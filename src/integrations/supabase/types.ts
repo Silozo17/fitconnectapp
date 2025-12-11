@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      client_notes: {
+        Row: {
+          category: string | null
+          client_id: string
+          coach_id: string
+          content: string
+          created_at: string
+          id: string
+          is_pinned: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          client_id: string
+          coach_id: string
+          content: string
+          created_at?: string
+          id?: string
+          is_pinned?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          client_id?: string
+          coach_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_pinned?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_notes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_notes_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_profiles: {
         Row: {
           age: number | null
@@ -67,6 +115,105 @@ export type Database = {
           weight_kg?: number | null
         }
         Relationships: []
+      }
+      client_progress: {
+        Row: {
+          body_fat_percentage: number | null
+          client_id: string
+          coach_id: string
+          created_at: string
+          id: string
+          measurements: Json | null
+          notes: string | null
+          recorded_at: string
+          weight_kg: number | null
+        }
+        Insert: {
+          body_fat_percentage?: number | null
+          client_id: string
+          coach_id: string
+          created_at?: string
+          id?: string
+          measurements?: Json | null
+          notes?: string | null
+          recorded_at?: string
+          weight_kg?: number | null
+        }
+        Update: {
+          body_fat_percentage?: number | null
+          client_id?: string
+          coach_id?: string
+          created_at?: string
+          id?: string
+          measurements?: Json | null
+          notes?: string | null
+          recorded_at?: string
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_progress_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_progress_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coach_clients: {
+        Row: {
+          client_id: string
+          coach_id: string
+          created_at: string
+          id: string
+          plan_type: string | null
+          start_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          coach_id: string
+          created_at?: string
+          id?: string
+          plan_type?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          coach_id?: string
+          created_at?: string
+          id?: string
+          plan_type?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_clients_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_clients_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       coach_profiles: {
         Row: {
@@ -124,6 +271,174 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      coaching_sessions: {
+        Row: {
+          client_id: string
+          coach_id: string
+          created_at: string
+          duration_minutes: number
+          id: string
+          is_online: boolean | null
+          location: string | null
+          notes: string | null
+          scheduled_at: string
+          session_type: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          coach_id: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          is_online?: boolean | null
+          location?: string | null
+          notes?: string | null
+          scheduled_at: string
+          session_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          coach_id?: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          is_online?: boolean | null
+          location?: string | null
+          notes?: string | null
+          scheduled_at?: string
+          session_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coaching_sessions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coaching_sessions_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plan_assignments: {
+        Row: {
+          assigned_at: string
+          client_id: string
+          coach_id: string
+          created_at: string
+          end_date: string | null
+          id: string
+          plan_id: string
+          start_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_at?: string
+          client_id: string
+          coach_id: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          plan_id: string
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_at?: string
+          client_id?: string
+          coach_id?: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          plan_id?: string
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_assignments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_assignments_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_assignments_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "training_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_plans: {
+        Row: {
+          coach_id: string
+          content: Json | null
+          created_at: string
+          description: string | null
+          duration_weeks: number | null
+          id: string
+          is_template: boolean | null
+          name: string
+          plan_type: string
+          updated_at: string
+        }
+        Insert: {
+          coach_id: string
+          content?: Json | null
+          created_at?: string
+          description?: string | null
+          duration_weeks?: number | null
+          id?: string
+          is_template?: boolean | null
+          name: string
+          plan_type: string
+          updated_at?: string
+        }
+        Update: {
+          coach_id?: string
+          content?: Json | null
+          created_at?: string
+          description?: string | null
+          duration_weeks?: number | null
+          id?: string
+          is_template?: boolean | null
+          name?: string
+          plan_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_plans_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
