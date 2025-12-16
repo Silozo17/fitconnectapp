@@ -275,7 +275,7 @@ export const useMessages = (participantId?: string) => {
     }
   }, [currentProfileId, participantId]);
 
-  // Send message
+  // Send message with optimistic update
   const sendMessage = async (content: string): Promise<boolean> => {
     if (!currentProfileId) {
       console.error("[useMessages] Cannot send message - no profile ID");
@@ -304,6 +304,19 @@ export const useMessages = (participantId?: string) => {
 
     console.log("[useMessages] Sending message to:", participantId);
 
+    // Create optimistic message for immediate UI update
+    const optimisticMessage: Message = {
+      id: `temp-${Date.now()}`,
+      sender_id: currentProfileId,
+      receiver_id: participantId,
+      content: content.trim(),
+      created_at: new Date().toISOString(),
+      read_at: null,
+    };
+
+    // Add optimistic message immediately
+    setMessages((prev) => [...prev, optimisticMessage]);
+
     try {
       const { data, error: sendError } = await supabase
         .from("messages")
@@ -317,6 +330,8 @@ export const useMessages = (participantId?: string) => {
 
       if (sendError) {
         console.error("[useMessages] Error sending message:", sendError);
+        // Remove optimistic message on error
+        setMessages((prev) => prev.filter((m) => m.id !== optimisticMessage.id));
         toast({
           title: "Failed to send message",
           description: sendError.message,
@@ -326,9 +341,17 @@ export const useMessages = (participantId?: string) => {
       }
 
       console.log("[useMessages] Message sent successfully:", data?.id);
+      
+      // Replace optimistic message with real one
+      setMessages((prev) => 
+        prev.map((m) => m.id === optimisticMessage.id ? data : m)
+      );
+      
       return true;
     } catch (err) {
       console.error("[useMessages] Unexpected error sending message:", err);
+      // Remove optimistic message on error
+      setMessages((prev) => prev.filter((m) => m.id !== optimisticMessage.id));
       toast({
         title: "Failed to send message",
         description: "An unexpected error occurred. Please try again.",
