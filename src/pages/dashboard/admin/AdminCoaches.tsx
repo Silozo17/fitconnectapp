@@ -1,11 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, MoreHorizontal, Pencil, Trash2, KeyRound, Eye, Gift, Users, DollarSign, Loader2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Search, MoreHorizontal, Pencil, Trash2, KeyRound, Eye, Gift, Users, DollarSign, Loader2, Pause, Ban, CheckCircle } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -25,6 +26,10 @@ import { toast } from "sonner";
 import EditCoachModal from "@/components/admin/EditCoachModal";
 import { CoachDetailDrawer } from "@/components/admin/CoachDetailDrawer";
 import { AssignFreePlanModal } from "@/components/admin/AssignFreePlanModal";
+import { StatusBadge } from "@/components/admin/StatusBadge";
+import { BulkActionBar } from "@/components/admin/BulkActionBar";
+import { AccountStatusModal } from "@/components/admin/AccountStatusModal";
+import { useAdminUserManagement } from "@/hooks/useAdminUserManagement";
 import { useLogAdminAction } from "@/hooks/useAuditLog";
 
 interface CoachUser {
@@ -41,6 +46,8 @@ interface CoachUser {
   location: string | null;
   profile_image_url: string | null;
   experience_years: number | null;
+  status?: string | null;
+  status_reason?: string | null;
 }
 
 const AdminCoaches = () => {
@@ -50,7 +57,11 @@ const AdminCoaches = () => {
   const [editingCoach, setEditingCoach] = useState<CoachUser | null>(null);
   const [viewingCoach, setViewingCoach] = useState<CoachUser | null>(null);
   const [assignPlanCoach, setAssignPlanCoach] = useState<CoachUser | null>(null);
+  const [statusCoach, setStatusCoach] = useState<CoachUser | null>(null);
   const [resettingPassword, setResettingPassword] = useState<string | null>(null);
+  const [selectedCoaches, setSelectedCoaches] = useState<Set<string>>(new Set());
+  
+  const { loading: actionLoading, bulkUpdateStatus, bulkDelete } = useAdminUserManagement("coach");
   const logAction = useLogAdminAction();
 
   useEffect(() => {
@@ -134,12 +145,62 @@ const AdminCoaches = () => {
     }
   };
 
-  const filteredCoaches = coaches.filter((coach) => {
-    const name = (coach.display_name || "").toLowerCase();
-    const location = (coach.location || "").toLowerCase();
+  const filteredCoaches = useMemo(() => {
     const query = searchQuery.toLowerCase();
-    return name.includes(query) || location.includes(query);
-  });
+    return coaches.filter((coach) => {
+      const name = (coach.display_name || "").toLowerCase();
+      const location = (coach.location || "").toLowerCase();
+      return name.includes(query) || location.includes(query);
+    });
+  }, [coaches, searchQuery]);
+
+  const selectedCoachesList = useMemo(() => {
+    return coaches.filter((c) => selectedCoaches.has(c.id));
+  }, [coaches, selectedCoaches]);
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedCoaches(new Set(filteredCoaches.map((c) => c.id)));
+    } else {
+      setSelectedCoaches(new Set());
+    }
+  };
+
+  const handleSelectCoach = (coachId: string, checked: boolean) => {
+    const newSet = new Set(selectedCoaches);
+    if (checked) {
+      newSet.add(coachId);
+    } else {
+      newSet.delete(coachId);
+    }
+    setSelectedCoaches(newSet);
+  };
+
+  const handleBulkAction = async (status: string) => {
+    const reason = status !== "active" 
+      ? prompt(`Enter reason for ${status === "banned" ? "banning" : "suspending"} ${selectedCoaches.size} coaches:`)
+      : undefined;
+    
+    if (status !== "active" && !reason) return;
+
+    const success = await bulkUpdateStatus(selectedCoachesList, status, reason || undefined);
+    if (success) {
+      setSelectedCoaches(new Set());
+      fetchCoaches();
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (!confirm(`Are you sure you want to delete ${selectedCoaches.size} coaches? This cannot be undone.`)) {
+      return;
+    }
+
+    const success = await bulkDelete(selectedCoachesList);
+    if (success) {
+      setSelectedCoaches(new Set());
+      fetchCoaches();
+    }
+  };
 
   // Stats
   const totalCoaches = coaches.length;
@@ -211,6 +272,18 @@ const AdminCoaches = () => {
           </Card>
         </div>
 
+        {selectedCoaches.size > 0 && (
+          <BulkActionBar
+            count={selectedCoaches.size}
+            onActivate={() => handleBulkAction("active")}
+            onSuspend={() => handleBulkAction("suspended")}
+            onBan={() => handleBulkAction("banned")}
+            onDelete={handleBulkDelete}
+            onClear={() => setSelectedCoaches(new Set())}
+            loading={actionLoading}
+          />
+        )}
+
         <Card>
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
@@ -235,12 +308,17 @@ const AdminCoaches = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-12">
+                      <Checkbox
+                        checked={selectedCoaches.size === filteredCoaches.length && filteredCoaches.length > 0}
+                        onCheckedChange={handleSelectAll}
+                      />
+                    </TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Specialty</TableHead>
                     <TableHead>Rate</TableHead>
                     <TableHead>Tier</TableHead>
-                    <TableHead>Stripe</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>Account Status</TableHead>
                     <TableHead>Joined</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -248,6 +326,12 @@ const AdminCoaches = () => {
                 <TableBody>
                   {filteredCoaches.map((coach) => (
                     <TableRow key={coach.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setViewingCoach(coach)}>
+                      <TableCell onClick={(e) => e.stopPropagation()}>
+                        <Checkbox
+                          checked={selectedCoaches.has(coach.id)}
+                          onCheckedChange={(checked) => handleSelectCoach(coach.id, !!checked)}
+                        />
+                      </TableCell>
                       <TableCell className="font-medium">
                         {coach.display_name || "Unnamed Coach"}
                       </TableCell>
@@ -274,14 +358,7 @@ const AdminCoaches = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={coach.stripe_connect_onboarded ? "default" : "outline"}>
-                          {coach.stripe_connect_onboarded ? "Connected" : "Not Connected"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={coach.onboarding_completed ? "default" : "secondary"}>
-                          {coach.onboarding_completed ? "Active" : "Onboarding"}
-                        </Badge>
+                        <StatusBadge status={coach.status || "active"} />
                       </TableCell>
                       <TableCell>
                         {new Date(coach.created_at).toLocaleDateString()}
@@ -318,6 +395,26 @@ const AdminCoaches = () => {
                               )}
                               Reset Password
                             </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            {coach.status !== "active" && (
+                              <DropdownMenuItem onClick={() => setStatusCoach(coach)}>
+                                <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
+                                Activate Account
+                              </DropdownMenuItem>
+                            )}
+                            {coach.status !== "suspended" && (
+                              <DropdownMenuItem onClick={() => setStatusCoach(coach)}>
+                                <Pause className="h-4 w-4 mr-2 text-amber-500" />
+                                Suspend Account
+                              </DropdownMenuItem>
+                            )}
+                            {coach.status !== "banned" && (
+                              <DropdownMenuItem onClick={() => setStatusCoach(coach)} className="text-destructive">
+                                <Ban className="h-4 w-4 mr-2" />
+                                Ban Account
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuSeparator />
                             <DropdownMenuItem
                               onClick={() => handleDeleteCoach(coach)}
                               className="text-destructive focus:text-destructive"
@@ -344,6 +441,22 @@ const AdminCoaches = () => {
           open={!!editingCoach}
           onClose={() => setEditingCoach(null)}
           onSaved={fetchCoaches}
+        />
+      )}
+
+      {/* Status Modal */}
+      {statusCoach && (
+        <AccountStatusModal
+          open={!!statusCoach}
+          onClose={() => setStatusCoach(null)}
+          onSaved={fetchCoaches}
+          user={{
+            id: statusCoach.id,
+            user_id: statusCoach.user_id,
+            name: statusCoach.display_name || "Unnamed Coach",
+            currentStatus: statusCoach.status || "active",
+          }}
+          userType="coach"
         />
       )}
 
