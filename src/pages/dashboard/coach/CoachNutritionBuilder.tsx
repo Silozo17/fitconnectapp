@@ -12,7 +12,9 @@ import { MealCard } from "@/components/nutritionbuilder/MealCard";
 import { MacroTracker } from "@/components/nutritionbuilder/MacroTracker";
 import { CreateFoodModal } from "@/components/nutritionbuilder/CreateFoodModal";
 import { AIMealSuggestion } from "@/components/nutritionbuilder/AIMealSuggestion";
+import { AIMacroCalculator } from "@/components/ai/AIMacroCalculator";
 import { Food, Meal, NutritionDay, MealFood, calculateDayMacros } from "@/hooks/useFoods";
+import { MacroCalculation } from "@/hooks/useAI";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -63,6 +65,13 @@ const CoachNutritionBuilder = () => {
     };
     fetchCoachProfile();
   }, [user]);
+
+  const handleMacrosCalculated = (macros: MacroCalculation) => {
+    setTargetCalories(Math.round(macros.targetCalories));
+    setTargetProtein(Math.round(macros.macros.protein));
+    setTargetCarbs(Math.round(macros.macros.carbs));
+    setTargetFat(Math.round(macros.macros.fat));
+  };
 
   const currentDay = days[selectedDayIndex];
   const dayMacros = currentDay ? calculateDayMacros(currentDay.meals) : { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
@@ -225,9 +234,12 @@ const CoachNutritionBuilder = () => {
 
       {/* Macro Targets */}
       <div className="card-elevated p-4 mb-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Target className="h-5 w-5 text-primary" />
-          <h3 className="font-semibold text-foreground">Daily Macro Targets</h3>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Target className="h-5 w-5 text-primary" />
+            <h3 className="font-semibold text-foreground">Daily Macro Targets</h3>
+          </div>
+          <AIMacroCalculator onMacrosCalculated={handleMacrosCalculated} />
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="space-y-2">

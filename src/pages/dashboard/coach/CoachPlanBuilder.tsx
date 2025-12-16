@@ -16,9 +16,11 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import ExerciseLibrary from "@/components/planbuilder/ExerciseLibrary";
 import WorkoutDayCard from "@/components/planbuilder/WorkoutDayCard";
 import CreateExerciseModal from "@/components/planbuilder/CreateExerciseModal";
+import { AIWorkoutGenerator } from "@/components/ai/AIWorkoutGenerator";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCreateTrainingPlan, useUpdateTrainingPlan, useTrainingPlan, PlanDay, PlanExercise } from "@/hooks/useTrainingPlans";
 import { Exercise } from "@/hooks/useExercises";
+import { WorkoutPlan } from "@/hooks/useAI";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -76,6 +78,26 @@ const CoachPlanBuilder = () => {
   function generateId() {
     return Math.random().toString(36).substring(2, 15);
   }
+
+  const handleAIPlanGenerated = (plan: WorkoutPlan) => {
+    setPlanName(plan.planName);
+    setPlanDescription(plan.description);
+    const newDays: PlanDay[] = plan.days.map((day) => ({
+      id: generateId(),
+      name: day.name,
+      exercises: day.exercises.map((ex) => ({
+        id: generateId(),
+        exercise_id: "",
+        exercise_name: ex.name,
+        sets: ex.sets,
+        reps: ex.reps,
+        rest: ex.rest,
+        notes: ex.notes,
+      })),
+    }));
+    setWorkoutDays(newDays);
+    toast.success("AI plan loaded! Review and customize as needed.");
+  };
 
   const handleAddDay = () => {
     const newDay: PlanDay = {
@@ -174,6 +196,7 @@ const CoachPlanBuilder = () => {
           </div>
         </div>
         <div className="flex gap-3">
+          <AIWorkoutGenerator onPlanGenerated={handleAIPlanGenerated} />
           <Button variant="outline" disabled>
             <Eye className="w-4 h-4 mr-2" />
             Preview
