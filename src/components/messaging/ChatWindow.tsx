@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useMessages } from "@/hooks/useMessages";
 import { format } from "date-fns";
 import { Send, Loader2, ArrowLeft, Check, CheckCheck, User, Briefcase, Shield, MapPin } from "lucide-react";
@@ -50,6 +50,7 @@ const ChatWindow = ({
     type: participantType || "client",
     location: participantLocation || null
   });
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { role } = useAuth();
   const { broadcastTyping } = useTypingBroadcast(currentProfileId || "", participantId);
@@ -128,13 +129,25 @@ const ChatWindow = ({
     }
   }, [participantName, participantAvatar, participantType, participantLocation]);
 
+  // Direct scroll function using container scrollTop
+  const scrollToBottom = useCallback(() => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
+  }, []);
+
   // Scroll to bottom on new messages
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-    }, 100);
+    const timeoutId = setTimeout(scrollToBottom, 50);
     return () => clearTimeout(timeoutId);
-  }, [messages]);
+  }, [messages, scrollToBottom]);
+
+  // Scroll on initial load when messages are ready
+  useEffect(() => {
+    if (!loading && messages.length > 0) {
+      scrollToBottom();
+    }
+  }, [loading, messages.length, scrollToBottom]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -144,10 +157,10 @@ const ChatWindow = ({
     const success = await sendMessage(newMessage);
     if (success) {
       setNewMessage("");
-      // Ensure scroll to bottom after sending
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-      }, 50);
+      // Force scroll after send using requestAnimationFrame
+      requestAnimationFrame(() => {
+        scrollToBottom();
+      });
     }
     setSending(false);
   };
@@ -231,7 +244,7 @@ const ChatWindow = ({
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.length === 0 ? (
             <div className="flex items-center justify-center h-full text-muted-foreground">
               <p>No messages yet. Start the conversation!</p>
