@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useActiveProfile } from "@/hooks/useActiveProfile";
 import { supabase } from "@/integrations/supabase/client";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 import { AvatarStatsHero } from "@/components/dashboard/AvatarStatsHero";
@@ -25,6 +26,7 @@ interface DashboardStats {
 
 const ClientOverview = () => {
   const { user } = useAuth();
+  const { profileId, isRoleSwitching, userId } = useActiveProfile();
   const [stats, setStats] = useState<DashboardStats>({
     coachCount: 0,
     upcomingSessions: 0,
@@ -32,44 +34,70 @@ const ClientOverview = () => {
     unreadMessages: 0,
   });
   const [firstName, setFirstName] = useState<string>("");
+  const [clientProfileId, setClientProfileId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchStats = async () => {
-      if (!user) return;
+      // Determine which profile ID to use
+      let profileIdToUse = clientProfileId;
 
-      // Get client profile
-      const { data: profile } = await supabase
-        .from("client_profiles")
-        .select("id, first_name")
-        .eq("user_id", user.id)
-        .maybeSingle();
+      // If we're role switching as admin, use the active profile ID directly
+      if (isRoleSwitching && profileId) {
+        profileIdToUse = profileId;
+      }
 
-      if (!profile) return;
+      // If we don't have a profile ID yet, fetch it
+      if (!profileIdToUse && userId) {
+        const { data: profile } = await supabase
+          .from("client_profiles")
+          .select("id, first_name")
+          .eq("user_id", userId)
+          .maybeSingle();
 
-      setFirstName(profile.first_name || "");
+        if (!profile) return;
+
+        profileIdToUse = profile.id;
+        setClientProfileId(profile.id);
+        setFirstName(profile.first_name || "");
+      }
+
+      if (!profileIdToUse) return;
+
+      // If role switching, fetch first name separately
+      if (isRoleSwitching && profileId) {
+        const { data: profile } = await supabase
+          .from("client_profiles")
+          .select("first_name")
+          .eq("id", profileId)
+          .maybeSingle();
+        
+        if (profile) {
+          setFirstName(profile.first_name || "");
+        }
+      }
 
       // Fetch all stats in parallel
       const [coaches, sessions, plans, messages] = await Promise.all([
         supabase
           .from("coach_clients")
           .select("id", { count: "exact" })
-          .eq("client_id", profile.id)
+          .eq("client_id", profileIdToUse)
           .eq("status", "active"),
         supabase
           .from("coaching_sessions")
           .select("id", { count: "exact" })
-          .eq("client_id", profile.id)
+          .eq("client_id", profileIdToUse)
           .eq("status", "scheduled")
           .gte("scheduled_at", new Date().toISOString()),
         supabase
           .from("plan_assignments")
           .select("id", { count: "exact" })
-          .eq("client_id", profile.id)
+          .eq("client_id", profileIdToUse)
           .eq("status", "active"),
         supabase
           .from("messages")
           .select("id", { count: "exact" })
-          .eq("receiver_id", profile.id)
+          .eq("receiver_id", profileIdToUse)
           .is("read_at", null),
       ]);
 
@@ -82,7 +110,7 @@ const ClientOverview = () => {
     };
 
     fetchStats();
-  }, [user]);
+  }, [userId, profileId, isRoleSwitching, clientProfileId]);
 
   const quickActions = [
     {

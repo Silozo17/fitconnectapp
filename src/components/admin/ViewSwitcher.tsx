@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+import { useState } from "react";
 import { useAdminView } from "@/contexts/AdminContext";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -8,30 +8,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Shield, User, Briefcase } from "lucide-react";
+import { Shield, User, Briefcase, Check, Plus, Loader2 } from "lucide-react";
+import CreateProfileModal from "./CreateProfileModal";
 
 const ViewSwitcher = () => {
-  const { viewMode, setViewMode } = useAdminView();
+  const {
+    activeProfileType,
+    availableProfiles,
+    setActiveProfile,
+    isLoadingProfiles,
+  } = useAdminView();
   const navigate = useNavigate();
-  const location = useLocation();
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [profileTypeToCreate, setProfileTypeToCreate] = useState<"client" | "coach">("client");
 
-  // Sync viewMode with current route
-  useEffect(() => {
-    const path = location.pathname;
-    if (path.startsWith("/dashboard/admin")) {
-      setViewMode("admin");
-    } else if (path.startsWith("/dashboard/coach")) {
-      setViewMode("coach");
-    } else if (path.startsWith("/dashboard/client")) {
-      setViewMode("client");
+  const handleViewChange = (value: string) => {
+    // Check if trying to create a new profile
+    if (value === "create-client") {
+      setProfileTypeToCreate("client");
+      setCreateModalOpen(true);
+      return;
     }
-  }, [location.pathname, setViewMode]);
+    if (value === "create-coach") {
+      setProfileTypeToCreate("coach");
+      setCreateModalOpen(true);
+      return;
+    }
 
-  const handleViewChange = (value: "admin" | "client" | "coach") => {
-    setViewMode(value);
-    
+    const viewMode = value as "admin" | "client" | "coach";
+    const profileId = availableProfiles[viewMode] || null;
+
+    setActiveProfile(viewMode, profileId);
+
     // Navigate to the appropriate dashboard
-    switch (value) {
+    switch (viewMode) {
       case "admin":
         navigate("/dashboard/admin");
         break;
@@ -44,32 +54,88 @@ const ViewSwitcher = () => {
     }
   };
 
+  const handleProfileCreated = () => {
+    // After creating a profile, switch to that view
+    const profileId = availableProfiles[profileTypeToCreate];
+    if (profileId) {
+      setActiveProfile(profileTypeToCreate, profileId);
+      navigate(`/dashboard/${profileTypeToCreate}`);
+    }
+  };
+
+  if (isLoadingProfiles) {
+    return (
+      <div className="w-[180px] h-10 flex items-center justify-center bg-card border border-border rounded-md">
+        <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
   return (
-    <Select value={viewMode} onValueChange={handleViewChange}>
-      <SelectTrigger className="w-[180px] bg-card border-border">
-        <SelectValue placeholder="Select view" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="admin">
-          <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-primary" />
-            <span>Admin View</span>
-          </div>
-        </SelectItem>
-        <SelectItem value="coach">
-          <div className="flex items-center gap-2">
-            <Briefcase className="w-4 h-4 text-orange-500" />
-            <span>Coach View</span>
-          </div>
-        </SelectItem>
-        <SelectItem value="client">
-          <div className="flex items-center gap-2">
-            <User className="w-4 h-4 text-blue-500" />
-            <span>Client View</span>
-          </div>
-        </SelectItem>
-      </SelectContent>
-    </Select>
+    <>
+      <Select value={activeProfileType} onValueChange={handleViewChange}>
+        <SelectTrigger className="w-[180px] bg-card border-border">
+          <SelectValue placeholder="Select view" />
+        </SelectTrigger>
+        <SelectContent>
+          {/* Admin View - Always available */}
+          <SelectItem value="admin">
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-primary" />
+              <span>Admin View</span>
+              {availableProfiles.admin && (
+                <Check className="w-3 h-3 text-green-500 ml-auto" />
+              )}
+            </div>
+          </SelectItem>
+
+          {/* Coach View */}
+          {availableProfiles.coach ? (
+            <SelectItem value="coach">
+              <div className="flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-orange-500" />
+                <span>Coach View</span>
+                <Check className="w-3 h-3 text-green-500 ml-auto" />
+              </div>
+            </SelectItem>
+          ) : (
+            <SelectItem value="create-coach">
+              <div className="flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-orange-500/50" />
+                <span className="text-muted-foreground">Coach View</span>
+                <Plus className="w-3 h-3 text-muted-foreground ml-auto" />
+              </div>
+            </SelectItem>
+          )}
+
+          {/* Client View */}
+          {availableProfiles.client ? (
+            <SelectItem value="client">
+              <div className="flex items-center gap-2">
+                <User className="w-4 h-4 text-blue-500" />
+                <span>Client View</span>
+                <Check className="w-3 h-3 text-green-500 ml-auto" />
+              </div>
+            </SelectItem>
+          ) : (
+            <SelectItem value="create-client">
+              <div className="flex items-center gap-2">
+                <User className="w-4 h-4 text-blue-500/50" />
+                <span className="text-muted-foreground">Client View</span>
+                <Plus className="w-3 h-3 text-muted-foreground ml-auto" />
+              </div>
+            </SelectItem>
+          )}
+        </SelectContent>
+      </Select>
+
+      <CreateProfileModal
+        open={createModalOpen}
+        onOpenChange={setCreateModalOpen}
+        profileType={profileTypeToCreate}
+        onSuccess={handleProfileCreated}
+      />
+    </>
   );
 };
 
