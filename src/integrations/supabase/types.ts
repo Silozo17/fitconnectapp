@@ -614,6 +614,96 @@ export type Database = {
           },
         ]
       }
+      food_categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          icon: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      foods: {
+        Row: {
+          calories_per_100g: number
+          carbs_g: number
+          category_id: string | null
+          coach_id: string | null
+          created_at: string
+          fat_g: number
+          fiber_g: number | null
+          id: string
+          is_custom: boolean | null
+          name: string
+          protein_g: number
+          serving_description: string | null
+          serving_size_g: number | null
+          updated_at: string
+        }
+        Insert: {
+          calories_per_100g?: number
+          carbs_g?: number
+          category_id?: string | null
+          coach_id?: string | null
+          created_at?: string
+          fat_g?: number
+          fiber_g?: number | null
+          id?: string
+          is_custom?: boolean | null
+          name: string
+          protein_g?: number
+          serving_description?: string | null
+          serving_size_g?: number | null
+          updated_at?: string
+        }
+        Update: {
+          calories_per_100g?: number
+          carbs_g?: number
+          category_id?: string | null
+          coach_id?: string | null
+          created_at?: string
+          fat_g?: number
+          fiber_g?: number | null
+          id?: string
+          is_custom?: boolean | null
+          name?: string
+          protein_g?: number
+          serving_description?: string | null
+          serving_size_g?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "foods_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "food_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "foods_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string

@@ -301,7 +301,7 @@ const CoachPlans = () => {
             ))}
 
             {/* Create New Card */}
-            <Link to="/dashboard/coach/plans/new?type=nutrition">
+            <Link to="/dashboard/coach/plans/nutrition/new">
               <div className="card-elevated p-6 border-2 border-dashed border-border hover:border-success/50 transition-colors flex flex-col items-center justify-center min-h-[200px] cursor-pointer">
                 <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center mb-3">
                   <Plus className="w-6 h-6 text-success" />
