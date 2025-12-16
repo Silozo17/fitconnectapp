@@ -23,6 +23,7 @@ import {
   WIDGET_CATEGORIES,
   DashboardWidget 
 } from "@/hooks/useAdminWidgets";
+import { getFormatOptionsForWidget, supportsFormatSelection, type WidgetDisplayFormat } from "@/lib/widget-formats";
 import { toast } from "sonner";
 import { RotateCcw, Loader2, BarChart3, DollarSign, TrendingUp, LineChart, Link2, List, Zap } from "lucide-react";
 
@@ -99,6 +100,30 @@ export function DashboardCustomizer({ open, onOpenChange }: DashboardCustomizerP
     }
   };
 
+  const handleFormatChange = async (type: string, widgetState: DashboardWidget | undefined, format: WidgetDisplayFormat) => {
+    try {
+      if (widgetState) {
+        await updateWidget.mutateAsync({
+          widgetId: widgetState.id,
+          updates: { config: { ...widgetState.config, displayFormat: format } },
+        });
+      } else {
+        const widgetConfig = WIDGET_TYPES[type as keyof typeof WIDGET_TYPES];
+        await addWidget.mutateAsync({
+          widget_type: type,
+          title: widgetConfig.label,
+          position: Object.keys(WIDGET_TYPES).indexOf(type),
+          size: "medium",
+          is_visible: true,
+          config: { displayFormat: format },
+        });
+      }
+      toast.success("Display format updated");
+    } catch (error) {
+      toast.error("Failed to update display format");
+    }
+  };
+
   const handleReset = async () => {
     try {
       await resetWidgets.mutateAsync();
@@ -129,11 +154,11 @@ export function DashboardCustomizer({ open, onOpenChange }: DashboardCustomizerP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[85vh]">
+      <DialogContent className="max-w-3xl max-h-[85vh]">
         <DialogHeader>
           <DialogTitle>Customize Dashboard</DialogTitle>
           <DialogDescription>
-            Choose which widgets to display and configure their size
+            Choose which widgets to display, their size, and how data is visualized
           </DialogDescription>
         </DialogHeader>
 
@@ -166,43 +191,67 @@ export function DashboardCustomizer({ open, onOpenChange }: DashboardCustomizerP
                   </div>
                   <Separator />
                   
-                  {(widgetsByCategory[cat.key] || []).map(({ type, label }) => {
+                  {(widgetsByCategory[cat.key] || []).map(({ type, label, category }) => {
                     const widgetState = getWidgetState(type);
                     const isVisible = widgetState?.is_visible ?? false;
                     const currentSize = widgetState?.size || "medium";
+                    const currentFormat = (widgetState?.config?.displayFormat as WidgetDisplayFormat) || "number";
+                    const formatOptions = getFormatOptionsForWidget(category);
+                    const hasFormatOptions = supportsFormatSelection(category);
 
                     return (
                       <div 
                         key={type}
-                        className="flex items-center justify-between p-3 rounded-lg bg-muted/50 gap-4"
+                        className="flex items-center justify-between p-3 rounded-lg bg-muted/50 gap-3"
                       >
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="flex items-center gap-3 min-w-0">
                           <Switch
                             id={type}
                             checked={isVisible}
                             onCheckedChange={() => handleToggleWidget(type, widgetState)}
                             disabled={updateWidget.isPending || addWidget.isPending}
                           />
-                          <Label htmlFor={type} className="cursor-pointer truncate">
+                          <Label htmlFor={type} className="cursor-pointer truncate text-sm">
                             {label}
                           </Label>
                         </div>
                         
-                        <Select
-                          value={currentSize}
-                          onValueChange={(size) => handleSizeChange(type, widgetState, size)}
-                          disabled={updateWidget.isPending || addWidget.isPending}
-                        >
-                          <SelectTrigger className="w-[100px]">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="small">Small</SelectItem>
-                            <SelectItem value="medium">Medium</SelectItem>
-                            <SelectItem value="large">Large</SelectItem>
-                            <SelectItem value="full">Full</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <div className="flex items-center gap-2">
+                          {hasFormatOptions && (
+                            <Select
+                              value={currentFormat}
+                              onValueChange={(format) => handleFormatChange(type, widgetState, format as WidgetDisplayFormat)}
+                              disabled={updateWidget.isPending || addWidget.isPending}
+                            >
+                              <SelectTrigger className="w-[100px]">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {formatOptions.map((opt) => (
+                                  <SelectItem key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                          
+                          <Select
+                            value={currentSize}
+                            onValueChange={(size) => handleSizeChange(type, widgetState, size)}
+                            disabled={updateWidget.isPending || addWidget.isPending}
+                          >
+                            <SelectTrigger className="w-[90px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="small">Small</SelectItem>
+                              <SelectItem value="medium">Medium</SelectItem>
+                              <SelectItem value="large">Large</SelectItem>
+                              <SelectItem value="full">Full</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
                     );
                   })}
