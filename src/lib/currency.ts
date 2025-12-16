@@ -1,0 +1,82 @@
+// Supported currencies
+export type CurrencyCode = 'GBP' | 'USD' | 'EUR' | 'AUD' | 'CAD';
+
+export interface CurrencyConfig {
+  code: CurrencyCode;
+  symbol: string;
+  name: string;
+  locale: string;
+}
+
+export const CURRENCIES: Record<CurrencyCode, CurrencyConfig> = {
+  GBP: { code: 'GBP', symbol: '£', name: 'British Pound', locale: 'en-GB' },
+  USD: { code: 'USD', symbol: '$', name: 'US Dollar', locale: 'en-US' },
+  EUR: { code: 'EUR', symbol: '€', name: 'Euro', locale: 'de-DE' },
+  AUD: { code: 'AUD', symbol: 'A$', name: 'Australian Dollar', locale: 'en-AU' },
+  CAD: { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar', locale: 'en-CA' },
+};
+
+// Default currency for UK launch
+export const DEFAULT_CURRENCY: CurrencyCode = 'GBP';
+export const DEFAULT_LOCALE = 'en-GB';
+
+/**
+ * Format a number as currency using Intl.NumberFormat
+ */
+export function formatCurrency(
+  amount: number,
+  currency: CurrencyCode = DEFAULT_CURRENCY,
+  locale?: string
+): string {
+  const currencyConfig = CURRENCIES[currency] || CURRENCIES[DEFAULT_CURRENCY];
+  const formatLocale = locale || currencyConfig.locale;
+
+  return new Intl.NumberFormat(formatLocale, {
+    style: 'currency',
+    currency: currencyConfig.code,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}
+
+/**
+ * Get the currency symbol for a given currency code
+ */
+export function getCurrencySymbol(currency: CurrencyCode = DEFAULT_CURRENCY): string {
+  return CURRENCIES[currency]?.symbol || CURRENCIES[DEFAULT_CURRENCY].symbol;
+}
+
+/**
+ * Parse a currency string back to a number
+ */
+export function parseCurrency(value: string): number {
+  // Remove currency symbols and non-numeric characters except decimal point
+  const cleaned = value.replace(/[^0-9.-]/g, '');
+  return parseFloat(cleaned) || 0;
+}
+
+/**
+ * Format a number as a compact currency (e.g., £1.2K, £1.5M)
+ */
+export function formatCompactCurrency(
+  amount: number,
+  currency: CurrencyCode = DEFAULT_CURRENCY,
+  locale?: string
+): string {
+  const currencyConfig = CURRENCIES[currency] || CURRENCIES[DEFAULT_CURRENCY];
+  const formatLocale = locale || currencyConfig.locale;
+
+  return new Intl.NumberFormat(formatLocale, {
+    style: 'currency',
+    currency: currencyConfig.code,
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(amount);
+}
+
+/**
+ * Get list of supported currencies for dropdowns
+ */
+export function getSupportedCurrencies(): CurrencyConfig[] {
+  return Object.values(CURRENCIES);
+}

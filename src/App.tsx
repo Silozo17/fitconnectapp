@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AdminProvider } from "@/contexts/AdminContext";
+import { LocaleProvider } from "@/contexts/LocaleContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Coaches from "./pages/Coaches";
@@ -71,6 +72,7 @@ const App = () => (
         <BrowserRouter>
           <AuthProvider>
             <AdminProvider>
+              <LocaleProvider>
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/coaches" element={<Coaches />} />
@@ -274,6 +276,7 @@ const App = () => (
               
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              </LocaleProvider>
             </AdminProvider>
           </AuthProvider>
         </BrowserRouter>

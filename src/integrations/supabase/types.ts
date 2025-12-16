@@ -146,6 +146,7 @@ export type Database = {
           client_id: string
           coach_id: string
           created_at: string | null
+          currency: string | null
           duration_minutes: number
           id: string
           is_online: boolean | null
@@ -159,6 +160,7 @@ export type Database = {
           client_id: string
           coach_id: string
           created_at?: string | null
+          currency?: string | null
           duration_minutes?: number
           id?: string
           is_online?: boolean | null
@@ -172,6 +174,7 @@ export type Database = {
           client_id?: string
           coach_id?: string
           created_at?: string | null
+          currency?: string | null
           duration_minutes?: number
           id?: string
           is_online?: boolean | null
@@ -259,6 +262,7 @@ export type Database = {
           client_id: string
           coach_id: string
           created_at: string
+          currency: string | null
           expires_at: string | null
           id: string
           package_id: string
@@ -274,6 +278,7 @@ export type Database = {
           client_id: string
           coach_id: string
           created_at?: string
+          currency?: string | null
           expires_at?: string | null
           id?: string
           package_id: string
@@ -289,6 +294,7 @@ export type Database = {
           client_id?: string
           coach_id?: string
           created_at?: string
+          currency?: string | null
           expires_at?: string | null
           id?: string
           package_id?: string
@@ -421,6 +427,7 @@ export type Database = {
           client_id: string
           coach_id: string
           created_at: string
+          currency: string | null
           current_period_end: string | null
           current_period_start: string
           id: string
@@ -435,6 +442,7 @@ export type Database = {
           client_id: string
           coach_id: string
           created_at?: string
+          currency?: string | null
           current_period_end?: string | null
           current_period_start?: string
           id?: string
@@ -449,6 +457,7 @@ export type Database = {
           client_id?: string
           coach_id?: string
           created_at?: string
+          currency?: string | null
           current_period_end?: string | null
           current_period_start?: string
           id?: string
@@ -752,11 +761,13 @@ export type Database = {
           client_id: string
           coach_id: string
           created_at: string
+          currency: string | null
           duration_minutes: number
           id: string
           is_online: boolean | null
           location: string | null
           notes: string | null
+          price: number | null
           scheduled_at: string
           session_type: string
           status: string
@@ -766,11 +777,13 @@ export type Database = {
           client_id: string
           coach_id: string
           created_at?: string
+          currency?: string | null
           duration_minutes?: number
           id?: string
           is_online?: boolean | null
           location?: string | null
           notes?: string | null
+          price?: number | null
           scheduled_at: string
           session_type?: string
           status?: string
@@ -780,11 +793,13 @@ export type Database = {
           client_id?: string
           coach_id?: string
           created_at?: string
+          currency?: string | null
           duration_minutes?: number
           id?: string
           is_online?: boolean | null
           location?: string | null
           notes?: string | null
+          price?: number | null
           scheduled_at?: string
           session_type?: string
           status?: string
@@ -1322,6 +1337,7 @@ export type Database = {
         Row: {
           coach_id: string
           created_at: string | null
+          currency: string | null
           description: string | null
           duration_minutes: number
           id: string
@@ -1335,6 +1351,7 @@ export type Database = {
         Insert: {
           coach_id: string
           created_at?: string | null
+          currency?: string | null
           description?: string | null
           duration_minutes?: number
           id?: string
@@ -1348,6 +1365,7 @@ export type Database = {
         Update: {
           coach_id?: string
           created_at?: string | null
+          currency?: string | null
           description?: string | null
           duration_minutes?: number
           id?: string
