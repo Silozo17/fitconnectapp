@@ -1,5 +1,5 @@
-import { useState, Suspense } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { useState, Suspense, useEffect } from "react";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Zap } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { TierSelector, TierFeatures } from "@/components/payments/TierSelector";
@@ -11,12 +11,28 @@ import { Button } from "@/components/ui/button";
 
 export default function Subscribe() {
   const { user, role } = useAuth();
-  const [selectedTier, setSelectedTier] = useState<TierKey>("pro");
-  const [billingInterval, setBillingInterval] = useState<BillingInterval>("monthly");
-  const [showCheckout, setShowCheckout] = useState(false);
+  const [searchParams] = useSearchParams();
+  
+  // Read initial values from URL params
+  const initialTier = (searchParams.get("tier") as TierKey) || "pro";
+  const initialBilling = (searchParams.get("billing") as BillingInterval) || "monthly";
+  
+  const [selectedTier, setSelectedTier] = useState<TierKey>(
+    initialTier in SUBSCRIPTION_TIERS && initialTier !== "free" ? initialTier : "pro"
+  );
+  const [billingInterval, setBillingInterval] = useState<BillingInterval>(
+    initialBilling === "yearly" ? "yearly" : "monthly"
+  );
+  const [showMobileCheckout, setShowMobileCheckout] = useState(false);
+  const [checkoutKey, setCheckoutKey] = useState(0);
 
-  // Redirect non-coaches to home
-  if (role && role !== "coach") {
+  // Reset checkout when tier or billing changes
+  useEffect(() => {
+    setCheckoutKey(prev => prev + 1);
+  }, [selectedTier, billingInterval]);
+
+  // Allow coaches and admins to view this page
+  if (role && role !== "coach" && role !== "admin") {
     return <Navigate to="/" replace />;
   }
 
@@ -28,7 +44,7 @@ export default function Subscribe() {
       <div className="w-full lg:w-1/2 bg-[#0D0D14] p-8 lg:p-12 flex flex-col">
         {/* Back Link */}
         <Link 
-          to="/" 
+          to="/pricing" 
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -60,10 +76,7 @@ export default function Subscribe() {
         <div className="mb-8">
           <TierSelector
             selectedTier={selectedTier}
-            onTierChange={(tier) => {
-              setSelectedTier(tier);
-              setShowCheckout(false);
-            }}
+            onTierChange={setSelectedTier}
           />
         </div>
 
@@ -78,18 +91,26 @@ export default function Subscribe() {
           <BillingToggle
             selectedTier={selectedTier}
             billingInterval={billingInterval}
-            onIntervalChange={(interval) => {
-              setBillingInterval(interval);
-              setShowCheckout(false);
-            }}
+            onIntervalChange={setBillingInterval}
           />
         </div>
 
-        {/* CTA Button - Mobile only */}
+        {/* CTA Button - Left side for desktop, full width for mobile */}
+        <div className="hidden lg:block">
+          {!user && (
+            <Link to="/auth">
+              <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6">
+                Sign in to subscribe
+              </Button>
+            </Link>
+          )}
+        </div>
+
+        {/* Mobile CTA Button */}
         <div className="lg:hidden">
-          {!showCheckout ? (
+          {!showMobileCheckout ? (
             <Button
-              onClick={() => setShowCheckout(true)}
+              onClick={() => setShowMobileCheckout(true)}
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6"
               disabled={!user}
             >
@@ -98,7 +119,7 @@ export default function Subscribe() {
           ) : (
             <Button
               variant="outline"
-              onClick={() => setShowCheckout(false)}
+              onClick={() => setShowMobileCheckout(false)}
               className="w-full"
             >
               Change plan
@@ -115,14 +136,14 @@ export default function Subscribe() {
         </p>
       </div>
 
-      {/* Right Side - Light */}
+      {/* Right Side - Light - Checkout shows immediately */}
       <div className="hidden lg:flex w-1/2 bg-white p-8 lg:p-12 flex-col">
         {/* Price Summary */}
         <div className="mb-8">
           <PriceSummary tier={selectedTier} billingInterval={billingInterval} />
         </div>
 
-        {/* Checkout or CTA */}
+        {/* Checkout Form - Show immediately when logged in */}
         {!user ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center">
             <div className="bg-gray-50 rounded-xl p-8 max-w-sm">
@@ -130,7 +151,7 @@ export default function Subscribe() {
                 Sign in to continue
               </h3>
               <p className="text-gray-600 text-sm mb-4">
-                You need to be signed in as a coach to subscribe to a plan.
+                You need to be signed in to subscribe to a plan.
               </p>
               <Link to="/auth">
                 <Button className="w-full bg-[#0D0D14] hover:bg-[#1a1a24] text-white">
@@ -140,20 +161,20 @@ export default function Subscribe() {
               <p className="text-xs text-gray-500 mt-4">
                 Don't have an account?{" "}
                 <Link to="/auth?mode=signup" className="text-[#0D0D14] hover:underline font-medium">
-                  Sign up as a coach
+                  Sign up
                 </Link>
               </p>
             </div>
           </div>
-        ) : !showCheckout ? (
-          <div className="flex-1 flex flex-col">
-            <div className="flex-1" />
-            <Button
-              onClick={() => setShowCheckout(true)}
-              className="w-full bg-[#0D0D14] hover:bg-[#1a1a24] text-white font-semibold py-6 text-lg"
-            >
-              Get started with {tierData.name}
-            </Button>
+        ) : (
+          <div className="flex-1">
+            <Suspense fallback={<CheckoutLoading />}>
+              <SubscriptionCheckout 
+                key={checkoutKey}
+                tier={selectedTier} 
+                billingInterval={billingInterval}
+              />
+            </Suspense>
             <p className="text-xs text-gray-500 text-center mt-4">
               By subscribing, you agree to our{" "}
               <Link to="/terms" className="underline hover:text-gray-700">
@@ -165,24 +186,15 @@ export default function Subscribe() {
               </Link>
             </p>
           </div>
-        ) : (
-          <div className="flex-1">
-            <Suspense fallback={<CheckoutLoading />}>
-              <SubscriptionCheckout 
-                tier={selectedTier} 
-                billingInterval={billingInterval}
-              />
-            </Suspense>
-          </div>
         )}
       </div>
 
       {/* Mobile Checkout Sheet */}
-      {showCheckout && (
+      {showMobileCheckout && (
         <div className="lg:hidden fixed inset-0 z-50 bg-white overflow-auto">
           <div className="p-4 border-b sticky top-0 bg-white">
             <button
-              onClick={() => setShowCheckout(false)}
+              onClick={() => setShowMobileCheckout(false)}
               className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -195,6 +207,7 @@ export default function Subscribe() {
               {user ? (
                 <Suspense fallback={<CheckoutLoading />}>
                   <SubscriptionCheckout 
+                    key={`mobile-${checkoutKey}`}
                     tier={selectedTier} 
                     billingInterval={billingInterval}
                   />
