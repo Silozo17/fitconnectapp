@@ -10,26 +10,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import ViewSwitcher from "@/components/admin/ViewSwitcher";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 
-interface ClientDashboardHeaderProps {
-  firstName?: string | null;
-  lastName?: string | null;
-  avatarUrl?: string | null;
-}
-
-const ClientDashboardHeader = ({
-  firstName,
-  lastName,
-  avatarUrl,
-}: ClientDashboardHeaderProps) => {
+const ClientDashboardHeader = () => {
   const { signOut, role } = useAuth();
-
-  const displayName = firstName
-    ? `${firstName}${lastName ? ` ${lastName}` : ""}`
-    : "Client";
+  const { displayName, avatarUrl } = useUserProfile();
 
   return (
     <header className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
@@ -62,13 +50,13 @@ const ClientDashboardHeader = ({
                   name={displayName}
                   className="w-8 h-8"
                 />
-                <span className="hidden md:block font-medium">{displayName}</span>
+                <span className="hidden md:block font-medium">{displayName || "Client"}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
                 <div className="flex flex-col">
-                  <span>{displayName}</span>
+                  <span>{displayName || "Client"}</span>
                   <span className="text-xs text-muted-foreground font-normal">
                     Client
                   </span>

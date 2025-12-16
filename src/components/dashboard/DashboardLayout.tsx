@@ -8,13 +8,6 @@ import { cn } from "@/lib/utils";
 import CoachSidebar from "./CoachSidebar";
 import DashboardHeader from "./DashboardHeader";
 
-interface CoachProfile {
-  display_name: string | null;
-  subscription_tier: string | null;
-  onboarding_completed: boolean;
-  profile_image_url: string | null;
-}
-
 interface DashboardLayoutProps {
   children: React.ReactNode;
   title?: string;
@@ -24,7 +17,7 @@ interface DashboardLayoutProps {
 const DashboardLayout = ({ children, title = "Coach Dashboard", description }: DashboardLayoutProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<CoachProfile | null>(null);
+  const [subscriptionTier, setSubscriptionTier] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -34,7 +27,7 @@ const DashboardLayout = ({ children, title = "Coach Dashboard", description }: D
 
       const { data } = await supabase
         .from("coach_profiles")
-        .select("display_name, subscription_tier, onboarding_completed, profile_image_url")
+        .select("subscription_tier, onboarding_completed")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -43,7 +36,7 @@ const DashboardLayout = ({ children, title = "Coach Dashboard", description }: D
         return;
       }
 
-      setProfile(data);
+      setSubscriptionTier(data?.subscription_tier || null);
       setLoading(false);
     };
 
@@ -77,11 +70,7 @@ const DashboardLayout = ({ children, title = "Coach Dashboard", description }: D
             sidebarCollapsed ? "ml-16" : "ml-64"
           )}
         >
-          <DashboardHeader
-            displayName={profile?.display_name}
-            subscriptionTier={profile?.subscription_tier}
-            profileImageUrl={profile?.profile_image_url}
-          />
+          <DashboardHeader subscriptionTier={subscriptionTier} />
 
           <main className="p-6">
             {children}
