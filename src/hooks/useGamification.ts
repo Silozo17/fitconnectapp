@@ -54,6 +54,9 @@ export interface XPLeaderboardEntry {
   last_name: string | null;
   avatar_url: string | null;
   rank?: number;
+  city?: string | null;
+  county?: string | null;
+  country?: string | null;
 }
 
 export const XP_ACTIONS = {
