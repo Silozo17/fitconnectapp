@@ -62,3 +62,6 @@ verify_jwt = false
 
 [functions.admin-sync-stripe-tiers]
 verify_jwt = true
+
+[functions.ai-challenge-suggestions]
+verify_jwt = true

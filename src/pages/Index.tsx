@@ -7,6 +7,7 @@ import FeaturedCoaches from "@/components/landing/FeaturedCoaches";
 import Leaderboard from "@/components/landing/Leaderboard";
 import Testimonials from "@/components/landing/Testimonials";
 import CTA from "@/components/landing/CTA";
+import { AvatarShowcase } from "@/components/landing/AvatarShowcase";
 
 const Index = () => {
   return (
@@ -24,6 +25,7 @@ const Index = () => {
         <main>
           <Hero />
           <FeaturedCoaches />
+          <AvatarShowcase />
           <Leaderboard />
           <Features />
           <Testimonials />

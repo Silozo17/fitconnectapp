@@ -7,7 +7,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, Pencil } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Loader2, Pencil, Lock, Trophy } from 'lucide-react';
+import { getUnlockDescription, getUnlockProgress, UNLOCK_DESCRIPTIONS } from '@/lib/avatar-unlocks';
 
 interface AvatarPickerProps {
   selectedAvatar: Avatar | null;
@@ -94,20 +96,51 @@ export function AvatarPicker({ selectedAvatar, profileType, trigger }: AvatarPic
         
         <div className="flex gap-6">
           {/* Preview section */}
-          <div className="flex-shrink-0 flex flex-col items-center justify-center p-4 bg-muted/30 rounded-xl">
+          <div className="flex-shrink-0 flex flex-col items-center justify-center p-4 bg-muted/30 rounded-xl w-[220px]">
             <AvatarShowcase avatar={displayAvatar} size="lg" showStats={false} />
             {displayAvatar && (
-              <p className="text-sm text-muted-foreground mt-2 text-center max-w-[180px]">
-                {displayAvatar.description}
-              </p>
+              <div className="text-center mt-3 space-y-2">
+                <p className="text-sm text-muted-foreground max-w-[180px]">
+                  {displayAvatar.description}
+                </p>
+                {/* Unlock requirements for locked avatars */}
+                {previewAvatar && !isAvatarUnlocked(previewAvatar) && (
+                  <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                    <div className="flex items-center gap-2 text-amber-500 mb-2">
+                      <Lock className="h-4 w-4" />
+                      <span className="text-xs font-medium">How to Unlock</span>
+                    </div>
+                    {previewAvatar.category === 'coach_exclusive' ? (
+                      <p className="text-xs text-muted-foreground">Become a verified coach</p>
+                    ) : (
+                      <>
+                        <p className="text-xs text-muted-foreground mb-2">
+                          {getUnlockDescription(previewAvatar.unlock_type, previewAvatar.unlock_threshold)}
+                        </p>
+                        {stats && previewAvatar.unlock_type && previewAvatar.unlock_threshold && (
+                          <div className="space-y-1">
+                            <Progress 
+                              value={getUnlockProgress(previewAvatar.unlock_type, previewAvatar.unlock_threshold, stats)?.percentage || 0} 
+                              className="h-1.5" 
+                            />
+                            <p className="text-xs text-muted-foreground">
+                              {getUnlockProgress(previewAvatar.unlock_type, previewAvatar.unlock_threshold, stats)?.current || 0} / {previewAvatar.unlock_threshold}
+                            </p>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
             )}
             <Button 
               className="mt-4" 
               onClick={handleConfirm}
-              disabled={!previewAvatar || selectAvatar.isPending}
+              disabled={!previewAvatar || !isAvatarUnlocked(previewAvatar) || selectAvatar.isPending}
             >
               {selectAvatar.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Select Avatar
+              {previewAvatar && !isAvatarUnlocked(previewAvatar) ? 'Locked' : 'Select Avatar'}
             </Button>
           </div>
           
