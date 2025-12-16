@@ -19,6 +19,10 @@ export interface CoachClient {
     fitness_goals: string[] | null;
     weight_kg: number | null;
     height_cm: number | null;
+    age: number | null;
+    dietary_restrictions: string[] | null;
+    allergies: string[] | null;
+    medical_conditions: string[] | null;
   } | null;
 }
 
@@ -62,7 +66,11 @@ export function useCoachClients() {
             user_id,
             fitness_goals,
             weight_kg,
-            height_cm
+            height_cm,
+            age,
+            dietary_restrictions,
+            allergies,
+            medical_conditions
           )
         `)
         .eq("coach_id", coachProfile.id);

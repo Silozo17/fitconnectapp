@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Save, LogOut } from "lucide-react";
+import { Loader2, Save, LogOut, AlertTriangle, Info } from "lucide-react";
+import { HealthTagInput } from "@/components/dashboard/clients/HealthTagInput";
 
 interface ClientProfile {
   first_name: string | null;
@@ -18,7 +19,25 @@ interface ClientProfile {
   weight_kg: number | null;
   height_cm: number | null;
   fitness_goals: string[] | null;
+  dietary_restrictions: string[] | null;
+  allergies: string[] | null;
+  medical_conditions: string[] | null;
 }
+
+const DIETARY_SUGGESTIONS = [
+  "Vegetarian", "Vegan", "Halal", "Kosher", "Gluten-Free", 
+  "Dairy-Free", "Keto", "Paleo", "Low-Carb", "Pescatarian"
+];
+
+const ALLERGY_SUGGESTIONS = [
+  "Nuts", "Peanuts", "Shellfish", "Dairy", "Eggs", 
+  "Soy", "Wheat", "Fish", "Sesame"
+];
+
+const MEDICAL_SUGGESTIONS = [
+  "Asthma", "Diabetes", "Heart Condition", "High Blood Pressure",
+  "Back Injury", "Knee Injury", "Shoulder Injury"
+];
 
 const ClientSettings = () => {
   const { user, signOut } = useAuth();
@@ -32,7 +51,7 @@ const ClientSettings = () => {
 
       const { data } = await supabase
         .from("client_profiles")
-        .select("first_name, last_name, age, gender_pronouns, weight_kg, height_cm, fitness_goals")
+        .select("first_name, last_name, age, gender_pronouns, weight_kg, height_cm, fitness_goals, dietary_restrictions, allergies, medical_conditions")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -56,6 +75,9 @@ const ClientSettings = () => {
         gender_pronouns: profile.gender_pronouns,
         weight_kg: profile.weight_kg,
         height_cm: profile.height_cm,
+        dietary_restrictions: profile.dietary_restrictions,
+        allergies: profile.allergies,
+        medical_conditions: profile.medical_conditions,
       })
       .eq("user_id", user.id);
 
@@ -68,7 +90,7 @@ const ClientSettings = () => {
     }
   };
 
-  const updateField = (field: keyof ClientProfile, value: string | number | null) => {
+  const updateField = (field: keyof ClientProfile, value: string | number | string[] | null) => {
     if (!profile) return;
     setProfile({ ...profile, [field]: value });
   };
@@ -172,7 +194,72 @@ const ClientSettings = () => {
           </CardContent>
         </Card>
 
-        {/* Fitness Goals */}
+        {/* Dietary Restrictions */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Dietary Restrictions</CardTitle>
+            <CardDescription>Any dietary preferences or restrictions</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <HealthTagInput
+              tags={profile?.dietary_restrictions || []}
+              onChange={(tags) => updateField("dietary_restrictions", tags)}
+              suggestions={DIETARY_SUGGESTIONS}
+              placeholder="Add dietary restriction..."
+              variant="default"
+            />
+          </CardContent>
+        </Card>
+
+        {/* Allergies */}
+        <Card className="border-warning/30">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-warning" />
+              Allergies
+            </CardTitle>
+            <CardDescription>Food or environmental allergies your coach should know about</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <HealthTagInput
+              tags={profile?.allergies || []}
+              onChange={(tags) => updateField("allergies", tags)}
+              suggestions={ALLERGY_SUGGESTIONS}
+              placeholder="Add allergy..."
+              variant="warning"
+            />
+            <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
+              <Info className="w-3 h-3" />
+              Your coach will see this information
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Medical Conditions */}
+        <Card className="border-destructive/30">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Info className="w-5 h-5 text-destructive" />
+              Medical Conditions
+            </CardTitle>
+            <CardDescription>Any medical conditions that may affect your training</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <HealthTagInput
+              tags={profile?.medical_conditions || []}
+              onChange={(tags) => updateField("medical_conditions", tags)}
+              suggestions={MEDICAL_SUGGESTIONS}
+              placeholder="Add medical condition..."
+              variant="danger"
+            />
+            <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
+              <Info className="w-3 h-3" />
+              Share any conditions that may affect your training
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Fitness Goals (Read-only display) */}
         <Card>
           <CardHeader>
             <CardTitle>Fitness Goals</CardTitle>
