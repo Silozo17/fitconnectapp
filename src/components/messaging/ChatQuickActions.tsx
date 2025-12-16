@@ -51,7 +51,7 @@ const ChatQuickActions = ({ coachId, onSendMessage }: ChatQuickActionsProps) => 
   const handleSendPricing = async () => {
     setSending(true);
     
-    let pricingMessage = "📋 **My Session Pricing:**\n\n";
+    let pricingMessage = "**My Session Pricing:**\n\n";
     
     if (sessionTypes.length > 0) {
       sessionTypes.forEach(type => {
@@ -71,7 +71,7 @@ const ChatQuickActions = ({ coachId, onSendMessage }: ChatQuickActionsProps) => 
 
   const handleSendBookingLink = async () => {
     setSending(true);
-    const bookingMessage = `📅 **Ready to book a session?**\n\nClick my profile to view my availability and book a time that works for you!`;
+    const bookingMessage = `**Ready to book a session?**\n\nClick my profile to view my availability and book a time that works for you!`;
     await onSendMessage(bookingMessage);
     setSending(false);
   };
@@ -80,7 +80,7 @@ const ChatQuickActions = ({ coachId, onSendMessage }: ChatQuickActionsProps) => 
     if (!paymentAmount) return;
     
     setSending(true);
-    const paymentMessage = `💳 **Payment Request**\n\nAmount: £${paymentAmount}\n${paymentDescription ? `For: ${paymentDescription}\n` : ""}\n_Payment processing coming soon. For now, please arrange payment directly._`;
+    const paymentMessage = `**Payment Request**\n\nAmount: £${paymentAmount}\n${paymentDescription ? `For: ${paymentDescription}\n` : ""}\n_Payment processing coming soon. For now, please arrange payment directly._`;
     await onSendMessage(paymentMessage);
     setSending(false);
     setShowPaymentDialog(false);

@@ -9,19 +9,20 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
-import { Dumbbell, ArrowRight, ArrowLeft, Check, Loader2, Crown, Zap, Sparkles } from "lucide-react";
+import { Dumbbell, ArrowRight, ArrowLeft, Check, Loader2, Crown, Zap, Sparkles, Salad, Swords, Shield, Flower2 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import { ProfileImageUpload } from "@/components/shared/ProfileImageUpload";
 
 const STEPS = ["Basic Info", "Specialties", "Services & Pricing", "Availability", "Choose Your Plan"];
 
-const COACH_TYPES = [
-  { id: "personal_training", label: "Personal Training", icon: "🏋️" },
-  { id: "nutrition", label: "Nutrition Coaching", icon: "🥗" },
-  { id: "boxing", label: "Boxing", icon: "🥊" },
-  { id: "mma", label: "MMA / Martial Arts", icon: "🥋" },
-  { id: "yoga", label: "Yoga & Mindfulness", icon: "🧘" },
-  { id: "crossfit", label: "CrossFit", icon: "⚡" },
+const COACH_TYPES: { id: string; label: string; icon: LucideIcon }[] = [
+  { id: "personal_training", label: "Personal Training", icon: Dumbbell },
+  { id: "nutrition", label: "Nutrition Coaching", icon: Salad },
+  { id: "boxing", label: "Boxing", icon: Swords },
+  { id: "mma", label: "MMA / Martial Arts", icon: Shield },
+  { id: "yoga", label: "Yoga & Mindfulness", icon: Flower2 },
+  { id: "crossfit", label: "CrossFit", icon: Zap },
 ];
 
 const SUBSCRIPTION_TIERS = [
@@ -271,26 +272,29 @@ const CoachOnboarding = () => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  {COACH_TYPES.map((type) => (
-                    <button
-                      key={type.id}
-                      type="button"
-                      onClick={() => handleMultiSelect("coachTypes", type.id)}
-                      className={`p-4 rounded-xl border-2 transition-all text-left flex items-center gap-3 ${
-                        formData.coachTypes.includes(type.id)
-                          ? "border-primary bg-primary/10"
-                          : "border-border hover:border-muted-foreground"
-                      }`}
-                    >
-                      <span className="text-2xl">{type.icon}</span>
-                      <span className={formData.coachTypes.includes(type.id) ? "text-foreground font-medium" : "text-muted-foreground"}>
-                        {type.label}
-                      </span>
-                      {formData.coachTypes.includes(type.id) && (
-                        <Check className="w-5 h-5 text-primary ml-auto" />
-                      )}
-                    </button>
-                  ))}
+                  {COACH_TYPES.map((type) => {
+                    const IconComponent = type.icon;
+                    return (
+                      <button
+                        key={type.id}
+                        type="button"
+                        onClick={() => handleMultiSelect("coachTypes", type.id)}
+                        className={`p-4 rounded-xl border-2 transition-all text-left flex items-center gap-3 ${
+                          formData.coachTypes.includes(type.id)
+                            ? "border-primary bg-primary/10"
+                            : "border-border hover:border-muted-foreground"
+                        }`}
+                      >
+                        <IconComponent className={`w-6 h-6 ${formData.coachTypes.includes(type.id) ? "text-primary" : "text-muted-foreground"}`} />
+                        <span className={formData.coachTypes.includes(type.id) ? "text-foreground font-medium" : "text-muted-foreground"}>
+                          {type.label}
+                        </span>
+                        {formData.coachTypes.includes(type.id) && (
+                          <Check className="w-5 h-5 text-primary ml-auto" />
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}

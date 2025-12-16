@@ -230,7 +230,7 @@ const ProspectProfileSheet = ({
                         className="flex flex-col items-center p-2 rounded-lg bg-muted/50 text-center"
                         title={item.badge?.description}
                       >
-                        <span className="text-xl">{item.badge?.icon || '🏆'}</span>
+                        <Trophy className="w-5 h-5 text-primary" />
                         <span className="text-xs text-muted-foreground truncate w-full">
                           {item.badge?.name}
                         </span>

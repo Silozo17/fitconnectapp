@@ -7,20 +7,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Dumbbell, ArrowRight, ArrowLeft, Check, Loader2 } from "lucide-react";
+import { Dumbbell, ArrowRight, ArrowLeft, Check, Loader2, Flame, Activity, Flower2, Weight, Target, Heart, Sparkles } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 
 const STEPS = ["Personal Info", "Body Metrics", "Fitness Goals", "Dietary Info"];
 
-const FITNESS_GOALS = [
-  { id: "weight_loss", label: "Weight Loss", icon: "🔥" },
-  { id: "muscle_gain", label: "Muscle Gain", icon: "💪" },
-  { id: "endurance", label: "Improve Endurance", icon: "🏃" },
-  { id: "flexibility", label: "Flexibility", icon: "🧘" },
-  { id: "strength", label: "Build Strength", icon: "🏋️" },
-  { id: "sports", label: "Sports Performance", icon: "⚽" },
-  { id: "rehabilitation", label: "Rehabilitation", icon: "🩹" },
-  { id: "general_fitness", label: "General Fitness", icon: "✨" },
+const FITNESS_GOALS: { id: string; label: string; icon: LucideIcon }[] = [
+  { id: "weight_loss", label: "Weight Loss", icon: Flame },
+  { id: "muscle_gain", label: "Muscle Gain", icon: Dumbbell },
+  { id: "endurance", label: "Improve Endurance", icon: Activity },
+  { id: "flexibility", label: "Flexibility", icon: Flower2 },
+  { id: "strength", label: "Build Strength", icon: Weight },
+  { id: "sports", label: "Sports Performance", icon: Target },
+  { id: "rehabilitation", label: "Rehabilitation", icon: Heart },
+  { id: "general_fitness", label: "General Fitness", icon: Sparkles },
 ];
 
 const DIETARY_RESTRICTIONS = [
@@ -317,26 +318,29 @@ const ClientOnboarding = () => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  {FITNESS_GOALS.map((goal) => (
-                    <button
-                      key={goal.id}
-                      type="button"
-                      onClick={() => handleMultiSelect("fitnessGoals", goal.id)}
-                      className={`p-4 rounded-xl border-2 transition-all text-left flex items-center gap-3 ${
-                        formData.fitnessGoals.includes(goal.id)
-                          ? "border-primary bg-primary/10"
-                          : "border-border hover:border-muted-foreground"
-                      }`}
-                    >
-                      <span className="text-2xl">{goal.icon}</span>
-                      <span className={formData.fitnessGoals.includes(goal.id) ? "text-foreground font-medium" : "text-muted-foreground"}>
-                        {goal.label}
-                      </span>
-                      {formData.fitnessGoals.includes(goal.id) && (
-                        <Check className="w-5 h-5 text-primary ml-auto" />
-                      )}
-                    </button>
-                  ))}
+                  {FITNESS_GOALS.map((goal) => {
+                    const IconComponent = goal.icon;
+                    return (
+                      <button
+                        key={goal.id}
+                        type="button"
+                        onClick={() => handleMultiSelect("fitnessGoals", goal.id)}
+                        className={`p-4 rounded-xl border-2 transition-all text-left flex items-center gap-3 ${
+                          formData.fitnessGoals.includes(goal.id)
+                            ? "border-primary bg-primary/10"
+                            : "border-border hover:border-muted-foreground"
+                        }`}
+                      >
+                        <IconComponent className={`w-6 h-6 ${formData.fitnessGoals.includes(goal.id) ? "text-primary" : "text-muted-foreground"}`} />
+                        <span className={formData.fitnessGoals.includes(goal.id) ? "text-foreground font-medium" : "text-muted-foreground"}>
+                          {goal.label}
+                        </span>
+                        {formData.fitnessGoals.includes(goal.id) && (
+                          <Check className="w-5 h-5 text-primary ml-auto" />
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}

@@ -1,4 +1,4 @@
-import { Flame, Trophy, Target } from "lucide-react";
+import { Flame, Trophy, Target, Star, Salad, Dumbbell, Moon, Flower2, Pill, Droplet, Check } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { HabitWithStreak, getStreakMilestone, getHabitCategory } from "@/hooks/useHabits";
@@ -6,6 +6,28 @@ import { HabitWithStreak, getStreakMilestone, getHabitCategory } from "@/hooks/u
 interface HabitStreakCardProps {
   habit: HabitWithStreak;
 }
+
+const getCategoryIcon = (iconName: string) => {
+  const icons: Record<string, React.ReactNode> = {
+    'Salad': <Salad className="w-5 h-5" />,
+    'Dumbbell': <Dumbbell className="w-5 h-5" />,
+    'Moon': <Moon className="w-5 h-5" />,
+    'Flower2': <Flower2 className="w-5 h-5" />,
+    'Pill': <Pill className="w-5 h-5" />,
+    'Droplet': <Droplet className="w-5 h-5" />,
+    'Check': <Check className="w-5 h-5" />,
+  };
+  return icons[iconName] || <Check className="w-5 h-5" />;
+};
+
+const getMilestoneIcon = (iconName: string) => {
+  const icons: Record<string, React.ReactNode> = {
+    'Trophy': <Trophy className="w-4 h-4 text-yellow-500 inline" />,
+    'Star': <Star className="w-4 h-4 text-yellow-500 inline" />,
+    'Flame': <Flame className="w-4 h-4 text-orange-500 inline" />,
+  };
+  return icons[iconName] || <Flame className="w-4 h-4 text-orange-500 inline" />;
+};
 
 const HabitStreakCard = ({ habit }: HabitStreakCardProps) => {
   const currentStreak = habit.streak?.current_streak || 0;
@@ -25,7 +47,7 @@ const HabitStreakCard = ({ habit }: HabitStreakCardProps) => {
     <Card className="overflow-hidden">
       <CardHeader className="pb-2">
         <div className="flex items-center gap-2">
-          <span className="text-xl">{category.icon}</span>
+          <span className={category.color}>{getCategoryIcon(category.icon)}</span>
           <CardTitle className="text-base truncate">{habit.name}</CardTitle>
         </div>
       </CardHeader>
@@ -40,8 +62,8 @@ const HabitStreakCard = ({ habit }: HabitStreakCardProps) => {
             {currentStreak === 1 ? 'day streak' : 'days streak'}
           </p>
           {milestone.label && (
-            <p className="text-sm font-medium text-orange-500 mt-1">
-              {milestone.emoji} {milestone.label}
+            <p className="text-sm font-medium text-orange-500 mt-1 flex items-center justify-center gap-1">
+              {getMilestoneIcon(milestone.icon)} {milestone.label}
             </p>
           )}
         </div>

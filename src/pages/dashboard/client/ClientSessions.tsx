@@ -16,6 +16,7 @@ import {
   CalendarX,
   Star,
   ExternalLink,
+  Check,
 } from "lucide-react";
 import WriteReviewModal from "@/components/reviews/WriteReviewModal";
 import { useHasReviewed } from "@/hooks/useReviews";
@@ -180,8 +181,9 @@ const ClientSessions = () => {
             </Button>
           )}
           {isCompleted && hasReviewed && (
-            <p className="text-xs text-muted-foreground text-center mt-4">
-              ✓ Review submitted
+            <p className="text-xs text-muted-foreground text-center mt-4 flex items-center justify-center gap-1">
+              <Check className="w-3 h-3" />
+              Review submitted
             </p>
           )}
         </CardContent>

@@ -140,21 +140,21 @@ const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSide
 
   const handleSendTrainingPlan = async (plan: TrainingPlan) => {
     setSending(`plan-${plan.id}`);
-    const message = `📋 **Training Plan: ${plan.name}**\n\n${plan.description || "A customized training program designed for you."}\n\n⏱️ Duration: ${plan.weeks} weeks\n\nThis plan has been assigned to you. Check your Plans section to view the full details!`;
+    const message = `**Training Plan: ${plan.name}**\n\n${plan.description || "A customized training program designed for you."}\n\nDuration: ${plan.weeks} weeks\n\nThis plan has been assigned to you. Check your Plans section to view the full details!`;
     await onSendMessage(message);
     setSending(null);
   };
 
   const handleSendPackage = async (pkg: CoachPackage) => {
     setSending(`pkg-${pkg.id}`);
-    const message = `📦 **Package: ${pkg.name}**\n\n${pkg.description || "A great value package for your fitness journey."}\n\n💰 Price: ${formatCurrency(pkg.price, (pkg.currency || "GBP") as CurrencyCode)}\n📍 Sessions: ${pkg.session_count}\n\nInterested? Let me know and I can set this up for you!`;
+    const message = `**Package: ${pkg.name}**\n\n${pkg.description || "A great value package for your fitness journey."}\n\nPrice: ${formatCurrency(pkg.price, (pkg.currency || "GBP") as CurrencyCode)}\nSessions: ${pkg.session_count}\n\nInterested? Let me know and I can set this up for you!`;
     await onSendMessage(message);
     setSending(null);
   };
 
   const handleSendSubscription = async (plan: SubscriptionPlan) => {
     setSending(`sub-${plan.id}`);
-    const message = `💳 **Subscription Plan: ${plan.name}**\n\n${plan.description || "Ongoing coaching support to help you reach your goals."}\n\n💰 Price: ${formatCurrency(plan.price, (plan.currency || "GBP") as CurrencyCode)}/${plan.billing_period}\n\nThis includes regular coaching, plan updates, and support. Let me know if you'd like to subscribe!`;
+    const message = `**Subscription Plan: ${plan.name}**\n\n${plan.description || "Ongoing coaching support to help you reach your goals."}\n\nPrice: ${formatCurrency(plan.price, (plan.currency || "GBP") as CurrencyCode)}/${plan.billing_period}\n\nThis includes regular coaching, plan updates, and support. Let me know if you'd like to subscribe!`;
     await onSendMessage(message);
     setSending(null);
   };

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, Flame, Undo2 } from "lucide-react";
+import { Check, Flame, Undo2, Salad, Dumbbell, Moon, Flower2, Pill, Droplet } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -8,6 +8,19 @@ import { HabitWithStreak, getHabitCategory, useLogHabit, useUnlogHabit } from "@
 interface TodayHabitCardProps {
   habit: HabitWithStreak;
 }
+
+const getCategoryIcon = (iconName: string, className: string = "h-6 w-6") => {
+  const icons: Record<string, React.ReactNode> = {
+    'Salad': <Salad className={className} />,
+    'Dumbbell': <Dumbbell className={className} />,
+    'Moon': <Moon className={className} />,
+    'Flower2': <Flower2 className={className} />,
+    'Pill': <Pill className={className} />,
+    'Droplet': <Droplet className={className} />,
+    'Check': <Check className={className} />,
+  };
+  return icons[iconName] || <Check className={className} />;
+};
 
 const TodayHabitCard = ({ habit }: TodayHabitCardProps) => {
   const [isAnimating, setIsAnimating] = useState(false);
@@ -51,7 +64,7 @@ const TodayHabitCard = ({ habit }: TodayHabitCardProps) => {
             {isCompleted ? (
               <Check className="h-6 w-6" />
             ) : (
-              <span className="text-2xl">{category.icon}</span>
+              <span className={category.color}>{getCategoryIcon(category.icon)}</span>
             )}
           </Button>
           
