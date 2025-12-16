@@ -25,8 +25,9 @@ import AdminProfile from "./pages/dashboard/admin/AdminProfile";
 import AdminPlatformPlans from "./pages/dashboard/admin/AdminPlatformPlans";
 import AdminFeatures from "./pages/dashboard/admin/AdminFeatures";
 import AdminReviews from "./pages/dashboard/admin/AdminReviews";
+import AdminVerification from "./pages/dashboard/admin/AdminVerification";
 
-// Client Dashboard Pages
+// Coach Dashboard Pages
 import ClientOverview from "./pages/dashboard/client/ClientOverview";
 import ClientCoaches from "./pages/dashboard/client/ClientCoaches";
 import ClientSessions from "./pages/dashboard/client/ClientSessions";
@@ -49,6 +50,7 @@ import CoachEarnings from "./pages/dashboard/coach/CoachEarnings";
 import CoachSettings from "./pages/dashboard/coach/CoachSettings";
 import CoachPackages from "./pages/dashboard/coach/CoachPackages";
 import CoachReviews from "./pages/dashboard/coach/CoachReviews";
+import CoachVerification from "./pages/dashboard/coach/CoachVerification";
 
 // Shared Dashboard Pages
 import Notifications from "./pages/dashboard/Notifications";
@@ -143,6 +145,11 @@ const App = () => (
                 <Route path="/dashboard/admin/reviews" element={
                   <ProtectedRoute allowedRoles={["admin"]}>
                     <AdminReviews />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/admin/verification" element={
+                  <ProtectedRoute allowedRoles={["admin", "manager"]}>
+                    <AdminVerification />
                   </ProtectedRoute>
                 } />
                 
@@ -284,6 +291,11 @@ const App = () => (
                 <Route path="/dashboard/coach/notifications" element={
                   <ProtectedRoute allowedRoles={["coach"]}>
                     <Notifications />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/coach/verification" element={
+                  <ProtectedRoute allowedRoles={["coach"]}>
+                    <CoachVerification />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/notifications" element={

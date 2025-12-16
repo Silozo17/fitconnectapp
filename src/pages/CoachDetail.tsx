@@ -16,6 +16,7 @@ import CoachReviewsSection from "@/components/reviews/CoachReviewsSection";
 import StarRating from "@/components/reviews/StarRating";
 import FavouriteButton from "@/components/favourites/FavouriteButton";
 import CoachPricingSection from "@/components/packages/CoachPricingSection";
+import { VerifiedBadge } from "@/components/verification/VerifiedBadge";
 import { useCoachReviews, calculateAverageRating } from "@/hooks/useReviews";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -137,9 +138,14 @@ const CoachDetail = () => {
                     <div className="flex-1">
                       <div className="flex items-start justify-between">
                         <div>
-                          <h1 className="text-2xl font-bold text-foreground">
-                            {coach.display_name || "Coach"}
-                          </h1>
+                          <div className="flex items-center gap-2">
+                            <h1 className="text-2xl font-bold text-foreground">
+                              {coach.display_name || "Coach"}
+                            </h1>
+                            {coach.is_verified && (
+                              <VerifiedBadge verifiedAt={coach.verified_at} size="md" />
+                            )}
+                          </div>
                           {coach.location && (
                             <p className="text-muted-foreground flex items-center gap-1 mt-1">
                               <MapPin className="h-4 w-4" />

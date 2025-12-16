@@ -12,6 +12,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Package,
+  Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -24,6 +25,7 @@ const menuItems = [
   { title: "Packages", icon: Package, path: "/dashboard/coach/packages" },
   { title: "Reviews", icon: MessageSquare, path: "/dashboard/coach/reviews" },
   { title: "Earnings", icon: DollarSign, path: "/dashboard/coach/earnings" },
+  { title: "Verification", icon: Shield, path: "/dashboard/coach/verification" },
   { title: "Settings", icon: Settings, path: "/dashboard/coach/settings" },
 ];
 
