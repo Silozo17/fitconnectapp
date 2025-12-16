@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Save, LogOut, AlertTriangle, Info, Bell, MapPin, User, Heart, Globe, Plug, Shield } from "lucide-react";
+import { Loader2, Save, LogOut, AlertTriangle, Info, Bell, MapPin, User, Heart, Globe, Plug, Shield, AtSign, Copy, Check } from "lucide-react";
 import { HealthTagInput } from "@/components/dashboard/clients/HealthTagInput";
 import { ProfileImageUpload } from "@/components/shared/ProfileImageUpload";
 import { CurrencySelector } from "@/components/shared/CurrencySelector";
@@ -28,6 +28,7 @@ import { Calendar } from "lucide-react";
 interface ClientProfile {
   first_name: string | null;
   last_name: string | null;
+  username: string;
   age: number | null;
   gender_pronouns: string | null;
   location: string | null;
@@ -89,6 +90,11 @@ const ClientSettings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [selectedTab, setSelectedTab] = useState("profile");
+  const [newUsername, setNewUsername] = useState("");
+  const [checkingUsername, setCheckingUsername] = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [usernameError, setUsernameError] = useState("");
+  const [usernameCopied, setUsernameCopied] = useState(false);
   const { data: selectedAvatar } = useSelectedAvatar('client');
   const { connectCalendar, disconnectCalendar, toggleSync, getConnection, isLoading: calendarLoading } = useCalendarSync();
 
@@ -98,7 +104,7 @@ const ClientSettings = () => {
 
       const { data } = await supabase
         .from("client_profiles")
-        .select("first_name, last_name, age, gender_pronouns, location, weight_kg, height_cm, fitness_goals, dietary_restrictions, allergies, medical_conditions, avatar_url, leaderboard_visible, leaderboard_display_name, city, county, country")
+        .select("first_name, last_name, username, age, gender_pronouns, location, weight_kg, height_cm, fitness_goals, dietary_restrictions, allergies, medical_conditions, avatar_url, leaderboard_visible, leaderboard_display_name, city, county, country")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -147,6 +153,73 @@ const ClientSettings = () => {
   const updateField = (field: keyof ClientProfile, value: string | number | string[] | null | boolean) => {
     if (!profile) return;
     setProfile({ ...profile, [field]: value });
+  };
+
+  const copyUsername = () => {
+    if (profile?.username) {
+      navigator.clipboard.writeText(`@${profile.username}`);
+      setUsernameCopied(true);
+      setTimeout(() => setUsernameCopied(false), 2000);
+      toast.success("Username copied!");
+    }
+  };
+
+  const checkUsernameAvailability = async (username: string) => {
+    if (!username || username.length < 3) {
+      setUsernameAvailable(null);
+      setUsernameError(username.length > 0 ? "Username must be at least 3 characters" : "");
+      return;
+    }
+    if (username.length > 30) {
+      setUsernameAvailable(null);
+      setUsernameError("Username must be 30 characters or less");
+      return;
+    }
+    if (username === profile?.username) {
+      setUsernameAvailable(null);
+      setUsernameError("");
+      return;
+    }
+
+    setCheckingUsername(true);
+    setUsernameError("");
+
+    const { data: available } = await supabase.rpc("is_username_available", {
+      check_username: username,
+    });
+
+    setCheckingUsername(false);
+    setUsernameAvailable(available === true);
+    if (!available) {
+      setUsernameError("This username is already taken");
+    }
+  };
+
+  const handleUsernameChange = (value: string) => {
+    const cleaned = value.toLowerCase().replace(/[^a-z0-9]/g, "");
+    setNewUsername(cleaned);
+    checkUsernameAvailability(cleaned);
+  };
+
+  const saveUsername = async () => {
+    if (!user || !newUsername || !usernameAvailable) return;
+
+    setSaving(true);
+    const { error } = await supabase
+      .from("client_profiles")
+      .update({ username: newUsername })
+      .eq("user_id", user.id);
+
+    setSaving(false);
+
+    if (error) {
+      toast.error("Failed to update username");
+    } else {
+      setProfile({ ...profile!, username: newUsername });
+      setNewUsername("");
+      setUsernameAvailable(null);
+      toast.success("Username updated!");
+    }
   };
 
   if (loading) {
@@ -219,6 +292,70 @@ const ClientSettings = () => {
                       onImageChange={(url) => updateField("avatar_url", url)}
                       size="lg"
                     />
+                  </CardContent>
+                </Card>
+
+                {/* Username */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <AtSign className="w-5 h-5 text-primary" />
+                      Username
+                    </CardTitle>
+                    <CardDescription>Your unique identifier for connections</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center gap-2 p-3 bg-secondary/50 rounded-lg">
+                      <AtSign className="w-4 h-4 text-muted-foreground" />
+                      <span className="font-mono font-medium">{profile?.username}</span>
+                      <Button variant="ghost" size="sm" onClick={copyUsername} className="ml-auto">
+                        {usernameCopied ? (
+                          <Check className="w-4 h-4 text-primary" />
+                        ) : (
+                          <Copy className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Change Username</Label>
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Input
+                            value={newUsername}
+                            onChange={(e) => handleUsernameChange(e.target.value)}
+                            placeholder="Enter new username"
+                            className="pl-9"
+                            maxLength={30}
+                          />
+                        </div>
+                        <Button
+                          onClick={saveUsername}
+                          disabled={saving || !usernameAvailable || !newUsername}
+                        >
+                          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
+                        </Button>
+                      </div>
+                      {checkingUsername && (
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                          Checking availability...
+                        </p>
+                      )}
+                      {usernameError && (
+                        <p className="text-sm text-destructive">{usernameError}</p>
+                      )}
+                      {usernameAvailable && newUsername && (
+                        <p className="text-sm text-primary flex items-center gap-1">
+                          <Check className="w-3 h-3" />
+                          Username available!
+                        </p>
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        Lowercase letters and numbers only, 3-30 characters
+                      </p>
+                    </div>
                   </CardContent>
                 </Card>
 
