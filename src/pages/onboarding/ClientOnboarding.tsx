@@ -10,8 +10,9 @@ import { Progress } from "@/components/ui/progress";
 import { Dumbbell, ArrowRight, ArrowLeft, Check, Loader2, Flame, Activity, Flower2, Weight, Target, Heart, Sparkles } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { toast } from "sonner";
+import WearablesOnboardingStep from "@/components/onboarding/WearablesOnboardingStep";
 
-const STEPS = ["Personal Info", "Body Metrics", "Fitness Goals", "Dietary Info"];
+const STEPS = ["Personal Info", "Body Metrics", "Fitness Goals", "Dietary Info", "Connect Devices"];
 
 const FITNESS_GOALS: { id: string; label: string; icon: LucideIcon }[] = [
   { id: "weight_loss", label: "Weight Loss", icon: Flame },
@@ -106,6 +107,12 @@ const ClientOnboarding = () => {
   };
 
   const handleNext = () => {
+    // Validate first name on personal info step
+    if (currentStep === 0 && !formData.firstName.trim()) {
+      toast.error("Please enter your first name");
+      return;
+    }
+    
     if (currentStep < STEPS.length - 1) {
       setCurrentStep((prev) => prev + 1);
     }
@@ -211,13 +218,16 @@ const ClientOnboarding = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="firstName" className="text-foreground">First Name</Label>
+                    <Label htmlFor="firstName" className="text-foreground">
+                      First Name <span className="text-destructive">*</span>
+                    </Label>
                     <Input
                       id="firstName"
                       value={formData.firstName}
                       onChange={(e) => handleInputChange("firstName", e.target.value)}
                       className="mt-1.5 bg-secondary border-border text-foreground"
                       placeholder="John"
+                      required
                     />
                   </div>
                   <div>
@@ -397,40 +407,33 @@ const ClientOnboarding = () => {
               </div>
             )}
 
-            {/* Navigation */}
-            <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
-              <Button
-                variant="ghost"
-                onClick={handleBack}
-                disabled={currentStep === 0}
-                className="text-muted-foreground"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back
-              </Button>
+            {/* Step 5: Wearables */}
+            {currentStep === 4 && (
+              <WearablesOnboardingStep
+                onComplete={handleComplete}
+                onSkip={handleComplete}
+              />
+            )}
 
-              {currentStep < STEPS.length - 1 ? (
+            {/* Navigation - only show for steps that don't have their own navigation */}
+            {currentStep < 4 && (
+              <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
+                <Button
+                  variant="ghost"
+                  onClick={handleBack}
+                  disabled={currentStep === 0}
+                  className="text-muted-foreground"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back
+                </Button>
+
                 <Button onClick={handleNext} className="bg-primary text-primary-foreground hover:bg-primary/90">
                   Next
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
-              ) : (
-                <Button
-                  onClick={handleComplete}
-                  disabled={isSubmitting}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90"
-                >
-                  {isSubmitting ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <>
-                      Complete Setup
-                      <Check className="w-4 h-4 ml-2" />
-                    </>
-                  )}
-                </Button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
