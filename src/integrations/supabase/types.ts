@@ -1737,6 +1737,63 @@ export type Database = {
           },
         ]
       }
+      grocery_lists: {
+        Row: {
+          client_id: string
+          coach_id: string | null
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          is_completed: boolean | null
+          items: Json
+          name: string
+          source_id: string | null
+          source_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          client_id: string
+          coach_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          is_completed?: boolean | null
+          items?: Json
+          name?: string
+          source_id?: string | null
+          source_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          client_id?: string
+          coach_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          is_completed?: boolean | null
+          items?: Json
+          name?: string
+          source_id?: string | null
+          source_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grocery_lists_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grocery_lists_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       habit_logs: {
         Row: {
           client_id: string
@@ -1866,6 +1923,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      integration_usage: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          integration_type: string
+          metadata: Json | null
+          provider: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          integration_type: string
+          metadata?: Json | null
+          provider: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          integration_type?: string
+          metadata?: Json | null
+          provider?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       leaderboard_entries: {
         Row: {

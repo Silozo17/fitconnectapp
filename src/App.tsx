@@ -26,6 +26,7 @@ import AdminPlatformPlans from "./pages/dashboard/admin/AdminPlatformPlans";
 import AdminFeatures from "./pages/dashboard/admin/AdminFeatures";
 import AdminReviews from "./pages/dashboard/admin/AdminReviews";
 import AdminVerification from "./pages/dashboard/admin/AdminVerification";
+import AdminIntegrations from "./pages/dashboard/admin/AdminIntegrations";
 
 // Coach Dashboard Pages
 import ClientOverview from "./pages/dashboard/client/ClientOverview";
@@ -41,6 +42,7 @@ import ClientAchievements from "./pages/dashboard/client/ClientAchievements";
 import ClientLeaderboard from "./pages/dashboard/client/ClientLeaderboard";
 import ClientChallenges from "./pages/dashboard/client/ClientChallenges";
 import ClientIntegrations from "./pages/dashboard/client/ClientIntegrations";
+import ClientGrocery from "./pages/dashboard/client/ClientGrocery";
 
 // Coach Dashboard Pages
 import CoachOverview from "./pages/dashboard/coach/CoachOverview";
@@ -166,6 +168,11 @@ const App = () => (
                     <AdminVerification />
                   </ProtectedRoute>
                 } />
+                <Route path="/dashboard/admin/integrations" element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminIntegrations />
+                  </ProtectedRoute>
+                } />
                 
                 {/* Onboarding */}
                 <Route path="/onboarding/client" element={
@@ -248,6 +255,11 @@ const App = () => (
                 <Route path="/dashboard/client/integrations" element={
                   <ProtectedRoute allowedRoles={["client", "admin"]}>
                     <ClientIntegrations />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/client/grocery" element={
+                  <ProtectedRoute allowedRoles={["client", "admin"]}>
+                    <ClientGrocery />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/client/library" element={
