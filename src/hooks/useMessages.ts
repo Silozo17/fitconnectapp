@@ -12,10 +12,12 @@ interface Message {
   read_at: string | null;
 }
 
-interface Conversation {
+export interface Conversation {
   participantId: string;
   participantName: string;
-  participantType: "client" | "coach";
+  participantType: "client" | "coach" | "admin";
+  participantAvatar: string | null;
+  participantLocation?: string | null;
   lastMessage: string;
   lastMessageTime: string;
   unreadCount: number;
@@ -142,33 +144,54 @@ export const useMessages = (participantId?: string) => {
       const conversationList: Conversation[] = [];
       
       for (const [partnerId, msgs] of conversationMap) {
+        let participantName = "Unknown";
+        let participantType: "client" | "coach" | "admin" = "client";
+        let participantAvatar: string | null = null;
+        let participantLocation: string | null = null;
+
         // Try to get coach profile first
-        const { data: coachData, error: coachError } = await supabase
+        const { data: coachData } = await supabase
           .from("coach_profiles")
-          .select("display_name")
+          .select("display_name, profile_image_url, location")
           .eq("id", partnerId)
           .single();
 
-        let participantName = "Unknown";
-        let participantType: "client" | "coach" = "coach";
-
         if (coachData?.display_name) {
           participantName = coachData.display_name;
+          participantType = "coach";
+          participantAvatar = coachData.profile_image_url;
+          participantLocation = coachData.location;
           console.log("[useMessages] Found coach partner:", participantName);
         } else {
           // Try client profile
-          const { data: clientData, error: clientError } = await supabase
+          const { data: clientData } = await supabase
             .from("client_profiles")
-            .select("first_name, last_name")
+            .select("first_name, last_name, avatar_url")
             .eq("id", partnerId)
             .single();
 
           if (clientData) {
             participantName = `${clientData.first_name || ""} ${clientData.last_name || ""}`.trim() || "Client";
             participantType = "client";
+            participantAvatar = clientData.avatar_url;
             console.log("[useMessages] Found client partner:", participantName);
           } else {
-            console.warn("[useMessages] Could not find partner profile for ID:", partnerId);
+            // Try admin profile
+            const { data: adminData } = await supabase
+              .from("admin_profiles")
+              .select("display_name, first_name, last_name, avatar_url")
+              .eq("id", partnerId)
+              .single();
+
+            if (adminData) {
+              participantName = adminData.display_name || 
+                `${adminData.first_name || ""} ${adminData.last_name || ""}`.trim() || "Admin";
+              participantType = "admin";
+              participantAvatar = adminData.avatar_url;
+              console.log("[useMessages] Found admin partner:", participantName);
+            } else {
+              console.warn("[useMessages] Could not find partner profile for ID:", partnerId);
+            }
           }
         }
 
@@ -181,6 +204,8 @@ export const useMessages = (participantId?: string) => {
           participantId: partnerId,
           participantName,
           participantType,
+          participantAvatar,
+          participantLocation,
           lastMessage: lastMsg.content,
           lastMessageTime: lastMsg.created_at,
           unreadCount,
