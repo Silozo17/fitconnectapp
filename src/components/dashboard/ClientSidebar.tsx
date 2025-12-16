@@ -16,6 +16,7 @@ import {
   Trophy,
   Medal,
   Flame,
+  Plug,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -31,6 +32,7 @@ const menuItems = [
   { title: "Achievements", icon: Trophy, path: "/dashboard/client/achievements" },
   { title: "Leaderboard", icon: Medal, path: "/dashboard/client/leaderboard" },
   { title: "Challenges", icon: Flame, path: "/dashboard/client/challenges" },
+  { title: "Integrations", icon: Plug, path: "/dashboard/client/integrations" },
   { title: "Settings", icon: Settings, path: "/dashboard/client/settings" },
 ];
 
