@@ -9,6 +9,7 @@ export type MarketplaceCoach = Tables<"coach_profiles"> & {
   is_sponsored?: boolean | null;
   tags?: string[] | null;
   gym_affiliation?: string | null;
+  card_image_url?: string | null;
 };
 
 interface UseCoachMarketplaceOptions {

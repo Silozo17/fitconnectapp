@@ -29,6 +29,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { ProfileImageUpload } from "@/components/shared/ProfileImageUpload";
+import { CardImageUpload } from "@/components/shared/CardImageUpload";
+import { CoachCardPreview } from "@/components/coaches/CoachCardPreview";
 import StripeConnectButton from "@/components/payments/StripeConnectButton";
 import PlatformSubscription from "@/components/payments/PlatformSubscription";
 import { useQuery } from "@tanstack/react-query";
@@ -76,7 +78,9 @@ interface CoachProfile {
   online_available: boolean | null;
   in_person_available: boolean | null;
   profile_image_url: string | null;
+  card_image_url: string | null;
   subscription_tier: string | null;
+  is_verified: boolean | null;
 }
 
 const videoProviders: {
@@ -180,7 +184,9 @@ const CoachSettings = () => {
     online_available: true,
     in_person_available: false,
     profile_image_url: null,
+    card_image_url: null,
     subscription_tier: "free",
+    is_verified: false,
   });
 
   // Fetch coach profile with React Query
@@ -191,7 +197,7 @@ const CoachSettings = () => {
 
       const { data, error } = await supabase
         .from("coach_profiles")
-        .select("id, display_name, username, bio, location, gym_affiliation, experience_years, hourly_rate, currency, coach_types, online_available, in_person_available, profile_image_url, subscription_tier")
+        .select("id, display_name, username, bio, location, gym_affiliation, experience_years, hourly_rate, currency, coach_types, online_available, in_person_available, profile_image_url, card_image_url, subscription_tier, is_verified")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -216,7 +222,9 @@ const CoachSettings = () => {
         online_available: coachData.online_available ?? true,
         in_person_available: coachData.in_person_available ?? false,
         profile_image_url: coachData.profile_image_url,
+        card_image_url: coachData.card_image_url,
         subscription_tier: coachData.subscription_tier || "free",
+        is_verified: coachData.is_verified ?? false,
       });
     }
   }, [coachData]);
@@ -239,6 +247,7 @@ const CoachSettings = () => {
         online_available: profile.online_available,
         in_person_available: profile.in_person_available,
         profile_image_url: profile.profile_image_url,
+        card_image_url: profile.card_image_url,
       })
       .eq("user_id", user.id);
 
@@ -429,6 +438,37 @@ const CoachSettings = () => {
                       onImageChange={(url) => setProfile({ ...profile, profile_image_url: url })}
                       size="lg"
                     />
+                  </div>
+
+                  {/* Marketplace Card Photo */}
+                  <div className="mb-6">
+                    <Label className="mb-3 block">Marketplace Card Photo</Label>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      This landscape image appears on your card in search results and listings.
+                    </p>
+                    <div className="flex flex-col lg:flex-row gap-6">
+                      <div className="flex-1">
+                        <CardImageUpload
+                          currentImageUrl={profile.card_image_url}
+                          userId={user?.id || ""}
+                          onImageChange={(url) => setProfile({ ...profile, card_image_url: url })}
+                        />
+                      </div>
+                      <div className="lg:w-80">
+                        <p className="text-sm font-medium mb-2 text-muted-foreground">Card Preview</p>
+                        <CoachCardPreview
+                          displayName={profile.display_name}
+                          cardImageUrl={profile.card_image_url}
+                          profileImageUrl={profile.profile_image_url}
+                          location={profile.location}
+                          bio={profile.bio}
+                          coachTypes={profile.coach_types}
+                          hourlyRate={profile.hourly_rate}
+                          currency={profile.currency}
+                          isVerified={profile.is_verified ?? false}
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   {/* Username */}
