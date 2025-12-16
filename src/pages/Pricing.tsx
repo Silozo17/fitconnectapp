@@ -4,7 +4,7 @@ import BlobShape from "@/components/ui/blob-shape";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { Link } from "react-router-dom";
-import { Check, Zap, Star, Crown, Sparkles, Users, MessageSquare, Calendar, TrendingUp, Video, FileText, Shield } from "lucide-react";
+import { Check, Zap, Star, Crown, Sparkles, Users, MessageSquare, Calendar, TrendingUp, Video, FileText, Shield, Percent } from "lucide-react";
 import { SUBSCRIPTION_TIERS, TierKey, BillingInterval } from "@/lib/stripe-config";
 import { formatCurrency } from "@/lib/currency";
 import { cn } from "@/lib/utils";
@@ -182,6 +182,14 @@ const Pricing = () => {
                           Save {formatCurrency(price.savings)}/year
                         </p>
                       )}
+                    </div>
+
+                    {/* Commission Rate - Prominent Display */}
+                    <div className="flex items-center gap-2 mb-3 p-3 rounded-lg bg-primary/10 border border-primary/20">
+                      <Percent className="w-5 h-5 text-primary" />
+                      <span className="font-semibold text-primary">
+                        Only {tier.commissionPercent}% platform fee
+                      </span>
                     </div>
 
                     {/* Client Limit */}
