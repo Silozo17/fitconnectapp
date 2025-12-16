@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Save, LogOut, AlertTriangle, Info, Bell } from "lucide-react";
+import { Loader2, Save, LogOut, AlertTriangle, Info, Bell, MapPin } from "lucide-react";
 import { HealthTagInput } from "@/components/dashboard/clients/HealthTagInput";
 import { ProfileImageUpload } from "@/components/shared/ProfileImageUpload";
 import { CurrencySelector } from "@/components/shared/CurrencySelector";
@@ -19,6 +19,7 @@ interface ClientProfile {
   last_name: string | null;
   age: number | null;
   gender_pronouns: string | null;
+  location: string | null;
   weight_kg: number | null;
   height_cm: number | null;
   fitness_goals: string[] | null;
@@ -55,7 +56,7 @@ const ClientSettings = () => {
 
       const { data } = await supabase
         .from("client_profiles")
-        .select("first_name, last_name, age, gender_pronouns, weight_kg, height_cm, fitness_goals, dietary_restrictions, allergies, medical_conditions, avatar_url")
+        .select("first_name, last_name, age, gender_pronouns, location, weight_kg, height_cm, fitness_goals, dietary_restrictions, allergies, medical_conditions, avatar_url")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -77,6 +78,7 @@ const ClientSettings = () => {
         last_name: profile.last_name,
         age: profile.age,
         gender_pronouns: profile.gender_pronouns,
+        location: profile.location,
         weight_kg: profile.weight_kg,
         height_cm: profile.height_cm,
         dietary_restrictions: profile.dietary_restrictions,
@@ -181,6 +183,21 @@ const ClientSettings = () => {
                   onChange={(e) => updateField("gender_pronouns", e.target.value)}
                 />
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="location" className="flex items-center gap-2">
+                <MapPin className="w-4 h-4" />
+                Location
+              </Label>
+              <Input
+                id="location"
+                placeholder="e.g., London, UK"
+                value={profile?.location || ""}
+                onChange={(e) => updateField("location", e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Your location helps coaches in your area find you
+              </p>
             </div>
           </CardContent>
         </Card>
