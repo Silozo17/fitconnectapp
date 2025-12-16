@@ -90,36 +90,39 @@ export default function Subscribe() {
           />
         </div>
 
-        {/* Features */}
-        <div className="mb-8">
-          <TierFeatures tier={selectedTier} />
+        {/* Features + Avatar Row */}
+        <div className="mb-8 flex items-start justify-between gap-6">
+          {/* Features on the left */}
+          <div className="flex-1">
+            <TierFeatures tier={selectedTier} />
+          </div>
+          
+          {/* Avatar on the right, beside features */}
+          <div className="hidden lg:block w-40 h-52 flex-shrink-0">
+            <div 
+              key={selectedTier}
+              className="w-full h-full animate-fade-in"
+            >
+              <img
+                src={getAvatarImageUrl(TIER_AVATARS[selectedTier])}
+                alt={`${tierData.name} tier avatar`}
+                className="w-full h-full object-contain drop-shadow-2xl"
+                style={{ 
+                  filter: 'drop-shadow(0 0 30px hsl(var(--primary) / 0.3))',
+                }}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Billing Toggle */}
-        <div className="mb-8 relative z-10">
+        <div className="mb-8">
           <p className="text-sm font-medium text-foreground mb-3">Choose billing cycle</p>
           <BillingToggle
             selectedTier={selectedTier}
             billingInterval={billingInterval}
             onIntervalChange={setBillingInterval}
           />
-        </div>
-
-        {/* Tier Avatar - Decorative element at bottom-right of panel */}
-        <div className="hidden lg:block absolute bottom-0 right-0 w-64 h-80 pointer-events-none opacity-90">
-          <div 
-            key={selectedTier}
-            className="w-full h-full animate-fade-in"
-          >
-            <img
-              src={getAvatarImageUrl(TIER_AVATARS[selectedTier])}
-              alt={`${tierData.name} tier avatar`}
-              className="w-full h-full object-contain drop-shadow-2xl transition-transform duration-700 ease-in-out"
-              style={{ 
-                filter: 'drop-shadow(0 0 30px hsl(var(--primary) / 0.3))',
-              }}
-            />
-          </div>
         </div>
 
         {/* CTA Button - Left side for desktop, full width for mobile */}
