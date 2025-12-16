@@ -9,10 +9,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
-import { useUserAvatars, useUserSelectedAvatar, useRevokeAvatar } from "@/hooks/useAdminAvatars";
+import { useUserAvatars, useUserSelectedAvatar, useRevokeAvatar, useAllAvatars } from "@/hooks/useAdminAvatars";
 import { getAvatarImageUrl } from "@/hooks/useAvatars";
 import { RARITY_CONFIG } from "@/lib/avatar-config";
 import { GrantAvatarModal } from "./GrantAvatarModal";
+import { LockedAvatarsSection } from "./LockedAvatarsSection";
 import { 
   Users, Calendar, Package, CreditCard, Star, 
   Gift, Ban, RefreshCw, DollarSign, CheckCircle,
@@ -33,11 +34,14 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan 
   // Fetch coach avatars
   const { data: coachAvatars, isLoading: avatarsLoading } = useUserAvatars(coach?.user_id);
   const { data: selectedAvatarData } = useUserSelectedAvatar(coach?.user_id, 'coach');
+  const { data: allAvatars } = useAllAvatars();
   const revokeAvatar = useRevokeAvatar();
   
   const unlockedAvatarIds = useMemo(() => {
     return new Set(coachAvatars?.map(ua => ua.avatar_id) || []);
   }, [coachAvatars]);
+
+  const totalAvatarCount = allAvatars?.length || 0;
   // Fetch coach's clients
   const { data: clients } = useQuery({
     queryKey: ["coach-clients", coach?.id],
@@ -336,10 +340,10 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan 
             <Card>
               <CardHeader className="pb-2 flex flex-row items-center justify-between">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <Trophy className="h-4 w-4 text-amber-500" /> Unlocked ({coachAvatars?.length || 0})
+                  <Trophy className="h-4 w-4 text-amber-500" /> Unlocked ({coachAvatars?.length || 0}/{totalAvatarCount})
                 </CardTitle>
                 <Button size="sm" onClick={() => setGrantModalOpen(true)}>
-                  <Gift className="h-4 w-4 mr-1" /> Grant
+                  <Gift className="h-4 w-4 mr-1" /> Grant Multiple
                 </Button>
               </CardHeader>
               <CardContent>
@@ -401,6 +405,12 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan 
                 )}
               </CardContent>
             </Card>
+
+            {/* Locked Avatars */}
+            <LockedAvatarsSection 
+              userId={coach?.user_id || ""} 
+              unlockedAvatarIds={unlockedAvatarIds} 
+            />
           </TabsContent>
 
           <TabsContent value="reviews" className="mt-4 space-y-2">

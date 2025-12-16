@@ -13,11 +13,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAllAvatars, useGrantAvatar } from "@/hooks/useAdminAvatars";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useAllAvatars, useGrantMultipleAvatars } from "@/hooks/useAdminAvatars";
 import { getAvatarImageUrl } from "@/hooks/useAvatars";
 import { RARITY_CONFIG } from "@/lib/avatar-config";
-import { Search, Gift, Loader2, Check, Lock } from "lucide-react";
+import { Search, Gift, Loader2, Lock, CheckSquare, Square } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface GrantAvatarModalProps {
@@ -35,13 +36,13 @@ export function GrantAvatarModal({
   userName,
   unlockedAvatarIds,
 }: GrantAvatarModalProps) {
-  const [selectedAvatarId, setSelectedAvatarId] = useState<string | null>(null);
+  const [selectedAvatarIds, setSelectedAvatarIds] = useState<Set<string>>(new Set());
   const [reason, setReason] = useState("");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string>("all");
 
   const { data: avatars, isLoading } = useAllAvatars();
-  const grantAvatar = useGrantAvatar();
+  const grantAvatars = useGrantMultipleAvatars();
 
   const filteredAvatars = useMemo(() => {
     if (!avatars) return [];
@@ -54,24 +55,46 @@ export function GrantAvatarModal({
     });
   }, [avatars, search, category, unlockedAvatarIds]);
 
-  const selectedAvatar = avatars?.find((a) => a.id === selectedAvatarId);
+  const selectedAvatars = useMemo(() => {
+    return avatars?.filter((a) => selectedAvatarIds.has(a.id)) || [];
+  }, [avatars, selectedAvatarIds]);
+
+  const toggleAvatar = (avatarId: string) => {
+    setSelectedAvatarIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(avatarId)) {
+        newSet.delete(avatarId);
+      } else {
+        newSet.add(avatarId);
+      }
+      return newSet;
+    });
+  };
+
+  const selectAll = () => {
+    setSelectedAvatarIds(new Set(filteredAvatars.map(a => a.id)));
+  };
+
+  const clearAll = () => {
+    setSelectedAvatarIds(new Set());
+  };
 
   const handleGrant = async () => {
-    if (!selectedAvatarId) return;
+    if (selectedAvatarIds.size === 0) return;
 
-    await grantAvatar.mutateAsync({
+    await grantAvatars.mutateAsync({
       userId,
-      avatarId: selectedAvatarId,
+      avatarIds: Array.from(selectedAvatarIds),
       reason: reason || undefined,
     });
 
-    setSelectedAvatarId(null);
+    setSelectedAvatarIds(new Set());
     setReason("");
     onOpenChange(false);
   };
 
   const handleClose = () => {
-    setSelectedAvatarId(null);
+    setSelectedAvatarIds(new Set());
     setReason("");
     setSearch("");
     onOpenChange(false);
@@ -83,10 +106,10 @@ export function GrantAvatarModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Gift className="h-5 w-5 text-primary" />
-            Grant Avatar to {userName}
+            Grant Avatars to {userName}
           </DialogTitle>
           <DialogDescription>
-            Select an avatar to grant. Only avatars the user doesn't have are shown.
+            Select one or more avatars to grant. Only avatars the user doesn't have are shown.
           </DialogDescription>
         </DialogHeader>
 
@@ -112,8 +135,23 @@ export function GrantAvatarModal({
             </TabsList>
           </Tabs>
 
+          {/* Selection Controls */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={selectAll} disabled={filteredAvatars.length === 0}>
+                <CheckSquare className="h-4 w-4 mr-1" /> Select All
+              </Button>
+              <Button variant="outline" size="sm" onClick={clearAll} disabled={selectedAvatarIds.size === 0}>
+                <Square className="h-4 w-4 mr-1" /> Clear All
+              </Button>
+            </div>
+            {selectedAvatarIds.size > 0 && (
+              <Badge variant="secondary">{selectedAvatarIds.size} selected</Badge>
+            )}
+          </div>
+
           {/* Avatar Grid */}
-          <ScrollArea className="h-[300px] border rounded-lg p-2">
+          <ScrollArea className="h-[280px] border rounded-lg p-2">
             {isLoading ? (
               <div className="flex items-center justify-center h-full">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -128,12 +166,12 @@ export function GrantAvatarModal({
               <div className="grid grid-cols-4 gap-3">
                 {filteredAvatars.map((avatar) => {
                   const rarityConfig = RARITY_CONFIG[avatar.rarity as keyof typeof RARITY_CONFIG];
-                  const isSelected = selectedAvatarId === avatar.id;
+                  const isSelected = selectedAvatarIds.has(avatar.id);
 
                   return (
                     <button
                       key={avatar.id}
-                      onClick={() => setSelectedAvatarId(avatar.id)}
+                      onClick={() => toggleAvatar(avatar.id)}
                       className={cn(
                         "relative p-2 rounded-lg border-2 transition-all text-left",
                         isSelected
@@ -141,11 +179,9 @@ export function GrantAvatarModal({
                           : "border-transparent hover:border-muted-foreground/30 bg-muted/50"
                       )}
                     >
-                      {isSelected && (
-                        <div className="absolute top-1 right-1 bg-primary rounded-full p-0.5">
-                          <Check className="h-3 w-3 text-primary-foreground" />
-                        </div>
-                      )}
+                      <div className="absolute top-1 right-1">
+                        <Checkbox checked={isSelected} className="pointer-events-none" />
+                      </div>
                       <div className="aspect-square rounded-md overflow-hidden mb-2 bg-background">
                         <img
                           src={getAvatarImageUrl(avatar.slug)}
@@ -170,26 +206,24 @@ export function GrantAvatarModal({
             )}
           </ScrollArea>
 
-          {/* Selected Avatar Preview */}
-          {selectedAvatar && (
-            <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
-              <img
-                src={getAvatarImageUrl(selectedAvatar.slug)}
-                alt={selectedAvatar.name}
-                className="h-16 w-16 object-contain rounded-md bg-background"
-              />
-              <div className="flex-1">
-                <p className="font-medium">{selectedAvatar.name}</p>
-                <p className="text-sm text-muted-foreground">{selectedAvatar.description}</p>
-                <Badge
-                  variant="outline"
-                  className={cn(
-                    "mt-1",
-                    RARITY_CONFIG[selectedAvatar.rarity as keyof typeof RARITY_CONFIG]?.color
-                  )}
-                >
-                  {selectedAvatar.rarity}
-                </Badge>
+          {/* Selected Avatars Preview */}
+          {selectedAvatars.length > 0 && (
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <p className="text-sm font-medium mb-2">Selected ({selectedAvatars.length}):</p>
+              <div className="flex flex-wrap gap-2">
+                {selectedAvatars.slice(0, 6).map((avatar) => (
+                  <Badge key={avatar.id} variant="secondary" className="gap-1">
+                    <img
+                      src={getAvatarImageUrl(avatar.slug)}
+                      alt={avatar.name}
+                      className="h-4 w-4 rounded"
+                    />
+                    {avatar.name}
+                  </Badge>
+                ))}
+                {selectedAvatars.length > 6 && (
+                  <Badge variant="outline">+{selectedAvatars.length - 6} more</Badge>
+                )}
               </div>
             </div>
           )}
@@ -198,7 +232,7 @@ export function GrantAvatarModal({
           <div className="space-y-2">
             <Label>Reason (optional)</Label>
             <Textarea
-              placeholder="Why are you granting this avatar? (for audit log)"
+              placeholder="Why are you granting these avatars? (for audit log)"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               rows={2}
@@ -212,10 +246,10 @@ export function GrantAvatarModal({
           </Button>
           <Button
             onClick={handleGrant}
-            disabled={!selectedAvatarId || grantAvatar.isPending}
+            disabled={selectedAvatarIds.size === 0 || grantAvatars.isPending}
           >
-            {grantAvatar.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            Grant Avatar
+            {grantAvatars.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            Grant {selectedAvatarIds.size > 0 ? `${selectedAvatarIds.size} Avatar${selectedAvatarIds.size > 1 ? 's' : ''}` : 'Avatar'}
           </Button>
         </DialogFooter>
       </DialogContent>

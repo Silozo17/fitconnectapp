@@ -17,10 +17,11 @@ import { format, formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import { useLogAdminAction } from "@/hooks/useAuditLog";
 import { useAdminUserStats } from "@/hooks/useAdminUserStats";
-import { useUserAvatars, useUserSelectedAvatar, useRevokeAvatar } from "@/hooks/useAdminAvatars";
+import { useUserAvatars, useUserSelectedAvatar, useRevokeAvatar, useAllAvatars } from "@/hooks/useAdminAvatars";
 import { getAvatarImageUrl } from "@/hooks/useAvatars";
 import { RARITY_CONFIG } from "@/lib/avatar-config";
 import { GrantAvatarModal } from "./GrantAvatarModal";
+import { LockedAvatarsSection } from "./LockedAvatarsSection";
 import { 
   User, Heart, Target, MapPin, Calendar, Dumbbell,
   Save, Loader2, AlertTriangle, Apple, Activity,
@@ -64,11 +65,14 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved }: UserDeta
   // Fetch user avatars
   const { data: userAvatars, isLoading: avatarsLoading } = useUserAvatars(user?.user_id);
   const { data: selectedAvatarData } = useUserSelectedAvatar(user?.user_id, 'client');
+  const { data: allAvatars } = useAllAvatars();
   const revokeAvatar = useRevokeAvatar();
   
   const unlockedAvatarIds = useMemo(() => {
     return new Set(userAvatars?.map(ua => ua.avatar_id) || []);
   }, [userAvatars]);
+
+  const totalAvatarCount = allAvatars?.length || 0;
 
   // Fetch connected coaches
   const { data: connectedCoaches } = useQuery({
@@ -743,10 +747,10 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved }: UserDeta
             <Card>
               <CardHeader className="pb-2 flex flex-row items-center justify-between">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <Trophy className="h-4 w-4 text-amber-500" /> Unlocked Avatars ({userAvatars?.length || 0})
+                  <Trophy className="h-4 w-4 text-amber-500" /> Unlocked ({userAvatars?.length || 0}/{totalAvatarCount})
                 </CardTitle>
                 <Button size="sm" onClick={() => setGrantModalOpen(true)}>
-                  <Gift className="h-4 w-4 mr-1" /> Grant
+                  <Gift className="h-4 w-4 mr-1" /> Grant Multiple
                 </Button>
               </CardHeader>
               <CardContent>
@@ -813,6 +817,12 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved }: UserDeta
                 )}
               </CardContent>
             </Card>
+
+            {/* Locked Avatars */}
+            <LockedAvatarsSection 
+              userId={user?.user_id || ""} 
+              unlockedAvatarIds={unlockedAvatarIds} 
+            />
           </TabsContent>
         </Tabs>
 

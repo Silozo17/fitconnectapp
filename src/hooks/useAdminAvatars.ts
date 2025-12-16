@@ -126,6 +126,66 @@ export function useGrantAvatar() {
   });
 }
 
+// Admin grants multiple avatars to user at once
+export function useGrantMultipleAvatars() {
+  const queryClient = useQueryClient();
+  const logAction = useLogAdminAction();
+  
+  return useMutation({
+    mutationFn: async ({ 
+      userId, 
+      avatarIds, 
+      reason 
+    }: { 
+      userId: string; 
+      avatarIds: string[]; 
+      reason?: string;
+    }) => {
+      const insertData = avatarIds.map(avatarId => ({
+        user_id: userId,
+        avatar_id: avatarId,
+        unlock_source: 'admin_grant',
+      }));
+      
+      const { data, error } = await supabase
+        .from('user_avatars')
+        .insert(insertData)
+        .select('*, avatar:avatars(*)');
+      
+      if (error) {
+        if (error.message.includes('duplicate')) {
+          throw new Error('Some avatars are already granted to this user');
+        }
+        throw error;
+      }
+      
+      return { data, reason };
+    },
+    onSuccess: ({ data, reason }, { userId }) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-user-avatars', userId] });
+      
+      const avatarNames = data?.map((d: any) => d.avatar?.name).filter(Boolean).join(', ');
+      
+      logAction.mutate({
+        action: 'GRANT_MULTIPLE_AVATARS',
+        entityType: 'user_avatars',
+        entityId: userId,
+        newValues: { 
+          user_id: userId, 
+          avatar_count: data?.length || 0,
+          avatar_names: avatarNames,
+          reason 
+        },
+      });
+      
+      toast.success(`${data?.length || 0} avatars granted successfully`);
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to grant avatars');
+    },
+  });
+}
+
 // Admin revokes avatar from user
 export function useRevokeAvatar() {
   const queryClient = useQueryClient();
