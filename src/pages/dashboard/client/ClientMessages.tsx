@@ -1,6 +1,4 @@
 import { useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 import ConversationList from "@/components/messaging/ConversationList";
 import ChatWindow from "@/components/messaging/ChatWindow";
@@ -11,25 +9,6 @@ import { useNavigate } from "react-router-dom";
 const ClientMessages = () => {
   const { id: participantId } = useParams();
   const navigate = useNavigate();
-  const [participantName, setParticipantName] = useState<string>("");
-
-  useEffect(() => {
-    const fetchParticipantName = async () => {
-      if (!participantId) return;
-
-      const { data: coachData } = await supabase
-        .from("coach_profiles")
-        .select("display_name")
-        .eq("id", participantId)
-        .single();
-
-      if (coachData?.display_name) {
-        setParticipantName(coachData.display_name);
-      }
-    };
-
-    fetchParticipantName();
-  }, [participantId]);
 
   return (
     <ClientDashboardLayout title="Messages" description="Chat with your coaches">
@@ -70,10 +49,7 @@ const ClientMessages = () => {
             }`}
           >
             {participantId ? (
-              <ChatWindow
-                participantId={participantId}
-                participantName={participantName}
-              />
+              <ChatWindow participantId={participantId} />
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
