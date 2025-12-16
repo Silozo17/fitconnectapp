@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Calendar, Clock, MapPin, Video } from "lucide-react";
-import { toast } from "sonner";
+import { useScheduleSession } from "@/hooks/useCoachClients";
 
 interface ScheduleSessionModalProps {
   open: boolean;
@@ -16,7 +16,7 @@ interface ScheduleSessionModalProps {
   clientId?: string;
 }
 
-export function ScheduleSessionModal({ open, onOpenChange, clientName }: ScheduleSessionModalProps) {
+export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId }: ScheduleSessionModalProps) {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [duration, setDuration] = useState("60");
@@ -24,18 +24,30 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName }: Schedul
   const [isOnline, setIsOnline] = useState(false);
   const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+
+  const scheduleSessionMutation = useScheduleSession();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    if (!clientId) return;
+
+    const scheduledAt = new Date(`${date}T${time}`).toISOString();
     
-    toast.success("Session scheduled successfully");
-    resetForm();
-    setIsLoading(false);
-    onOpenChange(false);
+    scheduleSessionMutation.mutate({
+      clientId,
+      scheduledAt,
+      duration: parseInt(duration),
+      sessionType,
+      isOnline,
+      location: isOnline ? undefined : location,
+      notes: notes || undefined,
+    }, {
+      onSuccess: () => {
+        resetForm();
+        onOpenChange(false);
+      },
+    });
   };
 
   const resetForm = () => {
@@ -168,8 +180,8 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName }: Schedul
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Scheduling..." : "Schedule Session"}
+            <Button type="submit" disabled={scheduleSessionMutation.isPending || !clientId || !sessionType}>
+              {scheduleSessionMutation.isPending ? "Scheduling..." : "Schedule Session"}
             </Button>
           </DialogFooter>
         </form>

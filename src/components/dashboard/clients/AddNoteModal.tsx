@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { FileText, Pin, Tag } from "lucide-react";
-import { toast } from "sonner";
+import { useAddNote } from "@/hooks/useCoachClients";
 
 interface AddNoteModalProps {
   open: boolean;
@@ -23,24 +23,31 @@ const noteCategories = [
   { value: "goal", label: "Goal", color: "bg-purple-500" },
 ];
 
-export function AddNoteModal({ open, onOpenChange, clientName }: AddNoteModalProps) {
+export function AddNoteModal({ open, onOpenChange, clientName, clientId }: AddNoteModalProps) {
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("general");
   const [isPinned, setIsPinned] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  
+  const addNoteMutation = useAddNote();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    if (!clientId) return;
     
-    toast.success("Note added successfully");
-    setContent("");
-    setCategory("general");
-    setIsPinned(false);
-    setIsLoading(false);
-    onOpenChange(false);
+    addNoteMutation.mutate({
+      clientId,
+      content,
+      category,
+      isPinned,
+    }, {
+      onSuccess: () => {
+        setContent("");
+        setCategory("general");
+        setIsPinned(false);
+        onOpenChange(false);
+      },
+    });
   };
 
   return (
@@ -108,8 +115,8 @@ export function AddNoteModal({ open, onOpenChange, clientName }: AddNoteModalPro
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading || !content.trim()}>
-              {isLoading ? "Saving..." : "Add Note"}
+            <Button type="submit" disabled={addNoteMutation.isPending || !content.trim() || !clientId}>
+              {addNoteMutation.isPending ? "Saving..." : "Add Note"}
             </Button>
           </DialogFooter>
         </form>
