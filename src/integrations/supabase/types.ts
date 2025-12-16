@@ -119,6 +119,7 @@ export type Database = {
           status_updated_by: string | null
           updated_at: string
           user_id: string
+          user_profile_id: string | null
           username: string
           users_last_viewed_at: string | null
           verifications_last_viewed_at: string | null
@@ -139,6 +140,7 @@ export type Database = {
           status_updated_by?: string | null
           updated_at?: string
           user_id: string
+          user_profile_id?: string | null
           username: string
           users_last_viewed_at?: string | null
           verifications_last_viewed_at?: string | null
@@ -159,11 +161,20 @@ export type Database = {
           status_updated_by?: string | null
           updated_at?: string
           user_id?: string
+          user_profile_id?: string | null
           username?: string
           users_last_viewed_at?: string | null
           verifications_last_viewed_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "admin_profiles_user_profile_id_fkey"
+            columns: ["user_profile_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       audit_logs: {
         Row: {
@@ -768,6 +779,7 @@ export type Database = {
           status_updated_by: string | null
           updated_at: string
           user_id: string
+          user_profile_id: string | null
           username: string
           weight_kg: number | null
         }
@@ -799,6 +811,7 @@ export type Database = {
           status_updated_by?: string | null
           updated_at?: string
           user_id: string
+          user_profile_id?: string | null
           username: string
           weight_kg?: number | null
         }
@@ -830,6 +843,7 @@ export type Database = {
           status_updated_by?: string | null
           updated_at?: string
           user_id?: string
+          user_profile_id?: string | null
           username?: string
           weight_kg?: number | null
         }
@@ -839,6 +853,13 @@ export type Database = {
             columns: ["selected_avatar_id"]
             isOneToOne: false
             referencedRelation: "avatars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_profiles_user_profile_id_fkey"
+            columns: ["user_profile_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1324,6 +1345,7 @@ export type Database = {
           subscription_tier: string | null
           updated_at: string
           user_id: string
+          user_profile_id: string | null
           username: string
           verification_notes: string | null
           verification_status: string | null
@@ -1359,6 +1381,7 @@ export type Database = {
           subscription_tier?: string | null
           updated_at?: string
           user_id: string
+          user_profile_id?: string | null
           username: string
           verification_notes?: string | null
           verification_status?: string | null
@@ -1394,6 +1417,7 @@ export type Database = {
           subscription_tier?: string | null
           updated_at?: string
           user_id?: string
+          user_profile_id?: string | null
           username?: string
           verification_notes?: string | null
           verification_status?: string | null
@@ -1406,6 +1430,13 @@ export type Database = {
             columns: ["selected_avatar_id"]
             isOneToOne: false
             referencedRelation: "avatars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_profiles_user_profile_id_fkey"
+            columns: ["user_profile_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -3192,6 +3223,54 @@ export type Database = {
           requester_user_id?: string
           responded_at?: string | null
           status?: string
+        }
+        Relationships: []
+      }
+      user_profiles: {
+        Row: {
+          avatar_url: string | null
+          city: string | null
+          country: string | null
+          county: string | null
+          created_at: string | null
+          display_name: string | null
+          first_name: string | null
+          id: string
+          last_name: string | null
+          location: string | null
+          updated_at: string | null
+          user_id: string
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          city?: string | null
+          country?: string | null
+          county?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          location?: string | null
+          updated_at?: string | null
+          user_id: string
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          city?: string | null
+          country?: string | null
+          county?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          location?: string | null
+          updated_at?: string | null
+          user_id?: string
+          username?: string
         }
         Relationships: []
       }

@@ -2,6 +2,7 @@ import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,13 +16,12 @@ import ViewSwitcher from "@/components/admin/ViewSwitcher";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 
 interface DashboardHeaderProps {
-  displayName?: string | null;
   subscriptionTier?: string | null;
-  profileImageUrl?: string | null;
 }
 
-const DashboardHeader = ({ displayName, subscriptionTier, profileImageUrl }: DashboardHeaderProps) => {
+const DashboardHeader = ({ subscriptionTier }: DashboardHeaderProps) => {
   const { signOut, role } = useAuth();
+  const { displayName, avatarUrl } = useUserProfile();
 
   const tierLabel = subscriptionTier === "elite" ? "Elite" : subscriptionTier === "pro" ? "Pro" : "Free";
 
@@ -57,7 +57,7 @@ const DashboardHeader = ({ displayName, subscriptionTier, profileImageUrl }: Das
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
                 <UserAvatar
-                  src={profileImageUrl}
+                  src={avatarUrl}
                   name={displayName}
                   className="h-10 w-10"
                 />

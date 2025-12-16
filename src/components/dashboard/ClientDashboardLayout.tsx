@@ -8,13 +8,6 @@ import { cn } from "@/lib/utils";
 import ClientSidebar from "./ClientSidebar";
 import ClientDashboardHeader from "./ClientDashboardHeader";
 
-interface ClientProfile {
-  first_name: string | null;
-  last_name: string | null;
-  onboarding_completed: boolean;
-  avatar_url: string | null;
-}
-
 interface ClientDashboardLayoutProps {
   children: React.ReactNode;
   title?: string;
@@ -28,17 +21,16 @@ const ClientDashboardLayout = ({
 }: ClientDashboardLayoutProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<ClientProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const checkOnboarding = async () => {
       if (!user) return;
 
       const { data } = await supabase
         .from("client_profiles")
-        .select("first_name, last_name, onboarding_completed, avatar_url")
+        .select("onboarding_completed")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -47,11 +39,10 @@ const ClientDashboardLayout = ({
         return;
       }
 
-      setProfile(data);
       setLoading(false);
     };
 
-    fetchProfile();
+    checkOnboarding();
   }, [user, navigate]);
 
   if (loading) {
@@ -81,11 +72,7 @@ const ClientDashboardLayout = ({
             sidebarCollapsed ? "ml-16" : "ml-64"
           )}
         >
-          <ClientDashboardHeader
-            firstName={profile?.first_name}
-            lastName={profile?.last_name}
-            avatarUrl={profile?.avatar_url}
-          />
+          <ClientDashboardHeader />
 
           <main className="p-6">{children}</main>
         </div>
