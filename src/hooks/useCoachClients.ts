@@ -210,41 +210,32 @@ export function useAddClient() {
   const { data: coachProfile } = useCoachProfile();
 
   return useMutation({
-    mutationFn: async (data: { email: string; firstName: string; lastName: string; planType: string }) => {
+    mutationFn: async (data: { email: string; firstName: string; lastName: string; planType: string; message?: string }) => {
       if (!coachProfile?.id) throw new Error("Coach profile not found");
 
-      // For now, we'll create a placeholder client profile
-      // In a real app, this would send an invitation email
-      const { data: newProfile, error: profileError } = await supabase
-        .from("client_profiles")
-        .insert({
-          user_id: crypto.randomUUID(), // Placeholder - would be real user after signup
-          first_name: data.firstName,
-          last_name: data.lastName,
-          onboarding_completed: false,
-        })
-        .select()
-        .single();
+      // Send invitation email via edge function
+      const response = await supabase.functions.invoke("send-client-invitation", {
+        body: {
+          email: data.email,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          coachName: coachProfile.display_name || "Your Coach",
+          message: data.message,
+        },
+      });
 
-      if (profileError) throw profileError;
+      if (response.error) {
+        throw new Error(response.error.message || "Failed to send invitation");
+      }
 
-      const { error: clientError } = await supabase
-        .from("coach_clients")
-        .insert({
-          coach_id: coachProfile.id,
-          client_id: newProfile.id,
-          status: "pending",
-          plan_type: data.planType,
-        });
-
-      if (clientError) throw clientError;
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["coach-clients"] });
-      toast.success("Client added successfully");
+      toast.success("Invitation sent successfully! The client will receive an email to join.");
     },
     onError: (error) => {
-      toast.error("Failed to add client: " + error.message);
+      toast.error("Failed to send invitation: " + error.message);
     },
   });
 }

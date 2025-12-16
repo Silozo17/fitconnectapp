@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, MoreHorizontal, Mail, Pencil, Trash2, KeyRound } from "lucide-react";
+import { Search, MoreHorizontal, Pencil, Trash2, KeyRound, Loader2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -31,6 +31,7 @@ interface ClientUser {
   age: number | null;
   onboarding_completed: boolean;
   created_at: string;
+  email?: string;
 }
 
 const AdminUsers = () => {
@@ -38,6 +39,7 @@ const AdminUsers = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingUser, setEditingUser] = useState<ClientUser | null>(null);
+  const [resettingPassword, setResettingPassword] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -78,9 +80,37 @@ const AdminUsers = () => {
     }
   };
 
-  const handleResetPassword = async (userId: string) => {
-    toast.info("Password reset functionality requires edge function setup");
-    // TODO: Implement edge function for password reset
+  const handleResetPassword = async (user: ClientUser) => {
+    if (!user.user_id) {
+      toast.error("User ID not found");
+      return;
+    }
+
+    // We need to get the user's email from auth - for now show info
+    // In production, you'd fetch this from a joined query or store email in profile
+    const email = prompt("Enter the user's email address to send password reset:");
+    if (!email) return;
+
+    setResettingPassword(user.user_id);
+    
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await supabase.functions.invoke("admin-password-reset", {
+        body: { userId: user.user_id, email },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message || "Failed to reset password");
+      }
+
+      toast.success("Password reset email sent successfully");
+    } catch (error: any) {
+      console.error("Password reset error:", error);
+      toast.error(error.message || "Failed to send password reset email");
+    } finally {
+      setResettingPassword(null);
+    }
   };
 
   const filteredUsers = users.filter((user) => {
@@ -156,8 +186,15 @@ const AdminUsers = () => {
                               <Pencil className="h-4 w-4 mr-2" />
                               Edit Details
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleResetPassword(user.user_id)}>
-                              <KeyRound className="h-4 w-4 mr-2" />
+                            <DropdownMenuItem 
+                              onClick={() => handleResetPassword(user)}
+                              disabled={resettingPassword === user.user_id}
+                            >
+                              {resettingPassword === user.user_id ? (
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              ) : (
+                                <KeyRound className="h-4 w-4 mr-2" />
+                              )}
                               Reset Password
                             </DropdownMenuItem>
                             <DropdownMenuItem
