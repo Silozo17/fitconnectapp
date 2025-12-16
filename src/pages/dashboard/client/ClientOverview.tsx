@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
+import { AvatarStatsHero } from "@/components/dashboard/AvatarStatsHero";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -133,15 +134,8 @@ const ClientOverview = () => {
       title="Dashboard"
       description="Your fitness journey overview"
     >
-      {/* Welcome Section */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">
-          Welcome back{firstName ? `, ${firstName}` : ""}!
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          Here's an overview of your fitness journey
-        </p>
-      </div>
+      {/* Avatar Stats Hero */}
+      <AvatarStatsHero firstName={firstName} />
 
       {/* Quick Actions Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
