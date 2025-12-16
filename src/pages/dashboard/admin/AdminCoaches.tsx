@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, MoreHorizontal, Pencil, Trash2, KeyRound, Eye, Gift, Users, DollarSign } from "lucide-react";
+import { Search, MoreHorizontal, Pencil, Trash2, KeyRound, Eye, Gift, Users, DollarSign, Loader2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -50,6 +50,7 @@ const AdminCoaches = () => {
   const [editingCoach, setEditingCoach] = useState<CoachUser | null>(null);
   const [viewingCoach, setViewingCoach] = useState<CoachUser | null>(null);
   const [assignPlanCoach, setAssignPlanCoach] = useState<CoachUser | null>(null);
+  const [resettingPassword, setResettingPassword] = useState<string | null>(null);
   const logAction = useLogAdminAction();
 
   useEffect(() => {
@@ -97,8 +98,40 @@ const AdminCoaches = () => {
     }
   };
 
-  const handleResetPassword = async (userId: string) => {
-    toast.info("Password reset functionality requires edge function setup");
+  const handleResetPassword = async (coach: CoachUser) => {
+    if (!coach.user_id) {
+      toast.error("User ID not found");
+      return;
+    }
+
+    const email = prompt("Enter the coach's email address to send password reset:");
+    if (!email) return;
+
+    setResettingPassword(coach.user_id);
+    
+    try {
+      const response = await supabase.functions.invoke("admin-password-reset", {
+        body: { userId: coach.user_id, email },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message || "Failed to reset password");
+      }
+
+      logAction.mutate({
+        action: "RESET_PASSWORD",
+        entityType: "coach_profiles",
+        entityId: coach.id,
+        newValues: { email },
+      });
+      
+      toast.success("Password reset email sent successfully");
+    } catch (error: any) {
+      console.error("Password reset error:", error);
+      toast.error(error.message || "Failed to send password reset email");
+    } finally {
+      setResettingPassword(null);
+    }
   };
 
   const filteredCoaches = coaches.filter((coach) => {
@@ -274,8 +307,15 @@ const AdminCoaches = () => {
                               Assign Free Plan
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => handleResetPassword(coach.user_id)}>
-                              <KeyRound className="h-4 w-4 mr-2" />
+                            <DropdownMenuItem 
+                              onClick={() => handleResetPassword(coach)}
+                              disabled={resettingPassword === coach.user_id}
+                            >
+                              {resettingPassword === coach.user_id ? (
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              ) : (
+                                <KeyRound className="h-4 w-4 mr-2" />
+                              )}
                               Reset Password
                             </DropdownMenuItem>
                             <DropdownMenuItem

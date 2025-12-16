@@ -3,9 +3,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { UserPlus, Mail } from "lucide-react";
-import { toast } from "sonner";
+import { UserPlus, Mail, Loader2 } from "lucide-react";
+import { useAddClient } from "@/hooks/useCoachClients";
 
 interface AddClientModalProps {
   open: boolean;
@@ -17,22 +18,36 @@ export function AddClientModal({ open, onOpenChange }: AddClientModalProps) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [planType, setPlanType] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  
+  const addClient = useAddClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     
-    // Mock submission - will be connected to real API later
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    toast.success(`Invitation sent to ${email}`);
-    setEmail("");
-    setFirstName("");
-    setLastName("");
-    setPlanType("");
-    setIsLoading(false);
-    onOpenChange(false);
+    if (!email || !firstName || !lastName) {
+      return;
+    }
+
+    addClient.mutate(
+      { 
+        email, 
+        firstName, 
+        lastName, 
+        planType: planType || "personal-training",
+        message: message || undefined,
+      },
+      {
+        onSuccess: () => {
+          setEmail("");
+          setFirstName("");
+          setLastName("");
+          setPlanType("");
+          setMessage("");
+          onOpenChange(false);
+        },
+      }
+    );
   };
 
   return (
@@ -41,7 +56,7 @@ export function AddClientModal({ open, onOpenChange }: AddClientModalProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
             <UserPlus className="h-5 w-5 text-primary" />
-            Add New Client
+            Invite New Client
           </DialogTitle>
         </DialogHeader>
         
@@ -55,6 +70,7 @@ export function AddClientModal({ open, onOpenChange }: AddClientModalProps) {
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder="John"
                 className="bg-background border-border"
+                required
               />
             </div>
             <div className="space-y-2">
@@ -65,6 +81,7 @@ export function AddClientModal({ open, onOpenChange }: AddClientModalProps) {
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="Doe"
                 className="bg-background border-border"
+                required
               />
             </div>
           </div>
@@ -99,17 +116,36 @@ export function AddClientModal({ open, onOpenChange }: AddClientModalProps) {
               </SelectContent>
             </Select>
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="message">Personal Message (Optional)</Label>
+            <Textarea
+              id="message"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Add a personal message to include in the invitation email..."
+              className="bg-background border-border min-h-[80px]"
+            />
+          </div>
           
           <DialogFooter className="gap-2 sm:gap-0">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
+              disabled={addClient.isPending}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Sending..." : "Send Invitation"}
+            <Button type="submit" disabled={addClient.isPending}>
+              {addClient.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                "Send Invitation"
+              )}
             </Button>
           </DialogFooter>
         </form>

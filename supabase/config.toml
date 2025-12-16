@@ -47,3 +47,9 @@ verify_jwt = false
 
 [functions.calendar-sync-session]
 verify_jwt = true
+
+[functions.admin-password-reset]
+verify_jwt = true
+
+[functions.send-client-invitation]
+verify_jwt = true
