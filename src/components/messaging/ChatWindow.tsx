@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import { useMessages } from "@/hooks/useMessages";
 import { format } from "date-fns";
-import { Send, Loader2, ArrowLeft } from "lucide-react";
+import { Send, Loader2, ArrowLeft, Check, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import ChatQuickActions from "./ChatQuickActions";
+import TypingIndicator, { useTypingBroadcast } from "./TypingIndicator";
 
 interface ChatWindowProps {
   participantId: string;
@@ -20,6 +21,7 @@ const ChatWindow = ({ participantId, participantName }: ChatWindowProps) => {
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { role } = useAuth();
+  const { broadcastTyping } = useTypingBroadcast(currentProfileId || "", participantId);
 
   const basePath = role === "coach" ? "/dashboard/coach/messages" : "/dashboard/client/messages";
 
@@ -38,6 +40,13 @@ const ChatWindow = ({ participantId, participantName }: ChatWindowProps) => {
       setNewMessage("");
     }
     setSending(false);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewMessage(e.target.value);
+    if (e.target.value.trim()) {
+      broadcastTyping();
+    }
   };
 
   if (loading) {
@@ -90,20 +99,43 @@ const ChatWindow = ({ participantId, participantName }: ChatWindowProps) => {
                       : "bg-muted text-foreground rounded-bl-md"
                   )}
                 >
-                  <p className="text-sm">{message.content}</p>
-                  <p
+                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  <div
                     className={cn(
-                      "text-xs mt-1",
-                      isMine ? "text-primary-foreground/70" : "text-muted-foreground"
+                      "flex items-center gap-1 mt-1",
+                      isMine ? "justify-end" : "justify-start"
                     )}
                   >
-                    {format(new Date(message.created_at), "HH:mm")}
-                  </p>
+                    <span
+                      className={cn(
+                        "text-xs",
+                        isMine ? "text-primary-foreground/70" : "text-muted-foreground"
+                      )}
+                    >
+                      {format(new Date(message.created_at), "HH:mm")}
+                    </span>
+                    {isMine && (
+                      message.read_at ? (
+                        <CheckCheck className="w-3 h-3 text-primary-foreground/70" />
+                      ) : (
+                        <Check className="w-3 h-3 text-primary-foreground/50" />
+                      )
+                    )}
+                  </div>
                 </div>
               </div>
             );
           })
         )}
+        
+        {/* Typing Indicator */}
+        {currentProfileId && (
+          <TypingIndicator 
+            conversationPartnerId={participantId} 
+            currentUserId={currentProfileId} 
+          />
+        )}
+        
         <div ref={messagesEndRef} />
       </div>
 
@@ -121,7 +153,7 @@ const ChatWindow = ({ participantId, participantName }: ChatWindowProps) => {
         <div className="flex gap-2">
           <Input
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            onChange={handleInputChange}
             placeholder="Type a message..."
             className="flex-1 bg-background border-border"
             disabled={sending}

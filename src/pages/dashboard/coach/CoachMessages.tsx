@@ -3,12 +3,15 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ConversationList from "@/components/messaging/ConversationList";
 import ChatWindow from "@/components/messaging/ChatWindow";
+import NewConversationModal from "@/components/messaging/NewConversationModal";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const CoachMessages = () => {
   const { id: participantId } = useParams();
   const [participantName, setParticipantName] = useState<string>("");
+  const [showNewConversation, setShowNewConversation] = useState(false);
 
   // Fetch participant name
   useEffect(() => {
@@ -45,7 +48,13 @@ const CoachMessages = () => {
   return (
     <DashboardLayout title="Messages" description="Chat with your clients.">
       <div className="flex flex-col h-[calc(100vh-180px)]">
-        <h1 className="font-display text-2xl font-bold text-foreground mb-4">Messages</h1>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="font-display text-2xl font-bold text-foreground">Messages</h1>
+          <Button onClick={() => setShowNewConversation(true)} size="sm">
+            <Plus className="h-4 w-4 mr-2" />
+            New Chat
+          </Button>
+        </div>
 
         <div className="flex-1 card-elevated overflow-hidden flex">
           {/* Conversations List - Hidden on mobile when in chat */}
@@ -68,14 +77,23 @@ const CoachMessages = () => {
                   <MessageSquare className="w-8 h-8 text-primary" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-2">Select a conversation</h3>
-                <p className="text-muted-foreground max-w-sm">
+                <p className="text-muted-foreground max-w-sm mb-4">
                   Choose a client from the list to start chatting
                 </p>
+                <Button onClick={() => setShowNewConversation(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Start New Conversation
+                </Button>
               </div>
             )}
           </div>
         </div>
       </div>
+
+      <NewConversationModal 
+        open={showNewConversation} 
+        onOpenChange={setShowNewConversation} 
+      />
     </DashboardLayout>
   );
 };
