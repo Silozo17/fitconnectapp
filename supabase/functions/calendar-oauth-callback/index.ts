@@ -75,6 +75,9 @@ serve(async (req) => {
 
     console.log("Calendar connection saved successfully");
 
+    // Get the app URL
+    const appUrl = Deno.env.get("APP_URL") || "https://9eda5b28-1d63-4ce1-a014-082ad965f0d2.lovableproject.com";
+
     // Determine redirect based on user role
     const { data: coachProfile } = await supabase
       .from("coach_profiles")
@@ -88,7 +91,7 @@ serve(async (req) => {
 
     return new Response(null, {
       status: 302,
-      headers: { Location: `${redirectPath}?connected=${provider}` },
+      headers: { Location: `${appUrl}${redirectPath}?connected=${provider}` },
     });
   } catch (error: any) {
     console.error("Error in calendar-oauth-callback:", error);
