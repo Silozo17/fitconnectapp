@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { AdminProvider } from "@/contexts/AdminContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Coaches from "./pages/Coaches";
@@ -12,6 +13,7 @@ import Auth from "./pages/Auth";
 import ClientOnboarding from "./pages/onboarding/ClientOnboarding";
 import CoachOnboarding from "./pages/onboarding/CoachOnboarding";
 import ClientDashboard from "./pages/dashboard/ClientDashboard";
+import AdminDashboard from "./pages/dashboard/AdminDashboard";
 
 // Coach Dashboard Pages
 import CoachOverview from "./pages/dashboard/coach/CoachOverview";
@@ -45,32 +47,41 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/coaches" element={<Coaches />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/faq" element={<FAQ />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/for-coaches" element={<ForCoaches />} />
-              <Route path="/how-it-works" element={<HowItWorks />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/onboarding/client" element={
-                <ProtectedRoute allowedRoles={["client"]}>
-                  <ClientOnboarding />
-                </ProtectedRoute>
-              } />
-              <Route path="/onboarding/coach" element={
-                <ProtectedRoute allowedRoles={["coach"]}>
-                  <CoachOnboarding />
-                </ProtectedRoute>
-              } />
-              <Route path="/dashboard/client" element={
-                <ProtectedRoute allowedRoles={["client"]}>
-                  <ClientDashboard />
-                </ProtectedRoute>
-              } />
+            <AdminProvider>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/coaches" element={<Coaches />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/faq" element={<FAQ />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/for-coaches" element={<ForCoaches />} />
+                <Route path="/how-it-works" element={<HowItWorks />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
+                
+                {/* Admin Dashboard */}
+                <Route path="/dashboard/admin" element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/onboarding/client" element={
+                  <ProtectedRoute allowedRoles={["client"]}>
+                    <ClientOnboarding />
+                  </ProtectedRoute>
+                } />
+                <Route path="/onboarding/coach" element={
+                  <ProtectedRoute allowedRoles={["coach"]}>
+                    <CoachOnboarding />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/client" element={
+                  <ProtectedRoute allowedRoles={["client"]}>
+                    <ClientDashboard />
+                  </ProtectedRoute>
+                } />
               
               {/* Coach Dashboard Routes */}
               <Route path="/dashboard/coach" element={
@@ -129,8 +140,9 @@ const App = () => (
                 </ProtectedRoute>
               } />
               
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </AdminProvider>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
