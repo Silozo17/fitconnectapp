@@ -15,6 +15,7 @@ import AvailabilityCalendar from "@/components/booking/AvailabilityCalendar";
 import CoachReviewsSection from "@/components/reviews/CoachReviewsSection";
 import StarRating from "@/components/reviews/StarRating";
 import FavouriteButton from "@/components/favourites/FavouriteButton";
+import CoachPricingSection from "@/components/packages/CoachPricingSection";
 import { useCoachReviews, calculateAverageRating } from "@/hooks/useReviews";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -202,6 +203,9 @@ const CoachDetail = () => {
                   )}
                 </CardContent>
               </Card>
+
+              {/* Pricing Section */}
+              <CoachPricingSection coachId={id || ""} />
 
               {/* Reviews Section */}
               <CoachReviewsSection coachId={id || ""} />
