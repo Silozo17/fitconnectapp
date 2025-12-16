@@ -8,7 +8,7 @@ import { PriceSummary } from "@/components/payments/PriceSummary";
 import { SubscriptionCheckout, CheckoutLoading } from "@/components/payments/SubscriptionCheckout";
 import { SUBSCRIPTION_TIERS, TierKey, BillingInterval } from "@/lib/stripe-config";
 import { Button } from "@/components/ui/button";
-
+import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
 export default function Subscribe() {
   const { user, role } = useAuth();
   const [searchParams] = useSearchParams();
@@ -41,7 +41,16 @@ export default function Subscribe() {
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Dark */}
-      <div className="w-full lg:w-1/2 bg-[#0D0D14] p-8 lg:p-12 flex flex-col">
+      <div className="w-full lg:w-1/2 bg-[#0D0D14] p-8 lg:p-12 flex flex-col relative overflow-hidden">
+        {/* Decorative Avatar */}
+        <DecorativeAvatar 
+          avatarSlug="powerlifter-gorilla" 
+          position="bottom-left" 
+          size="lg" 
+          opacity={20}
+          className="-left-8 -bottom-8"
+        />
+        
         {/* Back Link */}
         <Link 
           to="/pricing" 

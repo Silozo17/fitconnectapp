@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { ChevronRight, Lock, Sparkles, Trophy, Target } from 'lucide-react';
 import { useAvatars, getAvatarImageUrl } from '@/hooks/useAvatars';
 import { cn } from '@/lib/utils';
@@ -51,39 +50,24 @@ export function AvatarShowcase() {
         </div>
         
         <div className="grid md:grid-cols-2 gap-8 items-center max-w-5xl mx-auto">
-          {/* Featured Avatar Display */}
-          <div className="relative flex justify-center">
-            <div className="relative">
-              {/* Glow effect */}
-              <div className={cn(
-                "absolute inset-0 rounded-3xl blur-3xl opacity-30 bg-gradient-to-br",
-                rarityColors[featuredAvatars[activeIndex]?.rarity as keyof typeof rarityColors] || rarityColors.common
-              )} />
-              
-              {/* Avatar image */}
-              <div className="relative bg-card/80 backdrop-blur-sm border border-border/50 rounded-3xl p-8 w-64 h-80">
-                {featuredAvatars[activeIndex] && (
-                  <>
-                    <img
-                      src={featuredAvatars[activeIndex].image_url || getAvatarImageUrl(featuredAvatars[activeIndex].slug)}
-                      alt={featuredAvatars[activeIndex].name}
-                      className="w-full h-48 object-contain animate-float"
-                    />
-                    <div className="text-center mt-4">
-                      <h3 className="font-semibold text-foreground">{featuredAvatars[activeIndex].name}</h3>
-                      <Badge variant="outline" className={cn(
-                        "mt-1 capitalize",
-                        featuredAvatars[activeIndex].rarity === 'legendary' && "border-yellow-500/50 text-yellow-500",
-                        featuredAvatars[activeIndex].rarity === 'epic' && "border-purple-500/50 text-purple-500",
-                        featuredAvatars[activeIndex].rarity === 'rare' && "border-blue-500/50 text-blue-500"
-                      )}>
-                        {featuredAvatars[activeIndex].rarity}
-                      </Badge>
-                    </div>
-                  </>
-                )}
+          {/* Featured Avatar Display - Free floating, no box */}
+          <div className="relative flex justify-center items-center min-h-[400px]">
+            {featuredAvatars[activeIndex] && (
+              <div className="relative">
+                {/* Glow effect */}
+                <div className={cn(
+                  "absolute inset-0 blur-3xl opacity-40 scale-110 bg-gradient-to-br",
+                  rarityColors[featuredAvatars[activeIndex]?.rarity as keyof typeof rarityColors] || rarityColors.common
+                )} />
+                
+                {/* Avatar image - larger, free floating */}
+                <img
+                  src={featuredAvatars[activeIndex].image_url || getAvatarImageUrl(featuredAvatars[activeIndex].slug)}
+                  alt="Avatar character"
+                  className="relative w-72 h-96 object-contain animate-float drop-shadow-2xl"
+                />
               </div>
-            </div>
+            )}
           </div>
           
           {/* Avatar grid preview */}
