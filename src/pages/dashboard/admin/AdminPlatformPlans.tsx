@@ -48,7 +48,11 @@ const AdminPlatformPlans = () => {
   const [editingTier, setEditingTier] = useState<PlanTier | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const tiers = settings?.subscription_tiers || defaultTiers;
+  // Ensure tiers is always a valid array
+  const rawTiers = settings?.subscription_tiers;
+  const tiers: PlanTier[] = Array.isArray(rawTiers) 
+    ? rawTiers 
+    : (typeof rawTiers === 'string' ? JSON.parse(rawTiers) : defaultTiers);
 
   const handleSaveTier = async () => {
     if (!editingTier) return;
