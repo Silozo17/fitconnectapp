@@ -29,6 +29,7 @@ import { BulkActionBar } from "@/components/admin/BulkActionBar";
 import { AccountStatusModal } from "@/components/admin/AccountStatusModal";
 import { useAdminUserManagement } from "@/hooks/useAdminUserManagement";
 import { useLogAdminAction } from "@/hooks/useAuditLog";
+import { useAdminBadges } from "@/hooks/useSidebarBadges";
 
 interface ClientUser {
   id: string;
@@ -57,6 +58,12 @@ const AdminUsers = () => {
   
   const { loading: actionLoading, bulkUpdateStatus, bulkDelete } = useAdminUserManagement("client");
   const logAction = useLogAdminAction();
+  const { markUsersViewed } = useAdminBadges();
+
+  // Mark users as viewed when page loads
+  useEffect(() => {
+    markUsersViewed();
+  }, [markUsersViewed]);
 
   useEffect(() => {
     fetchUsers();
