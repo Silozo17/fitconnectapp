@@ -21,13 +21,14 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 
 const menuItems = [
   { title: "Home", icon: Home, path: "/dashboard/client" },
   { title: "My Coaches", icon: Users, path: "/dashboard/client/coaches" },
   { title: "Favourites", icon: Heart, path: "/dashboard/client/favourites" },
   { title: "Sessions", icon: Calendar, path: "/dashboard/client/sessions" },
-  { title: "Messages", icon: MessageSquare, path: "/dashboard/client/messages" },
+  { title: "Messages", icon: MessageSquare, path: "/dashboard/client/messages", showBadge: true },
   { title: "My Plans", icon: ClipboardList, path: "/dashboard/client/plans" },
   { title: "My Library", icon: BookOpen, path: "/dashboard/client/library" },
   { title: "Shopping", icon: ShoppingCart, path: "/dashboard/client/grocery" },
@@ -47,6 +48,7 @@ interface ClientSidebarProps {
 
 const ClientSidebar = ({ collapsed, onToggle }: ClientSidebarProps) => {
   const location = useLocation();
+  const { unreadCount } = useUnreadMessages();
 
   return (
     <aside
@@ -71,19 +73,37 @@ const ClientSidebar = ({ collapsed, onToggle }: ClientSidebarProps) => {
       <nav className="flex-1 p-2 space-y-1">
         {menuItems.map((item) => {
           const isActive = location.pathname === item.path;
+          const showBadge = 'showBadge' in item && item.showBadge && unreadCount > 0;
+          
           return (
             <Link
               key={item.path}
               to={item.path}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors",
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors relative",
                 isActive
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
-              <item.icon className="w-5 h-5 flex-shrink-0" />
-              {!collapsed && <span className="font-medium">{item.title}</span>}
+              <div className="relative">
+                <item.icon className="w-5 h-5 flex-shrink-0" />
+                {showBadge && collapsed && (
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-4 bg-green-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                )}
+              </div>
+              {!collapsed && (
+                <>
+                  <span className="font-medium flex-1">{item.title}</span>
+                  {showBadge && (
+                    <span className="min-w-[20px] h-5 bg-green-500 text-white text-xs font-bold rounded-full flex items-center justify-center px-1.5">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
+                </>
+              )}
             </Link>
           );
         })}
