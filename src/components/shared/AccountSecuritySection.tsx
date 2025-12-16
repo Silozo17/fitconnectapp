@@ -8,7 +8,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -18,7 +17,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Loader2, Mail, Lock, Shield } from "lucide-react";
+import { Loader2, Mail, Lock, Shield, Trash2, AlertTriangle } from "lucide-react";
+import { DeleteAccountModal } from "./DeleteAccountModal";
 
 const emailSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -35,10 +35,15 @@ const passwordSchema = z.object({
 type EmailFormData = z.infer<typeof emailSchema>;
 type PasswordFormData = z.infer<typeof passwordSchema>;
 
-export const AccountSecuritySection = () => {
+interface AccountSecuritySectionProps {
+  role?: "client" | "coach";
+}
+
+export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySectionProps) => {
   const { user } = useAuth();
   const [showEmailDialog, setShowEmailDialog] = useState(false);
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isUpdatingEmail, setIsUpdatingEmail] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
@@ -130,6 +135,35 @@ export const AccountSecuritySection = () => {
             </div>
             <Button variant="outline" onClick={() => setShowPasswordDialog(true)}>
               Change Password
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Danger Zone */}
+      <Card className="border-destructive/50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-destructive">
+            <AlertTriangle className="w-5 h-5" />
+            Danger Zone
+          </CardTitle>
+          <CardDescription>Irreversible actions that affect your account</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between p-4 bg-destructive/10 rounded-lg border border-destructive/20">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-full bg-destructive/20">
+                <Trash2 className="w-4 h-4 text-destructive" />
+              </div>
+              <div>
+                <p className="font-medium text-foreground">Delete Account</p>
+                <p className="text-sm text-muted-foreground">
+                  Permanently delete your account and all associated data
+                </p>
+              </div>
+            </div>
+            <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
+              Delete Account
             </Button>
           </div>
         </CardContent>
@@ -243,6 +277,13 @@ export const AccountSecuritySection = () => {
           </Form>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Account Modal */}
+      <DeleteAccountModal
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        role={role}
+      />
     </>
   );
 };

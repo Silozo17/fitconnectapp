@@ -676,15 +676,15 @@ const ClientSettings = () => {
             {/* Account Tab */}
             {selectedTab === "account" && (
               <div className="space-y-6">
-                <AccountSecuritySection />
+                <AccountSecuritySection role="client" />
                 
-                <Card className="border-destructive/50">
+                <Card>
                   <CardHeader>
-                    <CardTitle>Danger Zone</CardTitle>
-                    <CardDescription>Irreversible actions</CardDescription>
+                    <CardTitle>Session</CardTitle>
+                    <CardDescription>Manage your current session</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <Button variant="destructive" onClick={signOut}>
+                    <Button variant="outline" onClick={signOut}>
                       <LogOut className="w-4 h-4 mr-2" />
                       Sign Out
                     </Button>
