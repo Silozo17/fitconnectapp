@@ -1,13 +1,14 @@
 // Avatar unlock descriptions and requirements
+// Icons are Lucide icon names (not emojis) for consistent SVG rendering
 export const UNLOCK_DESCRIPTIONS: Record<string, { label: string; icon: string; verb: string }> = {
-  workout_count: { label: 'Workouts', icon: '💪', verb: 'Complete' },
-  habit_streak: { label: 'Day Streak', icon: '🔥', verb: 'Maintain a' },
-  progress_entries: { label: 'Progress Entries', icon: '📊', verb: 'Log' },
-  progress_photos: { label: 'Progress Photos', icon: '📸', verb: 'Upload' },
-  macro_days: { label: 'Days Tracking Macros', icon: '🥗', verb: 'Track macros for' },
-  xp_total: { label: 'XP', icon: '⚡', verb: 'Earn' },
-  challenges_completed: { label: 'Challenges', icon: '🎯', verb: 'Complete' },
-  leaderboard_rank: { label: 'Leaderboard Rank', icon: '🏆', verb: 'Reach top' },
+  workout_count: { label: 'Workouts', icon: 'Dumbbell', verb: 'Complete' },
+  habit_streak: { label: 'Day Streak', icon: 'Flame', verb: 'Maintain a' },
+  progress_entries: { label: 'Progress Entries', icon: 'BarChart3', verb: 'Log' },
+  progress_photos: { label: 'Progress Photos', icon: 'Camera', verb: 'Upload' },
+  macro_days: { label: 'Days Tracking Macros', icon: 'Utensils', verb: 'Track macros for' },
+  xp_total: { label: 'XP', icon: 'Zap', verb: 'Earn' },
+  challenges_completed: { label: 'Challenges', icon: 'Target', verb: 'Complete' },
+  leaderboard_rank: { label: 'Leaderboard Rank', icon: 'Trophy', verb: 'Reach top' },
 };
 
 export function getUnlockDescription(unlockType: string | null, threshold: number | null): string {

@@ -8,7 +8,16 @@ import { PriceSummary } from "@/components/payments/PriceSummary";
 import { SubscriptionCheckout, CheckoutLoading } from "@/components/payments/SubscriptionCheckout";
 import { SUBSCRIPTION_TIERS, TierKey, BillingInterval } from "@/lib/stripe-config";
 import { Button } from "@/components/ui/button";
-import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
+import { getAvatarImageUrl } from "@/hooks/useAvatars";
+
+// Tier-to-avatar mapping - each tier gets a progressively better avatar
+const TIER_AVATARS: Record<TierKey, string> = {
+  free: "strongman-bear",
+  starter: "deadlift-boar",
+  pro: "powerlifter-gorilla",
+  enterprise: "elite-personal-trainer-human",
+};
+
 export default function Subscribe() {
   const { user, role } = useAuth();
   const [searchParams] = useSearchParams();
@@ -39,16 +48,7 @@ export default function Subscribe() {
   const tierData = SUBSCRIPTION_TIERS[selectedTier];
 
   return (
-    <div className="min-h-screen flex relative">
-      {/* Decorative Avatar - placed at root level */}
-      <DecorativeAvatar 
-        avatarSlug="powerlifter-gorilla" 
-        position="bottom-left" 
-        size="xl" 
-        opacity={25}
-        className="left-4 bottom-4 z-10"
-      />
-
+    <div className="min-h-screen flex relative overflow-hidden">
       {/* Left Side - Dark */}
       <div className="w-full lg:w-1/2 bg-[#0D0D14] p-8 lg:p-12 flex flex-col relative">
         
@@ -90,9 +90,26 @@ export default function Subscribe() {
           />
         </div>
 
-        {/* Features */}
-        <div className="mb-8 flex-1">
+        {/* Features with Avatar */}
+        <div className="mb-8 flex-1 relative">
           <TierFeatures tier={selectedTier} />
+          
+          {/* Tier Avatar - Full opacity, positioned right of features */}
+          <div className="hidden lg:block absolute -right-4 bottom-0 w-48 h-64 pointer-events-none">
+            <div 
+              key={selectedTier}
+              className="w-full h-full animate-fade-in"
+            >
+              <img
+                src={getAvatarImageUrl(TIER_AVATARS[selectedTier])}
+                alt={`${tierData.name} tier avatar`}
+                className="w-full h-full object-contain drop-shadow-2xl transition-transform duration-700 ease-in-out hover:scale-105"
+                style={{ 
+                  filter: 'drop-shadow(0 0 30px hsl(var(--primary) / 0.4))',
+                }}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Billing Toggle */}
