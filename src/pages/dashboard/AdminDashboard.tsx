@@ -1,27 +1,69 @@
+import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { useAuth } from "@/contexts/AuthContext";
-import { useAdminView } from "@/contexts/AdminContext";
-import ViewSwitcher from "@/components/admin/ViewSwitcher";
-import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dumbbell, Users, Briefcase, Calendar, MessageSquare, TrendingUp, LogOut } from "lucide-react";
+import { Users, Dumbbell, DollarSign, Calendar, UserPlus, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const AdminDashboard = () => {
-  const { user, signOut } = useAuth();
-  const { viewMode } = useAdminView();
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalCoaches: 0,
+    activeSessions: 0,
+  });
 
-  const stats = [
-    { label: "Total Users", value: "1,234", icon: Users, color: "text-blue-500" },
-    { label: "Active Coaches", value: "89", icon: Briefcase, color: "text-orange-500" },
-    { label: "Sessions Today", value: "156", icon: Calendar, color: "text-green-500" },
-    { label: "Messages", value: "2.4K", icon: MessageSquare, color: "text-purple-500" },
-  ];
+  useEffect(() => {
+    fetchStats();
+  }, []);
 
-  const quickActions = [
-    { label: "View as Client", description: "Test the client experience", href: "/dashboard/client", icon: Users },
-    { label: "View as Coach", description: "Test the coach dashboard", href: "/dashboard/coach", icon: Briefcase },
-    { label: "Browse Coaches", description: "See the public coach listing", href: "/coaches", icon: TrendingUp },
+  const fetchStats = async () => {
+    const [clientsRes, coachesRes, sessionsRes] = await Promise.all([
+      supabase.from("client_profiles").select("id", { count: "exact", head: true }),
+      supabase.from("coach_profiles").select("id", { count: "exact", head: true }),
+      supabase.from("coaching_sessions").select("id", { count: "exact", head: true }).eq("status", "scheduled"),
+    ]);
+
+    setStats({
+      totalUsers: clientsRes.count || 0,
+      totalCoaches: coachesRes.count || 0,
+      activeSessions: sessionsRes.count || 0,
+    });
+  };
+
+  const statCards = [
+    {
+      title: "Total Users",
+      value: stats.totalUsers.toString(),
+      description: "Registered clients",
+      icon: Users,
+      color: "text-blue-500",
+      link: "/dashboard/admin/users",
+    },
+    {
+      title: "Active Coaches",
+      value: stats.totalCoaches.toString(),
+      description: "Verified coaches",
+      icon: Dumbbell,
+      color: "text-orange-500",
+      link: "/dashboard/admin/coaches",
+    },
+    {
+      title: "Scheduled Sessions",
+      value: stats.activeSessions.toString(),
+      description: "Upcoming sessions",
+      icon: Calendar,
+      color: "text-green-500",
+      link: "#",
+    },
+    {
+      title: "Revenue",
+      value: "$0",
+      description: "This month",
+      icon: DollarSign,
+      color: "text-primary",
+      link: "#",
+    },
   ];
 
   return (
@@ -31,130 +73,103 @@ const AdminDashboard = () => {
         <meta name="description" content="FitConnect admin dashboard for platform management" />
       </Helmet>
 
-      <div className="min-h-screen bg-background">
-        {/* Header */}
-        <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-xl gradient-bg-primary flex items-center justify-center">
-                <Dumbbell className="w-5 h-5 text-white" />
-              </div>
-              <span className="font-display font-bold text-xl text-foreground">
-                FitConnect
-              </span>
-            </Link>
-
-            <div className="flex items-center gap-4">
-              <ViewSwitcher />
-              <Button variant="ghost" size="sm" onClick={signOut}>
-                <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
-              </Button>
-            </div>
-          </div>
-        </header>
-
-        {/* Main Content */}
-        <main className="container mx-auto px-4 py-8">
-          {/* Welcome Section */}
-          <div className="mb-8">
-            <h1 className="font-display text-3xl font-bold text-foreground mb-2">
-              Admin Dashboard
-            </h1>
-            <p className="text-muted-foreground">
-              Welcome back, {user?.email}. You're viewing in {viewMode} mode.
-            </p>
+      <AdminLayout>
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
+            <p className="text-muted-foreground mt-1">Platform overview and management</p>
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            {stats.map((stat) => (
-              <Card key={stat.label} className="bg-card border-border">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-muted-foreground text-sm">{stat.label}</p>
-                      <p className="text-2xl font-bold text-foreground mt-1">{stat.value}</p>
-                    </div>
-                    <stat.icon className={`w-8 h-8 ${stat.color}`} />
-                  </div>
-                </CardContent>
-              </Card>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {statCards.map((stat) => (
+              <Link key={stat.title} to={stat.link}>
+                <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      {stat.title}
+                    </CardTitle>
+                    <stat.icon className={`h-5 w-5 ${stat.color}`} />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stat.value}</div>
+                    <p className="text-xs text-muted-foreground">{stat.description}</p>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
 
           {/* Quick Actions */}
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="text-foreground">Quick Actions</CardTitle>
-              <CardDescription>Switch between different views to test the platform</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {quickActions.map((action) => (
-                  <Link
-                    key={action.label}
-                    to={action.href}
-                    className="p-4 rounded-xl border border-border hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 group"
-                  >
-                    <action.icon className="w-8 h-8 text-primary mb-3 group-hover:scale-110 transition-transform" />
-                    <h3 className="font-semibold text-foreground mb-1">{action.label}</h3>
-                    <p className="text-sm text-muted-foreground">{action.description}</p>
-                  </Link>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Platform Status */}
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card className="bg-card border-border">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-foreground">Recent Activity</CardTitle>
+                <CardTitle>Quick Actions</CardTitle>
+                <CardDescription>Common administrative tasks</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {[
-                    { text: "New coach signed up", time: "2 min ago" },
-                    { text: "Session completed", time: "15 min ago" },
-                    { text: "New client registration", time: "1 hour ago" },
-                    { text: "Plan assigned", time: "2 hours ago" },
-                  ].map((activity, i) => (
-                    <div key={i} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                      <span className="text-foreground">{activity.text}</span>
-                      <span className="text-sm text-muted-foreground">{activity.time}</span>
-                    </div>
-                  ))}
-                </div>
+              <CardContent className="space-y-2">
+                <Link
+                  to="/dashboard/admin/users"
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                >
+                  <UserPlus className="h-5 w-5 text-primary" />
+                  <div>
+                    <p className="font-medium">Manage Users</p>
+                    <p className="text-sm text-muted-foreground">View and edit client accounts</p>
+                  </div>
+                </Link>
+                <Link
+                  to="/dashboard/admin/coaches"
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                >
+                  <Dumbbell className="h-5 w-5 text-orange-500" />
+                  <div>
+                    <p className="font-medium">Manage Coaches</p>
+                    <p className="text-sm text-muted-foreground">Review and approve coaches</p>
+                  </div>
+                </Link>
+                <Link
+                  to="/dashboard/admin/settings"
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                >
+                  <TrendingUp className="h-5 w-5 text-green-500" />
+                  <div>
+                    <p className="font-medium">Platform Settings</p>
+                    <p className="text-sm text-muted-foreground">Configure platform options</p>
+                  </div>
+                </Link>
               </CardContent>
             </Card>
 
-            <Card className="bg-card border-border">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-foreground">System Status</CardTitle>
+                <CardTitle>Recent Activity</CardTitle>
+                <CardDescription>Latest platform events</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {[
-                    { label: "Database", status: "Operational", color: "bg-green-500" },
-                    { label: "Authentication", status: "Operational", color: "bg-green-500" },
-                    { label: "Storage", status: "Operational", color: "bg-green-500" },
-                    { label: "Edge Functions", status: "Operational", color: "bg-green-500" },
-                  ].map((item, i) => (
-                    <div key={i} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                      <span className="text-foreground">{item.label}</span>
-                      <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${item.color}`} />
-                        <span className="text-sm text-muted-foreground">{item.status}</span>
-                      </div>
-                    </div>
-                  ))}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-2 w-2 rounded-full bg-green-500" />
+                    <p className="text-sm">Platform is running smoothly</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="h-2 w-2 rounded-full bg-blue-500" />
+                    <p className="text-sm">
+                      {stats.totalUsers} user{stats.totalUsers !== 1 ? "s" : ""} registered
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="h-2 w-2 rounded-full bg-orange-500" />
+                    <p className="text-sm">
+                      {stats.totalCoaches} coach{stats.totalCoaches !== 1 ? "es" : ""} active
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
-        </main>
-      </div>
+        </div>
+      </AdminLayout>
     </>
   );
 };

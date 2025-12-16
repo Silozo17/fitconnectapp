@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
+import ViewSwitcher from "@/components/admin/ViewSwitcher";
 
 interface ClientDashboardHeaderProps {
   firstName?: string | null;
@@ -21,7 +22,7 @@ const ClientDashboardHeader = ({
   firstName,
   lastName,
 }: ClientDashboardHeaderProps) => {
-  const { signOut } = useAuth();
+  const { signOut, role } = useAuth();
 
   const displayName = firstName
     ? `${firstName}${lastName ? ` ${lastName}` : ""}`
@@ -47,6 +48,9 @@ const ClientDashboardHeader = ({
 
         {/* Right side */}
         <div className="flex items-center gap-4">
+          {/* Admin View Switcher */}
+          {role === "admin" && <ViewSwitcher />}
+          
           {/* Notifications */}
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="w-5 h-5" />

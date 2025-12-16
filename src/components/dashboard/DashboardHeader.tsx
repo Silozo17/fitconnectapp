@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import ViewSwitcher from "@/components/admin/ViewSwitcher";
 
 interface DashboardHeaderProps {
   displayName?: string | null;
@@ -18,7 +19,7 @@ interface DashboardHeaderProps {
 }
 
 const DashboardHeader = ({ displayName, subscriptionTier }: DashboardHeaderProps) => {
-  const { signOut } = useAuth();
+  const { signOut, role } = useAuth();
 
   const tierLabel = subscriptionTier === "elite" ? "Elite" : subscriptionTier === "pro" ? "Pro" : "Free";
   const initials = displayName?.split(" ").map(n => n[0]).join("").toUpperCase() || "CO";
@@ -39,6 +40,9 @@ const DashboardHeader = ({ displayName, subscriptionTier }: DashboardHeaderProps
 
         {/* Right Section */}
         <div className="flex items-center gap-4">
+          {/* Admin View Switcher */}
+          {role === "admin" && <ViewSwitcher />}
+          
           {/* Subscription Tier */}
           <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary/20 text-primary">
             {tierLabel}
