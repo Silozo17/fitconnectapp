@@ -20,6 +20,7 @@ export interface SessionType {
   description: string | null;
   duration_minutes: number;
   price: number;
+  currency: string | null;
   is_online: boolean;
   is_in_person: boolean;
   is_active: boolean;

@@ -42,6 +42,7 @@ import {
 import { format, addDays, startOfWeek, isSameDay, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
+import { getCurrencySymbol, type CurrencyCode } from "@/lib/currency";
 
 const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -51,6 +52,7 @@ const CoachSchedule = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [coachId, setCoachId] = useState<string | null>(null);
+  const [coachCurrency, setCoachCurrency] = useState<CurrencyCode>("GBP");
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [showSessionTypeModal, setShowSessionTypeModal] = useState(false);
   const [editingSessionType, setEditingSessionType] = useState<SessionType | null>(null);
@@ -70,18 +72,21 @@ const CoachSchedule = () => {
   const [availEndTime, setAvailEndTime] = useState("18:00");
   const [availEnabled, setAvailEnabled] = useState(true);
 
-  // Get coach profile ID
+  // Get coach profile ID and currency
   useEffect(() => {
-    const fetchCoachId = async () => {
+    const fetchCoachProfile = async () => {
       if (!user) return;
       const { data } = await supabase
         .from("coach_profiles")
-        .select("id")
+        .select("id, currency")
         .eq("user_id", user.id)
         .maybeSingle();
-      if (data) setCoachId(data.id);
+      if (data) {
+        setCoachId(data.id);
+        setCoachCurrency((data.currency as CurrencyCode) || "GBP");
+      }
     };
-    fetchCoachId();
+    fetchCoachProfile();
   }, [user]);
 
   // Queries
@@ -156,6 +161,7 @@ const CoachSchedule = () => {
       description: sessionTypeDescription || null,
       duration_minutes: parseInt(sessionTypeDuration),
       price: parseFloat(sessionTypePrice),
+      currency: coachCurrency,
       is_online: sessionTypeOnline,
       is_in_person: sessionTypeInPerson,
       is_active: true,
@@ -510,7 +516,7 @@ const CoachSchedule = () => {
                     <div>
                       <p className="font-medium text-foreground">{type.name}</p>
                       <p className="text-sm text-muted-foreground">
-                        {type.duration_minutes} min - ${type.price}
+                        {type.duration_minutes} min - {getCurrencySymbol((type.currency as CurrencyCode) || coachCurrency)}{type.price}
                         {type.is_online && " • Online"}
                         {type.is_in_person && " • In-Person"}
                       </p>
@@ -563,7 +569,7 @@ const CoachSchedule = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Price ($)</Label>
+                <Label>Price ({getCurrencySymbol(coachCurrency)})</Label>
                 <Input 
                   type="number"
                   placeholder="0.00"
