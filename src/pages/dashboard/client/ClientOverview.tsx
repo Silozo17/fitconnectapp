@@ -12,6 +12,7 @@ import {
   ClipboardList,
   TrendingUp,
   ArrowRight,
+  Target,
 } from "lucide-react";
 
 interface DashboardStats {
@@ -110,6 +111,13 @@ const ClientOverview = () => {
       icon: ClipboardList,
       href: "/dashboard/client/plans",
       color: "text-orange-500",
+    },
+    {
+      title: "Habits",
+      description: "Track daily habits",
+      icon: Target,
+      href: "/dashboard/client/habits",
+      color: "text-cyan-500",
     },
     {
       title: "Progress",

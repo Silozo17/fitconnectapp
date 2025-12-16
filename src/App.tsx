@@ -33,6 +33,7 @@ import ClientCoaches from "./pages/dashboard/client/ClientCoaches";
 import ClientSessions from "./pages/dashboard/client/ClientSessions";
 import ClientMessages from "./pages/dashboard/client/ClientMessages";
 import ClientPlans from "./pages/dashboard/client/ClientPlans";
+import ClientHabits from "./pages/dashboard/client/ClientHabits";
 import ClientProgress from "./pages/dashboard/client/ClientProgress";
 import ClientSettings from "./pages/dashboard/client/ClientSettings";
 import ClientFavourites from "./pages/dashboard/client/ClientFavourites";
@@ -199,6 +200,11 @@ const App = () => (
                 <Route path="/dashboard/client/plans" element={
                   <ProtectedRoute allowedRoles={["client", "admin"]}>
                     <ClientPlans />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/client/habits" element={
+                  <ProtectedRoute allowedRoles={["client", "admin"]}>
+                    <ClientHabits />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/client/progress" element={

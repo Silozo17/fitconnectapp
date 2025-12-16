@@ -29,12 +29,14 @@ import { GoalProgressCard } from "@/components/dashboard/clients/GoalProgressCar
 import { NoteCard } from "@/components/dashboard/clients/NoteCard";
 import { SessionCalendar } from "@/components/dashboard/clients/SessionCalendar";
 import { HealthProfileCard } from "@/components/dashboard/clients/HealthProfileCard";
+import HabitManager from "@/components/dashboard/clients/HabitManager";
 import { 
   useClientDetail, 
   useClientSessions, 
   useClientNotes, 
   useClientProgress,
-  useClientPlanAssignments 
+  useClientPlanAssignments,
+  useCoachProfile
 } from "@/hooks/useCoachClients";
 import { format } from "date-fns";
 
@@ -42,6 +44,7 @@ const CoachClientDetail = () => {
   const { id } = useParams<{ id: string }>();
 
   // Fetch real data
+  const { data: coachProfile } = useCoachProfile();
   const { data: clientData, isLoading: isLoadingClient } = useClientDetail(id);
   const { data: sessions = [], isLoading: isLoadingSessions } = useClientSessions(id);
   const { data: notes = [], isLoading: isLoadingNotes } = useClientNotes(id);
@@ -272,6 +275,7 @@ const CoachClientDetail = () => {
           <TabsTrigger value="sessions">Sessions</TabsTrigger>
           <TabsTrigger value="progress">Progress</TabsTrigger>
           <TabsTrigger value="plans">Plans</TabsTrigger>
+          <TabsTrigger value="habits">Habits</TabsTrigger>
           <TabsTrigger value="notes">Notes</TabsTrigger>
         </TabsList>
 
@@ -510,6 +514,13 @@ const CoachClientDetail = () => {
                 Assign First Plan
               </Button>
             </div>
+          )}
+        </TabsContent>
+
+        {/* Habits Tab */}
+        <TabsContent value="habits" className="space-y-6">
+          {coachProfile?.id && id && (
+            <HabitManager coachId={coachProfile.id} clientId={id} />
           )}
         </TabsContent>
 
