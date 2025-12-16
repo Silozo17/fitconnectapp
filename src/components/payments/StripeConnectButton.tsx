@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
-import { SUBSCRIPTION_TIERS, TierKey } from "@/lib/stripe-config";
+import { SUBSCRIPTION_TIERS, TierKey, normalizeTier } from "@/lib/stripe-config";
 import { Link } from "react-router-dom";
 
 interface StripeConnectButtonProps {
@@ -34,11 +34,10 @@ const StripeConnectButton = ({ coachId, onSuccess }: StripeConnectButtonProps) =
     },
   });
 
-  // Get current commission rate based on tier - safely handle invalid/missing tier values
-  const rawTier = coachProfile?.subscription_tier || "free";
-  const currentTier: TierKey = (rawTier in SUBSCRIPTION_TIERS) ? rawTier as TierKey : "free";
+  // Get current commission rate based on tier - use centralized normalizer for legacy/invalid tiers
+  const currentTier = normalizeTier(coachProfile?.subscription_tier);
   const tierData = SUBSCRIPTION_TIERS[currentTier];
-  const commissionPercent = tierData?.commissionPercent || 4;
+  const commissionPercent = tierData.commissionPercent;
 
   const handleConnect = async () => {
     if (!user) return;
