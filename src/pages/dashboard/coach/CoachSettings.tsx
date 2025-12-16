@@ -926,15 +926,20 @@ const CoachSettings = () => {
             {/* Account & Security Tab */}
             {selectedTab === "account" && (
               <div className="space-y-6">
-                <AccountSecuritySection />
+                <AccountSecuritySection role="coach" />
 
-                <div className="card-elevated p-6 border-destructive/50">
-                  <h2 className="font-display font-bold text-foreground mb-4">Danger Zone</h2>
-                  <Button variant="destructive" onClick={signOut}>
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Sign Out
-                  </Button>
-                </div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Session</CardTitle>
+                    <CardDescription>Manage your current session</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button variant="outline" onClick={signOut}>
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </Button>
+                  </CardContent>
+                </Card>
               </div>
             )}
           </div>

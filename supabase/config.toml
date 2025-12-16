@@ -71,3 +71,6 @@ verify_jwt = true
 
 [functions.ai-document-verification]
 verify_jwt = true
+
+[functions.delete-account]
+verify_jwt = true
