@@ -247,6 +247,42 @@ export type Database = {
           },
         ]
       }
+      bundle_products: {
+        Row: {
+          bundle_id: string
+          display_order: number | null
+          id: string
+          product_id: string
+        }
+        Insert: {
+          bundle_id: string
+          display_order?: number | null
+          id?: string
+          product_id: string
+        }
+        Update: {
+          bundle_id?: string
+          display_order?: number | null
+          id?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bundle_products_bundle_id_fkey"
+            columns: ["bundle_id"]
+            isOneToOne: false
+            referencedRelation: "digital_bundles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bundle_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "digital_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       calendar_connections: {
         Row: {
           access_token: string
@@ -1237,6 +1273,253 @@ export type Database = {
           },
           {
             foreignKeyName: "connection_requests_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_purchases: {
+        Row: {
+          access_expires_at: string | null
+          amount_paid: number
+          bundle_id: string | null
+          coach_id: string
+          currency: string | null
+          id: string
+          product_id: string | null
+          purchased_at: string | null
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
+          user_id: string
+        }
+        Insert: {
+          access_expires_at?: string | null
+          amount_paid: number
+          bundle_id?: string | null
+          coach_id: string
+          currency?: string | null
+          id?: string
+          product_id?: string | null
+          purchased_at?: string | null
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          user_id: string
+        }
+        Update: {
+          access_expires_at?: string | null
+          amount_paid?: number
+          bundle_id?: string | null
+          coach_id?: string
+          currency?: string | null
+          id?: string
+          product_id?: string | null
+          purchased_at?: string | null
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_purchases_bundle_id_fkey"
+            columns: ["bundle_id"]
+            isOneToOne: false
+            referencedRelation: "digital_bundles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_purchases_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_purchases_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "digital_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_reviews: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_verified_purchase: boolean | null
+          product_id: string
+          rating: number
+          review_text: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_verified_purchase?: boolean | null
+          product_id: string
+          rating: number
+          review_text?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_verified_purchase?: boolean | null
+          product_id?: string
+          rating?: number
+          review_text?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "digital_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      digital_bundles: {
+        Row: {
+          coach_id: string
+          cover_image_url: string | null
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          id: string
+          is_featured: boolean | null
+          is_published: boolean | null
+          original_price: number | null
+          price: number
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          coach_id: string
+          cover_image_url?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          original_price?: number | null
+          price: number
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          coach_id?: string
+          cover_image_url?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          original_price?: number | null
+          price?: number
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "digital_bundles_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      digital_products: {
+        Row: {
+          category: string | null
+          coach_id: string
+          content_type: Database["public"]["Enums"]["content_type"]
+          content_url: string | null
+          cover_image_url: string | null
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          difficulty_level: string | null
+          download_count: number | null
+          duration_minutes: number | null
+          file_size_bytes: number | null
+          id: string
+          is_downloadable: boolean | null
+          is_featured: boolean | null
+          is_published: boolean | null
+          is_streamable: boolean | null
+          page_count: number | null
+          preview_url: string | null
+          price: number
+          short_description: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+          video_url: string | null
+        }
+        Insert: {
+          category?: string | null
+          coach_id: string
+          content_type?: Database["public"]["Enums"]["content_type"]
+          content_url?: string | null
+          cover_image_url?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          difficulty_level?: string | null
+          download_count?: number | null
+          duration_minutes?: number | null
+          file_size_bytes?: number | null
+          id?: string
+          is_downloadable?: boolean | null
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          is_streamable?: boolean | null
+          page_count?: number | null
+          preview_url?: string | null
+          price?: number
+          short_description?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          category?: string | null
+          coach_id?: string
+          content_type?: Database["public"]["Enums"]["content_type"]
+          content_url?: string | null
+          cover_image_url?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          difficulty_level?: string | null
+          download_count?: number | null
+          duration_minutes?: number | null
+          file_size_bytes?: number | null
+          id?: string
+          is_downloadable?: boolean | null
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          is_streamable?: boolean | null
+          page_count?: number | null
+          preview_url?: string | null
+          price?: number
+          short_description?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "digital_products_coach_id_fkey"
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "coach_profiles"
@@ -2383,6 +2666,13 @@ export type Database = {
     Enums: {
       app_role: "client" | "coach" | "admin" | "manager" | "staff"
       calendar_provider: "google_calendar" | "apple_calendar"
+      content_type:
+        | "ebook"
+        | "video_course"
+        | "single_video"
+        | "template"
+        | "audio"
+        | "other"
       video_provider: "zoom" | "google_meet"
       wearable_provider: "google_fit" | "fitbit" | "garmin" | "apple_health"
     }
@@ -2514,6 +2804,14 @@ export const Constants = {
     Enums: {
       app_role: ["client", "coach", "admin", "manager", "staff"],
       calendar_provider: ["google_calendar", "apple_calendar"],
+      content_type: [
+        "ebook",
+        "video_course",
+        "single_video",
+        "template",
+        "audio",
+        "other",
+      ],
       video_provider: ["zoom", "google_meet"],
       wearable_provider: ["google_fit", "fitbit", "garmin", "apple_health"],
     },
