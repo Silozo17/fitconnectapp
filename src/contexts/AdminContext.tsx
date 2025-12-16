@@ -34,10 +34,11 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const [isLoadingProfiles, setIsLoadingProfiles] = useState(true);
 
   const isAdminUser = role === "admin" || role === "manager" || role === "staff";
+  const canSwitchRoles = isAdminUser || role === "coach";
 
   // Fetch all profiles for the user
   const fetchProfiles = async () => {
-    if (!user?.id || !isAdminUser) {
+    if (!user?.id || !canSwitchRoles) {
       setIsLoadingProfiles(false);
       return;
     }
@@ -77,28 +78,35 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
 
       setAvailableProfiles(profiles);
 
-      // Restore saved preference or default to admin
+      // Determine default role based on user type
+      const defaultType: ViewMode = isAdminUser ? "admin" : "coach";
+      const defaultProfileId = isAdminUser ? profiles.admin : profiles.coach;
+
+      // Restore saved preference or default based on user type
       const savedRole = localStorage.getItem(STORAGE_KEY);
       if (savedRole) {
         try {
           const { type, profileId } = JSON.parse(savedRole);
-          if (profiles[type as ViewMode]) {
+          // Validate saved role is available and appropriate for user type
+          const isValidSavedRole = profiles[type as ViewMode] && 
+            (isAdminUser || type !== "admin"); // Non-admins can't switch to admin
+          
+          if (isValidSavedRole) {
             setActiveProfileType(type);
             setActiveProfileId(profileId);
             setViewMode(type);
           } else {
-            // Saved role no longer valid, default to admin
-            setActiveProfileType("admin");
-            setActiveProfileId(profiles.admin || null);
-            setViewMode("admin");
+            setActiveProfileType(defaultType);
+            setActiveProfileId(defaultProfileId || null);
+            setViewMode(defaultType);
           }
         } catch {
-          setActiveProfileType("admin");
-          setActiveProfileId(profiles.admin || null);
+          setActiveProfileType(defaultType);
+          setActiveProfileId(defaultProfileId || null);
         }
       } else {
-        setActiveProfileType("admin");
-        setActiveProfileId(profiles.admin || null);
+        setActiveProfileType(defaultType);
+        setActiveProfileId(defaultProfileId || null);
       }
     } catch (error) {
       console.error("Error fetching profiles:", error);
@@ -109,7 +117,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     fetchProfiles();
-  }, [user?.id, isAdminUser]);
+  }, [user?.id, canSwitchRoles]);
 
   const setActiveProfile = (type: ViewMode, profileId: string | null) => {
     setActiveProfileType(type);

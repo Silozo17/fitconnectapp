@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAdminView } from "@/contexts/AdminContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import {
   Select,
@@ -12,6 +13,7 @@ import { Shield, User, Briefcase, Check, Plus, Loader2 } from "lucide-react";
 import CreateProfileModal from "./CreateProfileModal";
 
 const ViewSwitcher = () => {
+  const { role } = useAuth();
   const {
     activeProfileType,
     availableProfiles,
@@ -21,6 +23,9 @@ const ViewSwitcher = () => {
   const navigate = useNavigate();
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [profileTypeToCreate, setProfileTypeToCreate] = useState<"client" | "coach">("client");
+
+  // Determine if user is admin (can see admin view option)
+  const isAdminUser = role === "admin" || role === "manager" || role === "staff";
 
   const handleViewChange = (value: string) => {
     // Check if trying to create a new profile
@@ -78,16 +83,18 @@ const ViewSwitcher = () => {
           <SelectValue placeholder="Select view" />
         </SelectTrigger>
         <SelectContent>
-          {/* Admin View - Always available */}
-          <SelectItem value="admin">
-            <div className="flex items-center gap-2">
-              <Shield className="w-4 h-4 text-primary" />
-              <span>Admin View</span>
-              {availableProfiles.admin && (
-                <Check className="w-3 h-3 text-green-500 ml-auto" />
-              )}
-            </div>
-          </SelectItem>
+          {/* Admin View - Only for admin users */}
+          {isAdminUser && (
+            <SelectItem value="admin">
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4 text-primary" />
+                <span>Admin View</span>
+                {availableProfiles.admin && (
+                  <Check className="w-3 h-3 text-green-500 ml-auto" />
+                )}
+              </div>
+            </SelectItem>
+          )}
 
           {/* Coach View */}
           {availableProfiles.coach ? (
