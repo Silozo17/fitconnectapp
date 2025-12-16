@@ -7,17 +7,22 @@ export const useAdminUserManagement = (userType: "client" | "coach") => {
   const [loading, setLoading] = useState(false);
   const logAction = useLogAdminAction();
 
-  const getUserEmail = async (userId: string): Promise<string | null> => {
+  const getUserAuthInfo = async (userId: string): Promise<{ email: string | null; lastSignInAt: string | null }> => {
     try {
       const { data, error } = await supabase.functions.invoke("admin-user-management", {
         body: { action: "get_user_email", userId },
       });
       if (error) throw error;
-      return data.email;
+      return { email: data.email, lastSignInAt: data.last_sign_in_at };
     } catch (error: any) {
-      console.error("Get email error:", error);
-      return null;
+      console.error("Get auth info error:", error);
+      return { email: null, lastSignInAt: null };
     }
+  };
+
+  const getUserEmail = async (userId: string): Promise<string | null> => {
+    const info = await getUserAuthInfo(userId);
+    return info.email;
   };
 
   const updateEmail = async (userId: string, profileId: string, newEmail: string) => {
@@ -152,6 +157,7 @@ export const useAdminUserManagement = (userType: "client" | "coach") => {
   return {
     loading,
     getUserEmail,
+    getUserAuthInfo,
     updateEmail,
     updateStatus,
     bulkUpdateStatus,
