@@ -34,8 +34,9 @@ export function DecorativeAvatar({
   animate = true,
   opacity = 30,
 }: DecorativeAvatarProps) {
-  const imageUrl = getAvatarImageUrl(avatarSlug);
-
+  // Convert hyphens to underscores for the avatar URL function
+  const normalizedSlug = avatarSlug.replace(/-/g, '_');
+  const imageUrl = getAvatarImageUrl(normalizedSlug);
   return (
     <div
       className={cn(
