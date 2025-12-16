@@ -1,8 +1,33 @@
 // Stripe price configuration for FitConnect platform subscriptions
 export const SUBSCRIPTION_TIERS = {
+  free: {
+    name: "Free",
+    description: "Get started at no cost",
+    clientLimit: 3,
+    prices: {
+      monthly: {
+        amount: 0,
+        priceId: null,
+      },
+      yearly: {
+        amount: 0,
+        monthlyEquivalent: 0,
+        savings: 0,
+        priceId: null,
+      },
+    },
+    features: [
+      "Up to 3 clients",
+      "Basic workout plans",
+      "Client messaging",
+      "Session scheduling",
+    ],
+    highlighted: false,
+  },
   starter: {
     name: "Starter",
     description: "Perfect for new coaches just getting started",
+    clientLimit: 10,
     prices: {
       monthly: {
         amount: 19,
@@ -28,6 +53,7 @@ export const SUBSCRIPTION_TIERS = {
   pro: {
     name: "Pro",
     description: "For established coaches ready to scale",
+    clientLimit: 50,
     prices: {
       monthly: {
         amount: 49,
@@ -42,7 +68,7 @@ export const SUBSCRIPTION_TIERS = {
     },
     features: [
       "Everything in Starter, plus:",
-      "Unlimited clients",
+      "Up to 50 clients",
       "Advanced analytics",
       "Priority support",
       "Custom branding",
@@ -55,6 +81,7 @@ export const SUBSCRIPTION_TIERS = {
   enterprise: {
     name: "Enterprise",
     description: "For elite coaches and fitness businesses",
+    clientLimit: null, // Unlimited
     prices: {
       monthly: {
         amount: 99,
@@ -69,6 +96,7 @@ export const SUBSCRIPTION_TIERS = {
     },
     features: [
       "Everything in Pro, plus:",
+      "Unlimited clients",
       "API access",
       "Dedicated account manager",
       "White-label options",
