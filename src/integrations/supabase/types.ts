@@ -2696,6 +2696,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      client_has_messaged_coach: {
+        Args: { client_profile_id: string }
+        Returns: boolean
+      }
+      coach_has_messaged_client: {
+        Args: { coach_profile_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
