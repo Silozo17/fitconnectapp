@@ -23,7 +23,6 @@ import {
   Calculator,
   Wrench,
   UserPlus,
-  User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
@@ -114,7 +113,6 @@ const menuGroups: MenuGroup[] = [
   },
 ];
 
-const profileItem: MenuItem = { title: "My Profile", icon: User, path: "/dashboard/profile" };
 const settingsItem: MenuItem = { title: "Settings", icon: Settings, path: "/dashboard/client/settings" };
 
 interface ClientSidebarProps {
@@ -332,9 +330,8 @@ const ClientSidebar = ({ collapsed, onToggle }: ClientSidebarProps) => {
           ))}
         </nav>
 
-        {/* Profile & Settings - Fixed at bottom */}
+        {/* Settings - Fixed at bottom */}
         <div className="p-2 border-t border-border space-y-1">
-          {renderMenuItem(profileItem)}
           {renderMenuItem(settingsItem)}
         </div>
 

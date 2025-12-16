@@ -13,9 +13,6 @@ import {
   Plug,
   Video,
   Calendar,
-  AtSign,
-  Copy,
-  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +25,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
-import { ProfileImageUpload } from "@/components/shared/ProfileImageUpload";
+
 import { CardImageUpload } from "@/components/shared/CardImageUpload";
 import { CoachCardPreview } from "@/components/coaches/CoachCardPreview";
 import StripeConnectButton from "@/components/payments/StripeConnectButton";
@@ -412,8 +409,21 @@ const CoachSettings = () => {
             {selectedTab === "profile" && (
               <>
                 <div className="card-elevated p-6">
-                  <h2 className="font-display font-bold text-foreground mb-6">Profile Information</h2>
+                  <h2 className="font-display font-bold text-foreground mb-6">Coach Profile</h2>
                   
+                  {/* Link to My Profile */}
+                  <div className="mb-6 p-4 bg-secondary/50 rounded-lg flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">
+                        Edit your name, username, and profile photo in <span className="font-medium text-foreground">My Profile</span>
+                      </p>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => navigate("/dashboard/profile")}>
+                      <User className="w-4 h-4 mr-2" />
+                      My Profile
+                    </Button>
+                  </div>
+
                   {/* Avatar Selection */}
                   <div className="mb-6">
                     <Label className="mb-3 block">Your Avatar</Label>
@@ -426,18 +436,6 @@ const CoachSettings = () => {
                         <AvatarPicker selectedAvatar={selectedAvatar} profileType="coach" />
                       </div>
                     </div>
-                  </div>
-
-                  {/* Profile Photo */}
-                  <div className="mb-6">
-                    <Label className="mb-3 block">Profile Photo</Label>
-                    <ProfileImageUpload
-                      currentImageUrl={profile.profile_image_url}
-                      userId={user?.id || ""}
-                      displayName={profile.display_name || ""}
-                      onImageChange={(url) => setProfile({ ...profile, profile_image_url: url })}
-                      size="lg"
-                    />
                   </div>
 
                   {/* Marketplace Card Photo */}
@@ -471,65 +469,7 @@ const CoachSettings = () => {
                     </div>
                   </div>
 
-                  {/* Username */}
-                  <Card className="mb-6">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <AtSign className="w-4 h-4 text-primary" />
-                        Username
-                      </CardTitle>
-                      <CardDescription>Your unique identifier for connections</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex items-center gap-2 p-3 bg-secondary/50 rounded-lg">
-                        <AtSign className="w-4 h-4 text-muted-foreground" />
-                        <span className="font-mono font-medium">{profile?.username}</span>
-                        <Button variant="ghost" size="sm" onClick={copyUsername} className="ml-auto">
-                          {usernameCopied ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
-                        </Button>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Change Username</Label>
-                        <div className="flex gap-2">
-                          <div className="relative flex-1">
-                            <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input
-                              value={newUsername}
-                              onChange={(e) => handleUsernameChange(e.target.value)}
-                              placeholder="Enter new username"
-                              className="pl-9"
-                              maxLength={30}
-                            />
-                          </div>
-                          <Button onClick={saveUsername} disabled={saving || !usernameAvailable || !newUsername}>
-                            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
-                          </Button>
-                        </div>
-                        {checkingUsername && <p className="text-sm text-muted-foreground">Checking availability...</p>}
-                        {usernameError && <p className="text-sm text-destructive">{usernameError}</p>}
-                        {usernameAvailable && newUsername && <p className="text-sm text-primary flex items-center gap-1"><Check className="w-3 h-3" /> Username available!</p>}
-                        <p className="text-xs text-muted-foreground">Lowercase letters and numbers only, 3-30 characters</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label>Display Name</Label>
-                      <Input
-                        value={profile.display_name || ""}
-                        onChange={(e) => setProfile({ ...profile, display_name: e.target.value })}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label>Email</Label>
-                      <Input
-                        value={user?.email || ""}
-                        className="mt-1"
-                        disabled
-                      />
-                    </div>
                     <div>
                       <Label>Location</Label>
                       <Input

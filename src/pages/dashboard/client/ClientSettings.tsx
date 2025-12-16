@@ -18,7 +18,7 @@ import { LeaderboardSettings } from "@/components/gamification/LeaderboardSettin
 import { AvatarPicker } from "@/components/avatars/AvatarPicker";
 import { AvatarShowcase } from "@/components/avatars/AvatarShowcase";
 import { useSelectedAvatar } from "@/hooks/useAvatars";
-import { UnifiedProfileSettings } from "@/components/shared/UnifiedProfileSettings";
+
 import WearableConnectionList from "@/components/integrations/WearableConnectionList";
 import CalendarConnectionCard from "@/components/integrations/CalendarConnectionCard";
 import HealthDataWidget from "@/components/integrations/HealthDataWidget";
@@ -195,6 +195,24 @@ const ClientSettings = () => {
             {/* Profile Tab */}
             {selectedTab === "profile" && (
               <>
+                {/* Link to My Profile */}
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Personal Information</p>
+                        <p className="text-sm text-muted-foreground">
+                          Edit your name, username, and profile photo in My Profile
+                        </p>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={() => window.location.href = "/dashboard/profile"}>
+                        <User className="w-4 h-4 mr-2" />
+                        My Profile
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
                 {/* Avatar Selection */}
                 <Card>
                   <CardHeader>
@@ -206,9 +224,6 @@ const ClientSettings = () => {
                     <AvatarPicker selectedAvatar={selectedAvatar} profileType="client" />
                   </CardContent>
                 </Card>
-
-                {/* Unified Profile Settings */}
-                <UnifiedProfileSettings />
 
                 {/* Body Metrics */}
                 <Card>

@@ -1,6 +1,7 @@
 import { Search, LogOut, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +17,7 @@ import { UserAvatar } from "@/components/shared/UserAvatar";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 
 const ClientDashboardHeader = () => {
+  const navigate = useNavigate();
   const { signOut, role } = useAuth();
   const { displayName, avatarUrl } = useUserProfile();
 
@@ -63,9 +65,9 @@ const ClientDashboardHeader = () => {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
                 <User className="w-4 h-4 mr-2" />
-                Profile
+                My Profile
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={signOut} className="text-destructive">

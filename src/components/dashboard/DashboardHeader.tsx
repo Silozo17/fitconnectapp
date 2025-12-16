@@ -1,8 +1,9 @@
-import { Search } from "lucide-react";
+import { Search, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +21,7 @@ interface DashboardHeaderProps {
 }
 
 const DashboardHeader = ({ subscriptionTier }: DashboardHeaderProps) => {
+  const navigate = useNavigate();
   const { signOut, role } = useAuth();
   const { displayName, avatarUrl } = useUserProfile();
 
@@ -73,7 +75,12 @@ const DashboardHeader = ({ subscriptionTier }: DashboardHeaderProps) => {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
+                <User className="h-4 w-4 mr-2" />
+                My Profile
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => signOut()}>
+                <LogOut className="h-4 w-4 mr-2" />
                 Sign out
               </DropdownMenuItem>
             </DropdownMenuContent>
