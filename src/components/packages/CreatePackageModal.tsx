@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -22,12 +22,28 @@ interface CreatePackageModalProps {
 }
 
 const CreatePackageModal = ({ open, onOpenChange, editPackage }: CreatePackageModalProps) => {
-  const [name, setName] = useState(editPackage?.name || "");
-  const [description, setDescription] = useState(editPackage?.description || "");
-  const [sessionCount, setSessionCount] = useState(editPackage?.session_count?.toString() || "5");
-  const [price, setPrice] = useState(editPackage?.price?.toString() || "");
-  const [validityDays, setValidityDays] = useState(editPackage?.validity_days?.toString() || "90");
-  const [isActive, setIsActive] = useState(editPackage?.is_active ?? true);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [sessionCount, setSessionCount] = useState("5");
+  const [price, setPrice] = useState("");
+  const [validityDays, setValidityDays] = useState("90");
+  const [isActive, setIsActive] = useState(true);
+
+  // Sync form state when modal opens or editPackage changes
+  useEffect(() => {
+    if (open) {
+      if (editPackage) {
+        setName(editPackage.name || "");
+        setDescription(editPackage.description || "");
+        setSessionCount(editPackage.session_count?.toString() || "5");
+        setPrice(editPackage.price?.toString() || "");
+        setValidityDays(editPackage.validity_days?.toString() || "90");
+        setIsActive(editPackage.is_active ?? true);
+      } else {
+        resetForm();
+      }
+    }
+  }, [open, editPackage]);
 
   const createPackage = useCreatePackage();
   const updatePackage = useUpdatePackage();
