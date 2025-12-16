@@ -1,3 +1,4 @@
+import React from 'react';
 import { cn } from '@/lib/utils';
 import { Avatar, getAvatarImageUrl } from '@/hooks/useAvatars';
 import { RARITY_CONFIG, getUnlockDescription } from '@/lib/avatar-config';
@@ -12,7 +13,8 @@ interface AvatarCardProps {
   onClick?: () => void;
 }
 
-export function AvatarCard({ avatar, isUnlocked, isSelected, progress, onClick }: AvatarCardProps) {
+export const AvatarCard = React.forwardRef<HTMLButtonElement, AvatarCardProps>(
+  function AvatarCard({ avatar, isUnlocked, isSelected, progress, onClick }, ref) {
   const rarityConfig = RARITY_CONFIG[avatar.rarity];
   const imageUrl = getAvatarImageUrl(avatar.slug);
   
@@ -21,6 +23,7 @@ export function AvatarCard({ avatar, isUnlocked, isSelected, progress, onClick }
   
   return (
     <button
+      ref={ref}
       onClick={isUnlocked ? onClick : undefined}
       disabled={!isUnlocked}
       className={cn(
@@ -107,4 +110,4 @@ export function AvatarCard({ avatar, isUnlocked, isSelected, progress, onClick }
       )}
     </button>
   );
-}
+});

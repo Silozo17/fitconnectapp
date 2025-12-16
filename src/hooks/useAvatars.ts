@@ -226,8 +226,14 @@ export function useCheckAvatarUnlocks() {
   });
 }
 
-// Get avatar image URL from storage
+// Get avatar image URL from storage (handles Title_Case filenames)
 export function getAvatarImageUrl(slug: string): string {
-  const { data } = supabase.storage.from('avatars').getPublicUrl(`${slug}.png`);
+  // Convert slug to Title_Case (e.g., "strongman_bear" → "Strongman_Bear")
+  const filename = slug
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join('_');
+  
+  const { data } = supabase.storage.from('avatars').getPublicUrl(`${filename}.png`);
   return data.publicUrl;
 }
