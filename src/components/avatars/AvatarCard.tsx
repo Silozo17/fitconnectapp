@@ -56,15 +56,15 @@ export const AvatarCard = React.forwardRef<HTMLButtonElement, AvatarCardProps>(
         </div>
       )}
       
-      {/* Avatar image */}
+      {/* Avatar image - portrait aspect ratio */}
       <div className={cn(
-        'relative w-16 h-16 rounded-full overflow-hidden mb-2',
+        'relative w-16 h-24 rounded-lg overflow-hidden mb-2',
         !isUnlocked && 'grayscale opacity-50'
       )}>
         <img
           src={imageUrl}
           alt={avatar.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
           onError={(e) => {
             (e.target as HTMLImageElement).src = '/placeholder.svg';
           }}
