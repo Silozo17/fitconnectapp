@@ -13,6 +13,23 @@ export interface AuditLog {
   ip_address: string | null;
   user_agent: string | null;
   created_at: string;
+  admin?: {
+    id: string;
+    display_name: string | null;
+    first_name: string | null;
+    last_name: string | null;
+  } | null;
+}
+
+interface AuditLogFilters {
+  actionType?: string;
+  entityType?: string;
+  adminId?: string;
+  startDate?: string;
+  endDate?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
 }
 
 export const useAuditLogs = (limit = 50) => {
@@ -27,6 +44,70 @@ export const useAuditLogs = (limit = 50) => {
 
       if (error) throw error;
       return data as AuditLog[];
+    },
+  });
+};
+
+export const useAuditLogsWithFilters = (filters: AuditLogFilters) => {
+  const { actionType, entityType, adminId, startDate, endDate, search, page = 1, limit = 50 } = filters;
+
+  return useQuery({
+    queryKey: ["audit-logs-filtered", filters],
+    queryFn: async () => {
+      // Build query
+      let query = supabase
+        .from("audit_logs")
+        .select(`
+          *,
+          admin:admin_profiles!audit_logs_admin_id_fkey (
+            id,
+            display_name,
+            first_name,
+            last_name
+          )
+        `, { count: "exact" });
+
+      // Apply filters
+      if (actionType) {
+        query = query.ilike("action", `%${actionType}%`);
+      }
+      
+      if (entityType) {
+        query = query.eq("entity_type", entityType);
+      }
+      
+      if (adminId) {
+        query = query.eq("admin_id", adminId);
+      }
+      
+      if (startDate) {
+        query = query.gte("created_at", startDate);
+      }
+      
+      if (endDate) {
+        query = query.lte("created_at", endDate);
+      }
+      
+      if (search) {
+        query = query.or(`entity_id.ilike.%${search}%,action.ilike.%${search}%`);
+      }
+
+      // Pagination
+      const from = (page - 1) * limit;
+      const to = from + limit - 1;
+      
+      query = query
+        .order("created_at", { ascending: false })
+        .range(from, to);
+
+      const { data, error, count } = await query;
+
+      if (error) throw error;
+      
+      return {
+        logs: data as AuditLog[],
+        count: count || 0,
+      };
     },
   });
 };
@@ -80,6 +161,7 @@ export const useLogAdminAction = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["audit-logs"] });
+      queryClient.invalidateQueries({ queryKey: ["audit-logs-filtered"] });
     },
   });
 };

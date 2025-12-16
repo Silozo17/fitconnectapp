@@ -28,6 +28,7 @@ import AdminReviews from "./pages/dashboard/admin/AdminReviews";
 import AdminVerification from "./pages/dashboard/admin/AdminVerification";
 import AdminIntegrations from "./pages/dashboard/admin/AdminIntegrations";
 import AdminChallenges from "./pages/dashboard/admin/AdminChallenges";
+import AdminAuditLog from "./pages/dashboard/admin/AdminAuditLog";
 
 // Coach Dashboard Pages
 import ClientOverview from "./pages/dashboard/client/ClientOverview";
@@ -205,6 +206,11 @@ const App = () => (
                 <Route path="/dashboard/admin/challenges" element={
                   <ProtectedRoute allowedRoles={["admin"]}>
                     <AdminChallenges />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/admin/audit" element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminAuditLog />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/admin/notifications" element={
