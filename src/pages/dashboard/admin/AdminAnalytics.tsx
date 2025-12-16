@@ -3,8 +3,18 @@ import { supabase } from "@/integrations/supabase/client";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Users, Dumbbell, Calendar, MessageSquare, TrendingUp, Activity } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Loader2, Users, Dumbbell, Calendar, MessageSquare, TrendingUp, Activity, Download, ChevronDown } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
+import { arrayToCSV, downloadCSV, generateExportFilename } from "@/lib/csv-export";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface AnalyticsData {
   totalUsers: number;
@@ -18,6 +28,7 @@ interface AnalyticsData {
 }
 
 const AdminAnalytics = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState("30d");
   const [analytics, setAnalytics] = useState<AnalyticsData>({
@@ -126,6 +137,33 @@ const AdminAnalytics = () => {
     return data;
   };
 
+  const handleExportSummary = () => {
+    const columns = [
+      { key: "metric", header: "Metric" },
+      { key: "value", header: "Value" },
+    ];
+
+    const summaryData = [
+      { metric: "Total Clients", value: analytics.totalUsers },
+      { metric: "Total Coaches", value: analytics.totalCoaches },
+      { metric: "Total Sessions", value: analytics.totalSessions },
+      { metric: "Completed Sessions", value: analytics.completedSessions },
+      { metric: "Session Completion Rate", value: `${analytics.sessionCompletionRate}%` },
+      { metric: "Total Messages", value: analytics.totalMessages },
+      { metric: "New Clients This Month", value: analytics.newUsersThisMonth },
+      { metric: "New Coaches This Month", value: analytics.newCoachesThisMonth },
+      { metric: "Avg Sessions per Coach", value: analytics.totalCoaches ? (analytics.totalSessions / analytics.totalCoaches).toFixed(1) : 0 },
+      { metric: "Avg Messages per User", value: analytics.totalUsers ? (analytics.totalMessages / analytics.totalUsers).toFixed(1) : 0 },
+      { metric: "Coach to Client Ratio", value: analytics.totalCoaches ? `1:${(analytics.totalUsers / analytics.totalCoaches).toFixed(1)}` : "N/A" },
+      { metric: "Client Growth Rate", value: `${analytics.totalUsers ? Math.round((analytics.newUsersThisMonth / analytics.totalUsers) * 100) : 0}%` },
+      { metric: "Coach Growth Rate", value: `${analytics.totalCoaches ? Math.round((analytics.newCoachesThisMonth / analytics.totalCoaches) * 100) : 0}%` },
+    ];
+
+    const csv = arrayToCSV(summaryData, columns);
+    downloadCSV(csv, generateExportFilename("analytics-summary"));
+    toast.success("Analytics summary exported to CSV");
+  };
+
   if (loading) {
     return (
       <AdminLayout>
@@ -144,17 +182,39 @@ const AdminAnalytics = () => {
             <h1 className="text-3xl font-bold">Analytics</h1>
             <p className="text-muted-foreground">Platform performance and user metrics</p>
           </div>
-          <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7d">Last 7 days</SelectItem>
-              <SelectItem value="30d">Last 30 days</SelectItem>
-              <SelectItem value="90d">Last 90 days</SelectItem>
-              <SelectItem value="1y">Last year</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                  <ChevronDown className="h-4 w-4 ml-2" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleExportSummary}>
+                  Export Summary Stats
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/dashboard/admin/users")}>
+                  Export User Data →
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/dashboard/admin/coaches")}>
+                  Export Coach Data →
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Select value={timeRange} onValueChange={setTimeRange}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7d">Last 7 days</SelectItem>
+                <SelectItem value="30d">Last 30 days</SelectItem>
+                <SelectItem value="90d">Last 90 days</SelectItem>
+                <SelectItem value="1y">Last year</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* Overview Stats */}
