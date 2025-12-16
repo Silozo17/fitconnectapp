@@ -226,10 +226,32 @@ export function useCheckAvatarUnlocks() {
   });
 }
 
-// Get avatar image URL from storage (handles Title_Case filenames)
+// Mapping of slugs to exact filenames (handles special cases like HIIT, CrossFit)
+const AVATAR_FILENAMES: Record<string, string> = {
+  strongman_bear: 'Strongman_Bear',
+  weightlifting_lion: 'Weightlifting_Lion',
+  crossfit_wolf: 'CrossFit_Wolf',
+  sprinter_cheetah: 'Sprinter_Cheetah',
+  parkour_monkey: 'Parkour_Monkey',
+  deadlift_boar: 'Deadlift_Boar',
+  armoured_rhino: 'Armoured_Rhino',
+  boxer_dog: 'Boxer_Dog',
+  hiit_fox: 'HIIT_Fox',
+  rogue_runner_cyborg: 'Rogue_Runner_Cyborg',
+  kickboxer_panther: 'Kickboxer_Panther',
+  martial_arts_crane: 'Martial_Arts_Crane',
+  yoga_wolf: 'Yoga_Wolf',
+  shaolin_tiger: 'Shaolin_Tiger',
+  bodybuilder_bull: 'Bodybuilder_Bull',
+  powerlifter_gorilla: 'Powerlifter_Gorilla',
+  streetwear_gorilla_trainer: 'Streetwear_Gorilla_Trainer',
+  meditative_android_monk: 'Meditative_Android_Monk',
+  elite_personal_trainer_human: 'Elite_Personal_Trainer_Human',
+};
+
+// Get avatar image URL from storage
 export function getAvatarImageUrl(slug: string): string {
-  // Convert slug to Title_Case (e.g., "strongman_bear" → "Strongman_Bear")
-  const filename = slug
+  const filename = AVATAR_FILENAMES[slug] || slug
     .split('_')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join('_');
