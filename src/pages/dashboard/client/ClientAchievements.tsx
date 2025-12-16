@@ -1,25 +1,53 @@
 import ClientDashboardLayout from '@/components/dashboard/ClientDashboardLayout';
 import { XPProgressBar } from '@/components/gamification/XPProgressBar';
 import { BadgeGrid } from '@/components/gamification/BadgeGrid';
-import { useXPTransactions } from '@/hooks/useGamification';
+import { useXPTransactions, useClientXP, getLevelTitle } from '@/hooks/useGamification';
+import { ShareAchievementButton } from '@/components/gamification/ShareAchievementButton';
+import { AchievementShareCard } from '@/components/gamification/AchievementShareCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format } from 'date-fns';
-import { Zap, TrendingUp, TrendingDown } from 'lucide-react';
+import { Zap, TrendingUp, TrendingDown, Share2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ClientAchievements() {
   const { data: transactions, isLoading: transactionsLoading } = useXPTransactions(50);
+  const { data: xpData } = useClientXP();
   
   return (
     <ClientDashboardLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold">Achievements</h1>
-          <p className="text-muted-foreground">Track your progress and unlock badges</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Achievements</h1>
+            <p className="text-muted-foreground">Track your progress and unlock badges</p>
+          </div>
+          {xpData && (
+            <ShareAchievementButton
+              achievement={{
+                type: 'level',
+                title: `Level ${xpData.current_level}`,
+                description: `${getLevelTitle(xpData.current_level)} with ${xpData.total_xp.toLocaleString()} XP earned!`,
+                value: xpData.current_level,
+              }}
+            />
+          )}
         </div>
         
         <XPProgressBar />
+        
+        {/* Quick Share Card for Current Level */}
+        {xpData && (
+          <AchievementShareCard
+            achievement={{
+              type: 'level',
+              title: `Level ${xpData.current_level} - ${getLevelTitle(xpData.current_level)}`,
+              description: `Total XP: ${xpData.total_xp.toLocaleString()} • Next level in ${xpData.xp_to_next_level - (xpData.total_xp % xpData.xp_to_next_level)} XP`,
+              value: xpData.current_level,
+              icon: '⬆️',
+            }}
+          />
+        )}
         
         <Tabs defaultValue="badges" className="space-y-4">
           <TabsList>

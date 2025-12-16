@@ -1,7 +1,8 @@
 import { Badge as BadgeType, RARITY_COLORS } from '@/hooks/useGamification';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { Lock } from 'lucide-react';
+import { Lock, Share2 } from 'lucide-react';
+import { ShareAchievementButton } from './ShareAchievementButton';
 
 interface BadgeCardProps {
   badge: BadgeType;
@@ -26,6 +27,21 @@ export function BadgeCard({ badge, earned = false, earnedAt, showDetails = true 
       {!earned && (
         <div className="absolute top-2 right-2">
           <Lock className="h-4 w-4 text-muted-foreground" />
+        </div>
+      )}
+      
+      {earned && (
+        <div className="absolute top-2 right-2">
+          <ShareAchievementButton
+            achievement={{
+              type: 'badge',
+              title: badge.name,
+              description: badge.description,
+              icon: badge.icon,
+            }}
+            variant="ghost"
+            size="icon"
+          />
         </div>
       )}
       

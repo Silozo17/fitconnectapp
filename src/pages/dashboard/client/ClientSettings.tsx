@@ -13,6 +13,7 @@ import { HealthTagInput } from "@/components/dashboard/clients/HealthTagInput";
 import { ProfileImageUpload } from "@/components/shared/ProfileImageUpload";
 import { CurrencySelector } from "@/components/shared/CurrencySelector";
 import { NotificationPreferences } from "@/components/notifications/NotificationPreferences";
+import { LeaderboardSettings } from "@/components/gamification/LeaderboardSettings";
 
 interface ClientProfile {
   first_name: string | null;
@@ -27,6 +28,11 @@ interface ClientProfile {
   allergies: string[] | null;
   medical_conditions: string[] | null;
   avatar_url: string | null;
+  leaderboard_visible: boolean;
+  leaderboard_display_name: string | null;
+  city: string | null;
+  county: string | null;
+  country: string | null;
 }
 
 const DIETARY_SUGGESTIONS = [
@@ -56,7 +62,7 @@ const ClientSettings = () => {
 
       const { data } = await supabase
         .from("client_profiles")
-        .select("first_name, last_name, age, gender_pronouns, location, weight_kg, height_cm, fitness_goals, dietary_restrictions, allergies, medical_conditions, avatar_url")
+        .select("first_name, last_name, age, gender_pronouns, location, weight_kg, height_cm, fitness_goals, dietary_restrictions, allergies, medical_conditions, avatar_url, leaderboard_visible, leaderboard_display_name, city, county, country")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -85,6 +91,11 @@ const ClientSettings = () => {
         allergies: profile.allergies,
         medical_conditions: profile.medical_conditions,
         avatar_url: profile.avatar_url,
+        leaderboard_visible: profile.leaderboard_visible,
+        leaderboard_display_name: profile.leaderboard_display_name,
+        city: profile.city,
+        county: profile.county,
+        country: profile.country,
       })
       .eq("user_id", user.id);
 
@@ -335,6 +346,16 @@ const ClientSettings = () => {
             </p>
           </CardContent>
         </Card>
+
+        {/* Leaderboard Settings */}
+        <LeaderboardSettings
+          leaderboardVisible={profile?.leaderboard_visible || false}
+          displayName={profile?.leaderboard_display_name || null}
+          city={profile?.city || null}
+          county={profile?.county || null}
+          country={profile?.country || null}
+          onUpdate={(field, value) => updateField(field as keyof ClientProfile, value)}
+        />
 
         {/* Notification Preferences */}
         <div className="space-y-4">

@@ -616,6 +616,9 @@ export type Database = {
           allergies: string[] | null
           avatar_url: string | null
           body_measurements: Json | null
+          city: string | null
+          country: string | null
+          county: string | null
           created_at: string
           dietary_restrictions: string[] | null
           first_name: string | null
@@ -624,6 +627,8 @@ export type Database = {
           height_cm: number | null
           id: string
           last_name: string | null
+          leaderboard_display_name: string | null
+          leaderboard_visible: boolean | null
           location: string | null
           medical_conditions: string[] | null
           onboarding_completed: boolean
@@ -636,6 +641,9 @@ export type Database = {
           allergies?: string[] | null
           avatar_url?: string | null
           body_measurements?: Json | null
+          city?: string | null
+          country?: string | null
+          county?: string | null
           created_at?: string
           dietary_restrictions?: string[] | null
           first_name?: string | null
@@ -644,6 +652,8 @@ export type Database = {
           height_cm?: number | null
           id?: string
           last_name?: string | null
+          leaderboard_display_name?: string | null
+          leaderboard_visible?: boolean | null
           location?: string | null
           medical_conditions?: string[] | null
           onboarding_completed?: boolean
@@ -656,6 +666,9 @@ export type Database = {
           allergies?: string[] | null
           avatar_url?: string | null
           body_measurements?: Json | null
+          city?: string | null
+          country?: string | null
+          county?: string | null
           created_at?: string
           dietary_restrictions?: string[] | null
           first_name?: string | null
@@ -664,6 +677,8 @@ export type Database = {
           height_cm?: number | null
           id?: string
           last_name?: string | null
+          leaderboard_display_name?: string | null
+          leaderboard_visible?: boolean | null
           location?: string | null
           medical_conditions?: string[] | null
           onboarding_completed?: boolean
