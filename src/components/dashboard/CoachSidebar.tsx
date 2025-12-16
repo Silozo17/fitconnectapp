@@ -17,6 +17,7 @@ import {
   ShoppingBag,
   Star,
   Kanban,
+  Trophy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
@@ -34,6 +35,7 @@ const menuItems: { title: string; icon: typeof LayoutDashboard; path: string; ba
   { title: "Training Plans", icon: ClipboardList, path: "/dashboard/coach/plans" },
   { title: "Digital Products", icon: ShoppingBag, path: "/dashboard/coach/products" },
   { title: "Packages", icon: Package, path: "/dashboard/coach/packages" },
+  { title: "Achievements", icon: Trophy, path: "/dashboard/coach/achievements" },
   { title: "Reviews", icon: Star, path: "/dashboard/coach/reviews" },
   { title: "Earnings", icon: DollarSign, path: "/dashboard/coach/earnings" },
   { title: "Verification", icon: Shield, path: "/dashboard/coach/verification" },

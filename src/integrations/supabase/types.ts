@@ -995,6 +995,48 @@ export type Database = {
           },
         ]
       }
+      coach_badges: {
+        Row: {
+          badge_id: string
+          coach_id: string
+          earned_at: string | null
+          id: string
+          is_featured: boolean | null
+          source_data: Json | null
+        }
+        Insert: {
+          badge_id: string
+          coach_id: string
+          earned_at?: string | null
+          id?: string
+          is_featured?: boolean | null
+          source_data?: Json | null
+        }
+        Update: {
+          badge_id?: string
+          coach_id?: string
+          earned_at?: string | null
+          id?: string
+          is_featured?: boolean | null
+          source_data?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_badges_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coach_clients: {
         Row: {
           client_id: string

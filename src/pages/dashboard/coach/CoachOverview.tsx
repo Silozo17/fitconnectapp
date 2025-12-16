@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import ConnectionRequests from "@/components/dashboard/coach/ConnectionRequests";
+import { ProfileCompletionCard } from "@/components/dashboard/coach/ProfileCompletionCard";
 
 // Mock data for demonstration
 const upcomingSessions = [
@@ -41,14 +42,7 @@ const CoachOverview = () => {
       </div>
 
       {/* Profile Completion */}
-      <div className="card-elevated p-4 mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-foreground">Profile Completion</span>
-          <span className="text-sm text-primary font-bold">75%</span>
-        </div>
-        <Progress value={75} className="h-2" />
-        <p className="text-xs text-muted-foreground mt-2">Complete your profile to attract more clients</p>
-      </div>
+      <ProfileCompletionCard />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
