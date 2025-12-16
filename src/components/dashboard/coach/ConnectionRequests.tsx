@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, X, Loader2, UserPlus, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -52,7 +53,7 @@ const ConnectionRequests = () => {
 
       // First get connection requests
       const { data: requestsData, error: requestsError } = await supabase
-        .from("connection_requests" as any)
+        .from("connection_requests")
         .select("*")
         .eq("coach_id", coachProfile.id)
         .eq("status", "pending")
@@ -62,7 +63,7 @@ const ConnectionRequests = () => {
       if (!requestsData || requestsData.length === 0) return [];
 
       // Get client profiles for these requests
-      const clientIds = (requestsData as any[]).map((r) => r.client_id);
+      const clientIds = requestsData.map((r) => r.client_id);
       const { data: clientProfiles, error: clientsError } = await supabase
         .from("client_profiles")
         .select("id, first_name, last_name, fitness_goals")
@@ -71,7 +72,7 @@ const ConnectionRequests = () => {
       if (clientsError) throw clientsError;
 
       // Combine the data
-      return (requestsData as any[]).map((request) => ({
+      return requestsData.map((request) => ({
         ...request,
         client_profile: clientProfiles?.find((c) => c.id === request.client_id) || null,
       })) as ConnectionRequest[];
@@ -79,13 +80,64 @@ const ConnectionRequests = () => {
     enabled: !!coachProfile?.id,
   });
 
+  // Real-time subscription for new connection requests
+  useEffect(() => {
+    if (!coachProfile?.id) return;
+
+    const channel = supabase
+      .channel("connection-requests-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "connection_requests",
+          filter: `coach_id=eq.${coachProfile.id}`,
+        },
+        (payload) => {
+          console.log("New connection request:", payload);
+          toast.info("New connection request received!");
+          queryClient.invalidateQueries({ queryKey: ["connection-requests", coachProfile.id] });
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "connection_requests",
+          filter: `coach_id=eq.${coachProfile.id}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["connection-requests", coachProfile.id] });
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "DELETE",
+          schema: "public",
+          table: "connection_requests",
+          filter: `coach_id=eq.${coachProfile.id}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["connection-requests", coachProfile.id] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [coachProfile?.id, queryClient]);
+
   // Accept request mutation
   const acceptMutation = useMutation({
     mutationFn: async (request: ConnectionRequest) => {
       // Update request status
       const { error: updateError } = await supabase
-        .from("connection_requests" as any)
-        .update({ status: "accepted", responded_at: new Date().toISOString() } as any)
+        .from("connection_requests")
+        .update({ status: "accepted", responded_at: new Date().toISOString() })
         .eq("id", request.id);
 
       if (updateError) throw updateError;
@@ -114,8 +166,8 @@ const ConnectionRequests = () => {
   const rejectMutation = useMutation({
     mutationFn: async (requestId: string) => {
       const { error } = await supabase
-        .from("connection_requests" as any)
-        .update({ status: "rejected", responded_at: new Date().toISOString() } as any)
+        .from("connection_requests")
+        .update({ status: "rejected", responded_at: new Date().toISOString() })
         .eq("id", requestId);
 
       if (error) throw error;
@@ -168,6 +220,10 @@ const ConnectionRequests = () => {
           <CardTitle className="flex items-center gap-2">
             <UserPlus className="h-5 w-5" />
             Connection Requests
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
           </CardTitle>
           {requests && requests.length > 0 && (
             <Badge variant="secondary">{requests.length} pending</Badge>
@@ -180,7 +236,7 @@ const ConnectionRequests = () => {
             {requests.map((request) => (
               <div
                 key={request.id}
-                className="flex items-start gap-4 p-4 rounded-lg bg-secondary/30 border border-border/50"
+                className="flex items-start gap-4 p-4 rounded-lg bg-secondary/30 border border-border/50 animate-fade-in"
               >
                 <Avatar className="h-12 w-12">
                   <AvatarFallback className="bg-primary/10 text-primary font-semibold">
@@ -255,7 +311,7 @@ const ConnectionRequests = () => {
             <UserPlus className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
             <p className="text-muted-foreground">No pending connection requests</p>
             <p className="text-sm text-muted-foreground mt-1">
-              New requests from clients will appear here
+              New requests from clients will appear here instantly
             </p>
           </div>
         )}
