@@ -45,7 +45,7 @@ import ClientLeaderboard from "./pages/dashboard/client/ClientLeaderboard";
 import ClientChallenges from "./pages/dashboard/client/ClientChallenges";
 import ClientIntegrations from "./pages/dashboard/client/ClientIntegrations";
 import ClientGrocery from "./pages/dashboard/client/ClientGrocery";
-
+import ClientConnections from "./pages/dashboard/client/ClientConnections";
 // Coach Dashboard Pages
 import CoachOverview from "./pages/dashboard/coach/CoachOverview";
 import CoachClients from "./pages/dashboard/coach/CoachClients";
@@ -63,6 +63,7 @@ import CoachReviews from "./pages/dashboard/coach/CoachReviews";
 import CoachVerification from "./pages/dashboard/coach/CoachVerification";
 import CoachPipeline from "./pages/dashboard/coach/CoachPipeline";
 import CoachAchievements from "./pages/dashboard/coach/CoachAchievements";
+import CoachConnections from "./pages/dashboard/coach/CoachConnections";
 // Shared Dashboard Pages
 import Notifications from "./pages/dashboard/Notifications";
 
@@ -321,6 +322,11 @@ const App = () => (
                     <ClientTools />
                   </ProtectedRoute>
                 } />
+                <Route path="/dashboard/client/connections" element={
+                  <ProtectedRoute allowedRoles={["client", "admin"]}>
+                    <ClientConnections />
+                  </ProtectedRoute>
+                } />
                 <Route path="/dashboard/client/notifications" element={
                   <ProtectedRoute allowedRoles={["client", "admin"]}>
                     <Notifications />
@@ -361,6 +367,11 @@ const App = () => (
                 <Route path="/dashboard/coach/messages/:id" element={
                   <ProtectedRoute allowedRoles={["coach"]}>
                     <CoachMessages />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/coach/connections" element={
+                  <ProtectedRoute allowedRoles={["coach"]}>
+                    <CoachConnections />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/coach/plans" element={

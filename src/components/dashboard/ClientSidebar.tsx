@@ -22,6 +22,7 @@ import {
   ShoppingCart,
   Calculator,
   Wrench,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
@@ -39,7 +40,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-type BadgeKey = "messages" | "plans";
+type BadgeKey = "messages" | "plans" | "connections";
 
 interface MenuItem {
   title: string;
@@ -63,6 +64,7 @@ const menuGroups: MenuGroup[] = [
     items: [
       { title: "Home", icon: Home, path: "/dashboard/client" },
       { title: "Messages", icon: MessageSquare, path: "/dashboard/client/messages", badgeKey: "messages" },
+      { title: "Connections", icon: UserPlus, path: "/dashboard/client/connections", badgeKey: "connections" },
     ],
   },
   {
@@ -121,7 +123,7 @@ interface ClientSidebarProps {
 const ClientSidebar = ({ collapsed, onToggle }: ClientSidebarProps) => {
   const location = useLocation();
   const { unreadCount } = useUnreadMessages();
-  const { newPlans } = useClientBadges();
+  const { newPlans, pendingConnections } = useClientBadges();
 
   // Initialize open groups based on current path
   const getInitialOpenGroups = () => {
@@ -155,6 +157,8 @@ const ClientSidebar = ({ collapsed, onToggle }: ClientSidebarProps) => {
         return unreadCount;
       case "plans":
         return newPlans;
+      case "connections":
+        return pendingConnections;
       default:
         return 0;
     }
