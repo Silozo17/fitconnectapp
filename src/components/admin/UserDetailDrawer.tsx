@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,11 +17,16 @@ import { format, formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import { useLogAdminAction } from "@/hooks/useAuditLog";
 import { useAdminUserStats } from "@/hooks/useAdminUserStats";
+import { useUserAvatars, useUserSelectedAvatar, useRevokeAvatar } from "@/hooks/useAdminAvatars";
+import { getAvatarImageUrl } from "@/hooks/useAvatars";
+import { RARITY_CONFIG } from "@/lib/avatar-config";
+import { GrantAvatarModal } from "./GrantAvatarModal";
 import { 
   User, Heart, Target, MapPin, Calendar, Dumbbell,
   Save, Loader2, AlertTriangle, Apple, Activity,
-  Trophy, Zap, Flame, Award, Star, TrendingUp
+  Trophy, Zap, Flame, Award, Star, TrendingUp, Gift, Trash2, Image
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface UserDetailDrawerProps {
   open: boolean;
@@ -50,10 +55,20 @@ const sourceLabels: Record<string, string> = {
 export function UserDetailDrawer({ open, onOpenChange, user, onSaved }: UserDetailDrawerProps) {
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState<any>({});
+  const [grantModalOpen, setGrantModalOpen] = useState(false);
   const logAction = useLogAdminAction();
 
   // Fetch gamification stats
   const { data: stats, isLoading: statsLoading } = useAdminUserStats(user?.id);
+  
+  // Fetch user avatars
+  const { data: userAvatars, isLoading: avatarsLoading } = useUserAvatars(user?.user_id);
+  const { data: selectedAvatarData } = useUserSelectedAvatar(user?.user_id, 'client');
+  const revokeAvatar = useRevokeAvatar();
+  
+  const unlockedAvatarIds = useMemo(() => {
+    return new Set(userAvatars?.map(ua => ua.avatar_id) || []);
+  }, [userAvatars]);
 
   // Fetch connected coaches
   const { data: connectedCoaches } = useQuery({
@@ -247,10 +262,11 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved }: UserDeta
         <Separator className="my-6" />
 
         <Tabs defaultValue="profile" className="mt-4">
-          <TabsList className="grid grid-cols-5 w-full">
+          <TabsList className="grid grid-cols-6 w-full">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="health">Health</TabsTrigger>
             <TabsTrigger value="gamification">Stats</TabsTrigger>
+            <TabsTrigger value="avatars">Avatars</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
@@ -684,6 +700,120 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved }: UserDeta
               </div>
             </div>
           </TabsContent>
+
+          {/* Avatars Tab */}
+          <TabsContent value="avatars" className="mt-4 space-y-4">
+            {/* Selected Avatar */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Image className="h-4 w-4 text-primary" /> Selected Avatar
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {selectedAvatarData?.avatar ? (
+                  <div className="flex items-center gap-4">
+                    <div className="h-20 w-20 rounded-lg bg-muted/50 overflow-hidden">
+                      <img
+                        src={getAvatarImageUrl(selectedAvatarData.avatar.slug)}
+                        alt={selectedAvatarData.avatar.name}
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                    <div>
+                      <p className="font-medium">{selectedAvatarData.avatar.name}</p>
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          "mt-1",
+                          RARITY_CONFIG[selectedAvatarData.avatar.rarity as keyof typeof RARITY_CONFIG]?.color
+                        )}
+                      >
+                        {selectedAvatarData.avatar.rarity}
+                      </Badge>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No avatar selected</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Unlocked Avatars */}
+            <Card>
+              <CardHeader className="pb-2 flex flex-row items-center justify-between">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Trophy className="h-4 w-4 text-amber-500" /> Unlocked Avatars ({userAvatars?.length || 0})
+                </CardTitle>
+                <Button size="sm" onClick={() => setGrantModalOpen(true)}>
+                  <Gift className="h-4 w-4 mr-1" /> Grant
+                </Button>
+              </CardHeader>
+              <CardContent>
+                {avatarsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : userAvatars && userAvatars.length > 0 ? (
+                  <div className="grid grid-cols-4 gap-3">
+                    {userAvatars.map((ua) => {
+                      const rarityConfig = RARITY_CONFIG[ua.avatar.rarity as keyof typeof RARITY_CONFIG];
+                      const isSelected = selectedAvatarData?.selected_avatar_id === ua.avatar_id;
+                      const canRevoke = ua.unlock_source === 'admin_grant';
+
+                      return (
+                        <div
+                          key={ua.id}
+                          className={cn(
+                            "relative p-2 rounded-lg border-2 bg-muted/30",
+                            isSelected ? "border-primary" : rarityConfig?.border || "border-muted"
+                          )}
+                        >
+                          {isSelected && (
+                            <Badge className="absolute -top-2 -right-2 text-[10px]">Active</Badge>
+                          )}
+                          <div className="aspect-square rounded-md overflow-hidden mb-2 bg-background">
+                            <img
+                              src={getAvatarImageUrl(ua.avatar.slug)}
+                              alt={ua.avatar.name}
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                          <p className="text-xs font-medium truncate">{ua.avatar.name}</p>
+                          <div className="flex items-center justify-between mt-1">
+                            <Badge variant="outline" className={cn("text-[10px]", rarityConfig?.color)}>
+                              {ua.avatar.rarity}
+                            </Badge>
+                            {canRevoke && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-5 w-5 text-destructive hover:text-destructive"
+                                onClick={() => revokeAvatar.mutate({
+                                  userAvatarId: ua.id,
+                                  userId: user.user_id,
+                                  avatarName: ua.avatar.name,
+                                })}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-muted-foreground mt-1">
+                            {ua.unlock_source === 'admin_grant' ? 'Admin granted' : 
+                             ua.unlock_source === 'default' ? 'Free' :
+                             ua.unlock_source === 'stat_unlock' ? 'Stat unlock' : ua.unlock_source}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">No avatars unlocked yet</p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
 
         <div className="mt-6 flex justify-end">
@@ -702,6 +832,15 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved }: UserDeta
           </Button>
         </div>
       </SheetContent>
+
+      {/* Grant Avatar Modal */}
+      <GrantAvatarModal
+        open={grantModalOpen}
+        onOpenChange={setGrantModalOpen}
+        userId={user?.user_id || ""}
+        userName={`${user?.first_name || ""} ${user?.last_name || "User"}`}
+        unlockedAvatarIds={unlockedAvatarIds}
+      />
     </Sheet>
   );
 }
