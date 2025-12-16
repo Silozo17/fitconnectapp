@@ -188,6 +188,51 @@ export type Database = {
           },
         ]
       }
+      avatars: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          name: string
+          rarity: string
+          slug: string
+          sort_order: number | null
+          unlock_threshold: number | null
+          unlock_type: string | null
+        }
+        Insert: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name: string
+          rarity?: string
+          slug: string
+          sort_order?: number | null
+          unlock_threshold?: number | null
+          unlock_type?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name?: string
+          rarity?: string
+          slug?: string
+          sort_order?: number | null
+          unlock_threshold?: number | null
+          unlock_type?: string | null
+        }
+        Relationships: []
+      }
       badges: {
         Row: {
           category: string
@@ -679,6 +724,7 @@ export type Database = {
           location: string | null
           medical_conditions: string[] | null
           onboarding_completed: boolean
+          selected_avatar_id: string | null
           updated_at: string
           user_id: string
           weight_kg: number | null
@@ -704,6 +750,7 @@ export type Database = {
           location?: string | null
           medical_conditions?: string[] | null
           onboarding_completed?: boolean
+          selected_avatar_id?: string | null
           updated_at?: string
           user_id: string
           weight_kg?: number | null
@@ -729,11 +776,20 @@ export type Database = {
           location?: string | null
           medical_conditions?: string[] | null
           onboarding_completed?: boolean
+          selected_avatar_id?: string | null
           updated_at?: string
           user_id?: string
           weight_kg?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "client_profiles_selected_avatar_id_fkey"
+            columns: ["selected_avatar_id"]
+            isOneToOne: false
+            referencedRelation: "avatars"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       client_progress: {
         Row: {
@@ -1114,6 +1170,7 @@ export type Database = {
           onboarding_completed: boolean
           online_available: boolean | null
           profile_image_url: string | null
+          selected_avatar_id: string | null
           stripe_connect_id: string | null
           stripe_connect_onboarded: boolean | null
           subscription_tier: string | null
@@ -1140,6 +1197,7 @@ export type Database = {
           onboarding_completed?: boolean
           online_available?: boolean | null
           profile_image_url?: string | null
+          selected_avatar_id?: string | null
           stripe_connect_id?: string | null
           stripe_connect_onboarded?: boolean | null
           subscription_tier?: string | null
@@ -1166,6 +1224,7 @@ export type Database = {
           onboarding_completed?: boolean
           online_available?: boolean | null
           profile_image_url?: string | null
+          selected_avatar_id?: string | null
           stripe_connect_id?: string | null
           stripe_connect_onboarded?: boolean | null
           subscription_tier?: string | null
@@ -1176,7 +1235,15 @@ export type Database = {
           verified_at?: string | null
           verified_by?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "coach_profiles_selected_avatar_id_fkey"
+            columns: ["selected_avatar_id"]
+            isOneToOne: false
+            referencedRelation: "avatars"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       coach_subscription_plans: {
         Row: {
@@ -2861,6 +2928,38 @@ export type Database = {
             columns: ["subscription_id"]
             isOneToOne: false
             referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_avatars: {
+        Row: {
+          avatar_id: string
+          id: string
+          unlock_source: string
+          unlocked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          avatar_id: string
+          id?: string
+          unlock_source?: string
+          unlocked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          avatar_id?: string
+          id?: string
+          unlock_source?: string
+          unlocked_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_avatars_avatar_id_fkey"
+            columns: ["avatar_id"]
+            isOneToOne: false
+            referencedRelation: "avatars"
             referencedColumns: ["id"]
           },
         ]

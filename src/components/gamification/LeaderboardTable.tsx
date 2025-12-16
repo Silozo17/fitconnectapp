@@ -4,11 +4,18 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { Trophy, Medal, Award, Zap } from 'lucide-react';
+import { getAvatarImageUrl } from '@/hooks/useAvatars';
+import { RARITY_CONFIG } from '@/lib/avatar-config';
 
 interface LeaderboardTableProps {
   entries: XPLeaderboardEntry[];
   isLoading?: boolean;
   emptyMessage?: string;
+}
+
+interface LeaderboardEntryWithAvatar extends XPLeaderboardEntry {
+  selected_avatar_slug?: string | null;
+  selected_avatar_rarity?: string | null;
 }
 
 function useClientProfile() {
@@ -62,19 +69,41 @@ export function LeaderboardTable({ entries, isLoading, emptyMessage = 'No entrie
   return (
     <div className="space-y-2">
       {entries.map((entry) => {
+        const entryWithAvatar = entry as LeaderboardEntryWithAvatar;
         const isMe = profile?.id === entry.client_id;
         // Privacy-safe display: only show first name or alias, no last name
         const displayName = entry.first_name || 'Anonymous';
         const initials = entry.first_name?.[0] || 'A';
         const locationDisplay = entry.city || entry.county || entry.country;
         
+        const hasAvatar = entryWithAvatar.selected_avatar_slug;
+        const avatarRarity = (entryWithAvatar.selected_avatar_rarity as keyof typeof RARITY_CONFIG) || 'common';
+        const rarityConfig = RARITY_CONFIG[avatarRarity];
+        
         return (
           <div key={entry.client_id} className={cn('flex items-center gap-4 p-3 rounded-lg border transition-all', getRankBg(entry.rank || 0), isMe && 'ring-2 ring-primary')}>
             <div className="w-8 flex justify-center">{getRankIcon(entry.rank || 0)}</div>
-            {/* Privacy: No avatar shown on leaderboards */}
-            <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
-              {initials}
-            </div>
+            {/* Avatar or initials */}
+            {hasAvatar ? (
+              <div className={cn(
+                'h-10 w-10 rounded-full overflow-hidden border-2',
+                rarityConfig.border,
+                rarityConfig.glow
+              )}>
+                <img
+                  src={getAvatarImageUrl(entryWithAvatar.selected_avatar_slug!)}
+                  alt={displayName}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
+                {initials}
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <span className={cn('font-medium truncate', isMe && 'text-primary')}>{displayName}</span>

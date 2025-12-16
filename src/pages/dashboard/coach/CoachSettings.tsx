@@ -29,6 +29,9 @@ import { CurrencySelector } from "@/components/shared/CurrencySelector";
 import { useLocale } from "@/contexts/LocaleContext";
 import { getCurrencySymbol } from "@/lib/currency";
 import { NotificationPreferences } from "@/components/notifications/NotificationPreferences";
+import { AvatarPicker } from "@/components/avatars/AvatarPicker";
+import { AvatarShowcase } from "@/components/avatars/AvatarShowcase";
+import { useSelectedAvatar } from "@/hooks/useAvatars";
 
 const coachTypes = ["Personal Trainer", "Nutritionist", "Boxing Coach", "MMA Coach", "Yoga Instructor", "CrossFit Coach"];
 
@@ -50,6 +53,7 @@ const CoachSettings = () => {
   const { currency } = useLocale();
   const [selectedTab, setSelectedTab] = useState("profile");
   const [saving, setSaving] = useState(false);
+  const { data: selectedAvatar } = useSelectedAvatar('coach');
 
   const [profile, setProfile] = useState<CoachProfile>({
     display_name: "",
@@ -178,8 +182,23 @@ const CoachSettings = () => {
                 <div className="card-elevated p-6">
                   <h2 className="font-display font-bold text-foreground mb-6">Profile Information</h2>
                   
-                  {/* Avatar */}
+                  {/* Avatar Selection */}
                   <div className="mb-6">
+                    <Label className="mb-3 block">Your Avatar</Label>
+                    <div className="flex flex-col sm:flex-row items-center gap-4">
+                      <AvatarShowcase avatar={selectedAvatar} size="md" showStats={false} />
+                      <div className="text-center sm:text-left">
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Choose an avatar to represent you on the platform
+                        </p>
+                        <AvatarPicker selectedAvatar={selectedAvatar} profileType="coach" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Profile Photo */}
+                  <div className="mb-6">
+                    <Label className="mb-3 block">Profile Photo</Label>
                     <ProfileImageUpload
                       currentImageUrl={profile.profile_image_url}
                       userId={user?.id || ""}
