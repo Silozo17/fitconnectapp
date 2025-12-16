@@ -20,3 +20,30 @@ verify_jwt = true
 
 [functions.ai-progress-analysis]
 verify_jwt = true
+
+[functions.wearable-oauth-start]
+verify_jwt = true
+
+[functions.wearable-oauth-callback]
+verify_jwt = false
+
+[functions.wearable-sync]
+verify_jwt = true
+
+[functions.video-oauth-start]
+verify_jwt = true
+
+[functions.video-oauth-callback]
+verify_jwt = false
+
+[functions.video-create-meeting]
+verify_jwt = true
+
+[functions.calendar-oauth-start]
+verify_jwt = true
+
+[functions.calendar-oauth-callback]
+verify_jwt = false
+
+[functions.calendar-sync-session]
+verify_jwt = true
