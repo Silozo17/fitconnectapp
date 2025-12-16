@@ -208,6 +208,60 @@ export type Database = {
           },
         ]
       }
+      client_habits: {
+        Row: {
+          category: string
+          client_id: string
+          coach_id: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          frequency: string
+          id: string
+          is_active: boolean | null
+          name: string
+          reminder_time: string | null
+          specific_days: number[] | null
+          start_date: string
+          target_count: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          client_id: string
+          coach_id: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          frequency?: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          reminder_time?: string | null
+          specific_days?: number[] | null
+          start_date?: string
+          target_count?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          client_id?: string
+          coach_id?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          frequency?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          reminder_time?: string | null
+          specific_days?: number[] | null
+          start_date?: string
+          target_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_notes: {
         Row: {
           category: string | null
@@ -1129,6 +1183,82 @@ export type Database = {
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      habit_logs: {
+        Row: {
+          client_id: string
+          completed_count: number
+          created_at: string
+          habit_id: string
+          id: string
+          logged_at: string
+          notes: string | null
+        }
+        Insert: {
+          client_id: string
+          completed_count?: number
+          created_at?: string
+          habit_id: string
+          id?: string
+          logged_at?: string
+          notes?: string | null
+        }
+        Update: {
+          client_id?: string
+          completed_count?: number
+          created_at?: string
+          habit_id?: string
+          id?: string
+          logged_at?: string
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habit_logs_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: false
+            referencedRelation: "client_habits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      habit_streaks: {
+        Row: {
+          current_streak: number
+          habit_id: string
+          id: string
+          last_completed_date: string | null
+          longest_streak: number
+          total_completions: number
+          updated_at: string
+        }
+        Insert: {
+          current_streak?: number
+          habit_id: string
+          id?: string
+          last_completed_date?: string | null
+          longest_streak?: number
+          total_completions?: number
+          updated_at?: string
+        }
+        Update: {
+          current_streak?: number
+          habit_id?: string
+          id?: string
+          last_completed_date?: string | null
+          longest_streak?: number
+          total_completions?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habit_streaks_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: true
+            referencedRelation: "client_habits"
             referencedColumns: ["id"]
           },
         ]

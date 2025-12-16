@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Dumbbell,
   Heart,
+  Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -22,6 +23,7 @@ const menuItems = [
   { title: "Sessions", icon: Calendar, path: "/dashboard/client/sessions" },
   { title: "Messages", icon: MessageSquare, path: "/dashboard/client/messages" },
   { title: "My Plans", icon: ClipboardList, path: "/dashboard/client/plans" },
+  { title: "Habits", icon: Target, path: "/dashboard/client/habits" },
   { title: "Progress", icon: TrendingUp, path: "/dashboard/client/progress" },
   { title: "Settings", icon: Settings, path: "/dashboard/client/settings" },
 ];
