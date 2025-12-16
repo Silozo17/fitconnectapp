@@ -14,6 +14,7 @@ import ClientOnboarding from "./pages/onboarding/ClientOnboarding";
 import CoachOnboarding from "./pages/onboarding/CoachOnboarding";
 import ClientDashboard from "./pages/dashboard/ClientDashboard";
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
+import ClientMessages from "./pages/dashboard/client/ClientMessages";
 
 // Coach Dashboard Pages
 import CoachOverview from "./pages/dashboard/coach/CoachOverview";
@@ -80,6 +81,16 @@ const App = () => (
                 <Route path="/dashboard/client" element={
                   <ProtectedRoute allowedRoles={["client"]}>
                     <ClientDashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/client/messages" element={
+                  <ProtectedRoute allowedRoles={["client"]}>
+                    <ClientMessages />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/client/messages/:id" element={
+                  <ProtectedRoute allowedRoles={["client"]}>
+                    <ClientMessages />
                   </ProtectedRoute>
                 } />
               
