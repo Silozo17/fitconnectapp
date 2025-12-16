@@ -1317,6 +1317,7 @@ export type Database = {
       }
       coach_profiles: {
         Row: {
+          also_client: boolean | null
           bio: string | null
           booking_mode: string | null
           card_image_url: string | null
@@ -1333,6 +1334,7 @@ export type Database = {
           is_verified: boolean | null
           location: string | null
           onboarding_completed: boolean
+          onboarding_progress: Json | null
           online_available: boolean | null
           profile_image_url: string | null
           selected_avatar_id: string | null
@@ -1353,6 +1355,7 @@ export type Database = {
           verified_by: string | null
         }
         Insert: {
+          also_client?: boolean | null
           bio?: string | null
           booking_mode?: string | null
           card_image_url?: string | null
@@ -1369,6 +1372,7 @@ export type Database = {
           is_verified?: boolean | null
           location?: string | null
           onboarding_completed?: boolean
+          onboarding_progress?: Json | null
           online_available?: boolean | null
           profile_image_url?: string | null
           selected_avatar_id?: string | null
@@ -1389,6 +1393,7 @@ export type Database = {
           verified_by?: string | null
         }
         Update: {
+          also_client?: boolean | null
           bio?: string | null
           booking_mode?: string | null
           card_image_url?: string | null
@@ -1405,6 +1410,7 @@ export type Database = {
           is_verified?: boolean | null
           location?: string | null
           onboarding_completed?: boolean
+          onboarding_progress?: Json | null
           online_available?: boolean | null
           profile_image_url?: string | null
           selected_avatar_id?: string | null

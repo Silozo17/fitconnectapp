@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,8 +13,20 @@ import { Dumbbell, ArrowRight, ArrowLeft, Check, Loader2, Crown, Zap, Sparkles, 
 import type { LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import { ProfileImageUpload } from "@/components/shared/ProfileImageUpload";
+import StripeConnectOnboardingStep from "@/components/onboarding/StripeConnectOnboardingStep";
+import IntegrationsOnboardingStep from "@/components/onboarding/IntegrationsOnboardingStep";
+import DualAccountStep from "@/components/onboarding/DualAccountStep";
 
-const STEPS = ["Basic Info", "Specialties", "Services & Pricing", "Availability", "Choose Your Plan"];
+const STEPS = [
+  "Basic Info",
+  "Specialties",
+  "Services & Pricing",
+  "Availability",
+  "Connect Payments",
+  "Integrations",
+  "Dual Account",
+  "Choose Your Plan"
+];
 
 const COACH_TYPES: { id: string; label: string; icon: LucideIcon }[] = [
   { id: "personal_training", label: "Personal Training", icon: Dumbbell },
@@ -54,9 +66,11 @@ const SUBSCRIPTION_TIERS = [
 ];
 
 const CoachOnboarding = () => {
+  const [searchParams] = useSearchParams();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingProfile, setIsCheckingProfile] = useState(true);
+  const [coachProfileId, setCoachProfileId] = useState<string | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -71,28 +85,36 @@ const CoachOnboarding = () => {
     inPersonAvailable: false,
     subscriptionTier: "free",
     profileImageUrl: null as string | null,
+    alsoClient: false,
   });
 
-  // Check if onboarding is already completed
+  // Check if onboarding is already completed and get coach profile ID
   useEffect(() => {
     const checkProfile = async () => {
       if (!user) return;
 
       const { data } = await supabase
         .from("coach_profiles")
-        .select("onboarding_completed")
+        .select("id, onboarding_completed")
         .eq("user_id", user.id)
         .maybeSingle();
 
       if (data?.onboarding_completed) {
         navigate("/dashboard/coach");
       } else {
+        setCoachProfileId(data?.id || null);
         setIsCheckingProfile(false);
+        
+        // Check if returning from Stripe
+        const stripeReturning = searchParams.get("stripe");
+        if (stripeReturning === "returning") {
+          setCurrentStep(4); // Go to Stripe step
+        }
       }
     };
 
     checkProfile();
-  }, [user, navigate]);
+  }, [user, navigate, searchParams]);
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -143,6 +165,7 @@ const CoachOnboarding = () => {
           in_person_available: formData.inPersonAvailable,
           subscription_tier: formData.subscriptionTier,
           profile_image_url: formData.profileImageUrl,
+          also_client: formData.alsoClient,
           onboarding_completed: true,
         })
         .eq("user_id", user.id);
@@ -150,12 +173,23 @@ const CoachOnboarding = () => {
       if (error) throw error;
 
       toast.success("Profile completed! Welcome to FitConnect.");
-      navigate("/dashboard/coach");
+      
+      // If they also created a client account and want to set it up
+      if (formData.alsoClient) {
+        navigate("/onboarding/client");
+      } else {
+        navigate("/dashboard/coach");
+      }
     } catch (error) {
       toast.error("Failed to save profile. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleDualAccountComplete = (createClientAccount: boolean) => {
+    setFormData(prev => ({ ...prev, alsoClient: createClientAccount }));
+    handleNext();
   };
 
   if (isCheckingProfile) {
@@ -373,8 +407,34 @@ const CoachOnboarding = () => {
               </div>
             )}
 
-            {/* Step 5: Subscription Tier */}
-            {currentStep === 4 && (
+            {/* Step 5: Connect Stripe */}
+            {currentStep === 4 && coachProfileId && (
+              <StripeConnectOnboardingStep
+                coachId={coachProfileId}
+                onComplete={handleNext}
+                onSkip={handleNext}
+              />
+            )}
+
+            {/* Step 6: Integrations */}
+            {currentStep === 5 && coachProfileId && (
+              <IntegrationsOnboardingStep
+                coachId={coachProfileId}
+                onComplete={handleNext}
+                onSkip={handleNext}
+              />
+            )}
+
+            {/* Step 7: Dual Account */}
+            {currentStep === 6 && coachProfileId && (
+              <DualAccountStep
+                coachId={coachProfileId}
+                onComplete={handleDualAccountComplete}
+              />
+            )}
+
+            {/* Step 8: Subscription Tier */}
+            {currentStep === 7 && (
               <div className="space-y-6">
                 <div>
                   <h2 className="font-display text-2xl font-bold text-foreground mb-2">
@@ -436,40 +496,42 @@ const CoachOnboarding = () => {
               </div>
             )}
 
-            {/* Navigation */}
-            <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
-              <Button
-                variant="ghost"
-                onClick={handleBack}
-                disabled={currentStep === 0}
-                className="text-muted-foreground"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back
-              </Button>
-
-              {currentStep < STEPS.length - 1 ? (
-                <Button onClick={handleNext} className="bg-primary text-primary-foreground hover:bg-primary/90">
-                  Next
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              ) : (
+            {/* Navigation - only show for steps that don't have their own navigation */}
+            {(currentStep <= 3 || currentStep === 7) && (
+              <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
                 <Button
-                  onClick={handleComplete}
-                  disabled={isSubmitting}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90"
+                  variant="ghost"
+                  onClick={handleBack}
+                  disabled={currentStep === 0}
+                  className="text-muted-foreground"
                 >
-                  {isSubmitting ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <>
-                      Complete Setup
-                      <Check className="w-4 h-4 ml-2" />
-                    </>
-                  )}
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back
                 </Button>
-              )}
-            </div>
+
+                {currentStep < STEPS.length - 1 ? (
+                  <Button onClick={handleNext} className="bg-primary text-primary-foreground hover:bg-primary/90">
+                    Next
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleComplete}
+                    disabled={isSubmitting}
+                    className="bg-primary text-primary-foreground hover:bg-primary/90"
+                  >
+                    {isSubmitting ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <>
+                        Complete Setup
+                        <Check className="w-4 h-4 ml-2" />
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

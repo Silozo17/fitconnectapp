@@ -25,6 +25,7 @@ const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [selectedRole, setSelectedRole] = useState<"client" | "coach">("client");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [alsoFindCoach, setAlsoFindCoach] = useState(false);
   const { signIn, signUp, user, role } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
