@@ -53,6 +53,7 @@ import {
   DocumentType,
 } from "@/hooks/useVerification";
 import { VerifiedBadge } from "@/components/verification/VerifiedBadge";
+import { AccountSecuritySection } from "@/components/shared/AccountSecuritySection";
 import { format } from "date-fns";
 import { Upload, FileText, Trash2, CheckCircle, XCircle, Clock, AlertCircle, Eye } from "lucide-react";
 
@@ -788,27 +789,7 @@ const CoachSettings = () => {
             {/* Account & Security Tab */}
             {selectedTab === "account" && (
               <div className="space-y-6">
-                <div className="card-elevated p-6">
-                  <h2 className="font-display font-bold text-foreground mb-6">Account Security</h2>
-
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg">
-                      <div>
-                        <p className="font-medium text-foreground">Password</p>
-                        <p className="text-sm text-muted-foreground">Change your account password</p>
-                      </div>
-                      <Button variant="outline">Change Password</Button>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg">
-                      <div>
-                        <p className="font-medium text-foreground">Email</p>
-                        <p className="text-sm text-muted-foreground">{user?.email}</p>
-                      </div>
-                      <Button variant="outline">Update Email</Button>
-                    </div>
-                  </div>
-                </div>
+                <AccountSecuritySection />
 
                 <div className="card-elevated p-6 border-destructive/50">
                   <h2 className="font-display font-bold text-foreground mb-4">Danger Zone</h2>

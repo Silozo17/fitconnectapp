@@ -10,13 +10,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePlatformSettings, useUpdatePlatformSetting } from "@/hooks/useAdminData";
 import { toast } from "sonner";
-import { Settings, Bell, Shield, Globe, Loader2, Plug } from "lucide-react";
+import { Settings, Bell, Shield, Globe, Loader2, Plug, User, LogOut } from "lucide-react";
 import { NotificationPreferences } from "@/components/notifications/NotificationPreferences";
 import { LanguageSelector } from "@/components/shared/LanguageSelector";
 import { Separator } from "@/components/ui/separator";
+import { AccountSecuritySection } from "@/components/shared/AccountSecuritySection";
+import { useAuth } from "@/contexts/AuthContext";
 
 const AdminSettings = () => {
   const { data: settings, isLoading } = usePlatformSettings();
+  const { signOut } = useAuth();
   const updateSetting = useUpdatePlatformSetting();
 
   const [localSettings, setLocalSettings] = useState({
@@ -113,6 +116,10 @@ const AdminSettings = () => {
               <TabsTrigger value="security" className="flex items-center gap-2">
                 <Shield className="h-4 w-4" />
                 Security
+              </TabsTrigger>
+              <TabsTrigger value="account" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                Account
               </TabsTrigger>
             </TabsList>
 
@@ -334,6 +341,23 @@ const AdminSettings = () => {
                       onCheckedChange={(checked) => handleToggle("allow_anonymous_reviews", checked)}
                     />
                   </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="account" className="space-y-4">
+              <AccountSecuritySection />
+              
+              <Card className="border-destructive/50">
+                <CardHeader>
+                  <CardTitle>Danger Zone</CardTitle>
+                  <CardDescription>Irreversible actions</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button variant="destructive" onClick={signOut}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </Button>
                 </CardContent>
               </Card>
             </TabsContent>
