@@ -68,9 +68,24 @@ const UserConnectionRequests = () => {
     );
   }
 
-  // Don't render the card if there are no pending requests
+  // Show empty state if there are no pending requests
   if (pendingRequests.length === 0) {
-    return null;
+    return (
+      <Card className="mb-8">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2">
+            <UserPlus className="h-5 w-5" />
+            Friend Requests
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-6 text-muted-foreground">
+            <UserPlus className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">No pending friend requests</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
