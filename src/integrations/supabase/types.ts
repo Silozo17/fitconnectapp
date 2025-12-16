@@ -165,6 +165,48 @@ export type Database = {
           },
         ]
       }
+      client_package_purchases: {
+        Row: {
+          amount_paid: number
+          client_id: string
+          coach_id: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          package_id: string
+          purchased_at: string
+          sessions_total: number
+          sessions_used: number | null
+          status: string | null
+        }
+        Insert: {
+          amount_paid: number
+          client_id: string
+          coach_id: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          package_id: string
+          purchased_at?: string
+          sessions_total: number
+          sessions_used?: number | null
+          status?: string | null
+        }
+        Update: {
+          amount_paid?: number
+          client_id?: string
+          coach_id?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          package_id?: string
+          purchased_at?: string
+          sessions_total?: number
+          sessions_used?: number | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       client_profiles: {
         Row: {
           age: number | null
@@ -279,6 +321,45 @@ export type Database = {
           },
         ]
       }
+      client_subscriptions: {
+        Row: {
+          cancelled_at: string | null
+          client_id: string
+          coach_id: string
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string
+          id: string
+          plan_id: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          client_id: string
+          coach_id: string
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string
+          id?: string
+          plan_id: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          client_id?: string
+          coach_id?: string
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string
+          id?: string
+          plan_id?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       coach_availability: {
         Row: {
           coach_id: string
@@ -365,6 +446,48 @@ export type Database = {
           },
         ]
       }
+      coach_packages: {
+        Row: {
+          coach_id: string
+          created_at: string
+          currency: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          price: number
+          session_count: number
+          updated_at: string
+          validity_days: number | null
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          price: number
+          session_count: number
+          updated_at?: string
+          validity_days?: number | null
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          price?: number
+          session_count?: number
+          updated_at?: string
+          validity_days?: number | null
+        }
+        Relationships: []
+      }
       coach_profiles: {
         Row: {
           bio: string | null
@@ -422,6 +545,51 @@ export type Database = {
           subscription_tier?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      coach_subscription_plans: {
+        Row: {
+          billing_period: string
+          coach_id: string
+          created_at: string
+          currency: string | null
+          description: string | null
+          features: Json | null
+          id: string
+          is_active: boolean | null
+          name: string
+          price: number
+          sessions_per_period: number | null
+          updated_at: string
+        }
+        Insert: {
+          billing_period?: string
+          coach_id: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          price: number
+          sessions_per_period?: number | null
+          updated_at?: string
+        }
+        Update: {
+          billing_period?: string
+          coach_id?: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          price?: number
+          sessions_per_period?: number | null
+          updated_at?: string
         }
         Relationships: []
       }

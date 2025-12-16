@@ -43,6 +43,7 @@ import CoachPlanBuilder from "./pages/dashboard/coach/CoachPlanBuilder";
 import CoachNutritionBuilder from "./pages/dashboard/coach/CoachNutritionBuilder";
 import CoachEarnings from "./pages/dashboard/coach/CoachEarnings";
 import CoachSettings from "./pages/dashboard/coach/CoachSettings";
+import CoachPackages from "./pages/dashboard/coach/CoachPackages";
 
 // Public Pages
 import About from "./pages/About";
@@ -229,6 +230,11 @@ const App = () => (
                 <Route path="/dashboard/coach/plans/nutrition/new" element={
                   <ProtectedRoute allowedRoles={["coach"]}>
                     <CoachNutritionBuilder />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/coach/packages" element={
+                  <ProtectedRoute allowedRoles={["coach"]}>
+                    <CoachPackages />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/coach/earnings" element={
