@@ -9,6 +9,7 @@ import { AdminProvider } from "@/contexts/AdminContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Coaches from "./pages/Coaches";
+import CoachDetail from "./pages/CoachDetail";
 import Auth from "./pages/Auth";
 import ClientOnboarding from "./pages/onboarding/ClientOnboarding";
 import CoachOnboarding from "./pages/onboarding/CoachOnboarding";
@@ -66,6 +67,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/coaches" element={<Coaches />} />
+                <Route path="/coaches/:id" element={<CoachDetail />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/faq" element={<FAQ />} />

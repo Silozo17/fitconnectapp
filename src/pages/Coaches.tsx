@@ -1,83 +1,29 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
+import { Search, SlidersHorizontal, Loader2, Users } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import CoachFilters, { FilterState } from "@/components/coaches/CoachFilters";
 import CoachCard from "@/components/coaches/CoachCard";
-import { coaches } from "@/data/coaches";
-import { Users } from "lucide-react";
+import CoachFilters from "@/components/coaches/CoachFilters";
+import { useCoachMarketplace } from "@/hooks/useCoachMarketplace";
 
 const Coaches = () => {
-  const [filters, setFilters] = useState<FilterState>({
-    search: "",
-    specialty: "",
-    location: "",
-    priceRange: "",
-    sessionType: "",
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [priceRange, setPriceRange] = useState<{ min: number; max: number } | undefined>();
+  const [onlineOnly, setOnlineOnly] = useState(false);
+  const [inPersonOnly, setInPersonOnly] = useState(false);
+
+  const { data: coaches, isLoading, error } = useCoachMarketplace({
+    search: searchQuery || undefined,
+    coachTypes: selectedTypes.length > 0 ? selectedTypes : undefined,
+    priceRange,
+    onlineOnly,
+    inPersonOnly,
   });
-
-  const filteredCoaches = useMemo(() => {
-    return coaches.filter((coach) => {
-      // Search filter
-      if (filters.search) {
-        const searchLower = filters.search.toLowerCase();
-        const matchesSearch =
-          coach.name.toLowerCase().includes(searchLower) ||
-          coach.specialty.toLowerCase().includes(searchLower) ||
-          coach.tags.some((tag) => tag.toLowerCase().includes(searchLower));
-        if (!matchesSearch) return false;
-      }
-
-      // Specialty filter
-      if (filters.specialty) {
-        const specialtyMap: Record<string, string[]> = {
-          "personal-training": ["Personal Training"],
-          nutrition: ["Nutrition Coach"],
-          boxing: ["Boxing Coach"],
-          mma: ["MMA Coach"],
-        };
-        if (!specialtyMap[filters.specialty]?.includes(coach.specialty)) {
-          return false;
-        }
-      }
-
-      // Location filter
-      if (filters.location) {
-        const locationLower = filters.location.toLowerCase();
-        if (locationLower === "online") {
-          if (!coach.online) return false;
-        } else {
-          if (!coach.location.toLowerCase().includes(locationLower)) return false;
-        }
-      }
-
-      // Price range filter
-      if (filters.priceRange) {
-        const [min, max] = filters.priceRange.split("-").map((v) => parseInt(v) || Infinity);
-        if (coach.price < min || (max !== Infinity && coach.price > max)) {
-          return false;
-        }
-      }
-
-      // Session type filter
-      if (filters.sessionType) {
-        if (filters.sessionType === "in-person" && !coach.inPerson) return false;
-        if (filters.sessionType === "online" && !coach.online) return false;
-        if (filters.sessionType === "both" && (!coach.online || !coach.inPerson)) return false;
-      }
-
-      return true;
-    });
-  }, [filters]);
-
-  // Sort sponsored coaches first
-  const sortedCoaches = useMemo(() => {
-    return [...filteredCoaches].sort((a, b) => {
-      if (a.sponsored && !b.sponsored) return -1;
-      if (!a.sponsored && b.sponsored) return 1;
-      return 0;
-    });
-  }, [filteredCoaches]);
 
   return (
     <>
@@ -99,44 +45,90 @@ const Coaches = () => {
               <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-2">
                 Find Your <span className="gradient-text">Perfect Coach</span>
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground mb-6">
                 Browse our verified fitness professionals and start your transformation today.
               </p>
-            </div>
 
-            {/* Filters */}
-            <div className="mb-8">
-              <CoachFilters onFilterChange={setFilters} />
-            </div>
-
-            {/* Results Count */}
-            <div className="flex items-center gap-2 mb-6 text-muted-foreground">
-              <Users className="w-5 h-5" />
-              <span>
-                Showing <strong className="text-foreground">{sortedCoaches.length}</strong> coaches
-              </span>
-            </div>
-
-            {/* Coach Grid */}
-            {sortedCoaches.length > 0 ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {sortedCoaches.map((coach) => (
-                  <CoachCard key={coach.id} coach={coach} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-16">
-                <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-8 h-8 text-muted-foreground" />
+              {/* Search Bar */}
+              <div className="flex gap-3 max-w-2xl">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by name, specialty, or location..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 h-12 bg-background/80 backdrop-blur-sm"
+                  />
                 </div>
-                <h3 className="font-display font-semibold text-xl text-foreground mb-2">
-                  No coaches found
-                </h3>
-                <p className="text-muted-foreground">
-                  Try adjusting your filters to see more results.
-                </p>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="h-12"
+                >
+                  <SlidersHorizontal className="h-5 w-5 mr-2" />
+                  Filters
+                </Button>
               </div>
-            )}
+            </div>
+
+            {/* Main Content */}
+            <div className="flex gap-8">
+              {/* Filters Sidebar */}
+              {showFilters && (
+                <aside className="w-64 flex-shrink-0">
+                  <CoachFilters
+                    selectedTypes={selectedTypes}
+                    onTypesChange={setSelectedTypes}
+                    priceRange={priceRange}
+                    onPriceRangeChange={setPriceRange}
+                    onlineOnly={onlineOnly}
+                    onOnlineOnlyChange={setOnlineOnly}
+                    inPersonOnly={inPersonOnly}
+                    onInPersonOnlyChange={setInPersonOnly}
+                  />
+                </aside>
+              )}
+
+              {/* Coaches Grid */}
+              <div className="flex-1">
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-20">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </div>
+                ) : error ? (
+                  <div className="text-center py-20 text-muted-foreground">
+                    <p>Failed to load coaches. Please try again.</p>
+                  </div>
+                ) : coaches && coaches.length > 0 ? (
+                  <>
+                    <div className="flex items-center gap-2 mb-6 text-muted-foreground">
+                      <Users className="w-5 h-5" />
+                      <span>
+                        Showing <strong className="text-foreground">{coaches.length}</strong> coach{coaches.length !== 1 ? "es" : ""}
+                      </span>
+                    </div>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {coaches.map((coach) => (
+                        <CoachCard key={coach.id} coach={coach} />
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-16">
+                    <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4">
+                      <Users className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <h3 className="font-display font-semibold text-xl text-foreground mb-2">
+                      No coaches found
+                    </h3>
+                    <p className="text-muted-foreground">
+                      Try adjusting your filters to see more results.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </main>
 
