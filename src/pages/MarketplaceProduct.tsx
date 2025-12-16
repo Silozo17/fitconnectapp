@@ -16,7 +16,7 @@ import { UserAvatar } from "@/components/shared/UserAvatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { StarRating } from "@/components/reviews/StarRating";
+import StarRating from "@/components/reviews/StarRating";
 
 const getContentIcon = (type: string) => {
   switch (type) {
@@ -97,7 +97,7 @@ export default function MarketplaceProduct() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout title="Loading..." description="Loading product details">
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
         </div>
@@ -107,7 +107,7 @@ export default function MarketplaceProduct() {
 
   if (!product) {
     return (
-      <PageLayout>
+      <PageLayout title="Product Not Found" description="The product you're looking for doesn't exist">
         <div className="min-h-screen bg-background flex flex-col items-center justify-center">
           <Package className="h-16 w-16 text-muted-foreground mb-4" />
           <h1 className="text-2xl font-bold mb-2">Product Not Found</h1>
@@ -118,7 +118,7 @@ export default function MarketplaceProduct() {
   }
 
   return (
-    <PageLayout>
+    <PageLayout title={product.title} description={product.short_description || product.description || "Digital content from FitConnect"}>
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">
           {/* Back Button */}
@@ -171,10 +171,7 @@ export default function MarketplaceProduct() {
                 {/* Rating */}
                 {reviews && reviews.length > 0 && (
                   <div className="flex items-center gap-2 mb-4">
-                    <StarRating rating={averageRating} readOnly size="sm" />
-                    <span className="text-sm text-muted-foreground">
-                      ({reviews.length} reviews)
-                    </span>
+                    <StarRating rating={averageRating} reviewCount={reviews.length} />
                   </div>
                 )}
 
@@ -264,7 +261,7 @@ export default function MarketplaceProduct() {
                                 </p>
                               </div>
                             </div>
-                            <StarRating rating={review.rating} readOnly size="sm" />
+                            <StarRating rating={review.rating} showCount={false} />
                           </div>
                           {review.review_text && (
                             <p className="text-sm text-muted-foreground">{review.review_text}</p>
@@ -302,7 +299,7 @@ export default function MarketplaceProduct() {
                       </Badge>
                     ) : (
                       <p className="text-4xl font-bold text-primary">
-                        {formatCurrency(product.price, product.currency)}
+                        {formatCurrency(product.price, (product.currency || "GBP") as "GBP" | "USD" | "EUR")}
                       </p>
                     )}
                   </div>
@@ -344,8 +341,8 @@ export default function MarketplaceProduct() {
                     >
                       <UserAvatar
                         name={product.coach_profiles?.display_name || "Coach"}
-                        imageUrl={product.coach_profiles?.profile_image_url}
-                        size="md"
+                        src={product.coach_profiles?.profile_image_url}
+                        className="h-10 w-10"
                       />
                       <div>
                         <p className="font-medium">{product.coach_profiles?.display_name}</p>

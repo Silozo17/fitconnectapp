@@ -61,7 +61,7 @@ export default function ProductCard({ product, viewMode = "grid" }: ProductCardP
               <UserAvatar
                 name={product.coach_profiles?.display_name || "Coach"}
                 src={product.coach_profiles?.profile_image_url}
-                size="sm"
+                className="h-6 w-6"
               />
               <span className="text-sm text-muted-foreground">
                 {product.coach_profiles?.display_name || "Unknown Coach"}
@@ -126,7 +126,7 @@ export default function ProductCard({ product, viewMode = "grid" }: ProductCardP
           <UserAvatar
             name={product.coach_profiles?.display_name || "Coach"}
             src={product.coach_profiles?.profile_image_url}
-            size="sm"
+            className="h-6 w-6"
           />
           <span className="text-xs text-muted-foreground truncate max-w-[100px]">
             {product.coach_profiles?.display_name || "Unknown"}
