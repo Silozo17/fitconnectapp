@@ -12,25 +12,39 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   useAdminWidgets, 
   useUpdateWidget, 
   useResetWidgets,
   WIDGET_TYPES,
+  WIDGET_CATEGORIES,
   DashboardWidget 
 } from "@/hooks/useAdminWidgets";
 import { toast } from "sonner";
-import { RotateCcw, Loader2 } from "lucide-react";
+import { RotateCcw, Loader2, BarChart3, DollarSign, TrendingUp, LineChart, Link2, List, Zap } from "lucide-react";
 
 interface DashboardCustomizerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
+const categoryIcons: Record<string, React.ComponentType<any>> = {
+  stats: BarChart3,
+  revenue: DollarSign,
+  analytics: TrendingUp,
+  charts: LineChart,
+  integrations: Link2,
+  lists: List,
+  actions: Zap,
+};
+
 export function DashboardCustomizer({ open, onOpenChange }: DashboardCustomizerProps) {
   const { data: widgets, isLoading } = useAdminWidgets();
   const updateWidget = useUpdateWidget();
   const resetWidgets = useResetWidgets();
+  const [activeCategory, setActiveCategory] = useState<string>("stats");
 
   const handleToggleWidget = async (widget: DashboardWidget) => {
     try {
@@ -41,6 +55,18 @@ export function DashboardCustomizer({ open, onOpenChange }: DashboardCustomizerP
       toast.success(`Widget ${widget.is_visible ? "hidden" : "shown"}`);
     } catch (error) {
       toast.error("Failed to update widget");
+    }
+  };
+
+  const handleSizeChange = async (widget: DashboardWidget, size: string) => {
+    try {
+      await updateWidget.mutateAsync({
+        widgetId: widget.id,
+        updates: { size: size as DashboardWidget["size"] },
+      });
+      toast.success("Widget size updated");
+    } catch (error) {
+      toast.error("Failed to update widget size");
     }
   };
 
@@ -63,56 +89,105 @@ export function DashboardCustomizer({ open, onOpenChange }: DashboardCustomizerP
     return widgets?.find(w => w.widget_type === type);
   };
 
+  const getCategoryCount = (category: string) => {
+    const categoryWidgets = widgetsByCategory[category] || [];
+    const visibleCount = categoryWidgets.filter(w => {
+      const state = getWidgetState(w.type);
+      return state?.is_visible ?? true;
+    }).length;
+    return { visible: visibleCount, total: categoryWidgets.length };
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-2xl max-h-[85vh]">
         <DialogHeader>
           <DialogTitle>Customize Dashboard</DialogTitle>
           <DialogDescription>
-            Choose which widgets to display on your dashboard
+            Choose which widgets to display and configure their size
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="h-[400px] pr-4">
-          <div className="space-y-6">
-            {Object.entries(widgetsByCategory).map(([category, categoryWidgets]) => (
-              <div key={category}>
-                <div className="flex items-center gap-2 mb-3">
-                  <h3 className="text-sm font-semibold capitalize">{category}</h3>
-                  <Badge variant="secondary" className="text-xs">
-                    {categoryWidgets.length}
+        <Tabs value={activeCategory} onValueChange={setActiveCategory} className="flex-1">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7">
+            {WIDGET_CATEGORIES.map((cat) => {
+              const Icon = categoryIcons[cat.key] || BarChart3;
+              const count = getCategoryCount(cat.key);
+              return (
+                <TabsTrigger key={cat.key} value={cat.key} className="flex items-center gap-1 text-xs">
+                  <Icon className="h-3 w-3" />
+                  <span className="hidden lg:inline">{cat.label.split(" ")[0]}</span>
+                  <Badge variant="secondary" className="h-4 w-4 p-0 text-[10px] justify-center">
+                    {count.visible}
                   </Badge>
-                </div>
-                <div className="space-y-2">
-                  {categoryWidgets.map(({ type, label }) => {
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+
+          <ScrollArea className="h-[400px] mt-4 pr-4">
+            {WIDGET_CATEGORIES.map((cat) => (
+              <TabsContent key={cat.key} value={cat.key} className="mt-0">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold">{cat.label}</h3>
+                    <Badge variant="outline">
+                      {getCategoryCount(cat.key).visible}/{getCategoryCount(cat.key).total} visible
+                    </Badge>
+                  </div>
+                  <Separator />
+                  
+                  {(widgetsByCategory[cat.key] || []).map(({ type, label }) => {
                     const widgetState = getWidgetState(type);
                     const isVisible = widgetState?.is_visible ?? true;
+                    const currentSize = widgetState?.size || "medium";
 
                     return (
                       <div 
                         key={type}
-                        className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                        className="flex items-center justify-between p-3 rounded-lg bg-muted/50 gap-4"
                       >
-                        <Label htmlFor={type} className="cursor-pointer">
-                          {label}
-                        </Label>
-                        <Switch
-                          id={type}
-                          checked={isVisible}
-                          onCheckedChange={() => widgetState && handleToggleWidget(widgetState)}
-                          disabled={!widgetState || updateWidget.isPending}
-                        />
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <Switch
+                            id={type}
+                            checked={isVisible}
+                            onCheckedChange={() => widgetState && handleToggleWidget(widgetState)}
+                            disabled={!widgetState || updateWidget.isPending}
+                          />
+                          <Label htmlFor={type} className="cursor-pointer truncate">
+                            {label}
+                          </Label>
+                        </div>
+                        
+                        {widgetState && (
+                          <Select
+                            value={currentSize}
+                            onValueChange={(size) => handleSizeChange(widgetState, size)}
+                            disabled={updateWidget.isPending}
+                          >
+                            <SelectTrigger className="w-[100px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="small">Small</SelectItem>
+                              <SelectItem value="medium">Medium</SelectItem>
+                              <SelectItem value="large">Large</SelectItem>
+                              <SelectItem value="full">Full</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
                       </div>
                     );
                   })}
                 </div>
-                <Separator className="mt-4" />
-              </div>
+              </TabsContent>
             ))}
-          </div>
-        </ScrollArea>
+          </ScrollArea>
+        </Tabs>
 
-        <div className="flex justify-between mt-4">
+        <Separator />
+
+        <div className="flex justify-between">
           <Button 
             variant="outline" 
             onClick={handleReset}
