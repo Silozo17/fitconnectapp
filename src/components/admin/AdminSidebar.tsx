@@ -8,32 +8,86 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
+import { useAdminBadges } from "@/hooks/useSidebarBadges";
+import { SidebarBadge } from "@/components/shared/SidebarBadge";
 
-const mainNavItems = [
+type BadgeKey = "users" | "verification";
+
+interface NavItem {
+  title: string;
+  url: string;
+  icon: typeof LayoutDashboard;
+  badgeKey?: BadgeKey;
+  badgeVariant?: "default" | "warning" | "urgent";
+}
+
+const mainNavItems: NavItem[] = [
   { title: "Dashboard", url: "/dashboard/admin", icon: LayoutDashboard },
-  { title: "Users", url: "/dashboard/admin/users", icon: Users },
+  { title: "Users", url: "/dashboard/admin/users", icon: Users, badgeKey: "users" },
   { title: "Coaches", url: "/dashboard/admin/coaches", icon: Dumbbell },
   { title: "Team", url: "/dashboard/admin/team", icon: UsersRound },
   { title: "Revenue", url: "/dashboard/admin/revenue", icon: DollarSign },
   { title: "Analytics", url: "/dashboard/admin/analytics", icon: BarChart3 },
 ];
 
-const platformNavItems = [
+const platformNavItems: NavItem[] = [
   { title: "Challenges", url: "/dashboard/admin/challenges", icon: Trophy },
-  { title: "Verification", url: "/dashboard/admin/verification", icon: Shield },
+  { title: "Verification", url: "/dashboard/admin/verification", icon: Shield, badgeKey: "verification", badgeVariant: "warning" },
   { title: "Pricing Plans", url: "/dashboard/admin/plans", icon: CreditCard },
   { title: "Feature Control", url: "/dashboard/admin/features", icon: Sliders },
   { title: "Reviews & Disputes", url: "/dashboard/admin/reviews", icon: MessageSquare },
   { title: "Integrations", url: "/dashboard/admin/integrations", icon: Plug },
 ];
 
-const bottomNavItems = [
+const bottomNavItems: NavItem[] = [
   { title: "My Profile", url: "/dashboard/admin/profile", icon: User },
   { title: "Settings", url: "/dashboard/admin/settings", icon: Settings },
 ];
 
 const AdminSidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const { pendingVerifications, newUsers } = useAdminBadges();
+
+  const getBadgeCount = (badgeKey?: BadgeKey): number => {
+    switch (badgeKey) {
+      case "users":
+        return newUsers;
+      case "verification":
+        return pendingVerifications;
+      default:
+        return 0;
+    }
+  };
+
+  const renderNavItem = (item: NavItem) => {
+    const badgeCount = getBadgeCount(item.badgeKey);
+    
+    return (
+      <NavLink
+        key={item.url}
+        to={item.url}
+        end={item.url === "/dashboard/admin"}
+        className={cn(
+          "flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors",
+          collapsed && "justify-center px-2"
+        )}
+        activeClassName="bg-primary/10 text-primary hover:bg-primary/10 hover:text-primary"
+      >
+        <div className="relative">
+          <item.icon className="h-5 w-5 flex-shrink-0" />
+          {badgeCount > 0 && collapsed && (
+            <SidebarBadge count={badgeCount} collapsed variant={item.badgeVariant} />
+          )}
+        </div>
+        {!collapsed && (
+          <>
+            <span className="flex-1">{item.title}</span>
+            {badgeCount > 0 && <SidebarBadge count={badgeCount} variant={item.badgeVariant} />}
+          </>
+        )}
+      </NavLink>
+    );
+  };
 
   return (
     <aside
@@ -62,21 +116,7 @@ const AdminSidebar = () => {
       </div>
 
       <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
-        {mainNavItems.map((item) => (
-          <NavLink
-            key={item.url}
-            to={item.url}
-            end={item.url === "/dashboard/admin"}
-            className={cn(
-              "flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors",
-              collapsed && "justify-center px-2"
-            )}
-            activeClassName="bg-primary/10 text-primary hover:bg-primary/10 hover:text-primary"
-          >
-            <item.icon className="h-5 w-5 flex-shrink-0" />
-            {!collapsed && <span>{item.title}</span>}
-          </NavLink>
-        ))}
+        {mainNavItems.map(renderNavItem)}
 
         {!collapsed && (
           <div className="pt-4 pb-2">
@@ -87,37 +127,11 @@ const AdminSidebar = () => {
         )}
         {collapsed && <Separator className="my-2" />}
 
-        {platformNavItems.map((item) => (
-          <NavLink
-            key={item.url}
-            to={item.url}
-            className={cn(
-              "flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors",
-              collapsed && "justify-center px-2"
-            )}
-            activeClassName="bg-primary/10 text-primary hover:bg-primary/10 hover:text-primary"
-          >
-            <item.icon className="h-5 w-5 flex-shrink-0" />
-            {!collapsed && <span>{item.title}</span>}
-          </NavLink>
-        ))}
+        {platformNavItems.map(renderNavItem)}
       </nav>
 
       <div className="p-2 border-t border-border space-y-1">
-        {bottomNavItems.map((item) => (
-          <NavLink
-            key={item.url}
-            to={item.url}
-            className={cn(
-              "flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors",
-              collapsed && "justify-center px-2"
-            )}
-            activeClassName="bg-primary/10 text-primary hover:bg-primary/10 hover:text-primary"
-          >
-            <item.icon className="h-5 w-5 flex-shrink-0" />
-            {!collapsed && <span>{item.title}</span>}
-          </NavLink>
-        ))}
+        {bottomNavItems.map(renderNavItem)}
       </div>
     </aside>
   );
