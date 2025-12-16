@@ -6,15 +6,16 @@ export const useActiveProfile = () => {
   const { activeProfileType, activeProfileId, availableProfiles } = useAdminView();
 
   const isAdminUser = role === "admin" || role === "manager" || role === "staff";
+  const canSwitchRoles = isAdminUser || role === "coach";
 
-  // If not an admin user, return based on their actual role
-  if (!isAdminUser) {
+  // If user cannot switch roles (pure clients), return based on their actual role
+  if (!canSwitchRoles) {
     return {
       profileId: null, // Will be fetched by individual components
-      profileType: role as "client" | "coach" | "admin",
+      profileType: "client" as const,
       isAdmin: false,
-      isCoach: role === "coach",
-      isClient: role === "client",
+      isCoach: false,
+      isClient: true,
       isRoleSwitching: false,
       userId: user?.id || null,
     };

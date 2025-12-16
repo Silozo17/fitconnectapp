@@ -41,8 +41,8 @@ const DashboardHeader = ({ displayName, subscriptionTier, profileImageUrl }: Das
 
         {/* Right Section */}
         <div className="flex items-center gap-4">
-          {/* Admin View Switcher */}
-          {role === "admin" && <ViewSwitcher />}
+          {/* Role Switcher - for admins and coaches */}
+          {(role === "admin" || role === "manager" || role === "staff" || role === "coach") && <ViewSwitcher />}
           
           {/* Subscription Tier */}
           <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary/20 text-primary">
