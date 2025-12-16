@@ -67,6 +67,7 @@ interface CoachProfile {
   username: string;
   bio: string | null;
   location: string | null;
+  gym_affiliation: string | null;
   experience_years: number | null;
   hourly_rate: number | null;
   currency: string | null;
@@ -169,6 +170,7 @@ const CoachSettings = () => {
     username: "",
     bio: "",
     location: "",
+    gym_affiliation: "",
     experience_years: null,
     hourly_rate: null,
     currency: "GBP",
@@ -187,7 +189,7 @@ const CoachSettings = () => {
 
       const { data, error } = await supabase
         .from("coach_profiles")
-        .select("id, display_name, username, bio, location, experience_years, hourly_rate, currency, coach_types, online_available, in_person_available, profile_image_url, subscription_tier")
+        .select("id, display_name, username, bio, location, gym_affiliation, experience_years, hourly_rate, currency, coach_types, online_available, in_person_available, profile_image_url, subscription_tier")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -204,6 +206,7 @@ const CoachSettings = () => {
         username: coachData.username || "",
         bio: coachData.bio || "",
         location: coachData.location || "",
+        gym_affiliation: coachData.gym_affiliation || "",
         experience_years: coachData.experience_years,
         hourly_rate: coachData.hourly_rate,
         currency: coachData.currency || "GBP",
@@ -226,6 +229,7 @@ const CoachSettings = () => {
         display_name: profile.display_name || null,
         bio: profile.bio || null,
         location: profile.location || null,
+        gym_affiliation: profile.gym_affiliation || null,
         experience_years: profile.experience_years,
         hourly_rate: profile.hourly_rate,
         currency: profile.currency || "GBP",
@@ -492,6 +496,18 @@ const CoachSettings = () => {
                         className="mt-1"
                         placeholder="London, UK"
                       />
+                    </div>
+                    <div>
+                      <Label>Gym Affiliation</Label>
+                      <Input
+                        value={profile.gym_affiliation || ""}
+                        onChange={(e) => setProfile({ ...profile, gym_affiliation: e.target.value })}
+                        className="mt-1"
+                        placeholder="e.g., PureGym Manchester, Independent"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Where do you train clients? Leave blank if you're an online-only coach.
+                      </p>
                     </div>
                     <div>
                       <Label>Years of Experience</Label>
