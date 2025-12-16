@@ -76,8 +76,15 @@ import MarketplaceProduct from "./pages/MarketplaceProduct";
 import MarketplaceBundle from "./pages/MarketplaceBundle";
 import ClientLibrary from "./pages/dashboard/client/ClientLibrary";
 import CoachProducts from "./pages/dashboard/coach/CoachProducts";
+import SuccessStories from "./pages/SuccessStories";
+import Contact from "./pages/Contact";
+import PersonalTrainers from "./pages/coaches/PersonalTrainers";
+import Nutritionists from "./pages/coaches/Nutritionists";
+import Boxing from "./pages/coaches/Boxing";
+import MMA from "./pages/coaches/MMA";
 
 import NotFound from "./pages/NotFound";
+import ScrollToTop from "./components/shared/ScrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -103,11 +110,17 @@ const App = () => (
                 <Route path="/how-it-works" element={<HowItWorks />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
+                <Route path="/success-stories" element={<SuccessStories />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/coaches/personal-trainers" element={<PersonalTrainers />} />
+                <Route path="/coaches/nutritionists" element={<Nutritionists />} />
+                <Route path="/coaches/boxing" element={<Boxing />} />
+                <Route path="/coaches/mma" element={<MMA />} />
                 <Route path="/marketplace" element={<Marketplace />} />
                 <Route path="/marketplace/:productId" element={<MarketplaceProduct />} />
                 <Route path="/marketplace/bundles/:bundleId" element={<MarketplaceBundle />} />
                 
-                {/* Admin Dashboard */}
+                <ScrollToTop />
                 <Route path="/dashboard/admin" element={
                   <ProtectedRoute allowedRoles={["admin", "manager", "staff"]}>
                     <AdminDashboard />
