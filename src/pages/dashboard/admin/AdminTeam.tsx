@@ -11,6 +11,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { toast } from "sonner";
 import { Loader2, MoreHorizontal, Plus, Search, Shield, Users } from "lucide-react";
 import AddTeamMemberModal from "@/components/admin/AddTeamMemberModal";
+import EditTeamMemberModal from "@/components/admin/EditTeamMemberModal";
+import ChangeRoleModal from "@/components/admin/ChangeRoleModal";
 
 interface TeamMember {
   id: string;
@@ -29,6 +31,9 @@ const AdminTeam = () => {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
 
   const fetchTeamMembers = async () => {
     setLoading(true);
@@ -254,8 +259,22 @@ const AdminTeam = () => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>Edit Details</DropdownMenuItem>
-                            <DropdownMenuItem>Change Role</DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedMember(member);
+                                setIsEditModalOpen(true);
+                              }}
+                            >
+                              Edit Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedMember(member);
+                                setIsRoleModalOpen(true);
+                              }}
+                            >
+                              Change Role
+                            </DropdownMenuItem>
                             <DropdownMenuItem
                               className="text-destructive"
                               onClick={() => handleDeleteMember(member.id)}
@@ -278,6 +297,26 @@ const AdminTeam = () => {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onSuccess={fetchTeamMembers}
+      />
+
+      <EditTeamMemberModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedMember(null);
+        }}
+        onSuccess={fetchTeamMembers}
+        member={selectedMember}
+      />
+
+      <ChangeRoleModal
+        isOpen={isRoleModalOpen}
+        onClose={() => {
+          setIsRoleModalOpen(false);
+          setSelectedMember(null);
+        }}
+        onSuccess={fetchTeamMembers}
+        member={selectedMember}
       />
     </AdminLayout>
   );
