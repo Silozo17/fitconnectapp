@@ -75,7 +75,18 @@ const AdminAnalytics = () => {
   };
 
   const handleExport = () => {
-    const csv = arrayToCSV([{ metric: "Total Clients", value: analytics.totalUsers }, { metric: "Total Coaches", value: analytics.totalCoaches }, { metric: "Total Sessions", value: analytics.totalSessions }, { metric: "Messages", value: analytics.totalMessages }], ["metric", "value"]);
+    const csv = arrayToCSV(
+      [
+        { metric: "Total Clients", value: analytics.totalUsers },
+        { metric: "Total Coaches", value: analytics.totalCoaches },
+        { metric: "Total Sessions", value: analytics.totalSessions },
+        { metric: "Messages", value: analytics.totalMessages }
+      ],
+      [
+        { key: "metric", header: "Metric" },
+        { key: "value", header: "Value" }
+      ]
+    );
     downloadCSV(csv, `analytics-${format(new Date(), "yyyy-MM-dd")}.csv`);
     toast.success("Exported");
   };
