@@ -17,6 +17,7 @@ import {
   Medal,
   Flame,
   Plug,
+  BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -27,6 +28,7 @@ const menuItems = [
   { title: "Sessions", icon: Calendar, path: "/dashboard/client/sessions" },
   { title: "Messages", icon: MessageSquare, path: "/dashboard/client/messages" },
   { title: "My Plans", icon: ClipboardList, path: "/dashboard/client/plans" },
+  { title: "My Library", icon: BookOpen, path: "/dashboard/client/library" },
   { title: "Habits", icon: Target, path: "/dashboard/client/habits" },
   { title: "Progress", icon: TrendingUp, path: "/dashboard/client/progress" },
   { title: "Achievements", icon: Trophy, path: "/dashboard/client/achievements" },

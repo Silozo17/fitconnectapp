@@ -19,6 +19,7 @@ const Navbar = () => {
 
   const navLinks = [
     { name: "Find Coaches", href: "/coaches" },
+    { name: "Marketplace", href: "/marketplace" },
     { name: "How It Works", href: "/how-it-works" },
     { name: "Pricing", href: "/pricing" },
     { name: "For Coaches", href: "/for-coaches" },
