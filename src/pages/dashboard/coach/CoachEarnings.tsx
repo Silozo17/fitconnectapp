@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  DollarSign,
   TrendingUp,
   TrendingDown,
   Calendar,
@@ -10,6 +9,7 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Filter,
+  PoundSterling,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import { useLocale } from "@/contexts/LocaleContext";
 
 // Mock data
 const monthlyStats = {
@@ -59,6 +60,7 @@ const monthlyData = [
 ];
 
 const CoachEarnings = () => {
+  const { formatCurrency } = useLocale();
   const [period, setPeriod] = useState("month");
 
   return (
@@ -93,14 +95,14 @@ const CoachEarnings = () => {
         <div className="card-elevated p-6">
           <div className="flex items-center justify-between mb-3">
             <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
-              <DollarSign className="w-6 h-6 text-success" />
+              <PoundSterling className="w-6 h-6 text-success" />
             </div>
             <div className={`flex items-center gap-1 text-sm ${monthlyStats.revenueChange > 0 ? 'text-success' : 'text-destructive'}`}>
               {monthlyStats.revenueChange > 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
               {Math.abs(monthlyStats.revenueChange)}%
             </div>
           </div>
-          <p className="text-3xl font-display font-bold text-foreground">£{monthlyStats.revenue.toLocaleString()}</p>
+          <p className="text-3xl font-display font-bold text-foreground">{formatCurrency(monthlyStats.revenue)}</p>
           <p className="text-sm text-muted-foreground">Total Revenue</p>
         </div>
 
@@ -121,10 +123,10 @@ const CoachEarnings = () => {
         <div className="card-elevated p-6">
           <div className="flex items-center justify-between mb-3">
             <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
-              <DollarSign className="w-6 h-6 text-accent" />
+              <PoundSterling className="w-6 h-6 text-accent" />
             </div>
           </div>
-          <p className="text-3xl font-display font-bold text-foreground">£{monthlyStats.avgSession.toFixed(2)}</p>
+          <p className="text-3xl font-display font-bold text-foreground">{formatCurrency(monthlyStats.avgSession)}</p>
           <p className="text-sm text-muted-foreground">Avg. per Session</p>
         </div>
 
@@ -134,7 +136,7 @@ const CoachEarnings = () => {
               <Clock className="w-6 h-6 text-warning" />
             </div>
           </div>
-          <p className="text-3xl font-display font-bold text-foreground">£{monthlyStats.pending}</p>
+          <p className="text-3xl font-display font-bold text-foreground">{formatCurrency(monthlyStats.pending)}</p>
           <p className="text-sm text-muted-foreground">Pending Payments</p>
         </div>
       </div>
@@ -154,7 +156,7 @@ const CoachEarnings = () => {
                   style={{ height: `${(data.revenue / 2500) * 100}%` }}
                 />
                 <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-card px-2 py-1 rounded text-sm font-medium text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-                  £{data.revenue}
+                  {formatCurrency(data.revenue)}
                 </div>
               </div>
               <span className="text-sm text-muted-foreground">{data.month}</span>
@@ -204,7 +206,7 @@ const CoachEarnings = () => {
                   </div>
                   <div className="text-right">
                     <p className={`font-bold ${tx.status === 'refunded' ? 'text-destructive' : 'text-foreground'}`}>
-                      {tx.status === 'refunded' ? '-' : '+'}£{tx.amount}
+                      {tx.status === 'refunded' ? '-' : '+'}{formatCurrency(tx.amount)}
                     </p>
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">{tx.date}</span>
@@ -242,7 +244,7 @@ const CoachEarnings = () => {
                           <CreditCard className="w-5 h-5 text-success" />
                         </div>
                         <div>
-                          <p className="font-medium text-foreground">£{payout.amount.toLocaleString()}</p>
+                          <p className="font-medium text-foreground">{formatCurrency(payout.amount)}</p>
                           <p className="text-sm text-muted-foreground">{payout.method}</p>
                         </div>
                       </div>
@@ -272,7 +274,7 @@ const CoachEarnings = () => {
                 <div className="p-4 bg-secondary/50 rounded-lg">
                   <p className="text-sm text-muted-foreground mb-1">Next Payout</p>
                   <p className="font-medium text-foreground">Jan 1, 2025</p>
-                  <p className="text-sm text-success">~£{monthlyStats.revenue - monthlyStats.pending}</p>
+                  <p className="text-sm text-success">~{formatCurrency(monthlyStats.revenue - monthlyStats.pending)}</p>
                 </div>
                 <Button variant="outline" className="w-full">Edit Payout Details</Button>
               </div>

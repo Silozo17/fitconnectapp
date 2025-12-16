@@ -4,12 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { Link } from "react-router-dom";
 import { Check, Star, Zap, Crown, MessageSquare, Calendar, TrendingUp, Video, FileText, Shield } from "lucide-react";
+import { useLocale } from "@/contexts/LocaleContext";
+
 
 const Pricing = () => {
+  const { formatCurrency } = useLocale();
+  
   const tiers = [
     {
       name: "Starter",
-      priceRange: "$30 - $50",
+      priceRange: "£25 - £40",
       perSession: "per session",
       description: "Perfect for beginners starting their fitness journey",
       icon: Zap,
@@ -24,7 +28,7 @@ const Pricing = () => {
     },
     {
       name: "Pro",
-      priceRange: "$50 - $100",
+      priceRange: "£40 - £80",
       perSession: "per session",
       description: "For dedicated individuals seeking accelerated results",
       icon: Star,
@@ -41,7 +45,7 @@ const Pricing = () => {
     },
     {
       name: "Elite",
-      priceRange: "$100 - $200+",
+      priceRange: "£80 - £150+",
       perSession: "per session",
       description: "Premium coaching from industry-leading experts",
       icon: Crown,
@@ -94,7 +98,7 @@ const Pricing = () => {
   return (
     <PageLayout
       title="Pricing"
-      description="Transparent pricing for FitConnect coaching services. Find coaches that fit your budget, from $30 to $200+ per session."
+      description="Transparent pricing for FitConnect coaching services. Find coaches that fit your budget, from £25 to £150+ per session."
     >
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 overflow-hidden">
@@ -248,11 +252,11 @@ const Pricing = () => {
                   <div className="text-center">
                     <div className="inline-block p-8 rounded-3xl bg-background shadow-soft">
                       <p className="text-sm text-muted-foreground mb-2">Example: 8-Session Package</p>
-                      <p className="text-lg line-through text-muted-foreground">$640</p>
+                      <p className="text-lg line-through text-muted-foreground">{formatCurrency(480)}</p>
                       <p className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                        $544
+                        {formatCurrency(408)}
                       </p>
-                      <p className="text-primary font-semibold">Save $96</p>
+                      <p className="text-primary font-semibold">Save {formatCurrency(72)}</p>
                     </div>
                   </div>
                 </div>

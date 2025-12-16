@@ -10,8 +10,10 @@ import type { CoachPackage, CoachSubscriptionPlan } from "@/hooks/usePackages";
 import CreatePackageModal from "@/components/packages/CreatePackageModal";
 import CreateSubscriptionPlanModal from "@/components/packages/CreateSubscriptionPlanModal";
 import { toast } from "sonner";
+import { useLocale } from "@/contexts/LocaleContext";
 
 const CoachPackages = () => {
+  const { formatCurrency } = useLocale();
   const { data: packages = [], isLoading: packagesLoading } = useCoachPackages();
   const { data: plans = [], isLoading: plansLoading } = useCoachSubscriptionPlans();
   const updatePackage = useUpdatePackage();
@@ -86,7 +88,7 @@ const CoachPackages = () => {
             <p className="text-xs text-muted-foreground">Sessions</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-primary">£{pkg.price}</p>
+            <p className="text-2xl font-bold text-primary">{formatCurrency(pkg.price)}</p>
             <p className="text-xs text-muted-foreground">Total Price</p>
           </div>
           <div>
@@ -96,7 +98,7 @@ const CoachPackages = () => {
         </div>
 
         <p className="text-xs text-muted-foreground text-center mt-3">
-          £{(pkg.price / pkg.session_count).toFixed(2)} per session
+          {formatCurrency(pkg.price / pkg.session_count)} per session
         </p>
       </CardContent>
     </Card>
@@ -143,7 +145,7 @@ const CoachPackages = () => {
         </div>
 
         <div className="flex items-baseline gap-1 mb-4">
-          <span className="text-3xl font-bold text-primary">£{plan.price}</span>
+          <span className="text-3xl font-bold text-primary">{formatCurrency(plan.price)}</span>
           <span className="text-muted-foreground">/{plan.billing_period}</span>
         </div>
 

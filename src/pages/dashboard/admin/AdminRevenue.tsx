@@ -5,9 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, DollarSign, TrendingUp, CreditCard, Users } from "lucide-react";
+import { Loader2, TrendingUp, CreditCard, Users, PoundSterling } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-
+import { useLocale } from "@/contexts/LocaleContext";
 interface RevenueStats {
   totalRevenue: number;
   mrr: number;
@@ -37,6 +37,7 @@ interface Subscription {
 const COLORS = ["hsl(var(--primary))", "hsl(var(--accent))", "hsl(var(--secondary))", "hsl(var(--muted))"];
 
 const AdminRevenue = () => {
+  const { formatCurrency, formatDisplayDate } = useLocale();
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState("30d");
   const [stats, setStats] = useState<RevenueStats>({
@@ -128,26 +129,19 @@ const AdminRevenue = () => {
     for (let i = 6; i >= 0; i--) {
       const date = new Date(now);
       date.setDate(date.getDate() - i);
-      const key = date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      const key = date.toLocaleDateString("en-GB", { month: "short", day: "numeric" });
       grouped[key] = 0;
     }
 
     transactions.forEach(tx => {
       const date = new Date(tx.created_at);
-      const key = date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      const key = date.toLocaleDateString("en-GB", { month: "short", day: "numeric" });
       if (grouped[key] !== undefined) {
         grouped[key] += Number(tx.amount);
       }
     });
 
     return Object.entries(grouped).map(([date, revenue]) => ({ date, revenue }));
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
   };
 
   if (loading) {
@@ -187,7 +181,7 @@ const AdminRevenue = () => {
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-primary/10 rounded-lg">
-                  <DollarSign className="h-6 w-6 text-primary" />
+                  <PoundSterling className="h-6 w-6 text-primary" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{formatCurrency(stats.totalRevenue)}</p>
@@ -336,7 +330,7 @@ const AdminRevenue = () => {
                   {transactions.slice(0, 10).map((tx) => (
                     <TableRow key={tx.id}>
                       <TableCell>
-                        {new Date(tx.created_at).toLocaleDateString()}
+                        {formatDisplayDate(tx.created_at)}
                       </TableCell>
                       <TableCell className="capitalize">{tx.transaction_type}</TableCell>
                       <TableCell>{tx.description || "—"}</TableCell>
@@ -391,7 +385,7 @@ const AdminRevenue = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {new Date(sub.started_at).toLocaleDateString()}
+                        {formatDisplayDate(sub.started_at)}
                       </TableCell>
                     </TableRow>
                   ))}
