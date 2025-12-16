@@ -18,6 +18,7 @@ import {
   Flame,
   Plug,
   BookOpen,
+  ShoppingCart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -29,6 +30,7 @@ const menuItems = [
   { title: "Messages", icon: MessageSquare, path: "/dashboard/client/messages" },
   { title: "My Plans", icon: ClipboardList, path: "/dashboard/client/plans" },
   { title: "My Library", icon: BookOpen, path: "/dashboard/client/library" },
+  { title: "Shopping", icon: ShoppingCart, path: "/dashboard/client/grocery" },
   { title: "Habits", icon: Target, path: "/dashboard/client/habits" },
   { title: "Progress", icon: TrendingUp, path: "/dashboard/client/progress" },
   { title: "Achievements", icon: Trophy, path: "/dashboard/client/achievements" },
