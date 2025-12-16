@@ -7,7 +7,9 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import CoachCard from "@/components/coaches/CoachCard";
 import CoachFilters from "@/components/coaches/CoachFilters";
-import { useCoachMarketplace } from "@/hooks/useCoachMarketplace";
+import BookSessionModal from "@/components/booking/BookSessionModal";
+import RequestConnectionModal from "@/components/coaches/RequestConnectionModal";
+import { useCoachMarketplace, type MarketplaceCoach } from "@/hooks/useCoachMarketplace";
 
 const Coaches = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -17,6 +19,10 @@ const Coaches = () => {
   const [onlineOnly, setOnlineOnly] = useState(false);
   const [inPersonOnly, setInPersonOnly] = useState(false);
 
+  // Modal state
+  const [bookingCoach, setBookingCoach] = useState<MarketplaceCoach | null>(null);
+  const [connectionCoach, setConnectionCoach] = useState<MarketplaceCoach | null>(null);
+
   const { data: coaches, isLoading, error } = useCoachMarketplace({
     search: searchQuery || undefined,
     coachTypes: selectedTypes.length > 0 ? selectedTypes : undefined,
@@ -24,6 +30,14 @@ const Coaches = () => {
     onlineOnly,
     inPersonOnly,
   });
+
+  const handleBook = (coach: MarketplaceCoach) => {
+    setBookingCoach(coach);
+  };
+
+  const handleRequestConnection = (coach: MarketplaceCoach) => {
+    setConnectionCoach(coach);
+  };
 
   return (
     <>
@@ -110,7 +124,12 @@ const Coaches = () => {
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {coaches.map((coach) => (
-                        <CoachCard key={coach.id} coach={coach} />
+                        <CoachCard 
+                          key={coach.id} 
+                          coach={coach}
+                          onBook={handleBook}
+                          onRequestConnection={handleRequestConnection}
+                        />
                       ))}
                     </div>
                   </>
@@ -134,6 +153,28 @@ const Coaches = () => {
 
         <Footer />
       </div>
+
+      {/* Booking Modal */}
+      {bookingCoach && (
+        <BookSessionModal
+          open={!!bookingCoach}
+          onOpenChange={(open) => !open && setBookingCoach(null)}
+          coach={{
+            id: bookingCoach.id,
+            display_name: bookingCoach.display_name || "Coach",
+            booking_mode: bookingCoach.booking_mode,
+          }}
+        />
+      )}
+
+      {/* Connection Request Modal */}
+      {connectionCoach && (
+        <RequestConnectionModal
+          open={!!connectionCoach}
+          onOpenChange={(open) => !open && setConnectionCoach(null)}
+          coach={connectionCoach}
+        />
+      )}
     </>
   );
 };

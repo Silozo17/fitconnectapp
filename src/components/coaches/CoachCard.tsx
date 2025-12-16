@@ -1,20 +1,66 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Star, MapPin, Video, User } from "lucide-react";
+import { MapPin, Video, User, MessageSquare, Calendar, UserPlus } from "lucide-react";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import FavouriteButton from "@/components/favourites/FavouriteButton";
 import StarRating from "@/components/reviews/StarRating";
 import { useCoachReviews, calculateAverageRating } from "@/hooks/useReviews";
+import { useAuth } from "@/contexts/AuthContext";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { MarketplaceCoach } from "@/hooks/useCoachMarketplace";
 
 interface CoachCardProps {
   coach: MarketplaceCoach;
+  onBook?: (coach: MarketplaceCoach) => void;
+  onRequestConnection?: (coach: MarketplaceCoach) => void;
 }
 
-const CoachCard = ({ coach }: CoachCardProps) => {
+const CoachCard = ({ coach, onBook, onRequestConnection }: CoachCardProps) => {
   const { data: reviews = [] } = useCoachReviews(coach.id);
   const averageRating = calculateAverageRating(reviews);
+  const { user, role } = useAuth();
+  const navigate = useNavigate();
+
+  const isClient = user && role === "client";
+  const isAuthenticated = !!user;
+
+  const handleMessage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      navigate("/auth?redirect=/coaches");
+      return;
+    }
+    // Navigate to messages with this coach
+    navigate(`/dashboard/client/messages?coach=${coach.id}`);
+  };
+
+  const handleBook = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      navigate("/auth?redirect=/coaches");
+      return;
+    }
+    onBook?.(coach);
+  };
+
+  const handleRequestConnection = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      navigate("/auth?redirect=/coaches");
+      return;
+    }
+    onRequestConnection?.(coach);
+  };
+
+  const handleSignUp = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate("/auth?tab=register&role=client");
+  };
 
   return (
     <div className="group card-glow rounded-2xl overflow-hidden hover-lift relative">
@@ -79,9 +125,67 @@ const CoachCard = ({ coach }: CoachCardProps) => {
               <span className="text-muted-foreground text-sm">Contact for pricing</span>
             )}
           </div>
-          <Button asChild variant="lime-outline" size="sm">
-            <Link to={`/coaches/${coach.id}`}>View Profile</Link>
-          </Button>
+          
+          {/* Action Buttons */}
+          {isClient ? (
+            <TooltipProvider>
+              <div className="flex items-center gap-1">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-9 w-9"
+                      onClick={handleMessage}
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Message</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-9 w-9"
+                      onClick={handleBook}
+                    >
+                      <Calendar className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Book Session</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-9 w-9"
+                      onClick={handleRequestConnection}
+                    >
+                      <UserPlus className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Request Connection</TooltipContent>
+                </Tooltip>
+
+                <Button asChild variant="lime-outline" size="sm">
+                  <Link to={`/coaches/${coach.id}`}>View</Link>
+                </Button>
+              </div>
+            </TooltipProvider>
+          ) : !isAuthenticated ? (
+            <Button variant="lime" size="sm" onClick={handleSignUp}>
+              Sign Up to Connect
+            </Button>
+          ) : (
+            <Button asChild variant="lime-outline" size="sm">
+              <Link to={`/coaches/${coach.id}`}>View Profile</Link>
+            </Button>
+          )}
         </div>
       </div>
     </div>
