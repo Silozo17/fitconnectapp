@@ -50,7 +50,7 @@ export default function Subscribe() {
   return (
     <div className="min-h-screen flex relative overflow-hidden">
       {/* Left Side - Dark */}
-      <div className="w-full lg:w-1/2 bg-[#0D0D14] p-8 lg:p-12 flex flex-col relative">
+      <div className="w-full lg:w-1/2 bg-[#0D0D14] p-8 lg:p-12 flex flex-col relative overflow-hidden">
         
         {/* Back Link */}
         <Link 
@@ -90,30 +90,13 @@ export default function Subscribe() {
           />
         </div>
 
-        {/* Features with Avatar */}
-        <div className="mb-8 flex-1 relative">
+        {/* Features */}
+        <div className="mb-8">
           <TierFeatures tier={selectedTier} />
-          
-          {/* Tier Avatar - Full opacity, positioned right of features */}
-          <div className="hidden lg:block absolute -right-4 bottom-0 w-48 h-64 pointer-events-none">
-            <div 
-              key={selectedTier}
-              className="w-full h-full animate-fade-in"
-            >
-              <img
-                src={getAvatarImageUrl(TIER_AVATARS[selectedTier])}
-                alt={`${tierData.name} tier avatar`}
-                className="w-full h-full object-contain drop-shadow-2xl transition-transform duration-700 ease-in-out hover:scale-105"
-                style={{ 
-                  filter: 'drop-shadow(0 0 30px hsl(var(--primary) / 0.4))',
-                }}
-              />
-            </div>
-          </div>
         </div>
 
         {/* Billing Toggle */}
-        <div className="mb-8">
+        <div className="mb-8 relative z-10">
           <p className="text-sm font-medium text-foreground mb-3">Choose billing cycle</p>
           <BillingToggle
             selectedTier={selectedTier}
@@ -122,8 +105,25 @@ export default function Subscribe() {
           />
         </div>
 
+        {/* Tier Avatar - Decorative element at bottom-right of panel */}
+        <div className="hidden lg:block absolute bottom-0 right-0 w-64 h-80 pointer-events-none opacity-90">
+          <div 
+            key={selectedTier}
+            className="w-full h-full animate-fade-in"
+          >
+            <img
+              src={getAvatarImageUrl(TIER_AVATARS[selectedTier])}
+              alt={`${tierData.name} tier avatar`}
+              className="w-full h-full object-contain drop-shadow-2xl transition-transform duration-700 ease-in-out"
+              style={{ 
+                filter: 'drop-shadow(0 0 30px hsl(var(--primary) / 0.3))',
+              }}
+            />
+          </div>
+        </div>
+
         {/* CTA Button - Left side for desktop, full width for mobile */}
-        <div className="hidden lg:block">
+        <div className="hidden lg:block relative z-10">
           {!user && (
             <Link to="/auth">
               <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6">
