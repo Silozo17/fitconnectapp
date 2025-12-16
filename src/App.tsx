@@ -69,6 +69,11 @@ import ForCoaches from "./pages/ForCoaches";
 import HowItWorks from "./pages/HowItWorks";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import Marketplace from "./pages/Marketplace";
+import MarketplaceProduct from "./pages/MarketplaceProduct";
+import MarketplaceBundle from "./pages/MarketplaceBundle";
+import ClientLibrary from "./pages/dashboard/client/ClientLibrary";
+import CoachProducts from "./pages/dashboard/coach/CoachProducts";
 
 import NotFound from "./pages/NotFound";
 
@@ -96,6 +101,9 @@ const App = () => (
                 <Route path="/how-it-works" element={<HowItWorks />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
+                <Route path="/marketplace" element={<Marketplace />} />
+                <Route path="/marketplace/:productId" element={<MarketplaceProduct />} />
+                <Route path="/marketplace/bundles/:bundleId" element={<MarketplaceBundle />} />
                 
                 {/* Admin Dashboard */}
                 <Route path="/dashboard/admin" element={
@@ -242,6 +250,11 @@ const App = () => (
                     <ClientIntegrations />
                   </ProtectedRoute>
                 } />
+                <Route path="/dashboard/client/library" element={
+                  <ProtectedRoute allowedRoles={["client", "admin"]}>
+                    <ClientLibrary />
+                  </ProtectedRoute>
+                } />
                 <Route path="/dashboard/client/notifications" element={
                   <ProtectedRoute allowedRoles={["client", "admin"]}>
                     <Notifications />
@@ -332,6 +345,11 @@ const App = () => (
                 <Route path="/dashboard/coach/integrations" element={
                   <ProtectedRoute allowedRoles={["coach"]}>
                     <CoachIntegrations />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/coach/products" element={
+                  <ProtectedRoute allowedRoles={["coach"]}>
+                    <CoachProducts />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/notifications" element={
