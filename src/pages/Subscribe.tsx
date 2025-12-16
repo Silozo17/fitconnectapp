@@ -166,17 +166,17 @@ export default function Subscribe() {
         </p>
       </div>
 
-      {/* Right Side - Light - Checkout shows immediately */}
-      <div className="hidden lg:flex w-1/2 bg-white p-8 lg:p-12 flex-col">
-        {/* Price Summary */}
-        <div className="mb-8">
+      {/* Right Side - Light - Side by side layout */}
+      <div className="hidden lg:flex w-1/2 bg-white p-6 lg:p-8 flex-row gap-6 items-start">
+        {/* LEFT: Price Summary - Compact box */}
+        <div className="w-72 flex-shrink-0">
           <PriceSummary tier={selectedTier} billingInterval={billingInterval} />
         </div>
 
-        {/* Checkout Form - Show immediately when logged in */}
-        {!user ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-center">
-            <div className="bg-gray-50 rounded-xl p-8 max-w-sm">
+        {/* RIGHT: Checkout Form - Takes remaining space */}
+        <div className="flex-1 min-w-0">
+          {!user ? (
+            <div className="bg-gray-50 rounded-xl p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Sign in to continue
               </h3>
@@ -195,28 +195,28 @@ export default function Subscribe() {
                 </Link>
               </p>
             </div>
-          </div>
-        ) : (
-          <div className="flex-1">
-            <Suspense fallback={<CheckoutLoading />}>
-              <SubscriptionCheckout 
-                key={checkoutKey}
-                tier={selectedTier} 
-                billingInterval={billingInterval}
-              />
-            </Suspense>
-            <p className="text-xs text-gray-500 text-center mt-4">
-              By subscribing, you agree to our{" "}
-              <Link to="/terms" className="underline hover:text-gray-700">
-                Terms of Service
-              </Link>{" "}
-              and{" "}
-              <Link to="/privacy" className="underline hover:text-gray-700">
-                Privacy Policy
-              </Link>
-            </p>
-          </div>
-        )}
+          ) : (
+            <div>
+              <Suspense fallback={<CheckoutLoading />}>
+                <SubscriptionCheckout 
+                  key={checkoutKey}
+                  tier={selectedTier} 
+                  billingInterval={billingInterval}
+                />
+              </Suspense>
+              <p className="text-xs text-gray-500 text-center mt-4">
+                By subscribing, you agree to our{" "}
+                <Link to="/terms" className="underline hover:text-gray-700">
+                  Terms of Service
+                </Link>{" "}
+                and{" "}
+                <Link to="/privacy" className="underline hover:text-gray-700">
+                  Privacy Policy
+                </Link>
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Mobile Checkout Sheet */}
