@@ -1,5 +1,9 @@
 import { NavLink } from "@/components/NavLink";
-import { LayoutDashboard, Users, Dumbbell, Settings, ChevronLeft, ChevronRight, UsersRound, DollarSign, BarChart3, User } from "lucide-react";
+import { 
+  LayoutDashboard, Users, Dumbbell, Settings, ChevronLeft, ChevronRight, 
+  UsersRound, DollarSign, BarChart3, User, CreditCard, Sliders, 
+  MessageSquare, Shield
+} from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -12,6 +16,12 @@ const mainNavItems = [
   { title: "Team", url: "/dashboard/admin/team", icon: UsersRound },
   { title: "Revenue", url: "/dashboard/admin/revenue", icon: DollarSign },
   { title: "Analytics", url: "/dashboard/admin/analytics", icon: BarChart3 },
+];
+
+const platformNavItems = [
+  { title: "Pricing Plans", url: "/dashboard/admin/plans", icon: CreditCard },
+  { title: "Feature Control", url: "/dashboard/admin/features", icon: Sliders },
+  { title: "Reviews & Disputes", url: "/dashboard/admin/reviews", icon: MessageSquare },
 ];
 
 const bottomNavItems = [
@@ -48,12 +58,36 @@ const AdminSidebar = () => {
         </Button>
       </div>
 
-      <nav className="flex-1 p-2 space-y-1">
+      <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
         {mainNavItems.map((item) => (
           <NavLink
             key={item.url}
             to={item.url}
             end={item.url === "/dashboard/admin"}
+            className={cn(
+              "flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors",
+              collapsed && "justify-center px-2"
+            )}
+            activeClassName="bg-primary/10 text-primary hover:bg-primary/10 hover:text-primary"
+          >
+            <item.icon className="h-5 w-5 flex-shrink-0" />
+            {!collapsed && <span>{item.title}</span>}
+          </NavLink>
+        ))}
+
+        {!collapsed && (
+          <div className="pt-4 pb-2">
+            <p className="px-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Platform
+            </p>
+          </div>
+        )}
+        {collapsed && <Separator className="my-2" />}
+
+        {platformNavItems.map((item) => (
+          <NavLink
+            key={item.url}
+            to={item.url}
             className={cn(
               "flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors",
               collapsed && "justify-center px-2"

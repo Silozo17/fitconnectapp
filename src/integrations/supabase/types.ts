@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_granted_subscriptions: {
+        Row: {
+          coach_id: string | null
+          created_at: string | null
+          expires_at: string | null
+          granted_by: string | null
+          id: string
+          is_active: boolean | null
+          reason: string | null
+          tier: string
+        }
+        Insert: {
+          coach_id?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          reason?: string | null
+          tier: string
+        }
+        Update: {
+          coach_id?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          reason?: string | null
+          tier?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_granted_subscriptions_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_profiles: {
         Row: {
           avatar_url: string | null
@@ -454,6 +495,54 @@ export type Database = {
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coach_feature_overrides: {
+        Row: {
+          coach_id: string | null
+          created_at: string | null
+          expires_at: string | null
+          feature_id: string | null
+          granted_by: string | null
+          id: string
+          reason: string | null
+          value: Json
+        }
+        Insert: {
+          coach_id?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          feature_id?: string | null
+          granted_by?: string | null
+          id?: string
+          reason?: string | null
+          value: Json
+        }
+        Update: {
+          coach_id?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          feature_id?: string | null
+          granted_by?: string | null
+          id?: string
+          reason?: string | null
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_feature_overrides_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_feature_overrides_feature_id_fkey"
+            columns: ["feature_id"]
+            isOneToOne: false
+            referencedRelation: "platform_features"
             referencedColumns: ["id"]
           },
         ]
@@ -1002,6 +1091,36 @@ export type Database = {
           },
         ]
       }
+      platform_features: {
+        Row: {
+          created_at: string | null
+          default_value: Json | null
+          description: string | null
+          feature_key: string
+          feature_type: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          default_value?: Json | null
+          description?: string | null
+          feature_key: string
+          feature_type?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          default_value?: Json | null
+          description?: string | null
+          feature_key?: string
+          feature_type?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       platform_settings: {
         Row: {
           description: string | null
@@ -1064,6 +1183,57 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      review_disputes: {
+        Row: {
+          admin_notes: string | null
+          coach_id: string | null
+          created_at: string | null
+          id: string
+          reason: string
+          resolved_at: string | null
+          resolved_by: string | null
+          review_id: string | null
+          status: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          coach_id?: string | null
+          created_at?: string | null
+          id?: string
+          reason: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          review_id?: string | null
+          status?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          coach_id?: string | null
+          created_at?: string | null
+          id?: string
+          reason?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          review_id?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_disputes_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_disputes_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reviews: {
         Row: {
@@ -1194,6 +1364,38 @@ export type Database = {
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tier_features: {
+        Row: {
+          created_at: string | null
+          feature_id: string | null
+          id: string
+          tier: string
+          value: Json
+        }
+        Insert: {
+          created_at?: string | null
+          feature_id?: string | null
+          id?: string
+          tier: string
+          value: Json
+        }
+        Update: {
+          created_at?: string | null
+          feature_id?: string | null
+          id?: string
+          tier?: string
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tier_features_feature_id_fkey"
+            columns: ["feature_id"]
+            isOneToOne: false
+            referencedRelation: "platform_features"
             referencedColumns: ["id"]
           },
         ]
