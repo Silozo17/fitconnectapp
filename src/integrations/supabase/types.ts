@@ -819,6 +819,42 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews: {
+        Row: {
+          client_id: string
+          coach_id: string
+          created_at: string
+          id: string
+          is_public: boolean | null
+          rating: number
+          review_text: string | null
+          session_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          coach_id: string
+          created_at?: string
+          id?: string
+          is_public?: boolean | null
+          rating: number
+          review_text?: string | null
+          session_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          coach_id?: string
+          created_at?: string
+          id?: string
+          is_public?: boolean | null
+          rating?: number
+          review_text?: string | null
+          session_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       session_types: {
         Row: {
           coach_id: string

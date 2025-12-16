@@ -12,6 +12,9 @@ import { useCoachAvailability, useSessionTypes } from "@/hooks/useCoachSchedule"
 import RequestConnectionModal from "@/components/coaches/RequestConnectionModal";
 import BookSessionModal from "@/components/booking/BookSessionModal";
 import AvailabilityCalendar from "@/components/booking/AvailabilityCalendar";
+import CoachReviewsSection from "@/components/reviews/CoachReviewsSection";
+import StarRating from "@/components/reviews/StarRating";
+import { useCoachReviews, calculateAverageRating } from "@/hooks/useReviews";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +27,8 @@ const CoachDetail = () => {
   const { data: coach, isLoading, error } = useCoachById(id || "");
   const { data: availability = [] } = useCoachAvailability(id || "");
   const { data: sessionTypes = [] } = useSessionTypes(id || "");
+  const { data: reviews = [] } = useCoachReviews(id);
+  const averageRating = calculateAverageRating(reviews);
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [startingConversation, setStartingConversation] = useState(false);
@@ -138,10 +143,11 @@ const CoachDetail = () => {
                             </p>
                           )}
                         </div>
-                        <div className="flex items-center gap-1 bg-amber-500/10 px-3 py-1.5 rounded-full">
-                          <Star className="h-5 w-5 fill-amber-500 text-amber-500" />
-                          <span className="font-semibold text-amber-600">New</span>
-                        </div>
+                        <StarRating 
+                          rating={averageRating} 
+                          reviewCount={reviews.length} 
+                          size="lg"
+                        />
                       </div>
 
                       {/* Coach Types */}
@@ -192,6 +198,9 @@ const CoachDetail = () => {
                   )}
                 </CardContent>
               </Card>
+
+              {/* Reviews Section */}
+              <CoachReviewsSection coachId={id || ""} />
             </div>
 
             {/* Sidebar - Booking Card */}
