@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Trophy, MapPin, Globe, Users, ChevronRight } from "lucide-react";
+import { Trophy, MapPin, Globe, Users, ChevronRight, Medal, Award, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,9 +18,9 @@ interface CachedLocation {
 
 function LeaderboardEntry({ entry, index }: { entry: PublicLeaderboardEntry; index: number }) {
   const getRankDisplay = (rank: number) => {
-    if (rank === 1) return <span className="text-2xl">🥇</span>;
-    if (rank === 2) return <span className="text-2xl">🥈</span>;
-    if (rank === 3) return <span className="text-2xl">🥉</span>;
+    if (rank === 1) return <Trophy className="w-6 h-6 text-yellow-500" />;
+    if (rank === 2) return <Medal className="w-6 h-6 text-gray-400" />;
+    if (rank === 3) return <Award className="w-6 h-6 text-amber-600" />;
     return <span className="text-muted-foreground font-medium w-8 text-center">{rank}</span>;
   };
 
@@ -210,8 +210,9 @@ export default function Leaderboard() {
               </Button>
             </Link>
           </div>
-          <p className="text-xs text-muted-foreground">
-            🔒 Your privacy is protected. Only appear on leaderboards if you choose to.
+          <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+            <Lock className="w-3 h-3" />
+            Your privacy is protected. Only appear on leaderboards if you choose to.
           </p>
         </div>
       </div>

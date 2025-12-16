@@ -115,7 +115,7 @@ export function useAdminUserStats(clientProfileId: string | undefined) {
         badges: (earnedBadges || []).map(b => ({
           id: b.badge_id,
           name: (b.badges as any)?.name || 'Unknown',
-          icon: (b.badges as any)?.icon || '🏆',
+          icon: (b.badges as any)?.icon || 'Trophy',
           rarity: (b.badges as any)?.rarity || 'common',
           earnedAt: b.earned_at,
           isFeatured: b.is_featured || false,

@@ -562,21 +562,21 @@ export function useCreateReview() {
 
 // Content categories
 export const CONTENT_CATEGORIES = [
-  { value: "workout", label: "Workout Programs", icon: "💪" },
-  { value: "nutrition", label: "Nutrition Guides", icon: "🥗" },
-  { value: "mindset", label: "Mindset & Motivation", icon: "🧠" },
-  { value: "recovery", label: "Recovery & Mobility", icon: "🔧" },
-  { value: "templates", label: "Templates & Trackers", icon: "📊" },
-  { value: "sport_specific", label: "Sport-Specific Training", icon: "🎯" },
-  { value: "other", label: "Other", icon: "📦" },
+  { value: "workout", label: "Workout Programs", icon: "Dumbbell" },
+  { value: "nutrition", label: "Nutrition Guides", icon: "Salad" },
+  { value: "mindset", label: "Mindset & Motivation", icon: "Brain" },
+  { value: "recovery", label: "Recovery & Mobility", icon: "Wrench" },
+  { value: "templates", label: "Templates & Trackers", icon: "BarChart" },
+  { value: "sport_specific", label: "Sport-Specific Training", icon: "Target" },
+  { value: "other", label: "Other", icon: "Package" },
 ];
 
 // Content types
 export const CONTENT_TYPES = [
-  { value: "ebook", label: "E-book", icon: "📚" },
-  { value: "video_course", label: "Video Course", icon: "🎬" },
-  { value: "single_video", label: "Single Video", icon: "🎥" },
-  { value: "template", label: "Template", icon: "📋" },
-  { value: "audio", label: "Audio Content", icon: "🎧" },
-  { value: "other", label: "Other", icon: "📦" },
+  { value: "ebook", label: "E-book", icon: "BookOpen" },
+  { value: "video_course", label: "Video Course", icon: "Video" },
+  { value: "single_video", label: "Single Video", icon: "Film" },
+  { value: "template", label: "Template", icon: "ClipboardList" },
+  { value: "audio", label: "Audio Content", icon: "Headphones" },
+  { value: "other", label: "Other", icon: "Package" },
 ];

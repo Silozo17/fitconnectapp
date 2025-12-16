@@ -47,13 +47,13 @@ export interface HabitWithStreak extends Habit {
 }
 
 const HABIT_CATEGORIES = [
-  { value: 'nutrition', label: 'Nutrition', icon: '🥗', color: 'text-green-500' },
-  { value: 'exercise', label: 'Exercise', icon: '💪', color: 'text-blue-500' },
-  { value: 'sleep', label: 'Sleep', icon: '😴', color: 'text-purple-500' },
-  { value: 'mindfulness', label: 'Mindfulness', icon: '🧘', color: 'text-teal-500' },
-  { value: 'supplement', label: 'Supplement', icon: '💊', color: 'text-orange-500' },
-  { value: 'water', label: 'Water', icon: '💧', color: 'text-cyan-500' },
-  { value: 'other', label: 'Other', icon: '✓', color: 'text-muted-foreground' },
+  { value: 'nutrition', label: 'Nutrition', icon: 'Salad', color: 'text-green-500' },
+  { value: 'exercise', label: 'Exercise', icon: 'Dumbbell', color: 'text-blue-500' },
+  { value: 'sleep', label: 'Sleep', icon: 'Moon', color: 'text-purple-500' },
+  { value: 'mindfulness', label: 'Mindfulness', icon: 'Flower2', color: 'text-teal-500' },
+  { value: 'supplement', label: 'Supplement', icon: 'Pill', color: 'text-orange-500' },
+  { value: 'water', label: 'Water', icon: 'Droplet', color: 'text-cyan-500' },
+  { value: 'other', label: 'Other', icon: 'Check', color: 'text-muted-foreground' },
 ];
 
 export const getHabitCategory = (category: string) => {
@@ -76,12 +76,12 @@ export const isHabitDueToday = (habit: Habit): boolean => {
 
 // Get streak milestone info
 export const getStreakMilestone = (streak: number) => {
-  if (streak >= 100) return { emoji: '🏆', label: 'Habit Hero!' };
-  if (streak >= 30) return { emoji: '⭐', label: 'Monthly Master!' };
-  if (streak >= 14) return { emoji: '🔥🔥🔥', label: 'Two Weeks!' };
-  if (streak >= 7) return { emoji: '🔥🔥', label: 'One Week Strong!' };
-  if (streak >= 3) return { emoji: '🔥', label: 'Getting Started!' };
-  return { emoji: '🔥', label: '' };
+  if (streak >= 100) return { icon: 'Trophy', label: 'Habit Hero!' };
+  if (streak >= 30) return { icon: 'Star', label: 'Monthly Master!' };
+  if (streak >= 14) return { icon: 'Flame', label: 'Two Weeks!' };
+  if (streak >= 7) return { icon: 'Flame', label: 'One Week Strong!' };
+  if (streak >= 3) return { icon: 'Flame', label: 'Getting Started!' };
+  return { icon: 'Flame', label: '' };
 };
 
 // Hook for coaches to get client habits

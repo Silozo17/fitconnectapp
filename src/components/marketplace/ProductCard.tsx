@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { BookOpen, Video, FileText, Headphones, Package, Clock, FileDown } from "lucide-react";
+import { BookOpen, Video, FileText, Headphones, Package, Clock, FileDown, Star } from "lucide-react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DigitalProduct, CONTENT_TYPES } from "@/hooks/useDigitalProducts";
@@ -86,7 +86,7 @@ export default function ProductCard({ product, viewMode = "grid" }: ProductCardP
           <img src={product.cover_image_url} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-            <span className="text-6xl">{contentType?.icon || "📦"}</span>
+            <Package className="w-12 h-12 text-primary/40" />
           </div>
         )}
         <div className="absolute top-3 left-3 flex flex-wrap gap-2">
@@ -99,7 +99,9 @@ export default function ProductCard({ product, viewMode = "grid" }: ProductCardP
           <Badge className="absolute top-3 right-3 bg-green-500 text-white">FREE</Badge>
         )}
         {product.is_featured && (
-          <Badge className="absolute bottom-3 left-3 bg-yellow-500/90 text-black">⭐ Featured</Badge>
+          <Badge className="absolute bottom-3 left-3 bg-yellow-500/90 text-black flex items-center gap-1">
+            <Star className="w-3 h-3" /> Featured
+          </Badge>
         )}
       </div>
       <CardContent className="p-4">

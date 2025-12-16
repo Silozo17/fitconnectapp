@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Dumbbell, Instagram, Twitter, Youtube, Facebook, Mail, ArrowRight } from "lucide-react";
+import { Dumbbell, Instagram, Twitter, Youtube, Facebook, Mail, ArrowRight, Zap } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -167,7 +167,7 @@ const Footer = () => {
           </p>
           <p className="text-muted-foreground text-sm flex items-center gap-2">
             Made with passion for fitness 
-            <span className="text-primary">⚡</span>
+            <Zap className="w-4 h-4 text-primary" />
           </p>
         </div>
       </div>

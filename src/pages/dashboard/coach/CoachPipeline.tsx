@@ -33,6 +33,7 @@ import {
   Loader2,
   ChevronRight,
   Eye,
+  FileText,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "react-router-dom";
@@ -184,8 +185,9 @@ const CoachPipeline = () => {
               )}
 
               {lead.notes && (
-                <p className="text-xs text-muted-foreground truncate mb-1">
-                  📝 {lead.notes}
+                <p className="text-xs text-muted-foreground truncate mb-1 flex items-center gap-1">
+                  <FileText className="w-3 h-3 flex-shrink-0" />
+                  {lead.notes}
                 </p>
               )}
 

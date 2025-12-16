@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { NeonBadge } from "@/components/ui/neon-badge";
 import { DottedPattern } from "@/components/ui/dotted-pattern";
-import { Users, Award, Star, Zap, ArrowRight } from "lucide-react";
+import { Users, Award, Star, Zap, ArrowRight, Dumbbell, Salad, Swords } from "lucide-react";
 import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
 
 const Hero = () => {
@@ -81,14 +81,14 @@ const Hero = () => {
           <div className="grid md:grid-cols-3 gap-6 relative">
             <div className="card-glow p-6 animate-float" style={{ animationDelay: '0s' }}>
               <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mb-4">
-                <span className="text-3xl">🏋️</span>
+                <Dumbbell className="w-8 h-8 text-primary" />
               </div>
               <h3 className="font-display font-semibold text-lg mb-2">Personal Training</h3>
               <p className="text-muted-foreground text-sm">Custom workout plans tailored to your goals</p>
             </div>
             <div className="card-glow p-6 border-primary/30 glow-sm animate-float" style={{ animationDelay: '0.5s' }}>
               <div className="w-16 h-16 rounded-2xl bg-accent/20 flex items-center justify-center mb-4">
-                <span className="text-3xl">🥗</span>
+                <Salad className="w-8 h-8 text-accent" />
               </div>
               <h3 className="font-display font-semibold text-lg mb-2">Nutrition Coaching</h3>
               <p className="text-muted-foreground text-sm">Meal plans and macro tracking for results</p>
@@ -96,7 +96,7 @@ const Hero = () => {
             </div>
             <div className="card-glow p-6 animate-float" style={{ animationDelay: '1s' }}>
               <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mb-4">
-                <span className="text-3xl">🥊</span>
+                <Swords className="w-8 h-8 text-primary" />
               </div>
               <h3 className="font-display font-semibold text-lg mb-2">Combat Sports</h3>
               <p className="text-muted-foreground text-sm">Boxing, MMA, and martial arts training</p>

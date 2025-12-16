@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { Trophy, Globe, MapPin, Search, Users, ChevronRight, Filter } from "lucide-react";
+import { Trophy, Globe, MapPin, Search, Users, ChevronRight, Filter, Medal, Award, Flag, Building2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
 import Navbar from "@/components/layout/Navbar";
@@ -38,9 +38,9 @@ type ScopeType = 'global' | 'country' | 'county' | 'city';
 
 function LeaderboardRow({ entry }: { entry: PublicLeaderboardEntry }) {
   const getRankDisplay = (rank: number) => {
-    if (rank === 1) return <span className="text-2xl">🥇</span>;
-    if (rank === 2) return <span className="text-2xl">🥈</span>;
-    if (rank === 3) return <span className="text-2xl">🥉</span>;
+    if (rank === 1) return <Trophy className="w-6 h-6 text-yellow-500" />;
+    if (rank === 2) return <Medal className="w-6 h-6 text-gray-400" />;
+    if (rank === 3) return <Award className="w-6 h-6 text-amber-600" />;
     return <span className="text-muted-foreground font-bold">{rank}</span>;
   };
 
@@ -74,9 +74,9 @@ function LeaderboardRow({ entry }: { entry: PublicLeaderboardEntry }) {
 
 function LeaderboardCard({ entry }: { entry: PublicLeaderboardEntry }) {
   const getRankDisplay = (rank: number) => {
-    if (rank === 1) return <span className="text-2xl">🥇</span>;
-    if (rank === 2) return <span className="text-2xl">🥈</span>;
-    if (rank === 3) return <span className="text-2xl">🥉</span>;
+    if (rank === 1) return <Trophy className="w-6 h-6 text-yellow-500" />;
+    if (rank === 2) return <Medal className="w-6 h-6 text-gray-400" />;
+    if (rank === 3) return <Award className="w-6 h-6 text-amber-600" />;
     return <span className="text-muted-foreground font-bold text-lg">#{rank}</span>;
   };
 
@@ -220,10 +220,10 @@ export default function Leaderboards() {
                     <SelectValue placeholder="Scope" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="global">🌍 Global</SelectItem>
-                    <SelectItem value="country">🏳️ By Country</SelectItem>
-                    <SelectItem value="county">📍 By County</SelectItem>
-                    <SelectItem value="city">🏙️ By City</SelectItem>
+                    <SelectItem value="global"><Globe className="h-4 w-4 inline mr-2" />Global</SelectItem>
+                    <SelectItem value="country"><Flag className="h-4 w-4 inline mr-2" />By Country</SelectItem>
+                    <SelectItem value="county"><MapPin className="h-4 w-4 inline mr-2" />By County</SelectItem>
+                    <SelectItem value="city"><Building2 className="h-4 w-4 inline mr-2" />By City</SelectItem>
                   </SelectContent>
                 </Select>
 
