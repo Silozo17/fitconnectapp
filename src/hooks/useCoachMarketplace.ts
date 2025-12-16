@@ -19,6 +19,7 @@ interface UseCoachMarketplaceOptions {
   inPersonOnly?: boolean;
   limit?: number;
   featured?: boolean;
+  location?: string;
 }
 
 export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}) => {
@@ -35,6 +36,10 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}) =>
         query = query.or(
           `display_name.ilike.%${options.search}%,bio.ilike.%${options.search}%,location.ilike.%${options.search}%`
         );
+      }
+
+      if (options.location) {
+        query = query.ilike("location", `%${options.location}%`);
       }
 
       if (options.coachTypes && options.coachTypes.length > 0) {
