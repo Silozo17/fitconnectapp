@@ -5,7 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, MoreHorizontal, Pencil, Trash2, KeyRound, Loader2, Eye, Pause, Ban, CheckCircle } from "lucide-react";
+import { 
+  Search, MoreHorizontal, Pencil, Trash2, KeyRound, Loader2, Eye, Pause, Ban, CheckCircle, 
+  UserPlus, Users, UserCheck, UsersRound, Calendar
+} from "lucide-react";
 import {
   Table,
   TableBody,
@@ -21,8 +24,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import EditUserModal from "@/components/admin/EditUserModal";
+import AddUserModal from "@/components/admin/AddUserModal";
 import { UserDetailDrawer } from "@/components/admin/UserDetailDrawer";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { BulkActionBar } from "@/components/admin/BulkActionBar";
@@ -41,22 +52,39 @@ interface ClientUser {
   created_at: string;
   email?: string;
   location?: string | null;
+  city?: string | null;
+  country?: string | null;
   avatar_url?: string | null;
   status?: string | null;
   status_reason?: string | null;
+  gender_pronouns?: string | null;
+  height_cm?: number | null;
+  weight_kg?: number | null;
+  fitness_goals?: string[] | null;
+  medical_conditions?: string[] | null;
+  allergies?: string[] | null;
+  dietary_restrictions?: string[] | null;
+  leaderboard_visible?: boolean | null;
+  leaderboard_display_name?: string | null;
+  coach_count?: number;
 }
 
 const AdminUsers = () => {
   const [users, setUsers] = useState<ClientUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [onboardingFilter, setOnboardingFilter] = useState<string>("all");
+  const [coachFilter, setCoachFilter] = useState<string>("all");
   const [editingUser, setEditingUser] = useState<ClientUser | null>(null);
   const [viewingUser, setViewingUser] = useState<ClientUser | null>(null);
   const [statusUser, setStatusUser] = useState<ClientUser | null>(null);
+  const [addUserOpen, setAddUserOpen] = useState(false);
   const [resettingPassword, setResettingPassword] = useState<string | null>(null);
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
+  const [userEmails, setUserEmails] = useState<Record<string, string>>({});
   
-  const { loading: actionLoading, bulkUpdateStatus, bulkDelete } = useAdminUserManagement("client");
+  const { loading: actionLoading, bulkUpdateStatus, bulkDelete, getUserEmail } = useAdminUserManagement("client");
   const logAction = useLogAdminAction();
   const { markUsersViewed } = useAdminBadges();
 
@@ -71,6 +99,8 @@ const AdminUsers = () => {
 
   const fetchUsers = async () => {
     setLoading(true);
+    
+    // Fetch users with coach count
     const { data, error } = await supabase
       .from("client_profiles")
       .select("*")
@@ -79,11 +109,52 @@ const AdminUsers = () => {
     if (error) {
       toast.error("Failed to fetch users");
       console.error(error);
-    } else {
-      setUsers(data || []);
+      setLoading(false);
+      return;
     }
+
+    // Fetch coach counts for each user
+    const usersWithCoachCount = await Promise.all(
+      (data || []).map(async (user) => {
+        const { count } = await supabase
+          .from("coach_clients")
+          .select("*", { count: "exact", head: true })
+          .eq("client_id", user.id);
+        
+        return { ...user, coach_count: count || 0 };
+      })
+    );
+
+    setUsers(usersWithCoachCount);
+    
+    // Fetch emails for all users
+    const emailPromises = usersWithCoachCount.map(async (user) => {
+      const email = await getUserEmail(user.user_id);
+      return { userId: user.user_id, email };
+    });
+    
+    const emails = await Promise.all(emailPromises);
+    const emailMap: Record<string, string> = {};
+    emails.forEach(({ userId, email }) => {
+      if (email) emailMap[userId] = email;
+    });
+    setUserEmails(emailMap);
+    
     setLoading(false);
   };
+
+  // Calculate stats
+  const stats = useMemo(() => {
+    const now = new Date();
+    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    
+    return {
+      total: users.length,
+      active: users.filter(u => u.onboarding_completed && u.status !== "banned" && u.status !== "suspended").length,
+      withCoaches: users.filter(u => (u.coach_count || 0) > 0).length,
+      newThisWeek: users.filter(u => new Date(u.created_at) > oneWeekAgo).length,
+    };
+  }, [users]);
 
   const handleDeleteUser = async (userId: string) => {
     if (!confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
@@ -115,7 +186,7 @@ const AdminUsers = () => {
       return;
     }
 
-    const email = prompt("Enter the user's email address to send password reset:");
+    const email = userEmails[user.user_id] || prompt("Enter the user's email address to send password reset:");
     if (!email) return;
 
     setResettingPassword(user.user_id);
@@ -147,10 +218,29 @@ const AdminUsers = () => {
 
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
+      // Search filter
       const fullName = `${user.first_name || ""} ${user.last_name || ""}`.toLowerCase();
-      return fullName.includes(searchQuery.toLowerCase());
+      const email = userEmails[user.user_id]?.toLowerCase() || "";
+      const matchesSearch = fullName.includes(searchQuery.toLowerCase()) || 
+                           email.includes(searchQuery.toLowerCase());
+      
+      // Status filter
+      const matchesStatus = statusFilter === "all" || user.status === statusFilter || 
+                          (statusFilter === "active" && !user.status);
+      
+      // Onboarding filter
+      const matchesOnboarding = onboardingFilter === "all" || 
+                               (onboardingFilter === "completed" && user.onboarding_completed) ||
+                               (onboardingFilter === "incomplete" && !user.onboarding_completed);
+      
+      // Coach filter
+      const matchesCoach = coachFilter === "all" ||
+                          (coachFilter === "with_coaches" && (user.coach_count || 0) > 0) ||
+                          (coachFilter === "no_coaches" && (user.coach_count || 0) === 0);
+      
+      return matchesSearch && matchesStatus && matchesOnboarding && matchesCoach;
     });
-  }, [users, searchQuery]);
+  }, [users, searchQuery, statusFilter, onboardingFilter, coachFilter, userEmails]);
 
   const selectedUsersList = useMemo(() => {
     return users.filter((u) => selectedUsers.has(u.id));
@@ -200,23 +290,82 @@ const AdminUsers = () => {
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "suspended":
-        return <Pause className="h-4 w-4" />;
-      case "banned":
-        return <Ban className="h-4 w-4" />;
-      default:
-        return <CheckCircle className="h-4 w-4" />;
-    }
+  const getLocationDisplay = (user: ClientUser) => {
+    if (user.city && user.country) return `${user.city}, ${user.country}`;
+    if (user.city) return user.city;
+    if (user.country) return user.country;
+    if (user.location) return user.location;
+    return "-";
   };
 
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Users Management</h1>
-          <p className="text-muted-foreground mt-1">Manage all client accounts</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Users Management</h1>
+            <p className="text-muted-foreground mt-1">Manage all client accounts</p>
+          </div>
+          <Button onClick={() => setAddUserOpen(true)}>
+            <UserPlus className="h-4 w-4 mr-2" />
+            Add User
+          </Button>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-blue-500/10 text-blue-500">
+                  <Users className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{stats.total}</p>
+                  <p className="text-sm text-muted-foreground">Total Users</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-green-500/10 text-green-500">
+                  <UserCheck className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{stats.active}</p>
+                  <p className="text-sm text-muted-foreground">Active Users</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-purple-500/10 text-purple-500">
+                  <UsersRound className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{stats.withCoaches}</p>
+                  <p className="text-sm text-muted-foreground">With Coaches</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-primary/10 text-primary">
+                  <Calendar className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{stats.newThisWeek}</p>
+                  <p className="text-sm text-muted-foreground">New This Week</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {selectedUsers.size > 0 && (
@@ -233,22 +382,65 @@ const AdminUsers = () => {
 
         <Card>
           <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <CardTitle>All Users ({users.length})</CardTitle>
-              <div className="relative w-72">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by name..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <CardTitle>All Users ({filteredUsers.length})</CardTitle>
+              </div>
+              
+              {/* Filters Row */}
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="relative w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by name or email..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-36">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="suspended">Suspended</SelectItem>
+                    <SelectItem value="banned">Banned</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Select value={onboardingFilter} onValueChange={setOnboardingFilter}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="Onboarding" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Onboarding</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="incomplete">Incomplete</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Select value={coachFilter} onValueChange={setCoachFilter}>
+                  <SelectTrigger className="w-36">
+                    <SelectValue placeholder="Coaches" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Users</SelectItem>
+                    <SelectItem value="with_coaches">Has Coaches</SelectItem>
+                    <SelectItem value="no_coaches">No Coaches</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div className="text-center py-8 text-muted-foreground">Loading users...</div>
+              <div className="flex items-center justify-center py-8 text-muted-foreground">
+                <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                Loading users...
+              </div>
             ) : filteredUsers.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">No users found</div>
             ) : (
@@ -262,8 +454,10 @@ const AdminUsers = () => {
                       />
                     </TableHead>
                     <TableHead>Name</TableHead>
-                    <TableHead>Age</TableHead>
-                    <TableHead>Account Status</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Coaches</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead>Onboarding</TableHead>
                     <TableHead>Joined</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -287,7 +481,17 @@ const AdminUsers = () => {
                           ? `${user.first_name || ""} ${user.last_name || ""}`.trim()
                           : "Unnamed User"}
                       </TableCell>
-                      <TableCell>{user.age || "-"}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {userEmails[user.user_id] || "-"}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {getLocationDisplay(user)}
+                      </TableCell>
+                      <TableCell>
+                        <span className={user.coach_count ? "text-primary font-medium" : "text-muted-foreground"}>
+                          {user.coach_count || 0}
+                        </span>
+                      </TableCell>
                       <TableCell>
                         <StatusBadge status={user.status || "active"} />
                       </TableCell>
@@ -386,6 +590,12 @@ const AdminUsers = () => {
           </CardContent>
         </Card>
       </div>
+
+      <AddUserModal
+        isOpen={addUserOpen}
+        onClose={() => setAddUserOpen(false)}
+        onSuccess={fetchUsers}
+      />
 
       {editingUser && (
         <EditUserModal
