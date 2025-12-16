@@ -194,15 +194,23 @@ export default function Leaderboard() {
         </div>
 
         {/* CTA */}
-        <div className="text-center">
-          <Link to="/auth?tab=signup">
-            <Button size="lg" className="gap-2 shadow-lg shadow-primary/25">
-              <Trophy className="h-5 w-5" />
-              Join the Competition - It's Free
+        <div className="text-center space-y-4">
+          <Link to="/leaderboards">
+            <Button size="lg" variant="outline" className="gap-2">
+              View Full Leaderboards
               <ChevronRight className="h-4 w-4" />
             </Button>
           </Link>
-          <p className="text-xs text-muted-foreground mt-3">
+          <div>
+            <Link to="/auth?tab=signup">
+              <Button size="lg" className="gap-2 shadow-lg shadow-primary/25">
+                <Trophy className="h-5 w-5" />
+                Join the Competition - It's Free
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+          <p className="text-xs text-muted-foreground">
             🔒 Your privacy is protected. Only appear on leaderboards if you choose to.
           </p>
         </div>

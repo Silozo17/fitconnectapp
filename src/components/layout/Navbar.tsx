@@ -38,6 +38,7 @@ const Navbar = () => {
   ];
 
   const navLinks = [
+    { name: "Leaderboards", href: "/leaderboards" },
     { name: "Marketplace", href: "/marketplace" },
   ];
 

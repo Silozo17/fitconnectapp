@@ -79,6 +79,7 @@ import ClientLibrary from "./pages/dashboard/client/ClientLibrary";
 import CoachProducts from "./pages/dashboard/coach/CoachProducts";
 import SuccessStories from "./pages/SuccessStories";
 import Contact from "./pages/Contact";
+import Leaderboards from "./pages/Leaderboards";
 import PersonalTrainers from "./pages/coaches/PersonalTrainers";
 import Nutritionists from "./pages/coaches/Nutritionists";
 import Boxing from "./pages/coaches/Boxing";
@@ -113,6 +114,7 @@ const App = () => (
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/success-stories" element={<SuccessStories />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/leaderboards" element={<Leaderboards />} />
                 <Route path="/coaches/personal-trainers" element={<PersonalTrainers />} />
                 <Route path="/coaches/nutritionists" element={<Nutritionists />} />
                 <Route path="/coaches/boxing" element={<Boxing />} />
