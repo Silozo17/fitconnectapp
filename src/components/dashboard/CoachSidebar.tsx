@@ -30,6 +30,7 @@ const menuItems: { title: string; icon: typeof LayoutDashboard; path: string; ba
   { title: "Clients", icon: Users, path: "/dashboard/coach/clients", badgeKey: "clients", badgeVariant: "warning" },
   { title: "Schedule", icon: Calendar, path: "/dashboard/coach/schedule", badgeKey: "schedule", badgeVariant: "warning" },
   { title: "Messages", icon: MessageSquare, path: "/dashboard/coach/messages", badgeKey: "messages" },
+  { title: "Connections", icon: Users, path: "/dashboard/coach/connections" },
   { title: "Training Plans", icon: ClipboardList, path: "/dashboard/coach/plans" },
   { title: "Digital Products", icon: ShoppingBag, path: "/dashboard/coach/products" },
   { title: "Packages", icon: Package, path: "/dashboard/coach/packages" },

@@ -119,6 +119,7 @@ export type Database = {
           status_updated_by: string | null
           updated_at: string
           user_id: string
+          username: string | null
           users_last_viewed_at: string | null
           verifications_last_viewed_at: string | null
         }
@@ -138,6 +139,7 @@ export type Database = {
           status_updated_by?: string | null
           updated_at?: string
           user_id: string
+          username?: string | null
           users_last_viewed_at?: string | null
           verifications_last_viewed_at?: string | null
         }
@@ -157,6 +159,7 @@ export type Database = {
           status_updated_by?: string | null
           updated_at?: string
           user_id?: string
+          username?: string | null
           users_last_viewed_at?: string | null
           verifications_last_viewed_at?: string | null
         }
@@ -765,6 +768,7 @@ export type Database = {
           status_updated_by: string | null
           updated_at: string
           user_id: string
+          username: string | null
           weight_kg: number | null
         }
         Insert: {
@@ -795,6 +799,7 @@ export type Database = {
           status_updated_by?: string | null
           updated_at?: string
           user_id: string
+          username?: string | null
           weight_kg?: number | null
         }
         Update: {
@@ -825,6 +830,7 @@ export type Database = {
           status_updated_by?: string | null
           updated_at?: string
           user_id?: string
+          username?: string | null
           weight_kg?: number | null
         }
         Relationships: [
@@ -1269,6 +1275,7 @@ export type Database = {
           subscription_tier: string | null
           updated_at: string
           user_id: string
+          username: string | null
           verification_notes: string | null
           verification_status: string | null
           verified_at: string | null
@@ -1301,6 +1308,7 @@ export type Database = {
           subscription_tier?: string | null
           updated_at?: string
           user_id: string
+          username?: string | null
           verification_notes?: string | null
           verification_status?: string | null
           verified_at?: string | null
@@ -1333,6 +1341,7 @@ export type Database = {
           subscription_tier?: string | null
           updated_at?: string
           user_id?: string
+          username?: string | null
           verification_notes?: string | null
           verification_status?: string | null
           verified_at?: string | null
@@ -3097,6 +3106,42 @@ export type Database = {
           },
         ]
       }
+      user_connections: {
+        Row: {
+          addressee_profile_type: string
+          addressee_user_id: string
+          created_at: string | null
+          id: string
+          message: string | null
+          requester_profile_type: string
+          requester_user_id: string
+          responded_at: string | null
+          status: string
+        }
+        Insert: {
+          addressee_profile_type: string
+          addressee_user_id: string
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          requester_profile_type: string
+          requester_user_id: string
+          responded_at?: string | null
+          status?: string
+        }
+        Update: {
+          addressee_profile_type?: string
+          addressee_user_id?: string
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          requester_profile_type?: string
+          requester_user_id?: string
+          responded_at?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -3264,11 +3309,16 @@ export type Database = {
         Args: { coach_profile_id: string }
         Returns: boolean
       }
+      generate_unique_username: { Args: { base_name: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_username_available: {
+        Args: { check_username: string }
         Returns: boolean
       }
       notify_admins: {

@@ -1,0 +1,359 @@
+import { useState, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+
+export interface UserConnection {
+  id: string;
+  requester_user_id: string;
+  requester_profile_type: string;
+  addressee_user_id: string;
+  addressee_profile_type: string;
+  status: string;
+  message: string | null;
+  created_at: string;
+  responded_at: string | null;
+  // Joined profile data
+  profile?: {
+    first_name?: string | null;
+    last_name?: string | null;
+    display_name?: string | null;
+    username?: string | null;
+    avatar_url?: string | null;
+    profile_image_url?: string | null;
+    location?: string | null;
+  };
+}
+
+interface SearchResult {
+  user_id: string;
+  username: string | null;
+  display_name: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  avatar_url: string | null;
+  profile_image_url: string | null;
+  profile_type: "client" | "coach" | "admin";
+  location: string | null;
+}
+
+export const useConnections = () => {
+  const { user, role } = useAuth();
+  const [connections, setConnections] = useState<UserConnection[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<UserConnection[]>([]);
+  const [sentRequests, setSentRequests] = useState<UserConnection[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const getProfileType = useCallback(() => {
+    if (role === "client") return "client";
+    if (role === "coach") return "coach";
+    return "admin";
+  }, [role]);
+
+  // Fetch all connections for current user
+  const fetchConnections = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+
+    try {
+      // Fetch accepted connections
+      const { data: acceptedData, error: acceptedError } = await supabase
+        .from("user_connections")
+        .select("*")
+        .eq("status", "accepted")
+        .or(`requester_user_id.eq.${user.id},addressee_user_id.eq.${user.id}`);
+
+      if (acceptedError) throw acceptedError;
+
+      // Fetch pending requests (where user is addressee)
+      const { data: pendingData, error: pendingError } = await supabase
+        .from("user_connections")
+        .select("*")
+        .eq("status", "pending")
+        .eq("addressee_user_id", user.id);
+
+      if (pendingError) throw pendingError;
+
+      // Fetch sent requests (where user is requester)
+      const { data: sentData, error: sentError } = await supabase
+        .from("user_connections")
+        .select("*")
+        .eq("status", "pending")
+        .eq("requester_user_id", user.id);
+
+      if (sentError) throw sentError;
+
+      // Enrich connections with profile data
+      const enrichedAccepted = await enrichConnectionsWithProfiles(acceptedData || [], user.id);
+      const enrichedPending = await enrichConnectionsWithProfiles(pendingData || [], user.id, true);
+      const enrichedSent = await enrichConnectionsWithProfiles(sentData || [], user.id, false);
+
+      setConnections(enrichedAccepted);
+      setPendingRequests(enrichedPending);
+      setSentRequests(enrichedSent);
+    } catch (error) {
+      console.error("Error fetching connections:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
+  // Enrich connections with profile data
+  const enrichConnectionsWithProfiles = async (
+    connections: UserConnection[],
+    currentUserId: string,
+    showRequester: boolean = false
+  ): Promise<UserConnection[]> => {
+    const enriched: UserConnection[] = [];
+
+    for (const conn of connections) {
+      // Determine which user's profile to fetch (the other person)
+      const isRequester = conn.requester_user_id === currentUserId;
+      const targetUserId = showRequester 
+        ? conn.requester_user_id 
+        : (isRequester ? conn.addressee_user_id : conn.requester_user_id);
+      const targetProfileType = showRequester 
+        ? conn.requester_profile_type 
+        : (isRequester ? conn.addressee_profile_type : conn.requester_profile_type);
+
+      let profile = null;
+
+      if (targetProfileType === "client") {
+        const { data } = await supabase
+          .from("client_profiles")
+          .select("first_name, last_name, username, avatar_url, location")
+          .eq("user_id", targetUserId)
+          .single();
+        profile = data;
+      } else if (targetProfileType === "coach") {
+        const { data } = await supabase
+          .from("coach_profiles")
+          .select("display_name, username, profile_image_url, location")
+          .eq("user_id", targetUserId)
+          .single();
+        profile = data;
+      } else {
+        const { data } = await supabase
+          .from("admin_profiles")
+          .select("first_name, last_name, display_name, username, avatar_url")
+          .eq("user_id", targetUserId)
+          .single();
+        profile = data;
+      }
+
+      enriched.push({ ...conn, profile: profile || undefined });
+    }
+
+    return enriched;
+  };
+
+  // Search users by username or email
+  const searchUsers = async (query: string): Promise<SearchResult[]> => {
+    if (!query || query.length < 2) return [];
+
+    const results: SearchResult[] = [];
+    const searchTerm = query.toLowerCase();
+
+    // Search clients
+    const { data: clients } = await supabase
+      .from("client_profiles")
+      .select("user_id, username, first_name, last_name, avatar_url, location")
+      .or(`username.ilike.%${searchTerm}%,first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%`)
+      .neq("user_id", user?.id)
+      .limit(10);
+
+    clients?.forEach((c) => {
+      results.push({
+        user_id: c.user_id,
+        username: c.username,
+        display_name: null,
+        first_name: c.first_name,
+        last_name: c.last_name,
+        avatar_url: c.avatar_url,
+        profile_image_url: null,
+        profile_type: "client",
+        location: c.location,
+      });
+    });
+
+    // Search coaches
+    const { data: coaches } = await supabase
+      .from("coach_profiles")
+      .select("user_id, username, display_name, profile_image_url, location")
+      .or(`username.ilike.%${searchTerm}%,display_name.ilike.%${searchTerm}%`)
+      .neq("user_id", user?.id)
+      .limit(10);
+
+    coaches?.forEach((c) => {
+      results.push({
+        user_id: c.user_id,
+        username: c.username,
+        display_name: c.display_name,
+        first_name: null,
+        last_name: null,
+        avatar_url: null,
+        profile_image_url: c.profile_image_url,
+        profile_type: "coach",
+        location: c.location,
+      });
+    });
+
+    return results;
+  };
+
+  // Send connection request
+  const sendConnectionRequest = async (
+    addresseeUserId: string,
+    addresseeProfileType: string,
+    message?: string
+  ): Promise<boolean> => {
+    if (!user) return false;
+
+    try {
+      const { error } = await supabase.from("user_connections").insert({
+        requester_user_id: user.id,
+        requester_profile_type: getProfileType(),
+        addressee_user_id: addresseeUserId,
+        addressee_profile_type: addresseeProfileType,
+        message: message || null,
+      });
+
+      if (error) {
+        if (error.code === "23505") {
+          toast.error("You already have a pending request with this user");
+        } else {
+          throw error;
+        }
+        return false;
+      }
+
+      toast.success("Connection request sent!");
+      fetchConnections();
+      return true;
+    } catch (error) {
+      console.error("Error sending connection request:", error);
+      toast.error("Failed to send connection request");
+      return false;
+    }
+  };
+
+  // Accept connection request
+  const acceptRequest = async (connectionId: string): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from("user_connections")
+        .update({ status: "accepted", responded_at: new Date().toISOString() })
+        .eq("id", connectionId);
+
+      if (error) throw error;
+
+      toast.success("Connection accepted!");
+      fetchConnections();
+      return true;
+    } catch (error) {
+      console.error("Error accepting request:", error);
+      toast.error("Failed to accept request");
+      return false;
+    }
+  };
+
+  // Reject connection request
+  const rejectRequest = async (connectionId: string): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from("user_connections")
+        .update({ status: "rejected", responded_at: new Date().toISOString() })
+        .eq("id", connectionId);
+
+      if (error) throw error;
+
+      toast.success("Request declined");
+      fetchConnections();
+      return true;
+    } catch (error) {
+      console.error("Error rejecting request:", error);
+      toast.error("Failed to decline request");
+      return false;
+    }
+  };
+
+  // Cancel sent request
+  const cancelRequest = async (connectionId: string): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from("user_connections")
+        .delete()
+        .eq("id", connectionId);
+
+      if (error) throw error;
+
+      toast.success("Request cancelled");
+      fetchConnections();
+      return true;
+    } catch (error) {
+      console.error("Error cancelling request:", error);
+      toast.error("Failed to cancel request");
+      return false;
+    }
+  };
+
+  // Remove connection
+  const removeConnection = async (connectionId: string): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from("user_connections")
+        .delete()
+        .eq("id", connectionId);
+
+      if (error) throw error;
+
+      toast.success("Connection removed");
+      fetchConnections();
+      return true;
+    } catch (error) {
+      console.error("Error removing connection:", error);
+      toast.error("Failed to remove connection");
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    fetchConnections();
+  }, [fetchConnections]);
+
+  // Realtime subscription
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel(`connections-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "user_connections",
+        },
+        () => fetchConnections()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, fetchConnections]);
+
+  return {
+    connections,
+    pendingRequests,
+    sentRequests,
+    loading,
+    searchUsers,
+    sendConnectionRequest,
+    acceptRequest,
+    rejectRequest,
+    cancelRequest,
+    removeConnection,
+    refreshConnections: fetchConnections,
+  };
+};

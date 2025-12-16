@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 interface ClientBadges {
   newPlans: number;
+  pendingConnections: number;
 }
 
 interface CoachBadges {
@@ -19,7 +20,7 @@ interface AdminBadges {
 
 export const useClientBadges = () => {
   const { user } = useAuth();
-  const [badges, setBadges] = useState<ClientBadges>({ newPlans: 0 });
+  const [badges, setBadges] = useState<ClientBadges>({ newPlans: 0, pendingConnections: 0 });
   const [clientProfileId, setClientProfileId] = useState<string | null>(null);
 
   // Get client profile ID
@@ -36,30 +37,37 @@ export const useClientBadges = () => {
     fetchProfileId();
   }, [user]);
 
-  // Fetch new plans count (plans assigned in last 7 days that haven't been viewed)
+  // Fetch new plans count and pending connections
   const fetchBadges = useCallback(async () => {
-    if (!clientProfileId) return;
+    if (!clientProfileId || !user) return;
 
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    const { count } = await supabase
+    const { count: plansCount } = await supabase
       .from("plan_assignments")
       .select("*", { count: "exact", head: true })
       .eq("client_id", clientProfileId)
       .gte("assigned_at", sevenDaysAgo.toISOString())
       .eq("status", "active");
 
-    setBadges({ newPlans: count || 0 });
-  }, [clientProfileId]);
+    // Pending connection requests (where user is addressee)
+    const { count: connectionsCount } = await supabase
+      .from("user_connections")
+      .select("*", { count: "exact", head: true })
+      .eq("addressee_user_id", user.id)
+      .eq("status", "pending");
+
+    setBadges({ newPlans: plansCount || 0, pendingConnections: connectionsCount || 0 });
+  }, [clientProfileId, user]);
 
   useEffect(() => {
     if (clientProfileId) fetchBadges();
   }, [clientProfileId, fetchBadges]);
 
-  // Realtime subscription for plan assignments
+  // Realtime subscription for plan assignments and connections
   useEffect(() => {
-    if (!clientProfileId) return;
+    if (!clientProfileId || !user) return;
 
     const channel = supabase
       .channel(`client-badges-${clientProfileId}`)
@@ -75,12 +83,21 @@ export const useClientBadges = () => {
           setBadges((prev) => ({ ...prev, newPlans: prev.newPlans + 1 }));
         }
       )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "user_connections",
+        },
+        () => fetchBadges()
+      )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [clientProfileId]);
+  }, [clientProfileId, user, fetchBadges]);
 
   return badges;
 };
