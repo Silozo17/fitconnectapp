@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -12,6 +12,7 @@ import {
   Edit,
   FileText,
   Dumbbell,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,70 +28,24 @@ import { ProgressChart } from "@/components/dashboard/clients/ProgressChart";
 import { GoalProgressCard } from "@/components/dashboard/clients/GoalProgressCard";
 import { NoteCard } from "@/components/dashboard/clients/NoteCard";
 import { SessionCalendar } from "@/components/dashboard/clients/SessionCalendar";
-
-// Mock client data
-const mockClientDetail = {
-  id: "1",
-  name: "John Smith",
-  email: "john@example.com",
-  phone: "+44 7700 900123",
-  avatar: "JS",
-  status: "active",
-  plan: "Personal Training",
-  startDate: "Oct 15, 2024",
-  sessionsCompleted: 24,
-  sessionsRemaining: 6,
-  goals: [
-    { id: "1", name: "Build muscle mass", current: "65", target: "100", progress: 65, unit: "%", isCompleted: false },
-    { id: "2", name: "Improve endurance", current: "8", target: "10", progress: 80, unit: "km", isCompleted: false },
-    { id: "3", name: "Lose 5kg", current: "3", target: "5", progress: 60, unit: "kg", isCompleted: false },
-  ],
-  currentWeight: 82,
-  targetWeight: 77,
-  startingWeight: 85,
-  height: 180,
-  age: 32,
-  notes: [
-    { id: "1", content: "Good progress on deadlifts, increased weight to 100kg. Client is highly motivated and showing consistent improvement.", category: "progress" as const, isPinned: true, createdAt: "2024-12-10T10:00:00Z" },
-    { id: "2", content: "Slight shoulder discomfort - modified exercises to avoid overhead movements. Will reassess next session.", category: "injury" as const, isPinned: false, createdAt: "2024-12-05T14:30:00Z" },
-    { id: "3", content: "Started new nutrition plan. Client reports feeling more energized.", category: "general" as const, isPinned: false, createdAt: "2024-11-28T09:00:00Z" },
-  ],
-  progressData: [
-    { date: "Oct 1", weight: 85, bodyFat: 22 },
-    { date: "Oct 15", weight: 84.5, bodyFat: 21.5 },
-    { date: "Nov 1", weight: 84, bodyFat: 21 },
-    { date: "Nov 15", weight: 83, bodyFat: 20 },
-    { date: "Dec 1", weight: 82.5, bodyFat: 19 },
-    { date: "Dec 15", weight: 82, bodyFat: 18 },
-  ],
-  upcomingSessions: [
-    { id: "1", date: "Today", time: "2:00 PM", type: "Strength Training", duration: 60, status: "scheduled" },
-    { id: "2", date: "Thu, Dec 14", time: "2:00 PM", type: "Cardio & Core", duration: 45, status: "scheduled" },
-    { id: "3", date: "Sat, Dec 16", time: "10:00 AM", type: "Full Body", duration: 60, status: "scheduled" },
-  ],
-  sessionHistory: [
-    { id: "h1", date: new Date(2024, 11, 10), type: "Strength Training", duration: 60, status: "completed" as const, notes: "Great session, hit new PR on squats" },
-    { id: "h2", date: new Date(2024, 11, 7), type: "HIIT Session", duration: 45, status: "completed" as const, notes: "High intensity, client performed well" },
-    { id: "h3", date: new Date(2024, 11, 5), type: "Upper Body", duration: 60, status: "completed" as const, notes: "Modified due to shoulder issue" },
-    { id: "h4", date: new Date(2024, 11, 3), type: "Cardio", duration: 30, status: "cancelled" as const, notes: "Client sick" },
-  ],
-  calendarSessions: [
-    { id: "c1", date: new Date(2024, 11, 10), type: "Strength Training", status: "completed" as const },
-    { id: "c2", date: new Date(2024, 11, 7), type: "HIIT Session", status: "completed" as const },
-    { id: "c3", date: new Date(2024, 11, 5), type: "Upper Body", status: "completed" as const },
-    { id: "c4", date: new Date(2024, 11, 14), type: "Cardio & Core", status: "scheduled" as const },
-    { id: "c5", date: new Date(2024, 11, 16), type: "Full Body", status: "scheduled" as const },
-    { id: "c6", date: new Date(2024, 11, 19), type: "Strength Training", status: "scheduled" as const },
-  ],
-  assignedPlans: [
-    { id: "p1", name: "12-Week Strength Program", type: "workout", status: "active", progress: 67, startDate: "Oct 15, 2024" },
-    { id: "p2", name: "High Protein Meal Plan", type: "nutrition", status: "active", progress: 80, startDate: "Nov 1, 2024" },
-  ],
-};
+import { 
+  useClientDetail, 
+  useClientSessions, 
+  useClientNotes, 
+  useClientProgress,
+  useClientPlanAssignments 
+} from "@/hooks/useCoachClients";
+import { format } from "date-fns";
 
 const CoachClientDetail = () => {
-  const { id } = useParams();
-  const client = mockClientDetail;
+  const { id } = useParams<{ id: string }>();
+
+  // Fetch real data
+  const { data: clientData, isLoading: isLoadingClient } = useClientDetail(id);
+  const { data: sessions = [], isLoading: isLoadingSessions } = useClientSessions(id);
+  const { data: notes = [], isLoading: isLoadingNotes } = useClientNotes(id);
+  const { data: progressData = [], isLoading: isLoadingProgress } = useClientProgress(id);
+  const { data: planAssignments = [], isLoading: isLoadingPlans } = useClientPlanAssignments(id);
 
   // Modal states
   const [isScheduleSessionOpen, setIsScheduleSessionOpen] = useState(false);
@@ -109,37 +64,123 @@ const CoachClientDetail = () => {
     notes?: string;
   } | null>(null);
 
-  const handleViewSession = (session: typeof mockClientDetail.sessionHistory[0]) => {
+  const client = clientData?.client_profile;
+  const clientRelation = clientData;
+
+  const fullName = useMemo(() => {
+    if (!client) return "Client";
+    return `${client.first_name || ''} ${client.last_name || ''}`.trim() || "Client";
+  }, [client]);
+
+  const initials = useMemo(() => {
+    if (!client) return "?";
+    const first = client.first_name?.[0] || '';
+    const last = client.last_name?.[0] || '';
+    return (first + last).toUpperCase() || '?';
+  }, [client]);
+
+  // Transform sessions for calendar
+  const calendarSessions = useMemo(() => {
+    return sessions.map(s => ({
+      id: s.id,
+      date: new Date(s.scheduled_at),
+      type: s.session_type,
+      status: s.status as "scheduled" | "completed" | "cancelled",
+    }));
+  }, [sessions]);
+
+  // Transform notes for NoteCard
+  const formattedNotes = useMemo(() => {
+    return notes.map(n => ({
+      id: n.id,
+      content: n.content,
+      category: (n.category || 'general') as "general" | "progress" | "injury" | "feedback" | "goal",
+      isPinned: n.is_pinned || false,
+      createdAt: n.created_at,
+    }));
+  }, [notes]);
+
+  // Transform progress data for chart
+  const chartData = useMemo(() => {
+    return progressData.map(p => ({
+      date: format(new Date(p.recorded_at), 'MMM d'),
+      weight: p.weight_kg || undefined,
+      bodyFat: p.body_fat_percentage || undefined,
+    }));
+  }, [progressData]);
+
+  // Session stats
+  const sessionStats = useMemo(() => {
+    const completed = sessions.filter(s => s.status === 'completed').length;
+    const upcoming = sessions.filter(s => s.status === 'scheduled').length;
+    return { completed, upcoming };
+  }, [sessions]);
+
+  // Goals from client profile
+  const goals = useMemo(() => {
+    if (!client?.fitness_goals) return [];
+    return client.fitness_goals.map((goal, i) => ({
+      id: String(i),
+      name: goal,
+      current: "In progress",
+      target: "100",
+      progress: 50,
+      unit: "%",
+      isCompleted: false,
+    }));
+  }, [client]);
+
+  const handleViewSession = (session: typeof sessions[0]) => {
     setSelectedSession({
       id: session.id,
-      clientName: client.name,
-      sessionType: session.type,
-      scheduledAt: session.date.toISOString(),
-      duration: session.duration,
-      status: session.status,
-      isOnline: false,
-      notes: session.notes,
+      clientName: fullName,
+      sessionType: session.session_type,
+      scheduledAt: session.scheduled_at,
+      duration: session.duration_minutes,
+      status: session.status as "scheduled" | "completed" | "cancelled" | "no_show",
+      isOnline: session.is_online || false,
+      notes: session.notes || undefined,
     });
     setIsSessionDetailOpen(true);
   };
 
   const handleCalendarSessionClick = (session: { id: string; date: Date; type: string; status: "scheduled" | "completed" | "cancelled" }) => {
-    setSelectedSession({
-      id: session.id,
-      clientName: client.name,
-      sessionType: session.type,
-      scheduledAt: session.date.toISOString(),
-      duration: 60,
-      status: session.status,
-      isOnline: false,
-    });
-    setIsSessionDetailOpen(true);
+    const fullSession = sessions.find(s => s.id === session.id);
+    if (fullSession) {
+      handleViewSession(fullSession);
+    }
   };
 
-  const weightProgress = ((client.startingWeight - client.currentWeight) / (client.startingWeight - client.targetWeight)) * 100;
+  const isLoading = isLoadingClient || isLoadingSessions || isLoadingNotes || isLoadingProgress || isLoadingPlans;
+
+  if (isLoading) {
+    return (
+      <DashboardLayout title="Client Details" description="Loading...">
+        <div className="flex items-center justify-center p-12">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!clientData) {
+    return (
+      <DashboardLayout title="Client Not Found" description="">
+        <Link to="/dashboard/coach/clients">
+          <Button variant="ghost" className="mb-4">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Clients
+          </Button>
+        </Link>
+        <div className="card-elevated p-12 text-center">
+          <p className="text-muted-foreground">Client not found or you don't have access.</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
-    <DashboardLayout title={client.name} description="View and manage client details.">
+    <DashboardLayout title={fullName} description="View and manage client details.">
       {/* Back Button */}
       <Link to="/dashboard/coach/clients">
         <Button variant="ghost" className="mb-4">
@@ -152,15 +193,29 @@ const CoachClientDetail = () => {
       <div className="card-elevated p-6 mb-6">
         <div className="flex flex-col md:flex-row md:items-center gap-6">
           <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-2xl">
-            {client.avatar}
+            {initials}
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="font-display text-2xl font-bold text-foreground">{client.name}</h1>
-              <Badge className="bg-success/20 text-success border-success/30">{client.status}</Badge>
+              <h1 className="font-display text-2xl font-bold text-foreground">{fullName}</h1>
+              <Badge className={
+                clientRelation?.status === 'active' ? 'bg-success/20 text-success border-success/30' :
+                clientRelation?.status === 'pending' ? 'bg-warning/20 text-warning border-warning/30' :
+                'bg-muted text-muted-foreground'
+              }>
+                {clientRelation?.status || 'unknown'}
+              </Badge>
             </div>
-            <p className="text-muted-foreground">{client.email} • {client.phone}</p>
-            <p className="text-sm text-muted-foreground mt-1">Client since {client.startDate} • {client.plan}</p>
+            <p className="text-muted-foreground">
+              {client?.height_cm && `${client.height_cm}cm`}
+              {client?.height_cm && client?.weight_kg && ' • '}
+              {client?.weight_kg && `${client.weight_kg}kg`}
+              {client?.age && ` • ${client.age} years old`}
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Client since {clientRelation?.start_date ? format(new Date(clientRelation.start_date), 'MMM d, yyyy') : 'N/A'}
+              {clientRelation?.plan_type && ` • ${clientRelation.plan_type}`}
+            </p>
           </div>
           <div className="flex gap-3">
             <Button variant="outline">
@@ -182,28 +237,30 @@ const CoachClientDetail = () => {
             <Calendar className="w-4 h-4 text-primary" />
             <span className="text-sm text-muted-foreground">Sessions Done</span>
           </div>
-          <p className="text-2xl font-display font-bold text-foreground">{client.sessionsCompleted}</p>
+          <p className="text-2xl font-display font-bold text-foreground">{sessionStats.completed}</p>
         </div>
         <div className="card-elevated p-4">
           <div className="flex items-center gap-2 mb-2">
             <Clock className="w-4 h-4 text-warning" />
-            <span className="text-sm text-muted-foreground">Remaining</span>
+            <span className="text-sm text-muted-foreground">Upcoming</span>
           </div>
-          <p className="text-2xl font-display font-bold text-foreground">{client.sessionsRemaining}</p>
+          <p className="text-2xl font-display font-bold text-foreground">{sessionStats.upcoming}</p>
         </div>
         <div className="card-elevated p-4">
           <div className="flex items-center gap-2 mb-2">
             <Scale className="w-4 h-4 text-success" />
             <span className="text-sm text-muted-foreground">Current Weight</span>
           </div>
-          <p className="text-2xl font-display font-bold text-foreground">{client.currentWeight} kg</p>
+          <p className="text-2xl font-display font-bold text-foreground">
+            {progressData.length > 0 ? `${progressData[progressData.length - 1].weight_kg || '-'} kg` : `${client?.weight_kg || '-'} kg`}
+          </p>
         </div>
         <div className="card-elevated p-4">
           <div className="flex items-center gap-2 mb-2">
             <Target className="w-4 h-4 text-accent" />
-            <span className="text-sm text-muted-foreground">Target Weight</span>
+            <span className="text-sm text-muted-foreground">Notes</span>
           </div>
-          <p className="text-2xl font-display font-bold text-foreground">{client.targetWeight} kg</p>
+          <p className="text-2xl font-display font-bold text-foreground">{notes.length}</p>
         </div>
       </div>
 
@@ -223,16 +280,20 @@ const CoachClientDetail = () => {
             {/* Goals */}
             <div className="card-elevated p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-display font-bold text-foreground">Goals Progress</h3>
+                <h3 className="font-display font-bold text-foreground">Fitness Goals</h3>
                 <Button variant="ghost" size="sm">
                   <Edit className="w-4 h-4" />
                 </Button>
               </div>
-              <div className="space-y-4">
-                {client.goals.map((goal) => (
-                  <GoalProgressCard key={goal.id} goal={goal} />
-                ))}
-              </div>
+              {goals.length > 0 ? (
+                <div className="space-y-4">
+                  {goals.map((goal) => (
+                    <GoalProgressCard key={goal.id} goal={goal} />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground">No goals set yet.</p>
+              )}
             </div>
 
             {/* Upcoming Sessions */}
@@ -244,41 +305,39 @@ const CoachClientDetail = () => {
                 </Button>
               </div>
               <div className="space-y-3">
-                {client.upcomingSessions.map((session) => (
-                  <div key={session.id} className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
+                {sessions.filter(s => s.status === 'scheduled').slice(0, 3).map((session) => (
+                  <div 
+                    key={session.id} 
+                    className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg cursor-pointer hover:bg-secondary/70 transition-colors"
+                    onClick={() => handleViewSession(session)}
+                  >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                         <Activity className="w-5 h-5 text-primary" />
                       </div>
                       <div>
-                        <p className="font-medium text-foreground">{session.type}</p>
-                        <p className="text-sm text-muted-foreground">{session.date} at {session.time}</p>
+                        <p className="font-medium text-foreground">{session.session_type}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {format(new Date(session.scheduled_at), 'MMM d, yyyy')} at {format(new Date(session.scheduled_at), 'h:mm a')}
+                        </p>
                       </div>
                     </div>
                     <Badge variant="outline" className="text-muted-foreground">
-                      {session.duration} min
+                      {session.duration_minutes} min
                     </Badge>
                   </div>
                 ))}
+                {sessions.filter(s => s.status === 'scheduled').length === 0 && (
+                  <p className="text-muted-foreground text-center py-4">No upcoming sessions</p>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Weight Progress */}
-          <div className="card-elevated p-6">
-            <h3 className="font-display font-bold text-foreground mb-4">Weight Progress</h3>
-            <div className="flex flex-wrap items-center gap-4 mb-4">
-              <span className="text-muted-foreground">Starting: {client.startingWeight}kg</span>
-              <span className="text-muted-foreground">→</span>
-              <span className="text-foreground font-medium">Current: {client.currentWeight}kg</span>
-              <span className="text-muted-foreground">→</span>
-              <span className="text-primary font-medium">Target: {client.targetWeight}kg</span>
-            </div>
-            <Progress value={weightProgress} className="h-3" />
-            <p className="text-sm text-muted-foreground mt-2">
-              {client.currentWeight - client.targetWeight}kg to go • {Math.round(weightProgress)}% progress
-            </p>
-          </div>
+          {/* Recent Progress */}
+          {chartData.length > 0 && (
+            <ProgressChart title="Recent Progress" data={chartData} />
+          )}
         </TabsContent>
 
         {/* Sessions Tab */}
@@ -287,7 +346,7 @@ const CoachClientDetail = () => {
             {/* Calendar */}
             <div className="lg:col-span-1">
               <SessionCalendar 
-                sessions={client.calendarSessions}
+                sessions={calendarSessions}
                 onDateClick={(date) => console.log("Date clicked:", date)}
                 onSessionClick={handleCalendarSessionClick}
               />
@@ -303,7 +362,7 @@ const CoachClientDetail = () => {
                 </Button>
               </div>
               <div className="divide-y divide-border">
-                {client.sessionHistory.map((session) => (
+                {sessions.map((session) => (
                   <div 
                     key={session.id} 
                     className="p-4 flex items-center justify-between hover:bg-secondary/30 transition-colors cursor-pointer"
@@ -311,28 +370,38 @@ const CoachClientDetail = () => {
                   >
                     <div className="flex items-center gap-4">
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                        session.status === 'completed' ? 'bg-success/10' : 'bg-destructive/10'
+                        session.status === 'completed' ? 'bg-success/10' : 
+                        session.status === 'cancelled' ? 'bg-destructive/10' : 'bg-primary/10'
                       }`}>
                         <Activity className={`w-5 h-5 ${
-                          session.status === 'completed' ? 'text-success' : 'text-destructive'
+                          session.status === 'completed' ? 'text-success' : 
+                          session.status === 'cancelled' ? 'text-destructive' : 'text-primary'
                         }`} />
                       </div>
                       <div>
-                        <p className="font-medium text-foreground">{session.type}</p>
-                        <p className="text-sm text-muted-foreground">{session.date.toLocaleDateString()}</p>
+                        <p className="font-medium text-foreground">{session.session_type}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {format(new Date(session.scheduled_at), 'MMM d, yyyy')}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <span className="text-muted-foreground">{session.duration} min</span>
+                      <span className="text-muted-foreground">{session.duration_minutes} min</span>
                       <Badge className={
                         session.status === 'completed' ? 'bg-success/20 text-success border-success/30' :
-                        'bg-destructive/20 text-destructive border-destructive/30'
+                        session.status === 'cancelled' ? 'bg-destructive/20 text-destructive border-destructive/30' :
+                        'bg-primary/20 text-primary border-primary/30'
                       }>
                         {session.status}
                       </Badge>
                     </div>
                   </div>
                 ))}
+                {sessions.length === 0 && (
+                  <div className="p-8 text-center text-muted-foreground">
+                    No sessions yet
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -347,27 +416,33 @@ const CoachClientDetail = () => {
             </Button>
           </div>
 
-          {/* Progress Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <ProgressChart 
-              title="Weight & Body Composition" 
-              data={client.progressData} 
-            />
-            <ProgressChart 
-              title="Body Fat Trend" 
-              data={client.progressData} 
-            />
-          </div>
+          {chartData.length > 0 ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <ProgressChart title="Weight & Body Composition" data={chartData} />
+              <ProgressChart title="Body Fat Trend" data={chartData} />
+            </div>
+          ) : (
+            <div className="card-elevated p-12 text-center">
+              <Scale className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground mb-4">No progress data logged yet</p>
+              <Button onClick={() => setIsAddProgressOpen(true)} variant="outline">
+                <Plus className="w-4 h-4 mr-2" />
+                Log First Progress Entry
+              </Button>
+            </div>
+          )}
 
           {/* Goals Progress */}
-          <div className="card-elevated p-6">
-            <h3 className="font-display font-bold text-foreground mb-4">Goal Progress</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {client.goals.map((goal) => (
-                <GoalProgressCard key={goal.id} goal={goal} />
-              ))}
+          {goals.length > 0 && (
+            <div className="card-elevated p-6">
+              <h3 className="font-display font-bold text-foreground mb-4">Goal Progress</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {goals.map((goal) => (
+                  <GoalProgressCard key={goal.id} goal={goal} />
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </TabsContent>
 
         {/* Plans Tab */}
@@ -379,36 +454,42 @@ const CoachClientDetail = () => {
             </Button>
           </div>
 
-          {client.assignedPlans.length > 0 ? (
+          {planAssignments.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {client.assignedPlans.map((plan) => (
-                <div key={plan.id} className="card-elevated p-6">
+              {planAssignments.map((assignment) => (
+                <div key={assignment.id} className="card-elevated p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                        plan.type === 'workout' ? 'bg-primary/10' : 'bg-accent/10'
+                        assignment.training_plan?.plan_type === 'workout' ? 'bg-primary/10' : 'bg-accent/10'
                       }`}>
-                        {plan.type === 'workout' ? (
+                        {assignment.training_plan?.plan_type === 'workout' ? (
                           <Dumbbell className="w-5 h-5 text-primary" />
                         ) : (
                           <FileText className="w-5 h-5 text-accent" />
                         )}
                       </div>
                       <div>
-                        <h4 className="font-medium text-foreground">{plan.name}</h4>
-                        <p className="text-sm text-muted-foreground capitalize">{plan.type} Plan</p>
+                        <h4 className="font-medium text-foreground">{assignment.training_plan?.name}</h4>
+                        <p className="text-sm text-muted-foreground capitalize">
+                          {assignment.training_plan?.plan_type} Plan
+                        </p>
                       </div>
                     </div>
-                    <Badge className="bg-success/20 text-success border-success/30">{plan.status}</Badge>
+                    <Badge className={
+                      assignment.status === 'active' ? 'bg-success/20 text-success border-success/30' :
+                      'bg-muted text-muted-foreground'
+                    }>
+                      {assignment.status}
+                    </Badge>
                   </div>
-                  <div className="mb-2">
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-muted-foreground">Progress</span>
-                      <span className="text-foreground">{plan.progress}%</span>
-                    </div>
-                    <Progress value={plan.progress} className="h-2" />
-                  </div>
-                  <p className="text-sm text-muted-foreground">Started: {plan.startDate}</p>
+                  {assignment.training_plan?.description && (
+                    <p className="text-sm text-muted-foreground mb-3">{assignment.training_plan.description}</p>
+                  )}
+                  <p className="text-sm text-muted-foreground">
+                    Assigned: {format(new Date(assignment.assigned_at), 'MMM d, yyyy')}
+                    {assignment.training_plan?.duration_weeks && ` • ${assignment.training_plan.duration_weeks} weeks`}
+                  </p>
                 </div>
               ))}
             </div>
@@ -433,18 +514,29 @@ const CoachClientDetail = () => {
             </Button>
           </div>
 
-          <div className="space-y-4">
-            {client.notes
-              .sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0))
-              .map((note) => (
-                <NoteCard 
-                  key={note.id} 
-                  note={note} 
-                  onEdit={() => {}} 
-                  onDelete={() => {}} 
-                />
-              ))}
-          </div>
+          {formattedNotes.length > 0 ? (
+            <div className="space-y-4">
+              {formattedNotes
+                .sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0))
+                .map((note) => (
+                  <NoteCard 
+                    key={note.id} 
+                    note={note} 
+                    onEdit={() => {}} 
+                    onDelete={() => {}} 
+                  />
+                ))}
+            </div>
+          ) : (
+            <div className="card-elevated p-12 text-center">
+              <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground mb-4">No notes yet</p>
+              <Button onClick={() => setIsAddNoteOpen(true)} variant="outline">
+                <Plus className="w-4 h-4 mr-2" />
+                Add First Note
+              </Button>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
 
@@ -452,7 +544,8 @@ const CoachClientDetail = () => {
       <ScheduleSessionModal 
         open={isScheduleSessionOpen} 
         onOpenChange={setIsScheduleSessionOpen}
-        clientName={client.name}
+        clientName={fullName}
+        clientId={id}
       />
 
       <SessionDetailModal 
@@ -467,19 +560,22 @@ const CoachClientDetail = () => {
       <AddNoteModal 
         open={isAddNoteOpen} 
         onOpenChange={setIsAddNoteOpen}
-        clientName={client.name}
+        clientName={fullName}
+        clientId={id}
       />
 
       <AddProgressModal 
         open={isAddProgressOpen} 
         onOpenChange={setIsAddProgressOpen}
-        clientName={client.name}
+        clientName={fullName}
+        clientId={id}
       />
 
       <AssignPlanModal 
         open={isAssignPlanOpen} 
         onOpenChange={setIsAssignPlanOpen}
-        clientName={client.name}
+        clientName={fullName}
+        clientId={id}
       />
     </DashboardLayout>
   );

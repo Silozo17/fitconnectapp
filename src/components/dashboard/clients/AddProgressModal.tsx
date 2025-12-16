@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { TrendingUp, Scale, Ruler } from "lucide-react";
-import { toast } from "sonner";
+import { useAddProgress } from "@/hooks/useCoachClients";
 
 interface AddProgressModalProps {
   open: boolean;
@@ -14,8 +14,7 @@ interface AddProgressModalProps {
   clientId?: string;
 }
 
-export function AddProgressModal({ open, onOpenChange, clientName }: AddProgressModalProps) {
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+export function AddProgressModal({ open, onOpenChange, clientName, clientId }: AddProgressModalProps) {
   const [weight, setWeight] = useState("");
   const [bodyFat, setBodyFat] = useState("");
   const [chest, setChest] = useState("");
@@ -24,22 +23,36 @@ export function AddProgressModal({ open, onOpenChange, clientName }: AddProgress
   const [arms, setArms] = useState("");
   const [legs, setLegs] = useState("");
   const [notes, setNotes] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  
+  const addProgressMutation = useAddProgress();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    if (!clientId) return;
+
+    const measurements: Record<string, number> = {};
+    if (chest) measurements.chest = parseFloat(chest);
+    if (waist) measurements.waist = parseFloat(waist);
+    if (hips) measurements.hips = parseFloat(hips);
+    if (arms) measurements.arms = parseFloat(arms);
+    if (legs) measurements.legs = parseFloat(legs);
     
-    toast.success("Progress recorded successfully");
-    resetForm();
-    setIsLoading(false);
-    onOpenChange(false);
+    addProgressMutation.mutate({
+      clientId,
+      weightKg: weight ? parseFloat(weight) : undefined,
+      bodyFatPercentage: bodyFat ? parseFloat(bodyFat) : undefined,
+      measurements: Object.keys(measurements).length > 0 ? measurements : undefined,
+      notes: notes || undefined,
+    }, {
+      onSuccess: () => {
+        resetForm();
+        onOpenChange(false);
+      },
+    });
   };
 
   const resetForm = () => {
-    setDate(new Date().toISOString().split('T')[0]);
     setWeight("");
     setBodyFat("");
     setChest("");
@@ -61,18 +74,6 @@ export function AddProgressModal({ open, onOpenChange, clientName }: AddProgress
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="date">Date</Label>
-            <Input
-              id="date"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="bg-background border-border"
-              required
-            />
-          </div>
-
           <div className="p-4 rounded-lg bg-background border border-border space-y-4">
             <div className="flex items-center gap-2 text-sm font-medium text-foreground">
               <Scale className="h-4 w-4 text-primary" />
@@ -195,8 +196,8 @@ export function AddProgressModal({ open, onOpenChange, clientName }: AddProgress
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Saving..." : "Save Progress"}
+            <Button type="submit" disabled={addProgressMutation.isPending || !clientId}>
+              {addProgressMutation.isPending ? "Saving..." : "Save Progress"}
             </Button>
           </DialogFooter>
         </form>
