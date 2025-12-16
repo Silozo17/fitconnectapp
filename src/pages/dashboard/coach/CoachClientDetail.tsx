@@ -28,6 +28,7 @@ import { ProgressChart } from "@/components/dashboard/clients/ProgressChart";
 import { GoalProgressCard } from "@/components/dashboard/clients/GoalProgressCard";
 import { NoteCard } from "@/components/dashboard/clients/NoteCard";
 import { SessionCalendar } from "@/components/dashboard/clients/SessionCalendar";
+import { HealthProfileCard } from "@/components/dashboard/clients/HealthProfileCard";
 import { 
   useClientDetail, 
   useClientSessions, 
@@ -333,6 +334,13 @@ const CoachClientDetail = () => {
               </div>
             </div>
           </div>
+
+          {/* Health Profile */}
+          <HealthProfileCard
+            dietaryRestrictions={client?.dietary_restrictions}
+            allergies={client?.allergies}
+            medicalConditions={client?.medical_conditions}
+          />
 
           {/* Recent Progress */}
           {chartData.length > 0 && (
