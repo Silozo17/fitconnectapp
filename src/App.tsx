@@ -13,6 +13,9 @@ import Auth from "./pages/Auth";
 import ClientOnboarding from "./pages/onboarding/ClientOnboarding";
 import CoachOnboarding from "./pages/onboarding/CoachOnboarding";
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
+import AdminUsers from "./pages/dashboard/admin/AdminUsers";
+import AdminCoaches from "./pages/dashboard/admin/AdminCoaches";
+import AdminSettings from "./pages/dashboard/admin/AdminSettings";
 
 // Client Dashboard Pages
 import ClientOverview from "./pages/dashboard/client/ClientOverview";
@@ -72,6 +75,21 @@ const App = () => (
                 <Route path="/dashboard/admin" element={
                   <ProtectedRoute allowedRoles={["admin"]}>
                     <AdminDashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/admin/users" element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminUsers />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/admin/coaches" element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminCoaches />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/admin/settings" element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminSettings />
                   </ProtectedRoute>
                 } />
                 
