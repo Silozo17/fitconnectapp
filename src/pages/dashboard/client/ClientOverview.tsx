@@ -5,6 +5,7 @@ import { useActiveProfile } from "@/hooks/useActiveProfile";
 import { supabase } from "@/integrations/supabase/client";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 import { AvatarStatsHero } from "@/components/dashboard/AvatarStatsHero";
+import UserConnectionRequests from "@/components/dashboard/client/UserConnectionRequests";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -164,6 +165,9 @@ const ClientOverview = () => {
     >
       {/* Avatar Stats Hero */}
       <AvatarStatsHero firstName={firstName} />
+
+      {/* Friend Requests */}
+      <UserConnectionRequests />
 
       {/* Quick Actions Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
