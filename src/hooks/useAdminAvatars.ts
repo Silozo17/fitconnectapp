@@ -89,7 +89,7 @@ export function useGrantAvatar() {
         .insert({
           user_id: userId,
           avatar_id: avatarId,
-          unlock_source: 'admin_grant',
+        unlock_source: 'manual_grant',
         })
         .select('*, avatar:avatars(*)')
         .single();
@@ -144,7 +144,7 @@ export function useGrantMultipleAvatars() {
       const insertData = avatarIds.map(avatarId => ({
         user_id: userId,
         avatar_id: avatarId,
-        unlock_source: 'admin_grant',
+        unlock_source: 'manual_grant',
       }));
       
       const { data, error } = await supabase
