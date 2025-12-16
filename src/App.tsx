@@ -50,6 +50,9 @@ import CoachSettings from "./pages/dashboard/coach/CoachSettings";
 import CoachPackages from "./pages/dashboard/coach/CoachPackages";
 import CoachReviews from "./pages/dashboard/coach/CoachReviews";
 
+// Shared Dashboard Pages
+import Notifications from "./pages/dashboard/Notifications";
+
 // Public Pages
 import About from "./pages/About";
 import FAQ from "./pages/FAQ";
@@ -201,6 +204,11 @@ const App = () => (
                     <ClientSettings />
                   </ProtectedRoute>
                 } />
+                <Route path="/dashboard/client/notifications" element={
+                  <ProtectedRoute allowedRoles={["client", "admin"]}>
+                    <Notifications />
+                  </ProtectedRoute>
+                } />
               
                 {/* Coach Dashboard Routes */}
                 <Route path="/dashboard/coach" element={
@@ -271,6 +279,16 @@ const App = () => (
                 <Route path="/dashboard/coach/settings" element={
                   <ProtectedRoute allowedRoles={["coach"]}>
                     <CoachSettings />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/coach/notifications" element={
+                  <ProtectedRoute allowedRoles={["coach"]}>
+                    <Notifications />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/notifications" element={
+                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
+                    <Notifications />
                   </ProtectedRoute>
                 } />
               
