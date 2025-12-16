@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
-import { SUBSCRIPTION_TIERS, TierKey, normalizeTier } from "@/lib/stripe-config";
+import { SUBSCRIPTION_TIERS, TierKey, normalizeTier, getTierPosition } from "@/lib/stripe-config";
 
 interface PlatformSubscriptionProps {
   coachId: string;
@@ -36,7 +36,6 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   });
 
   const handleSubscribe = (tierKey: TierKey) => {
-    // Navigate to the unified subscribe page with tier pre-selected
     navigate(`/subscribe?tier=${tierKey}&billing=monthly`);
   };
 
@@ -70,6 +69,18 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   };
 
   const activeTier = normalizeTier(subscription?.tier || currentTier);
+  const currentPosition = getTierPosition(activeTier);
+
+  const getButtonConfig = (tierKey: TierKey) => {
+    const targetPosition = getTierPosition(tierKey);
+    if (targetPosition > currentPosition) {
+      return { text: "Upgrade", variant: "default" as const };
+    }
+    if (targetPosition < currentPosition) {
+      return { text: "Downgrade", variant: "outline" as const };
+    }
+    return { text: "Current", variant: "outline" as const };
+  };
 
   return (
     <Card>
@@ -83,12 +94,13 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {(Object.entries(SUBSCRIPTION_TIERS) as [TierKey, typeof SUBSCRIPTION_TIERS[TierKey]][])
-            .filter(([tierKey]) => tierKey !== "free") // Don't show free tier as an option to subscribe to
             .map(([tierKey, tier]) => {
               const isCurrentTier = activeTier === tierKey;
               const isLoading = loadingTier === tierKey;
+              const buttonConfig = getButtonConfig(tierKey);
+              const isFreeToFree = tierKey === "free" && activeTier === "free";
 
               return (
                 <div
@@ -110,8 +122,12 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
                   
                   <h3 className="font-semibold text-lg mb-1">{tier.name}</h3>
                   <div className="flex items-baseline gap-1 mb-4">
-                    <span className="text-3xl font-bold">£{tier.prices.monthly.amount}</span>
-                    <span className="text-muted-foreground">/month</span>
+                    <span className="text-3xl font-bold">
+                      {tier.prices.monthly.amount === 0 ? "Free" : `£${tier.prices.monthly.amount}`}
+                    </span>
+                    {tier.prices.monthly.amount > 0 && (
+                      <span className="text-muted-foreground">/month</span>
+                    )}
                   </div>
 
                   <ul className="space-y-2 mb-4">
@@ -124,6 +140,22 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
                   </ul>
 
                   {isCurrentTier ? (
+                    activeTier !== "free" ? (
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleManageSubscription}
+                        disabled={loadingTier === "manage"}
+                      >
+                        {loadingTier === "manage" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                        Manage Subscription
+                      </Button>
+                    ) : (
+                      <Button variant="outline" className="w-full" disabled>
+                        Current Plan
+                      </Button>
+                    )
+                  ) : tierKey === "free" ? (
                     <Button
                       variant="outline"
                       className="w-full"
@@ -131,17 +163,17 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
                       disabled={loadingTier === "manage"}
                     >
                       {loadingTier === "manage" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                      Manage Subscription
+                      Downgrade
                     </Button>
                   ) : (
                     <Button
-                      variant={tier.highlighted ? "default" : "outline"}
+                      variant={buttonConfig.variant}
                       className="w-full"
                       onClick={() => handleSubscribe(tierKey)}
                       disabled={!!loadingTier}
                     >
                       {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                      {activeTier === "free" ? "Subscribe" : "Upgrade"}
+                      {buttonConfig.text}
                     </Button>
                   )}
                 </div>
