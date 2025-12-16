@@ -1,18 +1,19 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useUserProfile } from "@/hooks/useUserProfile";
+import { useUserProfile, checkUsernameAvailable } from "@/hooks/useUserProfile";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProfileImageUpload } from "@/components/shared/ProfileImageUpload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, AtSign, Copy, Check, Mail, Calendar, MapPin } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Loader2, AtSign, Copy, Check, Mail, Calendar, MapPin, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-import { checkUsernameAvailable } from "@/hooks/useUserProfile";
 import { format } from "date-fns";
 
 const MyProfile = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { 
     profile, 
@@ -114,6 +115,16 @@ const MyProfile = () => {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-3xl mx-auto space-y-6">
+        {/* Back Button */}
+        <Button
+          variant="ghost"
+          onClick={() => navigate(-1)}
+          className="mb-2"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+
         <div>
           <h1 className="font-display text-2xl font-bold text-foreground">My Profile</h1>
           <p className="text-muted-foreground">Manage your personal information across all roles</p>

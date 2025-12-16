@@ -24,7 +24,7 @@ import { SidebarBadge } from "@/components/shared/SidebarBadge";
 
 type BadgeKey = "messages" | "pipeline" | "schedule" | "clients";
 
-import { User } from "lucide-react";
+
 
 const menuItems: { title: string; icon: typeof LayoutDashboard; path: string; badgeKey?: BadgeKey; badgeVariant?: "default" | "warning" | "urgent" }[] = [
   { title: "Overview", icon: LayoutDashboard, path: "/dashboard/coach" },
@@ -42,7 +42,6 @@ const menuItems: { title: string; icon: typeof LayoutDashboard; path: string; ba
 ];
 
 const bottomItems: { title: string; icon: typeof LayoutDashboard; path: string }[] = [
-  { title: "My Profile", icon: User, path: "/dashboard/profile" },
   { title: "Settings", icon: Settings, path: "/dashboard/coach/settings" },
 ];
 

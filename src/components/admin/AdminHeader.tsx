@@ -1,7 +1,8 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { Button } from "@/components/ui/button";
-import { LogOut, Search } from "lucide-react";
+import { LogOut, Search, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import ViewSwitcher from "./ViewSwitcher";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
@@ -16,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const AdminHeader = () => {
+  const navigate = useNavigate();
   const { signOut, role } = useAuth();
   const { displayName, avatarUrl } = useUserProfile();
 
@@ -56,6 +58,10 @@ const AdminHeader = () => {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
+              <User className="h-4 w-4 mr-2" />
+              My Profile
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={signOut}>
               <LogOut className="h-4 w-4 mr-2" />
               Sign Out

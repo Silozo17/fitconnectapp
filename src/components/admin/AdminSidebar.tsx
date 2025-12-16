@@ -1,7 +1,7 @@
 import { NavLink } from "@/components/NavLink";
 import { 
   LayoutDashboard, Users, Dumbbell, Settings, ChevronLeft, ChevronRight, 
-  UsersRound, DollarSign, BarChart3, User,
+  UsersRound, DollarSign, BarChart3,
   MessageSquare, Shield, Trophy, FileText
 } from "lucide-react";
 import { useState } from "react";
@@ -38,7 +38,6 @@ const platformNavItems: NavItem[] = [
 ];
 
 const bottomNavItems: NavItem[] = [
-  { title: "My Profile", url: "/dashboard/profile", icon: User },
   { title: "Settings", url: "/dashboard/admin/settings", icon: Settings },
 ];
 
