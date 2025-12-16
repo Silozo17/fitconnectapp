@@ -3151,6 +3151,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      notify_admins: {
+        Args: {
+          p_data?: Json
+          p_message: string
+          p_title: string
+          p_type: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "client" | "coach" | "admin" | "manager" | "staff"
