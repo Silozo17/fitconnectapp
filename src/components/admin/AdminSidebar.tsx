@@ -38,7 +38,7 @@ const platformNavItems: NavItem[] = [
 ];
 
 const bottomNavItems: NavItem[] = [
-  { title: "My Profile", url: "/dashboard/admin/profile", icon: User },
+  { title: "My Profile", url: "/dashboard/profile", icon: User },
   { title: "Settings", url: "/dashboard/admin/settings", icon: Settings },
 ];
 
