@@ -1,8 +1,16 @@
-import { useMessages } from "@/hooks/useMessages";
+import { useMessages, Conversation } from "@/hooks/useMessages";
 import { formatDistanceToNow } from "date-fns";
-import { MessageSquare, Loader2, User, Briefcase, AlertCircle } from "lucide-react";
+import { MessageSquare, Loader2, User, Briefcase, AlertCircle, Shield, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useState } from "react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 interface ConversationListProps {
   activeConversationId?: string;
@@ -11,8 +19,29 @@ interface ConversationListProps {
 const ConversationList = ({ activeConversationId }: ConversationListProps) => {
   const { conversations, loading, error } = useMessages();
   const { role } = useAuth();
+  const [selectedProfile, setSelectedProfile] = useState<Conversation | null>(null);
   
   const basePath = role === "coach" ? "/dashboard/coach/messages" : "/dashboard/client/messages";
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const getTypeIcon = (type: "client" | "coach" | "admin") => {
+    switch (type) {
+      case "coach":
+        return <Briefcase className="w-3 h-3" />;
+      case "admin":
+        return <Shield className="w-3 h-3" />;
+      default:
+        return <User className="w-3 h-3" />;
+    }
+  };
 
   if (loading) {
     return (
@@ -47,48 +76,113 @@ const ConversationList = ({ activeConversationId }: ConversationListProps) => {
   }
 
   return (
-    <div className="divide-y divide-border">
-      {conversations.map((conversation) => (
-        <Link
-          key={conversation.participantId}
-          to={`${basePath}/${conversation.participantId}`}
-          className={`block p-4 hover:bg-muted/50 transition-colors ${
-            activeConversationId === conversation.participantId ? "bg-muted" : ""
-          }`}
-        >
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-              {conversation.participantType === "coach" ? (
-                <Briefcase className="w-5 h-5 text-primary" />
-              ) : (
-                <User className="w-5 h-5 text-primary" />
+    <>
+      <div className="divide-y divide-border">
+        {conversations.map((conversation) => (
+          <div
+            key={conversation.participantId}
+            className={`block p-4 hover:bg-muted/50 transition-colors ${
+              activeConversationId === conversation.participantId ? "bg-muted" : ""
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              {/* Clickable Avatar for Profile View */}
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  setSelectedProfile(conversation);
+                }}
+                className="flex-shrink-0 hover:opacity-80 transition-opacity"
+                title="View profile"
+              >
+                <Avatar className="w-10 h-10 ring-2 ring-primary/20">
+                  <AvatarImage src={conversation.participantAvatar || undefined} />
+                  <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                    {getInitials(conversation.participantName)}
+                  </AvatarFallback>
+                </Avatar>
+              </button>
+              
+              {/* Clickable Content for Chat */}
+              <Link
+                to={`${basePath}/${conversation.participantId}`}
+                className="flex-1 min-w-0"
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-foreground truncate">
+                      {conversation.participantName}
+                    </span>
+                    <span className="text-muted-foreground">
+                      {getTypeIcon(conversation.participantType)}
+                    </span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {formatDistanceToNow(new Date(conversation.lastMessageTime), { addSuffix: true })}
+                  </span>
+                </div>
+                
+                <p className="text-sm text-muted-foreground truncate">
+                  {conversation.lastMessage}
+                </p>
+              </Link>
+
+              {conversation.unreadCount > 0 && (
+                <div className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center flex-shrink-0">
+                  {conversation.unreadCount}
+                </div>
               )}
             </div>
-            
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-1">
-                <span className="font-medium text-foreground truncate">
-                  {conversation.participantName}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {formatDistanceToNow(new Date(conversation.lastMessageTime), { addSuffix: true })}
-                </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Profile Preview Sheet */}
+      <Sheet open={!!selectedProfile} onOpenChange={() => setSelectedProfile(null)}>
+        <SheetContent side="right" className="w-[320px] sm:w-[400px]">
+          <SheetHeader>
+            <SheetTitle>Profile</SheetTitle>
+          </SheetHeader>
+          
+          {selectedProfile && (
+            <div className="mt-6 flex flex-col items-center text-center">
+              <Avatar className="w-24 h-24 mb-4 ring-4 ring-primary/20">
+                <AvatarImage src={selectedProfile.participantAvatar || undefined} />
+                <AvatarFallback className="bg-primary/10 text-primary text-2xl">
+                  {getInitials(selectedProfile.participantName)}
+                </AvatarFallback>
+              </Avatar>
+              
+              <h3 className="text-xl font-semibold text-foreground">
+                {selectedProfile.participantName}
+              </h3>
+              
+              <div className="flex items-center gap-1 mt-1 text-muted-foreground text-sm">
+                {getTypeIcon(selectedProfile.participantType)}
+                <span className="capitalize">{selectedProfile.participantType}</span>
               </div>
               
-              <p className="text-sm text-muted-foreground truncate">
-                {conversation.lastMessage}
-              </p>
-            </div>
-
-            {conversation.unreadCount > 0 && (
-              <div className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center flex-shrink-0">
-                {conversation.unreadCount}
+              {selectedProfile.participantLocation && (
+                <div className="flex items-center gap-1 mt-2 text-muted-foreground text-sm">
+                  <MapPin className="w-4 h-4" />
+                  <span>{selectedProfile.participantLocation}</span>
+                </div>
+              )}
+              
+              <div className="mt-6 w-full">
+                <Link
+                  to={`${basePath}/${selectedProfile.participantId}`}
+                  className="block w-full py-2 px-4 bg-primary text-primary-foreground rounded-md text-center hover:bg-primary/90 transition-colors"
+                  onClick={() => setSelectedProfile(null)}
+                >
+                  Open Chat
+                </Link>
               </div>
-            )}
-          </div>
-        </Link>
-      ))}
-    </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
+    </>
   );
 };
 
