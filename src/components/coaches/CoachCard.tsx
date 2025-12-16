@@ -22,7 +22,7 @@ const CoachCard = ({ coach, onBook, onRequestConnection }: CoachCardProps) => {
   const { user, role } = useAuth();
   const navigate = useNavigate();
 
-  const isClient = user && role === "client";
+  const isClient = user && (role === "client" || role === "admin");
   const isAuthenticated = !!user;
 
   const handleMessage = (e: React.MouseEvent) => {
@@ -33,7 +33,7 @@ const CoachCard = ({ coach, onBook, onRequestConnection }: CoachCardProps) => {
       return;
     }
     // Navigate to messages with this coach
-    navigate(`/dashboard/client/messages?coach=${coach.id}`);
+    navigate(`/dashboard/client/messages/${coach.id}`);
   };
 
   const handleBook = (e: React.MouseEvent) => {
