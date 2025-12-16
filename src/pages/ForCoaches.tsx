@@ -115,8 +115,8 @@ const ForCoaches = () => {
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 overflow-hidden">
         <div className="absolute inset-0 -z-10">
-          <BlobShape className="absolute -top-40 -right-40 w-[600px] h-[600px] opacity-30" variant="primary" />
-          <BlobShape className="absolute -bottom-40 -left-40 w-[500px] h-[500px] opacity-20" variant="secondary" />
+          <BlobShape className="absolute -top-40 -right-40 w-[600px] h-[600px] opacity-30" variant="pink" />
+          <BlobShape className="absolute -bottom-40 -left-40 w-[500px] h-[500px] opacity-20" variant="teal" />
         </div>
         
         <div className="container mx-auto px-4">
@@ -202,7 +202,7 @@ const ForCoaches = () => {
                   </div>
                 </CardContent>
               </Card>
-              <BlobShape className="absolute -bottom-10 -right-10 w-32 h-32 opacity-50 -z-10" variant="accent" />
+              <BlobShape className="absolute -bottom-10 -right-10 w-32 h-32 opacity-50 -z-10" variant="orange" />
             </div>
           </div>
         </div>
