@@ -1292,6 +1292,50 @@ export type Database = {
           },
         ]
       }
+      contact_submissions: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          message: string
+          name: string
+          responded_at: string | null
+          responded_by: string | null
+          status: string | null
+          subject: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          message: string
+          name: string
+          responded_at?: string | null
+          responded_by?: string | null
+          status?: string | null
+          subject: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          responded_at?: string | null
+          responded_by?: string | null
+          status?: string | null
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_submissions_responded_by_fkey"
+            columns: ["responded_by"]
+            isOneToOne: false
+            referencedRelation: "admin_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_purchases: {
         Row: {
           access_expires_at: string | null
@@ -2055,6 +2099,30 @@ export type Database = {
           read_at?: string | null
           receiver_id?: string
           sender_id?: string
+        }
+        Relationships: []
+      }
+      newsletter_subscribers: {
+        Row: {
+          email: string
+          id: string
+          source: string | null
+          subscribed_at: string | null
+          unsubscribed_at: string | null
+        }
+        Insert: {
+          email: string
+          id?: string
+          source?: string | null
+          subscribed_at?: string | null
+          unsubscribed_at?: string | null
+        }
+        Update: {
+          email?: string
+          id?: string
+          source?: string | null
+          subscribed_at?: string | null
+          unsubscribed_at?: string | null
         }
         Relationships: []
       }
