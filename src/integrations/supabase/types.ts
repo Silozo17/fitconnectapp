@@ -113,6 +113,10 @@ export type Database = {
           id: string
           last_name: string | null
           phone: string | null
+          status: string | null
+          status_reason: string | null
+          status_updated_at: string | null
+          status_updated_by: string | null
           updated_at: string
           user_id: string
           users_last_viewed_at: string | null
@@ -128,6 +132,10 @@ export type Database = {
           id?: string
           last_name?: string | null
           phone?: string | null
+          status?: string | null
+          status_reason?: string | null
+          status_updated_at?: string | null
+          status_updated_by?: string | null
           updated_at?: string
           user_id: string
           users_last_viewed_at?: string | null
@@ -143,6 +151,10 @@ export type Database = {
           id?: string
           last_name?: string | null
           phone?: string | null
+          status?: string | null
+          status_reason?: string | null
+          status_updated_at?: string | null
+          status_updated_by?: string | null
           updated_at?: string
           user_id?: string
           users_last_viewed_at?: string | null
