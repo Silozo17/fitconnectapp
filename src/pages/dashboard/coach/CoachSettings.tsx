@@ -594,13 +594,7 @@ const CoachSettings = () => {
             {/* Services & Pricing Tab */}
             {selectedTab === "services" && (
               <div className="card-elevated p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="font-display font-bold text-foreground">Services & Pricing</h2>
-                  <Button size="sm" variant="outline" onClick={() => navigate("/dashboard/coach/schedule?tab=availability")}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Service
-                  </Button>
-                </div>
+                <h2 className="font-display font-bold text-foreground mb-6">Services & Pricing</h2>
 
                 <div className="space-y-6">
                   {/* Currency Selection */}
