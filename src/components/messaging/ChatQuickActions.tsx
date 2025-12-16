@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { DollarSign, Calendar, CreditCard, ChevronDown, Loader2 } from "lucide-react";
+import { 
+  DollarSign, 
+  Calendar, 
+  CreditCard, 
+  Loader2, 
+  FileText 
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -15,10 +15,18 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 import { useSessionTypes } from "@/hooks/useCoachSchedule";
+import { useMessageTemplates } from "@/hooks/useMessageTemplates";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface ChatQuickActionsProps {
@@ -29,12 +37,14 @@ interface ChatQuickActionsProps {
 const ChatQuickActions = ({ coachId, onSendMessage }: ChatQuickActionsProps) => {
   const [showPricingDialog, setShowPricingDialog] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [showTemplatesPopover, setShowTemplatesPopover] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState("");
   const [paymentDescription, setPaymentDescription] = useState("");
   const [sending, setSending] = useState(false);
   const { role } = useAuth();
 
   const { data: sessionTypes = [] } = useSessionTypes(coachId);
+  const { templates, loading: templatesLoading } = useMessageTemplates();
 
   const isCoach = role === "coach";
 
@@ -45,7 +55,7 @@ const ChatQuickActions = ({ coachId, onSendMessage }: ChatQuickActionsProps) => 
     
     if (sessionTypes.length > 0) {
       sessionTypes.forEach(type => {
-        pricingMessage += `• **${type.name}** - ${type.duration_minutes} min - $${type.price}\n`;
+        pricingMessage += `• **${type.name}** - ${type.duration_minutes} min - £${type.price}\n`;
         if (type.description) {
           pricingMessage += `  _${type.description}_\n`;
         }
@@ -70,7 +80,7 @@ const ChatQuickActions = ({ coachId, onSendMessage }: ChatQuickActionsProps) => 
     if (!paymentAmount) return;
     
     setSending(true);
-    const paymentMessage = `💳 **Payment Request**\n\nAmount: $${paymentAmount}\n${paymentDescription ? `For: ${paymentDescription}\n` : ""}\n_Payment processing coming soon. For now, please arrange payment directly._`;
+    const paymentMessage = `💳 **Payment Request**\n\nAmount: £${paymentAmount}\n${paymentDescription ? `For: ${paymentDescription}\n` : ""}\n_Payment processing coming soon. For now, please arrange payment directly._`;
     await onSendMessage(paymentMessage);
     setSending(false);
     setShowPaymentDialog(false);
@@ -78,43 +88,122 @@ const ChatQuickActions = ({ coachId, onSendMessage }: ChatQuickActionsProps) => 
     setPaymentDescription("");
   };
 
+  const handleUseTemplate = async (content: string) => {
+    setSending(true);
+    await onSendMessage(content);
+    setSending(false);
+    setShowTemplatesPopover(false);
+  };
+
+  // Group templates by category
+  const groupedTemplates = templates.reduce((acc, template) => {
+    const category = template.category || "general";
+    if (!acc[category]) acc[category] = [];
+    acc[category].push(template);
+    return acc;
+  }, {} as Record<string, typeof templates>);
+
   // Only show quick actions for coaches
   if (!isCoach) return null;
 
   return (
     <>
-      <div className="flex items-center gap-2 px-4 py-2 border-t border-border bg-card/50">
-        <span className="text-xs text-muted-foreground mr-2">Quick Actions:</span>
+      <div className="flex items-center gap-2 px-4 py-2 border-t border-border bg-card/50 overflow-x-auto">
+        <span className="text-xs text-muted-foreground mr-2 flex-shrink-0">Quick:</span>
         
+        {/* Templates Popover */}
+        <Popover open={showTemplatesPopover} onOpenChange={setShowTemplatesPopover}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-xs flex-shrink-0"
+            >
+              <FileText className="h-3 w-3 mr-1" />
+              Templates
+              {templates.length > 0 && (
+                <Badge variant="secondary" className="ml-1 h-4 px-1 text-[10px]">
+                  {templates.length}
+                </Badge>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 p-0" align="start">
+            <div className="p-3 border-b border-border">
+              <h4 className="font-medium text-sm">Message Templates</h4>
+              <p className="text-xs text-muted-foreground">Click to send</p>
+            </div>
+            <ScrollArea className="max-h-64">
+              {templatesLoading ? (
+                <div className="flex items-center justify-center p-4">
+                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                </div>
+              ) : templates.length === 0 ? (
+                <div className="p-4 text-center">
+                  <p className="text-sm text-muted-foreground">No templates yet</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Create templates in Settings → Messages
+                  </p>
+                </div>
+              ) : (
+                <div className="p-2 space-y-3">
+                  {Object.entries(groupedTemplates).map(([category, categoryTemplates]) => (
+                    <div key={category}>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wide px-2 mb-1 capitalize">
+                        {category}
+                      </p>
+                      <div className="space-y-1">
+                        {categoryTemplates.map((template) => (
+                          <button
+                            key={template.id}
+                            onClick={() => handleUseTemplate(template.content)}
+                            disabled={sending}
+                            className="w-full text-left p-2 rounded-md hover:bg-muted transition-colors"
+                          >
+                            <p className="text-sm font-medium text-foreground">{template.name}</p>
+                            <p className="text-xs text-muted-foreground line-clamp-1">
+                              {template.content}
+                            </p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </ScrollArea>
+          </PopoverContent>
+        </Popover>
+
         <Button
           variant="outline"
           size="sm"
-          className="h-8 text-xs"
+          className="h-8 text-xs flex-shrink-0"
           onClick={() => setShowPricingDialog(true)}
         >
           <DollarSign className="h-3 w-3 mr-1" />
-          Send Pricing
+          Pricing
         </Button>
 
         <Button
           variant="outline"
           size="sm"
-          className="h-8 text-xs"
+          className="h-8 text-xs flex-shrink-0"
           onClick={handleSendBookingLink}
           disabled={sending}
         >
           <Calendar className="h-3 w-3 mr-1" />
-          Booking Link
+          Book
         </Button>
 
         <Button
           variant="outline"
           size="sm"
-          className="h-8 text-xs"
+          className="h-8 text-xs flex-shrink-0"
           onClick={() => setShowPaymentDialog(true)}
         >
           <CreditCard className="h-3 w-3 mr-1" />
-          Request Payment
+          Payment
         </Button>
       </div>
 
@@ -137,7 +226,7 @@ const ChatQuickActions = ({ coachId, onSendMessage }: ChatQuickActionsProps) => 
                       <p className="font-medium text-foreground">{type.name}</p>
                       <p className="text-xs text-muted-foreground">{type.duration_minutes} minutes</p>
                     </div>
-                    <p className="font-bold text-primary">${type.price}</p>
+                    <p className="font-bold text-primary">£{type.price}</p>
                   </div>
                 ))}
               </div>
@@ -171,7 +260,7 @@ const ChatQuickActions = ({ coachId, onSendMessage }: ChatQuickActionsProps) => 
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="amount">Amount ($)</Label>
+              <Label htmlFor="amount">Amount (£)</Label>
               <Input
                 id="amount"
                 type="number"
