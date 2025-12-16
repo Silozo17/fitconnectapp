@@ -97,11 +97,8 @@ export const SUBSCRIPTION_TIERS = {
     features: [
       "Everything in Pro, plus:",
       "Unlimited clients",
-      "API access",
       "Dedicated account manager",
-      "White-label options",
       "Custom integrations",
-      "Team management",
       "Advanced reporting",
       "Phone support",
     ],
