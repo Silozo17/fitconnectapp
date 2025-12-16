@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AdminProvider } from "@/contexts/AdminContext";
@@ -12,9 +12,16 @@ import Coaches from "./pages/Coaches";
 import Auth from "./pages/Auth";
 import ClientOnboarding from "./pages/onboarding/ClientOnboarding";
 import CoachOnboarding from "./pages/onboarding/CoachOnboarding";
-import ClientDashboard from "./pages/dashboard/ClientDashboard";
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
+
+// Client Dashboard Pages
+import ClientOverview from "./pages/dashboard/client/ClientOverview";
+import ClientCoaches from "./pages/dashboard/client/ClientCoaches";
+import ClientSessions from "./pages/dashboard/client/ClientSessions";
 import ClientMessages from "./pages/dashboard/client/ClientMessages";
+import ClientPlans from "./pages/dashboard/client/ClientPlans";
+import ClientProgress from "./pages/dashboard/client/ClientProgress";
+import ClientSettings from "./pages/dashboard/client/ClientSettings";
 
 // Coach Dashboard Pages
 import CoachOverview from "./pages/dashboard/coach/CoachOverview";
@@ -68,6 +75,7 @@ const App = () => (
                   </ProtectedRoute>
                 } />
                 
+                {/* Onboarding */}
                 <Route path="/onboarding/client" element={
                   <ProtectedRoute allowedRoles={["client"]}>
                     <ClientOnboarding />
@@ -78,9 +86,21 @@ const App = () => (
                     <CoachOnboarding />
                   </ProtectedRoute>
                 } />
+
+                {/* Client Dashboard Routes */}
                 <Route path="/dashboard/client" element={
                   <ProtectedRoute allowedRoles={["client"]}>
-                    <ClientDashboard />
+                    <ClientOverview />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/client/coaches" element={
+                  <ProtectedRoute allowedRoles={["client"]}>
+                    <ClientCoaches />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/client/sessions" element={
+                  <ProtectedRoute allowedRoles={["client"]}>
+                    <ClientSessions />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/client/messages" element={
@@ -93,63 +113,78 @@ const App = () => (
                     <ClientMessages />
                   </ProtectedRoute>
                 } />
+                <Route path="/dashboard/client/plans" element={
+                  <ProtectedRoute allowedRoles={["client"]}>
+                    <ClientPlans />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/client/progress" element={
+                  <ProtectedRoute allowedRoles={["client"]}>
+                    <ClientProgress />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/client/settings" element={
+                  <ProtectedRoute allowedRoles={["client"]}>
+                    <ClientSettings />
+                  </ProtectedRoute>
+                } />
               
-              {/* Coach Dashboard Routes */}
-              <Route path="/dashboard/coach" element={
-                <ProtectedRoute allowedRoles={["coach"]}>
-                  <CoachOverview />
-                </ProtectedRoute>
-              } />
-              <Route path="/dashboard/coach/clients" element={
-                <ProtectedRoute allowedRoles={["coach"]}>
-                  <CoachClients />
-                </ProtectedRoute>
-              } />
-              <Route path="/dashboard/coach/clients/:id" element={
-                <ProtectedRoute allowedRoles={["coach"]}>
-                  <CoachClientDetail />
-                </ProtectedRoute>
-              } />
-              <Route path="/dashboard/coach/schedule" element={
-                <ProtectedRoute allowedRoles={["coach"]}>
-                  <CoachSchedule />
-                </ProtectedRoute>
-              } />
-              <Route path="/dashboard/coach/messages" element={
-                <ProtectedRoute allowedRoles={["coach"]}>
-                  <CoachMessages />
-                </ProtectedRoute>
-              } />
-              <Route path="/dashboard/coach/messages/:id" element={
-                <ProtectedRoute allowedRoles={["coach"]}>
-                  <CoachMessages />
-                </ProtectedRoute>
-              } />
-              <Route path="/dashboard/coach/plans" element={
-                <ProtectedRoute allowedRoles={["coach"]}>
-                  <CoachPlans />
-                </ProtectedRoute>
-              } />
-              <Route path="/dashboard/coach/plans/new" element={
-                <ProtectedRoute allowedRoles={["coach"]}>
-                  <CoachPlanBuilder />
-                </ProtectedRoute>
-              } />
-              <Route path="/dashboard/coach/plans/:id" element={
-                <ProtectedRoute allowedRoles={["coach"]}>
-                  <CoachPlanBuilder />
-                </ProtectedRoute>
-              } />
-              <Route path="/dashboard/coach/earnings" element={
-                <ProtectedRoute allowedRoles={["coach"]}>
-                  <CoachEarnings />
-                </ProtectedRoute>
-              } />
-              <Route path="/dashboard/coach/settings" element={
-                <ProtectedRoute allowedRoles={["coach"]}>
-                  <CoachSettings />
-                </ProtectedRoute>
-              } />
+                {/* Coach Dashboard Routes */}
+                <Route path="/dashboard/coach" element={
+                  <ProtectedRoute allowedRoles={["coach"]}>
+                    <CoachOverview />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/coach/clients" element={
+                  <ProtectedRoute allowedRoles={["coach"]}>
+                    <CoachClients />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/coach/clients/:id" element={
+                  <ProtectedRoute allowedRoles={["coach"]}>
+                    <CoachClientDetail />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/coach/schedule" element={
+                  <ProtectedRoute allowedRoles={["coach"]}>
+                    <CoachSchedule />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/coach/messages" element={
+                  <ProtectedRoute allowedRoles={["coach"]}>
+                    <CoachMessages />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/coach/messages/:id" element={
+                  <ProtectedRoute allowedRoles={["coach"]}>
+                    <CoachMessages />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/coach/plans" element={
+                  <ProtectedRoute allowedRoles={["coach"]}>
+                    <CoachPlans />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/coach/plans/new" element={
+                  <ProtectedRoute allowedRoles={["coach"]}>
+                    <CoachPlanBuilder />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/coach/plans/:id" element={
+                  <ProtectedRoute allowedRoles={["coach"]}>
+                    <CoachPlanBuilder />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/coach/earnings" element={
+                  <ProtectedRoute allowedRoles={["coach"]}>
+                    <CoachEarnings />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/coach/settings" element={
+                  <ProtectedRoute allowedRoles={["coach"]}>
+                    <CoachSettings />
+                  </ProtectedRoute>
+                } />
               
                 <Route path="*" element={<NotFound />} />
               </Routes>
