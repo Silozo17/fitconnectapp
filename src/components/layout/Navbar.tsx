@@ -32,10 +32,13 @@ const Navbar = () => {
     { name: "FAQ", href: "/faq", icon: HelpCircle, description: "Common questions answered" },
   ];
 
+  const forCoaches = [
+    { name: "Why FitConnect", href: "/for-coaches", icon: Users, description: "Benefits for coaches" },
+    { name: "Pricing & Plans", href: "/pricing", icon: BookOpen, description: "Platform subscription tiers" },
+  ];
+
   const navLinks = [
     { name: "Marketplace", href: "/marketplace" },
-    { name: "Pricing", href: "/pricing" },
-    { name: "For Coaches", href: "/for-coaches" },
   ];
 
   const dashboardLink = role === "coach" ? "/dashboard/coach" : role === "admin" ? "/dashboard/admin" : "/dashboard/client";
@@ -126,6 +129,39 @@ const Navbar = () => {
               )}
             </div>
 
+            {/* For Coaches Dropdown */}
+            <div 
+              className="relative"
+              onMouseEnter={() => handleDropdownEnter("forcoaches")}
+              onMouseLeave={handleDropdownLeave}
+            >
+              <button className="px-4 py-2 text-muted-foreground hover:text-foreground font-medium transition-colors rounded-lg hover:bg-secondary/50 flex items-center gap-1">
+                For Coaches
+                <ChevronDown className={cn("w-4 h-4 transition-transform", activeDropdown === "forcoaches" && "rotate-180")} />
+              </button>
+              
+              {activeDropdown === "forcoaches" && (
+                <div className="absolute top-full left-0 mt-2 w-72 bg-card border border-border rounded-xl shadow-lg p-2 animate-in fade-in slide-in-from-top-2">
+                  {forCoaches.map((item) => (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      className="flex items-start gap-3 p-3 rounded-lg hover:bg-secondary/50 transition-colors group"
+                      onClick={() => setActiveDropdown(null)}
+                    >
+                      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
+                        <item.icon className="w-4 h-4 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-foreground text-sm">{item.name}</p>
+                        <p className="text-xs text-muted-foreground">{item.description}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {navLinks.map((link) => (
               <Link key={link.name} to={link.href} className="px-4 py-2 text-muted-foreground hover:text-foreground font-medium transition-colors rounded-lg hover:bg-secondary/50">
                 {link.name}
@@ -178,6 +214,24 @@ const Navbar = () => {
               <div className="px-4 py-2">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Resources</p>
                 {resources.map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className="flex items-center gap-3 py-2 text-foreground hover:text-primary transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <item.icon className="w-4 h-4 text-primary" />
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+
+              <div className="border-t border-border/50 my-2" />
+
+              {/* Mobile For Coaches Section */}
+              <div className="px-4 py-2">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">For Coaches</p>
+                {forCoaches.map((item) => (
                   <Link
                     key={item.name}
                     to={item.href}

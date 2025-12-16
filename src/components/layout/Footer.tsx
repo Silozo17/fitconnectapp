@@ -55,13 +55,13 @@ const Footer = () => {
       { name: "FAQ", href: "/faq" },
       { name: "Marketplace", href: "/marketplace" },
     ],
-    Company: [
-      { name: "About Us", href: "/about" },
-      { name: "For Coaches", href: "/for-coaches" },
-      { name: "Pricing", href: "/pricing" },
-      { name: "Contact", href: "/contact" },
+    "For Coaches": [
+      { name: "Why FitConnect", href: "/for-coaches" },
+      { name: "Pricing & Plans", href: "/pricing" },
+      { name: "Contact Us", href: "/contact" },
     ],
     Legal: [
+      { name: "About Us", href: "/about" },
       { name: "Privacy Policy", href: "/privacy" },
       { name: "Terms of Service", href: "/terms" },
     ],
