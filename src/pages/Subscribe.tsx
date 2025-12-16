@@ -12,10 +12,10 @@ import { getAvatarImageUrl } from "@/hooks/useAvatars";
 
 // Tier-to-avatar mapping - each tier gets a progressively better avatar
 const TIER_AVATARS: Record<TierKey, string> = {
-  free: "strongman-bear",
-  starter: "deadlift-boar",
-  pro: "powerlifter-gorilla",
-  enterprise: "elite-personal-trainer-human",
+  free: "strongman_bear",
+  starter: "deadlift_boar",
+  pro: "powerlifter_gorilla",
+  enterprise: "elite_personal_trainer_human",
 };
 
 export default function Subscribe() {
