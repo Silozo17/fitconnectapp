@@ -87,6 +87,8 @@ import MMA from "./pages/coaches/MMA";
 
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/shared/ScrollToTop";
+import Subscribe from "./pages/Subscribe";
+import SubscribeSuccess from "./pages/SubscribeSuccess";
 
 const queryClient = new QueryClient();
 
@@ -390,6 +392,10 @@ const App = () => (
                     <Notifications />
                   </ProtectedRoute>
                 } />
+
+                {/* Subscription Pages */}
+                <Route path="/subscribe" element={<Subscribe />} />
+                <Route path="/subscribe/success" element={<SubscribeSuccess />} />
               
                 <Route path="*" element={<NotFound />} />
               </Routes>
