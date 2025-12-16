@@ -15,6 +15,7 @@ import {
   Shield,
   Plug,
   ShoppingBag,
+  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -26,7 +27,7 @@ const menuItems = [
   { title: "Training Plans", icon: ClipboardList, path: "/dashboard/coach/plans" },
   { title: "Digital Products", icon: ShoppingBag, path: "/dashboard/coach/products" },
   { title: "Packages", icon: Package, path: "/dashboard/coach/packages" },
-  { title: "Reviews", icon: MessageSquare, path: "/dashboard/coach/reviews" },
+  { title: "Reviews", icon: Star, path: "/dashboard/coach/reviews" },
   { title: "Earnings", icon: DollarSign, path: "/dashboard/coach/earnings" },
   { title: "Verification", icon: Shield, path: "/dashboard/coach/verification" },
   { title: "Integrations", icon: Plug, path: "/dashboard/coach/integrations" },
