@@ -1159,6 +1159,9 @@ export type Database = {
       }
       coaching_sessions: {
         Row: {
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
           client_id: string
           coach_id: string
           created_at: string
@@ -1170,6 +1173,7 @@ export type Database = {
           location: string | null
           notes: string | null
           price: number | null
+          rescheduled_from: string | null
           scheduled_at: string
           session_type: string
           status: string
@@ -1179,6 +1183,9 @@ export type Database = {
           video_provider: Database["public"]["Enums"]["video_provider"] | null
         }
         Insert: {
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           client_id: string
           coach_id: string
           created_at?: string
@@ -1190,6 +1197,7 @@ export type Database = {
           location?: string | null
           notes?: string | null
           price?: number | null
+          rescheduled_from?: string | null
           scheduled_at: string
           session_type?: string
           status?: string
@@ -1199,6 +1207,9 @@ export type Database = {
           video_provider?: Database["public"]["Enums"]["video_provider"] | null
         }
         Update: {
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           client_id?: string
           coach_id?: string
           created_at?: string
@@ -1210,6 +1221,7 @@ export type Database = {
           location?: string | null
           notes?: string | null
           price?: number | null
+          rescheduled_from?: string | null
           scheduled_at?: string
           session_type?: string
           status?: string

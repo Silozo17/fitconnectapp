@@ -15,6 +15,7 @@ import {
   Loader2,
   CalendarX,
   Star,
+  ExternalLink,
 } from "lucide-react";
 import WriteReviewModal from "@/components/reviews/WriteReviewModal";
 import { useHasReviewed } from "@/hooks/useReviews";
@@ -29,6 +30,7 @@ interface Session {
   location: string | null;
   notes: string | null;
   coach_id: string;
+  video_meeting_url: string | null;
   coach: {
     display_name: string | null;
   };
@@ -72,6 +74,7 @@ const ClientSessions = () => {
           location,
           notes,
           coach_id,
+          video_meeting_url,
           coach:coach_profiles!coaching_sessions_coach_id_fkey (
             display_name
           )
@@ -140,10 +143,23 @@ const ClientSessions = () => {
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
               {session.is_online ? (
-                <>
-                  <Video className="w-4 h-4" />
-                  <span>Online Session</span>
-                </>
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2">
+                    <Video className="w-4 h-4" />
+                    <span>Online Session</span>
+                  </div>
+                  {session.video_meeting_url && session.status === "scheduled" && (
+                    <a
+                      href={session.video_meeting_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-xs text-primary hover:underline"
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                      Join
+                    </a>
+                  )}
+                </div>
               ) : (
                 <>
                   <MapPin className="w-4 h-4" />

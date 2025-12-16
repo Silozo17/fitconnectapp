@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
   MessageSquare,
@@ -41,6 +42,7 @@ import {
 import { format } from "date-fns";
 
 const CoachClientDetail = () => {
+  const queryClient = useQueryClient();
   const { id } = useParams<{ id: string }>();
 
   // Fetch real data
@@ -66,6 +68,8 @@ const CoachClientDetail = () => {
     status: "scheduled" | "completed" | "cancelled" | "no_show";
     isOnline: boolean;
     notes?: string;
+    videoMeetingUrl?: string;
+    rescheduledFrom?: string;
   } | null>(null);
 
   const client = clientData?.client_profile;
@@ -144,6 +148,8 @@ const CoachClientDetail = () => {
       status: session.status as "scheduled" | "completed" | "cancelled" | "no_show",
       isOnline: session.is_online || false,
       notes: session.notes || undefined,
+      videoMeetingUrl: (session as any).video_meeting_url || undefined,
+      rescheduledFrom: (session as any).rescheduled_from || undefined,
     });
     setIsSessionDetailOpen(true);
   };
@@ -574,6 +580,9 @@ const CoachClientDetail = () => {
           if (!open) setSelectedSession(null);
         }}
         session={selectedSession}
+        onRefresh={() => {
+          queryClient.invalidateQueries({ queryKey: ["client-sessions"] });
+        }}
       />
 
       <AddNoteModal 

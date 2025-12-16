@@ -208,7 +208,7 @@ export const useRespondToBooking = () => {
 
       // If accepted, create a coaching session
       if (status === "accepted") {
-        const { error: sessionError } = await supabase
+        const { data: newSession, error: sessionError } = await supabase
           .from("coaching_sessions")
           .insert({
             coach_id: request.coach_id,
@@ -219,9 +219,23 @@ export const useRespondToBooking = () => {
             session_type: request.session_type?.name || "General",
             status: "scheduled",
             notes: request.message,
-          });
+          })
+          .select()
+          .single();
 
         if (sessionError) throw sessionError;
+
+        // Auto-create video meeting for online sessions
+        if (request.is_online && newSession) {
+          try {
+            await supabase.functions.invoke("video-create-meeting", {
+              body: { sessionId: newSession.id, provider: "google_meet" },
+            });
+          } catch (e) {
+            // Video meeting creation is optional - don't fail the booking
+            console.log("Auto video meeting creation skipped - provider may not be connected");
+          }
+        }
       }
 
       return { status };
