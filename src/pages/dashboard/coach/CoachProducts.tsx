@@ -175,7 +175,7 @@ export default function CoachProducts() {
                             {contentType?.icon} {contentType?.label}
                           </Badge>
                           <span className="font-bold text-primary">
-                            {product.price === 0 ? "Free" : formatCurrency(product.price, product.currency)}
+                            {product.price === 0 ? "Free" : formatCurrency(product.price, (product.currency || "GBP") as "GBP" | "USD" | "EUR")}
                           </span>
                         </div>
                         <h3 className="font-semibold line-clamp-1">{product.title}</h3>
@@ -264,7 +264,7 @@ export default function CoachProducts() {
                           Bundle
                         </Badge>
                         <span className="font-bold text-primary">
-                          {formatCurrency(bundle.price, bundle.currency)}
+                          {formatCurrency(bundle.price, (bundle.currency || "GBP") as "GBP" | "USD" | "EUR")}
                         </span>
                       </div>
                       <h3 className="font-semibold line-clamp-1">{bundle.title}</h3>

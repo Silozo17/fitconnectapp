@@ -56,7 +56,7 @@ export default function MarketplaceBundle() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout title="Loading..." description="Loading bundle details">
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
         </div>
@@ -66,7 +66,7 @@ export default function MarketplaceBundle() {
 
   if (!bundle) {
     return (
-      <PageLayout>
+      <PageLayout title="Bundle Not Found" description="The bundle you're looking for doesn't exist">
         <div className="min-h-screen bg-background flex flex-col items-center justify-center">
           <Package className="h-16 w-16 text-muted-foreground mb-4" />
           <h1 className="text-2xl font-bold mb-2">Bundle Not Found</h1>
@@ -77,7 +77,7 @@ export default function MarketplaceBundle() {
   }
 
   return (
-    <PageLayout>
+    <PageLayout title={bundle.title} description={bundle.description || "Digital bundle from FitConnect"}>
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">
           {/* Back Button */}
@@ -170,7 +170,7 @@ export default function MarketplaceBundle() {
                         </div>
                         <div className="text-right">
                           <p className="text-sm text-muted-foreground line-through">
-                            {formatCurrency(product.price, product.currency)}
+                            {formatCurrency(product.price, (product.currency || "GBP") as "GBP" | "USD" | "EUR")}
                           </p>
                           <Badge variant="outline" className="text-xs">
                             Included
@@ -191,15 +191,15 @@ export default function MarketplaceBundle() {
                   <div className="text-center space-y-2">
                     {bundle.original_price && bundle.original_price > bundle.price && (
                       <p className="text-lg text-muted-foreground line-through">
-                        {formatCurrency(bundle.original_price, bundle.currency)}
+                        {formatCurrency(bundle.original_price, (bundle.currency || "GBP") as "GBP" | "USD" | "EUR")}
                       </p>
                     )}
                     <p className="text-4xl font-bold text-primary">
-                      {formatCurrency(bundle.price, bundle.currency)}
+                      {formatCurrency(bundle.price, (bundle.currency || "GBP") as "GBP" | "USD" | "EUR")}
                     </p>
                     {savings > 0 && (
                       <Badge className="bg-green-500/20 text-green-500 border-green-500/30">
-                        You save {formatCurrency((bundle.original_price || 0) - bundle.price, bundle.currency)}
+                        You save {formatCurrency((bundle.original_price || 0) - bundle.price, (bundle.currency || "GBP") as "GBP" | "USD" | "EUR")}
                       </Badge>
                     )}
                   </div>
@@ -241,8 +241,8 @@ export default function MarketplaceBundle() {
                     >
                       <UserAvatar
                         name={bundle.coach_profiles?.display_name || "Coach"}
-                        imageUrl={bundle.coach_profiles?.profile_image_url}
-                        size="md"
+                        src={bundle.coach_profiles?.profile_image_url}
+                        className="h-10 w-10"
                       />
                       <div>
                         <p className="font-medium">{bundle.coach_profiles?.display_name}</p>

@@ -171,7 +171,7 @@ export default function CreateBundleModal({ open, onOpenChange, products }: Crea
                               <p className="text-xs text-muted-foreground">{contentType?.label}</p>
                             </div>
                             <span className="text-sm font-medium">
-                              {formatCurrency(product.price, product.currency)}
+                              {formatCurrency(product.price, (product.currency || "GBP") as "GBP" | "USD" | "EUR")}
                             </span>
                           </div>
                         );
@@ -233,13 +233,13 @@ export default function CreateBundleModal({ open, onOpenChange, products }: Crea
                 <div className="flex justify-between text-sm">
                   <span>Original Total ({selectedProducts.length} items)</span>
                   <span className="line-through text-muted-foreground">
-                    {formatCurrency(originalPrice, form.watch("currency"))}
+                    {formatCurrency(originalPrice, (form.watch("currency") || "GBP") as "GBP" | "USD" | "EUR")}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span>Bundle Price</span>
                   <span className="font-bold text-primary">
-                    {formatCurrency(bundlePrice, form.watch("currency"))}
+                    {formatCurrency(bundlePrice, (form.watch("currency") || "GBP") as "GBP" | "USD" | "EUR")}
                   </span>
                 </div>
                 {savings > 0 && (
