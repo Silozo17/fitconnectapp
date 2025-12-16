@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Calendar,
@@ -13,7 +14,10 @@ import {
   Video,
   Loader2,
   CalendarX,
+  Star,
 } from "lucide-react";
+import WriteReviewModal from "@/components/reviews/WriteReviewModal";
+import { useHasReviewed } from "@/hooks/useReviews";
 
 interface Session {
   id: string;
@@ -24,6 +28,7 @@ interface Session {
   is_online: boolean | null;
   location: string | null;
   notes: string | null;
+  coach_id: string;
   coach: {
     display_name: string | null;
   };
@@ -33,6 +38,12 @@ const ClientSessions = () => {
   const { user } = useAuth();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reviewModal, setReviewModal] = useState<{
+    open: boolean;
+    coachId: string;
+    coachName: string;
+    sessionId: string;
+  }>({ open: false, coachId: "", coachName: "", sessionId: "" });
 
   useEffect(() => {
     const fetchSessions = async () => {
@@ -60,6 +71,7 @@ const ClientSessions = () => {
           is_online,
           location,
           notes,
+          coach_id,
           coach:coach_profiles!coaching_sessions_coach_id_fkey (
             display_name
           )
@@ -90,46 +102,76 @@ const ClientSessions = () => {
     return <Badge variant={variants[status] || "outline"}>{status}</Badge>;
   };
 
-  const SessionCard = ({ session }: { session: Session }) => (
-    <Card>
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between mb-3">
-          <div>
-            <h4 className="font-semibold text-foreground">
-              {session.coach.display_name || "Coach"}
-            </h4>
-            <p className="text-sm text-muted-foreground">{session.session_type}</p>
+  const SessionCard = ({ session }: { session: Session }) => {
+    const isCompleted = session.status === "completed";
+    const { data: hasReviewed } = useHasReviewed(isCompleted ? session.id : undefined);
+
+    const handleWriteReview = () => {
+      setReviewModal({
+        open: true,
+        coachId: session.coach_id,
+        coachName: session.coach.display_name || "Coach",
+        sessionId: session.id,
+      });
+    };
+
+    return (
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-start justify-between mb-3">
+            <div>
+              <h4 className="font-semibold text-foreground">
+                {session.coach.display_name || "Coach"}
+              </h4>
+              <p className="text-sm text-muted-foreground">{session.session_type}</p>
+            </div>
+            {getStatusBadge(session.status)}
           </div>
-          {getStatusBadge(session.status)}
-        </div>
-        <div className="space-y-2 text-sm">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Calendar className="w-4 h-4" />
-            <span>{format(new Date(session.scheduled_at), "PPP")}</span>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Calendar className="w-4 h-4" />
+              <span>{format(new Date(session.scheduled_at), "PPP")}</span>
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Clock className="w-4 h-4" />
+              <span>
+                {format(new Date(session.scheduled_at), "p")} ({session.duration_minutes} min)
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              {session.is_online ? (
+                <>
+                  <Video className="w-4 h-4" />
+                  <span>Online Session</span>
+                </>
+              ) : (
+                <>
+                  <MapPin className="w-4 h-4" />
+                  <span>{session.location || "In Person"}</span>
+                </>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Clock className="w-4 h-4" />
-            <span>
-              {format(new Date(session.scheduled_at), "p")} ({session.duration_minutes} min)
-            </span>
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            {session.is_online ? (
-              <>
-                <Video className="w-4 h-4" />
-                <span>Online Session</span>
-              </>
-            ) : (
-              <>
-                <MapPin className="w-4 h-4" />
-                <span>{session.location || "In Person"}</span>
-              </>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+          {isCompleted && !hasReviewed && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full mt-4"
+              onClick={handleWriteReview}
+            >
+              <Star className="w-4 h-4 mr-2" />
+              Write Review
+            </Button>
+          )}
+          {isCompleted && hasReviewed && (
+            <p className="text-xs text-muted-foreground text-center mt-4">
+              ✓ Review submitted
+            </p>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
 
   const EmptyState = ({ message }: { message: string }) => (
     <Card>
@@ -192,6 +234,14 @@ const ClientSessions = () => {
           </TabsContent>
         </Tabs>
       )}
+
+      <WriteReviewModal
+        open={reviewModal.open}
+        onOpenChange={(open) => setReviewModal((prev) => ({ ...prev, open }))}
+        coachId={reviewModal.coachId}
+        coachName={reviewModal.coachName}
+        sessionId={reviewModal.sessionId}
+      />
     </ClientDashboardLayout>
   );
 };
