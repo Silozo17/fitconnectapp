@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import ConnectionRequests from "@/components/dashboard/coach/ConnectionRequests";
 
 // Mock data for demonstration
 const upcomingSessions = [
@@ -128,6 +129,11 @@ const CoachOverview = () => {
             <span className="text-sm">Send Message</span>
           </Button>
         </Link>
+      </div>
+
+      {/* Connection Requests */}
+      <div className="mb-6">
+        <ConnectionRequests />
       </div>
 
       {/* Two Column Layout */}
