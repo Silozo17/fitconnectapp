@@ -1,7 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { 
   Star, MapPin, Video, Users, ArrowLeft, 
-  Clock, Award, Calendar, MessageSquare, Loader2 
+  Clock, Award, Calendar, MessageSquare, Loader2, Building 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -149,6 +149,12 @@ const CoachDetail = () => {
                             <p className="text-muted-foreground flex items-center gap-1 mt-1">
                               <MapPin className="h-4 w-4" />
                               {coach.location}
+                            </p>
+                          )}
+                          {coach.gym_affiliation && (
+                            <p className="text-muted-foreground flex items-center gap-1 mt-1">
+                              <Building className="h-4 w-4" />
+                              {coach.gym_affiliation}
                             </p>
                           )}
                         </div>

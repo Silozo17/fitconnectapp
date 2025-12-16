@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Video, User, MessageSquare, Calendar, UserPlus } from "lucide-react";
+import { MapPin, Video, User, MessageSquare, Calendar, UserPlus, Building } from "lucide-react";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import FavouriteButton from "@/components/favourites/FavouriteButton";
 import StarRating from "@/components/reviews/StarRating";
@@ -105,9 +105,18 @@ const CoachCard = ({ coach, onBook, onRequestConnection }: CoachCardProps) => {
           <p className="text-primary text-sm font-medium mb-2">{coach.coach_types[0]}</p>
         )}
 
-        {coach.location && (
-          <div className="flex items-center gap-1 text-muted-foreground text-sm mb-4">
-            <MapPin className="w-3 h-3" />{coach.location}
+        {(coach.location || coach.gym_affiliation) && (
+          <div className="flex flex-col gap-1 text-muted-foreground text-sm mb-4">
+            {coach.location && (
+              <div className="flex items-center gap-1">
+                <MapPin className="w-3 h-3" />{coach.location}
+              </div>
+            )}
+            {coach.gym_affiliation && (
+              <div className="flex items-center gap-1">
+                <Building className="w-3 h-3" />{coach.gym_affiliation}
+              </div>
+            )}
           </div>
         )}
 

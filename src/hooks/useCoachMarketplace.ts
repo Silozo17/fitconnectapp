@@ -8,7 +8,7 @@ export type MarketplaceCoach = Tables<"coach_profiles"> & {
   reviews_count?: number | null;
   is_sponsored?: boolean | null;
   tags?: string[] | null;
-  // Verification fields are now in coach_profiles
+  gym_affiliation?: string | null;
 };
 
 interface UseCoachMarketplaceOptions {

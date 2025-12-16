@@ -1257,6 +1257,7 @@ export type Database = {
           currency: string | null
           display_name: string | null
           experience_years: number | null
+          gym_affiliation: string | null
           hourly_rate: number | null
           id: string
           in_person_available: boolean | null
@@ -1290,6 +1291,7 @@ export type Database = {
           currency?: string | null
           display_name?: string | null
           experience_years?: number | null
+          gym_affiliation?: string | null
           hourly_rate?: number | null
           id?: string
           in_person_available?: boolean | null
@@ -1323,6 +1325,7 @@ export type Database = {
           currency?: string | null
           display_name?: string | null
           experience_years?: number | null
+          gym_affiliation?: string | null
           hourly_rate?: number | null
           id?: string
           in_person_available?: boolean | null
