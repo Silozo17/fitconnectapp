@@ -47,6 +47,7 @@ import CoachNutritionBuilder from "./pages/dashboard/coach/CoachNutritionBuilder
 import CoachEarnings from "./pages/dashboard/coach/CoachEarnings";
 import CoachSettings from "./pages/dashboard/coach/CoachSettings";
 import CoachPackages from "./pages/dashboard/coach/CoachPackages";
+import CoachReviews from "./pages/dashboard/coach/CoachReviews";
 
 // Public Pages
 import About from "./pages/About";
@@ -258,6 +259,11 @@ const App = () => (
                 <Route path="/dashboard/coach/earnings" element={
                   <ProtectedRoute allowedRoles={["coach"]}>
                     <CoachEarnings />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/coach/reviews" element={
+                  <ProtectedRoute allowedRoles={["coach"]}>
+                    <CoachReviews />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/coach/settings" element={
