@@ -42,16 +42,16 @@ const ViewSwitcher = () => {
             <span>Admin View</span>
           </div>
         </SelectItem>
-        <SelectItem value="client">
-          <div className="flex items-center gap-2">
-            <User className="w-4 h-4 text-blue-500" />
-            <span>Client View</span>
-          </div>
-        </SelectItem>
         <SelectItem value="coach">
           <div className="flex items-center gap-2">
             <Briefcase className="w-4 h-4 text-orange-500" />
             <span>Coach View</span>
+          </div>
+        </SelectItem>
+        <SelectItem value="client">
+          <div className="flex items-center gap-2">
+            <User className="w-4 h-4 text-blue-500" />
+            <span>Client View</span>
           </div>
         </SelectItem>
       </SelectContent>
