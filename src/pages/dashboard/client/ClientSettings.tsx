@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Save, LogOut, AlertTriangle, Info, Bell, MapPin, User, Heart, Globe, Plug, Shield, Calculator } from "lucide-react";
+import { Loader2, Save, LogOut, AlertTriangle, Info, Bell, MapPin, User, Heart, Globe, Plug, Shield } from "lucide-react";
 import { HealthTagInput } from "@/components/dashboard/clients/HealthTagInput";
 import { ProfileImageUpload } from "@/components/shared/ProfileImageUpload";
 import { CurrencySelector } from "@/components/shared/CurrencySelector";
@@ -78,7 +78,6 @@ const settingsTabs = [
   { id: "health", icon: Heart, label: "Health Info" },
   { id: "preferences", icon: Globe, label: "Preferences" },
   { id: "integrations", icon: Plug, label: "Integrations" },
-  { id: "tools", icon: Calculator, label: "Tools" },
   { id: "notifications", icon: Bell, label: "Notifications" },
   { id: "account", icon: Shield, label: "Account" },
 ];
@@ -529,42 +528,6 @@ const ClientSettings = () => {
                   </div>
                 </div>
               </div>
-            )}
-
-            {/* Tools Tab */}
-            {selectedTab === "tools" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calculator className="w-5 h-5" />
-                    Fitness Tools
-                  </CardTitle>
-                  <CardDescription>Free calculators to help track your fitness journey</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      { name: "BMI Calculator", href: "/tools#bmi", description: "Body Mass Index" },
-                      { name: "BMR Calculator", href: "/tools#bmr", description: "Basal Metabolic Rate" },
-                      { name: "Calorie Calculator", href: "/tools#tdee", description: "Daily Energy Needs" },
-                      { name: "Ideal Weight", href: "/tools#ideal-weight", description: "Target Weight Range" },
-                      { name: "Body Fat %", href: "/tools#body-fat", description: "Fat Percentage" },
-                      { name: "One Rep Max", href: "/tools#1rm", description: "Max Lift Estimate" },
-                      { name: "Water Intake", href: "/tools#water", description: "Daily Hydration" },
-                      { name: "Heart Rate Zones", href: "/tools#heart-rate", description: "Training Zones" },
-                    ].map((tool) => (
-                      <a
-                        key={tool.name}
-                        href={tool.href}
-                        className="p-4 rounded-xl bg-secondary/30 border border-border hover:border-primary/50 hover:bg-secondary/50 transition-all"
-                      >
-                        <p className="font-medium text-sm">{tool.name}</p>
-                        <p className="text-xs text-muted-foreground">{tool.description}</p>
-                      </a>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
             )}
 
             {/* Notifications Tab */}
