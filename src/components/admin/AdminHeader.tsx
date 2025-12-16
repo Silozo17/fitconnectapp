@@ -1,8 +1,9 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Bell, LogOut, Search } from "lucide-react";
+import { LogOut, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import ViewSwitcher from "./ViewSwitcher";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 
 const AdminHeader = () => {
   const { signOut } = useAuth();
@@ -22,12 +23,7 @@ const AdminHeader = () => {
       <div className="flex items-center gap-4">
         <ViewSwitcher />
         
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          <span className="absolute -top-1 -right-1 h-4 w-4 bg-destructive rounded-full text-[10px] text-destructive-foreground flex items-center justify-center">
-            3
-          </span>
-        </Button>
+        <NotificationCenter />
 
         <Button variant="ghost" size="sm" onClick={signOut} className="gap-2">
           <LogOut className="h-4 w-4" />
