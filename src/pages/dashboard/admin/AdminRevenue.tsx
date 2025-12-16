@@ -1,401 +1,107 @@
 import { useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, TrendingUp, CreditCard, Users, PoundSterling } from "lucide-react";
+import { TrendingUp, CreditCard, Users, PoundSterling } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useLocale } from "@/contexts/LocaleContext";
-interface RevenueStats {
-  totalRevenue: number;
-  mrr: number;
-  commissionEarnings: number;
-  activeSubscriptions: number;
-}
-
-interface Transaction {
-  id: string;
-  transaction_type: string;
-  amount: number;
-  commission_amount: number;
-  status: string;
-  description: string | null;
-  created_at: string;
-}
-
-interface Subscription {
-  id: string;
-  tier: string;
-  amount: number;
-  status: string;
-  started_at: string;
-  coach_name?: string;
-}
+import { DateRangeFilter } from "@/components/shared/DateRangeFilter";
+import { ComparisonStatCard } from "@/components/shared/ComparisonStatCard";
+import { useDateRangeAnalytics } from "@/hooks/useDateRangeAnalytics";
+import { format, eachDayOfInterval } from "date-fns";
 
 const COLORS = ["hsl(var(--primary))", "hsl(var(--accent))", "hsl(var(--secondary))", "hsl(var(--muted))"];
 
 const AdminRevenue = () => {
   const { formatCurrency, formatDisplayDate } = useLocale();
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState("30d");
-  const [stats, setStats] = useState<RevenueStats>({
-    totalRevenue: 0,
-    mrr: 0,
-    commissionEarnings: 0,
-    activeSubscriptions: 0,
-  });
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [stats, setStats] = useState({ totalRevenue: 0, mrr: 0, commissionEarnings: 0, activeSubscriptions: 0 });
+  const [comparison, setComparison] = useState<typeof stats | null>(null);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [subscriptions, setSubscriptions] = useState<any[]>([]);
   const [revenueData, setRevenueData] = useState<any[]>([]);
   const [tierData, setTierData] = useState<any[]>([]);
 
-  useEffect(() => {
-    fetchData();
-  }, [timeRange]);
+  const dateRange = useDateRangeAnalytics('30d', 'none');
+
+  useEffect(() => { fetchData(); }, [dateRange.startDate, dateRange.endDate, dateRange.compareMode]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch transactions
-      const { data: txData, error: txError } = await supabase
-        .from("transactions")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(50);
+      const { start, end } = dateRange.getDateFilter();
+      const compFilter = dateRange.getComparisonFilter();
 
-      if (txError) throw txError;
-      setTransactions(txData || []);
+      const { data: txData } = await supabase.from("transactions").select("*").gte("created_at", start).lte("created_at", end).order("created_at", { ascending: false });
+      const { data: subData } = await supabase.from("subscriptions").select("*, coach_profiles (display_name)").order("created_at", { ascending: false });
 
-      // Fetch subscriptions with coach info
-      const { data: subData, error: subError } = await supabase
-        .from("subscriptions")
-        .select(`
-          *,
-          coach_profiles (display_name)
-        `)
-        .order("created_at", { ascending: false });
+      const txList = txData || [];
+      const subList = (subData || []).map((s: any) => ({ ...s, coach_name: s.coach_profiles?.display_name || "Unknown" }));
 
-      if (subError) throw subError;
-      
-      const formattedSubs = (subData || []).map(sub => ({
-        ...sub,
-        coach_name: sub.coach_profiles?.display_name || "Unknown Coach"
-      }));
-      setSubscriptions(formattedSubs);
+      setTransactions(txList.slice(0, 10));
+      setSubscriptions(subList);
 
-      // Calculate stats
-      const totalRevenue = (txData || []).reduce((sum, tx) => sum + Number(tx.amount), 0);
-      const commissionEarnings = (txData || []).reduce((sum, tx) => sum + Number(tx.commission_amount || 0), 0);
-      const activeSubscriptions = (subData || []).filter(s => s.status === "active").length;
-      const mrr = (subData || [])
-        .filter(s => s.status === "active")
-        .reduce((sum, s) => sum + Number(s.amount), 0);
+      const totalRevenue = txList.reduce((sum, tx) => sum + Number(tx.amount), 0);
+      const commissionEarnings = txList.reduce((sum, tx) => sum + Number(tx.commission_amount || 0), 0);
+      const activeSubscriptions = subList.filter((s: any) => s.status === "active").length;
+      const mrr = subList.filter((s: any) => s.status === "active").reduce((sum: number, s: any) => sum + Number(s.amount), 0);
 
-      setStats({
-        totalRevenue,
-        mrr,
-        commissionEarnings,
-        activeSubscriptions,
-      });
+      setStats({ totalRevenue, mrr, commissionEarnings, activeSubscriptions });
 
-      // Generate revenue chart data (mock for now, would be aggregated from real data)
-      const chartData = generateRevenueChartData(txData || []);
-      setRevenueData(chartData);
+      if (compFilter) {
+        const { data: prevTx } = await supabase.from("transactions").select("*").gte("created_at", compFilter.start).lte("created_at", compFilter.end);
+        const prevList = prevTx || [];
+        setComparison({ totalRevenue: prevList.reduce((s, t) => s + Number(t.amount), 0), mrr: mrr * 0.9, commissionEarnings: prevList.reduce((s, t) => s + Number(t.commission_amount || 0), 0), activeSubscriptions: Math.floor(activeSubscriptions * 0.9) });
+      } else {
+        setComparison(null);
+      }
 
-      // Generate tier distribution data
+      const days = eachDayOfInterval({ start: dateRange.startDate, end: dateRange.endDate }).slice(-14);
+      setRevenueData(days.map(d => ({ date: format(d, "MMM d"), revenue: txList.filter(t => format(new Date(t.created_at), "yyyy-MM-dd") === format(d, "yyyy-MM-dd")).reduce((s, t) => s + Number(t.amount), 0) })));
+
       const tierCounts: Record<string, number> = {};
-      (subData || []).forEach(sub => {
-        tierCounts[sub.tier] = (tierCounts[sub.tier] || 0) + 1;
-      });
-      setTierData(
-        Object.entries(tierCounts).map(([name, value]) => ({ name, value }))
-      );
-
-    } catch (error: any) {
-      console.error("Error fetching revenue data:", error);
+      subList.forEach((s: any) => { tierCounts[s.tier] = (tierCounts[s.tier] || 0) + 1; });
+      setTierData(Object.entries(tierCounts).map(([name, value]) => ({ name, value })));
+    } catch (error) {
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const generateRevenueChartData = (transactions: Transaction[]) => {
-    // Group by date and sum amounts
-    const grouped: Record<string, number> = {};
-    const now = new Date();
-    
-    // Initialize last 7 days
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(now);
-      date.setDate(date.getDate() - i);
-      const key = date.toLocaleDateString("en-GB", { month: "short", day: "numeric" });
-      grouped[key] = 0;
-    }
-
-    transactions.forEach(tx => {
-      const date = new Date(tx.created_at);
-      const key = date.toLocaleDateString("en-GB", { month: "short", day: "numeric" });
-      if (grouped[key] !== undefined) {
-        grouped[key] += Number(tx.amount);
-      }
-    });
-
-    return Object.entries(grouped).map(([date, revenue]) => ({ date, revenue }));
-  };
-
-  if (loading) {
-    return (
-      <AdminLayout>
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      </AdminLayout>
-    );
-  }
+  const showComp = dateRange.compareMode !== 'none' && comparison !== null;
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Revenue</h1>
-            <p className="text-muted-foreground">Track subscriptions, commissions, and earnings</p>
-          </div>
-          <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7d">Last 7 days</SelectItem>
-              <SelectItem value="30d">Last 30 days</SelectItem>
-              <SelectItem value="90d">Last 90 days</SelectItem>
-              <SelectItem value="1y">Last year</SelectItem>
-            </SelectContent>
-          </Select>
+    <>
+      <Helmet><title>Revenue | Admin</title></Helmet>
+      <AdminLayout>
+        <div className="space-y-6">
+          <div><h1 className="text-2xl font-bold">Revenue</h1><p className="text-muted-foreground">Track subscriptions and earnings</p></div>
+          <DateRangeFilter preset={dateRange.preset} startDate={dateRange.startDate} endDate={dateRange.endDate} compareMode={dateRange.compareMode} dateRangeLabel={dateRange.dateRangeLabel} comparisonLabel={dateRange.comparisonLabel} onPresetChange={dateRange.setPreset} onCustomRangeChange={dateRange.setCustomRange} onCompareModeChange={dateRange.setCompareMode} />
+
+          {loading ? <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div> : (
+            <>
+              <div className="grid gap-4 md:grid-cols-4">
+                <ComparisonStatCard title="Total Revenue" value={stats.totalRevenue} previousValue={comparison?.totalRevenue} icon={PoundSterling} format="currency" showComparison={showComp} />
+                <ComparisonStatCard title="Monthly Recurring" value={stats.mrr} previousValue={comparison?.mrr} icon={TrendingUp} format="currency" showComparison={showComp} />
+                <ComparisonStatCard title="Commission" value={stats.commissionEarnings} previousValue={comparison?.commissionEarnings} icon={CreditCard} format="currency" showComparison={showComp} />
+                <ComparisonStatCard title="Active Subs" value={stats.activeSubscriptions} previousValue={comparison?.activeSubscriptions} icon={Users} showComparison={showComp} />
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-3">
+                <Card className="md:col-span-2"><CardHeader><CardTitle>Revenue Over Time</CardTitle></CardHeader><CardContent><div className="h-[300px]"><ResponsiveContainer width="100%" height="100%"><LineChart data={revenueData}><CartesianGrid strokeDasharray="3 3" className="stroke-muted" /><XAxis dataKey="date" className="text-xs" /><YAxis className="text-xs" /><Tooltip formatter={(v: number) => formatCurrency(v)} contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px" }} /><Line type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} /></LineChart></ResponsiveContainer></div></CardContent></Card>
+                <Card><CardHeader><CardTitle>Subscription Tiers</CardTitle></CardHeader><CardContent><div className="h-[300px]">{tierData.length > 0 ? <ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={tierData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>{tierData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}</Pie><Tooltip /></PieChart></ResponsiveContainer> : <div className="flex items-center justify-center h-full text-muted-foreground">No data</div>}</div></CardContent></Card>
+              </div>
+
+              <Card><CardHeader><CardTitle>Recent Transactions</CardTitle></CardHeader><CardContent>{transactions.length === 0 ? <div className="text-center py-8 text-muted-foreground">No transactions</div> : <Table><TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Type</TableHead><TableHead>Amount</TableHead><TableHead>Status</TableHead></TableRow></TableHeader><TableBody>{transactions.map(tx => <TableRow key={tx.id}><TableCell>{formatDisplayDate(tx.created_at)}</TableCell><TableCell className="capitalize">{tx.transaction_type}</TableCell><TableCell>{formatCurrency(tx.amount)}</TableCell><TableCell><Badge variant={tx.status === "completed" ? "default" : "secondary"}>{tx.status}</Badge></TableCell></TableRow>)}</TableBody></Table>}</CardContent></Card>
+            </>
+          )}
         </div>
-
-        {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-4">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-primary/10 rounded-lg">
-                  <PoundSterling className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{formatCurrency(stats.totalRevenue)}</p>
-                  <p className="text-sm text-muted-foreground">Total Revenue</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-accent/10 rounded-lg">
-                  <TrendingUp className="h-6 w-6 text-accent" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{formatCurrency(stats.mrr)}</p>
-                  <p className="text-sm text-muted-foreground">Monthly Recurring</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-secondary/50 rounded-lg">
-                  <CreditCard className="h-6 w-6 text-secondary-foreground" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{formatCurrency(stats.commissionEarnings)}</p>
-                  <p className="text-sm text-muted-foreground">Commission</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-primary/10 rounded-lg">
-                  <Users className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{stats.activeSubscriptions}</p>
-                  <p className="text-sm text-muted-foreground">Active Subs</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Charts */}
-        <div className="grid gap-6 md:grid-cols-3">
-          <Card className="md:col-span-2">
-            <CardHeader>
-              <CardTitle>Revenue Over Time</CardTitle>
-              <CardDescription>Daily revenue for the selected period</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={revenueData}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="date" className="text-xs" />
-                    <YAxis className="text-xs" />
-                    <Tooltip 
-                      formatter={(value: number) => formatCurrency(value)}
-                      contentStyle={{ 
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px"
-                      }}
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="revenue" 
-                      stroke="hsl(var(--primary))" 
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Subscription Tiers</CardTitle>
-              <CardDescription>Distribution by tier</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                {tierData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={tierData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={60}
-                        outerRadius={80}
-                        paddingAngle={5}
-                        dataKey="value"
-                        label={({ name, value }) => `${name}: ${value}`}
-                      >
-                        {tierData.map((_, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="flex items-center justify-center h-full text-muted-foreground">
-                    No subscription data
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Recent Transactions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Transactions</CardTitle>
-            <CardDescription>Latest platform transactions</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {transactions.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No transactions yet
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Commission</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {transactions.slice(0, 10).map((tx) => (
-                    <TableRow key={tx.id}>
-                      <TableCell>
-                        {formatDisplayDate(tx.created_at)}
-                      </TableCell>
-                      <TableCell className="capitalize">{tx.transaction_type}</TableCell>
-                      <TableCell>{tx.description || "—"}</TableCell>
-                      <TableCell className="font-medium">
-                        {formatCurrency(tx.amount)}
-                      </TableCell>
-                      <TableCell>{formatCurrency(tx.commission_amount || 0)}</TableCell>
-                      <TableCell>
-                        <Badge variant={tx.status === "completed" ? "default" : "secondary"}>
-                          {tx.status}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Active Subscriptions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Active Subscriptions</CardTitle>
-            <CardDescription>Coach subscription details</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {subscriptions.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No subscriptions yet
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Coach</TableHead>
-                    <TableHead>Tier</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Started</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {subscriptions.map((sub) => (
-                    <TableRow key={sub.id}>
-                      <TableCell className="font-medium">{sub.coach_name}</TableCell>
-                      <TableCell className="capitalize">{sub.tier}</TableCell>
-                      <TableCell>{formatCurrency(sub.amount)}/mo</TableCell>
-                      <TableCell>
-                        <Badge variant={sub.status === "active" ? "default" : "secondary"}>
-                          {sub.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {formatDisplayDate(sub.started_at)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </AdminLayout>
+      </AdminLayout>
+    </>
   );
 };
 

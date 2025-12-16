@@ -1,447 +1,117 @@
 import { useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Loader2, Users, Dumbbell, Calendar, MessageSquare, TrendingUp, Activity, Download, ChevronDown } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
-import { arrayToCSV, downloadCSV, generateExportFilename } from "@/lib/csv-export";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Users, Dumbbell, Calendar, MessageSquare, TrendingUp, Activity, Download, ChevronDown } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, Legend } from "recharts";
+import { arrayToCSV, downloadCSV } from "@/lib/csv-export";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
-
-interface AnalyticsData {
-  totalUsers: number;
-  totalCoaches: number;
-  totalSessions: number;
-  totalMessages: number;
-  newUsersThisMonth: number;
-  newCoachesThisMonth: number;
-  completedSessions: number;
-  sessionCompletionRate: number;
-}
+import { DateRangeFilter } from "@/components/shared/DateRangeFilter";
+import { ComparisonStatCard } from "@/components/shared/ComparisonStatCard";
+import { useDateRangeAnalytics } from "@/hooks/useDateRangeAnalytics";
+import { format, eachDayOfInterval } from "date-fns";
 
 const AdminAnalytics = () => {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState("30d");
-  const [analytics, setAnalytics] = useState<AnalyticsData>({
-    totalUsers: 0,
-    totalCoaches: 0,
-    totalSessions: 0,
-    totalMessages: 0,
-    newUsersThisMonth: 0,
-    newCoachesThisMonth: 0,
-    completedSessions: 0,
-    sessionCompletionRate: 0,
-  });
+  const [analytics, setAnalytics] = useState({ totalUsers: 0, totalCoaches: 0, totalSessions: 0, totalMessages: 0, sessionCompletionRate: 0 });
+  const [comparison, setComparison] = useState<typeof analytics | null>(null);
   const [userGrowthData, setUserGrowthData] = useState<any[]>([]);
   const [sessionData, setSessionData] = useState<any[]>([]);
 
+  const dateRange = useDateRangeAnalytics('30d', 'none');
+
   useEffect(() => {
     fetchAnalytics();
-  }, [timeRange]);
+  }, [dateRange.startDate, dateRange.endDate, dateRange.compareMode]);
 
   const fetchAnalytics = async () => {
     setLoading(true);
     try {
-      const now = new Date();
-      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const { start, end } = dateRange.getDateFilter();
+      const compFilter = dateRange.getComparisonFilter();
 
-      // Fetch total counts
-      const [
-        { count: totalUsers },
-        { count: totalCoaches },
-        { count: totalSessions },
-        { count: totalMessages },
-        { count: newUsersThisMonth },
-        { count: newCoachesThisMonth },
-        { count: completedSessions },
-      ] = await Promise.all([
-        supabase.from("client_profiles").select("*", { count: "exact", head: true }),
-        supabase.from("coach_profiles").select("*", { count: "exact", head: true }),
-        supabase.from("coaching_sessions").select("*", { count: "exact", head: true }),
-        supabase.from("messages").select("*", { count: "exact", head: true }),
-        supabase
-          .from("client_profiles")
-          .select("*", { count: "exact", head: true })
-          .gte("created_at", thirtyDaysAgo.toISOString()),
-        supabase
-          .from("coach_profiles")
-          .select("*", { count: "exact", head: true })
-          .gte("created_at", thirtyDaysAgo.toISOString()),
-        supabase
-          .from("coaching_sessions")
-          .select("*", { count: "exact", head: true })
-          .eq("status", "completed"),
+      const [clients, coaches, sessions, messages] = await Promise.all([
+        supabase.from("client_profiles").select("id, created_at", { count: "exact" }).gte("created_at", start).lte("created_at", end),
+        supabase.from("coach_profiles").select("id, created_at", { count: "exact" }).gte("created_at", start).lte("created_at", end),
+        supabase.from("coaching_sessions").select("id, status, created_at", { count: "exact" }).gte("created_at", start).lte("created_at", end),
+        supabase.from("messages").select("id, created_at", { count: "exact" }).gte("created_at", start).lte("created_at", end),
       ]);
 
-      const sessionCompletionRate = totalSessions ? 
-        Math.round(((completedSessions || 0) / (totalSessions || 1)) * 100) : 0;
+      const completed = sessions.data?.filter(s => s.status === "completed").length || 0;
+      const total = sessions.count || 0;
 
       setAnalytics({
-        totalUsers: totalUsers || 0,
-        totalCoaches: totalCoaches || 0,
-        totalSessions: totalSessions || 0,
-        totalMessages: totalMessages || 0,
-        newUsersThisMonth: newUsersThisMonth || 0,
-        newCoachesThisMonth: newCoachesThisMonth || 0,
-        completedSessions: completedSessions || 0,
-        sessionCompletionRate,
+        totalUsers: clients.count || 0,
+        totalCoaches: coaches.count || 0,
+        totalSessions: total,
+        totalMessages: messages.count || 0,
+        sessionCompletionRate: total > 0 ? (completed / total) * 100 : 0,
       });
 
-      // Generate mock growth data for visualization
-      setUserGrowthData(generateGrowthData());
-      setSessionData(generateSessionData());
+      if (compFilter) {
+        const [pClients, pCoaches, pSessions, pMessages] = await Promise.all([
+          supabase.from("client_profiles").select("id", { count: "exact" }).gte("created_at", compFilter.start).lte("created_at", compFilter.end),
+          supabase.from("coach_profiles").select("id", { count: "exact" }).gte("created_at", compFilter.start).lte("created_at", compFilter.end),
+          supabase.from("coaching_sessions").select("id", { count: "exact" }).gte("created_at", compFilter.start).lte("created_at", compFilter.end),
+          supabase.from("messages").select("id", { count: "exact" }).gte("created_at", compFilter.start).lte("created_at", compFilter.end),
+        ]);
+        setComparison({ totalUsers: pClients.count || 0, totalCoaches: pCoaches.count || 0, totalSessions: pSessions.count || 0, totalMessages: pMessages.count || 0, sessionCompletionRate: 0 });
+      } else {
+        setComparison(null);
+      }
 
-    } catch (error: any) {
+      // Chart data
+      const days = eachDayOfInterval({ start: dateRange.startDate, end: dateRange.endDate }).slice(-14);
+      setUserGrowthData(days.map(d => ({ date: format(d, "MMM d"), clients: clients.data?.filter(c => format(new Date(c.created_at), "yyyy-MM-dd") === format(d, "yyyy-MM-dd")).length || 0, coaches: coaches.data?.filter(c => format(new Date(c.created_at), "yyyy-MM-dd") === format(d, "yyyy-MM-dd")).length || 0 })));
+      setSessionData(days.map(d => ({ date: format(d, "MMM d"), scheduled: sessions.data?.filter(s => format(new Date(s.created_at), "yyyy-MM-dd") === format(d, "yyyy-MM-dd")).length || 0, completed: sessions.data?.filter(s => format(new Date(s.created_at), "yyyy-MM-dd") === format(d, "yyyy-MM-dd") && s.status === "completed").length || 0 })));
+    } catch (error) {
       console.error("Error fetching analytics:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const generateGrowthData = () => {
-    const data = [];
-    const now = new Date();
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(now);
-      date.setDate(date.getDate() - i);
-      data.push({
-        date: date.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-        users: Math.floor(Math.random() * 10) + analytics.totalUsers / 7,
-        coaches: Math.floor(Math.random() * 5) + analytics.totalCoaches / 7,
-      });
-    }
-    return data;
+  const handleExport = () => {
+    const csv = arrayToCSV([{ metric: "Total Clients", value: analytics.totalUsers }, { metric: "Total Coaches", value: analytics.totalCoaches }, { metric: "Total Sessions", value: analytics.totalSessions }, { metric: "Messages", value: analytics.totalMessages }], ["metric", "value"]);
+    downloadCSV(csv, `analytics-${format(new Date(), "yyyy-MM-dd")}.csv`);
+    toast.success("Exported");
   };
 
-  const generateSessionData = () => {
-    const data = [];
-    const now = new Date();
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(now);
-      date.setDate(date.getDate() - i);
-      data.push({
-        date: date.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-        scheduled: Math.floor(Math.random() * 20) + 5,
-        completed: Math.floor(Math.random() * 15) + 3,
-      });
-    }
-    return data;
-  };
-
-  const handleExportSummary = () => {
-    const columns = [
-      { key: "metric", header: "Metric" },
-      { key: "value", header: "Value" },
-    ];
-
-    const summaryData = [
-      { metric: "Total Clients", value: analytics.totalUsers },
-      { metric: "Total Coaches", value: analytics.totalCoaches },
-      { metric: "Total Sessions", value: analytics.totalSessions },
-      { metric: "Completed Sessions", value: analytics.completedSessions },
-      { metric: "Session Completion Rate", value: `${analytics.sessionCompletionRate}%` },
-      { metric: "Total Messages", value: analytics.totalMessages },
-      { metric: "New Clients This Month", value: analytics.newUsersThisMonth },
-      { metric: "New Coaches This Month", value: analytics.newCoachesThisMonth },
-      { metric: "Avg Sessions per Coach", value: analytics.totalCoaches ? (analytics.totalSessions / analytics.totalCoaches).toFixed(1) : 0 },
-      { metric: "Avg Messages per User", value: analytics.totalUsers ? (analytics.totalMessages / analytics.totalUsers).toFixed(1) : 0 },
-      { metric: "Coach to Client Ratio", value: analytics.totalCoaches ? `1:${(analytics.totalUsers / analytics.totalCoaches).toFixed(1)}` : "N/A" },
-      { metric: "Client Growth Rate", value: `${analytics.totalUsers ? Math.round((analytics.newUsersThisMonth / analytics.totalUsers) * 100) : 0}%` },
-      { metric: "Coach Growth Rate", value: `${analytics.totalCoaches ? Math.round((analytics.newCoachesThisMonth / analytics.totalCoaches) * 100) : 0}%` },
-    ];
-
-    const csv = arrayToCSV(summaryData, columns);
-    downloadCSV(csv, generateExportFilename("analytics-summary"));
-    toast.success("Analytics summary exported to CSV");
-  };
-
-  if (loading) {
-    return (
-      <AdminLayout>
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      </AdminLayout>
-    );
-  }
+  const showComp = dateRange.compareMode !== 'none' && comparison !== null;
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Analytics</h1>
-            <p className="text-muted-foreground">Platform performance and user metrics</p>
+    <>
+      <Helmet><title>Platform Analytics | Admin</title></Helmet>
+      <AdminLayout>
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div><h1 className="text-2xl font-bold">Platform Analytics</h1><p className="text-muted-foreground">Track platform growth and engagement</p></div>
+            <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" />Export<ChevronDown className="w-4 h-4 ml-2" /></Button></DropdownMenuTrigger><DropdownMenuContent><DropdownMenuItem onClick={handleExport}>Export Summary</DropdownMenuItem></DropdownMenuContent></DropdownMenu>
           </div>
-          <div className="flex items-center gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                  <Download className="h-4 w-4 mr-2" />
-                  Export
-                  <ChevronDown className="h-4 w-4 ml-2" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleExportSummary}>
-                  Export Summary Stats
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/dashboard/admin/users")}>
-                  Export User Data →
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/dashboard/admin/coaches")}>
-                  Export Coach Data →
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Select value={timeRange} onValueChange={setTimeRange}>
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="7d">Last 7 days</SelectItem>
-                <SelectItem value="30d">Last 30 days</SelectItem>
-                <SelectItem value="90d">Last 90 days</SelectItem>
-                <SelectItem value="1y">Last year</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+
+          <DateRangeFilter preset={dateRange.preset} startDate={dateRange.startDate} endDate={dateRange.endDate} compareMode={dateRange.compareMode} dateRangeLabel={dateRange.dateRangeLabel} comparisonLabel={dateRange.comparisonLabel} onPresetChange={dateRange.setPreset} onCustomRangeChange={dateRange.setCustomRange} onCompareModeChange={dateRange.setCompareMode} />
+
+          {loading ? <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div> : (
+            <>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <ComparisonStatCard title="Total Clients" value={analytics.totalUsers} previousValue={comparison?.totalUsers} icon={Users} showComparison={showComp} />
+                <ComparisonStatCard title="Total Coaches" value={analytics.totalCoaches} previousValue={comparison?.totalCoaches} icon={Dumbbell} showComparison={showComp} />
+                <ComparisonStatCard title="Total Sessions" value={analytics.totalSessions} previousValue={comparison?.totalSessions} icon={Calendar} showComparison={showComp} />
+                <ComparisonStatCard title="Messages Sent" value={analytics.totalMessages} previousValue={comparison?.totalMessages} icon={MessageSquare} showComparison={showComp} />
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-2">
+                <Card><CardHeader><CardTitle className="flex items-center gap-2"><TrendingUp className="w-5 h-5 text-primary" />User Growth</CardTitle><CardDescription>New users over time</CardDescription></CardHeader><CardContent><div className="h-[300px]"><ResponsiveContainer width="100%" height="100%"><AreaChart data={userGrowthData}><CartesianGrid strokeDasharray="3 3" className="stroke-muted" /><XAxis dataKey="date" className="text-xs" /><YAxis className="text-xs" /><Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} /><Legend /><Area type="monotone" dataKey="clients" stackId="1" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.6} name="Clients" /><Area type="monotone" dataKey="coaches" stackId="1" stroke="hsl(var(--accent))" fill="hsl(var(--accent))" fillOpacity={0.6} name="Coaches" /></AreaChart></ResponsiveContainer></div></CardContent></Card>
+                <Card><CardHeader><CardTitle className="flex items-center gap-2"><Activity className="w-5 h-5 text-primary" />Session Activity</CardTitle><CardDescription>Scheduled vs completed</CardDescription></CardHeader><CardContent><div className="h-[300px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={sessionData}><CartesianGrid strokeDasharray="3 3" className="stroke-muted" /><XAxis dataKey="date" className="text-xs" /><YAxis className="text-xs" /><Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} /><Legend /><Bar dataKey="scheduled" fill="hsl(var(--muted-foreground))" name="Scheduled" radius={[4, 4, 0, 0]} /><Bar dataKey="completed" fill="hsl(var(--primary))" name="Completed" radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer></div></CardContent></Card>
+              </div>
+            </>
+          )}
         </div>
-
-        {/* Overview Stats */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-primary/10 rounded-lg">
-                  <Users className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{analytics.totalUsers}</p>
-                  <p className="text-sm text-muted-foreground">Total Clients</p>
-                  <p className="text-xs text-green-500">+{analytics.newUsersThisMonth} this month</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-accent/10 rounded-lg">
-                  <Dumbbell className="h-6 w-6 text-accent" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{analytics.totalCoaches}</p>
-                  <p className="text-sm text-muted-foreground">Total Coaches</p>
-                  <p className="text-xs text-green-500">+{analytics.newCoachesThisMonth} this month</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-secondary/50 rounded-lg">
-                  <Calendar className="h-6 w-6 text-secondary-foreground" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{analytics.totalSessions}</p>
-                  <p className="text-sm text-muted-foreground">Total Sessions</p>
-                  <p className="text-xs text-muted-foreground">{analytics.sessionCompletionRate}% completed</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-primary/10 rounded-lg">
-                  <MessageSquare className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{analytics.totalMessages}</p>
-                  <p className="text-sm text-muted-foreground">Messages Sent</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Charts */}
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5" />
-                User Growth
-              </CardTitle>
-              <CardDescription>New users and coaches over time</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={userGrowthData}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="date" className="text-xs" />
-                    <YAxis className="text-xs" />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px"
-                      }}
-                    />
-                    <Area 
-                      type="monotone" 
-                      dataKey="users" 
-                      stackId="1"
-                      stroke="hsl(var(--primary))" 
-                      fill="hsl(var(--primary) / 0.3)" 
-                      name="Clients"
-                    />
-                    <Area 
-                      type="monotone" 
-                      dataKey="coaches" 
-                      stackId="2"
-                      stroke="hsl(var(--accent))" 
-                      fill="hsl(var(--accent) / 0.3)" 
-                      name="Coaches"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5" />
-                Session Activity
-              </CardTitle>
-              <CardDescription>Scheduled vs completed sessions</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={sessionData}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="date" className="text-xs" />
-                    <YAxis className="text-xs" />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px"
-                      }}
-                    />
-                    <Bar dataKey="scheduled" fill="hsl(var(--primary))" name="Scheduled" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="completed" fill="hsl(var(--accent))" name="Completed" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Additional Metrics */}
-        <div className="grid gap-6 md:grid-cols-3">
-          <Card>
-            <CardHeader>
-              <CardTitle>Platform Health</CardTitle>
-              <CardDescription>Key performance indicators</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Session Completion Rate</span>
-                <span className="font-bold">{analytics.sessionCompletionRate}%</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Avg Sessions/Coach</span>
-                <span className="font-bold">
-                  {analytics.totalCoaches ? (analytics.totalSessions / analytics.totalCoaches).toFixed(1) : 0}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Avg Messages/User</span>
-                <span className="font-bold">
-                  {analytics.totalUsers ? (analytics.totalMessages / analytics.totalUsers).toFixed(1) : 0}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Coach to Client Ratio</span>
-                <span className="font-bold">
-                  1:{analytics.totalCoaches ? (analytics.totalUsers / analytics.totalCoaches).toFixed(1) : 0}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>User Engagement</CardTitle>
-              <CardDescription>Activity metrics</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Active Clients</span>
-                <span className="font-bold">{Math.round(analytics.totalUsers * 0.7)}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Active Coaches</span>
-                <span className="font-bold">{Math.round(analytics.totalCoaches * 0.85)}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Sessions This Week</span>
-                <span className="font-bold">{Math.round(analytics.totalSessions * 0.15)}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Messages This Week</span>
-                <span className="font-bold">{Math.round(analytics.totalMessages * 0.2)}</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Growth Metrics</CardTitle>
-              <CardDescription>Month-over-month changes</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">New Clients</span>
-                <span className="font-bold text-green-500">+{analytics.newUsersThisMonth}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">New Coaches</span>
-                <span className="font-bold text-green-500">+{analytics.newCoachesThisMonth}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Client Growth Rate</span>
-                <span className="font-bold text-green-500">
-                  +{analytics.totalUsers ? Math.round((analytics.newUsersThisMonth / analytics.totalUsers) * 100) : 0}%
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Coach Growth Rate</span>
-                <span className="font-bold text-green-500">
-                  +{analytics.totalCoaches ? Math.round((analytics.newCoachesThisMonth / analytics.totalCoaches) * 100) : 0}%
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </AdminLayout>
+      </AdminLayout>
+    </>
   );
 };
 
