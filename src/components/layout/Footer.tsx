@@ -27,14 +27,14 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-secondary/50 border-t border-border">
+    <footer className="bg-card/50 border-t border-border">
       <div className="container mx-auto px-4 py-12 md:py-16">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 md:gap-12">
           {/* Brand */}
           <div className="col-span-2">
-            <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 rounded-xl gradient-bg-primary flex items-center justify-center">
-                <Dumbbell className="w-5 h-5 text-white" />
+            <Link to="/" className="flex items-center gap-2 mb-4 group">
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center group-hover:shadow-glow-sm transition-all duration-300">
+                <Dumbbell className="w-5 h-5 text-primary-foreground" />
               </div>
               <span className="font-display font-bold text-xl text-foreground">
                 FitConnect
@@ -49,7 +49,7 @@ const Footer = () => {
                 <a
                   key={index}
                   href={social.href}
-                  className="w-10 h-10 rounded-xl bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-all duration-200"
+                  className="w-10 h-10 rounded-xl bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 hover:shadow-glow-sm transition-all duration-300"
                 >
                   <social.icon className="w-5 h-5" />
                 </a>
@@ -84,8 +84,9 @@ const Footer = () => {
           <p className="text-muted-foreground text-sm">
             © 2024 FitConnect. All rights reserved.
           </p>
-          <p className="text-muted-foreground text-sm">
-            Made with passion for fitness 💪
+          <p className="text-muted-foreground text-sm flex items-center gap-2">
+            Made with passion for fitness 
+            <span className="text-primary">⚡</span>
           </p>
         </div>
       </div>
