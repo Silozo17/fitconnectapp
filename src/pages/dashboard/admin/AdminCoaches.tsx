@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, MoreHorizontal, Pencil, Trash2, KeyRound, Eye, Gift, Users, DollarSign, Loader2, Pause, Ban, CheckCircle } from "lucide-react";
+import { Search, MoreHorizontal, Pencil, Trash2, KeyRound, Eye, Gift, Users, DollarSign, Loader2, Pause, Ban, CheckCircle, Download } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -31,6 +31,7 @@ import { BulkActionBar } from "@/components/admin/BulkActionBar";
 import { AccountStatusModal } from "@/components/admin/AccountStatusModal";
 import { useAdminUserManagement } from "@/hooks/useAdminUserManagement";
 import { useLogAdminAction } from "@/hooks/useAuditLog";
+import { arrayToCSV, downloadCSV, formatDateForCSV, formatArrayForCSV, generateExportFilename } from "@/lib/csv-export";
 
 interface CoachUser {
   id: string;
@@ -208,12 +209,52 @@ const AdminCoaches = () => {
   const paidCoaches = coaches.filter((c) => c.subscription_tier && c.subscription_tier !== "free").length;
   const stripeConnected = coaches.filter((c) => c.stripe_connect_onboarded).length;
 
+  const handleExportCoaches = () => {
+    const columns = [
+      { key: "display_name", header: "Display Name" },
+      { key: "coach_types", header: "Specialties" },
+      { key: "bio", header: "Bio" },
+      { key: "location", header: "Location" },
+      { key: "hourly_rate", header: "Hourly Rate (£)" },
+      { key: "experience_years", header: "Experience (Years)" },
+      { key: "subscription_tier", header: "Subscription Tier" },
+      { key: "stripe_connected", header: "Stripe Connected" },
+      { key: "status", header: "Account Status" },
+      { key: "onboarding_completed", header: "Onboarding Completed" },
+      { key: "created_at", header: "Joined Date" },
+    ];
+
+    const exportData = filteredCoaches.map((coach) => ({
+      display_name: coach.display_name || "-",
+      coach_types: formatArrayForCSV(coach.coach_types),
+      bio: coach.bio || "-",
+      location: coach.location || "-",
+      hourly_rate: coach.hourly_rate || "-",
+      experience_years: coach.experience_years || "-",
+      subscription_tier: coach.subscription_tier || "free",
+      stripe_connected: coach.stripe_connect_onboarded ? "Yes" : "No",
+      status: coach.status || "active",
+      onboarding_completed: coach.onboarding_completed ? "Yes" : "No",
+      created_at: formatDateForCSV(coach.created_at),
+    }));
+
+    const csv = arrayToCSV(exportData, columns);
+    downloadCSV(csv, generateExportFilename("coaches-export"));
+    toast.success(`Exported ${filteredCoaches.length} coaches to CSV`);
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Coaches Management</h1>
-          <p className="text-muted-foreground mt-1">Manage all coach accounts, subscriptions, and features</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Coaches Management</h1>
+            <p className="text-muted-foreground mt-1">Manage all coach accounts, subscriptions, and features</p>
+          </div>
+          <Button variant="outline" onClick={handleExportCoaches} disabled={filteredCoaches.length === 0}>
+            <Download className="h-4 w-4 mr-2" />
+            Export CSV
+          </Button>
         </div>
 
         {/* Stats */}

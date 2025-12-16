@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Search, MoreHorizontal, Pencil, Trash2, KeyRound, Loader2, Eye, Pause, Ban, CheckCircle, 
-  UserPlus, Users, UserCheck, UsersRound, Calendar
+  UserPlus, Users, UserCheck, UsersRound, Calendar, Download
 } from "lucide-react";
 import {
   Table,
@@ -41,6 +41,7 @@ import { AccountStatusModal } from "@/components/admin/AccountStatusModal";
 import { useAdminUserManagement } from "@/hooks/useAdminUserManagement";
 import { useLogAdminAction } from "@/hooks/useAuditLog";
 import { useAdminBadges } from "@/hooks/useSidebarBadges";
+import { arrayToCSV, downloadCSV, formatDateForCSV, formatArrayForCSV, generateExportFilename } from "@/lib/csv-export";
 
 interface ClientUser {
   id: string;
@@ -298,6 +299,52 @@ const AdminUsers = () => {
     return "-";
   };
 
+  const handleExportUsers = () => {
+    const columns = [
+      { key: "name", header: "Name" },
+      { key: "email", header: "Email" },
+      { key: "age", header: "Age" },
+      { key: "gender_pronouns", header: "Gender/Pronouns" },
+      { key: "location", header: "Location" },
+      { key: "height_cm", header: "Height (cm)" },
+      { key: "weight_kg", header: "Weight (kg)" },
+      { key: "fitness_goals", header: "Fitness Goals" },
+      { key: "dietary_restrictions", header: "Dietary Restrictions" },
+      { key: "allergies", header: "Allergies" },
+      { key: "medical_conditions", header: "Medical Conditions" },
+      { key: "coach_count", header: "Number of Coaches" },
+      { key: "status", header: "Account Status" },
+      { key: "onboarding_completed", header: "Onboarding Completed" },
+      { key: "leaderboard_visible", header: "Leaderboard Visible" },
+      { key: "leaderboard_display_name", header: "Leaderboard Name" },
+      { key: "created_at", header: "Joined Date" },
+    ];
+
+    const exportData = filteredUsers.map((user) => ({
+      name: `${user.first_name || ""} ${user.last_name || ""}`.trim() || "-",
+      email: userEmails[user.user_id] || "-",
+      age: user.age || "-",
+      gender_pronouns: user.gender_pronouns || "-",
+      location: getLocationDisplay(user),
+      height_cm: user.height_cm || "-",
+      weight_kg: user.weight_kg || "-",
+      fitness_goals: formatArrayForCSV(user.fitness_goals),
+      dietary_restrictions: formatArrayForCSV(user.dietary_restrictions),
+      allergies: formatArrayForCSV(user.allergies),
+      medical_conditions: formatArrayForCSV(user.medical_conditions),
+      coach_count: user.coach_count || 0,
+      status: user.status || "active",
+      onboarding_completed: user.onboarding_completed ? "Yes" : "No",
+      leaderboard_visible: user.leaderboard_visible ? "Yes" : "No",
+      leaderboard_display_name: user.leaderboard_display_name || "-",
+      created_at: formatDateForCSV(user.created_at),
+    }));
+
+    const csv = arrayToCSV(exportData, columns);
+    downloadCSV(csv, generateExportFilename("users-export"));
+    toast.success(`Exported ${filteredUsers.length} users to CSV`);
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -306,10 +353,16 @@ const AdminUsers = () => {
             <h1 className="text-3xl font-bold text-foreground">Users Management</h1>
             <p className="text-muted-foreground mt-1">Manage all client accounts</p>
           </div>
-          <Button onClick={() => setAddUserOpen(true)}>
-            <UserPlus className="h-4 w-4 mr-2" />
-            Add User
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={handleExportUsers} disabled={filteredUsers.length === 0}>
+              <Download className="h-4 w-4 mr-2" />
+              Export CSV
+            </Button>
+            <Button onClick={() => setAddUserOpen(true)}>
+              <UserPlus className="h-4 w-4 mr-2" />
+              Add User
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
