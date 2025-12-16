@@ -1381,6 +1381,11 @@ export type Database = {
       coach_verification_documents: {
         Row: {
           admin_notes: string | null
+          ai_analysis: Json | null
+          ai_analyzed_at: string | null
+          ai_confidence_score: number | null
+          ai_flagged: boolean | null
+          ai_flagged_reasons: string[] | null
           coach_id: string
           created_at: string
           document_type: string
@@ -1395,6 +1400,11 @@ export type Database = {
         }
         Insert: {
           admin_notes?: string | null
+          ai_analysis?: Json | null
+          ai_analyzed_at?: string | null
+          ai_confidence_score?: number | null
+          ai_flagged?: boolean | null
+          ai_flagged_reasons?: string[] | null
           coach_id: string
           created_at?: string
           document_type: string
@@ -1409,6 +1419,11 @@ export type Database = {
         }
         Update: {
           admin_notes?: string | null
+          ai_analysis?: Json | null
+          ai_analyzed_at?: string | null
+          ai_confidence_score?: number | null
+          ai_flagged?: boolean | null
+          ai_flagged_reasons?: string[] | null
           coach_id?: string
           created_at?: string
           document_type?: string

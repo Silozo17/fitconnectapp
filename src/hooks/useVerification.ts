@@ -7,6 +7,28 @@ export type DocumentType = 'identity' | 'certification' | 'insurance' | 'qualifi
 export type DocumentStatus = 'pending' | 'approved' | 'rejected';
 export type VerificationStatus = 'not_submitted' | 'pending' | 'approved' | 'rejected';
 
+export interface AIDocumentAnalysis {
+  documentTypeMatch: boolean;
+  extractedInfo: {
+    holderName?: string;
+    issuingAuthority?: string;
+    issueDate?: string;
+    expiryDate?: string;
+    documentNumber?: string;
+  };
+  qualityAssessment: {
+    isReadable: boolean;
+    isComplete: boolean;
+    hasWatermarks: boolean;
+  };
+  issues: string[];
+  confidenceScore: number;
+  shouldFlag: boolean;
+  flagReasons: string[];
+  recommendation: 'approve' | 'review' | 'reject';
+  summary: string;
+}
+
 export interface VerificationDocument {
   id: string;
   coach_id: string;
@@ -20,6 +42,12 @@ export interface VerificationDocument {
   reviewed_at: string | null;
   created_at: string;
   updated_at: string;
+  // AI analysis fields (stored as JSON)
+  ai_analysis: unknown | null;
+  ai_confidence_score: number | null;
+  ai_flagged: boolean | null;
+  ai_flagged_reasons: string[] | null;
+  ai_analyzed_at: string | null;
 }
 
 export interface CoachVerificationStatus {
@@ -78,10 +106,71 @@ export const useVerificationDocuments = () => {
   });
 };
 
+// Analyze document with AI
+export const useAIDocumentAnalysis = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      documentId,
+      documentUrl,
+      documentType,
+      fileName,
+    }: {
+      documentId: string;
+      documentUrl: string;
+      documentType: DocumentType;
+      fileName: string;
+    }) => {
+      // Call AI analysis edge function
+      const { data, error } = await supabase.functions.invoke('ai-document-verification', {
+        body: { documentUrl, documentType, fileName },
+      });
+
+      if (error) throw error;
+
+      const analysis = data.analysis as AIDocumentAnalysis;
+
+      // Update document with AI analysis results
+      const { error: updateError } = await supabase
+        .from("coach_verification_documents")
+        .update({
+          ai_analysis: analysis as any,
+          ai_confidence_score: analysis.confidenceScore,
+          ai_flagged: analysis.shouldFlag,
+          ai_flagged_reasons: analysis.flagReasons,
+          ai_analyzed_at: new Date().toISOString(),
+        })
+        .eq("id", documentId);
+
+      if (updateError) throw updateError;
+
+      return analysis;
+    },
+    onSuccess: (analysis) => {
+      queryClient.invalidateQueries({ queryKey: ["verification-documents"] });
+      queryClient.invalidateQueries({ queryKey: ["coach-verification-documents"] });
+      
+      if (analysis.shouldFlag) {
+        toast.warning(`AI flagged document for review: ${analysis.flagReasons[0] || 'See details'}`);
+      } else if (analysis.recommendation === 'approve') {
+        toast.success(`AI analysis complete: Recommended for approval (${analysis.confidenceScore}% confidence)`);
+      } else {
+        toast.info(`AI analysis complete: ${analysis.recommendation} (${analysis.confidenceScore}% confidence)`);
+      }
+    },
+    onError: (error) => {
+      console.error('AI analysis failed:', error);
+      toast.error("AI analysis failed - manual review required");
+    },
+  });
+};
+
 // Upload verification document
 export const useUploadVerificationDocument = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const aiAnalysis = useAIDocumentAnalysis();
 
   return useMutation({
     mutationFn: async ({ 
@@ -132,11 +221,20 @@ export const useUploadVerificationDocument = () => {
         .single();
 
       if (error) throw error;
+
+      // Trigger AI analysis in the background
+      aiAnalysis.mutate({
+        documentId: data.id,
+        documentUrl: urlData.publicUrl,
+        documentType,
+        fileName: file.name,
+      });
+
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["verification-documents"] });
-      toast.success("Document uploaded successfully");
+      toast.success("Document uploaded - AI analysis in progress...");
     },
     onError: (error) => {
       toast.error("Failed to upload document: " + error.message);
@@ -246,7 +344,7 @@ export const useCoachVerificationDocuments = (coachId: string | null) => {
   });
 };
 
-// Admin: Review verification
+// Admin: Review verification (with auto-approve documents)
 export const useReviewVerification = () => {
   const queryClient = useQueryClient();
 
@@ -262,6 +360,7 @@ export const useReviewVerification = () => {
       notes?: string;
       adminId: string;
     }) => {
+      // Update coach verification status
       const { error } = await supabase
         .from("coach_profiles")
         .update({
@@ -274,11 +373,34 @@ export const useReviewVerification = () => {
         .eq("id", coachId);
 
       if (error) throw error;
+
+      // If approving, auto-approve all pending documents
+      if (approved) {
+        const { error: docsError } = await supabase
+          .from("coach_verification_documents")
+          .update({
+            status: "approved",
+            reviewed_by: adminId,
+            reviewed_at: new Date().toISOString(),
+            admin_notes: "Auto-approved with profile verification",
+          })
+          .eq("coach_id", coachId)
+          .eq("status", "pending");
+
+        if (docsError) {
+          console.error("Failed to auto-approve documents:", docsError);
+          // Don't throw - profile was already approved
+        }
+      }
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["admin-verifications"] });
       queryClient.invalidateQueries({ queryKey: ["coach-verification-documents"] });
-      toast.success(variables.approved ? "Coach verified successfully" : "Verification rejected");
+      toast.success(
+        variables.approved 
+          ? "Coach verified - all pending documents auto-approved" 
+          : "Verification rejected"
+      );
     },
     onError: (error) => {
       toast.error("Failed to review: " + error.message);
@@ -320,6 +442,22 @@ export const useReviewDocument = () => {
     },
     onError: (error) => {
       toast.error("Failed to review document: " + error.message);
+    },
+  });
+};
+
+// Admin: Re-run AI analysis for a document
+export const useRerunAIAnalysis = () => {
+  const aiAnalysis = useAIDocumentAnalysis();
+
+  return useMutation({
+    mutationFn: async (document: VerificationDocument) => {
+      return aiAnalysis.mutateAsync({
+        documentId: document.id,
+        documentUrl: document.file_url,
+        documentType: document.document_type,
+        fileName: document.file_name,
+      });
     },
   });
 };
