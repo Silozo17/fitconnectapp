@@ -61,6 +61,12 @@ const MEDICAL_SUGGESTIONS = [
   "Back Injury", "Knee Injury", "Shoulder Injury"
 ];
 
+const FITNESS_GOALS = [
+  "Lose Weight", "Build Muscle", "Improve Endurance", "Increase Strength",
+  "Get Toned", "Improve Flexibility", "Better Cardio Health", "Train for Event",
+  "Reduce Stress", "Improve Posture", "Build Core Strength", "General Fitness"
+];
+
 const calendarProviders: {
   id: CalendarProvider;
   name: string;
@@ -124,6 +130,7 @@ const ClientSettings = () => {
         location: profile.location,
         weight_kg: profile.weight_kg,
         height_cm: profile.height_cm,
+        fitness_goals: profile.fitness_goals,
         dietary_restrictions: profile.dietary_restrictions,
         allergies: profile.allergies,
         medical_conditions: profile.medical_conditions,
@@ -260,23 +267,34 @@ const ClientSettings = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle>Fitness Goals</CardTitle>
-                    <CardDescription>Your current objectives</CardDescription>
+                    <CardDescription>Select your fitness objectives (choose multiple)</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    {profile?.fitness_goals && profile.fitness_goals.length > 0 ? (
-                      <div className="flex flex-wrap gap-2">
-                        {profile.fitness_goals.map((goal, index) => (
-                          <span
-                            key={index}
-                            className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
+                    <div className="flex flex-wrap gap-2">
+                      {FITNESS_GOALS.map((goal) => {
+                        const isSelected = profile?.fitness_goals?.includes(goal);
+                        return (
+                          <button
+                            key={goal}
+                            type="button"
+                            onClick={() => {
+                              const current = profile?.fitness_goals || [];
+                              const updated = isSelected
+                                ? current.filter((g) => g !== goal)
+                                : [...current, goal];
+                              updateField("fitness_goals", updated);
+                            }}
+                            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                              isSelected
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
+                            }`}
                           >
                             {goal}
-                          </span>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-muted-foreground text-sm">No fitness goals set</p>
-                    )}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </CardContent>
                 </Card>
 
