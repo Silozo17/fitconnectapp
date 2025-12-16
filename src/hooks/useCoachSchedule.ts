@@ -206,8 +206,18 @@ export const useRespondToBooking = () => {
 
       if (updateError) throw updateError;
 
-      // If accepted, create a coaching session
+      // If accepted, create a coaching session and establish coach-client relationship
       if (status === "accepted") {
+        // Create coach_clients relationship (triggers deal_closed in pipeline)
+        await supabase
+          .from("coach_clients")
+          .upsert({
+            coach_id: request.coach_id,
+            client_id: request.client_id,
+            status: "active",
+            plan_type: "session",
+          }, { onConflict: "coach_id,client_id" });
+
         const { data: newSession, error: sessionError } = await supabase
           .from("coaching_sessions")
           .insert({
