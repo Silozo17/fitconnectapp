@@ -34,9 +34,11 @@ const StripeConnectButton = ({ coachId, onSuccess }: StripeConnectButtonProps) =
     },
   });
 
-  // Get current commission rate based on tier
-  const currentTier = (coachProfile?.subscription_tier || "free") as TierKey;
-  const commissionPercent = SUBSCRIPTION_TIERS[currentTier]?.commissionPercent || 4;
+  // Get current commission rate based on tier - safely handle invalid/missing tier values
+  const rawTier = coachProfile?.subscription_tier || "free";
+  const currentTier: TierKey = (rawTier in SUBSCRIPTION_TIERS) ? rawTier as TierKey : "free";
+  const tierData = SUBSCRIPTION_TIERS[currentTier];
+  const commissionPercent = tierData?.commissionPercent || 4;
 
   const handleConnect = async () => {
     if (!user) return;
@@ -122,7 +124,7 @@ const StripeConnectButton = ({ coachId, onSuccess }: StripeConnectButtonProps) =
             <span className="text-sm">
               <span className="font-medium">{commissionPercent}%</span> platform fee on transactions
               <span className="text-muted-foreground ml-1">
-                ({SUBSCRIPTION_TIERS[currentTier].name} plan)
+                ({tierData.name} plan)
               </span>
             </span>
           </div>
@@ -177,10 +179,10 @@ const StripeConnectButton = ({ coachId, onSuccess }: StripeConnectButtonProps) =
         </div>
         <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10">
           <Percent className="w-4 h-4 text-primary" />
-          <span className="text-sm">
-            <span className="font-medium">{commissionPercent}%</span> platform fee
-            <span className="text-muted-foreground ml-1">
-              ({SUBSCRIPTION_TIERS[currentTier].name} plan)
+            <span className="text-sm">
+              <span className="font-medium">{commissionPercent}%</span> platform fee
+              <span className="text-muted-foreground ml-1">
+                ({tierData.name} plan)
             </span>
           </span>
         </div>
