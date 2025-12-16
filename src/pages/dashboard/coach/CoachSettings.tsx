@@ -1,17 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   User,
   Bell,
   CreditCard,
   Shield,
-  Palette,
-  HelpCircle,
   LogOut,
-  Camera,
   Save,
   Plus,
   Trash2,
-  ExternalLink,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,35 +16,44 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import { ProfileImageUpload } from "@/components/shared/ProfileImageUpload";
 
 const coachTypes = ["Personal Trainer", "Nutritionist", "Boxing Coach", "MMA Coach", "Yoga Instructor", "CrossFit Coach"];
 
-const CoachSettings = () => {
-  const { signOut } = useAuth();
-  const [selectedTab, setSelectedTab] = useState("profile");
+interface CoachProfile {
+  display_name: string | null;
+  bio: string | null;
+  location: string | null;
+  experience_years: number | null;
+  hourly_rate: number | null;
+  coach_types: string[] | null;
+  online_available: boolean | null;
+  in_person_available: boolean | null;
+  profile_image_url: string | null;
+  subscription_tier: string | null;
+}
 
-  // Mock profile data
-  const [profile, setProfile] = useState({
-    displayName: "Coach Mike",
-    email: "mike@example.com",
-    phone: "+44 7700 900123",
-    bio: "Certified personal trainer with 8 years of experience. Specializing in strength training and nutrition coaching.",
-    location: "London, UK",
-    experienceYears: 8,
-    hourlyRate: 75,
-    coachTypes: ["Personal Trainer", "Nutritionist"],
-    onlineAvailable: true,
-    inPersonAvailable: true,
+const CoachSettings = () => {
+  const { user, signOut } = useAuth();
+  const [selectedTab, setSelectedTab] = useState("profile");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const [profile, setProfile] = useState<CoachProfile>({
+    display_name: "",
+    bio: "",
+    location: "",
+    experience_years: null,
+    hourly_rate: null,
+    coach_types: [],
+    online_available: true,
+    in_person_available: false,
+    profile_image_url: null,
+    subscription_tier: "free",
   });
 
   const [notifications, setNotifications] = useState({
@@ -58,6 +64,74 @@ const CoachSettings = () => {
     pushMessages: true,
     pushReminders: true,
   });
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("coach_profiles")
+        .select("display_name, bio, location, experience_years, hourly_rate, coach_types, online_available, in_person_available, profile_image_url, subscription_tier")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (data) {
+        setProfile({
+          display_name: data.display_name || "",
+          bio: data.bio || "",
+          location: data.location || "",
+          experience_years: data.experience_years,
+          hourly_rate: data.hourly_rate,
+          coach_types: data.coach_types || [],
+          online_available: data.online_available ?? true,
+          in_person_available: data.in_person_available ?? false,
+          profile_image_url: data.profile_image_url,
+          subscription_tier: data.subscription_tier || "free",
+        });
+      }
+      setLoading(false);
+    };
+
+    fetchProfile();
+  }, [user]);
+
+  const handleSaveProfile = async () => {
+    if (!user) return;
+
+    setSaving(true);
+    const { error } = await supabase
+      .from("coach_profiles")
+      .update({
+        display_name: profile.display_name || null,
+        bio: profile.bio || null,
+        location: profile.location || null,
+        experience_years: profile.experience_years,
+        hourly_rate: profile.hourly_rate,
+        coach_types: profile.coach_types,
+        online_available: profile.online_available,
+        in_person_available: profile.in_person_available,
+        profile_image_url: profile.profile_image_url,
+      })
+      .eq("user_id", user.id);
+
+    setSaving(false);
+
+    if (error) {
+      toast.error("Failed to save changes");
+    } else {
+      toast.success("Profile updated successfully");
+    }
+  };
+
+  if (loading) {
+    return (
+      <DashboardLayout title="Settings">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout title="Settings" description="Manage your account settings and preferences.">
@@ -100,71 +174,59 @@ const CoachSettings = () => {
                   <h2 className="font-display font-bold text-foreground mb-6">Profile Information</h2>
                   
                   {/* Avatar */}
-                  <div className="flex items-center gap-6 mb-6">
-                    <div className="relative">
-                      <div className="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-2xl">
-                        CM
-                      </div>
-                      <button className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-                        <Camera className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground">Profile Photo</p>
-                      <p className="text-sm text-muted-foreground">JPG, PNG or GIF. Max 2MB.</p>
-                    </div>
+                  <div className="mb-6">
+                    <ProfileImageUpload
+                      currentImageUrl={profile.profile_image_url}
+                      userId={user?.id || ""}
+                      displayName={profile.display_name || ""}
+                      onImageChange={(url) => setProfile({ ...profile, profile_image_url: url })}
+                      size="lg"
+                    />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label>Display Name</Label>
                       <Input
-                        value={profile.displayName}
-                        onChange={(e) => setProfile({ ...profile, displayName: e.target.value })}
+                        value={profile.display_name || ""}
+                        onChange={(e) => setProfile({ ...profile, display_name: e.target.value })}
                         className="mt-1"
                       />
                     </div>
                     <div>
                       <Label>Email</Label>
                       <Input
-                        value={profile.email}
-                        onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                        value={user?.email || ""}
                         className="mt-1"
                         disabled
                       />
                     </div>
                     <div>
-                      <Label>Phone</Label>
-                      <Input
-                        value={profile.phone}
-                        onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
                       <Label>Location</Label>
                       <Input
-                        value={profile.location}
+                        value={profile.location || ""}
                         onChange={(e) => setProfile({ ...profile, location: e.target.value })}
                         className="mt-1"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <Label>Bio</Label>
-                      <Textarea
-                        value={profile.bio}
-                        onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                        className="mt-1"
-                        rows={4}
+                        placeholder="London, UK"
                       />
                     </div>
                     <div>
                       <Label>Years of Experience</Label>
                       <Input
                         type="number"
-                        value={profile.experienceYears}
-                        onChange={(e) => setProfile({ ...profile, experienceYears: parseInt(e.target.value) })}
+                        value={profile.experience_years || ""}
+                        onChange={(e) => setProfile({ ...profile, experience_years: parseInt(e.target.value) || null })}
                         className="mt-1"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label>Bio</Label>
+                      <Textarea
+                        value={profile.bio || ""}
+                        onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                        className="mt-1"
+                        rows={4}
+                        placeholder="Tell clients about your background and coaching philosophy..."
                       />
                     </div>
                   </div>
@@ -175,18 +237,19 @@ const CoachSettings = () => {
                       {coachTypes.map((type) => (
                         <Badge
                           key={type}
-                          variant={profile.coachTypes.includes(type) ? "default" : "outline"}
+                          variant={(profile.coach_types || []).includes(type) ? "default" : "outline"}
                           className={`cursor-pointer ${
-                            profile.coachTypes.includes(type)
+                            (profile.coach_types || []).includes(type)
                               ? "bg-primary text-primary-foreground"
                               : "hover:bg-secondary"
                           }`}
                           onClick={() => {
+                            const current = profile.coach_types || [];
                             setProfile({
                               ...profile,
-                              coachTypes: profile.coachTypes.includes(type)
-                                ? profile.coachTypes.filter((t) => t !== type)
-                                : [...profile.coachTypes, type],
+                              coach_types: current.includes(type)
+                                ? current.filter((t) => t !== type)
+                                : [...current, type],
                             });
                           }}
                         >
@@ -199,23 +262,27 @@ const CoachSettings = () => {
                   <div className="mt-6 flex items-center gap-8">
                     <div className="flex items-center gap-3">
                       <Switch
-                        checked={profile.onlineAvailable}
-                        onCheckedChange={(checked) => setProfile({ ...profile, onlineAvailable: checked })}
+                        checked={profile.online_available ?? true}
+                        onCheckedChange={(checked) => setProfile({ ...profile, online_available: checked })}
                       />
                       <Label>Available for Online Sessions</Label>
                     </div>
                     <div className="flex items-center gap-3">
                       <Switch
-                        checked={profile.inPersonAvailable}
-                        onCheckedChange={(checked) => setProfile({ ...profile, inPersonAvailable: checked })}
+                        checked={profile.in_person_available ?? false}
+                        onCheckedChange={(checked) => setProfile({ ...profile, in_person_available: checked })}
                       />
                       <Label>Available for In-Person Sessions</Label>
                     </div>
                   </div>
 
                   <div className="mt-6 flex justify-end">
-                    <Button className="bg-primary text-primary-foreground">
-                      <Save className="w-4 h-4 mr-2" />
+                    <Button onClick={handleSaveProfile} disabled={saving} className="bg-primary text-primary-foreground">
+                      {saving ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Save className="w-4 h-4 mr-2" />
+                      )}
                       Save Changes
                     </Button>
                   </div>
@@ -235,32 +302,24 @@ const CoachSettings = () => {
                 </div>
 
                 <div className="space-y-4">
-                  {[
-                    { name: "Personal Training (60 min)", price: 75, type: "session" },
-                    { name: "Nutrition Consultation", price: 50, type: "session" },
-                    { name: "Monthly Training Plan", price: 150, type: "plan" },
-                    { name: "Group Session (per person)", price: 25, type: "session" },
-                  ].map((service, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg">
-                      <div>
-                        <p className="font-medium text-foreground">{service.name}</p>
-                        <Badge variant="outline" className="mt-1">{service.type}</Badge>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                          <span className="text-muted-foreground">£</span>
-                          <Input
-                            type="number"
-                            value={service.price}
-                            className="w-20"
-                          />
-                        </div>
-                        <Button variant="ghost" size="icon" className="text-destructive">
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
+                  <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg">
+                    <div>
+                      <p className="font-medium text-foreground">Hourly Rate</p>
+                      <p className="text-sm text-muted-foreground">Your base session rate</p>
                     </div>
-                  ))}
+                    <div className="flex items-center gap-2">
+                      <span className="text-muted-foreground">£</span>
+                      <Input
+                        type="number"
+                        value={profile.hourly_rate || ""}
+                        onChange={(e) => setProfile({ ...profile, hourly_rate: parseFloat(e.target.value) || null })}
+                        className="w-24"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    More service types and packages coming soon.
+                  </p>
                 </div>
               </div>
             )}
@@ -322,7 +381,7 @@ const CoachSettings = () => {
                 <div className="card-elevated p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="font-display font-bold text-foreground">Current Plan</h2>
-                    <Badge className="bg-primary/20 text-primary">Free</Badge>
+                    <Badge className="bg-primary/20 text-primary capitalize">{profile.subscription_tier}</Badge>
                   </div>
                   <p className="text-muted-foreground mb-6">
                     Upgrade to unlock more features and grow your coaching business.
@@ -330,20 +389,20 @@ const CoachSettings = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {[
-                      { name: "Free", price: 0, features: ["5 clients max", "Basic messaging", "Standard support"] },
-                      { name: "Pro", price: 29, features: ["Unlimited clients", "Priority messaging", "Analytics dashboard", "Priority support"], popular: true },
-                      { name: "Elite", price: 79, features: ["Everything in Pro", "Custom branding", "API access", "Dedicated support"] },
+                      { name: "free", displayName: "Free", price: 0, features: ["5 clients max", "Basic messaging", "Standard support"] },
+                      { name: "pro", displayName: "Pro", price: 29, features: ["Unlimited clients", "Priority messaging", "Analytics dashboard", "Priority support"], popular: true },
+                      { name: "elite", displayName: "Elite", price: 79, features: ["Everything in Pro", "Custom branding", "API access", "Dedicated support"] },
                     ].map((plan) => (
                       <div
                         key={plan.name}
                         className={`p-4 rounded-lg border ${
                           plan.popular ? "border-primary bg-primary/5" : "border-border"
-                        }`}
+                        } ${profile.subscription_tier === plan.name ? "ring-2 ring-primary" : ""}`}
                       >
                         {plan.popular && (
                           <Badge className="bg-primary text-primary-foreground mb-2">Most Popular</Badge>
                         )}
-                        <h3 className="font-display font-bold text-foreground">{plan.name}</h3>
+                        <h3 className="font-display font-bold text-foreground">{plan.displayName}</h3>
                         <p className="text-2xl font-bold text-foreground mt-2">
                           £{plan.price}<span className="text-sm text-muted-foreground">/mo</span>
                         </p>
@@ -354,9 +413,10 @@ const CoachSettings = () => {
                         </ul>
                         <Button
                           className="w-full mt-4"
-                          variant={plan.name === "Free" ? "outline" : "default"}
+                          variant={profile.subscription_tier === plan.name ? "outline" : "default"}
+                          disabled={profile.subscription_tier === plan.name}
                         >
-                          {plan.name === "Free" ? "Current Plan" : "Upgrade"}
+                          {profile.subscription_tier === plan.name ? "Current Plan" : "Upgrade"}
                         </Button>
                       </div>
                     ))}
@@ -375,7 +435,7 @@ const CoachSettings = () => {
                     <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg">
                       <div>
                         <p className="font-medium text-foreground">Password</p>
-                        <p className="text-sm text-muted-foreground">Last changed 30 days ago</p>
+                        <p className="text-sm text-muted-foreground">Change your account password</p>
                       </div>
                       <Button variant="outline">Change Password</Button>
                     </div>
@@ -395,15 +455,14 @@ const CoachSettings = () => {
                   <p className="text-muted-foreground mb-4">
                     Permanently delete your account and all associated data.
                   </p>
-                  <Button variant="outline" className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground">
-                    Delete Account
-                  </Button>
+                  <div className="flex gap-4">
+                    <Button variant="destructive">Delete Account</Button>
+                    <Button variant="outline" onClick={signOut}>
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </Button>
+                  </div>
                 </div>
-
-                <Button variant="outline" onClick={() => signOut()} className="w-full">
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
-                </Button>
               </div>
             )}
           </div>

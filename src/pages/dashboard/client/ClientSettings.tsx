@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, Save, LogOut, AlertTriangle, Info } from "lucide-react";
 import { HealthTagInput } from "@/components/dashboard/clients/HealthTagInput";
+import { ProfileImageUpload } from "@/components/shared/ProfileImageUpload";
 
 interface ClientProfile {
   first_name: string | null;
@@ -22,6 +23,7 @@ interface ClientProfile {
   dietary_restrictions: string[] | null;
   allergies: string[] | null;
   medical_conditions: string[] | null;
+  avatar_url: string | null;
 }
 
 const DIETARY_SUGGESTIONS = [
@@ -51,7 +53,7 @@ const ClientSettings = () => {
 
       const { data } = await supabase
         .from("client_profiles")
-        .select("first_name, last_name, age, gender_pronouns, weight_kg, height_cm, fitness_goals, dietary_restrictions, allergies, medical_conditions")
+        .select("first_name, last_name, age, gender_pronouns, weight_kg, height_cm, fitness_goals, dietary_restrictions, allergies, medical_conditions, avatar_url")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -78,6 +80,7 @@ const ClientSettings = () => {
         dietary_restrictions: profile.dietary_restrictions,
         allergies: profile.allergies,
         medical_conditions: profile.medical_conditions,
+        avatar_url: profile.avatar_url,
       })
       .eq("user_id", user.id);
 
@@ -116,6 +119,23 @@ const ClientSettings = () => {
       </div>
 
       <div className="max-w-2xl space-y-6">
+        {/* Profile Photo */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Profile Photo</CardTitle>
+            <CardDescription>Upload a photo so your coaches can recognize you</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ProfileImageUpload
+              currentImageUrl={profile?.avatar_url}
+              userId={user?.id || ""}
+              displayName={`${profile?.first_name || ""} ${profile?.last_name || ""}`.trim()}
+              onImageChange={(url) => updateField("avatar_url", url)}
+              size="lg"
+            />
+          </CardContent>
+        </Card>
+
         {/* Personal Information */}
         <Card>
           <CardHeader>

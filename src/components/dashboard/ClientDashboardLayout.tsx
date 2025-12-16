@@ -12,6 +12,7 @@ interface ClientProfile {
   first_name: string | null;
   last_name: string | null;
   onboarding_completed: boolean;
+  avatar_url: string | null;
 }
 
 interface ClientDashboardLayoutProps {
@@ -37,7 +38,7 @@ const ClientDashboardLayout = ({
 
       const { data } = await supabase
         .from("client_profiles")
-        .select("first_name, last_name, onboarding_completed")
+        .select("first_name, last_name, onboarding_completed, avatar_url")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -83,6 +84,7 @@ const ClientDashboardLayout = ({
           <ClientDashboardHeader
             firstName={profile?.first_name}
             lastName={profile?.last_name}
+            avatarUrl={profile?.avatar_url}
           />
 
           <main className="p-6">{children}</main>
