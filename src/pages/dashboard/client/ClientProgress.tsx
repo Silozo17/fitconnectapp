@@ -8,6 +8,7 @@ import { useMyProgress } from "@/hooks/useClientProgress";
 import { LogProgressModal } from "@/components/progress/LogProgressModal";
 import { ProgressChart } from "@/components/progress/ProgressChart";
 import { ProgressEntryCard } from "@/components/progress/ProgressEntryCard";
+import { AIProgressInsights } from "@/components/ai/AIProgressInsights";
 
 const ClientProgress = () => {
   const { data, isLoading, error } = useMyProgress();
@@ -147,6 +148,7 @@ const ClientProgress = () => {
             <TabsList className="bg-secondary">
               <TabsTrigger value="charts">Charts</TabsTrigger>
               <TabsTrigger value="history">History</TabsTrigger>
+              <TabsTrigger value="insights">AI Insights</TabsTrigger>
             </TabsList>
 
             <TabsContent value="charts" className="space-y-6">
@@ -163,6 +165,10 @@ const ClientProgress = () => {
                   <ProgressEntryCard key={entry.id} entry={entry} />
                 ))}
               </div>
+            </TabsContent>
+
+            <TabsContent value="insights">
+              <AIProgressInsights progressData={progress} />
             </TabsContent>
           </Tabs>
         </>

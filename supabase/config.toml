@@ -2,3 +2,21 @@ project_id = "ntgfihgneyoxxbwmtceq"
 
 [functions.stripe-webhook]
 verify_jwt = false
+
+[functions.ai-meal-suggestion]
+verify_jwt = true
+
+[functions.ai-workout-generator]
+verify_jwt = true
+
+[functions.ai-exercise-alternatives]
+verify_jwt = true
+
+[functions.ai-food-substitutions]
+verify_jwt = true
+
+[functions.ai-macro-calculator]
+verify_jwt = true
+
+[functions.ai-progress-analysis]
+verify_jwt = true
