@@ -24,6 +24,15 @@ import CoachPlanBuilder from "./pages/dashboard/coach/CoachPlanBuilder";
 import CoachEarnings from "./pages/dashboard/coach/CoachEarnings";
 import CoachSettings from "./pages/dashboard/coach/CoachSettings";
 
+// Public Pages
+import About from "./pages/About";
+import FAQ from "./pages/FAQ";
+import Pricing from "./pages/Pricing";
+import ForCoaches from "./pages/ForCoaches";
+import HowItWorks from "./pages/HowItWorks";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +49,13 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/coaches" element={<Coaches />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/for-coaches" element={<ForCoaches />} />
+              <Route path="/how-it-works" element={<HowItWorks />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
               <Route path="/onboarding/client" element={
                 <ProtectedRoute allowedRoles={["client"]}>
                   <ClientOnboarding />
