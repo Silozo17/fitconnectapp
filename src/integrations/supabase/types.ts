@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_dashboard_widgets: {
+        Row: {
+          admin_id: string | null
+          config: Json | null
+          created_at: string | null
+          id: string
+          is_visible: boolean | null
+          position: number
+          size: string | null
+          title: string
+          updated_at: string | null
+          widget_type: string
+        }
+        Insert: {
+          admin_id?: string | null
+          config?: Json | null
+          created_at?: string | null
+          id?: string
+          is_visible?: boolean | null
+          position: number
+          size?: string | null
+          title: string
+          updated_at?: string | null
+          widget_type: string
+        }
+        Update: {
+          admin_id?: string | null
+          config?: Json | null
+          created_at?: string | null
+          id?: string
+          is_visible?: boolean | null
+          position?: number
+          size?: string | null
+          title?: string
+          updated_at?: string | null
+          widget_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_dashboard_widgets_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "admin_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_granted_subscriptions: {
         Row: {
           coach_id: string | null
@@ -2342,30 +2389,36 @@ export type Database = {
       }
       platform_features: {
         Row: {
+          category: string | null
           created_at: string | null
           default_value: Json | null
           description: string | null
           feature_key: string
           feature_type: string | null
           id: string
+          is_enforced: boolean | null
           name: string
         }
         Insert: {
+          category?: string | null
           created_at?: string | null
           default_value?: Json | null
           description?: string | null
           feature_key: string
           feature_type?: string | null
           id?: string
+          is_enforced?: boolean | null
           name: string
         }
         Update: {
+          category?: string | null
           created_at?: string | null
           default_value?: Json | null
           description?: string | null
           feature_key?: string
           feature_type?: string | null
           id?: string
+          is_enforced?: boolean | null
           name?: string
         }
         Relationships: []
@@ -2430,6 +2483,42 @@ export type Database = {
           stripe_subscription_id?: string | null
           tier?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      platform_tier_stripe: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_synced: boolean | null
+          last_synced_at: string | null
+          stripe_price_id_monthly: string | null
+          stripe_price_id_yearly: string | null
+          stripe_product_id: string | null
+          tier: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_synced?: boolean | null
+          last_synced_at?: string | null
+          stripe_price_id_monthly?: string | null
+          stripe_price_id_yearly?: string | null
+          stripe_product_id?: string | null
+          tier: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_synced?: boolean | null
+          last_synced_at?: string | null
+          stripe_price_id_monthly?: string | null
+          stripe_price_id_yearly?: string | null
+          stripe_product_id?: string | null
+          tier?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
