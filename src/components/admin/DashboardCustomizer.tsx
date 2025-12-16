@@ -49,6 +49,8 @@ export function DashboardCustomizer({ open, onOpenChange }: DashboardCustomizerP
   const [activeCategory, setActiveCategory] = useState<string>("stats");
 
   const handleToggleWidget = async (type: string, widgetState: DashboardWidget | undefined) => {
+    const currentlyVisible = widgetState?.is_visible ?? false;
+    
     try {
       if (widgetState) {
         await updateWidget.mutateAsync({
@@ -63,10 +65,10 @@ export function DashboardCustomizer({ open, onOpenChange }: DashboardCustomizerP
           title: widgetConfig.label,
           position: Object.keys(WIDGET_TYPES).indexOf(type),
           size: "medium",
-          is_visible: true,
+          is_visible: !currentlyVisible,
           config: {},
         });
-        toast.success("Widget shown");
+        toast.success(`Widget ${currentlyVisible ? "hidden" : "shown"}`);
       }
     } catch (error) {
       toast.error("Failed to update widget");
@@ -120,7 +122,7 @@ export function DashboardCustomizer({ open, onOpenChange }: DashboardCustomizerP
     const categoryWidgets = widgetsByCategory[category] || [];
     const visibleCount = categoryWidgets.filter(w => {
       const state = getWidgetState(w.type);
-      return state?.is_visible ?? true;
+      return state?.is_visible ?? false;
     }).length;
     return { visible: visibleCount, total: categoryWidgets.length };
   };
@@ -166,7 +168,7 @@ export function DashboardCustomizer({ open, onOpenChange }: DashboardCustomizerP
                   
                   {(widgetsByCategory[cat.key] || []).map(({ type, label }) => {
                     const widgetState = getWidgetState(type);
-                    const isVisible = widgetState?.is_visible ?? true;
+                    const isVisible = widgetState?.is_visible ?? false;
                     const currentSize = widgetState?.size || "medium";
 
                     return (
