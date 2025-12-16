@@ -30,28 +30,29 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-card border-t border-border">
+    <footer className="bg-secondary/50 border-t border-border">
       <div className="container mx-auto px-4 py-12 md:py-16">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 md:gap-12">
           {/* Brand */}
           <div className="col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-                <Dumbbell className="w-6 h-6 text-primary-foreground" />
+              <div className="w-10 h-10 rounded-xl gradient-bg-primary flex items-center justify-center">
+                <Dumbbell className="w-5 h-5 text-white" />
               </div>
               <span className="font-display font-bold text-xl text-foreground">
                 FitConnect
               </span>
             </Link>
             <p className="text-muted-foreground mb-6 max-w-sm">
-              Connect with world-class fitness coaches and transform your health journey. Your goals, your way.
+              Connect with world-class fitness coaches and transform your health
+              journey. Your goals, your way.
             </p>
-            <div className="flex gap-4">
+            <div className="flex gap-3">
               {socialLinks.map((social, index) => (
                 <a
                   key={index}
                   href={social.href}
-                  className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-secondary/80 transition-colors"
+                  className="w-10 h-10 rounded-xl bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-all duration-200"
                 >
                   <social.icon className="w-5 h-5" />
                 </a>
@@ -70,7 +71,7 @@ const Footer = () => {
                   <li key={link.name}>
                     <Link
                       to={link.href}
-                      className="text-muted-foreground hover:text-foreground transition-colors"
+                      className="text-muted-foreground hover:text-primary transition-colors"
                     >
                       {link.name}
                     </Link>

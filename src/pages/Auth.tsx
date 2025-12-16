@@ -6,11 +6,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { GradientButton } from "@/components/ui/gradient-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dumbbell, Loader2, User, Briefcase } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import BlobShape from "@/components/ui/blob-shape";
 
 const authSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -35,12 +37,9 @@ const Auth = () => {
     resolver: zodResolver(authSchema),
   });
 
-  // Redirect if already logged in
   useEffect(() => {
     if (user && role) {
       const from = location.state?.from?.pathname || "/";
-      
-      // Check if onboarding is needed (handled in dashboard routes)
       if (role === "client") {
         navigate("/onboarding/client");
       } else if (role === "coach") {
@@ -101,8 +100,8 @@ const Auth = () => {
           <div className="w-full max-w-md">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2 mb-8">
-              <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-                <Dumbbell className="w-6 h-6 text-primary-foreground" />
+              <div className="w-10 h-10 rounded-xl gradient-bg-primary flex items-center justify-center">
+                <Dumbbell className="w-5 h-5 text-white" />
               </div>
               <span className="font-display font-bold text-xl text-foreground">
                 FitConnect
@@ -192,7 +191,7 @@ const Auth = () => {
                   id="email"
                   type="email"
                   placeholder="you@example.com"
-                  className="mt-1.5 bg-secondary border-border text-foreground placeholder:text-muted-foreground"
+                  className="mt-1.5 bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12"
                   {...register("email")}
                 />
                 {errors.email && (
@@ -210,7 +209,7 @@ const Auth = () => {
                   id="password"
                   type="password"
                   placeholder="••••••••"
-                  className="mt-1.5 bg-secondary border-border text-foreground placeholder:text-muted-foreground"
+                  className="mt-1.5 bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12"
                   {...register("password")}
                 />
                 {errors.password && (
@@ -220,10 +219,10 @@ const Auth = () => {
                 )}
               </div>
 
-              <Button
+              <GradientButton
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 text-base font-semibold"
+                className="w-full h-12 text-base"
               >
                 {isSubmitting ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
@@ -232,7 +231,7 @@ const Auth = () => {
                 ) : (
                   "Create Account"
                 )}
-              </Button>
+              </GradientButton>
             </form>
 
             {/* Toggle */}
@@ -250,19 +249,23 @@ const Auth = () => {
         </div>
 
         {/* Right side - Visual */}
-        <div className="hidden lg:flex flex-1 bg-gradient-to-br from-primary/20 via-background to-accent/20 items-center justify-center p-12">
-          <div className="text-center max-w-lg">
-            <div className="w-24 h-24 rounded-2xl bg-primary/20 backdrop-blur-xl flex items-center justify-center mx-auto mb-8">
-              <Dumbbell className="w-12 h-12 text-primary" />
+        <div className="hidden lg:flex flex-1 gradient-bg-primary items-center justify-center p-12 relative overflow-hidden">
+          {/* Decorative Blobs */}
+          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+
+          <div className="text-center max-w-lg relative z-10">
+            <div className="w-24 h-24 rounded-3xl bg-white/20 backdrop-blur-xl flex items-center justify-center mx-auto mb-8">
+              <Dumbbell className="w-12 h-12 text-white" />
             </div>
-            <h2 className="font-display text-4xl font-bold text-foreground mb-4">
+            <h2 className="font-display text-4xl font-bold text-white mb-4">
               {isLogin
                 ? "Ready to crush your goals?"
                 : selectedRole === "client"
                 ? "Find your perfect coach"
                 : "Grow your coaching business"}
             </h2>
-            <p className="text-muted-foreground text-lg">
+            <p className="text-white/80 text-lg">
               {isLogin
                 ? "Your personalized fitness journey awaits."
                 : selectedRole === "client"
