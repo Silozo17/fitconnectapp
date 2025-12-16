@@ -68,3 +68,6 @@ verify_jwt = true
 
 [functions.admin-user-management]
 verify_jwt = true
+
+[functions.ai-document-verification]
+verify_jwt = true
