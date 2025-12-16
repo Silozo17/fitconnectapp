@@ -1103,6 +1103,53 @@ export type Database = {
           },
         ]
       }
+      coach_dashboard_widgets: {
+        Row: {
+          coach_id: string | null
+          config: Json | null
+          created_at: string | null
+          id: string
+          is_visible: boolean | null
+          position: number
+          size: string | null
+          title: string
+          updated_at: string | null
+          widget_type: string
+        }
+        Insert: {
+          coach_id?: string | null
+          config?: Json | null
+          created_at?: string | null
+          id?: string
+          is_visible?: boolean | null
+          position?: number
+          size?: string | null
+          title: string
+          updated_at?: string | null
+          widget_type: string
+        }
+        Update: {
+          coach_id?: string | null
+          config?: Json | null
+          created_at?: string | null
+          id?: string
+          is_visible?: boolean | null
+          position?: number
+          size?: string | null
+          title?: string
+          updated_at?: string | null
+          widget_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_dashboard_widgets_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coach_feature_overrides: {
         Row: {
           coach_id: string | null

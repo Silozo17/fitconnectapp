@@ -4,26 +4,27 @@ import {
   Users,
   Calendar,
   MessageSquare,
-  DollarSign,
-  TrendingUp,
   Clock,
   Plus,
   ArrowRight,
   Star,
+  TrendingUp,
+  Settings2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import ConnectionRequests from "@/components/dashboard/coach/ConnectionRequests";
 import { ProfileCompletionCard } from "@/components/dashboard/coach/ProfileCompletionCard";
+import { CoachDashboardCustomizer } from "@/components/dashboard/coach/CoachDashboardCustomizer";
+import { AddClientModal } from "@/components/dashboard/clients/AddClientModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { useActiveProfile } from "@/hooks/useActiveProfile";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { supabase } from "@/integrations/supabase/client";
 
 interface CoachStats {
   activeClients: number;
   sessionsThisWeek: number;
-  unreadMessages: number;
   averageRating: number;
   totalReviews: number;
 }
@@ -39,16 +40,18 @@ interface UpcomingSession {
 const CoachOverview = () => {
   const { user } = useAuth();
   const { profileId, isRoleSwitching, userId } = useActiveProfile();
+  const { unreadCount: unreadMessages } = useUnreadMessages();
   const [coachProfileId, setCoachProfileId] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string>("");
   const [stats, setStats] = useState<CoachStats>({
     activeClients: 0,
     sessionsThisWeek: 0,
-    unreadMessages: 0,
     averageRating: 0,
     totalReviews: 0,
   });
   const [upcomingSessions, setUpcomingSessions] = useState<UpcomingSession[]>([]);
+  const [customizerOpen, setCustomizerOpen] = useState(false);
+  const [addClientOpen, setAddClientOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -98,8 +101,8 @@ const CoachOverview = () => {
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(startOfWeek.getDate() + 7);
 
-      // Fetch all stats in parallel
-      const [clients, sessions, messages, reviews, upcoming] = await Promise.all([
+      // Fetch all stats in parallel (excluding messages - using hook now)
+      const [clients, sessions, reviews, upcoming] = await Promise.all([
         supabase
           .from("coach_clients")
           .select("id", { count: "exact" })
@@ -111,11 +114,6 @@ const CoachOverview = () => {
           .eq("coach_id", profileIdToUse)
           .gte("scheduled_at", startOfWeek.toISOString())
           .lt("scheduled_at", endOfWeek.toISOString()),
-        supabase
-          .from("messages")
-          .select("id", { count: "exact" })
-          .eq("receiver_id", profileIdToUse)
-          .is("read_at", null),
         supabase
           .from("reviews")
           .select("rating")
@@ -145,7 +143,6 @@ const CoachOverview = () => {
       setStats({
         activeClients: clients.count || 0,
         sessionsThisWeek: sessions.count || 0,
-        unreadMessages: messages.count || 0,
         averageRating: avgRating,
         totalReviews: reviews.data?.length || 0,
       });
@@ -190,11 +187,17 @@ const CoachOverview = () => {
   return (
     <DashboardLayout title="Overview" description="Manage your coaching business from your dashboard.">
       {/* Welcome & Quick Stats */}
-      <div className="mb-8">
-        <h1 className="font-display text-3xl font-bold text-foreground mb-2">
-          Welcome back{displayName ? `, ${displayName}` : ""}!
-        </h1>
-        <p className="text-muted-foreground">Here's what's happening with your coaching business today.</p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="font-display text-3xl font-bold text-foreground mb-2">
+            Welcome back{displayName ? `, ${displayName}` : ""}!
+          </h1>
+          <p className="text-muted-foreground">Here's what's happening with your coaching business today.</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => setCustomizerOpen(true)}>
+          <Settings2 className="w-4 h-4 mr-2" />
+          Customize
+        </Button>
       </div>
 
       {/* Profile Completion */}
@@ -235,13 +238,13 @@ const CoachOverview = () => {
             <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center">
               <MessageSquare className="w-6 h-6 text-warning" />
             </div>
-            {stats.unreadMessages > 0 && (
+            {unreadMessages > 0 && (
               <span className="w-5 h-5 rounded-full bg-accent text-accent-foreground text-xs flex items-center justify-center font-bold">
-                {stats.unreadMessages}
+                {unreadMessages}
               </span>
             )}
           </div>
-          <p className="text-3xl font-display font-bold text-foreground">{stats.unreadMessages}</p>
+          <p className="text-3xl font-display font-bold text-foreground">{unreadMessages}</p>
           <p className="text-sm text-muted-foreground">Unread Messages</p>
         </div>
 
@@ -265,7 +268,11 @@ const CoachOverview = () => {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <Button variant="outline" className="h-auto py-4 flex flex-col gap-2 border-dashed">
+        <Button 
+          variant="outline" 
+          className="h-auto py-4 flex flex-col gap-2 border-dashed"
+          onClick={() => setAddClientOpen(true)}
+        >
           <Plus className="w-5 h-5" />
           <span className="text-sm">Add Client</span>
         </Button>
@@ -360,6 +367,10 @@ const CoachOverview = () => {
           </div>
         </div>
       </div>
+
+      {/* Modals */}
+      <CoachDashboardCustomizer open={customizerOpen} onOpenChange={setCustomizerOpen} />
+      <AddClientModal open={addClientOpen} onOpenChange={setAddClientOpen} />
     </DashboardLayout>
   );
 };
