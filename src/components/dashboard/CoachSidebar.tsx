@@ -20,13 +20,17 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
+import { useCoachBadges } from "@/hooks/useSidebarBadges";
+import { SidebarBadge } from "@/components/shared/SidebarBadge";
 
-const menuItems = [
+type BadgeKey = "messages" | "pipeline" | "schedule" | "clients";
+
+const menuItems: { title: string; icon: typeof LayoutDashboard; path: string; badgeKey?: BadgeKey; badgeVariant?: "default" | "warning" | "urgent" }[] = [
   { title: "Overview", icon: LayoutDashboard, path: "/dashboard/coach" },
-  { title: "Pipeline", icon: Kanban, path: "/dashboard/coach/pipeline" },
-  { title: "Clients", icon: Users, path: "/dashboard/coach/clients" },
-  { title: "Schedule", icon: Calendar, path: "/dashboard/coach/schedule" },
-  { title: "Messages", icon: MessageSquare, path: "/dashboard/coach/messages", showBadge: true },
+  { title: "Pipeline", icon: Kanban, path: "/dashboard/coach/pipeline", badgeKey: "pipeline", badgeVariant: "warning" },
+  { title: "Clients", icon: Users, path: "/dashboard/coach/clients", badgeKey: "clients", badgeVariant: "warning" },
+  { title: "Schedule", icon: Calendar, path: "/dashboard/coach/schedule", badgeKey: "schedule", badgeVariant: "warning" },
+  { title: "Messages", icon: MessageSquare, path: "/dashboard/coach/messages", badgeKey: "messages" },
   { title: "Training Plans", icon: ClipboardList, path: "/dashboard/coach/plans" },
   { title: "Digital Products", icon: ShoppingBag, path: "/dashboard/coach/products" },
   { title: "Packages", icon: Package, path: "/dashboard/coach/packages" },
@@ -45,6 +49,22 @@ interface CoachSidebarProps {
 const CoachSidebar = ({ collapsed, onToggle }: CoachSidebarProps) => {
   const location = useLocation();
   const { unreadCount } = useUnreadMessages();
+  const { newLeads, pendingBookings, pendingConnections } = useCoachBadges();
+
+  const getBadgeCount = (badgeKey?: BadgeKey): number => {
+    switch (badgeKey) {
+      case "messages":
+        return unreadCount;
+      case "pipeline":
+        return newLeads;
+      case "schedule":
+        return pendingBookings;
+      case "clients":
+        return pendingConnections;
+      default:
+        return 0;
+    }
+  };
 
   return (
     <aside
@@ -72,7 +92,7 @@ const CoachSidebar = ({ collapsed, onToggle }: CoachSidebarProps) => {
         <ul className="space-y-1 px-2">
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
-            const showBadge = 'showBadge' in item && item.showBadge && unreadCount > 0;
+            const badgeCount = getBadgeCount(item.badgeKey);
             
             return (
               <li key={item.path}>
@@ -87,20 +107,14 @@ const CoachSidebar = ({ collapsed, onToggle }: CoachSidebarProps) => {
                 >
                   <div className="relative">
                     <item.icon className="w-5 h-5 shrink-0" />
-                    {showBadge && collapsed && (
-                      <span className="absolute -top-1 -right-1 min-w-[16px] h-4 bg-green-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
-                        {unreadCount > 99 ? "99+" : unreadCount}
-                      </span>
+                    {badgeCount > 0 && collapsed && (
+                      <SidebarBadge count={badgeCount} collapsed variant={item.badgeVariant} />
                     )}
                   </div>
                   {!collapsed && (
                     <>
                       <span className="font-medium flex-1">{item.title}</span>
-                      {showBadge && (
-                        <span className="min-w-[20px] h-5 bg-green-500 text-white text-xs font-bold rounded-full flex items-center justify-center px-1.5">
-                          {unreadCount > 99 ? "99+" : unreadCount}
-                        </span>
-                      )}
+                      {badgeCount > 0 && <SidebarBadge count={badgeCount} variant={item.badgeVariant} />}
                     </>
                   )}
                 </Link>
