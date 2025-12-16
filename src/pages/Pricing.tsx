@@ -186,7 +186,7 @@ const Pricing = () => {
                       ))}
                     </ul>
 
-                    <Link to={isFree ? "/auth" : "/subscribe"} className="block mt-auto">
+                    <Link to={isFree ? "/auth" : `/subscribe?tier=${key}&billing=${billingInterval}`} className="block mt-auto">
                       <GradientButton 
                         className="w-full" 
                         variant={isPopular ? "primary" : isFree ? "outline" : "primary"}
