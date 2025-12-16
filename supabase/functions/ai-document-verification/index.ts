@@ -27,6 +27,134 @@ interface DocumentAnalysis {
   summary: string;
 }
 
+// Detailed validation rules for each document type
+const documentRules = {
+  identity: {
+    name: "Government-issued Identity Document",
+    required: ['Full legal name', 'Photo of holder', 'Document number', 'Expiry date (if applicable)'],
+    accepted: [
+      'Passport (any country)',
+      'Driver\'s License',
+      'National ID Card',
+      'Residence Permit',
+      'Government-issued photo ID'
+    ],
+    rejectIf: [
+      'Document is expired',
+      'Photo is not clearly visible or face is obscured',
+      'Name is not readable or partially cut off',
+      'Document appears digitally altered, edited, or manipulated',
+      'Image is a screenshot of another screen',
+      'Document is clearly a photocopy with poor quality',
+      'Document type cannot be determined',
+      'Multiple documents merged or overlapping'
+    ],
+    flagIf: [
+      'Expiry date is within 3 months',
+      'Photo quality is poor but person is still identifiable',
+      'Some text is partially obscured but key info is readable',
+      'Document is from an unusual or less common country/format',
+      'Image has some glare but content is still readable'
+    ],
+    tips: 'Look for security features like holograms, watermarks, and official seals. Check that the photo matches standard ID photo requirements.'
+  },
+  certification: {
+    name: "Professional Fitness Certification",
+    required: ['Holder\'s full name', 'Certification type/title', 'Issuing organization', 'Date of issue or validity'],
+    accepted: [
+      'REPs (Register of Exercise Professionals) - UK',
+      'CIMSPA (Chartered Institute for Sport & Physical Activity) - UK',
+      'NASM (National Academy of Sports Medicine)',
+      'ACE (American Council on Exercise)',
+      'ACSM (American College of Sports Medicine)',
+      'ISSA (International Sports Sciences Association)',
+      'NSCA (National Strength and Conditioning Association)',
+      'Level 2/3/4 Personal Training Certificate (UK)',
+      'Nutrition certification from accredited body',
+      'Boxing/MMA coaching certification from recognized federation',
+      'First Aid certification (supplementary)',
+      'Any nationally recognized fitness qualification'
+    ],
+    rejectIf: [
+      'No issuing organization name visible',
+      'Certificate appears to be a template or sample document',
+      'No date visible anywhere on document',
+      'Document is clearly fake or from unrecognizable "diploma mill"',
+      'Name on certificate appears manually added after printing',
+      'Certificate number format is invalid or suspicious'
+    ],
+    flagIf: [
+      'Certification expired or will expire within 6 months',
+      'Issuing body is not in the common recognized list but appears legitimate',
+      'CPD (Continuing Professional Development) requirements may not be current',
+      'Certificate is in a foreign language requiring verification',
+      'Quality makes it hard to verify all details'
+    ],
+    tips: 'Legitimate certifications typically have certificate numbers, official logos, and sometimes QR codes for verification. REPs and CIMSPA certifications are gold standard in UK.'
+  },
+  insurance: {
+    name: "Professional Liability Insurance",
+    required: ['Policy holder name', 'Policy number', 'Coverage type', 'Valid from/to dates', 'Insurance provider name'],
+    coverageRequirements: [
+      'Professional Indemnity Insurance (recommended minimum £1 million)',
+      'Public Liability Insurance (recommended minimum £5 million)',
+      'Personal Accident cover (optional but recommended)',
+      'Product Liability if selling supplements (optional)'
+    ],
+    accepted: [
+      'Certificate of Insurance from recognized insurer',
+      'Insurance Schedule showing coverage details',
+      'Policy Summary document with key coverage info',
+      'Letter from insurance broker confirming coverage'
+    ],
+    rejectIf: [
+      'Policy is clearly expired (end date in the past)',
+      'Document is a quote or proposal, not an active policy',
+      'Coverage type is not related to professional liability',
+      'Policy holder name doesn\'t match expected name',
+      'Insurance provider appears fictitious',
+      'Document is just an invoice for premium payment'
+    ],
+    flagIf: [
+      'Policy expiry within 30 days',
+      'Coverage amount not clearly stated or below recommended minimum',
+      'Unclear if policy specifically covers personal training/coaching activities',
+      'Policy is from overseas provider (may need verification)',
+      'Document shows "subject to payment" or conditional status'
+    ],
+    tips: 'UK coaches typically need both Professional Indemnity (covers advice/instruction errors) and Public Liability (covers accidents/injuries). Look for policy schedules that clearly state coverage amounts.'
+  },
+  qualification: {
+    name: "Educational Qualification",
+    required: ['Holder\'s full name', 'Institution name', 'Qualification title/type', 'Date of award/completion'],
+    accepted: [
+      'Degree (BSc, BA, MSc, MA, PhD) in Sports Science, Exercise Science, Kinesiology, Nutrition, Physiotherapy',
+      'Diploma in Personal Training, Fitness Instruction, Sports Coaching',
+      'NVQ/BTEC Level 2/3/4 in Sport & Fitness',
+      'HND/HNC in Sports Science or related field',
+      'A-Level or equivalent in PE/Sports Science',
+      'University transcript showing relevant modules',
+      'Professional diploma from accredited institution',
+      'Overseas qualification with equivalency statement'
+    ],
+    rejectIf: [
+      'Document appears to be a work-in-progress or incomplete course',
+      'Institution is not recognizable or appears fictitious',
+      'Qualification is completely unrelated to fitness/health/coaching',
+      'Document is a course brochure or syllabus, not a certificate',
+      'No institution seal, signature, or official markings'
+    ],
+    flagIf: [
+      'Qualification from international institution (may need accreditation verification)',
+      'Older qualification (10+ years) where field has evolved significantly',
+      'Institution name has changed or merged since qualification was issued',
+      'Document shows "provisional" or "pending" status',
+      'Transcript instead of certificate (acceptable but less formal)'
+    ],
+    tips: 'Look for official institution seals, registrar signatures, and graduation dates. University qualifications typically include student/alumni numbers for verification.'
+  }
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -46,25 +174,47 @@ serve(async (req) => {
 
     console.log(`Analyzing document: ${documentType} - ${fileName}`);
 
-    const systemPrompt = `You are an expert document verification analyst for a fitness coaching platform. Your task is to analyze uploaded verification documents from coaches.
+    // Get the specific rules for this document type
+    const rules = documentRules[documentType as keyof typeof documentRules];
+    if (!rules) {
+      throw new Error(`Unknown document type: ${documentType}`);
+    }
 
-You will receive an image/document and must analyze it thoroughly to verify:
-1. Document authenticity and type matching
-2. Readability and quality
-3. Information extraction
-4. Potential issues or red flags
+    const systemPrompt = `You are an expert document verification analyst for a fitness coaching platform in the UK. Your task is to thoroughly analyze uploaded verification documents from coaches applying to be listed on the platform.
 
-Document type expected: ${documentType}
+## Document Type Being Analyzed: ${rules.name}
 
-Document types and what to look for:
-- identity: Government-issued ID (passport, driver's license, national ID). Check for name, photo, expiry date, document number.
-- certification: Fitness/coaching certifications (PT certification, nutrition certification, etc). Check for name, issuing body, date, certification type.
-- insurance: Professional liability/indemnity insurance. Check for policy holder, coverage type, validity dates, insurer name.
-- qualification: Educational qualifications (degrees, diplomas). Check for name, institution, date, qualification type.
+## Required Information
+The document MUST clearly show:
+${rules.required.map((r, i) => `${i + 1}. ${r}`).join('\n')}
 
-You must respond with a JSON object (and ONLY the JSON object, no markdown formatting) containing:
+## Accepted Document Types
+${rules.accepted.map(a => `- ${a}`).join('\n')}
+
+## REJECT the document if ANY of these apply:
+${rules.rejectIf.map(r => `- ${r}`).join('\n')}
+
+## FLAG for manual review if ANY of these apply:
+${rules.flagIf.map(f => `- ${f}`).join('\n')}
+
+${'coverageRequirements' in rules && rules.coverageRequirements ? `## Coverage Requirements (for insurance):\n${(rules.coverageRequirements as string[]).map((c: string) => `- ${c}`).join('\n')}` : ''}
+
+## Expert Tips
+${rules.tips}
+
+## Your Analysis Task
+1. First, determine if the uploaded document matches the expected type (${documentType})
+2. Extract all visible information (names, dates, numbers, organizations)
+3. Assess image quality and readability
+4. Check against rejection criteria - if ANY match, recommend REJECT
+5. Check against flag criteria - if ANY match, recommend REVIEW
+6. If document passes all checks and confidence is high (80%+), recommend APPROVE
+7. Be thorough but fair - coaches need these documents to work
+
+## Response Format
+You MUST respond with a valid JSON object (no markdown, no code blocks, just raw JSON) containing:
 {
-  "documentTypeMatch": boolean (does the document match the expected type?),
+  "documentTypeMatch": boolean,
   "extractedInfo": {
     "holderName": string or null,
     "issuingAuthority": string or null,
@@ -73,16 +223,16 @@ You must respond with a JSON object (and ONLY the JSON object, no markdown forma
     "documentNumber": string or null
   },
   "qualityAssessment": {
-    "isReadable": boolean (is text clearly legible?),
-    "isComplete": boolean (is the full document visible?),
-    "hasWatermarks": boolean (are there suspicious edits/watermarks?)
+    "isReadable": boolean,
+    "isComplete": boolean,
+    "hasWatermarks": boolean
   },
-  "issues": string[] (list any problems found),
-  "confidenceScore": number (0-100, how confident are you in authenticity?),
-  "shouldFlag": boolean (should this be flagged for manual review?),
-  "flagReasons": string[] (why is it flagged?),
+  "issues": string[],
+  "confidenceScore": number (0-100),
+  "shouldFlag": boolean,
+  "flagReasons": string[],
   "recommendation": "approve" | "review" | "reject",
-  "summary": string (brief human-readable summary)
+  "summary": string (2-3 sentence human-readable summary)
 }`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -100,7 +250,7 @@ You must respond with a JSON object (and ONLY the JSON object, no markdown forma
             content: [
               {
                 type: 'text',
-                text: `Please analyze this ${documentType} document and provide your verification assessment.`
+                text: `Please analyze this ${documentType} document (filename: ${fileName}) and provide your verification assessment. Be thorough and check all the criteria listed in your instructions.`
               },
               {
                 type: 'image_url',
