@@ -71,8 +71,8 @@ const CoachCard = ({ coach, onBook, onRequestConnection }: CoachCardProps) => {
       </div>
 
       <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
-        {coach.profile_image_url ? (
-          <img src={coach.profile_image_url} alt={coach.display_name || "Coach"} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        {(coach.card_image_url || coach.profile_image_url) ? (
+          <img src={coach.card_image_url || coach.profile_image_url || ""} alt={coach.display_name || "Coach"} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20">
             <UserAvatar src={null} name={coach.display_name} className="w-24 h-24 text-3xl" />

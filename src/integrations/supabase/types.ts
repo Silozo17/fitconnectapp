@@ -1251,6 +1251,7 @@ export type Database = {
         Row: {
           bio: string | null
           booking_mode: string | null
+          card_image_url: string | null
           certifications: Json | null
           coach_types: string[] | null
           created_at: string
@@ -1285,6 +1286,7 @@ export type Database = {
         Insert: {
           bio?: string | null
           booking_mode?: string | null
+          card_image_url?: string | null
           certifications?: Json | null
           coach_types?: string[] | null
           created_at?: string
@@ -1319,6 +1321,7 @@ export type Database = {
         Update: {
           bio?: string | null
           booking_mode?: string | null
+          card_image_url?: string | null
           certifications?: Json | null
           coach_types?: string[] | null
           created_at?: string
