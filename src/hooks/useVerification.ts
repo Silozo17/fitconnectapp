@@ -202,19 +202,25 @@ export const useUploadVerificationDocument = () => {
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const { data: urlData } = supabase.storage
+      // Generate signed URL for private bucket access (valid for 1 hour)
+      const { data: signedData, error: signedError } = await supabase.storage
         .from("documents")
-        .getPublicUrl(filePath);
+        .createSignedUrl(filePath, 3600);
 
-      // Create document record
+      if (signedError) throw signedError;
+
+      // Store the file path (not signed URL) for permanent storage
+      // We'll generate signed URLs on-demand when needed
+      const storedUrl = `verification/${user.id}/${fileName}`;
+
+      // Create document record with the storage path
       const { data, error } = await supabase
         .from("coach_verification_documents")
         .insert({
           coach_id: profile.id,
           document_type: documentType,
           file_name: file.name,
-          file_url: urlData.publicUrl,
+          file_url: storedUrl,
           file_size: file.size,
         })
         .select()
@@ -222,10 +228,10 @@ export const useUploadVerificationDocument = () => {
 
       if (error) throw error;
 
-      // Trigger AI analysis in the background
+      // Trigger AI analysis with signed URL (temporary access)
       aiAnalysis.mutate({
         documentId: data.id,
-        documentUrl: urlData.publicUrl,
+        documentUrl: signedData.signedUrl,
         documentType,
         fileName: file.name,
       });
@@ -452,12 +458,33 @@ export const useRerunAIAnalysis = () => {
 
   return useMutation({
     mutationFn: async (document: VerificationDocument) => {
+      // Generate fresh signed URL for AI analysis
+      const { data: signedData, error: signedError } = await supabase.storage
+        .from("documents")
+        .createSignedUrl(document.file_url, 3600);
+
+      if (signedError) throw signedError;
+
       return aiAnalysis.mutateAsync({
         documentId: document.id,
-        documentUrl: document.file_url,
+        documentUrl: signedData.signedUrl,
         documentType: document.document_type,
         fileName: document.file_name,
       });
+    },
+  });
+};
+
+// Helper to get a signed URL for viewing a document
+export const useDocumentSignedUrl = () => {
+  return useMutation({
+    mutationFn: async (filePath: string) => {
+      const { data, error } = await supabase.storage
+        .from("documents")
+        .createSignedUrl(filePath, 3600);
+
+      if (error) throw error;
+      return data.signedUrl;
     },
   });
 };
