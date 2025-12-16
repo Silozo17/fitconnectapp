@@ -1,7 +1,7 @@
 import { NavLink } from "@/components/NavLink";
 import { 
   LayoutDashboard, Users, Dumbbell, Settings, ChevronLeft, ChevronRight, 
-  UsersRound, DollarSign, BarChart3, User, CreditCard, Sliders, 
+  UsersRound, DollarSign, BarChart3, User,
   MessageSquare, Shield, Trophy, FileText
 } from "lucide-react";
 import { useState } from "react";
@@ -33,8 +33,6 @@ const mainNavItems: NavItem[] = [
 const platformNavItems: NavItem[] = [
   { title: "Challenges", url: "/dashboard/admin/challenges", icon: Trophy },
   { title: "Verification", url: "/dashboard/admin/verification", icon: Shield, badgeKey: "verification", badgeVariant: "warning" },
-  { title: "Pricing Plans", url: "/dashboard/admin/plans", icon: CreditCard },
-  { title: "Feature Control", url: "/dashboard/admin/features", icon: Sliders },
   { title: "Reviews & Disputes", url: "/dashboard/admin/reviews", icon: MessageSquare },
   { title: "Audit Log", url: "/dashboard/admin/audit", icon: FileText },
 ];

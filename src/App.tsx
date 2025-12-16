@@ -22,8 +22,6 @@ import AdminTeam from "./pages/dashboard/admin/AdminTeam";
 import AdminRevenue from "./pages/dashboard/admin/AdminRevenue";
 import AdminAnalytics from "./pages/dashboard/admin/AdminAnalytics";
 import AdminProfile from "./pages/dashboard/admin/AdminProfile";
-import AdminPlatformPlans from "./pages/dashboard/admin/AdminPlatformPlans";
-import AdminFeatures from "./pages/dashboard/admin/AdminFeatures";
 import AdminReviews from "./pages/dashboard/admin/AdminReviews";
 import AdminVerification from "./pages/dashboard/admin/AdminVerification";
 import AdminIntegrations from "./pages/dashboard/admin/AdminIntegrations";
@@ -181,16 +179,6 @@ const App = () => (
                 <Route path="/dashboard/admin/settings" element={
                   <ProtectedRoute allowedRoles={["admin"]}>
                     <AdminSettings />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/admin/plans" element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <AdminPlatformPlans />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/admin/features" element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <AdminFeatures />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/admin/reviews" element={
