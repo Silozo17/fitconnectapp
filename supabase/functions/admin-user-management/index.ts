@@ -81,7 +81,10 @@ Deno.serve(async (req) => {
           });
         }
 
-        return new Response(JSON.stringify({ email: userData.user.email }), {
+        return new Response(JSON.stringify({ 
+          email: userData.user.email,
+          last_sign_in_at: userData.user.last_sign_in_at 
+        }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }

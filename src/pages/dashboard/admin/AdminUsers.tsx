@@ -84,8 +84,9 @@ const AdminUsers = () => {
   const [resettingPassword, setResettingPassword] = useState<string | null>(null);
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
   const [userEmails, setUserEmails] = useState<Record<string, string>>({});
+  const [userLastLogins, setUserLastLogins] = useState<Record<string, string | null>>({});
   
-  const { loading: actionLoading, bulkUpdateStatus, bulkDelete, getUserEmail } = useAdminUserManagement("client");
+  const { loading: actionLoading, bulkUpdateStatus, bulkDelete, getUserAuthInfo } = useAdminUserManagement("client");
   const logAction = useLogAdminAction();
   const { markUsersViewed } = useAdminBadges();
 
@@ -128,18 +129,21 @@ const AdminUsers = () => {
 
     setUsers(usersWithCoachCount);
     
-    // Fetch emails for all users
-    const emailPromises = usersWithCoachCount.map(async (user) => {
-      const email = await getUserEmail(user.user_id);
-      return { userId: user.user_id, email };
+    // Fetch emails and last login for all users
+    const authPromises = usersWithCoachCount.map(async (user) => {
+      const info = await getUserAuthInfo(user.user_id);
+      return { userId: user.user_id, email: info.email, lastSignInAt: info.lastSignInAt };
     });
     
-    const emails = await Promise.all(emailPromises);
+    const authInfos = await Promise.all(authPromises);
     const emailMap: Record<string, string> = {};
-    emails.forEach(({ userId, email }) => {
+    const lastLoginMap: Record<string, string | null> = {};
+    authInfos.forEach(({ userId, email, lastSignInAt }) => {
       if (email) emailMap[userId] = email;
+      lastLoginMap[userId] = lastSignInAt;
     });
     setUserEmails(emailMap);
+    setUserLastLogins(lastLoginMap);
     
     setLoading(false);
   };
@@ -511,7 +515,7 @@ const AdminUsers = () => {
                     <TableHead>Location</TableHead>
                     <TableHead>Coaches</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Onboarding</TableHead>
+                    <TableHead>Last Login</TableHead>
                     <TableHead>Joined</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -548,13 +552,12 @@ const AdminUsers = () => {
                       <TableCell>
                         <StatusBadge status={user.status || "active"} />
                       </TableCell>
-                      <TableCell>
-                        <StatusBadge 
-                          status={user.onboarding_completed ? "active" : "suspended"} 
-                          className={user.onboarding_completed ? "" : "bg-muted/50 text-muted-foreground border-muted"}
-                        />
+                      <TableCell className="text-muted-foreground text-sm">
+                        {userLastLogins[user.user_id] 
+                          ? new Date(userLastLogins[user.user_id]!).toLocaleDateString()
+                          : "Never"}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-muted-foreground">
                         {new Date(user.created_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="text-right">

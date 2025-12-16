@@ -61,8 +61,9 @@ const AdminCoaches = () => {
   const [statusCoach, setStatusCoach] = useState<CoachUser | null>(null);
   const [resettingPassword, setResettingPassword] = useState<string | null>(null);
   const [selectedCoaches, setSelectedCoaches] = useState<Set<string>>(new Set());
+  const [coachLastLogins, setCoachLastLogins] = useState<Record<string, string | null>>({});
   
-  const { loading: actionLoading, bulkUpdateStatus, bulkDelete } = useAdminUserManagement("coach");
+  const { loading: actionLoading, bulkUpdateStatus, bulkDelete, getUserAuthInfo } = useAdminUserManagement("coach");
   const logAction = useLogAdminAction();
 
   useEffect(() => {
@@ -79,9 +80,25 @@ const AdminCoaches = () => {
     if (error) {
       toast.error("Failed to fetch coaches");
       console.error(error);
-    } else {
-      setCoaches(data || []);
+      setLoading(false);
+      return;
     }
+    
+    setCoaches(data || []);
+    
+    // Fetch last login for all coaches
+    const authPromises = (data || []).map(async (coach) => {
+      const info = await getUserAuthInfo(coach.user_id);
+      return { userId: coach.user_id, lastSignInAt: info.lastSignInAt };
+    });
+    
+    const authInfos = await Promise.all(authPromises);
+    const lastLoginMap: Record<string, string | null> = {};
+    authInfos.forEach(({ userId, lastSignInAt }) => {
+      lastLoginMap[userId] = lastSignInAt;
+    });
+    setCoachLastLogins(lastLoginMap);
+    
     setLoading(false);
   };
 
@@ -360,6 +377,7 @@ const AdminCoaches = () => {
                     <TableHead>Rate</TableHead>
                     <TableHead>Tier</TableHead>
                     <TableHead>Account Status</TableHead>
+                    <TableHead>Last Login</TableHead>
                     <TableHead>Joined</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -401,7 +419,12 @@ const AdminCoaches = () => {
                       <TableCell>
                         <StatusBadge status={coach.status || "active"} />
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {coachLastLogins[coach.user_id] 
+                          ? new Date(coachLastLogins[coach.user_id]!).toLocaleDateString()
+                          : "Never"}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
                         {new Date(coach.created_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
