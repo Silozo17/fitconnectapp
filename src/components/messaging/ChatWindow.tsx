@@ -16,7 +16,7 @@ interface ChatWindowProps {
 }
 
 const ChatWindow = ({ participantId, participantName }: ChatWindowProps) => {
-  const { messages, loading, sendMessage, currentProfileId } = useMessages(participantId);
+  const { messages, loading, error, sendMessage, currentProfileId } = useMessages(participantId);
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -44,7 +44,7 @@ const ChatWindow = ({ participantId, participantName }: ChatWindowProps) => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewMessage(e.target.value);
-    if (e.target.value.trim()) {
+    if (e.target.value.trim() && currentProfileId) {
       broadcastTyping();
     }
   };
@@ -53,6 +53,15 @@ const ChatWindow = ({ participantId, participantName }: ChatWindowProps) => {
     return (
       <div className="flex items-center justify-center h-full">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full text-center p-4">
+        <p className="text-destructive font-medium mb-2">Unable to load messages</p>
+        <p className="text-muted-foreground text-sm">{error}</p>
       </div>
     );
   }
