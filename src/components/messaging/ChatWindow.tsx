@@ -130,7 +130,10 @@ const ChatWindow = ({
 
   // Scroll to bottom on new messages
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const timeoutId = setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    }, 100);
+    return () => clearTimeout(timeoutId);
   }, [messages]);
 
   const handleSend = async (e: React.FormEvent) => {
@@ -141,6 +144,10 @@ const ChatWindow = ({
     const success = await sendMessage(newMessage);
     if (success) {
       setNewMessage("");
+      // Ensure scroll to bottom after sending
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+      }, 50);
     }
     setSending(false);
   };
