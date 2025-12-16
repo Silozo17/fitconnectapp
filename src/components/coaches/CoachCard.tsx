@@ -5,6 +5,7 @@ import { MapPin, Video, User, MessageSquare, Calendar, UserPlus } from "lucide-r
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import FavouriteButton from "@/components/favourites/FavouriteButton";
 import StarRating from "@/components/reviews/StarRating";
+import { VerifiedBadge } from "@/components/verification/VerifiedBadge";
 import { useCoachReviews, calculateAverageRating } from "@/hooks/useReviews";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocale } from "@/contexts/LocaleContext";
@@ -93,9 +94,14 @@ const CoachCard = ({ coach, onBook, onRequestConnection }: CoachCardProps) => {
           <StarRating rating={averageRating} reviewCount={reviews.length} size="sm" />
         </div>
 
-        <h3 className="font-display font-semibold text-lg text-foreground mb-1 group-hover:text-primary transition-colors">
-          {coach.display_name || "Coach"}
-        </h3>
+        <div className="flex items-center gap-2 mb-1">
+          <h3 className="font-display font-semibold text-lg text-foreground group-hover:text-primary transition-colors">
+            {coach.display_name || "Coach"}
+          </h3>
+          {coach.is_verified && (
+            <VerifiedBadge verifiedAt={coach.verified_at} size="sm" />
+          )}
+        </div>
         {coach.coach_types && coach.coach_types.length > 0 && (
           <p className="text-primary text-sm font-medium mb-2">{coach.coach_types[0]}</p>
         )}

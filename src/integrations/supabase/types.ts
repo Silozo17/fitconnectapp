@@ -657,6 +657,7 @@ export type Database = {
           hourly_rate: number | null
           id: string
           in_person_available: boolean | null
+          is_verified: boolean | null
           location: string | null
           onboarding_completed: boolean
           online_available: boolean | null
@@ -666,6 +667,10 @@ export type Database = {
           subscription_tier: string | null
           updated_at: string
           user_id: string
+          verification_notes: string | null
+          verification_status: string | null
+          verified_at: string | null
+          verified_by: string | null
         }
         Insert: {
           bio?: string | null
@@ -678,6 +683,7 @@ export type Database = {
           hourly_rate?: number | null
           id?: string
           in_person_available?: boolean | null
+          is_verified?: boolean | null
           location?: string | null
           onboarding_completed?: boolean
           online_available?: boolean | null
@@ -687,6 +693,10 @@ export type Database = {
           subscription_tier?: string | null
           updated_at?: string
           user_id: string
+          verification_notes?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Update: {
           bio?: string | null
@@ -699,6 +709,7 @@ export type Database = {
           hourly_rate?: number | null
           id?: string
           in_person_available?: boolean | null
+          is_verified?: boolean | null
           location?: string | null
           onboarding_completed?: boolean
           online_available?: boolean | null
@@ -708,6 +719,10 @@ export type Database = {
           subscription_tier?: string | null
           updated_at?: string
           user_id?: string
+          verification_notes?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: []
       }
@@ -755,6 +770,59 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      coach_verification_documents: {
+        Row: {
+          admin_notes: string | null
+          coach_id: string
+          created_at: string
+          document_type: string
+          file_name: string
+          file_size: number | null
+          file_url: string
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          coach_id: string
+          created_at?: string
+          document_type: string
+          file_name: string
+          file_size?: number | null
+          file_url: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          coach_id?: string
+          created_at?: string
+          document_type?: string
+          file_name?: string
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_verification_documents_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       coaching_sessions: {
         Row: {

@@ -6,9 +6,9 @@ import type { Tables } from "@/integrations/supabase/types";
 export type MarketplaceCoach = Tables<"coach_profiles"> & {
   rating?: number | null;
   reviews_count?: number | null;
-  is_verified?: boolean | null;
   is_sponsored?: boolean | null;
   tags?: string[] | null;
+  // Verification fields are now in coach_profiles
 };
 
 interface UseCoachMarketplaceOptions {

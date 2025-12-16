@@ -19,6 +19,7 @@ const mainNavItems = [
 ];
 
 const platformNavItems = [
+  { title: "Verification", url: "/dashboard/admin/verification", icon: Shield },
   { title: "Pricing Plans", url: "/dashboard/admin/plans", icon: CreditCard },
   { title: "Feature Control", url: "/dashboard/admin/features", icon: Sliders },
   { title: "Reviews & Disputes", url: "/dashboard/admin/reviews", icon: MessageSquare },
