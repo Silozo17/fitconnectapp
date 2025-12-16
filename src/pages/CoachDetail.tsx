@@ -14,6 +14,7 @@ import BookSessionModal from "@/components/booking/BookSessionModal";
 import AvailabilityCalendar from "@/components/booking/AvailabilityCalendar";
 import CoachReviewsSection from "@/components/reviews/CoachReviewsSection";
 import StarRating from "@/components/reviews/StarRating";
+import FavouriteButton from "@/components/favourites/FavouriteButton";
 import { useCoachReviews, calculateAverageRating } from "@/hooks/useReviews";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -143,11 +144,14 @@ const CoachDetail = () => {
                             </p>
                           )}
                         </div>
-                        <StarRating 
-                          rating={averageRating} 
-                          reviewCount={reviews.length} 
-                          size="lg"
-                        />
+                        <div className="flex items-center gap-3">
+                          <StarRating 
+                            rating={averageRating} 
+                            reviewCount={reviews.length} 
+                            size="lg"
+                          />
+                          <FavouriteButton coachId={coach.id} />
+                        </div>
                       </div>
 
                       {/* Coach Types */}

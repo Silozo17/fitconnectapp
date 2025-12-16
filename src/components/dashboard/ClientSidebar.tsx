@@ -11,12 +11,14 @@ import {
   ChevronLeft,
   ChevronRight,
   Dumbbell,
+  Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const menuItems = [
   { title: "Home", icon: Home, path: "/dashboard/client" },
   { title: "My Coaches", icon: Users, path: "/dashboard/client/coaches" },
+  { title: "Favourites", icon: Heart, path: "/dashboard/client/favourites" },
   { title: "Sessions", icon: Calendar, path: "/dashboard/client/sessions" },
   { title: "Messages", icon: MessageSquare, path: "/dashboard/client/messages" },
   { title: "My Plans", icon: ClipboardList, path: "/dashboard/client/plans" },

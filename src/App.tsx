@@ -30,6 +30,7 @@ import ClientMessages from "./pages/dashboard/client/ClientMessages";
 import ClientPlans from "./pages/dashboard/client/ClientPlans";
 import ClientProgress from "./pages/dashboard/client/ClientProgress";
 import ClientSettings from "./pages/dashboard/client/ClientSettings";
+import ClientFavourites from "./pages/dashboard/client/ClientFavourites";
 
 // Coach Dashboard Pages
 import CoachOverview from "./pages/dashboard/coach/CoachOverview";
@@ -141,6 +142,11 @@ const App = () => (
                 <Route path="/dashboard/client/coaches" element={
                   <ProtectedRoute allowedRoles={["client"]}>
                     <ClientCoaches />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/client/favourites" element={
+                  <ProtectedRoute allowedRoles={["client"]}>
+                    <ClientFavourites />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/client/sessions" element={
