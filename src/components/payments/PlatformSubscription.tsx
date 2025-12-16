@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
-import { SUBSCRIPTION_TIERS, TierKey } from "@/lib/stripe-config";
+import { SUBSCRIPTION_TIERS, TierKey, normalizeTier } from "@/lib/stripe-config";
 
 interface PlatformSubscriptionProps {
   coachId: string;
@@ -69,7 +69,7 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
     }
   };
 
-  const activeTier = subscription?.tier || currentTier;
+  const activeTier = normalizeTier(subscription?.tier || currentTier);
 
   return (
     <Card>

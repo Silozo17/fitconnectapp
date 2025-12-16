@@ -116,3 +116,22 @@ export const SUBSCRIPTION_TIERS = {
 
 export type TierKey = keyof typeof SUBSCRIPTION_TIERS;
 export type BillingInterval = "monthly" | "yearly";
+
+// Map legacy or invalid tier names to valid TierKeys
+export const normalizeTier = (tier: string | null | undefined): TierKey => {
+  if (!tier) return "free";
+  
+  // Direct match to valid tier
+  if (tier in SUBSCRIPTION_TIERS) {
+    return tier as TierKey;
+  }
+  
+  // Map legacy tier names
+  const legacyMap: Record<string, TierKey> = {
+    elite: "enterprise",
+    premium: "pro",
+    basic: "starter",
+  };
+  
+  return legacyMap[tier] || "free";
+};
