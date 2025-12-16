@@ -407,43 +407,45 @@ const CoachSettings = () => {
           <div className="flex-1 space-y-6">
             {/* Profile Tab */}
             {selectedTab === "profile" && (
-              <>
-                <div className="card-elevated p-6">
-                  <h2 className="font-display font-bold text-foreground mb-6">Coach Profile</h2>
-                  
-                  {/* Link to My Profile */}
-                  <div className="mb-6 p-4 bg-secondary/50 rounded-lg flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">
-                        Edit your name, username, and profile photo in <span className="font-medium text-foreground">My Profile</span>
-                      </p>
+              <div className="space-y-6">
+                {/* Link to My Profile */}
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          Edit your name, username, and profile photo in <span className="font-medium text-foreground">My Profile</span>
+                        </p>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={() => navigate("/dashboard/profile")}>
+                        <User className="w-4 h-4 mr-2" />
+                        My Profile
+                      </Button>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => navigate("/dashboard/profile")}>
-                      <User className="w-4 h-4 mr-2" />
-                      My Profile
-                    </Button>
-                  </div>
+                  </CardContent>
+                </Card>
 
-                  {/* Avatar Selection */}
-                  <div className="mb-6">
-                    <Label className="mb-3 block">Your Avatar</Label>
+                {/* Avatar Selection */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Your Avatar</CardTitle>
+                    <CardDescription>Choose an avatar to represent you on the platform</CardDescription>
+                  </CardHeader>
+                  <CardContent>
                     <div className="flex flex-col sm:flex-row items-center gap-4">
                       <AvatarShowcase avatar={selectedAvatar} size="md" showStats={false} />
-                      <div className="text-center sm:text-left">
-                        <p className="text-sm text-muted-foreground mb-2">
-                          Choose an avatar to represent you on the platform
-                        </p>
-                        <AvatarPicker selectedAvatar={selectedAvatar} profileType="coach" />
-                      </div>
+                      <AvatarPicker selectedAvatar={selectedAvatar} profileType="coach" />
                     </div>
-                  </div>
+                  </CardContent>
+                </Card>
 
-                  {/* Marketplace Card Photo */}
-                  <div className="mb-6">
-                    <Label className="mb-3 block">Marketplace Card Photo</Label>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      This landscape image appears on your card in search results and listings.
-                    </p>
+                {/* Marketplace Card Photo */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Marketplace Card Photo</CardTitle>
+                    <CardDescription>This landscape image appears on your card in search results and listings</CardDescription>
+                  </CardHeader>
+                  <CardContent>
                     <div className="flex flex-col lg:flex-row gap-6">
                       <div className="flex-1">
                         <CardImageUpload
@@ -467,40 +469,17 @@ const CoachSettings = () => {
                         />
                       </div>
                     </div>
-                  </div>
+                  </CardContent>
+                </Card>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Professional Details */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Professional Details</CardTitle>
+                    <CardDescription>Tell clients about your expertise and experience</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
                     <div>
-                      <Label>Location</Label>
-                      <Input
-                        value={profile.location || ""}
-                        onChange={(e) => setProfile({ ...profile, location: e.target.value })}
-                        className="mt-1"
-                        placeholder="London, UK"
-                      />
-                    </div>
-                    <div>
-                      <Label>Gym Affiliation</Label>
-                      <Input
-                        value={profile.gym_affiliation || ""}
-                        onChange={(e) => setProfile({ ...profile, gym_affiliation: e.target.value })}
-                        className="mt-1"
-                        placeholder="e.g., PureGym Manchester, Independent"
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Where do you train clients? Leave blank if you're an online-only coach.
-                      </p>
-                    </div>
-                    <div>
-                      <Label>Years of Experience</Label>
-                      <Input
-                        type="number"
-                        value={profile.experience_years || ""}
-                        onChange={(e) => setProfile({ ...profile, experience_years: parseInt(e.target.value) || null })}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
                       <Label>Bio</Label>
                       <Textarea
                         value={profile.bio || ""}
@@ -510,65 +489,118 @@ const CoachSettings = () => {
                         placeholder="Tell clients about your background and coaching philosophy..."
                       />
                     </div>
-                  </div>
-
-                  <div className="mt-6">
-                    <Label className="mb-2 block">Coach Types</Label>
-                    <div className="flex flex-wrap gap-2">
-                      {coachTypes.map((type) => (
-                        <Badge
-                          key={type}
-                          variant={(profile.coach_types || []).includes(type) ? "default" : "outline"}
-                          className={`cursor-pointer ${
-                            (profile.coach_types || []).includes(type)
-                              ? "bg-primary text-primary-foreground"
-                              : "hover:bg-secondary"
-                          }`}
-                          onClick={() => {
-                            const current = profile.coach_types || [];
-                            setProfile({
-                              ...profile,
-                              coach_types: current.includes(type)
-                                ? current.filter((t) => t !== type)
-                                : [...current, type],
-                            });
-                          }}
-                        >
-                          {type}
-                        </Badge>
-                      ))}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <Label>Years of Experience</Label>
+                        <Input
+                          type="number"
+                          value={profile.experience_years || ""}
+                          onChange={(e) => setProfile({ ...profile, experience_years: parseInt(e.target.value) || null })}
+                          className="mt-1"
+                        />
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="mt-6 flex items-center gap-8">
-                    <div className="flex items-center gap-3">
-                      <Switch
-                        checked={profile.online_available ?? true}
-                        onCheckedChange={(checked) => setProfile({ ...profile, online_available: checked })}
-                      />
-                      <Label>Available for Online Sessions</Label>
+                    <div>
+                      <Label className="mb-2 block">Coach Types</Label>
+                      <div className="flex flex-wrap gap-2">
+                        {coachTypes.map((type) => (
+                          <Badge
+                            key={type}
+                            variant={(profile.coach_types || []).includes(type) ? "default" : "outline"}
+                            className={`cursor-pointer ${
+                              (profile.coach_types || []).includes(type)
+                                ? "bg-primary text-primary-foreground"
+                                : "hover:bg-secondary"
+                            }`}
+                            onClick={() => {
+                              const current = profile.coach_types || [];
+                              setProfile({
+                                ...profile,
+                                coach_types: current.includes(type)
+                                  ? current.filter((t) => t !== type)
+                                  : [...current, type],
+                              });
+                            }}
+                          >
+                            {type}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <Switch
-                        checked={profile.in_person_available ?? false}
-                        onCheckedChange={(checked) => setProfile({ ...profile, in_person_available: checked })}
-                      />
-                      <Label>Available for In-Person Sessions</Label>
-                    </div>
-                  </div>
+                  </CardContent>
+                </Card>
 
-                  <div className="mt-6 flex justify-end">
-                    <Button onClick={handleSaveProfile} disabled={saving} className="bg-primary text-primary-foreground">
-                      {saving ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <Save className="w-4 h-4 mr-2" />
-                      )}
-                      Save Changes
-                    </Button>
-                  </div>
+                {/* Location & Workplace */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Location & Workplace</CardTitle>
+                    <CardDescription>Where do you train clients?</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <Label>Location</Label>
+                        <Input
+                          value={profile.location || ""}
+                          onChange={(e) => setProfile({ ...profile, location: e.target.value })}
+                          className="mt-1"
+                          placeholder="London, UK"
+                        />
+                      </div>
+                      <div>
+                        <Label>Gym Affiliation</Label>
+                        <Input
+                          value={profile.gym_affiliation || ""}
+                          onChange={(e) => setProfile({ ...profile, gym_affiliation: e.target.value })}
+                          className="mt-1"
+                          placeholder="e.g., PureGym Manchester, Independent"
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Leave blank if you're an online-only coach.
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Session Availability */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Session Availability</CardTitle>
+                    <CardDescription>How can clients train with you?</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-col sm:flex-row gap-6">
+                      <div className="flex items-center gap-3">
+                        <Switch
+                          checked={profile.online_available ?? true}
+                          onCheckedChange={(checked) => setProfile({ ...profile, online_available: checked })}
+                        />
+                        <Label>Available for Online Sessions</Label>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Switch
+                          checked={profile.in_person_available ?? false}
+                          onCheckedChange={(checked) => setProfile({ ...profile, in_person_available: checked })}
+                        />
+                        <Label>Available for In-Person Sessions</Label>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Save Button */}
+                <div className="flex justify-end">
+                  <Button onClick={handleSaveProfile} disabled={saving}>
+                    {saving ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Save className="w-4 h-4 mr-2" />
+                    )}
+                    Save Changes
+                  </Button>
                 </div>
-              </>
+              </div>
             )}
 
             {/* Services & Pricing Tab */}
