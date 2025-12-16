@@ -1,24 +1,10 @@
-import { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import {
-  ArrowLeft,
-  Plus,
-  Trash2,
-  GripVertical,
-  Save,
-  Eye,
-  Dumbbell,
-  Apple,
-  Clock,
-  ChevronDown,
-  ChevronUp,
-  X,
-} from "lucide-react";
+import { useState, useEffect } from "react";
+import { Link, useSearchParams, useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, Plus, Save, Eye, Loader2, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -26,50 +12,149 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
-
-const exerciseLibrary = [
-  { id: "1", name: "Barbell Squat", category: "Legs", equipment: "Barbell" },
-  { id: "2", name: "Bench Press", category: "Chest", equipment: "Barbell" },
-  { id: "3", name: "Deadlift", category: "Back", equipment: "Barbell" },
-  { id: "4", name: "Pull-ups", category: "Back", equipment: "Bodyweight" },
-  { id: "5", name: "Shoulder Press", category: "Shoulders", equipment: "Dumbbell" },
-  { id: "6", name: "Lunges", category: "Legs", equipment: "Bodyweight" },
-  { id: "7", name: "Plank", category: "Core", equipment: "Bodyweight" },
-  { id: "8", name: "Bicep Curls", category: "Arms", equipment: "Dumbbell" },
-];
+import ExerciseLibrary from "@/components/planbuilder/ExerciseLibrary";
+import WorkoutDayCard from "@/components/planbuilder/WorkoutDayCard";
+import CreateExerciseModal from "@/components/planbuilder/CreateExerciseModal";
+import { useAuth } from "@/contexts/AuthContext";
+import { useCreateTrainingPlan, useUpdateTrainingPlan, useTrainingPlan, PlanDay, PlanExercise } from "@/hooks/useTrainingPlans";
+import { Exercise } from "@/hooks/useExercises";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const CoachPlanBuilder = () => {
   const [searchParams] = useSearchParams();
+  const { planId } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const isNutrition = searchParams.get("type") === "nutrition";
-  
+  const isEditing = !!planId;
+
+  const [coachProfileId, setCoachProfileId] = useState<string | null>(null);
   const [planName, setPlanName] = useState("");
   const [planDescription, setPlanDescription] = useState("");
   const [duration, setDuration] = useState("4");
   const [level, setLevel] = useState("beginner");
   const [expandedDay, setExpandedDay] = useState<number | null>(0);
+  const [addingToDay, setAddingToDay] = useState<number | null>(null);
+  const [showCreateExercise, setShowCreateExercise] = useState(false);
 
-  const [workoutDays, setWorkoutDays] = useState([
-    {
-      name: "Day 1 - Upper Body",
-      exercises: [
-        { id: "1", name: "Bench Press", sets: 4, reps: "8-10", rest: "90s" },
-        { id: "2", name: "Pull-ups", sets: 3, reps: "8-12", rest: "60s" },
-      ],
-    },
-    {
-      name: "Day 2 - Lower Body",
-      exercises: [
-        { id: "3", name: "Barbell Squat", sets: 4, reps: "6-8", rest: "120s" },
-        { id: "4", name: "Lunges", sets: 3, reps: "12 each", rest: "60s" },
-      ],
-    },
-    {
-      name: "Day 3 - Rest",
-      exercises: [],
-    },
+  const [workoutDays, setWorkoutDays] = useState<PlanDay[]>([
+    { id: generateId(), name: "Day 1 - Push", exercises: [] },
+    { id: generateId(), name: "Day 2 - Pull", exercises: [] },
+    { id: generateId(), name: "Day 3 - Legs", exercises: [] },
   ]);
+
+  const { data: existingPlan, isLoading: planLoading } = useTrainingPlan(planId);
+  const createPlan = useCreateTrainingPlan();
+  const updatePlan = useUpdateTrainingPlan();
+
+  // Fetch coach profile ID
+  useEffect(() => {
+    const fetchCoachProfile = async () => {
+      if (!user?.id) return;
+      const { data } = await supabase
+        .from("coach_profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .single();
+      if (data) setCoachProfileId(data.id);
+    };
+    fetchCoachProfile();
+  }, [user?.id]);
+
+  // Load existing plan data
+  useEffect(() => {
+    if (existingPlan) {
+      setPlanName(existingPlan.name);
+      setPlanDescription(existingPlan.description || "");
+      setDuration(existingPlan.duration_weeks?.toString() || "4");
+      setWorkoutDays(existingPlan.content || []);
+    }
+  }, [existingPlan]);
+
+  function generateId() {
+    return Math.random().toString(36).substring(2, 15);
+  }
+
+  const handleAddDay = () => {
+    const newDay: PlanDay = {
+      id: generateId(),
+      name: `Day ${workoutDays.length + 1}`,
+      exercises: [],
+    };
+    setWorkoutDays([...workoutDays, newDay]);
+    setExpandedDay(workoutDays.length);
+  };
+
+  const handleUpdateDay = (dayIndex: number, updates: Partial<PlanDay>) => {
+    const newDays = [...workoutDays];
+    newDays[dayIndex] = { ...newDays[dayIndex], ...updates };
+    setWorkoutDays(newDays);
+  };
+
+  const handleDeleteDay = (dayIndex: number) => {
+    const newDays = workoutDays.filter((_, i) => i !== dayIndex);
+    setWorkoutDays(newDays);
+    if (expandedDay === dayIndex) setExpandedDay(null);
+  };
+
+  const handleAddExerciseToDay = (exercise: Exercise) => {
+    if (addingToDay === null) {
+      toast.error("Please select a day first");
+      return;
+    }
+
+    const newExercise: PlanExercise = {
+      id: generateId(),
+      exercise_id: exercise.id,
+      exercise_name: exercise.name,
+      sets: 3,
+      reps: "8-12",
+      rest: "60s",
+      video_url: exercise.video_url || undefined,
+    };
+
+    const newDays = [...workoutDays];
+    newDays[addingToDay].exercises.push(newExercise);
+    setWorkoutDays(newDays);
+    toast.success(`Added ${exercise.name} to ${newDays[addingToDay].name}`);
+  };
+
+  const handleSave = async () => {
+    if (!coachProfileId) {
+      toast.error("Coach profile not found");
+      return;
+    }
+
+    if (!planName.trim()) {
+      toast.error("Please enter a plan name");
+      return;
+    }
+
+    const planData = {
+      coach_id: coachProfileId,
+      name: planName,
+      description: planDescription || undefined,
+      plan_type: isNutrition ? "nutrition" : "workout",
+      duration_weeks: parseInt(duration),
+      content: workoutDays,
+      is_template: false,
+    };
+
+    try {
+      if (isEditing && planId) {
+        await updatePlan.mutateAsync({ id: planId, ...planData });
+      } else {
+        await createPlan.mutateAsync(planData);
+      }
+      navigate("/dashboard/coach/plans");
+    } catch (error) {
+      // Error handled by mutation
+    }
+  };
+
+  const isSaving = createPlan.isPending || updatePlan.isPending;
 
   return (
     <DashboardLayout title="Create Plan" description="Build a new training plan.">
@@ -83,19 +168,23 @@ const CoachPlanBuilder = () => {
           </Link>
           <div>
             <h1 className="font-display text-2xl font-bold text-foreground">
-              {isNutrition ? "Create Nutrition Plan" : "Create Workout Plan"}
+              {isEditing ? "Edit Plan" : isNutrition ? "Create Nutrition Plan" : "Create Workout Plan"}
             </h1>
             <p className="text-muted-foreground">Design a personalized plan for your clients</p>
           </div>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline">
+          <Button variant="outline" disabled>
             <Eye className="w-4 h-4 mr-2" />
             Preview
           </Button>
-          <Button className="bg-primary text-primary-foreground">
-            <Save className="w-4 h-4 mr-2" />
-            Save Plan
+          <Button onClick={handleSave} disabled={isSaving}>
+            {isSaving ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Save className="w-4 h-4 mr-2" />
+            )}
+            {isEditing ? "Update Plan" : "Save Plan"}
           </Button>
         </div>
       </div>
@@ -104,7 +193,7 @@ const CoachPlanBuilder = () => {
         {/* Plan Details */}
         <div className="lg:col-span-2 space-y-6">
           {/* Basic Info */}
-          <div className="card-elevated p-6">
+          <div className="card-glow rounded-2xl p-6">
             <h2 className="font-display font-bold text-foreground mb-4">Plan Details</h2>
             <div className="space-y-4">
               <div>
@@ -164,137 +253,73 @@ const CoachPlanBuilder = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="font-display font-bold text-foreground">Weekly Schedule</h2>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleAddDay}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Day
               </Button>
             </div>
 
             {workoutDays.map((day, dayIndex) => (
-              <div key={dayIndex} className="card-elevated overflow-hidden">
-                <button
-                  onClick={() => setExpandedDay(expandedDay === dayIndex ? null : dayIndex)}
-                  className="w-full p-4 flex items-center justify-between hover:bg-secondary/30 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <GripVertical className="w-5 h-5 text-muted-foreground cursor-grab" />
-                    <span className="font-medium text-foreground">{day.name}</span>
-                    <Badge variant="outline">{day.exercises.length} exercises</Badge>
-                  </div>
-                  {expandedDay === dayIndex ? (
-                    <ChevronUp className="w-5 h-5 text-muted-foreground" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5 text-muted-foreground" />
-                  )}
-                </button>
-
-                {expandedDay === dayIndex && (
-                  <div className="p-4 border-t border-border bg-secondary/20">
-                    <div className="mb-4">
-                      <Input
-                        value={day.name}
-                        onChange={(e) => {
-                          const updated = [...workoutDays];
-                          updated[dayIndex].name = e.target.value;
-                          setWorkoutDays(updated);
-                        }}
-                        className="font-medium"
-                      />
-                    </div>
-
-                    {/* Exercises */}
-                    <div className="space-y-3">
-                      {day.exercises.map((exercise, exerciseIndex) => (
-                        <div
-                          key={exerciseIndex}
-                          className="flex items-center gap-3 p-3 bg-card rounded-lg border border-border"
-                        >
-                          <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab" />
-                          <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center">
-                            <Dumbbell className="w-4 h-4 text-primary" />
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-medium text-foreground text-sm">{exercise.name}</p>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Input
-                              value={exercise.sets}
-                              className="w-16 h-8 text-center"
-                              placeholder="Sets"
-                            />
-                            <span className="text-muted-foreground">×</span>
-                            <Input
-                              value={exercise.reps}
-                              className="w-20 h-8 text-center"
-                              placeholder="Reps"
-                            />
-                            <div className="flex items-center gap-1">
-                              <Clock className="w-3 h-3 text-muted-foreground" />
-                              <Input
-                                value={exercise.rest}
-                                className="w-16 h-8 text-center"
-                                placeholder="Rest"
-                              />
-                            </div>
-                          </div>
-                          <Button variant="ghost" size="icon" className="text-destructive">
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      ))}
-
-                      <Button variant="outline" className="w-full border-dashed">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Exercise
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <WorkoutDayCard
+                key={day.id}
+                day={day}
+                isExpanded={expandedDay === dayIndex}
+                onToggleExpand={() => {
+                  setExpandedDay(expandedDay === dayIndex ? null : dayIndex);
+                  setAddingToDay(dayIndex);
+                }}
+                onUpdateDay={(updates) => handleUpdateDay(dayIndex, updates)}
+                onDeleteDay={() => handleDeleteDay(dayIndex)}
+                onAddExercise={() => setAddingToDay(dayIndex)}
+              />
             ))}
           </div>
         </div>
 
-        {/* Sidebar - Exercise Library */}
+        {/* Sidebar */}
         <div className="space-y-6">
-          <div className="card-elevated p-4">
-            <h3 className="font-display font-bold text-foreground mb-4">Exercise Library</h3>
-            <Input placeholder="Search exercises..." className="mb-4" />
-            <div className="space-y-2 max-h-[400px] overflow-y-auto">
-              {exerciseLibrary.map((exercise) => (
-                <div
-                  key={exercise.id}
-                  className="flex items-center justify-between p-2 hover:bg-secondary/50 rounded-lg cursor-pointer transition-colors"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center">
-                      <Dumbbell className="w-4 h-4 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{exercise.name}</p>
-                      <p className="text-xs text-muted-foreground">{exercise.category}</p>
-                    </div>
-                  </div>
-                  <Button variant="ghost" size="icon">
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                </div>
-              ))}
+          {/* Add to Day Indicator */}
+          {addingToDay !== null && (
+            <div className="card-glow rounded-2xl p-4 bg-primary/5 border-primary/20">
+              <p className="text-sm text-primary font-medium">
+                Adding exercises to: <span className="font-bold">{workoutDays[addingToDay]?.name}</span>
+              </p>
             </div>
-          </div>
+          )}
+
+          {/* Exercise Library */}
+          {coachProfileId && (
+            <ExerciseLibrary
+              onAddExercise={handleAddExerciseToDay}
+              onCreateCustom={() => setShowCreateExercise(true)}
+            />
+          )}
 
           {/* Tips */}
-          <div className="card-elevated p-4">
-            <h3 className="font-display font-bold text-foreground mb-2">Tips</h3>
+          <div className="card-glow rounded-2xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Lightbulb className="w-5 h-5 text-primary" />
+              <h3 className="font-display font-bold text-foreground">Tips</h3>
+            </div>
             <ul className="text-sm text-muted-foreground space-y-2">
-              <li>• Drag and drop to reorder exercises</li>
+              <li>• Click a day to start adding exercises</li>
+              <li>• Drag exercises to reorder them</li>
               <li>• Include rest days for recovery</li>
               <li>• Consider progressive overload</li>
-              <li>• Balance muscle groups</li>
+              <li>• Balance muscle groups across days</li>
             </ul>
           </div>
         </div>
       </div>
+
+      {/* Create Exercise Modal */}
+      {coachProfileId && (
+        <CreateExerciseModal
+          open={showCreateExercise}
+          onOpenChange={setShowCreateExercise}
+          coachId={coachProfileId}
+        />
+      )}
     </DashboardLayout>
   );
 };

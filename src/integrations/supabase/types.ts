@@ -527,6 +527,93 @@ export type Database = {
           },
         ]
       }
+      exercise_categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          icon: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      exercises: {
+        Row: {
+          category_id: string | null
+          coach_id: string | null
+          created_at: string
+          difficulty: string | null
+          equipment: string | null
+          id: string
+          instructions: string | null
+          is_custom: boolean | null
+          muscle_groups: string[] | null
+          name: string
+          thumbnail_url: string | null
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          category_id?: string | null
+          coach_id?: string | null
+          created_at?: string
+          difficulty?: string | null
+          equipment?: string | null
+          id?: string
+          instructions?: string | null
+          is_custom?: boolean | null
+          muscle_groups?: string[] | null
+          name: string
+          thumbnail_url?: string | null
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          category_id?: string | null
+          coach_id?: string | null
+          created_at?: string
+          difficulty?: string | null
+          equipment?: string | null
+          id?: string
+          instructions?: string | null
+          is_custom?: boolean | null
+          muscle_groups?: string[] | null
+          name?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercises_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "exercise_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exercises_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
