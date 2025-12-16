@@ -91,14 +91,14 @@ export default function Subscribe() {
         </div>
 
         {/* Features + Avatar Row */}
-        <div className="mb-8 flex items-start justify-between gap-6">
+        <div className="mb-8 flex items-start gap-4">
           {/* Features on the left */}
           <div className="flex-1">
             <TierFeatures tier={selectedTier} />
           </div>
           
           {/* Avatar on the right, beside features */}
-          <div className="hidden lg:block w-40 h-52 flex-shrink-0">
+          <div className="hidden lg:block w-48 h-64 flex-shrink-0">
             <div 
               key={selectedTier}
               className="w-full h-full animate-fade-in"
