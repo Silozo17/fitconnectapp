@@ -6,18 +6,52 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Sparkles, Lock, Crown, ChevronRight, Trophy, Target, Flame } from 'lucide-react';
+import { 
+  Sparkles, Lock, Crown, ChevronRight, Trophy, Target, Flame,
+  Dumbbell, BarChart3, Camera, Utensils, Zap
+} from 'lucide-react';
 import { useAvatars, getAvatarImageUrl } from '@/hooks/useAvatars';
 import { getUnlockDescription, UNLOCK_DESCRIPTIONS } from '@/lib/avatar-unlocks';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Rarity order for sorting (common first, legendary last)
+const RARITY_ORDER: Record<string, number> = {
+  common: 1,
+  uncommon: 2,
+  rare: 3,
+  epic: 4,
+  legendary: 5,
+};
+
+const sortByRarity = (a: any, b: any) => 
+  (RARITY_ORDER[a.rarity] || 0) - (RARITY_ORDER[b.rarity] || 0);
+
+// SVG icon component based on unlock type
+const UnlockIcon = ({ type, className = "h-5 w-5 text-white" }: { type: string | null; className?: string }) => {
+  if (!type) return null;
+  
+  const iconMap: Record<string, React.ReactNode> = {
+    workout_count: <Dumbbell className={className} />,
+    habit_streak: <Flame className={className} />,
+    progress_entries: <BarChart3 className={className} />,
+    progress_photos: <Camera className={className} />,
+    macro_days: <Utensils className={className} />,
+    xp_total: <Zap className={className} />,
+    challenges_completed: <Target className={className} />,
+    leaderboard_rank: <Trophy className={className} />,
+  };
+  
+  return iconMap[type] || null;
+};
+
 export default function Avatars() {
   const { data: avatars, isLoading } = useAvatars();
   
-  const freeAvatars = avatars?.filter(a => a.category === 'free') || [];
-  const challengeAvatars = avatars?.filter(a => a.category === 'challenge_unlock') || [];
-  const coachAvatars = avatars?.filter(a => a.category === 'coach_exclusive') || [];
+  // Filter and sort avatars by rarity
+  const freeAvatars = avatars?.filter(a => a.category === 'free').sort(sortByRarity) || [];
+  const challengeAvatars = avatars?.filter(a => a.category === 'challenge_unlock').sort(sortByRarity) || [];
+  const coachAvatars = avatars?.filter(a => a.category === 'coach_exclusive').sort(sortByRarity) || [];
   
   const rarityColors = {
     common: { border: 'border-slate-500/30', bg: 'bg-slate-500/10', text: 'text-slate-400' },
@@ -29,7 +63,6 @@ export default function Avatars() {
   
   const AvatarCard = ({ avatar, locked = false }: { avatar: any; locked?: boolean }) => {
     const colors = rarityColors[avatar.rarity as keyof typeof rarityColors] || rarityColors.common;
-    const unlockInfo = UNLOCK_DESCRIPTIONS[avatar.unlock_type];
     
     return (
       <Card className={cn(
@@ -43,15 +76,19 @@ export default function Avatars() {
               src={avatar.image_url || getAvatarImageUrl(avatar.slug)}
               alt={avatar.name}
               className={cn(
-                "max-h-full w-auto object-contain transition-transform group-hover:scale-110",
-                locked && "opacity-60"
+                "max-h-full w-auto object-contain transition-all duration-300",
+                locked && "group-hover:opacity-40"
               )}
             />
+            
+            {/* Centered unlock overlay on hover for locked avatars */}
             {locked && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="p-3 rounded-full bg-black/50">
-                  <Lock className="h-6 w-6 text-white" />
-                </div>
+              <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/50 rounded-lg">
+                <Lock className="h-6 w-6 text-white mb-2" />
+                <UnlockIcon type={avatar.unlock_type} className="h-5 w-5 text-white mb-1" />
+                <span className="text-white text-xs text-center px-2 font-medium">
+                  {getUnlockDescription(avatar.unlock_type, avatar.unlock_threshold)}
+                </span>
               </div>
             )}
           </div>
@@ -64,16 +101,6 @@ export default function Avatars() {
             </Badge>
           </div>
         </div>
-        
-        {/* Unlock requirement tooltip on hover */}
-        {avatar.category !== 'free' && (
-          <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/90 to-transparent translate-y-full group-hover:translate-y-0 transition-transform">
-            <div className="flex items-center gap-2 text-xs text-white">
-              {unlockInfo && <span>{unlockInfo.icon}</span>}
-              <span>{getUnlockDescription(avatar.unlock_type, avatar.unlock_threshold)}</span>
-            </div>
-          </div>
-        )}
       </Card>
     );
   };
