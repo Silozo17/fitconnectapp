@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   User,
   Bell,
@@ -127,6 +128,7 @@ const statusConfig = {
 };
 
 const CoachSettings = () => {
+  const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { currency } = useLocale();
   const [selectedTab, setSelectedTab] = useState("profile");
@@ -594,7 +596,7 @@ const CoachSettings = () => {
               <div className="card-elevated p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="font-display font-bold text-foreground">Services & Pricing</h2>
-                  <Button size="sm" variant="outline">
+                  <Button size="sm" variant="outline" onClick={() => navigate("/dashboard/coach/schedule?tab=availability")}>
                     <Plus className="w-4 h-4 mr-2" />
                     Add Service
                   </Button>
