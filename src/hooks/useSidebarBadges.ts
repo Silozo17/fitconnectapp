@@ -209,20 +209,41 @@ export const useAdminBadges = () => {
       .select("*", { count: "exact", head: true })
       .eq("status", "pending");
 
-    // New users in last 24 hours
+    // Get admin's last viewed timestamp
+    const { data: adminProfile } = await supabase
+      .from("admin_profiles")
+      .select("users_last_viewed_at")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    // Default to 24 hours ago if never viewed
     const oneDayAgo = new Date();
     oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+    const viewedAt = adminProfile?.users_last_viewed_at || oneDayAgo.toISOString();
 
+    // Count new client profiles since last viewed
     const { count: usersCount } = await supabase
-      .from("user_roles")
+      .from("client_profiles")
       .select("*", { count: "exact", head: true })
-      .gte("created_at", oneDayAgo.toISOString());
+      .gt("created_at", viewedAt);
 
     setBadges({
       pendingVerifications: verificationsCount || 0,
       newUsers: usersCount || 0,
     });
   }, [user, isAdmin]);
+
+  // Mark users as viewed and refresh badge
+  const markUsersViewed = useCallback(async () => {
+    if (!user || !isAdmin) return;
+    
+    await supabase
+      .from("admin_profiles")
+      .update({ users_last_viewed_at: new Date().toISOString() })
+      .eq("user_id", user.id);
+    
+    fetchBadges();
+  }, [user, isAdmin, fetchBadges]);
 
   useEffect(() => {
     if (user && isAdmin) fetchBadges();
@@ -248,7 +269,7 @@ export const useAdminBadges = () => {
         {
           event: "INSERT",
           schema: "public",
-          table: "user_roles",
+          table: "client_profiles",
         },
         () => fetchBadges()
       )
@@ -259,5 +280,5 @@ export const useAdminBadges = () => {
     };
   }, [user, isAdmin, fetchBadges]);
 
-  return badges;
+  return { ...badges, markUsersViewed };
 };

@@ -105,6 +105,7 @@ export type Database = {
       admin_profiles: {
         Row: {
           avatar_url: string | null
+          coaches_last_viewed_at: string | null
           created_at: string
           department: string | null
           display_name: string | null
@@ -114,9 +115,12 @@ export type Database = {
           phone: string | null
           updated_at: string
           user_id: string
+          users_last_viewed_at: string | null
+          verifications_last_viewed_at: string | null
         }
         Insert: {
           avatar_url?: string | null
+          coaches_last_viewed_at?: string | null
           created_at?: string
           department?: string | null
           display_name?: string | null
@@ -126,9 +130,12 @@ export type Database = {
           phone?: string | null
           updated_at?: string
           user_id: string
+          users_last_viewed_at?: string | null
+          verifications_last_viewed_at?: string | null
         }
         Update: {
           avatar_url?: string | null
+          coaches_last_viewed_at?: string | null
           created_at?: string
           department?: string | null
           display_name?: string | null
@@ -138,6 +145,8 @@ export type Database = {
           phone?: string | null
           updated_at?: string
           user_id?: string
+          users_last_viewed_at?: string | null
+          verifications_last_viewed_at?: string | null
         }
         Relationships: []
       }
