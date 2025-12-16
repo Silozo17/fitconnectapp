@@ -624,6 +624,7 @@ export type Database = {
           height_cm: number | null
           id: string
           last_name: string | null
+          location: string | null
           medical_conditions: string[] | null
           onboarding_completed: boolean
           updated_at: string
@@ -643,6 +644,7 @@ export type Database = {
           height_cm?: number | null
           id?: string
           last_name?: string | null
+          location?: string | null
           medical_conditions?: string[] | null
           onboarding_completed?: boolean
           updated_at?: string
@@ -662,6 +664,7 @@ export type Database = {
           height_cm?: number | null
           id?: string
           last_name?: string | null
+          location?: string | null
           medical_conditions?: string[] | null
           onboarding_completed?: boolean
           updated_at?: string
@@ -932,6 +935,60 @@ export type Database = {
             columns: ["feature_id"]
             isOneToOne: false
             referencedRelation: "platform_features"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coach_leads: {
+        Row: {
+          client_id: string
+          coach_id: string
+          created_at: string | null
+          deal_closed_at: string | null
+          id: string
+          notes: string | null
+          offer_sent_at: string | null
+          source: string | null
+          stage: string
+          updated_at: string | null
+        }
+        Insert: {
+          client_id: string
+          coach_id: string
+          created_at?: string | null
+          deal_closed_at?: string | null
+          id?: string
+          notes?: string | null
+          offer_sent_at?: string | null
+          source?: string | null
+          stage?: string
+          updated_at?: string | null
+        }
+        Update: {
+          client_id?: string
+          coach_id?: string
+          created_at?: string | null
+          deal_closed_at?: string | null
+          id?: string
+          notes?: string | null
+          offer_sent_at?: string | null
+          source?: string | null
+          stage?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_leads_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_leads_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
             referencedColumns: ["id"]
           },
         ]

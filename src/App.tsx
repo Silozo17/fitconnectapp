@@ -59,6 +59,7 @@ import CoachPackages from "./pages/dashboard/coach/CoachPackages";
 import CoachIntegrations from "./pages/dashboard/coach/CoachIntegrations";
 import CoachReviews from "./pages/dashboard/coach/CoachReviews";
 import CoachVerification from "./pages/dashboard/coach/CoachVerification";
+import CoachPipeline from "./pages/dashboard/coach/CoachPipeline";
 
 // Shared Dashboard Pages
 import Notifications from "./pages/dashboard/Notifications";
@@ -290,6 +291,11 @@ const App = () => (
                 <Route path="/dashboard/coach" element={
                   <ProtectedRoute allowedRoles={["coach"]}>
                     <CoachOverview />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/coach/pipeline" element={
+                  <ProtectedRoute allowedRoles={["coach"]}>
+                    <CoachPipeline />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/coach/clients" element={
