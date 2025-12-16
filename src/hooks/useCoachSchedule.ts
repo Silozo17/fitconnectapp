@@ -152,6 +152,7 @@ export const useUpdateAvailability = () => {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["coach-availability", variables.coach_id] });
+      queryClient.invalidateQueries({ queryKey: ["coach-profile-completion"] });
       toast.success("Availability updated");
     },
     onError: () => {
@@ -177,6 +178,7 @@ export const useUpsertSessionType = () => {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["session-types", variables.coach_id] });
+      queryClient.invalidateQueries({ queryKey: ["coach-profile-completion"] });
       toast.success("Session type saved");
     },
     onError: () => {
