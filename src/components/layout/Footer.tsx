@@ -5,20 +5,17 @@ const Footer = () => {
   const footerLinks = {
     Platform: [
       { name: "Find Coaches", href: "/coaches" },
-      { name: "Become a Coach", href: "/become-coach" },
-      { name: "Pricing", href: "#pricing" },
-      { name: "How It Works", href: "#how-it-works" },
+      { name: "For Coaches", href: "/for-coaches" },
+      { name: "Pricing", href: "/pricing" },
+      { name: "How It Works", href: "/how-it-works" },
     ],
-    Support: [
-      { name: "Help Center", href: "/help" },
-      { name: "Contact Us", href: "/contact" },
-      { name: "FAQs", href: "/faqs" },
-      { name: "Community", href: "/community" },
+    Company: [
+      { name: "About Us", href: "/about" },
+      { name: "FAQ", href: "/faq" },
     ],
     Legal: [
       { name: "Privacy Policy", href: "/privacy" },
       { name: "Terms of Service", href: "/terms" },
-      { name: "Cookie Policy", href: "/cookies" },
     ],
   };
 
