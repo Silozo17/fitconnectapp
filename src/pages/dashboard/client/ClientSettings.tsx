@@ -14,6 +14,7 @@ import { ProfileImageUpload } from "@/components/shared/ProfileImageUpload";
 import { CurrencySelector } from "@/components/shared/CurrencySelector";
 import { LanguageSelector } from "@/components/shared/LanguageSelector";
 import { NotificationPreferences } from "@/components/notifications/NotificationPreferences";
+import { AccountSecuritySection } from "@/components/shared/AccountSecuritySection";
 import { LeaderboardSettings } from "@/components/gamification/LeaderboardSettings";
 import { AvatarPicker } from "@/components/avatars/AvatarPicker";
 import { AvatarShowcase } from "@/components/avatars/AvatarShowcase";
@@ -537,18 +538,22 @@ const ClientSettings = () => {
 
             {/* Account Tab */}
             {selectedTab === "account" && (
-              <Card className="border-destructive/50">
-                <CardHeader>
-                  <CardTitle>Account</CardTitle>
-                  <CardDescription>Manage your account</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button variant="destructive" onClick={signOut}>
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Sign Out
-                  </Button>
-                </CardContent>
-              </Card>
+              <div className="space-y-6">
+                <AccountSecuritySection />
+                
+                <Card className="border-destructive/50">
+                  <CardHeader>
+                    <CardTitle>Danger Zone</CardTitle>
+                    <CardDescription>Irreversible actions</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button variant="destructive" onClick={signOut}>
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
             )}
           </div>
         </div>
