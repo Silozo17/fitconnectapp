@@ -113,9 +113,12 @@ serve(async (req) => {
 
     console.log("Video conference settings saved successfully");
 
+    // Get the app URL
+    const appUrl = Deno.env.get("APP_URL") || "https://9eda5b28-1d63-4ce1-a014-082ad965f0d2.lovableproject.com";
+
     return new Response(null, {
       status: 302,
-      headers: { Location: "/dashboard/coach/integrations?connected=" + provider },
+      headers: { Location: `${appUrl}/dashboard/coach/integrations?connected=${provider}` },
     });
   } catch (error: any) {
     console.error("Error in video-oauth-callback:", error);

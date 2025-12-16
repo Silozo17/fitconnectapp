@@ -115,11 +115,14 @@ serve(async (req) => {
 
     console.log("Wearable connection saved successfully");
 
+    // Get the app URL from the state or use a default
+    const appUrl = Deno.env.get("APP_URL") || "https://9eda5b28-1d63-4ce1-a014-082ad965f0d2.lovableproject.com";
+
     // Redirect back to integrations page
     return new Response(null, {
       status: 302,
       headers: {
-        Location: "/dashboard/client/integrations?connected=" + provider,
+        Location: `${appUrl}/dashboard/client/integrations?connected=${provider}`,
       },
     });
   } catch (error: any) {
