@@ -120,7 +120,7 @@ const App = () => (
                 <Route path="/marketplace/:productId" element={<MarketplaceProduct />} />
                 <Route path="/marketplace/bundles/:bundleId" element={<MarketplaceBundle />} />
                 
-                <ScrollToTop />
+                {/* Admin Dashboard */}
                 <Route path="/dashboard/admin" element={
                   <ProtectedRoute allowedRoles={["admin", "manager", "staff"]}>
                     <AdminDashboard />
@@ -385,6 +385,7 @@ const App = () => (
               
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              <ScrollToTop />
               </LocaleProvider>
             </AdminProvider>
           </AuthProvider>
