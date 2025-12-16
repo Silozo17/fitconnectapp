@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface Message {
   id: string;
@@ -22,25 +23,67 @@ interface Conversation {
 
 export const useMessages = (participantId?: string) => {
   const { user, role } = useAuth();
+  const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentProfileId, setCurrentProfileId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Get current user's profile ID
   useEffect(() => {
     const fetchProfileId = async () => {
-      if (!user) return;
+      if (!user) {
+        console.log("[useMessages] No user found, skipping profile fetch");
+        setLoading(false);
+        return;
+      }
+
+      console.log("[useMessages] Fetching profile ID for user:", user.id, "role:", role);
+      
+      // Handle admin role - they may not have a profile in client/coach tables
+      if (role === "admin" || role === "manager" || role === "staff") {
+        console.log("[useMessages] Admin user detected, checking admin_profiles");
+        const { data: adminData, error: adminError } = await supabase
+          .from("admin_profiles")
+          .select("id")
+          .eq("user_id", user.id)
+          .single();
+        
+        if (adminData) {
+          console.log("[useMessages] Admin profile found:", adminData.id);
+          setCurrentProfileId(adminData.id);
+          return;
+        }
+        
+        if (adminError) {
+          console.warn("[useMessages] No admin profile found:", adminError.message);
+        }
+      }
 
       const table = role === "coach" ? "coach_profiles" : "client_profiles";
-      const { data } = await supabase
+      console.log("[useMessages] Querying table:", table);
+      
+      const { data, error: profileError } = await supabase
         .from(table)
         .select("id")
         .eq("user_id", user.id)
         .single();
 
+      if (profileError) {
+        console.error("[useMessages] Error fetching profile:", profileError);
+        setError(`Failed to load profile: ${profileError.message}`);
+        setLoading(false);
+        return;
+      }
+
       if (data) {
+        console.log("[useMessages] Profile ID found:", data.id);
         setCurrentProfileId(data.id);
+      } else {
+        console.warn("[useMessages] No profile found for user");
+        setError("No profile found. Please complete onboarding.");
+        setLoading(false);
       }
     };
 
@@ -49,132 +92,235 @@ export const useMessages = (participantId?: string) => {
 
   // Fetch conversations
   const fetchConversations = useCallback(async () => {
-    if (!currentProfileId) return;
-
-    setLoading(true);
-    
-    // Fetch all messages involving current user
-    const { data: messagesData, error } = await supabase
-      .from("messages")
-      .select("*")
-      .or(`sender_id.eq.${currentProfileId},receiver_id.eq.${currentProfileId}`)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Error fetching messages:", error);
-      setLoading(false);
+    if (!currentProfileId) {
+      console.log("[useMessages] No profile ID, skipping conversation fetch");
       return;
     }
 
-    // Group by conversation partner
-    const conversationMap = new Map<string, Message[]>();
+    console.log("[useMessages] Fetching conversations for profile:", currentProfileId);
+    setLoading(true);
+    setError(null);
     
-    messagesData?.forEach((msg) => {
-      const partnerId = msg.sender_id === currentProfileId ? msg.receiver_id : msg.sender_id;
-      if (!conversationMap.has(partnerId)) {
-        conversationMap.set(partnerId, []);
+    try {
+      // Fetch all messages involving current user
+      const { data: messagesData, error: messagesError } = await supabase
+        .from("messages")
+        .select("*")
+        .or(`sender_id.eq.${currentProfileId},receiver_id.eq.${currentProfileId}`)
+        .order("created_at", { ascending: false });
+
+      if (messagesError) {
+        console.error("[useMessages] Error fetching messages:", messagesError);
+        setError(`Failed to load conversations: ${messagesError.message}`);
+        setLoading(false);
+        return;
       }
-      conversationMap.get(partnerId)!.push(msg);
-    });
 
-    // Build conversation list with partner details
-    const conversationList: Conversation[] = [];
-    
-    for (const [partnerId, msgs] of conversationMap) {
-      // Try to get coach profile first
-      let partnerData = await supabase
-        .from("coach_profiles")
-        .select("display_name")
-        .eq("id", partnerId)
-        .single();
+      console.log("[useMessages] Fetched messages count:", messagesData?.length || 0);
 
-      let participantName = "Unknown";
-      let participantType: "client" | "coach" = "coach";
+      if (!messagesData || messagesData.length === 0) {
+        console.log("[useMessages] No messages found");
+        setConversations([]);
+        setLoading(false);
+        return;
+      }
 
-      if (partnerData.data?.display_name) {
-        participantName = partnerData.data.display_name;
-      } else {
-        // Try client profile
-        const clientData = await supabase
-          .from("client_profiles")
-          .select("first_name, last_name")
+      // Group by conversation partner
+      const conversationMap = new Map<string, Message[]>();
+      
+      messagesData.forEach((msg) => {
+        const partnerId = msg.sender_id === currentProfileId ? msg.receiver_id : msg.sender_id;
+        if (!conversationMap.has(partnerId)) {
+          conversationMap.set(partnerId, []);
+        }
+        conversationMap.get(partnerId)!.push(msg);
+      });
+
+      console.log("[useMessages] Unique conversation partners:", conversationMap.size);
+
+      // Build conversation list with partner details
+      const conversationList: Conversation[] = [];
+      
+      for (const [partnerId, msgs] of conversationMap) {
+        // Try to get coach profile first
+        const { data: coachData, error: coachError } = await supabase
+          .from("coach_profiles")
+          .select("display_name")
           .eq("id", partnerId)
           .single();
 
-        if (clientData.data) {
-          participantName = `${clientData.data.first_name || ""} ${clientData.data.last_name || ""}`.trim() || "Client";
-          participantType = "client";
+        let participantName = "Unknown";
+        let participantType: "client" | "coach" = "coach";
+
+        if (coachData?.display_name) {
+          participantName = coachData.display_name;
+          console.log("[useMessages] Found coach partner:", participantName);
+        } else {
+          // Try client profile
+          const { data: clientData, error: clientError } = await supabase
+            .from("client_profiles")
+            .select("first_name, last_name")
+            .eq("id", partnerId)
+            .single();
+
+          if (clientData) {
+            participantName = `${clientData.first_name || ""} ${clientData.last_name || ""}`.trim() || "Client";
+            participantType = "client";
+            console.log("[useMessages] Found client partner:", participantName);
+          } else {
+            console.warn("[useMessages] Could not find partner profile for ID:", partnerId);
+          }
         }
+
+        const lastMsg = msgs[0];
+        const unreadCount = msgs.filter(
+          (m) => m.receiver_id === currentProfileId && !m.read_at
+        ).length;
+
+        conversationList.push({
+          participantId: partnerId,
+          participantName,
+          participantType,
+          lastMessage: lastMsg.content,
+          lastMessageTime: lastMsg.created_at,
+          unreadCount,
+        });
       }
 
-      const lastMsg = msgs[0];
-      const unreadCount = msgs.filter(
-        (m) => m.receiver_id === currentProfileId && !m.read_at
-      ).length;
+      // Sort by last message time (most recent first)
+      conversationList.sort((a, b) => 
+        new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
+      );
 
-      conversationList.push({
-        participantId: partnerId,
-        participantName,
-        participantType,
-        lastMessage: lastMsg.content,
-        lastMessageTime: lastMsg.created_at,
-        unreadCount,
-      });
+      console.log("[useMessages] Final conversation count:", conversationList.length);
+      setConversations(conversationList);
+    } catch (err) {
+      console.error("[useMessages] Unexpected error in fetchConversations:", err);
+      setError("An unexpected error occurred while loading conversations");
+    } finally {
+      setLoading(false);
     }
-
-    setConversations(conversationList);
-    setLoading(false);
   }, [currentProfileId]);
 
   // Fetch messages for specific conversation
   const fetchMessages = useCallback(async () => {
-    if (!currentProfileId || !participantId) return;
-
-    const { data, error } = await supabase
-      .from("messages")
-      .select("*")
-      .or(
-        `and(sender_id.eq.${currentProfileId},receiver_id.eq.${participantId}),and(sender_id.eq.${participantId},receiver_id.eq.${currentProfileId})`
-      )
-      .order("created_at", { ascending: true });
-
-    if (error) {
-      console.error("Error fetching messages:", error);
+    if (!currentProfileId || !participantId) {
+      console.log("[useMessages] Missing IDs for message fetch - profileId:", currentProfileId, "participantId:", participantId);
       return;
     }
 
-    setMessages(data || []);
+    console.log("[useMessages] Fetching messages between", currentProfileId, "and", participantId);
+    setLoading(true);
+    setError(null);
 
-    // Mark received messages as read
-    await supabase
-      .from("messages")
-      .update({ read_at: new Date().toISOString() })
-      .eq("sender_id", participantId)
-      .eq("receiver_id", currentProfileId)
-      .is("read_at", null);
+    try {
+      const { data, error: fetchError } = await supabase
+        .from("messages")
+        .select("*")
+        .or(
+          `and(sender_id.eq.${currentProfileId},receiver_id.eq.${participantId}),and(sender_id.eq.${participantId},receiver_id.eq.${currentProfileId})`
+        )
+        .order("created_at", { ascending: true });
+
+      if (fetchError) {
+        console.error("[useMessages] Error fetching messages:", fetchError);
+        setError(`Failed to load messages: ${fetchError.message}`);
+        return;
+      }
+
+      console.log("[useMessages] Fetched message count:", data?.length || 0);
+      setMessages(data || []);
+
+      // Mark received messages as read
+      const { error: updateError } = await supabase
+        .from("messages")
+        .update({ read_at: new Date().toISOString() })
+        .eq("sender_id", participantId)
+        .eq("receiver_id", currentProfileId)
+        .is("read_at", null);
+
+      if (updateError) {
+        console.warn("[useMessages] Error marking messages as read:", updateError);
+      }
+    } catch (err) {
+      console.error("[useMessages] Unexpected error in fetchMessages:", err);
+      setError("An unexpected error occurred while loading messages");
+    } finally {
+      setLoading(false);
+    }
   }, [currentProfileId, participantId]);
 
   // Send message
-  const sendMessage = async (content: string) => {
-    if (!currentProfileId || !participantId || !content.trim()) return false;
-
-    const { error } = await supabase.from("messages").insert({
-      sender_id: currentProfileId,
-      receiver_id: participantId,
-      content: content.trim(),
-    });
-
-    if (error) {
-      console.error("Error sending message:", error);
+  const sendMessage = async (content: string): Promise<boolean> => {
+    if (!currentProfileId) {
+      console.error("[useMessages] Cannot send message - no profile ID");
+      toast({
+        title: "Error",
+        description: "Your profile could not be loaded. Please refresh the page.",
+        variant: "destructive",
+      });
       return false;
     }
 
-    return true;
+    if (!participantId) {
+      console.error("[useMessages] Cannot send message - no participant ID");
+      toast({
+        title: "Error",
+        description: "No recipient selected.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (!content.trim()) {
+      console.warn("[useMessages] Cannot send empty message");
+      return false;
+    }
+
+    console.log("[useMessages] Sending message to:", participantId);
+
+    try {
+      const { data, error: sendError } = await supabase
+        .from("messages")
+        .insert({
+          sender_id: currentProfileId,
+          receiver_id: participantId,
+          content: content.trim(),
+        })
+        .select()
+        .single();
+
+      if (sendError) {
+        console.error("[useMessages] Error sending message:", sendError);
+        toast({
+          title: "Failed to send message",
+          description: sendError.message,
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      console.log("[useMessages] Message sent successfully:", data?.id);
+      return true;
+    } catch (err) {
+      console.error("[useMessages] Unexpected error sending message:", err);
+      toast({
+        title: "Failed to send message",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+      return false;
+    }
   };
 
   // Set up realtime subscription
   useEffect(() => {
-    if (!currentProfileId) return;
+    if (!currentProfileId) {
+      console.log("[useMessages] No profile ID, skipping realtime subscription");
+      return;
+    }
+
+    console.log("[useMessages] Setting up realtime subscription for profile:", currentProfileId);
 
     const channel = supabase
       .channel("messages-realtime")
@@ -187,19 +333,29 @@ export const useMessages = (participantId?: string) => {
         },
         (payload) => {
           const newMessage = payload.new as Message;
+          console.log("[useMessages] Realtime: New message received:", newMessage.id);
           
           // Check if message involves current user
           if (
             newMessage.sender_id === currentProfileId ||
             newMessage.receiver_id === currentProfileId
           ) {
+            console.log("[useMessages] Realtime: Message involves current user");
+            
             // Update messages if in active conversation
             if (
               participantId &&
               (newMessage.sender_id === participantId ||
                 newMessage.receiver_id === participantId)
             ) {
-              setMessages((prev) => [...prev, newMessage]);
+              console.log("[useMessages] Realtime: Adding message to active conversation");
+              setMessages((prev) => {
+                // Prevent duplicates
+                if (prev.some(m => m.id === newMessage.id)) {
+                  return prev;
+                }
+                return [...prev, newMessage];
+              });
             }
             
             // Refresh conversations list
@@ -207,26 +363,32 @@ export const useMessages = (participantId?: string) => {
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("[useMessages] Realtime subscription status:", status);
+      });
 
     return () => {
+      console.log("[useMessages] Cleaning up realtime subscription");
       supabase.removeChannel(channel);
     };
   }, [currentProfileId, participantId, fetchConversations]);
 
   // Initial fetch
   useEffect(() => {
+    if (!currentProfileId) return;
+    
     if (participantId) {
       fetchMessages();
     } else {
       fetchConversations();
     }
-  }, [participantId, fetchMessages, fetchConversations]);
+  }, [participantId, currentProfileId, fetchMessages, fetchConversations]);
 
   return {
     messages,
     conversations,
     loading,
+    error,
     sendMessage,
     currentProfileId,
     refetch: participantId ? fetchMessages : fetchConversations,

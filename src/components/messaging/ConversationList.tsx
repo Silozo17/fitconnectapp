@@ -1,6 +1,6 @@
 import { useMessages } from "@/hooks/useMessages";
 import { formatDistanceToNow } from "date-fns";
-import { MessageSquare, Loader2, User, Briefcase } from "lucide-react";
+import { MessageSquare, Loader2, User, Briefcase, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -9,7 +9,7 @@ interface ConversationListProps {
 }
 
 const ConversationList = ({ activeConversationId }: ConversationListProps) => {
-  const { conversations, loading } = useMessages();
+  const { conversations, loading, error } = useMessages();
   const { role } = useAuth();
   
   const basePath = role === "coach" ? "/dashboard/coach/messages" : "/dashboard/client/messages";
@@ -18,6 +18,16 @@ const ConversationList = ({ activeConversationId }: ConversationListProps) => {
     return (
       <div className="flex items-center justify-center p-8">
         <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-center">
+        <AlertCircle className="w-12 h-12 text-destructive mb-4" />
+        <h3 className="font-medium text-foreground mb-1">Unable to load conversations</h3>
+        <p className="text-sm text-muted-foreground">{error}</p>
       </div>
     );
   }
