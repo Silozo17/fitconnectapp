@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, ArrowRight } from "lucide-react";
+import { Star, MapPin, ArrowRight, CheckCircle } from "lucide-react";
 
 const FeaturedCoaches = () => {
   const coaches = [
@@ -14,7 +14,8 @@ const FeaturedCoaches = () => {
       reviews: 127,
       price: "£60/session",
       tags: ["Weight Loss", "Strength"],
-      image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=400&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=400&fit=crop",
       verified: true,
     },
     {
@@ -26,7 +27,8 @@ const FeaturedCoaches = () => {
       reviews: 89,
       price: "£45/session",
       tags: ["Meal Planning", "Vegan"],
-      image: "https://images.unsplash.com/photo-1594381898411-846e7d193883?w=400&h=400&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1594381898411-846e7d193883?w=400&h=400&fit=crop",
       verified: true,
     },
     {
@@ -38,7 +40,8 @@ const FeaturedCoaches = () => {
       reviews: 156,
       price: "£55/session",
       tags: ["Boxing", "Conditioning"],
-      image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=400&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=400&fit=crop",
       verified: true,
     },
     {
@@ -50,25 +53,30 @@ const FeaturedCoaches = () => {
       reviews: 72,
       price: "£65/session",
       tags: ["MMA", "Self Defense"],
-      image: "https://images.unsplash.com/photo-1549476464-37392f717541?w=400&h=400&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1549476464-37392f717541?w=400&h=400&fit=crop",
       verified: true,
     },
   ];
 
   return (
-    <section className="py-20 md:py-32 bg-card/50">
+    <section className="py-24 md:py-32 bg-background">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
           <div>
-            <span className="text-primary font-medium mb-4 block">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-gradient-teal/10 text-gradient-teal font-medium text-sm mb-4">
               TOP RATED
             </span>
             <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
-              Featured <span className="gradient-text">Coaches</span>
+              Featured <span className="gradient-text-teal">Coaches</span>
             </h2>
           </div>
-          <Button asChild variant="outline" className="border-border text-foreground hover:bg-secondary">
+          <Button
+            asChild
+            variant="outline"
+            className="border-border text-foreground hover:bg-secondary rounded-xl"
+          >
             <Link to="/coaches">
               View All Coaches
               <ArrowRight className="ml-2 w-4 h-4" />
@@ -93,7 +101,8 @@ const FeaturedCoaches = () => {
                 />
                 {coach.verified && (
                   <div className="absolute top-3 right-3">
-                    <Badge className="bg-primary text-primary-foreground">
+                    <Badge className="gradient-bg-primary text-white border-0 gap-1">
+                      <CheckCircle className="w-3 h-3" />
                       Verified
                     </Badge>
                   </div>
@@ -104,7 +113,9 @@ const FeaturedCoaches = () => {
               <div className="p-5">
                 <div className="flex items-center gap-1 mb-2">
                   <Star className="w-4 h-4 fill-warning text-warning" />
-                  <span className="font-medium text-foreground">{coach.rating}</span>
+                  <span className="font-medium text-foreground">
+                    {coach.rating}
+                  </span>
                   <span className="text-muted-foreground text-sm">
                     ({coach.reviews} reviews)
                   </span>
@@ -113,7 +124,9 @@ const FeaturedCoaches = () => {
                 <h3 className="font-display font-semibold text-lg text-foreground mb-1">
                   {coach.name}
                 </h3>
-                <p className="text-primary text-sm mb-2">{coach.specialty}</p>
+                <p className="text-primary text-sm font-medium mb-2">
+                  {coach.specialty}
+                </p>
 
                 <div className="flex items-center gap-1 text-muted-foreground text-sm mb-4">
                   <MapPin className="w-3 h-3" />
@@ -125,7 +138,7 @@ const FeaturedCoaches = () => {
                     <Badge
                       key={tag}
                       variant="secondary"
-                      className="bg-secondary text-secondary-foreground text-xs"
+                      className="bg-secondary text-secondary-foreground text-xs rounded-lg"
                     >
                       {tag}
                     </Badge>

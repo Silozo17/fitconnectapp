@@ -1,60 +1,68 @@
 import { Star, Quote } from "lucide-react";
+import BlobShape from "@/components/ui/blob-shape";
 
 const Testimonials = () => {
   const testimonials = [
     {
       name: "James Mitchell",
       role: "Lost 15kg in 4 months",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop",
-      content: "Finding Marcus through FitConnect changed my life. The personalized training plans and constant support helped me achieve what I thought was impossible.",
+      image:
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop",
+      content:
+        "Finding Marcus through FitConnect changed my life. The personalized training plans and constant support helped me achieve what I thought was impossible.",
       rating: 5,
     },
     {
       name: "Sophie Anderson",
       role: "Marathon Runner",
-      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop",
-      content: "The nutrition coaching I received was exceptional. My coach understood my training needs and created a plan that fueled my first marathon success.",
+      image:
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop",
+      content:
+        "The nutrition coaching I received was exceptional. My coach understood my training needs and created a plan that fueled my first marathon success.",
       rating: 5,
     },
     {
       name: "Michael Obi",
       role: "Amateur Boxer",
-      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop",
-      content: "Started boxing training through FitConnect and competed in my first amateur bout within 8 months. The quality of coaches here is unmatched.",
+      image:
+        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop",
+      content:
+        "Started boxing training through FitConnect and competed in my first amateur bout within 8 months. The quality of coaches here is unmatched.",
       rating: 5,
     },
   ];
 
   return (
-    <section className="py-20 md:py-32 bg-background relative overflow-hidden">
-      {/* Background Accent */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-3xl" />
+    <section className="py-24 md:py-32 bg-secondary/30 relative overflow-hidden">
+      {/* Background Blobs */}
+      <BlobShape variant="purple" size="lg" className="top-0 left-1/4 opacity-30" />
+      <BlobShape variant="teal" size="md" className="bottom-0 right-1/4 opacity-20" />
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="text-primary font-medium mb-4 block">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-gradient-orange/10 text-gradient-orange font-medium text-sm mb-4">
             SUCCESS STORIES
           </span>
           <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-6">
             Real Results from{" "}
-            <span className="gradient-text">Real People</span>
+            <span className="gradient-text-orange">Real People</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Join thousands of members who have transformed their lives with our expert coaches.
+            Join thousands of members who have transformed their lives with our
+            expert coaches.
           </p>
         </div>
 
         {/* Testimonials Grid */}
         <div className="grid md:grid-cols-3 gap-6 md:gap-8">
           {testimonials.map((testimonial, index) => (
-            <div
-              key={index}
-              className="card-elevated p-6 md:p-8 relative"
-            >
+            <div key={index} className="card-elevated p-6 md:p-8 relative bg-background">
               {/* Quote Icon */}
-              <div className="absolute top-6 right-6 text-primary/20">
-                <Quote className="w-12 h-12" />
+              <div className="absolute top-6 right-6">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gradient-pink/20 to-gradient-purple/10 flex items-center justify-center">
+                  <Quote className="w-5 h-5 text-primary" />
+                </div>
               </div>
 
               {/* Rating */}
@@ -77,7 +85,7 @@ const Testimonials = () => {
                 <img
                   src={testimonial.image}
                   alt={testimonial.name}
-                  className="w-12 h-12 rounded-full object-cover"
+                  className="w-12 h-12 rounded-xl object-cover ring-2 ring-primary/20"
                 />
                 <div>
                   <p className="font-display font-semibold text-foreground">
