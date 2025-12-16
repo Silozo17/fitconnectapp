@@ -27,6 +27,7 @@ import AdminFeatures from "./pages/dashboard/admin/AdminFeatures";
 import AdminReviews from "./pages/dashboard/admin/AdminReviews";
 import AdminVerification from "./pages/dashboard/admin/AdminVerification";
 import AdminIntegrations from "./pages/dashboard/admin/AdminIntegrations";
+import AdminChallenges from "./pages/dashboard/admin/AdminChallenges";
 
 // Coach Dashboard Pages
 import ClientOverview from "./pages/dashboard/client/ClientOverview";
@@ -89,6 +90,7 @@ import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/shared/ScrollToTop";
 import Subscribe from "./pages/Subscribe";
 import SubscribeSuccess from "./pages/SubscribeSuccess";
+import Avatars from "./pages/Avatars";
 
 const queryClient = new QueryClient();
 
@@ -117,6 +119,7 @@ const App = () => (
                 <Route path="/success-stories" element={<SuccessStories />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/leaderboards" element={<Leaderboards />} />
+                <Route path="/avatars" element={<Avatars />} />
                 <Route path="/coaches/personal-trainers" element={<PersonalTrainers />} />
                 <Route path="/coaches/nutritionists" element={<Nutritionists />} />
                 <Route path="/coaches/boxing" element={<Boxing />} />
@@ -189,6 +192,11 @@ const App = () => (
                 <Route path="/dashboard/admin/integrations" element={
                   <ProtectedRoute allowedRoles={["admin"]}>
                     <AdminIntegrations />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/admin/challenges" element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminChallenges />
                   </ProtectedRoute>
                 } />
                 

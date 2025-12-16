@@ -454,6 +454,7 @@ export type Database = {
       }
       challenges: {
         Row: {
+          admin_created_by: string | null
           badge_reward_id: string | null
           challenge_type: string
           created_at: string
@@ -464,6 +465,7 @@ export type Database = {
           is_active: boolean | null
           max_participants: number | null
           start_date: string
+          target_audience: string | null
           target_unit: string
           target_value: number
           title: string
@@ -471,6 +473,7 @@ export type Database = {
           xp_reward: number
         }
         Insert: {
+          admin_created_by?: string | null
           badge_reward_id?: string | null
           challenge_type?: string
           created_at?: string
@@ -481,6 +484,7 @@ export type Database = {
           is_active?: boolean | null
           max_participants?: number | null
           start_date?: string
+          target_audience?: string | null
           target_unit?: string
           target_value?: number
           title: string
@@ -488,6 +492,7 @@ export type Database = {
           xp_reward?: number
         }
         Update: {
+          admin_created_by?: string | null
           badge_reward_id?: string | null
           challenge_type?: string
           created_at?: string
@@ -498,6 +503,7 @@ export type Database = {
           is_active?: boolean | null
           max_participants?: number | null
           start_date?: string
+          target_audience?: string | null
           target_unit?: string
           target_value?: number
           title?: string
@@ -505,6 +511,13 @@ export type Database = {
           xp_reward?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "challenges_admin_created_by_fkey"
+            columns: ["admin_created_by"]
+            isOneToOne: false
+            referencedRelation: "admin_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "challenges_badge_reward_id_fkey"
             columns: ["badge_reward_id"]
