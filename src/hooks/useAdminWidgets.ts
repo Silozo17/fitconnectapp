@@ -1,5 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { WidgetDisplayFormat } from "@/lib/widget-formats";
+
+export interface WidgetConfig {
+  displayFormat?: WidgetDisplayFormat;
+  [key: string]: any;
+}
 
 export interface DashboardWidget {
   id: string;
@@ -9,7 +15,7 @@ export interface DashboardWidget {
   position: number;
   size: "small" | "medium" | "large" | "full";
   is_visible: boolean;
-  config: Record<string, any>;
+  config: WidgetConfig;
 }
 
 export const WIDGET_TYPES = {
@@ -221,6 +227,64 @@ export function useResetWidgets() {
 
         if (error) throw error;
       }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-widgets"] });
+    },
+  });
+}
+
+// Batch reorder widgets
+export function useReorderWidgets() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (widgets: { id: string; position: number }[]) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { data: adminProfile } = await supabase
+        .from("admin_profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .single();
+
+      // Update each widget's position
+      const updates = widgets.map(async ({ id, position }) => {
+        // Check if widget exists in DB
+        const { data: existing } = await supabase
+          .from("admin_dashboard_widgets")
+          .select("id, admin_id")
+          .eq("id", id)
+          .single();
+
+        if (existing?.admin_id === null && adminProfile) {
+          // Create user-specific copy with new position
+          const { data: widget } = await supabase
+            .from("admin_dashboard_widgets")
+            .select("*")
+            .eq("id", id)
+            .single();
+
+          if (widget) {
+            return supabase
+              .from("admin_dashboard_widgets")
+              .insert({
+                ...widget,
+                id: undefined,
+                admin_id: adminProfile.id,
+                position,
+              });
+          }
+        } else if (existing) {
+          return supabase
+            .from("admin_dashboard_widgets")
+            .update({ position })
+            .eq("id", id);
+        }
+      });
+
+      await Promise.all(updates);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-widgets"] });
