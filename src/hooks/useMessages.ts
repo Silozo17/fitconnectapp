@@ -227,7 +227,101 @@ export const useMessages = (participantId?: string) => {
     }
   }, [currentProfileId]);
 
-  // Fetch messages for specific conversation
+  // Soft refresh conversations - for new conversations only (no loading state)
+  const softRefreshConversations = useCallback(async () => {
+    if (!currentProfileId) return;
+    
+    // Don't set loading to true - this is a background refresh
+    try {
+      const { data: messagesData } = await supabase
+        .from("messages")
+        .select("*")
+        .or(`sender_id.eq.${currentProfileId},receiver_id.eq.${currentProfileId}`)
+        .order("created_at", { ascending: false });
+
+      if (!messagesData || messagesData.length === 0) return;
+
+      const conversationMap = new Map<string, Message[]>();
+      messagesData.forEach((msg) => {
+        const partnerId = msg.sender_id === currentProfileId ? msg.receiver_id : msg.sender_id;
+        if (!conversationMap.has(partnerId)) {
+          conversationMap.set(partnerId, []);
+        }
+        conversationMap.get(partnerId)!.push(msg);
+      });
+
+      const conversationList: Conversation[] = [];
+      
+      for (const [partnerId, msgs] of conversationMap) {
+        let participantName = "Unknown";
+        let participantType: "client" | "coach" | "admin" = "client";
+        let participantAvatar: string | null = null;
+        let participantLocation: string | null = null;
+
+        const { data: coachData } = await supabase
+          .from("coach_profiles")
+          .select("display_name, profile_image_url, location")
+          .eq("id", partnerId)
+          .single();
+
+        if (coachData?.display_name) {
+          participantName = coachData.display_name;
+          participantType = "coach";
+          participantAvatar = coachData.profile_image_url;
+          participantLocation = coachData.location;
+        } else {
+          const { data: clientData } = await supabase
+            .from("client_profiles")
+            .select("first_name, last_name, avatar_url")
+            .eq("id", partnerId)
+            .single();
+
+          if (clientData) {
+            participantName = `${clientData.first_name || ""} ${clientData.last_name || ""}`.trim() || "Client";
+            participantType = "client";
+            participantAvatar = clientData.avatar_url;
+          } else {
+            const { data: adminData } = await supabase
+              .from("admin_profiles")
+              .select("display_name, first_name, last_name, avatar_url")
+              .eq("id", partnerId)
+              .single();
+
+            if (adminData) {
+              participantName = adminData.display_name || 
+                `${adminData.first_name || ""} ${adminData.last_name || ""}`.trim() || "Admin";
+              participantType = "admin";
+              participantAvatar = adminData.avatar_url;
+            }
+          }
+        }
+
+        const lastMsg = msgs[0];
+        const unreadCount = msgs.filter(
+          (m) => m.receiver_id === currentProfileId && !m.read_at
+        ).length;
+
+        conversationList.push({
+          participantId: partnerId,
+          participantName,
+          participantType,
+          participantAvatar,
+          participantLocation,
+          lastMessage: lastMsg.content,
+          lastMessageTime: lastMsg.created_at,
+          unreadCount,
+        });
+      }
+
+      conversationList.sort((a, b) => 
+        new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
+      );
+
+      setConversations(conversationList);
+    } catch (err) {
+      console.error("[useMessages] Soft refresh error:", err);
+    }
+  }, [currentProfileId]);
   const fetchMessages = useCallback(async () => {
     if (!currentProfileId || !participantId) {
       console.log("[useMessages] Missing IDs for message fetch - profileId:", currentProfileId, "participantId:", participantId);
@@ -434,8 +528,37 @@ export const useMessages = (participantId?: string) => {
               }
             }
             
-            // Refresh conversations list
-            fetchConversations();
+            // Update conversations list locally (lightweight - no full re-fetch)
+            const partnerId = isReceived ? newMessage.sender_id : newMessage.receiver_id;
+            
+            setConversations((prev) => {
+              const existingIndex = prev.findIndex(c => c.participantId === partnerId);
+              
+              if (existingIndex >= 0) {
+                // Update existing conversation
+                const updated = [...prev];
+                const existing = updated[existingIndex];
+                updated[existingIndex] = {
+                  ...existing,
+                  lastMessage: newMessage.content,
+                  lastMessageTime: newMessage.created_at,
+                  unreadCount: isReceived && !participantId 
+                    ? existing.unreadCount + 1 
+                    : existing.unreadCount,
+                };
+                // Move updated conversation to top
+                const [conversation] = updated.splice(existingIndex, 1);
+                return [conversation, ...updated];
+              }
+              
+              // New conversation - will need profile info, do a soft fetch
+              // Only fetch if not currently viewing that conversation
+              if (!participantId) {
+                // Trigger a soft refresh for new conversations only
+                softRefreshConversations();
+              }
+              return prev;
+            });
           }
           
           if (payload.eventType === "UPDATE") {
@@ -464,7 +587,7 @@ export const useMessages = (participantId?: string) => {
       console.log("[useMessages] Cleaning up subscription:", channelName);
       supabase.removeChannel(channel);
     };
-  }, [currentProfileId, participantId, fetchConversations]);
+  }, [currentProfileId, participantId, softRefreshConversations]);
 
   // Initial fetch
   useEffect(() => {
