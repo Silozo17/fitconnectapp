@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import {
   usePendingVerifications,
+  useVerificationStats,
   useCoachVerificationDocuments,
   useReviewVerification,
   useReviewDocument,
@@ -363,12 +364,11 @@ const AdminVerification = () => {
   const [reviewNotes, setReviewNotes] = useState("");
 
   const { data: coaches = [], isLoading } = usePendingVerifications(activeTab);
+  const { data: stats } = useVerificationStats();
   const { data: documents = [] } = useCoachVerificationDocuments(selectedCoach?.id);
   const reviewMutation = useReviewVerification();
   const reviewDocMutation = useReviewDocument();
   const rerunAIMutation = useRerunAIAnalysis();
-
-  const pendingCount = coaches.filter(c => c.verification_status === "pending").length;
 
   // Calculate AI summary for selected coach
   const getAISummary = () => {
@@ -424,14 +424,14 @@ const AdminVerification = () => {
           <Card>
             <CardHeader className="pb-2">
               <CardDescription>Pending Review</CardDescription>
-              <CardTitle className="text-3xl text-amber-500">{pendingCount}</CardTitle>
+              <CardTitle className="text-3xl text-amber-500">{stats?.pendingCount ?? 0}</CardTitle>
             </CardHeader>
           </Card>
           <Card>
             <CardHeader className="pb-2">
               <CardDescription>Approved This Month</CardDescription>
               <CardTitle className="text-3xl text-primary">
-                {coaches.filter(c => c.verification_status === "approved").length}
+                {stats?.approvedThisMonth ?? 0}
               </CardTitle>
             </CardHeader>
           </Card>
@@ -439,7 +439,7 @@ const AdminVerification = () => {
             <CardHeader className="pb-2">
               <CardDescription>Rejected This Month</CardDescription>
               <CardTitle className="text-3xl text-destructive">
-                {coaches.filter(c => c.verification_status === "rejected").length}
+                {stats?.rejectedThisMonth ?? 0}
               </CardTitle>
             </CardHeader>
           </Card>
@@ -463,8 +463,8 @@ const AdminVerification = () => {
             <TabsTrigger value="pending" className="gap-2">
               <Clock className="w-4 h-4" />
               Pending
-              {pendingCount > 0 && (
-                <Badge variant="secondary" className="ml-1">{pendingCount}</Badge>
+              {(stats?.pendingCount ?? 0) > 0 && (
+                <Badge variant="secondary" className="ml-1">{stats?.pendingCount}</Badge>
               )}
             </TabsTrigger>
             <TabsTrigger value="approved" className="gap-2">

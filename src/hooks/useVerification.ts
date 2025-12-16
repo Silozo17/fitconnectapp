@@ -297,6 +297,48 @@ export const useSubmitForVerification = () => {
   });
 };
 
+// Admin: Get verification stats (all statuses for dashboard cards)
+export const useVerificationStats = () => {
+  return useQuery({
+    queryKey: ["admin-verification-stats"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("coach_profiles")
+        .select(`
+          verification_status,
+          verified_at
+        `)
+        .neq("verification_status", "not_submitted");
+
+      if (error) throw error;
+
+      const coaches = data || [];
+      
+      // Calculate start of current month
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      const pendingCount = coaches.filter(c => c.verification_status === "pending").length;
+      const approvedThisMonth = coaches.filter(c => 
+        c.verification_status === "approved" && 
+        c.verified_at && 
+        new Date(c.verified_at) >= startOfMonth
+      ).length;
+      const rejectedThisMonth = coaches.filter(c => 
+        c.verification_status === "rejected" && 
+        c.verified_at && 
+        new Date(c.verified_at) >= startOfMonth
+      ).length;
+
+      return {
+        pendingCount,
+        approvedThisMonth,
+        rejectedThisMonth,
+      };
+    },
+  });
+};
+
 // Admin: Get pending verifications
 export const usePendingVerifications = (status?: VerificationStatus) => {
   return useQuery({
