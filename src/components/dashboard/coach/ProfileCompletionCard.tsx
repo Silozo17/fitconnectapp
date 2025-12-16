@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 export const ProfileCompletionCard = () => {
   const { data, isLoading } = useCoachProfileCompletion();
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   if (isLoading) {
     return (
