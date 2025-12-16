@@ -117,6 +117,12 @@ export const SUBSCRIPTION_TIERS = {
 export type TierKey = keyof typeof SUBSCRIPTION_TIERS;
 export type BillingInterval = "monthly" | "yearly";
 
+// Tier order from lowest to highest (for upgrade/downgrade comparison)
+export const TIER_ORDER: TierKey[] = ["free", "starter", "pro", "enterprise"];
+
+// Helper to get tier position for comparison
+export const getTierPosition = (tier: TierKey): number => TIER_ORDER.indexOf(tier);
+
 // Map legacy or invalid tier names to valid TierKeys
 export const normalizeTier = (tier: string | null | undefined): TierKey => {
   if (!tier) return "free";
