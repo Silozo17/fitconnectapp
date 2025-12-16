@@ -1,9 +1,9 @@
 import { useRef, useState } from "react";
-import { Camera, Loader2, User, X } from "lucide-react";
+import { Camera, Loader2, X } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { useProfileImage } from "@/hooks/useProfileImage";
 import { cn } from "@/lib/utils";
+import { ImageCropperModal } from "./ImageCropperModal";
 
 interface ProfileImageUploadProps {
   currentImageUrl?: string | null;
@@ -42,6 +42,9 @@ export const ProfileImageUpload = ({
 }: ProfileImageUploadProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(currentImageUrl || null);
+  const [cropperImage, setCropperImage] = useState<string | null>(null);
+  const [showCropper, setShowCropper] = useState(false);
+  
   const { uploadImage, deleteImage, uploading } = useProfileImage({
     onSuccess: (url) => {
       setPreviewUrl(url);
@@ -49,12 +52,27 @@ export const ProfileImageUpload = ({
     },
   });
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Create preview immediately
+    // Create object URL and open cropper
     const objectUrl = URL.createObjectURL(file);
+    setCropperImage(objectUrl);
+    setShowCropper(true);
+
+    // Clear input so same file can be selected again
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    // Create file from blob
+    const file = new File([croppedBlob], "profile-photo.jpg", { type: "image/jpeg" });
+    
+    // Create preview immediately
+    const objectUrl = URL.createObjectURL(croppedBlob);
     setPreviewUrl(objectUrl);
 
     // Upload to storage
@@ -64,9 +82,18 @@ export const ProfileImageUpload = ({
       setPreviewUrl(currentImageUrl || null);
     }
 
-    // Clear input
-    if (inputRef.current) {
-      inputRef.current.value = "";
+    // Cleanup cropper image
+    if (cropperImage) {
+      URL.revokeObjectURL(cropperImage);
+      setCropperImage(null);
+    }
+  };
+
+  const handleCropperClose = () => {
+    setShowCropper(false);
+    if (cropperImage) {
+      URL.revokeObjectURL(cropperImage);
+      setCropperImage(null);
     }
   };
 
@@ -142,6 +169,16 @@ export const ProfileImageUpload = ({
         onChange={handleFileSelect}
         className="hidden"
       />
+
+      {/* Image Cropper Modal */}
+      {cropperImage && (
+        <ImageCropperModal
+          open={showCropper}
+          onClose={handleCropperClose}
+          imageSrc={cropperImage}
+          onCropComplete={handleCropComplete}
+        />
+      )}
     </div>
   );
 };

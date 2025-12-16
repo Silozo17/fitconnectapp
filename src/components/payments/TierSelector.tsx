@@ -8,9 +8,12 @@ interface TierSelectorProps {
 }
 
 export function TierSelector({ selectedTier, onTierChange }: TierSelectorProps) {
+  // Exclude free tier from selector since you can't subscribe to it
+  const paidTiers = (Object.keys(SUBSCRIPTION_TIERS) as TierKey[]).filter(key => key !== "free");
+
   return (
     <div className="flex gap-2 p-1 bg-background/20 rounded-lg border border-border/30">
-      {(Object.keys(SUBSCRIPTION_TIERS) as TierKey[]).map((tier) => {
+      {paidTiers.map((tier) => {
         const isSelected = selectedTier === tier;
         const tierData = SUBSCRIPTION_TIERS[tier];
         
