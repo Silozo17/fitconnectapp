@@ -4,6 +4,7 @@ import Footer from "@/components/layout/Footer";
 import Hero from "@/components/landing/Hero";
 import Features from "@/components/landing/Features";
 import FeaturedCoaches from "@/components/landing/FeaturedCoaches";
+import Leaderboard from "@/components/landing/Leaderboard";
 import Testimonials from "@/components/landing/Testimonials";
 import CTA from "@/components/landing/CTA";
 
@@ -23,6 +24,7 @@ const Index = () => {
         <main>
           <Hero />
           <FeaturedCoaches />
+          <Leaderboard />
           <Features />
           <Testimonials />
           <CTA />
