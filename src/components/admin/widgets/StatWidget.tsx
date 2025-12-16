@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, Dumbbell, Calendar, DollarSign, TrendingUp, TrendingDown } from "lucide-react";
+import { Users, Dumbbell, Calendar, DollarSign, TrendingUp, TrendingDown, MessageSquare, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface StatWidgetProps {
@@ -15,6 +15,8 @@ const iconMap: Record<string, React.ComponentType<any>> = {
   stats_coaches: Dumbbell,
   stats_sessions: Calendar,
   stats_revenue: DollarSign,
+  stats_messages: MessageSquare,
+  stats_reviews: Star,
 };
 
 const colorMap: Record<string, string> = {
@@ -22,6 +24,8 @@ const colorMap: Record<string, string> = {
   stats_coaches: "text-orange-500 bg-orange-500/10",
   stats_sessions: "text-green-500 bg-green-500/10",
   stats_revenue: "text-primary bg-primary/10",
+  stats_messages: "text-purple-500 bg-purple-500/10",
+  stats_reviews: "text-amber-500 bg-amber-500/10",
 };
 
 export function StatWidget({ type, title, value, change, size = "small" }: StatWidgetProps) {
