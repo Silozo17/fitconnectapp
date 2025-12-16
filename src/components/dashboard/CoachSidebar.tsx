@@ -24,6 +24,8 @@ import { SidebarBadge } from "@/components/shared/SidebarBadge";
 
 type BadgeKey = "messages" | "pipeline" | "schedule" | "clients";
 
+import { User } from "lucide-react";
+
 const menuItems: { title: string; icon: typeof LayoutDashboard; path: string; badgeKey?: BadgeKey; badgeVariant?: "default" | "warning" | "urgent" }[] = [
   { title: "Overview", icon: LayoutDashboard, path: "/dashboard/coach" },
   { title: "Pipeline", icon: Kanban, path: "/dashboard/coach/pipeline", badgeKey: "pipeline", badgeVariant: "warning" },
@@ -37,6 +39,10 @@ const menuItems: { title: string; icon: typeof LayoutDashboard; path: string; ba
   { title: "Achievements", icon: Trophy, path: "/dashboard/coach/achievements" },
   { title: "Reviews", icon: Star, path: "/dashboard/coach/reviews" },
   { title: "Earnings", icon: DollarSign, path: "/dashboard/coach/earnings" },
+];
+
+const bottomItems: { title: string; icon: typeof LayoutDashboard; path: string }[] = [
+  { title: "My Profile", icon: User, path: "/dashboard/profile" },
   { title: "Settings", icon: Settings, path: "/dashboard/coach/settings" },
 ];
 
@@ -122,6 +128,28 @@ const CoachSidebar = ({ collapsed, onToggle }: CoachSidebarProps) => {
           })}
         </ul>
       </nav>
+
+      {/* Bottom Items (Profile & Settings) */}
+      <div className="px-2 py-2 border-t border-sidebar-border space-y-1">
+        {bottomItems.map((item) => {
+          const isActive = location.pathname === item.path;
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={cn(
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
+                isActive
+                  ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+              )}
+            >
+              <item.icon className="w-5 h-5 shrink-0" />
+              {!collapsed && <span className="font-medium">{item.title}</span>}
+            </Link>
+          );
+        })}
+      </div>
 
       {/* Collapse Toggle */}
       <div className="p-4 border-t border-sidebar-border">

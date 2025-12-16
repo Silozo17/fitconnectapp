@@ -21,12 +21,12 @@ import AdminSettings from "./pages/dashboard/admin/AdminSettings";
 import AdminTeam from "./pages/dashboard/admin/AdminTeam";
 import AdminRevenue from "./pages/dashboard/admin/AdminRevenue";
 import AdminAnalytics from "./pages/dashboard/admin/AdminAnalytics";
-import AdminProfile from "./pages/dashboard/admin/AdminProfile";
 import AdminReviews from "./pages/dashboard/admin/AdminReviews";
 import AdminVerification from "./pages/dashboard/admin/AdminVerification";
 import AdminIntegrations from "./pages/dashboard/admin/AdminIntegrations";
 import AdminChallenges from "./pages/dashboard/admin/AdminChallenges";
 import AdminAuditLog from "./pages/dashboard/admin/AdminAuditLog";
+import MyProfile from "./pages/dashboard/MyProfile";
 
 // Coach Dashboard Pages
 import ClientOverview from "./pages/dashboard/client/ClientOverview";
@@ -171,9 +171,10 @@ const App = () => (
                     <AdminAnalytics />
                   </ProtectedRoute>
                 } />
-                <Route path="/dashboard/admin/profile" element={
-                  <ProtectedRoute allowedRoles={["admin", "manager", "staff"]}>
-                    <AdminProfile />
+                {/* Unified Profile Route */}
+                <Route path="/dashboard/profile" element={
+                  <ProtectedRoute allowedRoles={["admin", "manager", "staff", "coach", "client"]}>
+                    <MyProfile />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/admin/settings" element={
