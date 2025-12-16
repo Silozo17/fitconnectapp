@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,14 +10,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Progress } from "@/components/ui/progress";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import { useLogAdminAction } from "@/hooks/useAuditLog";
+import { useAdminUserStats } from "@/hooks/useAdminUserStats";
 import { 
   User, Heart, Target, MapPin, Calendar, Dumbbell,
-  Save, Loader2, AlertTriangle, Apple, Activity
+  Save, Loader2, AlertTriangle, Apple, Activity,
+  Trophy, Zap, Flame, Award, Star, TrendingUp
 } from "lucide-react";
 
 interface UserDetailDrawerProps {
@@ -27,10 +30,30 @@ interface UserDetailDrawerProps {
   onSaved?: () => void;
 }
 
+const rarityColors: Record<string, string> = {
+  common: "border-muted-foreground/30",
+  uncommon: "border-green-500",
+  rare: "border-blue-500",
+  epic: "border-purple-500",
+  legendary: "border-amber-500",
+};
+
+const sourceLabels: Record<string, string> = {
+  workout_logged: "Workout",
+  badge_earned: "Badge",
+  challenge_completed: "Challenge",
+  habit_streak: "Habit Streak",
+  progress_logged: "Progress",
+  session_completed: "Session",
+};
+
 export function UserDetailDrawer({ open, onOpenChange, user, onSaved }: UserDetailDrawerProps) {
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState<any>({});
   const logAction = useLogAdminAction();
+
+  // Fetch gamification stats
+  const { data: stats, isLoading: statsLoading } = useAdminUserStats(user?.id);
 
   // Fetch connected coaches
   const { data: connectedCoaches } = useQuery({
@@ -79,7 +102,7 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved }: UserDeta
   });
 
   // Initialize form data when user changes
-  useState(() => {
+  useEffect(() => {
     if (user) {
       setFormData({
         first_name: user.first_name || "",
@@ -99,7 +122,7 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved }: UserDeta
         leaderboard_display_name: user.leaderboard_display_name || "",
       });
     }
-  });
+  }, [user]);
 
   const handleSave = async () => {
     if (!user) return;
@@ -150,6 +173,8 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved }: UserDeta
 
   if (!user) return null;
 
+  const xpProgress = stats?.xp ? Math.min((stats.xp.total % (stats.xp.level * 100)) / (stats.xp.level * 100) * 100, 100) : 0;
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-[600px] sm:max-w-[600px] overflow-y-auto">
@@ -175,36 +200,57 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved }: UserDeta
                 {user.leaderboard_visible && (
                   <Badge variant="outline">Leaderboard</Badge>
                 )}
+                {stats && stats.xp.level > 1 && (
+                  <Badge variant="outline" className="gap-1">
+                    <Zap className="h-3 w-3" /> Level {stats.xp.level}
+                  </Badge>
+                )}
               </div>
             </div>
           </div>
         </SheetHeader>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-3 gap-2 mt-6">
-          <div className="text-center p-3 bg-muted/50 rounded-lg">
-            <Dumbbell className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
-            <p className="text-lg font-bold">{connectedCoaches?.length || 0}</p>
-            <p className="text-xs text-muted-foreground">Coaches</p>
+        {/* Quick Stats - Enhanced with gamification */}
+        <div className="grid grid-cols-6 gap-2 mt-6">
+          <div className="text-center p-2 bg-muted/50 rounded-lg">
+            <Dumbbell className="h-3 w-3 mx-auto mb-1 text-muted-foreground" />
+            <p className="text-sm font-bold">{connectedCoaches?.length || 0}</p>
+            <p className="text-[10px] text-muted-foreground">Coaches</p>
           </div>
-          <div className="text-center p-3 bg-muted/50 rounded-lg">
-            <Calendar className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
-            <p className="text-lg font-bold">{sessions?.length || 0}</p>
-            <p className="text-xs text-muted-foreground">Sessions</p>
+          <div className="text-center p-2 bg-muted/50 rounded-lg">
+            <Calendar className="h-3 w-3 mx-auto mb-1 text-muted-foreground" />
+            <p className="text-sm font-bold">{sessions?.length || 0}</p>
+            <p className="text-[10px] text-muted-foreground">Sessions</p>
           </div>
-          <div className="text-center p-3 bg-muted/50 rounded-lg">
-            <Activity className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
-            <p className="text-lg font-bold">{progress?.length || 0}</p>
-            <p className="text-xs text-muted-foreground">Progress</p>
+          <div className="text-center p-2 bg-muted/50 rounded-lg">
+            <Zap className="h-3 w-3 mx-auto mb-1 text-primary" />
+            <p className="text-sm font-bold">{stats?.xp.level || 1}</p>
+            <p className="text-[10px] text-muted-foreground">Level</p>
+          </div>
+          <div className="text-center p-2 bg-muted/50 rounded-lg">
+            <Trophy className="h-3 w-3 mx-auto mb-1 text-amber-500" />
+            <p className="text-sm font-bold">{stats?.badges.length || 0}</p>
+            <p className="text-[10px] text-muted-foreground">Badges</p>
+          </div>
+          <div className="text-center p-2 bg-muted/50 rounded-lg">
+            <Flame className="h-3 w-3 mx-auto mb-1 text-orange-500" />
+            <p className="text-sm font-bold">{stats?.habitStreak.current || 0}</p>
+            <p className="text-[10px] text-muted-foreground">Streak</p>
+          </div>
+          <div className="text-center p-2 bg-muted/50 rounded-lg">
+            <Target className="h-3 w-3 mx-auto mb-1 text-blue-500" />
+            <p className="text-sm font-bold">{stats?.challenges.completed || 0}</p>
+            <p className="text-[10px] text-muted-foreground">Challenges</p>
           </div>
         </div>
 
         <Separator className="my-6" />
 
         <Tabs defaultValue="profile" className="mt-4">
-          <TabsList className="grid grid-cols-4 w-full">
+          <TabsList className="grid grid-cols-5 w-full">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="health">Health</TabsTrigger>
+            <TabsTrigger value="gamification">Stats</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
@@ -339,6 +385,179 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved }: UserDeta
             </div>
           </TabsContent>
 
+          {/* New Gamification Tab */}
+          <TabsContent value="gamification" className="mt-4 space-y-4">
+            {statsLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : stats ? (
+              <>
+                {/* XP & Level Card */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Zap className="h-4 w-4 text-primary" /> XP & Level
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-2xl font-bold">Level {stats.xp.level}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {stats.xp.total.toLocaleString()} XP total
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium">Rank #{stats.leaderboardRank}</p>
+                        <p className="text-xs text-muted-foreground">
+                          of {stats.totalUsers} users
+                        </p>
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>Progress to next level</span>
+                        <span>{Math.round(xpProgress)}%</span>
+                      </div>
+                      <Progress value={xpProgress} className="h-2" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Badges Section */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Trophy className="h-4 w-4 text-amber-500" /> Badges Earned ({stats.badges.length})
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {stats.badges.length > 0 ? (
+                      <div className="grid grid-cols-4 gap-2">
+                        {stats.badges.map((badge) => (
+                          <div
+                            key={badge.id}
+                            className={`flex flex-col items-center p-2 rounded-lg border-2 bg-muted/30 ${rarityColors[badge.rarity] || rarityColors.common}`}
+                            title={`${badge.name} - Earned ${format(new Date(badge.earnedAt), "MMM d, yyyy")}`}
+                          >
+                            <span className="text-2xl">{badge.icon}</span>
+                            <span className="text-[10px] text-center mt-1 line-clamp-1">{badge.name}</span>
+                            {badge.isFeatured && (
+                              <Star className="h-3 w-3 text-amber-500 mt-1" />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground text-center py-4">No badges earned yet</p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Challenges & Habits */}
+                <div className="grid grid-cols-2 gap-4">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Target className="h-4 w-4 text-blue-500" /> Challenges
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex gap-4 mb-3">
+                        <div className="text-center">
+                          <p className="text-xl font-bold text-green-500">{stats.challenges.active}</p>
+                          <p className="text-xs text-muted-foreground">Active</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-xl font-bold">{stats.challenges.completed}</p>
+                          <p className="text-xs text-muted-foreground">Completed</p>
+                        </div>
+                      </div>
+                      {stats.challenges.recent.length > 0 && (
+                        <div className="space-y-1">
+                          {stats.challenges.recent.slice(0, 3).map((c) => (
+                            <div key={c.id} className="flex items-center justify-between text-xs p-1.5 bg-muted/50 rounded">
+                              <span className="truncate flex-1">{c.title}</span>
+                              <Badge variant={c.status === "completed" ? "default" : "secondary"} className="text-[10px] ml-2">
+                                {c.status === "completed" ? "Done" : `${c.progress}/${c.target}`}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Flame className="h-4 w-4 text-orange-500" /> Habit Streaks
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <div className="h-12 w-12 rounded-full bg-orange-500/20 flex items-center justify-center">
+                            <span className="text-xl font-bold text-orange-500">{stats.habitStreak.current}</span>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">Current Streak</p>
+                            <p className="text-xs text-muted-foreground">days</p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-center">
+                          <div className="p-2 bg-muted/50 rounded">
+                            <p className="font-bold">{stats.habitStreak.longest}</p>
+                            <p className="text-[10px] text-muted-foreground">Best Streak</p>
+                          </div>
+                          <div className="p-2 bg-muted/50 rounded">
+                            <p className="font-bold">{stats.habitStreak.totalCompletions}</p>
+                            <p className="text-[10px] text-muted-foreground">Total Done</p>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Recent XP Activity */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-green-500" /> Recent Activity
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {stats.recentActivity.length > 0 ? (
+                      <div className="space-y-2">
+                        {stats.recentActivity.map((activity) => (
+                          <div key={activity.id} className="flex items-center justify-between text-sm p-2 bg-muted/50 rounded">
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-green-500 border-green-500/50">
+                                +{activity.amount} XP
+                              </Badge>
+                              <span className="text-muted-foreground">
+                                {sourceLabels[activity.source] || activity.source}
+                              </span>
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground text-center py-4">No recent activity</p>
+                    )}
+                  </CardContent>
+                </Card>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">No gamification data available</p>
+            )}
+          </TabsContent>
+
           <TabsContent value="activity" className="mt-4 space-y-4">
             <Card>
               <CardHeader>
@@ -389,6 +608,36 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved }: UserDeta
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground">No sessions yet</p>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Progress Check-ins</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {progress && progress.length > 0 ? (
+                  <div className="space-y-2">
+                    {progress.map((p: any) => (
+                      <div key={p.id} className="flex items-center justify-between p-2 bg-muted/50 rounded">
+                        <div>
+                          <p className="text-sm font-medium">
+                            {p.weight_kg && `${p.weight_kg}kg`}
+                            {p.body_fat_percentage && ` • ${p.body_fat_percentage}% BF`}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {format(new Date(p.recorded_at), "MMM d, yyyy")}
+                          </p>
+                        </div>
+                        {p.photo_urls?.length > 0 && (
+                          <Badge variant="outline">{p.photo_urls.length} photos</Badge>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No progress logged yet</p>
                 )}
               </CardContent>
             </Card>
