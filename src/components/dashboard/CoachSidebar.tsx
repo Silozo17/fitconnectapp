@@ -16,11 +16,13 @@ import {
   Plug,
   ShoppingBag,
   Star,
+  Kanban,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const menuItems = [
   { title: "Overview", icon: LayoutDashboard, path: "/dashboard/coach" },
+  { title: "Pipeline", icon: Kanban, path: "/dashboard/coach/pipeline" },
   { title: "Clients", icon: Users, path: "/dashboard/coach/clients" },
   { title: "Schedule", icon: Calendar, path: "/dashboard/coach/schedule" },
   { title: "Messages", icon: MessageSquare, path: "/dashboard/coach/messages" },

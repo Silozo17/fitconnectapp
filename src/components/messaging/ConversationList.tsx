@@ -1,16 +1,11 @@
 import { useMessages, Conversation } from "@/hooks/useMessages";
 import { formatDistanceToNow } from "date-fns";
-import { MessageSquare, Loader2, User, Briefcase, AlertCircle, Shield, MapPin } from "lucide-react";
+import { MessageSquare, Loader2, User, Briefcase, AlertCircle, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState } from "react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import ProspectProfileSheet from "./ProspectProfileSheet";
 
 interface ConversationListProps {
   activeConversationId?: string;
@@ -137,51 +132,24 @@ const ConversationList = ({ activeConversationId }: ConversationListProps) => {
         ))}
       </div>
 
-      {/* Profile Preview Sheet */}
-      <Sheet open={!!selectedProfile} onOpenChange={() => setSelectedProfile(null)}>
-        <SheetContent side="right" className="w-[320px] sm:w-[400px]">
-          <SheetHeader>
-            <SheetTitle>Profile</SheetTitle>
-          </SheetHeader>
-          
-          {selectedProfile && (
-            <div className="mt-6 flex flex-col items-center text-center">
-              <Avatar className="w-24 h-24 mb-4 ring-4 ring-primary/20">
-                <AvatarImage src={selectedProfile.participantAvatar || undefined} />
-                <AvatarFallback className="bg-primary/10 text-primary text-2xl">
-                  {getInitials(selectedProfile.participantName)}
-                </AvatarFallback>
-              </Avatar>
-              
-              <h3 className="text-xl font-semibold text-foreground">
-                {selectedProfile.participantName}
-              </h3>
-              
-              <div className="flex items-center gap-1 mt-1 text-muted-foreground text-sm">
-                {getTypeIcon(selectedProfile.participantType)}
-                <span className="capitalize">{selectedProfile.participantType}</span>
-              </div>
-              
-              {selectedProfile.participantLocation && (
-                <div className="flex items-center gap-1 mt-2 text-muted-foreground text-sm">
-                  <MapPin className="w-4 h-4" />
-                  <span>{selectedProfile.participantLocation}</span>
-                </div>
-              )}
-              
-              <div className="mt-6 w-full">
-                <Link
-                  to={`${basePath}/${selectedProfile.participantId}`}
-                  className="block w-full py-2 px-4 bg-primary text-primary-foreground rounded-md text-center hover:bg-primary/90 transition-colors"
-                  onClick={() => setSelectedProfile(null)}
-                >
-                  Open Chat
-                </Link>
-              </div>
-            </div>
-          )}
-        </SheetContent>
-      </Sheet>
+      {/* Profile Preview Sheet - Enhanced for Coaches */}
+      {role === "coach" && selectedProfile?.participantType === "client" ? (
+        <ProspectProfileSheet
+          open={!!selectedProfile}
+          onOpenChange={() => setSelectedProfile(null)}
+          clientProfileId={selectedProfile?.participantId || null}
+          participantName={selectedProfile?.participantName || ''}
+          participantAvatar={selectedProfile?.participantAvatar}
+        />
+      ) : (
+        <ProspectProfileSheet
+          open={!!selectedProfile}
+          onOpenChange={() => setSelectedProfile(null)}
+          clientProfileId={selectedProfile?.participantId || null}
+          participantName={selectedProfile?.participantName || ''}
+          participantAvatar={selectedProfile?.participantAvatar}
+        />
+      )}
     </>
   );
 };
