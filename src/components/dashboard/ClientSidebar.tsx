@@ -41,7 +41,7 @@ const menuItems: { title: string; icon: typeof Home; path: string; badgeKey?: Ba
   { title: "Achievements", icon: Trophy, path: "/dashboard/client/achievements" },
   { title: "Leaderboard", icon: Medal, path: "/dashboard/client/leaderboard" },
   { title: "Challenges", icon: Flame, path: "/dashboard/client/challenges" },
-  { title: "Tools", icon: Calculator, path: "/tools" },
+  { title: "Tools", icon: Calculator, path: "/dashboard/client/tools" },
   { title: "Settings", icon: Settings, path: "/dashboard/client/settings" },
 ];
 
