@@ -94,6 +94,7 @@ import Subscribe from "./pages/Subscribe";
 import SubscribeSuccess from "./pages/SubscribeSuccess";
 import Avatars from "./pages/Avatars";
 import DashboardRedirect from "./pages/dashboard/DashboardRedirect";
+import Tools from "./pages/Tools";
 
 const queryClient = new QueryClient();
 
@@ -124,6 +125,7 @@ const App = () => (
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/leaderboards" element={<Leaderboards />} />
                 <Route path="/avatars" element={<Avatars />} />
+                <Route path="/tools" element={<Tools />} />
                 <Route path="/coaches/personal-trainers" element={<PersonalTrainers />} />
                 <Route path="/coaches/nutritionists" element={<Nutritionists />} />
                 <Route path="/coaches/boxing" element={<Boxing />} />

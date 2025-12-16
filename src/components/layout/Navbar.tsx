@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { GradientButton } from "@/components/ui/gradient-button";
-import { Menu, X, Dumbbell, ChevronDown, Swords, Apple, Flame, Users, BookOpen, Trophy, HelpCircle } from "lucide-react";
+import { Menu, X, Dumbbell, ChevronDown, Swords, Apple, Flame, Users, BookOpen, Trophy, HelpCircle, Calculator, Scale, Utensils, Heart, Droplets } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
@@ -34,6 +34,14 @@ const Navbar = () => {
     { name: "Nutritionists", href: "/coaches/nutritionists", icon: Apple, description: "Expert diet & meal plans" },
     { name: "Boxing Coaches", href: "/coaches/boxing", icon: Swords, description: "Learn the sweet science" },
     { name: "MMA Coaches", href: "/coaches/mma", icon: Flame, description: "Mixed martial arts training" },
+  ];
+
+  const tools = [
+    { name: "All Tools", href: "/tools", icon: Calculator, description: "Free fitness calculators" },
+    { name: "BMI Calculator", href: "/tools#bmi", icon: Scale, description: "Check your Body Mass Index" },
+    { name: "Calorie Calculator", href: "/tools#tdee", icon: Utensils, description: "Daily calorie needs" },
+    { name: "One Rep Max", href: "/tools#1rm", icon: Dumbbell, description: "Estimate your max lift" },
+    { name: "Heart Rate Zones", href: "/tools#heart-rate", icon: Heart, description: "Training zone calculator" },
   ];
 
   const resources = [
@@ -97,6 +105,39 @@ const Navbar = () => {
               {activeDropdown === "coaches" && (
                 <div className="absolute top-full left-0 mt-2 w-72 bg-card border border-border rounded-xl shadow-lg p-2 animate-in fade-in slide-in-from-top-2">
                   {coachTypes.map((item) => (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      className="flex items-start gap-3 p-3 rounded-lg hover:bg-secondary/50 transition-colors group"
+                      onClick={() => setActiveDropdown(null)}
+                    >
+                      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
+                        <item.icon className="w-4 h-4 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-foreground text-sm">{item.name}</p>
+                        <p className="text-xs text-muted-foreground">{item.description}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Tools Dropdown */}
+            <div 
+              className="relative"
+              onMouseEnter={() => handleDropdownEnter("tools")}
+              onMouseLeave={handleDropdownLeave}
+            >
+              <button className="px-4 py-2 text-muted-foreground hover:text-foreground font-medium transition-colors rounded-lg hover:bg-secondary/50 flex items-center gap-1">
+                Tools
+                <ChevronDown className={cn("w-4 h-4 transition-transform", activeDropdown === "tools" && "rotate-180")} />
+              </button>
+              
+              {activeDropdown === "tools" && (
+                <div className="absolute top-full left-0 mt-2 w-72 bg-card border border-border rounded-xl shadow-lg p-2 animate-in fade-in slide-in-from-top-2">
+                  {tools.map((item) => (
                     <Link
                       key={item.name}
                       to={item.href}
@@ -252,6 +293,24 @@ const Navbar = () => {
               <div className="px-4 py-2">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">For Coaches</p>
                 {forCoaches.map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className="flex items-center gap-3 py-2 text-foreground hover:text-primary transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <item.icon className="w-4 h-4 text-primary" />
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+
+              <div className="border-t border-border/50 my-2" />
+
+              {/* Mobile Tools Section */}
+              <div className="px-4 py-2">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Tools</p>
+                {tools.map((item) => (
                   <Link
                     key={item.name}
                     to={item.href}
