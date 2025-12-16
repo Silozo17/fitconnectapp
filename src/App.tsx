@@ -89,6 +89,7 @@ import MMA from "./pages/coaches/MMA";
 
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/shared/ScrollToTop";
+import ScrollRestoration from "./components/shared/ScrollRestoration";
 import Subscribe from "./pages/Subscribe";
 import SubscribeSuccess from "./pages/SubscribeSuccess";
 import Avatars from "./pages/Avatars";
@@ -103,6 +104,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <ScrollRestoration />
           <AuthProvider>
             <AdminProvider>
               <LocaleProvider>
