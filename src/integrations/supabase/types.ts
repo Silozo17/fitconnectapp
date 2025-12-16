@@ -3160,6 +3160,26 @@ export type Database = {
         }
         Returns: undefined
       }
+      notify_client: {
+        Args: {
+          p_client_id: string
+          p_data?: Json
+          p_message: string
+          p_title: string
+          p_type: string
+        }
+        Returns: undefined
+      }
+      notify_coach: {
+        Args: {
+          p_coach_id: string
+          p_data?: Json
+          p_message: string
+          p_title: string
+          p_type: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "client" | "coach" | "admin" | "manager" | "staff"
