@@ -1,4 +1,4 @@
-import { Bell, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import ViewSwitcher from "@/components/admin/ViewSwitcher";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 
 interface DashboardHeaderProps {
   displayName?: string | null;
@@ -49,10 +50,7 @@ const DashboardHeader = ({ displayName, subscriptionTier, profileImageUrl }: Das
           </span>
 
           {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="w-5 h-5 text-muted-foreground" />
-            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-accent" />
-          </Button>
+          <NotificationCenter />
 
           {/* Profile Dropdown */}
           <DropdownMenu>

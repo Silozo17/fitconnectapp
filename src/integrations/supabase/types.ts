@@ -1092,6 +1092,87 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          email_bookings: boolean | null
+          email_marketing: boolean | null
+          email_messages: boolean | null
+          email_reminders: boolean | null
+          id: string
+          push_bookings: boolean | null
+          push_messages: boolean | null
+          push_reminders: boolean | null
+          reminder_hours_before: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_bookings?: boolean | null
+          email_marketing?: boolean | null
+          email_messages?: boolean | null
+          email_reminders?: boolean | null
+          id?: string
+          push_bookings?: boolean | null
+          push_messages?: boolean | null
+          push_reminders?: boolean | null
+          reminder_hours_before?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_bookings?: boolean | null
+          email_marketing?: boolean | null
+          email_messages?: boolean | null
+          email_reminders?: boolean | null
+          id?: string
+          push_bookings?: boolean | null
+          push_messages?: boolean | null
+          push_reminders?: boolean | null
+          reminder_hours_before?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          data: Json | null
+          email_sent: boolean | null
+          id: string
+          message: string
+          read: boolean | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json | null
+          email_sent?: boolean | null
+          id?: string
+          message: string
+          read?: boolean | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json | null
+          email_sent?: boolean | null
+          id?: string
+          message?: string
+          read?: boolean | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       plan_assignments: {
         Row: {
           assigned_at: string

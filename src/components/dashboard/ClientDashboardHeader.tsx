@@ -1,4 +1,4 @@
-import { Search, Bell, LogOut, User } from "lucide-react";
+import { Search, LogOut, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +12,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import ViewSwitcher from "@/components/admin/ViewSwitcher";
 import { UserAvatar } from "@/components/shared/UserAvatar";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 
 interface ClientDashboardHeaderProps {
   firstName?: string | null;
@@ -50,10 +51,7 @@ const ClientDashboardHeader = ({
           {role === "admin" && <ViewSwitcher />}
           
           {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
-          </Button>
+          <NotificationCenter />
 
           {/* Profile Dropdown */}
           <DropdownMenu>

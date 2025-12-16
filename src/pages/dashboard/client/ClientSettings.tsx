@@ -8,10 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Save, LogOut, AlertTriangle, Info } from "lucide-react";
+import { Loader2, Save, LogOut, AlertTriangle, Info, Bell } from "lucide-react";
 import { HealthTagInput } from "@/components/dashboard/clients/HealthTagInput";
 import { ProfileImageUpload } from "@/components/shared/ProfileImageUpload";
 import { CurrencySelector } from "@/components/shared/CurrencySelector";
+import { NotificationPreferences } from "@/components/notifications/NotificationPreferences";
 
 interface ClientProfile {
   first_name: string | null;
@@ -317,6 +318,15 @@ const ClientSettings = () => {
             </p>
           </CardContent>
         </Card>
+
+        {/* Notification Preferences */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Bell className="w-5 h-5 text-muted-foreground" />
+            <h2 className="text-lg font-semibold">Notifications</h2>
+          </div>
+          <NotificationPreferences />
+        </div>
 
         {/* Save Button */}
         <Button onClick={handleSave} disabled={saving} className="w-full">

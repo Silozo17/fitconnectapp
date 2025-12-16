@@ -28,6 +28,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CurrencySelector } from "@/components/shared/CurrencySelector";
 import { useLocale } from "@/contexts/LocaleContext";
 import { getCurrencySymbol } from "@/lib/currency";
+import { NotificationPreferences } from "@/components/notifications/NotificationPreferences";
 
 const coachTypes = ["Personal Trainer", "Nutritionist", "Boxing Coach", "MMA Coach", "Yoga Instructor", "CrossFit Coach"];
 
@@ -61,15 +62,6 @@ const CoachSettings = () => {
     in_person_available: false,
     profile_image_url: null,
     subscription_tier: "free",
-  });
-
-  const [notifications, setNotifications] = useState({
-    emailBookings: true,
-    emailMessages: true,
-    emailMarketing: false,
-    pushBookings: true,
-    pushMessages: true,
-    pushReminders: true,
   });
 
   // Fetch coach profile with React Query
@@ -354,53 +346,7 @@ const CoachSettings = () => {
 
             {/* Notifications Tab */}
             {selectedTab === "notifications" && (
-              <div className="card-elevated p-6">
-                <h2 className="font-display font-bold text-foreground mb-6">Notification Preferences</h2>
-
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="font-medium text-foreground mb-4">Email Notifications</h3>
-                    <div className="space-y-4">
-                      {[
-                        { key: "emailBookings", label: "Booking confirmations and reminders" },
-                        { key: "emailMessages", label: "New messages from clients" },
-                        { key: "emailMarketing", label: "Marketing and promotional emails" },
-                      ].map((item) => (
-                        <div key={item.key} className="flex items-center justify-between">
-                          <Label>{item.label}</Label>
-                          <Switch
-                            checked={notifications[item.key as keyof typeof notifications]}
-                            onCheckedChange={(checked) =>
-                              setNotifications({ ...notifications, [item.key]: checked })
-                            }
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="border-t border-border pt-6">
-                    <h3 className="font-medium text-foreground mb-4">Push Notifications</h3>
-                    <div className="space-y-4">
-                      {[
-                        { key: "pushBookings", label: "New booking requests" },
-                        { key: "pushMessages", label: "New messages" },
-                        { key: "pushReminders", label: "Session reminders" },
-                      ].map((item) => (
-                        <div key={item.key} className="flex items-center justify-between">
-                          <Label>{item.label}</Label>
-                          <Switch
-                            checked={notifications[item.key as keyof typeof notifications]}
-                            onCheckedChange={(checked) =>
-                              setNotifications({ ...notifications, [item.key]: checked })
-                            }
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <NotificationPreferences />
             )}
 
             {/* Subscription & Payments Tab */}
