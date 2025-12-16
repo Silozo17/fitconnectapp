@@ -14,6 +14,7 @@ import { NotificationItem } from "@/components/notifications/NotificationItem";
 import { useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
+import AdminLayout from "@/components/admin/AdminLayout";
 
 const NOTIFICATION_TYPES = [
   { value: "all", label: "All Notifications" },
@@ -137,6 +138,14 @@ const Notifications = () => {
       <ClientDashboardLayout title="Notifications" description="View and manage your notifications">
         <NotificationsContent />
       </ClientDashboardLayout>
+    );
+  }
+
+  if (role === "admin" || role === "manager" || role === "staff") {
+    return (
+      <AdminLayout>
+        <NotificationsContent />
+      </AdminLayout>
     );
   }
 
