@@ -19,13 +19,14 @@ import {
   Kanban,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 
 const menuItems = [
   { title: "Overview", icon: LayoutDashboard, path: "/dashboard/coach" },
   { title: "Pipeline", icon: Kanban, path: "/dashboard/coach/pipeline" },
   { title: "Clients", icon: Users, path: "/dashboard/coach/clients" },
   { title: "Schedule", icon: Calendar, path: "/dashboard/coach/schedule" },
-  { title: "Messages", icon: MessageSquare, path: "/dashboard/coach/messages" },
+  { title: "Messages", icon: MessageSquare, path: "/dashboard/coach/messages", showBadge: true },
   { title: "Training Plans", icon: ClipboardList, path: "/dashboard/coach/plans" },
   { title: "Digital Products", icon: ShoppingBag, path: "/dashboard/coach/products" },
   { title: "Packages", icon: Package, path: "/dashboard/coach/packages" },
@@ -43,6 +44,7 @@ interface CoachSidebarProps {
 
 const CoachSidebar = ({ collapsed, onToggle }: CoachSidebarProps) => {
   const location = useLocation();
+  const { unreadCount } = useUnreadMessages();
 
   return (
     <aside
@@ -70,6 +72,8 @@ const CoachSidebar = ({ collapsed, onToggle }: CoachSidebarProps) => {
         <ul className="space-y-1 px-2">
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
+            const showBadge = 'showBadge' in item && item.showBadge && unreadCount > 0;
+            
             return (
               <li key={item.path}>
                 <Link
@@ -81,9 +85,23 @@ const CoachSidebar = ({ collapsed, onToggle }: CoachSidebarProps) => {
                       : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
                   )}
                 >
-                  <item.icon className="w-5 h-5 shrink-0" />
+                  <div className="relative">
+                    <item.icon className="w-5 h-5 shrink-0" />
+                    {showBadge && collapsed && (
+                      <span className="absolute -top-1 -right-1 min-w-[16px] h-4 bg-green-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                        {unreadCount > 99 ? "99+" : unreadCount}
+                      </span>
+                    )}
+                  </div>
                   {!collapsed && (
-                    <span className="font-medium">{item.title}</span>
+                    <>
+                      <span className="font-medium flex-1">{item.title}</span>
+                      {showBadge && (
+                        <span className="min-w-[20px] h-5 bg-green-500 text-white text-xs font-bold rounded-full flex items-center justify-center px-1.5">
+                          {unreadCount > 99 ? "99+" : unreadCount}
+                        </span>
+                      )}
+                    </>
                   )}
                 </Link>
               </li>

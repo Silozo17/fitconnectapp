@@ -361,7 +361,7 @@ export const useMessages = (participantId?: string) => {
     }
   };
 
-  // Set up realtime subscription
+  // Set up realtime subscription with unique channel per user
   useEffect(() => {
     if (!currentProfileId) {
       console.log("[useMessages] No profile ID, skipping realtime subscription");
@@ -371,7 +371,7 @@ export const useMessages = (participantId?: string) => {
     console.log("[useMessages] Setting up realtime subscription for profile:", currentProfileId);
 
     const channel = supabase
-      .channel("messages-realtime")
+      .channel(`messages-${currentProfileId}`)
       .on(
         "postgres_changes",
         {
@@ -398,17 +398,47 @@ export const useMessages = (participantId?: string) => {
             ) {
               console.log("[useMessages] Realtime: Adding message to active conversation");
               setMessages((prev) => {
-                // Prevent duplicates
-                if (prev.some(m => m.id === newMessage.id)) {
-                  return prev;
+                // Prevent duplicates (check for temp- prefix too for optimistic updates)
+                if (prev.some(m => m.id === newMessage.id || 
+                  (m.id.startsWith('temp-') && m.content === newMessage.content && m.sender_id === newMessage.sender_id))) {
+                  // Replace temp message with real one
+                  return prev.map(m => 
+                    m.id.startsWith('temp-') && m.content === newMessage.content && m.sender_id === newMessage.sender_id
+                      ? newMessage
+                      : m
+                  ).filter((m, i, arr) => arr.findIndex(x => x.id === m.id) === i);
                 }
                 return [...prev, newMessage];
               });
+              
+              // Mark as read if we're the receiver and viewing this conversation
+              if (newMessage.receiver_id === currentProfileId) {
+                supabase
+                  .from("messages")
+                  .update({ read_at: new Date().toISOString() })
+                  .eq("id", newMessage.id)
+                  .then(() => console.log("[useMessages] Marked new message as read"));
+              }
             }
             
             // Refresh conversations list
             fetchConversations();
           }
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "messages",
+        },
+        (payload) => {
+          const updatedMessage = payload.new as Message;
+          // Update message in state (for read receipts)
+          setMessages((prev) =>
+            prev.map((m) => (m.id === updatedMessage.id ? updatedMessage : m))
+          );
         }
       )
       .subscribe((status) => {
