@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import ChatQuickActions from "./ChatQuickActions";
 
 interface ChatWindowProps {
   participantId: string;
@@ -105,6 +106,15 @@ const ChatWindow = ({ participantId, participantName }: ChatWindowProps) => {
         )}
         <div ref={messagesEndRef} />
       </div>
+
+      {/* Quick Actions (for coaches) */}
+      <ChatQuickActions 
+        coachId={participantId} 
+        onSendMessage={async (msg) => {
+          const success = await sendMessage(msg);
+          return success;
+        }}
+      />
 
       {/* Input */}
       <form onSubmit={handleSend} className="p-4 border-t border-border bg-card">

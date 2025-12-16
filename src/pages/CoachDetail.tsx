@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { 
   Star, MapPin, Video, Users, BadgeCheck, ArrowLeft, 
   Clock, Award, Calendar, MessageSquare, Loader2 
@@ -8,17 +8,60 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import PageLayout from "@/components/layout/PageLayout";
 import { useCoachById } from "@/hooks/useCoachMarketplace";
+import { useCoachAvailability, useSessionTypes } from "@/hooks/useCoachSchedule";
 import RequestConnectionModal from "@/components/coaches/RequestConnectionModal";
+import BookSessionModal from "@/components/booking/BookSessionModal";
+import AvailabilityCalendar from "@/components/booking/AvailabilityCalendar";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const CoachDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { data: coach, isLoading, error } = useCoachById(id || "");
+  const { data: availability = [] } = useCoachAvailability(id || "");
+  const { data: sessionTypes = [] } = useSessionTypes(id || "");
   const [showRequestModal, setShowRequestModal] = useState(false);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [startingConversation, setStartingConversation] = useState(false);
   const { user, role } = useAuth();
 
   const defaultImage = `https://api.dicebear.com/7.x/avataaars/svg?seed=${id}`;
+
+  const handleMessageCoach = async () => {
+    if (!user || !coach) return;
+    
+    setStartingConversation(true);
+    try {
+      // Get client profile ID
+      const { data: clientProfile } = await supabase
+        .from("client_profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!clientProfile) {
+        toast.error("Please complete your profile first");
+        return;
+      }
+
+      // Check if conversation already exists by looking for any messages
+      const { data: existingMessages } = await supabase
+        .from("messages")
+        .select("id")
+        .or(`and(sender_id.eq.${clientProfile.id},receiver_id.eq.${coach.id}),and(sender_id.eq.${coach.id},receiver_id.eq.${clientProfile.id})`)
+        .limit(1);
+
+      // Navigate to messages with this coach
+      navigate(`/dashboard/client/messages/${coach.id}`);
+    } catch (error) {
+      toast.error("Failed to start conversation");
+    } finally {
+      setStartingConversation(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -167,18 +210,40 @@ const CoachDetail = () => {
                         <Button 
                           className="w-full" 
                           size="lg"
-                          onClick={() => setShowRequestModal(true)}
+                          onClick={handleMessageCoach}
+                          disabled={startingConversation}
                         >
-                          <MessageSquare className="h-4 w-4 mr-2" />
-                          Request Connection
+                          {startingConversation ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : (
+                            <MessageSquare className="h-4 w-4 mr-2" />
+                          )}
+                          Message Coach
+                        </Button>
+                        <Button 
+                          className="w-full" 
+                          size="lg"
+                          variant="outline"
+                          onClick={() => setShowBookingModal(true)}
+                        >
+                          <Calendar className="h-4 w-4 mr-2" />
+                          Book Session
                         </Button>
                         <p className="text-xs text-muted-foreground text-center">
-                          Send a request to connect with this coach
+                          Or send a connection request first
                         </p>
+                        <Button 
+                          className="w-full" 
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowRequestModal(true)}
+                        >
+                          Request Connection
+                        </Button>
                       </>
                     ) : user ? (
                       <p className="text-sm text-muted-foreground text-center">
-                        Sign in as a client to request a connection
+                        Sign in as a client to connect with this coach
                       </p>
                     ) : (
                       <>
@@ -199,11 +264,34 @@ const CoachDetail = () => {
                       <Clock className="h-4 w-4" />
                       <span>Usually responds within 24 hours</span>
                     </div>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
-                      <span>Flexible scheduling available</span>
-                    </div>
+                    {sessionTypes.length > 0 && (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Calendar className="h-4 w-4" />
+                        <span>{sessionTypes.length} session type{sessionTypes.length > 1 ? 's' : ''} available</span>
+                      </div>
+                    )}
                   </div>
+
+                  {/* Mini Availability Preview */}
+                  {availability.length > 0 && (
+                    <div className="mt-6 pt-6 border-t border-border">
+                      <p className="text-sm font-medium text-foreground mb-3">Available Days</p>
+                      <div className="flex flex-wrap gap-2">
+                        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => {
+                          const dayAvail = availability.find(a => a.day_of_week === index && a.is_active);
+                          return (
+                            <Badge 
+                              key={day} 
+                              variant={dayAvail ? "default" : "secondary"}
+                              className={dayAvail ? "" : "opacity-50"}
+                            >
+                              {day}
+                            </Badge>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -215,6 +303,13 @@ const CoachDetail = () => {
         open={showRequestModal}
         onOpenChange={setShowRequestModal}
         coach={coach}
+      />
+
+      <BookSessionModal
+        open={showBookingModal}
+        onOpenChange={setShowBookingModal}
+        coach={coach}
+        onMessageFirst={handleMessageCoach}
       />
     </PageLayout>
   );
