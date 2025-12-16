@@ -37,6 +37,9 @@ import ClientHabits from "./pages/dashboard/client/ClientHabits";
 import ClientProgress from "./pages/dashboard/client/ClientProgress";
 import ClientSettings from "./pages/dashboard/client/ClientSettings";
 import ClientFavourites from "./pages/dashboard/client/ClientFavourites";
+import ClientAchievements from "./pages/dashboard/client/ClientAchievements";
+import ClientLeaderboard from "./pages/dashboard/client/ClientLeaderboard";
+import ClientChallenges from "./pages/dashboard/client/ClientChallenges";
 
 // Coach Dashboard Pages
 import CoachOverview from "./pages/dashboard/coach/CoachOverview";
@@ -210,6 +213,21 @@ const App = () => (
                 <Route path="/dashboard/client/progress" element={
                   <ProtectedRoute allowedRoles={["client", "admin"]}>
                     <ClientProgress />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/client/achievements" element={
+                  <ProtectedRoute allowedRoles={["client", "admin"]}>
+                    <ClientAchievements />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/client/leaderboard" element={
+                  <ProtectedRoute allowedRoles={["client", "admin"]}>
+                    <ClientLeaderboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/client/challenges" element={
+                  <ProtectedRoute allowedRoles={["client", "admin"]}>
+                    <ClientChallenges />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/client/settings" element={

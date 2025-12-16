@@ -13,6 +13,9 @@ import {
   Dumbbell,
   Heart,
   Target,
+  Trophy,
+  Medal,
+  Flame,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -25,6 +28,9 @@ const menuItems = [
   { title: "My Plans", icon: ClipboardList, path: "/dashboard/client/plans" },
   { title: "Habits", icon: Target, path: "/dashboard/client/habits" },
   { title: "Progress", icon: TrendingUp, path: "/dashboard/client/progress" },
+  { title: "Achievements", icon: Trophy, path: "/dashboard/client/achievements" },
+  { title: "Leaderboard", icon: Medal, path: "/dashboard/client/leaderboard" },
+  { title: "Challenges", icon: Flame, path: "/dashboard/client/challenges" },
   { title: "Settings", icon: Settings, path: "/dashboard/client/settings" },
 ];
 
