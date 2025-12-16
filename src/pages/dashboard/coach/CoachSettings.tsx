@@ -9,6 +9,7 @@ import {
   Plus,
   Trash2,
   Loader2,
+  Globe,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,9 @@ import { ProfileImageUpload } from "@/components/shared/ProfileImageUpload";
 import StripeConnectButton from "@/components/payments/StripeConnectButton";
 import PlatformSubscription from "@/components/payments/PlatformSubscription";
 import { useQuery } from "@tanstack/react-query";
+import { CurrencySelector } from "@/components/shared/CurrencySelector";
+import { useLocale } from "@/contexts/LocaleContext";
+import { getCurrencySymbol } from "@/lib/currency";
 
 const coachTypes = ["Personal Trainer", "Nutritionist", "Boxing Coach", "MMA Coach", "Yoga Instructor", "CrossFit Coach"];
 
@@ -42,6 +46,7 @@ interface CoachProfile {
 
 const CoachSettings = () => {
   const { user, signOut } = useAuth();
+  const { currency } = useLocale();
   const [selectedTab, setSelectedTab] = useState("profile");
   const [saving, setSaving] = useState(false);
 
@@ -152,6 +157,7 @@ const CoachSettings = () => {
               {[
                 { id: "profile", icon: User, label: "Profile" },
                 { id: "services", icon: CreditCard, label: "Services & Pricing" },
+                { id: "preferences", icon: Globe, label: "Preferences" },
                 { id: "notifications", icon: Bell, label: "Notifications" },
                 { id: "subscription", icon: Shield, label: "Subscription" },
                 { id: "account", icon: Shield, label: "Account & Security" },
@@ -315,7 +321,7 @@ const CoachSettings = () => {
                       <p className="text-sm text-muted-foreground">Your base session rate</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground">£</span>
+                      <span className="text-muted-foreground">{getCurrencySymbol(currency)}</span>
                       <Input
                         type="number"
                         value={profile.hourly_rate || ""}
@@ -325,8 +331,23 @@ const CoachSettings = () => {
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    More service types and packages coming soon.
+                    Prices will be displayed in your selected currency ({currency}).
                   </p>
+                </div>
+              </div>
+            )}
+
+            {/* Preferences Tab */}
+            {selectedTab === "preferences" && (
+              <div className="card-elevated p-6">
+                <h2 className="font-display font-bold text-foreground mb-6">Display Preferences</h2>
+                <div className="space-y-6">
+                  <div className="max-w-xs">
+                    <CurrencySelector />
+                    <p className="text-sm text-muted-foreground mt-2">
+                      This affects how prices are displayed for you and your clients throughout the platform.
+                    </p>
+                  </div>
                 </div>
               </div>
             )}

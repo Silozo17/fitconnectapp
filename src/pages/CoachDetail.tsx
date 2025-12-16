@@ -19,6 +19,7 @@ import CoachPricingSection from "@/components/packages/CoachPricingSection";
 import { useCoachReviews, calculateAverageRating } from "@/hooks/useReviews";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLocale } from "@/contexts/LocaleContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { UserAvatar } from "@/components/shared/UserAvatar";
@@ -26,6 +27,7 @@ import { UserAvatar } from "@/components/shared/UserAvatar";
 const CoachDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { formatCurrency } = useLocale();
   const { data: coach, isLoading, error } = useCoachById(id || "");
   const { data: availability = [] } = useCoachAvailability(id || "");
   const { data: sessionTypes = [] } = useSessionTypes(id || "");
@@ -219,7 +221,7 @@ const CoachDetail = () => {
                     {coach.hourly_rate ? (
                       <>
                         <p className="text-3xl font-bold text-foreground">
-                          ${coach.hourly_rate}
+                          {formatCurrency(coach.hourly_rate)}
                         </p>
                         <p className="text-muted-foreground">per session</p>
                       </>

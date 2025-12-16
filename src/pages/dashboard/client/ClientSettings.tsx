@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, Save, LogOut, AlertTriangle, Info } from "lucide-react";
 import { HealthTagInput } from "@/components/dashboard/clients/HealthTagInput";
 import { ProfileImageUpload } from "@/components/shared/ProfileImageUpload";
+import { CurrencySelector } from "@/components/shared/CurrencySelector";
 
 interface ClientProfile {
   first_name: string | null;
@@ -300,6 +301,20 @@ const ClientSettings = () => {
             ) : (
               <p className="text-muted-foreground text-sm">No fitness goals set</p>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Preferences */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Preferences</CardTitle>
+            <CardDescription>Display and regional settings</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CurrencySelector />
+            <p className="text-xs text-muted-foreground mt-2">
+              This affects how prices are displayed throughout the platform
+            </p>
           </CardContent>
         </Card>
 

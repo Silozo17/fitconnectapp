@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCoachPackages, useCoachSubscriptionPlans } from "@/hooks/usePackages";
 import { Skeleton } from "@/components/ui/skeleton";
 import CheckoutButton from "@/components/payments/CheckoutButton";
+import { useLocale } from "@/contexts/LocaleContext";
 
 interface CoachPricingSectionProps {
   coachId: string;
@@ -13,6 +14,7 @@ interface CoachPricingSectionProps {
 }
 
 const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPricingSectionProps) => {
+  const { formatCurrency } = useLocale();
   const { data: packages = [], isLoading: packagesLoading } = useCoachPackages(coachId);
   const { data: plans = [], isLoading: plansLoading } = useCoachSubscriptionPlans(coachId);
 
@@ -79,9 +81,9 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
                   </div>
                   <div className="flex items-center justify-between mt-4">
                     <div>
-                      <span className="text-2xl font-bold text-primary">£{pkg.price}</span>
+                      <span className="text-2xl font-bold text-primary">{formatCurrency(pkg.price)}</span>
                       <span className="text-sm text-muted-foreground ml-2">
-                        (£{(pkg.price / pkg.session_count).toFixed(2)}/session)
+                        ({formatCurrency(pkg.price / pkg.session_count)}/session)
                       </span>
                     </div>
                     <CheckoutButton
@@ -137,7 +139,7 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
 
                   <div className="flex items-center justify-between mt-4">
                     <div>
-                      <span className="text-2xl font-bold text-primary">£{plan.price}</span>
+                      <span className="text-2xl font-bold text-primary">{formatCurrency(plan.price)}</span>
                       <span className="text-sm text-muted-foreground">/{plan.billing_period}</span>
                     </div>
                     <CheckoutButton
