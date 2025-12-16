@@ -39,16 +39,15 @@ const Auth = () => {
 
   useEffect(() => {
     if (user && role) {
-      const from = location.state?.from?.pathname || "/";
-      if (role === "client") {
+      if (role === "admin") {
+        navigate("/dashboard/admin");
+      } else if (role === "client") {
         navigate("/onboarding/client");
       } else if (role === "coach") {
         navigate("/onboarding/coach");
-      } else {
-        navigate(from);
       }
     }
-  }, [user, role, navigate, location]);
+  }, [user, role, navigate]);
 
   const onSubmit = async (data: AuthFormData) => {
     setIsSubmitting(true);
