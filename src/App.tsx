@@ -91,6 +91,7 @@ import ScrollToTop from "./components/shared/ScrollToTop";
 import Subscribe from "./pages/Subscribe";
 import SubscribeSuccess from "./pages/SubscribeSuccess";
 import Avatars from "./pages/Avatars";
+import DashboardRedirect from "./pages/dashboard/DashboardRedirect";
 
 const queryClient = new QueryClient();
 
@@ -127,6 +128,13 @@ const App = () => (
                 <Route path="/marketplace" element={<Marketplace />} />
                 <Route path="/marketplace/:productId" element={<MarketplaceProduct />} />
                 <Route path="/marketplace/bundles/:bundleId" element={<MarketplaceBundle />} />
+                
+                {/* Dashboard Redirect */}
+                <Route path="/dashboard" element={
+                  <ProtectedRoute allowedRoles={["client", "coach", "admin", "manager", "staff"]}>
+                    <DashboardRedirect />
+                  </ProtectedRoute>
+                } />
                 
                 {/* Admin Dashboard */}
                 <Route path="/dashboard/admin" element={

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, MoreHorizontal, Pencil, Trash2, KeyRound, Loader2 } from "lucide-react";
+import { Search, MoreHorizontal, Pencil, Trash2, KeyRound, Loader2, Eye } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import EditUserModal from "@/components/admin/EditUserModal";
+import { UserDetailDrawer } from "@/components/admin/UserDetailDrawer";
 
 interface ClientUser {
   id: string;
@@ -32,6 +33,8 @@ interface ClientUser {
   onboarding_completed: boolean;
   created_at: string;
   email?: string;
+  location?: string | null;
+  avatar_url?: string | null;
 }
 
 const AdminUsers = () => {
@@ -39,6 +42,7 @@ const AdminUsers = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingUser, setEditingUser] = useState<ClientUser | null>(null);
+  const [viewingUser, setViewingUser] = useState<ClientUser | null>(null);
   const [resettingPassword, setResettingPassword] = useState<string | null>(null);
 
   useEffect(() => {
@@ -86,16 +90,12 @@ const AdminUsers = () => {
       return;
     }
 
-    // We need to get the user's email from auth - for now show info
-    // In production, you'd fetch this from a joined query or store email in profile
     const email = prompt("Enter the user's email address to send password reset:");
     if (!email) return;
 
     setResettingPassword(user.user_id);
     
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
       const response = await supabase.functions.invoke("admin-password-reset", {
         body: { userId: user.user_id, email },
       });
@@ -159,7 +159,11 @@ const AdminUsers = () => {
                 </TableHeader>
                 <TableBody>
                   {filteredUsers.map((user) => (
-                    <TableRow key={user.id}>
+                    <TableRow 
+                      key={user.id} 
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => setViewingUser(user)}
+                    >
                       <TableCell className="font-medium">
                         {user.first_name || user.last_name
                           ? `${user.first_name || ""} ${user.last_name || ""}`.trim()
@@ -176,18 +180,31 @@ const AdminUsers = () => {
                       </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
+                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                             <Button variant="ghost" size="icon">
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setEditingUser(user)}>
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              setViewingUser(user);
+                            }}>
+                              <Eye className="h-4 w-4 mr-2" />
+                              View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingUser(user);
+                            }}>
                               <Pencil className="h-4 w-4 mr-2" />
-                              Edit Details
+                              Quick Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem 
-                              onClick={() => handleResetPassword(user)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleResetPassword(user);
+                              }}
                               disabled={resettingPassword === user.user_id}
                             >
                               {resettingPassword === user.user_id ? (
@@ -198,7 +215,10 @@ const AdminUsers = () => {
                               Reset Password
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => handleDeleteUser(user.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteUser(user.id);
+                              }}
                               className="text-destructive focus:text-destructive"
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
@@ -224,6 +244,13 @@ const AdminUsers = () => {
           onSaved={fetchUsers}
         />
       )}
+
+      <UserDetailDrawer
+        open={!!viewingUser}
+        onOpenChange={(open) => !open && setViewingUser(null)}
+        user={viewingUser}
+        onSaved={fetchUsers}
+      />
     </AdminLayout>
   );
 };
