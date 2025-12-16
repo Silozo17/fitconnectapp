@@ -53,3 +53,12 @@ verify_jwt = true
 
 [functions.send-client-invitation]
 verify_jwt = true
+
+[functions.create-subscription-checkout]
+verify_jwt = true
+
+[functions.get-stripe-config]
+verify_jwt = false
+
+[functions.admin-sync-stripe-tiers]
+verify_jwt = true
