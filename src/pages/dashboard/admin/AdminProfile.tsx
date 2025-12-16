@@ -78,9 +78,14 @@ const AdminProfile = () => {
 
         if (error) throw error;
       } else {
+        // Generate username for new admin profile
+        const baseUsername = (formData.first_name || formData.display_name || 'admin').toLowerCase().replace(/[^a-z0-9]/g, '');
+        const randomSuffix = Math.floor(Math.random() * 9999);
+        const generatedUsername = `${baseUsername}${randomSuffix}`;
+
         const { error } = await supabase
           .from("admin_profiles")
-          .insert({ user_id: user.id, ...formData });
+          .insert({ user_id: user.id, username: generatedUsername, ...formData });
 
         if (error) throw error;
       }

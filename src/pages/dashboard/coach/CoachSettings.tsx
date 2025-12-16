@@ -12,6 +12,9 @@ import {
   Plug,
   Video,
   Calendar,
+  AtSign,
+  Copy,
+  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,6 +64,7 @@ const coachTypes = ["Personal Trainer", "Nutritionist", "Boxing Coach", "MMA Coa
 
 interface CoachProfile {
   display_name: string | null;
+  username: string;
   bio: string | null;
   location: string | null;
   experience_years: number | null;
@@ -126,6 +130,11 @@ const CoachSettings = () => {
   const { currency } = useLocale();
   const [selectedTab, setSelectedTab] = useState("profile");
   const [saving, setSaving] = useState(false);
+  const [newUsername, setNewUsername] = useState("");
+  const [checkingUsername, setCheckingUsername] = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [usernameError, setUsernameError] = useState("");
+  const [usernameCopied, setUsernameCopied] = useState(false);
   const { data: selectedAvatar } = useSelectedAvatar('coach');
 
   // Video and Calendar hooks
@@ -157,6 +166,7 @@ const CoachSettings = () => {
 
   const [profile, setProfile] = useState<CoachProfile>({
     display_name: "",
+    username: "",
     bio: "",
     location: "",
     experience_years: null,
@@ -177,7 +187,7 @@ const CoachSettings = () => {
 
       const { data, error } = await supabase
         .from("coach_profiles")
-        .select("id, display_name, bio, location, experience_years, hourly_rate, currency, coach_types, online_available, in_person_available, profile_image_url, subscription_tier")
+        .select("id, display_name, username, bio, location, experience_years, hourly_rate, currency, coach_types, online_available, in_person_available, profile_image_url, subscription_tier")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -191,6 +201,7 @@ const CoachSettings = () => {
     if (coachData) {
       setProfile({
         display_name: coachData.display_name || "",
+        username: coachData.username || "",
         bio: coachData.bio || "",
         location: coachData.location || "",
         experience_years: coachData.experience_years,
@@ -231,6 +242,74 @@ const CoachSettings = () => {
       toast.error("Failed to save changes");
     } else {
       toast.success("Profile updated successfully");
+    }
+  };
+
+  // Username helpers
+  const copyUsername = () => {
+    if (profile?.username) {
+      navigator.clipboard.writeText(`@${profile.username}`);
+      setUsernameCopied(true);
+      setTimeout(() => setUsernameCopied(false), 2000);
+      toast.success("Username copied!");
+    }
+  };
+
+  const checkUsernameAvailability = async (username: string) => {
+    if (!username || username.length < 3) {
+      setUsernameAvailable(null);
+      setUsernameError(username.length > 0 ? "Username must be at least 3 characters" : "");
+      return;
+    }
+    if (username.length > 30) {
+      setUsernameAvailable(null);
+      setUsernameError("Username must be 30 characters or less");
+      return;
+    }
+    if (username === profile?.username) {
+      setUsernameAvailable(null);
+      setUsernameError("");
+      return;
+    }
+
+    setCheckingUsername(true);
+    setUsernameError("");
+
+    const { data: available } = await supabase.rpc("is_username_available", {
+      check_username: username,
+    });
+
+    setCheckingUsername(false);
+    setUsernameAvailable(available === true);
+    if (!available) {
+      setUsernameError("This username is already taken");
+    }
+  };
+
+  const handleUsernameChange = (value: string) => {
+    const cleaned = value.toLowerCase().replace(/[^a-z0-9]/g, "");
+    setNewUsername(cleaned);
+    checkUsernameAvailability(cleaned);
+  };
+
+  const saveUsername = async () => {
+    if (!user || !newUsername || !usernameAvailable) return;
+
+    setSaving(true);
+    const { error } = await supabase
+      .from("coach_profiles")
+      .update({ username: newUsername })
+      .eq("user_id", user.id);
+
+    setSaving(false);
+
+    if (error) {
+      toast.error("Failed to update username");
+    } else {
+      setProfile({ ...profile, username: newUsername });
+      setNewUsername("");
+      setUsernameAvailable(null);
+      toast.success("Username updated!");
     }
   };
 
@@ -345,6 +424,48 @@ const CoachSettings = () => {
                       size="lg"
                     />
                   </div>
+
+                  {/* Username */}
+                  <Card className="mb-6">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <AtSign className="w-4 h-4 text-primary" />
+                        Username
+                      </CardTitle>
+                      <CardDescription>Your unique identifier for connections</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center gap-2 p-3 bg-secondary/50 rounded-lg">
+                        <AtSign className="w-4 h-4 text-muted-foreground" />
+                        <span className="font-mono font-medium">{profile?.username}</span>
+                        <Button variant="ghost" size="sm" onClick={copyUsername} className="ml-auto">
+                          {usernameCopied ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
+                        </Button>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Change Username</Label>
+                        <div className="flex gap-2">
+                          <div className="relative flex-1">
+                            <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <Input
+                              value={newUsername}
+                              onChange={(e) => handleUsernameChange(e.target.value)}
+                              placeholder="Enter new username"
+                              className="pl-9"
+                              maxLength={30}
+                            />
+                          </div>
+                          <Button onClick={saveUsername} disabled={saving || !usernameAvailable || !newUsername}>
+                            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
+                          </Button>
+                        </div>
+                        {checkingUsername && <p className="text-sm text-muted-foreground">Checking availability...</p>}
+                        {usernameError && <p className="text-sm text-destructive">{usernameError}</p>}
+                        {usernameAvailable && newUsername && <p className="text-sm text-primary flex items-center gap-1"><Check className="w-3 h-3" /> Username available!</p>}
+                        <p className="text-xs text-muted-foreground">Lowercase letters and numbers only, 3-30 characters</p>
+                      </div>
+                    </CardContent>
+                  </Card>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>

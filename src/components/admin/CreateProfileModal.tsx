@@ -42,9 +42,15 @@ const CreateProfileModal = ({
     setIsLoading(true);
 
     try {
+      // Generate a unique username
+      const baseUsername = (firstName || displayName || 'user').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const randomSuffix = Math.floor(Math.random() * 9999);
+      const generatedUsername = `${baseUsername}${randomSuffix}`;
+
       if (profileType === "client") {
         const { error } = await supabase.from("client_profiles").insert({
           user_id: user.id,
+          username: generatedUsername,
           first_name: firstName || null,
           last_name: lastName || null,
           onboarding_completed: true,
@@ -56,6 +62,7 @@ const CreateProfileModal = ({
       } else {
         const { error } = await supabase.from("coach_profiles").insert({
           user_id: user.id,
+          username: generatedUsername,
           display_name: displayName || `${firstName} ${lastName}`.trim() || null,
           onboarding_completed: true,
         });

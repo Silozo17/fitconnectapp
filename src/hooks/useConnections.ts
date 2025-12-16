@@ -147,14 +147,41 @@ export const useConnections = () => {
     return enriched;
   };
 
-  // Search users by username or email
+  // Search users by username, name, or email
   const searchUsers = async (query: string): Promise<SearchResult[]> => {
     if (!query || query.length < 2) return [];
 
     const results: SearchResult[] = [];
     const searchTerm = query.toLowerCase();
+    const isEmailSearch = query.includes("@");
 
-    // Search clients
+    // If query looks like an email, search by exact email match
+    if (isEmailSearch) {
+      const { data: emailResults } = await supabase.rpc("search_users_by_email", {
+        search_email: query,
+      });
+
+      if (emailResults) {
+        emailResults.forEach((r: any) => {
+          if (r.user_id !== user?.id) {
+            results.push({
+              user_id: r.user_id,
+              username: r.username,
+              display_name: r.display_name,
+              first_name: r.first_name,
+              last_name: r.last_name,
+              avatar_url: r.avatar_url,
+              profile_image_url: r.profile_image_url,
+              profile_type: r.profile_type as "client" | "coach" | "admin",
+              location: r.location,
+            });
+          }
+        });
+      }
+      return results;
+    }
+
+    // Search clients by username or name
     const { data: clients } = await supabase
       .from("client_profiles")
       .select("user_id, username, first_name, last_name, avatar_url, location")
@@ -176,7 +203,7 @@ export const useConnections = () => {
       });
     });
 
-    // Search coaches
+    // Search coaches by username or display name
     const { data: coaches } = await supabase
       .from("coach_profiles")
       .select("user_id, username, display_name, profile_image_url, location")

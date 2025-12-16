@@ -119,7 +119,7 @@ export type Database = {
           status_updated_by: string | null
           updated_at: string
           user_id: string
-          username: string | null
+          username: string
           users_last_viewed_at: string | null
           verifications_last_viewed_at: string | null
         }
@@ -139,7 +139,7 @@ export type Database = {
           status_updated_by?: string | null
           updated_at?: string
           user_id: string
-          username?: string | null
+          username: string
           users_last_viewed_at?: string | null
           verifications_last_viewed_at?: string | null
         }
@@ -159,7 +159,7 @@ export type Database = {
           status_updated_by?: string | null
           updated_at?: string
           user_id?: string
-          username?: string | null
+          username?: string
           users_last_viewed_at?: string | null
           verifications_last_viewed_at?: string | null
         }
@@ -768,7 +768,7 @@ export type Database = {
           status_updated_by: string | null
           updated_at: string
           user_id: string
-          username: string | null
+          username: string
           weight_kg: number | null
         }
         Insert: {
@@ -799,7 +799,7 @@ export type Database = {
           status_updated_by?: string | null
           updated_at?: string
           user_id: string
-          username?: string | null
+          username: string
           weight_kg?: number | null
         }
         Update: {
@@ -830,7 +830,7 @@ export type Database = {
           status_updated_by?: string | null
           updated_at?: string
           user_id?: string
-          username?: string | null
+          username?: string
           weight_kg?: number | null
         }
         Relationships: [
@@ -1275,7 +1275,7 @@ export type Database = {
           subscription_tier: string | null
           updated_at: string
           user_id: string
-          username: string | null
+          username: string
           verification_notes: string | null
           verification_status: string | null
           verified_at: string | null
@@ -1308,7 +1308,7 @@ export type Database = {
           subscription_tier?: string | null
           updated_at?: string
           user_id: string
-          username?: string | null
+          username: string
           verification_notes?: string | null
           verification_status?: string | null
           verified_at?: string | null
@@ -1341,7 +1341,7 @@ export type Database = {
           subscription_tier?: string | null
           updated_at?: string
           user_id?: string
-          username?: string | null
+          username?: string
           verification_notes?: string | null
           verification_status?: string | null
           verified_at?: string | null
@@ -3349,6 +3349,20 @@ export type Database = {
           p_type: string
         }
         Returns: undefined
+      }
+      search_users_by_email: {
+        Args: { search_email: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          first_name: string
+          last_name: string
+          location: string
+          profile_image_url: string
+          profile_type: string
+          user_id: string
+          username: string
+        }[]
       }
     }
     Enums: {
