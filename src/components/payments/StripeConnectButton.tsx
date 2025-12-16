@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CreditCard, ExternalLink, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { CreditCard, ExternalLink, Loader2, CheckCircle, Percent } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +7,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
+import { SUBSCRIPTION_TIERS, TierKey } from "@/lib/stripe-config";
+import { Link } from "react-router-dom";
 
 interface StripeConnectButtonProps {
   coachId: string;
@@ -23,7 +25,7 @@ const StripeConnectButton = ({ coachId, onSuccess }: StripeConnectButtonProps) =
     queryFn: async () => {
       const { data, error } = await supabase
         .from("coach_profiles")
-        .select("stripe_connect_id, stripe_connect_onboarded")
+        .select("stripe_connect_id, stripe_connect_onboarded, subscription_tier")
         .eq("id", coachId)
         .single();
       
@@ -31,6 +33,10 @@ const StripeConnectButton = ({ coachId, onSuccess }: StripeConnectButtonProps) =
       return data;
     },
   });
+
+  // Get current commission rate based on tier
+  const currentTier = (coachProfile?.subscription_tier || "free") as TierKey;
+  const commissionPercent = SUBSCRIPTION_TIERS[currentTier]?.commissionPercent || 4;
 
   const handleConnect = async () => {
     if (!user) return;
@@ -96,7 +102,7 @@ const StripeConnectButton = ({ coachId, onSuccess }: StripeConnectButtonProps) =
   if (coachProfile?.stripe_connect_onboarded) {
     return (
       <Card className="border-green-500/20 bg-green-500/5">
-        <CardContent className="pt-6">
+        <CardContent className="pt-6 space-y-4">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-green-500/10 flex items-center justify-center">
               <CheckCircle className="h-5 w-5 text-green-500" />
@@ -111,6 +117,20 @@ const StripeConnectButton = ({ coachId, onSuccess }: StripeConnectButtonProps) =
               Active
             </Badge>
           </div>
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
+            <Percent className="w-4 h-4 text-primary" />
+            <span className="text-sm">
+              <span className="font-medium">{commissionPercent}%</span> platform fee on transactions
+              <span className="text-muted-foreground ml-1">
+                ({SUBSCRIPTION_TIERS[currentTier].name} plan)
+              </span>
+            </span>
+          </div>
+          {currentTier !== "enterprise" && (
+            <p className="text-xs text-muted-foreground">
+              <Link to="/pricing" className="text-primary hover:underline">Upgrade your plan</Link> to reduce fees
+            </p>
+          )}
         </CardContent>
       </Card>
     );
@@ -154,8 +174,21 @@ const StripeConnectButton = ({ coachId, onSuccess }: StripeConnectButtonProps) =
           <p>• Accept credit/debit card payments</p>
           <p>• Automatic transfers to your bank account</p>
           <p>• Secure and PCI compliant</p>
-          <p>• 15% platform fee on transactions</p>
         </div>
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10">
+          <Percent className="w-4 h-4 text-primary" />
+          <span className="text-sm">
+            <span className="font-medium">{commissionPercent}%</span> platform fee
+            <span className="text-muted-foreground ml-1">
+              ({SUBSCRIPTION_TIERS[currentTier].name} plan)
+            </span>
+          </span>
+        </div>
+        {currentTier !== "enterprise" && (
+          <p className="text-xs text-muted-foreground">
+            <Link to="/pricing" className="text-primary hover:underline">Upgrade your plan</Link> to reduce fees
+          </p>
+        )}
         
         <Button onClick={handleConnect} disabled={isLoading} className="w-full">
           {isLoading ? (

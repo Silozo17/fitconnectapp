@@ -4,6 +4,7 @@ export const SUBSCRIPTION_TIERS = {
     name: "Free",
     description: "Get started at no cost",
     clientLimit: 3,
+    commissionPercent: 4,
     prices: {
       monthly: {
         amount: 0,
@@ -21,6 +22,7 @@ export const SUBSCRIPTION_TIERS = {
       "Basic workout plans",
       "Client messaging",
       "Session scheduling",
+      "4% platform fee",
     ],
     highlighted: false,
   },
@@ -28,6 +30,7 @@ export const SUBSCRIPTION_TIERS = {
     name: "Starter",
     description: "Perfect for new coaches just getting started",
     clientLimit: 10,
+    commissionPercent: 3,
     prices: {
       monthly: {
         amount: 19,
@@ -47,6 +50,7 @@ export const SUBSCRIPTION_TIERS = {
       "Workout plan builder",
       "Client messaging",
       "Session scheduling",
+      "3% platform fee",
     ],
     highlighted: false,
   },
@@ -54,6 +58,7 @@ export const SUBSCRIPTION_TIERS = {
     name: "Pro",
     description: "For established coaches ready to scale",
     clientLimit: 50,
+    commissionPercent: 2,
     prices: {
       monthly: {
         amount: 49,
@@ -75,6 +80,7 @@ export const SUBSCRIPTION_TIERS = {
       "AI workout & meal planners",
       "Nutrition plan builder",
       "Client progress tracking",
+      "2% platform fee",
     ],
     highlighted: true,
   },
@@ -82,6 +88,7 @@ export const SUBSCRIPTION_TIERS = {
     name: "Enterprise",
     description: "For elite coaches and fitness businesses",
     clientLimit: null, // Unlimited
+    commissionPercent: 1,
     prices: {
       monthly: {
         amount: 99,
@@ -101,6 +108,7 @@ export const SUBSCRIPTION_TIERS = {
       "Custom integrations",
       "Advanced reporting",
       "Phone support",
+      "1% platform fee",
     ],
     highlighted: false,
   },

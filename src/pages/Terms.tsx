@@ -110,13 +110,24 @@ const Terms = () => {
                 <p>
                   Clients agree to pay for coaching sessions at the rates displayed on Coach profiles. Payment is 
                   processed through our secure payment system (powered by Stripe) at the time of booking. All fees 
-                  are in US dollars unless otherwise specified.
+                  are in GBP unless otherwise specified.
                 </p>
 
                 <h3>Coach Earnings</h3>
                 <p>
-                  Coaches receive payment for completed sessions minus a platform fee of 15%. Payments are processed 
-                  within 3-5 business days after session completion and transferred to the Coach's connected bank account.
+                  Coaches receive payment for completed sessions minus a platform commission fee that varies based 
+                  on their subscription tier:
+                </p>
+                <ul>
+                  <li><strong>Free Plan:</strong> 4% platform commission</li>
+                  <li><strong>Starter Plan:</strong> 3% platform commission</li>
+                  <li><strong>Pro Plan:</strong> 2% platform commission</li>
+                  <li><strong>Enterprise Plan:</strong> 1% platform commission</li>
+                </ul>
+                <p>
+                  Payments are processed within 3-5 business days after session completion and transferred to the 
+                  Coach's connected Stripe account. Coaches can reduce their commission rate by upgrading their 
+                  subscription plan at any time.
                 </p>
 
                 <h3>Refunds</h3>

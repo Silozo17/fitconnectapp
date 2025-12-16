@@ -46,6 +46,21 @@ serve(async (req) => {
       throw new Error("Coach has not set up payment processing yet");
     }
 
+    // Get coach's platform subscription to determine commission rate
+    const { data: platformSub } = await supabase
+      .from("platform_subscriptions")
+      .select("tier")
+      .eq("coach_id", coachId)
+      .eq("status", "active")
+      .single();
+
+    // Determine commission based on tier (default to free tier if no subscription)
+    const tier = platformSub?.tier || "free";
+    const commissionRates: Record<string, number> = { free: 4, starter: 3, pro: 2, enterprise: 1 };
+    const applicationFeePercent = commissionRates[tier] || 4;
+
+    console.log("Coach subscription tier:", tier, "Commission rate:", applicationFeePercent);
+
     let lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
     let mode: "payment" | "subscription" = "payment";
     let metadata: Record<string, string> = {
@@ -123,9 +138,6 @@ serve(async (req) => {
       metadata.plan_name = plan.name;
       metadata.billing_period = plan.billing_period;
     }
-
-    // Calculate platform fee (15%)
-    const applicationFeePercent = 15;
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode,
