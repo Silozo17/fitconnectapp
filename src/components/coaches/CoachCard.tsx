@@ -8,7 +8,7 @@ import StarRating from "@/components/reviews/StarRating";
 import { VerifiedBadge } from "@/components/verification/VerifiedBadge";
 import { useCoachReviews, calculateAverageRating } from "@/hooks/useReviews";
 import { useAuth } from "@/contexts/AuthContext";
-import { useLocale } from "@/contexts/LocaleContext";
+import { formatCurrency, type CurrencyCode } from "@/lib/currency";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { MarketplaceCoach } from "@/hooks/useCoachMarketplace";
 
@@ -22,7 +22,6 @@ const CoachCard = ({ coach, onBook, onRequestConnection }: CoachCardProps) => {
   const { data: reviews = [] } = useCoachReviews(coach.id);
   const averageRating = calculateAverageRating(reviews);
   const { user, role } = useAuth();
-  const { formatCurrency } = useLocale();
   const navigate = useNavigate();
 
   const isClient = user && (role === "client" || role === "admin");
@@ -126,7 +125,7 @@ const CoachCard = ({ coach, onBook, onRequestConnection }: CoachCardProps) => {
           <div>
             {coach.hourly_rate ? (
               <>
-                <span className="font-display font-bold text-xl text-foreground">{formatCurrency(coach.hourly_rate)}</span>
+                <span className="font-display font-bold text-xl text-foreground">{formatCurrency(coach.hourly_rate, (coach.currency as CurrencyCode) || 'GBP')}</span>
                 <span className="text-muted-foreground text-sm">/session</span>
               </>
             ) : (

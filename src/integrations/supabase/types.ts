@@ -1248,6 +1248,7 @@ export type Database = {
           certifications: Json | null
           coach_types: string[] | null
           created_at: string
+          currency: string | null
           display_name: string | null
           experience_years: number | null
           hourly_rate: number | null
@@ -1279,6 +1280,7 @@ export type Database = {
           certifications?: Json | null
           coach_types?: string[] | null
           created_at?: string
+          currency?: string | null
           display_name?: string | null
           experience_years?: number | null
           hourly_rate?: number | null
@@ -1310,6 +1312,7 @@ export type Database = {
           certifications?: Json | null
           coach_types?: string[] | null
           created_at?: string
+          currency?: string | null
           display_name?: string | null
           experience_years?: number | null
           hourly_rate?: number | null

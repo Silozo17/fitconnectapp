@@ -9,6 +9,7 @@ import { useCoachReviews, calculateAverageRating } from "@/hooks/useReviews";
 import FavouriteButton from "@/components/favourites/FavouriteButton";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import StarRating from "@/components/reviews/StarRating";
+import { formatCurrency, type CurrencyCode } from "@/lib/currency";
 
 const FavouriteCoachCard = ({ coach }: { coach: any }) => {
   const { data: reviews = [] } = useCoachReviews(coach.id);
@@ -92,7 +93,7 @@ const FavouriteCoachCard = ({ coach }: { coach: any }) => {
           <div className="flex items-center justify-between pt-3 border-t border-border">
             {coach.hourly_rate ? (
               <p className="font-semibold text-foreground">
-                ${coach.hourly_rate}<span className="text-sm text-muted-foreground font-normal">/session</span>
+                {formatCurrency(coach.hourly_rate, (coach.currency as CurrencyCode) || 'GBP')}<span className="text-sm text-muted-foreground font-normal">/session</span>
               </p>
             ) : (
               <p className="text-sm text-muted-foreground">Contact for pricing</p>
