@@ -5,6 +5,17 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const getTableName = (userType: string): string => {
+  switch (userType) {
+    case "coach":
+      return "coach_profiles";
+    case "team":
+      return "admin_profiles";
+    default:
+      return "client_profiles";
+  }
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -53,9 +64,9 @@ Deno.serve(async (req) => {
     });
 
     const body = await req.json();
-    const { action } = body;
+    const { action, userType } = body;
 
-    console.log(`Admin action: ${action}`, body);
+    console.log(`Admin action: ${action}, userType: ${userType}`, body);
 
     switch (action) {
       case "get_user_email": {
@@ -96,7 +107,7 @@ Deno.serve(async (req) => {
       }
 
       case "update_status": {
-        const { userId, profileId, userType, status, reason } = body;
+        const { userId, profileId, status, reason } = body;
         
         // Update auth user ban status if banning
         if (status === "banned") {
@@ -111,7 +122,7 @@ Deno.serve(async (req) => {
         }
 
         // Update profile status
-        const table = userType === "coach" ? "coach_profiles" : "client_profiles";
+        const table = getTableName(userType);
         const { error } = await supabaseAdmin
           .from(table)
           .update({
@@ -136,8 +147,12 @@ Deno.serve(async (req) => {
       }
 
       case "bulk_update_status": {
-        const { userIds, profileIds, userType, status, reason } = body;
+        const { users, status, reason } = body;
         
+        // Extract user IDs and profile IDs
+        const userIds = users.map((u: { user_id: string }) => u.user_id);
+        const profileIds = users.map((u: { id: string }) => u.id);
+
         // Update auth users ban status if banning
         for (const userId of userIds) {
           if (status === "banned") {
@@ -152,7 +167,7 @@ Deno.serve(async (req) => {
         }
 
         // Update profile statuses
-        const table = userType === "coach" ? "coach_profiles" : "client_profiles";
+        const table = getTableName(userType);
         const { error } = await supabaseAdmin
           .from(table)
           .update({
@@ -177,9 +192,10 @@ Deno.serve(async (req) => {
       }
 
       case "bulk_delete": {
-        const { profileIds, userType } = body;
+        const { users } = body;
+        const profileIds = users.map((u: { id: string }) => u.id);
         
-        const table = userType === "coach" ? "coach_profiles" : "client_profiles";
+        const table = getTableName(userType);
         const { error } = await supabaseAdmin
           .from(table)
           .delete()
