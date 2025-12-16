@@ -7,9 +7,11 @@ import {
   LogOut,
   Save,
   Plus,
-  Trash2,
   Loader2,
   Globe,
+  Plug,
+  Video,
+  Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -26,12 +29,32 @@ import StripeConnectButton from "@/components/payments/StripeConnectButton";
 import PlatformSubscription from "@/components/payments/PlatformSubscription";
 import { useQuery } from "@tanstack/react-query";
 import { CurrencySelector } from "@/components/shared/CurrencySelector";
+import { LanguageSelector } from "@/components/shared/LanguageSelector";
 import { useLocale } from "@/contexts/LocaleContext";
 import { getCurrencySymbol } from "@/lib/currency";
 import { NotificationPreferences } from "@/components/notifications/NotificationPreferences";
 import { AvatarPicker } from "@/components/avatars/AvatarPicker";
 import { AvatarShowcase } from "@/components/avatars/AvatarShowcase";
 import { useSelectedAvatar } from "@/hooks/useAvatars";
+import VideoProviderCard from "@/components/integrations/VideoProviderCard";
+import CalendarConnectionCard from "@/components/integrations/CalendarConnectionCard";
+import { useVideoConference, VideoProvider } from "@/hooks/useVideoConference";
+import { useCalendarSync, CalendarProvider } from "@/hooks/useCalendarSync";
+
+// Import verification components
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  useVerificationStatus,
+  useVerificationDocuments,
+  useUploadVerificationDocument,
+  useDeleteVerificationDocument,
+  useSubmitForVerification,
+  useDocumentSignedUrl,
+  DocumentType,
+} from "@/hooks/useVerification";
+import { VerifiedBadge } from "@/components/verification/VerifiedBadge";
+import { format } from "date-fns";
+import { Upload, FileText, Trash2, CheckCircle, XCircle, Clock, AlertCircle, Eye } from "lucide-react";
 
 const coachTypes = ["Personal Trainer", "Nutritionist", "Boxing Coach", "MMA Coach", "Yoga Instructor", "CrossFit Coach"];
 
@@ -49,12 +72,87 @@ interface CoachProfile {
   subscription_tier: string | null;
 }
 
+const videoProviders: {
+  id: VideoProvider;
+  name: string;
+  icon: React.ReactNode;
+  color: string;
+}[] = [
+  {
+    id: "zoom",
+    name: "Zoom",
+    icon: <Video className="w-6 h-6 text-white" />,
+    color: "bg-gradient-to-br from-blue-500 to-blue-700",
+  },
+  {
+    id: "google_meet",
+    name: "Google Meet",
+    icon: <Video className="w-6 h-6 text-white" />,
+    color: "bg-gradient-to-br from-green-500 to-teal-600",
+  },
+];
+
+const calendarProviders: {
+  id: CalendarProvider;
+  name: string;
+  icon: React.ReactNode;
+  color: string;
+}[] = [
+  {
+    id: "google_calendar",
+    name: "Google Calendar",
+    icon: <Calendar className="w-6 h-6 text-white" />,
+    color: "bg-gradient-to-br from-blue-500 to-blue-700",
+  },
+];
+
+const documentTypes: { type: DocumentType; label: string; description: string }[] = [
+  { type: "identity", label: "Government ID", description: "Passport, driver's license, or national ID" },
+  { type: "certification", label: "Professional Certification", description: "Personal training, nutrition, or coaching certification" },
+  { type: "insurance", label: "Liability Insurance", description: "Professional indemnity or liability insurance" },
+  { type: "qualification", label: "Qualifications", description: "Relevant degrees, diplomas, or qualifications" },
+];
+
+const statusConfig = {
+  not_submitted: { label: "Not Submitted", color: "bg-muted text-muted-foreground", icon: AlertCircle },
+  pending: { label: "Under Review", color: "bg-amber-500/10 text-amber-500", icon: Clock },
+  approved: { label: "Verified", color: "bg-primary/10 text-primary", icon: CheckCircle },
+  rejected: { label: "Rejected", color: "bg-destructive/10 text-destructive", icon: XCircle },
+};
+
 const CoachSettings = () => {
   const { user, signOut } = useAuth();
   const { currency } = useLocale();
   const [selectedTab, setSelectedTab] = useState("profile");
   const [saving, setSaving] = useState(false);
   const { data: selectedAvatar } = useSelectedAvatar('coach');
+
+  // Video and Calendar hooks
+  const {
+    connectVideoProvider,
+    disconnectVideoProvider,
+    updateSettings,
+    getSettings,
+    isLoading: videoLoading,
+  } = useVideoConference();
+
+  const {
+    connectCalendar,
+    disconnectCalendar,
+    toggleSync,
+    getConnection,
+    isLoading: calendarLoading,
+  } = useCalendarSync();
+
+  // Verification hooks
+  const { data: verificationStatus, isLoading: statusLoading } = useVerificationStatus();
+  const { data: documents = [], isLoading: docsLoading } = useVerificationDocuments();
+  const uploadMutation = useUploadVerificationDocument();
+  const deleteMutation = useDeleteVerificationDocument();
+  const submitMutation = useSubmitForVerification();
+  const signedUrlMutation = useDocumentSignedUrl();
+  const [uploadingType, setUploadingType] = useState<DocumentType | null>(null);
+  const [viewingDocId, setViewingDocId] = useState<string | null>(null);
 
   const [profile, setProfile] = useState<CoachProfile>({
     display_name: "",
@@ -135,6 +233,39 @@ const CoachSettings = () => {
     }
   };
 
+  // Verification helpers
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: DocumentType) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingType(type);
+    try {
+      await uploadMutation.mutateAsync({ file, documentType: type });
+    } finally {
+      setUploadingType(null);
+      e.target.value = "";
+    }
+  };
+
+  const handleViewDocument = async (doc: typeof documents[0]) => {
+    setViewingDocId(doc.id);
+    try {
+      const signedUrl = await signedUrlMutation.mutateAsync(doc.file_url);
+      window.open(signedUrl, '_blank');
+    } finally {
+      setViewingDocId(null);
+    }
+  };
+
+  const getDocumentsByType = (type: DocumentType) => {
+    return documents.filter(doc => doc.document_type === type);
+  };
+
+  const canSubmit = documents.length > 0 && verificationStatus?.verification_status === "not_submitted";
+  const isVerified = verificationStatus?.is_verified;
+  const currentStatus = verificationStatus?.verification_status || "not_submitted";
+  const StatusIcon = statusConfig[currentStatus as keyof typeof statusConfig]?.icon || AlertCircle;
+
   if (loading) {
     return (
       <DashboardLayout title="Settings">
@@ -157,9 +288,11 @@ const CoachSettings = () => {
               {[
                 { id: "profile", icon: User, label: "Profile" },
                 { id: "services", icon: CreditCard, label: "Services & Pricing" },
+                { id: "verification", icon: Shield, label: "Verification" },
+                { id: "integrations", icon: Plug, label: "Integrations" },
                 { id: "preferences", icon: Globe, label: "Preferences" },
                 { id: "notifications", icon: Bell, label: "Notifications" },
-                { id: "subscription", icon: Shield, label: "Subscription" },
+                { id: "subscription", icon: CreditCard, label: "Subscription" },
                 { id: "account", icon: Shield, label: "Account & Security" },
               ].map((item) => (
                 <button
@@ -375,11 +508,254 @@ const CoachSettings = () => {
               </div>
             )}
 
+            {/* Verification Tab */}
+            {selectedTab === "verification" && (
+              <div className="space-y-6">
+                {/* Status Card */}
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                          {isVerified ? (
+                            <VerifiedBadge size="lg" showTooltip={false} />
+                          ) : (
+                            <Shield className="w-6 h-6 text-primary" />
+                          )}
+                        </div>
+                        <div>
+                          <CardTitle>Verification Status</CardTitle>
+                          <CardDescription>
+                            {isVerified 
+                              ? "Your profile is verified" 
+                              : "Upload documents to get verified"}
+                          </CardDescription>
+                        </div>
+                      </div>
+                      <Badge className={statusConfig[currentStatus as keyof typeof statusConfig]?.color}>
+                        <StatusIcon className="w-3 h-3 mr-1" />
+                        {statusConfig[currentStatus as keyof typeof statusConfig]?.label}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  {verificationStatus?.verification_notes && (
+                    <CardContent>
+                      <div className="p-3 rounded-lg bg-muted">
+                        <p className="text-sm font-medium mb-1">Admin Notes:</p>
+                        <p className="text-sm text-muted-foreground">{verificationStatus.verification_notes}</p>
+                      </div>
+                    </CardContent>
+                  )}
+                  {isVerified && verificationStatus?.verified_at && (
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground">
+                        Verified on {format(new Date(verificationStatus.verified_at), "MMMM d, yyyy")}
+                      </p>
+                    </CardContent>
+                  )}
+                </Card>
+
+                {/* Document Upload Cards */}
+                <div className="grid gap-4 md:grid-cols-2">
+                  {documentTypes.map(({ type, label, description }) => {
+                    const typeDocs = getDocumentsByType(type);
+                    const isUploading = uploadingType === type;
+
+                    return (
+                      <Card key={type}>
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-base">{label}</CardTitle>
+                          <CardDescription className="text-xs">{description}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          {/* Uploaded documents */}
+                          {typeDocs.map((doc) => (
+                            <div
+                              key={doc.id}
+                              className="p-3 rounded-lg bg-muted/50 space-y-2"
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2 min-w-0 flex-1">
+                                  <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
+                                  <span className="text-sm truncate">{doc.file_name}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Badge 
+                                    variant="outline" 
+                                    className={`text-xs ${
+                                      doc.status === "approved" 
+                                        ? "text-primary border-primary" 
+                                        : doc.status === "rejected"
+                                        ? "text-destructive border-destructive"
+                                        : ""
+                                    }`}
+                                  >
+                                    {doc.status}
+                                  </Badge>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7"
+                                    onClick={() => handleViewDocument(doc)}
+                                    disabled={viewingDocId === doc.id}
+                                  >
+                                    {viewingDocId === doc.id ? (
+                                      <Loader2 className="w-3 h-3 animate-spin" />
+                                    ) : (
+                                      <Eye className="w-3 h-3" />
+                                    )}
+                                  </Button>
+                                  {doc.status === "pending" && (
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-7 w-7"
+                                      onClick={() => deleteMutation.mutate(doc.id)}
+                                      disabled={deleteMutation.isPending}
+                                    >
+                                      <Trash2 className="w-3 h-3 text-destructive" />
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+
+                          {/* Upload button */}
+                          {currentStatus !== "approved" && (
+                            <div>
+                              <Label htmlFor={`upload-${type}`} className="cursor-pointer">
+                                <div className="flex items-center justify-center gap-2 p-3 border-2 border-dashed border-border rounded-lg hover:border-primary/50 hover:bg-muted/50 transition-colors">
+                                  {isUploading ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                  ) : (
+                                    <Upload className="w-4 h-4" />
+                                  )}
+                                  <span className="text-sm">
+                                    {isUploading ? "Uploading..." : "Upload document"}
+                                  </span>
+                                </div>
+                              </Label>
+                              <Input
+                                id={`upload-${type}`}
+                                type="file"
+                                accept=".pdf,.jpg,.jpeg,.png"
+                                className="hidden"
+                                onChange={(e) => handleFileUpload(e, type)}
+                                disabled={isUploading}
+                              />
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+
+                {/* Submit for verification */}
+                {canSubmit && (
+                  <Card>
+                    <CardContent className="pt-6">
+                      <Button
+                        className="w-full"
+                        onClick={() => submitMutation.mutate()}
+                        disabled={submitMutation.isPending}
+                      >
+                        {submitMutation.isPending ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <Shield className="w-4 h-4 mr-2" />
+                        )}
+                        Submit for Verification
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
+
+            {/* Integrations Tab */}
+            {selectedTab === "integrations" && (
+              <div className="space-y-6">
+                {/* Video Conferencing */}
+                <div className="space-y-4">
+                  <div>
+                    <h2 className="text-xl font-semibold mb-1">Video Conferencing</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Automatically create video meeting links for your online sessions
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {videoProviders.map((provider) => {
+                      const settings = getSettings(provider.id);
+                      return (
+                        <VideoProviderCard
+                          key={provider.id}
+                          provider={provider.id}
+                          providerName={provider.name}
+                          providerIcon={provider.icon}
+                          providerColor={provider.color}
+                          isConnected={!!settings}
+                          autoCreateMeetings={settings?.auto_create_meetings}
+                          onConnect={() => connectVideoProvider.mutate(provider.id)}
+                          onDisconnect={() => settings && disconnectVideoProvider.mutate(settings.id)}
+                          onToggleAutoCreate={(enabled) =>
+                            settings &&
+                            updateSettings.mutate({
+                              settingsId: settings.id,
+                              autoCreateMeetings: enabled,
+                            })
+                          }
+                          isConnecting={connectVideoProvider.isPending}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Calendar Integration */}
+                <div className="space-y-4">
+                  <div>
+                    <h2 className="text-xl font-semibold mb-1">Calendar Sync</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Automatically add coaching sessions to your calendar
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {calendarProviders.map((provider) => {
+                      const connection = getConnection(provider.id);
+                      return (
+                        <CalendarConnectionCard
+                          key={provider.id}
+                          provider={provider.id}
+                          providerName={provider.name}
+                          providerIcon={provider.icon}
+                          providerColor={provider.color}
+                          isConnected={!!connection}
+                          syncEnabled={connection?.sync_enabled}
+                          onConnect={() => connectCalendar.mutate(provider.id)}
+                          onDisconnect={() => connection && disconnectCalendar.mutate(connection.id)}
+                          onToggleSync={(enabled) =>
+                            connection && toggleSync.mutate({ connectionId: connection.id, enabled })
+                          }
+                          isConnecting={connectCalendar.isPending}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Preferences Tab */}
             {selectedTab === "preferences" && (
               <div className="card-elevated p-6">
                 <h2 className="font-display font-bold text-foreground mb-6">Display Preferences</h2>
                 <div className="space-y-6">
+                  <LanguageSelector />
+                  <Separator />
                   <div className="max-w-xs">
                     <CurrencySelector />
                     <p className="text-sm text-muted-foreground mt-2">
@@ -426,26 +802,20 @@ const CoachSettings = () => {
 
                     <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg">
                       <div>
-                        <p className="font-medium text-foreground">Two-Factor Authentication</p>
-                        <p className="text-sm text-muted-foreground">Add an extra layer of security</p>
+                        <p className="font-medium text-foreground">Email</p>
+                        <p className="text-sm text-muted-foreground">{user?.email}</p>
                       </div>
-                      <Button variant="outline">Enable</Button>
+                      <Button variant="outline">Update Email</Button>
                     </div>
                   </div>
                 </div>
 
-                <div className="card-elevated p-6">
-                  <h2 className="font-display font-bold text-foreground text-destructive mb-4">Danger Zone</h2>
-                  <p className="text-muted-foreground mb-4">
-                    Permanently delete your account and all associated data.
-                  </p>
-                  <div className="flex gap-4">
-                    <Button variant="destructive">Delete Account</Button>
-                    <Button variant="outline" onClick={signOut}>
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Sign Out
-                    </Button>
-                  </div>
+                <div className="card-elevated p-6 border-destructive/50">
+                  <h2 className="font-display font-bold text-foreground mb-4">Danger Zone</h2>
+                  <Button variant="destructive" onClick={signOut}>
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </Button>
                 </div>
               </div>
             )}

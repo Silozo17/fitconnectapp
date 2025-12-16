@@ -16,9 +16,9 @@ import {
   Trophy,
   Medal,
   Flame,
-  Plug,
   BookOpen,
   ShoppingCart,
+  Calculator,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
@@ -41,7 +41,7 @@ const menuItems: { title: string; icon: typeof Home; path: string; badgeKey?: Ba
   { title: "Achievements", icon: Trophy, path: "/dashboard/client/achievements" },
   { title: "Leaderboard", icon: Medal, path: "/dashboard/client/leaderboard" },
   { title: "Challenges", icon: Flame, path: "/dashboard/client/challenges" },
-  { title: "Integrations", icon: Plug, path: "/dashboard/client/integrations" },
+  { title: "Tools", icon: Calculator, path: "/tools" },
   { title: "Settings", icon: Settings, path: "/dashboard/client/settings" },
 ];
 

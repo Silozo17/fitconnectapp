@@ -12,8 +12,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Package,
-  Shield,
-  Plug,
   ShoppingBag,
   Star,
   Kanban,
@@ -38,8 +36,6 @@ const menuItems: { title: string; icon: typeof LayoutDashboard; path: string; ba
   { title: "Achievements", icon: Trophy, path: "/dashboard/coach/achievements" },
   { title: "Reviews", icon: Star, path: "/dashboard/coach/reviews" },
   { title: "Earnings", icon: DollarSign, path: "/dashboard/coach/earnings" },
-  { title: "Verification", icon: Shield, path: "/dashboard/coach/verification" },
-  { title: "Integrations", icon: Plug, path: "/dashboard/coach/integrations" },
   { title: "Settings", icon: Settings, path: "/dashboard/coach/settings" },
 ];
 
