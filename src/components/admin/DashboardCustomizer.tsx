@@ -14,9 +14,10 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
+import {
   useAdminWidgets, 
   useUpdateWidget, 
+  useAddWidget,
   useResetWidgets,
   WIDGET_TYPES,
   WIDGET_CATEGORIES,
@@ -43,27 +44,53 @@ const categoryIcons: Record<string, React.ComponentType<any>> = {
 export function DashboardCustomizer({ open, onOpenChange }: DashboardCustomizerProps) {
   const { data: widgets, isLoading } = useAdminWidgets();
   const updateWidget = useUpdateWidget();
+  const addWidget = useAddWidget();
   const resetWidgets = useResetWidgets();
   const [activeCategory, setActiveCategory] = useState<string>("stats");
 
-  const handleToggleWidget = async (widget: DashboardWidget) => {
+  const handleToggleWidget = async (type: string, widgetState: DashboardWidget | undefined) => {
     try {
-      await updateWidget.mutateAsync({
-        widgetId: widget.id,
-        updates: { is_visible: !widget.is_visible },
-      });
-      toast.success(`Widget ${widget.is_visible ? "hidden" : "shown"}`);
+      if (widgetState) {
+        await updateWidget.mutateAsync({
+          widgetId: widgetState.id,
+          updates: { is_visible: !widgetState.is_visible },
+        });
+        toast.success(`Widget ${widgetState.is_visible ? "hidden" : "shown"}`);
+      } else {
+        const widgetConfig = WIDGET_TYPES[type as keyof typeof WIDGET_TYPES];
+        await addWidget.mutateAsync({
+          widget_type: type,
+          title: widgetConfig.label,
+          position: Object.keys(WIDGET_TYPES).indexOf(type),
+          size: "medium",
+          is_visible: true,
+          config: {},
+        });
+        toast.success("Widget shown");
+      }
     } catch (error) {
       toast.error("Failed to update widget");
     }
   };
 
-  const handleSizeChange = async (widget: DashboardWidget, size: string) => {
+  const handleSizeChange = async (type: string, widgetState: DashboardWidget | undefined, size: string) => {
     try {
-      await updateWidget.mutateAsync({
-        widgetId: widget.id,
-        updates: { size: size as DashboardWidget["size"] },
-      });
+      if (widgetState) {
+        await updateWidget.mutateAsync({
+          widgetId: widgetState.id,
+          updates: { size: size as DashboardWidget["size"] },
+        });
+      } else {
+        const widgetConfig = WIDGET_TYPES[type as keyof typeof WIDGET_TYPES];
+        await addWidget.mutateAsync({
+          widget_type: type,
+          title: widgetConfig.label,
+          position: Object.keys(WIDGET_TYPES).indexOf(type),
+          size: size as DashboardWidget["size"],
+          is_visible: true,
+          config: {},
+        });
+      }
       toast.success("Widget size updated");
     } catch (error) {
       toast.error("Failed to update widget size");
@@ -151,31 +178,29 @@ export function DashboardCustomizer({ open, onOpenChange }: DashboardCustomizerP
                           <Switch
                             id={type}
                             checked={isVisible}
-                            onCheckedChange={() => widgetState && handleToggleWidget(widgetState)}
-                            disabled={!widgetState || updateWidget.isPending}
+                            onCheckedChange={() => handleToggleWidget(type, widgetState)}
+                            disabled={updateWidget.isPending || addWidget.isPending}
                           />
                           <Label htmlFor={type} className="cursor-pointer truncate">
                             {label}
                           </Label>
                         </div>
                         
-                        {widgetState && (
-                          <Select
-                            value={currentSize}
-                            onValueChange={(size) => handleSizeChange(widgetState, size)}
-                            disabled={updateWidget.isPending}
-                          >
-                            <SelectTrigger className="w-[100px]">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="small">Small</SelectItem>
-                              <SelectItem value="medium">Medium</SelectItem>
-                              <SelectItem value="large">Large</SelectItem>
-                              <SelectItem value="full">Full</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        )}
+                        <Select
+                          value={currentSize}
+                          onValueChange={(size) => handleSizeChange(type, widgetState, size)}
+                          disabled={updateWidget.isPending || addWidget.isPending}
+                        >
+                          <SelectTrigger className="w-[100px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="small">Small</SelectItem>
+                            <SelectItem value="medium">Medium</SelectItem>
+                            <SelectItem value="large">Large</SelectItem>
+                            <SelectItem value="full">Full</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     );
                   })}
