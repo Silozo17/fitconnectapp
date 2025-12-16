@@ -141,6 +141,45 @@ export type Database = {
           },
         ]
       }
+      badges: {
+        Row: {
+          category: string
+          created_at: string
+          criteria: Json
+          description: string
+          icon: string
+          id: string
+          is_active: boolean | null
+          name: string
+          rarity: string
+          xp_reward: number
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          criteria?: Json
+          description: string
+          icon?: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          rarity?: string
+          xp_reward?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          criteria?: Json
+          description?: string
+          icon?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          rarity?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       booking_requests: {
         Row: {
           client_id: string
@@ -204,6 +243,141 @@ export type Database = {
             columns: ["session_type_id"]
             isOneToOne: false
             referencedRelation: "session_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenge_participants: {
+        Row: {
+          challenge_id: string
+          client_id: string
+          completed_at: string | null
+          current_progress: number
+          id: string
+          joined_at: string
+          status: string
+        }
+        Insert: {
+          challenge_id: string
+          client_id: string
+          completed_at?: string | null
+          current_progress?: number
+          id?: string
+          joined_at?: string
+          status?: string
+        }
+        Update: {
+          challenge_id?: string
+          client_id?: string
+          completed_at?: string | null
+          current_progress?: number
+          id?: string
+          joined_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_participants_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenges: {
+        Row: {
+          badge_reward_id: string | null
+          challenge_type: string
+          created_at: string
+          created_by: string
+          description: string | null
+          end_date: string
+          id: string
+          is_active: boolean | null
+          max_participants: number | null
+          start_date: string
+          target_unit: string
+          target_value: number
+          title: string
+          visibility: string
+          xp_reward: number
+        }
+        Insert: {
+          badge_reward_id?: string | null
+          challenge_type?: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          end_date: string
+          id?: string
+          is_active?: boolean | null
+          max_participants?: number | null
+          start_date?: string
+          target_unit?: string
+          target_value?: number
+          title: string
+          visibility?: string
+          xp_reward?: number
+        }
+        Update: {
+          badge_reward_id?: string | null
+          challenge_type?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          end_date?: string
+          id?: string
+          is_active?: boolean | null
+          max_participants?: number | null
+          start_date?: string
+          target_unit?: string
+          target_value?: number
+          title?: string
+          visibility?: string
+          xp_reward?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenges_badge_reward_id_fkey"
+            columns: ["badge_reward_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_badges: {
+        Row: {
+          badge_id: string
+          client_id: string
+          earned_at: string
+          id: string
+          is_featured: boolean | null
+          source_data: Json | null
+        }
+        Insert: {
+          badge_id: string
+          client_id: string
+          earned_at?: string
+          id?: string
+          is_featured?: boolean | null
+          source_data?: Json | null
+        }
+        Update: {
+          badge_id?: string
+          client_id?: string
+          earned_at?: string
+          id?: string
+          is_featured?: boolean | null
+          source_data?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
             referencedColumns: ["id"]
           },
         ]
@@ -520,6 +694,36 @@ export type Database = {
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      client_xp: {
+        Row: {
+          client_id: string
+          created_at: string
+          current_level: number
+          id: string
+          total_xp: number
+          updated_at: string
+          xp_to_next_level: number
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          current_level?: number
+          id?: string
+          total_xp?: number
+          updated_at?: string
+          xp_to_next_level?: number
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          current_level?: number
+          id?: string
+          total_xp?: number
+          updated_at?: string
+          xp_to_next_level?: number
         }
         Relationships: []
       }
@@ -1263,6 +1467,42 @@ export type Database = {
           },
         ]
       }
+      leaderboard_entries: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          period_end: string
+          period_start: string
+          period_type: string
+          rank: number | null
+          region: string | null
+          total_xp: number
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          period_end: string
+          period_start: string
+          period_type?: string
+          rank?: number | null
+          region?: string | null
+          total_xp?: number
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          period_end?: string
+          period_start?: string
+          period_type?: string
+          rank?: number | null
+          region?: string | null
+          total_xp?: number
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
@@ -1886,6 +2126,36 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      xp_transactions: {
+        Row: {
+          amount: number
+          client_id: string
+          created_at: string
+          description: string
+          id: string
+          source: string
+          source_id: string | null
+        }
+        Insert: {
+          amount: number
+          client_id: string
+          created_at?: string
+          description: string
+          id?: string
+          source: string
+          source_id?: string | null
+        }
+        Update: {
+          amount?: number
+          client_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          source?: string
+          source_id?: string | null
         }
         Relationships: []
       }
