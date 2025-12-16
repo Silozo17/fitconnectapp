@@ -1,13 +1,21 @@
 import { NavLink } from "@/components/NavLink";
-import { LayoutDashboard, Users, Dumbbell, Settings, ChevronLeft, ChevronRight } from "lucide-react";
+import { LayoutDashboard, Users, Dumbbell, Settings, ChevronLeft, ChevronRight, UsersRound, DollarSign, BarChart3, User } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
 
-const navItems = [
+const mainNavItems = [
   { title: "Dashboard", url: "/dashboard/admin", icon: LayoutDashboard },
   { title: "Users", url: "/dashboard/admin/users", icon: Users },
   { title: "Coaches", url: "/dashboard/admin/coaches", icon: Dumbbell },
+  { title: "Team", url: "/dashboard/admin/team", icon: UsersRound },
+  { title: "Revenue", url: "/dashboard/admin/revenue", icon: DollarSign },
+  { title: "Analytics", url: "/dashboard/admin/analytics", icon: BarChart3 },
+];
+
+const bottomNavItems = [
+  { title: "My Profile", url: "/dashboard/admin/profile", icon: User },
   { title: "Settings", url: "/dashboard/admin/settings", icon: Settings },
 ];
 
@@ -41,7 +49,7 @@ const AdminSidebar = () => {
       </div>
 
       <nav className="flex-1 p-2 space-y-1">
-        {navItems.map((item) => (
+        {mainNavItems.map((item) => (
           <NavLink
             key={item.url}
             to={item.url}
@@ -57,6 +65,23 @@ const AdminSidebar = () => {
           </NavLink>
         ))}
       </nav>
+
+      <div className="p-2 border-t border-border space-y-1">
+        {bottomNavItems.map((item) => (
+          <NavLink
+            key={item.url}
+            to={item.url}
+            className={cn(
+              "flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors",
+              collapsed && "justify-center px-2"
+            )}
+            activeClassName="bg-primary/10 text-primary hover:bg-primary/10 hover:text-primary"
+          >
+            <item.icon className="h-5 w-5 flex-shrink-0" />
+            {!collapsed && <span>{item.title}</span>}
+          </NavLink>
+        ))}
+      </div>
     </aside>
   );
 };

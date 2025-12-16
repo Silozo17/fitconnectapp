@@ -16,6 +16,10 @@ import AdminDashboard from "./pages/dashboard/AdminDashboard";
 import AdminUsers from "./pages/dashboard/admin/AdminUsers";
 import AdminCoaches from "./pages/dashboard/admin/AdminCoaches";
 import AdminSettings from "./pages/dashboard/admin/AdminSettings";
+import AdminTeam from "./pages/dashboard/admin/AdminTeam";
+import AdminRevenue from "./pages/dashboard/admin/AdminRevenue";
+import AdminAnalytics from "./pages/dashboard/admin/AdminAnalytics";
+import AdminProfile from "./pages/dashboard/admin/AdminProfile";
 
 // Client Dashboard Pages
 import ClientOverview from "./pages/dashboard/client/ClientOverview";
@@ -73,18 +77,38 @@ const App = () => (
                 
                 {/* Admin Dashboard */}
                 <Route path="/dashboard/admin" element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
+                  <ProtectedRoute allowedRoles={["admin", "manager", "staff"]}>
                     <AdminDashboard />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/admin/users" element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
+                  <ProtectedRoute allowedRoles={["admin", "manager"]}>
                     <AdminUsers />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/admin/coaches" element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
+                  <ProtectedRoute allowedRoles={["admin", "manager"]}>
                     <AdminCoaches />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/admin/team" element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminTeam />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/admin/revenue" element={
+                  <ProtectedRoute allowedRoles={["admin", "manager"]}>
+                    <AdminRevenue />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/admin/analytics" element={
+                  <ProtectedRoute allowedRoles={["admin", "manager"]}>
+                    <AdminAnalytics />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/admin/profile" element={
+                  <ProtectedRoute allowedRoles={["admin", "manager", "staff"]}>
+                    <AdminProfile />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/admin/settings" element={

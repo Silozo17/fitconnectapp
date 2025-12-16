@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          department: string | null
+          display_name: string | null
+          first_name: string | null
+          id: string
+          last_name: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          department?: string | null
+          display_name?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          department?: string | null
+          display_name?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       client_notes: {
         Row: {
           category: string | null
@@ -423,6 +462,77 @@ export type Database = {
           },
         ]
       }
+      platform_settings: {
+        Row: {
+          description: string | null
+          key: string
+          updated_at: string | null
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          description?: string | null
+          key: string
+          updated_at?: string | null
+          updated_by?: string | null
+          value: Json
+        }
+        Update: {
+          description?: string | null
+          key?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          amount: number
+          coach_id: string | null
+          created_at: string
+          currency: string | null
+          expires_at: string | null
+          id: string
+          started_at: string | null
+          status: string | null
+          stripe_subscription_id: string | null
+          tier: string
+        }
+        Insert: {
+          amount?: number
+          coach_id?: string | null
+          created_at?: string
+          currency?: string | null
+          expires_at?: string | null
+          id?: string
+          started_at?: string | null
+          status?: string | null
+          stripe_subscription_id?: string | null
+          tier?: string
+        }
+        Update: {
+          amount?: number
+          coach_id?: string | null
+          created_at?: string
+          currency?: string | null
+          expires_at?: string | null
+          id?: string
+          started_at?: string | null
+          status?: string | null
+          stripe_subscription_id?: string | null
+          tier?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       training_plans: {
         Row: {
           coach_id: string
@@ -470,6 +580,83 @@ export type Database = {
           },
         ]
       }
+      transactions: {
+        Row: {
+          amount: number
+          client_id: string | null
+          coach_id: string | null
+          commission_amount: number | null
+          commission_rate: number | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          id: string
+          session_id: string | null
+          status: string | null
+          subscription_id: string | null
+          transaction_type: string
+        }
+        Insert: {
+          amount: number
+          client_id?: string | null
+          coach_id?: string | null
+          commission_amount?: number | null
+          commission_rate?: number | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          session_id?: string | null
+          status?: string | null
+          subscription_id?: string | null
+          transaction_type: string
+        }
+        Update: {
+          amount?: number
+          client_id?: string | null
+          coach_id?: string | null
+          commission_amount?: number | null
+          commission_rate?: number | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          session_id?: string | null
+          status?: string | null
+          subscription_id?: string | null
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "coaching_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -505,7 +692,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "client" | "coach" | "admin"
+      app_role: "client" | "coach" | "admin" | "manager" | "staff"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -633,7 +820,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["client", "coach", "admin"],
+      app_role: ["client", "coach", "admin", "manager", "staff"],
     },
   },
 } as const
