@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Trophy, Globe, MapPin, Search, Users, ChevronRight, Filter } from "lucide-react";
 import { Link } from "react-router-dom";
+import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -173,8 +174,17 @@ export default function Leaderboards() {
         <meta name="description" content="See who's leading the fitness community. Join thousands competing to be their best on FitConnect." />
       </Helmet>
 
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background relative">
         <Navbar />
+        
+        {/* Decorative Avatar */}
+        <DecorativeAvatar 
+          avatarSlug="streetwear-gorilla-trainer" 
+          position="bottom-right" 
+          size="xl" 
+          opacity={15}
+          className="right-8 bottom-20 z-0"
+        />
         
         <main className="pt-24 pb-20">
           <div className="container mx-auto px-4 max-w-6xl">

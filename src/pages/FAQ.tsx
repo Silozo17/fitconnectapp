@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { Link } from "react-router-dom";
 import { MessageCircle } from "lucide-react";
+import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
 
 const FAQ = () => {
   const clientFAQs = [
@@ -109,6 +110,15 @@ const FAQ = () => {
       title="Frequently Asked Questions"
       description="Find answers to common questions about FitConnect. Learn about finding coaches, pricing, payments, and how our fitness coaching platform works."
     >
+      {/* Decorative Avatar */}
+      <DecorativeAvatar 
+        avatarSlug="yoga-wolf" 
+        position="bottom-right" 
+        size="lg" 
+        opacity={15}
+        className="right-8 bottom-40 z-0"
+      />
+
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 overflow-hidden">
         <div className="absolute inset-0 -z-10">

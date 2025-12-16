@@ -39,17 +39,18 @@ export default function Subscribe() {
   const tierData = SUBSCRIPTION_TIERS[selectedTier];
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex relative">
+      {/* Decorative Avatar - placed at root level */}
+      <DecorativeAvatar 
+        avatarSlug="powerlifter-gorilla" 
+        position="bottom-left" 
+        size="xl" 
+        opacity={25}
+        className="left-4 bottom-4 z-10"
+      />
+
       {/* Left Side - Dark */}
-      <div className="w-full lg:w-1/2 bg-[#0D0D14] p-8 lg:p-12 flex flex-col relative overflow-hidden">
-        {/* Decorative Avatar */}
-        <DecorativeAvatar 
-          avatarSlug="powerlifter-gorilla" 
-          position="bottom-left" 
-          size="lg" 
-          opacity={20}
-          className="-left-8 -bottom-8"
-        />
+      <div className="w-full lg:w-1/2 bg-[#0D0D14] p-8 lg:p-12 flex flex-col relative">
         
         {/* Back Link */}
         <Link 

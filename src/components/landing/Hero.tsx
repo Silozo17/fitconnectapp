@@ -3,6 +3,7 @@ import { GradientButton } from "@/components/ui/gradient-button";
 import { NeonBadge } from "@/components/ui/neon-badge";
 import { DottedPattern } from "@/components/ui/dotted-pattern";
 import { Users, Award, Star, Zap, ArrowRight } from "lucide-react";
+import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
 
 const Hero = () => {
   const stats = [
@@ -13,6 +14,15 @@ const Hero = () => {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden gradient-bg-hero">
+      {/* Decorative Avatar */}
+      <DecorativeAvatar 
+        avatarSlug="sprinter-cheetah" 
+        position="bottom-right" 
+        size="xl" 
+        opacity={25}
+        className="right-8 bottom-8 z-0"
+      />
+
       {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -left-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
