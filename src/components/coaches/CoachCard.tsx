@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Star, MapPin, Video, User, Heart } from "lucide-react";
-import { useState } from "react";
+import { Star, MapPin, Video, User } from "lucide-react";
 import { UserAvatar } from "@/components/shared/UserAvatar";
+import FavouriteButton from "@/components/favourites/FavouriteButton";
+import StarRating from "@/components/reviews/StarRating";
+import { useCoachReviews, calculateAverageRating } from "@/hooks/useReviews";
 import type { MarketplaceCoach } from "@/hooks/useCoachMarketplace";
 
 interface CoachCardProps {
@@ -11,16 +13,14 @@ interface CoachCardProps {
 }
 
 const CoachCard = ({ coach }: CoachCardProps) => {
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { data: reviews = [] } = useCoachReviews(coach.id);
+  const averageRating = calculateAverageRating(reviews);
 
   return (
     <div className="group card-glow rounded-2xl overflow-hidden hover-lift relative">
-      <button
-        onClick={() => setIsFavorite(!isFavorite)}
-        className={`absolute top-3 right-3 z-10 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${isFavorite ? 'bg-primary text-primary-foreground shadow-glow-sm' : 'bg-card/80 backdrop-blur-sm text-muted-foreground hover:text-primary'}`}
-      >
-        <Heart className={`w-5 h-5 ${isFavorite ? "fill-current" : ""}`} />
-      </button>
+      <div className="absolute top-3 right-3 z-10">
+        <FavouriteButton coachId={coach.id} />
+      </div>
 
       <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
         {coach.profile_image_url ? (
@@ -42,8 +42,7 @@ const CoachCard = ({ coach }: CoachCardProps) => {
 
       <div className="p-5">
         <div className="flex items-center gap-1 mb-2">
-          <Star className="w-4 h-4 fill-primary text-primary" />
-          <span className="font-medium text-foreground">New</span>
+          <StarRating rating={averageRating} reviewCount={reviews.length} size="sm" />
         </div>
 
         <h3 className="font-display font-semibold text-lg text-foreground mb-1 group-hover:text-primary transition-colors">

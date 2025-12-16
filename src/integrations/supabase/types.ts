@@ -617,6 +617,27 @@ export type Database = {
           },
         ]
       }
+      favourites: {
+        Row: {
+          client_id: string
+          coach_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          client_id: string
+          coach_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          client_id?: string
+          coach_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
       food_categories: {
         Row: {
           color: string | null
