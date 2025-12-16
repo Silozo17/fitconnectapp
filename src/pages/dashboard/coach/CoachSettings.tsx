@@ -41,6 +41,7 @@ interface CoachProfile {
   location: string | null;
   experience_years: number | null;
   hourly_rate: number | null;
+  currency: string | null;
   coach_types: string[] | null;
   online_available: boolean | null;
   in_person_available: boolean | null;
@@ -61,6 +62,7 @@ const CoachSettings = () => {
     location: "",
     experience_years: null,
     hourly_rate: null,
+    currency: "GBP",
     coach_types: [],
     online_available: true,
     in_person_available: false,
@@ -76,7 +78,7 @@ const CoachSettings = () => {
 
       const { data, error } = await supabase
         .from("coach_profiles")
-        .select("id, display_name, bio, location, experience_years, hourly_rate, coach_types, online_available, in_person_available, profile_image_url, subscription_tier")
+        .select("id, display_name, bio, location, experience_years, hourly_rate, currency, coach_types, online_available, in_person_available, profile_image_url, subscription_tier")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -94,6 +96,7 @@ const CoachSettings = () => {
         location: coachData.location || "",
         experience_years: coachData.experience_years,
         hourly_rate: coachData.hourly_rate,
+        currency: coachData.currency || "GBP",
         coach_types: coachData.coach_types || [],
         online_available: coachData.online_available ?? true,
         in_person_available: coachData.in_person_available ?? false,
@@ -115,6 +118,7 @@ const CoachSettings = () => {
         location: profile.location || null,
         experience_years: profile.experience_years,
         hourly_rate: profile.hourly_rate,
+        currency: profile.currency || "GBP",
         coach_types: profile.coach_types,
         online_available: profile.online_available,
         in_person_available: profile.in_person_available,
@@ -325,14 +329,29 @@ const CoachSettings = () => {
                   </Button>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-6">
+                  {/* Currency Selection */}
+                  <div className="p-4 bg-secondary/50 rounded-lg">
+                    <div className="mb-4">
+                      <Label className="text-foreground font-medium">Pricing Currency</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Select the currency for your rates. This will be displayed to clients.
+                      </p>
+                    </div>
+                    <CurrencySelector 
+                      value={profile.currency || "GBP"}
+                      onChange={(value) => setProfile({ ...profile, currency: value })}
+                    />
+                  </div>
+
+                  {/* Hourly Rate */}
                   <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg">
                     <div>
                       <p className="font-medium text-foreground">Hourly Rate</p>
                       <p className="text-sm text-muted-foreground">Your base session rate</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground">{getCurrencySymbol(currency)}</span>
+                      <span className="text-muted-foreground">{getCurrencySymbol((profile.currency || "GBP") as any)}</span>
                       <Input
                         type="number"
                         value={profile.hourly_rate || ""}
@@ -341,9 +360,17 @@ const CoachSettings = () => {
                       />
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    Prices will be displayed in your selected currency ({currency}).
-                  </p>
+
+                  <div className="flex justify-end">
+                    <Button onClick={handleSaveProfile} disabled={saving} className="bg-primary text-primary-foreground">
+                      {saving ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Save className="w-4 h-4 mr-2" />
+                      )}
+                      Save Changes
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
