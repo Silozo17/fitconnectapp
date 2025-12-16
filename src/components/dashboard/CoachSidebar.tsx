@@ -22,6 +22,7 @@ const menuItems = [
   { title: "Messages", icon: MessageSquare, path: "/dashboard/coach/messages" },
   { title: "Training Plans", icon: ClipboardList, path: "/dashboard/coach/plans" },
   { title: "Packages", icon: Package, path: "/dashboard/coach/packages" },
+  { title: "Reviews", icon: MessageSquare, path: "/dashboard/coach/reviews" },
   { title: "Earnings", icon: DollarSign, path: "/dashboard/coach/earnings" },
   { title: "Settings", icon: Settings, path: "/dashboard/coach/settings" },
 ];
