@@ -14,6 +14,9 @@ import { ProfileImageUpload } from "@/components/shared/ProfileImageUpload";
 import { CurrencySelector } from "@/components/shared/CurrencySelector";
 import { NotificationPreferences } from "@/components/notifications/NotificationPreferences";
 import { LeaderboardSettings } from "@/components/gamification/LeaderboardSettings";
+import { AvatarPicker } from "@/components/avatars/AvatarPicker";
+import { AvatarShowcase } from "@/components/avatars/AvatarShowcase";
+import { useSelectedAvatar } from "@/hooks/useAvatars";
 
 interface ClientProfile {
   first_name: string | null;
@@ -55,6 +58,7 @@ const ClientSettings = () => {
   const [profile, setProfile] = useState<ClientProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const { data: selectedAvatar } = useSelectedAvatar('client');
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -134,6 +138,18 @@ const ClientSettings = () => {
       </div>
 
       <div className="max-w-2xl space-y-6">
+        {/* Avatar Selection */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Avatar</CardTitle>
+            <CardDescription>Choose an avatar to represent you on leaderboards and throughout the platform</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center gap-4">
+            <AvatarShowcase avatar={selectedAvatar} size="lg" />
+            <AvatarPicker selectedAvatar={selectedAvatar} profileType="client" />
+          </CardContent>
+        </Card>
+
         {/* Profile Photo */}
         <Card>
           <CardHeader>

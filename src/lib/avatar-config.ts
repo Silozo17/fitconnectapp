@@ -1,0 +1,70 @@
+// Avatar configuration and unlock requirements
+
+export const UNLOCK_TYPES = {
+  workout_count: { label: 'Workouts', unit: 'workouts' },
+  habit_streak: { label: 'Day Streak', unit: 'days' },
+  progress_entries: { label: 'Progress Entries', unit: 'entries' },
+  progress_photos: { label: 'Progress Photos', unit: 'photos' },
+  macro_days: { label: 'Macro Tracking', unit: 'days' },
+  xp_total: { label: 'Total XP', unit: 'XP' },
+  leaderboard_rank: { label: 'Top Leaderboard', unit: '' },
+  challenges_completed: { label: 'Challenges', unit: 'completed' },
+  coach_role: { label: 'Coach Only', unit: '' },
+} as const;
+
+export const RARITY_CONFIG = {
+  common: {
+    label: 'Common',
+    color: 'text-muted-foreground',
+    bg: 'bg-muted/50',
+    border: 'border-muted',
+    glow: '',
+  },
+  uncommon: {
+    label: 'Uncommon',
+    color: 'text-green-500',
+    bg: 'bg-green-500/10',
+    border: 'border-green-500/50',
+    glow: 'shadow-[0_0_15px_rgba(34,197,94,0.3)]',
+  },
+  rare: {
+    label: 'Rare',
+    color: 'text-blue-500',
+    bg: 'bg-blue-500/10',
+    border: 'border-blue-500/50',
+    glow: 'shadow-[0_0_15px_rgba(59,130,246,0.3)]',
+  },
+  epic: {
+    label: 'Epic',
+    color: 'text-purple-500',
+    bg: 'bg-purple-500/10',
+    border: 'border-purple-500/50',
+    glow: 'shadow-[0_0_20px_rgba(168,85,247,0.4)]',
+  },
+  legendary: {
+    label: 'Legendary',
+    color: 'text-primary',
+    bg: 'bg-primary/10',
+    border: 'border-primary/50',
+    glow: 'shadow-[0_0_25px_hsl(var(--primary)/0.5)]',
+  },
+} as const;
+
+export type UnlockType = keyof typeof UNLOCK_TYPES;
+export type Rarity = keyof typeof RARITY_CONFIG;
+
+export function getUnlockDescription(unlockType: UnlockType | null, threshold: number | null): string {
+  if (!unlockType || threshold === null) return 'Free avatar';
+  
+  const config = UNLOCK_TYPES[unlockType];
+  if (!config) return 'Unknown requirement';
+  
+  if (unlockType === 'leaderboard_rank') {
+    return `Reach Top ${threshold} on leaderboard`;
+  }
+  if (unlockType === 'coach_role') {
+    return 'Exclusive to coaches';
+  }
+  
+  return `${config.label}: ${threshold} ${config.unit}`;
+}
