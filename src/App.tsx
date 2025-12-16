@@ -376,6 +376,11 @@ const App = () => (
                     <CoachNutritionBuilder />
                   </ProtectedRoute>
                 } />
+                <Route path="/dashboard/coach/plans/nutrition/:planId" element={
+                  <ProtectedRoute allowedRoles={["coach"]}>
+                    <CoachNutritionBuilder />
+                  </ProtectedRoute>
+                } />
                 <Route path="/dashboard/coach/packages" element={
                   <ProtectedRoute allowedRoles={["coach"]}>
                     <CoachPackages />

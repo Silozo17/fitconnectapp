@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Save, Plus, Target, Sparkles } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, Save, Plus, Target, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { FoodLibrary } from "@/components/nutritionbuilder/FoodLibrary";
@@ -18,11 +17,13 @@ import { MacroCalculation } from "@/hooks/useAI";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useTrainingPlan, useUpdateTrainingPlan } from "@/hooks/useTrainingPlans";
 
 const CoachNutritionBuilder = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const { planId } = useParams();
   const { user } = useAuth();
+  const isEditing = !!planId;
   
   const [planName, setPlanName] = useState("");
   const [planDescription, setPlanDescription] = useState("");
@@ -31,6 +32,7 @@ const CoachNutritionBuilder = () => {
   const [createFoodOpen, setCreateFoodOpen] = useState(false);
   const [coachProfileId, setCoachProfileId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("builder");
+  const [isLoadingPlan, setIsLoadingPlan] = useState(isEditing);
   
   // Macro targets
   const [targetCalories, setTargetCalories] = useState(2000);
@@ -52,6 +54,32 @@ const CoachNutritionBuilder = () => {
   ]);
   
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
+
+  // Fetch existing plan when editing
+  const { data: existingPlan } = useTrainingPlan(planId);
+  const updatePlanMutation = useUpdateTrainingPlan();
+
+  // Load existing plan data
+  useEffect(() => {
+    if (existingPlan && isEditing) {
+      setPlanName(existingPlan.name);
+      setPlanDescription(existingPlan.description || "");
+      setDurationWeeks(existingPlan.duration_weeks || 4);
+      
+      // Parse nutrition-specific content
+      const content = existingPlan.content as any;
+      if (content?.days && Array.isArray(content.days)) {
+        setDays(content.days);
+      }
+      if (content?.targets) {
+        setTargetCalories(content.targets.calories || 2000);
+        setTargetProtein(content.targets.protein || 150);
+        setTargetCarbs(content.targets.carbs || 200);
+        setTargetFat(content.targets.fat || 65);
+      }
+      setIsLoadingPlan(false);
+    }
+  }, [existingPlan, isEditing]);
 
   useEffect(() => {
     const fetchCoachProfile = async () => {
@@ -150,18 +178,31 @@ const CoachNutritionBuilder = () => {
         },
       };
 
-      const { error } = await supabase.from("training_plans").insert([{
-        name: planName,
-        description: planDescription,
-        plan_type: "nutrition",
-        duration_weeks: durationWeeks,
-        content: JSON.parse(JSON.stringify(planContent)),
-        coach_id: coachProfileId,
-        is_template: false,
-      }]);
+      if (isEditing && planId) {
+        // Update existing plan
+        await updatePlanMutation.mutateAsync({
+          id: planId,
+          name: planName,
+          description: planDescription,
+          duration_weeks: durationWeeks,
+          content: JSON.parse(JSON.stringify(planContent)) as any,
+        });
+        toast.success("Nutrition plan updated!");
+      } else {
+        // Create new plan
+        const { error } = await supabase.from("training_plans").insert([{
+          name: planName,
+          description: planDescription,
+          plan_type: "nutrition",
+          duration_weeks: durationWeeks,
+          content: JSON.parse(JSON.stringify(planContent)),
+          coach_id: coachProfileId,
+          is_template: false,
+        }]);
 
-      if (error) throw error;
-      toast.success("Nutrition plan saved!");
+        if (error) throw error;
+        toast.success("Nutrition plan saved!");
+      }
       navigate("/dashboard/coach/plans");
     } catch (error) {
       console.error(error);
@@ -171,8 +212,21 @@ const CoachNutritionBuilder = () => {
     }
   };
 
+  if (isLoadingPlan) {
+    return (
+      <DashboardLayout title="Nutrition Plan Builder" description="Loading plan...">
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
-    <DashboardLayout title="Nutrition Plan Builder" description="Create a customized nutrition plan">
+    <DashboardLayout 
+      title={isEditing ? "Edit Nutrition Plan" : "Nutrition Plan Builder"} 
+      description={isEditing ? "Update your nutrition plan" : "Create a customized nutrition plan"}
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
@@ -180,8 +234,12 @@ const CoachNutritionBuilder = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="font-display text-2xl font-bold text-foreground">Nutrition Plan Builder</h1>
-            <p className="text-muted-foreground">Create customized meal plans with macro tracking</p>
+            <h1 className="font-display text-2xl font-bold text-foreground">
+              {isEditing ? "Edit Nutrition Plan" : "Nutrition Plan Builder"}
+            </h1>
+            <p className="text-muted-foreground">
+              {isEditing ? "Update your meal plan" : "Create customized meal plans with macro tracking"}
+            </p>
           </div>
         </div>
         <div className="flex gap-3">
@@ -191,7 +249,7 @@ const CoachNutritionBuilder = () => {
           </Button>
           <Button onClick={handleSave} disabled={isSaving}>
             <Save className="h-4 w-4 mr-2" />
-            {isSaving ? "Saving..." : "Save Plan"}
+            {isSaving ? "Saving..." : isEditing ? "Update Plan" : "Save Plan"}
           </Button>
         </div>
       </div>
