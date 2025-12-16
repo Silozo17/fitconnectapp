@@ -65,3 +65,6 @@ verify_jwt = true
 
 [functions.ai-challenge-suggestions]
 verify_jwt = true
+
+[functions.admin-user-management]
+verify_jwt = true

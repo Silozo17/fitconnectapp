@@ -738,6 +738,10 @@ export type Database = {
           medical_conditions: string[] | null
           onboarding_completed: boolean
           selected_avatar_id: string | null
+          status: string | null
+          status_reason: string | null
+          status_updated_at: string | null
+          status_updated_by: string | null
           updated_at: string
           user_id: string
           weight_kg: number | null
@@ -764,6 +768,10 @@ export type Database = {
           medical_conditions?: string[] | null
           onboarding_completed?: boolean
           selected_avatar_id?: string | null
+          status?: string | null
+          status_reason?: string | null
+          status_updated_at?: string | null
+          status_updated_by?: string | null
           updated_at?: string
           user_id: string
           weight_kg?: number | null
@@ -790,6 +798,10 @@ export type Database = {
           medical_conditions?: string[] | null
           onboarding_completed?: boolean
           selected_avatar_id?: string | null
+          status?: string | null
+          status_reason?: string | null
+          status_updated_at?: string | null
+          status_updated_by?: string | null
           updated_at?: string
           user_id?: string
           weight_kg?: number | null
@@ -1184,6 +1196,10 @@ export type Database = {
           online_available: boolean | null
           profile_image_url: string | null
           selected_avatar_id: string | null
+          status: string | null
+          status_reason: string | null
+          status_updated_at: string | null
+          status_updated_by: string | null
           stripe_connect_id: string | null
           stripe_connect_onboarded: boolean | null
           subscription_tier: string | null
@@ -1211,6 +1227,10 @@ export type Database = {
           online_available?: boolean | null
           profile_image_url?: string | null
           selected_avatar_id?: string | null
+          status?: string | null
+          status_reason?: string | null
+          status_updated_at?: string | null
+          status_updated_by?: string | null
           stripe_connect_id?: string | null
           stripe_connect_onboarded?: boolean | null
           subscription_tier?: string | null
@@ -1238,6 +1258,10 @@ export type Database = {
           online_available?: boolean | null
           profile_image_url?: string | null
           selected_avatar_id?: string | null
+          status?: string | null
+          status_reason?: string | null
+          status_updated_at?: string | null
+          status_updated_by?: string | null
           stripe_connect_id?: string | null
           stripe_connect_onboarded?: boolean | null
           subscription_tier?: string | null
