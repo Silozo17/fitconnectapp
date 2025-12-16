@@ -178,6 +178,8 @@ export type Database = {
           sessions_total: number
           sessions_used: number | null
           status: string | null
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
         }
         Insert: {
           amount_paid: number
@@ -191,6 +193,8 @@ export type Database = {
           sessions_total: number
           sessions_used?: number | null
           status?: string | null
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
         }
         Update: {
           amount_paid?: number
@@ -204,6 +208,8 @@ export type Database = {
           sessions_total?: number
           sessions_used?: number | null
           status?: string | null
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
         }
         Relationships: []
       }
@@ -332,6 +338,8 @@ export type Database = {
           id: string
           plan_id: string
           status: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
           updated_at: string
         }
         Insert: {
@@ -344,6 +352,8 @@ export type Database = {
           id?: string
           plan_id: string
           status?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -356,6 +366,8 @@ export type Database = {
           id?: string
           plan_id?: string
           status?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -504,6 +516,8 @@ export type Database = {
           onboarding_completed: boolean
           online_available: boolean | null
           profile_image_url: string | null
+          stripe_connect_id: string | null
+          stripe_connect_onboarded: boolean | null
           subscription_tier: string | null
           updated_at: string
           user_id: string
@@ -523,6 +537,8 @@ export type Database = {
           onboarding_completed?: boolean
           online_available?: boolean | null
           profile_image_url?: string | null
+          stripe_connect_id?: string | null
+          stripe_connect_onboarded?: boolean | null
           subscription_tier?: string | null
           updated_at?: string
           user_id: string
@@ -542,6 +558,8 @@ export type Database = {
           onboarding_completed?: boolean
           online_available?: boolean | null
           profile_image_url?: string | null
+          stripe_connect_id?: string | null
+          stripe_connect_onboarded?: boolean | null
           subscription_tier?: string | null
           updated_at?: string
           user_id?: string
@@ -1005,6 +1023,45 @@ export type Database = {
           updated_at?: string | null
           updated_by?: string | null
           value?: Json
+        }
+        Relationships: []
+      }
+      platform_subscriptions: {
+        Row: {
+          coach_id: string
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          status: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          tier: string
+          updated_at: string
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tier?: string
+          updated_at?: string
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tier?: string
+          updated_at?: string
         }
         Relationships: []
       }
