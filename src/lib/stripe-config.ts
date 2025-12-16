@@ -34,13 +34,13 @@ export const SUBSCRIPTION_TIERS = {
     prices: {
       monthly: {
         amount: 19,
-        priceId: "price_1Sf01iHCGP7kst5ZX70XwDK8",
+        priceId: "price_1Sf80vEztIBHKDEerFCQIjUR",
       },
       yearly: {
         amount: 190,
         monthlyEquivalent: 15.83,
         savings: 38,
-        priceId: "price_1Sf021HCGP7kst5ZIQ2wTxr5",
+        priceId: "price_1Sf812EztIBHKDEevWTflleJ",
       },
     },
     features: [
@@ -62,13 +62,13 @@ export const SUBSCRIPTION_TIERS = {
     prices: {
       monthly: {
         amount: 49,
-        priceId: "price_1Sf028HCGP7kst5ZYy1DsERS",
+        priceId: "price_1Sf80wEztIBHKDEeO6RxdYCU",
       },
       yearly: {
         amount: 490,
         monthlyEquivalent: 40.83,
         savings: 98,
-        priceId: "price_1Sf029HCGP7kst5Z20Y6mbtW",
+        priceId: "price_1Sf813EztIBHKDEeqPNPZoRy",
       },
     },
     features: [
@@ -92,13 +92,13 @@ export const SUBSCRIPTION_TIERS = {
     prices: {
       monthly: {
         amount: 99,
-        priceId: "price_1Sf02BHCGP7kst5ZqGTsWl4S",
+        priceId: "price_1Sf80xEztIBHKDEegrV6T1T7",
       },
       yearly: {
         amount: 990,
         monthlyEquivalent: 82.50,
         savings: 198,
-        priceId: "price_1Sf02DHCGP7kst5ZavA9AJvG",
+        priceId: "price_1Sf814EztIBHKDEevMuXmU4J",
       },
     },
     features: [
