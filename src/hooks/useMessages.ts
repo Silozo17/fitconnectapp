@@ -361,7 +361,7 @@ export const useMessages = (participantId?: string) => {
     }
   };
 
-  // Set up realtime subscription with unique channel per user
+  // Set up realtime subscription - simplified with wildcard event and manual filtering
   useEffect(() => {
     if (!currentProfileId) {
       console.log("[useMessages] No profile ID, skipping realtime subscription");
@@ -370,118 +370,98 @@ export const useMessages = (participantId?: string) => {
 
     console.log("[useMessages] Setting up realtime subscription for profile:", currentProfileId);
 
-    // Create unique channel for this user's messages
-    const channelName = `user-messages-${currentProfileId}-${participantId || 'all'}`;
+    const channelName = `messages-${currentProfileId}`;
     
     const channel = supabase
       .channel(channelName)
-      // Listen for messages received by current user
       .on(
         "postgres_changes",
         {
-          event: "INSERT",
+          event: "*",
           schema: "public",
           table: "messages",
-          filter: `receiver_id=eq.${currentProfileId}`,
         },
         (payload) => {
-          const newMessage = payload.new as Message;
-          console.log("[useMessages] Realtime: Received message:", newMessage.id, "from:", newMessage.sender_id);
+          console.log("[useMessages] Realtime event:", payload.eventType, payload);
           
-          // If viewing a specific conversation, check if message is from that participant
-          if (participantId) {
-            if (newMessage.sender_id === participantId) {
-              console.log("[useMessages] Realtime: Adding received message to active conversation");
-              setMessages((prev) => {
-                // Check for duplicates
-                if (prev.some(m => m.id === newMessage.id)) {
-                  return prev;
-                }
-                return [...prev, newMessage];
-              });
+          if (payload.eventType === "INSERT") {
+            const newMessage = payload.new as Message;
+            
+            // Check if this message involves current user
+            const isReceived = newMessage.receiver_id === currentProfileId;
+            const isSent = newMessage.sender_id === currentProfileId;
+            
+            if (!isReceived && !isSent) {
+              console.log("[useMessages] Message not relevant to current user, ignoring");
+              return;
+            }
+            
+            console.log("[useMessages] Relevant message:", isReceived ? "received" : "sent", newMessage.id);
+            
+            // If viewing a specific conversation
+            if (participantId) {
+              const isInConversation = 
+                (newMessage.sender_id === participantId && newMessage.receiver_id === currentProfileId) ||
+                (newMessage.sender_id === currentProfileId && newMessage.receiver_id === participantId);
               
-              // Mark as read since we're viewing this conversation
-              supabase
-                .from("messages")
-                .update({ read_at: new Date().toISOString() })
-                .eq("id", newMessage.id)
-                .then(() => console.log("[useMessages] Marked message as read"));
+              if (isInConversation) {
+                console.log("[useMessages] Message is in active conversation");
+                
+                setMessages((prev) => {
+                  // Remove any temp message with matching content (for sent messages)
+                  const withoutTemp = prev.filter(m => 
+                    !(m.id.startsWith('temp-') && m.content === newMessage.content)
+                  );
+                  
+                  // Check if message already exists
+                  if (withoutTemp.some(m => m.id === newMessage.id)) {
+                    console.log("[useMessages] Message already exists, skipping");
+                    return withoutTemp;
+                  }
+                  
+                  console.log("[useMessages] Adding new message to state");
+                  return [...withoutTemp, newMessage];
+                });
+                
+                // Mark as read if it's a received message
+                if (isReceived) {
+                  supabase
+                    .from("messages")
+                    .update({ read_at: new Date().toISOString() })
+                    .eq("id", newMessage.id)
+                    .then(() => console.log("[useMessages] Marked message as read"));
+                }
+              }
+            }
+            
+            // Refresh conversations list
+            fetchConversations();
+          }
+          
+          if (payload.eventType === "UPDATE") {
+            const updatedMessage = payload.new as Message;
+            // Only update if we're the sender (for read receipts)
+            if (updatedMessage.sender_id === currentProfileId) {
+              console.log("[useMessages] Updating message (read receipt):", updatedMessage.id);
+              setMessages((prev) =>
+                prev.map((m) => (m.id === updatedMessage.id ? updatedMessage : m))
+              );
             }
           }
-          
-          // Always refresh conversations list for unread counts
-          fetchConversations();
         }
       )
-      // Listen for messages sent by current user (for confirmation)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-          filter: `sender_id=eq.${currentProfileId}`,
-        },
-        (payload) => {
-          const newMessage = payload.new as Message;
-          console.log("[useMessages] Realtime: Sent message confirmed:", newMessage.id);
-          
-          // Replace optimistic message with real one if in active conversation
-          if (participantId && newMessage.receiver_id === participantId) {
-            setMessages((prev) => {
-              // Find and replace temp message
-              const tempIndex = prev.findIndex(m => 
-                m.id.startsWith('temp-') && 
-                m.content === newMessage.content && 
-                m.sender_id === newMessage.sender_id
-              );
-              
-              if (tempIndex >= 0) {
-                const updated = [...prev];
-                updated[tempIndex] = newMessage;
-                return updated;
-              }
-              
-              // If no temp message found, check for duplicate
-              if (prev.some(m => m.id === newMessage.id)) {
-                return prev;
-              }
-              
-              // Add the message if not found
-              return [...prev, newMessage];
-            });
-          }
-          
-          // Refresh conversations to update last message
-          fetchConversations();
-        }
-      )
-      // Listen for read receipt updates
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "messages",
-          filter: `sender_id=eq.${currentProfileId}`,
-        },
-        (payload) => {
-          const updatedMessage = payload.new as Message;
-          console.log("[useMessages] Realtime: Message updated (read receipt):", updatedMessage.id);
-          setMessages((prev) =>
-            prev.map((m) => (m.id === updatedMessage.id ? updatedMessage : m))
-          );
-        }
-      )
-      .subscribe((status) => {
-        console.log("[useMessages] Realtime subscription status:", status);
+      .subscribe((status, err) => {
+        console.log("[useMessages] Subscription status:", status, err || "");
         if (status === 'SUBSCRIBED') {
-          console.log("[useMessages] Successfully subscribed to channel:", channelName);
+          console.log("[useMessages] Successfully subscribed to:", channelName);
+        }
+        if (status === 'CHANNEL_ERROR') {
+          console.error("[useMessages] Channel error:", err);
         }
       });
 
     return () => {
-      console.log("[useMessages] Cleaning up realtime subscription:", channelName);
+      console.log("[useMessages] Cleaning up subscription:", channelName);
       supabase.removeChannel(channel);
     };
   }, [currentProfileId, participantId, fetchConversations]);
