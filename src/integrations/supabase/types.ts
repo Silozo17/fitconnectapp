@@ -53,6 +53,70 @@ export type Database = {
         }
         Relationships: []
       }
+      booking_requests: {
+        Row: {
+          client_id: string
+          coach_id: string
+          created_at: string | null
+          duration_minutes: number
+          id: string
+          is_online: boolean | null
+          message: string | null
+          requested_at: string
+          responded_at: string | null
+          session_type_id: string | null
+          status: string | null
+        }
+        Insert: {
+          client_id: string
+          coach_id: string
+          created_at?: string | null
+          duration_minutes?: number
+          id?: string
+          is_online?: boolean | null
+          message?: string | null
+          requested_at: string
+          responded_at?: string | null
+          session_type_id?: string | null
+          status?: string | null
+        }
+        Update: {
+          client_id?: string
+          coach_id?: string
+          created_at?: string | null
+          duration_minutes?: number
+          id?: string
+          is_online?: boolean | null
+          message?: string | null
+          requested_at?: string
+          responded_at?: string | null
+          session_type_id?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_requests_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_requests_session_type_id_fkey"
+            columns: ["session_type_id"]
+            isOneToOne: false
+            referencedRelation: "session_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_notes: {
         Row: {
           category: string | null
@@ -209,6 +273,44 @@ export type Database = {
           },
         ]
       }
+      coach_availability: {
+        Row: {
+          coach_id: string
+          created_at: string | null
+          day_of_week: number
+          end_time: string
+          id: string
+          is_active: boolean | null
+          start_time: string
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string | null
+          day_of_week: number
+          end_time: string
+          id?: string
+          is_active?: boolean | null
+          start_time: string
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string | null
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          is_active?: boolean | null
+          start_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_availability_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coach_clients: {
         Row: {
           client_id: string
@@ -260,6 +362,7 @@ export type Database = {
       coach_profiles: {
         Row: {
           bio: string | null
+          booking_mode: string | null
           certifications: Json | null
           coach_types: string[] | null
           created_at: string
@@ -278,6 +381,7 @@ export type Database = {
         }
         Insert: {
           bio?: string | null
+          booking_mode?: string | null
           certifications?: Json | null
           coach_types?: string[] | null
           created_at?: string
@@ -296,6 +400,7 @@ export type Database = {
         }
         Update: {
           bio?: string | null
+          booking_mode?: string | null
           certifications?: Json | null
           coach_types?: string[] | null
           created_at?: string
@@ -530,6 +635,56 @@ export type Database = {
           value?: Json
         }
         Relationships: []
+      }
+      session_types: {
+        Row: {
+          coach_id: string
+          created_at: string | null
+          description: string | null
+          duration_minutes: number
+          id: string
+          is_active: boolean | null
+          is_in_person: boolean | null
+          is_online: boolean | null
+          name: string
+          price: number
+          updated_at: string | null
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean | null
+          is_in_person?: boolean | null
+          is_online?: boolean | null
+          name: string
+          price: number
+          updated_at?: string | null
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean | null
+          is_in_person?: boolean | null
+          is_online?: boolean | null
+          name?: string
+          price?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_types_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subscriptions: {
         Row: {
