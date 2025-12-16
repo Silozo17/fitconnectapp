@@ -1,10 +1,10 @@
 import { Package, RefreshCcw, Check } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCoachPackages, useCoachSubscriptionPlans } from "@/hooks/usePackages";
 import { Skeleton } from "@/components/ui/skeleton";
+import CheckoutButton from "@/components/payments/CheckoutButton";
 
 interface CoachPricingSectionProps {
   coachId: string;
@@ -84,9 +84,13 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
                         (£{(pkg.price / pkg.session_count).toFixed(2)}/session)
                       </span>
                     </div>
-                    <Button size="sm" onClick={() => onSelectPackage?.(pkg.id)}>
-                      Select
-                    </Button>
+                    <CheckoutButton
+                      type="package"
+                      itemId={pkg.id}
+                      coachId={coachId}
+                      label="Purchase"
+                      size="sm"
+                    />
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">
                     Valid for {pkg.validity_days} days after purchase
@@ -136,9 +140,13 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
                       <span className="text-2xl font-bold text-primary">£{plan.price}</span>
                       <span className="text-sm text-muted-foreground">/{plan.billing_period}</span>
                     </div>
-                    <Button size="sm" onClick={() => onSelectPlan?.(plan.id)}>
-                      Subscribe
-                    </Button>
+                    <CheckoutButton
+                      type="subscription"
+                      itemId={plan.id}
+                      coachId={coachId}
+                      label="Subscribe"
+                      size="sm"
+                    />
                   </div>
                 </div>
               ))}

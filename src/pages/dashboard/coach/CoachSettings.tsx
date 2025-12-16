@@ -21,6 +21,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { ProfileImageUpload } from "@/components/shared/ProfileImageUpload";
+import StripeConnectButton from "@/components/payments/StripeConnectButton";
+import PlatformSubscription from "@/components/payments/PlatformSubscription";
+import { useQuery } from "@tanstack/react-query";
 
 const coachTypes = ["Personal Trainer", "Nutritionist", "Boxing Coach", "MMA Coach", "Yoga Instructor", "CrossFit Coach"];
 
@@ -40,7 +43,6 @@ interface CoachProfile {
 const CoachSettings = () => {
   const { user, signOut } = useAuth();
   const [selectedTab, setSelectedTab] = useState("profile");
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   const [profile, setProfile] = useState<CoachProfile>({
@@ -65,35 +67,40 @@ const CoachSettings = () => {
     pushReminders: true,
   });
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (!user) return;
+  // Fetch coach profile with React Query
+  const { data: coachData, isLoading: loading, refetch } = useQuery({
+    queryKey: ["coach-profile-settings", user?.id],
+    queryFn: async () => {
+      if (!user) return null;
 
       const { data, error } = await supabase
         .from("coach_profiles")
-        .select("display_name, bio, location, experience_years, hourly_rate, coach_types, online_available, in_person_available, profile_image_url, subscription_tier")
+        .select("id, display_name, bio, location, experience_years, hourly_rate, coach_types, online_available, in_person_available, profile_image_url, subscription_tier")
         .eq("user_id", user.id)
         .maybeSingle();
 
-      if (data) {
-        setProfile({
-          display_name: data.display_name || "",
-          bio: data.bio || "",
-          location: data.location || "",
-          experience_years: data.experience_years,
-          hourly_rate: data.hourly_rate,
-          coach_types: data.coach_types || [],
-          online_available: data.online_available ?? true,
-          in_person_available: data.in_person_available ?? false,
-          profile_image_url: data.profile_image_url,
-          subscription_tier: data.subscription_tier || "free",
-        });
-      }
-      setLoading(false);
-    };
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
 
-    fetchProfile();
-  }, [user]);
+  useEffect(() => {
+    if (coachData) {
+      setProfile({
+        display_name: coachData.display_name || "",
+        bio: coachData.bio || "",
+        location: coachData.location || "",
+        experience_years: coachData.experience_years,
+        hourly_rate: coachData.hourly_rate,
+        coach_types: coachData.coach_types || [],
+        online_available: coachData.online_available ?? true,
+        in_person_available: coachData.in_person_available ?? false,
+        profile_image_url: coachData.profile_image_url,
+        subscription_tier: coachData.subscription_tier || "free",
+      });
+    }
+  }, [coachData]);
 
   const handleSaveProfile = async () => {
     if (!user) return;
@@ -375,53 +382,17 @@ const CoachSettings = () => {
               </div>
             )}
 
-            {/* Subscription Tab */}
-            {selectedTab === "subscription" && (
+            {/* Subscription & Payments Tab */}
+            {selectedTab === "subscription" && coachData && (
               <div className="space-y-6">
-                <div className="card-elevated p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="font-display font-bold text-foreground">Current Plan</h2>
-                    <Badge className="bg-primary/20 text-primary capitalize">{profile.subscription_tier}</Badge>
-                  </div>
-                  <p className="text-muted-foreground mb-6">
-                    Upgrade to unlock more features and grow your coaching business.
-                  </p>
+                {/* Stripe Connect for receiving payments */}
+                <StripeConnectButton coachId={coachData.id} onSuccess={() => refetch()} />
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {[
-                      { name: "free", displayName: "Free", price: 0, features: ["5 clients max", "Basic messaging", "Standard support"] },
-                      { name: "pro", displayName: "Pro", price: 29, features: ["Unlimited clients", "Priority messaging", "Analytics dashboard", "Priority support"], popular: true },
-                      { name: "elite", displayName: "Elite", price: 79, features: ["Everything in Pro", "Custom branding", "API access", "Dedicated support"] },
-                    ].map((plan) => (
-                      <div
-                        key={plan.name}
-                        className={`p-4 rounded-lg border ${
-                          plan.popular ? "border-primary bg-primary/5" : "border-border"
-                        } ${profile.subscription_tier === plan.name ? "ring-2 ring-primary" : ""}`}
-                      >
-                        {plan.popular && (
-                          <Badge className="bg-primary text-primary-foreground mb-2">Most Popular</Badge>
-                        )}
-                        <h3 className="font-display font-bold text-foreground">{plan.displayName}</h3>
-                        <p className="text-2xl font-bold text-foreground mt-2">
-                          £{plan.price}<span className="text-sm text-muted-foreground">/mo</span>
-                        </p>
-                        <ul className="mt-4 space-y-2">
-                          {plan.features.map((feature, i) => (
-                            <li key={i} className="text-sm text-muted-foreground">✓ {feature}</li>
-                          ))}
-                        </ul>
-                        <Button
-                          className="w-full mt-4"
-                          variant={profile.subscription_tier === plan.name ? "outline" : "default"}
-                          disabled={profile.subscription_tier === plan.name}
-                        >
-                          {profile.subscription_tier === plan.name ? "Current Plan" : "Upgrade"}
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                {/* Platform Subscription */}
+                <PlatformSubscription 
+                  coachId={coachData.id} 
+                  currentTier={profile.subscription_tier || "free"} 
+                />
               </div>
             )}
 
