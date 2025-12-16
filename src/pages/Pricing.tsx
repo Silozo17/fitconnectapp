@@ -58,28 +58,28 @@ const Pricing = () => {
       title="Coach Pricing"
       description="Choose the right plan for your coaching business. From free to enterprise, we have a plan that fits your needs."
     >
+      {/* Decorative Avatars - placed at PageLayout level */}
+      <DecorativeAvatar 
+        avatarSlug="bodybuilder-bull" 
+        position="top-right" 
+        size="xl" 
+        opacity={20}
+        className="right-4 top-32 z-0"
+      />
+      <DecorativeAvatar 
+        avatarSlug="hiit-fox" 
+        position="bottom-left" 
+        size="lg" 
+        opacity={15}
+        className="left-4 bottom-20 z-0"
+      />
+
       {/* Hero Section */}
-      <section className="relative pt-32 pb-16 overflow-hidden">
-        <div className="absolute inset-0 -z-10">
+      <section className="relative pt-32 pb-16">
+        <div className="absolute inset-0 -z-10 overflow-hidden">
           <BlobShape className="absolute -top-40 -right-40 w-[600px] h-[600px] opacity-30" variant="pink" />
           <BlobShape className="absolute -bottom-40 -left-40 w-[500px] h-[500px] opacity-20" variant="teal" />
         </div>
-        
-        {/* Decorative Avatars */}
-        <DecorativeAvatar 
-          avatarSlug="bodybuilder-bull" 
-          position="top-right" 
-          size="lg" 
-          opacity={15}
-          className="right-8 top-24"
-        />
-        <DecorativeAvatar 
-          avatarSlug="hiit-fox" 
-          position="bottom-left" 
-          size="md" 
-          opacity={12}
-          className="left-8 bottom-0"
-        />
         
         <div className="container mx-auto px-4 text-center">
           <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary font-medium text-sm mb-6">

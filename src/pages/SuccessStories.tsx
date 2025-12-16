@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, ArrowRight, TrendingDown, Dumbbell, Apple, Target } from "lucide-react";
+import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
 
 const SuccessStories = () => {
   const [activeFilter, setActiveFilter] = useState("all");
@@ -109,8 +110,17 @@ const SuccessStories = () => {
         <meta name="description" content="Read inspiring success stories from FitConnect clients who transformed their lives with our world-class coaches." />
       </Helmet>
       
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background relative">
         <Navbar />
+        
+        {/* Decorative Avatar */}
+        <DecorativeAvatar 
+          avatarSlug="deadlift-boar" 
+          position="bottom-right" 
+          size="xl" 
+          opacity={18}
+          className="right-8 bottom-20 z-0"
+        />
         
         {/* Hero Section */}
         <section className="pt-32 pb-16 px-4 relative overflow-hidden">

@@ -10,6 +10,7 @@ import {
   MessageSquare, Video, FileText, Clock, CheckCircle, Star,
   TrendingUp, Zap, Award
 } from "lucide-react";
+import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
 
 const ForCoaches = () => {
   const [sessionsPerWeek, setSessionsPerWeek] = useState(10);
@@ -112,6 +113,15 @@ const ForCoaches = () => {
       title="Become a Coach"
       description="Grow your coaching business with FitConnect. Reach thousands of clients, manage your schedule, and focus on what you love—coaching."
     >
+      {/* Decorative Avatar */}
+      <DecorativeAvatar 
+        avatarSlug="elite-personal-trainer-human" 
+        position="bottom-right" 
+        size="xl" 
+        opacity={20}
+        className="right-8 bottom-40 z-0"
+      />
+
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 overflow-hidden">
         <div className="absolute inset-0 -z-10">

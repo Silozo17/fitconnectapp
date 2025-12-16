@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Mail, MessageSquare, Clock, HelpCircle, Send, Instagram, Twitter, Youtube, Facebook } from "lucide-react";
+import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
 
 const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -96,8 +97,17 @@ const Contact = () => {
         <meta name="description" content="Have questions about FitConnect? Contact our support team. We're here to help you find the perfect fitness coach." />
       </Helmet>
       
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background relative">
         <Navbar />
+        
+        {/* Decorative Avatar */}
+        <DecorativeAvatar 
+          avatarSlug="parkour-monkey" 
+          position="bottom-right" 
+          size="lg" 
+          opacity={15}
+          className="right-8 bottom-20 z-0"
+        />
         
         {/* Hero Section */}
         <section className="pt-32 pb-16 px-4 relative overflow-hidden">

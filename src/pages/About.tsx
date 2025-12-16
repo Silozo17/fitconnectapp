@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { Link } from "react-router-dom";
 import { Award, Users, Heart, Target, TrendingUp, Shield, Sparkles, Globe } from "lucide-react";
+import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
 
 const About = () => {
   const values = [
@@ -64,6 +65,22 @@ const About = () => {
       title="About Us"
       description="Learn about FitConnect's mission to make personalized fitness coaching accessible to everyone. Meet our team and discover our story."
     >
+      {/* Decorative Avatars */}
+      <DecorativeAvatar 
+        avatarSlug="weightlifting-lion" 
+        position="top-right" 
+        size="lg" 
+        opacity={18}
+        className="right-8 top-40 z-0"
+      />
+      <DecorativeAvatar 
+        avatarSlug="strongman-bear" 
+        position="bottom-left" 
+        size="md" 
+        opacity={15}
+        className="left-8 bottom-60 z-0"
+      />
+
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 overflow-hidden">
         <div className="absolute inset-0 -z-10">

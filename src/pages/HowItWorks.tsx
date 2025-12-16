@@ -9,6 +9,7 @@ import {
   FileText, Shield, CheckCircle, Users,
   MessageSquare, Star, Zap, Award
 } from "lucide-react";
+import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
 
 const HowItWorks = () => {
   const clientSteps = [
@@ -151,6 +152,22 @@ const HowItWorks = () => {
       title="How It Works"
       description="Learn how FitConnect connects you with expert fitness coaches. Simple steps for clients to find coaches and coaches to grow their business."
     >
+      {/* Decorative Avatars */}
+      <DecorativeAvatar 
+        avatarSlug="crossfit-wolf" 
+        position="top-right" 
+        size="lg" 
+        opacity={18}
+        className="right-8 top-40 z-0"
+      />
+      <DecorativeAvatar 
+        avatarSlug="martial-arts-crane" 
+        position="bottom-left" 
+        size="md" 
+        opacity={15}
+        className="left-8 bottom-32 z-0"
+      />
+
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 overflow-hidden">
         <div className="absolute inset-0 -z-10">
