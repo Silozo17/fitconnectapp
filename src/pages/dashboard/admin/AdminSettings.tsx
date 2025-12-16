@@ -10,8 +10,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePlatformSettings, useUpdatePlatformSetting } from "@/hooks/useAdminData";
 import { toast } from "sonner";
-import { Settings, Bell, Shield, Globe, Loader2 } from "lucide-react";
+import { Settings, Bell, Shield, Globe, Loader2, Plug } from "lucide-react";
 import { NotificationPreferences } from "@/components/notifications/NotificationPreferences";
+import { LanguageSelector } from "@/components/shared/LanguageSelector";
+import { Separator } from "@/components/ui/separator";
 
 const AdminSettings = () => {
   const { data: settings, isLoading } = usePlatformSettings();
@@ -92,9 +94,17 @@ const AdminSettings = () => {
                 <Settings className="h-4 w-4" />
                 General
               </TabsTrigger>
+              <TabsTrigger value="preferences" className="flex items-center gap-2">
+                <Globe className="h-4 w-4" />
+                Preferences
+              </TabsTrigger>
               <TabsTrigger value="notifications" className="flex items-center gap-2">
                 <Bell className="h-4 w-4" />
                 Notifications
+              </TabsTrigger>
+              <TabsTrigger value="integrations" className="flex items-center gap-2">
+                <Plug className="h-4 w-4" />
+                Integrations
               </TabsTrigger>
               <TabsTrigger value="pricing" className="flex items-center gap-2">
                 <Globe className="h-4 w-4" />
@@ -155,6 +165,36 @@ const AdminSettings = () => {
               </Card>
             </TabsContent>
 
+            <TabsContent value="preferences" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Display Preferences</CardTitle>
+                  <CardDescription>Language and regional settings</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <LanguageSelector />
+                  <Separator />
+                  <div className="space-y-2">
+                    <Label>Default Currency</Label>
+                    <Select
+                      value={localSettings.currency}
+                      onValueChange={(value) => handleChange("currency", value)}
+                    >
+                      <SelectTrigger className="max-w-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="GBP">GBP (£)</SelectItem>
+                        <SelectItem value="USD">USD ($)</SelectItem>
+                        <SelectItem value="EUR">EUR (€)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">Default currency for new users</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
             <TabsContent value="notifications" className="space-y-4">
               <Card>
                 <CardHeader>
@@ -181,6 +221,35 @@ const AdminSettings = () => {
                 <h3 className="text-lg font-semibold mb-4">Your Personal Preferences</h3>
                 <NotificationPreferences />
               </div>
+            </TabsContent>
+
+            <TabsContent value="integrations" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Platform Integrations</CardTitle>
+                  <CardDescription>Monitor and manage third-party service connections</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Card className="p-4">
+                      <p className="font-medium">Stripe</p>
+                      <p className="text-sm text-muted-foreground">Payment processing - Connected</p>
+                    </Card>
+                    <Card className="p-4">
+                      <p className="font-medium">Wearables</p>
+                      <p className="text-sm text-muted-foreground">Fitness device sync - 3 providers</p>
+                    </Card>
+                    <Card className="p-4">
+                      <p className="font-medium">Calendar</p>
+                      <p className="text-sm text-muted-foreground">Session scheduling - Google Calendar</p>
+                    </Card>
+                    <Card className="p-4">
+                      <p className="font-medium">Video</p>
+                      <p className="text-sm text-muted-foreground">Video conferencing - Zoom, Google Meet</p>
+                    </Card>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="pricing" className="space-y-4">
