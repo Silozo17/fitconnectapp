@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Search,
   Plus,
@@ -11,8 +11,7 @@ import {
   Edit,
   Trash2,
   Users,
-  Clock,
-  Calendar,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,85 +23,23 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import { useTrainingPlans, useDeleteTrainingPlan, TrainingPlan } from "@/hooks/useTrainingPlans";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
 
-// Mock data
-const workoutPlans = [
-  { 
-    id: "1", 
-    name: "Beginner Full Body", 
-    type: "workout", 
-    duration: "4 weeks", 
-    level: "Beginner",
-    assignedTo: 8,
-    exercises: 24,
-    createdAt: "Nov 15, 2024"
-  },
-  { 
-    id: "2", 
-    name: "Advanced Strength", 
-    type: "workout", 
-    duration: "8 weeks", 
-    level: "Advanced",
-    assignedTo: 5,
-    exercises: 48,
-    createdAt: "Oct 20, 2024"
-  },
-  { 
-    id: "3", 
-    name: "HIIT Fat Burner", 
-    type: "workout", 
-    duration: "6 weeks", 
-    level: "Intermediate",
-    assignedTo: 12,
-    exercises: 36,
-    createdAt: "Sep 10, 2024"
-  },
-  { 
-    id: "4", 
-    name: "Boxing Conditioning", 
-    type: "workout", 
-    duration: "4 weeks", 
-    level: "Intermediate",
-    assignedTo: 3,
-    exercises: 20,
-    createdAt: "Dec 1, 2024"
-  },
-];
-
-const nutritionPlans = [
-  { 
-    id: "5", 
-    name: "Weight Loss Plan", 
-    type: "nutrition", 
-    duration: "12 weeks", 
-    calories: "1800 kcal",
-    assignedTo: 6,
-    meals: 21,
-    createdAt: "Nov 1, 2024"
-  },
-  { 
-    id: "6", 
-    name: "Muscle Building", 
-    type: "nutrition", 
-    duration: "8 weeks", 
-    calories: "2800 kcal",
-    assignedTo: 4,
-    meals: 28,
-    createdAt: "Oct 15, 2024"
-  },
-  { 
-    id: "7", 
-    name: "Maintenance Diet", 
-    type: "nutrition", 
-    duration: "Ongoing", 
-    calories: "2200 kcal",
-    assignedTo: 10,
-    meals: 14,
-    createdAt: "Sep 20, 2024"
-  },
-];
-
+// Mock templates for now
 const templates = [
   { id: "t1", name: "5x5 Strength Program", category: "Strength", downloads: 156 },
   { id: "t2", name: "Push Pull Legs Split", category: "Hypertrophy", downloads: 234 },
@@ -111,7 +48,73 @@ const templates = [
 ];
 
 const CoachPlans = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
+  const [coachProfileId, setCoachProfileId] = useState<string | null>(null);
+  const [planToDelete, setPlanToDelete] = useState<TrainingPlan | null>(null);
+
+  // Fetch coach profile ID
+  useEffect(() => {
+    const fetchCoachProfile = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from("coach_profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .single();
+      if (data) setCoachProfileId(data.id);
+    };
+    fetchCoachProfile();
+  }, [user]);
+
+  const { data: plans = [], isLoading } = useTrainingPlans(coachProfileId || undefined);
+  const deletePlanMutation = useDeleteTrainingPlan();
+
+  // Filter plans by type
+  const workoutPlans = plans.filter(p => p.plan_type === "workout");
+  const nutritionPlans = plans.filter(p => p.plan_type === "nutrition");
+
+  // Filter by search
+  const filterPlans = (planList: TrainingPlan[]) => {
+    if (!searchQuery.trim()) return planList;
+    return planList.filter(p => 
+      p.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  };
+
+  const handleEditPlan = (plan: TrainingPlan) => {
+    if (plan.plan_type === "nutrition") {
+      navigate(`/dashboard/coach/plans/nutrition/${plan.id}`);
+    } else {
+      navigate(`/dashboard/coach/plans/${plan.id}`);
+    }
+  };
+
+  const handleDeletePlan = async () => {
+    if (!planToDelete) return;
+    await deletePlanMutation.mutateAsync(planToDelete.id);
+    setPlanToDelete(null);
+  };
+
+  const handleDuplicatePlan = (plan: TrainingPlan) => {
+    // Navigate to create page with plan data as query params (simplified for now)
+    if (plan.plan_type === "nutrition") {
+      navigate(`/dashboard/coach/plans/nutrition/new?duplicate=${plan.id}`);
+    } else {
+      navigate(`/dashboard/coach/plans/new?duplicate=${plan.id}`);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <DashboardLayout title="Training Plans" description="Create and manage your training and nutrition plans.">
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout title="Training Plans" description="Create and manage your training and nutrition plans.">
@@ -161,9 +164,7 @@ const CoachPlans = () => {
               <Users className="w-5 h-5 text-accent" />
             </div>
             <div>
-              <p className="text-2xl font-display font-bold text-foreground">
-                {[...workoutPlans, ...nutritionPlans].reduce((acc, plan) => acc + plan.assignedTo, 0)}
-              </p>
+              <p className="text-2xl font-display font-bold text-foreground">0</p>
               <p className="text-sm text-muted-foreground">Active Assignments</p>
             </div>
           </div>
@@ -210,7 +211,7 @@ const CoachPlans = () => {
         {/* Workout Plans Tab */}
         <TabsContent value="workout">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {workoutPlans.map((plan) => (
+            {filterPlans(workoutPlans).map((plan) => (
               <div key={plan.id} className="card-elevated p-6 hover-lift">
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -223,27 +224,35 @@ const CoachPlans = () => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem><Edit className="w-4 h-4 mr-2" /> Edit</DropdownMenuItem>
-                      <DropdownMenuItem><Copy className="w-4 h-4 mr-2" /> Duplicate</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleEditPlan(plan)}>
+                        <Edit className="w-4 h-4 mr-2" /> Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleDuplicatePlan(plan)}>
+                        <Copy className="w-4 h-4 mr-2" /> Duplicate
+                      </DropdownMenuItem>
                       <DropdownMenuItem><Users className="w-4 h-4 mr-2" /> Assign</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive"><Trash2 className="w-4 h-4 mr-2" /> Delete</DropdownMenuItem>
+                      <DropdownMenuItem 
+                        className="text-destructive"
+                        onClick={() => setPlanToDelete(plan)}
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" /> Delete
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
                 <h3 className="font-display font-bold text-foreground mb-2">{plan.name}</h3>
                 <div className="flex items-center gap-2 mb-4">
-                  <Badge variant="outline">{plan.level}</Badge>
-                  <Badge variant="outline">{plan.duration}</Badge>
+                  {plan.duration_weeks && (
+                    <Badge variant="outline">{plan.duration_weeks} weeks</Badge>
+                  )}
                 </div>
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <div className="flex items-center gap-4">
                     <span className="flex items-center gap-1">
-                      <Dumbbell className="w-3 h-3" /> {plan.exercises} exercises
+                      <Dumbbell className="w-3 h-3" /> {Array.isArray(plan.content) ? plan.content.reduce((acc, day) => acc + (day.exercises?.length || 0), 0) : 0} exercises
                     </span>
                   </div>
-                  <span className="flex items-center gap-1">
-                    <Users className="w-3 h-3" /> {plan.assignedTo}
-                  </span>
+                  <span>{format(new Date(plan.created_at), "MMM d, yyyy")}</span>
                 </div>
               </div>
             ))}
@@ -259,46 +268,67 @@ const CoachPlans = () => {
               </div>
             </Link>
           </div>
+
+          {filterPlans(workoutPlans).length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              No workout plans found. Create your first one!
+            </div>
+          )}
         </TabsContent>
 
         {/* Nutrition Plans Tab */}
         <TabsContent value="nutrition">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {nutritionPlans.map((plan) => (
-              <div key={plan.id} className="card-elevated p-6 hover-lift">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
-                    <Apple className="w-6 h-6 text-success" />
+            {filterPlans(nutritionPlans).map((plan) => {
+              const content = plan.content as any;
+              const targetCalories = content?.targets?.calories;
+              return (
+                <div key={plan.id} className="card-elevated p-6 hover-lift">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
+                      <Apple className="w-6 h-6 text-success" />
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleEditPlan(plan)}>
+                          <Edit className="w-4 h-4 mr-2" /> Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDuplicatePlan(plan)}>
+                          <Copy className="w-4 h-4 mr-2" /> Duplicate
+                        </DropdownMenuItem>
+                        <DropdownMenuItem><Users className="w-4 h-4 mr-2" /> Assign</DropdownMenuItem>
+                        <DropdownMenuItem 
+                          className="text-destructive"
+                          onClick={() => setPlanToDelete(plan)}
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" /> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreVertical className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem><Edit className="w-4 h-4 mr-2" /> Edit</DropdownMenuItem>
-                      <DropdownMenuItem><Copy className="w-4 h-4 mr-2" /> Duplicate</DropdownMenuItem>
-                      <DropdownMenuItem><Users className="w-4 h-4 mr-2" /> Assign</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive"><Trash2 className="w-4 h-4 mr-2" /> Delete</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <h3 className="font-display font-bold text-foreground mb-2">{plan.name}</h3>
+                  <div className="flex items-center gap-2 mb-4">
+                    {targetCalories && (
+                      <Badge variant="outline">{targetCalories} kcal</Badge>
+                    )}
+                    {plan.duration_weeks && (
+                      <Badge variant="outline">{plan.duration_weeks} weeks</Badge>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Apple className="w-3 h-3" /> {Array.isArray(content?.days) ? content.days.length : 0} days
+                    </span>
+                    <span>{format(new Date(plan.created_at), "MMM d, yyyy")}</span>
+                  </div>
                 </div>
-                <h3 className="font-display font-bold text-foreground mb-2">{plan.name}</h3>
-                <div className="flex items-center gap-2 mb-4">
-                  <Badge variant="outline">{plan.calories}</Badge>
-                  <Badge variant="outline">{plan.duration}</Badge>
-                </div>
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <Apple className="w-3 h-3" /> {plan.meals} meals
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Users className="w-3 h-3" /> {plan.assignedTo}
-                  </span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
 
             {/* Create New Card */}
             <Link to="/dashboard/coach/plans/nutrition/new">
@@ -311,6 +341,12 @@ const CoachPlans = () => {
               </div>
             </Link>
           </div>
+
+          {filterPlans(nutritionPlans).length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              No nutrition plans found. Create your first one!
+            </div>
+          )}
         </TabsContent>
 
         {/* Templates Tab */}
@@ -345,6 +381,27 @@ const CoachPlans = () => {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!planToDelete} onOpenChange={(open) => !open && setPlanToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Plan</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete "{planToDelete?.name}". This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeletePlan}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 };
