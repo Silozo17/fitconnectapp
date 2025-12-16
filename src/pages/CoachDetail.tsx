@@ -229,7 +229,7 @@ const CoachDetail = () => {
                   </div>
 
                   <div className="space-y-3">
-                    {user && role === "client" ? (
+                    {user && (role === "client" || role === "admin") ? (
                       <>
                         <Button 
                           className="w-full" 

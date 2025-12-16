@@ -155,47 +155,47 @@ const App = () => (
 
                 {/* Client Dashboard Routes */}
                 <Route path="/dashboard/client" element={
-                  <ProtectedRoute allowedRoles={["client"]}>
+                  <ProtectedRoute allowedRoles={["client", "admin"]}>
                     <ClientOverview />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/client/coaches" element={
-                  <ProtectedRoute allowedRoles={["client"]}>
+                  <ProtectedRoute allowedRoles={["client", "admin"]}>
                     <ClientCoaches />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/client/favourites" element={
-                  <ProtectedRoute allowedRoles={["client"]}>
+                  <ProtectedRoute allowedRoles={["client", "admin"]}>
                     <ClientFavourites />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/client/sessions" element={
-                  <ProtectedRoute allowedRoles={["client"]}>
+                  <ProtectedRoute allowedRoles={["client", "admin"]}>
                     <ClientSessions />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/client/messages" element={
-                  <ProtectedRoute allowedRoles={["client"]}>
+                  <ProtectedRoute allowedRoles={["client", "admin"]}>
                     <ClientMessages />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/client/messages/:id" element={
-                  <ProtectedRoute allowedRoles={["client"]}>
+                  <ProtectedRoute allowedRoles={["client", "admin"]}>
                     <ClientMessages />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/client/plans" element={
-                  <ProtectedRoute allowedRoles={["client"]}>
+                  <ProtectedRoute allowedRoles={["client", "admin"]}>
                     <ClientPlans />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/client/progress" element={
-                  <ProtectedRoute allowedRoles={["client"]}>
+                  <ProtectedRoute allowedRoles={["client", "admin"]}>
                     <ClientProgress />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/client/settings" element={
-                  <ProtectedRoute allowedRoles={["client"]}>
+                  <ProtectedRoute allowedRoles={["client", "admin"]}>
                     <ClientSettings />
                   </ProtectedRoute>
                 } />
