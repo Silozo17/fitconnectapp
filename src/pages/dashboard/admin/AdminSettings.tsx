@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { usePlatformSettings, useUpdatePlatformSetting } from "@/hooks/useAdminData";
 import { toast } from "sonner";
 import { Settings, Bell, Shield, Globe, Loader2 } from "lucide-react";
+import { NotificationPreferences } from "@/components/notifications/NotificationPreferences";
 
 const AdminSettings = () => {
   const { data: settings, isLoading } = usePlatformSettings();
@@ -157,8 +158,8 @@ const AdminSettings = () => {
             <TabsContent value="notifications" className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>Notification Settings</CardTitle>
-                  <CardDescription>Configure email and notification preferences</CardDescription>
+                  <CardTitle>Platform Notification Settings</CardTitle>
+                  <CardDescription>Configure platform-wide email and notification preferences</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="flex items-center justify-between">
@@ -175,6 +176,11 @@ const AdminSettings = () => {
                   </div>
                 </CardContent>
               </Card>
+
+              <div className="pt-4">
+                <h3 className="text-lg font-semibold mb-4">Your Personal Preferences</h3>
+                <NotificationPreferences />
+              </div>
             </TabsContent>
 
             <TabsContent value="pricing" className="space-y-4">

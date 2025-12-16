@@ -33,7 +33,7 @@ export const NotificationCenter = () => {
     ? "/dashboard/client/notifications" 
     : role === "coach" 
     ? "/dashboard/coach/notifications" 
-    : "/dashboard/notifications";
+    : "/dashboard/admin/notifications";
 
   return (
     <Popover>
@@ -96,16 +96,12 @@ export const NotificationCenter = () => {
             </div>
           )}
         </ScrollArea>
-        {notifications.length > 0 && (
-          <>
-            <Separator />
-            <div className="p-2">
-              <Button variant="ghost" className="w-full text-sm" asChild>
-                <Link to={notificationsPath}>View all notifications</Link>
-              </Button>
-            </div>
-          </>
-        )}
+        <Separator />
+        <div className="p-2">
+          <Button variant="ghost" className="w-full text-sm" asChild>
+            <Link to={notificationsPath}>View all notifications</Link>
+          </Button>
+        </div>
       </PopoverContent>
     </Popover>
   );

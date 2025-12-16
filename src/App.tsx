@@ -207,6 +207,11 @@ const App = () => (
                     <AdminChallenges />
                   </ProtectedRoute>
                 } />
+                <Route path="/dashboard/admin/notifications" element={
+                  <ProtectedRoute allowedRoles={["admin", "manager", "staff"]}>
+                    <Notifications />
+                  </ProtectedRoute>
+                } />
                 
                 {/* Onboarding */}
                 <Route path="/onboarding/client" element={
