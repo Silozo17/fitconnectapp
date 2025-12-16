@@ -78,6 +78,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       password,
       options: {
         emailRedirectTo: redirectUrl,
+        data: {
+          role: selectedRole, // Pass role in metadata - trigger handles the rest
+        },
       },
     });
 
@@ -85,28 +88,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return { error };
     }
 
-    // Create user role entry
+    // Role and profile are now created automatically by the database trigger
     if (data.user) {
-      const { error: roleError } = await supabase.from("user_roles").insert({
-        user_id: data.user.id,
-        role: selectedRole,
-      });
-
-      if (roleError) {
-        return { error: roleError };
-      }
-
-      // Create initial profile based on role
-      if (selectedRole === "client") {
-        await supabase.from("client_profiles").insert({
-          user_id: data.user.id,
-        });
-      } else if (selectedRole === "coach") {
-        await supabase.from("coach_profiles").insert({
-          user_id: data.user.id,
-        });
-      }
-
       setRole(selectedRole);
     }
 
