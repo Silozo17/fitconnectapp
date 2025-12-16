@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -29,14 +29,31 @@ interface CreateSubscriptionPlanModalProps {
 }
 
 const CreateSubscriptionPlanModal = ({ open, onOpenChange, editPlan }: CreateSubscriptionPlanModalProps) => {
-  const [name, setName] = useState(editPlan?.name || "");
-  const [description, setDescription] = useState(editPlan?.description || "");
-  const [price, setPrice] = useState(editPlan?.price?.toString() || "");
-  const [billingPeriod, setBillingPeriod] = useState(editPlan?.billing_period || "monthly");
-  const [sessionsPerPeriod, setSessionsPerPeriod] = useState(editPlan?.sessions_per_period?.toString() || "");
-  const [features, setFeatures] = useState<string[]>(editPlan?.features || []);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
+  const [billingPeriod, setBillingPeriod] = useState("monthly");
+  const [sessionsPerPeriod, setSessionsPerPeriod] = useState("");
+  const [features, setFeatures] = useState<string[]>([]);
   const [newFeature, setNewFeature] = useState("");
-  const [isActive, setIsActive] = useState(editPlan?.is_active ?? true);
+  const [isActive, setIsActive] = useState(true);
+
+  // Sync form state when modal opens or editPlan changes
+  useEffect(() => {
+    if (open) {
+      if (editPlan) {
+        setName(editPlan.name || "");
+        setDescription(editPlan.description || "");
+        setPrice(editPlan.price?.toString() || "");
+        setBillingPeriod(editPlan.billing_period || "monthly");
+        setSessionsPerPeriod(editPlan.sessions_per_period?.toString() || "");
+        setFeatures(editPlan.features || []);
+        setIsActive(editPlan.is_active ?? true);
+      } else {
+        resetForm();
+      }
+    }
+  }, [open, editPlan]);
 
   const createPlan = useCreateSubscriptionPlan();
   const updatePlan = useUpdateSubscriptionPlan();
