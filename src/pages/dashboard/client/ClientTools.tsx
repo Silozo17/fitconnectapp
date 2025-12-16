@@ -1,4 +1,4 @@
-import PageLayout from "@/components/layout/PageLayout";
+import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 import BMICalculator from "@/components/tools/BMICalculator";
 import BMRCalculator from "@/components/tools/BMRCalculator";
 import TDEECalculator from "@/components/tools/TDEECalculator";
@@ -8,7 +8,6 @@ import OneRepMaxCalculator from "@/components/tools/OneRepMaxCalculator";
 import WaterIntakeCalculator from "@/components/tools/WaterIntakeCalculator";
 import HeartRateZoneCalculator from "@/components/tools/HeartRateZoneCalculator";
 import { Calculator, Scale, Flame, Utensils, Target, Percent, Dumbbell, Droplets, Heart } from "lucide-react";
-import { Link } from "react-router-dom";
 
 const toolsList = [
   { id: "bmi", name: "BMI Calculator", icon: Scale, description: "Body Mass Index" },
@@ -21,28 +20,28 @@ const toolsList = [
   { id: "heart-rate", name: "Heart Rate Zones", icon: Heart, description: "Training Zones" },
 ];
 
-const Tools = () => {
+const ClientTools = () => {
   return (
-    <PageLayout 
-      title="Free Fitness Calculators - BMI, BMR, Calorie Calculator"
-      description="Free fitness calculators including BMI, BMR, TDEE, body fat percentage, one rep max, water intake, and heart rate zone calculators. No signup required."
+    <ClientDashboardLayout
+      title="Fitness Tools"
+      description="Free fitness calculators to track your metrics and optimize your training"
     >
-      <div className="container mx-auto px-4 py-12">
-        {/* Hero Section */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
-            <Calculator className="w-8 h-8 text-primary" />
+      <div className="space-y-8">
+        {/* Header */}
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Calculator className="w-5 h-5 text-primary" />
+            </div>
+            <h1 className="text-2xl font-bold text-foreground">Fitness Tools</h1>
           </div>
-          <h1 className="text-4xl md:text-5xl font-display font-bold mb-4">
-            Free Fitness <span className="text-gradient">Calculators</span>
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Use our free calculators to track your fitness metrics, plan your nutrition, and optimize your training. No signup required.
+          <p className="text-muted-foreground">
+            Use these calculators to track your fitness metrics and optimize your training.
           </p>
         </div>
 
         {/* Quick Navigation */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {toolsList.map((tool) => (
             <a
               key={tool.id}
@@ -63,35 +62,19 @@ const Tools = () => {
         </div>
 
         {/* Calculators Grid */}
-        <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-          <BMICalculator />
-          <BMRCalculator />
-          <TDEECalculator />
-          <IdealWeightCalculator />
-          <BodyFatCalculator />
-          <OneRepMaxCalculator />
-          <WaterIntakeCalculator />
-          <HeartRateZoneCalculator />
-        </div>
-
-        {/* CTA Section */}
-        <div className="mt-16 text-center">
-          <div className="p-8 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20">
-            <h2 className="text-2xl font-display font-bold mb-2">Want Personalized Guidance?</h2>
-            <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
-              These calculators give you a starting point. For customized plans tailored to your goals, connect with a certified coach.
-            </p>
-            <Link
-              to="/coaches"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors"
-            >
-              Find a Coach
-            </Link>
-          </div>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div id="bmi"><BMICalculator /></div>
+          <div id="bmr"><BMRCalculator /></div>
+          <div id="tdee"><TDEECalculator /></div>
+          <div id="ideal-weight"><IdealWeightCalculator /></div>
+          <div id="body-fat"><BodyFatCalculator /></div>
+          <div id="1rm"><OneRepMaxCalculator /></div>
+          <div id="water"><WaterIntakeCalculator /></div>
+          <div id="heart-rate"><HeartRateZoneCalculator /></div>
         </div>
       </div>
-    </PageLayout>
+    </ClientDashboardLayout>
   );
 };
 
-export default Tools;
+export default ClientTools;

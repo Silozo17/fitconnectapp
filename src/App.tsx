@@ -94,7 +94,7 @@ import Subscribe from "./pages/Subscribe";
 import SubscribeSuccess from "./pages/SubscribeSuccess";
 import Avatars from "./pages/Avatars";
 import DashboardRedirect from "./pages/dashboard/DashboardRedirect";
-import Tools from "./pages/Tools";
+import ClientTools from "./pages/dashboard/client/ClientTools";
 
 const queryClient = new QueryClient();
 
@@ -125,7 +125,7 @@ const App = () => (
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/leaderboards" element={<Leaderboards />} />
                 <Route path="/avatars" element={<Avatars />} />
-                <Route path="/tools" element={<Tools />} />
+                {/* Tools removed from public - now in client dashboard */}
                 <Route path="/coaches/personal-trainers" element={<PersonalTrainers />} />
                 <Route path="/coaches/nutritionists" element={<Nutritionists />} />
                 <Route path="/coaches/boxing" element={<Boxing />} />
@@ -314,6 +314,11 @@ const App = () => (
                 <Route path="/dashboard/client/library" element={
                   <ProtectedRoute allowedRoles={["client", "admin"]}>
                     <ClientLibrary />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/client/tools" element={
+                  <ProtectedRoute allowedRoles={["client", "admin"]}>
+                    <ClientTools />
                   </ProtectedRoute>
                 } />
                 <Route path="/dashboard/client/notifications" element={
