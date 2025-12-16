@@ -247,6 +247,45 @@ export type Database = {
           },
         ]
       }
+      calendar_connections: {
+        Row: {
+          access_token: string
+          calendar_id: string | null
+          created_at: string | null
+          id: string
+          provider: Database["public"]["Enums"]["calendar_provider"]
+          refresh_token: string | null
+          sync_enabled: boolean | null
+          token_expires_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          calendar_id?: string | null
+          created_at?: string | null
+          id?: string
+          provider: Database["public"]["Enums"]["calendar_provider"]
+          refresh_token?: string | null
+          sync_enabled?: boolean | null
+          token_expires_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          calendar_id?: string | null
+          created_at?: string | null
+          id?: string
+          provider?: Database["public"]["Enums"]["calendar_provider"]
+          refresh_token?: string | null
+          sync_enabled?: boolean | null
+          token_expires_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       challenge_participants: {
         Row: {
           challenge_id: string
@@ -1089,6 +1128,7 @@ export type Database = {
           created_at: string
           currency: string | null
           duration_minutes: number
+          external_calendar_event_id: string | null
           id: string
           is_online: boolean | null
           location: string | null
@@ -1098,6 +1138,9 @@ export type Database = {
           session_type: string
           status: string
           updated_at: string
+          video_meeting_id: string | null
+          video_meeting_url: string | null
+          video_provider: Database["public"]["Enums"]["video_provider"] | null
         }
         Insert: {
           client_id: string
@@ -1105,6 +1148,7 @@ export type Database = {
           created_at?: string
           currency?: string | null
           duration_minutes?: number
+          external_calendar_event_id?: string | null
           id?: string
           is_online?: boolean | null
           location?: string | null
@@ -1114,6 +1158,9 @@ export type Database = {
           session_type?: string
           status?: string
           updated_at?: string
+          video_meeting_id?: string | null
+          video_meeting_url?: string | null
+          video_provider?: Database["public"]["Enums"]["video_provider"] | null
         }
         Update: {
           client_id?: string
@@ -1121,6 +1168,7 @@ export type Database = {
           created_at?: string
           currency?: string | null
           duration_minutes?: number
+          external_calendar_event_id?: string | null
           id?: string
           is_online?: boolean | null
           location?: string | null
@@ -1130,6 +1178,9 @@ export type Database = {
           session_type?: string
           status?: string
           updated_at?: string
+          video_meeting_id?: string | null
+          video_meeting_url?: string | null
+          video_provider?: Database["public"]["Enums"]["video_provider"] | null
         }
         Relationships: [
           {
@@ -1463,6 +1514,60 @@ export type Database = {
             columns: ["habit_id"]
             isOneToOne: true
             referencedRelation: "client_habits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      health_data_sync: {
+        Row: {
+          client_id: string
+          created_at: string | null
+          data_type: string
+          id: string
+          raw_data: Json | null
+          recorded_at: string
+          source: Database["public"]["Enums"]["wearable_provider"]
+          unit: string
+          value: number
+          wearable_connection_id: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string | null
+          data_type: string
+          id?: string
+          raw_data?: Json | null
+          recorded_at: string
+          source: Database["public"]["Enums"]["wearable_provider"]
+          unit: string
+          value: number
+          wearable_connection_id?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string | null
+          data_type?: string
+          id?: string
+          raw_data?: Json | null
+          recorded_at?: string
+          source?: Database["public"]["Enums"]["wearable_provider"]
+          unit?: string
+          value?: number
+          wearable_connection_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "health_data_sync_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "health_data_sync_wearable_connection_id_fkey"
+            columns: ["wearable_connection_id"]
+            isOneToOne: false
+            referencedRelation: "wearable_connections"
             referencedColumns: ["id"]
           },
         ]
@@ -2129,6 +2234,109 @@ export type Database = {
         }
         Relationships: []
       }
+      video_conference_settings: {
+        Row: {
+          access_token: string | null
+          auto_create_meetings: boolean | null
+          coach_id: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          provider: Database["public"]["Enums"]["video_provider"]
+          provider_user_id: string | null
+          refresh_token: string | null
+          token_expires_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          access_token?: string | null
+          auto_create_meetings?: boolean | null
+          coach_id: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          provider: Database["public"]["Enums"]["video_provider"]
+          provider_user_id?: string | null
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          access_token?: string | null
+          auto_create_meetings?: boolean | null
+          coach_id?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          provider?: Database["public"]["Enums"]["video_provider"]
+          provider_user_id?: string | null
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_conference_settings_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wearable_connections: {
+        Row: {
+          access_token: string
+          client_id: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          last_synced_at: string | null
+          provider: Database["public"]["Enums"]["wearable_provider"]
+          provider_user_id: string | null
+          refresh_token: string | null
+          scopes: string[] | null
+          token_expires_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          access_token: string
+          client_id: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_synced_at?: string | null
+          provider: Database["public"]["Enums"]["wearable_provider"]
+          provider_user_id?: string | null
+          refresh_token?: string | null
+          scopes?: string[] | null
+          token_expires_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          access_token?: string
+          client_id?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_synced_at?: string | null
+          provider?: Database["public"]["Enums"]["wearable_provider"]
+          provider_user_id?: string | null
+          refresh_token?: string | null
+          scopes?: string[] | null
+          token_expires_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wearable_connections_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       xp_transactions: {
         Row: {
           amount: number
@@ -2174,6 +2382,9 @@ export type Database = {
     }
     Enums: {
       app_role: "client" | "coach" | "admin" | "manager" | "staff"
+      calendar_provider: "google_calendar" | "apple_calendar"
+      video_provider: "zoom" | "google_meet"
+      wearable_provider: "google_fit" | "fitbit" | "garmin" | "apple_health"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2302,6 +2513,9 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["client", "coach", "admin", "manager", "staff"],
+      calendar_provider: ["google_calendar", "apple_calendar"],
+      video_provider: ["zoom", "google_meet"],
+      wearable_provider: ["google_fit", "fitbit", "garmin", "apple_health"],
     },
   },
 } as const
