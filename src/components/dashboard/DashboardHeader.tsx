@@ -10,19 +10,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/shared/UserAvatar";
 import ViewSwitcher from "@/components/admin/ViewSwitcher";
 
 interface DashboardHeaderProps {
   displayName?: string | null;
   subscriptionTier?: string | null;
+  profileImageUrl?: string | null;
 }
 
-const DashboardHeader = ({ displayName, subscriptionTier }: DashboardHeaderProps) => {
+const DashboardHeader = ({ displayName, subscriptionTier, profileImageUrl }: DashboardHeaderProps) => {
   const { signOut, role } = useAuth();
 
   const tierLabel = subscriptionTier === "elite" ? "Elite" : subscriptionTier === "pro" ? "Pro" : "Free";
-  const initials = displayName?.split(" ").map(n => n[0]).join("").toUpperCase() || "CO";
 
   return (
     <header className="h-16 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-30">
@@ -57,13 +57,12 @@ const DashboardHeader = ({ displayName, subscriptionTier }: DashboardHeaderProps
           {/* Profile Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src="" alt={displayName || "Coach"} />
-                  <AvatarFallback className="bg-primary text-primary-foreground">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
+              <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
+                <UserAvatar
+                  src={profileImageUrl}
+                  name={displayName}
+                  className="h-10 w-10"
+                />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>

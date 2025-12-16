@@ -1,6 +1,6 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { 
-  Star, MapPin, Video, Users, BadgeCheck, ArrowLeft, 
+  Star, MapPin, Video, Users, ArrowLeft, 
   Clock, Award, Calendar, MessageSquare, Loader2 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { UserAvatar } from "@/components/shared/UserAvatar";
 
 const CoachDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -27,8 +28,6 @@ const CoachDetail = () => {
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [startingConversation, setStartingConversation] = useState(false);
   const { user, role } = useAuth();
-
-  const defaultImage = `https://api.dicebear.com/7.x/avataaars/svg?seed=${id}`;
 
   const handleMessageCoach = async () => {
     if (!user || !coach) return;
@@ -112,11 +111,19 @@ const CoachDetail = () => {
                 <CardContent className="p-6">
                   <div className="flex flex-col sm:flex-row gap-6">
                     <div className="relative flex-shrink-0">
-                      <img
-                        src={coach.profile_image_url || defaultImage}
-                        alt={coach.display_name || "Coach"}
-                        className="h-32 w-32 rounded-2xl object-cover ring-4 ring-border"
-                      />
+                      {coach.profile_image_url ? (
+                        <img
+                          src={coach.profile_image_url}
+                          alt={coach.display_name || "Coach"}
+                          className="h-32 w-32 rounded-2xl object-cover ring-4 ring-border"
+                        />
+                      ) : (
+                        <UserAvatar
+                          src={null}
+                          name={coach.display_name}
+                          className="h-32 w-32 text-4xl ring-4 ring-border rounded-2xl"
+                        />
+                      )}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-start justify-between">

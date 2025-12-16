@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { Dumbbell, ArrowRight, ArrowLeft, Check, Loader2, Crown, Zap, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { ProfileImageUpload } from "@/components/shared/ProfileImageUpload";
 
 const STEPS = ["Basic Info", "Specialties", "Services & Pricing", "Availability", "Choose Your Plan"];
 
@@ -68,6 +69,7 @@ const CoachOnboarding = () => {
     onlineAvailable: true,
     inPersonAvailable: false,
     subscriptionTier: "free",
+    profileImageUrl: null as string | null,
   });
 
   // Check if onboarding is already completed
@@ -139,6 +141,7 @@ const CoachOnboarding = () => {
           online_available: formData.onlineAvailable,
           in_person_available: formData.inPersonAvailable,
           subscription_tier: formData.subscriptionTier,
+          profile_image_url: formData.profileImageUrl,
           onboarding_completed: true,
         })
         .eq("user_id", user.id);
@@ -207,6 +210,18 @@ const CoachOnboarding = () => {
                     Tell us about yourself
                   </h2>
                   <p className="text-muted-foreground">This will appear on your public profile.</p>
+                </div>
+
+                {/* Profile Image Upload */}
+                <div>
+                  <Label className="text-foreground mb-3 block">Profile Photo</Label>
+                  <ProfileImageUpload
+                    currentImageUrl={formData.profileImageUrl}
+                    userId={user?.id || ""}
+                    displayName={formData.displayName}
+                    onImageChange={(url) => handleInputChange("profileImageUrl", url || "")}
+                    size="lg"
+                  />
                 </div>
 
                 <div>

@@ -9,28 +9,26 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import ViewSwitcher from "@/components/admin/ViewSwitcher";
+import { UserAvatar } from "@/components/shared/UserAvatar";
 
 interface ClientDashboardHeaderProps {
   firstName?: string | null;
   lastName?: string | null;
+  avatarUrl?: string | null;
 }
 
 const ClientDashboardHeader = ({
   firstName,
   lastName,
+  avatarUrl,
 }: ClientDashboardHeaderProps) => {
   const { signOut, role } = useAuth();
 
   const displayName = firstName
     ? `${firstName}${lastName ? ` ${lastName}` : ""}`
     : "Client";
-
-  const initials = firstName
-    ? `${firstName[0]}${lastName ? lastName[0] : ""}`
-    : "C";
 
   return (
     <header className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
@@ -60,12 +58,12 @@ const ClientDashboardHeader = ({
           {/* Profile Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2">
-                <Avatar className="w-8 h-8">
-                  <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
+              <Button variant="ghost" className="flex items-center gap-2 p-1">
+                <UserAvatar
+                  src={avatarUrl}
+                  name={displayName}
+                  className="w-8 h-8"
+                />
                 <span className="hidden md:block font-medium">{displayName}</span>
               </Button>
             </DropdownMenuTrigger>

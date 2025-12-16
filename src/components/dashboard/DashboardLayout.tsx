@@ -12,6 +12,7 @@ interface CoachProfile {
   display_name: string | null;
   subscription_tier: string | null;
   onboarding_completed: boolean;
+  profile_image_url: string | null;
 }
 
 interface DashboardLayoutProps {
@@ -33,7 +34,7 @@ const DashboardLayout = ({ children, title = "Coach Dashboard", description }: D
 
       const { data } = await supabase
         .from("coach_profiles")
-        .select("display_name, subscription_tier, onboarding_completed")
+        .select("display_name, subscription_tier, onboarding_completed, profile_image_url")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -79,6 +80,7 @@ const DashboardLayout = ({ children, title = "Coach Dashboard", description }: D
           <DashboardHeader
             displayName={profile?.display_name}
             subscriptionTier={profile?.subscription_tier}
+            profileImageUrl={profile?.profile_image_url}
           />
 
           <main className="p-6">

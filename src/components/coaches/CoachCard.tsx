@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Star, MapPin, Video, User, Heart } from "lucide-react";
 import { useState } from "react";
+import { UserAvatar } from "@/components/shared/UserAvatar";
 import type { MarketplaceCoach } from "@/hooks/useCoachMarketplace";
 
 interface CoachCardProps {
@@ -11,7 +12,6 @@ interface CoachCardProps {
 
 const CoachCard = ({ coach }: CoachCardProps) => {
   const [isFavorite, setIsFavorite] = useState(false);
-  const defaultImage = `https://api.dicebear.com/7.x/avataaars/svg?seed=${coach.id}`;
 
   return (
     <div className="group card-elevated overflow-hidden hover-lift relative">
@@ -28,12 +28,22 @@ const CoachCard = ({ coach }: CoachCardProps) => {
       </button>
 
       {/* Image */}
-      <div className="relative aspect-[4/3] overflow-hidden">
-        <img
-          src={coach.profile_image_url || defaultImage}
-          alt={coach.display_name || "Coach"}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-        />
+      <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
+        {coach.profile_image_url ? (
+          <img
+            src={coach.profile_image_url}
+            alt={coach.display_name || "Coach"}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <UserAvatar
+              src={null}
+              name={coach.display_name}
+              className="w-24 h-24 text-3xl"
+            />
+          </div>
+        )}
         {/* Session Type Badges */}
         <div className="absolute bottom-3 left-3 flex gap-2">
           {coach.in_person_available && (
@@ -107,7 +117,7 @@ const CoachCard = ({ coach }: CoachCardProps) => {
             {coach.hourly_rate ? (
               <>
                 <span className="font-display font-bold text-xl text-foreground">
-                  ${coach.hourly_rate}
+                  £{coach.hourly_rate}
                 </span>
                 <span className="text-muted-foreground text-sm">/session</span>
               </>
