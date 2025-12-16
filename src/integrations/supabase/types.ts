@@ -229,33 +229,36 @@ export type Database = {
         Row: {
           body_fat_percentage: number | null
           client_id: string
-          coach_id: string
+          coach_id: string | null
           created_at: string
           id: string
           measurements: Json | null
           notes: string | null
+          photo_urls: string[] | null
           recorded_at: string
           weight_kg: number | null
         }
         Insert: {
           body_fat_percentage?: number | null
           client_id: string
-          coach_id: string
+          coach_id?: string | null
           created_at?: string
           id?: string
           measurements?: Json | null
           notes?: string | null
+          photo_urls?: string[] | null
           recorded_at?: string
           weight_kg?: number | null
         }
         Update: {
           body_fat_percentage?: number | null
           client_id?: string
-          coach_id?: string
+          coach_id?: string | null
           created_at?: string
           id?: string
           measurements?: Json | null
           notes?: string | null
+          photo_urls?: string[] | null
           recorded_at?: string
           weight_kg?: number | null
         }
