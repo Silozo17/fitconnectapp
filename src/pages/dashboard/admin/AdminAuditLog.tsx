@@ -321,7 +321,7 @@ const AdminAuditLog = () => {
                         {parseUserAgent(log.user_agent)}
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setSelectedLog(log); }}>
+                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setSelectedLog(log); }} aria-label="View log details">
                           <Eye className="h-4 w-4" />
                         </Button>
                       </TableCell>

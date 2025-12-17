@@ -1,122 +1,132 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AdminProvider } from "@/contexts/AdminContext";
 import { LocaleProvider } from "@/contexts/LocaleContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import Index from "./pages/Index";
-import Coaches from "./pages/Coaches";
-import CoachDetail from "./pages/CoachDetail";
-import Auth from "./pages/Auth";
-import ClientOnboarding from "./pages/onboarding/ClientOnboarding";
-import CoachOnboarding from "./pages/onboarding/CoachOnboarding";
-import AdminDashboard from "./pages/dashboard/AdminDashboard";
-import AdminUsers from "./pages/dashboard/admin/AdminUsers";
-import AdminCoaches from "./pages/dashboard/admin/AdminCoaches";
-import AdminSettings from "./pages/dashboard/admin/AdminSettings";
-import AdminTeam from "./pages/dashboard/admin/AdminTeam";
-import AdminRevenue from "./pages/dashboard/admin/AdminRevenue";
-import AdminAnalytics from "./pages/dashboard/admin/AdminAnalytics";
-import AdminReviews from "./pages/dashboard/admin/AdminReviews";
-import AdminVerification from "./pages/dashboard/admin/AdminVerification";
-import AdminIntegrations from "./pages/dashboard/admin/AdminIntegrations";
-import AdminChallenges from "./pages/dashboard/admin/AdminChallenges";
-import AdminAuditLog from "./pages/dashboard/admin/AdminAuditLog";
-import MyProfile from "./pages/dashboard/MyProfile";
-
-// Coach Dashboard Pages
-import ClientOverview from "./pages/dashboard/client/ClientOverview";
-import ClientCoaches from "./pages/dashboard/client/ClientCoaches";
-import ClientSessions from "./pages/dashboard/client/ClientSessions";
-import ClientMessages from "./pages/dashboard/client/ClientMessages";
-import ClientPlans from "./pages/dashboard/client/ClientPlans";
-import ClientHabits from "./pages/dashboard/client/ClientHabits";
-import ClientProgress from "./pages/dashboard/client/ClientProgress";
-import ClientSettings from "./pages/dashboard/client/ClientSettings";
-import ClientFavourites from "./pages/dashboard/client/ClientFavourites";
-import ClientAchievements from "./pages/dashboard/client/ClientAchievements";
-import ClientLeaderboard from "./pages/dashboard/client/ClientLeaderboard";
-import ClientChallenges from "./pages/dashboard/client/ClientChallenges";
-import ClientIntegrations from "./pages/dashboard/client/ClientIntegrations";
-import ClientGrocery from "./pages/dashboard/client/ClientGrocery";
-import ClientConnections from "./pages/dashboard/client/ClientConnections";
-// Coach Dashboard Pages
-import CoachOverview from "./pages/dashboard/coach/CoachOverview";
-import CoachClients from "./pages/dashboard/coach/CoachClients";
-import CoachClientDetail from "./pages/dashboard/coach/CoachClientDetail";
-import CoachSchedule from "./pages/dashboard/coach/CoachSchedule";
-import CoachMessages from "./pages/dashboard/coach/CoachMessages";
-import CoachPlans from "./pages/dashboard/coach/CoachPlans";
-import CoachPlanBuilder from "./pages/dashboard/coach/CoachPlanBuilder";
-import CoachNutritionBuilder from "./pages/dashboard/coach/CoachNutritionBuilder";
-import CoachEarnings from "./pages/dashboard/coach/CoachEarnings";
-import CoachSettings from "./pages/dashboard/coach/CoachSettings";
-import CoachPackages from "./pages/dashboard/coach/CoachPackages";
-import CoachIntegrations from "./pages/dashboard/coach/CoachIntegrations";
-import CoachReviews from "./pages/dashboard/coach/CoachReviews";
-import CoachVerification from "./pages/dashboard/coach/CoachVerification";
-import CoachPipeline from "./pages/dashboard/coach/CoachPipeline";
-import CoachAchievements from "./pages/dashboard/coach/CoachAchievements";
-import CoachConnections from "./pages/dashboard/coach/CoachConnections";
-// Shared Dashboard Pages
-import Notifications from "./pages/dashboard/Notifications";
-
-// Public Pages
-import About from "./pages/About";
-import FAQ from "./pages/FAQ";
-import Pricing from "./pages/Pricing";
-import ForCoaches from "./pages/ForCoaches";
-import HowItWorks from "./pages/HowItWorks";
-import Privacy from "./pages/Privacy";
-import Terms from "./pages/Terms";
-import Marketplace from "./pages/Marketplace";
-import MarketplaceProduct from "./pages/MarketplaceProduct";
-import MarketplaceBundle from "./pages/MarketplaceBundle";
-import ClientLibrary from "./pages/dashboard/client/ClientLibrary";
-import CoachProducts from "./pages/dashboard/coach/CoachProducts";
-import SuccessStories from "./pages/SuccessStories";
-import Contact from "./pages/Contact";
-import Community from "./pages/Community";
-import PersonalTrainers from "./pages/coaches/PersonalTrainers";
-import Nutritionists from "./pages/coaches/Nutritionists";
-import Boxing from "./pages/coaches/Boxing";
-import MMA from "./pages/coaches/MMA";
-
-// Documentation Pages
-import DocsHub from "./pages/docs/DocsHub";
-import GettingStarted from "./pages/docs/GettingStarted";
-import DocsClientOverview from "./pages/docs/client/ClientOverview";
-import DocsClientProfile from "./pages/docs/client/ClientProfile";
-import DocsClientCoaches from "./pages/docs/client/ClientCoaches";
-import DocsClientSessions from "./pages/docs/client/ClientSessions";
-import DocsClientPlans from "./pages/docs/client/ClientPlans";
-import DocsClientProgress from "./pages/docs/client/ClientProgress";
-import DocsClientAchievements from "./pages/docs/client/ClientAchievements";
-import DocsClientSettings from "./pages/docs/client/ClientSettingsDocs";
-import DocsCoachOverview from "./pages/docs/coach/CoachOverview";
-import DocsCoachOnboarding from "./pages/docs/coach/CoachOnboarding";
-import DocsCoachProfile from "./pages/docs/coach/CoachProfile";
-import DocsCoachEarnings from "./pages/docs/coach/CoachEarnings";
-import DocsCoachClients from "./pages/docs/coach/CoachClientsDocs";
-import DocsCoachMessaging from "./pages/docs/coach/CoachMessagingDocs";
-import DocsCoachPlans from "./pages/docs/coach/CoachPlansDocs";
-import DocsCoachSchedule from "./pages/docs/coach/CoachScheduleDocs";
-import DocsCoachPackages from "./pages/docs/coach/CoachPackagesDocs";
-import DocsCoachVerification from "./pages/docs/coach/CoachVerificationDocs";
-import DocsAdminOverview from "./pages/docs/admin/AdminOverview";
-
-import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/shared/ScrollToTop";
 import ScrollRestoration from "./components/shared/ScrollRestoration";
-import Subscribe from "./pages/Subscribe";
-import SubscribeSuccess from "./pages/SubscribeSuccess";
-import { Navigate } from "react-router-dom";
-import DashboardRedirect from "./pages/dashboard/DashboardRedirect";
-import ClientTools from "./pages/dashboard/client/ClientTools";
+import PageLoadingSpinner from "./components/shared/PageLoadingSpinner";
+
+// Eagerly loaded pages (critical path)
+import Index from "./pages/Index";
+import Auth from "./pages/Auth";
+import NotFound from "./pages/NotFound";
+
+// Lazy loaded public pages
+const Coaches = lazy(() => import("./pages/Coaches"));
+const CoachDetail = lazy(() => import("./pages/CoachDetail"));
+const About = lazy(() => import("./pages/About"));
+const FAQ = lazy(() => import("./pages/FAQ"));
+const Pricing = lazy(() => import("./pages/Pricing"));
+const ForCoaches = lazy(() => import("./pages/ForCoaches"));
+const HowItWorks = lazy(() => import("./pages/HowItWorks"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Terms = lazy(() => import("./pages/Terms"));
+const SuccessStories = lazy(() => import("./pages/SuccessStories"));
+const Contact = lazy(() => import("./pages/Contact"));
+const Community = lazy(() => import("./pages/Community"));
+const Marketplace = lazy(() => import("./pages/Marketplace"));
+const MarketplaceProduct = lazy(() => import("./pages/MarketplaceProduct"));
+const MarketplaceBundle = lazy(() => import("./pages/MarketplaceBundle"));
+const Subscribe = lazy(() => import("./pages/Subscribe"));
+const SubscribeSuccess = lazy(() => import("./pages/SubscribeSuccess"));
+
+// Coach category pages
+const PersonalTrainers = lazy(() => import("./pages/coaches/PersonalTrainers"));
+const Nutritionists = lazy(() => import("./pages/coaches/Nutritionists"));
+const Boxing = lazy(() => import("./pages/coaches/Boxing"));
+const MMA = lazy(() => import("./pages/coaches/MMA"));
+
+// Onboarding
+const ClientOnboarding = lazy(() => import("./pages/onboarding/ClientOnboarding"));
+const CoachOnboarding = lazy(() => import("./pages/onboarding/CoachOnboarding"));
+
+// Admin Dashboard Pages
+const AdminDashboard = lazy(() => import("./pages/dashboard/AdminDashboard"));
+const AdminUsers = lazy(() => import("./pages/dashboard/admin/AdminUsers"));
+const AdminCoaches = lazy(() => import("./pages/dashboard/admin/AdminCoaches"));
+const AdminSettings = lazy(() => import("./pages/dashboard/admin/AdminSettings"));
+const AdminTeam = lazy(() => import("./pages/dashboard/admin/AdminTeam"));
+const AdminRevenue = lazy(() => import("./pages/dashboard/admin/AdminRevenue"));
+const AdminAnalytics = lazy(() => import("./pages/dashboard/admin/AdminAnalytics"));
+const AdminReviews = lazy(() => import("./pages/dashboard/admin/AdminReviews"));
+const AdminVerification = lazy(() => import("./pages/dashboard/admin/AdminVerification"));
+const AdminIntegrations = lazy(() => import("./pages/dashboard/admin/AdminIntegrations"));
+const AdminChallenges = lazy(() => import("./pages/dashboard/admin/AdminChallenges"));
+const AdminAuditLog = lazy(() => import("./pages/dashboard/admin/AdminAuditLog"));
+const MyProfile = lazy(() => import("./pages/dashboard/MyProfile"));
+const DashboardRedirect = lazy(() => import("./pages/dashboard/DashboardRedirect"));
+
+// Client Dashboard Pages
+const ClientOverview = lazy(() => import("./pages/dashboard/client/ClientOverview"));
+const ClientCoaches = lazy(() => import("./pages/dashboard/client/ClientCoaches"));
+const ClientSessions = lazy(() => import("./pages/dashboard/client/ClientSessions"));
+const ClientMessages = lazy(() => import("./pages/dashboard/client/ClientMessages"));
+const ClientPlans = lazy(() => import("./pages/dashboard/client/ClientPlans"));
+const ClientHabits = lazy(() => import("./pages/dashboard/client/ClientHabits"));
+const ClientProgress = lazy(() => import("./pages/dashboard/client/ClientProgress"));
+const ClientSettings = lazy(() => import("./pages/dashboard/client/ClientSettings"));
+const ClientFavourites = lazy(() => import("./pages/dashboard/client/ClientFavourites"));
+const ClientAchievements = lazy(() => import("./pages/dashboard/client/ClientAchievements"));
+const ClientLeaderboard = lazy(() => import("./pages/dashboard/client/ClientLeaderboard"));
+const ClientChallenges = lazy(() => import("./pages/dashboard/client/ClientChallenges"));
+const ClientIntegrations = lazy(() => import("./pages/dashboard/client/ClientIntegrations"));
+const ClientGrocery = lazy(() => import("./pages/dashboard/client/ClientGrocery"));
+const ClientConnections = lazy(() => import("./pages/dashboard/client/ClientConnections"));
+const ClientLibrary = lazy(() => import("./pages/dashboard/client/ClientLibrary"));
+const ClientTools = lazy(() => import("./pages/dashboard/client/ClientTools"));
+
+// Coach Dashboard Pages
+const CoachOverview = lazy(() => import("./pages/dashboard/coach/CoachOverview"));
+const CoachClients = lazy(() => import("./pages/dashboard/coach/CoachClients"));
+const CoachClientDetail = lazy(() => import("./pages/dashboard/coach/CoachClientDetail"));
+const CoachSchedule = lazy(() => import("./pages/dashboard/coach/CoachSchedule"));
+const CoachMessages = lazy(() => import("./pages/dashboard/coach/CoachMessages"));
+const CoachPlans = lazy(() => import("./pages/dashboard/coach/CoachPlans"));
+const CoachPlanBuilder = lazy(() => import("./pages/dashboard/coach/CoachPlanBuilder"));
+const CoachNutritionBuilder = lazy(() => import("./pages/dashboard/coach/CoachNutritionBuilder"));
+const CoachEarnings = lazy(() => import("./pages/dashboard/coach/CoachEarnings"));
+const CoachSettings = lazy(() => import("./pages/dashboard/coach/CoachSettings"));
+const CoachPackages = lazy(() => import("./pages/dashboard/coach/CoachPackages"));
+const CoachIntegrations = lazy(() => import("./pages/dashboard/coach/CoachIntegrations"));
+const CoachReviews = lazy(() => import("./pages/dashboard/coach/CoachReviews"));
+const CoachVerification = lazy(() => import("./pages/dashboard/coach/CoachVerification"));
+const CoachPipeline = lazy(() => import("./pages/dashboard/coach/CoachPipeline"));
+const CoachAchievements = lazy(() => import("./pages/dashboard/coach/CoachAchievements"));
+const CoachConnections = lazy(() => import("./pages/dashboard/coach/CoachConnections"));
+const CoachProducts = lazy(() => import("./pages/dashboard/coach/CoachProducts"));
+
+// Shared Dashboard Pages
+const Notifications = lazy(() => import("./pages/dashboard/Notifications"));
+
+// Documentation Pages
+const DocsHub = lazy(() => import("./pages/docs/DocsHub"));
+const GettingStarted = lazy(() => import("./pages/docs/GettingStarted"));
+const DocsClientOverview = lazy(() => import("./pages/docs/client/ClientOverview"));
+const DocsClientProfile = lazy(() => import("./pages/docs/client/ClientProfile"));
+const DocsClientCoaches = lazy(() => import("./pages/docs/client/ClientCoaches"));
+const DocsClientSessions = lazy(() => import("./pages/docs/client/ClientSessions"));
+const DocsClientPlans = lazy(() => import("./pages/docs/client/ClientPlans"));
+const DocsClientProgress = lazy(() => import("./pages/docs/client/ClientProgress"));
+const DocsClientAchievements = lazy(() => import("./pages/docs/client/ClientAchievements"));
+const DocsClientSettings = lazy(() => import("./pages/docs/client/ClientSettingsDocs"));
+const DocsCoachOverview = lazy(() => import("./pages/docs/coach/CoachOverview"));
+const DocsCoachOnboarding = lazy(() => import("./pages/docs/coach/CoachOnboarding"));
+const DocsCoachProfile = lazy(() => import("./pages/docs/coach/CoachProfile"));
+const DocsCoachEarnings = lazy(() => import("./pages/docs/coach/CoachEarnings"));
+const DocsCoachClients = lazy(() => import("./pages/docs/coach/CoachClientsDocs"));
+const DocsCoachMessaging = lazy(() => import("./pages/docs/coach/CoachMessagingDocs"));
+const DocsCoachPlans = lazy(() => import("./pages/docs/coach/CoachPlansDocs"));
+const DocsCoachSchedule = lazy(() => import("./pages/docs/coach/CoachScheduleDocs"));
+const DocsCoachPackages = lazy(() => import("./pages/docs/coach/CoachPackagesDocs"));
+const DocsCoachVerification = lazy(() => import("./pages/docs/coach/CoachVerificationDocs"));
+const DocsAdminOverview = lazy(() => import("./pages/docs/admin/AdminOverview"));
 
 const queryClient = new QueryClient();
 
@@ -131,378 +141,378 @@ const App = () => (
           <AuthProvider>
             <AdminProvider>
               <LocaleProvider>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/coaches" element={<Coaches />} />
-                <Route path="/coaches/:id" element={<CoachDetail />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/faq" element={<FAQ />} />
-                <Route path="/pricing" element={<Pricing />} />
-                <Route path="/for-coaches" element={<ForCoaches />} />
-                <Route path="/how-it-works" element={<HowItWorks />} />
-                <Route path="/privacy" element={<Privacy />} />
-                <Route path="/terms" element={<Terms />} />
-                <Route path="/success-stories" element={<SuccessStories />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/community" element={<Community />} />
-                <Route path="/leaderboards" element={<Navigate to="/community" replace />} />
-                <Route path="/avatars" element={<Navigate to="/community?tab=avatars" replace />} />
-                {/* Tools removed from public - now in client dashboard */}
-                <Route path="/coaches/personal-trainers" element={<PersonalTrainers />} />
-                <Route path="/coaches/nutritionists" element={<Nutritionists />} />
-                <Route path="/coaches/boxing" element={<Boxing />} />
-                <Route path="/coaches/mma" element={<MMA />} />
-                <Route path="/marketplace" element={<Marketplace />} />
-                <Route path="/marketplace/:productId" element={<MarketplaceProduct />} />
-                <Route path="/marketplace/bundles/:bundleId" element={<MarketplaceBundle />} />
-                
-                {/* Documentation Routes */}
-                <Route path="/docs" element={<DocsHub />} />
-                <Route path="/docs/getting-started" element={<GettingStarted />} />
-                <Route path="/docs/client" element={<DocsClientOverview />} />
-                <Route path="/docs/client/profile" element={<DocsClientProfile />} />
-                <Route path="/docs/client/coaches" element={<DocsClientCoaches />} />
-                <Route path="/docs/client/sessions" element={<DocsClientSessions />} />
-                <Route path="/docs/client/plans" element={<DocsClientPlans />} />
-                <Route path="/docs/client/progress" element={<DocsClientProgress />} />
-                <Route path="/docs/client/achievements" element={<DocsClientAchievements />} />
-                <Route path="/docs/client/settings" element={<DocsClientSettings />} />
-                <Route path="/docs/coach" element={<DocsCoachOverview />} />
-                <Route path="/docs/coach/onboarding" element={<DocsCoachOnboarding />} />
-                <Route path="/docs/coach/profile" element={<DocsCoachProfile />} />
-                <Route path="/docs/coach/earnings" element={<DocsCoachEarnings />} />
-                <Route path="/docs/coach/clients" element={<DocsCoachClients />} />
-                <Route path="/docs/coach/messaging" element={<DocsCoachMessaging />} />
-                <Route path="/docs/coach/plans" element={<DocsCoachPlans />} />
-                <Route path="/docs/coach/schedule" element={<DocsCoachSchedule />} />
-                <Route path="/docs/coach/packages" element={<DocsCoachPackages />} />
-                <Route path="/docs/coach/verification" element={<DocsCoachVerification />} />
-                <Route path="/docs/admin" element={<DocsAdminOverview />} />
-                
-                {/* Dashboard Redirect */}
-                <Route path="/dashboard" element={
-                  <ProtectedRoute allowedRoles={["client", "coach", "admin", "manager", "staff"]}>
-                    <DashboardRedirect />
-                  </ProtectedRoute>
-                } />
-                
-                {/* Admin Dashboard */}
-                <Route path="/dashboard/admin" element={
-                  <ProtectedRoute allowedRoles={["admin", "manager", "staff"]}>
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/admin/users" element={
-                  <ProtectedRoute allowedRoles={["admin", "manager"]}>
-                    <AdminUsers />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/admin/coaches" element={
-                  <ProtectedRoute allowedRoles={["admin", "manager"]}>
-                    <AdminCoaches />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/admin/team" element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <AdminTeam />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/admin/revenue" element={
-                  <ProtectedRoute allowedRoles={["admin", "manager"]}>
-                    <AdminRevenue />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/admin/analytics" element={
-                  <ProtectedRoute allowedRoles={["admin", "manager"]}>
-                    <AdminAnalytics />
-                  </ProtectedRoute>
-                } />
-                {/* Unified Profile Route */}
-                <Route path="/dashboard/profile" element={
-                  <ProtectedRoute allowedRoles={["admin", "manager", "staff", "coach", "client"]}>
-                    <MyProfile />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/admin/settings" element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <AdminSettings />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/admin/reviews" element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <AdminReviews />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/admin/verification" element={
-                  <ProtectedRoute allowedRoles={["admin", "manager"]}>
-                    <AdminVerification />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/admin/integrations" element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <AdminIntegrations />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/admin/challenges" element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <AdminChallenges />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/admin/audit" element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <AdminAuditLog />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/admin/notifications" element={
-                  <ProtectedRoute allowedRoles={["admin", "manager", "staff"]}>
-                    <Notifications />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/admin/messages" element={
-                  <ProtectedRoute allowedRoles={["admin", "manager", "staff"]}>
-                    <CoachMessages />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/admin/messages/:participantId" element={
-                  <ProtectedRoute allowedRoles={["admin", "manager", "staff"]}>
-                    <CoachMessages />
-                  </ProtectedRoute>
-                } />
-                
-                {/* Onboarding */}
-                <Route path="/onboarding/client" element={
-                  <ProtectedRoute allowedRoles={["client"]}>
-                    <ClientOnboarding />
-                  </ProtectedRoute>
-                } />
-                <Route path="/onboarding/coach" element={
-                  <ProtectedRoute allowedRoles={["coach"]}>
-                    <CoachOnboarding />
-                  </ProtectedRoute>
-                } />
+                <Suspense fallback={<PageLoadingSpinner />}>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/coaches" element={<Coaches />} />
+                    <Route path="/coaches/:id" element={<CoachDetail />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/faq" element={<FAQ />} />
+                    <Route path="/pricing" element={<Pricing />} />
+                    <Route path="/for-coaches" element={<ForCoaches />} />
+                    <Route path="/how-it-works" element={<HowItWorks />} />
+                    <Route path="/privacy" element={<Privacy />} />
+                    <Route path="/terms" element={<Terms />} />
+                    <Route path="/success-stories" element={<SuccessStories />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/community" element={<Community />} />
+                    <Route path="/leaderboards" element={<Navigate to="/community" replace />} />
+                    <Route path="/avatars" element={<Navigate to="/community?tab=avatars" replace />} />
+                    <Route path="/coaches/personal-trainers" element={<PersonalTrainers />} />
+                    <Route path="/coaches/nutritionists" element={<Nutritionists />} />
+                    <Route path="/coaches/boxing" element={<Boxing />} />
+                    <Route path="/coaches/mma" element={<MMA />} />
+                    <Route path="/marketplace" element={<Marketplace />} />
+                    <Route path="/marketplace/:productId" element={<MarketplaceProduct />} />
+                    <Route path="/marketplace/bundles/:bundleId" element={<MarketplaceBundle />} />
+                    
+                    {/* Documentation Routes */}
+                    <Route path="/docs" element={<DocsHub />} />
+                    <Route path="/docs/getting-started" element={<GettingStarted />} />
+                    <Route path="/docs/client" element={<DocsClientOverview />} />
+                    <Route path="/docs/client/profile" element={<DocsClientProfile />} />
+                    <Route path="/docs/client/coaches" element={<DocsClientCoaches />} />
+                    <Route path="/docs/client/sessions" element={<DocsClientSessions />} />
+                    <Route path="/docs/client/plans" element={<DocsClientPlans />} />
+                    <Route path="/docs/client/progress" element={<DocsClientProgress />} />
+                    <Route path="/docs/client/achievements" element={<DocsClientAchievements />} />
+                    <Route path="/docs/client/settings" element={<DocsClientSettings />} />
+                    <Route path="/docs/coach" element={<DocsCoachOverview />} />
+                    <Route path="/docs/coach/onboarding" element={<DocsCoachOnboarding />} />
+                    <Route path="/docs/coach/profile" element={<DocsCoachProfile />} />
+                    <Route path="/docs/coach/earnings" element={<DocsCoachEarnings />} />
+                    <Route path="/docs/coach/clients" element={<DocsCoachClients />} />
+                    <Route path="/docs/coach/messaging" element={<DocsCoachMessaging />} />
+                    <Route path="/docs/coach/plans" element={<DocsCoachPlans />} />
+                    <Route path="/docs/coach/schedule" element={<DocsCoachSchedule />} />
+                    <Route path="/docs/coach/packages" element={<DocsCoachPackages />} />
+                    <Route path="/docs/coach/verification" element={<DocsCoachVerification />} />
+                    <Route path="/docs/admin" element={<DocsAdminOverview />} />
+                    
+                    {/* Dashboard Redirect */}
+                    <Route path="/dashboard" element={
+                      <ProtectedRoute allowedRoles={["client", "coach", "admin", "manager", "staff"]}>
+                        <DashboardRedirect />
+                      </ProtectedRoute>
+                    } />
+                    
+                    {/* Admin Dashboard */}
+                    <Route path="/dashboard/admin" element={
+                      <ProtectedRoute allowedRoles={["admin", "manager", "staff"]}>
+                        <AdminDashboard />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/admin/users" element={
+                      <ProtectedRoute allowedRoles={["admin", "manager"]}>
+                        <AdminUsers />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/admin/coaches" element={
+                      <ProtectedRoute allowedRoles={["admin", "manager"]}>
+                        <AdminCoaches />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/admin/team" element={
+                      <ProtectedRoute allowedRoles={["admin"]}>
+                        <AdminTeam />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/admin/revenue" element={
+                      <ProtectedRoute allowedRoles={["admin", "manager"]}>
+                        <AdminRevenue />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/admin/analytics" element={
+                      <ProtectedRoute allowedRoles={["admin", "manager"]}>
+                        <AdminAnalytics />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/profile" element={
+                      <ProtectedRoute allowedRoles={["admin", "manager", "staff", "coach", "client"]}>
+                        <MyProfile />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/admin/settings" element={
+                      <ProtectedRoute allowedRoles={["admin"]}>
+                        <AdminSettings />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/admin/reviews" element={
+                      <ProtectedRoute allowedRoles={["admin"]}>
+                        <AdminReviews />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/admin/verification" element={
+                      <ProtectedRoute allowedRoles={["admin", "manager"]}>
+                        <AdminVerification />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/admin/integrations" element={
+                      <ProtectedRoute allowedRoles={["admin"]}>
+                        <AdminIntegrations />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/admin/challenges" element={
+                      <ProtectedRoute allowedRoles={["admin"]}>
+                        <AdminChallenges />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/admin/audit" element={
+                      <ProtectedRoute allowedRoles={["admin"]}>
+                        <AdminAuditLog />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/admin/notifications" element={
+                      <ProtectedRoute allowedRoles={["admin", "manager", "staff"]}>
+                        <Notifications />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/admin/messages" element={
+                      <ProtectedRoute allowedRoles={["admin", "manager", "staff"]}>
+                        <CoachMessages />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/admin/messages/:participantId" element={
+                      <ProtectedRoute allowedRoles={["admin", "manager", "staff"]}>
+                        <CoachMessages />
+                      </ProtectedRoute>
+                    } />
+                    
+                    {/* Onboarding */}
+                    <Route path="/onboarding/client" element={
+                      <ProtectedRoute allowedRoles={["client"]}>
+                        <ClientOnboarding />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/onboarding/coach" element={
+                      <ProtectedRoute allowedRoles={["coach"]}>
+                        <CoachOnboarding />
+                      </ProtectedRoute>
+                    } />
 
-                {/* Client Dashboard Routes */}
-                <Route path="/dashboard/client" element={
-                  <ProtectedRoute allowedRoles={["client", "admin"]}>
-                    <ClientOverview />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/client/coaches" element={
-                  <ProtectedRoute allowedRoles={["client", "admin"]}>
-                    <ClientCoaches />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/client/favourites" element={
-                  <ProtectedRoute allowedRoles={["client", "admin"]}>
-                    <ClientFavourites />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/client/sessions" element={
-                  <ProtectedRoute allowedRoles={["client", "admin"]}>
-                    <ClientSessions />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/client/messages" element={
-                  <ProtectedRoute allowedRoles={["client", "admin"]}>
-                    <ClientMessages />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/client/messages/:id" element={
-                  <ProtectedRoute allowedRoles={["client", "admin"]}>
-                    <ClientMessages />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/client/plans" element={
-                  <ProtectedRoute allowedRoles={["client", "admin"]}>
-                    <ClientPlans />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/client/habits" element={
-                  <ProtectedRoute allowedRoles={["client", "admin"]}>
-                    <ClientHabits />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/client/progress" element={
-                  <ProtectedRoute allowedRoles={["client", "admin"]}>
-                    <ClientProgress />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/client/achievements" element={
-                  <ProtectedRoute allowedRoles={["client", "admin"]}>
-                    <ClientAchievements />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/client/leaderboard" element={
-                  <ProtectedRoute allowedRoles={["client", "admin"]}>
-                    <ClientLeaderboard />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/client/challenges" element={
-                  <ProtectedRoute allowedRoles={["client", "admin"]}>
-                    <ClientChallenges />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/client/settings" element={
-                  <ProtectedRoute allowedRoles={["client", "admin"]}>
-                    <ClientSettings />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/client/integrations" element={
-                  <ProtectedRoute allowedRoles={["client", "admin"]}>
-                    <ClientIntegrations />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/client/grocery" element={
-                  <ProtectedRoute allowedRoles={["client", "admin"]}>
-                    <ClientGrocery />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/client/library" element={
-                  <ProtectedRoute allowedRoles={["client", "admin"]}>
-                    <ClientLibrary />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/client/tools" element={
-                  <ProtectedRoute allowedRoles={["client", "admin"]}>
-                    <ClientTools />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/client/connections" element={
-                  <ProtectedRoute allowedRoles={["client", "admin"]}>
-                    <ClientConnections />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/client/notifications" element={
-                  <ProtectedRoute allowedRoles={["client", "admin"]}>
-                    <Notifications />
-                  </ProtectedRoute>
-                } />
-              
-                {/* Coach Dashboard Routes */}
-                <Route path="/dashboard/coach" element={
-                  <ProtectedRoute allowedRoles={["coach"]}>
-                    <CoachOverview />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/coach/pipeline" element={
-                  <ProtectedRoute allowedRoles={["coach"]}>
-                    <CoachPipeline />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/coach/clients" element={
-                  <ProtectedRoute allowedRoles={["coach"]}>
-                    <CoachClients />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/coach/clients/:id" element={
-                  <ProtectedRoute allowedRoles={["coach"]}>
-                    <CoachClientDetail />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/coach/schedule" element={
-                  <ProtectedRoute allowedRoles={["coach"]}>
-                    <CoachSchedule />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/coach/messages" element={
-                  <ProtectedRoute allowedRoles={["coach"]}>
-                    <CoachMessages />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/coach/messages/:id" element={
-                  <ProtectedRoute allowedRoles={["coach"]}>
-                    <CoachMessages />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/coach/connections" element={
-                  <ProtectedRoute allowedRoles={["coach"]}>
-                    <CoachConnections />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/coach/plans" element={
-                  <ProtectedRoute allowedRoles={["coach"]}>
-                    <CoachPlans />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/coach/plans/new" element={
-                  <ProtectedRoute allowedRoles={["coach"]}>
-                    <CoachPlanBuilder />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/coach/plans/:id" element={
-                  <ProtectedRoute allowedRoles={["coach"]}>
-                    <CoachPlanBuilder />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/coach/plans/nutrition/new" element={
-                  <ProtectedRoute allowedRoles={["coach"]}>
-                    <CoachNutritionBuilder />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/coach/plans/nutrition/:planId" element={
-                  <ProtectedRoute allowedRoles={["coach"]}>
-                    <CoachNutritionBuilder />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/coach/packages" element={
-                  <ProtectedRoute allowedRoles={["coach"]}>
-                    <CoachPackages />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/coach/achievements" element={
-                  <ProtectedRoute allowedRoles={["coach"]}>
-                    <CoachAchievements />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/coach/earnings" element={
-                  <ProtectedRoute allowedRoles={["coach"]}>
-                    <CoachEarnings />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/coach/reviews" element={
-                  <ProtectedRoute allowedRoles={["coach"]}>
-                    <CoachReviews />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/coach/settings" element={
-                  <ProtectedRoute allowedRoles={["coach"]}>
-                    <CoachSettings />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/coach/notifications" element={
-                  <ProtectedRoute allowedRoles={["coach"]}>
-                    <Notifications />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/coach/verification" element={
-                  <ProtectedRoute allowedRoles={["coach"]}>
-                    <CoachVerification />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/coach/integrations" element={
-                  <ProtectedRoute allowedRoles={["coach"]}>
-                    <CoachIntegrations />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/coach/products" element={
-                  <ProtectedRoute allowedRoles={["coach"]}>
-                    <CoachProducts />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/notifications" element={
-                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
-                    <Notifications />
-                  </ProtectedRoute>
-                } />
+                    {/* Client Dashboard Routes */}
+                    <Route path="/dashboard/client" element={
+                      <ProtectedRoute allowedRoles={["client", "admin"]}>
+                        <ClientOverview />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/client/coaches" element={
+                      <ProtectedRoute allowedRoles={["client", "admin"]}>
+                        <ClientCoaches />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/client/favourites" element={
+                      <ProtectedRoute allowedRoles={["client", "admin"]}>
+                        <ClientFavourites />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/client/sessions" element={
+                      <ProtectedRoute allowedRoles={["client", "admin"]}>
+                        <ClientSessions />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/client/messages" element={
+                      <ProtectedRoute allowedRoles={["client", "admin"]}>
+                        <ClientMessages />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/client/messages/:id" element={
+                      <ProtectedRoute allowedRoles={["client", "admin"]}>
+                        <ClientMessages />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/client/plans" element={
+                      <ProtectedRoute allowedRoles={["client", "admin"]}>
+                        <ClientPlans />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/client/habits" element={
+                      <ProtectedRoute allowedRoles={["client", "admin"]}>
+                        <ClientHabits />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/client/progress" element={
+                      <ProtectedRoute allowedRoles={["client", "admin"]}>
+                        <ClientProgress />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/client/achievements" element={
+                      <ProtectedRoute allowedRoles={["client", "admin"]}>
+                        <ClientAchievements />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/client/leaderboard" element={
+                      <ProtectedRoute allowedRoles={["client", "admin"]}>
+                        <ClientLeaderboard />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/client/challenges" element={
+                      <ProtectedRoute allowedRoles={["client", "admin"]}>
+                        <ClientChallenges />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/client/settings" element={
+                      <ProtectedRoute allowedRoles={["client", "admin"]}>
+                        <ClientSettings />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/client/integrations" element={
+                      <ProtectedRoute allowedRoles={["client", "admin"]}>
+                        <ClientIntegrations />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/client/grocery" element={
+                      <ProtectedRoute allowedRoles={["client", "admin"]}>
+                        <ClientGrocery />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/client/library" element={
+                      <ProtectedRoute allowedRoles={["client", "admin"]}>
+                        <ClientLibrary />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/client/tools" element={
+                      <ProtectedRoute allowedRoles={["client", "admin"]}>
+                        <ClientTools />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/client/connections" element={
+                      <ProtectedRoute allowedRoles={["client", "admin"]}>
+                        <ClientConnections />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/client/notifications" element={
+                      <ProtectedRoute allowedRoles={["client", "admin"]}>
+                        <Notifications />
+                      </ProtectedRoute>
+                    } />
+                  
+                    {/* Coach Dashboard Routes */}
+                    <Route path="/dashboard/coach" element={
+                      <ProtectedRoute allowedRoles={["coach"]}>
+                        <CoachOverview />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/coach/pipeline" element={
+                      <ProtectedRoute allowedRoles={["coach"]}>
+                        <CoachPipeline />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/coach/clients" element={
+                      <ProtectedRoute allowedRoles={["coach"]}>
+                        <CoachClients />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/coach/clients/:id" element={
+                      <ProtectedRoute allowedRoles={["coach"]}>
+                        <CoachClientDetail />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/coach/schedule" element={
+                      <ProtectedRoute allowedRoles={["coach"]}>
+                        <CoachSchedule />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/coach/messages" element={
+                      <ProtectedRoute allowedRoles={["coach"]}>
+                        <CoachMessages />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/coach/messages/:id" element={
+                      <ProtectedRoute allowedRoles={["coach"]}>
+                        <CoachMessages />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/coach/connections" element={
+                      <ProtectedRoute allowedRoles={["coach"]}>
+                        <CoachConnections />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/coach/plans" element={
+                      <ProtectedRoute allowedRoles={["coach"]}>
+                        <CoachPlans />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/coach/plans/new" element={
+                      <ProtectedRoute allowedRoles={["coach"]}>
+                        <CoachPlanBuilder />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/coach/plans/:id" element={
+                      <ProtectedRoute allowedRoles={["coach"]}>
+                        <CoachPlanBuilder />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/coach/plans/nutrition/new" element={
+                      <ProtectedRoute allowedRoles={["coach"]}>
+                        <CoachNutritionBuilder />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/coach/plans/nutrition/:planId" element={
+                      <ProtectedRoute allowedRoles={["coach"]}>
+                        <CoachNutritionBuilder />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/coach/packages" element={
+                      <ProtectedRoute allowedRoles={["coach"]}>
+                        <CoachPackages />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/coach/achievements" element={
+                      <ProtectedRoute allowedRoles={["coach"]}>
+                        <CoachAchievements />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/coach/earnings" element={
+                      <ProtectedRoute allowedRoles={["coach"]}>
+                        <CoachEarnings />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/coach/reviews" element={
+                      <ProtectedRoute allowedRoles={["coach"]}>
+                        <CoachReviews />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/coach/settings" element={
+                      <ProtectedRoute allowedRoles={["coach"]}>
+                        <CoachSettings />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/coach/notifications" element={
+                      <ProtectedRoute allowedRoles={["coach"]}>
+                        <Notifications />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/coach/verification" element={
+                      <ProtectedRoute allowedRoles={["coach"]}>
+                        <CoachVerification />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/coach/integrations" element={
+                      <ProtectedRoute allowedRoles={["coach"]}>
+                        <CoachIntegrations />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/coach/products" element={
+                      <ProtectedRoute allowedRoles={["coach"]}>
+                        <CoachProducts />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/notifications" element={
+                      <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
+                        <Notifications />
+                      </ProtectedRoute>
+                    } />
 
-                {/* Subscription Pages */}
-                <Route path="/subscribe" element={<Subscribe />} />
-                <Route path="/subscribe/success" element={<SubscribeSuccess />} />
-              
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-              <ScrollToTop />
+                    {/* Subscription Pages */}
+                    <Route path="/subscribe" element={<Subscribe />} />
+                    <Route path="/subscribe/success" element={<SubscribeSuccess />} />
+                  
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+                <ScrollToTop />
               </LocaleProvider>
             </AdminProvider>
           </AuthProvider>

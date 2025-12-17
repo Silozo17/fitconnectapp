@@ -61,6 +61,7 @@ const CoachPackages = () => {
             <Button
               variant="ghost"
               size="icon"
+              aria-label="Edit package"
               onClick={() => {
                 setEditPackage(pkg);
                 setShowPackageModal(true);
@@ -71,6 +72,7 @@ const CoachPackages = () => {
             <Button
               variant="ghost"
               size="icon"
+              aria-label={pkg.is_active ? "Deactivate package" : "Activate package"}
               onClick={() => handleTogglePackage(pkg)}
             >
               {pkg.is_active ? (

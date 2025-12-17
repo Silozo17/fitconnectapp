@@ -52,7 +52,7 @@ export function ClientCard({ client, onMessage, onSchedule }: ClientCardProps) {
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Open client menu">
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>

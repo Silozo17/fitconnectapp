@@ -122,7 +122,7 @@ const CoachPipeline = () => {
                 <h4 className="font-medium text-sm truncate">{name}</h4>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                    <Button variant="ghost" size="icon" className="h-6 w-6" aria-label="Open lead menu">
                       <MoreVertical className="w-4 h-4" />
                     </Button>
                   </DropdownMenuTrigger>
