@@ -2,7 +2,7 @@ import { useMessages, Conversation } from "@/hooks/useMessages";
 import { formatDistanceToNow } from "date-fns";
 import { MessageSquare, Loader2, User, Briefcase, AlertCircle, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAdminView } from "@/contexts/AdminContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState } from "react";
 import ProspectProfileSheet from "./ProspectProfileSheet";
@@ -13,10 +13,14 @@ interface ConversationListProps {
 
 const ConversationList = ({ activeConversationId }: ConversationListProps) => {
   const { conversations, loading, error } = useMessages();
-  const { role } = useAuth();
+  const { activeProfileType } = useAdminView();
   const [selectedProfile, setSelectedProfile] = useState<Conversation | null>(null);
   
-  const basePath = role === "coach" ? "/dashboard/coach/messages" : "/dashboard/client/messages";
+  const basePath = activeProfileType === "admin" 
+    ? "/dashboard/admin/messages" 
+    : activeProfileType === "coach" 
+      ? "/dashboard/coach/messages" 
+      : "/dashboard/client/messages";
 
   const getInitials = (name: string) => {
     return name
@@ -62,7 +66,7 @@ const ConversationList = ({ activeConversationId }: ConversationListProps) => {
         <MessageSquare className="w-12 h-12 text-muted-foreground mb-4" />
         <h3 className="font-medium text-foreground mb-1">No conversations yet</h3>
         <p className="text-sm text-muted-foreground">
-          {role === "coach" 
+          {activeProfileType === "coach" 
             ? "Start a conversation with one of your clients"
             : "Message a coach to get started"}
         </p>
@@ -133,7 +137,7 @@ const ConversationList = ({ activeConversationId }: ConversationListProps) => {
       </div>
 
       {/* Profile Preview Sheet - Enhanced for Coaches */}
-      {role === "coach" && selectedProfile?.participantType === "client" ? (
+      {activeProfileType === "coach" && selectedProfile?.participantType === "client" ? (
         <ProspectProfileSheet
           open={!!selectedProfile}
           onOpenChange={() => setSelectedProfile(null)}

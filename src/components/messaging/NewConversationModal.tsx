@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdminView } from "@/contexts/AdminContext";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +30,7 @@ interface NewConversationModalProps {
 
 const NewConversationModal = ({ open, onOpenChange }: NewConversationModalProps) => {
   const { user, role } = useAuth();
+  const { activeProfileType } = useAdminView();
   const navigate = useNavigate();
   const [contacts, setContacts] = useState<MessageableContact[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +39,11 @@ const NewConversationModal = ({ open, onOpenChange }: NewConversationModalProps)
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
 
-  const basePath = role === "coach" ? "/dashboard/coach/messages" : "/dashboard/client/messages";
+  const basePath = activeProfileType === "admin" 
+    ? "/dashboard/admin/messages" 
+    : activeProfileType === "coach" 
+      ? "/dashboard/coach/messages" 
+      : "/dashboard/client/messages";
 
   useEffect(() => {
     const fetchMessageableContacts = async () => {
