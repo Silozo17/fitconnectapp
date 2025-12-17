@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 import { AvatarStatsHero } from "@/components/dashboard/AvatarStatsHero";
 import UserConnectionRequests from "@/components/dashboard/client/UserConnectionRequests";
+import HealthDataWidget from "@/components/integrations/HealthDataWidget";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -165,6 +166,9 @@ const ClientOverview = () => {
     >
       {/* Avatar Stats Hero */}
       <AvatarStatsHero firstName={firstName} />
+
+      {/* Today's Health */}
+      <HealthDataWidget compact className="mb-6" />
 
       {/* Friend Requests */}
       <UserConnectionRequests />
