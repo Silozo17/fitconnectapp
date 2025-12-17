@@ -8,6 +8,7 @@ import Leaderboard from "@/components/landing/Leaderboard";
 import Testimonials from "@/components/landing/Testimonials";
 import CTA from "@/components/landing/CTA";
 import { AvatarShowcase } from "@/components/landing/AvatarShowcase";
+import { BlogSection } from "@/components/landing/BlogSection";
 
 const Index = () => {
   return (
@@ -30,6 +31,7 @@ const Index = () => {
           <Features />
           <Testimonials />
           <CTA />
+          <BlogSection />
         </main>
         <Footer />
       </div>

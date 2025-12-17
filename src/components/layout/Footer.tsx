@@ -53,6 +53,7 @@ const Footer = () => {
     Resources: [
       { name: "How It Works", href: "/how-it-works" },
       { name: "Success Stories", href: "/success-stories" },
+      { name: "Blog", href: "/blog" },
       { name: "Community", href: "/community" },
       { name: "Help Center", href: "/docs" },
       { name: "FAQ", href: "/faq" },
