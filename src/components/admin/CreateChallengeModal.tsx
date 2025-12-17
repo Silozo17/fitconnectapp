@@ -29,6 +29,7 @@ import {
 import { Loader2, Sparkles, Zap, RefreshCw } from 'lucide-react';
 import { CHALLENGE_TYPES } from '@/hooks/useChallenges';
 import { useAuth } from '@/contexts/AuthContext';
+import { ChallengeRewardUpload, RewardData, defaultRewardData } from './ChallengeRewardUpload';
 
 const challengeSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),
@@ -68,6 +69,7 @@ export function CreateChallengeModal({ open, onOpenChange, challenge }: CreateCh
   const queryClient = useQueryClient();
   const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([]);
   const [loadingAI, setLoadingAI] = useState(false);
+  const [rewardData, setRewardData] = useState<RewardData>(defaultRewardData);
   
   const isEdit = !!challenge;
   
@@ -105,10 +107,97 @@ export function CreateChallengeModal({ open, onOpenChange, challenge }: CreateCh
         is_active: challenge.is_active,
         max_participants: challenge.max_participants,
       });
+      
+      // Load existing reward data if any
+      if (challenge.reward_type && (challenge.avatar_reward || challenge.badge_reward)) {
+        const reward = challenge.avatar_reward || challenge.badge_reward;
+        setRewardData({
+          hasReward: true,
+          rewardType: challenge.reward_type as 'badge' | 'avatar',
+          rewardName: reward?.name || '',
+          rewardDescription: reward?.description || '',
+          rewardRarity: reward?.rarity || 'rare',
+          rewardImage: null,
+          rewardImagePreview: null,
+        });
+      } else {
+        setRewardData(defaultRewardData);
+      }
     } else {
       form.reset();
+      setRewardData(defaultRewardData);
     }
-  }, [challenge, form]);
+  }, [challenge, form, open]);
+  
+  const uploadRewardImage = async (file: File, rewardType: 'badge' | 'avatar'): Promise<string> => {
+    const bucket = rewardType === 'avatar' ? 'avatars' : 'coach-badges';
+    const fileExt = file.name.split('.').pop();
+    const fileName = `challenge_${Date.now()}.${fileExt}`;
+    
+    const { error: uploadError } = await supabase.storage
+      .from(bucket)
+      .upload(fileName, file);
+    
+    if (uploadError) throw uploadError;
+    
+    const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(fileName);
+    return publicUrl;
+  };
+  
+  const createExclusiveReward = async (
+    rewardData: RewardData,
+    challengeId: string
+  ): Promise<{ avatarId?: string; badgeId?: string }> => {
+    let imageUrl: string | null = null;
+    
+    if (rewardData.rewardImage) {
+      imageUrl = await uploadRewardImage(rewardData.rewardImage, rewardData.rewardType);
+    }
+    
+    if (rewardData.rewardType === 'avatar') {
+      // Create exclusive avatar
+      const slug = rewardData.rewardName.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+      const { data: avatar, error } = await supabase
+        .from('avatars')
+        .insert({
+          name: rewardData.rewardName,
+          slug: `challenge_${slug}_${Date.now()}`,
+          description: rewardData.rewardDescription || null,
+          image_url: imageUrl,
+          category: 'challenge_unlock',
+          rarity: rewardData.rewardRarity,
+          is_challenge_exclusive: true,
+          challenge_id: challengeId,
+          is_active: true,
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return { avatarId: avatar.id };
+    } else {
+      // Create exclusive badge
+      const { data: badge, error } = await supabase
+        .from('badges')
+        .insert({
+          name: rewardData.rewardName,
+          description: rewardData.rewardDescription || 'Exclusive challenge reward',
+          icon: '🏆',
+          image_url: imageUrl,
+          category: 'challenge',
+          rarity: rewardData.rewardRarity,
+          is_challenge_exclusive: true,
+          challenge_id: challengeId,
+          xp_reward: 0,
+          is_active: true,
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return { badgeId: badge.id };
+    }
+  };
   
   const mutation = useMutation({
     mutationFn: async (data: ChallengeForm) => {
@@ -137,6 +226,21 @@ export function CreateChallengeModal({ open, onOpenChange, challenge }: CreateCh
           })
           .eq('id', challenge.id);
         if (error) throw error;
+        
+        // Handle reward updates for existing challenge
+        if (rewardData.hasReward && rewardData.rewardName && rewardData.rewardImage) {
+          const { avatarId, badgeId } = await createExclusiveReward(rewardData, challenge.id);
+          
+          await supabase
+            .from('challenges')
+            .update({
+              reward_type: rewardData.rewardType,
+              avatar_reward_id: avatarId || null,
+              badge_reward_id: badgeId || null,
+            })
+            .eq('id', challenge.id);
+        }
+        
         return { isNew: false, data };
       } else {
         const { data: newChallenge, error } = await supabase.from('challenges').insert({
@@ -155,11 +259,30 @@ export function CreateChallengeModal({ open, onOpenChange, challenge }: CreateCh
           target_audience: data.target_audience,
         }).select().single();
         if (error) throw error;
+        
+        // Create exclusive reward if enabled
+        if (rewardData.hasReward && rewardData.rewardName) {
+          const { avatarId, badgeId } = await createExclusiveReward(rewardData, newChallenge.id);
+          
+          // Update challenge with reward reference
+          await supabase
+            .from('challenges')
+            .update({
+              reward_type: rewardData.rewardType,
+              avatar_reward_id: avatarId || null,
+              badge_reward_id: badgeId || null,
+            })
+            .eq('id', newChallenge.id);
+        }
+        
         return { isNew: true, data, challenge: newChallenge };
       }
     },
     onSuccess: async (result) => {
       queryClient.invalidateQueries({ queryKey: ['admin-challenges'] });
+      queryClient.invalidateQueries({ queryKey: ['available-challenges'] });
+      queryClient.invalidateQueries({ queryKey: ['avatars'] });
+      queryClient.invalidateQueries({ queryKey: ['badges'] });
       
       // Send notifications for new public challenges
       if (result?.isNew && result.challenge && result.data.visibility === 'public' && result.data.is_active) {
@@ -220,6 +343,9 @@ export function CreateChallengeModal({ open, onOpenChange, challenge }: CreateCh
   };
   
   const selectedType = CHALLENGE_TYPES.find(t => t.value === form.watch('challenge_type'));
+  
+  // Get existing reward image URL for editing
+  const existingRewardImageUrl = challenge?.avatar_reward?.image_url || challenge?.badge_reward?.image_url;
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -421,6 +547,13 @@ export function CreateChallengeModal({ open, onOpenChange, challenge }: CreateCh
               </div>
             </div>
           </div>
+          
+          {/* Exclusive Reward Section */}
+          <ChallengeRewardUpload
+            value={rewardData}
+            onChange={setRewardData}
+            existingRewardImageUrl={existingRewardImageUrl}
+          />
           
           <div className="flex justify-end gap-3 pt-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

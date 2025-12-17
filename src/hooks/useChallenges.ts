@@ -3,6 +3,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
+export interface ChallengeReward {
+  id: string;
+  name: string;
+  description: string | null;
+  image_url: string | null;
+  rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+}
+
 export interface Challenge {
   id: string;
   created_by: string;
@@ -15,13 +23,18 @@ export interface Challenge {
   end_date: string;
   xp_reward: number;
   badge_reward_id: string | null;
+  avatar_reward_id: string | null;
+  reward_type: 'badge' | 'avatar' | null;
   visibility: string;
   max_participants: number | null;
   is_active: boolean;
   created_at: string;
   participant_count?: number;
   my_participation?: ChallengeParticipant;
-  // New verification fields
+  // Reward data (joined)
+  avatar_reward?: ChallengeReward | null;
+  badge_reward?: ChallengeReward | null;
+  // Verification fields
   requires_verification: boolean;
   data_source: 'wearable_only' | 'verified_only' | 'any';
   wearable_data_type: string | null;
@@ -101,7 +114,17 @@ export function useAvailableChallenges() {
     queryFn: async () => {
       const today = new Date().toISOString().split('T')[0];
       
-      const { data, error } = await supabase.from('challenges').select('*').eq('is_active', true).eq('visibility', 'public').gte('end_date', today).order('start_date', { ascending: true });
+      const { data, error } = await supabase
+        .from('challenges')
+        .select(`
+          *,
+          avatar_reward:avatar_reward_id(id, name, description, image_url, rarity),
+          badge_reward:badge_reward_id(id, name, description, image_url, rarity)
+        `)
+        .eq('is_active', true)
+        .eq('visibility', 'public')
+        .gte('end_date', today)
+        .order('start_date', { ascending: true });
       if (error) throw error;
       
       const challengeIds = data.map(c => c.id);
@@ -116,7 +139,13 @@ export function useAvailableChallenges() {
         myData?.forEach(p => { myParticipations[p.challenge_id] = p as ChallengeParticipant; });
       }
       
-      return data.map(c => ({ ...c, participant_count: counts[c.id] || 0, my_participation: myParticipations[c.id] })) as Challenge[];
+      return data.map(c => ({ 
+        ...c, 
+        participant_count: counts[c.id] || 0, 
+        my_participation: myParticipations[c.id],
+        avatar_reward: c.avatar_reward as ChallengeReward | null,
+        badge_reward: c.badge_reward as ChallengeReward | null,
+      })) as Challenge[];
     },
   });
 }
