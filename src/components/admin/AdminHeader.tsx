@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { Button } from "@/components/ui/button";
-import { LogOut, Search, User } from "lucide-react";
+import { LogOut, Search, User, Menu } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import ViewSwitcher from "./ViewSwitcher";
@@ -16,15 +16,30 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const AdminHeader = () => {
+interface AdminHeaderProps {
+  onMenuToggle: () => void;
+}
+
+const AdminHeader = ({ onMenuToggle }: AdminHeaderProps) => {
   const navigate = useNavigate();
   const { signOut, role } = useAuth();
   const { displayName, avatarUrl } = useUserProfile();
 
   return (
-    <header className="h-16 border-b border-border bg-card px-6 flex items-center justify-between sticky top-0 z-10">
-      <div className="flex items-center gap-4 flex-1">
-        <div className="relative max-w-md flex-1">
+    <header className="h-16 border-b border-border bg-card px-4 lg:px-6 flex items-center justify-between sticky top-0 z-10">
+      <div className="flex items-center gap-3 flex-1">
+        {/* Mobile Hamburger */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="lg:hidden"
+          onClick={onMenuToggle}
+        >
+          <Menu className="w-5 h-5" />
+        </Button>
+
+        {/* Search */}
+        <div className="relative flex-1 max-w-xs sm:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search users, coaches..."
@@ -33,7 +48,7 @@ const AdminHeader = () => {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         <ViewSwitcher />
         
         <NotificationCenter />

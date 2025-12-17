@@ -1,4 +1,4 @@
-import { Search, User, LogOut } from "lucide-react";
+import { Search, User, LogOut, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,9 +18,10 @@ import { NotificationCenter } from "@/components/notifications/NotificationCente
 
 interface DashboardHeaderProps {
   subscriptionTier?: string | null;
+  onMenuToggle: () => void;
 }
 
-const DashboardHeader = ({ subscriptionTier }: DashboardHeaderProps) => {
+const DashboardHeader = ({ subscriptionTier, onMenuToggle }: DashboardHeaderProps) => {
   const navigate = useNavigate();
   const { signOut, role } = useAuth();
   const { displayName, avatarUrl } = useUserProfile();
@@ -29,25 +30,38 @@ const DashboardHeader = ({ subscriptionTier }: DashboardHeaderProps) => {
 
   return (
     <header className="h-16 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-30">
-      <div className="h-full px-6 flex items-center justify-between">
-        {/* Search */}
-        <div className="flex-1 max-w-md">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search clients, sessions..."
-              className="pl-10 bg-secondary border-border"
-            />
+      <div className="h-full px-4 lg:px-6 flex items-center justify-between">
+        {/* Left side - Hamburger + Search */}
+        <div className="flex items-center gap-3 flex-1">
+          {/* Mobile Hamburger */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden"
+            onClick={onMenuToggle}
+          >
+            <Menu className="w-5 h-5" />
+          </Button>
+
+          {/* Search */}
+          <div className="flex-1 max-w-xs sm:max-w-md">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search clients, sessions..."
+                className="pl-10 bg-secondary border-border"
+              />
+            </div>
           </div>
         </div>
 
         {/* Right Section */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {/* Role Switcher - for admins and coaches */}
           {(role === "admin" || role === "manager" || role === "staff" || role === "coach") && <ViewSwitcher />}
           
           {/* Subscription Tier */}
-          <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary/20 text-primary">
+          <span className="hidden sm:inline-flex px-3 py-1 rounded-full text-xs font-bold bg-primary/20 text-primary">
             {tierLabel}
           </span>
 
