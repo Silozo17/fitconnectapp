@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 import GroceryListCard from "@/components/integrations/GroceryListCard";
 import { useGroceryList, GroceryItem } from "@/hooks/useGroceryList";
+import { useAssignedNutritionPlans } from "@/hooks/useAssignedNutritionPlans";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,12 +16,28 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { ShoppingCart, Plus, Sparkles, Loader2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { ShoppingCart, Plus, Sparkles, Loader2, AlertCircle, Utensils } from "lucide-react";
 
 const ClientGrocery = () => {
   const { lists, isLoading, createList, updateItems, completeList, deleteList, generateFromMealPlan } = useGroceryList();
+  const { data: nutritionPlans, isLoading: plansLoading } = useAssignedNutritionPlans();
   const [newListName, setNewListName] = useState("");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
+  const [selectedPlanId, setSelectedPlanId] = useState<string>("");
 
   const handleCreateList = () => {
     if (!newListName.trim()) return;
@@ -30,12 +47,16 @@ const ClientGrocery = () => {
   };
 
   const handleGenerateList = () => {
-    // Generate a sample list (in production, would select from actual meal plans)
-    generateFromMealPlan.mutate({ mealPlanId: "", days: 7 });
+    if (!selectedPlanId) return;
+    generateFromMealPlan.mutate({ mealPlanId: selectedPlanId, days: 7 });
+    setGenerateDialogOpen(false);
+    setSelectedPlanId("");
   };
 
   const activeLists = lists?.filter((l) => !l.is_completed) || [];
   const completedLists = lists?.filter((l) => l.is_completed) || [];
+
+  const hasNutritionPlans = nutritionPlans && nutritionPlans.length > 0;
 
   return (
     <>
@@ -58,18 +79,83 @@ const ClientGrocery = () => {
               </p>
             </div>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={handleGenerateList}
-                disabled={generateFromMealPlan.isPending}
-              >
-                {generateFromMealPlan.isPending ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Sparkles className="w-4 h-4 mr-2" />
-                )}
-                Generate from Meal Plan
-              </Button>
+              {/* Generate from Meal Plan Button */}
+              {hasNutritionPlans ? (
+                <Dialog open={generateDialogOpen} onOpenChange={setGenerateDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline">
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Generate from Meal Plan
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Generate Shopping List</DialogTitle>
+                      <DialogDescription>
+                        Select a meal plan to generate a shopping list with all the ingredients you need.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4 space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Select Meal Plan</label>
+                        <Select value={selectedPlanId} onValueChange={setSelectedPlanId}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Choose a meal plan" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {nutritionPlans.map((plan) => (
+                              <SelectItem key={plan.plan_id} value={plan.plan_id}>
+                                <div className="flex flex-col">
+                                  <span>{plan.plan_name}</span>
+                                  {plan.coach_name && (
+                                    <span className="text-xs text-muted-foreground">
+                                      by {plan.coach_name}
+                                    </span>
+                                  )}
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setGenerateDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button 
+                        onClick={handleGenerateList} 
+                        disabled={!selectedPlanId || generateFromMealPlan.isPending}
+                      >
+                        {generateFromMealPlan.isPending ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <Sparkles className="w-4 h-4 mr-2" />
+                        )}
+                        Generate List
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              ) : (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span>
+                        <Button variant="outline" disabled className="opacity-50">
+                          <Sparkles className="w-4 h-4 mr-2" />
+                          Generate from Meal Plan
+                        </Button>
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>No meal plan assigned. Ask your coach to assign a nutrition plan first.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+
+              {/* New List Button */}
               <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
                 <DialogTrigger asChild>
                   <Button>
@@ -104,6 +190,24 @@ const ClientGrocery = () => {
               </Dialog>
             </div>
           </div>
+
+          {/* No Meal Plan Info Card */}
+          {!plansLoading && !hasNutritionPlans && (
+            <Card className="border-amber-500/30 bg-amber-500/5">
+              <CardContent className="flex items-start gap-4 py-4">
+                <div className="p-2 rounded-full bg-amber-500/10">
+                  <Utensils className="w-5 h-5 text-amber-500" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-amber-200">No Meal Plan Assigned</h3>
+                  <p className="text-sm text-muted-foreground">
+                    To generate shopping lists automatically from your meals, ask your coach to assign a nutrition plan. 
+                    You can still create manual shopping lists in the meantime.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Active Lists */}
           <div className="space-y-4">
