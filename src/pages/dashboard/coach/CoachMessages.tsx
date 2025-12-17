@@ -3,19 +3,16 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ConversationList from "@/components/messaging/ConversationList";
 import ChatWindow from "@/components/messaging/ChatWindow";
-import MessageSidePanel from "@/components/messaging/MessageSidePanel";
 import NewConversationModal from "@/components/messaging/NewConversationModal";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
-import { MessageSquare, Plus, PanelRightOpen, PanelRightClose } from "lucide-react";
+import { MessageSquare, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useMessages } from "@/hooks/useMessages";
 
 const CoachMessages = () => {
   const { id: participantId } = useParams();
   const [participantName, setParticipantName] = useState<string>("");
   const [showNewConversation, setShowNewConversation] = useState(false);
   const [showSidePanel, setShowSidePanel] = useState(true);
-  const { sendMessage } = useMessages(participantId);
 
   // Fetch participant name
   useEffect(() => {
@@ -49,41 +46,15 @@ const CoachMessages = () => {
     fetchParticipantName();
   }, [participantId]);
 
-  const handleSendFromPanel = async (message: string): Promise<boolean> => {
-    return await sendMessage(message);
-  };
-
   return (
     <DashboardLayout title="Messages" description="Chat with your clients.">
       <div className="flex flex-col h-[calc(100vh-180px)]">
         <div className="flex items-center justify-between mb-4">
           <h1 className="font-display text-2xl font-bold text-foreground">Messages</h1>
-          <div className="flex items-center gap-2">
-            {participantId && (
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setShowSidePanel(!showSidePanel)}
-                className="hidden lg:flex"
-              >
-                {showSidePanel ? (
-                  <>
-                    <PanelRightClose className="h-4 w-4 mr-2" />
-                    Hide Panel
-                  </>
-                ) : (
-                  <>
-                    <PanelRightOpen className="h-4 w-4 mr-2" />
-                    Show Panel
-                  </>
-                )}
-              </Button>
-            )}
-            <Button onClick={() => setShowNewConversation(true)} size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              New Chat
-            </Button>
-          </div>
+          <Button onClick={() => setShowNewConversation(true)} size="sm">
+            <Plus className="h-4 w-4 mr-2" />
+            New Chat
+          </Button>
         </div>
 
         <div className="flex-1 card-elevated overflow-hidden flex">
@@ -100,7 +71,12 @@ const CoachMessages = () => {
           {/* Chat Area */}
           <div className={`flex-1 flex flex-col ${!participantId ? "hidden lg:flex" : "flex"}`}>
             {participantId ? (
-              <ChatWindow participantId={participantId} participantName={participantName} />
+              <ChatWindow 
+                participantId={participantId} 
+                participantName={participantName}
+                showSidePanel={showSidePanel}
+                onToggleSidePanel={() => setShowSidePanel(!showSidePanel)}
+              />
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
@@ -117,17 +93,6 @@ const CoachMessages = () => {
               </div>
             )}
           </div>
-
-          {/* Side Panel - Only visible on desktop when chat is active */}
-          {participantId && showSidePanel && (
-            <div className="hidden lg:flex">
-              <MessageSidePanel
-                participantId={participantId}
-                onSendMessage={handleSendFromPanel}
-                onClose={() => setShowSidePanel(false)}
-              />
-            </div>
-          )}
         </div>
       </div>
 
