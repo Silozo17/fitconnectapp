@@ -9,11 +9,15 @@ import {
   Send, 
   Loader2,
   ChevronRight,
-  X
+  X,
+  Pencil
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { formatCurrency, CurrencyCode } from "@/lib/currency";
 import {
   AlertDialog,
@@ -25,6 +29,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface MessageSidePanelProps {
   participantId: string;
@@ -68,6 +87,28 @@ type PendingSend = {
   item: CoachPackage | SubscriptionPlan;
 } | null;
 
+interface EditingPackage {
+  original: CoachPackage;
+  edited: {
+    name: string;
+    description: string;
+    price: number;
+    session_count: number;
+    currency: string;
+  };
+}
+
+interface EditingSubscription {
+  original: SubscriptionPlan;
+  edited: {
+    name: string;
+    description: string;
+    price: number;
+    billing_period: string;
+    currency: string;
+  };
+}
+
 const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSidePanelProps) => {
   const { activeProfileType } = useAdminView();
   const [loading, setLoading] = useState(true);
@@ -79,6 +120,8 @@ const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSide
   const [coachId, setCoachId] = useState<string | null>(null);
   const [stripeConnected, setStripeConnected] = useState<boolean>(false);
   const [pendingSend, setPendingSend] = useState<PendingSend>(null);
+  const [editingPackage, setEditingPackage] = useState<EditingPackage | null>(null);
+  const [editingSubscription, setEditingSubscription] = useState<EditingSubscription | null>(null);
 
   // Only show for coaches (including admins viewing as coach)
   if (activeProfileType !== "coach") return null;
@@ -239,20 +282,93 @@ const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSide
     setSending(null);
   };
 
-  const handleSendPackage = async (pkg: CoachPackage) => {
-    if (!stripeConnected) {
-      setPendingSend({ type: 'package', item: pkg });
-      return;
-    }
-    await sendPackageMessage(pkg, true);
+  // Open edit dialog for package
+  const handlePackageClick = (pkg: CoachPackage) => {
+    setEditingPackage({
+      original: pkg,
+      edited: {
+        name: pkg.name,
+        description: pkg.description || '',
+        price: pkg.price,
+        session_count: pkg.session_count,
+        currency: pkg.currency || 'GBP',
+      }
+    });
   };
 
-  const handleSendSubscription = async (plan: SubscriptionPlan) => {
-    if (!stripeConnected) {
-      setPendingSend({ type: 'subscription', item: plan });
-      return;
+  // Open edit dialog for subscription
+  const handleSubscriptionClick = (plan: SubscriptionPlan) => {
+    setEditingSubscription({
+      original: plan,
+      edited: {
+        name: plan.name,
+        description: plan.description || '',
+        price: plan.price,
+        billing_period: plan.billing_period,
+        currency: plan.currency || 'GBP',
+      }
+    });
+  };
+
+  // Send edited package
+  const handleSendEditedPackage = async () => {
+    if (!editingPackage) return;
+    
+    const customPkg: CoachPackage = {
+      ...editingPackage.original,
+      name: editingPackage.edited.name,
+      description: editingPackage.edited.description,
+      price: editingPackage.edited.price,
+      session_count: editingPackage.edited.session_count,
+      currency: editingPackage.edited.currency,
+    };
+    
+    // For custom pricing, always send without checkout (can't use original price_id)
+    const isCustomPrice = editingPackage.edited.price !== editingPackage.original.price ||
+                          editingPackage.edited.session_count !== editingPackage.original.session_count;
+    
+    if (!stripeConnected || isCustomPrice) {
+      // Send without checkout URL
+      setSending(`pkg-${customPkg.id}`);
+      let message = `**📦 Package: ${customPkg.name}**\n\n${customPkg.description || "A great value package for your fitness journey."}\n\n💰 Price: ${formatCurrency(customPkg.price, (customPkg.currency || "GBP") as CurrencyCode)}\n📋 Sessions: ${customPkg.session_count}`;
+      message += `\n\nInterested? Let me know and I can set this up for you!`;
+      await onSendMessage(message);
+      setSending(null);
+    } else {
+      await sendPackageMessage(customPkg, true);
     }
-    await sendSubscriptionMessage(plan, true);
+    
+    setEditingPackage(null);
+  };
+
+  // Send edited subscription
+  const handleSendEditedSubscription = async () => {
+    if (!editingSubscription) return;
+    
+    const customPlan: SubscriptionPlan = {
+      ...editingSubscription.original,
+      name: editingSubscription.edited.name,
+      description: editingSubscription.edited.description,
+      price: editingSubscription.edited.price,
+      billing_period: editingSubscription.edited.billing_period,
+      currency: editingSubscription.edited.currency,
+    };
+    
+    // For custom pricing, always send without checkout
+    const isCustomPrice = editingSubscription.edited.price !== editingSubscription.original.price ||
+                          editingSubscription.edited.billing_period !== editingSubscription.original.billing_period;
+    
+    if (!stripeConnected || isCustomPrice) {
+      setSending(`sub-${customPlan.id}`);
+      let message = `**💳 Subscription Plan: ${customPlan.name}**\n\n${customPlan.description || "Ongoing coaching support to help you reach your goals."}\n\n💰 Price: ${formatCurrency(customPlan.price, (customPlan.currency || "GBP") as CurrencyCode)}/${customPlan.billing_period}\n\nThis includes regular coaching, plan updates, and support.`;
+      message += `\n\nLet me know if you'd like to subscribe!`;
+      await onSendMessage(message);
+      setSending(null);
+    } else {
+      await sendSubscriptionMessage(customPlan, true);
+    }
+    
+    setEditingSubscription(null);
   };
 
   const handleConfirmSendWithoutStripe = async () => {
@@ -342,7 +458,8 @@ const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSide
                   {packages.map((pkg) => (
                     <div
                       key={pkg.id}
-                      className="p-2 rounded-lg bg-muted/50 border border-border hover:border-primary/50 transition-colors"
+                      className="p-2 rounded-lg bg-muted/50 border border-border hover:border-primary/50 transition-colors cursor-pointer"
+                      onClick={() => handlePackageClick(pkg)}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
@@ -360,13 +477,12 @@ const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSide
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 flex-shrink-0"
-                          onClick={() => handleSendPackage(pkg)}
                           disabled={sending === `pkg-${pkg.id}`}
                         >
                           {sending === `pkg-${pkg.id}` ? (
                             <Loader2 className="h-3 w-3 animate-spin" />
                           ) : (
-                            <Send className="h-3 w-3" />
+                            <Pencil className="h-3 w-3" />
                           )}
                         </Button>
                       </div>
@@ -389,7 +505,8 @@ const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSide
                   {subscriptionPlans.map((plan) => (
                     <div
                       key={plan.id}
-                      className="p-2 rounded-lg bg-muted/50 border border-border hover:border-primary/50 transition-colors"
+                      className="p-2 rounded-lg bg-muted/50 border border-border hover:border-primary/50 transition-colors cursor-pointer"
+                      onClick={() => handleSubscriptionClick(plan)}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
@@ -402,13 +519,12 @@ const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSide
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 flex-shrink-0"
-                          onClick={() => handleSendSubscription(plan)}
                           disabled={sending === `sub-${plan.id}`}
                         >
                           {sending === `sub-${plan.id}` ? (
                             <Loader2 className="h-3 w-3 animate-spin" />
                           ) : (
-                            <Send className="h-3 w-3" />
+                            <Pencil className="h-3 w-3" />
                           )}
                         </Button>
                       </div>
@@ -432,6 +548,160 @@ const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSide
           </div>
         </ScrollArea>
       </div>
+
+      {/* Edit Package Dialog */}
+      <Dialog open={!!editingPackage} onOpenChange={(open) => !open && setEditingPackage(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Customize Package</DialogTitle>
+            <DialogDescription>
+              Edit the details before sending. This won't modify your original package.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {editingPackage && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="pkg-name">Package Name</Label>
+                <Input 
+                  id="pkg-name"
+                  value={editingPackage.edited.name} 
+                  onChange={(e) => setEditingPackage(prev => prev ? {...prev, edited: {...prev.edited, name: e.target.value}} : null)}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="pkg-desc">Description</Label>
+                <Textarea 
+                  id="pkg-desc"
+                  value={editingPackage.edited.description}
+                  onChange={(e) => setEditingPackage(prev => prev ? {...prev, edited: {...prev.edited, description: e.target.value}} : null)}
+                  rows={3}
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="pkg-price">Price (£)</Label>
+                  <Input 
+                    id="pkg-price"
+                    type="number" 
+                    min="0"
+                    step="0.01"
+                    value={editingPackage.edited.price}
+                    onChange={(e) => setEditingPackage(prev => prev ? {...prev, edited: {...prev.edited, price: parseFloat(e.target.value) || 0}} : null)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="pkg-sessions">Sessions</Label>
+                  <Input 
+                    id="pkg-sessions"
+                    type="number"
+                    min="1"
+                    value={editingPackage.edited.session_count}
+                    onChange={(e) => setEditingPackage(prev => prev ? {...prev, edited: {...prev.edited, session_count: parseInt(e.target.value) || 1}} : null)}
+                  />
+                </div>
+              </div>
+
+              {(editingPackage.edited.price !== editingPackage.original.price || 
+                editingPackage.edited.session_count !== editingPackage.original.session_count) && (
+                <p className="text-xs text-muted-foreground">
+                  Custom pricing will be sent without a payment button.
+                </p>
+              )}
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingPackage(null)}>Cancel</Button>
+            <Button onClick={handleSendEditedPackage} disabled={!!sending}>
+              {sending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
+              Send to Client
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Subscription Dialog */}
+      <Dialog open={!!editingSubscription} onOpenChange={(open) => !open && setEditingSubscription(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Customize Subscription</DialogTitle>
+            <DialogDescription>
+              Edit the details before sending. This won't modify your original plan.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {editingSubscription && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="sub-name">Plan Name</Label>
+                <Input 
+                  id="sub-name"
+                  value={editingSubscription.edited.name} 
+                  onChange={(e) => setEditingSubscription(prev => prev ? {...prev, edited: {...prev.edited, name: e.target.value}} : null)}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="sub-desc">Description</Label>
+                <Textarea 
+                  id="sub-desc"
+                  value={editingSubscription.edited.description}
+                  onChange={(e) => setEditingSubscription(prev => prev ? {...prev, edited: {...prev.edited, description: e.target.value}} : null)}
+                  rows={3}
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="sub-price">Price (£)</Label>
+                  <Input 
+                    id="sub-price"
+                    type="number" 
+                    min="0"
+                    step="0.01"
+                    value={editingSubscription.edited.price}
+                    onChange={(e) => setEditingSubscription(prev => prev ? {...prev, edited: {...prev.edited, price: parseFloat(e.target.value) || 0}} : null)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="sub-period">Billing Period</Label>
+                  <Select
+                    value={editingSubscription.edited.billing_period}
+                    onValueChange={(value) => setEditingSubscription(prev => prev ? {...prev, edited: {...prev.edited, billing_period: value}} : null)}
+                  >
+                    <SelectTrigger id="sub-period">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="yearly">Yearly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {(editingSubscription.edited.price !== editingSubscription.original.price || 
+                editingSubscription.edited.billing_period !== editingSubscription.original.billing_period) && (
+                <p className="text-xs text-muted-foreground">
+                  Custom pricing will be sent without a payment button.
+                </p>
+              )}
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingSubscription(null)}>Cancel</Button>
+            <Button onClick={handleSendEditedSubscription} disabled={!!sending}>
+              {sending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
+              Send to Client
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Stripe Not Connected Confirmation Dialog */}
       <AlertDialog open={!!pendingSend} onOpenChange={(open) => !open && setPendingSend(null)}>
