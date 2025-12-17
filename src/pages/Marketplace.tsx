@@ -219,7 +219,7 @@ export default function Marketplace() {
         <section className="py-12 bg-card/50 border-t border-border">
           <div className="container mx-auto px-4">
             <h2 className="text-2xl font-bold text-center mb-8">Browse by Type</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
               {CONTENT_TYPES.map((type) => (
                 <button
                   key={type.value}
@@ -227,10 +227,10 @@ export default function Marketplace() {
                     setContentType(type.value);
                     window.scrollTo({ top: 0, behavior: "smooth" });
                   }}
-                  className="flex flex-col items-center gap-2 p-6 rounded-xl bg-card border border-border hover:border-primary/50 hover:bg-primary/5 transition-all"
+                  className="flex flex-col items-center justify-center gap-1 sm:gap-2 min-h-[90px] sm:min-h-[110px] p-3 sm:p-4 lg:p-6 rounded-xl bg-card border border-border hover:border-primary/50 hover:bg-primary/5 transition-all"
                 >
-                  <span className="text-4xl">{type.icon}</span>
-                  <span className="text-sm font-medium">{type.label}</span>
+                  <span className="text-2xl sm:text-3xl lg:text-4xl">{type.icon}</span>
+                  <span className="text-xs sm:text-sm font-medium text-center line-clamp-2">{type.label}</span>
                 </button>
               ))}
             </div>
