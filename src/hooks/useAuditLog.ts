@@ -112,56 +112,93 @@ export const useAuditLogsWithFilters = (filters: AuditLogFilters) => {
   });
 };
 
+// Simple async function for logging - can be called from anywhere
+export const logAdminAction = async ({
+  userId,
+  action,
+  entityType,
+  entityId,
+  oldValues,
+  newValues,
+}: {
+  userId: string;
+  action: string;
+  entityType: string;
+  entityId?: string;
+  oldValues?: Record<string, unknown>;
+  newValues?: Record<string, unknown>;
+}) => {
+  try {
+    // Get admin profile id
+    const { data: adminProfile } = await supabase
+      .from("admin_profiles")
+      .select("id")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    const { data, error } = await supabase
+      .from("audit_logs")
+      .insert([{
+        admin_id: adminProfile?.id || null,
+        action,
+        entity_type: entityType,
+        entity_id: entityId || null,
+        old_values: oldValues ? JSON.parse(JSON.stringify(oldValues)) : null,
+        new_values: newValues ? JSON.parse(JSON.stringify(newValues)) : null,
+        user_agent: navigator.userAgent,
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Failed to log admin action:", error);
+      return null;
+    }
+    return data;
+  } catch (err) {
+    console.error("Failed to log admin action:", err);
+    return null;
+  }
+};
+
+// Hook version that provides user context automatically
 export const useLogAdminAction = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: async ({
+  const log = async ({
+    action,
+    entityType,
+    entityId,
+    oldValues,
+    newValues,
+  }: {
+    action: string;
+    entityType: string;
+    entityId?: string;
+    oldValues?: Record<string, unknown>;
+    newValues?: Record<string, unknown>;
+  }) => {
+    if (!user) {
+      console.warn("No user for audit logging");
+      return null;
+    }
+
+    const result = await logAdminAction({
+      userId: user.id,
       action,
       entityType,
       entityId,
       oldValues,
       newValues,
-    }: {
-      action: string;
-      entityType: string;
-      entityId?: string;
-      oldValues?: Record<string, unknown>;
-      newValues?: Record<string, unknown>;
-    }) => {
-      if (!user) {
-        console.warn("No user for audit logging");
-        return null;
-      }
+    });
 
-      // Get admin profile id
-      const { data: adminProfile } = await supabase
-        .from("admin_profiles")
-        .select("id")
-        .eq("user_id", user.id)
-        .maybeSingle();
+    // Invalidate queries after logging
+    queryClient.invalidateQueries({ queryKey: ["audit-logs"] });
+    queryClient.invalidateQueries({ queryKey: ["audit-logs-filtered"] });
 
-      const { data, error } = await supabase
-        .from("audit_logs")
-        .insert([{
-          admin_id: adminProfile?.id || null,
-          action,
-          entity_type: entityType,
-          entity_id: entityId || null,
-          old_values: oldValues ? JSON.parse(JSON.stringify(oldValues)) : null,
-          new_values: newValues ? JSON.parse(JSON.stringify(newValues)) : null,
-          user_agent: navigator.userAgent,
-        }])
-        .select()
-        .single();
+    return result;
+  };
 
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["audit-logs"] });
-      queryClient.invalidateQueries({ queryKey: ["audit-logs-filtered"] });
-    },
-  });
+  return { log };
 };

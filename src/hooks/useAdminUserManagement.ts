@@ -33,7 +33,7 @@ export const useAdminUserManagement = (userType: "client" | "coach") => {
       });
       if (error) throw error;
 
-      logAction.mutate({
+      logAction.log({
         action: "UPDATE_EMAIL",
         entityType: userType === "coach" ? "coach_profiles" : "client_profiles",
         entityId: profileId,
@@ -71,7 +71,7 @@ export const useAdminUserManagement = (userType: "client" | "coach") => {
       });
       if (error) throw error;
 
-      logAction.mutate({
+      logAction.log({
         action: `UPDATE_STATUS_${status.toUpperCase()}`,
         entityType: userType === "coach" ? "coach_profiles" : "client_profiles",
         entityId: profileId,
@@ -108,7 +108,7 @@ export const useAdminUserManagement = (userType: "client" | "coach") => {
       });
       if (error) throw error;
 
-      logAction.mutate({
+      logAction.log({
         action: `BULK_UPDATE_STATUS_${status.toUpperCase()}`,
         entityType: userType === "coach" ? "coach_profiles" : "client_profiles",
         newValues: { status, count: users.length, reason },
@@ -137,7 +137,7 @@ export const useAdminUserManagement = (userType: "client" | "coach") => {
       });
       if (error) throw error;
 
-      logAction.mutate({
+      logAction.log({
         action: "BULK_DELETE",
         entityType: userType === "coach" ? "coach_profiles" : "client_profiles",
         newValues: { count: users.length },

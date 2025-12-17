@@ -106,7 +106,7 @@ export function useGrantAvatar() {
     onSuccess: ({ data, reason }, { userId, avatarId }) => {
       queryClient.invalidateQueries({ queryKey: ['admin-user-avatars', userId] });
       
-      logAction.mutate({
+      logAction.log({
         action: 'GRANT_AVATAR',
         entityType: 'user_avatars',
         entityId: data.id,
@@ -166,7 +166,7 @@ export function useGrantMultipleAvatars() {
       
       const avatarNames = data?.map((d: any) => d.avatar?.name).filter(Boolean).join(', ');
       
-      logAction.mutate({
+      logAction.log({
         action: 'GRANT_MULTIPLE_AVATARS',
         entityType: 'user_avatars',
         entityId: userId,
@@ -215,7 +215,7 @@ export function useRevokeAvatar() {
     onSuccess: ({ userAvatarId, userId, avatarName, reason }) => {
       queryClient.invalidateQueries({ queryKey: ['admin-user-avatars', userId] });
       
-      logAction.mutate({
+      logAction.log({
         action: 'REVOKE_AVATAR',
         entityType: 'user_avatars',
         entityId: userAvatarId,

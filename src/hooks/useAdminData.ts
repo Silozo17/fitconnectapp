@@ -52,7 +52,7 @@ export const useUpdateTierFeature = () => {
       if (error) throw error;
       
       // Log the action
-      await logAction.mutateAsync({
+      await logAction.log({
         action: "UPDATE_TIER_FEATURE",
         entityType: "tier_features",
         entityId: featureId,
@@ -109,7 +109,7 @@ export const useUpdatePlatformSetting = () => {
       if (error) throw error;
       
       // Log the action
-      await logAction.mutateAsync({
+      await logAction.log({
         action: "UPDATE_PLATFORM_SETTING",
         entityType: "platform_settings",
         entityId: key,
@@ -173,7 +173,7 @@ export const useUpdateReviewDispute = () => {
       if (error) throw error;
       
       // Log the action
-      await logAction.mutateAsync({
+      await logAction.log({
         action: "RESOLVE_REVIEW_DISPUTE",
         entityType: "review_disputes",
         entityId: id,
@@ -228,7 +228,7 @@ export const useDeleteReview = () => {
       if (error) throw error;
       
       // Log the action
-      await logAction.mutateAsync({
+      await logAction.log({
         action: "DELETE_REVIEW",
         entityType: "reviews",
         entityId: reviewId,
@@ -307,7 +307,7 @@ export const useGrantFreePlan = () => {
         .eq("id", coachId);
 
       // Log the action
-      await logAction.mutateAsync({
+      await logAction.log({
         action: "GRANT_FREE_PLAN",
         entityType: "admin_granted_subscriptions",
         entityId: coachId,
@@ -356,7 +356,7 @@ export const useRevokeGrantedPlan = () => {
         .eq("id", coachId);
 
       // Log the action
-      await logAction.mutateAsync({
+      await logAction.log({
         action: "REVOKE_GRANTED_PLAN",
         entityType: "admin_granted_subscriptions",
         entityId: grantId,
@@ -428,7 +428,7 @@ export const useSetFeatureOverride = () => {
       if (error) throw error;
       
       // Log the action
-      await logAction.mutateAsync({
+      await logAction.log({
         action: oldValue !== undefined ? "UPDATE_FEATURE_OVERRIDE" : "SET_FEATURE_OVERRIDE",
         entityType: "coach_feature_overrides",
         entityId: coachId,
@@ -475,7 +475,7 @@ export const useRemoveFeatureOverride = () => {
       if (error) throw error;
       
       // Log the action
-      await logAction.mutateAsync({
+      await logAction.log({
         action: "REMOVE_FEATURE_OVERRIDE",
         entityType: "coach_feature_overrides",
         entityId: overrideId,

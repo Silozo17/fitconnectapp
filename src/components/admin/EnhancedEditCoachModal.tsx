@@ -120,7 +120,7 @@ export function EnhancedEditCoachModal({ coach, open, onClose, onSaved }: Enhanc
 
       if (error) throw error;
 
-      logAction.mutate({
+      logAction.log({
         action: "UPDATE_COACH",
         entityType: "coach_profiles",
         entityId: coach.id,
