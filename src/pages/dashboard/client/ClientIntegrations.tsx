@@ -1,9 +1,11 @@
+import { useState } from "react";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 import WearableConnectionList from "@/components/integrations/WearableConnectionList";
 import CalendarConnectionCard from "@/components/integrations/CalendarConnectionCard";
 import HealthDataWidget from "@/components/integrations/HealthDataWidget";
+import AppleCalendarConnectModal from "@/components/integrations/AppleCalendarConnectModal";
 import { useCalendarSync, CalendarProvider } from "@/hooks/useCalendarSync";
-import { Calendar } from "lucide-react";
+import { Calendar, Apple } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 const calendarProviders: {
@@ -11,6 +13,7 @@ const calendarProviders: {
   name: string;
   icon: React.ReactNode;
   color: string;
+  isCalDAV?: boolean;
 }[] = [
   {
     id: "google_calendar",
@@ -18,11 +21,27 @@ const calendarProviders: {
     icon: <Calendar className="w-6 h-6 text-white" />,
     color: "bg-gradient-to-br from-blue-500 to-blue-700",
   },
+  {
+    id: "apple_calendar",
+    name: "Apple Calendar",
+    icon: <Apple className="w-6 h-6 text-white" />,
+    color: "bg-gradient-to-br from-gray-700 to-gray-900",
+    isCalDAV: true,
+  },
 ];
 
 const ClientIntegrations = () => {
+  const [showAppleCalendarModal, setShowAppleCalendarModal] = useState(false);
   const { connectCalendar, disconnectCalendar, toggleSync, getConnection, isLoading } =
     useCalendarSync();
+
+  const handleCalendarConnect = (provider: CalendarProvider, isCalDAV?: boolean) => {
+    if (isCalDAV) {
+      setShowAppleCalendarModal(true);
+    } else {
+      connectCalendar.mutate(provider);
+    }
+  };
 
   return (
     <ClientDashboardLayout
@@ -75,7 +94,7 @@ const ClientIntegrations = () => {
                   providerColor={provider.color}
                   isConnected={!!connection}
                   syncEnabled={connection?.sync_enabled}
-                  onConnect={() => connectCalendar.mutate(provider.id)}
+                  onConnect={() => handleCalendarConnect(provider.id, provider.isCalDAV)}
                   onDisconnect={() => connection && disconnectCalendar.mutate(connection.id)}
                   onToggleSync={(enabled) =>
                     connection && toggleSync.mutate({ connectionId: connection.id, enabled })
@@ -87,6 +106,11 @@ const ClientIntegrations = () => {
           </div>
         </div>
       </div>
+
+      <AppleCalendarConnectModal
+        open={showAppleCalendarModal}
+        onOpenChange={setShowAppleCalendarModal}
+      />
     </ClientDashboardLayout>
   );
 };

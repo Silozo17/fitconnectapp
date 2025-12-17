@@ -1,5 +1,6 @@
-import { Activity, Heart, Watch, CheckCircle, ExternalLink, Loader2 } from "lucide-react";
+import { Activity, Heart, Watch, CheckCircle, ExternalLink, Loader2, Apple, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useWearables, WearableProvider } from "@/hooks/useWearables";
 
 interface WearablesOnboardingStepProps {
@@ -13,7 +14,16 @@ const WEARABLE_PROVIDERS: {
   description: string;
   icon: React.ReactNode;
   color: string;
+  comingSoon?: boolean;
 }[] = [
+  {
+    id: "apple_health",
+    name: "Apple Health",
+    description: "Requires FitConnect iOS app",
+    icon: <Apple className="w-5 h-5 text-white" />,
+    color: "bg-gradient-to-br from-pink-500 to-red-500",
+    comingSoon: true,
+  },
   {
     id: "google_fit",
     name: "Google Fit",
@@ -84,7 +94,9 @@ const WearablesOnboardingStep = ({ onComplete, onSkip }: WearablesOnboardingStep
             <div
               key={provider.id}
               className={`p-4 rounded-xl border-2 transition-all ${
-                isConnected
+                provider.comingSoon
+                  ? "border-border/50 bg-muted/30 opacity-75"
+                  : isConnected
                   ? "border-green-500/30 bg-green-500/5"
                   : "border-border hover:border-muted-foreground"
               }`}
@@ -95,11 +107,23 @@ const WearablesOnboardingStep = ({ onComplete, onSkip }: WearablesOnboardingStep
                     {provider.icon}
                   </div>
                   <div>
-                    <p className="font-medium text-foreground">{provider.name}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-foreground">{provider.name}</p>
+                      {provider.comingSoon && (
+                        <Badge variant="secondary" className="text-xs">
+                          <Clock className="w-3 h-3 mr-1" />
+                          Soon
+                        </Badge>
+                      )}
+                    </div>
                     <p className="text-sm text-muted-foreground">{provider.description}</p>
                   </div>
                 </div>
-                {isConnected ? (
+                {provider.comingSoon ? (
+                  <Button variant="outline" size="sm" disabled>
+                    Coming Soon
+                  </Button>
+                ) : isConnected ? (
                   <div className="flex items-center gap-2 text-green-600">
                     <CheckCircle className="w-5 h-5" />
                     <span className="text-sm font-medium">Connected</span>
