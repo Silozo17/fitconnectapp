@@ -4,7 +4,6 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import ClientSidebar from "./ClientSidebar";
 import ClientDashboardHeader from "./ClientDashboardHeader";
 
@@ -23,6 +22,7 @@ const ClientDashboardLayout = ({
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     const checkOnboarding = async () => {
@@ -64,17 +64,13 @@ const ClientDashboardLayout = ({
         <ClientSidebar
           collapsed={sidebarCollapsed}
           onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+          mobileOpen={mobileOpen}
+          setMobileOpen={setMobileOpen}
         />
 
-        <div
-          className={cn(
-            "transition-all duration-300",
-            sidebarCollapsed ? "ml-16" : "ml-64"
-          )}
-        >
-          <ClientDashboardHeader />
-
-          <main className="p-6">{children}</main>
+        <div className={`transition-all duration-300 ${sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"}`}>
+          <ClientDashboardHeader onMenuToggle={() => setMobileOpen(true)} />
+          <main className="p-4 lg:p-6">{children}</main>
         </div>
       </div>
     </>

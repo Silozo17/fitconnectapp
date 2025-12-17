@@ -1,4 +1,4 @@
-import { Search, LogOut, User } from "lucide-react";
+import { Search, LogOut, User, Menu } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -16,27 +16,44 @@ import ViewSwitcher from "@/components/admin/ViewSwitcher";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 
-const ClientDashboardHeader = () => {
+interface ClientDashboardHeaderProps {
+  onMenuToggle: () => void;
+}
+
+const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => {
   const navigate = useNavigate();
   const { signOut, role } = useAuth();
   const { displayName, avatarUrl } = useUserProfile();
 
   return (
     <header className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
-      <div className="flex items-center justify-between h-16 px-6">
-        {/* Search */}
-        <div className="flex-1 max-w-md">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search..."
-              className="pl-10 bg-muted/50 border-transparent focus:border-primary"
-            />
+      <div className="flex items-center justify-between h-16 px-4 lg:px-6">
+        {/* Left side - Hamburger + Search */}
+        <div className="flex items-center gap-3 flex-1">
+          {/* Mobile Hamburger */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden"
+            onClick={onMenuToggle}
+          >
+            <Menu className="w-5 h-5" />
+          </Button>
+
+          {/* Search */}
+          <div className="flex-1 max-w-xs sm:max-w-md">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search..."
+                className="pl-10 bg-muted/50 border-transparent focus:border-primary"
+              />
+            </div>
           </div>
         </div>
 
         {/* Right side */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {/* Admin View Switcher */}
           {role === "admin" && <ViewSwitcher />}
           

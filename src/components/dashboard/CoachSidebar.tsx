@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
@@ -21,10 +22,12 @@ import { Button } from "@/components/ui/button";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { useCoachBadges } from "@/hooks/useSidebarBadges";
 import { SidebarBadge } from "@/components/shared/SidebarBadge";
+import {
+  Sheet,
+  SheetContent,
+} from "@/components/ui/sheet";
 
 type BadgeKey = "messages" | "pipeline" | "schedule" | "clients";
-
-
 
 const menuItems: { title: string; icon: typeof LayoutDashboard; path: string; badgeKey?: BadgeKey; badgeVariant?: "default" | "warning" | "urgent" }[] = [
   { title: "Overview", icon: LayoutDashboard, path: "/dashboard/coach" },
@@ -48,12 +51,19 @@ const bottomItems: { title: string; icon: typeof LayoutDashboard; path: string }
 interface CoachSidebarProps {
   collapsed: boolean;
   onToggle: () => void;
+  mobileOpen: boolean;
+  setMobileOpen: (open: boolean) => void;
 }
 
-const CoachSidebar = ({ collapsed, onToggle }: CoachSidebarProps) => {
+const CoachSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: CoachSidebarProps) => {
   const location = useLocation();
   const { unreadCount } = useUnreadMessages();
   const { newLeads, pendingBookings, pendingConnections } = useCoachBadges();
+
+  // Close mobile menu on navigation
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname, setMobileOpen]);
 
   const getBadgeCount = (badgeKey?: BadgeKey): number => {
     switch (badgeKey) {
@@ -70,20 +80,15 @@ const CoachSidebar = ({ collapsed, onToggle }: CoachSidebarProps) => {
     }
   };
 
-  return (
-    <aside
-      className={cn(
-        "fixed left-0 top-0 h-screen bg-sidebar border-r border-sidebar-border flex flex-col transition-all duration-300 z-40",
-        collapsed ? "w-16" : "w-64"
-      )}
-    >
+  const SidebarContent = ({ isCollapsed = false }: { isCollapsed?: boolean }) => (
+    <>
       {/* Logo */}
       <div className="p-4 border-b border-sidebar-border">
         <Link to="/" className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shrink-0">
             <Dumbbell className="w-6 h-6 text-primary-foreground" />
           </div>
-          {!collapsed && (
+          {!isCollapsed && (
             <span className="font-display font-bold text-xl text-sidebar-foreground">
               FitConnect
             </span>
@@ -111,11 +116,11 @@ const CoachSidebar = ({ collapsed, onToggle }: CoachSidebarProps) => {
                 >
                   <div className="relative">
                     <item.icon className="w-5 h-5 shrink-0" />
-                    {badgeCount > 0 && collapsed && (
+                    {badgeCount > 0 && isCollapsed && (
                       <SidebarBadge count={badgeCount} collapsed variant={item.badgeVariant} />
                     )}
                   </div>
-                  {!collapsed && (
+                  {!isCollapsed && (
                     <>
                       <span className="font-medium flex-1">{item.title}</span>
                       {badgeCount > 0 && <SidebarBadge count={badgeCount} variant={item.badgeVariant} />}
@@ -128,7 +133,7 @@ const CoachSidebar = ({ collapsed, onToggle }: CoachSidebarProps) => {
         </ul>
       </nav>
 
-      {/* Bottom Items (Profile & Settings) */}
+      {/* Bottom Items (Settings) */}
       <div className="px-2 py-2 border-t border-sidebar-border space-y-1">
         {bottomItems.map((item) => {
           const isActive = location.pathname === item.path;
@@ -144,31 +149,54 @@ const CoachSidebar = ({ collapsed, onToggle }: CoachSidebarProps) => {
               )}
             >
               <item.icon className="w-5 h-5 shrink-0" />
-              {!collapsed && <span className="font-medium">{item.title}</span>}
+              {!isCollapsed && <span className="font-medium">{item.title}</span>}
             </Link>
           );
         })}
       </div>
 
-      {/* Collapse Toggle */}
-      <div className="p-4 border-t border-sidebar-border">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onToggle}
-          className="w-full justify-center text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
-        >
-          {collapsed ? (
-            <ChevronRight className="w-5 h-5" />
-          ) : (
-            <>
-              <ChevronLeft className="w-5 h-5 mr-2" />
-              <span>Collapse</span>
-            </>
-          )}
-        </Button>
-      </div>
-    </aside>
+      {/* Collapse Toggle - Desktop only */}
+      {!mobileOpen && (
+        <div className="p-4 border-t border-sidebar-border">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggle}
+            className="w-full justify-center text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+          >
+            {isCollapsed ? (
+              <ChevronRight className="w-5 h-5" />
+            ) : (
+              <>
+                <ChevronLeft className="w-5 h-5 mr-2" />
+                <span>Collapse</span>
+              </>
+            )}
+          </Button>
+        </div>
+      )}
+    </>
+  );
+
+  return (
+    <>
+      {/* Desktop Sidebar */}
+      <aside
+        className={cn(
+          "hidden lg:flex fixed left-0 top-0 h-screen bg-sidebar border-r border-sidebar-border flex-col transition-all duration-300 z-40",
+          collapsed ? "w-16" : "w-64"
+        )}
+      >
+        <SidebarContent isCollapsed={collapsed} />
+      </aside>
+
+      {/* Mobile Sidebar */}
+      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+        <SheetContent side="left" className="w-64 p-0 flex flex-col bg-sidebar">
+          <SidebarContent isCollapsed={false} />
+        </SheetContent>
+      </Sheet>
+    </>
   );
 };
 

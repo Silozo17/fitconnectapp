@@ -39,6 +39,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Sheet,
+  SheetContent,
+} from "@/components/ui/sheet";
 
 type BadgeKey = "messages" | "plans" | "connections";
 
@@ -118,9 +122,11 @@ const settingsItem: MenuItem = { title: "Settings", icon: Settings, path: "/dash
 interface ClientSidebarProps {
   collapsed: boolean;
   onToggle: () => void;
+  mobileOpen: boolean;
+  setMobileOpen: (open: boolean) => void;
 }
 
-const ClientSidebar = ({ collapsed, onToggle }: ClientSidebarProps) => {
+const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: ClientSidebarProps) => {
   const location = useLocation();
   const { unreadCount } = useUnreadMessages();
   const { newPlans, pendingConnections } = useClientBadges();
@@ -151,6 +157,11 @@ const ClientSidebar = ({ collapsed, onToggle }: ClientSidebarProps) => {
     });
   }, [location.pathname]);
 
+  // Close mobile menu on navigation
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname, setMobileOpen]);
+
   const getBadgeCount = (badgeKey?: BadgeKey): number => {
     switch (badgeKey) {
       case "messages":
@@ -176,11 +187,11 @@ const ClientSidebar = ({ collapsed, onToggle }: ClientSidebarProps) => {
     setOpenGroups((prev) => ({ ...prev, [groupId]: !prev[groupId] }));
   };
 
-  const renderMenuItem = (item: MenuItem, indented = false) => {
+  const renderMenuItem = (item: MenuItem, indented = false, isCollapsed = false) => {
     const isActive = location.pathname === item.path;
     const badgeCount = getBadgeCount(item.badgeKey);
 
-    if (collapsed) {
+    if (isCollapsed) {
       return (
         <Tooltip key={item.path} delayDuration={0}>
           <TooltipTrigger asChild>
@@ -225,11 +236,11 @@ const ClientSidebar = ({ collapsed, onToggle }: ClientSidebarProps) => {
     );
   };
 
-  const renderGroup = (group: MenuGroup) => {
+  const renderGroup = (group: MenuGroup, isCollapsed = false) => {
     if (!group.collapsible) {
       return (
         <div key={group.id} className="space-y-1">
-          {group.items.map((item) => renderMenuItem(item))}
+          {group.items.map((item) => renderMenuItem(item, false, isCollapsed))}
         </div>
       );
     }
@@ -239,7 +250,7 @@ const ClientSidebar = ({ collapsed, onToggle }: ClientSidebarProps) => {
     const GroupIcon = group.icon!;
     const isActive = isGroupActive(group);
 
-    if (collapsed) {
+    if (isCollapsed) {
       return (
         <Tooltip key={group.id} delayDuration={0}>
           <TooltipTrigger asChild>
@@ -294,48 +305,43 @@ const ClientSidebar = ({ collapsed, onToggle }: ClientSidebarProps) => {
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-1 mt-1">
-          {group.items.map((item) => renderMenuItem(item, true))}
+          {group.items.map((item) => renderMenuItem(item, true, false))}
         </CollapsibleContent>
       </Collapsible>
     );
   };
 
-  return (
-    <TooltipProvider>
-      <aside
-        className={cn(
-          "fixed left-0 top-0 h-full bg-card border-r border-border transition-all duration-300 z-50 flex flex-col",
-          collapsed ? "w-16" : "w-64"
-        )}
-      >
-        {/* Logo */}
-        <div className="p-4 border-b border-border">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Dumbbell className="w-5 h-5 text-primary-foreground" />
-            </div>
-            {!collapsed && (
-              <span className="font-bold text-lg text-foreground">FitConnect</span>
-            )}
-          </Link>
-        </div>
+  const SidebarContent = ({ isCollapsed = false }: { isCollapsed?: boolean }) => (
+    <>
+      {/* Logo */}
+      <div className="p-4 border-b border-border">
+        <Link to="/" className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+            <Dumbbell className="w-5 h-5 text-primary-foreground" />
+          </div>
+          {!isCollapsed && (
+            <span className="font-bold text-lg text-foreground">FitConnect</span>
+          )}
+        </Link>
+      </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 p-2 space-y-2 overflow-y-auto">
-          {menuGroups.map((group, index) => (
-            <div key={group.id}>
-              {index > 0 && <div className="my-2 border-t border-border/50" />}
-              {renderGroup(group)}
-            </div>
-          ))}
-        </nav>
+      {/* Navigation */}
+      <nav className="flex-1 p-2 space-y-2 overflow-y-auto">
+        {menuGroups.map((group, index) => (
+          <div key={group.id}>
+            {index > 0 && <div className="my-2 border-t border-border/50" />}
+            {renderGroup(group, isCollapsed)}
+          </div>
+        ))}
+      </nav>
 
-        {/* Settings - Fixed at bottom */}
-        <div className="p-2 border-t border-border space-y-1">
-          {renderMenuItem(settingsItem)}
-        </div>
+      {/* Settings - Fixed at bottom */}
+      <div className="p-2 border-t border-border space-y-1">
+        {renderMenuItem(settingsItem, false, isCollapsed)}
+      </div>
 
-        {/* Collapse Toggle */}
+      {/* Collapse Toggle - Desktop only */}
+      {!mobileOpen && (
         <div className="p-2 border-t border-border">
           <Button
             variant="ghost"
@@ -343,7 +349,7 @@ const ClientSidebar = ({ collapsed, onToggle }: ClientSidebarProps) => {
             onClick={onToggle}
             className="w-full justify-center"
           >
-            {collapsed ? (
+            {isCollapsed ? (
               <ChevronRight className="w-4 h-4" />
             ) : (
               <>
@@ -353,7 +359,28 @@ const ClientSidebar = ({ collapsed, onToggle }: ClientSidebarProps) => {
             )}
           </Button>
         </div>
+      )}
+    </>
+  );
+
+  return (
+    <TooltipProvider>
+      {/* Desktop Sidebar */}
+      <aside
+        className={cn(
+          "hidden lg:flex fixed left-0 top-0 h-full bg-card border-r border-border transition-all duration-300 z-50 flex-col",
+          collapsed ? "w-16" : "w-64"
+        )}
+      >
+        <SidebarContent isCollapsed={collapsed} />
       </aside>
+
+      {/* Mobile Sidebar */}
+      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+        <SheetContent side="left" className="w-64 p-0 flex flex-col">
+          <SidebarContent isCollapsed={false} />
+        </SheetContent>
+      </Sheet>
     </TooltipProvider>
   );
 };
