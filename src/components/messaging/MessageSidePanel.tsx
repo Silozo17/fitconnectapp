@@ -15,6 +15,16 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, CurrencyCode } from "@/lib/currency";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface MessageSidePanelProps {
   participantId: string;
@@ -53,6 +63,11 @@ interface SubscriptionPlan {
   currency: string;
 }
 
+type PendingSend = {
+  type: 'package' | 'subscription';
+  item: CoachPackage | SubscriptionPlan;
+} | null;
+
 const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSidePanelProps) => {
   const { activeProfileType } = useAdminView();
   const [loading, setLoading] = useState(true);
@@ -62,6 +77,8 @@ const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSide
   const [packages, setPackages] = useState<CoachPackage[]>([]);
   const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>([]);
   const [coachId, setCoachId] = useState<string | null>(null);
+  const [stripeConnected, setStripeConnected] = useState<boolean>(false);
+  const [pendingSend, setPendingSend] = useState<PendingSend>(null);
 
   // Only show for coaches (including admins viewing as coach)
   if (activeProfileType !== "coach") return null;
@@ -76,7 +93,7 @@ const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSide
 
       const { data: coachProfile } = await supabase
         .from("coach_profiles")
-        .select("id")
+        .select("id, stripe_connect_onboarded")
         .eq("user_id", user.id)
         .single();
 
@@ -86,6 +103,7 @@ const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSide
       }
 
       setCoachId(coachProfile.id);
+      setStripeConnected(coachProfile.stripe_connect_onboarded || false);
 
       // Fetch all data in parallel
       const [plansRes, packagesRes, subscriptionsRes] = await Promise.all([
@@ -145,28 +163,30 @@ const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSide
     setSending(null);
   };
 
-  const handleSendPackage = async (pkg: CoachPackage) => {
+  const sendPackageMessage = async (pkg: CoachPackage, includeCheckout: boolean) => {
     setSending(`pkg-${pkg.id}`);
     
-    // Generate checkout URL
     let checkoutUrl: string | null = null;
-    try {
-      const origin = window.location.origin;
-      const { data, error } = await supabase.functions.invoke('stripe-checkout', {
-        body: {
-          type: 'package',
-          itemId: pkg.id,
-          clientId: participantId,
-          coachId: coachId,
-          successUrl: `${origin}/dashboard/client/packages?success=true`,
-          cancelUrl: `${origin}/dashboard/client/messages`,
+    
+    if (includeCheckout) {
+      try {
+        const origin = window.location.origin;
+        const { data, error } = await supabase.functions.invoke('stripe-checkout', {
+          body: {
+            type: 'package',
+            itemId: pkg.id,
+            clientId: participantId,
+            coachId: coachId,
+            successUrl: `${origin}/dashboard/client/packages?success=true`,
+            cancelUrl: `${origin}/dashboard/client/messages`,
+          }
+        });
+        if (!error && data?.url) {
+          checkoutUrl = data.url;
         }
-      });
-      if (!error && data?.url) {
-        checkoutUrl = data.url;
+      } catch (e) {
+        console.error('Error generating checkout URL:', e);
       }
-    } catch (e) {
-      console.error('Error generating checkout URL:', e);
     }
     
     let message = `**📦 Package: ${pkg.name}**\n\n${pkg.description || "A great value package for your fitness journey."}\n\n💰 Price: ${formatCurrency(pkg.price, (pkg.currency || "GBP") as CurrencyCode)}\n📋 Sessions: ${pkg.session_count}`;
@@ -181,28 +201,30 @@ const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSide
     setSending(null);
   };
 
-  const handleSendSubscription = async (plan: SubscriptionPlan) => {
+  const sendSubscriptionMessage = async (plan: SubscriptionPlan, includeCheckout: boolean) => {
     setSending(`sub-${plan.id}`);
     
-    // Generate checkout URL
     let checkoutUrl: string | null = null;
-    try {
-      const origin = window.location.origin;
-      const { data, error } = await supabase.functions.invoke('stripe-checkout', {
-        body: {
-          type: 'subscription',
-          itemId: plan.id,
-          clientId: participantId,
-          coachId: coachId,
-          successUrl: `${origin}/dashboard/client/subscriptions?success=true`,
-          cancelUrl: `${origin}/dashboard/client/messages`,
+    
+    if (includeCheckout) {
+      try {
+        const origin = window.location.origin;
+        const { data, error } = await supabase.functions.invoke('stripe-checkout', {
+          body: {
+            type: 'subscription',
+            itemId: plan.id,
+            clientId: participantId,
+            coachId: coachId,
+            successUrl: `${origin}/dashboard/client/subscriptions?success=true`,
+            cancelUrl: `${origin}/dashboard/client/messages`,
+          }
+        });
+        if (!error && data?.url) {
+          checkoutUrl = data.url;
         }
-      });
-      if (!error && data?.url) {
-        checkoutUrl = data.url;
+      } catch (e) {
+        console.error('Error generating checkout URL:', e);
       }
-    } catch (e) {
-      console.error('Error generating checkout URL:', e);
     }
     
     let message = `**💳 Subscription Plan: ${plan.name}**\n\n${plan.description || "Ongoing coaching support to help you reach your goals."}\n\n💰 Price: ${formatCurrency(plan.price, (plan.currency || "GBP") as CurrencyCode)}/${plan.billing_period}\n\nThis includes regular coaching, plan updates, and support.`;
@@ -217,6 +239,34 @@ const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSide
     setSending(null);
   };
 
+  const handleSendPackage = async (pkg: CoachPackage) => {
+    if (!stripeConnected) {
+      setPendingSend({ type: 'package', item: pkg });
+      return;
+    }
+    await sendPackageMessage(pkg, true);
+  };
+
+  const handleSendSubscription = async (plan: SubscriptionPlan) => {
+    if (!stripeConnected) {
+      setPendingSend({ type: 'subscription', item: plan });
+      return;
+    }
+    await sendSubscriptionMessage(plan, true);
+  };
+
+  const handleConfirmSendWithoutStripe = async () => {
+    if (!pendingSend) return;
+    
+    if (pendingSend.type === 'package') {
+      await sendPackageMessage(pendingSend.item as CoachPackage, false);
+    } else {
+      await sendSubscriptionMessage(pendingSend.item as SubscriptionPlan, false);
+    }
+    
+    setPendingSend(null);
+  };
+
   if (loading) {
     return (
       <div className="w-72 border-l border-border bg-card flex items-center justify-center">
@@ -226,161 +276,181 @@ const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSide
   }
 
   return (
-    <div className="w-72 border-l border-border bg-card flex flex-col">
-      <div className="p-3 border-b border-border flex items-center justify-between">
-        <h3 className="font-semibold text-sm text-foreground">Quick Send</h3>
-        {onClose && (
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClose}>
-            <X className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
-
-      <ScrollArea className="flex-1">
-        <div className="p-3 space-y-4">
-          {/* Assigned Training Plans */}
-          {assignedPlans.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Dumbbell className="w-4 h-4 text-primary" />
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Assigned Plans
-                </span>
-              </div>
-              <div className="space-y-2">
-                {assignedPlans.map((plan) => (
-                  <div
-                    key={plan.id}
-                    className="p-2 rounded-lg bg-muted/50 border border-border hover:border-primary/50 transition-colors"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">{plan.name}</p>
-                        <p className="text-xs text-muted-foreground">{plan.weeks} weeks</p>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 flex-shrink-0"
-                        onClick={() => handleSendTrainingPlan(plan)}
-                        disabled={sending === `plan-${plan.id}`}
-                      >
-                        {sending === `plan-${plan.id}` ? (
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                        ) : (
-                          <Send className="h-3 w-3" />
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Packages */}
-          {packages.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Package className="w-4 h-4 text-orange-500" />
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Packages
-                </span>
-              </div>
-              <div className="space-y-2">
-                {packages.map((pkg) => (
-                  <div
-                    key={pkg.id}
-                    className="p-2 rounded-lg bg-muted/50 border border-border hover:border-primary/50 transition-colors"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">{pkg.name}</p>
-                        <div className="flex items-center gap-1 mt-0.5">
-                          <Badge variant="secondary" className="text-xs px-1 py-0">
-                            {pkg.session_count} sessions
-                          </Badge>
-                          <span className="text-xs text-primary font-medium">
-                            {formatCurrency(pkg.price, (pkg.currency || "GBP") as CurrencyCode)}
-                          </span>
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 flex-shrink-0"
-                        onClick={() => handleSendPackage(pkg)}
-                        disabled={sending === `pkg-${pkg.id}`}
-                      >
-                        {sending === `pkg-${pkg.id}` ? (
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                        ) : (
-                          <Send className="h-3 w-3" />
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Subscription Plans */}
-          {subscriptionPlans.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <CreditCard className="w-4 h-4 text-green-500" />
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Subscriptions
-                </span>
-              </div>
-              <div className="space-y-2">
-                {subscriptionPlans.map((plan) => (
-                  <div
-                    key={plan.id}
-                    className="p-2 rounded-lg bg-muted/50 border border-border hover:border-primary/50 transition-colors"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">{plan.name}</p>
-                        <span className="text-xs text-primary font-medium">
-                          {formatCurrency(plan.price, (plan.currency || "GBP") as CurrencyCode)}/{plan.billing_period}
-                        </span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 flex-shrink-0"
-                        onClick={() => handleSendSubscription(plan)}
-                        disabled={sending === `sub-${plan.id}`}
-                      >
-                        {sending === `sub-${plan.id}` ? (
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                        ) : (
-                          <Send className="h-3 w-3" />
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Empty State */}
-          {assignedPlans.length === 0 && packages.length === 0 && subscriptionPlans.length === 0 && (
-            <div className="text-center py-8">
-              <p className="text-sm text-muted-foreground">
-                No plans or packages to send yet.
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Create packages in your Packages page.
-              </p>
-            </div>
+    <>
+      <div className="w-72 border-l border-border bg-card flex flex-col">
+        <div className="p-3 border-b border-border flex items-center justify-between">
+          <h3 className="font-semibold text-sm text-foreground">Quick Send</h3>
+          {onClose && (
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClose}>
+              <X className="h-4 w-4" />
+            </Button>
           )}
         </div>
-      </ScrollArea>
-    </div>
+
+        <ScrollArea className="flex-1">
+          <div className="p-3 space-y-4">
+            {/* Assigned Training Plans */}
+            {assignedPlans.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Dumbbell className="w-4 h-4 text-primary" />
+                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Assigned Plans
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {assignedPlans.map((plan) => (
+                    <div
+                      key={plan.id}
+                      className="p-2 rounded-lg bg-muted/50 border border-border hover:border-primary/50 transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">{plan.name}</p>
+                          <p className="text-xs text-muted-foreground">{plan.weeks} weeks</p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 flex-shrink-0"
+                          onClick={() => handleSendTrainingPlan(plan)}
+                          disabled={sending === `plan-${plan.id}`}
+                        >
+                          {sending === `plan-${plan.id}` ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <Send className="h-3 w-3" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Packages */}
+            {packages.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Package className="w-4 h-4 text-orange-500" />
+                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Packages
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {packages.map((pkg) => (
+                    <div
+                      key={pkg.id}
+                      className="p-2 rounded-lg bg-muted/50 border border-border hover:border-primary/50 transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">{pkg.name}</p>
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <Badge variant="secondary" className="text-xs px-1 py-0">
+                              {pkg.session_count} sessions
+                            </Badge>
+                            <span className="text-xs text-primary font-medium">
+                              {formatCurrency(pkg.price, (pkg.currency || "GBP") as CurrencyCode)}
+                            </span>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 flex-shrink-0"
+                          onClick={() => handleSendPackage(pkg)}
+                          disabled={sending === `pkg-${pkg.id}`}
+                        >
+                          {sending === `pkg-${pkg.id}` ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <Send className="h-3 w-3" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Subscription Plans */}
+            {subscriptionPlans.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <CreditCard className="w-4 h-4 text-green-500" />
+                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Subscriptions
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {subscriptionPlans.map((plan) => (
+                    <div
+                      key={plan.id}
+                      className="p-2 rounded-lg bg-muted/50 border border-border hover:border-primary/50 transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">{plan.name}</p>
+                          <span className="text-xs text-primary font-medium">
+                            {formatCurrency(plan.price, (plan.currency || "GBP") as CurrencyCode)}/{plan.billing_period}
+                          </span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 flex-shrink-0"
+                          onClick={() => handleSendSubscription(plan)}
+                          disabled={sending === `sub-${plan.id}`}
+                        >
+                          {sending === `sub-${plan.id}` ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <Send className="h-3 w-3" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Empty State */}
+            {assignedPlans.length === 0 && packages.length === 0 && subscriptionPlans.length === 0 && (
+              <div className="text-center py-8">
+                <p className="text-sm text-muted-foreground">
+                  No plans or packages to send yet.
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Create packages in your Packages page.
+                </p>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+      </div>
+
+      {/* Stripe Not Connected Confirmation Dialog */}
+      <AlertDialog open={!!pendingSend} onOpenChange={(open) => !open && setPendingSend(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Stripe Not Connected</AlertDialogTitle>
+            <AlertDialogDescription>
+              You haven't connected your Stripe account yet. Would you like to send this {pendingSend?.type} without a payment button?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>No</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmSendWithoutStripe}>
+              Yes, Send Anyway
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 
