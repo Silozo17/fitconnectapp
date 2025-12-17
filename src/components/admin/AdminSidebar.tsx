@@ -2,7 +2,8 @@ import { NavLink } from "@/components/NavLink";
 import { 
   LayoutDashboard, Users, Dumbbell, Settings, ChevronLeft, ChevronRight, 
   UsersRound, DollarSign, BarChart3,
-  MessageSquare, Shield, Trophy, FileText, Search, LogOut, User, Rocket
+  MessageSquare, Shield, Trophy, FileText, Search, LogOut, User, Rocket,
+  MessageSquarePlus
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -11,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { useAdminBadges } from "@/hooks/useSidebarBadges";
+import { usePendingFeedbackCount } from "@/hooks/useFeedback";
 import { SidebarBadge } from "@/components/shared/SidebarBadge";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { useAuth } from "@/contexts/AuthContext";
@@ -20,7 +22,7 @@ import {
   SheetContent,
 } from "@/components/ui/sheet";
 
-type BadgeKey = "users" | "verification";
+type BadgeKey = "users" | "verification" | "feedback";
 
 interface NavItem {
   title: string;
@@ -43,6 +45,7 @@ const mainNavItems: NavItem[] = [
 const platformNavItems: NavItem[] = [
   { title: "Challenges", url: "/dashboard/admin/challenges", icon: Trophy },
   { title: "Verification", url: "/dashboard/admin/verification", icon: Shield, badgeKey: "verification", badgeVariant: "warning" },
+  { title: "Feedback", url: "/dashboard/admin/feedback", icon: MessageSquarePlus, badgeKey: "feedback" },
   { title: "Reviews & Disputes", url: "/dashboard/admin/reviews", icon: MessageSquare },
   { title: "Audit Log", url: "/dashboard/admin/audit", icon: FileText },
 ];
@@ -59,6 +62,7 @@ interface AdminSidebarProps {
 const AdminSidebar = ({ mobileOpen, setMobileOpen }: AdminSidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const { pendingVerifications, newUsers } = useAdminBadges();
+  const { data: pendingFeedbackCount = 0 } = usePendingFeedbackCount();
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut, role } = useAuth();
@@ -75,6 +79,8 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }: AdminSidebarProps) => {
         return newUsers;
       case "verification":
         return pendingVerifications;
+      case "feedback":
+        return pendingFeedbackCount;
       default:
         return 0;
     }

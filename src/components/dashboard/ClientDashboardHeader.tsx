@@ -15,6 +15,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import ViewSwitcher from "@/components/admin/ViewSwitcher";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
+import { FeedbackModal } from "@/components/feedback/FeedbackModal";
 
 interface ClientDashboardHeaderProps {
   onMenuToggle: () => void;
@@ -56,6 +57,9 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
         <div className="flex items-center gap-2 sm:gap-4">
           {/* Admin View Switcher */}
           {role === "admin" && <ViewSwitcher />}
+          
+          {/* Feedback */}
+          <FeedbackModal />
           
           {/* Notifications */}
           <NotificationCenter />

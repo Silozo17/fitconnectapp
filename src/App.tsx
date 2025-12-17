@@ -60,6 +60,7 @@ const AdminVerification = lazy(() => import("./pages/dashboard/admin/AdminVerifi
 const AdminIntegrations = lazy(() => import("./pages/dashboard/admin/AdminIntegrations"));
 const AdminChallenges = lazy(() => import("./pages/dashboard/admin/AdminChallenges"));
 const AdminAuditLog = lazy(() => import("./pages/dashboard/admin/AdminAuditLog"));
+const AdminFeedback = lazy(() => import("./pages/dashboard/admin/AdminFeedback"));
 const MyProfile = lazy(() => import("./pages/dashboard/MyProfile"));
 const DashboardRedirect = lazy(() => import("./pages/dashboard/DashboardRedirect"));
 
@@ -268,6 +269,11 @@ const App = () => (
                     <Route path="/dashboard/admin/audit" element={
                       <ProtectedRoute allowedRoles={["admin"]}>
                         <AdminAuditLog />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/admin/feedback" element={
+                      <ProtectedRoute allowedRoles={["admin", "manager"]}>
+                        <AdminFeedback />
                       </ProtectedRoute>
                     } />
                     <Route path="/dashboard/admin/notifications" element={

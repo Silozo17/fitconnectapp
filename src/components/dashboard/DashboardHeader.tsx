@@ -15,6 +15,7 @@ import {
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import ViewSwitcher from "@/components/admin/ViewSwitcher";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
+import { FeedbackModal } from "@/components/feedback/FeedbackModal";
 
 interface DashboardHeaderProps {
   subscriptionTier?: string | null;
@@ -64,6 +65,9 @@ const DashboardHeader = ({ subscriptionTier, onMenuToggle }: DashboardHeaderProp
           <span className="hidden sm:inline-flex px-3 py-1 rounded-full text-xs font-bold bg-primary/20 text-primary">
             {tierLabel}
           </span>
+
+          {/* Feedback */}
+          <FeedbackModal />
 
           {/* Notifications */}
           <NotificationCenter />
