@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -102,6 +102,7 @@ const settingsTabs = [
 
 const ClientSettings = () => {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [profile, setProfile] = useState<ClientProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -227,7 +228,7 @@ const ClientSettings = () => {
                           Edit your name, username, and profile photo in My Profile
                         </p>
                       </div>
-                      <Button variant="outline" size="sm" onClick={() => window.location.href = "/dashboard/profile"}>
+                      <Button variant="outline" size="sm" onClick={() => navigate("/dashboard/profile")}>
                         <User className="w-4 h-4 mr-2" />
                         My Profile
                       </Button>
