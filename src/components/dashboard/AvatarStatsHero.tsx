@@ -59,15 +59,15 @@ function StatItem({ icon, label, value, suffix, color, delay }: StatItemProps) {
 
   return (
     <div 
-      className="flex items-center gap-3 p-3 rounded-lg bg-card/50 border border-border/50 hover:border-primary/30 transition-all hover:scale-105 animate-fade-in"
+      className="flex items-center gap-3 p-3 rounded-lg bg-card/50 border border-border/50 hover:border-primary/30 transition-all hover:scale-105 animate-fade-in overflow-hidden"
       style={{ animationDelay: `${delay}ms` }}
     >
-      <div className={cn('p-2 rounded-lg', color)}>
+      <div className={cn('p-2 rounded-lg shrink-0', color)}>
         {icon}
       </div>
-      <div>
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="text-lg font-bold">
+      <div className="min-w-0 flex-1">
+        <p className="text-xs text-muted-foreground truncate">{label}</p>
+        <p className="text-lg font-bold truncate">
           {typeof value === 'number' ? displayValue.toLocaleString() : value}
           {suffix && <span className="text-sm font-normal text-muted-foreground ml-1">{suffix}</span>}
         </p>
@@ -273,15 +273,15 @@ export function AvatarStatsHero({ firstName }: AvatarStatsHeroProps) {
               />
               <Link 
                 to="/dashboard/client/achievements"
-                className="flex items-center gap-3 p-3 rounded-lg bg-primary/10 border border-primary/30 hover:bg-primary/20 transition-all hover:scale-105 animate-fade-in"
+                className="flex items-center gap-3 p-3 rounded-lg bg-primary/10 border border-primary/30 hover:bg-primary/20 transition-all hover:scale-105 animate-fade-in overflow-hidden"
                 style={{ animationDelay: '1000ms' }}
               >
-                <div className="p-2 rounded-lg bg-primary/20">
+                <div className="p-2 rounded-lg bg-primary/20 shrink-0">
                   <ChevronRight className="h-4 w-4 text-primary" />
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">View All</p>
-                  <p className="text-sm font-semibold text-primary">Achievements</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-muted-foreground truncate">View All</p>
+                  <p className="text-sm font-semibold text-primary truncate">Achievements</p>
                 </div>
               </Link>
             </div>
