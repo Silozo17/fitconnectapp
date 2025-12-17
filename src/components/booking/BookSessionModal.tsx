@@ -239,7 +239,7 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto overflow-x-hidden">
+      <DialogContent className="sm:max-w-lg max-w-[calc(100vw-2rem)] max-h-[90vh] overflow-y-auto overflow-x-hidden p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>Book with {coach.display_name}</DialogTitle>
           <DialogDescription>
@@ -342,7 +342,7 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
 
         {/* Step 2: Date & Time */}
         {step === "datetime" && (
-          <div className="space-y-4 py-4">
+          <div className="space-y-4 py-4 overflow-hidden">
             <AvailabilityCalendar
               availability={availability}
               bookedSessions={bookedSessions}
