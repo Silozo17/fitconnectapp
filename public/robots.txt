@@ -1,3 +1,6 @@
+# FitConnect Robots.txt
+# https://getfitconnect.co.uk
+
 User-agent: Googlebot
 Allow: /
 
@@ -12,3 +15,11 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /dashboard/
+Disallow: /onboarding/
+Disallow: /auth
+Disallow: /subscribe
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://getfitconnect.co.uk/sitemap.xml

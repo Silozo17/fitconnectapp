@@ -1,0 +1,34 @@
+{
+  "name": "FitConnect",
+  "short_name": "FitConnect",
+  "description": "Connect with world-class fitness coaches. Personal trainers, nutritionists, boxing, MMA and bodybuilding coaches.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0D0D14",
+  "theme_color": "#BEFF00",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["fitness", "health", "sports"],
+  "lang": "en-GB"
+}
