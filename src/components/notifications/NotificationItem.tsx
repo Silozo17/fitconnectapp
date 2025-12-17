@@ -27,7 +27,8 @@ const getNotificationIcon = (type: string) => {
     case "booking_cancelled":
     case "session_reminder":
       return Calendar;
-    case "new_message":
+    case "message":
+    case "new_message": // backward compatibility
       return MessageSquare;
     case "connection_request":
     case "connection_accepted":
@@ -51,7 +52,8 @@ const getNotificationColor = (type: string) => {
       return "text-primary bg-primary/10";
     case "booking_cancelled":
       return "text-destructive bg-destructive/10";
-    case "new_message":
+    case "message":
+    case "new_message": // backward compatibility
       return "text-blue-500 bg-blue-500/10";
     case "connection_request":
     case "connection_accepted":
