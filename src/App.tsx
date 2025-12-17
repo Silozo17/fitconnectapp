@@ -93,10 +93,21 @@ import DocsClientOverview from "./pages/docs/client/ClientOverview";
 import DocsClientProfile from "./pages/docs/client/ClientProfile";
 import DocsClientCoaches from "./pages/docs/client/ClientCoaches";
 import DocsClientSessions from "./pages/docs/client/ClientSessions";
+import DocsClientPlans from "./pages/docs/client/ClientPlans";
+import DocsClientProgress from "./pages/docs/client/ClientProgress";
+import DocsClientAchievements from "./pages/docs/client/ClientAchievements";
+import DocsClientSettings from "./pages/docs/client/ClientSettingsDocs";
 import DocsCoachOverview from "./pages/docs/coach/CoachOverview";
 import DocsCoachOnboarding from "./pages/docs/coach/CoachOnboarding";
 import DocsCoachProfile from "./pages/docs/coach/CoachProfile";
 import DocsCoachEarnings from "./pages/docs/coach/CoachEarnings";
+import DocsCoachClients from "./pages/docs/coach/CoachClientsDocs";
+import DocsCoachMessaging from "./pages/docs/coach/CoachMessagingDocs";
+import DocsCoachPlans from "./pages/docs/coach/CoachPlansDocs";
+import DocsCoachSchedule from "./pages/docs/coach/CoachScheduleDocs";
+import DocsCoachPackages from "./pages/docs/coach/CoachPackagesDocs";
+import DocsCoachVerification from "./pages/docs/coach/CoachVerificationDocs";
+import DocsAdminOverview from "./pages/docs/admin/AdminOverview";
 
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/shared/ScrollToTop";
@@ -153,10 +164,21 @@ const App = () => (
                 <Route path="/docs/client/profile" element={<DocsClientProfile />} />
                 <Route path="/docs/client/coaches" element={<DocsClientCoaches />} />
                 <Route path="/docs/client/sessions" element={<DocsClientSessions />} />
+                <Route path="/docs/client/plans" element={<DocsClientPlans />} />
+                <Route path="/docs/client/progress" element={<DocsClientProgress />} />
+                <Route path="/docs/client/achievements" element={<DocsClientAchievements />} />
+                <Route path="/docs/client/settings" element={<DocsClientSettings />} />
                 <Route path="/docs/coach" element={<DocsCoachOverview />} />
                 <Route path="/docs/coach/onboarding" element={<DocsCoachOnboarding />} />
                 <Route path="/docs/coach/profile" element={<DocsCoachProfile />} />
                 <Route path="/docs/coach/earnings" element={<DocsCoachEarnings />} />
+                <Route path="/docs/coach/clients" element={<DocsCoachClients />} />
+                <Route path="/docs/coach/messaging" element={<DocsCoachMessaging />} />
+                <Route path="/docs/coach/plans" element={<DocsCoachPlans />} />
+                <Route path="/docs/coach/schedule" element={<DocsCoachSchedule />} />
+                <Route path="/docs/coach/packages" element={<DocsCoachPackages />} />
+                <Route path="/docs/coach/verification" element={<DocsCoachVerification />} />
+                <Route path="/docs/admin" element={<DocsAdminOverview />} />
                 
                 {/* Dashboard Redirect */}
                 <Route path="/dashboard" element={
