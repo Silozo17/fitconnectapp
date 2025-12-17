@@ -107,6 +107,47 @@ serve(async (req) => {
 
     console.log("Coach tier:", tier, "Commission:", applicationFeePercent + "%");
 
+    // Check if coach has Boost active
+    const { data: coachBoost } = await supabase
+      .from("coach_boosts")
+      .select("is_active")
+      .eq("coach_id", coachId)
+      .eq("is_active", true)
+      .maybeSingle();
+
+    // Check if this is a NEW client (never booked with this coach)
+    const { count: previousBookings } = await supabase
+      .from("coaching_sessions")
+      .select("*", { count: "exact", head: true })
+      .eq("coach_id", coachId)
+      .eq("client_id", clientId);
+
+    const isNewClient = (previousBookings || 0) === 0;
+    const isBoostedAcquisition = !!(coachBoost?.is_active && isNewClient);
+
+    console.log("Boost check:", { boostActive: coachBoost?.is_active, isNewClient, isBoostedAcquisition });
+
+    // Get Boost settings and calculate fee if applicable
+    let boostFeeAmount = 0;
+    if (isBoostedAcquisition) {
+      const { data: boostSettings } = await supabase
+        .from("boost_settings")
+        .select("commission_rate, min_fee, max_fee")
+        .eq("is_active", true)
+        .single();
+
+      const commissionRate = boostSettings?.commission_rate || 0.30;
+      const minFee = boostSettings?.min_fee || 10;
+      const maxFee = boostSettings?.max_fee || 100;
+
+      // Calculate: 30% of session price, min £10, max £100
+      boostFeeAmount = Math.min(
+        Math.max((sessionType.price || 0) * commissionRate, minFee),
+        maxFee
+      );
+      console.log("Boost fee calculated:", boostFeeAmount);
+    }
+
     // Calculate payment amount
     const sessionPrice = sessionType.price || 0;
     const currency = (sessionType.currency || coachProfile.currency || 'GBP').toLowerCase();
@@ -192,10 +233,16 @@ serve(async (req) => {
       payment_type: sessionType.payment_required, // 'deposit' or 'full'
       session_price: String(sessionPrice),
       amount_due: String(amountDue),
+      is_boosted_acquisition: isBoostedAcquisition ? 'true' : 'false',
+      boost_fee_amount: String(boostFeeAmount),
     };
 
-    // Calculate application fee (platform commission)
-    const applicationFeeAmount = Math.round(amountDue * 100 * applicationFeePercent / 100);
+    // Calculate application fee (platform commission + boost fee)
+    const platformFeeAmount = Math.round(amountDue * 100 * applicationFeePercent / 100);
+    const boostFeeInCents = Math.round(boostFeeAmount * 100);
+    const applicationFeeAmount = platformFeeAmount + boostFeeInCents;
+
+    console.log("Fees:", { platformFee: platformFeeAmount, boostFee: boostFeeInCents, totalFee: applicationFeeAmount });
 
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({

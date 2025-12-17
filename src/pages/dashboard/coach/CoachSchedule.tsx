@@ -54,6 +54,7 @@ import { format, addDays, startOfWeek, isSameDay, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { getCurrencySymbol, type CurrencyCode } from "@/lib/currency";
+import { useCoachBoostStatus } from "@/hooks/useCoachBoost";
 
 const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -124,6 +125,7 @@ const CoachSchedule = () => {
   const { data: availability = [], isLoading: loadingAvailability } = useCoachAvailability(coachId || "");
   const { data: sessionTypes = [], isLoading: loadingSessionTypes } = useSessionTypes(coachId || "");
   const { data: bookingRequests = [], isLoading: loadingRequests } = useBookingRequests();
+  const { data: boostStatus } = useCoachBoostStatus();
   
   // Fetch coaching sessions for calendar
   const { data: sessions = [] } = useQuery({
@@ -184,6 +186,21 @@ const CoachSchedule = () => {
 
   const handleSaveSessionType = async () => {
     if (!coachId || !sessionTypeName || !sessionTypePrice) return;
+
+    // Check if Boost is active and this would remove the last payment-required session type
+    if (boostStatus?.is_active && paymentRequired === "none") {
+      const otherPaymentSessions = sessionTypes.filter(
+        st => st.id !== editingSessionType?.id && st.payment_required !== "none" && st.is_active
+      );
+      
+      if (otherPaymentSessions.length === 0) {
+        toast.error(
+          "Cannot remove payment requirement - Boost requires at least one session type with payment enabled. Disable Boost first if you want to remove all payment requirements.",
+          { duration: 6000 }
+        );
+        return;
+      }
+    }
 
     await upsertSessionType.mutateAsync({
       id: editingSessionType?.id,
