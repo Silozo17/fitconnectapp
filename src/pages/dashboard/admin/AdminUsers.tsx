@@ -35,6 +35,7 @@ import { toast } from "sonner";
 import EditUserModal from "@/components/admin/EditUserModal";
 import AddUserModal from "@/components/admin/AddUserModal";
 import { UserDetailDrawer } from "@/components/admin/UserDetailDrawer";
+import { AdminUserCard } from "@/components/admin/AdminUserCard";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { BulkActionBar } from "@/components/admin/BulkActionBar";
 import { AccountStatusModal } from "@/components/admin/AccountStatusModal";
@@ -501,148 +502,170 @@ const AdminUsers = () => {
             ) : filteredUsers.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">No users found</div>
             ) : (
-              <div className="overflow-x-auto -mx-4 sm:mx-0">
-              <Table className="min-w-[700px]">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">
-                      <Checkbox
-                        checked={selectedUsers.size === filteredUsers.length && filteredUsers.length > 0}
-                        onCheckedChange={handleSelectAll}
-                      />
-                    </TableHead>
-                    <TableHead>User</TableHead>
-                    <TableHead className="hidden sm:table-cell">Location</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="hidden md:table-cell">Coaches</TableHead>
-                    <TableHead className="hidden md:table-cell">Last Login</TableHead>
-                    <TableHead className="hidden sm:table-cell">Joined</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+              <>
+                {/* Mobile Card View */}
+                <div className="block md:hidden space-y-3">
                   {filteredUsers.map((user) => (
-                    <TableRow 
-                      key={user.id} 
-                      className="cursor-pointer hover:bg-muted/50"
+                    <AdminUserCard
+                      key={user.id}
+                      user={user}
+                      email={userEmails[user.user_id]}
+                      selected={selectedUsers.has(user.id)}
+                      onSelect={(checked) => handleSelectUser(user.id, !!checked)}
                       onClick={() => setViewingUser(user)}
-                    >
-                      <TableCell onClick={(e) => e.stopPropagation()}>
-                        <Checkbox
-                          checked={selectedUsers.has(user.id)}
-                          onCheckedChange={(checked) => handleSelectUser(user.id, !!checked)}
-                        />
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        <div>
-                          {user.first_name || user.last_name
-                            ? `${user.first_name || ""} ${user.last_name || ""}`.trim()
-                            : "Unnamed User"}
-                          <p className="text-xs text-muted-foreground">{userEmails[user.user_id] || "-"}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground hidden sm:table-cell">
-                        {getLocationDisplay(user)}
-                      </TableCell>
-                      <TableCell>
-                        <StatusBadge status={user.status || "active"} />
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        <span className={user.coach_count ? "text-primary font-medium" : "text-muted-foreground"}>
-                          {user.coach_count || 0}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm hidden md:table-cell">
-                        {userLastLogins[user.user_id] 
-                          ? new Date(userLastLogins[user.user_id]!).toLocaleDateString()
-                          : "Never"}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground hidden sm:table-cell">
-                        {new Date(user.created_at).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={(e) => {
-                              e.stopPropagation();
-                              setViewingUser(user);
-                            }}>
-                              <Eye className="h-4 w-4 mr-2" />
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={(e) => {
-                              e.stopPropagation();
-                              setEditingUser(user);
-                            }}>
-                              <Pencil className="h-4 w-4 mr-2" />
-                              Edit Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleResetPassword(user);
-                              }}
-                              disabled={resettingPassword === user.user_id}
-                            >
-                              {resettingPassword === user.user_id ? (
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              ) : (
-                                <KeyRound className="h-4 w-4 mr-2" />
-                              )}
-                              Reset Password
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            {user.status !== "active" && (
-                              <DropdownMenuItem onClick={(e) => {
-                                e.stopPropagation();
-                                setStatusUser(user);
-                              }}>
-                                <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
-                                Activate Account
-                              </DropdownMenuItem>
-                            )}
-                            {user.status !== "suspended" && (
-                              <DropdownMenuItem onClick={(e) => {
-                                e.stopPropagation();
-                                setStatusUser(user);
-                              }}>
-                                <Pause className="h-4 w-4 mr-2 text-amber-500" />
-                                Suspend Account
-                              </DropdownMenuItem>
-                            )}
-                            {user.status !== "banned" && (
-                              <DropdownMenuItem onClick={(e) => {
-                                e.stopPropagation();
-                                setStatusUser(user);
-                              }} className="text-destructive">
-                                <Ban className="h-4 w-4 mr-2" />
-                                Ban Account
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteUser(user.id);
-                              }}
-                              className="text-destructive focus:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete User
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
+                      onEdit={() => setEditingUser(user)}
+                      onResetPassword={() => handleResetPassword(user)}
+                      onChangeStatus={() => setStatusUser(user)}
+                      onDelete={() => handleDeleteUser(user.id)}
+                      isResettingPassword={resettingPassword === user.user_id}
+                    />
                   ))}
-                </TableBody>
-              </Table>
-              </div>
+                </div>
+
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto -mx-4 sm:mx-0">
+                  <Table className="min-w-[700px]">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-12">
+                          <Checkbox
+                            checked={selectedUsers.size === filteredUsers.length && filteredUsers.length > 0}
+                            onCheckedChange={handleSelectAll}
+                          />
+                        </TableHead>
+                        <TableHead>User</TableHead>
+                        <TableHead>Location</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Coaches</TableHead>
+                        <TableHead>Last Login</TableHead>
+                        <TableHead>Joined</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredUsers.map((user) => (
+                        <TableRow 
+                          key={user.id} 
+                          className="cursor-pointer hover:bg-muted/50"
+                          onClick={() => setViewingUser(user)}
+                        >
+                          <TableCell onClick={(e) => e.stopPropagation()}>
+                            <Checkbox
+                              checked={selectedUsers.has(user.id)}
+                              onCheckedChange={(checked) => handleSelectUser(user.id, !!checked)}
+                            />
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            <div>
+                              {user.first_name || user.last_name
+                                ? `${user.first_name || ""} ${user.last_name || ""}`.trim()
+                                : "Unnamed User"}
+                              <p className="text-xs text-muted-foreground">{userEmails[user.user_id] || "-"}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {getLocationDisplay(user)}
+                          </TableCell>
+                          <TableCell>
+                            <StatusBadge status={user.status || "active"} />
+                          </TableCell>
+                          <TableCell>
+                            <span className={user.coach_count ? "text-primary font-medium" : "text-muted-foreground"}>
+                              {user.coach_count || 0}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm">
+                            {userLastLogins[user.user_id] 
+                              ? new Date(userLastLogins[user.user_id]!).toLocaleDateString()
+                              : "Never"}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {new Date(user.created_at).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                <Button variant="ghost" size="icon">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={(e) => {
+                                  e.stopPropagation();
+                                  setViewingUser(user);
+                                }}>
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  View Details
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingUser(user);
+                                }}>
+                                  <Pencil className="h-4 w-4 mr-2" />
+                                  Edit Details
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleResetPassword(user);
+                                  }}
+                                  disabled={resettingPassword === user.user_id}
+                                >
+                                  {resettingPassword === user.user_id ? (
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  ) : (
+                                    <KeyRound className="h-4 w-4 mr-2" />
+                                  )}
+                                  Reset Password
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                {user.status !== "active" && (
+                                  <DropdownMenuItem onClick={(e) => {
+                                    e.stopPropagation();
+                                    setStatusUser(user);
+                                  }}>
+                                    <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
+                                    Activate Account
+                                  </DropdownMenuItem>
+                                )}
+                                {user.status !== "suspended" && (
+                                  <DropdownMenuItem onClick={(e) => {
+                                    e.stopPropagation();
+                                    setStatusUser(user);
+                                  }}>
+                                    <Pause className="h-4 w-4 mr-2 text-amber-500" />
+                                    Suspend Account
+                                  </DropdownMenuItem>
+                                )}
+                                {user.status !== "banned" && (
+                                  <DropdownMenuItem onClick={(e) => {
+                                    e.stopPropagation();
+                                    setStatusUser(user);
+                                  }} className="text-destructive">
+                                    <Ban className="h-4 w-4 mr-2" />
+                                    Ban Account
+                                  </DropdownMenuItem>
+                                )}
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteUser(user.id);
+                                  }}
+                                  className="text-destructive focus:text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete User
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
