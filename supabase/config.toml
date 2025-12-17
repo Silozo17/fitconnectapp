@@ -83,3 +83,42 @@ verify_jwt = true
 
 [functions.generate-doc-screenshot]
 verify_jwt = true
+
+[functions.send-welcome-email]
+verify_jwt = false
+
+[functions.send-password-reset-email]
+verify_jwt = false
+
+[functions.send-new-client-email]
+verify_jwt = false
+
+[functions.send-payout-email]
+verify_jwt = false
+
+[functions.send-booking-reminder]
+verify_jwt = false
+
+[functions.send-booking-confirmation]
+verify_jwt = false
+
+[functions.send-booking-accepted]
+verify_jwt = false
+
+[functions.send-booking-cancelled]
+verify_jwt = false
+
+[functions.send-payment-receipt]
+verify_jwt = false
+
+[functions.send-message-notification]
+verify_jwt = false
+
+[functions.send-connection-request-email]
+verify_jwt = false
+
+[functions.send-review-request]
+verify_jwt = false
+
+[functions.send-newsletter-welcome]
+verify_jwt = false

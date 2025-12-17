@@ -2019,6 +2019,72 @@ export type Database = {
           },
         ]
       }
+      email_logs: {
+        Row: {
+          email_type: string
+          id: string
+          recipient_email: string
+          resend_id: string | null
+          sent_at: string | null
+          status: string | null
+          subject: string
+          user_id: string | null
+        }
+        Insert: {
+          email_type: string
+          id?: string
+          recipient_email: string
+          resend_id?: string | null
+          sent_at?: string | null
+          status?: string | null
+          subject: string
+          user_id?: string | null
+        }
+        Update: {
+          email_type?: string
+          id?: string
+          recipient_email?: string
+          resend_id?: string | null
+          sent_at?: string | null
+          status?: string | null
+          subject?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      email_preferences: {
+        Row: {
+          booking_reminders: boolean | null
+          created_at: string | null
+          id: string
+          marketing_emails: boolean | null
+          message_notifications: boolean | null
+          updated_at: string | null
+          user_id: string
+          weekly_digest: boolean | null
+        }
+        Insert: {
+          booking_reminders?: boolean | null
+          created_at?: string | null
+          id?: string
+          marketing_emails?: boolean | null
+          message_notifications?: boolean | null
+          updated_at?: string | null
+          user_id: string
+          weekly_digest?: boolean | null
+        }
+        Update: {
+          booking_reminders?: boolean | null
+          created_at?: string | null
+          id?: string
+          marketing_emails?: boolean | null
+          message_notifications?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+          weekly_digest?: boolean | null
+        }
+        Relationships: []
+      }
       exercise_categories: {
         Row: {
           color: string | null
