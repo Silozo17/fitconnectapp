@@ -44,7 +44,9 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}) =>
       let query = supabase
         .from("coach_profiles")
         .select("*")
-        .eq("onboarding_completed", true);
+        .eq("onboarding_completed", true)
+        .eq("marketplace_visible", true)
+        .or("status.is.null,status.eq.active");
 
       // Apply filters
       if (options.search) {

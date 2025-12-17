@@ -1588,6 +1588,7 @@ export type Database = {
           in_person_available: boolean | null
           is_verified: boolean | null
           location: string | null
+          marketplace_visible: boolean | null
           onboarding_completed: boolean
           onboarding_progress: Json | null
           online_available: boolean | null
@@ -1629,6 +1630,7 @@ export type Database = {
           in_person_available?: boolean | null
           is_verified?: boolean | null
           location?: string | null
+          marketplace_visible?: boolean | null
           onboarding_completed?: boolean
           onboarding_progress?: Json | null
           online_available?: boolean | null
@@ -1670,6 +1672,7 @@ export type Database = {
           in_person_available?: boolean | null
           is_verified?: boolean | null
           location?: string | null
+          marketplace_visible?: boolean | null
           onboarding_completed?: boolean
           onboarding_progress?: Json | null
           online_available?: boolean | null

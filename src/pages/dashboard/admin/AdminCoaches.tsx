@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, MoreHorizontal, Pencil, Trash2, KeyRound, Eye, Gift, Users, DollarSign, Loader2, Pause, Ban, CheckCircle, Download } from "lucide-react";
+import { Search, MoreHorizontal, Pencil, Trash2, KeyRound, Eye, EyeOff, Gift, Users, DollarSign, Loader2, Pause, Ban, CheckCircle, Download } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -50,6 +50,7 @@ interface CoachUser {
   experience_years: number | null;
   status?: string | null;
   status_reason?: string | null;
+  marketplace_visible?: boolean | null;
 }
 
 const AdminCoaches = () => {
@@ -393,6 +394,7 @@ const AdminCoaches = () => {
                         <TableHead>Specialty</TableHead>
                         <TableHead>Rate</TableHead>
                         <TableHead>Tier</TableHead>
+                        <TableHead>Visible</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Last Login</TableHead>
                         <TableHead>Joined</TableHead>
@@ -432,6 +434,13 @@ const AdminCoaches = () => {
                             <Badge variant="secondary" className="capitalize">
                               {coach.subscription_tier || "free"}
                             </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {coach.marketplace_visible === false ? (
+                              <EyeOff className="h-4 w-4 text-amber-500" />
+                            ) : (
+                              <Eye className="h-4 w-4 text-muted-foreground" />
+                            )}
                           </TableCell>
                           <TableCell>
                             <StatusBadge status={coach.status || "active"} />
@@ -555,6 +564,7 @@ const AdminCoaches = () => {
         onResetPassword={() => viewingCoach && handleResetPassword(viewingCoach)}
         onChangeStatus={() => viewingCoach && setStatusCoach(viewingCoach)}
         onDelete={() => viewingCoach && handleDeleteCoach(viewingCoach)}
+        onRefresh={fetchCoaches}
       />
 
       {/* Assign Free Plan Modal */}
