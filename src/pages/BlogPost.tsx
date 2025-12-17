@@ -8,7 +8,8 @@ import { BlogCard } from "@/components/blog/BlogCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, Clock, ArrowLeft, Share2, Twitter, Linkedin, Facebook, ChevronRight } from "lucide-react";
+import { ShareButton } from "@/components/shared/ShareButton";
+import { Calendar, Clock, ArrowLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 
 export default function BlogPost() {
@@ -122,16 +123,7 @@ export default function BlogPost() {
   ]);
 
   const shareUrl = `https://getfitconnect.co.uk/blog/${post.slug}`;
-  const shareText = post.title;
-
-  const handleShare = (platform: string) => {
-    const urls: Record<string, string> = {
-      twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`,
-      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`,
-      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
-    };
-    window.open(urls[platform], "_blank", "width=600,height=400");
-  };
+  const shareText = `${post.title} - ${post.excerpt}`;
 
   return (
     <>
@@ -187,22 +179,13 @@ export default function BlogPost() {
                 <span>By {post.author}</span>
               </div>
 
-              {/* Share Buttons */}
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-muted-foreground flex items-center gap-2">
-                  <Share2 className="w-4 h-4" />
-                  Share:
-                </span>
-                <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => handleShare("twitter")}>
-                  <Twitter className="w-4 h-4" />
-                </Button>
-                <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => handleShare("linkedin")}>
-                  <Linkedin className="w-4 h-4" />
-                </Button>
-                <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => handleShare("facebook")}>
-                  <Facebook className="w-4 h-4" />
-                </Button>
-              </div>
+              {/* Share Button */}
+              <ShareButton
+                title={post.title}
+                text={shareText}
+                url={shareUrl}
+                variant="outline"
+              />
             </header>
 
             {/* Featured Image */}

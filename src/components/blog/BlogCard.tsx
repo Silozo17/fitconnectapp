@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Calendar, Clock, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { ShareButton } from "@/components/shared/ShareButton";
 
 interface BlogPost {
   id: string;
@@ -81,7 +82,19 @@ export function BlogCard({ post, featured = false }: BlogCardProps) {
               {post.reading_time_minutes} min read
             </span>
           </div>
-          <ArrowRight className="w-4 h-4 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="flex items-center gap-2">
+            <div onClick={(e) => e.preventDefault()}>
+              <ShareButton
+                title={post.title}
+                text={post.excerpt}
+                url={`${window.location.origin}/blog/${post.slug}`}
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+              />
+            </div>
+            <ArrowRight className="w-4 h-4 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
         </div>
       </div>
     </Link>
