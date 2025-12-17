@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { LeaderboardTable } from './LeaderboardTable';
@@ -375,7 +376,11 @@ export function LocationLeaderboard({ timeFrame = 'alltime' }: LocationLeaderboa
       {userLocation && !userLocation.leaderboard_visible && (
         <div className="text-center p-4 bg-muted/50 rounded-lg">
           <p className="text-sm text-muted-foreground">
-            You're not visible on leaderboards. Go to Settings → Leaderboard Settings to opt in.
+            You're not visible on leaderboards.{' '}
+            <Link to="/dashboard/client/settings?tab=preferences" className="text-primary underline hover:text-primary/80">
+              Go to Leaderboard Settings
+            </Link>{' '}
+            to opt in.
           </p>
         </div>
       )}
