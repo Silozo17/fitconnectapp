@@ -5,7 +5,7 @@ import { Send, Loader2, ArrowLeft, Check, CheckCheck, User, Briefcase, Shield, M
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAdminView } from "@/contexts/AdminContext";
 import { cn } from "@/lib/utils";
 import ChatQuickActions from "./ChatQuickActions";
 import TypingIndicator, { useTypingBroadcast } from "./TypingIndicator";
@@ -52,10 +52,14 @@ const ChatWindow = ({
   });
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { role } = useAuth();
+  const { activeProfileType } = useAdminView();
   const { broadcastTyping } = useTypingBroadcast(currentProfileId || "", participantId);
 
-  const basePath = role === "coach" ? "/dashboard/coach/messages" : "/dashboard/client/messages";
+  const basePath = activeProfileType === "admin" 
+    ? "/dashboard/admin/messages" 
+    : activeProfileType === "coach" 
+      ? "/dashboard/coach/messages" 
+      : "/dashboard/client/messages";
 
   // Fetch participant info if not provided
   useEffect(() => {
