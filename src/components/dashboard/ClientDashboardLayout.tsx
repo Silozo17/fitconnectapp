@@ -68,7 +68,7 @@ const ClientDashboardLayout = ({
           setMobileOpen={setMobileOpen}
         />
 
-        <div className={`transition-all duration-300 ${sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"}`}>
+        <div className={`transition-all duration-300 ${sidebarCollapsed ? "xl:ml-16" : "xl:ml-64"}`}>
           <ClientDashboardHeader onMenuToggle={() => setMobileOpen(true)} />
           <main className="p-4 lg:p-6">{children}</main>
         </div>

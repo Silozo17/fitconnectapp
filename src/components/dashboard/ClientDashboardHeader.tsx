@@ -27,21 +27,21 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
 
   return (
     <header className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
-      <div className="flex items-center justify-between h-16 px-4 lg:px-6">
+      <div className="flex items-center justify-between h-16 px-4 xl:px-6">
         {/* Left side - Hamburger + Search (search hidden on mobile) */}
         <div className="flex items-center gap-3 flex-1">
           {/* Mobile Hamburger */}
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden"
+            className="xl:hidden"
             onClick={onMenuToggle}
           >
             <Menu className="w-5 h-5" />
           </Button>
 
           {/* Search - Hidden on mobile */}
-          <div className="hidden lg:flex flex-1 max-w-md">
+          <div className="hidden xl:flex flex-1 max-w-md">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -61,7 +61,7 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
           <NotificationCenter />
 
           {/* Profile Dropdown - Hidden on mobile */}
-          <div className="hidden lg:block">
+          <div className="hidden xl:block">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-2 p-1">
