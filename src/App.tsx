@@ -86,6 +86,18 @@ import Nutritionists from "./pages/coaches/Nutritionists";
 import Boxing from "./pages/coaches/Boxing";
 import MMA from "./pages/coaches/MMA";
 
+// Documentation Pages
+import DocsHub from "./pages/docs/DocsHub";
+import GettingStarted from "./pages/docs/GettingStarted";
+import DocsClientOverview from "./pages/docs/client/ClientOverview";
+import DocsClientProfile from "./pages/docs/client/ClientProfile";
+import DocsClientCoaches from "./pages/docs/client/ClientCoaches";
+import DocsClientSessions from "./pages/docs/client/ClientSessions";
+import DocsCoachOverview from "./pages/docs/coach/CoachOverview";
+import DocsCoachOnboarding from "./pages/docs/coach/CoachOnboarding";
+import DocsCoachProfile from "./pages/docs/coach/CoachProfile";
+import DocsCoachEarnings from "./pages/docs/coach/CoachEarnings";
+
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/shared/ScrollToTop";
 import ScrollRestoration from "./components/shared/ScrollRestoration";
@@ -133,6 +145,18 @@ const App = () => (
                 <Route path="/marketplace" element={<Marketplace />} />
                 <Route path="/marketplace/:productId" element={<MarketplaceProduct />} />
                 <Route path="/marketplace/bundles/:bundleId" element={<MarketplaceBundle />} />
+                
+                {/* Documentation Routes */}
+                <Route path="/docs" element={<DocsHub />} />
+                <Route path="/docs/getting-started" element={<GettingStarted />} />
+                <Route path="/docs/client" element={<DocsClientOverview />} />
+                <Route path="/docs/client/profile" element={<DocsClientProfile />} />
+                <Route path="/docs/client/coaches" element={<DocsClientCoaches />} />
+                <Route path="/docs/client/sessions" element={<DocsClientSessions />} />
+                <Route path="/docs/coach" element={<DocsCoachOverview />} />
+                <Route path="/docs/coach/onboarding" element={<DocsCoachOnboarding />} />
+                <Route path="/docs/coach/profile" element={<DocsCoachProfile />} />
+                <Route path="/docs/coach/earnings" element={<DocsCoachEarnings />} />
                 
                 {/* Dashboard Redirect */}
                 <Route path="/dashboard" element={
