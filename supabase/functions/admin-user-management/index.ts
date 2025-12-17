@@ -150,11 +150,7 @@ Deno.serve(async (req) => {
       }
 
       case "bulk_update_status": {
-        const { users, status, reason } = body;
-        
-        // Extract user IDs and profile IDs
-        const userIds = users.map((u: { user_id: string }) => u.user_id);
-        const profileIds = users.map((u: { id: string }) => u.id);
+        const { userIds, profileIds, status, reason } = body;
 
         // Update auth users ban status if banning
         for (const userId of userIds) {
@@ -195,8 +191,7 @@ Deno.serve(async (req) => {
       }
 
       case "bulk_delete": {
-        const { users } = body;
-        const profileIds = users.map((u: { id: string }) => u.id);
+        const { profileIds } = body;
         
         const table = getTableName(userType);
         const { error } = await supabaseAdmin
