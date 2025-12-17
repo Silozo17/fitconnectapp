@@ -36,6 +36,7 @@ export default function ClientCoaches() {
         </ul>
 
         <DocScreenshot 
+          docId="coach-marketplace"
           alt="Coach marketplace showing coach cards with filters"
           caption="The coach marketplace with filter options"
         />
@@ -104,6 +105,7 @@ export default function ClientCoaches() {
         </ul>
 
         <DocScreenshot 
+          docId="coach-card"
           alt="Coach card showing profile, name, rating, and details"
           caption="A coach card with key information"
         />

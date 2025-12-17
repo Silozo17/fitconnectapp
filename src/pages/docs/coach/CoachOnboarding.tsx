@@ -55,6 +55,7 @@ export default function CoachOnboarding() {
         </ul>
 
         <DocScreenshot 
+          docId="coach-info-form"
           alt="Coach basic info form with name, bio, and location fields"
           caption="Enter your basic professional information"
         />
@@ -139,6 +140,7 @@ export default function CoachOnboarding() {
         </DocStep>
 
         <DocScreenshot 
+          docId="availability-settings"
           alt="Availability settings showing daily time slots"
           caption="Configure your weekly availability"
         />

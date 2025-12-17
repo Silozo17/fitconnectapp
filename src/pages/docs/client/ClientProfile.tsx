@@ -39,6 +39,7 @@ export default function ClientProfile() {
         </DocStep>
 
         <DocScreenshot 
+          docId="client-profile-form"
           alt="Personal information form showing name, age, and pronoun fields"
           caption="Step 1: Personal Information"
         />
@@ -88,6 +89,7 @@ export default function ClientProfile() {
         </ol>
 
         <DocScreenshot 
+          docId="client-settings-page"
           alt="Client settings page with profile tab selected"
           caption="Profile settings in your dashboard"
         />

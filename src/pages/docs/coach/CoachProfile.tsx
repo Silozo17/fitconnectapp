@@ -123,6 +123,7 @@ export default function CoachProfile() {
         </DocStep>
 
         <DocScreenshot 
+          docId="card-image-upload"
           alt="Card image upload showing landscape crop"
           caption="Upload a landscape image for your marketplace card"
         />

@@ -56,6 +56,7 @@ export default function ClientSessions() {
         </DocStep>
 
         <DocScreenshot 
+          docId="booking-calendar"
           alt="Booking calendar showing available time slots"
           caption="Select an available time slot from the coach's calendar"
         />
@@ -122,6 +123,7 @@ export default function ClientSessions() {
         </p>
 
         <DocScreenshot 
+          docId="sessions-dashboard"
           alt="Sessions dashboard showing upcoming and past sessions"
           caption="Your sessions dashboard"
         />
