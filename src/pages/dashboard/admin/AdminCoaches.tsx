@@ -263,19 +263,19 @@ const AdminCoaches = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Coaches Management</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Coaches Management</h1>
             <p className="text-muted-foreground mt-1">Manage all coach accounts, subscriptions, and features</p>
           </div>
-          <Button variant="outline" onClick={handleExportCoaches} disabled={filteredCoaches.length === 0}>
+          <Button variant="outline" size="sm" onClick={handleExportCoaches} disabled={filteredCoaches.length === 0} className="w-full sm:w-auto">
             <Download className="h-4 w-4 mr-2" />
             Export CSV
           </Button>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
@@ -344,9 +344,9 @@ const AdminCoaches = () => {
 
         <Card>
           <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <CardTitle>All Coaches ({filteredCoaches.length})</CardTitle>
-              <div className="relative w-72">
+              <div className="relative w-full sm:w-72">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search by name or location..."

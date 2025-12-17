@@ -352,17 +352,17 @@ const AdminUsers = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Users Management</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Users Management</h1>
             <p className="text-muted-foreground mt-1">Manage all client accounts</p>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={handleExportUsers} disabled={filteredUsers.length === 0}>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button variant="outline" size="sm" onClick={handleExportUsers} disabled={filteredUsers.length === 0} className="flex-1 sm:flex-none">
               <Download className="h-4 w-4 mr-2" />
               Export CSV
             </Button>
-            <Button onClick={() => setAddUserOpen(true)}>
+            <Button size="sm" onClick={() => setAddUserOpen(true)} className="flex-1 sm:flex-none">
               <UserPlus className="h-4 w-4 mr-2" />
               Add User
             </Button>
@@ -370,7 +370,7 @@ const AdminUsers = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-4">
@@ -445,8 +445,8 @@ const AdminUsers = () => {
               </div>
               
               {/* Filters Row */}
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="relative w-64">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3">
+                <div className="relative w-full sm:w-64">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search by name or email..."
@@ -457,7 +457,7 @@ const AdminUsers = () => {
                 </div>
                 
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-36">
+                  <SelectTrigger className="w-full sm:w-36">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>

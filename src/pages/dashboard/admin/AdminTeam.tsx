@@ -211,18 +211,18 @@ const AdminTeam = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Team Management</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold">Team Management</h1>
             <p className="text-muted-foreground">Manage admins, managers, and staff</p>
           </div>
-          <Button onClick={() => setIsAddModalOpen(true)}>
+          <Button onClick={() => setIsAddModalOpen(true)} className="w-full sm:w-auto">
             <Plus className="h-4 w-4 mr-2" />
             Add Team Member
           </Button>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 grid-cols-2 xl:grid-cols-4">
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
@@ -294,9 +294,9 @@ const AdminTeam = () => {
                 <CardTitle>Team Members</CardTitle>
                 <CardDescription>All admins, managers, and staff</CardDescription>
               </div>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:flex-wrap">
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[130px]">
+                  <SelectTrigger className="w-full sm:w-[130px]">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -307,7 +307,7 @@ const AdminTeam = () => {
                   </SelectContent>
                 </Select>
                 <Select value={roleFilter} onValueChange={setRoleFilter}>
-                  <SelectTrigger className="w-[130px]">
+                  <SelectTrigger className="w-full sm:w-[130px]">
                     <SelectValue placeholder="Role" />
                   </SelectTrigger>
                   <SelectContent>
@@ -317,7 +317,7 @@ const AdminTeam = () => {
                     <SelectItem value="staff">Staff</SelectItem>
                   </SelectContent>
                 </Select>
-                <div className="relative w-64">
+                <div className="relative w-full sm:w-64">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search team..."

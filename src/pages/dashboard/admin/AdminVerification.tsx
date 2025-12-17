@@ -414,13 +414,15 @@ const AdminVerification = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold">Coach Verification</h1>
-          <p className="text-muted-foreground">Review and verify coach credentials with AI-assisted analysis</p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold">Coach Verification</h1>
+            <p className="text-muted-foreground">Review and verify coach credentials with AI-assisted analysis</p>
+          </div>
         </div>
 
         {/* Stats */}
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 grid-cols-2 xl:grid-cols-4">
           <Card>
             <CardHeader className="pb-2">
               <CardDescription>Pending Review</CardDescription>

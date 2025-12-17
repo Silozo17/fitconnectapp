@@ -169,20 +169,22 @@ const AdminDashboard = () => {
 
       <AdminLayout>
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Admin Dashboard</h1>
               <p className="text-muted-foreground mt-1">Platform overview and management</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <Button 
                 variant={editMode ? "default" : "outline"} 
                 onClick={() => setEditMode(!editMode)}
+                size="sm"
+                className="flex-1 sm:flex-none"
               >
                 {editMode ? (
                   <>
                     <Check className="h-4 w-4 mr-2" />
-                    Done Editing
+                    Done
                   </>
                 ) : (
                   <>
@@ -191,7 +193,7 @@ const AdminDashboard = () => {
                   </>
                 )}
               </Button>
-              <Button variant="outline" onClick={() => setCustomizerOpen(true)}>
+              <Button variant="outline" size="sm" onClick={() => setCustomizerOpen(true)} className="flex-1 sm:flex-none">
                 <Settings2 className="h-4 w-4 mr-2" />
                 Customize
               </Button>
