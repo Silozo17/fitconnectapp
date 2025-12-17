@@ -320,6 +320,7 @@ export type Database = {
           currency: string | null
           duration_minutes: number
           id: string
+          is_boosted_acquisition: boolean | null
           is_online: boolean | null
           message: string | null
           payment_required: string | null
@@ -340,6 +341,7 @@ export type Database = {
           currency?: string | null
           duration_minutes?: number
           id?: string
+          is_boosted_acquisition?: boolean | null
           is_online?: boolean | null
           message?: string | null
           payment_required?: string | null
@@ -360,6 +362,7 @@ export type Database = {
           currency?: string | null
           duration_minutes?: number
           id?: string
+          is_boosted_acquisition?: boolean | null
           is_online?: boolean | null
           message?: string | null
           payment_required?: string | null
@@ -3812,6 +3815,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_boost_stats: {
+        Args: { p_coach_id: string; p_fee_amount: number }
+        Returns: undefined
       }
       is_username_available: {
         Args: { check_username: string }

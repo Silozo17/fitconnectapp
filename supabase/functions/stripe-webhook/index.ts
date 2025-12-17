@@ -110,8 +110,10 @@ serve(async (req) => {
           const paymentType = metadata.payment_type; // 'deposit' or 'full'
           const amountPaid = parseFloat(metadata.amount_due || "0");
           const sessionPrice = parseFloat(metadata.session_price || "0");
+          const isBoostedAcquisition = metadata.is_boosted_acquisition === 'true';
+          const boostFeeAmount = parseFloat(metadata.boost_fee_amount || "0");
 
-          console.log("Booking payment completed:", { bookingRequestId, paymentType, amountPaid });
+          console.log("Booking payment completed:", { bookingRequestId, paymentType, amountPaid, isBoostedAcquisition, boostFeeAmount });
 
           // Determine payment status based on payment type
           const paymentStatus = paymentType === 'full' ? 'fully_paid' : 'deposit_paid';
@@ -123,6 +125,7 @@ serve(async (req) => {
               payment_status: paymentStatus,
               amount_paid: amountPaid,
               stripe_payment_intent_id: session.payment_intent as string,
+              is_boosted_acquisition: isBoostedAcquisition,
             })
             .eq("id", bookingRequestId);
 
@@ -130,6 +133,42 @@ serve(async (req) => {
             console.error("Error updating booking request payment:", error);
           } else {
             console.log("Booking payment recorded successfully:", paymentStatus);
+          }
+
+          // Handle Boost attribution if applicable
+          if (isBoostedAcquisition && boostFeeAmount > 0) {
+            console.log("Creating boost attribution for coach:", metadata.coach_id);
+
+            // Create attribution record
+            const { error: attrError } = await supabase
+              .from("boost_client_attributions")
+              .insert({
+                coach_id: metadata.coach_id,
+                client_id: metadata.client_id,
+                first_booking_id: bookingRequestId,
+                booking_amount: sessionPrice,
+                fee_amount: boostFeeAmount,
+                fee_status: 'charged',
+                stripe_charge_id: session.payment_intent as string,
+              });
+
+            if (attrError) {
+              console.error("Error creating boost attribution:", attrError);
+            } else {
+              console.log("Boost attribution created successfully");
+            }
+
+            // Update coach boost stats using RPC
+            const { error: statsError } = await supabase.rpc('increment_boost_stats', {
+              p_coach_id: metadata.coach_id,
+              p_fee_amount: boostFeeAmount,
+            });
+
+            if (statsError) {
+              console.error("Error updating boost stats:", statsError);
+            } else {
+              console.log("Boost stats updated successfully");
+            }
           }
         }
         break;
