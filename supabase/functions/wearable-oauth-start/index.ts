@@ -72,6 +72,13 @@ serve(async (req) => {
         authUrl = `https://connect.garmin.com/oauthConfirm?oauth_token=placeholder&oauth_callback=${encodeURIComponent(redirectUri)}&state=${state}`;
         break;
 
+      case "apple_health":
+        throw new Error(
+          "Apple Health requires a native iOS app to access HealthKit data. " +
+          "This feature is coming soon with the FitConnect iOS app. " +
+          "In the meantime, you can manually log your health data using the 'Log Data' button."
+        );
+
       default:
         throw new Error(`Unsupported provider: ${provider}`);
     }

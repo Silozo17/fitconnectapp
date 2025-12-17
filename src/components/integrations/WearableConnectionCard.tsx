@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Check, RefreshCw, Unlink } from "lucide-react";
+import { Loader2, Check, RefreshCw, Unlink, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +17,8 @@ interface WearableConnectionCardProps {
   onSync: () => void;
   isConnecting?: boolean;
   isSyncing?: boolean;
+  comingSoon?: boolean;
+  comingSoonDescription?: string;
 }
 
 const WearableConnectionCard = ({
@@ -31,9 +33,14 @@ const WearableConnectionCard = ({
   onSync,
   isConnecting,
   isSyncing,
+  comingSoon,
+  comingSoonDescription,
 }: WearableConnectionCardProps) => {
   return (
-    <Card className="bg-card/50 border-border/50 hover:border-primary/30 transition-all">
+    <Card className={cn(
+      "bg-card/50 border-border/50 hover:border-primary/30 transition-all",
+      comingSoon && "opacity-75"
+    )}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -47,18 +54,32 @@ const WearableConnectionCard = ({
             </div>
             <div>
               <CardTitle className="text-lg">{providerName}</CardTitle>
-              {isConnected && (
+              {comingSoon ? (
+                <Badge variant="secondary" className="mt-1 text-xs">
+                  <Clock className="w-3 h-3 mr-1" />
+                  Coming Soon
+                </Badge>
+              ) : isConnected ? (
                 <Badge variant="outline" className="mt-1 text-xs text-primary border-primary/30">
                   <Check className="w-3 h-3 mr-1" />
                   Connected
                 </Badge>
-              )}
+              ) : null}
             </div>
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        {isConnected ? (
+        {comingSoon ? (
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              {comingSoonDescription || "This integration is coming soon."}
+            </p>
+            <Button disabled className="w-full" variant="secondary">
+              Coming Soon
+            </Button>
+          </div>
+        ) : isConnected ? (
           <div className="space-y-3">
             {lastSynced && (
               <p className="text-sm text-muted-foreground">

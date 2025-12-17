@@ -434,7 +434,9 @@ export type Database = {
       calendar_connections: {
         Row: {
           access_token: string
+          caldav_server_url: string | null
           calendar_id: string | null
+          connection_type: string | null
           created_at: string | null
           id: string
           provider: Database["public"]["Enums"]["calendar_provider"]
@@ -446,7 +448,9 @@ export type Database = {
         }
         Insert: {
           access_token: string
+          caldav_server_url?: string | null
           calendar_id?: string | null
+          connection_type?: string | null
           created_at?: string | null
           id?: string
           provider: Database["public"]["Enums"]["calendar_provider"]
@@ -458,7 +462,9 @@ export type Database = {
         }
         Update: {
           access_token?: string
+          caldav_server_url?: string | null
           calendar_id?: string | null
+          connection_type?: string | null
           created_at?: string | null
           id?: string
           provider?: Database["public"]["Enums"]["calendar_provider"]

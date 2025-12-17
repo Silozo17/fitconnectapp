@@ -128,3 +128,9 @@ verify_jwt = false
 
 [functions.notify-new-challenge]
 verify_jwt = false
+
+[functions.calendar-caldav-connect]
+verify_jwt = true
+
+[functions.calendar-caldav-sync]
+verify_jwt = true
