@@ -259,6 +259,16 @@ const App = () => (
                     <Notifications />
                   </ProtectedRoute>
                 } />
+                <Route path="/dashboard/admin/messages" element={
+                  <ProtectedRoute allowedRoles={["admin", "manager", "staff"]}>
+                    <CoachMessages />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/admin/messages/:participantId" element={
+                  <ProtectedRoute allowedRoles={["admin", "manager", "staff"]}>
+                    <CoachMessages />
+                  </ProtectedRoute>
+                } />
                 
                 {/* Onboarding */}
                 <Route path="/onboarding/client" element={

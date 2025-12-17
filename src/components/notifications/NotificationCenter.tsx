@@ -14,9 +14,11 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { NotificationItem } from "./NotificationItem";
 import { AllNotificationsModal } from "./AllNotificationsModal";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdminView } from "@/contexts/AdminContext";
 
 export const NotificationCenter = () => {
   const { role } = useAuth();
+  const { activeProfileType } = useAdminView();
   const { 
     notifications, 
     loading, 
@@ -30,20 +32,23 @@ export const NotificationCenter = () => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const navigate = useNavigate();
 
+  // Use activeProfileType if available (for view switching), fallback to role
+  const effectiveRole = activeProfileType || role || "client";
+
   const handleNotificationClick = (notification: typeof notifications[0]) => {
     if (!notification.read) {
       markAsRead(notification.id);
     }
-    const route = getNotificationRoute(notification, role || "client");
+    const route = getNotificationRoute(notification, effectiveRole);
     if (route) {
       setPopoverOpen(false);
       navigate(route);
     }
   };
 
-  const settingsPath = role === "client"
+  const settingsPath = effectiveRole === "client"
     ? "/dashboard/client/settings" 
-    : role === "coach" 
+    : effectiveRole === "coach" 
     ? "/dashboard/coach/settings" 
     : "/dashboard/admin/settings";
 
