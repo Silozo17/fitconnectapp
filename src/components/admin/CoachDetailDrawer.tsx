@@ -14,12 +14,21 @@ import { getAvatarImageUrl } from "@/hooks/useAvatars";
 import { RARITY_CONFIG } from "@/lib/avatar-config";
 import { GrantAvatarModal } from "./GrantAvatarModal";
 import { LockedAvatarsSection } from "./LockedAvatarsSection";
+import { useUserLastLogin } from "@/hooks/useUserLastLogin";
+import { useCoachAdminStats } from "@/hooks/useCoachAdminStats";
 import { 
   Users, Calendar, Package, CreditCard, Star, 
   Gift, Ban, RefreshCw, DollarSign, CheckCircle,
-  Trophy, Trash2, Image, Loader2, Pencil, KeyRound, Pause
+  Trophy, Trash2, Image, Loader2, Pencil, KeyRound, Pause, Clock,
+  ShieldCheck, ShieldX, ShieldAlert
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface CoachDetailDrawerProps {
   open: boolean;
@@ -34,6 +43,12 @@ interface CoachDetailDrawerProps {
 
 export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan, onEdit, onResetPassword, onChangeStatus, onDelete }: CoachDetailDrawerProps) {
   const [grantModalOpen, setGrantModalOpen] = useState(false);
+
+  // Fetch last login
+  const { data: lastLogin, isLoading: lastLoginLoading } = useUserLastLogin(coach?.user_id);
+  
+  // Fetch admin stats (subscription, clients, commission)
+  const { data: adminStats, isLoading: adminStatsLoading } = useCoachAdminStats(coach?.id, coach?.user_id);
 
   // Fetch coach avatars
   const { data: coachAvatars, isLoading: avatarsLoading } = useUserAvatars(coach?.user_id);
@@ -455,25 +470,86 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan,
               <p>{format(new Date(coach.created_at), "MMM d, yyyy")}</p>
             </div>
             <div>
+              <p className="text-muted-foreground">Last Login</p>
+              {lastLoginLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              ) : (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="flex items-center gap-1 cursor-help">
+                        <Clock className="h-3 w-3 text-muted-foreground" />
+                        {lastLogin?.relativeTime || "Never"}
+                      </p>
+                    </TooltipTrigger>
+                    {lastLogin?.absoluteTime && (
+                      <TooltipContent>
+                        <p>{lastLogin.absoluteTime}</p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>
+            <div>
+              <p className="text-muted-foreground">Subscription</p>
+              {adminStatsLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Badge variant={
+                  adminStats?.subscription?.status === "active" ? "default" :
+                  adminStats?.subscription?.status === "cancelled" ? "destructive" :
+                  "secondary"
+                }>
+                  {adminStats?.subscription?.status || "Free"}
+                </Badge>
+              )}
+            </div>
+            <div>
+              <p className="text-muted-foreground">Verification</p>
+              {adminStatsLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <p className="flex items-center gap-1">
+                  {adminStats?.verificationStatus === "verified" ? (
+                    <><ShieldCheck className="h-3 w-3 text-green-500" /> Verified</>
+                  ) : adminStats?.verificationStatus === "pending" ? (
+                    <><ShieldAlert className="h-3 w-3 text-amber-500" /> Pending</>
+                  ) : (
+                    <><ShieldX className="h-3 w-3 text-muted-foreground" /> Not Submitted</>
+                  )}
+                </p>
+              )}
+            </div>
+            <div>
+              <p className="text-muted-foreground">Active Clients</p>
+              {adminStatsLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <p className="flex items-center gap-1">
+                  <Users className="h-3 w-3 text-muted-foreground" />
+                  {adminStats?.activeClients || 0}
+                </p>
+              )}
+            </div>
+            <div>
+              <p className="text-muted-foreground">Commission Paid</p>
+              {adminStatsLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <p className="flex items-center gap-1">
+                  <DollarSign className="h-3 w-3 text-muted-foreground" />
+                  £{(adminStats?.totalCommissionPaid || 0).toFixed(2)}
+                </p>
+              )}
+            </div>
+            <div>
               <p className="text-muted-foreground">Hourly Rate</p>
               <p>£{coach.hourly_rate || 0}/hr</p>
             </div>
             <div>
               <p className="text-muted-foreground">Experience</p>
               <p>{coach.experience_years || 0} years</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Onboarding</p>
-              <p className="flex items-center gap-1">
-                {coach.onboarding_completed ? (
-                  <>
-                    <CheckCircle className="h-3 w-3 text-green-500" />
-                    Complete
-                  </>
-                ) : (
-                  "Incomplete"
-                )}
-              </p>
             </div>
           </div>
         </div>

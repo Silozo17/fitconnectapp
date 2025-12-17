@@ -14,6 +14,7 @@ import { Progress } from "@/components/ui/progress";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format, formatDistanceToNow } from "date-fns";
+import { useUserLastLogin } from "@/hooks/useUserLastLogin";
 import { toast } from "sonner";
 import { useLogAdminAction } from "@/hooks/useAuditLog";
 import { useAdminUserStats } from "@/hooks/useAdminUserStats";
@@ -26,8 +27,14 @@ import {
   User, Heart, Target, MapPin, Calendar, Dumbbell,
   Save, Loader2, AlertTriangle, Apple, Activity,
   Trophy, Zap, Flame, Award, Star, TrendingUp, Gift, Trash2, Image,
-  Pencil, KeyRound, Pause
+  Pencil, KeyRound, Pause, Clock
 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 interface UserDetailDrawerProps {
@@ -66,6 +73,9 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved, onEdit, on
 
   // Fetch gamification stats
   const { data: stats, isLoading: statsLoading } = useAdminUserStats(user?.id);
+  
+  // Fetch last login
+  const { data: lastLogin, isLoading: lastLoginLoading } = useUserLastLogin(user?.user_id);
   
   // Fetch user avatars
   const { data: userAvatars, isLoading: avatarsLoading } = useUserAvatars(user?.user_id);
@@ -834,7 +844,13 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved, onEdit, on
         {/* Quick Actions */}
         <Separator className="my-6" />
         <div className="space-y-3">
-          <p className="text-sm font-medium text-muted-foreground">Quick Actions</p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-muted-foreground">Quick Actions</p>
+            <div className="text-xs text-muted-foreground flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              Last login: {lastLoginLoading ? "..." : (lastLogin?.relativeTime || "Never")}
+            </div>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <Button variant="outline" size="sm" onClick={onEdit} className="justify-start">
               <Pencil className="h-4 w-4 mr-2" />
