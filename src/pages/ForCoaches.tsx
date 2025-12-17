@@ -8,16 +8,17 @@ import { Link } from "react-router-dom";
 import { 
   Users, DollarSign, Calendar, BarChart3, Shield, Globe, 
   MessageSquare, Video, FileText, Clock, CheckCircle, Star,
-  TrendingUp, Zap, Award
+  TrendingUp, Award
 } from "lucide-react";
 import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
 
 const ForCoaches = () => {
-  const [sessionsPerWeek, setSessionsPerWeek] = useState(10);
-  const [ratePerSession, setRatePerSession] = useState(75);
+  const [numberOfClients, setNumberOfClients] = useState(15);
+  const [adminHoursPerClient, setAdminHoursPerClient] = useState(2);
 
-  const monthlyEarnings = sessionsPerWeek * ratePerSession * 4 * 0.85; // 15% platform fee
-  const yearlyEarnings = monthlyEarnings * 12;
+  // 70% time saved through platform automation (scheduling, payments, tracking, messaging)
+  const weeklyTimeSaved = Math.round(numberOfClients * adminHoursPerClient * 0.7);
+  const yearlyTimeSaved = weeklyTimeSaved * 52;
 
   const benefits = [
     {
@@ -158,56 +159,63 @@ const ForCoaches = () => {
               <Card className="border-0 shadow-lg bg-card/80 backdrop-blur-sm">
                 <CardContent className="p-8">
                   <div className="text-center mb-6">
-                    <Zap className="w-12 h-12 text-primary mx-auto mb-4" />
-                    <h3 className="text-xl font-bold">Earnings Calculator</h3>
-                    <p className="text-muted-foreground text-sm">See your potential earnings</p>
+                    <Clock className="w-12 h-12 text-primary mx-auto mb-4" />
+                    <h3 className="text-xl font-bold">Value Calculator</h3>
+                    <p className="text-muted-foreground text-sm">See what FitConnect saves you</p>
                   </div>
                   <div className="space-y-6">
                     <div>
                       <label className="block text-sm font-medium mb-2">
-                        Sessions per week: {sessionsPerWeek}
+                        Number of clients: {numberOfClients}
                       </label>
                       <Input
                         type="range"
                         min="1"
-                        max="40"
-                        value={sessionsPerWeek}
-                        onChange={(e) => setSessionsPerWeek(Number(e.target.value))}
+                        max="50"
+                        value={numberOfClients}
+                        onChange={(e) => setNumberOfClients(Number(e.target.value))}
                         className="w-full accent-primary"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-2">
-                        Rate per session: ${ratePerSession}
+                        Admin hours per client/week: {adminHoursPerClient}
                       </label>
                       <Input
                         type="range"
-                        min="30"
-                        max="200"
-                        step="5"
-                        value={ratePerSession}
-                        onChange={(e) => setRatePerSession(Number(e.target.value))}
+                        min="1"
+                        max="5"
+                        value={adminHoursPerClient}
+                        onChange={(e) => setAdminHoursPerClient(Number(e.target.value))}
                         className="w-full accent-primary"
                       />
                     </div>
                     <div className="pt-4 border-t border-border">
-                      <div className="grid grid-cols-2 gap-4 text-center">
+                      <div className="grid grid-cols-2 gap-4 text-center mb-4">
                         <div>
-                          <p className="text-sm text-muted-foreground">Monthly</p>
+                          <p className="text-sm text-muted-foreground">Weekly</p>
                           <p className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                            ${monthlyEarnings.toLocaleString()}
+                            {weeklyTimeSaved} hours
                           </p>
+                          <p className="text-xs text-muted-foreground">saved</p>
                         </div>
                         <div>
                           <p className="text-sm text-muted-foreground">Yearly</p>
                           <p className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                            ${yearlyEarnings.toLocaleString()}
+                            {yearlyTimeSaved.toLocaleString()} hours
                           </p>
+                          <p className="text-xs text-muted-foreground">saved</p>
                         </div>
                       </div>
-                      <p className="text-xs text-muted-foreground text-center mt-4">
-                        *After 15% platform fee. Actual earnings may vary.
-                      </p>
+                      <div className="pt-4 border-t border-border text-center">
+                        <div className="flex items-center justify-center gap-2 mb-1">
+                          <Globe className="w-5 h-5 text-primary" />
+                          <p className="text-lg font-bold">10,000+ active clients</p>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          looking for coaches like you
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
