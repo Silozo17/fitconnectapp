@@ -39,14 +39,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 
-// Mock templates for now
-const templates = [
-  { id: "t1", name: "5x5 Strength Program", category: "Strength", downloads: 156 },
-  { id: "t2", name: "Push Pull Legs Split", category: "Hypertrophy", downloads: 234 },
-  { id: "t3", name: "Couch to 5K", category: "Cardio", downloads: 89 },
-  { id: "t4", name: "Keto Meal Plan", category: "Nutrition", downloads: 312 },
-];
-
 const CoachPlans = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -135,7 +127,7 @@ const CoachPlans = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="card-elevated p-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -169,17 +161,6 @@ const CoachPlans = () => {
             </div>
           </div>
         </div>
-        <div className="card-elevated p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-warning/10 flex items-center justify-center">
-              <Copy className="w-5 h-5 text-warning" />
-            </div>
-            <div>
-              <p className="text-2xl font-display font-bold text-foreground">{templates.length}</p>
-              <p className="text-sm text-muted-foreground">Templates</p>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Tabs */}
@@ -188,7 +169,6 @@ const CoachPlans = () => {
           <TabsList className="bg-secondary">
             <TabsTrigger value="workout">Workout Plans</TabsTrigger>
             <TabsTrigger value="nutrition">Nutrition Plans</TabsTrigger>
-            <TabsTrigger value="templates">Templates</TabsTrigger>
           </TabsList>
 
           <div className="flex gap-3">
@@ -347,38 +327,6 @@ const CoachPlans = () => {
               No nutrition plans found. Create your first one!
             </div>
           )}
-        </TabsContent>
-
-        {/* Templates Tab */}
-        <TabsContent value="templates">
-          <div className="card-elevated">
-            <div className="p-4 border-b border-border">
-              <h3 className="font-display font-bold text-foreground">Popular Templates</h3>
-              <p className="text-sm text-muted-foreground">Start with a proven template and customize</p>
-            </div>
-            <div className="divide-y divide-border">
-              {templates.map((template) => (
-                <div key={template.id} className="p-4 flex items-center justify-between hover:bg-secondary/30 transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                      template.category === 'Nutrition' ? 'bg-success/10' : 'bg-primary/10'
-                    }`}>
-                      {template.category === 'Nutrition' ? (
-                        <Apple className="w-5 h-5 text-success" />
-                      ) : (
-                        <Dumbbell className="w-5 h-5 text-primary" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground">{template.name}</p>
-                      <p className="text-sm text-muted-foreground">{template.category} • {template.downloads} uses</p>
-                    </div>
-                  </div>
-                  <Button variant="outline" size="sm">Use Template</Button>
-                </div>
-              ))}
-            </div>
-          </div>
         </TabsContent>
       </Tabs>
 
