@@ -134,3 +134,6 @@ verify_jwt = true
 
 [functions.calendar-caldav-sync]
 verify_jwt = true
+
+[functions.ai-blog-formatter]
+verify_jwt = true
