@@ -114,8 +114,8 @@ export const useSessionManagement = () => {
           await supabase.functions.invoke("video-create-meeting", {
             body: { sessionId, provider: "google_meet" },
           });
-        } catch (e) {
-          console.log("Video meeting creation skipped - provider not connected");
+        } catch {
+          // Video meeting creation skipped - provider not connected
         }
       }
 

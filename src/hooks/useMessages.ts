@@ -36,16 +36,12 @@ export const useMessages = (participantId?: string) => {
   useEffect(() => {
     const fetchProfileId = async () => {
       if (!user) {
-        console.log("[useMessages] No user found, skipping profile fetch");
         setLoading(false);
         return;
       }
 
-      console.log("[useMessages] Fetching profile ID for user:", user.id, "role:", role);
-      
       // Handle admin role - they may not have a profile in client/coach tables
       if (role === "admin" || role === "manager" || role === "staff") {
-        console.log("[useMessages] Admin user detected, checking admin_profiles");
         const { data: adminData, error: adminError } = await supabase
           .from("admin_profiles")
           .select("id")
@@ -53,7 +49,6 @@ export const useMessages = (participantId?: string) => {
           .single();
         
         if (adminData) {
-          console.log("[useMessages] Admin profile found:", adminData.id);
           setCurrentProfileId(adminData.id);
           return;
         }
@@ -64,7 +59,6 @@ export const useMessages = (participantId?: string) => {
       }
 
       const table = role === "coach" ? "coach_profiles" : "client_profiles";
-      console.log("[useMessages] Querying table:", table);
       
       const { data, error: profileError } = await supabase
         .from(table)
@@ -80,10 +74,8 @@ export const useMessages = (participantId?: string) => {
       }
 
       if (data) {
-        console.log("[useMessages] Profile ID found:", data.id);
         setCurrentProfileId(data.id);
       } else {
-        console.warn("[useMessages] No profile found for user");
         setError("No profile found. Please complete onboarding.");
         setLoading(false);
       }
@@ -95,11 +87,9 @@ export const useMessages = (participantId?: string) => {
   // Fetch conversations
   const fetchConversations = useCallback(async () => {
     if (!currentProfileId) {
-      console.log("[useMessages] No profile ID, skipping conversation fetch");
       return;
     }
 
-    console.log("[useMessages] Fetching conversations for profile:", currentProfileId);
     setLoading(true);
     setError(null);
     
@@ -118,10 +108,7 @@ export const useMessages = (participantId?: string) => {
         return;
       }
 
-      console.log("[useMessages] Fetched messages count:", messagesData?.length || 0);
-
       if (!messagesData || messagesData.length === 0) {
-        console.log("[useMessages] No messages found");
         setConversations([]);
         setLoading(false);
         return;
@@ -137,8 +124,6 @@ export const useMessages = (participantId?: string) => {
         }
         conversationMap.get(partnerId)!.push(msg);
       });
-
-      console.log("[useMessages] Unique conversation partners:", conversationMap.size);
 
       // Build conversation list with partner details
       const conversationList: Conversation[] = [];
@@ -161,7 +146,6 @@ export const useMessages = (participantId?: string) => {
           participantType = "coach";
           participantAvatar = coachData.profile_image_url;
           participantLocation = coachData.location;
-          console.log("[useMessages] Found coach partner:", participantName);
         } else {
           // Try client profile
           const { data: clientData } = await supabase
@@ -174,7 +158,6 @@ export const useMessages = (participantId?: string) => {
             participantName = `${clientData.first_name || ""} ${clientData.last_name || ""}`.trim() || "Client";
             participantType = "client";
             participantAvatar = clientData.avatar_url;
-            console.log("[useMessages] Found client partner:", participantName);
           } else {
             // Try admin profile
             const { data: adminData } = await supabase
@@ -188,9 +171,6 @@ export const useMessages = (participantId?: string) => {
                 `${adminData.first_name || ""} ${adminData.last_name || ""}`.trim() || "Admin";
               participantType = "admin";
               participantAvatar = adminData.avatar_url;
-              console.log("[useMessages] Found admin partner:", participantName);
-            } else {
-              console.warn("[useMessages] Could not find partner profile for ID:", partnerId);
             }
           }
         }
@@ -217,7 +197,6 @@ export const useMessages = (participantId?: string) => {
         new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
       );
 
-      console.log("[useMessages] Final conversation count:", conversationList.length);
       setConversations(conversationList);
     } catch (err) {
       console.error("[useMessages] Unexpected error in fetchConversations:", err);
@@ -322,13 +301,12 @@ export const useMessages = (participantId?: string) => {
       console.error("[useMessages] Soft refresh error:", err);
     }
   }, [currentProfileId]);
+
   const fetchMessages = useCallback(async () => {
     if (!currentProfileId || !participantId) {
-      console.log("[useMessages] Missing IDs for message fetch - profileId:", currentProfileId, "participantId:", participantId);
       return;
     }
 
-    console.log("[useMessages] Fetching messages between", currentProfileId, "and", participantId);
     setLoading(true);
     setError(null);
 
@@ -347,7 +325,6 @@ export const useMessages = (participantId?: string) => {
         return;
       }
 
-      console.log("[useMessages] Fetched message count:", data?.length || 0);
       setMessages(data || []);
 
       // Mark received messages as read
@@ -372,7 +349,6 @@ export const useMessages = (participantId?: string) => {
   // Send message with optimistic update
   const sendMessage = async (content: string): Promise<boolean> => {
     if (!currentProfileId) {
-      console.error("[useMessages] Cannot send message - no profile ID");
       toast({
         title: "Error",
         description: "Your profile could not be loaded. Please refresh the page.",
@@ -382,7 +358,6 @@ export const useMessages = (participantId?: string) => {
     }
 
     if (!participantId) {
-      console.error("[useMessages] Cannot send message - no participant ID");
       toast({
         title: "Error",
         description: "No recipient selected.",
@@ -392,11 +367,8 @@ export const useMessages = (participantId?: string) => {
     }
 
     if (!content.trim()) {
-      console.warn("[useMessages] Cannot send empty message");
       return false;
     }
-
-    console.log("[useMessages] Sending message to:", participantId);
 
     // Create optimistic message for immediate UI update
     const optimisticMessage: Message = {
@@ -434,8 +406,6 @@ export const useMessages = (participantId?: string) => {
         return false;
       }
 
-      console.log("[useMessages] Message sent successfully:", data?.id);
-      
       // Replace optimistic message with real one
       setMessages((prev) => 
         prev.map((m) => m.id === optimisticMessage.id ? data : m)
@@ -458,11 +428,8 @@ export const useMessages = (participantId?: string) => {
   // Set up realtime subscription - simplified with wildcard event and manual filtering
   useEffect(() => {
     if (!currentProfileId) {
-      console.log("[useMessages] No profile ID, skipping realtime subscription");
       return;
     }
-
-    console.log("[useMessages] Setting up realtime subscription for profile:", currentProfileId);
 
     const channelName = `messages-${currentProfileId}`;
     
@@ -476,8 +443,6 @@ export const useMessages = (participantId?: string) => {
           table: "messages",
         },
         (payload) => {
-          console.log("[useMessages] Realtime event:", payload.eventType, payload);
-          
           if (payload.eventType === "INSERT") {
             const newMessage = payload.new as Message;
             
@@ -486,11 +451,8 @@ export const useMessages = (participantId?: string) => {
             const isSent = newMessage.sender_id === currentProfileId;
             
             if (!isReceived && !isSent) {
-              console.log("[useMessages] Message not relevant to current user, ignoring");
               return;
             }
-            
-            console.log("[useMessages] Relevant message:", isReceived ? "received" : "sent", newMessage.id);
             
             // If viewing a specific conversation
             if (participantId) {
@@ -499,114 +461,147 @@ export const useMessages = (participantId?: string) => {
                 (newMessage.sender_id === currentProfileId && newMessage.receiver_id === participantId);
               
               if (isInConversation) {
-                console.log("[useMessages] Message is in active conversation");
-                
+                // Only add if not already in messages (avoid duplicates from optimistic update)
                 setMessages((prev) => {
-                  // Remove any temp message with matching content (for sent messages)
-                  const withoutTemp = prev.filter(m => 
-                    !(m.id.startsWith('temp-') && m.content === newMessage.content)
-                  );
-                  
-                  // Check if message already exists
-                  if (withoutTemp.some(m => m.id === newMessage.id)) {
-                    console.log("[useMessages] Message already exists, skipping");
-                    return withoutTemp;
-                  }
-                  
-                  console.log("[useMessages] Adding new message to state");
-                  return [...withoutTemp, newMessage];
+                  const exists = prev.some(m => m.id === newMessage.id);
+                  if (exists) return prev;
+                  return [...prev, newMessage];
                 });
                 
-                // Mark as read if it's a received message
+                // Mark as read if received
                 if (isReceived) {
                   supabase
                     .from("messages")
                     .update({ read_at: new Date().toISOString() })
                     .eq("id", newMessage.id)
-                    .then(() => console.log("[useMessages] Marked message as read"));
+                    .then();
                 }
               }
             }
             
-            // Update conversations list locally (lightweight - no full re-fetch)
-            const partnerId = isReceived ? newMessage.sender_id : newMessage.receiver_id;
-            
-            setConversations((prev) => {
-              const existingIndex = prev.findIndex(c => c.participantId === partnerId);
-              
-              if (existingIndex >= 0) {
-                // Update existing conversation
-                const updated = [...prev];
-                const existing = updated[existingIndex];
-                updated[existingIndex] = {
-                  ...existing,
-                  lastMessage: newMessage.content,
-                  lastMessageTime: newMessage.created_at,
-                  unreadCount: isReceived && !participantId 
-                    ? existing.unreadCount + 1 
-                    : existing.unreadCount,
-                };
-                // Move updated conversation to top
-                const [conversation] = updated.splice(existingIndex, 1);
-                return [conversation, ...updated];
-              }
-              
-              // New conversation - will need profile info, do a soft fetch
-              // Only fetch if not currently viewing that conversation
-              if (!participantId) {
-                // Trigger a soft refresh for new conversations only
-                softRefreshConversations();
-              }
-              return prev;
-            });
+            // Refresh conversations for any new message
+            softRefreshConversations();
           }
           
           if (payload.eventType === "UPDATE") {
             const updatedMessage = payload.new as Message;
-            // Only update if we're the sender (for read receipts)
-            if (updatedMessage.sender_id === currentProfileId) {
-              console.log("[useMessages] Updating message (read receipt):", updatedMessage.id);
-              setMessages((prev) =>
-                prev.map((m) => (m.id === updatedMessage.id ? updatedMessage : m))
-              );
-            }
+            setMessages((prev) =>
+              prev.map((m) => (m.id === updatedMessage.id ? updatedMessage : m))
+            );
           }
         }
       )
-      .subscribe((status, err) => {
-        console.log("[useMessages] Subscription status:", status, err || "");
-        if (status === 'SUBSCRIBED') {
-          console.log("[useMessages] Successfully subscribed to:", channelName);
-        }
-        if (status === 'CHANNEL_ERROR') {
-          console.error("[useMessages] Channel error:", err);
-        }
-      });
+      .subscribe();
 
     return () => {
-      console.log("[useMessages] Cleaning up subscription:", channelName);
       supabase.removeChannel(channel);
     };
   }, [currentProfileId, participantId, softRefreshConversations]);
 
-  // Initial fetch
+  // Auto-fetch conversations when profile ID is available
   useEffect(() => {
-    if (!currentProfileId) return;
-    
-    if (participantId) {
-      fetchMessages();
-    } else {
+    if (currentProfileId && !participantId) {
       fetchConversations();
     }
-  }, [participantId, currentProfileId, fetchMessages, fetchConversations]);
+  }, [currentProfileId, participantId, fetchConversations]);
+
+  // Auto-fetch messages when viewing a conversation
+  useEffect(() => {
+    if (currentProfileId && participantId) {
+      fetchMessages();
+    }
+  }, [currentProfileId, participantId, fetchMessages]);
 
   return {
     messages,
     conversations,
     loading,
     error,
-    sendMessage,
     currentProfileId,
-    refetch: participantId ? fetchMessages : fetchConversations,
+    sendMessage,
+    fetchMessages,
+    fetchConversations,
+    softRefreshConversations,
   };
+};
+
+// Hook to start a new conversation
+export const useStartConversation = () => {
+  const { user, role } = useAuth();
+  const { toast } = useToast();
+  const [sending, setSending] = useState(false);
+
+  const startConversation = async (
+    recipientId: string,
+    initialMessage: string
+  ): Promise<boolean> => {
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to send messages.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    setSending(true);
+
+    try {
+      // Get current user's profile ID
+      const table = role === "coach" ? "coach_profiles" : 
+                    (role === "admin" || role === "manager" || role === "staff") ? "admin_profiles" : 
+                    "client_profiles";
+      
+      const { data: profile, error: profileError } = await supabase
+        .from(table)
+        .select("id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (profileError || !profile) {
+        toast({
+          title: "Error",
+          description: "Could not find your profile.",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      // Send the initial message
+      const { error: sendError } = await supabase.from("messages").insert({
+        sender_id: profile.id,
+        receiver_id: recipientId,
+        content: initialMessage.trim(),
+      });
+
+      if (sendError) {
+        console.error("[useStartConversation] Error:", sendError);
+        toast({
+          title: "Failed to send message",
+          description: sendError.message,
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      toast({
+        title: "Message sent",
+        description: "Your conversation has been started.",
+      });
+      
+      return true;
+    } catch (err) {
+      console.error("[useStartConversation] Unexpected error:", err);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return { startConversation, sending };
 };

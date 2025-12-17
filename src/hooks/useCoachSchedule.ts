@@ -244,9 +244,8 @@ export const useRespondToBooking = () => {
             await supabase.functions.invoke("video-create-meeting", {
               body: { sessionId: newSession.id, provider: "google_meet" },
             });
-          } catch (e) {
+          } catch {
             // Video meeting creation is optional - don't fail the booking
-            console.log("Auto video meeting creation skipped - provider may not be connected");
           }
         }
       }
