@@ -4,15 +4,20 @@ import { BadgeGrid } from '@/components/gamification/BadgeGrid';
 import { useXPTransactions, useClientXP, getLevelTitle } from '@/hooks/useGamification';
 import { ShareAchievementButton } from '@/components/gamification/ShareAchievementButton';
 import { AchievementShareCard } from '@/components/gamification/AchievementShareCard';
+import { AvatarShowcase } from '@/components/avatars/AvatarShowcase';
+import { AvatarPicker } from '@/components/avatars/AvatarPicker';
+import { useSelectedAvatar } from '@/hooks/useAvatars';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
-import { Zap, TrendingUp, TrendingDown, Share2 } from 'lucide-react';
+import { Zap, TrendingUp, TrendingDown, Pencil } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ClientAchievements() {
   const { data: transactions, isLoading: transactionsLoading } = useXPTransactions(50);
   const { data: xpData } = useClientXP();
+  const { data: selectedAvatar } = useSelectedAvatar('client');
   
   return (
     <ClientDashboardLayout>
@@ -34,20 +39,43 @@ export default function ClientAchievements() {
           )}
         </div>
         
-        <XPProgressBar />
-        
-        {/* Quick Share Card for Current Level */}
-        {xpData && (
-          <AchievementShareCard
-            achievement={{
-              type: 'level',
-              title: `Level ${xpData.current_level} - ${getLevelTitle(xpData.current_level)}`,
-              description: `Total XP: ${xpData.total_xp.toLocaleString()} • Next level in ${xpData.xp_to_next_level - (xpData.total_xp % xpData.xp_to_next_level)} XP`,
-              value: xpData.current_level,
-              icon: '⬆️',
-            }}
-          />
-        )}
+        {/* Avatar and XP Progress Section */}
+        <div className="flex flex-col md:flex-row gap-6 items-start">
+          {/* Avatar Section */}
+          <div className="flex flex-col items-center">
+            <AvatarShowcase avatar={selectedAvatar || null} size="lg" showStats={true} />
+            <AvatarPicker 
+              selectedAvatar={selectedAvatar || null} 
+              profileType="client" 
+              trigger={
+                <Button variant="outline" size="sm" className="mt-3 gap-2">
+                  <Pencil className="h-4 w-4" />
+                  Change Avatar
+                </Button>
+              }
+            />
+          </div>
+          
+          {/* XP Progress */}
+          <div className="flex-1 w-full">
+            <XPProgressBar />
+            
+            {/* Quick Share Card for Current Level */}
+            {xpData && (
+              <div className="mt-4">
+                <AchievementShareCard
+                  achievement={{
+                    type: 'level',
+                    title: `Level ${xpData.current_level} - ${getLevelTitle(xpData.current_level)}`,
+                    description: `Total XP: ${xpData.total_xp.toLocaleString()} • Next level in ${xpData.xp_to_next_level - (xpData.total_xp % xpData.xp_to_next_level)} XP`,
+                    value: xpData.current_level,
+                    icon: '⬆️',
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        </div>
         
         <Tabs defaultValue="badges" className="space-y-4">
           <TabsList>
