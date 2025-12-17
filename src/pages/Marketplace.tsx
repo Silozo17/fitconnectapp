@@ -1,6 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Filter, Package, BookOpen, Video, FileText, Headphones, Grid, List } from "lucide-react";
+import { Search, Filter, Package, BookOpen, Video, FileText, Headphones, Grid, List, Film, ClipboardList, type LucideIcon } from "lucide-react";
+
+// Map string icon names to actual Lucide components
+const ICON_MAP: Record<string, LucideIcon> = {
+  BookOpen,
+  Video,
+  Film,
+  ClipboardList,
+  Headphones,
+  Package,
+};
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -229,7 +239,10 @@ export default function Marketplace() {
                   }}
                   className="flex flex-col items-center justify-center gap-1 sm:gap-2 min-h-[90px] sm:min-h-[110px] p-3 sm:p-4 lg:p-6 rounded-xl bg-card border border-border hover:border-primary/50 hover:bg-primary/5 transition-all"
                 >
-                  <span className="text-2xl sm:text-3xl lg:text-4xl">{type.icon}</span>
+                  {(() => {
+                    const IconComponent = ICON_MAP[type.icon] || Package;
+                    return <IconComponent className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 text-primary" />;
+                  })()}
                   <span className="text-xs sm:text-sm font-medium text-center line-clamp-2">{type.label}</span>
                 </button>
               ))}
