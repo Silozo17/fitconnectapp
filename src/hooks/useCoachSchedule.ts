@@ -26,6 +26,10 @@ export interface SessionType {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  // Payment configuration
+  payment_required: 'none' | 'deposit' | 'full';
+  deposit_type: 'percentage' | 'fixed';
+  deposit_value: number;
 }
 
 export interface BookingRequest {
@@ -40,6 +44,14 @@ export interface BookingRequest {
   status: string;
   responded_at: string | null;
   created_at: string;
+  // Payment tracking
+  payment_required: string | null;
+  payment_status: string | null;
+  amount_due: number | null;
+  amount_paid: number | null;
+  currency: string | null;
+  stripe_checkout_session_id: string | null;
+  stripe_payment_intent_id: string | null;
   client?: {
     first_name: string | null;
     last_name: string | null;

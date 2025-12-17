@@ -27,7 +27,7 @@ serve(async (req) => {
     const { 
       bookingRequestId, // optional - if paying after booking request created
       sessionTypeId,
-      clientId,
+      clientId: providedClientId,
       coachId,
       requestedAt, // ISO string of requested session time
       durationMinutes,
@@ -36,6 +36,26 @@ serve(async (req) => {
       successUrl,
       cancelUrl,
     } = await req.json();
+
+    // Resolve client_id from JWT if not provided
+    let clientId = providedClientId;
+    if (!clientId) {
+      const authHeader = req.headers.get("Authorization");
+      if (!authHeader) throw new Error("Authentication required");
+      
+      const token = authHeader.replace("Bearer ", "");
+      const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+      if (authError || !user) throw new Error("Invalid authentication");
+      
+      const { data: clientProfile, error: clientError } = await supabase
+        .from("client_profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .single();
+      
+      if (clientError || !clientProfile) throw new Error("Client profile not found");
+      clientId = clientProfile.id;
+    }
 
     console.log("Creating booking checkout:", { sessionTypeId, clientId, coachId, bookingRequestId });
 
