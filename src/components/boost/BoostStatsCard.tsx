@@ -167,7 +167,7 @@ export const BoostStatsCard = () => {
               See how much you'd pay for different booking amounts:
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {[30, 50, 80, 150].map((amount) => {
+              {[30, 50, 70, 100].map((amount) => {
                 const fee = calculateBoostFee(amount, settings);
                 return (
                   <div key={amount} className="p-3 rounded-lg bg-muted/50 text-center">
