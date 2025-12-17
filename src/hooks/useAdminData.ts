@@ -306,6 +306,35 @@ export const useGrantFreePlan = () => {
         .update({ subscription_tier: tier })
         .eq("id", coachId);
 
+      // If granting Founder tier, also award the Founder badge
+      if (tier === "founder") {
+        // Get the Founder badge
+        const { data: founderBadge } = await supabase
+          .from("badges")
+          .select("id")
+          .eq("name", "Founder")
+          .single();
+
+        if (founderBadge) {
+          // Check if coach already has this badge
+          const { data: existingBadge } = await supabase
+            .from("coach_badges")
+            .select("id")
+            .eq("coach_id", coachId)
+            .eq("badge_id", founderBadge.id)
+            .single();
+
+          if (!existingBadge) {
+            // Award the Founder badge
+            await supabase.from("coach_badges").insert({
+              coach_id: coachId,
+              badge_id: founderBadge.id,
+              source_data: { granted_reason: reason || "Founder plan grant" },
+            });
+          }
+        }
+      }
+
       // Log the action
       await logAction.log({
         action: "GRANT_FREE_PLAN",
