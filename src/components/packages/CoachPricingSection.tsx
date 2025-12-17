@@ -79,10 +79,10 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
                     </div>
                     <Badge variant="secondary">{pkg.session_count} sessions</Badge>
                   </div>
-                  <div className="flex items-center justify-between mt-4">
-                    <div>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4">
+                    <div className="min-w-0">
                       <span className="text-2xl font-bold text-primary">{formatCurrency(pkg.price)}</span>
-                      <span className="text-sm text-muted-foreground ml-2">
+                      <span className="text-sm text-muted-foreground ml-2 block sm:inline">
                         ({formatCurrency(pkg.price / pkg.session_count)}/session)
                       </span>
                     </div>
@@ -92,6 +92,7 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
                       coachId={coachId}
                       label="Purchase"
                       size="sm"
+                      className="w-full sm:w-auto"
                     />
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">
@@ -137,8 +138,8 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
                     </ul>
                   )}
 
-                  <div className="flex items-center justify-between mt-4">
-                    <div>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4">
+                    <div className="min-w-0">
                       <span className="text-2xl font-bold text-primary">{formatCurrency(plan.price)}</span>
                       <span className="text-sm text-muted-foreground">/{plan.billing_period}</span>
                     </div>
@@ -148,6 +149,7 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
                       coachId={coachId}
                       label="Subscribe"
                       size="sm"
+                      className="w-full sm:w-auto"
                     />
                   </div>
                 </div>

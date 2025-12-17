@@ -67,6 +67,7 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
   const [isOnline, setIsOnline] = useState(true);
   const [message, setMessage] = useState("");
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [bypassMessageFirst, setBypassMessageFirst] = useState(false);
 
   const { user } = useAuth();
   const { data: availability = [] } = useCoachAvailability(coach.id);
@@ -172,6 +173,7 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
     setIsOnline(true);
     setMessage("");
     setIsProcessingPayment(false);
+    setBypassMessageFirst(false);
   };
 
   const handleClose = () => {
@@ -180,7 +182,7 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
   };
 
   // If message first mode, show message prompt
-  if (isMessageFirst && step === "type") {
+  if (isMessageFirst && step === "type" && !bypassMessageFirst) {
     return (
       <Dialog open={open} onOpenChange={handleClose}>
         <DialogContent className="sm:max-w-md">
@@ -207,7 +209,7 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
                 <MessageSquare className="h-4 w-4 mr-2" />
                 Start Conversation
               </Button>
-              <Button variant="outline" onClick={() => setStep("type")}>
+              <Button variant="outline" onClick={() => setBypassMessageFirst(true)}>
                 View Session Types Anyway
               </Button>
             </div>
