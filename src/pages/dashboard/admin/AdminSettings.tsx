@@ -119,19 +119,26 @@ const AdminSettings = () => {
     ? rawTiers 
     : (typeof rawTiers === 'string' ? JSON.parse(rawTiers) : defaultTiers);
 
+  // Helper to parse boolean settings stored as strings
+  const parseBoolean = (value: any, defaultValue: boolean): boolean => {
+    if (value === true || value === "true") return true;
+    if (value === false || value === "false") return false;
+    return defaultValue;
+  };
+
   useEffect(() => {
     if (settings) {
       setLocalSettings(prev => ({
         ...prev,
-        email_notifications: settings.email_notifications ?? true,
-        auto_approve_coaches: settings.auto_approve_coaches ?? false,
-        maintenance_mode: settings.maintenance_mode ?? false,
+        email_notifications: parseBoolean(settings.email_notifications, true),
+        auto_approve_coaches: parseBoolean(settings.auto_approve_coaches, false),
+        maintenance_mode: parseBoolean(settings.maintenance_mode, false),
         commission_rate: settings.commission_rate ?? 15,
         currency: settings.currency ?? "GBP",
         min_session_price: settings.min_session_price ?? 10,
         max_session_price: settings.max_session_price ?? 500,
-        require_coach_verification: settings.require_coach_verification ?? true,
-        allow_anonymous_reviews: settings.allow_anonymous_reviews ?? false,
+        require_coach_verification: parseBoolean(settings.require_coach_verification, true),
+        allow_anonymous_reviews: parseBoolean(settings.allow_anonymous_reviews, false),
         social_facebook: settings.social_facebook ?? "",
         social_instagram: settings.social_instagram ?? "",
         social_tiktok: settings.social_tiktok ?? "",
