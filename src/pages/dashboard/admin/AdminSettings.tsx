@@ -277,54 +277,57 @@ const AdminSettings = () => {
           </div>
 
           <Tabs defaultValue="general" className="space-y-4">
-            {/* Scrollable TabsList for mobile */}
-            <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 pb-2">
-              <TabsList className="inline-flex w-max sm:w-auto h-auto flex-nowrap">
-                <TabsTrigger value="general" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
-                  <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline">General</span>
-                  <span className="xs:hidden">Gen</span>
-                </TabsTrigger>
-                <TabsTrigger value="preferences" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
-                  <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline">Preferences</span>
-                  <span className="xs:hidden">Pref</span>
-                </TabsTrigger>
-                <TabsTrigger value="branding" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
-                  <Share2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline">Branding</span>
-                  <span className="xs:hidden">Brand</span>
-                </TabsTrigger>
-                <TabsTrigger value="plans" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
-                  <CreditCard className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  Plans
-                </TabsTrigger>
-                <TabsTrigger value="features" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
-                  <Sliders className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline">Features</span>
-                  <span className="xs:hidden">Feat</span>
-                </TabsTrigger>
-                <TabsTrigger value="notifications" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
-                  <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline">Notifications</span>
-                  <span className="xs:hidden">Notif</span>
-                </TabsTrigger>
-                <TabsTrigger value="integrations" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
-                  <Plug className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline">Integrations</span>
-                  <span className="xs:hidden">Integ</span>
-                </TabsTrigger>
-                <TabsTrigger value="security" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
-                  <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline">Security</span>
-                  <span className="xs:hidden">Sec</span>
-                </TabsTrigger>
-                <TabsTrigger value="account" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
-                  <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline">Account</span>
-                  <span className="xs:hidden">Acct</span>
-                </TabsTrigger>
-              </TabsList>
+            {/* Scrollable TabsList for mobile with fade indicators */}
+            <div className="relative">
+              <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 pb-2 [mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-16px),transparent)] sm:[mask-image:none]">
+                <TabsList className="inline-flex w-max sm:w-auto h-auto flex-nowrap">
+                  <TabsTrigger value="general" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                    <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">General</span>
+                    <span className="sm:hidden">Gen</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="preferences" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                    <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Preferences</span>
+                    <span className="sm:hidden">Pref</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="branding" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                    <Share2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Branding</span>
+                    <span className="sm:hidden">Brand</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="plans" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                    <CreditCard className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Plans</span>
+                    <span className="sm:hidden">Plans</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="features" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                    <Sliders className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Features</span>
+                    <span className="sm:hidden">Feat</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="notifications" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                    <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Notifications</span>
+                    <span className="sm:hidden">Notif</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="integrations" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                    <Plug className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Integrations</span>
+                    <span className="sm:hidden">Integ</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="security" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                    <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Security</span>
+                    <span className="sm:hidden">Sec</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="account" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                    <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Account</span>
+                    <span className="sm:hidden">Acct</span>
+                  </TabsTrigger>
+                </TabsList>
+              </div>
             </div>
 
             <TabsContent value="general" className="space-y-4">
@@ -660,8 +663,9 @@ const AdminSettings = () => {
                   <CardTitle className="text-base sm:text-lg">Feature Access by Tier</CardTitle>
                   <CardDescription className="text-xs sm:text-sm">Configure which features are available for each subscription tier</CardDescription>
                 </CardHeader>
-                <CardContent className="p-0 sm:p-6">
-                  <div className="overflow-x-auto">
+                <CardContent className="p-3 sm:p-6">
+                  {/* Desktop Table View */}
+                  <div className="hidden sm:block overflow-x-auto">
                     <table className="w-full min-w-[600px]">
                       <thead>
                         <tr className="border-b">
@@ -677,7 +681,7 @@ const AdminSettings = () => {
                             <td className="py-2 sm:py-3 px-3 sm:px-4">
                               <div>
                                 <p className="font-medium text-sm">{feature.name}</p>
-                                <p className="text-xs text-muted-foreground hidden sm:block">{feature.description}</p>
+                                <p className="text-xs text-muted-foreground">{feature.description}</p>
                               </div>
                             </td>
                             {tiers.filter((t: PlanTier) => t.isActive).map((tier: PlanTier) => {
@@ -722,6 +726,59 @@ const AdminSettings = () => {
                         ))}
                       </tbody>
                     </table>
+                  </div>
+
+                  {/* Mobile Card View */}
+                  <div className="sm:hidden space-y-3">
+                    {platformFeatures?.map((feature: any) => (
+                      <Card key={feature.id} className="p-3 bg-muted/30">
+                        <div className="mb-3">
+                          <p className="font-medium text-sm">{feature.name}</p>
+                          <p className="text-xs text-muted-foreground">{feature.description}</p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          {tiers.filter((t: PlanTier) => t.isActive).map((tier: PlanTier) => {
+                            const value = getFeatureValue(tier.id, feature.id);
+                            return (
+                              <div key={tier.id} className="flex flex-col items-center gap-1 p-2 rounded-md bg-background">
+                                <span className="text-xs font-medium text-muted-foreground">{tier.name}</span>
+                                {feature.feature_type === "boolean" ? (
+                                  <Switch 
+                                    checked={value === true}
+                                    onCheckedChange={(checked) => handleFeatureChange(tier.id, feature.id, checked)}
+                                  />
+                                ) : feature.feature_type === "number" ? (
+                                  <Input 
+                                    type="number"
+                                    className="w-16 text-center text-sm h-8"
+                                    value={typeof value === "number" ? value : 0}
+                                    onChange={(e) => handleFeatureChange(tier.id, feature.id, Number(e.target.value))}
+                                  />
+                                ) : (
+                                  <Select 
+                                    value={typeof value === "string" ? value : "none"}
+                                    onValueChange={(newValue) => handleFeatureChange(tier.id, feature.id, newValue)}
+                                  >
+                                    <SelectTrigger className="w-full text-xs h-8">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="none">None</SelectItem>
+                                      <SelectItem value="basic">Basic</SelectItem>
+                                      <SelectItem value="standard">Standard</SelectItem>
+                                      <SelectItem value="full">Full</SelectItem>
+                                      <SelectItem value="advanced">Advanced</SelectItem>
+                                      <SelectItem value="limited">Limited</SelectItem>
+                                      <SelectItem value="unlimited">Unlimited</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </Card>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
