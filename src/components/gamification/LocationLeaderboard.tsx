@@ -240,37 +240,37 @@ export function LocationLeaderboard({ timeFrame = 'alltime' }: LocationLeaderboa
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {myRanks.ranks.city && myRanks.profile.city && (
-                <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
-                  <Building className="h-4 w-4 text-primary" />
-                  <div>
-                    <div className="font-bold text-primary">#{myRanks.ranks.city.rank}</div>
-                    <div className="text-xs text-muted-foreground">{myRanks.profile.city}</div>
+                <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg overflow-hidden">
+                  <Building className="h-4 w-4 text-primary shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <div className="font-bold text-primary truncate">#{myRanks.ranks.city.rank}</div>
+                    <div className="text-xs text-muted-foreground truncate">{myRanks.profile.city}</div>
                   </div>
                 </div>
               )}
               {myRanks.ranks.county && myRanks.profile.county && (
-                <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
-                  <Map className="h-4 w-4 text-primary" />
-                  <div>
-                    <div className="font-bold text-primary">#{myRanks.ranks.county.rank}</div>
-                    <div className="text-xs text-muted-foreground">{myRanks.profile.county}</div>
+                <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg overflow-hidden">
+                  <Map className="h-4 w-4 text-primary shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <div className="font-bold text-primary truncate">#{myRanks.ranks.county.rank}</div>
+                    <div className="text-xs text-muted-foreground truncate">{myRanks.profile.county}</div>
                   </div>
                 </div>
               )}
               {myRanks.ranks.country && myRanks.profile.country && (
-                <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  <div>
-                    <div className="font-bold text-primary">#{myRanks.ranks.country.rank}</div>
-                    <div className="text-xs text-muted-foreground">{myRanks.profile.country}</div>
+                <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg overflow-hidden">
+                  <MapPin className="h-4 w-4 text-primary shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <div className="font-bold text-primary truncate">#{myRanks.ranks.country.rank}</div>
+                    <div className="text-xs text-muted-foreground truncate">{myRanks.profile.country}</div>
                   </div>
                 </div>
               )}
-              <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
-                <Globe className="h-4 w-4 text-primary" />
-                <div>
-                  <div className="font-bold text-primary">#{myRanks.ranks.global.rank}</div>
-                  <div className="text-xs text-muted-foreground">Global</div>
+              <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg overflow-hidden">
+                <Globe className="h-4 w-4 text-primary shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <div className="font-bold text-primary truncate">#{myRanks.ranks.global.rank}</div>
+                  <div className="text-xs text-muted-foreground truncate">Global</div>
                 </div>
               </div>
             </div>
