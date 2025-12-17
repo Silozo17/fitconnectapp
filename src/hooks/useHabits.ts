@@ -19,6 +19,9 @@ export interface Habit {
   end_date: string | null;
   created_at: string;
   updated_at: string;
+  // Wearable linking fields
+  wearable_target_type: string | null;
+  wearable_target_value: number | null;
 }
 
 export interface HabitLog {
@@ -29,6 +32,9 @@ export interface HabitLog {
   completed_count: number;
   notes: string | null;
   created_at: string;
+  // Verification fields
+  verification_type: 'manual' | 'wearable_auto' | 'coach_verified';
+  health_data_id: string | null;
 }
 
 export interface HabitStreak {
@@ -45,6 +51,15 @@ export interface HabitWithStreak extends Habit {
   streak?: HabitStreak;
   todayLog?: HabitLog;
 }
+
+// Wearable target types for habits
+export const WEARABLE_HABIT_TARGETS = [
+  { value: 'steps', label: 'Steps', unit: 'steps', defaultValue: 10000, icon: 'Footprints' },
+  { value: 'calories', label: 'Calories Burned', unit: 'kcal', defaultValue: 500, icon: 'Flame' },
+  { value: 'active_minutes', label: 'Active Minutes', unit: 'min', defaultValue: 30, icon: 'Timer' },
+  { value: 'sleep', label: 'Sleep Hours', unit: 'hours', defaultValue: 8, icon: 'Moon' },
+  { value: 'distance', label: 'Distance', unit: 'km', defaultValue: 5, icon: 'MapPin' },
+];
 
 const HABIT_CATEGORIES = [
   { value: 'nutrition', label: 'Nutrition', icon: 'Salad', color: 'text-green-500' },

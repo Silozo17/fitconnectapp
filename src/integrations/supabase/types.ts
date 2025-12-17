@@ -475,7 +475,10 @@ export type Database = {
           current_progress: number
           id: string
           joined_at: string
+          last_wearable_sync_at: string | null
           status: string
+          unverified_progress: number | null
+          verified_progress: number | null
         }
         Insert: {
           challenge_id: string
@@ -484,7 +487,10 @@ export type Database = {
           current_progress?: number
           id?: string
           joined_at?: string
+          last_wearable_sync_at?: string | null
           status?: string
+          unverified_progress?: number | null
+          verified_progress?: number | null
         }
         Update: {
           challenge_id?: string
@@ -493,7 +499,10 @@ export type Database = {
           current_progress?: number
           id?: string
           joined_at?: string
+          last_wearable_sync_at?: string | null
           status?: string
+          unverified_progress?: number | null
+          verified_progress?: number | null
         }
         Relationships: [
           {
@@ -512,17 +521,20 @@ export type Database = {
           challenge_type: string
           created_at: string
           created_by: string
+          data_source: string | null
           description: string | null
           end_date: string
           id: string
           is_active: boolean | null
           max_participants: number | null
+          requires_verification: boolean | null
           start_date: string
           target_audience: string | null
           target_unit: string
           target_value: number
           title: string
           visibility: string
+          wearable_data_type: string | null
           xp_reward: number
         }
         Insert: {
@@ -531,17 +543,20 @@ export type Database = {
           challenge_type?: string
           created_at?: string
           created_by: string
+          data_source?: string | null
           description?: string | null
           end_date: string
           id?: string
           is_active?: boolean | null
           max_participants?: number | null
+          requires_verification?: boolean | null
           start_date?: string
           target_audience?: string | null
           target_unit?: string
           target_value?: number
           title: string
           visibility?: string
+          wearable_data_type?: string | null
           xp_reward?: number
         }
         Update: {
@@ -550,17 +565,20 @@ export type Database = {
           challenge_type?: string
           created_at?: string
           created_by?: string
+          data_source?: string | null
           description?: string | null
           end_date?: string
           id?: string
           is_active?: boolean | null
           max_participants?: number | null
+          requires_verification?: boolean | null
           start_date?: string
           target_audience?: string | null
           target_unit?: string
           target_value?: number
           title?: string
           visibility?: string
+          wearable_data_type?: string | null
           xp_reward?: number
         }
         Relationships: [
@@ -632,6 +650,8 @@ export type Database = {
           start_date: string
           target_count: number
           updated_at: string
+          wearable_target_type: string | null
+          wearable_target_value: number | null
         }
         Insert: {
           category?: string
@@ -649,6 +669,8 @@ export type Database = {
           start_date?: string
           target_count?: number
           updated_at?: string
+          wearable_target_type?: string | null
+          wearable_target_value?: number | null
         }
         Update: {
           category?: string
@@ -666,6 +688,8 @@ export type Database = {
           start_date?: string
           target_count?: number
           updated_at?: string
+          wearable_target_type?: string | null
+          wearable_target_value?: number | null
         }
         Relationships: []
       }
@@ -888,11 +912,14 @@ export type Database = {
           client_id: string
           coach_id: string | null
           created_at: string
+          data_source: string | null
           id: string
+          is_verified: boolean | null
           measurements: Json | null
           notes: string | null
           photo_urls: string[] | null
           recorded_at: string
+          wearable_connection_id: string | null
           weight_kg: number | null
         }
         Insert: {
@@ -900,11 +927,14 @@ export type Database = {
           client_id: string
           coach_id?: string | null
           created_at?: string
+          data_source?: string | null
           id?: string
+          is_verified?: boolean | null
           measurements?: Json | null
           notes?: string | null
           photo_urls?: string[] | null
           recorded_at?: string
+          wearable_connection_id?: string | null
           weight_kg?: number | null
         }
         Update: {
@@ -912,11 +942,14 @@ export type Database = {
           client_id?: string
           coach_id?: string | null
           created_at?: string
+          data_source?: string | null
           id?: string
+          is_verified?: boolean | null
           measurements?: Json | null
           notes?: string | null
           photo_urls?: string[] | null
           recorded_at?: string
+          wearable_connection_id?: string | null
           weight_kg?: number | null
         }
         Relationships: [
@@ -932,6 +965,13 @@ export type Database = {
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_progress_wearable_connection_id_fkey"
+            columns: ["wearable_connection_id"]
+            isOneToOne: false
+            referencedRelation: "wearable_connections"
             referencedColumns: ["id"]
           },
         ]
@@ -2355,27 +2395,33 @@ export type Database = {
           completed_count: number
           created_at: string
           habit_id: string
+          health_data_id: string | null
           id: string
           logged_at: string
           notes: string | null
+          verification_type: string | null
         }
         Insert: {
           client_id: string
           completed_count?: number
           created_at?: string
           habit_id: string
+          health_data_id?: string | null
           id?: string
           logged_at?: string
           notes?: string | null
+          verification_type?: string | null
         }
         Update: {
           client_id?: string
           completed_count?: number
           created_at?: string
           habit_id?: string
+          health_data_id?: string | null
           id?: string
           logged_at?: string
           notes?: string | null
+          verification_type?: string | null
         }
         Relationships: [
           {
@@ -2383,6 +2429,13 @@ export type Database = {
             columns: ["habit_id"]
             isOneToOne: false
             referencedRelation: "client_habits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "habit_logs_health_data_id_fkey"
+            columns: ["health_data_id"]
+            isOneToOne: false
+            referencedRelation: "health_data_sync"
             referencedColumns: ["id"]
           },
         ]

@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { format, differenceInDays, isAfter, isBefore } from 'date-fns';
-import { Calendar, Users, Zap, Trophy, Clock, Target } from 'lucide-react';
+import { Calendar, Users, Zap, Trophy, Clock, Target, ShieldCheck, Watch, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ChallengeCardProps {
@@ -25,6 +26,7 @@ export function ChallengeCard({ challenge, showJoinButton = true, showProgress =
   const isJoined = !!challenge.my_participation;
   
   const challengeType = CHALLENGE_TYPES.find(t => t.value === challenge.challenge_type);
+  const isWearableChallenge = challengeType?.wearableRequired || challenge.requires_verification;
   
   const getStatusBadge = () => {
     if (hasEnded) {
@@ -39,9 +41,51 @@ export function ChallengeCard({ challenge, showJoinButton = true, showProgress =
     return <Badge className="bg-primary/20 text-primary">{daysLeft} days left</Badge>;
   };
   
+  const getVerificationBadge = () => {
+    if (challenge.data_source === 'wearable_only') {
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/30 gap-1">
+                <ShieldCheck className="h-3 w-3" />
+                Verified Only
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="max-w-xs">Only wearable-verified progress counts. Connect a fitness device to participate.</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    }
+    if (challenge.requires_verification) {
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/30 gap-1">
+                <Watch className="h-3 w-3" />
+                Wearable Tracked
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="max-w-xs">Progress automatically tracks from connected wearables</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    }
+    return null;
+  };
+  
   const progress = challenge.my_participation 
     ? (challenge.my_participation.current_progress / challenge.target_value) * 100
     : 0;
+  
+  const verifiedProgress = challenge.my_participation?.verified_progress || 0;
+  const unverifiedProgress = challenge.my_participation?.unverified_progress || 0;
+  const showVerifiedSplit = isWearableChallenge && (verifiedProgress > 0 || unverifiedProgress > 0);
   
   return (
     <Card className={cn(
@@ -49,9 +93,12 @@ export function ChallengeCard({ challenge, showJoinButton = true, showProgress =
       hasEnded && 'opacity-60'
     )}>
       <CardHeader className="pb-2">
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between gap-2">
           <div className="flex-1">
-            <CardTitle className="text-lg">{challenge.title}</CardTitle>
+            <div className="flex items-center gap-2 flex-wrap">
+              <CardTitle className="text-lg">{challenge.title}</CardTitle>
+              {getVerificationBadge()}
+            </div>
             {challenge.description && (
               <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                 {challenge.description}
@@ -103,6 +150,21 @@ export function ChallengeCard({ challenge, showJoinButton = true, showProgress =
               </span>
             </div>
             <Progress value={progress} className="h-2" />
+            
+            {showVerifiedSplit && (
+              <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
+                <span className="flex items-center gap-1">
+                  <ShieldCheck className="h-3 w-3 text-emerald-500" />
+                  Verified: {verifiedProgress}
+                </span>
+                {challenge.data_source !== 'wearable_only' && unverifiedProgress > 0 && (
+                  <span className="flex items-center gap-1">
+                    <AlertTriangle className="h-3 w-3 text-amber-500" />
+                    Manual: {unverifiedProgress}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         )}
         
@@ -114,13 +176,21 @@ export function ChallengeCard({ challenge, showJoinButton = true, showProgress =
                 Joined
               </Badge>
             ) : (
-              <Button
-                className="w-full"
-                onClick={() => joinChallenge.mutate(challenge.id)}
-                disabled={joinChallenge.isPending || !hasStarted}
-              >
-                {!hasStarted ? 'Coming Soon' : 'Join Challenge'}
-              </Button>
+              <div className="space-y-2">
+                {isWearableChallenge && challenge.data_source === 'wearable_only' && (
+                  <p className="text-xs text-amber-500 flex items-center gap-1">
+                    <AlertTriangle className="h-3 w-3" />
+                    Requires connected wearable device
+                  </p>
+                )}
+                <Button
+                  className="w-full"
+                  onClick={() => joinChallenge.mutate(challenge.id)}
+                  disabled={joinChallenge.isPending || !hasStarted}
+                >
+                  {!hasStarted ? 'Coming Soon' : 'Join Challenge'}
+                </Button>
+              </div>
             )}
           </div>
         )}

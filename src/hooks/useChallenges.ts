@@ -21,6 +21,10 @@ export interface Challenge {
   created_at: string;
   participant_count?: number;
   my_participation?: ChallengeParticipant;
+  // New verification fields
+  requires_verification: boolean;
+  data_source: 'wearable_only' | 'verified_only' | 'any';
+  wearable_data_type: string | null;
 }
 
 export interface ChallengeParticipant {
@@ -32,14 +36,35 @@ export interface ChallengeParticipant {
   joined_at: string;
   completed_at: string | null;
   challenge?: Challenge;
+  // New verification fields
+  verified_progress: number;
+  unverified_progress: number;
+  last_wearable_sync_at: string | null;
 }
 
+// Wearable data types for challenges
+export const WEARABLE_DATA_TYPES = [
+  { value: 'steps', label: 'Steps', unit: 'steps' },
+  { value: 'calories', label: 'Calories Burned', unit: 'kcal' },
+  { value: 'active_minutes', label: 'Active Minutes', unit: 'minutes' },
+  { value: 'sleep', label: 'Sleep Hours', unit: 'hours' },
+  { value: 'distance', label: 'Distance', unit: 'km' },
+  { value: 'heart_rate', label: 'Avg Heart Rate', unit: 'bpm' },
+];
+
 export const CHALLENGE_TYPES = [
-  { value: 'habit_streak', label: 'Habit Streak', unit: 'days', description: 'Maintain a streak for X days' },
-  { value: 'workout_count', label: 'Workout Count', unit: 'workouts', description: 'Complete X workouts' },
-  { value: 'xp_race', label: 'XP Race', unit: 'XP', description: 'Earn the most XP' },
-  { value: 'progress_logs', label: 'Progress Logs', unit: 'entries', description: 'Log X progress entries' },
-  { value: 'habit_completions', label: 'Habit Completions', unit: 'completions', description: 'Complete X habit check-ins' },
+  // Manual challenge types
+  { value: 'habit_streak', label: 'Habit Streak', unit: 'days', description: 'Maintain a streak for X days', wearableRequired: false },
+  { value: 'workout_count', label: 'Workout Count', unit: 'workouts', description: 'Complete X workouts', wearableRequired: false },
+  { value: 'xp_race', label: 'XP Race', unit: 'XP', description: 'Earn the most XP', wearableRequired: false },
+  { value: 'progress_logs', label: 'Progress Logs', unit: 'entries', description: 'Log X progress entries', wearableRequired: false },
+  { value: 'habit_completions', label: 'Habit Completions', unit: 'completions', description: 'Complete X habit check-ins', wearableRequired: false },
+  // Wearable-verified challenge types
+  { value: 'steps_total', label: 'Step Challenge', unit: 'steps', description: 'Walk X total steps', wearableRequired: true, dataType: 'steps' },
+  { value: 'active_minutes_total', label: 'Active Minutes', unit: 'minutes', description: 'X minutes of activity', wearableRequired: true, dataType: 'active_minutes' },
+  { value: 'calories_burned', label: 'Calorie Burn', unit: 'kcal', description: 'Burn X calories', wearableRequired: true, dataType: 'calories' },
+  { value: 'sleep_challenge', label: 'Sleep Challenge', unit: 'hours', description: 'Average X hours sleep', wearableRequired: true, dataType: 'sleep' },
+  { value: 'distance_challenge', label: 'Distance Challenge', unit: 'km', description: 'Travel X kilometers', wearableRequired: true, dataType: 'distance' },
 ];
 
 function useClientProfile() {
