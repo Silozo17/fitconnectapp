@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { MessageSquare, UserMinus, MapPin, AtSign } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface ConnectionCardProps {
   connection: {
@@ -12,6 +12,7 @@ interface ConnectionCardProps {
     requester_user_id: string;
     addressee_user_id: string;
     profile?: {
+      id?: string;
       first_name?: string | null;
       last_name?: string | null;
       display_name?: string | null;
@@ -36,8 +37,13 @@ export const ConnectionCard = ({ connection, onRemove }: ConnectionCardProps) =>
   const initials = displayName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
 
   const handleMessage = () => {
+    const profileId = profile?.id;
+    if (!profileId) {
+      toast.error("Unable to start conversation");
+      return;
+    }
     const basePath = role === "coach" ? "/dashboard/coach" : "/dashboard/client";
-    navigate(`${basePath}/messages`);
+    navigate(`${basePath}/messages/${profileId}`);
   };
 
   return (
