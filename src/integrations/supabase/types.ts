@@ -309,6 +309,8 @@ export type Database = {
       }
       booking_requests: {
         Row: {
+          amount_due: number | null
+          amount_paid: number | null
           client_id: string
           coach_id: string
           created_at: string | null
@@ -317,12 +319,18 @@ export type Database = {
           id: string
           is_online: boolean | null
           message: string | null
+          payment_required: string | null
+          payment_status: string | null
           requested_at: string
           responded_at: string | null
           session_type_id: string | null
           status: string | null
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
         }
         Insert: {
+          amount_due?: number | null
+          amount_paid?: number | null
           client_id: string
           coach_id: string
           created_at?: string | null
@@ -331,12 +339,18 @@ export type Database = {
           id?: string
           is_online?: boolean | null
           message?: string | null
+          payment_required?: string | null
+          payment_status?: string | null
           requested_at: string
           responded_at?: string | null
           session_type_id?: string | null
           status?: string | null
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
         }
         Update: {
+          amount_due?: number | null
+          amount_paid?: number | null
           client_id?: string
           coach_id?: string
           created_at?: string | null
@@ -345,10 +359,14 @@ export type Database = {
           id?: string
           is_online?: boolean | null
           message?: string | null
+          payment_required?: string | null
+          payment_status?: string | null
           requested_at?: string
           responded_at?: string | null
           session_type_id?: string | null
           status?: string | null
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
         }
         Relationships: [
           {
@@ -1562,6 +1580,7 @@ export type Database = {
       }
       coaching_sessions: {
         Row: {
+          amount_paid: number | null
           cancellation_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
@@ -1569,23 +1588,28 @@ export type Database = {
           coach_id: string
           created_at: string
           currency: string | null
+          deposit_amount: number | null
           duration_minutes: number
           external_calendar_event_id: string | null
           id: string
           is_online: boolean | null
           location: string | null
           notes: string | null
+          payment_status: string | null
           price: number | null
+          remaining_balance: number | null
           rescheduled_from: string | null
           scheduled_at: string
           session_type: string
           status: string
+          stripe_payment_intent_id: string | null
           updated_at: string
           video_meeting_id: string | null
           video_meeting_url: string | null
           video_provider: Database["public"]["Enums"]["video_provider"] | null
         }
         Insert: {
+          amount_paid?: number | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
@@ -1593,23 +1617,28 @@ export type Database = {
           coach_id: string
           created_at?: string
           currency?: string | null
+          deposit_amount?: number | null
           duration_minutes?: number
           external_calendar_event_id?: string | null
           id?: string
           is_online?: boolean | null
           location?: string | null
           notes?: string | null
+          payment_status?: string | null
           price?: number | null
+          remaining_balance?: number | null
           rescheduled_from?: string | null
           scheduled_at: string
           session_type?: string
           status?: string
+          stripe_payment_intent_id?: string | null
           updated_at?: string
           video_meeting_id?: string | null
           video_meeting_url?: string | null
           video_provider?: Database["public"]["Enums"]["video_provider"] | null
         }
         Update: {
+          amount_paid?: number | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
@@ -1617,17 +1646,21 @@ export type Database = {
           coach_id?: string
           created_at?: string
           currency?: string | null
+          deposit_amount?: number | null
           duration_minutes?: number
           external_calendar_event_id?: string | null
           id?: string
           is_online?: boolean | null
           location?: string | null
           notes?: string | null
+          payment_status?: string | null
           price?: number | null
+          remaining_balance?: number | null
           rescheduled_from?: string | null
           scheduled_at?: string
           session_type?: string
           status?: string
+          stripe_payment_intent_id?: string | null
           updated_at?: string
           video_meeting_id?: string | null
           video_meeting_url?: string | null
@@ -2913,6 +2946,8 @@ export type Database = {
           coach_id: string
           created_at: string | null
           currency: string | null
+          deposit_type: string | null
+          deposit_value: number | null
           description: string | null
           duration_minutes: number
           id: string
@@ -2920,6 +2955,7 @@ export type Database = {
           is_in_person: boolean | null
           is_online: boolean | null
           name: string
+          payment_required: string | null
           price: number
           updated_at: string | null
         }
@@ -2927,6 +2963,8 @@ export type Database = {
           coach_id: string
           created_at?: string | null
           currency?: string | null
+          deposit_type?: string | null
+          deposit_value?: number | null
           description?: string | null
           duration_minutes?: number
           id?: string
@@ -2934,6 +2972,7 @@ export type Database = {
           is_in_person?: boolean | null
           is_online?: boolean | null
           name: string
+          payment_required?: string | null
           price: number
           updated_at?: string | null
         }
@@ -2941,6 +2980,8 @@ export type Database = {
           coach_id?: string
           created_at?: string | null
           currency?: string | null
+          deposit_type?: string | null
+          deposit_value?: number | null
           description?: string | null
           duration_minutes?: number
           id?: string
@@ -2948,6 +2989,7 @@ export type Database = {
           is_in_person?: boolean | null
           is_online?: boolean | null
           name?: string
+          payment_required?: string | null
           price?: number
           updated_at?: string | null
         }
