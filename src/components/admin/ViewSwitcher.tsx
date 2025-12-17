@@ -1,7 +1,24 @@
 import { useState } from "react";
 import { useAdminView } from "@/contexts/AdminContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+
+// Routes that exist in multiple views - maps route segment to which views support it
+const ROUTE_EQUIVALENTS: Record<string, Record<string, boolean>> = {
+  settings: { admin: true, coach: true, client: true },
+  messages: { admin: false, coach: true, client: true },
+  integrations: { admin: true, coach: true, client: true },
+  notifications: { admin: true, coach: true, client: true },
+  reviews: { admin: true, coach: true, client: false },
+  achievements: { admin: false, coach: true, client: true },
+  verification: { admin: true, coach: true, client: false },
+  challenges: { admin: true, coach: false, client: true },
+  plans: { admin: false, coach: true, client: true },
+  connections: { admin: false, coach: true, client: true },
+  progress: { admin: false, coach: false, client: true },
+  habits: { admin: false, coach: false, client: true },
+  profile: { admin: true, coach: true, client: true },
+};
 import {
   Select,
   SelectContent,
@@ -21,8 +38,18 @@ const ViewSwitcher = () => {
     isLoadingProfiles,
   } = useAdminView();
   const navigate = useNavigate();
+  const location = useLocation();
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [profileTypeToCreate, setProfileTypeToCreate] = useState<"client" | "coach">("client");
+
+  // Extract current page from path: /dashboard/admin/settings → "settings"
+  const getCurrentPage = (pathname: string): string | null => {
+    const segments = pathname.split('/').filter(Boolean);
+    if (segments.length >= 3 && segments[0] === 'dashboard') {
+      return segments[2] || null;
+    }
+    return null;
+  };
 
   // Determine if user is admin (can see admin view option)
   const isAdminUser = role === "admin" || role === "manager" || role === "staff";
@@ -45,17 +72,15 @@ const ViewSwitcher = () => {
 
     setActiveProfile(viewMode, profileId);
 
-    // Navigate to the appropriate dashboard
-    switch (viewMode) {
-      case "admin":
-        navigate("/dashboard/admin");
-        break;
-      case "client":
-        navigate("/dashboard/client");
-        break;
-      case "coach":
-        navigate("/dashboard/coach");
-        break;
+    // Get current page and check if it exists in target view
+    const currentPage = getCurrentPage(location.pathname);
+    
+    if (currentPage && ROUTE_EQUIVALENTS[currentPage]?.[viewMode]) {
+      // Same page exists in target view - navigate there
+      navigate(`/dashboard/${viewMode}/${currentPage}`);
+    } else {
+      // Fallback to dashboard home for that view
+      navigate(`/dashboard/${viewMode}`);
     }
   };
 
