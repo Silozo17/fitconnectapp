@@ -15,6 +15,7 @@ export interface UserConnection {
   responded_at: string | null;
   // Joined profile data
   profile?: {
+    id?: string;
     first_name?: string | null;
     last_name?: string | null;
     display_name?: string | null;
@@ -121,21 +122,21 @@ export const useConnections = () => {
       if (targetProfileType === "client") {
         const { data } = await supabase
           .from("client_profiles")
-          .select("first_name, last_name, username, avatar_url, location")
+          .select("id, first_name, last_name, username, avatar_url, location")
           .eq("user_id", targetUserId)
           .single();
         profile = data;
       } else if (targetProfileType === "coach") {
         const { data } = await supabase
           .from("coach_profiles")
-          .select("display_name, username, profile_image_url, location")
+          .select("id, display_name, username, profile_image_url, location")
           .eq("user_id", targetUserId)
           .single();
         profile = data;
       } else {
         const { data } = await supabase
           .from("admin_profiles")
-          .select("first_name, last_name, display_name, username, avatar_url")
+          .select("id, first_name, last_name, display_name, username, avatar_url")
           .eq("user_id", targetUserId)
           .single();
         profile = data;
