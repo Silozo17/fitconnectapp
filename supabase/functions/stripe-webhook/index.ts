@@ -104,6 +104,33 @@ serve(async (req) => {
 
             console.log("Platform subscription recorded successfully");
           }
+        } else if (metadata.type === "booking") {
+          // Booking payment (deposit or full payment)
+          const bookingRequestId = metadata.booking_request_id;
+          const paymentType = metadata.payment_type; // 'deposit' or 'full'
+          const amountPaid = parseFloat(metadata.amount_due || "0");
+          const sessionPrice = parseFloat(metadata.session_price || "0");
+
+          console.log("Booking payment completed:", { bookingRequestId, paymentType, amountPaid });
+
+          // Determine payment status based on payment type
+          const paymentStatus = paymentType === 'full' ? 'fully_paid' : 'deposit_paid';
+
+          // Update booking request with payment info
+          const { error } = await supabase
+            .from("booking_requests")
+            .update({
+              payment_status: paymentStatus,
+              amount_paid: amountPaid,
+              stripe_payment_intent_id: session.payment_intent as string,
+            })
+            .eq("id", bookingRequestId);
+
+          if (error) {
+            console.error("Error updating booking request payment:", error);
+          } else {
+            console.log("Booking payment recorded successfully:", paymentStatus);
+          }
         }
         break;
       }
