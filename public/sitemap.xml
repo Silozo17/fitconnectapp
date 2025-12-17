@@ -94,6 +94,74 @@
     <priority>0.7</priority>
   </url>
   
+  <!-- Blog -->
+  <url>
+    <loc>https://getfitconnect.co.uk/blog</loc>
+    <lastmod>2025-12-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://getfitconnect.co.uk/blog/best-workout-apps-2026</loc>
+    <lastmod>2025-12-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://getfitconnect.co.uk/blog/what-to-expect-first-pt-session</loc>
+    <lastmod>2025-12-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://getfitconnect.co.uk/blog/online-vs-in-person-personal-training</loc>
+    <lastmod>2025-12-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://getfitconnect.co.uk/blog/is-a-personal-trainer-worth-the-investment</loc>
+    <lastmod>2025-12-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://getfitconnect.co.uk/blog/how-to-choose-a-personal-trainer</loc>
+    <lastmod>2025-12-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://getfitconnect.co.uk/blog/benefits-of-a-nutrition-coach</loc>
+    <lastmod>2025-12-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://getfitconnect.co.uk/blog/boxing-for-beginners-uk-guide</loc>
+    <lastmod>2025-12-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://getfitconnect.co.uk/blog/how-often-should-you-train-with-a-pt</loc>
+    <lastmod>2025-12-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://getfitconnect.co.uk/blog/personal-trainer-vs-gym-membership</loc>
+    <lastmod>2025-12-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://getfitconnect.co.uk/blog/fitness-goals-2026-how-to-achieve</loc>
+    <lastmod>2025-12-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
   <!-- Documentation -->
   <url>
     <loc>https://getfitconnect.co.uk/docs</loc>
