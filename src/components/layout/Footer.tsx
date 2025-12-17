@@ -109,8 +109,8 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-12 md:py-16">
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-8 md:gap-12">
+      <div className="container mx-auto px-4 py-10 md:py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-8 lg:gap-10">
           {/* Brand */}
           <div className="col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4 group">

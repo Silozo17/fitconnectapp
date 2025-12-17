@@ -48,9 +48,9 @@ export default function Subscribe() {
   const tierData = SUBSCRIPTION_TIERS[selectedTier];
 
   return (
-    <div className="min-h-screen flex relative overflow-hidden">
+    <div className="min-h-screen flex flex-col md:flex-row relative overflow-hidden">
       {/* Left Side - Dark */}
-      <div className="w-full lg:w-1/2 bg-[#0D0D14] p-8 lg:p-12 flex flex-col relative overflow-hidden">
+      <div className="w-full md:w-1/2 bg-[#0D0D14] p-6 sm:p-8 md:p-10 lg:p-12 flex flex-col relative overflow-hidden">
         
         {/* Back Link */}
         <Link 
@@ -98,7 +98,7 @@ export default function Subscribe() {
           </div>
           
           {/* Avatar on the right, beside features */}
-          <div className="hidden lg:block w-48 h-64 flex-shrink-0">
+          <div className="hidden md:block w-40 lg:w-48 h-56 lg:h-64 flex-shrink-0">
             <div 
               key={selectedTier}
               className="w-full h-full animate-fade-in"
@@ -126,7 +126,7 @@ export default function Subscribe() {
         </div>
 
         {/* CTA Button - Left side for desktop, full width for mobile */}
-        <div className="hidden lg:block relative z-10">
+        <div className="hidden md:block relative z-10">
           {!user && (
             <Link to="/auth">
               <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6">
@@ -137,7 +137,7 @@ export default function Subscribe() {
         </div>
 
         {/* Mobile CTA Button */}
-        <div className="lg:hidden">
+        <div className="md:hidden">
           {!showMobileCheckout ? (
             <Button
               onClick={() => setShowMobileCheckout(true)}
@@ -167,14 +167,14 @@ export default function Subscribe() {
       </div>
 
       {/* Right Side - Light - Side by side layout */}
-      <div className="hidden lg:flex w-1/2 bg-white p-6 lg:p-8 flex-row gap-6 items-start">
+      <div className="hidden md:flex w-1/2 bg-white p-4 md:p-6 lg:p-8 flex-col lg:flex-row gap-4 lg:gap-6 items-start overflow-y-auto">
         {/* LEFT: Price Summary - Compact box */}
-        <div className="w-72 flex-shrink-0">
+        <div className="w-full lg:w-64 xl:w-72 flex-shrink-0">
           <PriceSummary tier={selectedTier} billingInterval={billingInterval} />
         </div>
 
         {/* RIGHT: Checkout Form - Takes remaining space */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 w-full">
           {!user ? (
             <div className="bg-gray-50 rounded-xl p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -220,8 +220,8 @@ export default function Subscribe() {
       </div>
 
       {/* Mobile Checkout Sheet */}
-      {showMobileCheckout && (
-        <div className="lg:hidden fixed inset-0 z-50 bg-white overflow-auto">
+      {showMobileCheckout && user && (
+        <div className="md:hidden fixed inset-0 z-50 bg-white overflow-auto">
           <div className="p-4 border-b sticky top-0 bg-white">
             <button
               onClick={() => setShowMobileCheckout(false)}
