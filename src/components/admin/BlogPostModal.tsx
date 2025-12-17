@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,9 +8,11 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Search, Image, Settings, X, Loader2, Eye, EyeOff, Sparkles } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { FileText, Search, Image, Settings, X, Loader2, Eye, EyeOff, Sparkles, Upload, Trash2 } from "lucide-react";
 import { BlogPost, useCreateBlogPost, useUpdateBlogPost, useBlogCategories } from "@/hooks/useBlogPosts";
 import { useAIBlogFormatter } from "@/hooks/useAIBlogFormatter";
+import { useBlogImage } from "@/hooks/useBlogImage";
 import { AIBlogSuggestions } from "./AIBlogSuggestions";
 
 interface BlogPostModalProps {
@@ -48,7 +50,8 @@ export const BlogPostModal = ({ open, onOpenChange, post }: BlogPostModalProps) 
   const updatePost = useUpdateBlogPost();
   const { data: existingCategories } = useBlogCategories();
   const { formatContent, isFormatting, suggestions, clearSuggestions } = useAIBlogFormatter();
-  
+  const { uploadImage, deleteImage, isUploading, uploadProgress } = useBlogImage();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
@@ -396,20 +399,98 @@ export const BlogPostModal = ({ open, onOpenChange, post }: BlogPostModalProps) 
               </TabsContent>
 
               <TabsContent value="media" className="space-y-4 mt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="featured_image">Featured Image URL</Label>
+                {/* Image Upload */}
+                <div className="space-y-3">
+                  <Label>Cover Image</Label>
+                  
+                  {/* Drag & Drop Zone */}
+                  <div
+                    className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer hover:border-primary/50 ${
+                      isUploading ? 'border-primary bg-primary/5' : 'border-border'
+                    }`}
+                    onClick={() => fileInputRef.current?.click()}
+                    onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                    onDrop={async (e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const file = e.dataTransfer.files?.[0];
+                      if (file) {
+                        const url = await uploadImage(file);
+                        if (url) setFormData(prev => ({ ...prev, featured_image: url }));
+                      }
+                    }}
+                  >
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const url = await uploadImage(file);
+                          if (url) setFormData(prev => ({ ...prev, featured_image: url }));
+                        }
+                        e.target.value = '';
+                      }}
+                    />
+                    
+                    {isUploading ? (
+                      <div className="space-y-2">
+                        <Loader2 className="h-8 w-8 mx-auto text-primary animate-spin" />
+                        <p className="text-sm text-muted-foreground">Uploading...</p>
+                        <Progress value={uploadProgress} className="w-48 mx-auto" />
+                      </div>
+                    ) : (
+                      <>
+                        <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                        <p className="text-sm text-muted-foreground">
+                          Drag & drop an image or <span className="text-primary">click to browse</span>
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          JPG, PNG, WebP or GIF · Max 5MB · Recommended: 1200×630px
+                        </p>
+                      </>
+                    )}
+                  </div>
+
+                  {/* OR Divider */}
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <div className="flex-1 border-t border-border" />
+                    <span>OR paste URL</span>
+                    <div className="flex-1 border-t border-border" />
+                  </div>
+
+                  {/* URL Input */}
                   <Input
-                    id="featured_image"
                     value={formData.featured_image}
                     onChange={(e) => setFormData(prev => ({ ...prev, featured_image: e.target.value }))}
                     placeholder="https://images.unsplash.com/..."
                   />
                 </div>
 
+                {/* Preview */}
                 {formData.featured_image && (
                   <div className="space-y-2">
-                    <Label>Preview</Label>
-                    <div className="border rounded-md overflow-hidden">
+                    <div className="flex items-center justify-between">
+                      <Label>Preview</Label>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={async () => {
+                          if (formData.featured_image.includes('blog-images')) {
+                            await deleteImage(formData.featured_image);
+                          }
+                          setFormData(prev => ({ ...prev, featured_image: '' }));
+                        }}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Remove
+                      </Button>
+                    </div>
+                    <div className="border rounded-lg overflow-hidden">
                       <img
                         src={formData.featured_image}
                         alt="Featured"
@@ -421,10 +502,6 @@ export const BlogPostModal = ({ open, onOpenChange, post }: BlogPostModalProps) 
                     </div>
                   </div>
                 )}
-
-                <p className="text-sm text-muted-foreground">
-                  Tip: Use Unsplash URLs for high-quality free images. Recommended size: 1200x630px for optimal social sharing.
-                </p>
               </TabsContent>
 
               <TabsContent value="settings" className="space-y-4 mt-4">

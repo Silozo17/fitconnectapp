@@ -218,7 +218,7 @@ export default function BlogPost() {
 
             {/* Content */}
             <div 
-              className="max-w-3xl mx-auto prose prose-invert prose-lg prose-headings:font-display prose-headings:text-foreground prose-p:text-muted-foreground prose-a:text-primary prose-strong:text-foreground prose-li:text-muted-foreground"
+              className="max-w-3xl mx-auto prose-blog"
               dangerouslySetInnerHTML={{ __html: post.content }}
             />
 

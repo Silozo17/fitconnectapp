@@ -25,33 +25,41 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    const systemPrompt = `You are an expert blog content editor and SEO specialist. Your task is to transform raw text into beautifully formatted, SEO-optimized blog content.
+    const systemPrompt = `You are an expert blog content editor and SEO specialist. Transform raw text into beautifully formatted, scannable, SEO-optimized blog content.
 
-FORMAT THE CONTENT FOLLOWING THESE RULES:
-1. Use HTML tags for formatting (not markdown)
-2. Structure with H2 headings for main sections (every 250-350 words)
-3. Use H3 subheadings for subsections where appropriate
-4. Keep paragraphs short (3-4 sentences max, wrapped in <p> tags)
-5. Use <ul>/<li> for bullet lists when there are 3+ related items
-6. Use <ol>/<li> for sequential/numbered items
-7. Use <strong> for key terms and important phrases (2-4 per section)
-8. Use <em> for emphasis sparingly
-9. Add a compelling intro paragraph that hooks the reader
-10. Include a clear conclusion with actionable takeaway
-11. Use question-based headings where appropriate (good for featured snippets)
+CRITICAL FORMATTING RULES:
+1. Use semantic HTML tags (not markdown)
+2. Start with a compelling intro paragraph (2-3 sentences) that hooks readers
+3. Structure with H2 headings for main sections - make them engaging questions or benefit-focused
+4. Use H3 subheadings within sections for sub-topics
+5. Paragraphs MUST be short: 2-4 sentences max, wrapped in <p> tags
+6. Add VISUAL BREATHING ROOM - don't create walls of text
+7. Use <ul>/<li> for bullet lists (3+ related items) - bullets improve scannability
+8. Use <ol>/<li> for step-by-step or ranked items
+9. Use <strong> to highlight key terms (2-3 per paragraph, not overused)
+10. Use <em> sparingly for emphasis
+11. Include a clear conclusion with actionable CTA
+12. For fitness content: include actionable tips, expert insights, and practical advice
+
+VISUAL HIERARCHY REQUIREMENTS:
+- First paragraph: Hook with a relatable problem or compelling statistic
+- Each H2 section: 150-250 words max
+- Include at least one bulleted list per major section
+- Add a "Key Takeaways" or "Quick Tips" box using: <div class="bg-primary/10 border border-primary/20 rounded-lg p-4 my-6"><strong>💡 Key Takeaway:</strong> ...</div>
+- For quotes or expert tips use: <blockquote>...</blockquote>
 
 SEO BEST PRACTICES:
-- Meta title: Primary keyword near start, max 60 chars, compelling
-- Meta description: Include keyword, call-to-action, max 160 chars
-- Keywords: 5-8 relevant terms based on content analysis
+- Meta title: Primary keyword first, benefit-focused, max 60 chars
+- Meta description: Keyword + benefit + CTA, max 160 chars
+- Keywords: 5-8 relevant LSI terms
 
 RESPOND WITH VALID JSON ONLY (no markdown code blocks):
 {
-  "formattedContent": "HTML formatted content here",
-  "suggestedExcerpt": "2-3 sentence summary for blog cards",
+  "formattedContent": "Beautifully formatted HTML with proper spacing",
+  "suggestedExcerpt": "Engaging 2-3 sentence summary for cards",
   "suggestedMetaTitle": "SEO title max 60 chars",
-  "suggestedMetaDescription": "SEO description max 160 chars with CTA",
-  "suggestedKeywords": ["keyword1", "keyword2", "keyword3"]
+  "suggestedMetaDescription": "Compelling description max 160 chars",
+  "suggestedKeywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"]
 }`;
 
     const userPrompt = `Format this blog content for optimal readability and SEO.
