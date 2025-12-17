@@ -11,6 +11,12 @@ serve(async (req) => {
   }
 
   try {
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      console.error('LOVABLE_API_KEY is not configured');
+      throw new Error('AI service is not configured');
+    }
+
     const { target_audience, duration } = await req.json();
     
     const durationMap: Record<string, number> = {
@@ -28,12 +34,14 @@ serve(async (req) => {
     };
     const audienceContext = audienceMap[target_audience as string] || 'fitness enthusiasts';
     
+    console.log('Generating AI challenge suggestions:', { target_audience, duration, durationDays });
+    
     // Call Lovable AI Gateway
-    const response = await fetch('https://ai-gateway.lovable.ai/v1/chat/completions', {
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Deno.env.get('LOVABLE_API_KEY')}`,
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
       },
       body: JSON.stringify({
         model: 'google/gemini-2.5-flash',
@@ -63,12 +71,34 @@ serve(async (req) => {
       }),
     });
 
+    // Handle rate limit errors
+    if (response.status === 429) {
+      console.error('AI Gateway rate limit exceeded');
+      return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }), {
+        status: 429,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Handle payment required errors
+    if (response.status === 402) {
+      console.error('AI Gateway credits exhausted');
+      return new Response(JSON.stringify({ error: 'AI credits exhausted. Please add credits to continue.' }), {
+        status: 402,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('AI Gateway error:', response.status, errorText);
       throw new Error(`AI Gateway error: ${response.status}`);
     }
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || '';
+    
+    console.log('AI response received, parsing suggestions...');
     
     // Parse JSON from response
     let suggestions = [];
@@ -77,6 +107,7 @@ serve(async (req) => {
       const jsonMatch = content.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
         suggestions = JSON.parse(jsonMatch[0]);
+        console.log('Successfully parsed', suggestions.length, 'suggestions');
       }
     } catch (parseError) {
       console.error('Failed to parse AI response:', parseError);
