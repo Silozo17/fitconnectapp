@@ -124,7 +124,7 @@ export function AvatarShowcase() {
               </Card>
             </div>
             
-            <Link to="/avatars">
+            <Link to="/community?tab=avatars">
               <Button className="w-full gap-2">
                 View All Avatars
                 <ChevronRight className="h-4 w-4" />

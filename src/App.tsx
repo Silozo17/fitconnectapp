@@ -80,7 +80,7 @@ import ClientLibrary from "./pages/dashboard/client/ClientLibrary";
 import CoachProducts from "./pages/dashboard/coach/CoachProducts";
 import SuccessStories from "./pages/SuccessStories";
 import Contact from "./pages/Contact";
-import Leaderboards from "./pages/Leaderboards";
+import Community from "./pages/Community";
 import PersonalTrainers from "./pages/coaches/PersonalTrainers";
 import Nutritionists from "./pages/coaches/Nutritionists";
 import Boxing from "./pages/coaches/Boxing";
@@ -91,7 +91,7 @@ import ScrollToTop from "./components/shared/ScrollToTop";
 import ScrollRestoration from "./components/shared/ScrollRestoration";
 import Subscribe from "./pages/Subscribe";
 import SubscribeSuccess from "./pages/SubscribeSuccess";
-import Avatars from "./pages/Avatars";
+import { Navigate } from "react-router-dom";
 import DashboardRedirect from "./pages/dashboard/DashboardRedirect";
 import ClientTools from "./pages/dashboard/client/ClientTools";
 
@@ -122,8 +122,9 @@ const App = () => (
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/success-stories" element={<SuccessStories />} />
                 <Route path="/contact" element={<Contact />} />
-                <Route path="/leaderboards" element={<Leaderboards />} />
-                <Route path="/avatars" element={<Avatars />} />
+                <Route path="/community" element={<Community />} />
+                <Route path="/leaderboards" element={<Navigate to="/community" replace />} />
+                <Route path="/avatars" element={<Navigate to="/community?tab=avatars" replace />} />
                 {/* Tools removed from public - now in client dashboard */}
                 <Route path="/coaches/personal-trainers" element={<PersonalTrainers />} />
                 <Route path="/coaches/nutritionists" element={<Nutritionists />} />
