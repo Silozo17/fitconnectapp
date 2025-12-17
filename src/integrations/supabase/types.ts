@@ -3893,6 +3893,10 @@ export type Database = {
         Args: { client_profile_id: string }
         Returns: boolean
       }
+      coach_can_view_client_profile: {
+        Args: { client_profile_id: string }
+        Returns: boolean
+      }
       coach_has_messaged_client: {
         Args: { coach_profile_id: string }
         Returns: boolean
