@@ -11,11 +11,11 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
 const rarityColors: Record<string, string> = {
-  common: "border-muted-foreground/30 bg-muted/20",
-  uncommon: "border-success/50 bg-success/10",
-  rare: "border-primary/50 bg-primary/10",
-  epic: "border-accent/50 bg-accent/10",
-  legendary: "border-warning/50 bg-warning/10",
+  common: "border-muted-foreground/30",
+  uncommon: "border-success/50",
+  rare: "border-primary/50",
+  epic: "border-accent/50",
+  legendary: "border-warning/50",
 };
 
 const rarityTextColors: Record<string, string> = {
@@ -32,6 +32,24 @@ const rarityOrder: Record<string, number> = {
   rare: 2,
   epic: 3,
   legendary: 4,
+};
+
+// Subtle gradient for unearned badges
+const rarityGradientUnearned: Record<string, string> = {
+  common: "radial-gradient(ellipse at 85% 50%, hsla(0, 0%, 60%, 0.08) 0%, transparent 55%)",
+  uncommon: "radial-gradient(ellipse at 85% 50%, hsla(142, 76%, 36%, 0.08) 0%, transparent 55%)",
+  rare: "radial-gradient(ellipse at 85% 50%, hsla(217, 91%, 60%, 0.08) 0%, transparent 55%)",
+  epic: "radial-gradient(ellipse at 85% 50%, hsla(270, 70%, 60%, 0.08) 0%, transparent 55%)",
+  legendary: "radial-gradient(ellipse at 85% 50%, hsla(45, 93%, 47%, 0.08) 0%, transparent 55%)",
+};
+
+// Stronger gradient for earned badges
+const rarityGradientEarned: Record<string, string> = {
+  common: "radial-gradient(ellipse at 85% 50%, hsla(0, 0%, 60%, 0.25) 0%, transparent 50%)",
+  uncommon: "radial-gradient(ellipse at 85% 50%, hsla(142, 76%, 36%, 0.25) 0%, transparent 50%)",
+  rare: "radial-gradient(ellipse at 85% 50%, hsla(217, 91%, 60%, 0.25) 0%, transparent 50%)",
+  epic: "radial-gradient(ellipse at 85% 50%, hsla(270, 70%, 60%, 0.25) 0%, transparent 50%)",
+  legendary: "radial-gradient(ellipse at 85% 50%, hsla(45, 93%, 47%, 0.25) 0%, transparent 50%)",
 };
 
 interface BadgeProgress {
@@ -167,13 +185,18 @@ const CoachAchievements = () => {
       ? calculateBadgeProgress(badge.criteria as Record<string, unknown>, stats || null, profileCompletionPercent)
       : null;
 
+    const gradientStyle = isEarned 
+      ? rarityGradientEarned[badge.rarity] 
+      : rarityGradientUnearned[badge.rarity];
+
     return (
       <div
         key={badge.id}
         className={cn(
           "p-4 rounded-xl border-2 transition-all",
-          isEarned ? rarityColors[badge.rarity] : "border-muted/50 bg-muted/10 opacity-80"
+          isEarned ? rarityColors[badge.rarity] : "border-muted/50 opacity-80"
         )}
+        style={{ background: gradientStyle }}
       >
         <div className="flex flex-col sm:flex-row items-start gap-4">
           {/* Left side - Text content */}
