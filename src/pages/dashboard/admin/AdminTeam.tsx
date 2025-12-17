@@ -20,6 +20,7 @@ import { TeamMemberDetailDrawer } from "@/components/admin/TeamMemberDetailDrawe
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { BulkActionBar } from "@/components/admin/BulkActionBar";
 import { useAdminTeamManagement } from "@/hooks/useAdminTeamManagement";
+import { AdminTeamCard } from "@/components/admin/AdminTeamCard";
 
 interface TeamMember {
   id: string;
@@ -339,129 +340,162 @@ const AdminTeam = () => {
                 No team members found
               </div>
             ) : (
-              <div className="overflow-x-auto -mx-4 sm:mx-0">
-              <Table className="min-w-[600px]">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">
-                      <Checkbox
-                        checked={selectedIds.size === filteredMembers.length && filteredMembers.length > 0}
-                        onCheckedChange={toggleSelectAll}
-                      />
-                    </TableHead>
-                    <TableHead>Member</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="hidden sm:table-cell">Department</TableHead>
-                    <TableHead className="hidden sm:table-cell">Joined</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+              <>
+                {/* Mobile Card View */}
+                <div className="block md:hidden space-y-3">
                   {filteredMembers.map((member) => (
-                    <TableRow 
+                    <AdminTeamCard
                       key={member.id}
-                      className="cursor-pointer hover:bg-muted/50"
+                      member={member}
+                      selected={selectedIds.has(member.id)}
+                      onSelect={(checked) => toggleSelect(member.id)}
                       onClick={() => {
                         setSelectedMember(member);
                         setIsDetailDrawerOpen(true);
                       }}
-                    >
-                      <TableCell onClick={(e) => e.stopPropagation()}>
-                        <Checkbox
-                          checked={selectedIds.has(member.id)}
-                          onCheckedChange={() => toggleSelect(member.id)}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarFallback>
-                              {member.first_name?.[0] || member.display_name?.[0] || "T"}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium">
-                              {member.display_name || `${member.first_name || ""} ${member.last_name || ""}`.trim() || "Unnamed"}
-                            </p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={getRoleBadgeColor(member.role)}>
-                          {member.role}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <StatusBadge status={member.status || "active"} />
-                      </TableCell>
-                      <TableCell className="hidden sm:table-cell">{member.department || "—"}</TableCell>
-                      <TableCell className="hidden sm:table-cell">
-                        {new Date(member.created_at).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setSelectedMember(member);
-                                setIsDetailDrawerOpen(true);
-                              }}
-                            >
-                              <Eye className="h-4 w-4 mr-2" />
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setSelectedMember(member);
-                                setIsEditModalOpen(true);
-                              }}
-                            >
-                              Edit Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setSelectedMember(member);
-                                setIsRoleModalOpen(true);
-                              }}
-                            >
-                              Change Role
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => handleResetPassword(member)}>
-                              <KeyRound className="h-4 w-4 mr-2" />
-                              Reset Password
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setSelectedMember(member);
-                                setIsStatusModalOpen(true);
-                              }}
-                            >
-                              <Pause className="h-4 w-4 mr-2" />
-                              Change Status
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={() => handleDeleteMember(member)}
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Remove Member
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
+                      onEdit={() => {
+                        setSelectedMember(member);
+                        setIsEditModalOpen(true);
+                      }}
+                      onChangeRole={() => {
+                        setSelectedMember(member);
+                        setIsRoleModalOpen(true);
+                      }}
+                      onResetPassword={() => handleResetPassword(member)}
+                      onChangeStatus={() => {
+                        setSelectedMember(member);
+                        setIsStatusModalOpen(true);
+                      }}
+                      onDelete={() => handleDeleteMember(member)}
+                    />
                   ))}
-                </TableBody>
-              </Table>
-              </div>
+                </div>
+
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto -mx-4 sm:mx-0">
+                  <Table className="min-w-[600px]">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-12">
+                          <Checkbox
+                            checked={selectedIds.size === filteredMembers.length && filteredMembers.length > 0}
+                            onCheckedChange={toggleSelectAll}
+                          />
+                        </TableHead>
+                        <TableHead>Member</TableHead>
+                        <TableHead>Role</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Department</TableHead>
+                        <TableHead>Joined</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredMembers.map((member) => (
+                        <TableRow 
+                          key={member.id}
+                          className="cursor-pointer hover:bg-muted/50"
+                          onClick={() => {
+                            setSelectedMember(member);
+                            setIsDetailDrawerOpen(true);
+                          }}
+                        >
+                          <TableCell onClick={(e) => e.stopPropagation()}>
+                            <Checkbox
+                              checked={selectedIds.has(member.id)}
+                              onCheckedChange={() => toggleSelect(member.id)}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <Avatar>
+                                <AvatarFallback>
+                                  {member.first_name?.[0] || member.display_name?.[0] || "T"}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium">
+                                  {member.display_name || `${member.first_name || ""} ${member.last_name || ""}`.trim() || "Unnamed"}
+                                </p>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={getRoleBadgeColor(member.role)}>
+                              {member.role}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <StatusBadge status={member.status || "active"} />
+                          </TableCell>
+                          <TableCell>{member.department || "—"}</TableCell>
+                          <TableCell>
+                            {new Date(member.created_at).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setSelectedMember(member);
+                                    setIsDetailDrawerOpen(true);
+                                  }}
+                                >
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  View Details
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setSelectedMember(member);
+                                    setIsEditModalOpen(true);
+                                  }}
+                                >
+                                  Edit Details
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setSelectedMember(member);
+                                    setIsRoleModalOpen(true);
+                                  }}
+                                >
+                                  Change Role
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => handleResetPassword(member)}>
+                                  <KeyRound className="h-4 w-4 mr-2" />
+                                  Reset Password
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setSelectedMember(member);
+                                    setIsStatusModalOpen(true);
+                                  }}
+                                >
+                                  <Pause className="h-4 w-4 mr-2" />
+                                  Change Status
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  className="text-destructive"
+                                  onClick={() => handleDeleteMember(member)}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Remove Member
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>

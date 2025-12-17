@@ -29,6 +29,7 @@ import { AssignFreePlanModal } from "@/components/admin/AssignFreePlanModal";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { BulkActionBar } from "@/components/admin/BulkActionBar";
 import { AccountStatusModal } from "@/components/admin/AccountStatusModal";
+import { AdminCoachCard } from "@/components/admin/AdminCoachCard";
 import { useAdminUserManagement } from "@/hooks/useAdminUserManagement";
 import { useLogAdminAction } from "@/hooks/useAuditLog";
 import { arrayToCSV, downloadCSV, formatDateForCSV, formatArrayForCSV, generateExportFilename } from "@/lib/csv-export";
@@ -363,138 +364,160 @@ const AdminCoaches = () => {
             ) : filteredCoaches.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">No coaches found</div>
             ) : (
-              <div className="overflow-x-auto -mx-4 sm:mx-0">
-              <Table className="min-w-[800px]">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">
-                      <Checkbox
-                        checked={selectedCoaches.size === filteredCoaches.length && filteredCoaches.length > 0}
-                        onCheckedChange={handleSelectAll}
-                      />
-                    </TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead className="hidden sm:table-cell">Specialty</TableHead>
-                    <TableHead>Rate</TableHead>
-                    <TableHead className="hidden md:table-cell">Tier</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="hidden md:table-cell">Last Login</TableHead>
-                    <TableHead className="hidden sm:table-cell">Joined</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+              <>
+                {/* Mobile Card View */}
+                <div className="block md:hidden space-y-3">
                   {filteredCoaches.map((coach) => (
-                    <TableRow key={coach.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setViewingCoach(coach)}>
-                      <TableCell onClick={(e) => e.stopPropagation()}>
-                        <Checkbox
-                          checked={selectedCoaches.has(coach.id)}
-                          onCheckedChange={(checked) => handleSelectCoach(coach.id, !!checked)}
-                        />
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {coach.display_name || "Unnamed Coach"}
-                      </TableCell>
-                      <TableCell className="hidden sm:table-cell">
-                        <div className="flex flex-wrap gap-1">
-                          {coach.coach_types?.slice(0, 2).map((type) => (
-                            <Badge key={type} variant="outline" className="text-xs">
-                              {type}
-                            </Badge>
-                          ))}
-                          {(coach.coach_types?.length || 0) > 2 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{(coach.coach_types?.length || 0) - 2}
-                            </Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {coach.hourly_rate ? `£${coach.hourly_rate}/hr` : "-"}
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        <Badge variant="secondary" className="capitalize">
-                          {coach.subscription_tier || "free"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <StatusBadge status={coach.status || "active"} />
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm hidden md:table-cell">
-                        {coachLastLogins[coach.user_id] 
-                          ? new Date(coachLastLogins[coach.user_id]!).toLocaleDateString()
-                          : "Never"}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground hidden sm:table-cell">
-                        {new Date(coach.created_at).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setViewingCoach(coach)}>
-                              <Eye className="h-4 w-4 mr-2" />
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEditingCoach(coach)}>
-                              <Pencil className="h-4 w-4 mr-2" />
-                              Edit Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setAssignPlanCoach(coach)}>
-                              <Gift className="h-4 w-4 mr-2" />
-                              Assign Free Plan
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem 
-                              onClick={() => handleResetPassword(coach)}
-                              disabled={resettingPassword === coach.user_id}
-                            >
-                              {resettingPassword === coach.user_id ? (
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              ) : (
-                                <KeyRound className="h-4 w-4 mr-2" />
-                              )}
-                              Reset Password
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            {coach.status !== "active" && (
-                              <DropdownMenuItem onClick={() => setStatusCoach(coach)}>
-                                <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
-                                Activate Account
-                              </DropdownMenuItem>
-                            )}
-                            {coach.status !== "suspended" && (
-                              <DropdownMenuItem onClick={() => setStatusCoach(coach)}>
-                                <Pause className="h-4 w-4 mr-2 text-amber-500" />
-                                Suspend Account
-                              </DropdownMenuItem>
-                            )}
-                            {coach.status !== "banned" && (
-                              <DropdownMenuItem onClick={() => setStatusCoach(coach)} className="text-destructive">
-                                <Ban className="h-4 w-4 mr-2" />
-                                Ban Account
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => handleDeleteCoach(coach)}
-                              className="text-destructive focus:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete Coach
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
+                    <AdminCoachCard
+                      key={coach.id}
+                      coach={coach}
+                      selected={selectedCoaches.has(coach.id)}
+                      onSelect={(checked) => handleSelectCoach(coach.id, !!checked)}
+                      onClick={() => setViewingCoach(coach)}
+                      onEdit={() => setEditingCoach(coach)}
+                      onAssignPlan={() => setAssignPlanCoach(coach)}
+                      onResetPassword={() => handleResetPassword(coach)}
+                      onChangeStatus={() => setStatusCoach(coach)}
+                      onDelete={() => handleDeleteCoach(coach)}
+                      isResettingPassword={resettingPassword === coach.user_id}
+                    />
                   ))}
-                </TableBody>
-              </Table>
-              </div>
+                </div>
+
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto -mx-4 sm:mx-0">
+                  <Table className="min-w-[800px]">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-12">
+                          <Checkbox
+                            checked={selectedCoaches.size === filteredCoaches.length && filteredCoaches.length > 0}
+                            onCheckedChange={handleSelectAll}
+                          />
+                        </TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Specialty</TableHead>
+                        <TableHead>Rate</TableHead>
+                        <TableHead>Tier</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Last Login</TableHead>
+                        <TableHead>Joined</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredCoaches.map((coach) => (
+                        <TableRow key={coach.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setViewingCoach(coach)}>
+                          <TableCell onClick={(e) => e.stopPropagation()}>
+                            <Checkbox
+                              checked={selectedCoaches.has(coach.id)}
+                              onCheckedChange={(checked) => handleSelectCoach(coach.id, !!checked)}
+                            />
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {coach.display_name || "Unnamed Coach"}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-wrap gap-1">
+                              {coach.coach_types?.slice(0, 2).map((type) => (
+                                <Badge key={type} variant="outline" className="text-xs">
+                                  {type}
+                                </Badge>
+                              ))}
+                              {(coach.coach_types?.length || 0) > 2 && (
+                                <Badge variant="outline" className="text-xs">
+                                  +{(coach.coach_types?.length || 0) - 2}
+                                </Badge>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {coach.hourly_rate ? `£${coach.hourly_rate}/hr` : "-"}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="secondary" className="capitalize">
+                              {coach.subscription_tier || "free"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <StatusBadge status={coach.status || "active"} />
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm">
+                            {coachLastLogins[coach.user_id] 
+                              ? new Date(coachLastLogins[coach.user_id]!).toLocaleDateString()
+                              : "Never"}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {new Date(coach.created_at).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => setViewingCoach(coach)}>
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  View Details
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setEditingCoach(coach)}>
+                                  <Pencil className="h-4 w-4 mr-2" />
+                                  Edit Details
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setAssignPlanCoach(coach)}>
+                                  <Gift className="h-4 w-4 mr-2" />
+                                  Assign Free Plan
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem 
+                                  onClick={() => handleResetPassword(coach)}
+                                  disabled={resettingPassword === coach.user_id}
+                                >
+                                  {resettingPassword === coach.user_id ? (
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  ) : (
+                                    <KeyRound className="h-4 w-4 mr-2" />
+                                  )}
+                                  Reset Password
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                {coach.status !== "active" && (
+                                  <DropdownMenuItem onClick={() => setStatusCoach(coach)}>
+                                    <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
+                                    Activate Account
+                                  </DropdownMenuItem>
+                                )}
+                                {coach.status !== "suspended" && (
+                                  <DropdownMenuItem onClick={() => setStatusCoach(coach)}>
+                                    <Pause className="h-4 w-4 mr-2 text-amber-500" />
+                                    Suspend Account
+                                  </DropdownMenuItem>
+                                )}
+                                {coach.status !== "banned" && (
+                                  <DropdownMenuItem onClick={() => setStatusCoach(coach)} className="text-destructive">
+                                    <Ban className="h-4 w-4 mr-2" />
+                                    Ban Account
+                                  </DropdownMenuItem>
+                                )}
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  onClick={() => handleDeleteCoach(coach)}
+                                  className="text-destructive focus:text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete Coach
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
