@@ -6,7 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useCreateHabit, useUpdateHabit, Habit, HABIT_CATEGORIES_LIST } from "@/hooks/useHabits";
+import { Switch } from "@/components/ui/switch";
+import { useCreateHabit, useUpdateHabit, Habit, HABIT_CATEGORIES_LIST, WEARABLE_HABIT_TARGETS } from "@/hooks/useHabits";
+import { Watch, ShieldCheck } from "lucide-react";
 
 interface CreateHabitModalProps {
   open: boolean;
@@ -41,10 +43,16 @@ const CreateHabitModal = ({ open, onOpenChange, coachId, clientId, habit }: Crea
     reminder_time: habit?.reminder_time || '',
     start_date: habit?.start_date || new Date().toISOString().split('T')[0],
     end_date: habit?.end_date || '',
+    wearable_target_type: habit?.wearable_target_type || '',
+    wearable_target_value: habit?.wearable_target_value || 0,
   });
+  
+  const [useWearable, setUseWearable] = useState(!!habit?.wearable_target_type);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const wearableTarget = WEARABLE_HABIT_TARGETS.find(t => t.value === formData.wearable_target_type);
     
     const data = {
       ...formData,
@@ -54,6 +62,8 @@ const CreateHabitModal = ({ open, onOpenChange, coachId, clientId, habit }: Crea
       description: formData.description || null,
       reminder_time: formData.reminder_time || null,
       end_date: formData.end_date || null,
+      wearable_target_type: useWearable && formData.wearable_target_type ? formData.wearable_target_type : null,
+      wearable_target_value: useWearable && formData.wearable_target_value ? formData.wearable_target_value : null,
     };
     
     if (isEditing) {
@@ -71,6 +81,15 @@ const CreateHabitModal = ({ open, onOpenChange, coachId, clientId, habit }: Crea
       specific_days: prev.specific_days.includes(day)
         ? prev.specific_days.filter(d => d !== day)
         : [...prev.specific_days, day].sort(),
+    }));
+  };
+  
+  const handleWearableTypeChange = (type: string) => {
+    const wearableTarget = WEARABLE_HABIT_TARGETS.find(t => t.value === type);
+    setFormData(prev => ({
+      ...prev,
+      wearable_target_type: type,
+      wearable_target_value: wearableTarget?.defaultValue || 0,
     }));
   };
   
@@ -201,6 +220,66 @@ const CreateHabitModal = ({ open, onOpenChange, coachId, clientId, habit }: Crea
                 onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
               />
             </div>
+          </div>
+          
+          {/* Wearable Auto-Verification */}
+          <div className="space-y-3 p-4 rounded-lg bg-muted/50 border">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Watch className="h-4 w-4 text-primary" />
+                <Label htmlFor="wearable-toggle" className="font-medium">Link to Wearable Data</Label>
+              </div>
+              <Switch
+                id="wearable-toggle"
+                checked={useWearable}
+                onCheckedChange={setUseWearable}
+              />
+            </div>
+            
+            {useWearable && (
+              <div className="space-y-3 pt-2">
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <ShieldCheck className="h-3 w-3 text-emerald-500" />
+                  Habit will auto-complete when wearable data meets the target
+                </p>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label>Data Type</Label>
+                    <Select
+                      value={formData.wearable_target_type}
+                      onValueChange={handleWearableTypeChange}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select data type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {WEARABLE_HABIT_TARGETS.map((target) => (
+                          <SelectItem key={target.value} value={target.value}>
+                            {target.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Target Value</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        min={1}
+                        value={formData.wearable_target_value}
+                        onChange={(e) => setFormData({ ...formData, wearable_target_value: parseInt(e.target.value) || 0 })}
+                      />
+                      <span className="text-sm text-muted-foreground shrink-0">
+                        {WEARABLE_HABIT_TARGETS.find(t => t.value === formData.wearable_target_type)?.unit || ''}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           
           {/* Reminder Time */}
