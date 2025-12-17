@@ -38,52 +38,50 @@ const WearableConnectionCard = ({
 }: WearableConnectionCardProps) => {
   return (
     <Card className={cn(
-      "bg-card/50 border-border/50 hover:border-primary/30 transition-all",
+      "bg-card/50 border-border/50 hover:border-primary/30 transition-all min-h-[160px]",
       comingSoon && "opacity-75"
     )}>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div
-              className={cn(
-                "w-12 h-12 rounded-xl flex items-center justify-center",
-                providerColor
-              )}
-            >
-              {providerIcon}
-            </div>
-            <div>
-              <CardTitle className="text-lg">{providerName}</CardTitle>
-              {comingSoon ? (
-                <Badge variant="secondary" className="mt-1 text-xs">
-                  <Clock className="w-3 h-3 mr-1" />
-                  Coming Soon
-                </Badge>
-              ) : isConnected ? (
-                <Badge variant="outline" className="mt-1 text-xs text-primary border-primary/30">
-                  <Check className="w-3 h-3 mr-1" />
-                  Connected
-                </Badge>
-              ) : null}
-            </div>
+      <CardHeader className="pb-2 pt-4 px-4">
+        <div className="flex items-start gap-3">
+          <div
+            className={cn(
+              "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+              providerColor
+            )}
+          >
+            {providerIcon}
+          </div>
+          <div className="min-w-0 flex-1">
+            <CardTitle className="text-base truncate">{providerName}</CardTitle>
+            {comingSoon ? (
+              <Badge variant="secondary" className="mt-1 text-[10px] px-1.5 py-0">
+                <Clock className="w-2.5 h-2.5 mr-0.5" />
+                Soon
+              </Badge>
+            ) : isConnected ? (
+              <Badge variant="outline" className="mt-1 text-[10px] px-1.5 py-0 text-primary border-primary/30">
+                <Check className="w-2.5 h-2.5 mr-0.5" />
+                Connected
+              </Badge>
+            ) : null}
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-4 pb-4">
         {comingSoon ? (
           <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground line-clamp-2">
               {comingSoonDescription || "This integration is coming soon."}
             </p>
-            <Button disabled className="w-full" variant="secondary">
+            <Button disabled className="w-full" variant="secondary" size="sm">
               Coming Soon
             </Button>
           </div>
         ) : isConnected ? (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {lastSynced && (
-              <p className="text-sm text-muted-foreground">
-                Last synced: {format(new Date(lastSynced), "MMM d, yyyy h:mm a")}
+              <p className="text-xs text-muted-foreground truncate">
+                Synced: {format(new Date(lastSynced), "MMM d, h:mm a")}
               </p>
             )}
             <div className="flex gap-2">
@@ -92,22 +90,22 @@ const WearableConnectionCard = ({
                 variant="outline"
                 onClick={onSync}
                 disabled={isSyncing}
-                className="flex-1"
+                className="flex-1 text-xs"
               >
                 {isSyncing ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  <Loader2 className="w-3 h-3 animate-spin mr-1" />
                 ) : (
-                  <RefreshCw className="w-4 h-4 mr-2" />
+                  <RefreshCw className="w-3 h-3 mr-1" />
                 )}
-                Sync Now
+                Sync
               </Button>
               <Button
                 size="sm"
                 variant="ghost"
                 onClick={onDisconnect}
-                className="text-destructive hover:text-destructive"
+                className="text-destructive hover:text-destructive px-2"
               >
-                <Unlink className="w-4 h-4" />
+                <Unlink className="w-3 h-3" />
               </Button>
             </div>
           </div>
@@ -116,11 +114,12 @@ const WearableConnectionCard = ({
             onClick={onConnect}
             disabled={isConnecting}
             className="w-full"
+            size="sm"
           >
             {isConnecting ? (
-              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              <Loader2 className="w-3 h-3 animate-spin mr-1" />
             ) : null}
-            Connect {providerName}
+            Connect
           </Button>
         )}
       </CardContent>
