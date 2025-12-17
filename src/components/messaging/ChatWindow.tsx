@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useMessages } from "@/hooks/useMessages";
 import { format } from "date-fns";
-import { Send, Loader2, ArrowLeft, Check, CheckCheck, User, Briefcase, Shield, MapPin } from "lucide-react";
+import { Send, Loader2, ArrowLeft, Check, CheckCheck, User, Briefcase, Shield, MapPin, PanelRightOpen, PanelRightClose } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import ChatQuickActions from "./ChatQuickActions";
 import TypingIndicator, { useTypingBroadcast } from "./TypingIndicator";
 import ProspectProfileSheet from "./ProspectProfileSheet";
+import MessageSidePanel from "./MessageSidePanel";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import {
   Sheet,
@@ -35,6 +36,8 @@ interface ChatWindowProps {
   participantAvatar?: string | null;
   participantType?: "client" | "coach" | "admin";
   participantLocation?: string | null;
+  showSidePanel?: boolean;
+  onToggleSidePanel?: () => void;
 }
 
 const ChatWindow = ({ 
@@ -42,7 +45,9 @@ const ChatWindow = ({
   participantName,
   participantAvatar,
   participantType,
-  participantLocation 
+  participantLocation,
+  showSidePanel = false,
+  onToggleSidePanel
 }: ChatWindowProps) => {
   const { messages, loading, error, sendMessage, currentProfileId } = useMessages(participantId);
   const [newMessage, setNewMessage] = useState("");
@@ -219,132 +224,168 @@ const ChatWindow = ({
   // Determine if we should use ProspectProfileSheet (coach viewing client)
   const shouldUseProspectSheet = activeProfileType === "coach" && participantInfo.type === "client";
 
+  // Check if coach to show side panel toggle
+  const isCoachView = activeProfileType === "coach";
+
   return (
     <>
-      <div className="flex flex-col h-full">
-        {/* Header */}
-        <div className="p-4 border-b border-border bg-card flex items-center gap-3">
-          <Link to={basePath} className="lg:hidden">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-          </Link>
-          
-          {/* Clickable header for profile view */}
-          <button
-            onClick={() => setProfileOpen(true)}
-            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
-          >
-            <UserAvatar
-              src={participantInfo.avatar}
-              avatarSlug={participantInfo.avatarSlug}
-              avatarRarity={participantInfo.avatarRarity}
-              name={participantInfo.name}
-              className="w-10 h-10 ring-2 ring-primary/20"
-              showRarityBorder
-            />
-            <div className="text-left">
-              <div className="flex items-center gap-2">
-                <h2 className="font-semibold text-foreground">{participantInfo.name}</h2>
-                <span className="text-muted-foreground">
-                  {getTypeIcon(participantInfo.type)}
-                </span>
+      <div className="flex h-full">
+        {/* Main Chat Area */}
+        <div className="flex-1 flex flex-col h-full">
+          {/* Header */}
+          <div className="p-4 border-b border-border bg-card flex items-center gap-3">
+            <Link to={basePath} className="lg:hidden">
+              <Button variant="ghost" size="icon">
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+            </Link>
+            
+            {/* Clickable header for profile view */}
+            <button
+              onClick={() => setProfileOpen(true)}
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity flex-1"
+            >
+              <UserAvatar
+                src={participantInfo.avatar}
+                avatarSlug={participantInfo.avatarSlug}
+                avatarRarity={participantInfo.avatarRarity}
+                name={participantInfo.name}
+                className="w-10 h-10 ring-2 ring-primary/20"
+                showRarityBorder
+              />
+              <div className="text-left">
+                <div className="flex items-center gap-2">
+                  <h2 className="font-semibold text-foreground">{participantInfo.name}</h2>
+                  <span className="text-muted-foreground">
+                    {getTypeIcon(participantInfo.type)}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground">Tap to view profile</p>
               </div>
-              <p className="text-xs text-muted-foreground">Tap to view profile</p>
-            </div>
-          </button>
-        </div>
+            </button>
 
-        {/* Messages */}
-        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
-              <p>No messages yet. Start the conversation!</p>
-            </div>
-          ) : (
-            messages.map((message) => {
-              const isMine = message.sender_id === currentProfileId;
-              return (
-                <div
-                  key={message.id}
-                  className={cn("flex", isMine ? "justify-end" : "justify-start")}
-                >
+            {/* Side panel toggle for coaches */}
+            {isCoachView && onToggleSidePanel && (
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={onToggleSidePanel}
+                className="hidden lg:flex"
+              >
+                {showSidePanel ? (
+                  <PanelRightClose className="h-5 w-5" />
+                ) : (
+                  <PanelRightOpen className="h-5 w-5" />
+                )}
+              </Button>
+            )}
+          </div>
+
+          {/* Messages */}
+          <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+            {messages.length === 0 ? (
+              <div className="flex items-center justify-center h-full text-muted-foreground">
+                <p>No messages yet. Start the conversation!</p>
+              </div>
+            ) : (
+              messages.map((message) => {
+                const isMine = message.sender_id === currentProfileId;
+                return (
                   <div
-                    className={cn(
-                      "max-w-[70%] rounded-2xl px-4 py-2",
-                      isMine
-                        ? "bg-primary text-primary-foreground rounded-br-md"
-                        : "bg-muted text-foreground rounded-bl-md"
-                    )}
+                    key={message.id}
+                    className={cn("flex", isMine ? "justify-end" : "justify-start")}
                   >
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                     <div
                       className={cn(
-                        "flex items-center gap-1 mt-1",
-                        isMine ? "justify-end" : "justify-start"
+                        "max-w-[70%] rounded-2xl px-4 py-2",
+                        isMine
+                          ? "bg-primary text-primary-foreground rounded-br-md"
+                          : "bg-muted text-foreground rounded-bl-md"
                       )}
                     >
-                      <span
+                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      <div
                         className={cn(
-                          "text-xs",
-                          isMine ? "text-primary-foreground/70" : "text-muted-foreground"
+                          "flex items-center gap-1 mt-1",
+                          isMine ? "justify-end" : "justify-start"
                         )}
                       >
-                        {format(new Date(message.created_at), "HH:mm")}
-                      </span>
-                      {isMine && (
-                        message.read_at ? (
-                          <CheckCheck className="w-3 h-3 text-primary-foreground/70" />
-                        ) : (
-                          <Check className="w-3 h-3 text-primary-foreground/50" />
-                        )
-                      )}
+                        <span
+                          className={cn(
+                            "text-xs",
+                            isMine ? "text-primary-foreground/70" : "text-muted-foreground"
+                          )}
+                        >
+                          {format(new Date(message.created_at), "HH:mm")}
+                        </span>
+                        {isMine && (
+                          message.read_at ? (
+                            <CheckCheck className="w-3 h-3 text-primary-foreground/70" />
+                          ) : (
+                            <Check className="w-3 h-3 text-primary-foreground/50" />
+                          )
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })
-          )}
-          
-          {/* Typing Indicator */}
-          {currentProfileId && (
-            <TypingIndicator 
-              conversationPartnerId={participantId} 
-              currentUserId={currentProfileId} 
-            />
-          )}
-          
-          <div ref={messagesEndRef} />
+                );
+              })
+            )}
+            
+            {/* Typing Indicator */}
+            {currentProfileId && (
+              <TypingIndicator 
+                conversationPartnerId={participantId} 
+                currentUserId={currentProfileId} 
+              />
+            )}
+            
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Quick Actions (for coaches) */}
+          <ChatQuickActions 
+            coachId={participantId} 
+            onSendMessage={async (msg) => {
+              const success = await sendMessage(msg);
+              return success;
+            }}
+          />
+
+          {/* Input */}
+          <form onSubmit={handleSend} className="p-4 border-t border-border bg-card">
+            <div className="flex gap-2">
+              <Input
+                value={newMessage}
+                onChange={handleInputChange}
+                placeholder="Type a message..."
+                className="flex-1 bg-background border-border"
+                disabled={sending}
+              />
+              <Button type="submit" disabled={sending || !newMessage.trim()}>
+                {sending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
+              </Button>
+            </div>
+          </form>
         </div>
 
-        {/* Quick Actions (for coaches) */}
-        <ChatQuickActions 
-          coachId={participantId} 
-          onSendMessage={async (msg) => {
-            const success = await sendMessage(msg);
-            return success;
-          }}
-        />
-
-        {/* Input */}
-        <form onSubmit={handleSend} className="p-4 border-t border-border bg-card">
-          <div className="flex gap-2">
-            <Input
-              value={newMessage}
-              onChange={handleInputChange}
-              placeholder="Type a message..."
-              className="flex-1 bg-background border-border"
-              disabled={sending}
+        {/* Side Panel - inside ChatWindow to share sendMessage */}
+        {isCoachView && showSidePanel && (
+          <div className="hidden lg:flex">
+            <MessageSidePanel
+              participantId={participantId}
+              onSendMessage={async (msg) => {
+                const success = await sendMessage(msg);
+                return success;
+              }}
+              onClose={onToggleSidePanel}
             />
-            <Button type="submit" disabled={sending || !newMessage.trim()}>
-              {sending ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Send className="w-4 h-4" />
-              )}
-            </Button>
           </div>
-        </form>
+        )}
       </div>
 
       {/* Profile Sheet - Use ProspectProfileSheet for coaches viewing clients */}

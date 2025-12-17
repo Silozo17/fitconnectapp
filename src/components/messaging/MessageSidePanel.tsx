@@ -147,14 +147,72 @@ const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSide
 
   const handleSendPackage = async (pkg: CoachPackage) => {
     setSending(`pkg-${pkg.id}`);
-    const message = `**Package: ${pkg.name}**\n\n${pkg.description || "A great value package for your fitness journey."}\n\nPrice: ${formatCurrency(pkg.price, (pkg.currency || "GBP") as CurrencyCode)}\nSessions: ${pkg.session_count}\n\nInterested? Let me know and I can set this up for you!`;
+    
+    // Generate checkout URL
+    let checkoutUrl: string | null = null;
+    try {
+      const origin = window.location.origin;
+      const { data, error } = await supabase.functions.invoke('stripe-checkout', {
+        body: {
+          type: 'package',
+          itemId: pkg.id,
+          clientId: participantId,
+          coachId: coachId,
+          successUrl: `${origin}/dashboard/client/packages?success=true`,
+          cancelUrl: `${origin}/dashboard/client/messages`,
+        }
+      });
+      if (!error && data?.url) {
+        checkoutUrl = data.url;
+      }
+    } catch (e) {
+      console.error('Error generating checkout URL:', e);
+    }
+    
+    let message = `**📦 Package: ${pkg.name}**\n\n${pkg.description || "A great value package for your fitness journey."}\n\n💰 Price: ${formatCurrency(pkg.price, (pkg.currency || "GBP") as CurrencyCode)}\n📋 Sessions: ${pkg.session_count}`;
+    
+    if (checkoutUrl) {
+      message += `\n\n🛒 Ready to purchase? Click here:\n${checkoutUrl}`;
+    } else {
+      message += `\n\nInterested? Let me know and I can set this up for you!`;
+    }
+    
     await onSendMessage(message);
     setSending(null);
   };
 
   const handleSendSubscription = async (plan: SubscriptionPlan) => {
     setSending(`sub-${plan.id}`);
-    const message = `**Subscription Plan: ${plan.name}**\n\n${plan.description || "Ongoing coaching support to help you reach your goals."}\n\nPrice: ${formatCurrency(plan.price, (plan.currency || "GBP") as CurrencyCode)}/${plan.billing_period}\n\nThis includes regular coaching, plan updates, and support. Let me know if you'd like to subscribe!`;
+    
+    // Generate checkout URL
+    let checkoutUrl: string | null = null;
+    try {
+      const origin = window.location.origin;
+      const { data, error } = await supabase.functions.invoke('stripe-checkout', {
+        body: {
+          type: 'subscription',
+          itemId: plan.id,
+          clientId: participantId,
+          coachId: coachId,
+          successUrl: `${origin}/dashboard/client/subscriptions?success=true`,
+          cancelUrl: `${origin}/dashboard/client/messages`,
+        }
+      });
+      if (!error && data?.url) {
+        checkoutUrl = data.url;
+      }
+    } catch (e) {
+      console.error('Error generating checkout URL:', e);
+    }
+    
+    let message = `**💳 Subscription Plan: ${plan.name}**\n\n${plan.description || "Ongoing coaching support to help you reach your goals."}\n\n💰 Price: ${formatCurrency(plan.price, (plan.currency || "GBP") as CurrencyCode)}/${plan.billing_period}\n\nThis includes regular coaching, plan updates, and support.`;
+    
+    if (checkoutUrl) {
+      message += `\n\n🛒 Ready to subscribe? Click here:\n${checkoutUrl}`;
+    } else {
+      message += `\n\nLet me know if you'd like to subscribe!`;
+    }
+    
     await onSendMessage(message);
     setSending(null);
   };
