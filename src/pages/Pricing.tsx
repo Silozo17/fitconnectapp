@@ -15,6 +15,7 @@ const tierIcons: Record<TierKey, typeof Zap> = {
   starter: Zap,
   pro: Star,
   enterprise: Crown,
+  founder: Sparkles,
 };
 
 const Pricing = () => {

@@ -16,6 +16,7 @@ const TIER_AVATARS: Record<TierKey, string> = {
   starter: "deadlift_boar",
   pro: "powerlifter_gorilla",
   enterprise: "elite_personal_trainer_human",
+  founder: "elite_personal_trainer_human",
 };
 
 export default function Subscribe() {

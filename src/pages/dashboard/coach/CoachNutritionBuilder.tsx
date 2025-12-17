@@ -12,9 +12,11 @@ import { MacroTracker } from "@/components/nutritionbuilder/MacroTracker";
 import { CreateFoodModal } from "@/components/nutritionbuilder/CreateFoodModal";
 import { AIMealSuggestion } from "@/components/nutritionbuilder/AIMealSuggestion";
 import { AIMacroCalculator } from "@/components/ai/AIMacroCalculator";
+import { FeatureGate } from "@/components/FeatureGate";
 import { Food, Meal, NutritionDay, MealFood, calculateDayMacros } from "@/hooks/useFoods";
 import { MacroCalculation } from "@/hooks/useAI";
 import { useAuth } from "@/contexts/AuthContext";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useTrainingPlan, useUpdateTrainingPlan } from "@/hooks/useTrainingPlans";
@@ -23,6 +25,7 @@ const CoachNutritionBuilder = () => {
   const navigate = useNavigate();
   const { planId } = useParams();
   const { user } = useAuth();
+  const { hasFeature } = useFeatureAccess();
   const isEditing = !!planId;
   
   const [planName, setPlanName] = useState("");
@@ -103,6 +106,7 @@ const CoachNutritionBuilder = () => {
 
   const currentDay = days[selectedDayIndex];
   const dayMacros = currentDay ? calculateDayMacros(currentDay.meals) : { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
+  const canUseAI = hasFeature("ai_meal_suggestions");
 
   const addDay = () => {
     const newDay: NutritionDay = {
@@ -205,7 +209,6 @@ const CoachNutritionBuilder = () => {
       }
       navigate("/dashboard/coach/plans");
     } catch (error) {
-      console.error(error);
       toast.error("Failed to save plan");
     } finally {
       setIsSaving(false);
@@ -227,209 +230,215 @@ const CoachNutritionBuilder = () => {
       title={isEditing ? "Edit Nutrition Plan" : "Nutrition Plan Builder"} 
       description={isEditing ? "Update your nutrition plan" : "Create a customized nutrition plan"}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="font-display text-2xl font-bold text-foreground">
-              {isEditing ? "Edit Nutrition Plan" : "Nutrition Plan Builder"}
-            </h1>
-            <p className="text-muted-foreground">
-              {isEditing ? "Update your meal plan" : "Create customized meal plans with macro tracking"}
-            </p>
+      <FeatureGate feature="nutrition_plan_builder">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="font-display text-2xl font-bold text-foreground">
+                {isEditing ? "Edit Nutrition Plan" : "Nutrition Plan Builder"}
+              </h1>
+              <p className="text-muted-foreground">
+                {isEditing ? "Update your meal plan" : "Create customized meal plans with macro tracking"}
+              </p>
+            </div>
           </div>
-        </div>
-        <div className="flex gap-3">
-          <Button variant="outline" onClick={() => setCreateFoodOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Custom Food
-          </Button>
-          <Button onClick={handleSave} disabled={isSaving}>
-            <Save className="h-4 w-4 mr-2" />
-            {isSaving ? "Saving..." : isEditing ? "Update Plan" : "Save Plan"}
-          </Button>
-        </div>
-      </div>
-
-      {/* Plan Info */}
-      <div className="card-elevated p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="md:col-span-2 space-y-2">
-            <Label htmlFor="planName">Plan Name *</Label>
-            <Input
-              id="planName"
-              value={planName}
-              onChange={(e) => setPlanName(e.target.value)}
-              placeholder="e.g., Weight Loss Meal Plan"
-              className="bg-background border-border"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="duration">Duration (weeks)</Label>
-            <Input
-              id="duration"
-              type="number"
-              min={1}
-              value={durationWeeks}
-              onChange={(e) => setDurationWeeks(parseInt(e.target.value) || 1)}
-              className="bg-background border-border"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Description</Label>
-            <Input
-              value={planDescription}
-              onChange={(e) => setPlanDescription(e.target.value)}
-              placeholder="Brief description..."
-              className="bg-background border-border"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Macro Targets */}
-      <div className="card-elevated p-4 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Target className="h-5 w-5 text-primary" />
-            <h3 className="font-semibold text-foreground">Daily Macro Targets</h3>
-          </div>
-          <AIMacroCalculator onMacrosCalculated={handleMacrosCalculated} />
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="space-y-2">
-            <Label className="text-primary">Calories</Label>
-            <Input
-              type="number"
-              value={targetCalories}
-              onChange={(e) => setTargetCalories(parseInt(e.target.value) || 0)}
-              className="bg-background border-border"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-red-400">Protein (g)</Label>
-            <Input
-              type="number"
-              value={targetProtein}
-              onChange={(e) => setTargetProtein(parseInt(e.target.value) || 0)}
-              className="bg-background border-border"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-yellow-400">Carbs (g)</Label>
-            <Input
-              type="number"
-              value={targetCarbs}
-              onChange={(e) => setTargetCarbs(parseInt(e.target.value) || 0)}
-              className="bg-background border-border"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-blue-400">Fat (g)</Label>
-            <Input
-              type="number"
-              value={targetFat}
-              onChange={(e) => setTargetFat(parseInt(e.target.value) || 0)}
-              className="bg-background border-border"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-        <TabsList className="bg-secondary">
-          <TabsTrigger value="builder">Meal Builder</TabsTrigger>
-          <TabsTrigger value="ai">
-            <Sparkles className="h-4 w-4 mr-2" />
-            AI Suggestions
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="builder" className="mt-6">
-          {/* Day Selector */}
-          <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
-            {days.map((day, index) => (
-              <Button
-                key={day.id}
-                variant={selectedDayIndex === index ? "default" : "outline"}
-                onClick={() => setSelectedDayIndex(index)}
-                className="shrink-0"
-              >
-                {day.name}
-              </Button>
-            ))}
-            <Button variant="outline" onClick={addDay} className="shrink-0">
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={() => setCreateFoodOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Add Day
+              Add Custom Food
+            </Button>
+            <Button onClick={handleSave} disabled={isSaving}>
+              <Save className="h-4 w-4 mr-2" />
+              {isSaving ? "Saving..." : isEditing ? "Update Plan" : "Save Plan"}
             </Button>
           </div>
+        </div>
 
-          {/* Main Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Food Library */}
-            <div className="lg:col-span-1 h-[600px]">
-              <FoodLibrary onAddFood={(food) => addFoodToMeal(food, 0)} />
-            </div>
-
-            {/* Meals */}
-            <div className="lg:col-span-2 space-y-4">
-              {/* Macro Summary */}
-              <MacroTracker
-                calories={dayMacros.calories}
-                protein={dayMacros.protein}
-                carbs={dayMacros.carbs}
-                fat={dayMacros.fat}
-                targetCalories={targetCalories}
-                targetProtein={targetProtein}
-                targetCarbs={targetCarbs}
-                targetFat={targetFat}
+        {/* Plan Info */}
+        <div className="card-elevated p-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="md:col-span-2 space-y-2">
+              <Label htmlFor="planName">Plan Name *</Label>
+              <Input
+                id="planName"
+                value={planName}
+                onChange={(e) => setPlanName(e.target.value)}
+                placeholder="e.g., Weight Loss Meal Plan"
+                className="bg-background border-border"
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="duration">Duration (weeks)</Label>
+              <Input
+                id="duration"
+                type="number"
+                min={1}
+                value={durationWeeks}
+                onChange={(e) => setDurationWeeks(parseInt(e.target.value) || 1)}
+                className="bg-background border-border"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input
+                value={planDescription}
+                onChange={(e) => setPlanDescription(e.target.value)}
+                placeholder="Brief description..."
+                className="bg-background border-border"
+              />
+            </div>
+          </div>
+        </div>
 
-              {/* Meals List */}
-              <div className="space-y-4">
-                {currentDay?.meals.map((meal, index) => (
-                  <MealCard
-                    key={meal.id}
-                    meal={meal}
-                    onUpdateMeal={(updatedMeal) => updateMeal(index, updatedMeal)}
-                    onDeleteMeal={() => deleteMeal(index)}
-                  />
-                ))}
-              </div>
+        {/* Macro Targets */}
+        <div className="card-elevated p-4 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold text-foreground">Daily Macro Targets</h3>
+            </div>
+            {canUseAI && <AIMacroCalculator onMacrosCalculated={handleMacrosCalculated} />}
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <Label className="text-primary">Calories</Label>
+              <Input
+                type="number"
+                value={targetCalories}
+                onChange={(e) => setTargetCalories(parseInt(e.target.value) || 0)}
+                className="bg-background border-border"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-red-400">Protein (g)</Label>
+              <Input
+                type="number"
+                value={targetProtein}
+                onChange={(e) => setTargetProtein(parseInt(e.target.value) || 0)}
+                className="bg-background border-border"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-yellow-400">Carbs (g)</Label>
+              <Input
+                type="number"
+                value={targetCarbs}
+                onChange={(e) => setTargetCarbs(parseInt(e.target.value) || 0)}
+                className="bg-background border-border"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-blue-400">Fat (g)</Label>
+              <Input
+                type="number"
+                value={targetFat}
+                onChange={(e) => setTargetFat(parseInt(e.target.value) || 0)}
+                className="bg-background border-border"
+              />
+            </div>
+          </div>
+        </div>
 
-              {/* Add Meal Button */}
-              <Button variant="outline" className="w-full" onClick={addMeal}>
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+          <TabsList className="bg-secondary">
+            <TabsTrigger value="builder">Meal Builder</TabsTrigger>
+            {canUseAI && (
+              <TabsTrigger value="ai">
+                <Sparkles className="h-4 w-4 mr-2" />
+                AI Suggestions
+              </TabsTrigger>
+            )}
+          </TabsList>
+
+          <TabsContent value="builder" className="mt-6">
+            {/* Day Selector */}
+            <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
+              {days.map((day, index) => (
+                <Button
+                  key={day.id}
+                  variant={selectedDayIndex === index ? "default" : "outline"}
+                  onClick={() => setSelectedDayIndex(index)}
+                  className="shrink-0"
+                >
+                  {day.name}
+                </Button>
+              ))}
+              <Button variant="outline" onClick={addDay} className="shrink-0">
                 <Plus className="h-4 w-4 mr-2" />
-                Add Meal
+                Add Day
               </Button>
             </div>
-          </div>
-        </TabsContent>
 
-        <TabsContent value="ai" className="mt-6">
-          <div className="max-w-2xl mx-auto">
-            <AIMealSuggestion
-              targetCalories={targetCalories}
-              targetProtein={targetProtein}
-              targetCarbs={targetCarbs}
-              targetFat={targetFat}
-            />
-          </div>
-        </TabsContent>
-      </Tabs>
+            {/* Main Content */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Food Library */}
+              <div className="lg:col-span-1 h-[600px]">
+                <FoodLibrary onAddFood={(food) => addFoodToMeal(food, 0)} />
+              </div>
 
-      {/* Create Food Modal */}
-      {coachProfileId && (
-        <CreateFoodModal
-          open={createFoodOpen}
-          onOpenChange={setCreateFoodOpen}
-          coachId={coachProfileId}
-        />
-      )}
+              {/* Meals */}
+              <div className="lg:col-span-2 space-y-4">
+                {/* Macro Summary */}
+                <MacroTracker
+                  calories={dayMacros.calories}
+                  protein={dayMacros.protein}
+                  carbs={dayMacros.carbs}
+                  fat={dayMacros.fat}
+                  targetCalories={targetCalories}
+                  targetProtein={targetProtein}
+                  targetCarbs={targetCarbs}
+                  targetFat={targetFat}
+                />
+
+                {/* Meals List */}
+                <div className="space-y-4">
+                  {currentDay?.meals.map((meal, index) => (
+                    <MealCard
+                      key={meal.id}
+                      meal={meal}
+                      onUpdateMeal={(updatedMeal) => updateMeal(index, updatedMeal)}
+                      onDeleteMeal={() => deleteMeal(index)}
+                    />
+                  ))}
+                </div>
+
+                {/* Add Meal Button */}
+                <Button variant="outline" className="w-full" onClick={addMeal}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Meal
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+
+          {canUseAI && (
+            <TabsContent value="ai" className="mt-6">
+              <div className="max-w-2xl mx-auto">
+                <AIMealSuggestion
+                  targetCalories={targetCalories}
+                  targetProtein={targetProtein}
+                  targetCarbs={targetCarbs}
+                  targetFat={targetFat}
+                />
+              </div>
+            </TabsContent>
+          )}
+        </Tabs>
+
+        {/* Create Food Modal */}
+        {coachProfileId && (
+          <CreateFoodModal
+            open={createFoodOpen}
+            onOpenChange={setCreateFoodOpen}
+            coachId={coachProfileId}
+          />
+        )}
+      </FeatureGate>
     </DashboardLayout>
   );
 };
