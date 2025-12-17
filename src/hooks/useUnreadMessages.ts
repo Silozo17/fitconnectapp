@@ -1,18 +1,26 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdminView } from "@/contexts/AdminContext";
 
 export const useUnreadMessages = () => {
   const { user, role } = useAuth();
+  const { activeProfileId } = useAdminView();
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [currentProfileId, setCurrentProfileId] = useState<string | null>(null);
 
-  // Get current user's profile ID
+  // Get current user's profile ID - prioritize activeProfileId from AdminContext
   useEffect(() => {
     const fetchProfileId = async () => {
       if (!user) {
         setLoading(false);
+        return;
+      }
+
+      // If we have an active profile from AdminContext (view switching), use it
+      if (activeProfileId) {
+        setCurrentProfileId(activeProfileId);
         return;
       }
 
@@ -46,7 +54,7 @@ export const useUnreadMessages = () => {
     };
 
     fetchProfileId();
-  }, [user, role]);
+  }, [user, role, activeProfileId]);
 
   // Fetch unread count
   const fetchUnreadCount = useCallback(async () => {

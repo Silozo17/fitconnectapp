@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Bell, CheckCheck, Settings } from "lucide-react";
+import { getNotificationRoute } from "./notificationNavigation";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -27,8 +28,20 @@ export const NotificationCenter = () => {
 
   const [showAllModal, setShowAllModal] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const navigate = useNavigate();
 
-  const settingsPath = role === "client" 
+  const handleNotificationClick = (notification: typeof notifications[0]) => {
+    if (!notification.read) {
+      markAsRead(notification.id);
+    }
+    const route = getNotificationRoute(notification, role || "client");
+    if (route) {
+      setPopoverOpen(false);
+      navigate(route);
+    }
+  };
+
+  const settingsPath = role === "client"
     ? "/dashboard/client/settings" 
     : role === "coach" 
     ? "/dashboard/coach/settings" 
@@ -96,6 +109,7 @@ export const NotificationCenter = () => {
                     notification={notification}
                     onMarkAsRead={markAsRead}
                     onDelete={deleteNotification}
+                    onClick={() => handleNotificationClick(notification)}
                   />
                 ))}
               </div>
