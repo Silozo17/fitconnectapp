@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -5,6 +6,7 @@ import { MessageSquare, UserMinus, MapPin, AtSign } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { FriendProfileSheet } from "./FriendProfileSheet";
 
 interface ConnectionCardProps {
   connection: {
@@ -22,12 +24,14 @@ interface ConnectionCardProps {
       location?: string | null;
     };
   };
+  currentUserId: string;
   onRemove: (id: string) => void;
 }
 
-export const ConnectionCard = ({ connection, onRemove }: ConnectionCardProps) => {
+export const ConnectionCard = ({ connection, currentUserId, onRemove }: ConnectionCardProps) => {
   const navigate = useNavigate();
   const { role } = useAuth();
+  const [showProfile, setShowProfile] = useState(false);
   
   const profile = connection.profile;
   const displayName = profile?.display_name || 
@@ -35,6 +39,11 @@ export const ConnectionCard = ({ connection, onRemove }: ConnectionCardProps) =>
     "Unknown User";
   const avatarUrl = profile?.avatar_url || profile?.profile_image_url;
   const initials = displayName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
+
+  // Determine the friend's user_id (the other person in the connection)
+  const friendUserId = connection.requester_user_id === currentUserId 
+    ? connection.addressee_user_id 
+    : connection.requester_user_id;
 
   const handleMessage = () => {
     const profileId = profile?.id;
@@ -47,51 +56,72 @@ export const ConnectionCard = ({ connection, onRemove }: ConnectionCardProps) =>
   };
 
   return (
-    <Card className="p-4 bg-card/50 border-border/50 hover:border-primary/30 transition-colors">
-      <div className="flex items-center gap-4">
-        <Avatar className="h-12 w-12 border-2 border-border">
-          <AvatarImage src={avatarUrl || undefined} alt={displayName} />
-          <AvatarFallback className="bg-muted text-muted-foreground">
-            {initials}
-          </AvatarFallback>
-        </Avatar>
-        
-        <div className="flex-1 min-w-0">
-          <h4 className="font-semibold text-foreground truncate">{displayName}</h4>
-          {profile?.username && (
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              <AtSign className="w-3 h-3" />
-              <span>{profile.username}</span>
-            </div>
-          )}
-          {profile?.location && (
-            <div className="flex items-center gap-1 text-sm text-muted-foreground mt-0.5">
-              <MapPin className="w-3 h-3" />
-              <span className="truncate">{profile.location}</span>
-            </div>
-          )}
-        </div>
+    <>
+      <Card className="p-4 bg-card/50 border-border/50 hover:border-primary/30 transition-colors">
+        <div className="flex items-center gap-4">
+          <div 
+            className="cursor-pointer"
+            onClick={() => setShowProfile(true)}
+          >
+            <Avatar className="h-12 w-12 border-2 border-border hover:border-primary transition-colors">
+              <AvatarImage src={avatarUrl || undefined} alt={displayName} />
+              <AvatarFallback className="bg-muted text-muted-foreground">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+          </div>
+          
+          <div 
+            className="flex-1 min-w-0 cursor-pointer"
+            onClick={() => setShowProfile(true)}
+          >
+            <h4 className="font-semibold text-foreground truncate hover:text-primary transition-colors">
+              {displayName}
+            </h4>
+            {profile?.username && (
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <AtSign className="w-3 h-3" />
+                <span>{profile.username}</span>
+              </div>
+            )}
+            {profile?.location && (
+              <div className="flex items-center gap-1 text-sm text-muted-foreground mt-0.5">
+                <MapPin className="w-3 h-3" />
+                <span className="truncate">{profile.location}</span>
+              </div>
+            )}
+          </div>
 
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleMessage}
-            className="gap-1.5"
-          >
-            <MessageSquare className="w-4 h-4" />
-            <span className="hidden sm:inline">Message</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onRemove(connection.id)}
-            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-          >
-            <UserMinus className="w-4 h-4" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleMessage}
+              className="gap-1.5"
+            >
+              <MessageSquare className="w-4 h-4" />
+              <span className="hidden sm:inline">Message</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onRemove(connection.id)}
+              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            >
+              <UserMinus className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
-      </div>
-    </Card>
+      </Card>
+
+      <FriendProfileSheet
+        open={showProfile}
+        onOpenChange={setShowProfile}
+        connectionId={connection.id}
+        friendUserId={friendUserId}
+        friendProfileId={profile?.id}
+        onRemove={onRemove}
+      />
+    </>
   );
 };

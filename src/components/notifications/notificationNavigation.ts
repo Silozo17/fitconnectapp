@@ -28,9 +28,7 @@ export const getNotificationRoute = (
     
     case "connection_request":
     case "connection_accepted":
-      return role === "coach" 
-        ? `${baseRoute}/clients` 
-        : `${baseRoute}/coaches`;
+      return `${baseRoute}/connections`;
     
     case "review_received":
       return role === "coach" 

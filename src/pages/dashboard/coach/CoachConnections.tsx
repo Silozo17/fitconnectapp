@@ -9,8 +9,10 @@ import { ConnectionCard } from "@/components/connections/ConnectionCard";
 import { PendingRequestCard } from "@/components/connections/PendingRequestCard";
 import { AddConnectionModal } from "@/components/connections/AddConnectionModal";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/AuthContext";
 
 const CoachConnections = () => {
+  const { user } = useAuth();
   const {
     connections,
     pendingRequests,
@@ -107,6 +109,7 @@ const CoachConnections = () => {
                       <ConnectionCard
                         key={connection.id}
                         connection={connection}
+                        currentUserId={user?.id || ""}
                         onRemove={removeConnection}
                       />
                     ))}
