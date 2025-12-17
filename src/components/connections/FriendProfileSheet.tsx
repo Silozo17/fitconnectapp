@@ -9,7 +9,6 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -25,6 +24,9 @@ import {
 } from "lucide-react";
 import { calculateLevelFromXP, getLevelTitle, RARITY_COLORS } from "@/hooks/useGamification";
 import { toast } from "sonner";
+import { UserAvatar } from "@/components/shared/UserAvatar";
+import { getAvatarImageUrl } from "@/hooks/useAvatars";
+import { Rarity } from "@/lib/avatar-config";
 
 interface FriendProfileSheetProps {
   open: boolean;
@@ -52,6 +54,7 @@ interface FriendProfile {
 interface FriendAvatar {
   id: string;
   name: string;
+  slug: string;
   image_url: string | null;
   rarity: string;
 }
@@ -120,7 +123,7 @@ export function FriendProfileSheet({
         if (profileData.selected_avatar_id) {
           const { data: avatarData } = await supabase
             .from("avatars")
-            .select("id, name, image_url, rarity")
+            .select("id, name, slug, image_url, rarity")
             .eq("id", profileData.selected_avatar_id)
             .single();
           
@@ -245,16 +248,13 @@ export function FriendProfileSheet({
                   boxShadow: `0 0 20px ${rarityColors.border}40`
                 }}
               >
-                <Avatar className="h-24 w-24 border-2 border-background">
-                  {avatar?.image_url ? (
-                    <AvatarImage src={avatar.image_url} alt={displayName} className="object-contain bg-background" />
-                  ) : (
-                    <AvatarImage src={profile.avatar_url || undefined} alt={displayName} />
-                  )}
-                  <AvatarFallback className="text-2xl">
-                    {displayName.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
+                <UserAvatar
+                  src={profile.avatar_url}
+                  avatarSlug={avatar?.slug}
+                  avatarRarity={avatar?.rarity as Rarity}
+                  name={displayName}
+                  className="h-24 w-24 border-2 border-background"
+                />
               </div>
               
               <div className="text-center">
