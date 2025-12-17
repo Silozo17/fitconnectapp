@@ -62,6 +62,7 @@ export default function CoachEarnings() {
         </DocStep>
 
         <DocScreenshot 
+          docId="stripe-connect-status"
           alt="Stripe Connect button showing connected status"
           caption="Your Stripe connection status in Settings"
         />
@@ -162,6 +163,7 @@ export default function CoachEarnings() {
         </ul>
 
         <DocScreenshot 
+          docId="earnings-dashboard"
           alt="Earnings dashboard showing revenue metrics and transaction list"
           caption="Your earnings dashboard overview"
         />
