@@ -42,6 +42,51 @@ const parseUserAgent = (ua: string | null) => {
   return { browser, os };
 };
 
+// Human-readable labels for settings and fields
+const FIELD_LABELS: Record<string, string> = {
+  // Platform settings
+  maintenance_mode: "Maintenance Mode",
+  auto_approve_coaches: "Auto-Approve Coaches",
+  require_coach_verification: "Require Coach Verification",
+  commission_rate: "Commission Rate",
+  default_currency: "Default Currency",
+  default_language: "Default Language",
+  allow_anonymous_reviews: "Allow Anonymous Reviews",
+  platform_name: "Platform Name",
+  support_email: "Support Email",
+  contact_email: "Contact Email",
+  contact_phone: "Contact Phone",
+  twitter_url: "Twitter URL",
+  instagram_url: "Instagram URL",
+  facebook_url: "Facebook URL",
+  linkedin_url: "LinkedIn URL",
+  youtube_url: "YouTube URL",
+  
+  // Tier features
+  max_clients: "Max Clients",
+  ai_features: "AI Features",
+  custom_branding: "Custom Branding",
+  analytics_access: "Analytics Access",
+  priority_support: "Priority Support",
+  api_access: "API Access",
+  
+  // Common fields
+  tier: "Tier",
+  feature: "Feature",
+  value: "Value",
+  reason: "Reason",
+  coach: "Coach",
+  client: "Client",
+  rating: "Rating",
+  status: "Status",
+  admin_notes: "Admin Notes",
+  expires_at: "Expires At",
+};
+
+const getFieldLabel = (key: string): string => {
+  return FIELD_LABELS[key] || key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+};
+
 const JsonDiff = ({ oldValues, newValues }: { oldValues: Record<string, unknown> | null; newValues: Record<string, unknown> | null }) => {
   const allKeys = new Set([
     ...Object.keys(oldValues || {}),
@@ -58,13 +103,14 @@ const JsonDiff = ({ oldValues, newValues }: { oldValues: Record<string, unknown>
         const oldVal = oldValues?.[key];
         const newVal = newValues?.[key];
         const hasChanged = JSON.stringify(oldVal) !== JSON.stringify(newVal);
+        const label = getFieldLabel(key);
         
         if (!hasChanged && oldVal === undefined) {
           // New value added
           return (
             <div key={key} className="flex items-start gap-2 text-sm">
               <Badge variant="default" className="text-xs shrink-0">+</Badge>
-              <span className="font-medium text-foreground">{key}:</span>
+              <span className="font-medium text-foreground">{label}:</span>
               <span className="text-green-500">{formatValue(newVal)}</span>
             </div>
           );
@@ -75,7 +121,7 @@ const JsonDiff = ({ oldValues, newValues }: { oldValues: Record<string, unknown>
           return (
             <div key={key} className="flex items-start gap-2 text-sm">
               <Badge variant="destructive" className="text-xs shrink-0">-</Badge>
-              <span className="font-medium text-foreground">{key}:</span>
+              <span className="font-medium text-foreground">{label}:</span>
               <span className="text-red-500 line-through">{formatValue(oldVal)}</span>
             </div>
           );
@@ -86,7 +132,7 @@ const JsonDiff = ({ oldValues, newValues }: { oldValues: Record<string, unknown>
           return (
             <div key={key} className="flex items-start gap-2 text-sm flex-wrap">
               <Badge variant="secondary" className="text-xs shrink-0">~</Badge>
-              <span className="font-medium text-foreground">{key}:</span>
+              <span className="font-medium text-foreground">{label}:</span>
               <span className="text-red-400">{formatValue(oldVal) || "∅"}</span>
               <ArrowRight className="h-4 w-4 text-muted-foreground" />
               <span className="text-green-400">{formatValue(newVal)}</span>
@@ -102,6 +148,7 @@ const JsonDiff = ({ oldValues, newValues }: { oldValues: Record<string, unknown>
 
 const formatValue = (value: unknown): string => {
   if (value === null || value === undefined) return "null";
+  if (typeof value === "boolean") return value ? "Yes" : "No";
   if (typeof value === "object") return JSON.stringify(value);
   return String(value);
 };
