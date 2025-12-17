@@ -17,7 +17,7 @@ import { LockedAvatarsSection } from "./LockedAvatarsSection";
 import { 
   Users, Calendar, Package, CreditCard, Star, 
   Gift, Ban, RefreshCw, DollarSign, CheckCircle,
-  Trophy, Trash2, Image, Loader2
+  Trophy, Trash2, Image, Loader2, Pencil, KeyRound, Pause
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -26,9 +26,13 @@ interface CoachDetailDrawerProps {
   onOpenChange: (open: boolean) => void;
   coach: any;
   onAssignFreePlan: () => void;
+  onEdit?: () => void;
+  onResetPassword?: () => void;
+  onChangeStatus?: () => void;
+  onDelete?: () => void;
 }
 
-export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan }: CoachDetailDrawerProps) {
+export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan, onEdit, onResetPassword, onChangeStatus, onDelete }: CoachDetailDrawerProps) {
   const [grantModalOpen, setGrantModalOpen] = useState(false);
 
   // Fetch coach avatars
@@ -206,21 +210,25 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan 
         <div className="mt-6 space-y-2">
           <p className="text-sm font-medium text-muted-foreground">Admin Actions</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <Button variant="outline" className="justify-start" onClick={onEdit}>
+              <Pencil className="h-4 w-4 mr-2" />
+              Edit Coach
+            </Button>
             <Button variant="outline" className="justify-start" onClick={onAssignFreePlan}>
               <Gift className="h-4 w-4 mr-2" />
               {grantedSub ? "Change Plan" : "Give Free Plan"}
             </Button>
-            <Button variant="outline" className="justify-start" disabled>
-              <Ban className="h-4 w-4 mr-2" />
-              Suspend
+            <Button variant="outline" className="justify-start" onClick={onResetPassword}>
+              <KeyRound className="h-4 w-4 mr-2" />
+              Reset Password
             </Button>
-            <Button variant="outline" className="justify-start" disabled>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Reset Stripe
+            <Button variant="outline" className="justify-start" onClick={onChangeStatus}>
+              <Pause className="h-4 w-4 mr-2" />
+              Change Status
             </Button>
-            <Button variant="outline" className="justify-start" disabled>
-              <DollarSign className="h-4 w-4 mr-2" />
-              View Earnings
+            <Button variant="destructive" className="justify-start col-span-full sm:col-span-1" onClick={onDelete}>
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Coach
             </Button>
           </div>
         </div>

@@ -513,11 +513,6 @@ const AdminUsers = () => {
                       selected={selectedUsers.has(user.id)}
                       onSelect={(checked) => handleSelectUser(user.id, !!checked)}
                       onClick={() => setViewingUser(user)}
-                      onEdit={() => setEditingUser(user)}
-                      onResetPassword={() => handleResetPassword(user)}
-                      onChangeStatus={() => setStatusUser(user)}
-                      onDelete={() => handleDeleteUser(user.id)}
-                      isResettingPassword={resettingPassword === user.user_id}
                     />
                   ))}
                 </div>
@@ -706,6 +701,10 @@ const AdminUsers = () => {
         onOpenChange={(open) => !open && setViewingUser(null)}
         user={viewingUser}
         onSaved={fetchUsers}
+        onEdit={() => viewingUser && setEditingUser(viewingUser)}
+        onResetPassword={() => viewingUser && handleResetPassword(viewingUser)}
+        onChangeStatus={() => viewingUser && setStatusUser(viewingUser)}
+        onDelete={() => viewingUser && handleDeleteUser(viewingUser.id)}
       />
     </AdminLayout>
   );
