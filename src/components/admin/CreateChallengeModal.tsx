@@ -137,8 +137,9 @@ export function CreateChallengeModal({ open, onOpenChange, challenge }: CreateCh
           })
           .eq('id', challenge.id);
         if (error) throw error;
+        return { isNew: false, data };
       } else {
-        const { error } = await supabase.from('challenges').insert({
+        const { data: newChallenge, error } = await supabase.from('challenges').insert({
           title: data.title,
           description: data.description,
           challenge_type: data.challenge_type,
@@ -151,12 +152,33 @@ export function CreateChallengeModal({ open, onOpenChange, challenge }: CreateCh
           is_active: data.is_active,
           max_participants: data.max_participants,
           created_by: adminProfile?.id || user?.id!,
-        });
+          target_audience: data.target_audience,
+        }).select().single();
         if (error) throw error;
+        return { isNew: true, data, challenge: newChallenge };
       }
     },
-    onSuccess: () => {
+    onSuccess: async (result) => {
       queryClient.invalidateQueries({ queryKey: ['admin-challenges'] });
+      
+      // Send notifications for new public challenges
+      if (result?.isNew && result.challenge && result.data.visibility === 'public' && result.data.is_active) {
+        try {
+          await supabase.functions.invoke('notify-new-challenge', {
+            body: {
+              challenge_id: result.challenge.id,
+              title: result.data.title,
+              description: result.data.description,
+              target_audience: result.data.target_audience,
+              xp_reward: result.data.xp_reward,
+              visibility: result.data.visibility,
+            },
+          });
+        } catch (error) {
+          console.error('Failed to send challenge notifications:', error);
+        }
+      }
+      
       toast.success(isEdit ? 'Challenge updated' : 'Challenge created');
       onOpenChange(false);
     },

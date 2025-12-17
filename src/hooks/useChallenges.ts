@@ -212,14 +212,33 @@ export function useCreateChallenge() {
   const { data: profile } = useCoachProfile();
   
   return useMutation({
-    mutationFn: async (challenge: { title: string; description?: string; challenge_type: string; target_value: number; target_unit: string; start_date: string; end_date: string; xp_reward: number; visibility: string; max_participants?: number; }) => {
+    mutationFn: async (challenge: { title: string; description?: string; challenge_type: string; target_value: number; target_unit: string; start_date: string; end_date: string; xp_reward: number; visibility: string; max_participants?: number; target_audience?: string; }) => {
       if (!profile?.id) throw new Error('No coach profile');
       const { data, error } = await supabase.from('challenges').insert({ ...challenge, created_by: profile.id }).select().single();
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ['available-challenges'] });
+      
+      // Send notifications for new public challenges
+      if (data && data.visibility === 'public' && data.is_active) {
+        try {
+          await supabase.functions.invoke('notify-new-challenge', {
+            body: {
+              challenge_id: data.id,
+              title: data.title,
+              description: data.description,
+              target_audience: data.target_audience || 'clients',
+              xp_reward: data.xp_reward,
+              visibility: data.visibility,
+            },
+          });
+        } catch (error) {
+          console.error('Failed to send challenge notifications:', error);
+        }
+      }
+      
       toast.success('Challenge created!');
     },
   });
