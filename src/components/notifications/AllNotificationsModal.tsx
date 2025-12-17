@@ -33,7 +33,7 @@ const NOTIFICATION_TYPES = [
   { value: "booking_confirmed", label: "Bookings Confirmed" },
   { value: "booking_cancelled", label: "Bookings Cancelled" },
   { value: "session_reminder", label: "Session Reminders" },
-  { value: "new_message", label: "Messages" },
+  { value: "message", label: "Messages" },
   { value: "connection_request", label: "Connection Requests" },
   { value: "connection_accepted", label: "Connections Accepted" },
   { value: "review_received", label: "Reviews" },
