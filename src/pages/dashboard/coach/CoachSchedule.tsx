@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   ChevronLeft,
@@ -95,6 +96,7 @@ const CoachSchedule = () => {
   const [preBookingBuffer, setPreBookingBuffer] = useState("60");
   const [postBookingBuffer, setPostBookingBuffer] = useState("15");
   const [defaultLocation, setDefaultLocation] = useState("");
+  const [stripeConnected, setStripeConnected] = useState(false);
 
   // Get coach profile ID, currency, and booking settings
   useEffect(() => {
@@ -102,7 +104,7 @@ const CoachSchedule = () => {
       if (!user) return;
       const { data } = await supabase
         .from("coach_profiles")
-        .select("id, currency, booking_mode, pre_booking_buffer_minutes, post_booking_buffer_minutes, default_session_location")
+        .select("id, currency, booking_mode, pre_booking_buffer_minutes, post_booking_buffer_minutes, default_session_location, stripe_connect_onboarded")
         .eq("user_id", user.id)
         .maybeSingle();
       if (data) {
@@ -112,6 +114,7 @@ const CoachSchedule = () => {
         setPreBookingBuffer(String(data.pre_booking_buffer_minutes || 60));
         setPostBookingBuffer(String(data.post_booking_buffer_minutes || 15));
         setDefaultLocation(data.default_session_location || "");
+        setStripeConnected(!!data.stripe_connect_onboarded);
       }
     };
     fetchCoachProfile();
@@ -519,6 +522,26 @@ const CoachSchedule = () => {
 
         {/* Availability Tab */}
         <TabsContent value="availability" className="space-y-6">
+          {/* Stripe Connect Banner */}
+          {!stripeConnected && (
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-warning/10 border border-warning/30 rounded-lg">
+              <div className="flex items-start gap-3">
+                <CreditCard className="w-5 h-5 text-warning mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-medium text-foreground">Connect Stripe to Enable Payments</p>
+                  <p className="text-sm text-muted-foreground">
+                    To collect deposits or require payment during bookings, you need to connect your Stripe account first.
+                  </p>
+                </div>
+              </div>
+              <Button asChild variant="outline" className="shrink-0 border-warning/50 hover:bg-warning/10">
+                <Link to="/dashboard/coach/settings?tab=subscription">
+                  Connect Stripe
+                </Link>
+              </Button>
+            </div>
+          )}
+
           {/* Booking Settings Card */}
           <div className="card-elevated">
             <div className="p-4 border-b border-border">
