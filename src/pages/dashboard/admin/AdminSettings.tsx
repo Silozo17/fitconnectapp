@@ -25,7 +25,8 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Settings, Bell, Shield, Globe, Loader2, Plug, User, LogOut, CreditCard, Sliders, Plus, Edit, Trash2, Crown, Zap, Rocket, Star } from "lucide-react";
+import { Settings, Bell, Shield, Globe, Loader2, Plug, User, LogOut, CreditCard, Sliders, Plus, Edit, Trash2, Crown, Zap, Rocket, Star, Share2, Facebook, Instagram, Youtube } from "lucide-react";
+import { TikTokIcon } from "@/components/icons/TikTokIcon";
 import { NotificationPreferences } from "@/components/notifications/NotificationPreferences";
 import { LanguageSelector } from "@/components/shared/LanguageSelector";
 import { Separator } from "@/components/ui/separator";
@@ -77,6 +78,16 @@ const AdminSettings = () => {
     max_session_price: 500,
     require_coach_verification: true,
     allow_anonymous_reviews: false,
+    social_facebook: "",
+    social_instagram: "",
+    social_tiktok: "",
+    social_x: "",
+    social_youtube: "",
+    contact_email: "",
+    contact_phone: "",
+    contact_address: "",
+    legal_email: "",
+    privacy_email: "",
   });
 
   const [editingTier, setEditingTier] = useState<PlanTier | null>(null);
@@ -121,13 +132,23 @@ const AdminSettings = () => {
         max_session_price: settings.max_session_price ?? 500,
         require_coach_verification: settings.require_coach_verification ?? true,
         allow_anonymous_reviews: settings.allow_anonymous_reviews ?? false,
+        social_facebook: settings.social_facebook ?? "",
+        social_instagram: settings.social_instagram ?? "",
+        social_tiktok: settings.social_tiktok ?? "",
+        social_x: settings.social_x ?? "",
+        social_youtube: settings.social_youtube ?? "",
+        contact_email: settings.contact_email ?? "",
+        contact_phone: settings.contact_phone ?? "",
+        contact_address: settings.contact_address ?? "",
+        legal_email: settings.legal_email ?? "",
+        privacy_email: settings.privacy_email ?? "",
       }));
     }
   }, [settings]);
 
   const handleSave = async () => {
     const updates = Object.entries(localSettings).map(([key, value]) =>
-      updateSetting.mutateAsync({ key, value })
+      updateSetting.mutateAsync({ key, value: String(value) })
     );
     
     await Promise.all(updates);
@@ -262,6 +283,11 @@ const AdminSettings = () => {
                   <span className="hidden xs:inline">Preferences</span>
                   <span className="xs:hidden">Pref</span>
                 </TabsTrigger>
+                <TabsTrigger value="branding" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                  <Share2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Branding</span>
+                  <span className="xs:hidden">Brand</span>
+                </TabsTrigger>
                 <TabsTrigger value="plans" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
                   <CreditCard className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   Plans
@@ -372,6 +398,138 @@ const AdminSettings = () => {
                       </SelectContent>
                     </Select>
                     <p className="text-xs text-muted-foreground">Default currency for new users</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Branding Tab - Social Media & Contact Settings */}
+            <TabsContent value="branding" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Social Media Links</CardTitle>
+                  <CardDescription>Configure social media links displayed across the website</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <Facebook className="h-4 w-4" />
+                        Facebook
+                      </Label>
+                      <Input
+                        placeholder="https://facebook.com/yourpage"
+                        value={localSettings.social_facebook || ""}
+                        onChange={(e) => handleChange("social_facebook", e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <Instagram className="h-4 w-4" />
+                        Instagram
+                      </Label>
+                      <Input
+                        placeholder="https://instagram.com/yourprofile"
+                        value={localSettings.social_instagram || ""}
+                        onChange={(e) => handleChange("social_instagram", e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <TikTokIcon className="h-4 w-4" />
+                        TikTok
+                      </Label>
+                      <Input
+                        placeholder="https://tiktok.com/@yourprofile"
+                        value={localSettings.social_tiktok || ""}
+                        onChange={(e) => handleChange("social_tiktok", e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
+                          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
+                        X (Twitter)
+                      </Label>
+                      <Input
+                        placeholder="https://x.com/yourprofile"
+                        value={localSettings.social_x || ""}
+                        onChange={(e) => handleChange("social_x", e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <Youtube className="h-4 w-4" />
+                        YouTube
+                      </Label>
+                      <Input
+                        placeholder="https://youtube.com/@yourchannel"
+                        value={localSettings.social_youtube || ""}
+                        onChange={(e) => handleChange("social_youtube", e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Contact Information</CardTitle>
+                  <CardDescription>Business contact details displayed on the website</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label>Support Email</Label>
+                      <Input
+                        type="email"
+                        placeholder="support@example.com"
+                        value={localSettings.contact_email || ""}
+                        onChange={(e) => handleChange("contact_email", e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground">Primary contact email shown on website</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Business Phone</Label>
+                      <Input
+                        type="tel"
+                        placeholder="+44 800 123 4567"
+                        value={localSettings.contact_phone || ""}
+                        onChange={(e) => handleChange("contact_phone", e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground">Business phone number</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Legal Email</Label>
+                      <Input
+                        type="email"
+                        placeholder="legal@example.com"
+                        value={localSettings.legal_email || ""}
+                        onChange={(e) => handleChange("legal_email", e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground">Shown on Terms of Service page</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Privacy Email</Label>
+                      <Input
+                        type="email"
+                        placeholder="privacy@example.com"
+                        value={localSettings.privacy_email || ""}
+                        onChange={(e) => handleChange("privacy_email", e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground">Shown on Privacy Policy page</p>
+                    </div>
+                  </div>
+                  <Separator />
+                  <div className="space-y-2">
+                    <Label>Business Address</Label>
+                    <Input
+                      placeholder="Company Name, City, Country"
+                      value={localSettings.contact_address || ""}
+                      onChange={(e) => handleChange("contact_address", e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground">Shown in footer and legal pages</p>
                   </div>
                 </CardContent>
               </Card>

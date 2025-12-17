@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Dumbbell, Instagram, Twitter, Youtube, Facebook, Mail, ArrowRight, Zap } from "lucide-react";
+import { Dumbbell, Mail, ArrowRight, Zap } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { SocialLinks } from "@/components/shared/SocialLinks";
 
 const Footer = () => {
   const [email, setEmail] = useState("");
@@ -69,13 +70,6 @@ const Footer = () => {
     ],
   };
 
-  const socialLinks = [
-    { icon: Instagram, href: "#", label: "Instagram" },
-    { icon: Twitter, href: "#", label: "Twitter" },
-    { icon: Youtube, href: "#", label: "YouTube" },
-    { icon: Facebook, href: "#", label: "Facebook" },
-  ];
-
   return (
     <footer className="bg-card/50 border-t border-border">
       {/* Newsletter Section */}
@@ -125,18 +119,10 @@ const Footer = () => {
               Connect with world-class fitness coaches and transform your health
               journey. Your goals, your way.
             </p>
-            <div className="flex gap-3">
-              {socialLinks.map((social, index) => (
-                <a
-                  key={index}
-                  href={social.href}
-                  className="w-10 h-10 rounded-xl bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 hover:shadow-glow-sm transition-all duration-300"
-                  aria-label={social.label}
-                >
-                  <social.icon className="w-5 h-5" />
-                </a>
-              ))}
-            </div>
+            <SocialLinks 
+              iconSize="w-5 h-5"
+              className="gap-3"
+            />
           </div>
 
           {/* Links */}

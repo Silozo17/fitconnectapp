@@ -11,8 +11,10 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Mail, MessageSquare, Clock, HelpCircle, Send, Instagram, Twitter, Youtube, Facebook } from "lucide-react";
+import { Mail, MessageSquare, Clock, HelpCircle, Send } from "lucide-react";
 import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
+import { SocialLinks } from "@/components/shared/SocialLinks";
+import { usePlatformContact } from "@/hooks/usePlatformContact";
 
 const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -22,6 +24,7 @@ const Contact = () => {
     subject: "",
     message: "",
   });
+  const { contact } = usePlatformContact();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +62,7 @@ const Contact = () => {
     {
       icon: Mail,
       title: "Email Us",
-      description: "support@fitconnect.com",
+      description: contact.email,
       subtext: "We'll respond within 24 hours",
     },
     {
@@ -81,13 +84,6 @@ const Contact = () => {
     { title: "What are the pricing options?", href: "/pricing" },
     { title: "How do I become a coach?", href: "/for-coaches" },
     { title: "View all FAQs", href: "/faq" },
-  ];
-
-  const socialLinks = [
-    { icon: Instagram, href: "#", label: "Instagram" },
-    { icon: Twitter, href: "#", label: "Twitter" },
-    { icon: Youtube, href: "#", label: "YouTube" },
-    { icon: Facebook, href: "#", label: "Facebook" },
   ];
 
   return (
@@ -248,18 +244,7 @@ const Contact = () => {
                     <CardTitle className="font-display text-lg">Follow Us</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex gap-3">
-                      {socialLinks.map((social, index) => (
-                        <a
-                          key={index}
-                          href={social.href}
-                          className="w-10 h-10 rounded-xl bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-all"
-                          aria-label={social.label}
-                        >
-                          <social.icon className="w-5 h-5" />
-                        </a>
-                      ))}
-                    </div>
+                <SocialLinks iconSize="w-5 h-5" className="gap-3" />
                   </CardContent>
                 </Card>
               </div>
