@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdminView } from "@/contexts/AdminContext";
 import { useToast } from "@/hooks/use-toast";
 
 interface Message {
@@ -25,6 +26,7 @@ export interface Conversation {
 
 export const useMessages = (participantId?: string) => {
   const { user, role } = useAuth();
+  const { activeProfileId, activeProfileType } = useAdminView();
   const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -32,7 +34,7 @@ export const useMessages = (participantId?: string) => {
   const [currentProfileId, setCurrentProfileId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Get current user's profile ID
+  // Get current user's profile ID - prioritize activeProfileId from AdminContext
   useEffect(() => {
     const fetchProfileId = async () => {
       if (!user) {
@@ -40,7 +42,13 @@ export const useMessages = (participantId?: string) => {
         return;
       }
 
-      // Handle admin role - they may not have a profile in client/coach tables
+      // If we have an active profile from AdminContext (view switching), use it
+      if (activeProfileId) {
+        setCurrentProfileId(activeProfileId);
+        return;
+      }
+
+      // Fall back to role-based lookup for users without view switching
       if (role === "admin" || role === "manager" || role === "staff") {
         const { data: adminData, error: adminError } = await supabase
           .from("admin_profiles")
@@ -82,7 +90,7 @@ export const useMessages = (participantId?: string) => {
     };
 
     fetchProfileId();
-  }, [user, role]);
+  }, [user, role, activeProfileId]);
 
   // Fetch conversations
   const fetchConversations = useCallback(async () => {

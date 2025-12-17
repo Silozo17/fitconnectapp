@@ -19,10 +19,10 @@ export const getNotificationRoute = (
     case "session_reminder":
       return `${baseRoute}/schedule`;
     
-    case "new_message": {
+    case "message": {
       const conversationId = data.conversation_id || data.sender_id;
       return conversationId 
-        ? `${baseRoute}/messages?conversation=${conversationId}`
+        ? `${baseRoute}/messages/${conversationId}`
         : `${baseRoute}/messages`;
     }
     
