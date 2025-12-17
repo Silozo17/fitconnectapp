@@ -1,7 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Footprints, Heart, Moon, Flame, Activity, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Footprints, Heart, Moon, Flame, Activity, Clock, Watch } from "lucide-react";
 import { useHealthData, HealthDataType } from "@/hooks/useHealthData";
+import { useWearables } from "@/hooks/useWearables";
 import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 
 const metrics: {
   type: HealthDataType;
@@ -61,10 +64,12 @@ interface HealthDataWidgetProps {
 
 const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps) => {
   const { getTodayValue, isLoading, data } = useHealthData();
+  const { connections, isLoading: wearablesLoading } = useWearables();
 
+  const hasConnectedDevice = connections && connections.length > 0;
   const hasData = data && data.length > 0;
 
-  if (isLoading) {
+  if (isLoading || wearablesLoading) {
     return (
       <Card className={cn("bg-card/50 border-border/50", className)}>
         <CardHeader className="pb-2">
@@ -84,7 +89,7 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
     );
   }
 
-  if (!hasData) {
+  if (!hasConnectedDevice) {
     return (
       <Card className={cn("bg-card/50 border-border/50", className)}>
         <CardHeader className="pb-2">
@@ -93,10 +98,23 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
             Today's Health
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground text-center py-4">
-            Connect a wearable device to see your health data
-          </p>
+        <CardContent className="flex flex-col items-center py-6 gap-4">
+          <div className="p-3 rounded-full bg-muted/50">
+            <Watch className="w-8 h-8 text-muted-foreground" />
+          </div>
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground mb-1">
+              No device connected
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Connect a wearable to track your health metrics
+            </p>
+          </div>
+          <Button asChild variant="outline" size="sm">
+            <Link to="/dashboard/client/integrations">
+              Connect a Device
+            </Link>
+          </Button>
         </CardContent>
       </Card>
     );
