@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Search, SlidersHorizontal, Loader2, Users } from "lucide-react";
+import { Search, SlidersHorizontal, Loader2, Users, X } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import CoachCard from "@/components/coaches/CoachCard";
@@ -74,23 +75,50 @@ const Coaches = () => {
                     className="pl-10 h-12 bg-background/80 backdrop-blur-sm"
                   />
                 </div>
+                {/* Desktop Filter Toggle */}
                 <Button
                   variant="outline"
                   size="lg"
                   onClick={() => setShowFilters(!showFilters)}
-                  className="h-12"
+                  className="hidden md:flex h-12"
                 >
                   <SlidersHorizontal className="h-5 w-5 mr-2" />
                   Filters
                 </Button>
+
+                {/* Mobile Filter Sheet */}
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="outline" size="lg" className="md:hidden h-12">
+                      <SlidersHorizontal className="h-5 w-5" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="w-[300px] sm:w-[350px] p-0">
+                    <SheetHeader className="p-4 border-b border-border">
+                      <SheetTitle>Filters</SheetTitle>
+                    </SheetHeader>
+                    <div className="p-4 overflow-y-auto max-h-[calc(100vh-80px)]">
+                      <CoachFilters
+                        selectedTypes={selectedTypes}
+                        onTypesChange={setSelectedTypes}
+                        priceRange={priceRange}
+                        onPriceRangeChange={setPriceRange}
+                        onlineOnly={onlineOnly}
+                        onOnlineOnlyChange={setOnlineOnly}
+                        inPersonOnly={inPersonOnly}
+                        onInPersonOnlyChange={setInPersonOnly}
+                      />
+                    </div>
+                  </SheetContent>
+                </Sheet>
               </div>
             </div>
 
             {/* Main Content */}
-            <div className="flex gap-8">
-              {/* Filters Sidebar */}
+            <div className="flex gap-6 lg:gap-8">
+              {/* Filters Sidebar - Desktop only */}
               {showFilters && (
-                <aside className="w-64 flex-shrink-0">
+                <aside className="hidden md:block w-64 flex-shrink-0">
                   <CoachFilters
                     selectedTypes={selectedTypes}
                     onTypesChange={setSelectedTypes}
@@ -122,7 +150,7 @@ const Coaches = () => {
                         Showing <strong className="text-foreground">{coaches.length}</strong> coach{coaches.length !== 1 ? "es" : ""}
                       </span>
                     </div>
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                       {coaches.map((coach) => (
                         <CoachCard 
                           key={coach.id} 

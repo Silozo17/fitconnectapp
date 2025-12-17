@@ -73,7 +73,11 @@ const navItems: NavItem[] = [
   },
 ];
 
-export function DocNav() {
+interface DocNavProps {
+  onNavigate?: () => void;
+}
+
+export function DocNav({ onNavigate }: DocNavProps) {
   const location = useLocation();
   const currentPath = location.pathname;
 
@@ -82,10 +86,14 @@ export function DocNav() {
     currentPath.startsWith(item.href) || 
     item.children?.some(child => currentPath === child.href);
 
+  const handleClick = () => {
+    onNavigate?.();
+  };
+
   return (
-    <nav className="w-64 flex-shrink-0 border-r border-border bg-card/50 p-4 overflow-y-auto">
+    <nav className="w-full lg:w-64 flex-shrink-0 border-r border-border bg-card/50 p-4 overflow-y-auto">
       <div className="mb-6">
-        <Link to="/docs" className="flex items-center gap-2 text-primary font-semibold">
+        <Link to="/docs" className="flex items-center gap-2 text-primary font-semibold" onClick={handleClick}>
           <BookOpen className="h-5 w-5" />
           <span>Help Center</span>
         </Link>
@@ -96,6 +104,7 @@ export function DocNav() {
           <div key={item.href}>
             <Link
               to={item.href}
+              onClick={handleClick}
               className={cn(
                 "flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors",
                 isActive(item.href) || (isParentActive(item) && !item.children)
@@ -119,6 +128,7 @@ export function DocNav() {
                   <Link
                     key={child.href}
                     to={child.href}
+                    onClick={handleClick}
                     className={cn(
                       "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors",
                       isActive(child.href)

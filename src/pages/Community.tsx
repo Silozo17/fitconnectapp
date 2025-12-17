@@ -304,7 +304,7 @@ export default function Community() {
                     <span className="font-semibold text-sm">Filters</span>
                   </div>
                   
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                     <Select value={scope} onValueChange={(v) => setScope(v as ScopeType)}>
                       <SelectTrigger>
                         <Globe className="h-4 w-4 mr-2 text-muted-foreground" />
@@ -351,7 +351,7 @@ export default function Community() {
                       </Select>
                     )}
 
-                    <div className="relative col-span-2 md:col-span-1">
+                    <div className="relative col-span-1 sm:col-span-2 lg:col-span-1">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input placeholder="Search location..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9" />
                     </div>

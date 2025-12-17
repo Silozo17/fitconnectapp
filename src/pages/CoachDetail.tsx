@@ -225,8 +225,8 @@ const CoachDetail = () => {
             </div>
 
             {/* Sidebar - Booking Card */}
-            <div className="lg:col-span-1">
-              <Card className="sticky top-24">
+            <div className="lg:col-span-1 order-first lg:order-last">
+              <Card className="lg:sticky lg:top-24">
                 <CardContent className="p-6">
                   <div className="text-center mb-6">
                     {coach.hourly_rate ? (
