@@ -50,6 +50,13 @@ export const getNotificationRoute = (
     case "level_up":
       return `${baseRoute}/achievements`;
     
+    case "new_challenge":
+      return role === "client" 
+        ? `${baseRoute}/challenges` 
+        : role === "coach"
+        ? `${baseRoute}/challenges`
+        : null;
+    
     default:
       return null;
   }

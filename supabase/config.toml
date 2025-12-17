@@ -125,3 +125,6 @@ verify_jwt = false
 
 [functions.get-user-location]
 verify_jwt = false
+
+[functions.notify-new-challenge]
+verify_jwt = false
