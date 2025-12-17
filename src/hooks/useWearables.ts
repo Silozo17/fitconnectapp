@@ -19,7 +19,7 @@ export const useWearables = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: connections, isLoading } = useQuery({
+  const { data: connections, isLoading, error } = useQuery({
     queryKey: ["wearable-connections", user?.id],
     queryFn: async () => {
       const { data: clientProfile } = await supabase
@@ -110,6 +110,7 @@ export const useWearables = () => {
   return {
     connections,
     isLoading,
+    error,
     connectWearable,
     disconnectWearable,
     syncWearable,
