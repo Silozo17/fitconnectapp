@@ -35,7 +35,7 @@ const CTA = () => {
             <Button
               asChild
               size="lg"
-              className="bg-white text-primary hover:bg-white/90 h-14 px-8 text-lg font-semibold rounded-xl shadow-soft-lg"
+              className="bg-gray-900 text-white hover:bg-gray-800 h-14 px-8 text-lg font-semibold rounded-xl shadow-lg"
             >
               <Link to="/coaches">
                 Find Your Coach
@@ -46,7 +46,7 @@ const CTA = () => {
               asChild
               variant="outline"
               size="lg"
-              className="border-white/30 text-white hover:bg-white/10 h-14 text-lg px-8 rounded-xl"
+              className="border-gray-900 text-gray-900 hover:bg-gray-900/10 h-14 text-lg px-8 rounded-xl border-2"
             >
               <Link to="/become-coach">Apply as Coach</Link>
             </Button>
