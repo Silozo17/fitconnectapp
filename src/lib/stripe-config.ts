@@ -25,6 +25,7 @@ export const SUBSCRIPTION_TIERS = {
       "4% platform fee",
     ],
     highlighted: false,
+    adminOnly: false,
   },
   starter: {
     name: "Starter",
@@ -53,6 +54,7 @@ export const SUBSCRIPTION_TIERS = {
       "3% platform fee",
     ],
     highlighted: false,
+    adminOnly: false,
   },
   pro: {
     name: "Pro",
@@ -83,6 +85,7 @@ export const SUBSCRIPTION_TIERS = {
       "2% platform fee",
     ],
     highlighted: true,
+    adminOnly: false,
   },
   enterprise: {
     name: "Enterprise",
@@ -111,6 +114,34 @@ export const SUBSCRIPTION_TIERS = {
       "1% platform fee",
     ],
     highlighted: false,
+    adminOnly: false,
+  },
+  founder: {
+    name: "Founder",
+    description: "Lifetime unlimited access - Admin grant only",
+    clientLimit: null, // Unlimited
+    commissionPercent: 0,
+    prices: {
+      monthly: {
+        amount: 0,
+        priceId: null,
+      },
+      yearly: {
+        amount: 0,
+        monthlyEquivalent: 0,
+        savings: 0,
+        priceId: null,
+      },
+    },
+    features: [
+      "Unlimited clients",
+      "All Pro & Enterprise features",
+      "Priority support",
+      "0% platform fee forever",
+      "Early access to new features",
+    ],
+    highlighted: false,
+    adminOnly: true,
   },
 } as const;
 
@@ -118,7 +149,7 @@ export type TierKey = keyof typeof SUBSCRIPTION_TIERS;
 export type BillingInterval = "monthly" | "yearly";
 
 // Tier order from lowest to highest (for upgrade/downgrade comparison)
-export const TIER_ORDER: TierKey[] = ["free", "starter", "pro", "enterprise"];
+export const TIER_ORDER: TierKey[] = ["free", "starter", "pro", "enterprise", "founder"];
 
 // Helper to get tier position for comparison
 export const getTierPosition = (tier: TierKey): number => TIER_ORDER.indexOf(tier);

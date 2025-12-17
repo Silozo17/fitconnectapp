@@ -1,14 +1,17 @@
 import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Check, X, Loader2, UserPlus, MessageSquare } from "lucide-react";
+import { Check, X, Loader2, UserPlus, MessageSquare, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { Link } from "react-router-dom";
 
 interface ConnectionRequest {
   id: string;
@@ -28,6 +31,7 @@ interface ConnectionRequest {
 const ConnectionRequests = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { clientLimit, activeClientCount, canAddClient, isApproachingLimit, currentTier } = useFeatureAccess();
 
   // Get coach profile ID
   const { data: coachProfile } = useQuery({
@@ -95,7 +99,6 @@ const ConnectionRequests = () => {
           filter: `coach_id=eq.${coachProfile.id}`,
         },
         (payload) => {
-          console.log("New connection request:", payload);
           toast.info("New connection request received!");
           queryClient.invalidateQueries({ queryKey: ["connection-requests", coachProfile.id] });
         }
@@ -134,6 +137,11 @@ const ConnectionRequests = () => {
   // Accept request mutation
   const acceptMutation = useMutation({
     mutationFn: async (request: ConnectionRequest) => {
+      // Check client limit FIRST
+      if (!canAddClient()) {
+        throw new Error(`Client limit reached (${clientLimit} clients). Upgrade your plan to add more.`);
+      }
+
       // Update request status
       const { error: updateError } = await supabase
         .from("connection_requests")
@@ -157,8 +165,7 @@ const ConnectionRequests = () => {
       queryClient.invalidateQueries({ queryKey: ["coach-clients"] });
     },
     onError: (error) => {
-      toast.error("Failed to accept request. Please try again.");
-      console.error("Accept error:", error);
+      toast.error(error.message || "Failed to accept request. Please try again.");
     },
   });
 
@@ -178,7 +185,6 @@ const ConnectionRequests = () => {
     },
     onError: (error) => {
       toast.error("Failed to decline request. Please try again.");
-      console.error("Reject error:", error);
     },
   });
 
@@ -194,6 +200,8 @@ const ConnectionRequests = () => {
     const name = [profile.first_name, profile.last_name].filter(Boolean).join(" ");
     return name || "Unknown Client";
   };
+
+  const atLimit = !canAddClient();
 
   if (isLoading) {
     return (
@@ -225,12 +233,52 @@ const ConnectionRequests = () => {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
             </span>
           </CardTitle>
-          {requests && requests.length > 0 && (
-            <Badge variant="secondary">{requests.length} pending</Badge>
-          )}
+          <div className="flex items-center gap-2">
+            {clientLimit !== null && (
+              <Badge variant={atLimit ? "destructive" : isApproachingLimit() ? "secondary" : "outline"}>
+                {activeClientCount}/{clientLimit} clients
+              </Badge>
+            )}
+            {requests && requests.length > 0 && (
+              <Badge variant="secondary">{requests.length} pending</Badge>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent>
+        {/* Client limit warning */}
+        {atLimit && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription className="flex items-center justify-between">
+              <span>
+                You've reached your client limit ({clientLimit} clients) on the {currentTier} plan.
+              </span>
+              <Link to="/subscribe">
+                <Button size="sm" variant="outline" className="ml-2">
+                  Upgrade
+                </Button>
+              </Link>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {isApproachingLimit() && !atLimit && (
+          <Alert className="mb-4 border-amber-500/50 bg-amber-500/10">
+            <AlertTriangle className="h-4 w-4 text-amber-500" />
+            <AlertDescription className="flex items-center justify-between text-amber-600">
+              <span>
+                You're approaching your client limit ({activeClientCount}/{clientLimit}).
+              </span>
+              <Link to="/subscribe">
+                <Button size="sm" variant="outline" className="ml-2">
+                  Upgrade
+                </Button>
+              </Link>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {requests && requests.length > 0 ? (
           <div className="space-y-4">
             {requests.map((request) => (
@@ -291,7 +339,8 @@ const ConnectionRequests = () => {
                   <Button
                     size="sm"
                     onClick={() => acceptMutation.mutate(request)}
-                    disabled={acceptMutation.isPending || rejectMutation.isPending}
+                    disabled={acceptMutation.isPending || rejectMutation.isPending || atLimit}
+                    title={atLimit ? "Client limit reached - upgrade to accept" : "Accept request"}
                   >
                     {acceptMutation.isPending ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
