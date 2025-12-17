@@ -339,7 +339,8 @@ const AdminTeam = () => {
                 No team members found
               </div>
             ) : (
-              <Table>
+              <div className="overflow-x-auto -mx-4 sm:mx-0">
+              <Table className="min-w-[600px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-12">
@@ -351,8 +352,8 @@ const AdminTeam = () => {
                     <TableHead>Member</TableHead>
                     <TableHead>Role</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Department</TableHead>
-                    <TableHead>Joined</TableHead>
+                    <TableHead className="hidden sm:table-cell">Department</TableHead>
+                    <TableHead className="hidden sm:table-cell">Joined</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -394,8 +395,8 @@ const AdminTeam = () => {
                       <TableCell>
                         <StatusBadge status={member.status || "active"} />
                       </TableCell>
-                      <TableCell>{member.department || "—"}</TableCell>
-                      <TableCell>
+                      <TableCell className="hidden sm:table-cell">{member.department || "—"}</TableCell>
+                      <TableCell className="hidden sm:table-cell">
                         {new Date(member.created_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
@@ -460,6 +461,7 @@ const AdminTeam = () => {
                   ))}
                 </TableBody>
               </Table>
+              </div>
             )}
           </CardContent>
         </Card>

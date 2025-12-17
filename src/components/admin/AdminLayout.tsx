@@ -12,9 +12,9 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   return (
     <div className="min-h-screen bg-background flex w-full">
       <AdminSidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
-      <div className="flex-1 flex flex-col xl:ml-64">
+      <div className="flex-1 flex flex-col xl:ml-64 min-w-0">
         <AdminHeader onMenuToggle={() => setMobileOpen(true)} />
-        <main className="flex-1 p-4 lg:p-6 overflow-auto">
+        <main className="flex-1 p-4 lg:p-6 overflow-x-hidden overflow-y-auto">
           {children}
         </main>
       </div>

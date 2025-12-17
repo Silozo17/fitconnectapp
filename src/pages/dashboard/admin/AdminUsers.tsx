@@ -501,7 +501,8 @@ const AdminUsers = () => {
             ) : filteredUsers.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">No users found</div>
             ) : (
-              <Table>
+              <div className="overflow-x-auto -mx-4 sm:mx-0">
+              <Table className="min-w-[700px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-12">
@@ -510,13 +511,12 @@ const AdminUsers = () => {
                         onCheckedChange={handleSelectAll}
                       />
                     </TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Location</TableHead>
-                    <TableHead>Coaches</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead className="hidden sm:table-cell">Location</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Last Login</TableHead>
-                    <TableHead>Joined</TableHead>
+                    <TableHead className="hidden md:table-cell">Coaches</TableHead>
+                    <TableHead className="hidden md:table-cell">Last Login</TableHead>
+                    <TableHead className="hidden sm:table-cell">Joined</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -534,30 +534,30 @@ const AdminUsers = () => {
                         />
                       </TableCell>
                       <TableCell className="font-medium">
-                        {user.first_name || user.last_name
-                          ? `${user.first_name || ""} ${user.last_name || ""}`.trim()
-                          : "Unnamed User"}
+                        <div>
+                          {user.first_name || user.last_name
+                            ? `${user.first_name || ""} ${user.last_name || ""}`.trim()
+                            : "Unnamed User"}
+                          <p className="text-xs text-muted-foreground">{userEmails[user.user_id] || "-"}</p>
+                        </div>
                       </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {userEmails[user.user_id] || "-"}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
+                      <TableCell className="text-muted-foreground hidden sm:table-cell">
                         {getLocationDisplay(user)}
-                      </TableCell>
-                      <TableCell>
-                        <span className={user.coach_count ? "text-primary font-medium" : "text-muted-foreground"}>
-                          {user.coach_count || 0}
-                        </span>
                       </TableCell>
                       <TableCell>
                         <StatusBadge status={user.status || "active"} />
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
+                      <TableCell className="hidden md:table-cell">
+                        <span className={user.coach_count ? "text-primary font-medium" : "text-muted-foreground"}>
+                          {user.coach_count || 0}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm hidden md:table-cell">
                         {userLastLogins[user.user_id] 
                           ? new Date(userLastLogins[user.user_id]!).toLocaleDateString()
                           : "Never"}
                       </TableCell>
-                      <TableCell className="text-muted-foreground">
+                      <TableCell className="text-muted-foreground hidden sm:table-cell">
                         {new Date(user.created_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="text-right">
@@ -642,6 +642,7 @@ const AdminUsers = () => {
                   ))}
                 </TableBody>
               </Table>
+              </div>
             )}
           </CardContent>
         </Card>
