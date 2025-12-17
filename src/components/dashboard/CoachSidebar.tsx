@@ -202,7 +202,7 @@ const CoachSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: CoachS
 
       {/* Mobile Sidebar */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="w-64 p-0 flex flex-col bg-sidebar">
+        <SheetContent side="left" className="w-64 p-0 flex flex-col bg-sidebar" onOpenAutoFocus={(e) => e.preventDefault()}>
           {/* Logo */}
           <div className="p-4 border-b border-sidebar-border">
             <Link to="/" className="flex items-center gap-3">
@@ -221,6 +221,7 @@ const CoachSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: CoachS
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="Search..."
+                autoFocus={false}
                 className="pl-10 bg-sidebar-accent/50 border-transparent focus:border-primary"
               />
             </div>
