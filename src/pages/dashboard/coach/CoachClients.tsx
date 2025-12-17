@@ -124,33 +124,33 @@ const CoachClients = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <div className="card-elevated p-4">
+        <div className="card-elevated p-4 overflow-hidden">
           <div className="flex items-center gap-2 mb-2">
-            <Users className="w-4 h-4 text-primary" />
-            <p className="text-sm text-muted-foreground">Total Clients</p>
+            <Users className="w-4 h-4 text-primary shrink-0" />
+            <p className="text-sm text-muted-foreground truncate">Total Clients</p>
           </div>
-          <p className="text-2xl font-display font-bold text-foreground">{stats.total}</p>
+          <p className="text-2xl font-display font-bold text-foreground truncate">{stats.total}</p>
         </div>
-        <div className="card-elevated p-4">
+        <div className="card-elevated p-4 overflow-hidden">
           <div className="flex items-center gap-2 mb-2">
-            <UserCheck className="w-4 h-4 text-success" />
-            <p className="text-sm text-muted-foreground">Active</p>
+            <UserCheck className="w-4 h-4 text-success shrink-0" />
+            <p className="text-sm text-muted-foreground truncate">Active</p>
           </div>
-          <p className="text-2xl font-display font-bold text-success">{stats.active}</p>
+          <p className="text-2xl font-display font-bold text-success truncate">{stats.active}</p>
         </div>
-        <div className="card-elevated p-4">
+        <div className="card-elevated p-4 overflow-hidden">
           <div className="flex items-center gap-2 mb-2">
-            <Clock className="w-4 h-4 text-warning" />
-            <p className="text-sm text-muted-foreground">Pending</p>
+            <Clock className="w-4 h-4 text-warning shrink-0" />
+            <p className="text-sm text-muted-foreground truncate">Pending</p>
           </div>
-          <p className="text-2xl font-display font-bold text-warning">{stats.pending}</p>
+          <p className="text-2xl font-display font-bold text-warning truncate">{stats.pending}</p>
         </div>
-        <div className="card-elevated p-4">
+        <div className="card-elevated p-4 overflow-hidden">
           <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-4 h-4 text-accent" />
-            <p className="text-sm text-muted-foreground">This Month</p>
+            <TrendingUp className="w-4 h-4 text-accent shrink-0" />
+            <p className="text-sm text-muted-foreground truncate">This Month</p>
           </div>
-          <p className="text-2xl font-display font-bold text-accent">
+          <p className="text-2xl font-display font-bold text-accent truncate">
             {clients.filter(c => {
               const startDate = c.start_date ? new Date(c.start_date) : null;
               if (!startDate) return false;
