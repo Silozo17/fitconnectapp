@@ -94,7 +94,7 @@ const CoachSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: CoachS
     <>
       {/* Logo */}
       <div className="p-4 border-b border-sidebar-border">
-        <Link to="/" className="flex items-center gap-3">
+        <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shrink-0">
             <Dumbbell className="w-6 h-6 text-primary-foreground" />
           </div>
@@ -103,7 +103,7 @@ const CoachSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: CoachS
               FitConnect
             </span>
           )}
-        </Link>
+        </div>
       </div>
 
       {/* Navigation */}
@@ -205,14 +205,14 @@ const CoachSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: CoachS
         <SheetContent side="left" className="w-64 p-0 flex flex-col bg-sidebar" onOpenAutoFocus={(e) => e.preventDefault()}>
           {/* Logo */}
           <div className="p-4 border-b border-sidebar-border">
-            <Link to="/" className="flex items-center gap-3">
+            <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shrink-0">
                 <Dumbbell className="w-6 h-6 text-primary-foreground" />
               </div>
               <span className="font-display font-bold text-xl text-sidebar-foreground">
                 FitConnect
               </span>
-            </Link>
+            </div>
           </div>
 
           {/* Search - Mobile only */}
