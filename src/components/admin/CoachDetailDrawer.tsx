@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Switch } from "@/components/ui/switch";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
@@ -247,53 +248,59 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan,
               <Pause className="h-4 w-4 mr-2" />
               Change Status
             </Button>
-            <Button 
-              variant="outline" 
-              className={cn(
-                "justify-start",
-                coach.marketplace_visible === false && "border-amber-500/50 text-amber-500"
-              )}
-              disabled={togglingVisibility}
-              onClick={async (e) => {
-                e.stopPropagation();
-                setTogglingVisibility(true);
-                const newValue = coach.marketplace_visible !== false;
-                const { error } = await supabase
-                  .from("coach_profiles")
-                  .update({ marketplace_visible: !newValue })
-                  .eq("id", coach.id);
-                
-                if (error) {
-                  toast.error("Failed to update visibility");
-                } else {
-                  toast.success(newValue ? "Coach hidden from marketplace" : "Coach visible in marketplace");
-                  logAction.log({
-                    action: newValue ? "HIDE_FROM_MARKETPLACE" : "SHOW_IN_MARKETPLACE",
-                    entityType: "coach_profiles",
-                    entityId: coach.id,
-                    oldValues: { marketplace_visible: !newValue },
-                    newValues: { marketplace_visible: newValue ? false : true },
-                  });
-                  queryClient.invalidateQueries({ queryKey: ["marketplace-coaches"] });
-                  onRefresh?.();
-                }
-                setTogglingVisibility(false);
-              }}
-            >
-              {togglingVisibility ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : coach.marketplace_visible === false ? (
-                <EyeOff className="h-4 w-4 mr-2" />
-              ) : (
-                <Eye className="h-4 w-4 mr-2" />
-              )}
-              {coach.marketplace_visible === false ? "Hidden from Search" : "Visible in Search"}
-            </Button>
-            <Button variant="destructive" className="justify-start col-span-full sm:col-span-1" onClick={onDelete}>
+            <Button variant="destructive" className="justify-start" onClick={onDelete}>
               <Trash2 className="h-4 w-4 mr-2" />
               Delete Coach
             </Button>
           </div>
+
+          {/* Visibility Toggle Card */}
+          <Card className="mt-4">
+            <CardContent className="flex items-center justify-between py-4">
+              <div className="flex items-center gap-3">
+                {coach.marketplace_visible !== false ? (
+                  <Eye className="h-5 w-5 text-primary" />
+                ) : (
+                  <EyeOff className="h-5 w-5 text-amber-500" />
+                )}
+                <div>
+                  <p className="font-medium">Visible in Search</p>
+                  <p className="text-xs text-muted-foreground">
+                    {coach.marketplace_visible !== false 
+                      ? "Coach appears in marketplace search results" 
+                      : "Coach is hidden from marketplace"}
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={coach.marketplace_visible !== false}
+                disabled={togglingVisibility}
+                onCheckedChange={async (checked) => {
+                  setTogglingVisibility(true);
+                  const { error } = await supabase
+                    .from("coach_profiles")
+                    .update({ marketplace_visible: checked })
+                    .eq("id", coach.id);
+                  
+                  if (error) {
+                    toast.error("Failed to update visibility");
+                  } else {
+                    toast.success(checked ? "Coach visible in marketplace" : "Coach hidden from marketplace");
+                    logAction.log({
+                      action: checked ? "SHOW_IN_MARKETPLACE" : "HIDE_FROM_MARKETPLACE",
+                      entityType: "coach_profiles",
+                      entityId: coach.id,
+                      oldValues: { marketplace_visible: !checked },
+                      newValues: { marketplace_visible: checked },
+                    });
+                    queryClient.invalidateQueries({ queryKey: ["marketplace-coaches"] });
+                    onRefresh?.();
+                  }
+                  setTogglingVisibility(false);
+                }}
+              />
+            </CardContent>
+          </Card>
         </div>
 
         <Separator className="my-6" />
