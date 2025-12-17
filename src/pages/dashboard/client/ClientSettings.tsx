@@ -23,8 +23,9 @@ import { useSelectedAvatar } from "@/hooks/useAvatars";
 import WearableConnectionList from "@/components/integrations/WearableConnectionList";
 import CalendarConnectionCard from "@/components/integrations/CalendarConnectionCard";
 import HealthDataWidget from "@/components/integrations/HealthDataWidget";
+import AppleCalendarConnectModal from "@/components/integrations/AppleCalendarConnectModal";
 import { useCalendarSync, CalendarProvider } from "@/hooks/useCalendarSync";
-import { Calendar } from "lucide-react";
+import { Calendar, Apple } from "lucide-react";
 
 interface ClientProfile {
   first_name: string | null;
@@ -73,12 +74,20 @@ const calendarProviders: {
   name: string;
   icon: React.ReactNode;
   color: string;
+  isCalDav?: boolean;
 }[] = [
   {
     id: "google_calendar",
     name: "Google Calendar",
-    icon: <Calendar className="w-6 h-6 text-white" />,
+    icon: <Calendar className="w-5 h-5 text-white" />,
     color: "bg-gradient-to-br from-blue-500 to-blue-700",
+  },
+  {
+    id: "apple_calendar",
+    name: "Apple Calendar",
+    icon: <Apple className="w-5 h-5 text-white" />,
+    color: "bg-gradient-to-br from-gray-700 to-gray-900",
+    isCalDav: true,
   },
 ];
 
@@ -103,6 +112,7 @@ const ClientSettings = () => {
   });
   const { data: selectedAvatar } = useSelectedAvatar('client');
   const { connectCalendar, disconnectCalendar, toggleSync, getConnection, isLoading: calendarLoading } = useCalendarSync();
+  const [showAppleCalendarModal, setShowAppleCalendarModal] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -469,9 +479,12 @@ const ClientSettings = () => {
                       Automatically add your coaching sessions to your calendar
                     </p>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {calendarProviders.map((provider) => {
                       const connection = getConnection(provider.id);
+                      const handleConnect = provider.isCalDav 
+                        ? () => setShowAppleCalendarModal(true)
+                        : () => connectCalendar.mutate(provider.id);
                       return (
                         <CalendarConnectionCard
                           key={provider.id}
@@ -481,7 +494,7 @@ const ClientSettings = () => {
                           providerColor={provider.color}
                           isConnected={!!connection}
                           syncEnabled={connection?.sync_enabled}
-                          onConnect={() => connectCalendar.mutate(provider.id)}
+                          onConnect={handleConnect}
                           onDisconnect={() => connection && disconnectCalendar.mutate(connection.id)}
                           onToggleSync={(enabled) =>
                             connection && toggleSync.mutate({ connectionId: connection.id, enabled })
@@ -492,6 +505,11 @@ const ClientSettings = () => {
                     })}
                   </div>
                 </div>
+
+                <AppleCalendarConnectModal 
+                  open={showAppleCalendarModal} 
+                  onOpenChange={setShowAppleCalendarModal} 
+                />
               </div>
             )}
 

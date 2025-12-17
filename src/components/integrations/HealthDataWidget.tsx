@@ -74,9 +74,9 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="h-16 bg-muted/50 rounded-lg animate-pulse" />
+              <div key={i} className="h-14 sm:h-16 bg-muted/50 rounded-lg animate-pulse" />
             ))}
           </div>
         </CardContent>
@@ -114,22 +114,22 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
       </CardHeader>
       <CardContent>
         <div className={cn(
-          "grid gap-3",
-          compact ? "grid-cols-2" : "grid-cols-2 md:grid-cols-3"
+          "grid gap-2 sm:gap-3",
+          compact ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-3"
         )}>
           {displayMetrics.map((metric) => {
             const value = getTodayValue(metric.type);
             return (
               <div
                 key={metric.type}
-                className="bg-muted/30 rounded-lg p-3 flex items-center gap-3"
+                className="bg-muted/30 rounded-lg p-2 sm:p-3 flex items-center gap-2 sm:gap-3 min-h-[56px]"
               >
-                <div className={cn("p-2 rounded-lg bg-muted/50", metric.color)}>
+                <div className={cn("p-1.5 sm:p-2 rounded-lg bg-muted/50 shrink-0", metric.color)}>
                   {metric.icon}
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">{metric.label}</p>
-                  <p className="font-semibold">{metric.format(value)}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{metric.label}</p>
+                  <p className="font-semibold text-sm sm:text-base truncate">{metric.format(value)}</p>
                 </div>
               </div>
             );

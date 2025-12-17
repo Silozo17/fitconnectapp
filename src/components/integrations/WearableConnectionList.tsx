@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Activity, Heart, Watch, Apple, Smartphone, PenLine } from "lucide-react";
+import { Activity, Heart, Watch, Apple, PenLine } from "lucide-react";
 import WearableConnectionCard from "./WearableConnectionCard";
 import { useWearables, WearableProvider } from "@/hooks/useWearables";
 import ManualHealthDataModal from "./ManualHealthDataModal";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 const providers: {
   id: WearableProvider;
@@ -64,26 +65,8 @@ const WearableConnectionList = () => {
 
   return (
     <div className="space-y-4">
-      {/* Manual Entry Option */}
-      <div className="flex items-center justify-between p-4 rounded-lg border border-dashed border-border bg-card/50">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <PenLine className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <h4 className="font-medium">Manual Health Data Entry</h4>
-            <p className="text-sm text-muted-foreground">
-              Log steps, heart rate, sleep, and calories manually
-            </p>
-          </div>
-        </div>
-        <Button variant="outline" size="sm" onClick={() => setShowManualEntry(true)}>
-          Log Data
-        </Button>
-      </div>
-
       {/* Wearable Providers Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {providers.map((provider) => {
           const connection = getConnection(provider.id);
           return (
@@ -106,6 +89,28 @@ const WearableConnectionList = () => {
           );
         })}
       </div>
+
+      {/* Manual Entry Card */}
+      <Card className="bg-card/50 border-dashed border-border/50">
+        <CardContent className="p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <PenLine className="h-5 w-5 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <h4 className="font-medium text-sm">Manual Health Data</h4>
+                <p className="text-xs text-muted-foreground">
+                  Log steps, heart rate, sleep manually
+                </p>
+              </div>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => setShowManualEntry(true)} className="shrink-0">
+              Log Data
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       <ManualHealthDataModal open={showManualEntry} onOpenChange={setShowManualEntry} />
     </div>
