@@ -19,7 +19,7 @@ export default function ClientLeaderboard() {
             <h1 className="text-2xl font-bold">Leaderboard</h1>
             <p className="text-muted-foreground">Compete with other members in your area</p>
           </div>
-          <Link to="/dashboard/client/settings">
+          <Link to="/dashboard/client/settings?tab=preferences">
             <Button variant="outline" size="sm">
               <Settings className="h-4 w-4 mr-2" />
               Leaderboard Settings

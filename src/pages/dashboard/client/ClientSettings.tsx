@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -92,10 +93,14 @@ const settingsTabs = [
 
 const ClientSettings = () => {
   const { user, signOut } = useAuth();
+  const [searchParams] = useSearchParams();
   const [profile, setProfile] = useState<ClientProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [selectedTab, setSelectedTab] = useState("profile");
+  const [selectedTab, setSelectedTab] = useState(() => {
+    const tabParam = searchParams.get('tab');
+    return tabParam && settingsTabs.some(t => t.id === tabParam) ? tabParam : 'profile';
+  });
   const { data: selectedAvatar } = useSelectedAvatar('client');
   const { connectCalendar, disconnectCalendar, toggleSync, getConnection, isLoading: calendarLoading } = useCalendarSync();
 
