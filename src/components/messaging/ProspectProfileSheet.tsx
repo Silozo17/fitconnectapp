@@ -1,8 +1,6 @@
-import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -29,6 +27,8 @@ import {
 import { Link } from "react-router-dom";
 import { useCoachPipeline } from "@/hooks/useCoachPipeline";
 import { toast } from "@/hooks/use-toast";
+import { UserAvatar } from "@/components/shared/UserAvatar";
+import { Rarity } from "@/lib/avatar-config";
 
 interface ProspectProfileSheetProps {
   open: boolean;
@@ -48,14 +48,14 @@ const ProspectProfileSheet = ({
   const { user } = useAuth();
   const { addLead, coachProfileId } = useCoachPipeline();
 
-  // Fetch full client profile
+  // Fetch full client profile with avatar
   const { data: clientProfile, isLoading: profileLoading } = useQuery({
     queryKey: ['prospect-profile', clientProfileId],
     queryFn: async () => {
       if (!clientProfileId) return null;
       const { data, error } = await supabase
         .from('client_profiles')
-        .select('*')
+        .select('*, avatars:selected_avatar_id(slug, rarity)')
         .eq('id', clientProfileId)
         .single();
       if (error) throw error;
@@ -117,14 +117,6 @@ const ProspectProfileSheet = ({
     enabled: !!clientProfileId && !!coachProfileId && open,
   });
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
 
   const handleAddToPipeline = async () => {
     if (!clientProfileId) return;
@@ -162,12 +154,14 @@ const ProspectProfileSheet = ({
           <div className="mt-6 space-y-6">
             {/* Header */}
             <div className="flex flex-col items-center text-center">
-              <Avatar className="w-20 h-20 mb-3 ring-4 ring-primary/20">
-                <AvatarImage src={participantAvatar || clientProfile?.avatar_url || undefined} />
-                <AvatarFallback className="bg-primary/10 text-primary text-xl">
-                  {getInitials(fullName)}
-                </AvatarFallback>
-              </Avatar>
+              <UserAvatar
+                src={clientProfile?.avatar_url || participantAvatar}
+                avatarSlug={(clientProfile?.avatars as any)?.slug}
+                avatarRarity={(clientProfile?.avatars as any)?.rarity as Rarity}
+                name={fullName}
+                className="w-20 h-20 mb-3 ring-4 ring-primary/20"
+                showRarityBorder
+              />
               <h3 className="text-lg font-semibold text-foreground">{fullName}</h3>
               {isClient && (
                 <Badge variant="default" className="mt-1">
