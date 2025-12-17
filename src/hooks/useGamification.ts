@@ -29,6 +29,7 @@ export interface Badge {
   description: string;
   category: string;
   icon: string;
+  image_url?: string | null;
   rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
   xp_reward: number;
   criteria: Record<string, any>;
