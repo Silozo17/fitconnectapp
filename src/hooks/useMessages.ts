@@ -19,6 +19,9 @@ export interface Conversation {
   participantType: "client" | "coach" | "admin";
   participantAvatar: string | null;
   participantLocation?: string | null;
+  // Avatar data for character avatars
+  participantAvatarSlug?: string | null;
+  participantAvatarRarity?: string | null;
   lastMessage: string;
   lastMessageTime: string;
   unreadCount: number;
@@ -141,11 +144,13 @@ export const useMessages = (participantId?: string) => {
         let participantType: "client" | "coach" | "admin" = "client";
         let participantAvatar: string | null = null;
         let participantLocation: string | null = null;
+        let participantAvatarSlug: string | null = null;
+        let participantAvatarRarity: string | null = null;
 
         // Try to get coach profile first
         const { data: coachData } = await supabase
           .from("coach_profiles")
-          .select("display_name, profile_image_url, location")
+          .select("display_name, profile_image_url, location, avatars:selected_avatar_id(slug, rarity)")
           .eq("id", partnerId)
           .single();
 
@@ -154,11 +159,14 @@ export const useMessages = (participantId?: string) => {
           participantType = "coach";
           participantAvatar = coachData.profile_image_url;
           participantLocation = coachData.location;
+          const avatarData = coachData.avatars as { slug: string; rarity: string } | null;
+          participantAvatarSlug = avatarData?.slug || null;
+          participantAvatarRarity = avatarData?.rarity || null;
         } else {
           // Try client profile
           const { data: clientData } = await supabase
             .from("client_profiles")
-            .select("first_name, last_name, avatar_url")
+            .select("first_name, last_name, avatar_url, avatars:selected_avatar_id(slug, rarity)")
             .eq("id", partnerId)
             .single();
 
@@ -166,6 +174,9 @@ export const useMessages = (participantId?: string) => {
             participantName = `${clientData.first_name || ""} ${clientData.last_name || ""}`.trim() || "Client";
             participantType = "client";
             participantAvatar = clientData.avatar_url;
+            const avatarData = clientData.avatars as { slug: string; rarity: string } | null;
+            participantAvatarSlug = avatarData?.slug || null;
+            participantAvatarRarity = avatarData?.rarity || null;
           } else {
             // Try admin profile
             const { data: adminData } = await supabase
@@ -194,6 +205,8 @@ export const useMessages = (participantId?: string) => {
           participantType,
           participantAvatar,
           participantLocation,
+          participantAvatarSlug,
+          participantAvatarRarity,
           lastMessage: lastMsg.content,
           lastMessageTime: lastMsg.created_at,
           unreadCount,
@@ -244,10 +257,12 @@ export const useMessages = (participantId?: string) => {
         let participantType: "client" | "coach" | "admin" = "client";
         let participantAvatar: string | null = null;
         let participantLocation: string | null = null;
+        let participantAvatarSlug: string | null = null;
+        let participantAvatarRarity: string | null = null;
 
         const { data: coachData } = await supabase
           .from("coach_profiles")
-          .select("display_name, profile_image_url, location")
+          .select("display_name, profile_image_url, location, avatars:selected_avatar_id(slug, rarity)")
           .eq("id", partnerId)
           .single();
 
@@ -256,10 +271,13 @@ export const useMessages = (participantId?: string) => {
           participantType = "coach";
           participantAvatar = coachData.profile_image_url;
           participantLocation = coachData.location;
+          const avatarData = coachData.avatars as { slug: string; rarity: string } | null;
+          participantAvatarSlug = avatarData?.slug || null;
+          participantAvatarRarity = avatarData?.rarity || null;
         } else {
           const { data: clientData } = await supabase
             .from("client_profiles")
-            .select("first_name, last_name, avatar_url")
+            .select("first_name, last_name, avatar_url, avatars:selected_avatar_id(slug, rarity)")
             .eq("id", partnerId)
             .single();
 
@@ -267,6 +285,9 @@ export const useMessages = (participantId?: string) => {
             participantName = `${clientData.first_name || ""} ${clientData.last_name || ""}`.trim() || "Client";
             participantType = "client";
             participantAvatar = clientData.avatar_url;
+            const avatarData = clientData.avatars as { slug: string; rarity: string } | null;
+            participantAvatarSlug = avatarData?.slug || null;
+            participantAvatarRarity = avatarData?.rarity || null;
           } else {
             const { data: adminData } = await supabase
               .from("admin_profiles")
@@ -294,6 +315,8 @@ export const useMessages = (participantId?: string) => {
           participantType,
           participantAvatar,
           participantLocation,
+          participantAvatarSlug,
+          participantAvatarRarity,
           lastMessage: lastMsg.content,
           lastMessageTime: lastMsg.created_at,
           unreadCount,

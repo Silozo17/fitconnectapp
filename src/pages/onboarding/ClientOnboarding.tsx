@@ -11,8 +11,9 @@ import { Dumbbell, ArrowRight, ArrowLeft, Check, Loader2, Flame, Activity, Flowe
 import type { LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import WearablesOnboardingStep from "@/components/onboarding/WearablesOnboardingStep";
+import { AvatarSelectionStep } from "@/components/onboarding/AvatarSelectionStep";
 
-const STEPS = ["Personal Info", "Body Metrics", "Fitness Goals", "Dietary Info", "Connect Devices"];
+const STEPS = ["Choose Avatar", "Personal Info", "Body Metrics", "Fitness Goals", "Dietary Info", "Connect Devices"];
 
 const FITNESS_GOALS: { id: string; label: string; icon: LucideIcon }[] = [
   { id: "weight_loss", label: "Weight Loss", icon: Flame },
@@ -60,6 +61,8 @@ const ClientOnboarding = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
+    selectedAvatarId: null as string | null,
+    selectedAvatarSlug: null as string | null,
     firstName: "",
     lastName: "",
     age: "",
@@ -106,9 +109,23 @@ const ClientOnboarding = () => {
     });
   };
 
+  const handleAvatarSelect = (avatarId: string | null, avatarSlug: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      selectedAvatarId: avatarId,
+      selectedAvatarSlug: avatarSlug,
+    }));
+  };
+
   const handleNext = () => {
+    // Validate avatar selection on step 0
+    if (currentStep === 0 && !formData.selectedAvatarId) {
+      toast.error("Please choose an avatar to continue");
+      return;
+    }
+    
     // Validate first name on personal info step
-    if (currentStep === 0 && !formData.firstName.trim()) {
+    if (currentStep === 1 && !formData.firstName.trim()) {
       toast.error("Please enter your first name");
       return;
     }
@@ -134,6 +151,7 @@ const ClientOnboarding = () => {
     setIsSubmitting(true);
 
     try {
+      // Update client profile with all data including selected avatar
       const { error } = await supabase
         .from("client_profiles")
         .update({
@@ -146,15 +164,30 @@ const ClientOnboarding = () => {
           fitness_goals: formData.fitnessGoals,
           dietary_restrictions: formData.dietaryRestrictions,
           allergies: formData.allergies,
+          selected_avatar_id: formData.selectedAvatarId,
           onboarding_completed: true,
         })
         .eq("user_id", user.id);
 
       if (error) throw error;
 
+      // Also unlock the selected avatar for the user (add to user_avatars table)
+      if (formData.selectedAvatarId) {
+        await supabase
+          .from("user_avatars")
+          .upsert({
+            user_id: user.id,
+            avatar_id: formData.selectedAvatarId,
+            unlock_source: "default",
+          }, {
+            onConflict: "user_id,avatar_id"
+          });
+      }
+
       toast.success("Profile completed! Let's find you a coach.");
       navigate("/dashboard/client");
     } catch (error) {
+      console.error("Error saving profile:", error);
       toast.error("Failed to save profile. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -206,8 +239,16 @@ const ClientOnboarding = () => {
         {/* Form Content */}
         <div className="container mx-auto px-4 py-8 max-w-2xl">
           <div className="card-elevated p-8">
-            {/* Step 1: Personal Info */}
+            {/* Step 0: Choose Avatar */}
             {currentStep === 0 && (
+              <AvatarSelectionStep
+                selectedAvatarId={formData.selectedAvatarId}
+                onSelect={handleAvatarSelect}
+              />
+            )}
+
+            {/* Step 1: Personal Info */}
+            {currentStep === 1 && (
               <div className="space-y-6">
                 <div>
                   <h2 className="font-display text-2xl font-bold text-foreground mb-2">
@@ -277,7 +318,7 @@ const ClientOnboarding = () => {
             )}
 
             {/* Step 2: Body Metrics */}
-            {currentStep === 1 && (
+            {currentStep === 2 && (
               <div className="space-y-6">
                 <div>
                   <h2 className="font-display text-2xl font-bold text-foreground mb-2">
@@ -318,7 +359,7 @@ const ClientOnboarding = () => {
             )}
 
             {/* Step 3: Fitness Goals */}
-            {currentStep === 2 && (
+            {currentStep === 3 && (
               <div className="space-y-6">
                 <div>
                   <h2 className="font-display text-2xl font-bold text-foreground mb-2">
@@ -356,7 +397,7 @@ const ClientOnboarding = () => {
             )}
 
             {/* Step 4: Dietary Info */}
-            {currentStep === 3 && (
+            {currentStep === 4 && (
               <div className="space-y-6">
                 <div>
                   <h2 className="font-display text-2xl font-bold text-foreground mb-2">
@@ -408,7 +449,7 @@ const ClientOnboarding = () => {
             )}
 
             {/* Step 5: Wearables */}
-            {currentStep === 4 && (
+            {currentStep === 5 && (
               <WearablesOnboardingStep
                 onComplete={handleComplete}
                 onSkip={handleComplete}
@@ -416,7 +457,7 @@ const ClientOnboarding = () => {
             )}
 
             {/* Navigation - only show for steps that don't have their own navigation */}
-            {currentStep < 4 && (
+            {currentStep < 5 && (
               <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
                 <Button
                   variant="ghost"

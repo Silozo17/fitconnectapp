@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageSquare, UserMinus, MapPin, AtSign } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { FriendProfileSheet } from "./FriendProfileSheet";
+import { UserAvatar } from "@/components/shared/UserAvatar";
+import { Rarity } from "@/lib/avatar-config";
 
 interface ConnectionCardProps {
   connection: {
@@ -22,6 +23,8 @@ interface ConnectionCardProps {
       avatar_url?: string | null;
       profile_image_url?: string | null;
       location?: string | null;
+      selected_avatar_slug?: string | null;
+      selected_avatar_rarity?: string | null;
     };
   };
   currentUserId: string;
@@ -38,7 +41,6 @@ export const ConnectionCard = ({ connection, currentUserId, onRemove }: Connecti
     `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || 
     "Unknown User";
   const avatarUrl = profile?.avatar_url || profile?.profile_image_url;
-  const initials = displayName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
 
   // Determine the friend's user_id (the other person in the connection)
   const friendUserId = connection.requester_user_id === currentUserId 
@@ -63,12 +65,13 @@ export const ConnectionCard = ({ connection, currentUserId, onRemove }: Connecti
             className="cursor-pointer"
             onClick={() => setShowProfile(true)}
           >
-            <Avatar className="h-12 w-12 border-2 border-border hover:border-primary transition-colors">
-              <AvatarImage src={avatarUrl || undefined} alt={displayName} />
-              <AvatarFallback className="bg-muted text-muted-foreground">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatar
+              src={avatarUrl}
+              avatarSlug={profile?.selected_avatar_slug}
+              avatarRarity={profile?.selected_avatar_rarity as Rarity | undefined}
+              name={displayName}
+              className="h-12 w-12 hover:ring-2 hover:ring-primary transition-all"
+            />
           </div>
           
           <div 
