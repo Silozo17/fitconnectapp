@@ -12,6 +12,7 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import ScrollToTop from "./components/shared/ScrollToTop";
 import ScrollRestoration from "./components/shared/ScrollRestoration";
 import PageLoadingSpinner from "./components/shared/PageLoadingSpinner";
+import { ReloadPrompt } from "./components/pwa/ReloadPrompt";
 
 // Eagerly loaded pages (critical path)
 import Index from "./pages/Index";
@@ -139,6 +140,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <ReloadPrompt />
         <BrowserRouter>
           <ScrollRestoration />
           <AuthProvider>
