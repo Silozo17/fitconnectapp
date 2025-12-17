@@ -9,7 +9,8 @@ import { useAdminView } from "@/contexts/AdminContext";
 import { cn } from "@/lib/utils";
 import ChatQuickActions from "./ChatQuickActions";
 import TypingIndicator, { useTypingBroadcast } from "./TypingIndicator";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import ProspectProfileSheet from "./ProspectProfileSheet";
+import { UserAvatar } from "@/components/shared/UserAvatar";
 import {
   Sheet,
   SheetContent,
@@ -17,10 +18,13 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
+import { Rarity } from "@/lib/avatar-config";
 
 interface ParticipantInfo {
   name: string;
   avatar: string | null;
+  avatarSlug?: string | null;
+  avatarRarity?: Rarity | null;
   type: "client" | "coach" | "admin";
   location?: string | null;
 }
@@ -47,6 +51,8 @@ const ChatWindow = ({
   const [participantInfo, setParticipantInfo] = useState<ParticipantInfo>({
     name: participantName || "Conversation",
     avatar: participantAvatar || null,
+    avatarSlug: null,
+    avatarRarity: null,
     type: participantType || "client",
     location: participantLocation || null
   });
@@ -66,10 +72,10 @@ const ChatWindow = ({
     const fetchParticipantInfo = async () => {
       if (participantName && participantAvatar !== undefined) return;
       
-      // Try coach profile first
+      // Try coach profile first (with avatar)
       const { data: coachData } = await supabase
         .from("coach_profiles")
-        .select("display_name, profile_image_url, location")
+        .select("display_name, profile_image_url, location, selected_avatar_id, avatars:selected_avatar_id(slug, rarity)")
         .eq("id", participantId)
         .single();
 
@@ -77,16 +83,18 @@ const ChatWindow = ({
         setParticipantInfo({
           name: coachData.display_name,
           avatar: coachData.profile_image_url,
+          avatarSlug: (coachData.avatars as any)?.slug || null,
+          avatarRarity: (coachData.avatars as any)?.rarity as Rarity || null,
           type: "coach",
           location: coachData.location
         });
         return;
       }
 
-      // Try client profile
+      // Try client profile (with avatar)
       const { data: clientData } = await supabase
         .from("client_profiles")
-        .select("first_name, last_name, avatar_url")
+        .select("first_name, last_name, avatar_url, location, selected_avatar_id, avatars:selected_avatar_id(slug, rarity)")
         .eq("id", participantId)
         .single();
 
@@ -94,8 +102,10 @@ const ChatWindow = ({
         setParticipantInfo({
           name: `${clientData.first_name || ""} ${clientData.last_name || ""}`.trim() || "Client",
           avatar: clientData.avatar_url,
+          avatarSlug: (clientData.avatars as any)?.slug || null,
+          avatarRarity: (clientData.avatars as any)?.rarity as Rarity || null,
           type: "client",
-          location: null
+          location: clientData.location
         });
         return;
       }
@@ -111,6 +121,8 @@ const ChatWindow = ({
         setParticipantInfo({
           name: adminData.display_name || `${adminData.first_name || ""} ${adminData.last_name || ""}`.trim() || "Admin",
           avatar: adminData.avatar_url,
+          avatarSlug: null,
+          avatarRarity: null,
           type: "admin",
           location: null
         });
@@ -176,15 +188,6 @@ const ChatWindow = ({
     }
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   const getTypeIcon = (type: "client" | "coach" | "admin") => {
     switch (type) {
       case "coach":
@@ -213,6 +216,9 @@ const ChatWindow = ({
     );
   }
 
+  // Determine if we should use ProspectProfileSheet (coach viewing client)
+  const shouldUseProspectSheet = activeProfileType === "coach" && participantInfo.type === "client";
+
   return (
     <>
       <div className="flex flex-col h-full">
@@ -229,12 +235,14 @@ const ChatWindow = ({
             onClick={() => setProfileOpen(true)}
             className="flex items-center gap-3 hover:opacity-80 transition-opacity"
           >
-            <Avatar className="w-10 h-10 ring-2 ring-primary/20">
-              <AvatarImage src={participantInfo.avatar || undefined} />
-              <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                {getInitials(participantInfo.name)}
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatar
+              src={participantInfo.avatar}
+              avatarSlug={participantInfo.avatarSlug}
+              avatarRarity={participantInfo.avatarRarity}
+              name={participantInfo.name}
+              className="w-10 h-10 ring-2 ring-primary/20"
+              showRarityBorder
+            />
             <div className="text-left">
               <div className="flex items-center gap-2">
                 <h2 className="font-semibold text-foreground">{participantInfo.name}</h2>
@@ -339,51 +347,63 @@ const ChatWindow = ({
         </form>
       </div>
 
-      {/* Profile Preview Sheet */}
-      <Sheet open={profileOpen} onOpenChange={setProfileOpen}>
-        <SheetContent side="right" className="w-[320px] sm:w-[400px]">
-          <SheetHeader>
-            <SheetTitle>Profile</SheetTitle>
-          </SheetHeader>
-          
-          <div className="mt-6 flex flex-col items-center text-center">
-            <Avatar className="w-24 h-24 mb-4 ring-4 ring-primary/20">
-              <AvatarImage src={participantInfo.avatar || undefined} />
-              <AvatarFallback className="bg-primary/10 text-primary text-2xl">
-                {getInitials(participantInfo.name)}
-              </AvatarFallback>
-            </Avatar>
+      {/* Profile Sheet - Use ProspectProfileSheet for coaches viewing clients */}
+      {shouldUseProspectSheet ? (
+        <ProspectProfileSheet
+          open={profileOpen}
+          onOpenChange={setProfileOpen}
+          clientProfileId={participantId}
+          participantName={participantInfo.name}
+          participantAvatar={participantInfo.avatar}
+        />
+      ) : (
+        <Sheet open={profileOpen} onOpenChange={setProfileOpen}>
+          <SheetContent side="right" className="w-[320px] sm:w-[400px]">
+            <SheetHeader>
+              <SheetTitle>Profile</SheetTitle>
+            </SheetHeader>
             
-            <h3 className="text-xl font-semibold text-foreground">
-              {participantInfo.name}
-            </h3>
-            
-            <div className="flex items-center gap-1 mt-1 text-muted-foreground text-sm">
-              {getTypeIcon(participantInfo.type)}
-              <span className="capitalize">{participantInfo.type}</span>
+            <div className="mt-6 flex flex-col items-center text-center">
+              <UserAvatar
+                src={participantInfo.avatar}
+                avatarSlug={participantInfo.avatarSlug}
+                avatarRarity={participantInfo.avatarRarity}
+                name={participantInfo.name}
+                className="w-24 h-24 mb-4 ring-4 ring-primary/20"
+                showRarityBorder
+              />
+              
+              <h3 className="text-xl font-semibold text-foreground">
+                {participantInfo.name}
+              </h3>
+              
+              <div className="flex items-center gap-1 mt-1 text-muted-foreground text-sm">
+                {getTypeIcon(participantInfo.type)}
+                <span className="capitalize">{participantInfo.type}</span>
+              </div>
+              
+              {participantInfo.location && (
+                <div className="flex items-center gap-1 mt-2 text-muted-foreground text-sm">
+                  <MapPin className="w-4 h-4" />
+                  <span>{participantInfo.location}</span>
+                </div>
+              )}
+              
+              {participantInfo.type === "coach" && (
+                <div className="mt-6 w-full">
+                  <Link
+                    to={`/coaches/${participantId}`}
+                    className="block w-full py-2 px-4 bg-primary text-primary-foreground rounded-md text-center hover:bg-primary/90 transition-colors"
+                    onClick={() => setProfileOpen(false)}
+                  >
+                    View Full Profile
+                  </Link>
+                </div>
+              )}
             </div>
-            
-            {participantInfo.location && (
-              <div className="flex items-center gap-1 mt-2 text-muted-foreground text-sm">
-                <MapPin className="w-4 h-4" />
-                <span>{participantInfo.location}</span>
-              </div>
-            )}
-            
-            {participantInfo.type === "coach" && (
-              <div className="mt-6 w-full">
-                <Link
-                  to={`/coaches/${participantId}`}
-                  className="block w-full py-2 px-4 bg-primary text-primary-foreground rounded-md text-center hover:bg-primary/90 transition-colors"
-                  onClick={() => setProfileOpen(false)}
-                >
-                  View Full Profile
-                </Link>
-              </div>
-            )}
-          </div>
-        </SheetContent>
-      </Sheet>
+          </SheetContent>
+        </Sheet>
+      )}
     </>
   );
 };

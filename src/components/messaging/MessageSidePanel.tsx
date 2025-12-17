@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAdminView } from "@/contexts/AdminContext";
 import { 
   Dumbbell, 
   UtensilsCrossed, 
@@ -54,7 +54,7 @@ interface SubscriptionPlan {
 }
 
 const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSidePanelProps) => {
-  const { role } = useAuth();
+  const { activeProfileType } = useAdminView();
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState<string | null>(null);
   const [assignedPlans, setAssignedPlans] = useState<TrainingPlan[]>([]);
@@ -63,8 +63,8 @@ const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSide
   const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>([]);
   const [coachId, setCoachId] = useState<string | null>(null);
 
-  // Only show for coaches
-  if (role !== "coach") return null;
+  // Only show for coaches (including admins viewing as coach)
+  if (activeProfileType !== "coach") return null;
 
   useEffect(() => {
     const fetchData = async () => {
