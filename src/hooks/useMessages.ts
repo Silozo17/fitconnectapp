@@ -190,6 +190,9 @@ export const useMessages = (participantId?: string) => {
                 `${adminData.first_name || ""} ${adminData.last_name || ""}`.trim() || "Admin";
               participantType = "admin";
               participantAvatar = adminData.avatar_url;
+            } else {
+              // No profile found - user was likely deleted
+              participantName = "Deleted User";
             }
           }
         }
@@ -300,6 +303,9 @@ export const useMessages = (participantId?: string) => {
                 `${adminData.first_name || ""} ${adminData.last_name || ""}`.trim() || "Admin";
               participantType = "admin";
               participantAvatar = adminData.avatar_url;
+            } else {
+              // No profile found - user was likely deleted
+              participantName = "Deleted User";
             }
           }
         }

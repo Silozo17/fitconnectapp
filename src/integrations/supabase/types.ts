@@ -3889,6 +3889,10 @@ export type Database = {
     }
     Functions: {
       calculate_boost_fee: { Args: { booking_amount: number }; Returns: number }
+      client_can_view_client_profile: {
+        Args: { target_client_profile_id: string }
+        Returns: boolean
+      }
       client_has_messaged_coach: {
         Args: { client_profile_id: string }
         Returns: boolean
