@@ -31,7 +31,7 @@ const DashboardHeader = ({ subscriptionTier, onMenuToggle }: DashboardHeaderProp
   return (
     <header className="h-16 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-30">
       <div className="h-full px-4 lg:px-6 flex items-center justify-between">
-        {/* Left side - Hamburger + Search */}
+        {/* Left side - Hamburger + Search (search hidden on mobile) */}
         <div className="flex items-center gap-3 flex-1">
           {/* Mobile Hamburger */}
           <Button
@@ -43,9 +43,9 @@ const DashboardHeader = ({ subscriptionTier, onMenuToggle }: DashboardHeaderProp
             <Menu className="w-5 h-5" />
           </Button>
 
-          {/* Search */}
-          <div className="flex-1 max-w-xs sm:max-w-md">
-            <div className="relative">
+          {/* Search - Hidden on mobile */}
+          <div className="hidden lg:flex flex-1 max-w-md">
+            <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="Search clients, sessions..."
@@ -68,37 +68,39 @@ const DashboardHeader = ({ subscriptionTier, onMenuToggle }: DashboardHeaderProp
           {/* Notifications */}
           <NotificationCenter />
 
-          {/* Profile Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
-                <UserAvatar
-                  src={avatarUrl}
-                  name={displayName}
-                  className="h-10 w-10"
-                />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{displayName || "Coach"}</p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {tierLabel} Plan
-                  </p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
-                <User className="h-4 w-4 mr-2" />
-                My Profile
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => signOut()}>
-                <LogOut className="h-4 w-4 mr-2" />
-                Sign out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Profile Dropdown - Hidden on mobile */}
+          <div className="hidden lg:block">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
+                  <UserAvatar
+                    src={avatarUrl}
+                    name={displayName}
+                    className="h-10 w-10"
+                  />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{displayName || "Coach"}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {tierLabel} Plan
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
+                  <User className="h-4 w-4 mr-2" />
+                  My Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => signOut()}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
     </header>

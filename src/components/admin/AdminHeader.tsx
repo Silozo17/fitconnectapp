@@ -38,13 +38,15 @@ const AdminHeader = ({ onMenuToggle }: AdminHeaderProps) => {
           <Menu className="w-5 h-5" />
         </Button>
 
-        {/* Search */}
-        <div className="relative flex-1 max-w-xs sm:max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search users, coaches..."
-            className="pl-10 bg-background"
-          />
+        {/* Search - Hidden on mobile */}
+        <div className="hidden lg:flex flex-1 max-w-md">
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search users, coaches..."
+              className="pl-10 bg-background"
+            />
+          </div>
         </div>
       </div>
 
@@ -53,36 +55,39 @@ const AdminHeader = ({ onMenuToggle }: AdminHeaderProps) => {
         
         <NotificationCenter />
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
-              <UserAvatar
-                src={avatarUrl}
-                name={displayName}
-                className="h-10 w-10"
-              />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="end" forceMount>
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{displayName || "Admin"}</p>
-                <p className="text-xs leading-none text-muted-foreground capitalize">
-                  {role}
-                </p>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
-              <User className="h-4 w-4 mr-2" />
-              My Profile
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={signOut}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* Profile Dropdown - Hidden on mobile */}
+        <div className="hidden lg:block">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
+                <UserAvatar
+                  src={avatarUrl}
+                  name={displayName}
+                  className="h-10 w-10"
+                />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">{displayName || "Admin"}</p>
+                  <p className="text-xs leading-none text-muted-foreground capitalize">
+                    {role}
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
+                <User className="h-4 w-4 mr-2" />
+                My Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={signOut}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </header>
   );

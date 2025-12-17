@@ -2,15 +2,19 @@ import { NavLink } from "@/components/NavLink";
 import { 
   LayoutDashboard, Users, Dumbbell, Settings, ChevronLeft, ChevronRight, 
   UsersRound, DollarSign, BarChart3,
-  MessageSquare, Shield, Trophy, FileText
+  MessageSquare, Shield, Trophy, FileText, Search, LogOut, User
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { useAdminBadges } from "@/hooks/useSidebarBadges";
 import { SidebarBadge } from "@/components/shared/SidebarBadge";
+import { UserAvatar } from "@/components/shared/UserAvatar";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import {
   Sheet,
   SheetContent,
@@ -55,6 +59,9 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }: AdminSidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const { pendingVerifications, newUsers } = useAdminBadges();
   const location = useLocation();
+  const navigate = useNavigate();
+  const { signOut, role } = useAuth();
+  const { displayName, avatarUrl } = useUserProfile();
 
   // Close mobile menu on navigation
   useEffect(() => {
@@ -162,7 +169,78 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }: AdminSidebarProps) => {
       {/* Mobile Sidebar */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent side="left" className="w-64 p-0 flex flex-col">
-          <SidebarContent isCollapsed={false} />
+          {/* Logo */}
+          <div className="p-4 border-b border-border flex items-center">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-sm">FC</span>
+              </div>
+              <span className="font-semibold text-foreground">Admin</span>
+            </div>
+          </div>
+
+          {/* Search - Mobile only */}
+          <div className="p-3 border-b border-border">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search users, coaches..."
+                className="pl-10 bg-muted/50 border-transparent focus:border-primary"
+              />
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
+            {mainNavItems.map((item) => renderNavItem(item, false))}
+
+            <div className="pt-4 pb-2">
+              <p className="px-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Platform
+              </p>
+            </div>
+
+            {platformNavItems.map((item) => renderNavItem(item, false))}
+          </nav>
+
+          {/* Settings */}
+          <div className="p-2 border-t border-border space-y-1">
+            {bottomNavItems.map((item) => renderNavItem(item, false))}
+          </div>
+
+          {/* Profile Section - Mobile only */}
+          <div className="p-3 border-t border-border">
+            <div className="flex items-center gap-3 mb-3">
+              <UserAvatar src={avatarUrl} name={displayName} className="w-10 h-10" />
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm truncate">{displayName || "Admin"}</p>
+                <p className="text-xs text-muted-foreground capitalize">{role}</p>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start"
+                onClick={() => {
+                  navigate("/dashboard/profile");
+                  setMobileOpen(false);
+                }}
+              >
+                <User className="w-4 h-4 mr-2" />
+                My Profile
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start text-destructive hover:text-destructive"
+                onClick={() => signOut()}
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </Button>
+            </div>
+          </div>
         </SheetContent>
       </Sheet>
     </>
