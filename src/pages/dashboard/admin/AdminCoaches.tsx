@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, MoreHorizontal, Pencil, Trash2, KeyRound, Eye, EyeOff, Gift, Users, DollarSign, Loader2, Pause, Ban, CheckCircle, Download } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Search, MoreHorizontal, Pencil, Trash2, KeyRound, Eye, Gift, Users, DollarSign, Loader2, Pause, Ban, CheckCircle, Download } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -64,9 +65,42 @@ const AdminCoaches = () => {
   const [resettingPassword, setResettingPassword] = useState<string | null>(null);
   const [selectedCoaches, setSelectedCoaches] = useState<Set<string>>(new Set());
   const [coachLastLogins, setCoachLastLogins] = useState<Record<string, string | null>>({});
+  const [togglingVisibility, setTogglingVisibility] = useState<string | null>(null);
   
   const { loading: actionLoading, bulkUpdateStatus, bulkDelete, getUserAuthInfo } = useAdminUserManagement("coach");
   const logAction = useLogAdminAction();
+
+  const handleToggleVisibility = async (coach: CoachUser, newValue: boolean) => {
+    setTogglingVisibility(coach.id);
+    try {
+      const { error } = await supabase
+        .from("coach_profiles")
+        .update({ marketplace_visible: newValue })
+        .eq("id", coach.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setCoaches(prev => prev.map(c => 
+        c.id === coach.id ? { ...c, marketplace_visible: newValue } : c
+      ));
+
+      logAction.log({
+        action: newValue ? "SHOW_COACH_IN_MARKETPLACE" : "HIDE_COACH_FROM_MARKETPLACE",
+        entityType: "coach_profiles",
+        entityId: coach.id,
+        oldValues: { marketplace_visible: !newValue },
+        newValues: { marketplace_visible: newValue },
+      });
+
+      toast.success(newValue ? "Coach visible in search" : "Coach hidden from search");
+    } catch (error) {
+      console.error("Failed to toggle visibility:", error);
+      toast.error("Failed to update visibility");
+    } finally {
+      setTogglingVisibility(null);
+    }
+  };
 
   useEffect(() => {
     fetchCoaches();
@@ -435,12 +469,12 @@ const AdminCoaches = () => {
                               {coach.subscription_tier || "free"}
                             </Badge>
                           </TableCell>
-                          <TableCell>
-                            {coach.marketplace_visible === false ? (
-                              <EyeOff className="h-4 w-4 text-amber-500" />
-                            ) : (
-                              <Eye className="h-4 w-4 text-muted-foreground" />
-                            )}
+                          <TableCell onClick={(e) => e.stopPropagation()}>
+                            <Switch
+                              checked={coach.marketplace_visible !== false}
+                              onCheckedChange={(checked) => handleToggleVisibility(coach, checked)}
+                              disabled={togglingVisibility === coach.id}
+                            />
                           </TableCell>
                           <TableCell>
                             <StatusBadge status={coach.status || "active"} />
