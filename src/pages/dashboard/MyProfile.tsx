@@ -118,7 +118,13 @@ const MyProfile = () => {
         {/* Back Button */}
         <Button
           variant="ghost"
-          onClick={() => navigate(-1)}
+          onClick={() => {
+            if (window.history.state && window.history.state.idx > 0) {
+              navigate(-1);
+            } else {
+              navigate("/dashboard");
+            }
+          }}
           className="mb-2"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
