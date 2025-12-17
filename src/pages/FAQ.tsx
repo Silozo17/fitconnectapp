@@ -6,8 +6,10 @@ import { GradientButton } from "@/components/ui/gradient-button";
 import { Link } from "react-router-dom";
 import { MessageCircle } from "lucide-react";
 import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
+import { usePlatformContact } from "@/hooks/usePlatformContact";
 
 const FAQ = () => {
+  const { contact } = usePlatformContact();
   const clientFAQs = [
     {
       question: "How do I find the right coach for me?",
@@ -89,7 +91,7 @@ const FAQ = () => {
     },
     {
       question: "How do I contact customer support?",
-      answer: "You can reach our support team via email at support@fitconnect.com, through the in-app chat, or by phone during business hours (9 AM - 6 PM EST). We typically respond to inquiries within 24 hours."
+      answer: `You can reach our support team via email at ${contact.email}, through the in-app chat, or by phone during business hours (9 AM - 6 PM GMT). We typically respond to inquiries within 24 hours.`
     },
     {
       question: "Do you offer refunds?",
@@ -101,7 +103,7 @@ const FAQ = () => {
     },
     {
       question: "Can I use FitConnect for corporate wellness programs?",
-      answer: "Yes! We offer corporate packages for businesses looking to provide fitness coaching as an employee benefit. Contact our enterprise team at enterprise@fitconnect.com for custom solutions and volume pricing."
+      answer: `Yes! We offer corporate packages for businesses looking to provide fitness coaching as an employee benefit. Contact our enterprise team at ${contact.email} for custom solutions and volume pricing.`
     }
   ];
 
@@ -233,7 +235,7 @@ const FAQ = () => {
               Can't find the answer you're looking for? Our friendly support team is here to help you with anything you need.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="mailto:support@fitconnect.com">
+              <a href={`mailto:${contact.email}`}>
                 <GradientButton size="lg">Contact Support</GradientButton>
               </a>
               <Link to="/how-it-works">

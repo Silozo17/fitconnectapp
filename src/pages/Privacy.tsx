@@ -1,8 +1,10 @@
 import PageLayout from "@/components/layout/PageLayout";
 import BlobShape from "@/components/ui/blob-shape";
 import { Card, CardContent } from "@/components/ui/card";
+import { usePlatformContact } from "@/hooks/usePlatformContact";
 
 const Privacy = () => {
+  const { contact } = usePlatformContact();
   return (
     <PageLayout
       title="Privacy Policy"
@@ -147,7 +149,7 @@ const Privacy = () => {
                   <li><strong>Restriction:</strong> Request limitation of processing in certain circumstances</li>
                 </ul>
                 <p>
-                  To exercise these rights, please contact us at privacy@fitconnect.com. We will respond to your 
+                  To exercise these rights, please contact us at {contact.privacyEmail}. We will respond to your 
                   request within 30 days.
                 </p>
 
@@ -206,9 +208,9 @@ const Privacy = () => {
                 <h2>13. Contact Us</h2>
                 <p>If you have questions or concerns about this Privacy Policy or our data practices, please contact us:</p>
                 <ul>
-                  <li>Email: privacy@fitconnect.com</li>
-                  <li>Address: FitConnect Inc., 123 Fitness Street, San Francisco, CA 94102</li>
-                  <li>Phone: 1-800-FIT-CNCT</li>
+                  <li>Email: {contact.privacyEmail}</li>
+                  <li>Address: {contact.address}</li>
+                  {contact.phone && <li>Phone: {contact.phone}</li>}
                 </ul>
 
                 <p className="text-sm text-muted-foreground mt-8">

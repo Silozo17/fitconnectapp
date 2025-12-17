@@ -1,8 +1,10 @@
 import PageLayout from "@/components/layout/PageLayout";
 import BlobShape from "@/components/ui/blob-shape";
 import { Card, CardContent } from "@/components/ui/card";
+import { usePlatformContact } from "@/hooks/usePlatformContact";
 
 const Terms = () => {
+  const { contact } = usePlatformContact();
   return (
     <PageLayout
       title="Terms of Service"
@@ -230,9 +232,9 @@ const Terms = () => {
                 <h2>17. Contact Information</h2>
                 <p>For questions about these Terms, please contact us:</p>
                 <ul>
-                  <li>Email: legal@fitconnect.com</li>
-                  <li>Address: FitConnect Inc., 123 Fitness Street, San Francisco, CA 94102</li>
-                  <li>Phone: 1-800-FIT-CNCT</li>
+                  <li>Email: {contact.legalEmail}</li>
+                  <li>Address: {contact.address}</li>
+                  {contact.phone && <li>Phone: {contact.phone}</li>}
                 </ul>
 
                 <p className="text-sm text-muted-foreground mt-8">
