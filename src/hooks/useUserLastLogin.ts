@@ -9,7 +9,7 @@ export function useUserLastLogin(userId: string | undefined) {
       if (!userId) return null;
       
       const { data, error } = await supabase.functions.invoke("admin-user-management", {
-        body: { action: "get_user_info", userId },
+        body: { action: "get_user_email", userId },
       });
 
       if (error) throw error;
