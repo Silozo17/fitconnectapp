@@ -101,7 +101,7 @@ const CoachDetail = () => {
     >
       <div className="min-h-screen bg-background">
         {/* Back Button */}
-        <div className="container mx-auto px-4 pt-6">
+        <div className="container mx-auto px-4 pt-20 sm:pt-6">
           <Button variant="ghost" asChild size="sm">
             <Link to="/coaches">
               <ArrowLeft className="h-4 w-4 mr-2" />
