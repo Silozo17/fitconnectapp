@@ -50,8 +50,7 @@ const Navbar = () => {
   ];
 
   const navLinks = [
-    { name: "Avatars", href: "/avatars" },
-    { name: "Leaderboards", href: "/leaderboards" },
+    { name: "Community", href: "/community" },
     { name: "Marketplace", href: "/marketplace" },
   ];
 

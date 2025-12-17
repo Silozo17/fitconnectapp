@@ -195,7 +195,7 @@ export default function Leaderboard() {
 
         {/* CTA */}
         <div className="text-center space-y-4">
-          <Link to="/leaderboards">
+          <Link to="/community">
             <Button size="lg" variant="outline" className="gap-2">
               View Full Leaderboards
               <ChevronRight className="h-4 w-4" />
