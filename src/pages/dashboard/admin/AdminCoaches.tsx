@@ -363,7 +363,8 @@ const AdminCoaches = () => {
             ) : filteredCoaches.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">No coaches found</div>
             ) : (
-              <Table>
+              <div className="overflow-x-auto -mx-4 sm:mx-0">
+              <Table className="min-w-[800px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-12">
@@ -373,12 +374,12 @@ const AdminCoaches = () => {
                       />
                     </TableHead>
                     <TableHead>Name</TableHead>
-                    <TableHead>Specialty</TableHead>
+                    <TableHead className="hidden sm:table-cell">Specialty</TableHead>
                     <TableHead>Rate</TableHead>
-                    <TableHead>Tier</TableHead>
-                    <TableHead>Account Status</TableHead>
-                    <TableHead>Last Login</TableHead>
-                    <TableHead>Joined</TableHead>
+                    <TableHead className="hidden md:table-cell">Tier</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="hidden md:table-cell">Last Login</TableHead>
+                    <TableHead className="hidden sm:table-cell">Joined</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -394,7 +395,7 @@ const AdminCoaches = () => {
                       <TableCell className="font-medium">
                         {coach.display_name || "Unnamed Coach"}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden sm:table-cell">
                         <div className="flex flex-wrap gap-1">
                           {coach.coach_types?.slice(0, 2).map((type) => (
                             <Badge key={type} variant="outline" className="text-xs">
@@ -411,7 +412,7 @@ const AdminCoaches = () => {
                       <TableCell>
                         {coach.hourly_rate ? `£${coach.hourly_rate}/hr` : "-"}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden md:table-cell">
                         <Badge variant="secondary" className="capitalize">
                           {coach.subscription_tier || "free"}
                         </Badge>
@@ -419,12 +420,12 @@ const AdminCoaches = () => {
                       <TableCell>
                         <StatusBadge status={coach.status || "active"} />
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
+                      <TableCell className="text-muted-foreground text-sm hidden md:table-cell">
                         {coachLastLogins[coach.user_id] 
                           ? new Date(coachLastLogins[coach.user_id]!).toLocaleDateString()
                           : "Never"}
                       </TableCell>
-                      <TableCell className="text-muted-foreground">
+                      <TableCell className="text-muted-foreground hidden sm:table-cell">
                         {new Date(coach.created_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
@@ -493,6 +494,7 @@ const AdminCoaches = () => {
                   ))}
                 </TableBody>
               </Table>
+              </div>
             )}
           </CardContent>
         </Card>

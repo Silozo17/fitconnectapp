@@ -252,16 +252,17 @@ const AdminAuditLog = () => {
         {/* Table */}
         <Card>
           <CardContent className="p-0">
-            <Table>
+            <div className="overflow-x-auto">
+            <Table className="min-w-[900px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>Timestamp</TableHead>
                   <TableHead>Admin</TableHead>
                   <TableHead>Action</TableHead>
-                  <TableHead>Entity Type</TableHead>
-                  <TableHead>Entity ID</TableHead>
-                  <TableHead>Changes</TableHead>
-                  <TableHead>Device</TableHead>
+                  <TableHead className="hidden sm:table-cell">Entity Type</TableHead>
+                  <TableHead className="hidden md:table-cell">Entity ID</TableHead>
+                  <TableHead className="hidden md:table-cell">Changes</TableHead>
+                  <TableHead className="hidden lg:table-cell">Device</TableHead>
                   <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -292,16 +293,16 @@ const AdminAuditLog = () => {
                           {log.action.replace(/_/g, " ")}
                         </Badge>
                       </TableCell>
-                      <TableCell className="capitalize">
+                      <TableCell className="capitalize hidden sm:table-cell">
                         {log.entity_type.replace(/_/g, " ")}
                       </TableCell>
-                      <TableCell className="font-mono text-xs">
+                      <TableCell className="font-mono text-xs hidden md:table-cell">
                         {log.entity_id ? `${log.entity_id.slice(0, 8)}...` : "-"}
                       </TableCell>
-                      <TableCell className="max-w-[200px] truncate">
+                      <TableCell className="max-w-[200px] truncate hidden md:table-cell">
                         {formatChanges(log)}
                       </TableCell>
-                      <TableCell className="text-muted-foreground">
+                      <TableCell className="text-muted-foreground hidden lg:table-cell">
                         {parseUserAgent(log.user_agent)}
                       </TableCell>
                       <TableCell>
@@ -314,6 +315,7 @@ const AdminAuditLog = () => {
                 )}
               </TableBody>
             </Table>
+            </div>
           </CardContent>
         </Card>
 

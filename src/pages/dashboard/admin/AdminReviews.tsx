@@ -167,15 +167,16 @@ const AdminReviews = () => {
                 </CardHeader>
                 <CardContent>
                   {filteredReviews && filteredReviews.length > 0 ? (
-                    <Table>
+                    <div className="overflow-x-auto -mx-4 sm:mx-0">
+                    <Table className="min-w-[700px]">
                       <TableHeader>
                         <TableRow>
                           <TableHead>Client</TableHead>
                           <TableHead>Coach</TableHead>
                           <TableHead>Rating</TableHead>
-                          <TableHead className="w-[300px]">Review</TableHead>
-                          <TableHead>Date</TableHead>
-                          <TableHead>Visibility</TableHead>
+                          <TableHead className="w-[300px] hidden sm:table-cell">Review</TableHead>
+                          <TableHead className="hidden md:table-cell">Date</TableHead>
+                          <TableHead className="hidden sm:table-cell">Visibility</TableHead>
                           <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -187,13 +188,13 @@ const AdminReviews = () => {
                             </TableCell>
                             <TableCell>{review.coach_profiles?.display_name || "Unknown"}</TableCell>
                             <TableCell>{renderStars(review.rating)}</TableCell>
-                            <TableCell className="max-w-[300px] truncate">
+                            <TableCell className="max-w-[300px] truncate hidden sm:table-cell">
                               {review.review_text || <span className="text-muted-foreground">No text</span>}
                             </TableCell>
-                            <TableCell className="text-muted-foreground">
+                            <TableCell className="text-muted-foreground hidden md:table-cell">
                               {format(new Date(review.created_at), "MMM d, yyyy")}
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="hidden sm:table-cell">
                               <Badge variant={review.is_public ? "default" : "secondary"}>
                                 {review.is_public ? "Public" : "Private"}
                               </Badge>
@@ -215,6 +216,7 @@ const AdminReviews = () => {
                         ))}
                       </TableBody>
                     </Table>
+                    </div>
                   ) : (
                     <div className="text-center py-8 text-muted-foreground">
                       <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
