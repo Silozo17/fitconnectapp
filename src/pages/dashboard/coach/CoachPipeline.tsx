@@ -1,16 +1,19 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { useCoachPipeline, Lead, LeadStage } from "@/hooks/useCoachPipeline";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -19,6 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   UserPlus,
@@ -29,28 +33,67 @@ import {
   Trash2,
   StickyNote,
   MapPin,
-  Target,
   Loader2,
   ChevronRight,
   Eye,
   FileText,
+  Plus,
+  Users,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import ProspectProfileSheet from "@/components/messaging/ProspectProfileSheet";
 
-const STAGES: { key: LeadStage; label: string; icon: React.ReactNode; color: string }[] = [
-  { key: 'new_lead', label: 'New Leads', icon: <UserPlus className="w-4 h-4" />, color: 'bg-blue-500' },
-  { key: 'conversation_started', label: 'In Conversation', icon: <MessageSquare className="w-4 h-4" />, color: 'bg-amber-500' },
-  { key: 'offer_sent', label: 'Offer Sent', icon: <Send className="w-4 h-4" />, color: 'bg-purple-500' },
-  { key: 'deal_closed', label: 'Deal Closed', icon: <CheckCircle className="w-4 h-4" />, color: 'bg-green-500' },
+const STAGES: { key: LeadStage; label: string; icon: React.ReactNode; color: string; borderColor: string }[] = [
+  { key: 'new_lead', label: 'New Leads', icon: <UserPlus className="w-4 h-4" />, color: 'bg-blue-500', borderColor: 'border-l-blue-500' },
+  { key: 'conversation_started', label: 'In Conversation', icon: <MessageSquare className="w-4 h-4" />, color: 'bg-amber-500', borderColor: 'border-l-amber-500' },
+  { key: 'offer_sent', label: 'Offer Sent', icon: <Send className="w-4 h-4" />, color: 'bg-purple-500', borderColor: 'border-l-purple-500' },
+  { key: 'deal_closed', label: 'Deal Closed', icon: <CheckCircle className="w-4 h-4" />, color: 'bg-green-500', borderColor: 'border-l-green-500' },
 ];
 
 const CoachPipeline = () => {
-  const { leadsByStage, isLoading, updateStage, updateNotes, deleteLead } = useCoachPipeline();
+  const { leads, leadsByStage, isLoading, coachProfileId, addLead, updateStage, updateNotes, deleteLead } = useCoachPipeline();
   const [notesModal, setNotesModal] = useState<{ lead: Lead; notes: string } | null>(null);
   const [profileSheet, setProfileSheet] = useState<{ clientId: string; name: string; avatar?: string } | null>(null);
+  const [showAddLeadModal, setShowAddLeadModal] = useState(false);
+
+  // Fetch clients who messaged the coach but aren't in the pipeline
+  const { data: availableClients = [], isLoading: loadingClients, refetch: refetchAvailableClients } = useQuery({
+    queryKey: ['available-pipeline-clients', coachProfileId, leads.length],
+    queryFn: async () => {
+      if (!coachProfileId) return [];
+      
+      // Get all messages where coach is receiver (clients who initiated contact)
+      const { data: messages, error: msgError } = await supabase
+        .from('messages')
+        .select('sender_id')
+        .eq('receiver_id', coachProfileId);
+      
+      if (msgError) throw msgError;
+      
+      // Get unique client IDs
+      const clientIds = [...new Set(messages?.map(m => m.sender_id) || [])];
+      if (clientIds.length === 0) return [];
+      
+      // Get existing lead client IDs
+      const existingLeadClientIds = leads.map(l => l.client_id);
+      
+      // Filter to only clients not in pipeline
+      const availableIds = clientIds.filter(id => !existingLeadClientIds.includes(id));
+      if (availableIds.length === 0) return [];
+      
+      // Fetch client profiles for available IDs
+      const { data: clients, error: clientError } = await supabase
+        .from('client_profiles')
+        .select('id, first_name, last_name, location, fitness_goals, avatar_url')
+        .in('id', availableIds);
+      
+      if (clientError) throw clientError;
+      return clients || [];
+    },
+    enabled: !!coachProfileId,
+  });
 
   const getInitials = (firstName?: string | null, lastName?: string | null) => {
     const f = firstName?.[0] || '';
@@ -61,6 +104,12 @@ const CoachPipeline = () => {
   const getFullName = (lead: Lead) => {
     const first = lead.client_profile?.first_name || '';
     const last = lead.client_profile?.last_name || '';
+    return `${first} ${last}`.trim() || 'Unknown';
+  };
+
+  const getClientName = (client: { first_name?: string | null; last_name?: string | null }) => {
+    const first = client.first_name || '';
+    const last = client.last_name || '';
     return `${first} ${last}`.trim() || 'Unknown';
   };
 
@@ -93,13 +142,25 @@ const CoachPipeline = () => {
     }
   };
 
+  const handleAddToPipeline = async (clientId: string) => {
+    try {
+      await addLead.mutateAsync({ clientId, source: 'manual' });
+      toast({ title: "Lead added", description: "Client added to pipeline" });
+      refetchAvailableClients();
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to add lead", variant: "destructive" });
+    }
+  };
+
   const renderLeadCard = (lead: Lead) => {
     const name = getFullName(lead);
     const stageIndex = STAGES.findIndex(s => s.key === lead.stage);
+    const stage = STAGES[stageIndex];
     
     return (
-      <Card key={lead.id} className="mb-3 hover:shadow-md transition-shadow">
-        <CardContent className="p-3">
+      <Card key={lead.id} className={`mb-3 border-l-4 ${stage.borderColor} hover:shadow-md transition-shadow bg-card`}>
+        <CardContent className="p-4">
+          {/* Header: Avatar + Name + Quick Actions */}
           <div className="flex items-start gap-3">
             <button
               onClick={() => setProfileSheet({
@@ -109,99 +170,122 @@ const CoachPipeline = () => {
               })}
               className="flex-shrink-0"
             >
-              <Avatar className="w-10 h-10 ring-2 ring-primary/20 hover:ring-primary/40 transition-all">
+              <Avatar className="w-14 h-14 ring-2 ring-primary/20 hover:ring-primary/40 transition-all">
                 <AvatarImage src={lead.client_profile?.avatar_url || undefined} />
-                <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                <AvatarFallback className="bg-primary/10 text-primary text-base font-medium">
                   {getInitials(lead.client_profile?.first_name, lead.client_profile?.last_name)}
                 </AvatarFallback>
               </Avatar>
             </button>
 
             <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-1">
-                <h4 className="font-medium text-sm truncate">{name}</h4>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-6 w-6" aria-label="Open lead menu">
-                      <MoreVertical className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => setProfileSheet({
-                      clientId: lead.client_id,
-                      name,
-                      avatar: lead.client_profile?.avatar_url || undefined,
-                    })}>
-                      <Eye className="w-4 h-4 mr-2" />
-                      View Profile
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={`/dashboard/coach/messages/${lead.client_id}`}>
-                        <MessageSquare className="w-4 h-4 mr-2" />
-                        Message
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setNotesModal({ lead, notes: lead.notes || '' })}>
-                      <StickyNote className="w-4 h-4 mr-2" />
-                      Edit Notes
-                    </DropdownMenuItem>
-                    {stageIndex < STAGES.length - 1 && (
-                      <DropdownMenuItem onClick={() => handleMoveToStage(lead, STAGES[stageIndex + 1].key)}>
-                        <ChevronRight className="w-4 h-4 mr-2" />
-                        Move to {STAGES[stageIndex + 1].label}
+              <div className="flex items-center justify-between gap-2">
+                <h4 className="font-semibold text-base truncate">{name}</h4>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  {/* Quick Action: Message */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    asChild
+                  >
+                    <Link to={`/dashboard/coach/messages/${lead.client_id}`}>
+                      <MessageSquare className="w-4 h-4" />
+                    </Link>
+                  </Button>
+                  
+                  {/* More Actions Dropdown */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Open lead menu">
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => setProfileSheet({
+                        clientId: lead.client_id,
+                        name,
+                        avatar: lead.client_profile?.avatar_url || undefined,
+                      })}>
+                        <Eye className="w-4 h-4 mr-2" />
+                        View Profile
                       </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem
-                      onClick={() => handleDelete(lead)}
-                      className="text-destructive focus:text-destructive"
-                    >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Remove
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                      <DropdownMenuItem onClick={() => setNotesModal({ lead, notes: lead.notes || '' })}>
+                        <StickyNote className="w-4 h-4 mr-2" />
+                        Edit Notes
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      {stageIndex < STAGES.length - 1 && (
+                        <DropdownMenuItem onClick={() => handleMoveToStage(lead, STAGES[stageIndex + 1].key)}>
+                          <ChevronRight className="w-4 h-4 mr-2" />
+                          Move to {STAGES[stageIndex + 1].label}
+                        </DropdownMenuItem>
+                      )}
+                      {stageIndex > 0 && (
+                        <DropdownMenuItem onClick={() => handleMoveToStage(lead, STAGES[stageIndex - 1].key)}>
+                          <ChevronRight className="w-4 h-4 mr-2 rotate-180" />
+                          Move to {STAGES[stageIndex - 1].label}
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => handleDelete(lead)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Remove
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
 
+              {/* Location */}
               {lead.client_profile?.location && (
-                <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
-                  <MapPin className="w-3 h-3" />
-                  {lead.client_profile.location}
+                <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-1">
+                  <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="truncate">{lead.client_profile.location}</span>
                 </div>
               )}
-
-              {lead.client_profile?.fitness_goals && lead.client_profile.fitness_goals.length > 0 && (
-                <div className="flex flex-wrap gap-1 mb-2">
-                  {lead.client_profile.fitness_goals.slice(0, 2).map((goal, i) => (
-                    <Badge key={i} variant="secondary" className="text-[10px] px-1.5 py-0">
-                      {goal}
-                    </Badge>
-                  ))}
-                  {lead.client_profile.fitness_goals.length > 2 && (
-                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                      +{lead.client_profile.fitness_goals.length - 2}
-                    </Badge>
-                  )}
-                </div>
-              )}
-
-              {lead.notes && (
-                <p className="text-xs text-muted-foreground truncate mb-1 flex items-center gap-1">
-                  <FileText className="w-3 h-3 flex-shrink-0" />
-                  {lead.notes}
-                </p>
-              )}
-
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] text-muted-foreground">
-                  {formatDistanceToNow(new Date(lead.created_at), { addSuffix: true })}
-                </span>
-                {lead.source && (
-                  <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                    {lead.source.replace('_', ' ')}
-                  </Badge>
-                )}
-              </div>
             </div>
+          </div>
+
+          {/* Goals */}
+          {lead.client_profile?.fitness_goals && lead.client_profile.fitness_goals.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-3">
+              {lead.client_profile.fitness_goals.slice(0, 3).map((goal, i) => (
+                <Badge key={i} variant="secondary" className="text-xs px-2 py-0.5">
+                  {goal}
+                </Badge>
+              ))}
+              {lead.client_profile.fitness_goals.length > 3 && (
+                <Badge variant="secondary" className="text-xs px-2 py-0.5">
+                  +{lead.client_profile.fitness_goals.length - 3}
+                </Badge>
+              )}
+            </div>
+          )}
+
+          {/* Notes */}
+          {lead.notes && (
+            <div className="mt-3 p-2.5 rounded-md bg-muted/50">
+              <p className="text-sm text-muted-foreground line-clamp-2 flex items-start gap-1.5">
+                <FileText className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+                <span>{lead.notes}</span>
+              </p>
+            </div>
+          )}
+
+          {/* Footer: Time + Source */}
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
+            <span className="text-xs text-muted-foreground">
+              {formatDistanceToNow(new Date(lead.created_at), { addSuffix: true })}
+            </span>
+            {lead.source && (
+              <Badge variant="outline" className="text-xs capitalize">
+                {lead.source.replace('_', ' ')}
+              </Badge>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -213,6 +297,14 @@ const CoachPipeline = () => {
       title="Sales Pipeline"
       description="Track and manage your leads from first contact to client conversion"
     >
+      {/* Header with Add Button */}
+      <div className="flex justify-end mb-4">
+        <Button onClick={() => setShowAddLeadModal(true)} size="sm">
+          <Plus className="w-4 h-4 mr-2" />
+          Add to Pipeline
+        </Button>
+      </div>
+      
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -246,6 +338,93 @@ const CoachPipeline = () => {
           ))}
         </div>
       )}
+
+      {/* Add to Pipeline Modal */}
+      <Dialog open={showAddLeadModal} onOpenChange={setShowAddLeadModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              Add to Pipeline
+            </DialogTitle>
+            <DialogDescription>
+              Add clients who have messaged you back to your pipeline
+            </DialogDescription>
+          </DialogHeader>
+          
+          {loadingClients ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            </div>
+          ) : availableClients.length === 0 ? (
+            <div className="py-8 text-center">
+              <Users className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
+              <p className="text-muted-foreground">No available clients to add</p>
+              <p className="text-sm text-muted-foreground/70 mt-1">
+                All clients who messaged you are already in the pipeline
+              </p>
+            </div>
+          ) : (
+            <ScrollArea className="max-h-[400px] pr-4">
+              <div className="space-y-2">
+                {availableClients.map((client) => (
+                  <div
+                    key={client.id}
+                    className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
+                  >
+                    <Avatar className="w-12 h-12">
+                      <AvatarImage src={client.avatar_url || undefined} />
+                      <AvatarFallback className="bg-primary/10 text-primary">
+                        {getInitials(client.first_name, client.last_name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{getClientName(client)}</p>
+                      {client.location && (
+                        <p className="text-sm text-muted-foreground flex items-center gap-1 truncate">
+                          <MapPin className="w-3 h-3 flex-shrink-0" />
+                          {client.location}
+                        </p>
+                      )}
+                      {client.fitness_goals && client.fitness_goals.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {client.fitness_goals.slice(0, 2).map((goal, i) => (
+                            <Badge key={i} variant="secondary" className="text-xs">
+                              {goal}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <Button
+                      size="sm"
+                      onClick={() => handleAddToPipeline(client.id)}
+                      disabled={addLead.isPending}
+                    >
+                      {addLead.isPending ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Plus className="w-4 h-4 mr-1" />
+                          Add
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          )}
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddLeadModal(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Notes Modal */}
       <Dialog open={!!notesModal} onOpenChange={() => setNotesModal(null)}>
