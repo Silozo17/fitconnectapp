@@ -4,12 +4,28 @@ import { NeonBadge } from "@/components/ui/neon-badge";
 import { DottedPattern } from "@/components/ui/dotted-pattern";
 import { Users, Award, Star, Zap, ArrowRight, Dumbbell, Salad, Swords } from "lucide-react";
 import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
+import { usePlatformStats } from "@/hooks/usePlatformStats";
+import { formatStatNumber } from "@/lib/formatStats";
 
 const Hero = () => {
+  const { data: platformStats, isLoading } = usePlatformStats();
+
   const stats = [
-    { icon: Users, value: "10K+", label: "Active Users" },
-    { icon: Award, value: "500+", label: "Expert Coaches" },
-    { icon: Star, value: "4.9", label: "Average Rating" },
+    { 
+      icon: Users, 
+      value: isLoading ? "..." : formatStatNumber(platformStats?.totalUsers || 0), 
+      label: "Active Users" 
+    },
+    { 
+      icon: Award, 
+      value: isLoading ? "..." : formatStatNumber(platformStats?.totalCoaches || 0), 
+      label: "Expert Coaches" 
+    },
+    { 
+      icon: Star, 
+      value: platformStats?.avgRating?.toFixed(1) || "4.9", 
+      label: "Average Rating" 
+    },
   ];
 
   return (
