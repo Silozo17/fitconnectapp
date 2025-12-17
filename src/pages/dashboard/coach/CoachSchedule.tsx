@@ -90,18 +90,28 @@ const CoachSchedule = () => {
   const [availEndTime, setAvailEndTime] = useState("18:00");
   const [availEnabled, setAvailEnabled] = useState(true);
 
-  // Get coach profile ID and currency
+  // Booking settings state
+  const [bookingMode, setBookingMode] = useState<"direct" | "message_first">("direct");
+  const [preBookingBuffer, setPreBookingBuffer] = useState("60");
+  const [postBookingBuffer, setPostBookingBuffer] = useState("15");
+  const [defaultLocation, setDefaultLocation] = useState("");
+
+  // Get coach profile ID, currency, and booking settings
   useEffect(() => {
     const fetchCoachProfile = async () => {
       if (!user) return;
       const { data } = await supabase
         .from("coach_profiles")
-        .select("id, currency")
+        .select("id, currency, booking_mode, pre_booking_buffer_minutes, post_booking_buffer_minutes, default_session_location")
         .eq("user_id", user.id)
         .maybeSingle();
       if (data) {
         setCoachId(data.id);
         setCoachCurrency((data.currency as CurrencyCode) || "GBP");
+        setBookingMode((data.booking_mode as "direct" | "message_first") || "direct");
+        setPreBookingBuffer(String(data.pre_booking_buffer_minutes || 60));
+        setPostBookingBuffer(String(data.post_booking_buffer_minutes || 15));
+        setDefaultLocation(data.default_session_location || "");
       }
     };
     fetchCoachProfile();
@@ -287,6 +297,27 @@ const CoachSchedule = () => {
     setAvailEndTime(existing?.end_time?.slice(0, 5) || "18:00");
     setAvailEnabled(existing?.is_active ?? true);
     setShowAvailabilityModal(true);
+  };
+
+  // Save booking settings
+  const handleSaveBookingSettings = async () => {
+    if (!coachId) return;
+    
+    const { error } = await supabase
+      .from("coach_profiles")
+      .update({
+        booking_mode: bookingMode,
+        pre_booking_buffer_minutes: parseInt(preBookingBuffer),
+        post_booking_buffer_minutes: parseInt(postBookingBuffer),
+        default_session_location: defaultLocation || null,
+      })
+      .eq("id", coachId);
+    
+    if (error) {
+      toast.error("Failed to save booking settings");
+    } else {
+      toast.success("Booking settings saved");
+    }
   };
 
   const getSessionForSlot = (dayIndex: number, time: string) => {
@@ -487,7 +518,103 @@ const CoachSchedule = () => {
         </TabsContent>
 
         {/* Availability Tab */}
-        <TabsContent value="availability">
+        <TabsContent value="availability" className="space-y-6">
+          {/* Booking Settings Card */}
+          <div className="card-elevated">
+            <div className="p-4 border-b border-border">
+              <h3 className="font-display font-bold text-foreground">Booking Settings</h3>
+              <p className="text-sm text-muted-foreground">Control how clients can book with you</p>
+            </div>
+            <div className="p-4 space-y-6">
+              {/* Booking Approval */}
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="font-medium">Require approval for bookings</Label>
+                  <p className="text-sm text-muted-foreground">
+                    When enabled, you must approve each booking before it's confirmed
+                  </p>
+                </div>
+                <Switch
+                  checked={bookingMode === "message_first"}
+                  onCheckedChange={(checked) => setBookingMode(checked ? "message_first" : "direct")}
+                />
+              </div>
+
+              {/* Pre-booking Buffer */}
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Minimum notice before booking</Label>
+                  <Select value={preBookingBuffer} onValueChange={setPreBookingBuffer}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="60">1 hour</SelectItem>
+                      <SelectItem value="120">2 hours</SelectItem>
+                      <SelectItem value="240">4 hours</SelectItem>
+                      <SelectItem value="720">12 hours</SelectItem>
+                      <SelectItem value="1440">24 hours</SelectItem>
+                      <SelectItem value="2880">48 hours</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Clients must book at least this far in advance
+                  </p>
+                </div>
+
+                {/* Post-booking Buffer */}
+                <div className="space-y-2">
+                  <Label>Buffer between sessions</Label>
+                  <Select value={postBookingBuffer} onValueChange={setPostBookingBuffer}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="0">No buffer</SelectItem>
+                      <SelectItem value="15">15 minutes</SelectItem>
+                      <SelectItem value="30">30 minutes</SelectItem>
+                      <SelectItem value="45">45 minutes</SelectItem>
+                      <SelectItem value="60">1 hour</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Time blocked after each session ends
+                  </p>
+                </div>
+              </div>
+
+              {/* Default Location */}
+              <div className="space-y-2">
+                <Label>Default session location</Label>
+                <Input
+                  placeholder="e.g., PureGym Manchester, 123 Main St"
+                  value={defaultLocation}
+                  onChange={(e) => setDefaultLocation(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Default location for in-person sessions (can be overridden per session type)
+                </p>
+              </div>
+
+              {/* Save Button */}
+              <div className="flex justify-end pt-2">
+                <Button onClick={handleSaveBookingSettings}>
+                  Save Settings
+                </Button>
+              </div>
+
+              {/* Info about deposits */}
+              <div className="flex items-start gap-3 p-3 bg-secondary/50 rounded-lg text-sm">
+                <AlertCircle className="w-4 h-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+                <p className="text-muted-foreground">
+                  Deposits and payment requirements are configured per session type below. 
+                  Edit a session type to set up deposits or require full payment upfront.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Weekly Availability Card */}
           <div className="card-elevated">
             <div className="p-4 border-b border-border">
               <h3 className="font-display font-bold text-foreground">Weekly Availability</h3>
