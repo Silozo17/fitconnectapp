@@ -226,11 +226,13 @@ export type Database = {
       avatars: {
         Row: {
           category: string
+          challenge_id: string | null
           created_at: string | null
           description: string | null
           id: string
           image_url: string | null
           is_active: boolean | null
+          is_challenge_exclusive: boolean | null
           name: string
           rarity: string
           slug: string
@@ -240,11 +242,13 @@ export type Database = {
         }
         Insert: {
           category?: string
+          challenge_id?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          is_challenge_exclusive?: boolean | null
           name: string
           rarity?: string
           slug: string
@@ -254,11 +258,13 @@ export type Database = {
         }
         Update: {
           category?: string
+          challenge_id?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          is_challenge_exclusive?: boolean | null
           name?: string
           rarity?: string
           slug?: string
@@ -266,11 +272,20 @@ export type Database = {
           unlock_threshold?: number | null
           unlock_type?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "avatars_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       badges: {
         Row: {
           category: string
+          challenge_id: string | null
           created_at: string
           criteria: Json
           description: string
@@ -278,12 +293,14 @@ export type Database = {
           id: string
           image_url: string | null
           is_active: boolean | null
+          is_challenge_exclusive: boolean | null
           name: string
           rarity: string
           xp_reward: number
         }
         Insert: {
           category?: string
+          challenge_id?: string | null
           created_at?: string
           criteria?: Json
           description: string
@@ -291,12 +308,14 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          is_challenge_exclusive?: boolean | null
           name: string
           rarity?: string
           xp_reward?: number
         }
         Update: {
           category?: string
+          challenge_id?: string | null
           created_at?: string
           criteria?: Json
           description?: string
@@ -304,11 +323,20 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          is_challenge_exclusive?: boolean | null
           name?: string
           rarity?: string
           xp_reward?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "badges_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       booking_requests: {
         Row: {
@@ -628,6 +656,7 @@ export type Database = {
       challenges: {
         Row: {
           admin_created_by: string | null
+          avatar_reward_id: string | null
           badge_reward_id: string | null
           challenge_type: string
           created_at: string
@@ -639,6 +668,7 @@ export type Database = {
           is_active: boolean | null
           max_participants: number | null
           requires_verification: boolean | null
+          reward_type: string | null
           start_date: string
           target_audience: string | null
           target_unit: string
@@ -650,6 +680,7 @@ export type Database = {
         }
         Insert: {
           admin_created_by?: string | null
+          avatar_reward_id?: string | null
           badge_reward_id?: string | null
           challenge_type?: string
           created_at?: string
@@ -661,6 +692,7 @@ export type Database = {
           is_active?: boolean | null
           max_participants?: number | null
           requires_verification?: boolean | null
+          reward_type?: string | null
           start_date?: string
           target_audience?: string | null
           target_unit?: string
@@ -672,6 +704,7 @@ export type Database = {
         }
         Update: {
           admin_created_by?: string | null
+          avatar_reward_id?: string | null
           badge_reward_id?: string | null
           challenge_type?: string
           created_at?: string
@@ -683,6 +716,7 @@ export type Database = {
           is_active?: boolean | null
           max_participants?: number | null
           requires_verification?: boolean | null
+          reward_type?: string | null
           start_date?: string
           target_audience?: string | null
           target_unit?: string
@@ -698,6 +732,13 @@ export type Database = {
             columns: ["admin_created_by"]
             isOneToOne: false
             referencedRelation: "admin_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenges_avatar_reward_id_fkey"
+            columns: ["avatar_reward_id"]
+            isOneToOne: false
+            referencedRelation: "avatars"
             referencedColumns: ["id"]
           },
           {

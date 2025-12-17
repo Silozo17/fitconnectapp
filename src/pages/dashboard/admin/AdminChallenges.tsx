@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Plus, Search, Trophy, Users, Calendar, Target, 
-  MoreHorizontal, Edit, Trash2, Sparkles, Loader2 
+  MoreHorizontal, Edit, Trash2, Sparkles, Loader2, Gift 
 } from 'lucide-react';
 import { format, isPast, isFuture, isWithinInterval } from 'date-fns';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -34,6 +34,13 @@ import {
 import { CreateChallengeModal } from '@/components/admin/CreateChallengeModal';
 import { CHALLENGE_TYPES } from '@/hooks/useChallenges';
 
+interface ChallengeReward {
+  id: string;
+  name: string;
+  rarity: string;
+  image_url: string | null;
+}
+
 interface Challenge {
   id: string;
   title: string;
@@ -49,6 +56,9 @@ interface Challenge {
   target_audience: string;
   max_participants: number | null;
   participant_count?: number;
+  reward_type: 'badge' | 'avatar' | null;
+  avatar_reward?: ChallengeReward | null;
+  badge_reward?: ChallengeReward | null;
 }
 
 export default function AdminChallenges() {
@@ -65,7 +75,12 @@ export default function AdminChallenges() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('challenges')
-        .select('*, challenge_participants(count)')
+        .select(`
+          *, 
+          challenge_participants(count),
+          avatar_reward:avatar_reward_id(id, name, rarity, image_url),
+          badge_reward:badge_reward_id(id, name, rarity, image_url)
+        `)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -73,6 +88,8 @@ export default function AdminChallenges() {
       return (data || []).map(c => ({
         ...c,
         participant_count: (c.challenge_participants as any)?.[0]?.count || 0,
+        avatar_reward: c.avatar_reward as ChallengeReward | null,
+        badge_reward: c.badge_reward as ChallengeReward | null,
       })) as Challenge[];
     },
   });
@@ -135,6 +152,12 @@ export default function AdminChallenges() {
               <h3 className="font-medium">{challenge.title}</h3>
               <Badge variant={status.variant}>{status.label}</Badge>
               <Badge variant="outline" className="capitalize">{challenge.target_audience}</Badge>
+              {(challenge.avatar_reward || challenge.badge_reward) && (
+                <Badge variant="outline" className="bg-primary/10 border-primary/30 text-primary gap-1">
+                  <Gift className="h-3 w-3" />
+                  {challenge.reward_type === 'avatar' ? 'Avatar' : 'Badge'}
+                </Badge>
+              )}
             </div>
             <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
               <span className="flex items-center gap-1">

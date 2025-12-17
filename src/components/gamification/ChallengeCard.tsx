@@ -5,8 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { format, differenceInDays, isAfter, isBefore } from 'date-fns';
-import { Calendar, Users, Zap, Trophy, Clock, Target, ShieldCheck, Watch, AlertTriangle } from 'lucide-react';
+import { Calendar, Users, Zap, Trophy, Clock, Target, ShieldCheck, Watch, AlertTriangle, Gift } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ChallengeRewardPreview } from './ChallengeRewardPreview';
 
 interface ChallengeCardProps {
   challenge: Challenge;
@@ -87,6 +88,11 @@ export function ChallengeCard({ challenge, showJoinButton = true, showProgress =
   const unverifiedProgress = challenge.my_participation?.unverified_progress || 0;
   const showVerifiedSplit = isWearableChallenge && (verifiedProgress > 0 || unverifiedProgress > 0);
   
+  // Get reward data
+  const reward = challenge.avatar_reward || challenge.badge_reward;
+  const rewardType = challenge.reward_type;
+  const isRewardUnlocked = challenge.my_participation?.status === 'completed';
+  
   return (
     <Card className={cn(
       'transition-all',
@@ -139,6 +145,18 @@ export function ChallengeCard({ challenge, showJoinButton = true, showProgress =
           <div className="text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
             <span className="font-medium">{challengeType.label}:</span> {challengeType.description}
           </div>
+        )}
+        
+        {/* Exclusive Reward Preview */}
+        {reward && rewardType && (
+          <ChallengeRewardPreview
+            rewardType={rewardType}
+            rewardName={reward.name}
+            rewardDescription={reward.description}
+            rewardImageUrl={reward.image_url}
+            rarity={reward.rarity}
+            isUnlocked={isRewardUnlocked}
+          />
         )}
         
         {showProgress && isJoined && (

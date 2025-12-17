@@ -15,6 +15,8 @@ export interface Avatar {
   rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
   sort_order: number;
   is_active: boolean;
+  is_challenge_exclusive?: boolean;
+  challenge_id?: string | null;
 }
 
 export interface UserAvatar {
@@ -166,6 +168,10 @@ export function useCheckAvatarUnlocks() {
       
       for (const avatar of avatars) {
         if (unlockedIds.has(avatar.id)) continue;
+        
+        // Skip challenge-exclusive avatars - they can only be earned via challenge completion
+        if (avatar.is_challenge_exclusive) continue;
+        
         if (avatar.category === 'free') {
           // Auto-unlock free avatars
           await unlockAvatar.mutateAsync({ avatarId: avatar.id, source: 'default' });
