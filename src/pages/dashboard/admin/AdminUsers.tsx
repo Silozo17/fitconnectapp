@@ -176,7 +176,7 @@ const AdminUsers = () => {
       toast.error("Failed to delete user");
       console.error(error);
     } else {
-      logAction.mutate({
+      logAction.log({
         action: "DELETE_USER",
         entityType: "client_profiles",
         entityId: userId,
@@ -206,7 +206,7 @@ const AdminUsers = () => {
         throw new Error(response.error.message || "Failed to reset password");
       }
 
-      logAction.mutate({
+      logAction.log({
         action: "RESET_PASSWORD",
         entityType: "client_profiles",
         entityId: user.id,

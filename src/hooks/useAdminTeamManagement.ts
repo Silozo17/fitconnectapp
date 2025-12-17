@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 export const useAdminTeamManagement = () => {
   const [loading, setLoading] = useState(false);
-  const { mutateAsync: logAction } = useLogAdminAction();
+  const logAction = useLogAdminAction();
 
   const getUserEmail = async (userId: string): Promise<string | null> => {
     try {
@@ -42,7 +42,7 @@ export const useAdminTeamManagement = () => {
 
       if (error) throw error;
 
-      await logAction({
+      await logAction.log({
         action: `team_${status}`,
         entityType: "team_member",
         entityId: profileId,
@@ -78,7 +78,7 @@ export const useAdminTeamManagement = () => {
 
       if (error) throw error;
 
-      await logAction({
+      await logAction.log({
         action: `bulk_team_${status}`,
         entityType: "team_member",
         entityId: members.map((m) => m.id).join(","),
@@ -110,7 +110,7 @@ export const useAdminTeamManagement = () => {
 
       if (error) throw error;
 
-      await logAction({
+      await logAction.log({
         action: "bulk_team_delete",
         entityType: "team_member",
         entityId: members.map((m) => m.id).join(","),
@@ -136,7 +136,7 @@ export const useAdminTeamManagement = () => {
 
       if (error) throw error;
 
-      await logAction({
+      await logAction.log({
         action: "team_password_reset",
         entityType: "team_member",
         entityId: profileId,

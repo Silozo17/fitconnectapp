@@ -188,7 +188,7 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved, onEdit, on
 
       if (error) throw error;
 
-      logAction.mutate({
+      logAction.log({
         action: "UPDATE_USER",
         entityType: "client_profiles",
         entityId: user.id,

@@ -68,7 +68,7 @@ export const AccountStatusModal = ({
 
       if (error) throw error;
 
-      logAction.mutate({
+      logAction.log({
         action: `UPDATE_STATUS_${status.toUpperCase()}`,
         entityType: userType === "coach" ? "coach_profiles" : "client_profiles",
         entityId: user.id,

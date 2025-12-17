@@ -117,7 +117,7 @@ const AdminCoaches = () => {
       toast.error("Failed to delete coach");
       console.error(error);
     } else {
-      logAction.mutate({
+      logAction.log({
         action: "DELETE_COACH",
         entityType: "coach_profiles",
         entityId: coach.id,
@@ -148,7 +148,7 @@ const AdminCoaches = () => {
         throw new Error(response.error.message || "Failed to reset password");
       }
 
-      logAction.mutate({
+      logAction.log({
         action: "RESET_PASSWORD",
         entityType: "coach_profiles",
         entityId: coach.id,
