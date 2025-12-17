@@ -1,4 +1,4 @@
-import { Trophy, Star, Check, Dumbbell } from "lucide-react";
+import { Trophy, Star, Check, Dumbbell, Lock } from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { useCoachBadges, useAvailableCoachBadges, useCoachStats } from "@/hooks/useCoachGamification";
 import { useCoachProfileCompletion } from "@/hooks/useCoachProfileCompletion";
@@ -6,6 +6,7 @@ import { useAutoAwardCoachBadges } from "@/hooks/useAutoAwardCoachBadges";
 import { useFeaturedBadges } from "@/hooks/useFeaturedBadges";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
@@ -33,6 +34,91 @@ const rarityOrder: Record<string, number> = {
   legendary: 4,
 };
 
+interface BadgeProgress {
+  current: number;
+  target: number;
+  percentage: number;
+  label: string;
+}
+
+const calculateBadgeProgress = (
+  criteria: Record<string, unknown> | null,
+  stats: { clientCount: number; sessionCount: number; reviewCount: number; averageRating: number; isVerified: boolean } | null,
+  profileCompletionPercent: number
+): BadgeProgress => {
+  const criteriaType = criteria?.type as string;
+  const criteriaValue = (criteria?.value as number) || 0;
+
+  switch (criteriaType) {
+    case "profile_completion": {
+      const current = profileCompletionPercent;
+      return {
+        current,
+        target: criteriaValue,
+        percentage: Math.min((current / criteriaValue) * 100, 100),
+        label: `${current}% / ${criteriaValue}%`,
+      };
+    }
+    case "client_count": {
+      const current = stats?.clientCount || 0;
+      return {
+        current,
+        target: criteriaValue,
+        percentage: Math.min((current / criteriaValue) * 100, 100),
+        label: `${current} / ${criteriaValue} clients`,
+      };
+    }
+    case "session_count": {
+      const current = stats?.sessionCount || 0;
+      return {
+        current,
+        target: criteriaValue,
+        percentage: Math.min((current / criteriaValue) * 100, 100),
+        label: `${current} / ${criteriaValue} sessions`,
+      };
+    }
+    case "review_count": {
+      const current = stats?.reviewCount || 0;
+      return {
+        current,
+        target: criteriaValue,
+        percentage: Math.min((current / criteriaValue) * 100, 100),
+        label: `${current} / ${criteriaValue} reviews`,
+      };
+    }
+    case "rating_threshold": {
+      const minReviews = (criteria?.min_reviews as number) || 5;
+      const targetRating = (criteria?.rating as number) || criteriaValue;
+      const currentRating = stats?.averageRating || 0;
+      const hasEnoughReviews = (stats?.reviewCount || 0) >= minReviews;
+      return {
+        current: currentRating,
+        target: targetRating,
+        percentage: hasEnoughReviews ? Math.min((currentRating / targetRating) * 100, 100) : 0,
+        label: hasEnoughReviews 
+          ? `${currentRating.toFixed(1)} / ${targetRating} rating`
+          : `Need ${minReviews} reviews first`,
+      };
+    }
+    case "verification": {
+      const isVerified = stats?.isVerified || false;
+      return {
+        current: isVerified ? 1 : 0,
+        target: 1,
+        percentage: isVerified ? 100 : 0,
+        label: isVerified ? "Verified" : "Get verified",
+      };
+    }
+    default:
+      return {
+        current: 0,
+        target: 1,
+        percentage: 0,
+        label: "In progress",
+      };
+  }
+};
+
 const CoachAchievements = () => {
   const { data: earnedBadges, isLoading: badgesLoading } = useCoachBadges();
   const { data: availableBadges, isLoading: availableLoading } = useAvailableCoachBadges();
@@ -47,16 +133,16 @@ const CoachAchievements = () => {
 
   const earnedBadgeIds = new Set(earnedBadges?.map((b) => b.badge_id) || []);
   const featuredCount = earnedBadges?.filter((b) => b.is_featured).length || 0;
+  const profileCompletionPercent = profileCompletion?.percentage || 0;
 
-  // Filter to only earned badges and sort by rarity
-  const getEarnedBadgesByCategory = (category: string) => {
+  // Get ALL badges by category and sort by rarity
+  const getBadgesByCategory = (category: string) => {
     const categoryBadges = availableBadges?.filter((b) => b.category === category) || [];
-    const earnedOnly = categoryBadges.filter((b) => earnedBadgeIds.has(b.id));
-    return earnedOnly.sort((a, b) => rarityOrder[a.rarity] - rarityOrder[b.rarity]);
+    return categoryBadges.sort((a, b) => rarityOrder[a.rarity] - rarityOrder[b.rarity]);
   };
 
-  const profileBadges = getEarnedBadgesByCategory("coach_profile");
-  const milestoneBadges = getEarnedBadgesByCategory("coach_milestone");
+  const profileBadges = getBadgesByCategory("coach_profile");
+  const milestoneBadges = getBadgesByCategory("coach_milestone");
 
   const handleToggleFeatured = (coachBadgeId: string, currentlyFeatured: boolean) => {
     toggleFeatured({ coachBadgeId, currentlyFeatured, currentFeaturedCount: featuredCount });
@@ -75,55 +161,84 @@ const CoachAchievements = () => {
   }
 
   const renderBadgeCard = (badge: typeof availableBadges[0]) => {
+    const isEarned = earnedBadgeIds.has(badge.id);
     const earnedData = earnedBadges?.find((b) => b.badge_id === badge.id);
+    const progress = !isEarned 
+      ? calculateBadgeProgress(badge.criteria as Record<string, unknown>, stats || null, profileCompletionPercent)
+      : null;
 
     return (
       <div
         key={badge.id}
         className={cn(
           "p-4 rounded-xl border-2 transition-all",
-          rarityColors[badge.rarity]
+          isEarned ? rarityColors[badge.rarity] : "border-muted/50 bg-muted/10 opacity-80"
         )}
       >
         <div className="flex flex-col sm:flex-row items-start gap-4">
           {/* Left side - Text content */}
           <div className="flex-1 min-w-0 order-2 sm:order-1">
-            <h3 className="font-semibold text-foreground text-lg">{badge.name}</h3>
+            <h3 className={cn("font-semibold text-lg", isEarned ? "text-foreground" : "text-muted-foreground")}>
+              {badge.name}
+            </h3>
             <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{badge.description}</p>
             
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <span className={cn("text-xs font-medium capitalize px-2 py-0.5 rounded-full", rarityTextColors[badge.rarity], "bg-background/50")}>
+                <span className={cn(
+                  "text-xs font-medium capitalize px-2 py-0.5 rounded-full bg-background/50",
+                  isEarned ? rarityTextColors[badge.rarity] : "text-muted-foreground"
+                )}>
                   {badge.rarity}
                 </span>
-                <span className="text-xs text-muted-foreground">
-                  Earned {format(new Date(earnedData!.earned_at), "MMM d, yyyy")}
-                </span>
+                {isEarned && earnedData && (
+                  <span className="text-xs text-muted-foreground">
+                    Earned {format(new Date(earnedData.earned_at), "MMM d, yyyy")}
+                  </span>
+                )}
               </div>
-              <Button
-                size="sm"
-                variant={earnedData?.is_featured ? "default" : "outline"}
-                className="h-8 text-xs"
-                onClick={() => handleToggleFeatured(earnedData!.id, earnedData!.is_featured)}
-                disabled={isUpdating || (!earnedData?.is_featured && featuredCount >= MAX_FEATURED_BADGES)}
-              >
-                <Star className={cn("h-3 w-3 mr-1", earnedData?.is_featured && "fill-current")} />
-                {earnedData?.is_featured ? "Featured" : "Feature on Profile"}
-              </Button>
+
+              {/* Progress bar for unearned badges */}
+              {!isEarned && progress && (
+                <div className="space-y-1">
+                  <Progress value={progress.percentage} className="h-2" />
+                  <p className="text-xs text-muted-foreground">{progress.label}</p>
+                </div>
+              )}
+
+              {/* Feature button for earned badges */}
+              {isEarned && earnedData && (
+                <Button
+                  size="sm"
+                  variant={earnedData.is_featured ? "default" : "outline"}
+                  className="h-8 text-xs"
+                  onClick={() => handleToggleFeatured(earnedData.id, earnedData.is_featured)}
+                  disabled={isUpdating || (!earnedData.is_featured && featuredCount >= MAX_FEATURED_BADGES)}
+                >
+                  <Star className={cn("h-3 w-3 mr-1", earnedData.is_featured && "fill-current")} />
+                  {earnedData.is_featured ? "Featured" : "Feature on Profile"}
+                </Button>
+              )}
             </div>
           </div>
 
-          {/* Right side - Badge image */}
+          {/* Right side - Badge image or Lock icon */}
           <div className="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 order-1 sm:order-2 self-center sm:self-start">
-            {badge.image_url ? (
-              <img 
-                src={badge.image_url} 
-                alt={badge.name} 
-                className="w-full h-full object-contain drop-shadow-lg"
-              />
+            {isEarned ? (
+              badge.image_url ? (
+                <img 
+                  src={badge.image_url} 
+                  alt={badge.name} 
+                  className="w-full h-full object-contain drop-shadow-lg"
+                />
+              ) : (
+                <div className="w-full h-full rounded-xl bg-background/50 flex items-center justify-center">
+                  <Trophy className="w-10 h-10 text-primary" />
+                </div>
+              )
             ) : (
-              <div className="w-full h-full rounded-xl bg-background/50 flex items-center justify-center">
-                <Trophy className="w-10 h-10 text-primary" />
+              <div className="w-full h-full rounded-xl bg-muted/30 flex items-center justify-center border border-muted">
+                <Lock className="w-10 h-10 text-muted-foreground/50" />
               </div>
             )}
           </div>
@@ -132,7 +247,8 @@ const CoachAchievements = () => {
     );
   };
 
-  const totalEarned = profileBadges.length + milestoneBadges.length;
+  const totalEarned = earnedBadges?.length || 0;
+  const totalAvailable = availableBadges?.length || 0;
 
   return (
     <DashboardLayout title="Achievements" description="Track your coaching milestones and badges">
@@ -140,7 +256,7 @@ const CoachAchievements = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div className="card-elevated p-4 text-center">
           <Trophy className="w-8 h-8 text-primary mx-auto mb-2" />
-          <p className="text-2xl font-bold text-foreground">{totalEarned}</p>
+          <p className="text-2xl font-bold text-foreground">{totalEarned}/{totalAvailable}</p>
           <p className="text-sm text-muted-foreground">Badges Earned</p>
         </div>
         <div className="card-elevated p-4 text-center">
@@ -184,12 +300,12 @@ const CoachAchievements = () => {
         </div>
       )}
 
-      {/* Empty State */}
-      {totalEarned === 0 && (
+      {/* Empty State - only if no badges exist at all */}
+      {totalAvailable === 0 && (
         <div className="text-center py-12">
           <Trophy className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-foreground mb-2">No badges earned yet</h3>
-          <p className="text-muted-foreground">Complete your profile and reach milestones to earn badges!</p>
+          <h3 className="text-lg font-semibold text-foreground mb-2">No badges available</h3>
+          <p className="text-muted-foreground">Check back later for achievements to unlock!</p>
         </div>
       )}
     </DashboardLayout>
