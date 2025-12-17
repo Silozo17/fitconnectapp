@@ -6,12 +6,19 @@ import { format, addDays, startOfWeek, isSameDay, isAfter, setHours, setMinutes,
 import { cn } from "@/lib/utils";
 import type { CoachAvailability } from "@/hooks/useCoachSchedule";
 
+interface BookedSession {
+  date: string;
+  time: string;
+  duration_minutes: number;
+}
+
 interface AvailabilityCalendarProps {
   availability: CoachAvailability[];
-  bookedSlots?: { date: string; time: string }[];
+  bookedSessions?: BookedSession[];
   onSelectSlot?: (date: Date, time: string) => void;
   selectedDate?: Date | null;
   selectedTime?: string | null;
+  sessionDuration?: number; // Duration of session being booked
 }
 
 const timeSlots = [
@@ -24,16 +31,57 @@ const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const AvailabilityCalendar = ({
   availability,
-  bookedSlots = [],
+  bookedSessions = [],
   onSelectSlot,
   selectedDate,
   selectedTime,
+  sessionDuration = 60,
 }: AvailabilityCalendarProps) => {
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
 
   const weekDays = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   }, [weekStart]);
+
+  // Calculate how many 30-min slots the session takes
+  const slotsNeeded = Math.ceil(sessionDuration / 30);
+
+  // Check if a slot overlaps with any booked session
+  const isSlotBlockedByBooking = (date: Date, time: string) => {
+    const [hours, minutes] = time.split(":").map(Number);
+    const slotStart = setMinutes(setHours(date, hours), minutes);
+    const slotEnd = new Date(slotStart.getTime() + 30 * 60 * 1000); // 30-min slot
+
+    return bookedSessions.some((session) => {
+      const sessionDate = parseISO(session.date);
+      if (!isSameDay(sessionDate, date)) return false;
+
+      const [sessionHours, sessionMinutes] = session.time.split(":").map(Number);
+      const sessionStart = setMinutes(setHours(sessionDate, sessionHours), sessionMinutes);
+      const sessionEnd = new Date(sessionStart.getTime() + session.duration_minutes * 60 * 1000);
+
+      // Check if slot overlaps with session
+      return slotStart < sessionEnd && slotEnd > sessionStart;
+    });
+  };
+
+  // Check if booking a session at this slot would fit without overlapping
+  const wouldSessionFit = (date: Date, time: string) => {
+    const [hours, minutes] = time.split(":").map(Number);
+    const proposedStart = setMinutes(setHours(date, hours), minutes);
+    const proposedEnd = new Date(proposedStart.getTime() + sessionDuration * 60 * 1000);
+
+    return !bookedSessions.some((session) => {
+      const sessionDate = parseISO(session.date);
+      if (!isSameDay(sessionDate, date)) return false;
+
+      const [sessionHours, sessionMinutes] = session.time.split(":").map(Number);
+      const sessionStart = setMinutes(setHours(sessionDate, sessionHours), sessionMinutes);
+      const sessionEnd = new Date(sessionStart.getTime() + session.duration_minutes * 60 * 1000);
+
+      return proposedStart < sessionEnd && proposedEnd > sessionStart;
+    });
+  };
 
   const isSlotAvailable = (date: Date, time: string) => {
     const dayOfWeek = date.getDay();
@@ -51,18 +99,25 @@ const AvailabilityCalendar = ({
     const [endHours, endMinutes] = dayAvailability.end_time.split(":").map(Number);
     const endTime = setMinutes(setHours(new Date(), endHours), endMinutes);
     
-    if (slotTime < startTime || slotTime >= endTime) return false;
+    // Check if the session would end after availability window
+    const sessionEndTime = new Date(slotTime.getTime() + sessionDuration * 60 * 1000);
+    const sessionEndHours = sessionEndTime.getHours();
+    const sessionEndMinutes = sessionEndTime.getMinutes();
+    const sessionEndTimeOnly = setMinutes(setHours(new Date(), sessionEndHours), sessionEndMinutes);
     
-    // Check if slot is not booked
-    const isBooked = bookedSlots.some(
-      slot => isSameDay(parseISO(slot.date), date) && slot.time === time
-    );
+    if (slotTime < startTime || sessionEndTimeOnly > endTime) return false;
+    
+    // Check if slot is blocked by existing bookings
+    if (isSlotBlockedByBooking(date, time)) return false;
+    
+    // Check if the full session duration would fit without overlapping
+    if (!wouldSessionFit(date, time)) return false;
     
     // Check if slot is not in the past
     const slotDateTime = setMinutes(setHours(date, hours), minutes);
     const isPast = !isAfter(slotDateTime, new Date());
     
-    return !isBooked && !isPast;
+    return !isPast;
   };
 
   const isSelected = (date: Date, time: string) => {

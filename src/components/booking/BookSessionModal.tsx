@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { format, setHours, setMinutes } from "date-fns";
+import { useState, useMemo } from "react";
+import { format, setHours, setMinutes, parseISO } from "date-fns";
 import { Calendar, Clock, Video, MapPin, MessageSquare, Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -16,6 +16,8 @@ import { Badge } from "@/components/ui/badge";
 import { useCoachAvailability, useSessionTypes, useCreateBookingRequest } from "@/hooks/useCoachSchedule";
 import AvailabilityCalendar from "./AvailabilityCalendar";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface BookSessionModalProps {
   open: boolean;
@@ -40,6 +42,28 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
   const { data: availability = [] } = useCoachAvailability(coach.id);
   const { data: sessionTypes = [] } = useSessionTypes(coach.id);
   const createBooking = useCreateBookingRequest();
+
+  // Fetch existing booked sessions for this coach
+  const { data: bookedSessions = [] } = useQuery({
+    queryKey: ["coach-booked-sessions", coach.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("coaching_sessions")
+        .select("scheduled_at, duration_minutes")
+        .eq("coach_id", coach.id)
+        .in("status", ["scheduled", "confirmed"])
+        .gte("scheduled_at", new Date().toISOString());
+
+      if (error) throw error;
+
+      return (data || []).map((session) => ({
+        date: session.scheduled_at.split("T")[0],
+        time: format(parseISO(session.scheduled_at), "HH:mm"),
+        duration_minutes: session.duration_minutes,
+      }));
+    },
+    enabled: open,
+  });
 
   const selectedSessionType = sessionTypes.find(t => t.id === selectedType);
   const isMessageFirst = coach.booking_mode === "message_first";
@@ -207,9 +231,11 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
           <div className="space-y-4 py-4">
             <AvailabilityCalendar
               availability={availability}
+              bookedSessions={bookedSessions}
               onSelectSlot={handleSlotSelect}
               selectedDate={selectedDate}
               selectedTime={selectedTime}
+              sessionDuration={selectedSessionType?.duration_minutes || 60}
             />
 
             {/* Online/In-Person Toggle */}
