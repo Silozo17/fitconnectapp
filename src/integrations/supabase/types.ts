@@ -2441,6 +2441,51 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback: {
+        Row: {
+          admin_notes: string | null
+          category: string
+          created_at: string | null
+          id: string
+          message: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          subject: string
+          updated_at: string | null
+          user_id: string
+          user_type: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          category?: string
+          created_at?: string | null
+          id?: string
+          message: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          subject: string
+          updated_at?: string | null
+          user_id: string
+          user_type: string
+        }
+        Update: {
+          admin_notes?: string | null
+          category?: string
+          created_at?: string | null
+          id?: string
+          message?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          subject?: string
+          updated_at?: string | null
+          user_id?: string
+          user_type?: string
+        }
+        Relationships: []
+      }
       food_categories: {
         Row: {
           color: string | null

@@ -57,6 +57,10 @@ export const getNotificationRoute = (
         ? `${baseRoute}/challenges`
         : null;
     
+    case "feedback_update":
+      // Users see feedback update notifications - no specific page to navigate to
+      return null;
+    
     default:
       return null;
   }

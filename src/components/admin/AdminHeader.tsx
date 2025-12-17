@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import ViewSwitcher from "./ViewSwitcher";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { UserAvatar } from "@/components/shared/UserAvatar";
+import { FeedbackModal } from "@/components/feedback/FeedbackModal";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,6 +53,8 @@ const AdminHeader = ({ onMenuToggle }: AdminHeaderProps) => {
 
       <div className="flex items-center gap-2 sm:gap-4">
         <ViewSwitcher />
+        
+        <FeedbackModal />
         
         <NotificationCenter />
 
