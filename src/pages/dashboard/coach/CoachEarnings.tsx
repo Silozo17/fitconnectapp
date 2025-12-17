@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   TrendingUp,
   TrendingDown,
@@ -13,6 +14,7 @@ import {
   Loader2,
   AlertCircle,
   ExternalLink,
+  Info,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,20 +26,38 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { useLocale } from "@/contexts/LocaleContext";
-import { useCoachEarnings, useCoachProfile } from "@/hooks/useCoachEarnings";
+import { useCoachEarnings, useCoachProfile, useStripeExpressLogin } from "@/hooks/useCoachEarnings";
 import { format } from "date-fns";
 
+type PeriodType = "week" | "month" | "quarter" | "year";
+
 const CoachEarnings = () => {
+  const navigate = useNavigate();
   const { formatCurrency } = useLocale();
-  const [period, setPeriod] = useState("month");
+  const [period, setPeriod] = useState<PeriodType>("month");
   
   const { data: coachProfile, isLoading: profileLoading } = useCoachProfile();
-  const { transactions, stats, monthlyData, isLoading } = useCoachEarnings(coachProfile?.id || null);
+  const { transactions, stats, monthlyData, isLoading } = useCoachEarnings(coachProfile?.id || null, period);
+  const stripeExpressLogin = useStripeExpressLogin();
 
   const hasStripeConnected = coachProfile?.stripe_connect_onboarded;
-  const maxRevenue = Math.max(...monthlyData.map(d => d.revenue), 100);
+  const maxRevenue = Math.max(...monthlyData.map(d => d.netRevenue), 100);
+
+  const handleConnectStripe = () => {
+    navigate("/dashboard/coach/settings");
+  };
+
+  const handleManageStripe = () => {
+    stripeExpressLogin.mutate();
+  };
 
   if (profileLoading || isLoading) {
     return (
@@ -58,7 +78,7 @@ const CoachEarnings = () => {
           <p className="text-muted-foreground">Track your revenue, transactions, and payouts</p>
         </div>
         <div className="flex gap-3">
-          <Select value={period} onValueChange={setPeriod}>
+          <Select value={period} onValueChange={(v) => setPeriod(v as PeriodType)}>
             <SelectTrigger className="w-40">
               <SelectValue />
             </SelectTrigger>
@@ -85,7 +105,7 @@ const CoachEarnings = () => {
               <p className="font-medium text-foreground">Connect Stripe to receive payments</p>
               <p className="text-sm text-muted-foreground">Set up your Stripe account to accept client payments and receive payouts.</p>
             </div>
-            <Button size="sm" className="bg-primary text-primary-foreground">
+            <Button size="sm" className="bg-primary text-primary-foreground" onClick={handleConnectStripe}>
               Connect Stripe
             </Button>
           </div>
@@ -94,20 +114,32 @@ const CoachEarnings = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {/* Net Revenue (Primary) */}
         <div className="card-elevated p-6">
           <div className="flex items-center justify-between mb-3">
             <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
               <PoundSterling className="w-6 h-6 text-success" />
             </div>
-            {stats.revenueChange !== 0 && (
-              <div className={`flex items-center gap-1 text-sm ${stats.revenueChange > 0 ? 'text-success' : 'text-destructive'}`}>
-                {stats.revenueChange > 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-                {Math.abs(stats.revenueChange)}%
-              </div>
-            )}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="w-4 h-4 text-muted-foreground" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-sm">
+                    <span className="text-muted-foreground">Gross: </span>
+                    <span className="font-medium">{formatCurrency(stats.grossRevenue)}</span>
+                    <br />
+                    <span className="text-muted-foreground">Platform fee ({stats.commissionRate}%): </span>
+                    <span className="font-medium">-{formatCurrency(stats.commissionPaid)}</span>
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
-          <p className="text-3xl font-display font-bold text-foreground">{formatCurrency(stats.revenue)}</p>
-          <p className="text-sm text-muted-foreground">Total Revenue</p>
+          <p className="text-3xl font-display font-bold text-foreground">{formatCurrency(stats.netRevenue)}</p>
+          <p className="text-sm text-muted-foreground">Net Revenue</p>
+          <p className="text-xs text-muted-foreground mt-1">After {stats.commissionRate}% platform fee</p>
         </div>
 
         <div className="card-elevated p-6">
@@ -133,7 +165,7 @@ const CoachEarnings = () => {
             </div>
           </div>
           <p className="text-3xl font-display font-bold text-foreground">{formatCurrency(stats.avgSession)}</p>
-          <p className="text-sm text-muted-foreground">Avg. per Session</p>
+          <p className="text-sm text-muted-foreground">Avg. Net per Session</p>
         </div>
 
         <div className="card-elevated p-6">
@@ -143,27 +175,33 @@ const CoachEarnings = () => {
             </div>
           </div>
           <p className="text-3xl font-display font-bold text-foreground">{formatCurrency(stats.pending)}</p>
-          <p className="text-sm text-muted-foreground">Pending Payments</p>
+          <p className="text-sm text-muted-foreground">Pending (Net)</p>
         </div>
       </div>
 
       {/* Revenue Chart */}
       <div className="card-elevated p-6 mb-6">
-        <h3 className="font-display font-bold text-foreground mb-4">Revenue Overview</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-display font-bold text-foreground">Revenue Overview</h3>
+          <Badge variant="outline" className="text-xs">
+            Net earnings after {stats.commissionRate}% fee
+          </Badge>
+        </div>
         {transactions.length > 0 ? (
           <div className="h-64 flex items-end justify-between gap-4 px-4">
             {monthlyData.map((data) => (
               <div key={data.month} className="flex-1 flex flex-col items-center gap-2">
                 <div
                   className="w-full bg-primary/20 rounded-t-lg hover:bg-primary/30 transition-colors relative group"
-                  style={{ height: `${Math.max((data.revenue / maxRevenue) * 200, 4)}px` }}
+                  style={{ height: `${Math.max((data.netRevenue / maxRevenue) * 200, 4)}px` }}
                 >
                   <div
                     className="absolute inset-x-0 bottom-0 bg-primary rounded-t-lg transition-all"
-                    style={{ height: data.revenue > 0 ? "100%" : "0%" }}
+                    style={{ height: data.netRevenue > 0 ? "100%" : "0%" }}
                   />
-                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-card px-2 py-1 rounded text-sm font-medium text-foreground opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                    {formatCurrency(data.revenue)}
+                  <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-card px-2 py-1 rounded text-sm font-medium text-foreground opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-border">
+                    <span className="text-success">{formatCurrency(data.netRevenue)}</span>
+                    <span className="text-muted-foreground text-xs ml-1">net</span>
                   </div>
                 </div>
                 <span className="text-sm text-muted-foreground">{data.month}</span>
@@ -221,9 +259,24 @@ const CoachEarnings = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className={`font-bold ${tx.status === 'refunded' ? 'text-destructive' : 'text-foreground'}`}>
-                        {tx.status === 'refunded' ? '-' : '+'}{formatCurrency(tx.amount)}
-                      </p>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p className={`font-bold ${tx.status === 'refunded' ? 'text-destructive' : 'text-foreground'}`}>
+                              {tx.status === 'refunded' ? '-' : '+'}{formatCurrency(tx.netAmount)}
+                            </p>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-sm">
+                              <span className="text-muted-foreground">Gross: </span>
+                              <span>{formatCurrency(tx.amount)}</span>
+                              <br />
+                              <span className="text-muted-foreground">Fee: </span>
+                              <span>-{formatCurrency(tx.commission)}</span>
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-muted-foreground">{format(new Date(tx.date), "MMM d, yyyy")}</span>
                         <Badge
@@ -264,13 +317,21 @@ const CoachEarnings = () => {
                     <CreditCard className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
                     <p className="text-muted-foreground">No payouts yet</p>
                     <p className="text-sm text-muted-foreground mt-1">Payouts will appear here once you start receiving payments.</p>
+                    <Button variant="outline" className="mt-4" onClick={handleManageStripe} disabled={stripeExpressLogin.isPending}>
+                      {stripeExpressLogin.isPending ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                      )}
+                      View in Stripe Dashboard
+                    </Button>
                   </div>
                 ) : (
                   <div className="p-12 text-center">
                     <AlertCircle className="w-12 h-12 mx-auto mb-3 text-warning/50" />
                     <p className="text-muted-foreground">Connect Stripe to receive payouts</p>
                     <p className="text-sm text-muted-foreground mt-1">You need to connect your Stripe account to receive payouts from client payments.</p>
-                    <Button className="mt-4 bg-primary text-primary-foreground">
+                    <Button className="mt-4 bg-primary text-primary-foreground" onClick={handleConnectStripe}>
                       Connect Stripe
                     </Button>
                   </div>
@@ -284,22 +345,36 @@ const CoachEarnings = () => {
               {hasStripeConnected ? (
                 <div className="space-y-4">
                   <div className="p-4 bg-secondary/50 rounded-lg">
+                    <p className="text-sm text-muted-foreground mb-1">Platform Fee</p>
+                    <p className="font-medium text-foreground">{stats.commissionRate}% ({stats.tier} tier)</p>
+                  </div>
+                  <div className="p-4 bg-secondary/50 rounded-lg">
                     <p className="text-sm text-muted-foreground mb-1">Payout Schedule</p>
                     <p className="font-medium text-foreground">Managed by Stripe</p>
                   </div>
                   <div className="p-4 bg-secondary/50 rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-1">Available Balance</p>
-                    <p className="font-medium text-foreground">{formatCurrency(stats.revenue - stats.pending)}</p>
+                    <p className="text-sm text-muted-foreground mb-1">Estimated Net Balance</p>
+                    <p className="font-medium text-foreground">{formatCurrency(stats.netRevenue - stats.pending)}</p>
+                    <p className="text-xs text-muted-foreground mt-1">View actual balance in Stripe</p>
                   </div>
-                  <Button variant="outline" className="w-full">
-                    <ExternalLink className="w-4 h-4 mr-2" />
+                  <Button 
+                    variant="outline" 
+                    className="w-full" 
+                    onClick={handleManageStripe}
+                    disabled={stripeExpressLogin.isPending}
+                  >
+                    {stripeExpressLogin.isPending ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                    )}
                     Manage in Stripe
                   </Button>
                 </div>
               ) : (
                 <div className="text-center py-4">
                   <p className="text-sm text-muted-foreground mb-4">Connect Stripe to configure payout settings</p>
-                  <Button className="w-full bg-primary text-primary-foreground">
+                  <Button className="w-full bg-primary text-primary-foreground" onClick={handleConnectStripe}>
                     Connect Stripe
                   </Button>
                 </div>
