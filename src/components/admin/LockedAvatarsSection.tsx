@@ -57,7 +57,7 @@ export function LockedAvatarsSection({ userId, unlockedAvatarIds }: LockedAvatar
             All avatars unlocked!
           </p>
         ) : (
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {lockedAvatars.map((avatar) => {
               const rarityConfig = RARITY_CONFIG[avatar.rarity as keyof typeof RARITY_CONFIG];
               const unlockDesc = getUnlockDescription(avatar.unlock_type, avatar.unlock_threshold);
@@ -89,7 +89,7 @@ export function LockedAvatarsSection({ userId, unlockedAvatarIds }: LockedAvatar
                             }}
                           />
                         </div>
-                        <p className="text-xs font-medium truncate">{avatar.name}</p>
+                        <p className="text-xs font-medium line-clamp-2 leading-tight">{avatar.name}</p>
                         <div className="flex items-center justify-between mt-1">
                           <Badge variant="outline" className={cn("text-[10px]", rarityConfig?.color)}>
                             {avatar.rarity}

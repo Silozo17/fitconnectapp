@@ -163,7 +163,7 @@ export function GrantAvatarModal({
                 <p className="text-sm">User may already have all avatars</p>
               </div>
             ) : (
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {filteredAvatars.map((avatar) => {
                   const rarityConfig = RARITY_CONFIG[avatar.rarity as keyof typeof RARITY_CONFIG];
                   const isSelected = selectedAvatarIds.has(avatar.id);
@@ -192,7 +192,7 @@ export function GrantAvatarModal({
                           }}
                         />
                       </div>
-                      <p className="text-xs font-medium truncate">{avatar.name}</p>
+                      <p className="text-xs font-medium line-clamp-2 leading-tight">{avatar.name}</p>
                       <Badge
                         variant="outline"
                         className={cn("text-[10px] mt-1", rarityConfig?.color)}
