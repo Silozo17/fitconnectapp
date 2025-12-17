@@ -325,8 +325,8 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
 
   const SidebarContent = ({ isCollapsed = false }: { isCollapsed?: boolean }) => (
     <>
-      {/* Logo */}
-      <div className="p-4 border-b border-border">
+      {/* Logo with Collapse Toggle */}
+      <div className="p-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
             <Dumbbell className="w-5 h-5 text-primary-foreground" />
@@ -335,6 +335,17 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
             <span className="font-bold text-lg text-foreground">FitConnect</span>
           )}
         </div>
+        {/* Collapse Toggle - Desktop only */}
+        {!mobileOpen && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onToggle}
+            className="h-8 w-8"
+          >
+            {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </Button>
+        )}
       </div>
 
       {/* Navigation */}
@@ -351,27 +362,6 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
       <div className="p-2 border-t border-border space-y-1">
         {renderMenuItem(settingsItem, false, isCollapsed)}
       </div>
-
-      {/* Collapse Toggle - Desktop only */}
-      {!mobileOpen && (
-        <div className="p-2 border-t border-border">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggle}
-            className="w-full justify-center"
-          >
-            {isCollapsed ? (
-              <ChevronRight className="w-4 h-4" />
-            ) : (
-              <>
-                <ChevronLeft className="w-4 h-4 mr-2" />
-                <span>Collapse</span>
-              </>
-            )}
-          </Button>
-        </div>
-      )}
     </>
   );
 
