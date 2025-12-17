@@ -30,21 +30,21 @@ const DashboardHeader = ({ subscriptionTier, onMenuToggle }: DashboardHeaderProp
 
   return (
     <header className="h-16 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-30">
-      <div className="h-full px-4 lg:px-6 flex items-center justify-between">
+      <div className="h-full px-4 xl:px-6 flex items-center justify-between">
         {/* Left side - Hamburger + Search (search hidden on mobile) */}
         <div className="flex items-center gap-3 flex-1">
           {/* Mobile Hamburger */}
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden"
+            className="xl:hidden"
             onClick={onMenuToggle}
           >
             <Menu className="w-5 h-5" />
           </Button>
 
           {/* Search - Hidden on mobile */}
-          <div className="hidden lg:flex flex-1 max-w-md">
+          <div className="hidden xl:flex flex-1 max-w-md">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -69,7 +69,7 @@ const DashboardHeader = ({ subscriptionTier, onMenuToggle }: DashboardHeaderProp
           <NotificationCenter />
 
           {/* Profile Dropdown - Hidden on mobile */}
-          <div className="hidden lg:block">
+          <div className="hidden xl:block">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
