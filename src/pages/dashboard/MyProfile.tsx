@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, AtSign, Copy, Check, Mail, Calendar, MapPin, ArrowLeft } from "lucide-react";
+import { Loader2, AtSign, Copy, Check, Calendar, MapPin, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -291,16 +291,9 @@ const MyProfile = () => {
         <Card>
           <CardHeader>
             <CardTitle>Account Information</CardTitle>
-            <CardDescription>Your account details (read-only)</CardDescription>
+            <CardDescription>Your account details</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-              <Mail className="w-4 h-4 text-muted-foreground" />
-              <div>
-                <p className="text-sm text-muted-foreground">Email</p>
-                <p className="font-medium">{user?.email}</p>
-              </div>
-            </div>
+          <CardContent>
             <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
               <Calendar className="w-4 h-4 text-muted-foreground" />
               <div>
