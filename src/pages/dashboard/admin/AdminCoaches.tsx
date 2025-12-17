@@ -374,12 +374,6 @@ const AdminCoaches = () => {
                       selected={selectedCoaches.has(coach.id)}
                       onSelect={(checked) => handleSelectCoach(coach.id, !!checked)}
                       onClick={() => setViewingCoach(coach)}
-                      onEdit={() => setEditingCoach(coach)}
-                      onAssignPlan={() => setAssignPlanCoach(coach)}
-                      onResetPassword={() => handleResetPassword(coach)}
-                      onChangeStatus={() => setStatusCoach(coach)}
-                      onDelete={() => handleDeleteCoach(coach)}
-                      isResettingPassword={resettingPassword === coach.user_id}
                     />
                   ))}
                 </div>
@@ -557,6 +551,10 @@ const AdminCoaches = () => {
         onAssignFreePlan={() => {
           if (viewingCoach) setAssignPlanCoach(viewingCoach);
         }}
+        onEdit={() => viewingCoach && setEditingCoach(viewingCoach)}
+        onResetPassword={() => viewingCoach && handleResetPassword(viewingCoach)}
+        onChangeStatus={() => viewingCoach && setStatusCoach(viewingCoach)}
+        onDelete={() => viewingCoach && handleDeleteCoach(viewingCoach)}
       />
 
       {/* Assign Free Plan Modal */}

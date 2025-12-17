@@ -1,10 +1,7 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { StatusBadge } from "./StatusBadge";
-import { MoreHorizontal, Eye, Pencil, Shield, KeyRound, Pause, Trash2 } from "lucide-react";
 
 interface TeamMember {
   id: string;
@@ -22,11 +19,6 @@ interface AdminTeamCardProps {
   selected: boolean;
   onSelect: (checked: boolean) => void;
   onClick: () => void;
-  onEdit: () => void;
-  onChangeRole: () => void;
-  onResetPassword: () => void;
-  onChangeStatus: () => void;
-  onDelete: () => void;
 }
 
 const getRoleBadgeColor = (role: string) => {
@@ -47,11 +39,6 @@ export const AdminTeamCard = ({
   selected,
   onSelect,
   onClick,
-  onEdit,
-  onChangeRole,
-  onResetPassword,
-  onChangeStatus,
-  onDelete,
 }: AdminTeamCardProps) => {
   const displayName = member.display_name || `${member.first_name || ""} ${member.last_name || ""}`.trim() || "Unnamed";
   const initials = member.first_name?.[0] || member.display_name?.[0] || "T";
@@ -82,44 +69,6 @@ export const AdminTeamCard = ({
       </div>
 
       <StatusBadge status={member.status || "active"} />
-
-      <div onClick={(e) => e.stopPropagation()}>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={onClick}>
-              <Eye className="h-4 w-4 mr-2" />
-              View Details
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={onEdit}>
-              <Pencil className="h-4 w-4 mr-2" />
-              Edit Details
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={onChangeRole}>
-              <Shield className="h-4 w-4 mr-2" />
-              Change Role
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={onResetPassword}>
-              <KeyRound className="h-4 w-4 mr-2" />
-              Reset Password
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onChangeStatus}>
-              <Pause className="h-4 w-4 mr-2" />
-              Change Status
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onDelete} className="text-destructive">
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete Member
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
     </div>
   );
 };

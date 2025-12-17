@@ -353,20 +353,6 @@ const AdminTeam = () => {
                         setSelectedMember(member);
                         setIsDetailDrawerOpen(true);
                       }}
-                      onEdit={() => {
-                        setSelectedMember(member);
-                        setIsEditModalOpen(true);
-                      }}
-                      onChangeRole={() => {
-                        setSelectedMember(member);
-                        setIsRoleModalOpen(true);
-                      }}
-                      onResetPassword={() => handleResetPassword(member)}
-                      onChangeStatus={() => {
-                        setSelectedMember(member);
-                        setIsStatusModalOpen(true);
-                      }}
-                      onDelete={() => handleDeleteMember(member)}
                     />
                   ))}
                 </div>

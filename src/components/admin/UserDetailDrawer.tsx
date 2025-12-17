@@ -25,7 +25,8 @@ import { LockedAvatarsSection } from "./LockedAvatarsSection";
 import { 
   User, Heart, Target, MapPin, Calendar, Dumbbell,
   Save, Loader2, AlertTriangle, Apple, Activity,
-  Trophy, Zap, Flame, Award, Star, TrendingUp, Gift, Trash2, Image
+  Trophy, Zap, Flame, Award, Star, TrendingUp, Gift, Trash2, Image,
+  Pencil, KeyRound, Pause
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -34,6 +35,10 @@ interface UserDetailDrawerProps {
   onOpenChange: (open: boolean) => void;
   user: any;
   onSaved?: () => void;
+  onEdit?: () => void;
+  onResetPassword?: () => void;
+  onChangeStatus?: () => void;
+  onDelete?: () => void;
 }
 
 const rarityColors: Record<string, string> = {
@@ -53,7 +58,7 @@ const sourceLabels: Record<string, string> = {
   session_completed: "Session",
 };
 
-export function UserDetailDrawer({ open, onOpenChange, user, onSaved }: UserDetailDrawerProps) {
+export function UserDetailDrawer({ open, onOpenChange, user, onSaved, onEdit, onResetPassword, onChangeStatus, onDelete }: UserDetailDrawerProps) {
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState<any>({});
   const [grantModalOpen, setGrantModalOpen] = useState(false);
@@ -825,6 +830,30 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved }: UserDeta
             />
           </TabsContent>
         </Tabs>
+
+        {/* Quick Actions */}
+        <Separator className="my-6" />
+        <div className="space-y-3">
+          <p className="text-sm font-medium text-muted-foreground">Quick Actions</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <Button variant="outline" size="sm" onClick={onEdit} className="justify-start">
+              <Pencil className="h-4 w-4 mr-2" />
+              Edit User
+            </Button>
+            <Button variant="outline" size="sm" onClick={onResetPassword} className="justify-start">
+              <KeyRound className="h-4 w-4 mr-2" />
+              Reset Password
+            </Button>
+            <Button variant="outline" size="sm" onClick={onChangeStatus} className="justify-start">
+              <Pause className="h-4 w-4 mr-2" />
+              Change Status
+            </Button>
+            <Button variant="destructive" size="sm" onClick={onDelete} className="justify-start">
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete User
+            </Button>
+          </div>
+        </div>
 
         <div className="mt-6 flex justify-end">
           <Button onClick={handleSave} disabled={saving}>
