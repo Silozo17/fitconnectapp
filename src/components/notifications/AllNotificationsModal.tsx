@@ -18,6 +18,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdminView } from "@/contexts/AdminContext";
 import { NotificationItem } from "./NotificationItem";
 import { getNotificationRoute } from "./notificationNavigation";
 import { cn } from "@/lib/utils";
@@ -47,6 +48,11 @@ export const AllNotificationsModal = ({
 }: AllNotificationsModalProps) => {
   const navigate = useNavigate();
   const { role } = useAuth();
+  const { activeProfileType } = useAdminView();
+  
+  // Use activeProfileType if available (for view switching), fallback to role
+  const effectiveRole = activeProfileType || role || "client";
+  
   const {
     notifications,
     loading,
@@ -75,7 +81,7 @@ export const AllNotificationsModal = ({
     }
 
     // Get navigation route
-    const route = getNotificationRoute(notification, role || "client");
+    const route = getNotificationRoute(notification, effectiveRole);
     if (route) {
       onOpenChange(false);
       navigate(route);
