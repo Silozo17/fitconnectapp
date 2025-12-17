@@ -12,6 +12,9 @@ import {
   Loader2,
   Edit2,
   Trash2,
+  CreditCard,
+  Banknote,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +22,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -48,6 +58,9 @@ const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const timeSlots = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
 
+type PaymentRequired = "none" | "deposit" | "full";
+type DepositType = "percentage" | "fixed";
+
 const CoachSchedule = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -66,6 +79,11 @@ const CoachSchedule = () => {
   const [sessionTypePrice, setSessionTypePrice] = useState("");
   const [sessionTypeOnline, setSessionTypeOnline] = useState(true);
   const [sessionTypeInPerson, setSessionTypeInPerson] = useState(false);
+  
+  // Payment requirement state for session type
+  const [paymentRequired, setPaymentRequired] = useState<PaymentRequired>("none");
+  const [depositType, setDepositType] = useState<DepositType>("percentage");
+  const [depositValue, setDepositValue] = useState("");
   
   // Form state for availability
   const [availStartTime, setAvailStartTime] = useState("09:00");
@@ -165,6 +183,9 @@ const CoachSchedule = () => {
       is_online: sessionTypeOnline,
       is_in_person: sessionTypeInPerson,
       is_active: true,
+      payment_required: paymentRequired,
+      deposit_type: paymentRequired === "deposit" ? depositType : null,
+      deposit_value: paymentRequired === "deposit" ? parseFloat(depositValue) || null : null,
     });
 
     setShowSessionTypeModal(false);
@@ -179,6 +200,9 @@ const CoachSchedule = () => {
     setSessionTypePrice("");
     setSessionTypeOnline(true);
     setSessionTypeInPerson(false);
+    setPaymentRequired("none");
+    setDepositType("percentage");
+    setDepositValue("");
   };
 
   const handleEditSessionType = (type: SessionType) => {
@@ -189,7 +213,57 @@ const CoachSchedule = () => {
     setSessionTypePrice(type.price.toString());
     setSessionTypeOnline(type.is_online);
     setSessionTypeInPerson(type.is_in_person);
+    setPaymentRequired((type.payment_required as PaymentRequired) || "none");
+    setDepositType((type.deposit_type as DepositType) || "percentage");
+    setDepositValue(type.deposit_value?.toString() || "");
     setShowSessionTypeModal(true);
+  };
+
+  // Helper to format currency
+  const formatCurrency = (amount: number, currency: string = coachCurrency) => {
+    return `${getCurrencySymbol(currency as CurrencyCode)}${amount.toFixed(2)}`;
+  };
+
+  // Helper to get payment status badge
+  const getPaymentStatusBadge = (request: ReturnType<typeof useBookingRequests>["data"][0]) => {
+    const paymentReq = request.payment_required || "none";
+    const paymentStatus = request.payment_status || "not_required";
+    const amountPaid = request.amount_paid || 0;
+    const amountDue = request.amount_due || 0;
+    const currency = request.currency || coachCurrency;
+
+    if (paymentReq === "none" || paymentStatus === "not_required") {
+      return null;
+    }
+
+    if (paymentStatus === "paid") {
+      return (
+        <Badge className="bg-success/20 text-success border-success/30">
+          <CreditCard className="w-3 h-3 mr-1" />
+          Paid {formatCurrency(amountPaid, currency)}
+        </Badge>
+      );
+    }
+
+    if (paymentStatus === "deposit_paid") {
+      return (
+        <Badge className="bg-primary/20 text-primary border-primary/30">
+          <Banknote className="w-3 h-3 mr-1" />
+          Deposit Paid {formatCurrency(amountPaid, currency)}
+        </Badge>
+      );
+    }
+
+    if (paymentStatus === "pending") {
+      return (
+        <Badge variant="outline" className="text-warning border-warning/30">
+          <AlertCircle className="w-3 h-3 mr-1" />
+          Awaiting {formatCurrency(amountDue, currency)}
+        </Badge>
+      );
+    }
+
+    return null;
   };
 
   const handleSaveAvailability = async () => {
@@ -363,7 +437,7 @@ const CoachSchedule = () => {
                           {request.client?.first_name} {request.client?.last_name}
                         </p>
                         <p className="text-sm text-muted-foreground">{request.session_type?.name || "General Session"}</p>
-                        <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                        <div className="flex flex-wrap items-center gap-2 mt-1 text-sm text-muted-foreground">
                           <Clock className="w-3 h-3" />
                           <span>
                             {format(parseISO(request.requested_at), "MMM d, yyyy 'at' h:mm a")}
@@ -377,6 +451,7 @@ const CoachSchedule = () => {
                               <MapPin className="w-3 h-3 mr-1" /> In-Person
                             </Badge>
                           )}
+                          {getPaymentStatusBadge(request)}
                         </div>
                         {request.message && (
                           <p className="text-sm text-muted-foreground mt-2 italic">"{request.message}"</p>
@@ -514,7 +589,19 @@ const CoachSchedule = () => {
                 {sessionTypes.map((type) => (
                   <div key={type.id} className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
                     <div>
-                      <p className="font-medium text-foreground">{type.name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-foreground">{type.name}</p>
+                        {type.payment_required === "full" && (
+                          <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/30">
+                            Pay Upfront
+                          </Badge>
+                        )}
+                        {type.payment_required === "deposit" && (
+                          <Badge variant="outline" className="text-xs bg-accent/10 text-accent border-accent/30">
+                            Deposit Required
+                          </Badge>
+                        )}
+                      </div>
                       <p className="text-sm text-muted-foreground">
                         {type.duration_minutes} min - {getCurrencySymbol((type.currency as CurrencyCode) || coachCurrency)}{type.price}
                         {type.is_online && " • Online"}
@@ -541,7 +628,7 @@ const CoachSchedule = () => {
               Define a service offering for your clients to book.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
             <div className="space-y-2">
               <Label>Name</Label>
               <Input 
@@ -593,6 +680,79 @@ const CoachSchedule = () => {
                 />
                 <Label className="font-normal">In-Person</Label>
               </div>
+            </div>
+
+            {/* Payment Requirements Section */}
+            <div className="border-t border-border pt-4 space-y-4">
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <CreditCard className="w-4 h-4" />
+                  Payment Requirements
+                </Label>
+                <Select value={paymentRequired} onValueChange={(v) => setPaymentRequired(v as PaymentRequired)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select payment requirement" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No upfront payment</SelectItem>
+                    <SelectItem value="deposit">Require deposit</SelectItem>
+                    <SelectItem value="full">Require full payment</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {paymentRequired === "none" && "Clients can book without paying in advance"}
+                  {paymentRequired === "deposit" && "Clients pay a deposit to secure the booking"}
+                  {paymentRequired === "full" && "Clients must pay the full session price to book"}
+                </p>
+              </div>
+
+              {paymentRequired === "deposit" && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Deposit Type</Label>
+                    <Select value={depositType} onValueChange={(v) => setDepositType(v as DepositType)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="percentage">Percentage of price</SelectItem>
+                        <SelectItem value="fixed">Fixed amount</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>
+                      {depositType === "percentage" ? "Deposit %" : `Deposit (${getCurrencySymbol(coachCurrency)})`}
+                    </Label>
+                    <Input 
+                      type="number"
+                      placeholder={depositType === "percentage" ? "e.g., 25" : "e.g., 20.00"}
+                      value={depositValue}
+                      onChange={(e) => setDepositValue(e.target.value)}
+                      min="0"
+                      max={depositType === "percentage" ? "100" : undefined}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {paymentRequired === "deposit" && depositValue && sessionTypePrice && (
+                <div className="bg-secondary/50 rounded-lg p-3 text-sm">
+                  <p className="text-muted-foreground">
+                    Deposit amount:{" "}
+                    <span className="font-medium text-foreground">
+                      {formatCurrency(
+                        depositType === "percentage"
+                          ? (parseFloat(sessionTypePrice) * parseFloat(depositValue)) / 100
+                          : parseFloat(depositValue)
+                      )}
+                    </span>
+                    {depositType === "percentage" && (
+                      <span className="text-muted-foreground"> ({depositValue}% of {formatCurrency(parseFloat(sessionTypePrice))})</span>
+                    )}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter>
