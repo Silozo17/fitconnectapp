@@ -25,6 +25,15 @@ const ACTION_TYPES = [
   { value: "BULK_DELETE", label: "Bulk Delete" },
   { value: "LOGIN", label: "Login" },
   { value: "LOGOUT", label: "Logout" },
+  { value: "UPDATE_PLATFORM_SETTING", label: "Update Setting" },
+  { value: "UPDATE_TIER_FEATURE", label: "Update Tier Feature" },
+  { value: "GRANT_FREE_PLAN", label: "Grant Free Plan" },
+  { value: "REVOKE_GRANTED_PLAN", label: "Revoke Plan" },
+  { value: "SET_FEATURE_OVERRIDE", label: "Set Override" },
+  { value: "UPDATE_FEATURE_OVERRIDE", label: "Update Override" },
+  { value: "REMOVE_FEATURE_OVERRIDE", label: "Remove Override" },
+  { value: "RESOLVE_REVIEW_DISPUTE", label: "Resolve Dispute" },
+  { value: "DELETE_REVIEW", label: "Delete Review" },
 ];
 
 const ENTITY_TYPES = [
@@ -39,7 +48,13 @@ const ENTITY_TYPES = [
   { value: "package", label: "Packages" },
   { value: "verification", label: "Verification" },
   { value: "review", label: "Reviews" },
+  { value: "reviews", label: "Reviews" },
   { value: "connection", label: "Connections" },
+  { value: "platform_settings", label: "Platform Settings" },
+  { value: "tier_features", label: "Tier Features" },
+  { value: "coach_feature_overrides", label: "Feature Overrides" },
+  { value: "admin_granted_subscriptions", label: "Granted Subscriptions" },
+  { value: "review_disputes", label: "Review Disputes" },
 ];
 
 const getActionBadgeVariant = (action: string) => {

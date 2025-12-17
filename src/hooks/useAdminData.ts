@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useLogAdminAction } from "./useAuditLog";
 
 // Platform Features
 export const usePlatformFeatures = () => {
@@ -33,14 +34,32 @@ export const useTierFeatures = () => {
 
 export const useUpdateTierFeature = () => {
   const queryClient = useQueryClient();
+  const logAction = useLogAdminAction();
+  
   return useMutation({
-    mutationFn: async ({ tier, featureId, value }: { tier: string; featureId: string; value: any }) => {
+    mutationFn: async ({ tier, featureId, value, featureName, oldValue }: { 
+      tier: string; 
+      featureId: string; 
+      value: any;
+      featureName?: string;
+      oldValue?: any;
+    }) => {
       const { data, error } = await supabase
         .from("tier_features")
         .upsert({ tier, feature_id: featureId, value }, { onConflict: "tier,feature_id" })
         .select()
         .single();
       if (error) throw error;
+      
+      // Log the action
+      await logAction.mutateAsync({
+        action: "UPDATE_TIER_FEATURE",
+        entityType: "tier_features",
+        entityId: featureId,
+        oldValues: oldValue !== undefined ? { tier, feature: featureName, value: oldValue } : undefined,
+        newValues: { tier, feature: featureName, value },
+      });
+      
       return data;
     },
     onSuccess: () => {
@@ -73,14 +92,31 @@ export const usePlatformSettings = () => {
 
 export const useUpdatePlatformSetting = () => {
   const queryClient = useQueryClient();
+  const logAction = useLogAdminAction();
+  
   return useMutation({
-    mutationFn: async ({ key, value, description }: { key: string; value: any; description?: string }) => {
+    mutationFn: async ({ key, value, description, oldValue }: { 
+      key: string; 
+      value: any; 
+      description?: string;
+      oldValue?: any;
+    }) => {
       const { data, error } = await supabase
         .from("platform_settings")
         .upsert({ key, value, description, updated_at: new Date().toISOString() }, { onConflict: "key" })
         .select()
         .single();
       if (error) throw error;
+      
+      // Log the action
+      await logAction.mutateAsync({
+        action: "UPDATE_PLATFORM_SETTING",
+        entityType: "platform_settings",
+        entityId: key,
+        oldValues: oldValue !== undefined ? { [key]: oldValue } : undefined,
+        newValues: { [key]: value },
+      });
+      
       return data;
     },
     onSuccess: () => {
@@ -113,12 +149,15 @@ export const useReviewDisputes = () => {
 
 export const useUpdateReviewDispute = () => {
   const queryClient = useQueryClient();
+  const logAction = useLogAdminAction();
+  
   return useMutation({
-    mutationFn: async ({ id, status, adminNotes, resolvedBy }: { 
+    mutationFn: async ({ id, status, adminNotes, resolvedBy, oldStatus }: { 
       id: string; 
       status: string; 
       adminNotes?: string; 
       resolvedBy?: string;
+      oldStatus?: string;
     }) => {
       const { data, error } = await supabase
         .from("review_disputes")
@@ -132,6 +171,16 @@ export const useUpdateReviewDispute = () => {
         .select()
         .single();
       if (error) throw error;
+      
+      // Log the action
+      await logAction.mutateAsync({
+        action: "RESOLVE_REVIEW_DISPUTE",
+        entityType: "review_disputes",
+        entityId: id,
+        oldValues: oldStatus ? { status: oldStatus } : undefined,
+        newValues: { status, admin_notes: adminNotes },
+      });
+      
       return data;
     },
     onSuccess: () => {
@@ -165,13 +214,30 @@ export const useAllReviews = () => {
 
 export const useDeleteReview = () => {
   const queryClient = useQueryClient();
+  const logAction = useLogAdminAction();
+  
   return useMutation({
-    mutationFn: async (reviewId: string) => {
+    mutationFn: async ({ reviewId, reviewData }: { 
+      reviewId: string;
+      reviewData?: { rating?: number; coachName?: string; clientName?: string };
+    }) => {
       const { error } = await supabase
         .from("reviews")
         .delete()
         .eq("id", reviewId);
       if (error) throw error;
+      
+      // Log the action
+      await logAction.mutateAsync({
+        action: "DELETE_REVIEW",
+        entityType: "reviews",
+        entityId: reviewId,
+        oldValues: reviewData ? {
+          rating: reviewData.rating,
+          coach: reviewData.coachName,
+          client: reviewData.clientName,
+        } : undefined,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["all-reviews"] });
@@ -203,12 +269,15 @@ export const useAdminGrantedSubscriptions = () => {
 
 export const useGrantFreePlan = () => {
   const queryClient = useQueryClient();
+  const logAction = useLogAdminAction();
+  
   return useMutation({
-    mutationFn: async ({ coachId, tier, reason, expiresAt }: { 
+    mutationFn: async ({ coachId, tier, reason, expiresAt, coachName }: { 
       coachId: string; 
       tier: string; 
       reason?: string;
       expiresAt?: string;
+      coachName?: string;
     }) => {
       // First, deactivate any existing granted subscriptions for this coach
       await supabase
@@ -237,6 +306,19 @@ export const useGrantFreePlan = () => {
         .update({ subscription_tier: tier })
         .eq("id", coachId);
 
+      // Log the action
+      await logAction.mutateAsync({
+        action: "GRANT_FREE_PLAN",
+        entityType: "admin_granted_subscriptions",
+        entityId: coachId,
+        newValues: { 
+          coach: coachName || coachId, 
+          tier, 
+          reason, 
+          expires_at: expiresAt 
+        },
+      });
+
       return data;
     },
     onSuccess: () => {
@@ -252,8 +334,15 @@ export const useGrantFreePlan = () => {
 
 export const useRevokeGrantedPlan = () => {
   const queryClient = useQueryClient();
+  const logAction = useLogAdminAction();
+  
   return useMutation({
-    mutationFn: async ({ grantId, coachId }: { grantId: string; coachId: string }) => {
+    mutationFn: async ({ grantId, coachId, tier, coachName }: { 
+      grantId: string; 
+      coachId: string;
+      tier?: string;
+      coachName?: string;
+    }) => {
       const { error } = await supabase
         .from("admin_granted_subscriptions")
         .update({ is_active: false })
@@ -265,6 +354,18 @@ export const useRevokeGrantedPlan = () => {
         .from("coach_profiles")
         .update({ subscription_tier: "free" })
         .eq("id", coachId);
+
+      // Log the action
+      await logAction.mutateAsync({
+        action: "REVOKE_GRANTED_PLAN",
+        entityType: "admin_granted_subscriptions",
+        entityId: grantId,
+        oldValues: { 
+          coach: coachName || coachId, 
+          tier: tier || "unknown" 
+        },
+        newValues: { tier: "free" },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-granted-subscriptions"] });
@@ -300,13 +401,18 @@ export const useCoachFeatureOverrides = (coachId?: string) => {
 
 export const useSetFeatureOverride = () => {
   const queryClient = useQueryClient();
+  const logAction = useLogAdminAction();
+  
   return useMutation({
-    mutationFn: async ({ coachId, featureId, value, reason, expiresAt }: { 
+    mutationFn: async ({ coachId, featureId, value, reason, expiresAt, featureName, coachName, oldValue }: { 
       coachId: string; 
       featureId: string; 
       value: any;
       reason?: string;
       expiresAt?: string;
+      featureName?: string;
+      coachName?: string;
+      oldValue?: any;
     }) => {
       const { data, error } = await supabase
         .from("coach_feature_overrides")
@@ -320,6 +426,25 @@ export const useSetFeatureOverride = () => {
         .select()
         .single();
       if (error) throw error;
+      
+      // Log the action
+      await logAction.mutateAsync({
+        action: oldValue !== undefined ? "UPDATE_FEATURE_OVERRIDE" : "SET_FEATURE_OVERRIDE",
+        entityType: "coach_feature_overrides",
+        entityId: coachId,
+        oldValues: oldValue !== undefined ? { 
+          coach: coachName, 
+          feature: featureName, 
+          value: oldValue 
+        } : undefined,
+        newValues: { 
+          coach: coachName || coachId, 
+          feature: featureName || featureId, 
+          value, 
+          reason 
+        },
+      });
+      
       return data;
     },
     onSuccess: () => {
@@ -334,13 +459,32 @@ export const useSetFeatureOverride = () => {
 
 export const useRemoveFeatureOverride = () => {
   const queryClient = useQueryClient();
+  const logAction = useLogAdminAction();
+  
   return useMutation({
-    mutationFn: async (overrideId: string) => {
+    mutationFn: async ({ overrideId, coachName, featureName, oldValue }: { 
+      overrideId: string;
+      coachName?: string;
+      featureName?: string;
+      oldValue?: any;
+    }) => {
       const { error } = await supabase
         .from("coach_feature_overrides")
         .delete()
         .eq("id", overrideId);
       if (error) throw error;
+      
+      // Log the action
+      await logAction.mutateAsync({
+        action: "REMOVE_FEATURE_OVERRIDE",
+        entityType: "coach_feature_overrides",
+        entityId: overrideId,
+        oldValues: { 
+          coach: coachName, 
+          feature: featureName, 
+          value: oldValue 
+        },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["coach-feature-overrides"] });
