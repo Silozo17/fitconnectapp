@@ -114,31 +114,34 @@ export default function Leaderboard() {
     // Check cache first
     const cached = localStorage.getItem(LOCATION_CACHE_KEY);
     if (cached) {
-      const parsed: CachedLocation = JSON.parse(cached);
-      const weekInMs = 7 * 24 * 60 * 60 * 1000;
-      if (Date.now() - parsed.timestamp < weekInMs) {
-        setUserLocation(parsed);
-        return;
+      try {
+        const parsed: CachedLocation = JSON.parse(cached);
+        const weekInMs = 7 * 24 * 60 * 60 * 1000;
+        if (Date.now() - parsed.timestamp < weekInMs) {
+          setUserLocation(parsed);
+          return;
+        }
+      } catch {
+        localStorage.removeItem(LOCATION_CACHE_KEY);
       }
     }
 
-    // Fetch location
-    fetch('https://ip-api.com/json/?fields=city,country')
-      .then(res => res.json())
-      .then(data => {
-        if (data.city) {
-          const location: CachedLocation = {
-            city: data.city,
-            country: data.country,
-            timestamp: Date.now(),
-          };
-          localStorage.setItem(LOCATION_CACHE_KEY, JSON.stringify(location));
-          setUserLocation(location);
+    // Use the cached location from useUserLocation hook storage
+    const userLocationCache = localStorage.getItem('fitconnect_user_location');
+    if (userLocationCache) {
+      try {
+        const parsed = JSON.parse(userLocationCache);
+        if (parsed.city) {
+          setUserLocation({
+            city: parsed.city,
+            country: parsed.country,
+            timestamp: parsed.timestamp,
+          });
         }
-      })
-      .catch(() => {
-        // Silently fail - global leaderboard will still work
-      });
+      } catch {
+        // Ignore parse errors
+      }
+    }
   }, []);
 
   const hasParticipants = (globalData?.totalParticipants || 0) > 0;

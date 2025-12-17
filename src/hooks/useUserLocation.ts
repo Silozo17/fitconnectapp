@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface LocationData {
   city: string | null;
   region: string | null;
   country: string | null;
+  county: string | null;
   isLoading: boolean;
   error: string | null;
 }
@@ -15,6 +17,7 @@ interface StoredLocation {
   city: string | null;
   region: string | null;
   country: string | null;
+  county: string | null;
   timestamp: number;
 }
 
@@ -23,6 +26,7 @@ export const useUserLocation = () => {
     city: null,
     region: null,
     country: null,
+    county: null,
     isLoading: true,
     error: null,
   });
@@ -40,6 +44,7 @@ export const useUserLocation = () => {
               city: parsed.city,
               region: parsed.region,
               country: parsed.country,
+              county: parsed.county,
               isLoading: false,
               error: null,
             });
@@ -50,16 +55,17 @@ export const useUserLocation = () => {
         }
       }
 
-      // Try IP-based geolocation
+      // Use edge function for geolocation
       try {
-        const response = await fetch("https://ip-api.com/json/?fields=city,regionName,country");
-        if (!response.ok) throw new Error("Failed to fetch location");
+        const { data, error } = await supabase.functions.invoke('get-user-location');
         
-        const data = await response.json();
+        if (error) throw error;
+        
         const locationData = {
-          city: data.city || null,
-          region: data.regionName || null,
-          country: data.country || null,
+          city: data?.city || null,
+          region: data?.region || null,
+          country: data?.country || null,
+          county: data?.county || null,
         };
 
         // Store in localStorage
@@ -75,11 +81,13 @@ export const useUserLocation = () => {
           error: null,
         });
       } catch (error) {
+        console.error('Location detection failed:', error);
         // Default to UK if detection fails
         setLocation({
           city: null,
           region: null,
           country: "United Kingdom",
+          county: null,
           isLoading: false,
           error: null,
         });
@@ -95,6 +103,7 @@ export const useUserLocation = () => {
       city: null,
       region: null,
       country: null,
+      county: null,
       isLoading: false,
       error: null,
     });
