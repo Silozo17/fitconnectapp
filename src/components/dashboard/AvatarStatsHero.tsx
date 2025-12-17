@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { useSelectedAvatar, getAvatarImageUrl } from '@/hooks/useAvatars';
 import { useUserStats } from '@/hooks/useUserStats';
 import { RARITY_CONFIG } from '@/lib/avatar-config';
+import { AvatarPicker } from '@/components/avatars/AvatarPicker';
 import { 
   Zap, 
   Trophy, 
@@ -15,7 +16,6 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
-
 interface StatItemProps {
   icon: React.ReactNode;
   label: string;
@@ -124,40 +124,43 @@ export function AvatarStatsHero({ firstName }: AvatarStatsHeroProps) {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Avatar Section */}
           <div className="flex flex-col items-center lg:items-start">
-            {/* Avatar with glow */}
-            <Link 
-              to="/dashboard/client/achievements" 
-              className="group relative block"
-            >
-              <div className={cn(
-                'relative rounded-xl p-1 transition-transform group-hover:scale-105',
-                rarityConfig.glow,
-                rarityConfig.border,
-                'border-2 bg-gradient-to-br from-primary/20 to-accent/20'
-              )}>
-                {/* Animated glow ring */}
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/40 via-transparent to-accent/40 animate-pulse" />
-                
-                {/* Avatar image - portrait */}
-                <div className="relative w-32 h-44 md:w-40 md:h-56 rounded-lg overflow-hidden bg-background/50">
-                  <img
-                    src={imageUrl}
-                    alt={selectedAvatar?.name || 'Your Avatar'}
-                    className="w-full h-full object-contain"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/placeholder.svg';
-                    }}
-                  />
-                </div>
-              </div>
-              
-              {/* Hover indicator */}
-              <div className="absolute inset-0 rounded-xl flex items-center justify-center bg-background/0 group-hover:bg-background/20 transition-colors">
-                <span className="opacity-0 group-hover:opacity-100 transition-opacity text-xs font-medium text-foreground bg-background/80 px-2 py-1 rounded-full">
-                  Change Avatar
-                </span>
-              </div>
-            </Link>
+            {/* Avatar with glow - opens picker dialog */}
+            <AvatarPicker
+              selectedAvatar={selectedAvatar || null}
+              profileType="client"
+              trigger={
+                <button className="group relative block cursor-pointer">
+                  <div className={cn(
+                    'relative rounded-xl p-1 transition-transform group-hover:scale-105',
+                    rarityConfig.glow,
+                    rarityConfig.border,
+                    'border-2 bg-gradient-to-br from-primary/20 to-accent/20'
+                  )}>
+                    {/* Animated glow ring */}
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/40 via-transparent to-accent/40 animate-pulse" />
+                    
+                    {/* Avatar image - portrait */}
+                    <div className="relative w-32 h-44 md:w-40 md:h-56 rounded-lg overflow-hidden bg-background/50">
+                      <img
+                        src={imageUrl}
+                        alt={selectedAvatar?.name || 'Your Avatar'}
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/placeholder.svg';
+                        }}
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Hover indicator */}
+                  <div className="absolute inset-0 rounded-xl flex items-center justify-center bg-background/0 group-hover:bg-background/20 transition-colors">
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity text-xs font-medium text-foreground bg-background/80 px-2 py-1 rounded-full">
+                      Change Avatar
+                    </span>
+                  </div>
+                </button>
+              }
+            />
             
             {/* Avatar name and rarity */}
             {selectedAvatar && (
@@ -170,12 +173,15 @@ export function AvatarStatsHero({ firstName }: AvatarStatsHeroProps) {
             )}
             
             {!selectedAvatar && (
-              <Link 
-                to="/dashboard/client/achievements"
-                className="mt-3 text-sm text-primary hover:underline flex items-center gap-1"
-              >
-                Choose your avatar <ChevronRight className="h-3 w-3" />
-              </Link>
+              <AvatarPicker
+                selectedAvatar={null}
+                profileType="client"
+                trigger={
+                  <button className="mt-3 text-sm text-primary hover:underline flex items-center gap-1">
+                    Choose your avatar <ChevronRight className="h-3 w-3" />
+                  </button>
+                }
+              />
             )}
           </div>
           
