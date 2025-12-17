@@ -1,6 +1,13 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { useLocation } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+
+// Helper to extract view mode from URL path
+const getViewModeFromPath = (pathname: string): ViewMode | null => {
+  const match = pathname.match(/^\/dashboard\/(admin|coach|client)/);
+  return match ? (match[1] as ViewMode) : null;
+};
 
 type ViewMode = "admin" | "client" | "coach";
 
@@ -27,6 +34,7 @@ const STORAGE_KEY = "admin_active_role";
 
 export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const { user, role } = useAuth();
+  const location = useLocation();
   const [viewMode, setViewMode] = useState<ViewMode>("admin");
   const [availableProfiles, setAvailableProfiles] = useState<AvailableProfiles>({});
   const [activeProfileType, setActiveProfileType] = useState<ViewMode>("admin");
@@ -82,8 +90,28 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       const defaultType: ViewMode = isAdminUser ? "admin" : "coach";
       const defaultProfileId = isAdminUser ? profiles.admin : profiles.coach;
 
-      // Restore saved preference or default based on user type
+      // Priority: URL path > localStorage > default
+      const pathViewMode = getViewModeFromPath(location.pathname);
       const savedRole = localStorage.getItem(STORAGE_KEY);
+      
+      // Check if URL path specifies a valid view mode
+      if (pathViewMode) {
+        const hasAccessToPath = pathViewMode === "admin" 
+          ? isAdminUser 
+          : !!profiles[pathViewMode];
+        
+        if (hasAccessToPath) {
+          const pathProfileId = profiles[pathViewMode] || null;
+          setActiveProfileType(pathViewMode);
+          setActiveProfileId(pathProfileId);
+          setViewMode(pathViewMode);
+          // Update localStorage to match URL
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ type: pathViewMode, profileId: pathProfileId }));
+          return;
+        }
+      }
+      
+      // Fallback to localStorage if no valid URL path
       if (savedRole) {
         try {
           const { type, profileId } = JSON.parse(savedRole);
@@ -95,19 +123,17 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
             setActiveProfileType(type);
             setActiveProfileId(profileId);
             setViewMode(type);
-          } else {
-            setActiveProfileType(defaultType);
-            setActiveProfileId(defaultProfileId || null);
-            setViewMode(defaultType);
+            return;
           }
         } catch {
-          setActiveProfileType(defaultType);
-          setActiveProfileId(defaultProfileId || null);
+          // Invalid saved role, fall through to default
         }
-      } else {
-        setActiveProfileType(defaultType);
-        setActiveProfileId(defaultProfileId || null);
       }
+      
+      // Default based on user type
+      setActiveProfileType(defaultType);
+      setActiveProfileId(defaultProfileId || null);
+      setViewMode(defaultType);
     } catch (error) {
       console.error("Error fetching profiles:", error);
     } finally {
@@ -118,6 +144,28 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     fetchProfiles();
   }, [user?.id, canSwitchRoles]);
+
+  // Sync context with URL when route changes (handles browser back/forward, direct URL navigation)
+  useEffect(() => {
+    if (isLoadingProfiles) return;
+    
+    const pathViewMode = getViewModeFromPath(location.pathname);
+    
+    // Only sync if we're on a dashboard route and it differs from current context
+    if (pathViewMode && pathViewMode !== activeProfileType) {
+      const hasAccess = pathViewMode === "admin" 
+        ? isAdminUser 
+        : !!availableProfiles[pathViewMode];
+      
+      if (hasAccess) {
+        const profileId = availableProfiles[pathViewMode] || null;
+        setActiveProfileType(pathViewMode);
+        setActiveProfileId(profileId);
+        setViewMode(pathViewMode);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ type: pathViewMode, profileId }));
+      }
+    }
+  }, [location.pathname, availableProfiles, isLoadingProfiles, isAdminUser]);
 
   const setActiveProfile = (type: ViewMode, profileId: string | null) => {
     setActiveProfileType(type);
