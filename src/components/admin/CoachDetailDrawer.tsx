@@ -6,7 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { useUserAvatars, useUserSelectedAvatar, useRevokeAvatar, useAllAvatars } from "@/hooks/useAdminAvatars";
@@ -16,11 +16,13 @@ import { GrantAvatarModal } from "./GrantAvatarModal";
 import { LockedAvatarsSection } from "./LockedAvatarsSection";
 import { useUserLastLogin } from "@/hooks/useUserLastLogin";
 import { useCoachAdminStats } from "@/hooks/useCoachAdminStats";
+import { useLogAdminAction } from "@/hooks/useAuditLog";
+import { toast } from "sonner";
 import { 
   Users, Calendar, Package, CreditCard, Star, 
   Gift, Ban, RefreshCw, DollarSign, CheckCircle,
   Trophy, Trash2, Image, Loader2, Pencil, KeyRound, Pause, Clock,
-  ShieldCheck, ShieldX, ShieldAlert
+  ShieldCheck, ShieldX, ShieldAlert, Eye, EyeOff
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -39,10 +41,14 @@ interface CoachDetailDrawerProps {
   onResetPassword?: () => void;
   onChangeStatus?: () => void;
   onDelete?: () => void;
+  onRefresh?: () => void;
 }
 
-export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan, onEdit, onResetPassword, onChangeStatus, onDelete }: CoachDetailDrawerProps) {
+export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan, onEdit, onResetPassword, onChangeStatus, onDelete, onRefresh }: CoachDetailDrawerProps) {
   const [grantModalOpen, setGrantModalOpen] = useState(false);
+  const [togglingVisibility, setTogglingVisibility] = useState(false);
+  const queryClient = useQueryClient();
+  const logAction = useLogAdminAction();
 
   // Fetch last login
   const { data: lastLogin, isLoading: lastLoginLoading } = useUserLastLogin(coach?.user_id);
@@ -240,6 +246,48 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan,
             <Button variant="outline" className="justify-start" onClick={onChangeStatus}>
               <Pause className="h-4 w-4 mr-2" />
               Change Status
+            </Button>
+            <Button 
+              variant="outline" 
+              className={cn(
+                "justify-start",
+                coach.marketplace_visible === false && "border-amber-500/50 text-amber-500"
+              )}
+              disabled={togglingVisibility}
+              onClick={async (e) => {
+                e.stopPropagation();
+                setTogglingVisibility(true);
+                const newValue = coach.marketplace_visible !== false;
+                const { error } = await supabase
+                  .from("coach_profiles")
+                  .update({ marketplace_visible: !newValue })
+                  .eq("id", coach.id);
+                
+                if (error) {
+                  toast.error("Failed to update visibility");
+                } else {
+                  toast.success(newValue ? "Coach hidden from marketplace" : "Coach visible in marketplace");
+                  logAction.log({
+                    action: newValue ? "HIDE_FROM_MARKETPLACE" : "SHOW_IN_MARKETPLACE",
+                    entityType: "coach_profiles",
+                    entityId: coach.id,
+                    oldValues: { marketplace_visible: !newValue },
+                    newValues: { marketplace_visible: newValue ? false : true },
+                  });
+                  queryClient.invalidateQueries({ queryKey: ["marketplace-coaches"] });
+                  onRefresh?.();
+                }
+                setTogglingVisibility(false);
+              }}
+            >
+              {togglingVisibility ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : coach.marketplace_visible === false ? (
+                <EyeOff className="h-4 w-4 mr-2" />
+              ) : (
+                <Eye className="h-4 w-4 mr-2" />
+              )}
+              {coach.marketplace_visible === false ? "Hidden from Search" : "Visible in Search"}
             </Button>
             <Button variant="destructive" className="justify-start col-span-full sm:col-span-1" onClick={onDelete}>
               <Trash2 className="h-4 w-4 mr-2" />
