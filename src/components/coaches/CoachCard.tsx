@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Video, User, MessageSquare, Calendar, UserPlus, Building } from "lucide-react";
+import { MapPin, Video, User, MessageSquare, Calendar, UserPlus, Building, Rocket } from "lucide-react";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import FavouriteButton from "@/components/favourites/FavouriteButton";
 import StarRating from "@/components/reviews/StarRating";
@@ -65,8 +65,14 @@ const CoachCard = ({ coach, onBook, onRequestConnection }: CoachCardProps) => {
   };
 
   return (
-    <div className="group card-glow rounded-2xl overflow-hidden hover-lift relative">
-      <div className="absolute top-3 right-3 z-10">
+    <div className={`group card-glow rounded-2xl overflow-hidden hover-lift relative ${coach.is_sponsored ? "ring-2 ring-primary/50" : ""}`}>
+      <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
+        {coach.is_sponsored && (
+          <Badge className="bg-primary/90 text-primary-foreground border-0 backdrop-blur-sm">
+            <Rocket className="w-3 h-3 mr-1" />
+            Sponsored
+          </Badge>
+        )}
         <FavouriteButton coachId={coach.id} />
       </div>
 

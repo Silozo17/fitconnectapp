@@ -20,6 +20,7 @@ import {
   Search,
   LogOut,
   User,
+  Rocket,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,6 +47,7 @@ const menuItems: { title: string; icon: typeof LayoutDashboard; path: string; ba
   { title: "Training Plans", icon: ClipboardList, path: "/dashboard/coach/plans" },
   { title: "Digital Products", icon: ShoppingBag, path: "/dashboard/coach/products" },
   { title: "Packages", icon: Package, path: "/dashboard/coach/packages" },
+  { title: "Boost", icon: Rocket, path: "/dashboard/coach/boost" },
   { title: "Achievements", icon: Trophy, path: "/dashboard/coach/achievements" },
   { title: "Reviews", icon: Star, path: "/dashboard/coach/reviews" },
   { title: "Earnings", icon: DollarSign, path: "/dashboard/coach/earnings" },

@@ -21,12 +21,26 @@ interface UseCoachMarketplaceOptions {
   limit?: number;
   featured?: boolean;
   location?: string;
+  showSponsoredFirst?: boolean;
 }
 
 export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}) => {
+  const showSponsoredFirst = options.showSponsoredFirst !== false; // Default true
+
   return useQuery({
     queryKey: ["marketplace-coaches", options],
     queryFn: async () => {
+      // First, get boosted coach IDs if showing sponsored first
+      let boostedCoachIds: string[] = [];
+      if (showSponsoredFirst) {
+        const { data: boosts } = await supabase
+          .from("coach_boosts")
+          .select("coach_id")
+          .eq("is_active", true);
+        
+        boostedCoachIds = (boosts || []).map(b => b.coach_id);
+      }
+
       let query = supabase
         .from("coach_profiles")
         .select("*")
@@ -71,7 +85,28 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}) =>
       const { data, error } = await query;
 
       if (error) throw error;
-      return (data || []) as MarketplaceCoach[];
+
+      // Mark sponsored coaches and sort them first
+      const coaches = (data || []).map(coach => ({
+        ...coach,
+        is_sponsored: boostedCoachIds.includes(coach.id),
+      })) as MarketplaceCoach[];
+
+      // Sort: sponsored first (randomized among themselves), then non-sponsored
+      if (showSponsoredFirst && boostedCoachIds.length > 0) {
+        const sponsored = coaches.filter(c => c.is_sponsored);
+        const nonSponsored = coaches.filter(c => !c.is_sponsored);
+        
+        // Randomize sponsored coaches for fair exposure
+        for (let i = sponsored.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [sponsored[i], sponsored[j]] = [sponsored[j], sponsored[i]];
+        }
+        
+        return [...sponsored, ...nonSponsored];
+      }
+
+      return coaches;
     },
   });
 };

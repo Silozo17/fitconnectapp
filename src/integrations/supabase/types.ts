@@ -395,6 +395,105 @@ export type Database = {
           },
         ]
       }
+      boost_client_attributions: {
+        Row: {
+          attributed_at: string | null
+          booking_amount: number | null
+          client_id: string
+          coach_id: string
+          created_at: string | null
+          fee_amount: number | null
+          fee_status: string | null
+          first_booking_id: string | null
+          id: string
+          stripe_charge_id: string | null
+        }
+        Insert: {
+          attributed_at?: string | null
+          booking_amount?: number | null
+          client_id: string
+          coach_id: string
+          created_at?: string | null
+          fee_amount?: number | null
+          fee_status?: string | null
+          first_booking_id?: string | null
+          id?: string
+          stripe_charge_id?: string | null
+        }
+        Update: {
+          attributed_at?: string | null
+          booking_amount?: number | null
+          client_id?: string
+          coach_id?: string
+          created_at?: string | null
+          fee_amount?: number | null
+          fee_status?: string | null
+          first_booking_id?: string | null
+          id?: string
+          stripe_charge_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "boost_client_attributions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "boost_client_attributions_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "boost_client_attributions_first_booking_id_fkey"
+            columns: ["first_booking_id"]
+            isOneToOne: false
+            referencedRelation: "booking_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      boost_settings: {
+        Row: {
+          commission_rate: number | null
+          id: string
+          is_active: boolean | null
+          max_fee: number | null
+          min_fee: number | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          commission_rate?: number | null
+          id?: string
+          is_active?: boolean | null
+          max_fee?: number | null
+          min_fee?: number | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          commission_rate?: number | null
+          id?: string
+          is_active?: boolean | null
+          max_fee?: number | null
+          min_fee?: number | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "boost_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "admin_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bundle_products: {
         Row: {
           bundle_id: string
@@ -1138,6 +1237,50 @@ export type Database = {
             foreignKeyName: "coach_badges_coach_id_fkey"
             columns: ["coach_id"]
             isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coach_boosts: {
+        Row: {
+          activated_at: string | null
+          coach_id: string
+          created_at: string | null
+          deactivated_at: string | null
+          id: string
+          is_active: boolean
+          total_clients_acquired: number | null
+          total_fees_paid: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          activated_at?: string | null
+          coach_id: string
+          created_at?: string | null
+          deactivated_at?: string | null
+          id?: string
+          is_active?: boolean
+          total_clients_acquired?: number | null
+          total_fees_paid?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          activated_at?: string | null
+          coach_id?: string
+          created_at?: string | null
+          deactivated_at?: string | null
+          id?: string
+          is_active?: boolean
+          total_clients_acquired?: number | null
+          total_fees_paid?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_boosts_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: true
             referencedRelation: "coach_profiles"
             referencedColumns: ["id"]
           },
@@ -3653,6 +3796,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_boost_fee: { Args: { booking_amount: number }; Returns: number }
       client_has_messaged_coach: {
         Args: { client_profile_id: string }
         Returns: boolean

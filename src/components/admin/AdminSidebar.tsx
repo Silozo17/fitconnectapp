@@ -2,7 +2,7 @@ import { NavLink } from "@/components/NavLink";
 import { 
   LayoutDashboard, Users, Dumbbell, Settings, ChevronLeft, ChevronRight, 
   UsersRound, DollarSign, BarChart3,
-  MessageSquare, Shield, Trophy, FileText, Search, LogOut, User
+  MessageSquare, Shield, Trophy, FileText, Search, LogOut, User, Rocket
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -36,6 +36,7 @@ const mainNavItems: NavItem[] = [
   { title: "Coaches", url: "/dashboard/admin/coaches", icon: Dumbbell },
   { title: "Team", url: "/dashboard/admin/team", icon: UsersRound },
   { title: "Revenue", url: "/dashboard/admin/revenue", icon: DollarSign },
+  { title: "Boosts", url: "/dashboard/admin/boosts", icon: Rocket },
   { title: "Analytics", url: "/dashboard/admin/analytics", icon: BarChart3 },
 ];
 

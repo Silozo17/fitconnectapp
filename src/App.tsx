@@ -98,6 +98,8 @@ const CoachIntegrations = lazy(() => import("./pages/dashboard/coach/CoachIntegr
 const CoachReviews = lazy(() => import("./pages/dashboard/coach/CoachReviews"));
 const CoachVerification = lazy(() => import("./pages/dashboard/coach/CoachVerification"));
 const CoachPipeline = lazy(() => import("./pages/dashboard/coach/CoachPipeline"));
+const CoachBoost = lazy(() => import("./pages/dashboard/coach/CoachBoost"));
+const AdminBoosts = lazy(() => import("./pages/dashboard/admin/AdminBoosts"));
 const CoachAchievements = lazy(() => import("./pages/dashboard/coach/CoachAchievements"));
 const CoachConnections = lazy(() => import("./pages/dashboard/coach/CoachConnections"));
 const CoachProducts = lazy(() => import("./pages/dashboard/coach/CoachProducts"));
@@ -221,6 +223,11 @@ const App = () => (
                     <Route path="/dashboard/admin/revenue" element={
                       <ProtectedRoute allowedRoles={["admin", "manager"]}>
                         <AdminRevenue />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/admin/boosts" element={
+                      <ProtectedRoute allowedRoles={["admin", "manager"]}>
+                        <AdminBoosts />
                       </ProtectedRoute>
                     } />
                     <Route path="/dashboard/admin/analytics" element={
@@ -467,6 +474,11 @@ const App = () => (
                     <Route path="/dashboard/coach/earnings" element={
                       <ProtectedRoute allowedRoles={["coach"]}>
                         <CoachEarnings />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/coach/boost" element={
+                      <ProtectedRoute allowedRoles={["coach"]}>
+                        <CoachBoost />
                       </ProtectedRoute>
                     } />
                     <Route path="/dashboard/coach/reviews" element={
