@@ -19,6 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLogAdminAction } from "@/hooks/useAuditLog";
 import { Loader2, X } from "lucide-react";
+import { COACH_TYPES, COACH_TYPE_CATEGORIES, getCoachTypesByCategory, getCoachTypeLabel } from "@/constants/coachTypes";
 
 interface CoachUser {
   id: string;
@@ -47,19 +48,6 @@ interface EnhancedEditCoachModalProps {
   onSaved: () => void;
 }
 
-const COACH_TYPES = [
-  "Personal Trainer",
-  "Nutritionist",
-  "Boxing Coach",
-  "MMA Coach",
-  "Yoga Instructor",
-  "Pilates Instructor",
-  "CrossFit Coach",
-  "Strength Coach",
-  "Bodybuilding Coach",
-  "Running Coach",
-];
-
 const SUBSCRIPTION_TIERS = ["free", "starter", "pro", "enterprise"];
 const VERIFICATION_STATUSES = ["not_submitted", "pending", "approved", "rejected"];
 const BOOKING_MODES = ["message_first", "direct"];
@@ -81,7 +69,7 @@ export function EnhancedEditCoachModal({ coach, open, onClose, onSaved }: Enhanc
     booking_mode: "message_first",
     onboarding_completed: false,
   });
-  const [newCoachType, setNewCoachType] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
   const logAction = useLogAdminAction();
 
   useEffect(() => {
@@ -150,16 +138,32 @@ export function EnhancedEditCoachModal({ coach, open, onClose, onSaved }: Enhanc
     }
   };
 
-  const addCoachType = (type: string) => {
-    if (type && !formData.coach_types.includes(type)) {
-      setFormData({ ...formData, coach_types: [...formData.coach_types, type] });
+  const addCoachType = (typeId: string) => {
+    if (typeId && !formData.coach_types.includes(typeId)) {
+      setFormData({ ...formData, coach_types: [...formData.coach_types, typeId] });
     }
-    setNewCoachType("");
+    setSelectedCategory("");
   };
 
-  const removeCoachType = (type: string) => {
-    setFormData({ ...formData, coach_types: formData.coach_types.filter(t => t !== type) });
+  const removeCoachType = (typeId: string) => {
+    setFormData({ ...formData, coach_types: formData.coach_types.filter(t => t !== typeId) });
   };
+
+  // Get available types not already selected, grouped by category
+  const getAvailableTypesByCategory = () => {
+    const result: Record<string, typeof COACH_TYPES> = {};
+    COACH_TYPE_CATEGORIES.forEach((category) => {
+      const types = getCoachTypesByCategory(category.id).filter(
+        (t) => !formData.coach_types.includes(t.id)
+      );
+      if (types.length > 0) {
+        result[category.label] = types;
+      }
+    });
+    return result;
+  };
+
+  const availableTypes = getAvailableTypesByCategory();
 
   return (
     <Dialog open={open} onOpenChange={() => onClose()}>
@@ -239,25 +243,37 @@ export function EnhancedEditCoachModal({ coach, open, onClose, onSaved }: Enhanc
 
           <TabsContent value="services" className="space-y-4 mt-4">
             <div className="space-y-2">
-              <Label>Coach Types</Label>
+              <Label>Coach Specialties</Label>
               <div className="flex flex-wrap gap-2 mb-2">
-                {formData.coach_types.map((type) => (
-                  <Badge key={type} variant="secondary" className="gap-1">
-                    {type}
-                    <button onClick={() => removeCoachType(type)}>
+                {formData.coach_types.map((typeId) => (
+                  <Badge key={typeId} variant="secondary" className="gap-1">
+                    {getCoachTypeLabel(typeId)}
+                    <button onClick={() => removeCoachType(typeId)}>
                       <X className="h-3 w-3" />
                     </button>
                   </Badge>
                 ))}
+                {formData.coach_types.length === 0 && (
+                  <span className="text-sm text-muted-foreground">No specialties selected</span>
+                )}
               </div>
               <div className="flex gap-2">
-                <Select value={newCoachType} onValueChange={addCoachType}>
+                <Select value={selectedCategory} onValueChange={addCoachType}>
                   <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Add coach type" />
+                    <SelectValue placeholder="Add specialty..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {COACH_TYPES.filter(t => !formData.coach_types.includes(t)).map((type) => (
-                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    {Object.entries(availableTypes).map(([category, types]) => (
+                      <div key={category}>
+                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                          {category}
+                        </div>
+                        {types.map((type) => (
+                          <SelectItem key={type.id} value={type.id}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </div>
                     ))}
                   </SelectContent>
                 </Select>

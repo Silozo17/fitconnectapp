@@ -3,17 +3,13 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
-const COACH_TYPES = [
-  "Personal Trainer",
-  "Nutritionist",
-  "Boxing Coach",
-  "MMA Coach",
-  "Yoga Instructor",
-  "Strength Coach",
-  "CrossFit Coach",
-  "Running Coach",
-];
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { COACH_TYPE_CATEGORIES, getCoachTypesByCategory } from "@/constants/coachTypes";
 
 interface CoachFiltersProps {
   selectedTypes: string[];
@@ -36,11 +32,11 @@ const CoachFilters = ({
   inPersonOnly,
   onInPersonOnlyChange,
 }: CoachFiltersProps) => {
-  const handleTypeToggle = (type: string) => {
-    if (selectedTypes.includes(type)) {
-      onTypesChange(selectedTypes.filter((t) => t !== type));
+  const handleTypeToggle = (typeId: string) => {
+    if (selectedTypes.includes(typeId)) {
+      onTypesChange(selectedTypes.filter((t) => t !== typeId));
     } else {
-      onTypesChange([...selectedTypes, type]);
+      onTypesChange([...selectedTypes, typeId]);
     }
   };
 
@@ -71,23 +67,50 @@ const CoachFilters = ({
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Coach Type */}
+        {/* Coach Type by Category */}
         <div>
           <h4 className="font-medium mb-3 text-sm">Specialty</h4>
-          <div className="space-y-2">
-            {COACH_TYPES.map((type) => (
-              <div key={type} className="flex items-center gap-2">
-                <Checkbox
-                  id={type}
-                  checked={selectedTypes.includes(type)}
-                  onCheckedChange={() => handleTypeToggle(type)}
-                />
-                <Label htmlFor={type} className="text-sm cursor-pointer">
-                  {type}
-                </Label>
-              </div>
-            ))}
-          </div>
+          <Accordion type="multiple" className="w-full" defaultValue={["combat", "fitness"]}>
+            {COACH_TYPE_CATEGORIES.map((category) => {
+              const CategoryIcon = category.icon;
+              const typesInCategory = getCoachTypesByCategory(category.id);
+              const selectedInCategory = typesInCategory.filter((t) =>
+                selectedTypes.includes(t.id)
+              ).length;
+
+              return (
+                <AccordionItem key={category.id} value={category.id}>
+                  <AccordionTrigger className="text-sm py-2 hover:no-underline">
+                    <div className="flex items-center gap-2">
+                      <CategoryIcon className="w-4 h-4 text-muted-foreground" />
+                      <span>{category.label}</span>
+                      {selectedInCategory > 0 && (
+                        <span className="text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded-full">
+                          {selectedInCategory}
+                        </span>
+                      )}
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-2 pl-6">
+                      {typesInCategory.map((type) => (
+                        <div key={type.id} className="flex items-center gap-2">
+                          <Checkbox
+                            id={type.id}
+                            checked={selectedTypes.includes(type.id)}
+                            onCheckedChange={() => handleTypeToggle(type.id)}
+                          />
+                          <Label htmlFor={type.id} className="text-sm cursor-pointer">
+                            {type.label}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
+          </Accordion>
         </div>
 
         {/* Price Range */}
@@ -101,8 +124,8 @@ const CoachFilters = ({
             className="mb-2"
           />
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>${priceRange?.min ?? 0}</span>
-            <span>${priceRange?.max ?? 500}+</span>
+            <span>£{priceRange?.min ?? 0}</span>
+            <span>£{priceRange?.max ?? 500}+</span>
           </div>
         </div>
 
