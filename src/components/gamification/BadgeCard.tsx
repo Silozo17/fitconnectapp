@@ -51,11 +51,15 @@ export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
         <div className="text-center">
           <div 
             className={cn(
-              'text-4xl mb-2',
+              'w-16 h-16 mx-auto mb-2 flex items-center justify-center',
               !earned && 'grayscale'
             )}
           >
-            {badge.icon}
+            {badge.image_url ? (
+              <img src={badge.image_url} alt={badge.name} className="w-14 h-14 object-contain" />
+            ) : (
+              <span className="text-4xl">{badge.icon}</span>
+            )}
           </div>
           
           <h4 className={cn(

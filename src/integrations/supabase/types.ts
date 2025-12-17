@@ -276,6 +276,7 @@ export type Database = {
           description: string
           icon: string
           id: string
+          image_url: string | null
           is_active: boolean | null
           name: string
           rarity: string
@@ -288,6 +289,7 @@ export type Database = {
           description: string
           icon?: string
           id?: string
+          image_url?: string | null
           is_active?: boolean | null
           name: string
           rarity?: string
@@ -300,6 +302,7 @@ export type Database = {
           description?: string
           icon?: string
           id?: string
+          image_url?: string | null
           is_active?: boolean | null
           name?: string
           rarity?: string

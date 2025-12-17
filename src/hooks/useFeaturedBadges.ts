@@ -63,7 +63,7 @@ export function useCoachFeaturedBadges(coachId: string | undefined) {
         .select(`
           id,
           earned_at,
-          badge:badges(id, name, icon, rarity, description)
+          badge:badges(id, name, icon, image_url, rarity, description)
         `)
         .eq("coach_id", coachId)
         .eq("is_featured", true)

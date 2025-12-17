@@ -9,6 +9,7 @@ interface Badge {
   description: string;
   category: string;
   icon: string;
+  image_url?: string | null;
   rarity: string;
   xp_reward: number;
   criteria: Record<string, unknown>;
