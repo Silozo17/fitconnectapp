@@ -3,6 +3,9 @@ project_id = "ntgfihgneyoxxbwmtceq"
 [functions.stripe-webhook]
 verify_jwt = false
 
+[functions.stripe-express-login]
+verify_jwt = true
+
 [functions.ai-meal-suggestion]
 verify_jwt = true
 
