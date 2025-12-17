@@ -41,7 +41,7 @@ export function DocsLayout({ title, description, breadcrumbs = [], children }: D
       <div className="min-h-screen flex flex-col bg-background">
         <Navbar />
         
-        <div className="flex-1 flex">
+        <div className="flex-1 flex pt-16 md:pt-20">
           {/* Sidebar - hidden on mobile */}
           <div className="hidden lg:block">
             <div className="sticky top-0 h-screen">
