@@ -239,7 +239,7 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto overflow-x-hidden">
         <DialogHeader>
           <DialogTitle>Book with {coach.display_name}</DialogTitle>
           <DialogDescription>

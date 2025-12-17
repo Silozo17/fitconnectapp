@@ -154,7 +154,7 @@ const AvailabilityCalendar = ({
   const activeDaySlots = activeDayIndex >= 0 ? getAvailableSlotsForDay(activeDayIndex) : [];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full overflow-hidden">
       {/* Week Navigation */}
       <div className="flex items-center justify-between">
         <Button 
@@ -162,23 +162,23 @@ const AvailabilityCalendar = ({
           size="icon" 
           onClick={handlePrevWeek}
           disabled={!canGoPrev}
-          className="h-9 w-9"
+          className="h-9 w-9 flex-shrink-0"
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <span className="font-medium text-foreground text-sm sm:text-base">
+        <span className="font-medium text-foreground text-sm sm:text-base text-center">
           {format(weekStart, "MMM d")} - {format(addDays(weekStart, 6), "MMM d, yyyy")}
         </span>
-        <Button variant="outline" size="icon" onClick={handleNextWeek} className="h-9 w-9">
+        <Button variant="outline" size="icon" onClick={handleNextWeek} className="h-9 w-9 flex-shrink-0">
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
 
       {/* Mobile View: Day Selector + Time List */}
-      <div className="block sm:hidden space-y-4">
+      <div className="block sm:hidden space-y-4 w-full overflow-hidden">
         {/* Day Pills - Horizontal Scroll */}
-        <ScrollArea className="w-full whitespace-nowrap">
-          <div className="flex gap-2 pb-2">
+        <ScrollArea className="w-full">
+          <div className="flex gap-2 pb-2 px-1">
             {weekDays.map((day, i) => {
               const isToday = isSameDay(day, new Date());
               const hasSlots = dayHasAvailability(i);
@@ -190,7 +190,7 @@ const AvailabilityCalendar = ({
                   onClick={() => setSelectedDayIndex(i)}
                   disabled={!hasSlots}
                   className={cn(
-                    "flex flex-col items-center min-w-[56px] py-2 px-3 rounded-xl transition-all",
+                    "flex flex-col items-center min-w-[52px] py-2 px-2 rounded-xl transition-all flex-shrink-0",
                     isActive 
                       ? "bg-primary text-primary-foreground" 
                       : hasSlots
@@ -213,7 +213,7 @@ const AvailabilityCalendar = ({
               );
             })}
           </div>
-          <ScrollBar orientation="horizontal" />
+          <ScrollBar orientation="horizontal" className="h-2" />
         </ScrollArea>
 
         {/* Selected Day Header */}
@@ -229,7 +229,7 @@ const AvailabilityCalendar = ({
         )}
 
         {/* Time Slots List */}
-        <div className="space-y-2 max-h-[280px] overflow-y-auto">
+        <div className="space-y-2 max-h-[280px] overflow-y-auto overflow-x-hidden">
           {activeDaySlots.length > 0 ? (
             activeDaySlots.map((time) => {
               const selected = activeDay && isSelected(activeDay, time);
