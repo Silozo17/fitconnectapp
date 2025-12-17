@@ -7,48 +7,33 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Share2, Twitter, Facebook, Linkedin, Link, Check, MessageCircle } from 'lucide-react';
-import { share, type ShareOptions } from '@/lib/share';
+import { share, canUseNativeShare, type ShareOptions } from '@/lib/share';
 
-export interface ShareableAchievement {
-  type: 'badge' | 'level' | 'challenge' | 'rank';
+interface ShareButtonProps {
   title: string;
-  description: string;
-  value?: string | number;
-  icon?: string;
-}
-
-interface ShareAchievementButtonProps {
-  achievement: ShareableAchievement;
-  variant?: 'default' | 'outline' | 'ghost';
+  text: string;
+  url: string;
+  variant?: 'default' | 'outline' | 'ghost' | 'secondary';
   size?: 'default' | 'sm' | 'lg' | 'icon';
+  className?: string;
 }
 
-export function ShareAchievementButton({ 
-  achievement, 
+export function ShareButton({ 
+  title,
+  text,
+  url,
   variant = 'outline',
-  size = 'sm' 
-}: ShareAchievementButtonProps) {
+  size = 'sm',
+  className = ''
+}: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
 
-  const getShareText = () => {
-    switch (achievement.type) {
-      case 'badge':
-        return `🏆 I just earned the "${achievement.title}" badge on FitConnect! ${achievement.description}`;
-      case 'level':
-        return `⬆️ Level Up! I just reached Level ${achievement.value} on FitConnect!\n💪 ${achievement.description}`;
-      case 'challenge':
-        return `🎯 Challenge Complete! I finished "${achievement.title}" on FitConnect!\n${achievement.description}`;
-      case 'rank':
-        return `📊 I'm ranked #${achievement.value} ${achievement.title} on FitConnect!\n${achievement.description}`;
-      default:
-        return `🎉 ${achievement.title} - ${achievement.description}`;
-    }
-  };
+  const shareOptions: ShareOptions = { title, text, url };
 
-  const shareOptions: ShareOptions = {
-    title: `FitConnect Achievement: ${achievement.title}`,
-    text: getShareText(),
-    url: window.location.origin,
+  const handleNativeShare = async () => {
+    if (canUseNativeShare()) {
+      await share('native', shareOptions);
+    }
   };
 
   const handleShare = async (platform: 'twitter' | 'facebook' | 'linkedin' | 'whatsapp' | 'copy') => {
@@ -59,12 +44,26 @@ export function ShareAchievementButton({
     }
   };
 
+  // On mobile, try native share first
+  if (canUseNativeShare() && size === 'icon') {
+    return (
+      <Button 
+        variant={variant} 
+        size={size} 
+        className={className}
+        onClick={handleNativeShare}
+      >
+        <Share2 className="h-4 w-4" />
+      </Button>
+    );
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant={variant} size={size}>
-          <Share2 className="h-4 w-4 mr-2" />
-          Share
+        <Button variant={variant} size={size} className={className}>
+          <Share2 className="h-4 w-4" />
+          {size !== 'icon' && <span className="ml-2">Share</span>}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">

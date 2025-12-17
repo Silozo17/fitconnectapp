@@ -3,6 +3,7 @@ import {
   Star, MapPin, Video, Users, ArrowLeft, 
   Clock, Award, Calendar, MessageSquare, Loader2, Building 
 } from "lucide-react";
+import { ShareButton } from "@/components/shared/ShareButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -164,6 +165,13 @@ const CoachDetail = () => {
                             rating={averageRating} 
                             reviewCount={reviews.length} 
                             size="lg"
+                          />
+                          <ShareButton
+                            title={`${coach.display_name} - Coach on FitConnect`}
+                            text={coach.bio || `Check out ${coach.display_name}'s coaching profile on FitConnect!`}
+                            url={window.location.href}
+                            variant="ghost"
+                            size="icon"
                           />
                           <FavouriteButton coachId={coach.id} />
                         </div>
