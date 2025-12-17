@@ -45,34 +45,26 @@ export const AdminCoachCard = ({
 
   return (
     <div
-      className={`flex items-center gap-3 p-3 rounded-lg border bg-card cursor-pointer hover:bg-muted/50 transition-colors ${
+      className={`flex items-center gap-2 p-3 rounded-lg border bg-card cursor-pointer hover:bg-muted/50 transition-colors ${
         selected ? "border-primary ring-1 ring-primary" : ""
       }`}
       onClick={onClick}
     >
-      <div onClick={(e) => e.stopPropagation()}>
+      <div onClick={(e) => e.stopPropagation()} className="flex-shrink-0">
         <Checkbox checked={selected} onCheckedChange={onSelect} />
       </div>
 
-      <Avatar className="h-10 w-10">
+      <Avatar className="h-10 w-10 flex-shrink-0">
         {coach.profile_image_url && <AvatarImage src={coach.profile_image_url} alt={displayName} />}
         <AvatarFallback>{initials}</AvatarFallback>
       </Avatar>
 
-      <div className="flex-1 min-w-0">
-        <p className="font-medium text-sm truncate">{displayName}</p>
-        <div className="flex flex-wrap gap-1 mt-0.5">
-          {coach.coach_types?.slice(0, 2).map((type) => (
-            <Badge key={type} variant="outline" className="text-xs py-0 h-5">
-              {type}
-            </Badge>
-          ))}
-          {(coach.coach_types?.length || 0) > 2 && (
-            <Badge variant="outline" className="text-xs py-0 h-5">
-              +{(coach.coach_types?.length || 0) - 2}
-            </Badge>
-          )}
-        </div>
+      <div className="flex-1 min-w-0 overflow-hidden">
+        <p className="font-medium text-sm leading-tight">{displayName}</p>
+        <p className="text-xs text-muted-foreground">
+          {coach.coach_types?.slice(0, 2).join(", ") || "No specialty"}
+          {(coach.coach_types?.length || 0) > 2 && ` +${(coach.coach_types?.length || 0) - 2}`}
+        </p>
       </div>
 
       <StatusBadge status={coach.status || "active"} />

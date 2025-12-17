@@ -145,7 +145,7 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan 
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-[500px] sm:max-w-[500px] overflow-y-auto">
+      <SheetContent className="w-full sm:max-w-[500px] overflow-y-auto">
         <SheetHeader>
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16">
@@ -179,7 +179,7 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan 
         </SheetHeader>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-4 gap-2 mt-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-6">
           <div className="text-center p-3 bg-muted/50 rounded-lg">
             <Users className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
             <p className="text-lg font-bold">{clients?.length || 0}</p>
@@ -205,7 +205,7 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan 
         {/* Admin Actions */}
         <div className="mt-6 space-y-2">
           <p className="text-sm font-medium text-muted-foreground">Admin Actions</p>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <Button variant="outline" className="justify-start" onClick={onAssignFreePlan}>
               <Gift className="h-4 w-4 mr-2" />
               {grantedSub ? "Change Plan" : "Give Free Plan"}
@@ -229,7 +229,7 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan 
 
         {/* Detailed Tabs */}
         <Tabs defaultValue="clients" className="mt-4">
-          <TabsList className="grid grid-cols-4 w-full">
+          <TabsList className="grid grid-cols-2 sm:grid-cols-4 w-full h-auto gap-1">
             <TabsTrigger value="clients">Clients</TabsTrigger>
             <TabsTrigger value="packages">Packages</TabsTrigger>
             <TabsTrigger value="avatars">Avatars</TabsTrigger>
@@ -352,7 +352,7 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan 
                     <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                   </div>
                 ) : coachAvatars && coachAvatars.length > 0 ? (
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {coachAvatars.map((ua) => {
                       const rarityConfig = RARITY_CONFIG[ua.avatar.rarity as keyof typeof RARITY_CONFIG];
                       const isSelected = selectedAvatarData?.selected_avatar_id === ua.avatar_id;

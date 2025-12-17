@@ -196,7 +196,7 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved }: UserDeta
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-[600px] sm:max-w-[600px] overflow-y-auto">
+      <SheetContent className="w-full sm:max-w-[600px] overflow-y-auto">
         <SheetHeader>
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16">
@@ -230,7 +230,7 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved }: UserDeta
         </SheetHeader>
 
         {/* Quick Stats - Enhanced with gamification */}
-        <div className="grid grid-cols-6 gap-2 mt-6">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-6">
           <div className="text-center p-2 bg-muted/50 rounded-lg">
             <Dumbbell className="h-3 w-3 mx-auto mb-1 text-muted-foreground" />
             <p className="text-sm font-bold">{connectedCoaches?.length || 0}</p>
@@ -266,7 +266,7 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved }: UserDeta
         <Separator className="my-6" />
 
         <Tabs defaultValue="profile" className="mt-4">
-          <TabsList className="grid grid-cols-6 w-full">
+          <TabsList className="grid grid-cols-3 sm:grid-cols-6 w-full h-auto gap-1">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="health">Health</TabsTrigger>
             <TabsTrigger value="gamification">Stats</TabsTrigger>
@@ -276,7 +276,7 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved }: UserDeta
           </TabsList>
 
           <TabsContent value="profile" className="mt-4 space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>First Name</Label>
                 <Input
@@ -314,7 +314,7 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved }: UserDeta
               <h4 className="font-medium flex items-center gap-2">
                 <MapPin className="h-4 w-4" /> Location
               </h4>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label>City</Label>
                   <Input
@@ -352,7 +352,7 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved }: UserDeta
           </TabsContent>
 
           <TabsContent value="health" className="mt-4 space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Weight (kg)</Label>
                 <Input

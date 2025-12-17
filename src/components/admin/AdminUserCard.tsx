@@ -58,8 +58,8 @@ export const AdminUserCard = ({
         <AvatarFallback>{initials}</AvatarFallback>
       </Avatar>
 
-      <div className="flex-1 min-w-0">
-        <p className="font-medium text-sm truncate">{fullName}</p>
+      <div className="flex-1 min-w-0 overflow-hidden">
+        <p className="font-medium text-sm leading-tight">{fullName}</p>
         <p className="text-xs text-muted-foreground truncate">{email || "No email"}</p>
       </div>
 

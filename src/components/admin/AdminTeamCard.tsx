@@ -58,27 +58,28 @@ export const AdminTeamCard = ({
 
   return (
     <div
-      className={`flex items-center gap-3 p-3 rounded-lg border bg-card cursor-pointer hover:bg-muted/50 transition-colors ${
+      className={`flex items-center gap-2 p-3 rounded-lg border bg-card cursor-pointer hover:bg-muted/50 transition-colors ${
         selected ? "border-primary ring-1 ring-primary" : ""
       }`}
       onClick={onClick}
     >
-      <div onClick={(e) => e.stopPropagation()}>
+      <div onClick={(e) => e.stopPropagation()} className="flex-shrink-0">
         <Checkbox checked={selected} onCheckedChange={onSelect} />
       </div>
 
-      <Avatar className="h-10 w-10">
+      <Avatar className="h-10 w-10 flex-shrink-0">
         <AvatarFallback>{initials}</AvatarFallback>
       </Avatar>
 
-      <div className="flex-1 min-w-0">
-        <p className="font-medium text-sm truncate">{displayName}</p>
-        <p className="text-xs text-muted-foreground truncate">{member.department || "No department"}</p>
+      <div className="flex-1 min-w-0 overflow-hidden">
+        <p className="font-medium text-sm leading-tight">{displayName}</p>
+        <div className="flex items-center gap-1.5 mt-0.5">
+          <Badge className={`${getRoleBadgeColor(member.role)} capitalize text-[10px] h-4 px-1.5`}>
+            {member.role}
+          </Badge>
+          <span className="text-xs text-muted-foreground truncate">{member.department || ""}</span>
+        </div>
       </div>
-
-      <Badge className={`${getRoleBadgeColor(member.role)} capitalize`}>
-        {member.role}
-      </Badge>
 
       <StatusBadge status={member.status || "active"} />
 
