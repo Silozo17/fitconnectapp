@@ -244,45 +244,55 @@ const AdminSettings = () => {
       <AdminLayout>
         <div className="space-y-6 max-w-5xl">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Platform Settings</h1>
-            <p className="text-muted-foreground mt-1">Configure platform-wide settings and preferences</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Platform Settings</h1>
+            <p className="text-muted-foreground mt-1 text-sm sm:text-base">Configure platform-wide settings and preferences</p>
           </div>
 
           <Tabs defaultValue="general" className="space-y-4">
-            <TabsList className="flex-wrap">
-              <TabsTrigger value="general" className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
-                General
-              </TabsTrigger>
-              <TabsTrigger value="preferences" className="flex items-center gap-2">
-                <Globe className="h-4 w-4" />
-                Preferences
-              </TabsTrigger>
-              <TabsTrigger value="plans" className="flex items-center gap-2">
-                <CreditCard className="h-4 w-4" />
-                Plans
-              </TabsTrigger>
-              <TabsTrigger value="features" className="flex items-center gap-2">
-                <Sliders className="h-4 w-4" />
-                Features
-              </TabsTrigger>
-              <TabsTrigger value="notifications" className="flex items-center gap-2">
-                <Bell className="h-4 w-4" />
-                Notifications
-              </TabsTrigger>
-              <TabsTrigger value="integrations" className="flex items-center gap-2">
-                <Plug className="h-4 w-4" />
-                Integrations
-              </TabsTrigger>
-              <TabsTrigger value="security" className="flex items-center gap-2">
-                <Shield className="h-4 w-4" />
-                Security
-              </TabsTrigger>
-              <TabsTrigger value="account" className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                Account
-              </TabsTrigger>
-            </TabsList>
+            {/* Scrollable TabsList for mobile */}
+            <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 pb-2">
+              <TabsList className="inline-flex w-max sm:w-auto h-auto flex-nowrap">
+                <TabsTrigger value="general" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                  <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">General</span>
+                  <span className="xs:hidden">Gen</span>
+                </TabsTrigger>
+                <TabsTrigger value="preferences" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                  <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Preferences</span>
+                  <span className="xs:hidden">Pref</span>
+                </TabsTrigger>
+                <TabsTrigger value="plans" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                  <CreditCard className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  Plans
+                </TabsTrigger>
+                <TabsTrigger value="features" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                  <Sliders className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Features</span>
+                  <span className="xs:hidden">Feat</span>
+                </TabsTrigger>
+                <TabsTrigger value="notifications" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                  <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Notifications</span>
+                  <span className="xs:hidden">Notif</span>
+                </TabsTrigger>
+                <TabsTrigger value="integrations" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                  <Plug className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Integrations</span>
+                  <span className="xs:hidden">Integ</span>
+                </TabsTrigger>
+                <TabsTrigger value="security" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                  <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Security</span>
+                  <span className="xs:hidden">Sec</span>
+                </TabsTrigger>
+                <TabsTrigger value="account" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                  <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Account</span>
+                  <span className="xs:hidden">Acct</span>
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
             <TabsContent value="general" className="space-y-4">
               <Card>
@@ -290,41 +300,45 @@ const AdminSettings = () => {
                   <CardTitle>General Settings</CardTitle>
                   <CardDescription>Platform-wide configuration options</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
+                <CardContent className="space-y-4 sm:space-y-6">
+                  {/* Responsive toggle row */}
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="space-y-0.5 min-w-0">
                       <Label>Maintenance Mode</Label>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground line-clamp-2 sm:line-clamp-none">
                         Put the platform in maintenance mode (users can't access)
                       </p>
                     </div>
                     <Switch
+                      className="shrink-0"
                       checked={localSettings.maintenance_mode}
                       onCheckedChange={(checked) => handleToggle("maintenance_mode", checked)}
                     />
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="space-y-0.5 min-w-0">
                       <Label>Auto-Approve Coaches</Label>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground line-clamp-2 sm:line-clamp-none">
                         Automatically approve new coach registrations
                       </p>
                     </div>
                     <Switch
+                      className="shrink-0"
                       checked={localSettings.auto_approve_coaches}
                       onCheckedChange={(checked) => handleToggle("auto_approve_coaches", checked)}
                     />
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="space-y-0.5 min-w-0">
                       <Label>Require Coach Verification</Label>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground line-clamp-2 sm:line-clamp-none">
                         Coaches must be verified before appearing in marketplace
                       </p>
                     </div>
                     <Switch
+                      className="shrink-0"
                       checked={localSettings.require_coach_verification}
                       onCheckedChange={(checked) => handleToggle("require_coach_verification", checked)}
                     />
@@ -348,7 +362,7 @@ const AdminSettings = () => {
                       value={localSettings.currency}
                       onValueChange={(value) => handleChange("currency", value)}
                     >
-                      <SelectTrigger className="max-w-xs">
+                      <SelectTrigger className="w-full sm:max-w-xs">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -365,31 +379,31 @@ const AdminSettings = () => {
 
             {/* Plans Tab - Consolidated from AdminPlatformPlans */}
             <TabsContent value="plans" className="space-y-6">
-              {/* Pricing Tiers */}
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+              {/* Pricing Tiers - Single column on mobile */}
+              <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                 {tiers.map((tier: PlanTier) => {
                   const IconComponent = tierIcons[tier.icon] || Star;
                   return (
                     <Card key={tier.id} className={!tier.isActive ? "opacity-60" : ""}>
-                      <CardHeader>
+                      <CardHeader className="pb-2 sm:pb-6">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <div className="p-2 rounded-lg bg-primary/10">
-                              <IconComponent className="h-5 w-5 text-primary" />
+                            <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10">
+                              <IconComponent className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                             </div>
-                            <CardTitle className="text-lg">{tier.name}</CardTitle>
+                            <CardTitle className="text-base sm:text-lg">{tier.name}</CardTitle>
                           </div>
                           <Switch 
                             checked={tier.isActive} 
                             onCheckedChange={(checked) => handleToggleTier(tier.id, checked)}
                           />
                         </div>
-                        <CardDescription>{tier.description}</CardDescription>
+                        <CardDescription className="text-xs sm:text-sm">{tier.description}</CardDescription>
                       </CardHeader>
-                      <CardContent className="space-y-4">
+                      <CardContent className="space-y-3 sm:space-y-4">
                         <div className="flex items-baseline gap-1">
-                          <span className="text-3xl font-bold">£{tier.price}</span>
-                          <span className="text-muted-foreground">/{tier.billingPeriod}</span>
+                          <span className="text-2xl sm:text-3xl font-bold">£{tier.price}</span>
+                          <span className="text-muted-foreground text-sm">/{tier.billingPeriod}</span>
                         </div>
                         
                         <Dialog open={isDialogOpen && editingTier?.id === tier.id} onOpenChange={(open) => {
@@ -406,7 +420,7 @@ const AdminSettings = () => {
                               Edit Plan
                             </Button>
                           </DialogTrigger>
-                          <DialogContent>
+                          <DialogContent className="max-w-[95vw] sm:max-w-lg">
                             <DialogHeader>
                               <DialogTitle>Edit {tier.name} Plan</DialogTitle>
                               <DialogDescription>
@@ -423,7 +437,7 @@ const AdminSettings = () => {
                                 />
                               </div>
                               
-                              <div className="grid grid-cols-2 gap-4">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                   <Label>Price (£)</Label>
                                   <Input 
@@ -458,14 +472,14 @@ const AdminSettings = () => {
                               </div>
                             </div>
                             
-                            <DialogFooter>
-                              <Button variant="outline" onClick={() => {
+                            <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
+                              <Button variant="outline" className="w-full sm:w-auto" onClick={() => {
                                 setIsDialogOpen(false);
                                 setEditingTier(null);
                               }}>
                                 Cancel
                               </Button>
-                              <Button onClick={handleSaveTier}>Save Changes</Button>
+                              <Button className="w-full sm:w-auto" onClick={handleSaveTier}>Save Changes</Button>
                             </DialogFooter>
                           </DialogContent>
                         </Dialog>
@@ -478,33 +492,33 @@ const AdminSettings = () => {
               {/* Feature Matrix */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Feature Access by Tier</CardTitle>
-                  <CardDescription>Configure which features are available for each subscription tier</CardDescription>
+                  <CardTitle className="text-base sm:text-lg">Feature Access by Tier</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">Configure which features are available for each subscription tier</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-0 sm:p-6">
                   <div className="overflow-x-auto">
-                    <table className="w-full">
+                    <table className="w-full min-w-[600px]">
                       <thead>
                         <tr className="border-b">
-                          <th className="text-left py-3 px-4 font-medium">Feature</th>
+                          <th className="text-left py-2 sm:py-3 px-3 sm:px-4 font-medium text-sm min-w-[180px]">Feature</th>
                           {tiers.filter((t: PlanTier) => t.isActive).map((tier: PlanTier) => (
-                            <th key={tier.id} className="text-center py-3 px-4 font-medium">{tier.name}</th>
+                            <th key={tier.id} className="text-center py-2 sm:py-3 px-2 sm:px-4 font-medium text-sm">{tier.name}</th>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
                         {platformFeatures?.map((feature: any) => (
                           <tr key={feature.id} className="border-b last:border-0">
-                            <td className="py-3 px-4">
+                            <td className="py-2 sm:py-3 px-3 sm:px-4">
                               <div>
-                                <p className="font-medium">{feature.name}</p>
-                                <p className="text-sm text-muted-foreground">{feature.description}</p>
+                                <p className="font-medium text-sm">{feature.name}</p>
+                                <p className="text-xs text-muted-foreground hidden sm:block">{feature.description}</p>
                               </div>
                             </td>
                             {tiers.filter((t: PlanTier) => t.isActive).map((tier: PlanTier) => {
                               const value = getFeatureValue(tier.id, feature.id);
                               return (
-                                <td key={tier.id} className="text-center py-3 px-4">
+                                <td key={tier.id} className="text-center py-2 sm:py-3 px-2 sm:px-4">
                                   {feature.feature_type === "boolean" ? (
                                     <Switch 
                                       checked={value === true}
@@ -513,7 +527,7 @@ const AdminSettings = () => {
                                   ) : feature.feature_type === "number" ? (
                                     <Input 
                                       type="number"
-                                      className="w-20 mx-auto text-center"
+                                      className="w-16 sm:w-20 mx-auto text-center text-sm"
                                       value={typeof value === "number" ? value : 0}
                                       onChange={(e) => handleFeatureChange(tier.id, feature.id, Number(e.target.value))}
                                     />
@@ -522,7 +536,7 @@ const AdminSettings = () => {
                                       value={typeof value === "string" ? value : "none"}
                                       onValueChange={(newValue) => handleFeatureChange(tier.id, feature.id, newValue)}
                                     >
-                                      <SelectTrigger className="w-28 mx-auto">
+                                      <SelectTrigger className="w-20 sm:w-28 mx-auto text-xs sm:text-sm">
                                         <SelectValue />
                                       </SelectTrigger>
                                       <SelectContent>
@@ -554,7 +568,7 @@ const AdminSettings = () => {
                   <CardDescription>Platform fees for coach transactions</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-4 md:grid-cols-2">
+                  <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Label>Platform Commission Rate (%)</Label>
                       <Input 
@@ -562,7 +576,7 @@ const AdminSettings = () => {
                         value={localSettings.commission_rate}
                         onChange={(e) => handleChange("commission_rate", Number(e.target.value))}
                       />
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
                         Percentage taken from each client payment to coaches
                       </p>
                     </div>
@@ -590,40 +604,42 @@ const AdminSettings = () => {
             {/* Features Tab - Consolidated from AdminFeatures */}
             <TabsContent value="features" className="space-y-4">
               <Tabs defaultValue="matrix" className="space-y-4">
-                <TabsList>
-                  <TabsTrigger value="matrix">Feature Matrix</TabsTrigger>
-                  <TabsTrigger value="overrides">Coach Overrides</TabsTrigger>
-                </TabsList>
+                <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+                  <TabsList className="w-max sm:w-auto">
+                    <TabsTrigger value="matrix">Feature Matrix</TabsTrigger>
+                    <TabsTrigger value="overrides">Coach Overrides</TabsTrigger>
+                  </TabsList>
+                </div>
 
                 <TabsContent value="matrix" className="space-y-4">
                   <Card>
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Sliders className="h-5 w-5" />
+                      <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                        <Sliders className="h-4 w-4 sm:h-5 sm:w-5" />
                         Feature Access by Tier
                       </CardTitle>
-                      <CardDescription>
+                      <CardDescription className="text-xs sm:text-sm">
                         View which features are available for each subscription tier
                       </CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-0 sm:p-6">
                       <div className="overflow-x-auto">
-                        <Table>
+                        <Table className="min-w-[600px]">
                           <TableHeader>
                             <TableRow>
-                              <TableHead className="w-[300px]">Feature</TableHead>
+                              <TableHead className="min-w-[200px]">Feature</TableHead>
                               {featureTiers.map((tier) => (
-                                <TableHead key={tier} className="text-center capitalize">{tier}</TableHead>
+                                <TableHead key={tier} className="text-center capitalize text-xs sm:text-sm">{tier}</TableHead>
                               ))}
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             {platformFeatures?.map((feature: any) => (
                               <TableRow key={feature.id}>
-                                <TableCell>
+                                <TableCell className="py-2 sm:py-4">
                                   <div>
-                                    <p className="font-medium">{feature.name}</p>
-                                    <p className="text-sm text-muted-foreground">{feature.description}</p>
+                                    <p className="font-medium text-sm">{feature.name}</p>
+                                    <p className="text-xs text-muted-foreground hidden sm:block">{feature.description}</p>
                                   </div>
                                 </TableCell>
                                 {featureTiers.map((tier) => {
@@ -631,7 +647,7 @@ const AdminSettings = () => {
                                     (tf: any) => tf.tier === tier && tf.feature_id === feature.id
                                   );
                                   return (
-                                    <TableCell key={tier} className="text-center">
+                                    <TableCell key={tier} className="text-center py-2 sm:py-4">
                                       {getFeatureValueDisplay(tf?.value)}
                                     </TableCell>
                                   );
@@ -641,7 +657,7 @@ const AdminSettings = () => {
                           </TableBody>
                         </Table>
                       </div>
-                      <p className="text-sm text-muted-foreground mt-4">
+                      <p className="text-xs sm:text-sm text-muted-foreground mt-4 px-3 sm:px-0">
                         To edit feature values, go to the Plans tab.
                       </p>
                     </CardContent>
@@ -651,24 +667,24 @@ const AdminSettings = () => {
                 <TabsContent value="overrides" className="space-y-4">
                   <Card>
                     <CardHeader>
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
-                          <CardTitle className="flex items-center gap-2">
-                            <Shield className="h-5 w-5" />
+                          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                            <Shield className="h-4 w-4 sm:h-5 sm:w-5" />
                             Coach Feature Overrides
                           </CardTitle>
-                          <CardDescription>
+                          <CardDescription className="text-xs sm:text-sm">
                             Grant or restrict specific features for individual coaches
                           </CardDescription>
                         </div>
                         <Dialog open={isOverrideDialogOpen} onOpenChange={setIsOverrideDialogOpen}>
                           <DialogTrigger asChild>
-                            <Button>
+                            <Button size="sm" className="w-full sm:w-auto">
                               <Plus className="h-4 w-4 mr-2" />
                               Add Override
                             </Button>
                           </DialogTrigger>
-                          <DialogContent>
+                          <DialogContent className="max-w-[95vw] sm:max-w-lg">
                             <DialogHeader>
                               <DialogTitle>Add Feature Override</DialogTitle>
                               <DialogDescription>
@@ -749,11 +765,11 @@ const AdminSettings = () => {
                               </div>
                             </div>
                             
-                            <DialogFooter>
-                              <Button variant="outline" onClick={() => setIsOverrideDialogOpen(false)}>
+                            <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
+                              <Button variant="outline" className="w-full sm:w-auto" onClick={() => setIsOverrideDialogOpen(false)}>
                                 Cancel
                               </Button>
-                              <Button onClick={handleAddOverride}>Add Override</Button>
+                              <Button className="w-full sm:w-auto" onClick={handleAddOverride}>Add Override</Button>
                             </DialogFooter>
                           </DialogContent>
                         </Dialog>
@@ -761,51 +777,95 @@ const AdminSettings = () => {
                     </CardHeader>
                     <CardContent>
                       {allOverrides && allOverrides.length > 0 ? (
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Coach</TableHead>
-                              <TableHead>Feature</TableHead>
-                              <TableHead>Value</TableHead>
-                              <TableHead>Reason</TableHead>
-                              <TableHead>Expires</TableHead>
-                              <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
+                        <>
+                          {/* Desktop Table */}
+                          <div className="hidden sm:block overflow-x-auto">
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Coach</TableHead>
+                                  <TableHead>Feature</TableHead>
+                                  <TableHead>Value</TableHead>
+                                  <TableHead>Reason</TableHead>
+                                  <TableHead>Expires</TableHead>
+                                  <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {allOverrides.map((override: any) => (
+                                  <TableRow key={override.id}>
+                                    <TableCell>
+                                      {coaches?.find((c: any) => c.id === override.coach_id)?.display_name || "Unknown"}
+                                    </TableCell>
+                                    <TableCell>{override.platform_features?.name}</TableCell>
+                                    <TableCell>{getFeatureValueDisplay(override.value)}</TableCell>
+                                    <TableCell className="text-muted-foreground">
+                                      {override.reason || "-"}
+                                    </TableCell>
+                                    <TableCell className="text-muted-foreground">
+                                      {override.expires_at 
+                                        ? new Date(override.expires_at).toLocaleDateString() 
+                                        : "Never"}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                      <Button 
+                                        variant="ghost" 
+                                        size="icon"
+                                        onClick={() => removeOverride.mutate(override.id)}
+                                      >
+                                        <Trash2 className="h-4 w-4 text-destructive" />
+                                      </Button>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+
+                          {/* Mobile Cards */}
+                          <div className="sm:hidden space-y-3">
                             {allOverrides.map((override: any) => (
-                              <TableRow key={override.id}>
-                                <TableCell>
-                                  {coaches?.find((c: any) => c.id === override.coach_id)?.display_name || "Unknown"}
-                                </TableCell>
-                                <TableCell>{override.platform_features?.name}</TableCell>
-                                <TableCell>{getFeatureValueDisplay(override.value)}</TableCell>
-                                <TableCell className="text-muted-foreground">
-                                  {override.reason || "-"}
-                                </TableCell>
-                                <TableCell className="text-muted-foreground">
-                                  {override.expires_at 
-                                    ? new Date(override.expires_at).toLocaleDateString() 
-                                    : "Never"}
-                                </TableCell>
-                                <TableCell className="text-right">
+                              <Card key={override.id} className="p-3">
+                                <div className="flex justify-between items-start gap-2">
+                                  <div className="min-w-0 flex-1">
+                                    <p className="font-medium text-sm truncate">
+                                      {coaches?.find((c: any) => c.id === override.coach_id)?.display_name || "Unknown"}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground truncate">
+                                      {override.platform_features?.name}
+                                    </p>
+                                  </div>
                                   <Button 
                                     variant="ghost" 
                                     size="icon"
+                                    className="shrink-0 h-8 w-8"
                                     onClick={() => removeOverride.mutate(override.id)}
                                   >
                                     <Trash2 className="h-4 w-4 text-destructive" />
                                   </Button>
-                                </TableCell>
-                              </TableRow>
+                                </div>
+                                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                  {getFeatureValueDisplay(override.value)}
+                                  <span className="text-xs text-muted-foreground">
+                                    {override.expires_at 
+                                      ? `Expires ${new Date(override.expires_at).toLocaleDateString()}` 
+                                      : "No expiry"}
+                                  </span>
+                                </div>
+                                {override.reason && (
+                                  <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
+                                    {override.reason}
+                                  </p>
+                                )}
+                              </Card>
                             ))}
-                          </TableBody>
-                        </Table>
+                          </div>
+                        </>
                       ) : (
                         <div className="text-center py-8 text-muted-foreground">
-                          <Shield className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                          <p>No feature overrides configured</p>
-                          <p className="text-sm">Add overrides to grant or restrict features for specific coaches</p>
+                          <Shield className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-4 opacity-50" />
+                          <p className="text-sm">No feature overrides configured</p>
+                          <p className="text-xs">Add overrides to grant or restrict features for specific coaches</p>
                         </div>
                       )}
                     </CardContent>
@@ -820,15 +880,16 @@ const AdminSettings = () => {
                   <CardTitle>Platform Notification Settings</CardTitle>
                   <CardDescription>Configure platform-wide email and notification preferences</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
+                <CardContent className="space-y-4 sm:space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="space-y-0.5 min-w-0">
                       <Label>Email Notifications</Label>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground line-clamp-2 sm:line-clamp-none">
                         Send email notifications for important events
                       </p>
                     </div>
                     <Switch
+                      className="shrink-0"
                       checked={localSettings.email_notifications}
                       onCheckedChange={(checked) => handleToggle("email_notifications", checked)}
                     />
@@ -849,22 +910,22 @@ const AdminSettings = () => {
                   <CardDescription>Monitor and manage third-party service connections</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card className="p-4">
-                      <p className="font-medium">Stripe</p>
-                      <p className="text-sm text-muted-foreground">Payment processing - Connected</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <Card className="p-3 sm:p-4">
+                      <p className="font-medium text-sm sm:text-base">Stripe</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Payment processing - Connected</p>
                     </Card>
-                    <Card className="p-4">
-                      <p className="font-medium">Wearables</p>
-                      <p className="text-sm text-muted-foreground">Fitness device sync - 3 providers</p>
+                    <Card className="p-3 sm:p-4">
+                      <p className="font-medium text-sm sm:text-base">Wearables</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Fitness device sync - 3 providers</p>
                     </Card>
-                    <Card className="p-4">
-                      <p className="font-medium">Calendar</p>
-                      <p className="text-sm text-muted-foreground">Session scheduling - Google Calendar</p>
+                    <Card className="p-3 sm:p-4">
+                      <p className="font-medium text-sm sm:text-base">Calendar</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Session scheduling - Google Calendar</p>
                     </Card>
-                    <Card className="p-4">
-                      <p className="font-medium">Video</p>
-                      <p className="text-sm text-muted-foreground">Video conferencing - Zoom, Google Meet</p>
+                    <Card className="p-3 sm:p-4">
+                      <p className="font-medium text-sm sm:text-base">Video</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Video conferencing - Zoom, Google Meet</p>
                     </Card>
                   </div>
                 </CardContent>
@@ -877,15 +938,16 @@ const AdminSettings = () => {
                   <CardTitle>Security Settings</CardTitle>
                   <CardDescription>Configure security and privacy options</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
+                <CardContent className="space-y-4 sm:space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="space-y-0.5 min-w-0">
                       <Label>Allow Anonymous Reviews</Label>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground line-clamp-2 sm:line-clamp-none">
                         Allow clients to post reviews without showing their name
                       </p>
                     </div>
                     <Switch
+                      className="shrink-0"
                       checked={localSettings.allow_anonymous_reviews}
                       onCheckedChange={(checked) => handleToggle("allow_anonymous_reviews", checked)}
                     />
@@ -903,7 +965,7 @@ const AdminSettings = () => {
                   <CardDescription>Sign out of your account</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button variant="destructive" onClick={signOut}>
+                  <Button variant="destructive" className="w-full sm:w-auto" onClick={signOut}>
                     <LogOut className="h-4 w-4 mr-2" />
                     Sign Out
                   </Button>
@@ -913,7 +975,7 @@ const AdminSettings = () => {
           </Tabs>
 
           <div className="flex justify-end">
-            <Button onClick={handleSave} disabled={updateSetting.isPending}>
+            <Button className="w-full sm:w-auto" onClick={handleSave} disabled={updateSetting.isPending}>
               {updateSetting.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />

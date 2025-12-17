@@ -99,41 +99,41 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="w-5 h-5" />
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Shield className="w-4 h-4 sm:w-5 sm:h-5" />
             Account Security
           </CardTitle>
-          <CardDescription>Manage your email and password</CardDescription>
+          <CardDescription className="text-xs sm:text-sm">Manage your email and password</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Email Row */}
-          <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-primary/10">
-                <Mail className="w-4 h-4 text-primary" />
+        <CardContent className="space-y-3 sm:space-y-4">
+          {/* Email Row - Responsive */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-4 bg-secondary/50 rounded-lg">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="p-1.5 sm:p-2 rounded-full bg-primary/10 shrink-0">
+                <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
               </div>
-              <div>
-                <p className="font-medium text-foreground">Email Address</p>
-                <p className="text-sm text-muted-foreground">{user?.email}</p>
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-foreground text-sm sm:text-base">Email Address</p>
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">{user?.email}</p>
               </div>
             </div>
-            <Button variant="outline" onClick={() => setShowEmailDialog(true)}>
+            <Button variant="outline" size="sm" className="w-full sm:w-auto shrink-0" onClick={() => setShowEmailDialog(true)}>
               Update Email
             </Button>
           </div>
 
-          {/* Password Row */}
-          <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-primary/10">
-                <Lock className="w-4 h-4 text-primary" />
+          {/* Password Row - Responsive */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-4 bg-secondary/50 rounded-lg">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="p-1.5 sm:p-2 rounded-full bg-primary/10 shrink-0">
+                <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
               </div>
-              <div>
-                <p className="font-medium text-foreground">Password</p>
-                <p className="text-sm text-muted-foreground">Change your account password</p>
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-foreground text-sm sm:text-base">Password</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Change your account password</p>
               </div>
             </div>
-            <Button variant="outline" onClick={() => setShowPasswordDialog(true)}>
+            <Button variant="outline" size="sm" className="w-full sm:w-auto shrink-0" onClick={() => setShowPasswordDialog(true)}>
               Change Password
             </Button>
           </div>
@@ -143,26 +143,26 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
       {/* Danger Zone */}
       <Card className="border-destructive/50">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-destructive">
-            <AlertTriangle className="w-5 h-5" />
+          <CardTitle className="flex items-center gap-2 text-destructive text-base sm:text-lg">
+            <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5" />
             Danger Zone
           </CardTitle>
-          <CardDescription>Irreversible actions that affect your account</CardDescription>
+          <CardDescription className="text-xs sm:text-sm">Irreversible actions that affect your account</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between p-4 bg-destructive/10 rounded-lg border border-destructive/20">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-destructive/20">
-                <Trash2 className="w-4 h-4 text-destructive" />
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-4 bg-destructive/10 rounded-lg border border-destructive/20">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="p-1.5 sm:p-2 rounded-full bg-destructive/20 shrink-0">
+                <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-destructive" />
               </div>
-              <div>
-                <p className="font-medium text-foreground">Delete Account</p>
-                <p className="text-sm text-muted-foreground">
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-foreground text-sm sm:text-base">Delete Account</p>
+                <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
                   Permanently delete your account and all associated data
                 </p>
               </div>
             </div>
-            <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
+            <Button variant="destructive" size="sm" className="w-full sm:w-auto shrink-0" onClick={() => setShowDeleteDialog(true)}>
               Delete Account
             </Button>
           </div>
@@ -171,10 +171,10 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
 
       {/* Email Update Dialog */}
       <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-[95vw] sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Update Email Address</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-xs sm:text-sm">
               Enter your new email address. You'll receive confirmation emails at both your old and new addresses.
             </DialogDescription>
           </DialogHeader>
@@ -197,15 +197,16 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
                   </FormItem>
                 )}
               />
-              <DialogFooter>
+              <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
                 <Button
                   type="button"
                   variant="outline"
+                  className="w-full sm:w-auto"
                   onClick={() => setShowEmailDialog(false)}
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isUpdatingEmail}>
+                <Button type="submit" className="w-full sm:w-auto" disabled={isUpdatingEmail}>
                   {isUpdatingEmail && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   Update Email
                 </Button>
@@ -217,10 +218,10 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
 
       {/* Password Update Dialog */}
       <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-[95vw] sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Change Password</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-xs sm:text-sm">
               Enter your new password. Make sure it's at least 8 characters long.
             </DialogDescription>
           </DialogHeader>
@@ -260,15 +261,16 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
                   </FormItem>
                 )}
               />
-              <DialogFooter>
+              <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
                 <Button
                   type="button"
                   variant="outline"
+                  className="w-full sm:w-auto"
                   onClick={() => setShowPasswordDialog(false)}
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isUpdatingPassword}>
+                <Button type="submit" className="w-full sm:w-auto" disabled={isUpdatingPassword}>
                   {isUpdatingPassword && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   Change Password
                 </Button>
