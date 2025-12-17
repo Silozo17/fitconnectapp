@@ -84,14 +84,14 @@ const AdminRevenue = () => {
 
           {loading ? <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div> : (
             <>
-              <div className="grid gap-4 md:grid-cols-4">
+              <div className="grid gap-4 grid-cols-2 xl:grid-cols-4">
                 <ComparisonStatCard title="Total Revenue" value={stats.totalRevenue} previousValue={comparison?.totalRevenue} icon={PoundSterling} format="currency" showComparison={showComp} />
                 <ComparisonStatCard title="Monthly Recurring" value={stats.mrr} previousValue={comparison?.mrr} icon={TrendingUp} format="currency" showComparison={showComp} />
                 <ComparisonStatCard title="Commission" value={stats.commissionEarnings} previousValue={comparison?.commissionEarnings} icon={CreditCard} format="currency" showComparison={showComp} />
                 <ComparisonStatCard title="Active Subs" value={stats.activeSubscriptions} previousValue={comparison?.activeSubscriptions} icon={Users} showComparison={showComp} />
               </div>
 
-              <div className="grid gap-6 md:grid-cols-3">
+              <div className="grid gap-6 grid-cols-1 xl:grid-cols-3">
                 <Card className="md:col-span-2"><CardHeader><CardTitle>Revenue Over Time</CardTitle></CardHeader><CardContent><div className="h-[300px]"><ResponsiveContainer width="100%" height="100%"><LineChart data={revenueData}><CartesianGrid strokeDasharray="3 3" className="stroke-muted" /><XAxis dataKey="date" className="text-xs" /><YAxis className="text-xs" /><Tooltip formatter={(v: number) => formatCurrency(v)} contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px" }} /><Line type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} /></LineChart></ResponsiveContainer></div></CardContent></Card>
                 <Card><CardHeader><CardTitle>Subscription Tiers</CardTitle></CardHeader><CardContent><div className="h-[300px]">{tierData.length > 0 ? <ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={tierData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>{tierData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}</Pie><Tooltip /></PieChart></ResponsiveContainer> : <div className="flex items-center justify-center h-full text-muted-foreground">No data</div>}</div></CardContent></Card>
               </div>

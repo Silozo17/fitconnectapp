@@ -107,14 +107,14 @@ const AdminAnalytics = () => {
 
           {loading ? <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div> : (
             <>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-4 grid-cols-2 xl:grid-cols-4">
                 <ComparisonStatCard title="Total Clients" value={analytics.totalUsers} previousValue={comparison?.totalUsers} icon={Users} showComparison={showComp} />
                 <ComparisonStatCard title="Total Coaches" value={analytics.totalCoaches} previousValue={comparison?.totalCoaches} icon={Dumbbell} showComparison={showComp} />
                 <ComparisonStatCard title="Total Sessions" value={analytics.totalSessions} previousValue={comparison?.totalSessions} icon={Calendar} showComparison={showComp} />
                 <ComparisonStatCard title="Messages Sent" value={analytics.totalMessages} previousValue={comparison?.totalMessages} icon={MessageSquare} showComparison={showComp} />
               </div>
 
-              <div className="grid gap-6 md:grid-cols-2">
+              <div className="grid gap-6 grid-cols-1 xl:grid-cols-2">
                 <Card><CardHeader><CardTitle className="flex items-center gap-2"><TrendingUp className="w-5 h-5 text-primary" />User Growth</CardTitle><CardDescription>New users over time</CardDescription></CardHeader><CardContent><div className="h-[300px]"><ResponsiveContainer width="100%" height="100%"><AreaChart data={userGrowthData}><CartesianGrid strokeDasharray="3 3" className="stroke-muted" /><XAxis dataKey="date" className="text-xs" /><YAxis className="text-xs" /><Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} /><Legend /><Area type="monotone" dataKey="clients" stackId="1" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.6} name="Clients" /><Area type="monotone" dataKey="coaches" stackId="1" stroke="hsl(var(--accent))" fill="hsl(var(--accent))" fillOpacity={0.6} name="Coaches" /></AreaChart></ResponsiveContainer></div></CardContent></Card>
                 <Card><CardHeader><CardTitle className="flex items-center gap-2"><Activity className="w-5 h-5 text-primary" />Session Activity</CardTitle><CardDescription>Scheduled vs completed</CardDescription></CardHeader><CardContent><div className="h-[300px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={sessionData}><CartesianGrid strokeDasharray="3 3" className="stroke-muted" /><XAxis dataKey="date" className="text-xs" /><YAxis className="text-xs" /><Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} /><Legend /><Bar dataKey="scheduled" fill="hsl(var(--muted-foreground))" name="Scheduled" radius={[4, 4, 0, 0]} /><Bar dataKey="completed" fill="hsl(var(--primary))" name="Completed" radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer></div></CardContent></Card>
               </div>
