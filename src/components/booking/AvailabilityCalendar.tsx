@@ -1,7 +1,8 @@
 import { useState, useMemo } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { format, addDays, startOfWeek, isSameDay, isAfter, setHours, setMinutes, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import type { CoachAvailability } from "@/hooks/useCoachSchedule";
@@ -18,16 +19,21 @@ interface AvailabilityCalendarProps {
   onSelectSlot?: (date: Date, time: string) => void;
   selectedDate?: Date | null;
   selectedTime?: string | null;
-  sessionDuration?: number; // Duration of session being booked
+  sessionDuration?: number;
+  preBookingBuffer?: number;
+  postBookingBuffer?: number;
 }
 
 const timeSlots = [
+  "06:00", "06:30", "07:00", "07:30", "08:00", "08:30",
   "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
   "12:00", "12:30", "13:00", "13:30", "14:00", "14:30",
-  "15:00", "15:30", "16:00", "16:30", "17:00", "17:30"
+  "15:00", "15:30", "16:00", "16:30", "17:00", "17:30",
+  "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00"
 ];
 
 const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const fullDayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 const AvailabilityCalendar = ({
   availability,
@@ -36,21 +42,21 @@ const AvailabilityCalendar = ({
   selectedDate,
   selectedTime,
   sessionDuration = 60,
+  preBookingBuffer = 60,
+  postBookingBuffer = 15,
 }: AvailabilityCalendarProps) => {
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
 
   const weekDays = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   }, [weekStart]);
 
-  // Calculate how many 30-min slots the session takes
-  const slotsNeeded = Math.ceil(sessionDuration / 30);
-
-  // Check if a slot overlaps with any booked session
+  // Check if a slot overlaps with any booked session (including post-buffer)
   const isSlotBlockedByBooking = (date: Date, time: string) => {
     const [hours, minutes] = time.split(":").map(Number);
     const slotStart = setMinutes(setHours(date, hours), minutes);
-    const slotEnd = new Date(slotStart.getTime() + 30 * 60 * 1000); // 30-min slot
+    const slotEnd = new Date(slotStart.getTime() + 30 * 60 * 1000);
 
     return bookedSessions.some((session) => {
       const sessionDate = parseISO(session.date);
@@ -58,9 +64,9 @@ const AvailabilityCalendar = ({
 
       const [sessionHours, sessionMinutes] = session.time.split(":").map(Number);
       const sessionStart = setMinutes(setHours(sessionDate, sessionHours), sessionMinutes);
-      const sessionEnd = new Date(sessionStart.getTime() + session.duration_minutes * 60 * 1000);
+      // Add post-booking buffer to session end
+      const sessionEnd = new Date(sessionStart.getTime() + (session.duration_minutes + postBookingBuffer) * 60 * 1000);
 
-      // Check if slot overlaps with session
       return slotStart < sessionEnd && slotEnd > sessionStart;
     });
   };
@@ -77,7 +83,7 @@ const AvailabilityCalendar = ({
 
       const [sessionHours, sessionMinutes] = session.time.split(":").map(Number);
       const sessionStart = setMinutes(setHours(sessionDate, sessionHours), sessionMinutes);
-      const sessionEnd = new Date(sessionStart.getTime() + session.duration_minutes * 60 * 1000);
+      const sessionEnd = new Date(sessionStart.getTime() + (session.duration_minutes + postBookingBuffer) * 60 * 1000);
 
       return proposedStart < sessionEnd && proposedEnd > sessionStart;
     });
@@ -89,7 +95,6 @@ const AvailabilityCalendar = ({
     
     if (!dayAvailability) return false;
     
-    // Check if time is within available hours
     const [hours, minutes] = time.split(":").map(Number);
     const slotTime = setMinutes(setHours(new Date(), hours), minutes);
     
@@ -99,25 +104,20 @@ const AvailabilityCalendar = ({
     const [endHours, endMinutes] = dayAvailability.end_time.split(":").map(Number);
     const endTime = setMinutes(setHours(new Date(), endHours), endMinutes);
     
-    // Check if the session would end after availability window
     const sessionEndTime = new Date(slotTime.getTime() + sessionDuration * 60 * 1000);
     const sessionEndHours = sessionEndTime.getHours();
     const sessionEndMinutes = sessionEndTime.getMinutes();
     const sessionEndTimeOnly = setMinutes(setHours(new Date(), sessionEndHours), sessionEndMinutes);
     
     if (slotTime < startTime || sessionEndTimeOnly > endTime) return false;
-    
-    // Check if slot is blocked by existing bookings
     if (isSlotBlockedByBooking(date, time)) return false;
-    
-    // Check if the full session duration would fit without overlapping
     if (!wouldSessionFit(date, time)) return false;
     
-    // Check if slot is not in the past
+    // Check pre-booking buffer (minimum notice)
     const slotDateTime = setMinutes(setHours(date, hours), minutes);
-    const isPast = !isAfter(slotDateTime, new Date());
+    const minBookingTime = new Date(Date.now() + preBookingBuffer * 60 * 1000);
     
-    return !isPast;
+    return isAfter(slotDateTime, minBookingTime);
   };
 
   const isSelected = (date: Date, time: string) => {
@@ -126,13 +126,32 @@ const AvailabilityCalendar = ({
 
   const handlePrevWeek = () => {
     setWeekStart(prev => addDays(prev, -7));
+    setSelectedDayIndex(null);
   };
 
   const handleNextWeek = () => {
     setWeekStart(prev => addDays(prev, 7));
+    setSelectedDayIndex(null);
   };
 
   const canGoPrev = isAfter(weekStart, startOfWeek(new Date(), { weekStartsOn: 1 }));
+
+  // Check if a day has any available slots
+  const dayHasAvailability = (dayIndex: number) => {
+    const date = weekDays[dayIndex];
+    return timeSlots.some(time => isSlotAvailable(date, time));
+  };
+
+  // Get available slots for a specific day
+  const getAvailableSlotsForDay = (dayIndex: number) => {
+    const date = weekDays[dayIndex];
+    return timeSlots.filter(time => isSlotAvailable(date, time));
+  };
+
+  // Mobile: Selected day or first available day
+  const activeDayIndex = selectedDayIndex ?? weekDays.findIndex((_, i) => dayHasAvailability(i));
+  const activeDay = activeDayIndex >= 0 ? weekDays[activeDayIndex] : null;
+  const activeDaySlots = activeDayIndex >= 0 ? getAvailableSlotsForDay(activeDayIndex) : [];
 
   return (
     <div className="space-y-4">
@@ -143,80 +162,168 @@ const AvailabilityCalendar = ({
           size="icon" 
           onClick={handlePrevWeek}
           disabled={!canGoPrev}
+          className="h-9 w-9"
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <span className="font-medium text-foreground">
+        <span className="font-medium text-foreground text-sm sm:text-base">
           {format(weekStart, "MMM d")} - {format(addDays(weekStart, 6), "MMM d, yyyy")}
         </span>
-        <Button variant="outline" size="icon" onClick={handleNextWeek}>
+        <Button variant="outline" size="icon" onClick={handleNextWeek} className="h-9 w-9">
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
 
-      {/* Day Headers */}
-      <div className="grid grid-cols-7 gap-1">
-        {weekDays.map((day, i) => {
-          const isToday = isSameDay(day, new Date());
-          const dayAvailability = availability.find(a => a.day_of_week === day.getDay() && a.is_active);
-          
-          return (
-            <div 
-              key={i} 
-              className={cn(
-                "text-center p-2 rounded-lg",
-                isToday && "bg-primary/10"
-              )}
-            >
-              <p className="text-xs text-muted-foreground">{dayNames[day.getDay()]}</p>
-              <p className={cn(
-                "text-lg font-bold",
-                isToday ? "text-primary" : "text-foreground"
-              )}>
-                {format(day, "d")}
-              </p>
-              {dayAvailability && (
-                <Badge variant="outline" className="text-[10px] mt-1">
-                  {dayAvailability.start_time.slice(0, 5)} - {dayAvailability.end_time.slice(0, 5)}
-                </Badge>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Time Slots Grid */}
-      <div className="max-h-[300px] overflow-y-auto space-y-2">
-        {timeSlots.map((time) => (
-          <div key={time} className="grid grid-cols-7 gap-1">
-            {weekDays.map((day, dayIndex) => {
-              const available = isSlotAvailable(day, time);
-              const selected = isSelected(day, time);
+      {/* Mobile View: Day Selector + Time List */}
+      <div className="block sm:hidden space-y-4">
+        {/* Day Pills - Horizontal Scroll */}
+        <ScrollArea className="w-full whitespace-nowrap">
+          <div className="flex gap-2 pb-2">
+            {weekDays.map((day, i) => {
+              const isToday = isSameDay(day, new Date());
+              const hasSlots = dayHasAvailability(i);
+              const isActive = activeDayIndex === i;
               
               return (
                 <button
-                  key={dayIndex}
-                  onClick={() => available && onSelectSlot?.(day, time)}
-                  disabled={!available}
+                  key={i}
+                  onClick={() => setSelectedDayIndex(i)}
+                  disabled={!hasSlots}
                   className={cn(
-                    "py-2 text-xs rounded-md transition-colors",
-                    available
-                      ? selected
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-secondary hover:bg-secondary/80 text-foreground"
-                      : "bg-muted/30 text-muted-foreground cursor-not-allowed",
+                    "flex flex-col items-center min-w-[56px] py-2 px-3 rounded-xl transition-all",
+                    isActive 
+                      ? "bg-primary text-primary-foreground" 
+                      : hasSlots
+                        ? "bg-secondary hover:bg-secondary/80 text-foreground"
+                        : "bg-muted/30 text-muted-foreground cursor-not-allowed",
+                    isToday && !isActive && hasSlots && "ring-2 ring-primary/50"
                   )}
                 >
-                  {time}
+                  <span className="text-[10px] uppercase tracking-wide opacity-80">
+                    {dayNames[day.getDay()]}
+                  </span>
+                  <span className="text-lg font-bold">{format(day, "d")}</span>
+                  {hasSlots && (
+                    <div className={cn(
+                      "w-1.5 h-1.5 rounded-full mt-1",
+                      isActive ? "bg-primary-foreground" : "bg-primary"
+                    )} />
+                  )}
                 </button>
               );
             })}
           </div>
-        ))}
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+
+        {/* Selected Day Header */}
+        {activeDay && (
+          <div className="bg-secondary/50 rounded-lg p-3">
+            <p className="font-medium text-foreground">
+              {fullDayNames[activeDay.getDay()]}, {format(activeDay, "MMM d")}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {activeDaySlots.length} slots available
+            </p>
+          </div>
+        )}
+
+        {/* Time Slots List */}
+        <div className="space-y-2 max-h-[280px] overflow-y-auto">
+          {activeDaySlots.length > 0 ? (
+            activeDaySlots.map((time) => {
+              const selected = activeDay && isSelected(activeDay, time);
+              
+              return (
+                <button
+                  key={time}
+                  onClick={() => activeDay && onSelectSlot?.(activeDay, time)}
+                  className={cn(
+                    "w-full flex items-center justify-between p-4 rounded-xl transition-all",
+                    selected
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary hover:bg-secondary/80 text-foreground"
+                  )}
+                >
+                  <span className="text-lg font-medium">{time}</span>
+                  {selected && <Check className="h-5 w-5" />}
+                </button>
+              );
+            })
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              No available slots for this day
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Desktop View: 7-Column Grid */}
+      <div className="hidden sm:block space-y-4">
+        {/* Day Headers */}
+        <div className="grid grid-cols-7 gap-1">
+          {weekDays.map((day, i) => {
+            const isToday = isSameDay(day, new Date());
+            const dayAvailability = availability.find(a => a.day_of_week === day.getDay() && a.is_active);
+            
+            return (
+              <div 
+                key={i} 
+                className={cn(
+                  "text-center p-2 rounded-lg",
+                  isToday && "bg-primary/10"
+                )}
+              >
+                <p className="text-xs text-muted-foreground">{dayNames[day.getDay()]}</p>
+                <p className={cn(
+                  "text-lg font-bold",
+                  isToday ? "text-primary" : "text-foreground"
+                )}>
+                  {format(day, "d")}
+                </p>
+                {dayAvailability && (
+                  <Badge variant="outline" className="text-[10px] mt-1">
+                    {dayAvailability.start_time.slice(0, 5)} - {dayAvailability.end_time.slice(0, 5)}
+                  </Badge>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Time Slots Grid */}
+        <div className="max-h-[300px] overflow-y-auto space-y-2">
+          {timeSlots.map((time) => (
+            <div key={time} className="grid grid-cols-7 gap-1">
+              {weekDays.map((day, dayIndex) => {
+                const available = isSlotAvailable(day, time);
+                const selected = isSelected(day, time);
+                
+                return (
+                  <button
+                    key={dayIndex}
+                    onClick={() => available && onSelectSlot?.(day, time)}
+                    disabled={!available}
+                    className={cn(
+                      "py-2 text-xs rounded-md transition-colors",
+                      available
+                        ? selected
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-secondary hover:bg-secondary/80 text-foreground"
+                        : "bg-muted/30 text-muted-foreground cursor-not-allowed",
+                    )}
+                  >
+                    {time}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
         <div className="flex items-center gap-1">
           <div className="w-3 h-3 rounded bg-secondary" />
           <span>Available</span>

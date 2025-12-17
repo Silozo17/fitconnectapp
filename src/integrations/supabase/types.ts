@@ -1343,6 +1343,7 @@ export type Database = {
           coach_types: string[] | null
           created_at: string
           currency: string | null
+          default_session_location: string | null
           display_name: string | null
           experience_years: number | null
           gym_affiliation: string | null
@@ -1354,6 +1355,8 @@ export type Database = {
           onboarding_completed: boolean
           onboarding_progress: Json | null
           online_available: boolean | null
+          post_booking_buffer_minutes: number | null
+          pre_booking_buffer_minutes: number | null
           profile_image_url: string | null
           selected_avatar_id: string | null
           status: string | null
@@ -1381,6 +1384,7 @@ export type Database = {
           coach_types?: string[] | null
           created_at?: string
           currency?: string | null
+          default_session_location?: string | null
           display_name?: string | null
           experience_years?: number | null
           gym_affiliation?: string | null
@@ -1392,6 +1396,8 @@ export type Database = {
           onboarding_completed?: boolean
           onboarding_progress?: Json | null
           online_available?: boolean | null
+          post_booking_buffer_minutes?: number | null
+          pre_booking_buffer_minutes?: number | null
           profile_image_url?: string | null
           selected_avatar_id?: string | null
           status?: string | null
@@ -1419,6 +1425,7 @@ export type Database = {
           coach_types?: string[] | null
           created_at?: string
           currency?: string | null
+          default_session_location?: string | null
           display_name?: string | null
           experience_years?: number | null
           gym_affiliation?: string | null
@@ -1430,6 +1437,8 @@ export type Database = {
           onboarding_completed?: boolean
           onboarding_progress?: Json | null
           online_available?: boolean | null
+          post_booking_buffer_minutes?: number | null
+          pre_booking_buffer_minutes?: number | null
           profile_image_url?: string | null
           selected_avatar_id?: string | null
           status?: string | null

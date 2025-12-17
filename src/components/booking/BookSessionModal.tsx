@@ -64,7 +64,7 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [isOnline, setIsOnline] = useState(true);
+  const [isOnline, setIsOnline] = useState<boolean | null>(null);
   const [message, setMessage] = useState("");
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [bypassMessageFirst, setBypassMessageFirst] = useState(false);
@@ -100,6 +100,24 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
   const isMessageFirst = coach.booking_mode === "message_first";
   const currency = selectedSessionType?.currency || coach.currency || 'GBP';
 
+  // Determine effective isOnline value based on session type
+  const effectiveIsOnline = useMemo(() => {
+    if (!selectedSessionType) return true;
+    
+    // If user has explicitly set a value, use it
+    if (isOnline !== null) return isOnline;
+    
+    // Auto-determine based on session type capabilities
+    if (selectedSessionType.is_online && !selectedSessionType.is_in_person) {
+      return true; // Only online available
+    }
+    if (!selectedSessionType.is_online && selectedSessionType.is_in_person) {
+      return false; // Only in-person available
+    }
+    // Both available, default to online
+    return true;
+  }, [selectedSessionType, isOnline]);
+
   // Calculate payment info
   const paymentRequired = selectedSessionType?.payment_required || 'none';
   const amountDueNow = selectedSessionType ? getAmountDueNow(selectedSessionType) : 0;
@@ -128,7 +146,7 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
             coachId: coach.id,
             requestedAt: requestedAt.toISOString(),
             durationMinutes: selectedSessionType.duration_minutes,
-            isOnline,
+            isOnline: effectiveIsOnline,
             message: message || null,
             successUrl: `${window.location.origin}/dashboard/client/sessions?booking=success`,
             cancelUrl: `${window.location.origin}/dashboard/client/coaches?booking=cancelled`,
@@ -157,7 +175,7 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
       session_type_id: selectedSessionType.id,
       requested_at: requestedAt.toISOString(),
       duration_minutes: selectedSessionType.duration_minutes,
-      is_online: isOnline,
+      is_online: effectiveIsOnline,
       message: message || undefined,
     });
 
@@ -170,7 +188,7 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
     setSelectedType(null);
     setSelectedDate(null);
     setSelectedTime(null);
-    setIsOnline(true);
+    setIsOnline(null);
     setMessage("");
     setIsProcessingPayment(false);
     setBypassMessageFirst(false);
@@ -403,8 +421,8 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Format</span>
                 <span className="font-medium text-foreground flex items-center gap-2">
-                  {isOnline ? <Video className="h-4 w-4" /> : <MapPin className="h-4 w-4" />}
-                  {isOnline ? "Online" : "In-Person"}
+                  {effectiveIsOnline ? <Video className="h-4 w-4" /> : <MapPin className="h-4 w-4" />}
+                  {effectiveIsOnline ? "Online" : "In-Person"}
                 </span>
               </div>
               
