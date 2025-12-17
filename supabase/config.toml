@@ -6,6 +6,9 @@ verify_jwt = false
 [functions.stripe-express-login]
 verify_jwt = true
 
+[functions.stripe-booking-checkout]
+verify_jwt = true
+
 [functions.ai-meal-suggestion]
 verify_jwt = true
 
