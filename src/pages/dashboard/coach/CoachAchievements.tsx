@@ -1,9 +1,13 @@
-import { Trophy, Lock, Check, Star } from "lucide-react";
+import { Trophy, Lock, Check, Star, Dumbbell } from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { useCoachBadges, useAvailableCoachBadges, useCoachStats } from "@/hooks/useCoachGamification";
 import { useCoachProfileCompletion } from "@/hooks/useCoachProfileCompletion";
+import { useAutoAwardCoachBadges } from "@/hooks/useAutoAwardCoachBadges";
+import { useFeaturedBadges } from "@/hooks/useFeaturedBadges";
+import { getBadgeIcon } from "@/lib/badge-icons";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
@@ -28,10 +32,15 @@ const CoachAchievements = () => {
   const { data: availableBadges, isLoading: availableLoading } = useAvailableCoachBadges();
   const { data: stats, isLoading: statsLoading } = useCoachStats();
   const { data: profileCompletion } = useCoachProfileCompletion();
+  const { toggleFeatured, isUpdating, MAX_FEATURED_BADGES } = useFeaturedBadges();
+  
+  // Auto-award badges on page load
+  useAutoAwardCoachBadges();
 
   const isLoading = badgesLoading || availableLoading || statsLoading;
 
   const earnedBadgeIds = new Set(earnedBadges?.map((b) => b.badge_id) || []);
+  const featuredCount = earnedBadges?.filter((b) => b.is_featured).length || 0;
 
   // Group badges by category
   const profileBadges = availableBadges?.filter((b) => b.category === "coach_profile") || [];
@@ -83,6 +92,10 @@ const CoachAchievements = () => {
     return { current: 0, target: 0, percentage: 0 };
   };
 
+  const handleToggleFeatured = (coachBadgeId: string, currentlyFeatured: boolean) => {
+    toggleFeatured({ coachBadgeId, currentlyFeatured, currentFeaturedCount: featuredCount });
+  };
+
   if (isLoading) {
     return (
       <DashboardLayout title="Achievements" description="Track your coaching milestones and badges">
@@ -95,6 +108,70 @@ const CoachAchievements = () => {
     );
   }
 
+  const renderBadgeCard = (badge: typeof availableBadges[0], isProfileBadge: boolean) => {
+    const isEarned = earnedBadgeIds.has(badge.id);
+    const earnedData = earnedBadges?.find((b) => b.badge_id === badge.id);
+    const progress = getBadgeProgress(badge);
+    const IconComponent = getBadgeIcon(badge.icon);
+
+    return (
+      <div
+        key={badge.id}
+        className={cn(
+          "p-4 rounded-xl border-2 transition-all",
+          isEarned ? rarityColors[badge.rarity] : "border-border bg-card opacity-60"
+        )}
+      >
+        <div className="flex items-start gap-3">
+          <div className={cn(
+            "w-12 h-12 rounded-full flex items-center justify-center",
+            isEarned ? "bg-background/50" : "bg-muted"
+          )}>
+            {isEarned ? (
+              <IconComponent className="h-6 w-6" />
+            ) : (
+              <Lock className="w-5 h-5 text-muted-foreground" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-foreground">{badge.name}</h3>
+            <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{badge.description}</p>
+            
+            {isEarned ? (
+              <div className="space-y-2">
+                <p className="text-xs text-success">
+                  Earned {format(new Date(earnedData!.earned_at), "MMM d, yyyy")}
+                </p>
+                <Button
+                  size="sm"
+                  variant={earnedData?.is_featured ? "default" : "outline"}
+                  className="h-7 text-xs"
+                  onClick={() => handleToggleFeatured(earnedData!.id, earnedData!.is_featured)}
+                  disabled={isUpdating || (!earnedData?.is_featured && featuredCount >= MAX_FEATURED_BADGES)}
+                >
+                  <Star className={cn("h-3 w-3 mr-1", earnedData?.is_featured && "fill-current")} />
+                  {earnedData?.is_featured ? "Featured" : "Feature"}
+                </Button>
+              </div>
+            ) : (
+              <div>
+                <Progress value={progress.percentage} className="h-1.5 mb-1" />
+                <p className="text-xs text-muted-foreground">
+                  {isProfileBadge ? `${progress.current}% / ${progress.target}%` : `${progress.current} / ${progress.target}`}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="mt-2 flex justify-end">
+          <span className={cn("text-xs font-medium capitalize", rarityTextColors[badge.rarity])}>
+            {badge.rarity}
+          </span>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <DashboardLayout title="Achievements" description="Track your coaching milestones and badges">
       {/* Summary Stats */}
@@ -106,8 +183,8 @@ const CoachAchievements = () => {
         </div>
         <div className="card-elevated p-4 text-center">
           <Star className="w-8 h-8 text-warning mx-auto mb-2" />
-          <p className="text-2xl font-bold text-foreground">{availableBadges?.length || 0}</p>
-          <p className="text-sm text-muted-foreground">Total Available</p>
+          <p className="text-2xl font-bold text-foreground">{featuredCount}/{MAX_FEATURED_BADGES}</p>
+          <p className="text-sm text-muted-foreground">Featured on Profile</p>
         </div>
         <div className="card-elevated p-4 text-center">
           <div className="w-8 h-8 rounded-full bg-success/20 flex items-center justify-center mx-auto mb-2">
@@ -118,7 +195,7 @@ const CoachAchievements = () => {
         </div>
         <div className="card-elevated p-4 text-center">
           <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-2">
-            <span className="text-lg">💪</span>
+            <Dumbbell className="w-5 h-5 text-accent" />
           </div>
           <p className="text-2xl font-bold text-foreground">{stats?.sessionCount || 0}</p>
           <p className="text-sm text-muted-foreground">Sessions Completed</p>
@@ -129,52 +206,7 @@ const CoachAchievements = () => {
       <div className="mb-8">
         <h2 className="text-xl font-display font-bold text-foreground mb-4">Profile Badges</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {profileBadges.map((badge) => {
-            const isEarned = earnedBadgeIds.has(badge.id);
-            const earnedData = earnedBadges?.find((b) => b.badge_id === badge.id);
-            const progress = getBadgeProgress(badge);
-
-            return (
-              <div
-                key={badge.id}
-                className={cn(
-                  "p-4 rounded-xl border-2 transition-all",
-                  isEarned ? rarityColors[badge.rarity] : "border-border bg-card opacity-60"
-                )}
-              >
-                <div className="flex items-start gap-3">
-                  <div className={cn(
-                    "w-12 h-12 rounded-full flex items-center justify-center text-2xl",
-                    isEarned ? "bg-background/50" : "bg-muted"
-                  )}>
-                    {isEarned ? badge.icon : <Lock className="w-5 h-5 text-muted-foreground" />}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-foreground">{badge.name}</h3>
-                    <p className="text-xs text-muted-foreground mb-2">{badge.description}</p>
-                    
-                    {isEarned ? (
-                      <p className="text-xs text-success">
-                        Earned {format(new Date(earnedData!.earned_at), "MMM d, yyyy")}
-                      </p>
-                    ) : (
-                      <div>
-                        <Progress value={progress.percentage} className="h-1.5 mb-1" />
-                        <p className="text-xs text-muted-foreground">
-                          {progress.current}% / {progress.target}%
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="mt-2 flex justify-end">
-                  <span className={cn("text-xs font-medium capitalize", rarityTextColors[badge.rarity])}>
-                    {badge.rarity}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
+          {profileBadges.map((badge) => renderBadgeCard(badge, true))}
         </div>
       </div>
 
@@ -182,52 +214,7 @@ const CoachAchievements = () => {
       <div>
         <h2 className="text-xl font-display font-bold text-foreground mb-4">Milestone Badges</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {milestoneBadges.map((badge) => {
-            const isEarned = earnedBadgeIds.has(badge.id);
-            const earnedData = earnedBadges?.find((b) => b.badge_id === badge.id);
-            const progress = getBadgeProgress(badge);
-
-            return (
-              <div
-                key={badge.id}
-                className={cn(
-                  "p-4 rounded-xl border-2 transition-all",
-                  isEarned ? rarityColors[badge.rarity] : "border-border bg-card opacity-60"
-                )}
-              >
-                <div className="flex items-start gap-3">
-                  <div className={cn(
-                    "w-12 h-12 rounded-full flex items-center justify-center text-2xl",
-                    isEarned ? "bg-background/50" : "bg-muted"
-                  )}>
-                    {isEarned ? badge.icon : <Lock className="w-5 h-5 text-muted-foreground" />}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-foreground">{badge.name}</h3>
-                    <p className="text-xs text-muted-foreground mb-2">{badge.description}</p>
-                    
-                    {isEarned ? (
-                      <p className="text-xs text-success">
-                        Earned {format(new Date(earnedData!.earned_at), "MMM d, yyyy")}
-                      </p>
-                    ) : (
-                      <div>
-                        <Progress value={progress.percentage} className="h-1.5 mb-1" />
-                        <p className="text-xs text-muted-foreground">
-                          {progress.current} / {progress.target}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="mt-2 flex justify-end">
-                  <span className={cn("text-xs font-medium capitalize", rarityTextColors[badge.rarity])}>
-                    {badge.rarity}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
+          {milestoneBadges.map((badge) => renderBadgeCard(badge, false))}
         </div>
       </div>
     </DashboardLayout>

@@ -17,6 +17,7 @@ import StarRating from "@/components/reviews/StarRating";
 import FavouriteButton from "@/components/favourites/FavouriteButton";
 import CoachPricingSection from "@/components/packages/CoachPricingSection";
 import { VerifiedBadge } from "@/components/verification/VerifiedBadge";
+import { CoachFeaturedBadges } from "@/components/coaches/CoachFeaturedBadges";
 import { useCoachReviews, calculateAverageRating } from "@/hooks/useReviews";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -175,6 +176,11 @@ const CoachDetail = () => {
                             {type}
                           </Badge>
                         ))}
+                      </div>
+
+                      {/* Featured Badges */}
+                      <div className="mt-4">
+                        <CoachFeaturedBadges coachId={coach.id} />
                       </div>
 
                       {/* Quick Stats */}
