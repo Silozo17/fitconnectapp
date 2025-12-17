@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Users, Dumbbell, Settings, ChevronLeft, ChevronRight, 
   UsersRound, DollarSign, BarChart3,
   MessageSquare, Shield, Trophy, FileText, Search, LogOut, User, Rocket,
-  MessageSquarePlus, Plug
+  MessageSquarePlus, Plug, ClipboardList
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -44,11 +44,12 @@ const mainNavItems: NavItem[] = [
 
 const platformNavItems: NavItem[] = [
   { title: "Challenges", url: "/dashboard/admin/challenges", icon: Trophy },
+  { title: "Blog", url: "/dashboard/admin/blog", icon: FileText },
   { title: "Verification", url: "/dashboard/admin/verification", icon: Shield, badgeKey: "verification", badgeVariant: "warning" },
   { title: "Integrations", url: "/dashboard/admin/integrations", icon: Plug },
   { title: "Feedback", url: "/dashboard/admin/feedback", icon: MessageSquarePlus, badgeKey: "feedback" },
   { title: "Reviews & Disputes", url: "/dashboard/admin/reviews", icon: MessageSquare },
-  { title: "Audit Log", url: "/dashboard/admin/audit", icon: FileText },
+  { title: "Audit Log", url: "/dashboard/admin/audit", icon: ClipboardList },
 ];
 
 const bottomNavItems: NavItem[] = [
