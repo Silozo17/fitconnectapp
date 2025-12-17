@@ -64,12 +64,12 @@ interface HealthDataWidgetProps {
 
 const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps) => {
   const { getTodayValue, isLoading, data } = useHealthData();
-  const { connections, isLoading: wearablesLoading } = useWearables();
+  const { connections, isLoading: wearablesLoading, error: wearablesError } = useWearables();
 
   const hasConnectedDevice = connections && connections.length > 0;
   const hasData = data && data.length > 0;
 
-  if (isLoading || wearablesLoading) {
+  if (isLoading && !wearablesError && wearablesLoading) {
     return (
       <Card className={cn("bg-card/50 border-border/50", className)}>
         <CardHeader className="pb-2">
@@ -89,7 +89,7 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
     );
   }
 
-  if (!hasConnectedDevice) {
+  if (wearablesError || !hasConnectedDevice) {
     return (
       <Card className={cn("bg-card/50 border-border/50", className)}>
         <CardHeader className="pb-2">
