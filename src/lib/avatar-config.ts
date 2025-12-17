@@ -50,6 +50,22 @@ export const RARITY_CONFIG = {
   },
 } as const;
 
+// Default avatar for users who haven't selected one
+export const DEFAULT_AVATAR = {
+  slug: 'strongman_bear',
+  name: 'Strongman Bear',
+  rarity: 'common' as const,
+};
+
+// Free avatars available during onboarding
+export const FREE_AVATARS = [
+  { slug: 'strongman_bear', name: 'Strongman Bear' },
+  { slug: 'weightlifting_lion', name: 'Weightlifting Lion' },
+  { slug: 'crossfit_wolf', name: 'CrossFit Wolf' },
+  { slug: 'sprinter_cheetah', name: 'Sprinter Cheetah' },
+  { slug: 'parkour_monkey', name: 'Parkour Monkey' },
+];
+
 export type UnlockType = keyof typeof UNLOCK_TYPES;
 export type Rarity = keyof typeof RARITY_CONFIG;
 

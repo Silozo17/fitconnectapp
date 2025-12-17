@@ -3,9 +3,10 @@ import { formatDistanceToNow } from "date-fns";
 import { MessageSquare, Loader2, User, Briefcase, AlertCircle, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAdminView } from "@/contexts/AdminContext";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState } from "react";
 import ProspectProfileSheet from "./ProspectProfileSheet";
+import { UserAvatar } from "@/components/shared/UserAvatar";
+import { Rarity } from "@/lib/avatar-config";
 
 interface ConversationListProps {
   activeConversationId?: string;
@@ -21,15 +22,6 @@ const ConversationList = ({ activeConversationId }: ConversationListProps) => {
     : activeProfileType === "coach" 
       ? "/dashboard/coach/messages" 
       : "/dashboard/client/messages";
-
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
 
   const getTypeIcon = (type: "client" | "coach" | "admin") => {
     switch (type) {
@@ -85,7 +77,7 @@ const ConversationList = ({ activeConversationId }: ConversationListProps) => {
             }`}
           >
             <div className="flex items-start gap-3">
-              {/* Clickable Avatar for Profile View */}
+              {/* Clickable Avatar for Profile View - now uses UserAvatar with character avatar support */}
               <button
                 onClick={(e) => {
                   e.preventDefault();
@@ -94,12 +86,13 @@ const ConversationList = ({ activeConversationId }: ConversationListProps) => {
                 className="flex-shrink-0 hover:opacity-80 transition-opacity"
                 title="View profile"
               >
-                <Avatar className="w-10 h-10 ring-2 ring-primary/20">
-                  <AvatarImage src={conversation.participantAvatar || undefined} />
-                  <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                    {getInitials(conversation.participantName)}
-                  </AvatarFallback>
-                </Avatar>
+                <UserAvatar
+                  src={conversation.participantAvatar}
+                  avatarSlug={conversation.participantAvatarSlug}
+                  avatarRarity={conversation.participantAvatarRarity as Rarity | undefined}
+                  name={conversation.participantName}
+                  className="w-10 h-10 ring-2 ring-primary/20"
+                />
               </button>
               
               {/* Clickable Content for Chat */}

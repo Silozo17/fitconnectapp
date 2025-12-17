@@ -23,6 +23,9 @@ export interface UserConnection {
     avatar_url?: string | null;
     profile_image_url?: string | null;
     location?: string | null;
+    // Avatar data for character avatars
+    selected_avatar_slug?: string | null;
+    selected_avatar_rarity?: string | null;
   };
 }
 
@@ -122,17 +125,31 @@ export const useConnections = () => {
       if (targetProfileType === "client") {
         const { data } = await supabase
           .from("client_profiles")
-          .select("id, first_name, last_name, username, avatar_url, location")
+          .select("id, first_name, last_name, username, avatar_url, location, avatars:selected_avatar_id(slug, rarity)")
           .eq("user_id", targetUserId)
           .single();
-        profile = data;
+        if (data) {
+          const avatarData = data.avatars as { slug: string; rarity: string } | null;
+          profile = {
+            ...data,
+            selected_avatar_slug: avatarData?.slug || null,
+            selected_avatar_rarity: avatarData?.rarity || null,
+          };
+        }
       } else if (targetProfileType === "coach") {
         const { data } = await supabase
           .from("coach_profiles")
-          .select("id, display_name, username, profile_image_url, location")
+          .select("id, display_name, username, profile_image_url, location, avatars:selected_avatar_id(slug, rarity)")
           .eq("user_id", targetUserId)
           .single();
-        profile = data;
+        if (data) {
+          const avatarData = data.avatars as { slug: string; rarity: string } | null;
+          profile = {
+            ...data,
+            selected_avatar_slug: avatarData?.slug || null,
+            selected_avatar_rarity: avatarData?.rarity || null,
+          };
+        }
       } else {
         const { data } = await supabase
           .from("admin_profiles")

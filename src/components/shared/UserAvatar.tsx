@@ -1,14 +1,27 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { getAvatarImageUrl } from "@/hooks/useAvatars";
+import { DEFAULT_AVATAR, RARITY_CONFIG, Rarity } from "@/lib/avatar-config";
 
 interface UserAvatarProps {
-  src?: string | null;
+  src?: string | null;           // Uploaded profile photo
+  avatarSlug?: string | null;    // Selected character avatar slug
+  avatarRarity?: Rarity | null;  // Rarity for border styling
   name?: string | null;
   className?: string;
   fallbackClassName?: string;
+  showRarityBorder?: boolean;    // Whether to show rarity-colored border
 }
 
-export const UserAvatar = ({ src, name, className, fallbackClassName }: UserAvatarProps) => {
+export const UserAvatar = ({ 
+  src, 
+  avatarSlug, 
+  avatarRarity,
+  name, 
+  className, 
+  fallbackClassName,
+  showRarityBorder = false 
+}: UserAvatarProps) => {
   const getInitials = () => {
     if (!name) return "?";
     return name
@@ -19,7 +32,7 @@ export const UserAvatar = ({ src, name, className, fallbackClassName }: UserAvat
       .slice(0, 2);
   };
 
-  // Generate consistent color based on name
+  // Generate consistent color based on name for fallback
   const getAvatarColor = () => {
     if (!name) return "bg-primary/20 text-primary";
     const colors = [
@@ -34,9 +47,38 @@ export const UserAvatar = ({ src, name, className, fallbackClassName }: UserAvat
     return colors[index];
   };
 
+  // Priority: 1) Character avatar slug, 2) Uploaded photo, 3) Default avatar, 4) Initials
+  const getImageUrl = () => {
+    if (avatarSlug) {
+      return getAvatarImageUrl(avatarSlug);
+    }
+    if (src) {
+      return src;
+    }
+    // Use default avatar if no photo and no selected avatar
+    return getAvatarImageUrl(DEFAULT_AVATAR.slug);
+  };
+
+  const imageUrl = getImageUrl();
+  const hasCharacterAvatar = !!avatarSlug || (!src && !avatarSlug);
+  
+  // Get rarity border styling
+  const rarityConfig = avatarRarity ? RARITY_CONFIG[avatarRarity] : null;
+  const borderClass = showRarityBorder && rarityConfig 
+    ? `${rarityConfig.border} border-2` 
+    : "border border-border";
+
   return (
-    <Avatar className={cn("border border-border", className)}>
-      <AvatarImage src={src || undefined} alt={name || "User"} className="object-cover" />
+    <Avatar className={cn(borderClass, className)}>
+      <AvatarImage 
+        src={imageUrl || undefined} 
+        alt={name || "User"} 
+        className={cn(
+          "object-cover",
+          // Character avatars need object-contain to show full image
+          hasCharacterAvatar && "object-contain bg-gradient-to-br from-background to-muted/50"
+        )} 
+      />
       <AvatarFallback className={cn("font-semibold", getAvatarColor(), fallbackClassName)}>
         {getInitials()}
       </AvatarFallback>
