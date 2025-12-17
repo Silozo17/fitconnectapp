@@ -493,9 +493,31 @@ export const useMessages = (participantId?: string) => {
           
           if (payload.eventType === "UPDATE") {
             const updatedMessage = payload.new as Message;
-            setMessages((prev) =>
-              prev.map((m) => (m.id === updatedMessage.id ? updatedMessage : m))
-            );
+            
+            // Check if this message involves current user
+            const isReceived = updatedMessage.receiver_id === currentProfileId;
+            const isSent = updatedMessage.sender_id === currentProfileId;
+            
+            if (!isReceived && !isSent) {
+              return; // Not relevant to current user
+            }
+            
+            // If viewing a specific conversation, check if message belongs to it
+            if (participantId) {
+              const isInConversation = 
+                (updatedMessage.sender_id === participantId && updatedMessage.receiver_id === currentProfileId) ||
+                (updatedMessage.sender_id === currentProfileId && updatedMessage.receiver_id === participantId);
+              
+              if (isInConversation) {
+                // Update the message in state (this includes read_at changes)
+                setMessages((prev) =>
+                  prev.map((m) => (m.id === updatedMessage.id ? updatedMessage : m))
+                );
+              }
+            }
+            
+            // Refresh conversations to update read status in conversation list
+            softRefreshConversations();
           }
         }
       )
