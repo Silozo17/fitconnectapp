@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
@@ -12,6 +12,7 @@ import {
   Dumbbell,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Package,
   ShoppingBag,
   Star,
@@ -21,6 +22,7 @@ import {
   LogOut,
   User,
   Rocket,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,31 +33,94 @@ import { UserAvatar } from "@/components/shared/UserAvatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Sheet,
   SheetContent,
 } from "@/components/ui/sheet";
 
 type BadgeKey = "messages" | "pipeline" | "schedule" | "clients";
 
-const menuItems: { title: string; icon: typeof LayoutDashboard; path: string; badgeKey?: BadgeKey; badgeVariant?: "default" | "warning" | "urgent" }[] = [
-  { title: "Overview", icon: LayoutDashboard, path: "/dashboard/coach" },
-  { title: "Pipeline", icon: Kanban, path: "/dashboard/coach/pipeline", badgeKey: "pipeline", badgeVariant: "warning" },
-  { title: "Clients", icon: Users, path: "/dashboard/coach/clients", badgeKey: "clients", badgeVariant: "warning" },
-  { title: "Schedule", icon: Calendar, path: "/dashboard/coach/schedule", badgeKey: "schedule", badgeVariant: "warning" },
-  { title: "Messages", icon: MessageSquare, path: "/dashboard/coach/messages", badgeKey: "messages" },
-  { title: "Connections", icon: Users, path: "/dashboard/coach/connections" },
-  { title: "Training Plans", icon: ClipboardList, path: "/dashboard/coach/plans" },
-  { title: "Digital Products", icon: ShoppingBag, path: "/dashboard/coach/products" },
-  { title: "Packages", icon: Package, path: "/dashboard/coach/packages" },
-  { title: "Boost", icon: Rocket, path: "/dashboard/coach/boost" },
-  { title: "Achievements", icon: Trophy, path: "/dashboard/coach/achievements" },
-  { title: "Reviews", icon: Star, path: "/dashboard/coach/reviews" },
-  { title: "Earnings", icon: DollarSign, path: "/dashboard/coach/earnings" },
+interface MenuItem {
+  title: string;
+  icon: typeof LayoutDashboard;
+  path: string;
+  badgeKey?: BadgeKey;
+  badgeVariant?: "default" | "warning" | "urgent";
+}
+
+interface MenuGroup {
+  id: string;
+  label?: string;
+  icon?: typeof LayoutDashboard;
+  items: MenuItem[];
+  collapsible: boolean;
+}
+
+const menuGroups: MenuGroup[] = [
+  {
+    id: "main",
+    collapsible: false,
+    items: [
+      { title: "Overview", icon: LayoutDashboard, path: "/dashboard/coach" },
+      { title: "Pipeline", icon: Kanban, path: "/dashboard/coach/pipeline", badgeKey: "pipeline", badgeVariant: "warning" },
+      { title: "Messages", icon: MessageSquare, path: "/dashboard/coach/messages", badgeKey: "messages" },
+      { title: "Connections", icon: UserPlus, path: "/dashboard/coach/connections" },
+    ],
+  },
+  {
+    id: "clients",
+    label: "Client Management",
+    icon: Users,
+    collapsible: true,
+    items: [
+      { title: "Clients", icon: Users, path: "/dashboard/coach/clients", badgeKey: "clients", badgeVariant: "warning" },
+      { title: "Schedule", icon: Calendar, path: "/dashboard/coach/schedule", badgeKey: "schedule", badgeVariant: "warning" },
+      { title: "Training Plans", icon: ClipboardList, path: "/dashboard/coach/plans" },
+    ],
+  },
+  {
+    id: "products",
+    label: "Products & Pricing",
+    icon: Package,
+    collapsible: true,
+    items: [
+      { title: "Packages", icon: Package, path: "/dashboard/coach/packages" },
+      { title: "Digital Products", icon: ShoppingBag, path: "/dashboard/coach/products" },
+    ],
+  },
+  {
+    id: "business",
+    label: "Business",
+    icon: DollarSign,
+    collapsible: true,
+    items: [
+      { title: "Boost", icon: Rocket, path: "/dashboard/coach/boost" },
+      { title: "Earnings", icon: DollarSign, path: "/dashboard/coach/earnings" },
+      { title: "Reviews", icon: Star, path: "/dashboard/coach/reviews" },
+    ],
+  },
+  {
+    id: "gamification",
+    label: "Gamification",
+    icon: Trophy,
+    collapsible: true,
+    items: [
+      { title: "Achievements", icon: Trophy, path: "/dashboard/coach/achievements" },
+    ],
+  },
 ];
 
-const bottomItems: { title: string; icon: typeof LayoutDashboard; path: string }[] = [
-  { title: "Settings", icon: Settings, path: "/dashboard/coach/settings" },
-];
+const settingsItem: MenuItem = { title: "Settings", icon: Settings, path: "/dashboard/coach/settings" };
 
 interface CoachSidebarProps {
   collapsed: boolean;
@@ -71,6 +136,32 @@ const CoachSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: CoachS
   const { displayName, avatarUrl } = useUserProfile();
   const { unreadCount } = useUnreadMessages();
   const { newLeads, pendingBookings, pendingConnections } = useCoachBadges();
+
+  // Initialize open groups based on current path
+  const getInitialOpenGroups = () => {
+    const openGroups: Record<string, boolean> = {};
+    menuGroups.forEach((group) => {
+      if (group.collapsible) {
+        const isActiveGroup = group.items.some((item) => location.pathname === item.path);
+        openGroups[group.id] = isActiveGroup;
+      }
+    });
+    return openGroups;
+  };
+
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(getInitialOpenGroups);
+
+  // Update open groups when route changes
+  useEffect(() => {
+    menuGroups.forEach((group) => {
+      if (group.collapsible) {
+        const isActiveGroup = group.items.some((item) => location.pathname === item.path);
+        if (isActiveGroup) {
+          setOpenGroups((prev) => ({ ...prev, [group.id]: true }));
+        }
+      }
+    });
+  }, [location.pathname]);
 
   // Close mobile menu on navigation
   useEffect(() => {
@@ -92,10 +183,146 @@ const CoachSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: CoachS
     }
   };
 
+  const getGroupBadgeCount = (group: MenuGroup): number => {
+    return group.items.reduce((sum, item) => sum + getBadgeCount(item.badgeKey), 0);
+  };
+
+  const isGroupActive = (group: MenuGroup): boolean => {
+    return group.items.some((item) => location.pathname === item.path);
+  };
+
+  const toggleGroup = (groupId: string) => {
+    setOpenGroups((prev) => ({ ...prev, [groupId]: !prev[groupId] }));
+  };
+
+  const renderMenuItem = (item: MenuItem, indented = false, isCollapsed = false) => {
+    const isActive = location.pathname === item.path;
+    const badgeCount = getBadgeCount(item.badgeKey);
+
+    if (isCollapsed) {
+      return (
+        <Tooltip key={item.path} delayDuration={0}>
+          <TooltipTrigger asChild>
+            <Link
+              to={item.path}
+              className={cn(
+                "flex items-center justify-center p-2.5 rounded-lg transition-colors relative",
+                isActive
+                  ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+              )}
+            >
+              <div className="relative">
+                <item.icon className="w-5 h-5" />
+                {badgeCount > 0 && <SidebarBadge count={badgeCount} collapsed variant={item.badgeVariant} />}
+              </div>
+            </Link>
+          </TooltipTrigger>
+          <TooltipContent side="right" className="font-medium">
+            {item.title}
+          </TooltipContent>
+        </Tooltip>
+      );
+    }
+
+    return (
+      <Link
+        key={item.path}
+        to={item.path}
+        className={cn(
+          "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors relative",
+          indented && "ml-4",
+          isActive
+            ? "bg-sidebar-primary text-sidebar-primary-foreground"
+            : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+        )}
+      >
+        <item.icon className="w-4 h-4 flex-shrink-0" />
+        <span className="font-medium text-sm flex-1">{item.title}</span>
+        {badgeCount > 0 && <SidebarBadge count={badgeCount} variant={item.badgeVariant} />}
+      </Link>
+    );
+  };
+
+  const renderGroup = (group: MenuGroup, isCollapsed = false) => {
+    if (!group.collapsible) {
+      return (
+        <div key={group.id} className="space-y-1">
+          {group.items.map((item) => renderMenuItem(item, false, isCollapsed))}
+        </div>
+      );
+    }
+
+    const isOpen = openGroups[group.id];
+    const groupBadgeCount = getGroupBadgeCount(group);
+    const GroupIcon = group.icon!;
+    const isActive = isGroupActive(group);
+
+    if (isCollapsed) {
+      return (
+        <Tooltip key={group.id} delayDuration={0}>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => toggleGroup(group.id)}
+              className={cn(
+                "flex items-center justify-center p-2.5 rounded-lg transition-colors relative w-full",
+                isActive
+                  ? "bg-sidebar-primary/20 text-sidebar-primary-foreground"
+                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+              )}
+            >
+              <div className="relative">
+                <GroupIcon className="w-5 h-5" />
+                {groupBadgeCount > 0 && <SidebarBadge count={groupBadgeCount} collapsed />}
+              </div>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="right" className="font-medium">
+            {group.label}
+          </TooltipContent>
+        </Tooltip>
+      );
+    }
+
+    return (
+      <Collapsible
+        key={group.id}
+        open={isOpen}
+        onOpenChange={() => toggleGroup(group.id)}
+      >
+        <CollapsibleTrigger asChild>
+          <button
+            className={cn(
+              "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors w-full text-left",
+              isActive
+                ? "bg-sidebar-primary/10 text-sidebar-primary-foreground"
+                : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            )}
+          >
+            <GroupIcon className="w-4 h-4 flex-shrink-0" />
+            <span className="font-semibold text-sm flex-1">{group.label}</span>
+            {groupBadgeCount > 0 && !isOpen && (
+              <SidebarBadge count={groupBadgeCount} />
+            )}
+            <ChevronDown
+              className={cn(
+                "w-4 h-4 transition-transform duration-200",
+                isOpen && "rotate-180"
+              )}
+            />
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-1 mt-1">
+          {group.items.map((item) => renderMenuItem(item, true, false))}
+        </CollapsibleContent>
+      </Collapsible>
+    );
+  };
+
   const SidebarContent = ({ isCollapsed = false }: { isCollapsed?: boolean }) => (
     <>
-      {/* Logo */}
-      <div className="p-4 border-b border-sidebar-border">
+      {/* Logo with Collapse Toggle */}
+      <div className="p-4 border-b border-sidebar-border flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shrink-0">
             <Dumbbell className="w-6 h-6 text-primary-foreground" />
@@ -106,92 +333,38 @@ const CoachSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: CoachS
             </span>
           )}
         </div>
+        {/* Collapse Toggle - Desktop only */}
+        {!mobileOpen && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onToggle}
+            className="h-8 w-8 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+          >
+            {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </Button>
+        )}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 py-4 overflow-y-auto">
-        <ul className="space-y-1 px-2">
-          {menuItems.map((item) => {
-            const isActive = location.pathname === item.path;
-            const badgeCount = getBadgeCount(item.badgeKey);
-            
-            return (
-              <li key={item.path}>
-                <Link
-                  to={item.path}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
-                    isActive
-                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                  )}
-                >
-                  <div className="relative">
-                    <item.icon className="w-5 h-5 shrink-0" />
-                    {badgeCount > 0 && isCollapsed && (
-                      <SidebarBadge count={badgeCount} collapsed variant={item.badgeVariant} />
-                    )}
-                  </div>
-                  {!isCollapsed && (
-                    <>
-                      <span className="font-medium flex-1">{item.title}</span>
-                      {badgeCount > 0 && <SidebarBadge count={badgeCount} variant={item.badgeVariant} />}
-                    </>
-                  )}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+      <nav className="flex-1 p-2 space-y-2 overflow-y-auto">
+        {menuGroups.map((group, index) => (
+          <div key={group.id}>
+            {index > 0 && <div className="my-2 border-t border-sidebar-border/50" />}
+            {renderGroup(group, isCollapsed)}
+          </div>
+        ))}
       </nav>
 
-      {/* Bottom Items (Settings) */}
-      <div className="px-2 py-2 border-t border-sidebar-border space-y-1">
-        {bottomItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
-                isActive
-                  ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-              )}
-            >
-              <item.icon className="w-5 h-5 shrink-0" />
-              {!isCollapsed && <span className="font-medium">{item.title}</span>}
-            </Link>
-          );
-        })}
+      {/* Settings - Fixed at bottom */}
+      <div className="p-2 border-t border-sidebar-border space-y-1">
+        {renderMenuItem(settingsItem, false, isCollapsed)}
       </div>
-
-      {/* Collapse Toggle - Desktop only */}
-      {!mobileOpen && (
-        <div className="p-4 border-t border-sidebar-border">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggle}
-            className="w-full justify-center text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
-          >
-            {isCollapsed ? (
-              <ChevronRight className="w-5 h-5" />
-            ) : (
-              <>
-                <ChevronLeft className="w-5 h-5 mr-2" />
-                <span>Collapse</span>
-              </>
-            )}
-          </Button>
-        </div>
-      )}
     </>
   );
 
   return (
-    <>
+    <TooltipProvider>
       {/* Desktop Sidebar */}
       <aside
         className={cn(
@@ -230,53 +403,18 @@ const CoachSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: CoachS
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 py-4 overflow-y-auto">
-            <ul className="space-y-1 px-2">
-              {menuItems.map((item) => {
-                const isActive = location.pathname === item.path;
-                const badgeCount = getBadgeCount(item.badgeKey);
-                
-                return (
-                  <li key={item.path}>
-                    <Link
-                      to={item.path}
-                      className={cn(
-                        "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
-                        isActive
-                          ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                          : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                      )}
-                    >
-                      <item.icon className="w-5 h-5 shrink-0" />
-                      <span className="font-medium flex-1">{item.title}</span>
-                      {badgeCount > 0 && <SidebarBadge count={badgeCount} variant={item.badgeVariant} />}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+          <nav className="flex-1 p-2 space-y-2 overflow-y-auto">
+            {menuGroups.map((group, index) => (
+              <div key={group.id}>
+                {index > 0 && <div className="my-2 border-t border-sidebar-border/50" />}
+                {renderGroup(group, false)}
+              </div>
+            ))}
           </nav>
 
           {/* Settings */}
-          <div className="px-2 py-2 border-t border-sidebar-border space-y-1">
-            {bottomItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
-                    isActive
-                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                  )}
-                >
-                  <item.icon className="w-5 h-5 shrink-0" />
-                  <span className="font-medium">{item.title}</span>
-                </Link>
-              );
-            })}
+          <div className="p-2 border-t border-sidebar-border space-y-1">
+            {renderMenuItem(settingsItem, false, false)}
           </div>
 
           {/* Profile Section - Mobile only */}
@@ -314,7 +452,7 @@ const CoachSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: CoachS
           </div>
         </SheetContent>
       </Sheet>
-    </>
+    </TooltipProvider>
   );
 };
 

@@ -120,14 +120,14 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }: AdminSidebarProps) => {
   const SidebarContent = ({ isCollapsed = false }: { isCollapsed?: boolean }) => (
     <>
       <div className="p-4 border-b border-border flex items-center justify-between">
-        {!isCollapsed && (
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">FC</span>
-            </div>
-            <span className="font-semibold text-foreground">Admin</span>
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+            <Dumbbell className="w-5 h-5 text-primary-foreground" />
           </div>
-        )}
+          {!isCollapsed && (
+            <span className="font-bold text-lg text-foreground">FitConnect</span>
+          )}
+        </div>
         {/* Collapse Toggle - Desktop only */}
         {!mobileOpen && (
           <Button
@@ -180,10 +180,10 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }: AdminSidebarProps) => {
           {/* Logo */}
           <div className="p-4 border-b border-border flex items-center">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">FC</span>
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <Dumbbell className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="font-semibold text-foreground">Admin</span>
+              <span className="font-bold text-lg text-foreground">FitConnect</span>
             </div>
           </div>
 
