@@ -24,6 +24,12 @@ export type MarketplaceCoach = {
   selected_avatar_id: string | null;
   created_at: string;
   onboarding_completed: boolean;
+  // Joined avatar data
+  avatars?: {
+    slug: string;
+    rarity: string;
+    image_url: string | null;
+  } | null;
   // Computed/added fields
   rating?: number | null;
   reviews_count?: number | null;
