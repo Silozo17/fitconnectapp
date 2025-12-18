@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import DOMPurify from "dompurify";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { SEOHead, createBreadcrumbSchema } from "@/components/shared/SEOHead";
+import { SEOHead, createBreadcrumbSchema, createArticleSchema } from "@/components/shared/SEOHead";
 import { BlogCard } from "@/components/blog/BlogCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -88,34 +88,16 @@ export default function BlogPost() {
     );
   }
 
-  const articleSchema = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": post.title,
-    "description": post.meta_description || post.excerpt,
-    "image": post.featured_image || "https://getfitconnect.co.uk/og-image.png",
-    "author": {
-      "@type": "Organization",
-      "name": post.author || "FitConnect",
-      "url": "https://getfitconnect.co.uk",
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "FitConnect",
-      "url": "https://getfitconnect.co.uk",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://getfitconnect.co.uk/pwa-512x512.png",
-      },
-    },
-    "datePublished": post.published_at,
-    "dateModified": post.updated_at || post.published_at,
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": `https://getfitconnect.co.uk/blog/${post.slug}`,
-    },
-    "keywords": post.keywords?.join(", "),
-  };
+  const articleSchema = createArticleSchema({
+    headline: post.title,
+    description: post.meta_description || post.excerpt,
+    image: post.featured_image || undefined,
+    url: `/blog/${post.slug}`,
+    author: post.author || "FitConnect",
+    datePublished: post.published_at,
+    dateModified: post.updated_at || post.published_at,
+    keywords: post.keywords || [],
+  });
 
   const breadcrumbSchema = createBreadcrumbSchema([
     { name: "Home", url: "/" },

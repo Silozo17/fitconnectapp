@@ -146,3 +146,6 @@ verify_jwt = true
 
 [functions.create-purchase-invoice]
 verify_jwt = false
+
+[functions.sitemap]
+verify_jwt = false

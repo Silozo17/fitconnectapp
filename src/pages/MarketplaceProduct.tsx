@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import PageLayout from "@/components/layout/PageLayout";
+import { SEOHead, createProductSchema, createBreadcrumbSchema } from "@/components/shared/SEOHead";
 import { useDigitalProduct, useProductReviews, useHasPurchased, CONTENT_TYPES, CONTENT_CATEGORIES } from "@/hooks/useDigitalProducts";
 import { formatCurrency } from "@/lib/currency";
 import { UserAvatar } from "@/components/shared/UserAvatar";
@@ -106,19 +107,55 @@ export default function MarketplaceProduct() {
     );
   }
 
+  // Generate SEO schema
+  const productSchema = createProductSchema({
+    name: product.title,
+    description: product.short_description || product.description || "",
+    image: product.cover_image_url || undefined,
+    url: `/marketplace/${product.slug || productId}`,
+    price: product.price,
+    currency: product.currency || "GBP",
+    availability: "InStock",
+    rating: averageRating > 0 ? averageRating : undefined,
+    reviewCount: reviews && reviews.length > 0 ? reviews.length : undefined,
+    seller: product.coach_profiles?.display_name || "FitConnect",
+  });
+
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Marketplace", url: "/marketplace" },
+    { name: product.title, url: `/marketplace/${product.slug || productId}` },
+  ]);
+
   return (
-    <PageLayout title={product.title} description={product.short_description || product.description || "Digital content from FitConnect"}>
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 pt-24 md:pt-28 pb-8">
-          {/* Back Button */}
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/marketplace")}
-            className="mb-6"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Marketplace
-          </Button>
+    <>
+      <SEOHead
+        title={product.title}
+        description={product.short_description || product.description?.slice(0, 155) || "Digital fitness content from FitConnect"}
+        canonicalPath={`/marketplace/${product.slug || productId}`}
+        ogImage={product.cover_image_url || undefined}
+        keywords={[
+          product.category || "",
+          product.content_type?.replace("_", " ") || "",
+          "fitness content",
+          "workout plan",
+          "digital product",
+          ...(product.tags || []),
+        ].filter(Boolean)}
+        schema={[productSchema, breadcrumbSchema]}
+      />
+      <PageLayout title={product.title} description={product.short_description || product.description || "Digital content from FitConnect"}>
+        <div className="min-h-screen bg-background">
+          <div className="container mx-auto px-4 pt-24 md:pt-28 pb-8">
+            {/* Back Button */}
+            <Button
+              variant="ghost"
+              onClick={() => navigate("/marketplace")}
+              className="mb-6"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Marketplace
+            </Button>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content */}
@@ -416,5 +453,6 @@ export default function MarketplaceProduct() {
         </Dialog>
       </div>
     </PageLayout>
+    </>
   );
 }

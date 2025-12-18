@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import PageLayout from "@/components/layout/PageLayout";
+import { SEOHead, createProductSchema, createBreadcrumbSchema } from "@/components/shared/SEOHead";
 import { useDigitalBundle, useHasPurchased, CONTENT_TYPES } from "@/hooks/useDigitalProducts";
 import { formatCurrency } from "@/lib/currency";
 import { UserAvatar } from "@/components/shared/UserAvatar";
@@ -59,19 +60,52 @@ export default function MarketplaceBundle() {
     );
   }
 
+  // Generate SEO schema
+  const bundleSchema = createProductSchema({
+    name: bundle.title,
+    description: bundle.description || `Bundle of ${bundle.products?.length || 0} digital products`,
+    image: bundle.cover_image_url || undefined,
+    url: `/marketplace/bundles/${bundleId}`,
+    price: bundle.price,
+    currency: bundle.currency || "GBP",
+    availability: "InStock",
+    seller: bundle.coach_profiles?.display_name || "FitConnect",
+  });
+
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Marketplace", url: "/marketplace" },
+    { name: bundle.title, url: `/marketplace/bundles/${bundleId}` },
+  ]);
+
   return (
-    <PageLayout title={bundle.title} description={bundle.description || "Digital bundle from FitConnect"}>
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 pt-24 md:pt-28 pb-8">
-          {/* Back Button */}
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/marketplace")}
-            className="mb-6"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Marketplace
-          </Button>
+    <>
+      <SEOHead
+        title={`${bundle.title} - Bundle`}
+        description={bundle.description?.slice(0, 155) || `Get ${bundle.products?.length || 0} fitness products in one bundle and save ${savings}%`}
+        canonicalPath={`/marketplace/bundles/${bundleId}`}
+        ogImage={bundle.cover_image_url || undefined}
+        keywords={[
+          "fitness bundle",
+          "workout bundle",
+          "digital products",
+          "save money",
+          ...(bundle.products?.map(p => p.category).filter(Boolean) || []),
+        ]}
+        schema={[bundleSchema, breadcrumbSchema]}
+      />
+      <PageLayout title={bundle.title} description={bundle.description || "Digital bundle from FitConnect"}>
+        <div className="min-h-screen bg-background">
+          <div className="container mx-auto px-4 pt-24 md:pt-28 pb-8">
+            {/* Back Button */}
+            <Button
+              variant="ghost"
+              onClick={() => navigate("/marketplace")}
+              className="mb-6"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Marketplace
+            </Button>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content */}
@@ -249,5 +283,6 @@ export default function MarketplaceBundle() {
         </div>
       </div>
     </PageLayout>
+    </>
   );
 }
