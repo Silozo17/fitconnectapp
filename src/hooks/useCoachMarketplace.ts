@@ -137,18 +137,42 @@ export const useCoachById = (coachId: string) => {
   return useQuery({
     queryKey: ["coach", coachId],
     queryFn: async () => {
-      // For individual coach view, use the public view for unauthenticated users
-      // This ensures only safe columns are exposed
-      const { data, error } = await supabase
-        .from("public_coach_profiles")
-        .select("*")
-        .eq("id", coachId)
-        .maybeSingle();
+      // Check if user is authenticated
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        // Authenticated users: query base table (RLS handles access control)
+        // This allows clients to see coaches they've messaged/connected with
+        // even if those coaches have marketplace_visible = false
+        const { data, error } = await supabase
+          .from("coach_profiles")
+          .select(`
+            id, display_name, bio, coach_types, certifications,
+            experience_years, hourly_rate, currency, location,
+            online_available, in_person_available, profile_image_url,
+            card_image_url, booking_mode, is_verified, verified_at,
+            gym_affiliation, marketplace_visible, selected_avatar_id,
+            created_at, onboarding_completed,
+            avatars(slug, rarity, image_url)
+          `)
+          .eq("id", coachId)
+          .maybeSingle();
 
-      if (error) throw error;
-      return (data as unknown as MarketplaceCoach) || null;
+        if (error) throw error;
+        return (data as unknown as MarketplaceCoach) || null;
+      } else {
+        // Anonymous users: use GDPR-safe public view (marketplace-visible only)
+        const { data, error } = await supabase
+          .from("public_coach_profiles")
+          .select("*")
+          .eq("id", coachId)
+          .maybeSingle();
+
+        if (error) throw error;
+        return (data as unknown as MarketplaceCoach) || null;
+      }
     },
     enabled: !!coachId,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 };
