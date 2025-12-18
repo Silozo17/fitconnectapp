@@ -10,6 +10,7 @@ export interface InvoiceSettings {
   business_email: string | null;
   business_phone: string | null;
   vat_number: string | null;
+  vat_registered: boolean;
   company_registration: string | null;
   logo_url: string | null;
   template_id: string;
