@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { usePlatformUrl } from "@/hooks/usePlatformUrl";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +27,7 @@ import {
   Users, Calendar, Package, CreditCard, Star, 
   Gift, Ban, RefreshCw, DollarSign, CheckCircle,
   Trophy, Trash2, Image, Loader2, Pencil, KeyRound, Pause, Clock,
-  ShieldCheck, ShieldX, ShieldAlert, Eye, EyeOff, ExternalLink
+  ShieldCheck, ShieldX, ShieldAlert, Eye, EyeOff, ExternalLink, Copy
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -265,16 +266,25 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan,
               Delete Coach
             </Button>
             {coach.username && (
-              <Button variant="outline" className="justify-start" asChild>
-                <a 
-                  href={getAbsoluteUrl(`/coaches/${coach.username}`)} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1 justify-start" asChild>
+                  <Link to={`/coaches/${coach.username}`} target="_blank">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    View Profile
+                  </Link>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={() => {
+                    navigator.clipboard.writeText(getAbsoluteUrl(`/coaches/${coach.username}`));
+                    toast.success("Profile URL copied to clipboard");
+                  }}
+                  title="Copy branded profile URL"
                 >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  View Public Profile
-                </a>
-              </Button>
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
             )}
           </div>
 
