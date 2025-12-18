@@ -25,71 +25,74 @@ export function AvatarShowcase({ avatar, className, showStats = false, size = 'm
   const imageUrl = avatar ? getAvatarImageUrl(avatar.slug) : '/placeholder.svg';
   
   return (
-    <div className={cn('relative flex flex-col items-center', className)}>
-      {/* Stats positioned around avatar */}
-      {showStats && stats && (
-        <>
-          {/* Top-left: Level */}
-          <div className="absolute -top-2 -left-2 z-10 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            <div className="flex items-center gap-1 bg-background/80 backdrop-blur-sm rounded-full px-2 py-1 border border-primary/30">
-              <span className="text-xs font-bold text-primary">Lvl</span>
-              <span className="text-sm font-bold">{stats.currentLevel}</span>
+    <div className={cn('flex flex-col items-center', className)}>
+      {/* Avatar + Stats wrapper - stats positioned relative to this */}
+      <div className="relative">
+        {/* Stats positioned around avatar */}
+        {showStats && stats && (
+          <>
+            {/* Top-left: Level */}
+            <div className="absolute -top-2 -left-2 z-10 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+              <div className="flex items-center gap-1 bg-background/80 backdrop-blur-sm rounded-full px-2 py-1 border border-primary/30">
+                <span className="text-xs font-bold text-primary">Lvl</span>
+                <span className="text-sm font-bold">{stats.currentLevel}</span>
+              </div>
             </div>
-          </div>
-          
-          {/* Top-right: XP */}
-          <div className="absolute -top-2 -right-2 z-10 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            <div className="flex items-center gap-1 bg-background/80 backdrop-blur-sm rounded-full px-2 py-1 border border-primary/30">
-              <Zap className="h-3 w-3 text-primary" />
-              <span className="text-sm font-bold">{stats.xpTotal.toLocaleString()}</span>
+            
+            {/* Top-right: XP */}
+            <div className="absolute -top-2 -right-2 z-10 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+              <div className="flex items-center gap-1 bg-background/80 backdrop-blur-sm rounded-full px-2 py-1 border border-primary/30">
+                <Zap className="h-3 w-3 text-primary" />
+                <span className="text-sm font-bold">{stats.xpTotal.toLocaleString()}</span>
+              </div>
             </div>
-          </div>
-          
-          {/* Bottom-left: Badges */}
-          <div className="absolute -bottom-2 -left-2 z-10 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-            <div className="flex items-center gap-1 bg-background/80 backdrop-blur-sm rounded-full px-2 py-1 border border-amber-500/30">
-              <Medal className="h-3 w-3 text-amber-500" />
-              <span className="text-sm font-bold">{stats.badgesEarned}</span>
+            
+            {/* Bottom-left: Badges */}
+            <div className="absolute -bottom-2 -left-2 z-10 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+              <div className="flex items-center gap-1 bg-background/80 backdrop-blur-sm rounded-full px-2 py-1 border border-amber-500/30">
+                <Medal className="h-3 w-3 text-amber-500" />
+                <span className="text-sm font-bold">{stats.badgesEarned}</span>
+              </div>
             </div>
-          </div>
-          
-          {/* Bottom-right: Challenges */}
-          <div className="absolute -bottom-2 -right-2 z-10 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-            <div className="flex items-center gap-1 bg-background/80 backdrop-blur-sm rounded-full px-2 py-1 border border-purple-500/30">
-              <Target className="h-3 w-3 text-purple-500" />
-              <span className="text-sm font-bold">{stats.challengesCompleted}</span>
+            
+            {/* Bottom-right: Challenges */}
+            <div className="absolute -bottom-2 -right-2 z-10 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+              <div className="flex items-center gap-1 bg-background/80 backdrop-blur-sm rounded-full px-2 py-1 border border-purple-500/30">
+                <Target className="h-3 w-3 text-purple-500" />
+                <span className="text-sm font-bold">{stats.challengesCompleted}</span>
+              </div>
             </div>
-          </div>
-        </>
-      )}
-      
-      {/* Avatar container with glow effect - portrait */}
-      <div className={cn(
-        'relative rounded-xl p-1',
-        rarityConfig.glow,
-        rarityConfig.border,
-        'border-2 bg-gradient-to-br from-primary/20 to-accent/20'
-      )}>
-        {/* Inner glow ring */}
-        <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/30 via-transparent to-accent/30 animate-pulse" />
+          </>
+        )}
         
-        {/* Avatar image - portrait */}
+        {/* Avatar container with glow effect - portrait */}
         <div className={cn(
-          'relative rounded-lg overflow-hidden bg-background/50',
-          sizeClasses[size]
+          'relative rounded-xl p-1',
+          rarityConfig.glow,
+          rarityConfig.border,
+          'border-2 bg-gradient-to-br from-primary/20 to-accent/20'
         )}>
-          <img
-            src={imageUrl}
-            alt={avatar?.name || 'Avatar'}
-            className="w-full h-full object-contain"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/placeholder.svg';
-            }}
-          />
+          {/* Inner glow ring */}
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/30 via-transparent to-accent/30 animate-pulse" />
+          
+          {/* Avatar image - portrait */}
+          <div className={cn(
+            'relative rounded-lg overflow-hidden bg-background/50',
+            sizeClasses[size]
+          )}>
+            <img
+              src={imageUrl}
+              alt={avatar?.name || 'Avatar'}
+              className="w-full h-full object-contain"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/placeholder.svg';
+              }}
+            />
+          </div>
         </div>
       </div>
       
-      {/* Avatar name and rarity */}
+      {/* Avatar name and rarity - OUTSIDE the relative wrapper */}
       {avatar && (
         <div className="mt-3 text-center">
           <h3 className="font-bold text-lg">{avatar.name}</h3>
