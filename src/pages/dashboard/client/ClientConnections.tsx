@@ -3,7 +3,8 @@ import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, UserPlus, Clock, Send, Loader2 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Users, UserPlus, Clock, Send, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { useConnections } from "@/hooks/useConnections";
 import { ConnectionCard } from "@/components/connections/ConnectionCard";
 import { PendingRequestCard } from "@/components/connections/PendingRequestCard";
@@ -18,10 +19,12 @@ const ClientConnections = () => {
     pendingRequests,
     sentRequests,
     loading,
+    error,
     acceptRequest,
     rejectRequest,
     cancelRequest,
     removeConnection,
+    refreshConnections,
   } = useConnections();
   const [addModalOpen, setAddModalOpen] = useState(false);
 
@@ -41,6 +44,25 @@ const ClientConnections = () => {
             Add Connection
           </Button>
         </div>
+
+        {/* Error Alert */}
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="flex items-center justify-between">
+              <span>{error}</span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={refreshConnections}
+                className="ml-4"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Retry
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Tabs */}
         <Tabs defaultValue="friends" className="space-y-4">

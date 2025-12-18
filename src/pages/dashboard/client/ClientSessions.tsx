@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -41,6 +41,7 @@ const ClientSessions = () => {
   const { user } = useAuth();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
+  const [clientProfileId, setClientProfileId] = useState<string | null>(null);
   const [reviewModal, setReviewModal] = useState<{
     open: boolean;
     coachId: string;
@@ -48,8 +49,33 @@ const ClientSessions = () => {
     sessionId: string;
   }>({ open: false, coachId: "", coachName: "", sessionId: "" });
 
+  const fetchSessions = useCallback(async (profileId: string) => {
+    const { data } = await supabase
+      .from("coaching_sessions")
+      .select(`
+        id,
+        scheduled_at,
+        duration_minutes,
+        session_type,
+        status,
+        is_online,
+        location,
+        notes,
+        coach_id,
+        video_meeting_url,
+        coach:coach_profiles!coaching_sessions_coach_id_fkey (
+          display_name
+        )
+      `)
+      .eq("client_id", profileId)
+      .order("scheduled_at", { ascending: true });
+
+    setSessions((data as unknown as Session[]) || []);
+    setLoading(false);
+  }, []);
+
   useEffect(() => {
-    const fetchSessions = async () => {
+    const init = async () => {
       if (!user) return;
 
       const { data: profile } = await supabase
@@ -63,32 +89,38 @@ const ClientSessions = () => {
         return;
       }
 
-      const { data } = await supabase
-        .from("coaching_sessions")
-        .select(`
-          id,
-          scheduled_at,
-          duration_minutes,
-          session_type,
-          status,
-          is_online,
-          location,
-          notes,
-          coach_id,
-          video_meeting_url,
-          coach:coach_profiles!coaching_sessions_coach_id_fkey (
-            display_name
-          )
-        `)
-        .eq("client_id", profile.id)
-        .order("scheduled_at", { ascending: true });
-
-      setSessions((data as unknown as Session[]) || []);
-      setLoading(false);
+      setClientProfileId(profile.id);
+      await fetchSessions(profile.id);
     };
 
-    fetchSessions();
-  }, [user]);
+    init();
+  }, [user, fetchSessions]);
+
+  // REAL-TIME UPDATES: Subscribe to session changes
+  useEffect(() => {
+    if (!clientProfileId) return;
+
+    const channel = supabase
+      .channel(`client-sessions-${clientProfileId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "coaching_sessions",
+          filter: `client_id=eq.${clientProfileId}`,
+        },
+        () => {
+          // Refetch sessions on any change
+          fetchSessions(clientProfileId);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [clientProfileId, fetchSessions]);
 
   const upcomingSessions = sessions.filter(
     (s) => s.status === "scheduled" && new Date(s.scheduled_at) >= new Date()

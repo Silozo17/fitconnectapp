@@ -146,27 +146,26 @@ export const useMyHabits = () => {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
+      if (!habits || habits.length === 0) return [];
       
-      // Get streaks for these habits
+      // EMPTY ARRAY GUARD: Only query if we have habit IDs
       const habitIds = habits.map(h => h.id);
-      const { data: streaks } = await supabase
-        .from('habit_streaks')
-        .select('*')
-        .in('habit_id', habitIds);
       
-      // Get today's logs
+      // Get streaks and today's logs in parallel
       const today = new Date().toISOString().split('T')[0];
-      const { data: todayLogs } = await supabase
-        .from('habit_logs')
-        .select('*')
-        .in('habit_id', habitIds)
-        .eq('logged_at', today);
+      const [streaksResult, todayLogsResult] = await Promise.all([
+        supabase.from('habit_streaks').select('*').in('habit_id', habitIds),
+        supabase.from('habit_logs').select('*').in('habit_id', habitIds).eq('logged_at', today),
+      ]);
+      
+      const streaks = streaksResult.data || [];
+      const todayLogs = todayLogsResult.data || [];
       
       // Combine data
       return habits.map(habit => ({
         ...habit,
-        streak: streaks?.find(s => s.habit_id === habit.id),
-        todayLog: todayLogs?.find(l => l.habit_id === habit.id),
+        streak: streaks.find(s => s.habit_id === habit.id),
+        todayLog: todayLogs.find(l => l.habit_id === habit.id),
       })) as HabitWithStreak[];
     },
     enabled: !!user,

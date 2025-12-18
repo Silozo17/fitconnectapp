@@ -9,6 +9,7 @@ import UserConnectionRequests from "@/components/dashboard/client/UserConnection
 import HealthDataWidget from "@/components/integrations/HealthDataWidget";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Users,
   Calendar,
@@ -17,6 +18,8 @@ import {
   TrendingUp,
   ArrowRight,
   Target,
+  AlertCircle,
+  RefreshCw,
 } from "lucide-react";
 
 interface DashboardStats {
@@ -37,9 +40,13 @@ const ClientOverview = () => {
   });
   const [firstName, setFirstName] = useState<string>("");
   const [clientProfileId, setClientProfileId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isRetrying, setIsRetrying] = useState(false);
 
-  useEffect(() => {
-    const fetchStats = async () => {
+  const fetchStats = async () => {
+    setError(null);
+    
+    try {
       // Determine which profile ID to use
       let profileIdToUse = clientProfileId;
 
@@ -50,12 +57,13 @@ const ClientOverview = () => {
 
       // If we don't have a profile ID yet, fetch it
       if (!profileIdToUse && userId) {
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from("client_profiles")
           .select("id, first_name")
           .eq("user_id", userId)
           .maybeSingle();
 
+        if (profileError) throw profileError;
         if (!profile) return;
 
         profileIdToUse = profile.id;
@@ -78,7 +86,7 @@ const ClientOverview = () => {
         }
       }
 
-      // Fetch all stats in parallel
+      // Fetch all stats in parallel with error handling
       const [coaches, sessions, plans, messages] = await Promise.all([
         supabase
           .from("coach_clients")
@@ -103,16 +111,33 @@ const ClientOverview = () => {
           .is("read_at", null),
       ]);
 
+      // Check for errors in any of the queries
+      if (coaches.error) throw coaches.error;
+      if (sessions.error) throw sessions.error;
+      if (plans.error) throw plans.error;
+      if (messages.error) throw messages.error;
+
       setStats({
         coachCount: coaches.count || 0,
         upcomingSessions: sessions.count || 0,
         activePlans: plans.count || 0,
         unreadMessages: messages.count || 0,
       });
-    };
+    } catch (err) {
+      console.error("Error fetching dashboard stats:", err);
+      setError("Failed to load some dashboard data. Please try again.");
+    }
+  };
 
+  useEffect(() => {
     fetchStats();
   }, [userId, profileId, isRoleSwitching, clientProfileId]);
+
+  const handleRetry = async () => {
+    setIsRetrying(true);
+    await fetchStats();
+    setIsRetrying(false);
+  };
 
   const quickActions = [
     {
@@ -164,6 +189,26 @@ const ClientOverview = () => {
       title="Dashboard"
       description="Your fitness journey overview"
     >
+      {/* Error Alert */}
+      {error && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span>{error}</span>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleRetry}
+              disabled={isRetrying}
+              className="ml-4"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${isRetrying ? 'animate-spin' : ''}`} />
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Avatar Stats Hero */}
       <AvatarStatsHero firstName={firstName} />
 
