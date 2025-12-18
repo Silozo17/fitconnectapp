@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -18,7 +18,9 @@ import {
   AlertCircle,
   RefreshCw,
   CalendarDays,
+  Calendar as CalendarIcon,
 } from "lucide-react";
+import { AddCoachSessionModal } from "@/components/dashboard/coach/AddCoachSessionModal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -61,7 +63,8 @@ import { useExternalCalendarEvents, useSyncExternalCalendar } from "@/hooks/useE
 
 const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const timeSlots = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
+// Full 24-hour time slots
+const timeSlots = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")}:00`);
 
 type PaymentRequired = "none" | "deposit" | "full";
 type DepositType = "percentage" | "fixed";
@@ -102,6 +105,14 @@ const CoachSchedule = () => {
   const [defaultLocation, setDefaultLocation] = useState("");
   const [stripeConnected, setStripeConnected] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  
+  // Add Session Modal state
+  const [showAddSessionModal, setShowAddSessionModal] = useState(false);
+  const [preselectedDate, setPreselectedDate] = useState<Date | undefined>();
+  const [preselectedTime, setPreselectedTime] = useState<string | undefined>();
+  
+  // Calendar scroll ref
+  const calendarScrollRef = useRef<HTMLDivElement>(null);
 
   // Get coach profile ID, currency, and booking settings
   useEffect(() => {
@@ -249,7 +260,7 @@ const CoachSchedule = () => {
     }
   }, [user?.id]);
 
-  // Get external event for a time slot
+  // Get external event for a time slot (skip all-day events - they're shown as banners)
   const getExternalEventForSlot = (dayIndex: number, time: string) => {
     const date = weekDates[dayIndex];
     const slotStart = new Date(date);
@@ -258,11 +269,54 @@ const CoachSchedule = () => {
     const slotEnd = new Date(slotStart.getTime() + 60 * 60 * 1000); // 1 hour slot
 
     return externalEvents.find(event => {
+      if (event.is_all_day) return false; // Skip all-day events
       const eventStart = new Date(event.start_time);
       const eventEnd = new Date(event.end_time);
       return eventStart < slotEnd && eventEnd > slotStart;
     });
   };
+
+  // Get all-day events for a specific day
+  const getAllDayEventsForDate = (dayIndex: number) => {
+    const date = weekDates[dayIndex];
+    const dayStart = new Date(date);
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(date);
+    dayEnd.setHours(23, 59, 59, 999);
+
+    return externalEvents.filter(event => {
+      if (!event.is_all_day) return false;
+      const eventStart = new Date(event.start_time);
+      const eventEnd = new Date(event.end_time);
+      return eventStart <= dayEnd && eventEnd >= dayStart;
+    });
+  };
+
+  // Check if a time slot is within coach availability
+  const isWithinAvailability = (dayIndex: number, time: string) => {
+    const dayOfWeek = (dayIndex + 1) % 7; // Convert Mon=0 to Sun=0 format
+    const dayAvail = availability.find(a => a.day_of_week === dayOfWeek && a.is_active);
+    if (!dayAvail) return false;
+    const [slotHour] = time.split(':').map(Number);
+    const [startHour] = (dayAvail.start_time || '09:00').split(':').map(Number);
+    const [endHour] = (dayAvail.end_time || '18:00').split(':').map(Number);
+    return slotHour >= startHour && slotHour < endHour;
+  };
+
+  // Handle clicking on a calendar slot
+  const handleSlotClick = (dayIndex: number, time: string) => {
+    setPreselectedDate(weekDates[dayIndex]);
+    setPreselectedTime(time);
+    setShowAddSessionModal(true);
+  };
+
+  // Scroll to 6am on mount
+  useEffect(() => {
+    if (calendarScrollRef.current) {
+      const slot6am = 6 * 60; // 6am = 6 * 60px height per slot
+      calendarScrollRef.current.scrollTop = slot6am;
+    }
+  }, []);
 
   const handleSaveSessionType = async () => {
     if (!coachId || !sessionTypeName || !sessionTypePrice) return;
@@ -439,7 +493,11 @@ const CoachSchedule = () => {
           <h1 className="font-display text-2xl font-bold text-foreground">Schedule</h1>
           <p className="text-muted-foreground">Manage your calendar, availability, and booking requests</p>
         </div>
-        <Button className="bg-primary text-primary-foreground">
+        <Button className="bg-primary text-primary-foreground" onClick={() => {
+          setPreselectedDate(undefined);
+          setPreselectedTime(undefined);
+          setShowAddSessionModal(true);
+        }}>
           <Plus className="w-4 h-4 mr-2" />
           Add Session
         </Button>
@@ -499,62 +557,94 @@ const CoachSchedule = () => {
                   ))}
                 </div>
 
-                {/* Time Slots */}
-                {timeSlots.map((time) => (
-                  <div key={time} className="grid grid-cols-8 border-b border-border">
-                    <div className="p-3 text-sm text-muted-foreground">{time}</div>
-                    {weekDates.map((_, dayIndex) => {
-                      const session = getSessionForSlot(dayIndex, time);
-                      const externalEvent = !session ? getExternalEventForSlot(dayIndex, time) : null;
-                      return (
-                        <div
-                          key={dayIndex}
-                          className="p-1 border-l border-border min-h-[60px] hover:bg-secondary/30 transition-colors cursor-pointer"
-                        >
-                          {session && (
-                            <div className={`p-2 rounded-lg text-xs ${
-                              session.is_online 
-                                ? 'bg-primary/20 border border-primary/30' 
-                                : 'bg-accent/20 border border-accent/30'
-                            }`}>
-                              <p className="font-medium text-foreground truncate">
-                                {session.client?.first_name} {session.client?.last_name}
-                              </p>
-                              <p className="text-muted-foreground truncate">{session.session_type}</p>
-                              <div className="flex items-center gap-1 mt-1">
-                                {session.is_online ? (
-                                  <Video className="w-3 h-3 text-primary" />
-                                ) : (
-                                  <MapPin className="w-3 h-3 text-accent" />
-                                )}
-                                <span className="text-muted-foreground">{session.duration_minutes}m</span>
-                              </div>
-                            </div>
-                          )}
-                          {externalEvent && (
-                            <div className="p-2 rounded-lg text-xs bg-muted/50 border border-muted-foreground/20">
-                              <p className="font-medium text-muted-foreground truncate">
-                                {externalEvent.title || "Busy"}
-                              </p>
-                              <div className="flex items-center gap-1 mt-1">
-                                <CalendarDays className="w-3 h-3 text-muted-foreground" />
-                                <span className="text-muted-foreground text-xs">
-                                  {externalEvent.source === 'apple_calendar' ? 'iCloud' : 'Google'}
-                                </span>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
+                {/* All-Day Events Row */}
+                <div className="grid grid-cols-8 border-b border-border bg-muted/30">
+                  <div className="p-2 text-xs text-muted-foreground flex items-center">
+                    <CalendarIcon className="w-3 h-3 mr-1" />
+                    All-Day
                   </div>
-                ))}
+                  {weekDates.map((_, dayIndex) => {
+                    const allDayEvents = getAllDayEventsForDate(dayIndex);
+                    return (
+                      <div key={dayIndex} className="p-1 border-l border-border min-h-[40px]">
+                        {allDayEvents.map((event, idx) => (
+                          <div key={idx} className="p-1.5 rounded text-xs bg-warning/20 border border-warning/30 mb-1">
+                            <p className="font-medium text-warning-foreground truncate">
+                              {event.title || "Busy"}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Time Slots - scrollable */}
+                <div ref={calendarScrollRef} className="max-h-[600px] overflow-y-auto">
+                  {timeSlots.map((time) => (
+                    <div key={time} className="grid grid-cols-8 border-b border-border">
+                      <div className="p-3 text-sm text-muted-foreground">{time}</div>
+                      {weekDates.map((_, dayIndex) => {
+                        const session = getSessionForSlot(dayIndex, time);
+                        const externalEvent = !session ? getExternalEventForSlot(dayIndex, time) : null;
+                        const isAvailable = isWithinAvailability(dayIndex, time);
+                        return (
+                          <div
+                            key={dayIndex}
+                            className={`p-1 border-l border-border min-h-[60px] transition-colors cursor-pointer ${
+                              isAvailable ? 'bg-success/5 hover:bg-success/10' : 'hover:bg-secondary/30'
+                            }`}
+                            onClick={() => !session && !externalEvent && handleSlotClick(dayIndex, time)}
+                          >
+                            {session && (
+                              <div className={`p-2 rounded-lg text-xs ${
+                                session.is_online 
+                                  ? 'bg-primary/20 border border-primary/30' 
+                                  : 'bg-accent/20 border border-accent/30'
+                              }`}>
+                                <p className="font-medium text-foreground truncate">
+                                  {session.client?.first_name} {session.client?.last_name}
+                                </p>
+                                <p className="text-muted-foreground truncate">{session.session_type}</p>
+                                <div className="flex items-center gap-1 mt-1">
+                                  {session.is_online ? (
+                                    <Video className="w-3 h-3 text-primary" />
+                                  ) : (
+                                    <MapPin className="w-3 h-3 text-accent" />
+                                  )}
+                                  <span className="text-muted-foreground">{session.duration_minutes}m</span>
+                                </div>
+                              </div>
+                            )}
+                            {externalEvent && (
+                              <div className="p-2 rounded-lg text-xs bg-muted/50 border border-muted-foreground/20">
+                                <p className="font-medium text-muted-foreground truncate">
+                                  {externalEvent.title || "Busy"}
+                                </p>
+                                <div className="flex items-center gap-1 mt-1">
+                                  <CalendarDays className="w-3 h-3 text-muted-foreground" />
+                                  <span className="text-muted-foreground text-xs">
+                                    {externalEvent.source === 'apple_calendar' ? 'iCloud' : 'Google'}
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
 
           {/* Legend */}
           <div className="flex flex-wrap items-center gap-6 mt-4">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded bg-success/10 border border-success/30" />
+              <span className="text-sm text-muted-foreground">Available</span>
+            </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded bg-accent/20 border border-accent/30" />
               <span className="text-sm text-muted-foreground">In-Person</span>
@@ -565,7 +655,11 @@ const CoachSchedule = () => {
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded bg-muted/50 border border-muted-foreground/20" />
-              <span className="text-sm text-muted-foreground">External Calendar (Busy)</span>
+              <span className="text-sm text-muted-foreground">External Calendar</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded bg-warning/20 border border-warning/30" />
+              <span className="text-sm text-muted-foreground">All-Day / Holiday</span>
             </div>
           </div>
         </TabsContent>
