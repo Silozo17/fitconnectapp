@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useBlocker } from "react-router-dom";
 
 export interface UseUnsavedChangesOptions {
   enabled?: boolean;
@@ -67,18 +66,11 @@ export function useUnsavedChanges<T>(
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty, enabled]);
 
-  // React Router navigation blocking
-  const blocker = useBlocker(
-    ({ currentLocation, nextLocation }) =>
-      enabled && isDirty && currentLocation.pathname !== nextLocation.pathname
-  );
-
   return {
     currentData,
     setCurrentData: updateData,
     setInitialData,
     isDirty,
     resetDirty,
-    blocker,
   };
 }

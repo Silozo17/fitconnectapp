@@ -75,7 +75,6 @@ import { CoachTypeSelector } from "@/components/coach/CoachTypeSelector";
 import { MarketplaceSection } from "@/components/coach/MarketplaceSection";
 import { ProfileCompletionProgress } from "@/components/coach/ProfileCompletionProgress";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
-import { UnsavedChangesDialog } from "@/components/shared/UnsavedChangesDialog";
 
 interface CoachProfile {
   display_name: string | null;
@@ -227,11 +226,9 @@ const CoachSettings = () => {
     youtube_url: null,
   });
   
-  const {
-    isDirty,
-    resetDirty,
-    blocker,
-  } = useUnsavedChanges(profile, { enabled: true });
+  // Note: useUnsavedChanges provides beforeunload warning for browser close/refresh
+  // Router blocking requires data router which isn't used in this app
+  useUnsavedChanges(profile, { enabled: true });
   
   // Track dirty state by comparing with initial values
   const checkIsDirty = (): boolean => {
@@ -1133,8 +1130,6 @@ const CoachSettings = () => {
           </div>
         </div>
       </div>
-      {/* Unsaved Changes Dialog */}
-      <UnsavedChangesDialog blocker={blocker} />
     </DashboardLayout>
   );
 };
