@@ -15,13 +15,17 @@ interface UserAvatarProps {
   size?: 'sm' | 'md' | 'lg' | 'xl'; // Predefined sizes for squircle
 }
 
-// Predefined sizes for squircle variant (landscape ratio ~1.25:1)
+// Predefined sizes for squircle variant (landscape ratio ~1.5:1)
 const SQUIRCLE_SIZES = {
-  sm: 'w-20 h-16',      // Small - for lists
-  md: 'w-32 h-26',      // Medium - for cards  
-  lg: 'w-40 h-32',      // Large - for profiles
-  xl: 'w-48 h-40',      // Extra large - for hero sections
+  sm: 'w-24 h-16',      // Small - for lists (1.5:1)
+  md: 'w-36 h-24',      // Medium - for cards (1.5:1)
+  lg: 'w-48 h-32',      // Large - for profiles (1.5:1)
+  xl: 'w-60 h-40',      // Extra large - for hero sections (1.5:1)
 };
+
+// Always-vibrant gradient for squircle variant (regardless of rarity)
+const SQUIRCLE_GRADIENT = 'bg-gradient-to-br from-cyan-400 via-emerald-400 to-lime-400';
+const SQUIRCLE_GLOW = 'shadow-[0_0_30px_rgba(0,255,170,0.5)]';
 
 export const UserAvatar = ({ 
   src, 
@@ -109,14 +113,14 @@ export const UserAvatar = ({
     <div 
       className={cn(
         "relative shrink-0 rounded-2xl",
-        rarityConfig.gradient,
-        rarityConfig.glow,
+        SQUIRCLE_GRADIENT,  // Always vibrant cyan-lime gradient for squircle
+        SQUIRCLE_GLOW,      // Always vibrant glow
         sizeClass,
         className
       )}
       style={{ 
         // Allow avatar to overflow at top only, clip sides and bottom cleanly
-        clipPath: hasCharacterAvatar ? 'inset(-50% 0 0 0)' : undefined 
+        clipPath: hasCharacterAvatar ? 'inset(-60% 0 0 0)' : undefined 
       }}
     >
       {/* Avatar image - positioned so upper body shows, head extends above */}
@@ -127,7 +131,7 @@ export const UserAvatar = ({
           className={cn(
             "absolute w-full object-contain",
             hasCharacterAvatar 
-              ? "h-[200%] left-1/2 -translate-x-1/2 -bottom-[50%] object-top" 
+              ? "h-[250%] left-1/2 -translate-x-1/2 -bottom-[65%] object-top" 
               : "inset-0 h-full object-cover"
           )}
           onError={(e) => {
