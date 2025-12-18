@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAdminView } from "@/contexts/AdminContext";
 import {
   Sheet,
   SheetContent,
@@ -92,7 +92,7 @@ export function FriendProfileSheet({
   onRemove,
 }: FriendProfileSheetProps) {
   const navigate = useNavigate();
-  const { role } = useAuth();
+  const { activeProfileType } = useAdminView();
   const [profile, setProfile] = useState<FriendProfile | null>(null);
   const [avatar, setAvatar] = useState<FriendAvatar | null>(null);
   const [xp, setXp] = useState<FriendXP | null>(null);
@@ -197,7 +197,7 @@ export function FriendProfileSheet({
       toast.error("Unable to start conversation");
       return;
     }
-    const basePath = role === "coach" ? "/dashboard/coach" : "/dashboard/client";
+    const basePath = `/dashboard/${activeProfileType || "client"}`;
     onOpenChange(false);
     navigate(`${basePath}/messages/${friendProfileId}`);
   };

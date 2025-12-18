@@ -191,8 +191,9 @@ Deno.serve(async (req) => {
       }
 
       case "bulk_delete": {
-        const { profileIds } = body;
+        const { profileIds, userIds } = body;
         
+        // Delete profiles first
         const table = getTableName(userType);
         const { error } = await supabaseAdmin
           .from(table)
@@ -200,11 +201,27 @@ Deno.serve(async (req) => {
           .in("id", profileIds);
 
         if (error) {
-          console.error("Bulk delete error:", error);
+          console.error("Bulk delete profiles error:", error);
           return new Response(JSON.stringify({ error: error.message }), {
             status: 400,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
+        }
+
+        // Also delete auth users if userIds provided
+        if (userIds && userIds.length > 0) {
+          const deleteErrors: string[] = [];
+          for (const userId of userIds) {
+            const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+            if (authError) {
+              console.error(`Failed to delete auth user ${userId}:`, authError);
+              deleteErrors.push(userId);
+            }
+          }
+          
+          if (deleteErrors.length > 0) {
+            console.warn(`Failed to delete ${deleteErrors.length} auth users`);
+          }
         }
 
         return new Response(JSON.stringify({ success: true, count: profileIds.length }), {
