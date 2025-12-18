@@ -61,6 +61,9 @@ export const COACH_TYPES: CoachType[] = [
   { id: "running", label: "Running Coach", category: "fitness", icon: Footprints },
   { id: "swimming", label: "Swimming Coach", category: "fitness", icon: Wind },
   { id: "athletics", label: "Athletics", category: "fitness", icon: Medal },
+  { id: "functional_training", label: "Functional Training", category: "fitness", icon: Activity },
+  { id: "mobility", label: "Mobility & Flexibility", category: "fitness", icon: Flower2 },
+  { id: "calisthenics", label: "Calisthenics", category: "fitness", icon: Dumbbell },
 
   // Nutrition
   { id: "nutritionist", label: "Nutritionist", category: "nutrition", icon: Salad },
@@ -71,15 +74,22 @@ export const COACH_TYPES: CoachType[] = [
   { id: "yoga", label: "Yoga", category: "mindBody", icon: Flower2 },
   { id: "pilates", label: "Pilates", category: "mindBody", icon: Flower2 },
   { id: "meditation", label: "Meditation & Mindfulness", category: "mindBody", icon: Brain },
+  { id: "nervous_system_regulation", label: "Nervous System Regulation", category: "mindBody", icon: Brain },
+  { id: "somatic_work", label: "Somatic Work", category: "mindBody", icon: Heart },
+  { id: "breathwork", label: "Breathwork", category: "mindBody", icon: Wind },
 
   // Therapy & Recovery
   { id: "physio", label: "Physiotherapy", category: "therapy", icon: Heart },
   { id: "osteopath", label: "Osteopath", category: "therapy", icon: Heart },
   { id: "sports_massage", label: "Sports Massage", category: "therapy", icon: Hand },
+  { id: "regeneration_recovery", label: "Regeneration & Recovery", category: "therapy", icon: Heart },
+  { id: "injury_rehab", label: "Injury Rehabilitation", category: "therapy", icon: Activity },
 
   // Specialist
   { id: "posing", label: "Posing Coach", category: "specialist", icon: Sparkles },
   { id: "pre_postnatal", label: "Pre/Postnatal Fitness", category: "specialist", icon: Heart },
+  { id: "wellness_coaching", label: "Life & Wellness Coaching", category: "specialist", icon: Star },
+  { id: "sleep_coaching", label: "Sleep Coaching", category: "specialist", icon: Brain },
 ];
 
 // Helper to get types by category
