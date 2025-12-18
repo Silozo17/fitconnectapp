@@ -12,7 +12,16 @@ interface UserAvatarProps {
   fallbackClassName?: string;
   showRarityBorder?: boolean;    // Whether to show rarity-colored border
   variant?: 'circle' | 'squircle'; // Avatar shape variant
+  size?: 'sm' | 'md' | 'lg' | 'xl'; // Predefined sizes for squircle
 }
+
+// Predefined sizes for squircle variant (width x height)
+const SQUIRCLE_SIZES = {
+  sm: 'w-16 h-20',      // Small - for lists
+  md: 'w-24 h-28',      // Medium - for cards  
+  lg: 'w-32 h-40',      // Large - for profiles
+  xl: 'w-40 h-52',      // Extra large - for hero sections
+};
 
 export const UserAvatar = ({ 
   src, 
@@ -22,7 +31,8 @@ export const UserAvatar = ({
   className, 
   fallbackClassName,
   showRarityBorder = false,
-  variant = 'circle'
+  variant = 'circle',
+  size = 'md'
 }: UserAvatarProps) => {
   const getInitials = () => {
     if (!name) return "?";
@@ -91,31 +101,42 @@ export const UserAvatar = ({
     );
   }
 
-  // Squircle variant - rounded square with gradient background and avatar overflow
+  // NFT-style squircle variant with overflow effect
+  const sizeClass = SQUIRCLE_SIZES[size];
+  
   return (
     <div 
       className={cn(
-        "relative shrink-0 rounded-2xl overflow-hidden",
+        "relative shrink-0 rounded-3xl",
         rarityConfig.gradient,
         rarityConfig.glow,
+        sizeClass,
         className
       )}
+      style={{ 
+        // Allow avatar to overflow at top while containing sides/bottom
+        clipPath: hasCharacterAvatar ? 'inset(-30% -5% 0% -5%)' : undefined 
+      }}
     >
-      {/* Avatar image - positioned to extend above container */}
+      {/* Avatar image - positioned to extend ABOVE container */}
       {imageUrl ? (
         <img 
           src={imageUrl} 
           alt={name || "User"} 
           className={cn(
-            "absolute inset-0 w-full h-full object-cover",
-            // For character avatars, position to show head/upper body
-            hasCharacterAvatar && "object-top scale-110 translate-y-[5%]"
+            "absolute w-full object-contain",
+            hasCharacterAvatar 
+              ? "h-[140%] bottom-0 left-1/2 -translate-x-1/2 object-bottom" 
+              : "inset-0 h-full object-cover"
           )}
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = '/placeholder.svg';
+          }}
         />
       ) : (
         // Fallback with initials
         <div className={cn(
-          "absolute inset-0 flex items-center justify-center font-semibold text-white",
+          "absolute inset-0 flex items-center justify-center font-bold text-white text-2xl",
           fallbackClassName
         )}>
           {getInitials()}

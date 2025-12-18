@@ -146,20 +146,18 @@ export function AvatarStatsHero({ firstName }: AvatarStatsHeroProps) {
               trigger={
                 <button className="group relative block cursor-pointer">
                   <div className={cn(
-                    'relative rounded-xl p-1 transition-transform group-hover:scale-105',
+                    'relative rounded-3xl transition-transform group-hover:scale-105',
                     rarityConfig.glow,
-                    rarityConfig.border,
-                    'border-2 bg-gradient-to-br from-primary/20 to-accent/20'
                   )}>
-                    {/* Animated glow ring */}
-                    <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/40 via-transparent to-accent/40 animate-pulse" />
-                    
-                    {/* Avatar image - portrait */}
-                    <div className="relative w-32 h-44 md:w-40 md:h-56 rounded-lg overflow-hidden bg-background/50">
+                    {/* Avatar image using squircle variant */}
+                    <div className={cn(
+                      'relative w-36 h-48 md:w-44 md:h-56 rounded-3xl overflow-visible',
+                      rarityConfig.gradient
+                    )} style={{ clipPath: 'inset(-30% -5% 0% -5%)' }}>
                       <img
                         src={imageUrl}
                         alt={selectedAvatar?.name || 'Your Avatar'}
-                        className="w-full h-full object-contain"
+                        className="absolute w-full h-[140%] bottom-0 left-1/2 -translate-x-1/2 object-contain object-bottom"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = '/placeholder.svg';
                         }}
@@ -168,7 +166,7 @@ export function AvatarStatsHero({ firstName }: AvatarStatsHeroProps) {
                   </div>
                   
                   {/* Hover indicator */}
-                  <div className="absolute inset-0 rounded-xl flex items-center justify-center bg-background/0 group-hover:bg-background/20 transition-colors">
+                  <div className="absolute inset-0 rounded-3xl flex items-center justify-center bg-background/0 group-hover:bg-background/20 transition-colors">
                     <span className="opacity-0 group-hover:opacity-100 transition-opacity text-xs font-medium text-foreground bg-background/80 px-2 py-1 rounded-full">
                       Change Avatar
                     </span>

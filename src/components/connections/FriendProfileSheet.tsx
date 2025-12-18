@@ -221,7 +221,6 @@ export function FriendProfileSheet({
   const levelTitle = getLevelTitle(level);
 
   const avatarRarity = avatar?.rarity || "common";
-  const rarityColors = RARITY_COLORS[avatarRarity as keyof typeof RARITY_COLORS] || RARITY_COLORS.common;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -241,21 +240,15 @@ export function FriendProfileSheet({
           <div className="space-y-6 mt-6">
             {/* Avatar & Name */}
             <div className="flex flex-col items-center gap-3">
-              <div 
-                className="relative rounded-full p-1"
-                style={{ 
-                  background: `linear-gradient(135deg, ${rarityColors.border}, ${rarityColors.bg})`,
-                  boxShadow: `0 0 20px ${rarityColors.border}40`
-                }}
-              >
-                <UserAvatar
-                  src={profile.avatar_url}
-                  avatarSlug={avatar?.slug}
-                  avatarRarity={avatar?.rarity as Rarity}
-                  name={displayName}
-                  className="h-24 w-24 border-2 border-background"
-                />
-              </div>
+              <UserAvatar
+                src={profile.avatar_url}
+                avatarSlug={avatar?.slug}
+                avatarRarity={avatar?.rarity as Rarity}
+                name={displayName}
+                variant="squircle"
+                size="lg"
+                showRarityBorder
+              />
               
               <div className="text-center">
                 <h3 className="text-xl font-bold text-foreground">{displayName}</h3>

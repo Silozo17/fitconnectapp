@@ -48,9 +48,9 @@ export function CoachFeaturedBadges({ coachId }: CoachFeaturedBadgesProps) {
                   )}
                 >
                   {badge.image_url ? (
-                    <img src={badge.image_url} alt={badge.name} className="h-4 w-4 object-contain" />
+                    <img src={badge.image_url} alt={badge.name} className="h-6 w-6 object-contain" />
                   ) : (
-                    <IconComponent className="h-3.5 w-3.5" />
+                    <IconComponent className="h-5 w-5" />
                   )}
                   <span className="max-w-[80px] truncate">{badge.name}</span>
                 </div>
