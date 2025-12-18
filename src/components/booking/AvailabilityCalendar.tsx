@@ -258,84 +258,97 @@ const AvailabilityCalendar = ({
         </div>
       </div>
 
-      {/* Desktop View: 7-Column Grid */}
-      <div className="hidden sm:block space-y-4">
-        {/* Day Headers */}
-        <div className="grid grid-cols-7 gap-1">
+      {/* Desktop/Tablet View: Two-Step Selection */}
+      <div className="hidden sm:block space-y-6">
+        {/* Day Cards - Clickable */}
+        <div className="grid grid-cols-7 gap-2">
           {weekDays.map((day, i) => {
             const isToday = isSameDay(day, new Date());
-            const dayAvailability = availability.find(a => a.day_of_week === day.getDay() && a.is_active);
+            const hasSlots = dayHasAvailability(i);
+            const slotCount = getAvailableSlotsForDay(i).length;
+            const isActive = activeDayIndex === i;
             
             return (
-              <div 
-                key={i} 
+              <button
+                key={i}
+                onClick={() => setSelectedDayIndex(i)}
+                disabled={!hasSlots}
                 className={cn(
-                  "text-center p-2 rounded-lg",
-                  isToday && "bg-primary/10"
+                  "flex flex-col items-center p-3 md:p-4 rounded-xl border transition-all",
+                  isActive 
+                    ? "border-primary bg-primary/10 ring-2 ring-primary shadow-sm" 
+                    : hasSlots
+                      ? "border-border bg-card hover:bg-accent hover:border-accent-foreground/20"
+                      : "border-border/50 bg-muted/20 cursor-not-allowed opacity-50",
+                  isToday && !isActive && hasSlots && "border-primary/50"
                 )}
               >
-                <p className="text-xs text-muted-foreground">{dayNames[day.getDay()]}</p>
-                <p className={cn(
-                  "text-lg font-bold",
-                  isToday ? "text-primary" : "text-foreground"
+                <span className="text-xs text-muted-foreground uppercase tracking-wide">
+                  {dayNames[day.getDay()]}
+                </span>
+                <span className={cn(
+                  "text-2xl md:text-3xl font-bold mt-1",
+                  isActive ? "text-primary" : isToday ? "text-primary" : "text-foreground"
                 )}>
                   {format(day, "d")}
-                </p>
-                {dayAvailability && (
-                  <Badge variant="outline" className="text-[10px] mt-1">
-                    {dayAvailability.start_time.slice(0, 5)} - {dayAvailability.end_time.slice(0, 5)}
-                  </Badge>
+                </span>
+                {hasSlots ? (
+                  <span className={cn(
+                    "text-xs mt-1.5",
+                    isActive ? "text-primary font-medium" : "text-muted-foreground"
+                  )}>
+                    {slotCount} slot{slotCount !== 1 ? 's' : ''}
+                  </span>
+                ) : (
+                  <span className="text-xs mt-1.5 text-muted-foreground/50">—</span>
                 )}
-              </div>
+              </button>
             );
           })}
         </div>
 
-        {/* Time Slots Grid */}
-        <div className="max-h-[300px] overflow-y-auto space-y-2">
-          {timeSlots.map((time) => (
-            <div key={time} className="grid grid-cols-7 gap-1">
-              {weekDays.map((day, dayIndex) => {
-                const available = isSlotAvailable(day, time);
-                const selected = isSelected(day, time);
-                
-                return (
-                  <button
-                    key={dayIndex}
-                    onClick={() => available && onSelectSlot?.(day, time)}
-                    disabled={!available}
-                    className={cn(
-                      "py-2 text-xs rounded-md transition-colors",
-                      available
-                        ? selected
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-secondary hover:bg-secondary/80 text-foreground"
-                        : "bg-muted/30 text-muted-foreground cursor-not-allowed",
-                    )}
-                  >
-                    {time}
-                  </button>
-                );
-              })}
+        {/* Selected Day Header */}
+        {activeDay && (
+          <div className="flex items-center justify-between border-b pb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">
+                {fullDayNames[activeDay.getDay()]}, {format(activeDay, "MMMM d")}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {activeDaySlots.length} available time{activeDaySlots.length !== 1 ? 's' : ''}
+              </p>
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
+        )}
 
-      {/* Legend */}
-      <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 rounded bg-secondary" />
-          <span>Available</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 rounded bg-primary" />
-          <span>Selected</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 rounded bg-muted/30" />
-          <span>Unavailable</span>
-        </div>
+        {/* Time Slots Grid - Only Available */}
+        {activeDaySlots.length > 0 ? (
+          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+            {activeDaySlots.map((time) => {
+              const selected = activeDay && isSelected(activeDay, time);
+              
+              return (
+                <button
+                  key={time}
+                  onClick={() => activeDay && onSelectSlot?.(activeDay, time)}
+                  className={cn(
+                    "py-3 px-4 rounded-lg font-medium text-sm transition-all",
+                    selected
+                      ? "bg-primary text-primary-foreground shadow-md ring-2 ring-primary ring-offset-2"
+                      : "bg-secondary hover:bg-secondary/80 hover:shadow-sm text-foreground"
+                  )}
+                >
+                  {time}
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-12 text-muted-foreground bg-muted/20 rounded-xl">
+            <p className="text-lg font-medium mb-1">No availability</p>
+            <p className="text-sm">Select a different day to see available times</p>
+          </div>
+        )}
       </div>
     </div>
   );
