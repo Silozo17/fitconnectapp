@@ -46,7 +46,27 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
 
   // Fetch all profiles for the user
   const fetchProfiles = async () => {
-    if (!user?.id || !canSwitchRoles) {
+    if (!user?.id) {
+      setIsLoadingProfiles(false);
+      return;
+    }
+
+    // For clients who can't switch roles, set their profile type correctly
+    if (!canSwitchRoles) {
+      if (role === "client") {
+        setActiveProfileType("client");
+        setViewMode("client");
+        // Fetch their client profile ID for messaging
+        const { data } = await supabase
+          .from("client_profiles")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (data?.id) {
+          setActiveProfileId(data.id);
+          setAvailableProfiles({ client: data.id });
+        }
+      }
       setIsLoadingProfiles(false);
       return;
     }

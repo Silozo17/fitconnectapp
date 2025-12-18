@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { useAdminView } from "@/contexts/AdminContext";
 import { useState } from "react";
 import ProspectProfileSheet from "./ProspectProfileSheet";
+import { CoachProfileSheet } from "./CoachProfileSheet";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { Rarity } from "@/lib/avatar-config";
 
@@ -129,8 +130,9 @@ const ConversationList = ({ activeConversationId }: ConversationListProps) => {
         ))}
       </div>
 
-      {/* Profile Preview Sheet - Enhanced for Coaches */}
+      {/* Profile Preview Sheet - Role-aware */}
       {activeProfileType === "coach" && selectedProfile?.participantType === "client" ? (
+        // Coach viewing client - show ProspectProfileSheet
         <ProspectProfileSheet
           open={!!selectedProfile}
           onOpenChange={() => setSelectedProfile(null)}
@@ -138,7 +140,17 @@ const ConversationList = ({ activeConversationId }: ConversationListProps) => {
           participantName={selectedProfile?.participantName || ''}
           participantAvatar={selectedProfile?.participantAvatar}
         />
-      ) : (
+      ) : selectedProfile?.participantType === "coach" ? (
+        // Client/Admin viewing coach - show CoachProfileSheet
+        <CoachProfileSheet
+          open={!!selectedProfile}
+          onOpenChange={() => setSelectedProfile(null)}
+          coachProfileId={selectedProfile?.participantId || null}
+          participantName={selectedProfile?.participantName || ''}
+          participantAvatar={selectedProfile?.participantAvatar}
+        />
+      ) : selectedProfile ? (
+        // Fallback for other cases (viewing admin, etc.)
         <ProspectProfileSheet
           open={!!selectedProfile}
           onOpenChange={() => setSelectedProfile(null)}
@@ -146,7 +158,7 @@ const ConversationList = ({ activeConversationId }: ConversationListProps) => {
           participantName={selectedProfile?.participantName || ''}
           participantAvatar={selectedProfile?.participantAvatar}
         />
-      )}
+      ) : null}
     </>
   );
 };
