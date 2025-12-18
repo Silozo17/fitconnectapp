@@ -31,6 +31,7 @@ import { NoteCard } from "@/components/dashboard/clients/NoteCard";
 import { SessionCalendar } from "@/components/dashboard/clients/SessionCalendar";
 import { HealthProfileCard } from "@/components/dashboard/clients/HealthProfileCard";
 import HabitManager from "@/components/dashboard/clients/HabitManager";
+import { FeatureGate } from "@/components/FeatureGate";
 import { 
   useClientDetail, 
   useClientSessions, 
@@ -427,40 +428,42 @@ const CoachClientDetail = () => {
 
         {/* Progress Tab */}
         <TabsContent value="progress" className="space-y-6">
-          <div className="flex justify-end">
-            <Button onClick={() => setIsAddProgressOpen(true)} className="bg-primary text-primary-foreground">
-              <Plus className="w-4 h-4 mr-2" />
-              Log Progress
-            </Button>
-          </div>
-
-          {chartData.length > 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ProgressChart title="Weight & Body Composition" data={chartData} />
-              <ProgressChart title="Body Fat Trend" data={chartData} />
-            </div>
-          ) : (
-            <div className="card-elevated p-12 text-center">
-              <Scale className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground mb-4">No progress data logged yet</p>
-              <Button onClick={() => setIsAddProgressOpen(true)} variant="outline">
+          <FeatureGate feature="client_progress_tracking">
+            <div className="flex justify-end">
+              <Button onClick={() => setIsAddProgressOpen(true)} className="bg-primary text-primary-foreground">
                 <Plus className="w-4 h-4 mr-2" />
-                Log First Progress Entry
+                Log Progress
               </Button>
             </div>
-          )}
 
-          {/* Goals Progress */}
-          {goals.length > 0 && (
-            <div className="card-elevated p-6">
-              <h3 className="font-display font-bold text-foreground mb-4">Goal Progress</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {goals.map((goal) => (
-                  <GoalProgressCard key={goal.id} goal={goal} />
-                ))}
+            {chartData.length > 0 ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ProgressChart title="Weight & Body Composition" data={chartData} />
+                <ProgressChart title="Body Fat Trend" data={chartData} />
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="card-elevated p-12 text-center">
+                <Scale className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground mb-4">No progress data logged yet</p>
+                <Button onClick={() => setIsAddProgressOpen(true)} variant="outline">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Log First Progress Entry
+                </Button>
+              </div>
+            )}
+
+            {/* Goals Progress */}
+            {goals.length > 0 && (
+              <div className="card-elevated p-6">
+                <h3 className="font-display font-bold text-foreground mb-4">Goal Progress</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {goals.map((goal) => (
+                    <GoalProgressCard key={goal.id} goal={goal} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </FeatureGate>
         </TabsContent>
 
         {/* Plans Tab */}

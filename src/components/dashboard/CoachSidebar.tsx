@@ -23,6 +23,7 @@ import {
   User,
   Rocket,
   UserPlus,
+  Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +33,8 @@ import { SidebarBadge } from "@/components/shared/SidebarBadge";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { FeatureKey } from "@/lib/feature-config";
 import {
   Collapsible,
   CollapsibleContent,
@@ -56,6 +59,7 @@ interface MenuItem {
   path: string;
   badgeKey?: BadgeKey;
   badgeVariant?: "default" | "warning" | "urgent";
+  requiredFeature?: FeatureKey;
 }
 
 interface MenuGroup {
@@ -85,7 +89,7 @@ const menuGroups: MenuGroup[] = [
     items: [
       { title: "Clients", icon: Users, path: "/dashboard/coach/clients", badgeKey: "clients", badgeVariant: "warning" },
       { title: "Schedule", icon: Calendar, path: "/dashboard/coach/schedule", badgeKey: "schedule", badgeVariant: "warning" },
-      { title: "Training Plans", icon: ClipboardList, path: "/dashboard/coach/plans" },
+      { title: "Training Plans", icon: ClipboardList, path: "/dashboard/coach/plans", requiredFeature: "workout_plan_builder" },
     ],
   },
   {
@@ -104,7 +108,7 @@ const menuGroups: MenuGroup[] = [
     icon: DollarSign,
     collapsible: true,
     items: [
-      { title: "Boost", icon: Rocket, path: "/dashboard/coach/boost" },
+      { title: "Boost", icon: Rocket, path: "/dashboard/coach/boost", requiredFeature: "boost_marketing" },
       { title: "Earnings", icon: DollarSign, path: "/dashboard/coach/earnings" },
       { title: "Reviews", icon: Star, path: "/dashboard/coach/reviews" },
     ],
@@ -136,6 +140,7 @@ const CoachSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: CoachS
   const { displayName, avatarUrl } = useUserProfile();
   const { unreadCount } = useUnreadMessages();
   const { newLeads, pendingBookings, pendingConnections } = useCoachBadges();
+  const { hasFeature } = useFeatureAccess();
 
   // Initialize open groups based on current path
   const getInitialOpenGroups = () => {
@@ -198,6 +203,7 @@ const CoachSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: CoachS
   const renderMenuItem = (item: MenuItem, indented = false, isCollapsed = false) => {
     const isActive = location.pathname === item.path;
     const badgeCount = getBadgeCount(item.badgeKey);
+    const isLocked = item.requiredFeature && !hasFeature(item.requiredFeature);
 
     if (isCollapsed) {
       return (
@@ -209,17 +215,22 @@ const CoachSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: CoachS
                 "flex items-center justify-center p-2.5 rounded-lg transition-colors relative",
                 isActive
                   ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  : isLocked
+                    ? "text-sidebar-foreground/40 hover:bg-sidebar-accent/50"
+                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
               )}
             >
               <div className="relative">
                 <item.icon className="w-5 h-5" />
-                {badgeCount > 0 && <SidebarBadge count={badgeCount} collapsed variant={item.badgeVariant} />}
+                {isLocked && (
+                  <Lock className="w-3 h-3 absolute -top-1 -right-1 text-warning" />
+                )}
+                {badgeCount > 0 && !isLocked && <SidebarBadge count={badgeCount} collapsed variant={item.badgeVariant} />}
               </div>
             </Link>
           </TooltipTrigger>
           <TooltipContent side="right" className="font-medium">
-            {item.title}
+            {item.title} {isLocked && "(Upgrade required)"}
           </TooltipContent>
         </Tooltip>
       );
@@ -234,12 +245,15 @@ const CoachSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: CoachS
           indented && "ml-4",
           isActive
             ? "bg-sidebar-primary text-sidebar-primary-foreground"
-            : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            : isLocked
+              ? "text-sidebar-foreground/40 hover:bg-sidebar-accent/50"
+              : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
         )}
       >
         <item.icon className="w-4 h-4 flex-shrink-0" />
         <span className="font-medium text-sm flex-1">{item.title}</span>
-        {badgeCount > 0 && <SidebarBadge count={badgeCount} variant={item.badgeVariant} />}
+        {isLocked && <Lock className="w-3.5 h-3.5 text-warning" />}
+        {badgeCount > 0 && !isLocked && <SidebarBadge count={badgeCount} variant={item.badgeVariant} />}
       </Link>
     );
   };
