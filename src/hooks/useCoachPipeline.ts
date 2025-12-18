@@ -23,6 +23,9 @@ export interface Lead {
     location: string | null;
     fitness_goals: string[] | null;
     avatar_url: string | null;
+    user_profiles?: {
+      avatar_url: string | null;
+    } | null;
   } | null;
 }
 
@@ -57,7 +60,8 @@ export const useCoachPipeline = () => {
         .select(`
           *,
           client_profile:client_profiles(
-            id, first_name, last_name, location, fitness_goals, avatar_url
+            id, first_name, last_name, location, fitness_goals, avatar_url,
+            user_profiles(avatar_url)
           )
         `)
         .eq('coach_id', coachProfile.id)
