@@ -9,13 +9,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
-import { Dumbbell, ArrowRight, ArrowLeft, Check, Loader2, Crown, Zap, Sparkles } from "lucide-react";
+import { Dumbbell, ArrowRight, ArrowLeft, Check, Loader2, Crown, Zap, Sparkles, Star } from "lucide-react";
 import { toast } from "sonner";
 import { ProfileImageUpload } from "@/components/shared/ProfileImageUpload";
 import StripeConnectOnboardingStep from "@/components/onboarding/StripeConnectOnboardingStep";
 import IntegrationsOnboardingStep from "@/components/onboarding/IntegrationsOnboardingStep";
 import DualAccountStep from "@/components/onboarding/DualAccountStep";
 import { COACH_TYPES, COACH_TYPE_CATEGORIES, getCoachTypesByCategory } from "@/constants/coachTypes";
+import { SUBSCRIPTION_TIERS, TierKey } from "@/lib/stripe-config";
 
 const STEPS = [
   "Basic Info",
@@ -28,33 +29,30 @@ const STEPS = [
   "Choose Your Plan"
 ];
 
-const SUBSCRIPTION_TIERS = [
-  {
-    id: "free",
-    name: "Free",
-    price: "£0",
-    description: "Get started with the basics",
-    features: ["Basic profile listing", "Up to 5 active clients", "Standard support"],
-    icon: Sparkles,
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    price: "£29",
-    description: "Grow your coaching business",
-    features: ["Featured in search results", "Unlimited clients", "Priority support", "Custom branding"],
-    icon: Zap,
-    popular: true,
-  },
-  {
-    id: "elite",
-    name: "Elite",
-    price: "£79",
-    description: "Maximum visibility & tools",
-    features: ["Top placement in listings", "Verified badge", "Analytics dashboard", "Lead generation tools", "1-on-1 onboarding"],
-    icon: Crown,
-  },
-];
+// Map tier icons for display
+const TIER_ICONS: Record<TierKey, typeof Sparkles> = {
+  free: Sparkles,
+  starter: Zap,
+  pro: Star,
+  enterprise: Crown,
+  founder: Crown,
+};
+
+// Get displayable tiers (exclude admin-only tiers)
+const getDisplayableTiers = () => {
+  return (Object.entries(SUBSCRIPTION_TIERS) as [TierKey, typeof SUBSCRIPTION_TIERS.free][])
+    .filter(([_, config]) => !config.adminOnly)
+    .map(([key, config]) => ({
+      id: key,
+      name: config.name,
+      price: `£${config.prices.monthly.amount}`,
+      description: config.description,
+      features: config.features,
+      icon: TIER_ICONS[key],
+      popular: config.highlighted,
+      clientLimit: config.clientLimit,
+    }));
+};
 
 const CoachOnboarding = () => {
   const [searchParams] = useSearchParams();
@@ -451,7 +449,7 @@ const CoachOnboarding = () => {
                 </div>
 
                 <div className="space-y-4">
-                  {SUBSCRIPTION_TIERS.map((tier) => {
+                  {getDisplayableTiers().map((tier) => {
                     const Icon = tier.icon;
                     return (
                       <button

@@ -64,6 +64,7 @@ const CreateProfileModal = ({
           user_id: user.id,
           username: generatedUsername,
           display_name: displayName || `${firstName} ${lastName}`.trim() || null,
+          subscription_tier: "free",
           onboarding_completed: true,
         });
 
