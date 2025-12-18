@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { User, Briefcase, CheckCircle, Loader2 } from "lucide-react";
+import { User, Briefcase, CheckCircle, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,9 +8,10 @@ import { toast } from "sonner";
 interface DualAccountStepProps {
   coachId: string;
   onComplete: (createClientAccount: boolean) => void;
+  onBack?: () => void;
 }
 
-const DualAccountStep = ({ coachId, onComplete }: DualAccountStepProps) => {
+const DualAccountStep = ({ coachId, onComplete, onBack }: DualAccountStepProps) => {
   const { user } = useAuth();
   const [isCreating, setIsCreating] = useState(false);
   const [selectedOption, setSelectedOption] = useState<"coach_only" | "both" | null>(null);
@@ -165,20 +166,28 @@ const DualAccountStep = ({ coachId, onComplete }: DualAccountStepProps) => {
         </button>
       </div>
 
-      <Button
-        onClick={selectedOption === "both" ? handleCreateDualAccount : handleCoachOnly}
-        disabled={!selectedOption || isCreating}
-        className="w-full bg-primary text-primary-foreground"
-      >
-        {isCreating ? (
-          <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Creating account...
-          </>
-        ) : (
-          "Continue"
+      <div className="flex gap-3">
+        {onBack && (
+          <Button variant="outline" onClick={onBack}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
         )}
-      </Button>
+        <Button
+          onClick={selectedOption === "both" ? handleCreateDualAccount : handleCoachOnly}
+          disabled={!selectedOption || isCreating}
+          className="flex-1 bg-primary text-primary-foreground"
+        >
+          {isCreating ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Creating account...
+            </>
+          ) : (
+            "Continue"
+          )}
+        </Button>
+      </div>
     </div>
   );
 };
