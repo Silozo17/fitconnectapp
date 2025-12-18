@@ -56,6 +56,7 @@ export const useCoachBadges = () => {
       return data as CoachBadge[];
     },
     enabled: !!user?.id,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
 
@@ -74,6 +75,7 @@ export const useAvailableCoachBadges = () => {
       if (error) throw error;
       return data as Badge[];
     },
+    staleTime: 1000 * 60 * 10, // 10 minutes - badges rarely change
   });
 };
 

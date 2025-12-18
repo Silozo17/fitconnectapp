@@ -1,14 +1,15 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 import ConversationList from "@/components/messaging/ConversationList";
 import ChatWindow from "@/components/messaging/ChatWindow";
 import { MessageSquare, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useParticipantName } from "@/hooks/useParticipantName";
 
 const ClientMessages = () => {
   const { id: participantId } = useParams();
   const navigate = useNavigate();
+  const { data: participantName } = useParticipantName(participantId);
 
   return (
     <ClientDashboardLayout title="Messages" description="Chat with your coaches">
@@ -49,7 +50,7 @@ const ClientMessages = () => {
             }`}
           >
             {participantId ? (
-              <ChatWindow participantId={participantId} />
+              <ChatWindow participantId={participantId} participantName={participantName} />
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
