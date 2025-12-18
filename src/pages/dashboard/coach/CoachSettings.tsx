@@ -722,16 +722,16 @@ const CoachSettings = () => {
                         <CardContent className="space-y-3">
                           {/* Uploaded documents */}
                           {typeDocs.map((doc) => (
-                            <div
+                          <div
                               key={doc.id}
-                              className="p-3 rounded-lg bg-muted/50 space-y-2"
+                              className="p-3 rounded-lg bg-muted/50 space-y-2 overflow-hidden"
                             >
-                              <div className="flex items-center justify-between">
+                              <div className="flex items-center justify-between min-w-0 gap-2">
                                 <div className="flex items-center gap-2 min-w-0 flex-1">
                                   <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
                                   <span className="text-sm truncate">{doc.file_name}</span>
                                 </div>
-                                <div className="flex items-center gap-1">
+                                <div className="flex items-center gap-1 shrink-0">
                                   <Badge 
                                     variant="outline" 
                                     className={`text-xs ${
