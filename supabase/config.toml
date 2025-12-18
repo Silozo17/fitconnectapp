@@ -137,3 +137,6 @@ verify_jwt = true
 
 [functions.ai-blog-formatter]
 verify_jwt = true
+
+[functions.check-password-breach]
+verify_jwt = false
