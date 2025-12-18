@@ -163,7 +163,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "FitConnect <receipts@resend.dev>",
+        from: "FitConnect <support@getfitconnect.co.uk>",
         to: [email],
         subject: `🧾 Payment Receipt - ${formattedAmount}`,
         html,

@@ -140,7 +140,7 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "FitConnect <bookings@resend.dev>",
+          from: "FitConnect <support@getfitconnect.co.uk>",
           to: [recipientUser.email],
           subject: `😔 Session Cancelled - ${formattedDate}`,
           html,
