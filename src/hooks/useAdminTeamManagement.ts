@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLogAdminAction } from "@/hooks/useAuditLog";
 import { toast } from "sonner";
@@ -7,7 +7,7 @@ export const useAdminTeamManagement = () => {
   const [loading, setLoading] = useState(false);
   const logAction = useLogAdminAction();
 
-  const getUserEmail = async (userId: string): Promise<string | null> => {
+  const getUserEmail = useCallback(async (userId: string): Promise<string | null> => {
     try {
       const { data, error } = await supabase.functions.invoke("admin-user-management", {
         body: { action: "get_user_email", userId, userType: "team" },
@@ -19,10 +19,9 @@ export const useAdminTeamManagement = () => {
       console.error("Failed to get user email:", error);
       return null;
     }
-  };
+  }, []);
 
-  // Batch fetch emails for multiple users in a single request
-  const getUserEmailsBatch = async (userIds: string[]): Promise<Record<string, string | null>> => {
+  const getUserEmailsBatch = useCallback(async (userIds: string[]): Promise<Record<string, string | null>> => {
     if (userIds.length === 0) return {};
     
     try {
@@ -32,7 +31,6 @@ export const useAdminTeamManagement = () => {
 
       if (error) throw error;
       
-      // Convert to simple email map
       const emailMap: Record<string, string | null> = {};
       if (data?.users) {
         Object.entries(data.users).forEach(([userId, userData]) => {
@@ -44,9 +42,9 @@ export const useAdminTeamManagement = () => {
       console.error("Failed to get user emails batch:", error);
       return {};
     }
-  };
+  }, []);
 
-  const updateStatus = async (
+  const updateStatus = useCallback(async (
     userId: string,
     profileId: string,
     status: string,
@@ -82,9 +80,9 @@ export const useAdminTeamManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [logAction]);
 
-  const bulkUpdateStatus = async (
+  const bulkUpdateStatus = useCallback(async (
     members: Array<{ id: string; user_id: string }>,
     status: string,
     reason?: string
@@ -119,9 +117,9 @@ export const useAdminTeamManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [logAction]);
 
-  const bulkDelete = async (
+  const bulkDelete = useCallback(async (
     members: Array<{ id: string; user_id: string }>
   ): Promise<boolean> => {
     setLoading(true);
@@ -152,9 +150,9 @@ export const useAdminTeamManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [logAction]);
 
-  const resetPassword = async (userId: string, profileId: string): Promise<boolean> => {
+  const resetPassword = useCallback(async (userId: string, profileId: string): Promise<boolean> => {
     setLoading(true);
     try {
       const { error } = await supabase.functions.invoke("admin-password-reset", {
@@ -176,7 +174,7 @@ export const useAdminTeamManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [logAction]);
 
   return {
     loading,
