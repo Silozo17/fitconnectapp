@@ -3,10 +3,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, MapPin, Star, Calendar, MessageSquare, ExternalLink, Award, Briefcase } from "lucide-react";
+import { Loader2, MapPin, Star, Calendar, ExternalLink, Award, Briefcase } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import { getBadgeIcon } from "@/lib/badge-icons";
 
 interface CoachProfileSheetProps {
   open: boolean;
@@ -180,16 +181,19 @@ export const CoachProfileSheet = ({
                   Achievements
                 </h4>
                 <div className="grid grid-cols-4 gap-2">
-                  {data.badges.map((badge: any) => (
-                    <div key={badge.id} className="flex flex-col items-center text-center">
-                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-lg">
-                        {badge.badge?.icon || '🏆'}
+                  {data.badges.map((badge: any) => {
+                    const BadgeIcon = getBadgeIcon(badge.badge?.icon || 'Trophy');
+                    return (
+                      <div key={badge.id} className="flex flex-col items-center text-center">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <BadgeIcon className="h-5 w-5 text-primary" />
+                        </div>
+                        <span className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                          {badge.badge?.name}
+                        </span>
                       </div>
-                      <span className="text-xs text-muted-foreground mt-1 line-clamp-1">
-                        {badge.badge?.name}
-                      </span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
