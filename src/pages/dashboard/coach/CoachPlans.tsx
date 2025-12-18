@@ -13,6 +13,7 @@ import {
   Users,
   Loader2,
 } from "lucide-react";
+import { FeatureGate } from "@/components/FeatureGate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -98,8 +99,9 @@ const CoachPlans = () => {
 
   return (
     <DashboardLayout title="Training Plans" description="Create and manage your training and nutrition plans.">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+      <FeatureGate feature="workout_plan_builder">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h1 className="font-display text-2xl font-bold text-foreground">Training Plans</h1>
           <p className="text-muted-foreground">Create, manage, and assign workout and nutrition plans</p>
@@ -338,6 +340,7 @@ const CoachPlans = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      </FeatureGate>
     </DashboardLayout>
   );
 };
