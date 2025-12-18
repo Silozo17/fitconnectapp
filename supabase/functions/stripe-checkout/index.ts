@@ -31,9 +31,10 @@ serve(async (req) => {
       coachId,
       successUrl,
       cancelUrl,
+      embedded, // NEW: flag for embedded checkout mode
     } = await req.json();
 
-    console.log("Creating checkout session:", { type, itemId, clientId, coachId });
+    console.log("Creating checkout session:", { type, itemId, clientId, coachId, embedded });
 
     // Get coach's Stripe Connect account
     const { data: coachProfile, error: coachError } = await supabase
@@ -189,6 +190,8 @@ serve(async (req) => {
       success_url: successUrl,
       cancel_url: cancelUrl,
       metadata,
+      // Add embedded mode support
+      ...(embedded ? { ui_mode: "embedded", return_url: successUrl } : {}),
       payment_intent_data: mode === "payment" ? {
         application_fee_amount: Math.round((metadata.amount ? parseFloat(metadata.amount) : 0) * 100 * applicationFeePercent / 100),
         transfer_data: {
@@ -204,6 +207,12 @@ serve(async (req) => {
       } : undefined,
     };
 
+    // Remove success_url and cancel_url for embedded mode
+    if (embedded) {
+      delete sessionParams.success_url;
+      delete sessionParams.cancel_url;
+    }
+
     const session = await stripe.checkout.sessions.create(sessionParams);
 
     console.log("Checkout session created:", session.id);
@@ -212,6 +221,7 @@ serve(async (req) => {
       JSON.stringify({ 
         sessionId: session.id,
         url: session.url,
+        clientSecret: session.client_secret, // For embedded mode
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

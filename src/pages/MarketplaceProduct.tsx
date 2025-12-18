@@ -35,7 +35,6 @@ export default function MarketplaceProduct() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
   const { data: product, isLoading } = useDigitalProduct(productId || "");
@@ -76,25 +75,13 @@ export default function MarketplaceProduct() {
       return;
     }
 
-    setIsCheckingOut(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("content-checkout", {
-        body: {
-          productId: product?.id,
-          successUrl: `${window.location.origin}/dashboard/client/library?purchased=${product?.id}`,
-          cancelUrl: window.location.href,
-        },
-      });
-
-      if (error) throw error;
-      if (data?.url) {
-        window.open(data.url, "_blank");
-      }
-    } catch (error: any) {
-      toast({ title: "Checkout failed", description: error.message, variant: "destructive" });
-    } finally {
-      setIsCheckingOut(false);
-    }
+    // Navigate to embedded checkout page
+    const params = new URLSearchParams({
+      type: "digital-product",
+      itemId: product?.id || "",
+      returnUrl: `/marketplace/${productId}`,
+    });
+    navigate(`/checkout?${params.toString()}`);
   };
 
   if (isLoading) {
@@ -122,12 +109,12 @@ export default function MarketplaceProduct() {
   return (
     <PageLayout title={product.title} description={product.short_description || product.description || "Digital content from FitConnect"}>
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 pt-20 md:pt-8 pb-8">
+        <div className="container mx-auto px-4 pt-24 md:pt-8 pb-8">
           {/* Back Button */}
           <Button
             variant="ghost"
             onClick={() => navigate("/marketplace")}
-            className="mb-6 mt-4 md:mt-0"
+            className="mb-6"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Marketplace
@@ -345,13 +332,8 @@ export default function MarketplaceProduct() {
                       className="w-full" 
                       size="lg"
                       onClick={handlePurchase}
-                      disabled={isCheckingOut}
                     >
-                      {isCheckingOut ? (
-                        <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full mr-2" />
-                      ) : (
-                        <ShoppingCart className="h-4 w-4 mr-2" />
-                      )}
+                      <ShoppingCart className="h-4 w-4 mr-2" />
                       {product.price === 0 ? "Get for Free" : "Purchase Now"}
                     </Button>
                   )}

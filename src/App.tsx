@@ -39,6 +39,7 @@ const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const Subscribe = lazy(() => import("./pages/Subscribe"));
 const SubscribeSuccess = lazy(() => import("./pages/SubscribeSuccess"));
+const Checkout = lazy(() => import("./pages/Checkout"));
 
 // Coach category pages
 const PersonalTrainers = lazy(() => import("./pages/coaches/PersonalTrainers"));
@@ -176,6 +177,7 @@ const App = () => (
                     <Route path="/marketplace" element={<Marketplace />} />
                     <Route path="/marketplace/:productId" element={<MarketplaceProduct />} />
                     <Route path="/marketplace/bundles/:bundleId" element={<MarketplaceBundle />} />
+                    <Route path="/checkout" element={<Checkout />} />
                     <Route path="/blog" element={<Blog />} />
                     <Route path="/blog/:slug" element={<BlogPost />} />
                     
