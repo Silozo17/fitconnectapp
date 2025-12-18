@@ -162,17 +162,12 @@ const WearablesOnboardingStep = ({ onComplete, onSkip }: WearablesOnboardingStep
         </p>
       </div>
 
-      <div className="flex gap-3">
-        <Button variant="outline" onClick={onSkip} className="flex-1">
-          Set up later
-        </Button>
-        <Button 
-          onClick={onComplete} 
-          className="flex-1 bg-primary text-primary-foreground"
-        >
-          {hasAnyConnection ? "Continue" : "Skip for now"}
-        </Button>
-      </div>
+      <Button 
+        onClick={hasAnyConnection ? onComplete : onSkip} 
+        className="w-full bg-primary text-primary-foreground"
+      >
+        {hasAnyConnection ? "Continue" : "Skip for now"}
+      </Button>
     </div>
   );
 };

@@ -257,7 +257,7 @@ const ClientOnboarding = () => {
                   <p className="text-muted-foreground">Tell us a bit about yourself.</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="firstName" className="text-foreground">
                       First Name <span className="text-destructive">*</span>
@@ -290,7 +290,7 @@ const ClientOnboarding = () => {
                     type="number"
                     value={formData.age}
                     onChange={(e) => handleInputChange("age", e.target.value)}
-                    className="mt-1.5 bg-secondary border-border text-foreground w-32"
+                    className="mt-1.5 bg-secondary border-border text-foreground w-full sm:w-32"
                     placeholder="25"
                   />
                 </div>
@@ -327,7 +327,7 @@ const ClientOnboarding = () => {
                   <p className="text-muted-foreground">This helps coaches create personalized plans.</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="height" className="text-foreground">Height (cm)</Label>
                     <Input
@@ -368,7 +368,7 @@ const ClientOnboarding = () => {
                   <p className="text-muted-foreground">Select all that apply.</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {FITNESS_GOALS.map((goal) => {
                     const IconComponent = goal.icon;
                     return (

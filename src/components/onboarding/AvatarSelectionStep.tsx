@@ -126,7 +126,7 @@ export function AvatarSelectionStep({ selectedAvatarId, onSelect }: AvatarSelect
                 "bg-gradient-to-t from-background/90 to-transparent"
               )}>
                 <p className={cn(
-                  "text-xs font-medium truncate",
+                  "text-xs font-medium line-clamp-2 text-center",
                   isSelected ? "text-primary" : "text-foreground"
                 )}>
                   {avatar.name}

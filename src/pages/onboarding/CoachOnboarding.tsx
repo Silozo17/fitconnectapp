@@ -120,6 +120,12 @@ const CoachOnboarding = () => {
   };
 
   const handleNext = () => {
+    // Validate specialties step - require at least one specialty
+    if (currentStep === 1 && formData.coachTypes.length === 0) {
+      toast.error("Please select at least one specialty");
+      return;
+    }
+    
     if (currentStep < STEPS.length - 1) {
       setCurrentStep((prev) => prev + 1);
     }
@@ -277,7 +283,7 @@ const CoachOnboarding = () => {
                     type="number"
                     value={formData.experienceYears}
                     onChange={(e) => handleInputChange("experienceYears", e.target.value)}
-                    className="mt-1.5 bg-secondary border-border text-foreground w-32"
+                    className="mt-1.5 bg-secondary border-border text-foreground w-full sm:w-32"
                     placeholder="5"
                   />
                 </div>
@@ -305,7 +311,7 @@ const CoachOnboarding = () => {
                           <CategoryIcon className="w-5 h-5 text-primary" />
                           <h3 className="font-medium text-foreground">{category.label}</h3>
                         </div>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           {typesInCategory.map((type) => {
                             const IconComponent = type.icon;
                             const isSelected = formData.coachTypes.includes(type.id);
@@ -355,7 +361,7 @@ const CoachOnboarding = () => {
                     type="number"
                     value={formData.hourlyRate}
                     onChange={(e) => handleInputChange("hourlyRate", e.target.value)}
-                    className="mt-1.5 bg-secondary border-border text-foreground w-40"
+                    className="mt-1.5 bg-secondary border-border text-foreground w-full sm:w-40"
                     placeholder="50"
                   />
                   <p className="text-sm text-muted-foreground mt-2">
@@ -435,6 +441,7 @@ const CoachOnboarding = () => {
               <DualAccountStep
                 coachId={coachProfileId}
                 onComplete={handleDualAccountComplete}
+                onBack={handleBack}
               />
             )}
 
