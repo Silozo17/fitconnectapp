@@ -12,6 +12,7 @@ interface CoachHeroSectionProps {
     id: string;
     display_name: string | null;
     profile_image_url: string | null;
+    card_image_url: string | null;
     avatars?: { slug: string; rarity: string } | null;
     is_verified: boolean | null;
     verified_at: string | null;
@@ -35,7 +36,7 @@ export function CoachHeroSection({ coach, averageRating, reviewCount }: CoachHer
           {/* Profile Image */}
           <div className="flex justify-center md:justify-start shrink-0">
             <UserAvatar
-              src={coach.profile_image_url}
+              src={coach.card_image_url || coach.profile_image_url}
               avatarSlug={coach.avatars?.slug}
               avatarRarity={coach.avatars?.rarity as any}
               name={coach.display_name}
