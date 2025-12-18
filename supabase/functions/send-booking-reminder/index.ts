@@ -3,9 +3,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { 
   baseEmailTemplate, 
   ctaButton, 
-  profileImageWithGlow,
+  squircleAvatarComponent,
   infoCard,
-  getAvatarUrl,
+  getDefaultAvatarUrl,
   EMAIL_CONFIG 
 } from "../_shared/email-templates.ts";
 
@@ -87,26 +87,8 @@ serve(async (req) => {
     const reminderText = isUrgent ? "Starting in 1 hour!" : "Tomorrow's Session";
     const urgencyEmoji = isUrgent ? "⏰" : "📅";
 
-    // Get avatars
-    let coachAvatarUrl = session.coach.profile_image_url;
-    if (session.coach.selected_avatar_id) {
-      const { data: avatar } = await supabase
-        .from("avatars")
-        .select("name")
-        .eq("id", session.coach.selected_avatar_id)
-        .single();
-      if (avatar) coachAvatarUrl = getAvatarUrl(avatar.name, supabaseUrl);
-    }
-
-    let clientAvatarUrl = session.client.avatar_url;
-    if (session.client.selected_avatar_id) {
-      const { data: avatar } = await supabase
-        .from("avatars")
-        .select("name")
-        .eq("id", session.client.selected_avatar_id)
-        .single();
-      if (avatar) clientAvatarUrl = getAvatarUrl(avatar.name, supabaseUrl);
-    }
+    // Use default FitConnect mascot avatar
+    const avatarUrl = getDefaultAvatarUrl(supabaseUrl);
 
     const coachName = session.coach.display_name || "Your Coach";
     const clientName = [session.client.first_name, session.client.last_name].filter(Boolean).join(' ') || "Your Client";
@@ -130,7 +112,7 @@ serve(async (req) => {
           Session with ${coachName}
         </p>
         
-        ${profileImageWithGlow(coachAvatarUrl, coachName, 80)}
+        ${squircleAvatarComponent(avatarUrl, coachName, 80)}
         
         ${infoCard("Session Details", [
           { label: "Date", value: formattedDate },
@@ -201,7 +183,7 @@ serve(async (req) => {
           Session with ${clientName}
         </p>
         
-        ${profileImageWithGlow(clientAvatarUrl, clientName, 80)}
+        ${squircleAvatarComponent(avatarUrl, clientName, 80)}
         
         ${infoCard("Session Details", [
           { label: "Client", value: clientName },

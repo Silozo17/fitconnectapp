@@ -1,6 +1,9 @@
 // Shared email template utilities for FitConnect
 // Brand colors and configuration
 
+// Default FitConnect mascot avatar for emails
+export const DEFAULT_EMAIL_AVATAR = 'Elite_Personal_Trainer_Human';
+
 export const EMAIL_CONFIG = {
   colors: {
     primary: '#BEFF00',        // Electric lime
@@ -32,6 +35,11 @@ export const EMAIL_CONFIG = {
 export function getAvatarUrl(avatarName: string | null, supabaseUrl: string): string | null {
   if (!avatarName) return null;
   return `${supabaseUrl}/storage/v1/object/public/avatars/${encodeURIComponent(avatarName)}.png`;
+}
+
+// Get the default FitConnect mascot avatar URL
+export function getDefaultAvatarUrl(supabaseUrl: string): string {
+  return `${supabaseUrl}/storage/v1/object/public/avatars/${DEFAULT_EMAIL_AVATAR}.png`;
 }
 
 // Base email wrapper with FitConnect branding
@@ -185,6 +193,50 @@ export function profileImageWithGlow(imageUrl: string | null, name: string, size
     <div style="text-align: center;">
       <div style="display: inline-block; border-radius: 50%; box-shadow: 0 0 30px ${colors.primary}40; padding: 4px; background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent} 100%);">
         <img src="${imageUrl}" alt="${name}" style="width: ${size}px; height: ${size}px; border-radius: 50%; object-fit: cover; display: block;">
+      </div>
+    </div>
+  `;
+}
+
+// Squircle avatar component for emails (iOS-style rounded square)
+export function squircleAvatarComponent(avatarUrl: string, name: string, size: number = 100): string {
+  const { colors } = EMAIL_CONFIG;
+  
+  return `
+    <div style="text-align: center; margin: 0 auto 24px auto;">
+      <div style="display: inline-block; position: relative;">
+        <!-- Glow effect behind squircle -->
+        <div style="
+          position: absolute; 
+          inset: -8px; 
+          background: linear-gradient(135deg, ${colors.primary}40 0%, ${colors.accent}40 100%);
+          border-radius: 30%;
+          filter: blur(12px);
+        "></div>
+        <!-- Squircle container with gradient border -->
+        <div style="
+          position: relative;
+          width: ${size}px; 
+          height: ${size}px; 
+          border-radius: 30%; 
+          background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent} 100%);
+          padding: 3px;
+          box-sizing: border-box;
+        ">
+          <img 
+            src="${avatarUrl}" 
+            alt="${name}" 
+            style="
+              width: 100%; 
+              height: 100%; 
+              border-radius: 30%; 
+              object-fit: cover;
+              object-position: top;
+              display: block;
+              background-color: ${colors.cardBg};
+            "
+          >
+        </div>
       </div>
     </div>
   `;

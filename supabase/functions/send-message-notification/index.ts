@@ -3,8 +3,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { 
   baseEmailTemplate, 
   ctaButton, 
-  profileImageWithGlow,
-  getAvatarUrl,
+  squircleAvatarComponent,
+  getDefaultAvatarUrl,
   EMAIL_CONFIG 
 } from "../_shared/email-templates.ts";
 
@@ -110,17 +110,8 @@ serve(async (req) => {
       });
     }
 
-    // Get sender avatar
-    let senderAvatarUrl = senderCoach?.profile_image_url || senderClient?.avatar_url;
-    const senderAvatarId = senderCoach?.selected_avatar_id || senderClient?.selected_avatar_id;
-    if (senderAvatarId) {
-      const { data: avatar } = await supabase
-        .from("avatars")
-        .select("name")
-        .eq("id", senderAvatarId)
-        .single();
-      if (avatar) senderAvatarUrl = getAvatarUrl(avatar.name, supabaseUrl);
-    }
+    // Use default FitConnect mascot avatar
+    const avatarUrl = getDefaultAvatarUrl(supabaseUrl);
 
     const senderName = senderCoach?.display_name || 
       [senderClient?.first_name, senderClient?.last_name].filter(Boolean).join(' ') || 
@@ -150,7 +141,7 @@ serve(async (req) => {
         Hi ${receiverName}, you have a new message from <strong style="color: ${colors.primary}">${senderName}</strong>
       </p>
       
-      ${profileImageWithGlow(senderAvatarUrl, senderName, 64)}
+      ${squircleAvatarComponent(avatarUrl, senderName, 64)}
       
       <div style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; margin: 24px 0; border-left: 3px solid ${colors.primary};">
         <p style="color: ${colors.text}; margin: 0; line-height: 1.6; font-size: 15px;">

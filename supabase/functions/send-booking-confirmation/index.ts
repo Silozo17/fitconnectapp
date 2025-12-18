@@ -3,9 +3,10 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { 
   baseEmailTemplate, 
   ctaButton, 
-  profileImageWithGlow,
+  squircleAvatarComponent,
   infoCard,
   getAvatarUrl,
+  getDefaultAvatarUrl,
   EMAIL_CONFIG 
 } from "../_shared/email-templates.ts";
 
@@ -64,16 +65,8 @@ serve(async (req) => {
       throw new Error("Client email not found");
     }
 
-    // Get coach avatar
-    let coachAvatarUrl = booking.coach.profile_image_url;
-    if (booking.coach.selected_avatar_id) {
-      const { data: avatar } = await supabase
-        .from("avatars")
-        .select("name")
-        .eq("id", booking.coach.selected_avatar_id)
-        .single();
-      if (avatar) coachAvatarUrl = getAvatarUrl(avatar.name, supabaseUrl);
-    }
+    // Use default FitConnect mascot avatar
+    const avatarUrl = getDefaultAvatarUrl(supabaseUrl);
 
     const coachName = booking.coach.display_name || "Your Coach";
     const clientName = booking.client.first_name || "there";
@@ -116,7 +109,7 @@ serve(async (req) => {
         Hi ${clientName}, your booking request has been sent to <strong style="color: ${colors.primary}">${coachName}</strong>. You'll receive a confirmation once they accept.
       </p>
       
-      ${profileImageWithGlow(coachAvatarUrl, coachName, 80)}
+      ${squircleAvatarComponent(avatarUrl, coachName, 80)}
       
       ${infoCard("Booking Details", [
         { label: "Coach", value: coachName },
