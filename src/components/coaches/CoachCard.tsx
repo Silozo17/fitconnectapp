@@ -10,6 +10,7 @@ import { useCoachReviews, calculateAverageRating } from "@/hooks/useReviews";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatCurrency, type CurrencyCode } from "@/lib/currency";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { getAvatarImageUrl } from "@/hooks/useAvatars";
 import type { MarketplaceCoach } from "@/hooks/useCoachMarketplace";
 
 interface CoachCardProps {
@@ -78,8 +79,19 @@ const CoachCard = ({ coach, onBook, onRequestConnection }: CoachCardProps) => {
 
       <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
         {(coach.card_image_url || coach.profile_image_url) ? (
+          // Priority 1: Uploaded card or profile image
           <img src={coach.card_image_url || coach.profile_image_url || ""} alt={coach.display_name || "Coach"} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        ) : coach.avatars?.slug ? (
+          // Priority 2: Selected character avatar displayed full-width
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-cyan-400 via-emerald-400 to-lime-400 overflow-hidden">
+            <img 
+              src={getAvatarImageUrl(coach.avatars.slug)} 
+              alt={coach.display_name || "Coach"} 
+              className="h-[200%] object-contain object-bottom"
+            />
+          </div>
         ) : (
+          // Priority 3: Fallback to initials
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20">
             <UserAvatar 
               src={null} 
