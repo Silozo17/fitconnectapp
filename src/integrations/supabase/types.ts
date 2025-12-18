@@ -2050,6 +2050,7 @@ export type Database = {
           online_available: boolean | null
           post_booking_buffer_minutes: number | null
           pre_booking_buffer_minutes: number | null
+          primary_coach_type: string | null
           profile_image_url: string | null
           selected_avatar_id: string | null
           status: string | null
@@ -2092,6 +2093,7 @@ export type Database = {
           online_available?: boolean | null
           post_booking_buffer_minutes?: number | null
           pre_booking_buffer_minutes?: number | null
+          primary_coach_type?: string | null
           profile_image_url?: string | null
           selected_avatar_id?: string | null
           status?: string | null
@@ -2134,6 +2136,7 @@ export type Database = {
           online_available?: boolean | null
           post_booking_buffer_minutes?: number | null
           pre_booking_buffer_minutes?: number | null
+          primary_coach_type?: string | null
           profile_image_url?: string | null
           selected_avatar_id?: string | null
           status?: string | null

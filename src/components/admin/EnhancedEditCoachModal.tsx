@@ -18,7 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLogAdminAction } from "@/hooks/useAuditLog";
-import { Loader2, X } from "lucide-react";
+import { Loader2, X, Star } from "lucide-react";
 import { COACH_TYPES, COACH_TYPE_CATEGORIES, getCoachTypesByCategory, getCoachTypeLabel } from "@/constants/coachTypes";
 
 interface CoachUser {
@@ -26,6 +26,7 @@ interface CoachUser {
   user_id: string;
   display_name: string | null;
   coach_types: string[] | null;
+  primary_coach_type: string | null;
   hourly_rate: number | null;
   subscription_tier: string | null;
   onboarding_completed: boolean;
@@ -62,6 +63,7 @@ export function EnhancedEditCoachModal({ coach, open, onClose, onSaved }: Enhanc
     experience_years: "",
     subscription_tier: "free",
     coach_types: [] as string[],
+    primary_coach_type: "",
     online_available: true,
     in_person_available: false,
     verification_status: "not_submitted",
@@ -82,6 +84,7 @@ export function EnhancedEditCoachModal({ coach, open, onClose, onSaved }: Enhanc
         experience_years: coach.experience_years?.toString() || "",
         subscription_tier: coach.subscription_tier || "free",
         coach_types: coach.coach_types || [],
+        primary_coach_type: coach.primary_coach_type || "",
         online_available: coach.online_available ?? true,
         in_person_available: coach.in_person_available ?? false,
         verification_status: coach.verification_status || "not_submitted",
@@ -105,6 +108,7 @@ export function EnhancedEditCoachModal({ coach, open, onClose, onSaved }: Enhanc
         experience_years: formData.experience_years ? Number(formData.experience_years) : null,
         subscription_tier: formData.subscription_tier,
         coach_types: formData.coach_types,
+        primary_coach_type: formData.primary_coach_type || null,
         online_available: formData.online_available,
         in_person_available: formData.in_person_available,
         verification_status: formData.verification_status,
@@ -140,13 +144,24 @@ export function EnhancedEditCoachModal({ coach, open, onClose, onSaved }: Enhanc
 
   const addCoachType = (typeId: string) => {
     if (typeId && !formData.coach_types.includes(typeId)) {
-      setFormData({ ...formData, coach_types: [...formData.coach_types, typeId] });
+      const newTypes = [...formData.coach_types, typeId];
+      const newPrimary = formData.primary_coach_type || typeId; // Set as primary if none selected
+      setFormData({ ...formData, coach_types: newTypes, primary_coach_type: newPrimary });
     }
     setSelectedCategory("");
   };
 
   const removeCoachType = (typeId: string) => {
-    setFormData({ ...formData, coach_types: formData.coach_types.filter(t => t !== typeId) });
+    const newTypes = formData.coach_types.filter(t => t !== typeId);
+    // If removing primary, set first remaining as primary
+    const newPrimary = formData.primary_coach_type === typeId 
+      ? (newTypes.length > 0 ? newTypes[0] : "")
+      : formData.primary_coach_type;
+    setFormData({ ...formData, coach_types: newTypes, primary_coach_type: newPrimary });
+  };
+
+  const setPrimaryType = (typeId: string) => {
+    setFormData({ ...formData, primary_coach_type: typeId });
   };
 
   // Get available types not already selected, grouped by category
@@ -244,15 +259,29 @@ export function EnhancedEditCoachModal({ coach, open, onClose, onSaved }: Enhanc
           <TabsContent value="services" className="space-y-4 mt-4">
             <div className="space-y-2">
               <Label>Coach Specialties</Label>
+              <p className="text-xs text-muted-foreground mb-2">Click the star to set primary specialty</p>
               <div className="flex flex-wrap gap-2 mb-2">
-                {formData.coach_types.map((typeId) => (
-                  <Badge key={typeId} variant="secondary" className="gap-1">
-                    {getCoachTypeLabel(typeId)}
-                    <button onClick={() => removeCoachType(typeId)}>
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                ))}
+                {formData.coach_types.map((typeId) => {
+                  const isPrimary = formData.primary_coach_type === typeId;
+                  return (
+                    <Badge 
+                      key={typeId} 
+                      variant={isPrimary ? "default" : "secondary"} 
+                      className="gap-1 cursor-pointer"
+                      onClick={() => setPrimaryType(typeId)}
+                    >
+                      {isPrimary && <Star className="h-3 w-3 fill-current" />}
+                      {getCoachTypeLabel(typeId)}
+                      {isPrimary && <span className="text-xs opacity-80">(Primary)</span>}
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); removeCoachType(typeId); }}
+                        className="ml-1"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  );
+                })}
                 {formData.coach_types.length === 0 && (
                   <span className="text-sm text-muted-foreground">No specialties selected</span>
                 )}

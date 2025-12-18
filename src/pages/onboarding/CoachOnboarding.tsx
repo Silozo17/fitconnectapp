@@ -68,6 +68,7 @@ const CoachOnboarding = () => {
     bio: "",
     experienceYears: "",
     coachTypes: [] as string[],
+    primaryCoachType: "" as string,
     hourlyRate: "",
     location: "",
     onlineAvailable: true,
@@ -112,11 +113,29 @@ const CoachOnboarding = () => {
   const handleMultiSelect = (field: string, value: string) => {
     setFormData((prev) => {
       const current = prev[field as keyof typeof formData] as string[];
-      const updated = current.includes(value)
+      const isRemoving = current.includes(value);
+      const updated = isRemoving
         ? current.filter((v) => v !== value)
         : [...current, value];
-      return { ...prev, [field]: updated };
+      
+      // Handle primary specialty logic
+      let newPrimary = prev.primaryCoachType;
+      if (field === "coachTypes") {
+        if (isRemoving && prev.primaryCoachType === value) {
+          // If removing the primary, set first remaining as primary
+          newPrimary = updated.length > 0 ? updated[0] : "";
+        } else if (!isRemoving && updated.length === 1) {
+          // If this is the first selection, make it primary
+          newPrimary = value;
+        }
+      }
+      
+      return { ...prev, [field]: updated, primaryCoachType: newPrimary };
     });
+  };
+
+  const handleSetPrimary = (typeId: string) => {
+    setFormData((prev) => ({ ...prev, primaryCoachType: typeId }));
   };
 
   const handleNext = () => {
@@ -154,6 +173,7 @@ const CoachOnboarding = () => {
           bio: formData.bio || null,
           experience_years: formData.experienceYears ? parseInt(formData.experienceYears) : null,
           coach_types: formData.coachTypes,
+          primary_coach_type: formData.primaryCoachType || null,
           hourly_rate: formData.hourlyRate ? parseFloat(formData.hourlyRate) : null,
           location: formData.location || null,
           online_available: formData.onlineAvailable,
@@ -297,10 +317,40 @@ const CoachOnboarding = () => {
                   <h2 className="font-display text-2xl font-bold text-foreground mb-2">
                     What do you specialize in?
                   </h2>
-                  <p className="text-muted-foreground">Select all that apply.</p>
+                  <p className="text-muted-foreground">Select all that apply. Click the star to set your primary specialty.</p>
                 </div>
 
-                <div className="space-y-6 max-h-[50vh] overflow-y-auto pr-2">
+                {/* Selected specialties with primary indicator */}
+                {formData.coachTypes.length > 0 && (
+                  <div className="p-4 rounded-xl bg-secondary/50 border border-border">
+                    <p className="text-sm text-muted-foreground mb-3">Your selected specialties:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {formData.coachTypes.map((typeId) => {
+                        const type = COACH_TYPES.find(t => t.id === typeId);
+                        const isPrimary = formData.primaryCoachType === typeId;
+                        if (!type) return null;
+                        return (
+                          <button
+                            key={typeId}
+                            type="button"
+                            onClick={() => handleSetPrimary(typeId)}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-all ${
+                              isPrimary 
+                                ? "bg-primary text-primary-foreground" 
+                                : "bg-secondary text-foreground hover:bg-secondary/80"
+                            }`}
+                          >
+                            {isPrimary && <Star className="w-3.5 h-3.5 fill-current" />}
+                            {type.label}
+                            {isPrimary && <span className="text-xs opacity-80">(Primary)</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-6 max-h-[40vh] overflow-y-auto pr-2">
                   {COACH_TYPE_CATEGORIES.map((category) => {
                     const CategoryIcon = category.icon;
                     const typesInCategory = getCoachTypesByCategory(category.id);
@@ -315,6 +365,7 @@ const CoachOnboarding = () => {
                           {typesInCategory.map((type) => {
                             const IconComponent = type.icon;
                             const isSelected = formData.coachTypes.includes(type.id);
+                            const isPrimary = formData.primaryCoachType === type.id;
                             return (
                               <button
                                 key={type.id}
@@ -322,15 +373,20 @@ const CoachOnboarding = () => {
                                 onClick={() => handleMultiSelect("coachTypes", type.id)}
                                 className={`p-3 rounded-lg border-2 transition-all text-left flex items-center gap-2 ${
                                   isSelected
-                                    ? "border-primary bg-primary/10"
+                                    ? isPrimary 
+                                      ? "border-primary bg-primary/20" 
+                                      : "border-primary bg-primary/10"
                                     : "border-border hover:border-muted-foreground"
                                 }`}
                               >
                                 <IconComponent className={`w-5 h-5 shrink-0 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
-                                <span className={`text-sm ${isSelected ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+                                <span className={`text-sm flex-1 ${isSelected ? "text-foreground font-medium" : "text-muted-foreground"}`}>
                                   {type.label}
                                 </span>
-                                {isSelected && (
+                                {isPrimary && (
+                                  <Star className="w-4 h-4 text-primary fill-primary shrink-0" />
+                                )}
+                                {isSelected && !isPrimary && (
                                   <Check className="w-4 h-4 text-primary ml-auto shrink-0" />
                                 )}
                               </button>
