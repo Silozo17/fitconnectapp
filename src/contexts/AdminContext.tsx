@@ -35,14 +35,33 @@ const STORAGE_KEY = "admin_active_role";
 export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const { user, role } = useAuth();
   const location = useLocation();
-  const [viewMode, setViewMode] = useState<ViewMode>("admin");
+  
+  // Smart default based on role - prevents wrong navigation for clients
+  const getDefaultViewMode = (currentRole: string | null): ViewMode => {
+    if (currentRole === "client") return "client";
+    if (currentRole === "coach") return "coach";
+    return "admin"; // admins, managers, staff
+  };
+  
+  const [viewMode, setViewMode] = useState<ViewMode>(() => getDefaultViewMode(role));
   const [availableProfiles, setAvailableProfiles] = useState<AvailableProfiles>({});
-  const [activeProfileType, setActiveProfileType] = useState<ViewMode>("admin");
+  const [activeProfileType, setActiveProfileType] = useState<ViewMode>(() => getDefaultViewMode(role));
   const [activeProfileId, setActiveProfileId] = useState<string | null>(null);
   const [isLoadingProfiles, setIsLoadingProfiles] = useState(true);
 
   const isAdminUser = role === "admin" || role === "manager" || role === "staff";
   const canSwitchRoles = isAdminUser || role === "coach";
+  
+  // Update state when role first becomes available (fixes race condition for notification clicks)
+  useEffect(() => {
+    if (role === "client") {
+      setActiveProfileType("client");
+      setViewMode("client");
+    } else if (role === "coach" && !isAdminUser) {
+      setActiveProfileType("coach");
+      setViewMode("coach");
+    }
+  }, [role, isAdminUser]);
 
   // Fetch all profiles for the user
   const fetchProfiles = async () => {

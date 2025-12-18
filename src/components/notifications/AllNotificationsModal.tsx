@@ -50,8 +50,11 @@ export const AllNotificationsModal = ({
   const { role } = useAuth();
   const { activeProfileType } = useAdminView();
   
-  // Use activeProfileType if available (for view switching), fallback to role
-  const effectiveRole = activeProfileType || role || "client";
+  // For clients, ALWAYS use "client" - they can't switch views anyway
+  // For coaches/admins who can switch, use activeProfileType
+  const effectiveRole = role === "client" 
+    ? "client" 
+    : (activeProfileType || role || "client");
   
   const {
     notifications,
