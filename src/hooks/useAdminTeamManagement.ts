@@ -21,6 +21,31 @@ export const useAdminTeamManagement = () => {
     }
   };
 
+  // Batch fetch emails for multiple users in a single request
+  const getUserEmailsBatch = async (userIds: string[]): Promise<Record<string, string | null>> => {
+    if (userIds.length === 0) return {};
+    
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-user-management", {
+        body: { action: "get_user_emails_batch", userIds, userType: "team" },
+      });
+
+      if (error) throw error;
+      
+      // Convert to simple email map
+      const emailMap: Record<string, string | null> = {};
+      if (data?.users) {
+        Object.entries(data.users).forEach(([userId, userData]) => {
+          emailMap[userId] = (userData as { email: string | null }).email;
+        });
+      }
+      return emailMap;
+    } catch (error) {
+      console.error("Failed to get user emails batch:", error);
+      return {};
+    }
+  };
+
   const updateStatus = async (
     userId: string,
     profileId: string,
@@ -156,6 +181,7 @@ export const useAdminTeamManagement = () => {
   return {
     loading,
     getUserEmail,
+    getUserEmailsBatch,
     updateStatus,
     bulkUpdateStatus,
     bulkDelete,

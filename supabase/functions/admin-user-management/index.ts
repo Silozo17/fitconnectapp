@@ -89,6 +89,41 @@ Deno.serve(async (req) => {
         });
       }
 
+      case "get_user_emails_batch": {
+        const { userIds } = body;
+        if (!Array.isArray(userIds) || userIds.length === 0) {
+          return new Response(JSON.stringify({ error: "userIds must be a non-empty array" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        const results: Record<string, { email: string | null; last_sign_in_at: string | null }> = {};
+        
+        // Batch fetch all users
+        await Promise.all(
+          userIds.map(async (userId: string) => {
+            try {
+              const { data: userData, error } = await supabaseAdmin.auth.admin.getUserById(userId);
+              if (!error && userData?.user) {
+                results[userId] = {
+                  email: userData.user.email || null,
+                  last_sign_in_at: userData.user.last_sign_in_at || null,
+                };
+              } else {
+                results[userId] = { email: null, last_sign_in_at: null };
+              }
+            } catch {
+              results[userId] = { email: null, last_sign_in_at: null };
+            }
+          })
+        );
+
+        return new Response(JSON.stringify({ users: results }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       case "update_email": {
         const { userId, newEmail } = body;
         

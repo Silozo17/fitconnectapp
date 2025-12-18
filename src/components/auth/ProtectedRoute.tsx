@@ -11,7 +11,8 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const { user, role, loading } = useAuth();
   const location = useLocation();
 
-  if (loading) {
+  // Show loading while auth is initializing or while role is being fetched
+  if (loading || (user && role === null)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -28,7 +29,12 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
     return <>{children}</>;
   }
 
-  if (allowedRoles && role && !allowedRoles.includes(role)) {
+  // If user exists but role couldn't be fetched, redirect to home
+  if (!role) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (allowedRoles && !allowedRoles.includes(role)) {
     return <Navigate to="/" replace />;
   }
 
