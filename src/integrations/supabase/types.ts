@@ -2146,11 +2146,14 @@ export type Database = {
           default_session_location: string | null
           display_name: string | null
           experience_years: number | null
+          facebook_url: string | null
           gym_affiliation: string | null
           hourly_rate: number | null
           id: string
           in_person_available: boolean | null
+          instagram_url: string | null
           is_verified: boolean | null
+          linkedin_url: string | null
           location: string | null
           marketplace_visible: boolean | null
           onboarding_completed: boolean
@@ -2168,6 +2171,8 @@ export type Database = {
           stripe_connect_id: string | null
           stripe_connect_onboarded: boolean | null
           subscription_tier: string | null
+          threads_url: string | null
+          tiktok_url: string | null
           updated_at: string
           user_id: string
           user_profile_id: string | null
@@ -2177,6 +2182,8 @@ export type Database = {
           verified_at: string | null
           verified_by: string | null
           who_i_work_with: string | null
+          x_url: string | null
+          youtube_url: string | null
         }
         Insert: {
           also_client?: boolean | null
@@ -2190,11 +2197,14 @@ export type Database = {
           default_session_location?: string | null
           display_name?: string | null
           experience_years?: number | null
+          facebook_url?: string | null
           gym_affiliation?: string | null
           hourly_rate?: number | null
           id?: string
           in_person_available?: boolean | null
+          instagram_url?: string | null
           is_verified?: boolean | null
+          linkedin_url?: string | null
           location?: string | null
           marketplace_visible?: boolean | null
           onboarding_completed?: boolean
@@ -2212,6 +2222,8 @@ export type Database = {
           stripe_connect_id?: string | null
           stripe_connect_onboarded?: boolean | null
           subscription_tier?: string | null
+          threads_url?: string | null
+          tiktok_url?: string | null
           updated_at?: string
           user_id: string
           user_profile_id?: string | null
@@ -2221,6 +2233,8 @@ export type Database = {
           verified_at?: string | null
           verified_by?: string | null
           who_i_work_with?: string | null
+          x_url?: string | null
+          youtube_url?: string | null
         }
         Update: {
           also_client?: boolean | null
@@ -2234,11 +2248,14 @@ export type Database = {
           default_session_location?: string | null
           display_name?: string | null
           experience_years?: number | null
+          facebook_url?: string | null
           gym_affiliation?: string | null
           hourly_rate?: number | null
           id?: string
           in_person_available?: boolean | null
+          instagram_url?: string | null
           is_verified?: boolean | null
+          linkedin_url?: string | null
           location?: string | null
           marketplace_visible?: boolean | null
           onboarding_completed?: boolean
@@ -2256,6 +2273,8 @@ export type Database = {
           stripe_connect_id?: string | null
           stripe_connect_onboarded?: boolean | null
           subscription_tier?: string | null
+          threads_url?: string | null
+          tiktok_url?: string | null
           updated_at?: string
           user_id?: string
           user_profile_id?: string | null
@@ -2265,6 +2284,8 @@ export type Database = {
           verified_at?: string | null
           verified_by?: string | null
           who_i_work_with?: string | null
+          x_url?: string | null
+          youtube_url?: string | null
         }
         Relationships: [
           {
