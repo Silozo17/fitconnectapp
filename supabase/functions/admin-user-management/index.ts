@@ -46,17 +46,20 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Check admin role using user's token so auth.uid() works in the RPC
-    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const supabaseUserClient = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
+    // Check admin role by directly querying user_roles with service role (bypasses RLS)
+    console.log("Checking admin role for user:", user.id);
     
-    const { data: hasRole } = await supabaseUserClient.rpc("has_role", {
-      _role: "admin",
-    });
+    const { data: roleData, error: roleError } = await supabaseServiceClient
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle();
 
-    if (!hasRole) {
+    console.log("Role check result:", { roleData, roleError });
+
+    if (roleError || !roleData) {
+      console.log("Admin role check failed - no admin role found");
       return new Response(JSON.stringify({ error: "Unauthorized - admin role required" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
