@@ -281,7 +281,7 @@ const CoachSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: CoachS
               className={cn(
                 "flex items-center justify-center p-2.5 rounded-lg transition-colors relative w-full",
                 isActive
-                  ? "bg-sidebar-primary/20 text-sidebar-primary-foreground"
+                  ? "bg-primary/20 text-primary"
                   : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
               )}
             >
@@ -309,7 +309,7 @@ const CoachSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: CoachS
             className={cn(
               "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors w-full text-left",
               isActive
-                ? "bg-sidebar-primary/10 text-sidebar-primary-foreground"
+                ? "bg-primary/10 text-primary"
                 : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
             )}
           >
