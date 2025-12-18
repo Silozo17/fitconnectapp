@@ -66,8 +66,7 @@ import { CoachGalleryUpload } from "@/components/coach/CoachGalleryUpload";
 import { CoachGroupClassesManager } from "@/components/coach/CoachGroupClassesManager";
 import { CoachWhoIWorkWithSection } from "@/components/coach/CoachWhoIWorkWithSection";
 import { CoachSocialLinksSection, type SocialLinks } from "@/components/coach/CoachSocialLinksSection";
-
-const coachTypes = ["Personal Trainer", "Nutritionist", "Boxing Coach", "MMA Coach", "Yoga Instructor", "CrossFit Coach"];
+import { CoachTypeSelector } from "@/components/coach/CoachTypeSelector";
 
 interface CoachProfile {
   display_name: string | null;
@@ -553,33 +552,10 @@ const CoachSettings = () => {
                         />
                       </div>
                     </div>
-                    <div>
-                      <Label className="mb-2 block">Coach Types</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {coachTypes.map((type) => (
-                          <Badge
-                            key={type}
-                            variant={(profile.coach_types || []).includes(type) ? "default" : "outline"}
-                            className={`cursor-pointer ${
-                              (profile.coach_types || []).includes(type)
-                                ? "bg-primary text-primary-foreground"
-                                : "hover:bg-secondary"
-                            }`}
-                            onClick={() => {
-                              const current = profile.coach_types || [];
-                              setProfile({
-                                ...profile,
-                                coach_types: current.includes(type)
-                                  ? current.filter((t) => t !== type)
-                                  : [...current, type],
-                              });
-                            }}
-                          >
-                            {type}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
+                    <CoachTypeSelector
+                      selectedTypes={profile.coach_types || []}
+                      onChange={(types) => setProfile({ ...profile, coach_types: types })}
+                    />
                   </CardContent>
                 </Card>
 
