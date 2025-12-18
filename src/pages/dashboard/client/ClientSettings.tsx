@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import { UnsavedChangesDialog } from "@/components/shared/UnsavedChangesDialog";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, Save, LogOut, AlertTriangle, Info, Bell, User, Heart, Globe, Plug, Shield } from "lucide-react";
 import { HealthTagInput } from "@/components/dashboard/clients/HealthTagInput";
@@ -114,6 +116,21 @@ const ClientSettings = () => {
   const { data: selectedAvatar } = useSelectedAvatar('client');
   const { connectCalendar, disconnectCalendar, toggleSync, getConnection, isLoading: calendarLoading } = useCalendarSync();
   const [showAppleCalendarModal, setShowAppleCalendarModal] = useState(false);
+  
+  // Track initial data for dirty state detection
+  const initialProfileRef = useRef<ClientProfile | null>(null);
+  
+  const {
+    isDirty,
+    resetDirty,
+    blocker,
+  } = useUnsavedChanges(profile, { enabled: true });
+  
+  // Track dirty state by comparing with initial values
+  const checkIsDirty = (): boolean => {
+    if (!profile || !initialProfileRef.current) return false;
+    return JSON.stringify(profile) !== JSON.stringify(initialProfileRef.current);
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -126,6 +143,7 @@ const ClientSettings = () => {
         .maybeSingle();
 
       setProfile(data);
+      initialProfileRef.current = data ? JSON.parse(JSON.stringify(data)) : null;
       setLoading(false);
     };
 
@@ -164,6 +182,8 @@ const ClientSettings = () => {
     if (error) {
       toast.error("Failed to save changes");
     } else {
+      // Reset dirty state after successful save
+      initialProfileRef.current = profile ? JSON.parse(JSON.stringify(profile)) : null;
       toast.success("Settings saved successfully");
     }
   };
@@ -315,7 +335,11 @@ const ClientSettings = () => {
                 </Card>
 
                 <div className="flex justify-end">
-                  <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground">
+                  <Button 
+                    onClick={handleSave} 
+                    disabled={saving || !checkIsDirty()} 
+                    className={checkIsDirty() ? "bg-primary text-primary-foreground" : ""}
+                  >
                     {saving ? (
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     ) : (
@@ -396,7 +420,11 @@ const ClientSettings = () => {
                 </Card>
 
                 <div className="flex justify-end">
-                  <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground">
+                  <Button 
+                    onClick={handleSave} 
+                    disabled={saving || !checkIsDirty()} 
+                    className={checkIsDirty() ? "bg-primary text-primary-foreground" : ""}
+                  >
                     {saving ? (
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     ) : (
@@ -439,7 +467,11 @@ const ClientSettings = () => {
                 />
 
                 <div className="flex justify-end">
-                  <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground">
+                  <Button 
+                    onClick={handleSave} 
+                    disabled={saving || !checkIsDirty()} 
+                    className={checkIsDirty() ? "bg-primary text-primary-foreground" : ""}
+                  >
                     {saving ? (
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     ) : (
@@ -568,6 +600,8 @@ const ClientSettings = () => {
           </div>
         </div>
       </div>
+      {/* Unsaved Changes Dialog */}
+      <UnsavedChangesDialog blocker={blocker} />
     </ClientDashboardLayout>
   );
 };

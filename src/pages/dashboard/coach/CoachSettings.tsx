@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import {
   User,
@@ -74,6 +74,8 @@ import { CoachSocialLinksSection, type SocialLinks } from "@/components/coach/Co
 import { CoachTypeSelector } from "@/components/coach/CoachTypeSelector";
 import { MarketplaceSection } from "@/components/coach/MarketplaceSection";
 import { ProfileCompletionProgress } from "@/components/coach/ProfileCompletionProgress";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import { UnsavedChangesDialog } from "@/components/shared/UnsavedChangesDialog";
 
 interface CoachProfile {
   display_name: string | null;
@@ -196,6 +198,9 @@ const CoachSettings = () => {
   const [uploadingType, setUploadingType] = useState<DocumentType | null>(null);
   const [viewingDocId, setViewingDocId] = useState<string | null>(null);
 
+  // Track initial data for dirty state detection
+  const initialProfileRef = useRef<CoachProfile | null>(null);
+
   const [profile, setProfile] = useState<CoachProfile>({
     display_name: "",
     username: "",
@@ -221,6 +226,18 @@ const CoachSettings = () => {
     linkedin_url: null,
     youtube_url: null,
   });
+  
+  const {
+    isDirty,
+    resetDirty,
+    blocker,
+  } = useUnsavedChanges(profile, { enabled: true });
+  
+  // Track dirty state by comparing with initial values
+  const checkIsDirty = (): boolean => {
+    if (!initialProfileRef.current) return false;
+    return JSON.stringify(profile) !== JSON.stringify(initialProfileRef.current);
+  };
 
   // Fetch coach profile with React Query
   const { data: coachData, isLoading: loading, refetch } = useQuery({
@@ -242,7 +259,7 @@ const CoachSettings = () => {
 
   useEffect(() => {
     if (coachData) {
-      setProfile({
+      const profileData: CoachProfile = {
         display_name: coachData.display_name || "",
         username: coachData.username || "",
         bio: coachData.bio || "",
@@ -266,7 +283,9 @@ const CoachSettings = () => {
         threads_url: coachData.threads_url || null,
         linkedin_url: coachData.linkedin_url || null,
         youtube_url: coachData.youtube_url || null,
-      });
+      };
+      setProfile(profileData);
+      initialProfileRef.current = JSON.parse(JSON.stringify(profileData));
     }
   }, [coachData]);
 
@@ -305,6 +324,8 @@ const CoachSettings = () => {
     if (error) {
       toast.error("Failed to save changes");
     } else {
+      // Reset dirty state after successful save
+      initialProfileRef.current = JSON.parse(JSON.stringify(profile));
       toast.success("Profile updated successfully");
     }
   };
@@ -710,9 +731,14 @@ const CoachSettings = () => {
                 <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-background/95 backdrop-blur border-t p-4 z-40">
                   <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
                     <p className="text-sm text-muted-foreground hidden sm:block">
-                      Remember to save your changes
+                      {checkIsDirty() ? "You have unsaved changes" : "All changes saved"}
                     </p>
-                    <Button onClick={handleSaveProfile} disabled={saving} size="lg">
+                    <Button 
+                      onClick={handleSaveProfile} 
+                      disabled={saving || !checkIsDirty()} 
+                      size="lg"
+                      variant={checkIsDirty() ? "default" : "outline"}
+                    >
                       {saving ? (
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       ) : (
@@ -1107,6 +1133,8 @@ const CoachSettings = () => {
           </div>
         </div>
       </div>
+      {/* Unsaved Changes Dialog */}
+      <UnsavedChangesDialog blocker={blocker} />
     </DashboardLayout>
   );
 };
