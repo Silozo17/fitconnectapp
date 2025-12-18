@@ -11,6 +11,7 @@ interface UserAvatarProps {
   className?: string;
   fallbackClassName?: string;
   showRarityBorder?: boolean;    // Whether to show rarity-colored border
+  variant?: 'circle' | 'squircle'; // Avatar shape variant
 }
 
 export const UserAvatar = ({ 
@@ -20,7 +21,8 @@ export const UserAvatar = ({
   name, 
   className, 
   fallbackClassName,
-  showRarityBorder = false 
+  showRarityBorder = false,
+  variant = 'circle'
 }: UserAvatarProps) => {
   const getInitials = () => {
     if (!name) return "?";
@@ -62,26 +64,63 @@ export const UserAvatar = ({
   const imageUrl = getImageUrl();
   const hasCharacterAvatar = !!avatarSlug || (!src && !avatarSlug);
   
-  // Get rarity border styling
-  const rarityConfig = avatarRarity ? RARITY_CONFIG[avatarRarity] : null;
-  const borderClass = showRarityBorder && rarityConfig 
-    ? `${rarityConfig.border} border-2` 
-    : "border border-border";
+  // Get rarity config for styling
+  const rarityConfig = avatarRarity ? RARITY_CONFIG[avatarRarity] : RARITY_CONFIG.common;
+  
+  // Circle variant (default) - uses shadcn Avatar component
+  if (variant === 'circle') {
+    const borderClass = showRarityBorder && avatarRarity 
+      ? `${rarityConfig.border} border-2` 
+      : "border border-border";
 
+    return (
+      <Avatar className={cn(borderClass, className)}>
+        <AvatarImage 
+          src={imageUrl || undefined} 
+          alt={name || "User"} 
+          className={cn(
+            "object-cover",
+            // Character avatars use object-top to show head/face area in circular containers
+            hasCharacterAvatar && "object-top bg-gradient-to-br from-background to-muted/50"
+          )} 
+        />
+        <AvatarFallback className={cn("font-semibold", getAvatarColor(), fallbackClassName)}>
+          {getInitials()}
+        </AvatarFallback>
+      </Avatar>
+    );
+  }
+
+  // Squircle variant - rounded square with gradient background and avatar overflow
   return (
-    <Avatar className={cn(borderClass, className)}>
-      <AvatarImage 
-        src={imageUrl || undefined} 
-        alt={name || "User"} 
-        className={cn(
-          "object-cover",
-          // Character avatars use object-top to show head/face area in circular containers
-          hasCharacterAvatar && "object-top bg-gradient-to-br from-background to-muted/50"
-        )} 
-      />
-      <AvatarFallback className={cn("font-semibold", getAvatarColor(), fallbackClassName)}>
-        {getInitials()}
-      </AvatarFallback>
-    </Avatar>
+    <div 
+      className={cn(
+        "relative shrink-0 rounded-2xl overflow-hidden",
+        rarityConfig.gradient,
+        rarityConfig.glow,
+        className
+      )}
+    >
+      {/* Avatar image - positioned to extend above container */}
+      {imageUrl ? (
+        <img 
+          src={imageUrl} 
+          alt={name || "User"} 
+          className={cn(
+            "absolute inset-0 w-full h-full object-cover",
+            // For character avatars, position to show head/upper body
+            hasCharacterAvatar && "object-top scale-110 translate-y-[5%]"
+          )}
+        />
+      ) : (
+        // Fallback with initials
+        <div className={cn(
+          "absolute inset-0 flex items-center justify-center font-semibold text-white",
+          fallbackClassName
+        )}>
+          {getInitials()}
+        </div>
+      )}
+    </div>
   );
 };
