@@ -23,14 +23,14 @@ export const BulkActionBar = ({
   if (count === 0) return null;
 
   return (
-    <div className="flex items-center gap-3 p-3 bg-primary/10 border border-primary/20 rounded-lg animate-in fade-in slide-in-from-top-2">
-      <span className="text-sm font-medium">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-primary/10 border border-primary/20 rounded-lg animate-in fade-in slide-in-from-top-2">
+      <span className="text-sm font-medium shrink-0">
         {count} {count === 1 ? "item" : "items"} selected
       </span>
       
-      <div className="flex-1" />
+      <div className="hidden sm:block flex-1" />
       
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Button
           size="sm"
           variant="outline"
@@ -39,7 +39,7 @@ export const BulkActionBar = ({
           className="gap-1.5"
         >
           <CheckCircle className="h-4 w-4 text-green-500" />
-          Activate
+          <span className="hidden xs:inline">Activate</span>
         </Button>
         <Button
           size="sm"
@@ -49,7 +49,7 @@ export const BulkActionBar = ({
           className="gap-1.5"
         >
           <Pause className="h-4 w-4 text-amber-500" />
-          Suspend
+          <span className="hidden xs:inline">Suspend</span>
         </Button>
         <Button
           size="sm"
@@ -59,7 +59,7 @@ export const BulkActionBar = ({
           className="gap-1.5"
         >
           <Ban className="h-4 w-4 text-red-500" />
-          Ban
+          <span className="hidden xs:inline">Ban</span>
         </Button>
         <Button
           size="sm"
@@ -69,7 +69,7 @@ export const BulkActionBar = ({
           className="gap-1.5"
         >
           <Trash2 className="h-4 w-4" />
-          Delete
+          <span className="hidden xs:inline">Delete</span>
         </Button>
         <Button
           size="sm"
@@ -79,7 +79,7 @@ export const BulkActionBar = ({
           className="gap-1.5"
         >
           <X className="h-4 w-4" />
-          Clear
+          <span className="hidden xs:inline">Clear</span>
         </Button>
       </div>
     </div>
