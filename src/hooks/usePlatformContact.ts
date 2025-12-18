@@ -7,6 +7,8 @@ interface PlatformSocials {
   tiktok: string;
   x: string;
   youtube: string;
+  linkedin: string;
+  threads: string;
 }
 
 interface PlatformContact {
@@ -36,6 +38,8 @@ export const usePlatformContact = (): PlatformContactData => {
           "social_tiktok",
           "social_x",
           "social_youtube",
+          "social_linkedin",
+          "social_threads",
           "contact_email",
           "contact_phone",
           "contact_address",
@@ -62,6 +66,8 @@ export const usePlatformContact = (): PlatformContactData => {
       tiktok: settings?.social_tiktok || "#",
       x: settings?.social_x || "#",
       youtube: settings?.social_youtube || "#",
+      linkedin: settings?.social_linkedin || "#",
+      threads: settings?.social_threads || "#",
     },
     contact: {
       email: settings?.contact_email || "support@fitconnect.com",
