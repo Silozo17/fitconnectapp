@@ -75,8 +75,8 @@ export const UserAvatar = ({
         alt={name || "User"} 
         className={cn(
           "object-cover",
-          // Character avatars need object-contain to show full image
-          hasCharacterAvatar && "object-contain bg-gradient-to-br from-background to-muted/50"
+          // Character avatars use object-top to show head/face area in circular containers
+          hasCharacterAvatar && "object-top bg-gradient-to-br from-background to-muted/50"
         )} 
       />
       <AvatarFallback className={cn("font-semibold", getAvatarColor(), fallbackClassName)}>
