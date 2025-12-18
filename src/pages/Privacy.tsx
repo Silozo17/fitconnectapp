@@ -35,9 +35,10 @@ const Privacy = () => {
               <CardContent className="p-8 md:p-12 prose prose-gray dark:prose-invert max-w-none">
                 <h2>1. Introduction</h2>
                 <p>
-                  Welcome to FitConnect ("we," "our," or "us"). We are committed to protecting your personal information 
-                  and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard 
-                  your information when you use our website and mobile application (collectively, the "Platform").
+                  Welcome to FitConnect, a trading name of AMW Media Ltd ("we," "our," or "us"). We are committed 
+                  to protecting your personal information and your right to privacy. This Privacy Policy explains 
+                  how we collect, use, disclose, and safeguard your information when you use our website and mobile 
+                  application (collectively, the "Platform").
                 </p>
                 <p>
                   Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, 

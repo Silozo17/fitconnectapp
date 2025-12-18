@@ -40,9 +40,10 @@ const Terms = () => {
                   If you do not agree to these Terms, please do not use the Platform.
                 </p>
                 <p>
-                  These Terms constitute a legally binding agreement between you and FitConnect Ltd, a company 
-                  registered in England and Wales ("FitConnect," "we," "us," or "our"). We may update these Terms 
-                  from time to time, and your continued use of the Platform constitutes acceptance of any changes.
+                  These Terms constitute a legally binding agreement between you and AMW Media Ltd, trading as 
+                  FitConnect, a company registered in England and Wales ("FitConnect," "we," "us," or "our"). We 
+                  may update these Terms from time to time, and your continued use of the Platform constitutes 
+                  acceptance of any changes.
                 </p>
 
                 <h2>2. Description of Service</h2>
