@@ -120,7 +120,7 @@ export const UserAvatar = ({
       )}
       style={{ 
         // Allow avatar to overflow at top only, clip sides and bottom cleanly
-        clipPath: hasCharacterAvatar ? 'inset(-65% 0 0 0)' : undefined 
+        clipPath: hasCharacterAvatar ? 'inset(-55% 0 0 0)' : undefined 
       }}
     >
       {/* Avatar image - positioned so upper body shows, head extends above */}
