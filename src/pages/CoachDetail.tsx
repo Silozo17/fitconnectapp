@@ -1,34 +1,30 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { 
-  Star, MapPin, Video, Users, ArrowLeft, 
-  Clock, Award, Calendar, MessageSquare, Loader2, Building 
+  ArrowLeft, Clock, Calendar, MessageSquare, Loader2, Badge as BadgeIcon 
 } from "lucide-react";
-import { ShareButton } from "@/components/shared/ShareButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import PageLayout from "@/components/layout/PageLayout";
 import { useCoachById } from "@/hooks/useCoachMarketplace";
 import { useCoachAvailability, useSessionTypes } from "@/hooks/useCoachSchedule";
 import RequestConnectionModal from "@/components/coaches/RequestConnectionModal";
 import BookSessionModal from "@/components/booking/BookSessionModal";
-import AvailabilityCalendar from "@/components/booking/AvailabilityCalendar";
 import CoachReviewsSection from "@/components/reviews/CoachReviewsSection";
-import StarRating from "@/components/reviews/StarRating";
-import FavouriteButton from "@/components/favourites/FavouriteButton";
 import CoachPricingSection from "@/components/packages/CoachPricingSection";
-import { VerifiedBadge } from "@/components/verification/VerifiedBadge";
-import { CoachFeaturedBadges } from "@/components/coaches/CoachFeaturedBadges";
 import { useCoachReviews, calculateAverageRating } from "@/hooks/useReviews";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatCurrency, type CurrencyCode } from "@/lib/currency";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { UserAvatar } from "@/components/shared/UserAvatar";
 import { CoachGallerySection } from "@/components/coach/CoachGallerySection";
 import { CoachGroupClassesSection } from "@/components/coach/CoachGroupClassesSection";
-import { CoachSocialLinks } from "@/components/coach/CoachSocialLinks";
+import { CoachHeroSection } from "@/components/coach/CoachHeroSection";
+import { CoachQuickStats } from "@/components/coach/CoachQuickStats";
+import { CoachAboutSection } from "@/components/coach/CoachAboutSection";
+import { CoachSocialLinksDisplay } from "@/components/coach/CoachSocialLinksDisplay";
+import { CoachSocialLinksSection } from "@/components/coach/CoachSocialLinksSection";
 
 const CoachDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -48,7 +44,6 @@ const CoachDetail = () => {
     
     setStartingConversation(true);
     try {
-      // Get client profile ID
       const { data: clientProfile } = await supabase
         .from("client_profiles")
         .select("id")
@@ -60,14 +55,6 @@ const CoachDetail = () => {
         return;
       }
 
-      // Check if conversation already exists by looking for any messages
-      const { data: existingMessages } = await supabase
-        .from("messages")
-        .select("id")
-        .or(`and(sender_id.eq.${clientProfile.id},receiver_id.eq.${coach.id}),and(sender_id.eq.${coach.id},receiver_id.eq.${clientProfile.id})`)
-        .limit(1);
-
-      // Navigate to messages with this coach
       navigate(`/dashboard/client/messages/${coach.id}`);
     } catch (error) {
       toast.error("Failed to start conversation");
@@ -106,7 +93,7 @@ const CoachDetail = () => {
     >
       <div className="min-h-screen bg-background">
         {/* Back Button */}
-        <div className="container mx-auto px-4 pt-24">
+        <div className="container mx-auto px-4 pt-24 pb-4">
           <Button variant="ghost" asChild size="sm">
             <Link to="/coaches">
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -115,140 +102,37 @@ const CoachDetail = () => {
           </Button>
         </div>
 
-        {/* Hero Section */}
-        <div className="container mx-auto px-4 py-8">
+        {/* Main Content */}
+        <div className="container mx-auto px-4 pb-12">
           <div className="grid lg:grid-cols-3 gap-8">
-            {/* Main Content */}
+            {/* Main Content Column */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Profile Header */}
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex flex-col sm:flex-row gap-6">
-                    <div className="relative flex-shrink-0 mt-10">
-                      <UserAvatar
-                        src={coach.profile_image_url}
-                        avatarSlug={coach.avatars?.slug}
-                        avatarRarity={coach.avatars?.rarity as any}
-                        name={coach.display_name}
-                        variant="squircle"
-                        size="lg"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h1 className="text-2xl font-bold text-foreground">
-                              {coach.display_name || "Coach"}
-                            </h1>
-                            {coach.is_verified && (
-                              <VerifiedBadge verifiedAt={coach.verified_at} size="md" />
-                            )}
-                          </div>
-                          {coach.location && (
-                            <p className="text-muted-foreground flex items-center gap-1 mt-1">
-                              <MapPin className="h-4 w-4" />
-                              {coach.location}
-                            </p>
-                          )}
-                          {coach.gym_affiliation && (
-                            <p className="text-muted-foreground flex items-center gap-1 mt-1">
-                              <Building className="h-4 w-4" />
-                              {coach.gym_affiliation}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <StarRating 
-                            rating={averageRating} 
-                            reviewCount={reviews.length} 
-                            size="lg"
-                          />
-                          <ShareButton
-                            title={`${coach.display_name} - Coach on FitConnect`}
-                            text={coach.bio || `Check out ${coach.display_name}'s coaching profile on FitConnect!`}
-                            url={window.location.href}
-                            variant="ghost"
-                            size="icon"
-                          />
-                          <FavouriteButton coachId={coach.id} />
-                        </div>
-                      </div>
-
-                      {/* Coach Types */}
-                      <div className="flex flex-wrap gap-2 mt-4">
-                        {coach.coach_types?.map((type) => (
-                          <Badge key={type} variant="secondary">
-                            {type}
-                          </Badge>
-                        ))}
-                      </div>
-
-                      {/* Featured Badges */}
-                      <div className="mt-4">
-                        <CoachFeaturedBadges coachId={coach.id} />
-                      </div>
-
-                      {/* Quick Stats */}
-                      <div className="flex flex-wrap gap-4 mt-4 text-sm">
-                        {coach.experience_years && (
-                          <span className="flex items-center gap-1 text-muted-foreground">
-                            <Award className="h-4 w-4" />
-                            {coach.experience_years} years experience
-                          </span>
-                        )}
-                        {coach.online_available && (
-                          <span className="flex items-center gap-1 text-green-600">
-                            <Video className="h-4 w-4" />
-                            Online Sessions
-                          </span>
-                        )}
-                        {coach.in_person_available && (
-                          <span className="flex items-center gap-1 text-blue-600">
-                            <Users className="h-4 w-4" />
-                            In-Person
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
+              {/* 1. Hero Section */}
+              <Card className="overflow-hidden border-0 shadow-lg">
+                <CoachHeroSection 
+                  coach={coach}
+                  averageRating={averageRating}
+                  reviewCount={reviews.length}
+                />
               </Card>
 
-              {/* About Section */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>About</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {coach.bio ? (
-                    <p className="text-muted-foreground whitespace-pre-wrap">{coach.bio}</p>
-                  ) : (
-                    <p className="text-muted-foreground italic">No bio available</p>
-                  )}
-                </CardContent>
-              </Card>
+              {/* 2. Quick Stats Bar */}
+              <CoachQuickStats
+                experienceYears={coach.experience_years}
+                onlineAvailable={coach.online_available}
+                inPersonAvailable={coach.in_person_available}
+                reviewCount={reviews.length}
+                averageRating={averageRating}
+              />
 
-              {/* Who I Work With Section */}
-              {coach.who_i_work_with && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Who I Work With</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground whitespace-pre-wrap">{coach.who_i_work_with}</p>
-                  </CardContent>
-                </Card>
-              )}
+              {/* 3. About Section (Combined) */}
+              <CoachAboutSection 
+                bio={coach.bio}
+                whoIWorkWith={coach.who_i_work_with}
+              />
 
-              {/* Gallery Section */}
-              <CoachGallerySection coachId={id || ""} />
-
-              {/* Group Classes Section */}
-              <CoachGroupClassesSection coachId={id || ""} />
-
-              {/* Social Media Links */}
-              <CoachSocialLinks 
+              {/* 4. Social Media Links */}
+              <CoachSocialLinksDisplay 
                 socialLinks={{
                   facebook_url: coach.facebook_url,
                   instagram_url: coach.instagram_url,
@@ -260,30 +144,38 @@ const CoachDetail = () => {
                 }}
               />
 
-              {/* Pricing Section */}
+              {/* 5. Gallery Section */}
+              <CoachGallerySection coachId={id || ""} />
+
+              {/* 6. Pricing & Packages */}
               <CoachPricingSection coachId={id || ""} />
 
-              {/* Reviews Section */}
+              {/* 7. Group Classes */}
+              <CoachGroupClassesSection coachId={id || ""} />
+
+              {/* 8. Reviews Section */}
               <CoachReviewsSection coachId={id || ""} />
             </div>
 
             {/* Sidebar - Booking Card */}
             <div className="lg:col-span-1 order-first lg:order-last">
-              <Card className="lg:sticky lg:top-24">
+              <Card className="lg:sticky lg:top-24 shadow-lg border-border/50">
                 <CardContent className="p-6">
-                  <div className="text-center mb-6">
+                  {/* Price Display */}
+                  <div className="text-center mb-6 pb-6 border-b border-border">
                     {coach.hourly_rate ? (
                       <>
-                        <p className="text-3xl font-bold text-foreground">
+                        <p className="text-4xl font-bold text-foreground">
                           {formatCurrency(coach.hourly_rate, (coach.currency as CurrencyCode) || 'GBP')}
                         </p>
-                        <p className="text-muted-foreground">per session</p>
+                        <p className="text-muted-foreground mt-1">per session</p>
                       </>
                     ) : (
-                      <p className="text-muted-foreground">Contact for pricing</p>
+                      <p className="text-lg text-muted-foreground">Contact for pricing</p>
                     )}
                   </div>
 
+                  {/* CTA Buttons */}
                   <div className="space-y-3">
                     {user && (role === "client" || role === "admin") ? (
                       <>
@@ -309,20 +201,19 @@ const CoachDetail = () => {
                           <Calendar className="h-4 w-4 mr-2" />
                           Book Session
                         </Button>
-                        <p className="text-xs text-muted-foreground text-center">
-                          Or send a connection request first
-                        </p>
-                        <Button 
-                          className="w-full" 
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setShowRequestModal(true)}
-                        >
-                          Request Connection
-                        </Button>
+                        <div className="pt-2">
+                          <Button 
+                            className="w-full" 
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowRequestModal(true)}
+                          >
+                            Request Connection
+                          </Button>
+                        </div>
                       </>
                     ) : user ? (
-                      <p className="text-sm text-muted-foreground text-center">
+                      <p className="text-sm text-muted-foreground text-center py-4">
                         Sign in as a client to connect with this coach
                       </p>
                     ) : (
@@ -332,22 +223,29 @@ const CoachDetail = () => {
                             Sign Up to Connect
                           </Link>
                         </Button>
-                        <p className="text-xs text-muted-foreground text-center">
+                        <p className="text-xs text-muted-foreground text-center mt-2">
                           Create an account to connect with coaches
                         </p>
                       </>
                     )}
                   </div>
 
-                  <div className="mt-6 pt-6 border-t border-border space-y-3 text-sm">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Clock className="h-4 w-4" />
-                      <span>Usually responds within 24 hours</span>
+                  {/* Info Section */}
+                  <div className="mt-6 pt-6 border-t border-border space-y-4">
+                    <div className="flex items-center gap-3 text-sm">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-muted">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                      <span className="text-muted-foreground">Usually responds within 24 hours</span>
                     </div>
                     {sessionTypes.length > 0 && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Calendar className="h-4 w-4" />
-                        <span>{sessionTypes.length} session type{sessionTypes.length > 1 ? 's' : ''} available</span>
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-muted">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <span className="text-muted-foreground">
+                          {sessionTypes.length} session type{sessionTypes.length > 1 ? 's' : ''} available
+                        </span>
                       </div>
                     )}
                   </div>
@@ -363,7 +261,7 @@ const CoachDetail = () => {
                             <Badge 
                               key={day} 
                               variant={dayAvail ? "default" : "secondary"}
-                              className={dayAvail ? "" : "opacity-50"}
+                              className={dayAvail ? "" : "opacity-40"}
                             >
                               {day}
                             </Badge>
