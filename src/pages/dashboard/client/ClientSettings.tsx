@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
-import { UnsavedChangesDialog } from "@/components/shared/UnsavedChangesDialog";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, Save, LogOut, AlertTriangle, Info, Bell, User, Heart, Globe, Plug, Shield } from "lucide-react";
 import { HealthTagInput } from "@/components/dashboard/clients/HealthTagInput";
@@ -120,11 +119,9 @@ const ClientSettings = () => {
   // Track initial data for dirty state detection
   const initialProfileRef = useRef<ClientProfile | null>(null);
   
-  const {
-    isDirty,
-    resetDirty,
-    blocker,
-  } = useUnsavedChanges(profile, { enabled: true });
+  // Note: useUnsavedChanges provides beforeunload warning for browser close/refresh
+  // Router blocking requires data router which isn't used in this app
+  useUnsavedChanges(profile, { enabled: true });
   
   // Track dirty state by comparing with initial values
   const checkIsDirty = (): boolean => {
@@ -600,8 +597,6 @@ const ClientSettings = () => {
           </div>
         </div>
       </div>
-      {/* Unsaved Changes Dialog */}
-      <UnsavedChangesDialog blocker={blocker} />
     </ClientDashboardLayout>
   );
 };

@@ -8,14 +8,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Blocker } from "react-router-dom";
 
 interface UnsavedChangesDialogProps {
-  blocker: Blocker;
+  open: boolean;
+  onStay: () => void;
+  onLeave: () => void;
 }
 
-export function UnsavedChangesDialog({ blocker }: UnsavedChangesDialogProps) {
-  if (blocker.state !== "blocked") {
+export function UnsavedChangesDialog({ open, onStay, onLeave }: UnsavedChangesDialogProps) {
+  if (!open) {
     return null;
   }
 
@@ -30,11 +31,11 @@ export function UnsavedChangesDialog({ blocker }: UnsavedChangesDialogProps) {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => blocker.reset?.()}>
+          <AlertDialogCancel onClick={onStay}>
             Stay on Page
           </AlertDialogCancel>
           <AlertDialogAction
-            onClick={() => blocker.proceed?.()}
+            onClick={onLeave}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             Leave Without Saving

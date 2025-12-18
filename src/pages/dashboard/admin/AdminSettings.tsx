@@ -41,7 +41,6 @@ import { Separator } from "@/components/ui/separator";
 import { AccountSecuritySection } from "@/components/shared/AccountSecuritySection";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
-import { UnsavedChangesDialog } from "@/components/shared/UnsavedChangesDialog";
 
 interface PlanTier {
   id: string;
@@ -104,9 +103,9 @@ const AdminSettings = () => {
     privacy_email: "",
   });
   
-  const {
-    blocker,
-  } = useUnsavedChanges(localSettings, { enabled: true });
+  // Note: useUnsavedChanges provides beforeunload warning for browser close/refresh
+  // Router blocking requires data router which isn't used in this app
+  useUnsavedChanges(localSettings, { enabled: true });
   
   const checkIsDirty = (): boolean => {
     if (!initialSettingsRef.current) return false;
@@ -1263,9 +1262,6 @@ const AdminSettings = () => {
             </Button>
           </div>
         </div>
-        
-        {/* Unsaved Changes Dialog */}
-        <UnsavedChangesDialog blocker={blocker} />
       </AdminLayout>
     </>
   );
