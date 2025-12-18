@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -110,6 +111,9 @@ const AdminProfile = () => {
 
   return (
     <AdminLayout>
+      <Helmet>
+        <title>My Profile | Admin Dashboard</title>
+      </Helmet>
       <div className="space-y-6 max-w-2xl">
         <div>
           <h1 className="text-3xl font-bold">My Profile</h1>
