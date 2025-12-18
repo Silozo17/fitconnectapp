@@ -9,6 +9,7 @@ interface CheckoutButtonProps {
   type: "package" | "subscription";
   itemId: string;
   coachId: string;
+  coachUsername?: string;
   label?: string;
   variant?: "default" | "outline" | "secondary";
   size?: "default" | "sm" | "lg";
@@ -19,6 +20,7 @@ const CheckoutButton = ({
   type,
   itemId,
   coachId,
+  coachUsername,
   label = "Purchase",
   variant = "default",
   size = "default",
@@ -48,7 +50,7 @@ const CheckoutButton = ({
       }
 
       const successUrl = `${window.location.origin}/dashboard/client/coaches?payment=success`;
-      const cancelUrl = `${window.location.origin}/coaches/${coachId}?payment=cancelled`;
+      const cancelUrl = `${window.location.origin}/coaches/${coachUsername || coachId}?payment=cancelled`;
 
       const { data, error } = await supabase.functions.invoke("stripe-checkout", {
         body: {

@@ -28,6 +28,7 @@ interface ParticipantInfo {
   avatarRarity?: Rarity | null;
   type: "client" | "coach" | "admin";
   location?: string | null;
+  username?: string | null;
 }
 
 interface ChatWindowProps {
@@ -59,7 +60,8 @@ const ChatWindow = ({
     avatarSlug: null,
     avatarRarity: null,
     type: participantType || "client",
-    location: participantLocation || null
+    location: participantLocation || null,
+    username: null
   });
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -80,7 +82,7 @@ const ChatWindow = ({
       // Try coach profile first (with avatar)
       const { data: coachData } = await supabase
         .from("coach_profiles")
-        .select("display_name, profile_image_url, location, selected_avatar_id, avatars:selected_avatar_id(slug, rarity)")
+        .select("display_name, profile_image_url, location, username, selected_avatar_id, avatars:selected_avatar_id(slug, rarity)")
         .eq("id", participantId)
         .single();
 
@@ -91,7 +93,8 @@ const ChatWindow = ({
           avatarSlug: (coachData.avatars as any)?.slug || null,
           avatarRarity: (coachData.avatars as any)?.rarity as Rarity || null,
           type: "coach",
-          location: coachData.location
+          location: coachData.location,
+          username: coachData.username
         });
         return;
       }
@@ -110,7 +113,8 @@ const ChatWindow = ({
           avatarSlug: (clientData.avatars as any)?.slug || null,
           avatarRarity: (clientData.avatars as any)?.rarity as Rarity || null,
           type: "client",
-          location: clientData.location
+          location: clientData.location,
+          username: null
         });
         return;
       }
@@ -129,7 +133,8 @@ const ChatWindow = ({
           avatarSlug: null,
           avatarRarity: null,
           type: "admin",
-          location: null
+          location: null,
+          username: null
         });
       }
     };
@@ -433,7 +438,7 @@ const ChatWindow = ({
               {participantInfo.type === "coach" && (
                 <div className="mt-6 w-full">
                   <Link
-                    to={`/coaches/${participantId}`}
+                    to={`/coaches/${participantInfo.username || participantId}`}
                     className="block w-full py-2 px-4 bg-primary text-primary-foreground rounded-md text-center hover:bg-primary/90 transition-colors"
                     onClick={() => setProfileOpen(false)}
                   >

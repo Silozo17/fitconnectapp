@@ -142,7 +142,7 @@ export default function MarketplaceBundle() {
                       <div 
                         key={product.id}
                         className="flex items-center gap-4 p-4 rounded-lg border border-border hover:border-primary/50 cursor-pointer transition-all"
-                        onClick={() => navigate(`/marketplace/${product.id}`)}
+                        onClick={() => navigate(`/marketplace/${product.slug || product.id}`)}
                       >
                         <div className="w-20 h-14 rounded-md overflow-hidden flex-shrink-0">
                           {product.cover_image_url ? (
@@ -237,7 +237,7 @@ export default function MarketplaceBundle() {
                     <p className="text-sm text-muted-foreground mb-3">Created by</p>
                     <div 
                       className="flex items-center gap-3 cursor-pointer hover:bg-muted/50 p-2 rounded-lg -mx-2"
-                      onClick={() => navigate(`/coaches/${bundle.coach_id}`)}
+                      onClick={() => navigate(`/coaches/${bundle.coach_profiles?.username || bundle.coach_id}`)}
                     >
                       <UserAvatar
                         name={bundle.coach_profiles?.display_name || "Coach"}
