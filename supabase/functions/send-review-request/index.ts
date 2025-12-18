@@ -3,8 +3,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { 
   baseEmailTemplate, 
   ctaButton, 
-  profileImageWithGlow,
-  getAvatarUrl,
+  squircleAvatarComponent,
+  getDefaultAvatarUrl,
   EMAIL_CONFIG 
 } from "../_shared/email-templates.ts";
 
@@ -77,16 +77,8 @@ serve(async (req) => {
       throw new Error("Client email not found");
     }
 
-    // Get coach avatar
-    let coachAvatarUrl = session.coach.profile_image_url;
-    if (session.coach.selected_avatar_id) {
-      const { data: avatar } = await supabase
-        .from("avatars")
-        .select("name")
-        .eq("id", session.coach.selected_avatar_id)
-        .single();
-      if (avatar) coachAvatarUrl = getAvatarUrl(avatar.name, supabaseUrl);
-    }
+    // Use default FitConnect mascot avatar
+    const avatarUrl = getDefaultAvatarUrl(supabaseUrl);
 
     const coachName = session.coach.display_name || "Your Coach";
     const clientName = session.client.first_name || "there";
@@ -113,7 +105,7 @@ serve(async (req) => {
         Hi ${clientName}, we hope you enjoyed your session with <strong style="color: ${colors.primary}">${coachName}</strong> on ${formattedDate}!
       </p>
       
-      ${profileImageWithGlow(coachAvatarUrl, coachName, 80)}
+      ${squircleAvatarComponent(avatarUrl, coachName, 80)}
       
       <div style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 24px; margin: 24px 0; text-align: center;">
         <p style="color: ${colors.textMuted}; margin: 0 0 16px 0;">

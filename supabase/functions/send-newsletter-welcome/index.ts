@@ -3,7 +3,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { 
   baseEmailTemplate, 
   ctaButton, 
-  getAvatarUrl,
+  squircleAvatarComponent,
+  getDefaultAvatarUrl,
   EMAIL_CONFIG 
 } from "../_shared/email-templates.ts";
 
@@ -39,19 +40,12 @@ serve(async (req) => {
 
     const { colors } = EMAIL_CONFIG;
 
-    // Get some mascot avatars to showcase
-    const mascotAvatars = [
-      getAvatarUrl("Strongman Bear", supabaseUrl),
-      getAvatarUrl("Weightlifting Lion", supabaseUrl),
-      getAvatarUrl("CrossFit Wolf", supabaseUrl),
-    ];
-
+    // Use default FitConnect mascot avatar
+    const mascotAvatarUrl = getDefaultAvatarUrl(supabaseUrl);
     const name = firstName || "Fitness Enthusiast";
 
     const emailContent = `
-      <div style="text-align: center; margin-bottom: 24px;">
-        <span style="font-size: 48px;">🎯</span>
-      </div>
+      ${squircleAvatarComponent(mascotAvatarUrl, "FitConnect", 100)}
       
       <h2 class="headline" style="color: ${colors.text}; margin: 0 0 16px 0; text-align: center; font-size: 24px;">
         Welcome to FitConnect!
@@ -60,13 +54,6 @@ serve(async (req) => {
       <p style="color: ${colors.textMuted}; line-height: 1.7; text-align: center; margin-bottom: 24px;">
         Hey ${name}! Thanks for subscribing to our newsletter. You're now part of a community dedicated to fitness excellence.
       </p>
-      
-      <!-- Avatar Showcase -->
-      <div style="text-align: center; margin: 32px 0;">
-        ${mascotAvatars.map((url, i) => `
-          <img src="${url}" alt="FitConnect Avatar" style="width: 60px; height: 60px; border-radius: 50%; margin: 0 8px; border: 2px solid ${colors.primary}; opacity: ${1 - (i * 0.2)}; display: inline-block;">
-        `).join('')}
-      </div>
       
       <div style="background: rgba(190, 255, 0, 0.1); border-radius: 12px; padding: 24px; margin: 24px 0;">
         <h3 style="color: ${colors.primary}; margin: 0 0 16px 0; font-size: 16px; text-align: center;">What to expect:</h3>

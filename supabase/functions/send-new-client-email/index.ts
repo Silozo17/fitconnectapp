@@ -3,9 +3,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { 
   baseEmailTemplate, 
   ctaButton, 
-  profileImageWithGlow,
+  squircleAvatarComponent,
   infoCard,
-  getAvatarUrl,
+  getDefaultAvatarUrl,
   EMAIL_CONFIG 
 } from "../_shared/email-templates.ts";
 
@@ -72,18 +72,8 @@ serve(async (req) => {
     const clientName = [client.first_name, client.last_name].filter(Boolean).join(' ') || 'New Client';
     const { colors } = EMAIL_CONFIG;
 
-    // Get client avatar
-    let clientAvatarUrl = client.avatar_url;
-    if (client.selected_avatar_id) {
-      const { data: avatar } = await supabase
-        .from("avatars")
-        .select("name")
-        .eq("id", client.selected_avatar_id)
-        .single();
-      if (avatar) {
-        clientAvatarUrl = getAvatarUrl(avatar.name, supabaseUrl);
-      }
-    }
+    // Use default FitConnect mascot avatar
+    const avatarUrl = getDefaultAvatarUrl(supabaseUrl);
 
     const goalsText = client.fitness_goals?.length 
       ? client.fitness_goals.join(', ')
@@ -102,7 +92,7 @@ serve(async (req) => {
         Great news! <strong style="color: ${colors.primary}">${clientName}</strong> is now your client.
       </p>
       
-      ${profileImageWithGlow(clientAvatarUrl, clientName, 80)}
+      ${squircleAvatarComponent(avatarUrl, clientName, 80)}
       
       ${infoCard("Client Details", [
         { label: "Name", value: clientName },
