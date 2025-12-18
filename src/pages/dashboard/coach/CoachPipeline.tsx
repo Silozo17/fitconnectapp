@@ -4,7 +4,6 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { useCoachPipeline, Lead, LeadStage } from "@/hooks/useCoachPipeline";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -45,6 +44,8 @@ import { formatDistanceToNow } from "date-fns";
 import { Link } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import ProspectProfileSheet from "@/components/messaging/ProspectProfileSheet";
+import { UserAvatar } from "@/components/shared/UserAvatar";
+import { Rarity } from "@/lib/avatar-config";
 
 const STAGES: { key: LeadStage; label: string; icon: React.ReactNode; color: string; borderColor: string }[] = [
   { key: 'new_lead', label: 'New Leads', icon: <UserPlus className="w-4 h-4" />, color: 'bg-blue-500', borderColor: 'border-l-blue-500' },
@@ -84,10 +85,10 @@ const CoachPipeline = () => {
       const availableIds = clientIds.filter(id => !existingLeadClientIds.includes(id));
       if (availableIds.length === 0) return [];
       
-      // Fetch client profiles for available IDs with unified avatar
+      // Fetch client profiles for available IDs with unified avatar and character avatar
       const { data: clients, error: clientError } = await supabase
         .from('client_profiles')
-        .select('id, first_name, last_name, location, fitness_goals, avatar_url, user_profiles(avatar_url)')
+        .select('id, first_name, last_name, location, fitness_goals, avatar_url, selected_avatar_id, user_profiles(avatar_url), avatar:avatars(slug, rarity)')
         .in('id', availableIds);
       
       if (clientError) throw clientError;
@@ -159,6 +160,8 @@ const CoachPipeline = () => {
     const stage = STAGES[stageIndex];
     // Use unified avatar from user_profiles, fallback to client_profiles avatar
     const avatarUrl = lead.client_profile?.user_profiles?.avatar_url || lead.client_profile?.avatar_url || undefined;
+    const avatarSlug = lead.client_profile?.avatar?.slug || undefined;
+    const avatarRarity = lead.client_profile?.avatar?.rarity as Rarity | undefined;
     
     return (
       <Card key={lead.id} className={`mb-3 border-l-4 ${stage.borderColor} hover:shadow-md transition-shadow bg-card`}>
@@ -173,12 +176,14 @@ const CoachPipeline = () => {
               })}
               className="flex-shrink-0"
             >
-              <Avatar className="w-14 h-14 ring-2 ring-primary/20 hover:ring-primary/40 transition-all">
-                <AvatarImage src={avatarUrl} />
-                <AvatarFallback className="bg-primary/10 text-primary text-base font-medium">
-                  {getInitials(lead.client_profile?.first_name, lead.client_profile?.last_name)}
-                </AvatarFallback>
-              </Avatar>
+              <UserAvatar
+                src={avatarUrl}
+                avatarSlug={avatarSlug}
+                avatarRarity={avatarRarity}
+                name={name}
+                className="w-14 h-14 ring-2 ring-primary/20 hover:ring-primary/40 transition-all"
+                showRarityBorder={!!avatarSlug}
+              />
             </button>
 
             <div className="flex-1 min-w-0">
@@ -383,12 +388,14 @@ const CoachPipeline = () => {
                     key={client.id}
                     className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
                   >
-                    <Avatar className="w-12 h-12">
-                      <AvatarImage src={(client as any).user_profiles?.avatar_url || client.avatar_url || undefined} />
-                      <AvatarFallback className="bg-primary/10 text-primary">
-                        {getInitials(client.first_name, client.last_name)}
-                      </AvatarFallback>
-                    </Avatar>
+                    <UserAvatar
+                      src={(client as any).user_profiles?.avatar_url || client.avatar_url || undefined}
+                      avatarSlug={(client as any).avatar?.slug}
+                      avatarRarity={(client as any).avatar?.rarity as Rarity}
+                      name={getClientName(client)}
+                      className="w-12 h-12"
+                      showRarityBorder={!!(client as any).avatar?.slug}
+                    />
                     
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{getClientName(client)}</p>
