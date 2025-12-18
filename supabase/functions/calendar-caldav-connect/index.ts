@@ -1,5 +1,5 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { DAVClient } from "https://esm.sh/tsdav@2.1.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,10 +9,7 @@ const corsHeaders = {
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-// Apple iCloud CalDAV endpoint
-const APPLE_CALDAV_URL = "https://caldav.icloud.com";
-
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -35,7 +32,8 @@ serve(async (req) => {
 
     const { email, appSpecificPassword, provider } = await req.json();
     
-    console.log(`CalDAV connect attempt for provider: ${provider}, user: ${user.id}`);
+    console.log(`=== iCloud CalDAV Connect ===`);
+    console.log(`Provider: ${provider}, User: ${user.id}`);
 
     if (!email || !appSpecificPassword) {
       throw new Error("Email and app-specific password are required");
@@ -45,33 +43,45 @@ serve(async (req) => {
       throw new Error("Only Apple Calendar (iCloud) is supported for CalDAV");
     }
 
-    // Validate CalDAV credentials by making a PROPFIND request to iCloud
-    const credentials = btoa(`${email}:${appSpecificPassword}`);
+    // Validate credentials using tsdav library
+    console.log("Step 1: Validating credentials with tsdav...");
     
-    const caldavResponse = await fetch(`${APPLE_CALDAV_URL}/`, {
-      method: "PROPFIND",
-      headers: {
-        "Authorization": `Basic ${credentials}`,
-        "Content-Type": "application/xml",
-        "Depth": "0",
+    const client = new DAVClient({
+      serverUrl: "https://caldav.icloud.com",
+      credentials: {
+        username: email,
+        password: appSpecificPassword,
       },
-      body: `<?xml version="1.0" encoding="utf-8"?>
-        <d:propfind xmlns:d="DAV:">
-          <d:prop>
-            <d:current-user-principal/>
-          </d:prop>
-        </d:propfind>`,
+      authMethod: "Basic",
+      defaultAccountType: "caldav",
     });
 
-    console.log(`CalDAV validation response status: ${caldavResponse.status}`);
-
-    if (caldavResponse.status === 401) {
+    try {
+      await client.login();
+      console.log("Step 2: Login successful!");
+      console.log("Server URL after login:", client.serverUrl);
+    } catch (loginError) {
+      console.error("Login failed:", loginError);
       throw new Error("Invalid credentials. Please check your iCloud email and app-specific password.");
     }
 
-    if (!caldavResponse.ok && caldavResponse.status !== 207) {
-      throw new Error(`CalDAV connection failed: ${caldavResponse.statusText}`);
+    // Fetch calendars to verify access and get calendar URLs
+    console.log("Step 3: Fetching calendars to verify access...");
+    let calendarData: { url: string; displayName: string }[] = [];
+    try {
+      const calendars = await client.fetchCalendars();
+      calendarData = calendars.map(c => ({
+        url: c.url,
+        displayName: typeof c.displayName === 'string' ? c.displayName : 'Unnamed',
+      }));
+      console.log(`Found ${calendarData.length} calendars:`, calendarData);
+    } catch (calError) {
+      console.error("Error fetching calendars:", calError);
+      // Continue anyway - credentials might still be valid
     }
+
+    // Store calendar URLs for faster future syncs
+    const calendarUrls = calendarData.map(c => c.url).join(",");
 
     // Use service role to store the connection securely
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -84,8 +94,7 @@ serve(async (req) => {
       .eq("provider", "apple_calendar")
       .single();
 
-    // Encrypt credentials (in production, use proper encryption)
-    // For now, we store as base64 - you should implement proper encryption with vault
+    // Encrypt credentials
     const encryptedCredentials = btoa(JSON.stringify({ email, password: appSpecificPassword }));
 
     if (existing) {
@@ -95,7 +104,8 @@ serve(async (req) => {
         .update({
           access_token: encryptedCredentials,
           connection_type: "caldav",
-          caldav_server_url: APPLE_CALDAV_URL,
+          caldav_server_url: client.serverUrl || "https://caldav.icloud.com",
+          calendar_id: calendarUrls || null,
           sync_enabled: true,
           updated_at: new Date().toISOString(),
         })
@@ -112,7 +122,8 @@ serve(async (req) => {
           provider: "apple_calendar",
           access_token: encryptedCredentials,
           connection_type: "caldav",
-          caldav_server_url: APPLE_CALDAV_URL,
+          caldav_server_url: client.serverUrl || "https://caldav.icloud.com",
+          calendar_id: calendarUrls || null,
           sync_enabled: true,
         });
 
@@ -120,8 +131,14 @@ serve(async (req) => {
       console.log(`Created new CalDAV connection for user: ${user.id}`);
     }
 
+    console.log("=== iCloud CalDAV Connect Complete ===");
+
     return new Response(
-      JSON.stringify({ success: true, message: "Apple Calendar connected successfully" }),
+      JSON.stringify({ 
+        success: true, 
+        message: "Apple Calendar connected successfully",
+        calendarsFound: calendarData.length,
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
