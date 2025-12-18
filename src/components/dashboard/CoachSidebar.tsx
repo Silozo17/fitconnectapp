@@ -24,6 +24,7 @@ import {
   Rocket,
   UserPlus,
   Lock,
+  Receipt,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -112,6 +113,7 @@ const menuGroups: MenuGroup[] = [
     items: [
       { title: "Boost", icon: Rocket, path: "/dashboard/coach/boost", requiredFeature: "boost_marketing" },
       { title: "Earnings", icon: DollarSign, path: "/dashboard/coach/earnings" },
+      { title: "Financial", icon: Receipt, path: "/dashboard/coach/financial" },
       { title: "Reviews", icon: Star, path: "/dashboard/coach/reviews" },
     ],
   },
