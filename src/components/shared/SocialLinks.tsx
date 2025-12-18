@@ -44,9 +44,18 @@ export const SocialLinks = ({
     ? "text-foreground/70 hover:text-foreground transition-colors"
     : "text-muted-foreground hover:text-primary transition-colors";
 
+  // Filter out social links without valid URLs
+  const activeSocialLinks = socialLinks.filter(
+    (social) => social.href && social.href !== "#" && social.href.trim() !== ""
+  );
+
+  if (activeSocialLinks.length === 0) {
+    return null;
+  }
+
   return (
     <div className={`flex items-center gap-4 ${className}`}>
-      {socialLinks.map((social) => (
+      {activeSocialLinks.map((social) => (
         <a
           key={social.name}
           href={social.href}

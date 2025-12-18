@@ -61,13 +61,13 @@ export const usePlatformContact = (): PlatformContactData => {
 
   return {
     socials: {
-      facebook: settings?.social_facebook || "#",
-      instagram: settings?.social_instagram || "#",
-      tiktok: settings?.social_tiktok || "#",
-      x: settings?.social_x || "#",
-      youtube: settings?.social_youtube || "#",
-      linkedin: settings?.social_linkedin || "#",
-      threads: settings?.social_threads || "#",
+      facebook: settings?.social_facebook || "",
+      instagram: settings?.social_instagram || "",
+      tiktok: settings?.social_tiktok || "",
+      x: settings?.social_x || "",
+      youtube: settings?.social_youtube || "",
+      linkedin: settings?.social_linkedin || "",
+      threads: settings?.social_threads || "",
     },
     contact: {
       email: settings?.contact_email || "support@fitconnect.com",
