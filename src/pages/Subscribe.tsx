@@ -1,5 +1,5 @@
 import { useState, Suspense, useEffect } from "react";
-import { Link, Navigate, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useSearchParams, useLocation } from "react-router-dom";
 import { ArrowLeft, Zap } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { TierSelector, TierFeatures } from "@/components/payments/TierSelector";
@@ -22,6 +22,11 @@ const TIER_AVATARS: Record<TierKey, string> = {
 export default function Subscribe() {
   const { user, role } = useAuth();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
+  
+  // Build return URL for auth redirect
+  const currentUrl = `${location.pathname}${location.search}`;
+  const encodedReturnUrl = encodeURIComponent(currentUrl);
   
   // Read initial values from URL params
   const initialTier = (searchParams.get("tier") as TierKey) || "pro";
@@ -129,7 +134,7 @@ export default function Subscribe() {
         {/* CTA Button - Left side for desktop, full width for mobile */}
         <div className="hidden md:block relative z-10">
           {!user && (
-            <Link to="/auth">
+            <Link to={`/auth?returnUrl=${encodedReturnUrl}`}>
               <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6">
                 Sign in to subscribe
               </Button>
@@ -184,14 +189,14 @@ export default function Subscribe() {
               <p className="text-gray-600 text-sm mb-4">
                 You need to be signed in to subscribe to a plan.
               </p>
-              <Link to="/auth">
+              <Link to={`/auth?returnUrl=${encodedReturnUrl}`}>
                 <Button className="w-full bg-[#0D0D14] hover:bg-[#1a1a24] text-white">
                   Sign in
                 </Button>
               </Link>
               <p className="text-xs text-gray-500 mt-4">
                 Don't have an account?{" "}
-                <Link to="/auth?mode=signup" className="text-[#0D0D14] hover:underline font-medium">
+                <Link to={`/auth?mode=signup&returnUrl=${encodedReturnUrl}`} className="text-[#0D0D14] hover:underline font-medium">
                   Sign up
                 </Link>
               </p>
@@ -245,7 +250,7 @@ export default function Subscribe() {
                 </Suspense>
               ) : (
                 <div className="text-center">
-                  <Link to="/auth">
+                  <Link to={`/auth?returnUrl=${encodedReturnUrl}`}>
                     <Button className="w-full">Sign in to subscribe</Button>
                   </Link>
                 </div>

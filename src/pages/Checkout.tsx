@@ -1,5 +1,5 @@
 import { useState, Suspense } from "react";
-import { useSearchParams, useNavigate, Link } from "react-router-dom";
+import { useSearchParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { ArrowLeft, Zap, Package, ShoppingBag, CalendarCheck, BookOpen, Video, FileText, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -26,8 +26,13 @@ const CONTENT_TYPE_ICONS: Record<string, typeof Video> = {
 export default function Checkout() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const [showMobileCheckout, setShowMobileCheckout] = useState(false);
+
+  // Build return URL for auth redirect
+  const currentUrl = `${location.pathname}${location.search}`;
+  const encodedReturnUrl = encodeURIComponent(currentUrl);
 
   const type = searchParams.get("type") as CheckoutType;
   const itemId = searchParams.get("itemId");
@@ -288,14 +293,14 @@ export default function Checkout() {
               <p className="text-gray-600 text-sm mb-4">
                 You need to be signed in to complete your purchase.
               </p>
-              <Link to="/auth">
+              <Link to={`/auth?returnUrl=${encodedReturnUrl}`}>
                 <Button className="w-full bg-[#0D0D14] hover:bg-[#1a1a24] text-white">
                   Sign in
                 </Button>
               </Link>
               <p className="text-xs text-gray-500 mt-4">
                 Don't have an account?{" "}
-                <Link to="/auth?mode=signup" className="text-[#0D0D14] hover:underline font-medium">
+                <Link to={`/auth?mode=signup&returnUrl=${encodedReturnUrl}`} className="text-[#0D0D14] hover:underline font-medium">
                   Sign up
                 </Link>
               </p>
