@@ -8,7 +8,7 @@ export interface Invoice {
   coach_id: string;
   client_id: string | null;
   invoice_number: string;
-  status: "draft" | "sent" | "paid" | "overdue" | "cancelled";
+  status: "draft" | "sent" | "paid" | "overdue" | "cancelled" | "refunded";
   due_date: string | null;
   sent_at: string | null;
   paid_at: string | null;
@@ -57,6 +57,7 @@ export interface FinancialSummary {
   totalPaid: number;
   totalOutstanding: number;
   totalOverdue: number;
+  totalRefunded: number;
   totalExpenses: number;
   netProfit: number;
 }
@@ -338,6 +339,7 @@ export function useFinancialSummary(coachId: string | undefined) {
     totalPaid: 0,
     totalOutstanding: 0,
     totalOverdue: 0,
+    totalRefunded: 0,
     totalExpenses: 0,
     netProfit: 0,
   };
@@ -352,6 +354,8 @@ export function useFinancialSummary(coachId: string | undefined) {
       } else if (invoice.status === "overdue") {
         summary.totalOverdue += invoice.total;
         summary.totalOutstanding += invoice.total;
+      } else if (invoice.status === "refunded") {
+        summary.totalRefunded += invoice.total;
       }
     });
   }
@@ -360,7 +364,8 @@ export function useFinancialSummary(coachId: string | undefined) {
     summary.totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
   }
 
-  summary.netProfit = summary.totalPaid - summary.totalExpenses;
+  // Net profit = paid - refunded - expenses
+  summary.netProfit = summary.totalPaid - summary.totalRefunded - summary.totalExpenses;
 
   return summary;
 }

@@ -132,6 +132,19 @@ serve(async (req) => {
       throw new Error("Coach has not set up payment processing yet");
     }
 
+    // Get coach's VAT settings
+    const { data: invoiceSettings } = await supabase
+      .from("coach_invoice_settings")
+      .select("vat_registered, vat_rate, vat_inclusive")
+      .eq("coach_id", coachId)
+      .maybeSingle();
+
+    const isVatRegistered = invoiceSettings?.vat_registered || false;
+    const vatRate = invoiceSettings?.vat_rate || 0;
+    const isVatInclusive = invoiceSettings?.vat_inclusive || false;
+
+    console.log("VAT settings:", { isVatRegistered, vatRate, isVatInclusive });
+
     // Get coach's platform subscription to determine commission rate
     const { data: platformSub } = await supabase
       .from("platform_subscriptions")
@@ -190,6 +203,7 @@ serve(async (req) => {
     // Calculate payment amount
     const sessionPrice = sessionType.price || 0;
     const currency = (sessionType.currency || coachProfile.currency || 'GBP').toLowerCase();
+    const currencySymbol = currency === 'usd' ? '$' : currency === 'eur' ? '€' : '£';
     
     let amountDue = 0;
     let paymentDescription = '';
@@ -204,15 +218,25 @@ serve(async (req) => {
       } else {
         // Fixed amount deposit
         amountDue = sessionType.deposit_value || 0;
-        paymentDescription = `£${amountDue} deposit for ${sessionType.name}`;
+        paymentDescription = `${currencySymbol}${amountDue} deposit for ${sessionType.name}`;
       }
+    }
+
+    // Apply VAT if registered and NOT inclusive
+    let vatAmount = 0;
+    if (isVatRegistered && vatRate > 0 && !isVatInclusive) {
+      vatAmount = Math.round(amountDue * vatRate) / 100;
+      amountDue = amountDue + vatAmount;
+      paymentDescription += ` (incl. ${vatRate}% VAT)`;
+    } else if (isVatRegistered && isVatInclusive) {
+      paymentDescription += ` (incl. VAT)`;
     }
 
     if (amountDue <= 0) {
       throw new Error("Invalid payment amount calculated");
     }
 
-    console.log("Payment amount:", amountDue, currency);
+    console.log("Payment amount:", amountDue, currency, "VAT:", vatAmount);
 
     // Create or update booking request with payment status
     let finalBookingRequestId = bookingRequestId;
@@ -274,6 +298,9 @@ serve(async (req) => {
       amount_due: String(amountDue),
       is_boosted_acquisition: isBoostedAcquisition ? 'true' : 'false',
       boost_fee_amount: String(boostFeeAmount),
+      vat_registered: String(isVatRegistered),
+      vat_rate: String(vatRate),
+      vat_amount: String(vatAmount),
     };
 
     // Calculate application fee (platform commission + boost fee)

@@ -190,7 +190,7 @@ export function useClientReceipts() {
 
       if (!clientProfile) return [];
 
-      // Fetch paid invoices for this client
+      // Fetch paid and refunded invoices for this client
       const { data, error } = await supabase
         .from("coach_invoices")
         .select(`
@@ -203,7 +203,7 @@ export function useClientReceipts() {
           line_items:invoice_line_items(*)
         `)
         .eq("client_id", clientProfile.id)
-        .eq("status", "paid")
+        .in("status", ["paid", "refunded"])
         .order("paid_at", { ascending: false });
 
       if (error) throw error;

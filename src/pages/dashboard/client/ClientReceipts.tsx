@@ -99,8 +99,14 @@ const ClientReceipts = () => {
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <h3 className="font-semibold">{receipt.invoice_number}</h3>
-                          <Badge variant="secondary" className="bg-green-500/10 text-green-500">
-                            Paid
+                          <Badge 
+                            variant="secondary" 
+                            className={receipt.status === "refunded" 
+                              ? "bg-orange-500/10 text-orange-500" 
+                              : "bg-green-500/10 text-green-500"
+                            }
+                          >
+                            {receipt.status === "refunded" ? "Refunded" : "Paid"}
                           </Badge>
                         </div>
                         <p className="text-sm text-muted-foreground">

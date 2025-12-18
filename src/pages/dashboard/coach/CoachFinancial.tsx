@@ -48,6 +48,7 @@ import {
   FileCheck,
   PieChart,
   Download,
+  RotateCcw,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 import { format } from "date-fns";
@@ -73,6 +74,7 @@ const INVOICE_STATUS_CONFIG = {
   paid: { label: "Paid", color: "bg-green-500/10 text-green-500", icon: CheckCircle2 },
   overdue: { label: "Overdue", color: "bg-destructive/10 text-destructive", icon: AlertTriangle },
   cancelled: { label: "Cancelled", color: "bg-muted text-muted-foreground line-through", icon: Trash2 },
+  refunded: { label: "Refunded", color: "bg-orange-500/10 text-orange-500", icon: RotateCcw },
 };
 
 const CHART_COLORS = ["hsl(var(--primary))", "hsl(var(--destructive))", "hsl(var(--warning))", "hsl(142 76% 36%)", "hsl(221 83% 53%)", "hsl(262 83% 58%)", "hsl(24 95% 53%)", "hsl(173 80% 40%)"];
