@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Loader2, Upload, X, Save } from "lucide-react";
 import { InvoiceTemplateSelector } from "@/components/invoice/InvoiceTemplateSelector";
 import { InvoicePreview, InvoiceData, BusinessDetails } from "@/components/invoice/InvoicePreview";
@@ -31,6 +32,8 @@ export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps)
     businessPhone: "",
     vatNumber: "",
     vatRegistered: false,
+    vatRate: 20,
+    vatInclusive: false,
     companyRegistration: "",
     templateId: "modern" as TemplateId,
     accentColor: "#BEFF00",
@@ -49,6 +52,8 @@ export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps)
         businessPhone: settings.business_phone || "",
         vatNumber: settings.vat_number || "",
         vatRegistered: settings.vat_registered || false,
+        vatRate: settings.vat_rate ?? 20,
+        vatInclusive: settings.vat_inclusive || false,
         companyRegistration: settings.company_registration || "",
         templateId: (settings.template_id as TemplateId) || "modern",
         accentColor: settings.accent_color || "#BEFF00",
@@ -70,6 +75,8 @@ export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps)
         business_phone: formData.businessPhone || null,
         vat_number: formData.vatRegistered ? (formData.vatNumber || null) : null,
         vat_registered: formData.vatRegistered,
+        vat_rate: formData.vatRegistered ? formData.vatRate : null,
+        vat_inclusive: formData.vatInclusive,
         company_registration: formData.companyRegistration || null,
         template_id: formData.templateId,
         accent_color: formData.accentColor,
@@ -95,9 +102,26 @@ export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps)
 
   // Sample invoice for preview - conditionally include VAT based on toggle
   const subtotal = 290;
-  const taxRate = formData.vatRegistered ? 20 : undefined;
-  const taxAmount = formData.vatRegistered ? subtotal * 0.2 : undefined;
-  const total = formData.vatRegistered ? subtotal + (taxAmount || 0) : subtotal;
+  let taxRate: number | undefined;
+  let taxAmount: number | undefined;
+  let total: number;
+
+  if (formData.vatRegistered) {
+    taxRate = formData.vatRate;
+    if (formData.vatInclusive) {
+      // Inclusive: prices already include VAT
+      // Example: £120 includes £20 VAT (at 20%), so net = £100
+      taxAmount = subtotal - (subtotal / (1 + formData.vatRate / 100));
+      total = subtotal;
+    } else {
+      // Exclusive: VAT is added on top
+      // Example: £100 + 20% VAT = £120 total
+      taxAmount = subtotal * (formData.vatRate / 100);
+      total = subtotal + taxAmount;
+    }
+  } else {
+    total = subtotal;
+  }
 
   const sampleInvoice: InvoiceData = {
     invoiceNumber: "INV-001",
@@ -239,13 +263,56 @@ export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps)
             </div>
             
             {formData.vatRegistered && (
-              <div>
-                <Label>VAT Number</Label>
-                <Input
-                  value={formData.vatNumber}
-                  onChange={(e) => setFormData({ ...formData, vatNumber: e.target.value })}
-                  placeholder="GB123456789"
-                />
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label>VAT Number</Label>
+                    <Input
+                      value={formData.vatNumber}
+                      onChange={(e) => setFormData({ ...formData, vatNumber: e.target.value })}
+                      placeholder="GB123456789"
+                    />
+                  </div>
+                  <div>
+                    <Label>VAT Rate (%)</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.5"
+                      value={formData.vatRate}
+                      onChange={(e) => setFormData({ ...formData, vatRate: parseFloat(e.target.value) || 0 })}
+                      placeholder="20"
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>VAT Calculation Method</Label>
+                  <RadioGroup
+                    value={formData.vatInclusive ? "inclusive" : "exclusive"}
+                    onValueChange={(value) => setFormData({ ...formData, vatInclusive: value === "inclusive" })}
+                    className="flex flex-col space-y-1"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="exclusive" id="vat-exclusive" />
+                      <Label htmlFor="vat-exclusive" className="font-normal cursor-pointer">
+                        Add VAT to prices (exclusive)
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="inclusive" id="vat-inclusive" />
+                      <Label htmlFor="vat-inclusive" className="font-normal cursor-pointer">
+                        Prices already include VAT (inclusive)
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {formData.vatInclusive
+                      ? `Example: £100 includes £${(100 - 100 / (1 + formData.vatRate / 100)).toFixed(2)} VAT`
+                      : `Example: £100 + ${formData.vatRate}% VAT = £${(100 * (1 + formData.vatRate / 100)).toFixed(2)} total`}
+                  </p>
+                </div>
               </div>
             )}
           </div>
