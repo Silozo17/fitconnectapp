@@ -95,6 +95,7 @@ export const CoachProfileSheet = ({
                 avatarRarity={profile.avatars?.rarity as Rarity}
                 name={fullName}
                 className="h-20 w-20"
+                variant="squircle"
                 showRarityBorder
               />
               <div className="flex-1 min-w-0">

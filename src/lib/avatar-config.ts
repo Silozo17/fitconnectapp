@@ -19,6 +19,7 @@ export const RARITY_CONFIG = {
     bg: 'bg-muted/50',
     border: 'border-muted',
     glow: '',
+    gradient: 'bg-gradient-to-br from-slate-400 to-slate-500',
   },
   uncommon: {
     label: 'Uncommon',
@@ -26,6 +27,7 @@ export const RARITY_CONFIG = {
     bg: 'bg-green-500/10',
     border: 'border-green-500/50',
     glow: 'shadow-[0_0_15px_rgba(34,197,94,0.3)]',
+    gradient: 'bg-gradient-to-br from-emerald-400 to-green-500',
   },
   rare: {
     label: 'Rare',
@@ -33,6 +35,7 @@ export const RARITY_CONFIG = {
     bg: 'bg-blue-500/10',
     border: 'border-blue-500/50',
     glow: 'shadow-[0_0_15px_rgba(59,130,246,0.3)]',
+    gradient: 'bg-gradient-to-br from-blue-400 to-indigo-500',
   },
   epic: {
     label: 'Epic',
@@ -40,6 +43,7 @@ export const RARITY_CONFIG = {
     bg: 'bg-purple-500/10',
     border: 'border-purple-500/50',
     glow: 'shadow-[0_0_20px_rgba(168,85,247,0.4)]',
+    gradient: 'bg-gradient-to-br from-purple-400 to-pink-500',
   },
   legendary: {
     label: 'Legendary',
@@ -47,6 +51,7 @@ export const RARITY_CONFIG = {
     bg: 'bg-primary/10',
     border: 'border-primary/50',
     glow: 'shadow-[0_0_25px_hsl(var(--primary)/0.5)]',
+    gradient: 'bg-gradient-to-br from-cyan-400 to-lime-400',
   },
 } as const;
 
