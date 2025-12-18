@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import {
   Table,
   TableBody,
@@ -66,6 +67,9 @@ const AdminBoosts = () => {
 
   return (
     <AdminLayout>
+      <Helmet>
+        <title>Boosts | Admin Dashboard</title>
+      </Helmet>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
