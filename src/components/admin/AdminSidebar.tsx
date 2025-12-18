@@ -17,6 +17,8 @@ import { SidebarBadge } from "@/components/shared/SidebarBadge";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useSelectedAvatar } from "@/hooks/useAvatars";
+import { Rarity } from "@/lib/avatar-config";
 import {
   Sheet,
   SheetContent,
@@ -69,6 +71,7 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }: AdminSidebarProps) => {
   const navigate = useNavigate();
   const { signOut, role } = useAuth();
   const { displayName, avatarUrl } = useUserProfile();
+  const { data: selectedAvatar } = useSelectedAvatar('client');
 
   // Close mobile menu on navigation
   useEffect(() => {
@@ -221,7 +224,14 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }: AdminSidebarProps) => {
           {/* Profile Section - Mobile only */}
           <div className="p-3 border-t border-border">
             <div className="flex items-center gap-3 mb-3">
-              <UserAvatar src={avatarUrl} name={displayName} className="w-10 h-10" />
+              <UserAvatar 
+                src={avatarUrl} 
+                avatarSlug={selectedAvatar?.slug}
+                avatarRarity={selectedAvatar?.rarity as Rarity}
+                name={displayName} 
+                className="w-10 h-10" 
+                showRarityBorder
+              />
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-sm truncate">{displayName || "Admin"}</p>
                 <p className="text-xs text-muted-foreground capitalize">{role}</p>
