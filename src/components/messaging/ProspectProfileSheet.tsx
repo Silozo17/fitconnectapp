@@ -48,74 +48,61 @@ const ProspectProfileSheet = ({
   const { user } = useAuth();
   const { addLead, coachProfileId } = useCoachPipeline();
 
-  // Fetch full client profile with avatar
-  const { data: clientProfile, isLoading: profileLoading } = useQuery({
-    queryKey: ['prospect-profile', clientProfileId],
+  // Fetch all data in parallel for faster loading
+  const { data, isLoading: profileLoading } = useQuery({
+    queryKey: ['prospect-profile-full', clientProfileId, coachProfileId],
     queryFn: async () => {
       if (!clientProfileId) return null;
-      const { data, error } = await supabase
-        .from('client_profiles')
-        .select('*, avatars:selected_avatar_id(slug, rarity)')
-        .eq('id', clientProfileId)
-        .single();
-      if (error) throw error;
-      return data;
+
+      // Fetch all data in parallel
+      const [profileResult, badgesResult, clientResult, leadResult] = await Promise.all([
+        // Client profile with avatar
+        supabase
+          .from('client_profiles')
+          .select('*, avatars:selected_avatar_id(slug, rarity)')
+          .eq('id', clientProfileId)
+          .single(),
+        // Client badges
+        supabase
+          .from('client_badges')
+          .select(`*, badge:badges(name, icon, description, rarity)`)
+          .eq('client_id', clientProfileId)
+          .limit(6),
+        // Is already a client check
+        coachProfileId 
+          ? supabase
+              .from('coach_clients')
+              .select('id')
+              .eq('coach_id', coachProfileId)
+              .eq('client_id', clientProfileId)
+              .maybeSingle()
+          : Promise.resolve({ data: null, error: null }),
+        // Existing lead check
+        coachProfileId
+          ? supabase
+              .from('coach_leads')
+              .select('id, stage')
+              .eq('coach_id', coachProfileId)
+              .eq('client_id', clientProfileId)
+              .maybeSingle()
+          : Promise.resolve({ data: null, error: null }),
+      ]);
+
+      return {
+        clientProfile: profileResult.data,
+        badges: badgesResult.data || [],
+        isClient: !!clientResult.data,
+        existingLead: leadResult.data,
+      };
     },
     enabled: !!clientProfileId && open,
+    staleTime: 30000, // Cache for 30 seconds
   });
 
-  // Check if this prospect is already a client
-  const { data: isClient } = useQuery({
-    queryKey: ['is-client', clientProfileId, coachProfileId],
-    queryFn: async () => {
-      if (!clientProfileId || !coachProfileId) return false;
-      const { data, error } = await supabase
-        .from('coach_clients')
-        .select('id')
-        .eq('coach_id', coachProfileId)
-        .eq('client_id', clientProfileId)
-        .maybeSingle();
-      if (error) throw error;
-      return !!data;
-    },
-    enabled: !!clientProfileId && !!coachProfileId && open,
-  });
-
-  // Fetch client badges/achievements
-  const { data: badges = [] } = useQuery({
-    queryKey: ['client-badges', clientProfileId],
-    queryFn: async () => {
-      if (!clientProfileId) return [];
-      const { data, error } = await supabase
-        .from('client_badges')
-        .select(`
-          *,
-          badge:badges(name, icon, description, rarity)
-        `)
-        .eq('client_id', clientProfileId)
-        .limit(6);
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!clientProfileId && open,
-  });
-
-  // Check if already in pipeline
-  const { data: existingLead } = useQuery({
-    queryKey: ['existing-lead', clientProfileId, coachProfileId],
-    queryFn: async () => {
-      if (!clientProfileId || !coachProfileId) return null;
-      const { data, error } = await supabase
-        .from('coach_leads')
-        .select('id, stage')
-        .eq('coach_id', coachProfileId)
-        .eq('client_id', clientProfileId)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!clientProfileId && !!coachProfileId && open,
-  });
+  const clientProfile = data?.clientProfile;
+  const badges = data?.badges || [];
+  const isClient = data?.isClient || false;
+  const existingLead = data?.existingLead;
 
 
   const handleAddToPipeline = async () => {

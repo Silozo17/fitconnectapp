@@ -1,0 +1,223 @@
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Loader2, MapPin, Star, Calendar, MessageSquare, ExternalLink, Award, Briefcase } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
+
+interface CoachProfileSheetProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  coachProfileId: string | null;
+  participantName: string;
+  participantAvatar?: string;
+}
+
+export const CoachProfileSheet = ({
+  open,
+  onOpenChange,
+  coachProfileId,
+  participantName,
+  participantAvatar,
+}: CoachProfileSheetProps) => {
+  // Fetch coach profile data with all related info in parallel
+  const { data, isLoading } = useQuery({
+    queryKey: ['coach-profile-sheet', coachProfileId],
+    queryFn: async () => {
+      if (!coachProfileId) return null;
+
+      const [profileResult, reviewsResult, badgesResult] = await Promise.all([
+        supabase
+          .from('coach_profiles')
+          .select(`
+            *,
+            avatars:selected_avatar_id(slug, rarity, image_url)
+          `)
+          .eq('id', coachProfileId)
+          .single(),
+        supabase
+          .from('reviews')
+          .select('rating')
+          .eq('coach_id', coachProfileId),
+        supabase
+          .from('coach_badges')
+          .select('*, badge:badges(name, icon, description, rarity)')
+          .eq('coach_id', coachProfileId)
+          .limit(4)
+      ]);
+
+      const profile = profileResult.data;
+      const reviews = reviewsResult.data || [];
+      const badges = badgesResult.data || [];
+
+      // Calculate average rating
+      const avgRating = reviews.length > 0
+        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+        : 0;
+
+      return {
+        profile,
+        avgRating,
+        reviewCount: reviews.length,
+        badges
+      };
+    },
+    enabled: !!coachProfileId && open,
+    staleTime: 30000, // Cache for 30 seconds
+  });
+
+  const profile = data?.profile;
+  const fullName = profile?.display_name || participantName;
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle>Coach Profile</SheetTitle>
+        </SheetHeader>
+
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : profile ? (
+          <div className="space-y-6 mt-6">
+            {/* Profile Header */}
+            <div className="flex items-center gap-4">
+              <Avatar className="h-20 w-20 border-2 border-primary/20">
+                <AvatarImage 
+                  src={profile.profile_image_url || participantAvatar || profile.avatars?.image_url} 
+                  alt={fullName} 
+                />
+                <AvatarFallback className="text-xl bg-primary/10 text-primary">
+                  {fullName.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg font-semibold truncate">{fullName}</h3>
+                {profile.location && (
+                  <p className="text-sm text-muted-foreground flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    {profile.location}
+                  </p>
+                )}
+                {data?.reviewCount > 0 && (
+                  <div className="flex items-center gap-1 mt-1">
+                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    <span className="text-sm font-medium">{data.avgRating.toFixed(1)}</span>
+                    <span className="text-xs text-muted-foreground">
+                      ({data.reviewCount} review{data.reviewCount !== 1 ? 's' : ''})
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Verification Badge */}
+            {profile.is_verified && (
+              <Badge variant="secondary" className="bg-green-500/10 text-green-500 border-green-500/20">
+                <Award className="h-3 w-3 mr-1" />
+                Verified Coach
+              </Badge>
+            )}
+
+            <Separator />
+
+            {/* Specialties */}
+            {profile.coach_types && profile.coach_types.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium flex items-center gap-2">
+                  <Briefcase className="h-4 w-4 text-muted-foreground" />
+                  Specialties
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {profile.coach_types.map((type: string) => (
+                    <Badge key={type} variant="outline" className="text-xs">
+                      {type}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Bio */}
+            {profile.bio && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium">About</h4>
+                <p className="text-sm text-muted-foreground line-clamp-4">
+                  {profile.bio}
+                </p>
+              </div>
+            )}
+
+            {/* Experience & Rate */}
+            <div className="grid grid-cols-2 gap-4">
+              {profile.experience_years && (
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <p className="text-xs text-muted-foreground">Experience</p>
+                  <p className="text-sm font-medium">{profile.experience_years} years</p>
+                </div>
+              )}
+              {profile.hourly_rate && (
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <p className="text-xs text-muted-foreground">Hourly Rate</p>
+                  <p className="text-sm font-medium">
+                    {profile.currency === 'GBP' ? '£' : profile.currency === 'EUR' ? '€' : '$'}
+                    {profile.hourly_rate}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Badges */}
+            {data?.badges && data.badges.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium flex items-center gap-2">
+                  <Award className="h-4 w-4 text-muted-foreground" />
+                  Achievements
+                </h4>
+                <div className="grid grid-cols-4 gap-2">
+                  {data.badges.map((badge: any) => (
+                    <div key={badge.id} className="flex flex-col items-center text-center">
+                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-lg">
+                        {badge.badge?.icon || '🏆'}
+                      </div>
+                      <span className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                        {badge.badge?.name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <Separator />
+
+            {/* Actions */}
+            <div className="space-y-3">
+              <Button asChild className="w-full" variant="outline">
+                <Link to={`/coaches/${coachProfileId}`}>
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  View Full Profile
+                </Link>
+              </Button>
+              <Button asChild className="w-full">
+                <Link to={`/coaches/${coachProfileId}?book=true`}>
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Book a Session
+                </Link>
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-12 text-muted-foreground">
+            <p>Profile not found</p>
+          </div>
+        )}
+      </SheetContent>
+    </Sheet>
+  );
+};
