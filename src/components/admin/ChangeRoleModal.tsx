@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
@@ -50,6 +50,12 @@ const ChangeRoleModal = ({
 }: ChangeRoleModalProps) => {
   const [loading, setLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string>(member?.role || "staff");
+
+  useEffect(() => {
+    if (member && isOpen) {
+      setSelectedRole(member.role || "staff");
+    }
+  }, [member, isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
