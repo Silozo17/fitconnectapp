@@ -1734,8 +1734,82 @@ export type Database = {
           },
         ]
       }
+      coach_invoice_settings: {
+        Row: {
+          accent_color: string | null
+          bank_details: string | null
+          business_address: string | null
+          business_email: string | null
+          business_name: string | null
+          business_phone: string | null
+          coach_id: string
+          company_registration: string | null
+          created_at: string | null
+          default_notes: string | null
+          default_payment_terms: string | null
+          id: string
+          logo_url: string | null
+          template_id: string | null
+          updated_at: string | null
+          vat_number: string | null
+        }
+        Insert: {
+          accent_color?: string | null
+          bank_details?: string | null
+          business_address?: string | null
+          business_email?: string | null
+          business_name?: string | null
+          business_phone?: string | null
+          coach_id: string
+          company_registration?: string | null
+          created_at?: string | null
+          default_notes?: string | null
+          default_payment_terms?: string | null
+          id?: string
+          logo_url?: string | null
+          template_id?: string | null
+          updated_at?: string | null
+          vat_number?: string | null
+        }
+        Update: {
+          accent_color?: string | null
+          bank_details?: string | null
+          business_address?: string | null
+          business_email?: string | null
+          business_name?: string | null
+          business_phone?: string | null
+          coach_id?: string
+          company_registration?: string | null
+          created_at?: string | null
+          default_notes?: string | null
+          default_payment_terms?: string | null
+          id?: string
+          logo_url?: string | null
+          template_id?: string | null
+          updated_at?: string | null
+          vat_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_invoice_settings_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: true
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_invoice_settings_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: true
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coach_invoices: {
         Row: {
+          accent_color: string | null
+          business_snapshot: Json | null
           client_id: string | null
           coach_id: string
           created_at: string | null
@@ -1750,10 +1824,13 @@ export type Database = {
           subtotal: number | null
           tax_amount: number | null
           tax_rate: number | null
+          template_id: string | null
           total: number
           updated_at: string | null
         }
         Insert: {
+          accent_color?: string | null
+          business_snapshot?: Json | null
           client_id?: string | null
           coach_id: string
           created_at?: string | null
@@ -1768,10 +1845,13 @@ export type Database = {
           subtotal?: number | null
           tax_amount?: number | null
           tax_rate?: number | null
+          template_id?: string | null
           total: number
           updated_at?: string | null
         }
         Update: {
+          accent_color?: string | null
+          business_snapshot?: Json | null
           client_id?: string | null
           coach_id?: string
           created_at?: string | null
@@ -1786,6 +1866,7 @@ export type Database = {
           subtotal?: number | null
           tax_amount?: number | null
           tax_rate?: number | null
+          template_id?: string | null
           total?: number
           updated_at?: string | null
         }
