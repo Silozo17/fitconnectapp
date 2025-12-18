@@ -2853,6 +2853,7 @@ export type Database = {
           preview_url: string | null
           price: number
           short_description: string | null
+          slug: string | null
           tags: string[] | null
           title: string
           updated_at: string | null
@@ -2881,6 +2882,7 @@ export type Database = {
           preview_url?: string | null
           price?: number
           short_description?: string | null
+          slug?: string | null
           tags?: string[] | null
           title: string
           updated_at?: string | null
@@ -2909,6 +2911,7 @@ export type Database = {
           preview_url?: string | null
           price?: number
           short_description?: string | null
+          slug?: string | null
           tags?: string[] | null
           title?: string
           updated_at?: string | null
@@ -4982,6 +4985,10 @@ export type Database = {
       coach_has_messaged_client: {
         Args: { coach_profile_id: string }
         Returns: boolean
+      }
+      generate_product_slug: {
+        Args: { product_id: string; title: string }
+        Returns: string
       }
       generate_unique_username: { Args: { base_name: string }; Returns: string }
       has_role:

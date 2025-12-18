@@ -25,6 +25,7 @@ import { CoachQuickStats } from "@/components/coach/CoachQuickStats";
 import { CoachAboutSection } from "@/components/coach/CoachAboutSection";
 import { CoachSocialLinksDisplay } from "@/components/coach/CoachSocialLinksDisplay";
 import { CoachSocialLinksSection } from "@/components/coach/CoachSocialLinksSection";
+import { CoachDigitalProductsSection } from "@/components/coach/CoachDigitalProductsSection";
 
 const CoachDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -153,7 +154,10 @@ const CoachDetail = () => {
               {/* 7. Group Classes */}
               <CoachGroupClassesSection coachId={id || ""} />
 
-              {/* 8. Reviews Section */}
+              {/* 8. Digital Products */}
+              <CoachDigitalProductsSection coachId={id || ""} />
+
+              {/* 9. Reviews Section */}
               <CoachReviewsSection coachId={id || ""} />
             </div>
 

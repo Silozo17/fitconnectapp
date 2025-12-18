@@ -6,10 +6,19 @@ import { DigitalProduct, CONTENT_TYPES } from "@/hooks/useDigitalProducts";
 import { formatCurrency, CurrencyCode } from "@/lib/currency";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 
+// Extended type to include slug
+interface ProductWithSlug extends DigitalProduct {
+  slug?: string | null;
+}
+
 interface ProductCardProps {
-  product: DigitalProduct;
+  product: ProductWithSlug;
   viewMode?: "grid" | "list";
 }
+
+const getProductUrl = (product: ProductWithSlug) => {
+  return `/marketplace/${product.slug || product.id}`;
+};
 
 const getContentIcon = (type: string) => {
   switch (type) {
@@ -30,7 +39,7 @@ export default function ProductCard({ product, viewMode = "grid" }: ProductCardP
     return (
       <Card 
         className="flex flex-row overflow-hidden hover:border-primary/50 transition-all cursor-pointer"
-        onClick={() => navigate(`/marketplace/${product.id}`)}
+        onClick={() => navigate(getProductUrl(product))}
       >
         <div className="w-48 h-32 flex-shrink-0">
           {product.cover_image_url ? (
@@ -80,7 +89,7 @@ export default function ProductCard({ product, viewMode = "grid" }: ProductCardP
   return (
     <Card 
       className="overflow-hidden hover:border-primary/50 transition-all cursor-pointer group"
-      onClick={() => navigate(`/marketplace/${product.id}`)}
+      onClick={() => navigate(getProductUrl(product))}
     >
       <div className="aspect-[4/3] relative overflow-hidden">
         {product.cover_image_url ? (

@@ -6,6 +6,7 @@ export interface DigitalProduct {
   id: string;
   coach_id: string;
   title: string;
+  slug?: string | null;
   description: string | null;
   short_description: string | null;
   content_type: 'ebook' | 'video_course' | 'single_video' | 'template' | 'audio' | 'other';
@@ -151,12 +152,15 @@ export function useFeaturedProducts() {
   });
 }
 
-// Fetch single product
-export function useDigitalProduct(productId: string) {
+// Fetch single product by ID or slug
+export function useDigitalProduct(productIdOrSlug: string) {
   return useQuery({
-    queryKey: ["digital-product", productId],
+    queryKey: ["digital-product", productIdOrSlug],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Check if it's a UUID format
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(productIdOrSlug);
+      
+      let query = supabase
         .from("digital_products")
         .select(`
           *,
@@ -165,14 +169,20 @@ export function useDigitalProduct(productId: string) {
             profile_image_url,
             bio
           )
-        `)
-        .eq("id", productId)
-        .single();
+        `);
+
+      if (isUUID) {
+        query = query.eq("id", productIdOrSlug);
+      } else {
+        query = query.eq("slug", productIdOrSlug);
+      }
+
+      const { data, error } = await query.single();
 
       if (error) throw error;
-      return data as DigitalProduct;
+      return data as DigitalProduct & { slug?: string };
     },
-    enabled: !!productId,
+    enabled: !!productIdOrSlug,
   });
 }
 

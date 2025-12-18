@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -9,10 +9,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCreateProduct, CONTENT_CATEGORIES, CONTENT_TYPES } from "@/hooks/useDigitalProducts";
+import { useAIProductAssist } from "@/hooks/useAIProductAssist";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Sparkles, Upload, Link, Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
+  slug: z.string().optional(),
   short_description: z.string().max(150).optional(),
   description: z.string().optional(),
   content_type: z.enum(["ebook", "video_course", "single_video", "template", "audio", "other"]),
@@ -40,13 +46,29 @@ interface CreateProductModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
+// Generate slug from title
+const generateSlug = (title: string): string => {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
 export default function CreateProductModal({ open, onOpenChange }: CreateProductModalProps) {
   const createProduct = useCreateProduct();
+  const { generateDescription, generateTags, isGeneratingDescription, isGeneratingTags } = useAIProductAssist();
+  const { toast } = useToast();
+  const [imageTab, setImageTab] = useState<"upload" | "url">("upload");
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
+      slug: "",
       short_description: "",
       description: "",
       content_type: "ebook",
@@ -69,21 +91,102 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
   });
 
   const contentType = form.watch("content_type");
+  const title = form.watch("title");
+  const category = form.watch("category");
+
+  // Auto-generate slug when title changes
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTitle = e.target.value;
+    form.setValue("title", newTitle);
+    // Only auto-generate if slug is empty or matches the old auto-generated slug
+    const currentSlug = form.getValues("slug");
+    if (!currentSlug || currentSlug === generateSlug(form.getValues("title"))) {
+      form.setValue("slug", generateSlug(newTitle));
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Invalid file", description: "Please select an image file", variant: "destructive" });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Image must be less than 5MB", variant: "destructive" });
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("product-images")
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("product-images")
+        .getPublicUrl(fileName);
+
+      setUploadedImageUrl(publicUrl);
+      form.setValue("cover_image_url", publicUrl);
+      toast({ title: "Image uploaded successfully" });
+    } catch (error: any) {
+      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleAIDescription = async () => {
+    const result = await generateDescription(title, contentType, category);
+    if (result) {
+      form.setValue("short_description", result.short_description);
+      form.setValue("description", result.full_description);
+      toast({ title: "Description generated!" });
+    }
+  };
+
+  const handleAITags = async () => {
+    const result = await generateTags(title, contentType, category);
+    if (result) {
+      form.setValue("tags", result.join(", "));
+      toast({ title: "Tags generated!" });
+    }
+  };
 
   const onSubmit = async (values: FormValues) => {
     const tags = values.tags ? values.tags.split(",").map(t => t.trim()).filter(Boolean) : [];
     
+    // Use uploaded image if available and tab is upload
+    const coverImageUrl = imageTab === "upload" && uploadedImageUrl 
+      ? uploadedImageUrl 
+      : values.cover_image_url;
+
     await createProduct.mutateAsync({
       ...values,
       tags,
+      slug: values.slug || undefined,
       compare_at_price: values.compare_at_price ? Number(values.compare_at_price) : null,
-      cover_image_url: values.cover_image_url || null,
+      cover_image_url: coverImageUrl || null,
       preview_url: values.preview_url || null,
       content_url: values.content_url || null,
       video_url: values.video_url || null,
     });
     
     form.reset();
+    setUploadedImageUrl(null);
     onOpenChange(false);
   };
 
@@ -108,8 +211,32 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
                   <FormItem>
                     <FormLabel>Title *</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Ultimate 12-Week Workout Program" {...field} />
+                      <Input 
+                        placeholder="e.g., Ultimate 12-Week Workout Program" 
+                        {...field}
+                        onChange={handleTitleChange}
+                      />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="slug"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>URL Slug</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="ultimate-12-week-workout-program" 
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Auto-generated from title. Customize for SEO-friendly URLs.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -120,7 +247,24 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
                 name="short_description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Short Description</FormLabel>
+                    <div className="flex items-center justify-between">
+                      <FormLabel>Short Description</FormLabel>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleAIDescription}
+                        disabled={isGeneratingDescription || !title}
+                        className="h-8 text-xs gap-1"
+                      >
+                        {isGeneratingDescription ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Sparkles className="h-3 w-3" />
+                        )}
+                        AI Assist
+                      </Button>
+                    </div>
                     <FormControl>
                       <Input placeholder="Brief summary for cards (max 150 chars)" {...field} />
                     </FormControl>
@@ -134,7 +278,14 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Full Description</FormLabel>
+                    <div className="flex items-center justify-between">
+                      <FormLabel>Full Description</FormLabel>
+                      {!isGeneratingDescription && (
+                        <span className="text-xs text-muted-foreground">
+                          Use AI Assist above to generate both
+                        </span>
+                      )}
+                    </div>
                     <FormControl>
                       <Textarea 
                         placeholder="Detailed description of your product..." 
@@ -230,7 +381,24 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
                 name="tags"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tags</FormLabel>
+                    <div className="flex items-center justify-between">
+                      <FormLabel>Tags</FormLabel>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleAITags}
+                        disabled={isGeneratingTags || !title}
+                        className="h-6 text-xs gap-1 px-2"
+                      >
+                        {isGeneratingTags ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Sparkles className="h-3 w-3" />
+                        )}
+                        Suggest
+                      </Button>
+                    </div>
                     <FormControl>
                       <Input placeholder="weight loss, strength, HIIT" {...field} />
                     </FormControl>
@@ -297,22 +465,81 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
               />
             </div>
 
-            {/* URLs */}
+            {/* Cover Image */}
             <div className="space-y-4">
-              <FormField
-                control={form.control}
-                name="cover_image_url"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Cover Image URL</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <FormLabel>Cover Image</FormLabel>
+              <Tabs value={imageTab} onValueChange={(v) => setImageTab(v as "upload" | "url")}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="upload" className="gap-2">
+                    <Upload className="h-4 w-4" />
+                    Upload Image
+                  </TabsTrigger>
+                  <TabsTrigger value="url" className="gap-2">
+                    <Link className="h-4 w-4" />
+                    Paste URL
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="upload" className="space-y-3">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  {uploadedImageUrl ? (
+                    <div className="relative">
+                      <img 
+                        src={uploadedImageUrl} 
+                        alt="Cover preview" 
+                        className="w-full h-40 object-cover rounded-lg"
+                      />
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        className="absolute bottom-2 right-2"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        Change Image
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full h-24"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploading}
+                    >
+                      {isUploading ? (
+                        <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                      ) : (
+                        <Upload className="h-5 w-5 mr-2" />
+                      )}
+                      {isUploading ? "Uploading..." : "Click to upload cover image"}
+                    </Button>
+                  )}
+                </TabsContent>
+                <TabsContent value="url">
+                  <FormField
+                    control={form.control}
+                    name="cover_image_url"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input placeholder="https://..." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TabsContent>
+              </Tabs>
+            </div>
 
+            {/* Other URLs */}
+            <div className="space-y-4">
               <FormField
                 control={form.control}
                 name="preview_url"
