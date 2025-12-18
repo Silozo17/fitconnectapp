@@ -23,7 +23,7 @@ const Privacy = () => {
               Policy
             </span>
           </h1>
-          <p className="text-muted-foreground">Last updated: December 16, 2024</p>
+          <p className="text-muted-foreground">Last updated: December 18, 2024</p>
         </div>
       </section>
 
@@ -187,7 +187,13 @@ const Privacy = () => {
                 <p>
                   Your information may be transferred to and processed in countries other than your country of 
                   residence. These countries may have different data protection laws. We ensure appropriate 
-                  safeguards are in place for such transfers.
+                  safeguards are in place for such transfers in accordance with the UK General Data Protection 
+                  Regulation (UK GDPR) and the Data Protection Act 2018.
+                </p>
+                <p>
+                  For transfers outside the UK and EEA, we rely on adequacy decisions, Standard Contractual 
+                  Clauses (SCCs), or other lawful transfer mechanisms approved by the UK Information 
+                  Commissioner's Office (ICO).
                 </p>
 
                 <h2>11. Data Retention</h2>
@@ -198,20 +204,101 @@ const Privacy = () => {
                   where we need to retain it for legal compliance.
                 </p>
 
-                <h2>12. Changes to This Policy</h2>
+                <h2>12. Google Services Integration</h2>
+                <p>
+                  FitConnect integrates with various Google services to enhance your experience. This section 
+                  explains how we use Google APIs and your rights regarding this data.
+                </p>
+
+                <h3>Google Sign-In (OAuth 2.0)</h3>
+                <p>When you choose to sign in with Google, we access:</p>
+                <ul>
+                  <li>Your basic profile information (name, email address, profile picture)</li>
+                  <li>Your email address for account identification and communication</li>
+                </ul>
+                <p>
+                  We use this information solely to create and authenticate your FitConnect account. We do not 
+                  post to your Google account or access any other Google services without your explicit consent.
+                </p>
+
+                <h3>Google Calendar Integration</h3>
+                <p>
+                  Coaches and clients can optionally connect their Google Calendar to sync coaching sessions. 
+                  When you connect Google Calendar, we request access to:
+                </p>
+                <ul>
+                  <li><strong>calendar.events scope:</strong> To create, read, and update calendar events for your coaching sessions</li>
+                </ul>
+                <p>We use this access to:</p>
+                <ul>
+                  <li>Automatically add confirmed coaching sessions to your calendar</li>
+                  <li>Update calendar events when sessions are rescheduled</li>
+                  <li>Remove calendar events when sessions are cancelled</li>
+                </ul>
+                <p>
+                  We only access calendar events created by FitConnect. We do not read, modify, or delete your 
+                  other calendar events.
+                </p>
+
+                <h3>Google Fit Integration (Wearables)</h3>
+                <p>
+                  Clients can optionally connect Google Fit to sync fitness and health data. When you connect 
+                  Google Fit, we may request access to:
+                </p>
+                <ul>
+                  <li><strong>fitness.activity.read:</strong> To read your activity data (steps, active minutes, calories burned)</li>
+                  <li><strong>fitness.body.read:</strong> To read body measurements (weight, body fat percentage)</li>
+                  <li><strong>fitness.sleep.read:</strong> To read sleep data for wellness tracking</li>
+                </ul>
+                <p>We use this data to:</p>
+                <ul>
+                  <li>Display your fitness metrics on your dashboard</li>
+                  <li>Share relevant data with your connected coaches (with your consent)</li>
+                  <li>Track progress towards fitness goals and habits</li>
+                  <li>Verify challenge completion for gamification features</li>
+                </ul>
+
+                <h3>Revoking Google Access</h3>
+                <p>
+                  You can disconnect Google services from FitConnect at any time through your account settings. 
+                  Additionally, you can revoke FitConnect's access to your Google account directly through Google:
+                </p>
+                <ul>
+                  <li>Visit <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">myaccount.google.com/permissions</a></li>
+                  <li>Find "FitConnect" in the list of apps with access</li>
+                  <li>Click "Remove Access" to revoke all permissions</li>
+                </ul>
+                <p>
+                  When you disconnect or revoke access, we stop receiving new data from Google services. Previously 
+                  synced data remains in your FitConnect account unless you request its deletion.
+                </p>
+
+                <h3>Google Data Retention</h3>
+                <p>
+                  Data synced from Google services is retained in accordance with our general data retention 
+                  policy (Section 11). Calendar event data is retained for the duration of your account. Fitness 
+                  data from Google Fit is retained for up to 2 years for progress tracking purposes, or until 
+                  you request deletion.
+                </p>
+
+                <h2>13. Changes to This Policy</h2>
                 <p>
                   We may update this Privacy Policy from time to time. We will notify you of any changes by 
                   posting the new Privacy Policy on this page and updating the "Last updated" date. We encourage 
                   you to review this Privacy Policy periodically.
                 </p>
 
-                <h2>13. Contact Us</h2>
+                <h2>14. Contact Us</h2>
                 <p>If you have questions or concerns about this Privacy Policy or our data practices, please contact us:</p>
                 <ul>
                   <li>Email: {contact.privacyEmail}</li>
                   <li>Address: {contact.address}</li>
                   {contact.phone && <li>Phone: {contact.phone}</li>}
                 </ul>
+                <p>
+                  For UK-specific privacy inquiries or to contact our Data Protection representative, please 
+                  email {contact.privacyEmail} with "UK GDPR Request" in the subject line.
+                </p>
 
                 <p className="text-sm text-muted-foreground mt-8">
                   By using FitConnect, you acknowledge that you have read and understood this Privacy Policy 

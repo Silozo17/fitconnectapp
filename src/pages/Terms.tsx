@@ -23,7 +23,7 @@ const Terms = () => {
               Service
             </span>
           </h1>
-          <p className="text-muted-foreground">Last updated: December 16, 2024</p>
+          <p className="text-muted-foreground">Last updated: December 18, 2024</p>
         </div>
       </section>
 
@@ -40,9 +40,9 @@ const Terms = () => {
                   If you do not agree to these Terms, please do not use the Platform.
                 </p>
                 <p>
-                  These Terms constitute a legally binding agreement between you and FitConnect Inc. ("FitConnect," 
-                  "we," "us," or "our"). We may update these Terms from time to time, and your continued use of the 
-                  Platform constitutes acceptance of any changes.
+                  These Terms constitute a legally binding agreement between you and FitConnect Ltd, a company 
+                  registered in England and Wales ("FitConnect," "we," "us," or "our"). We may update these Terms 
+                  from time to time, and your continued use of the Platform constitutes acceptance of any changes.
                 </p>
 
                 <h2>2. Description of Service</h2>
@@ -195,13 +195,17 @@ const Terms = () => {
 
                 <h2>12. Dispute Resolution</h2>
                 <p>
-                  Any disputes arising from these Terms or your use of the Platform shall be resolved through binding 
-                  arbitration in San Francisco, California, in accordance with the American Arbitration Association 
-                  rules. You waive any right to participate in a class action lawsuit or class-wide arbitration.
+                  We hope to resolve any disputes amicably. If you have a complaint, please contact us first at{" "}
+                  {contact.legalEmail} and we will try to resolve the matter.
                 </p>
                 <p>
                   For disputes between Clients and Coaches regarding services, both parties agree to first attempt 
-                  resolution through FitConnect's support team before pursuing arbitration.
+                  resolution through FitConnect's support team before pursuing formal proceedings.
+                </p>
+                <p>
+                  If we cannot resolve a dispute informally, any legal proceedings shall be brought exclusively in 
+                  the courts of England and Wales. Both parties agree to submit to the exclusive jurisdiction of 
+                  these courts.
                 </p>
 
                 <h2>13. Termination</h2>
@@ -213,8 +217,9 @@ const Terms = () => {
 
                 <h2>14. Governing Law</h2>
                 <p>
-                  These Terms shall be governed by and construed in accordance with the laws of the State of California, 
-                  without regard to conflict of law principles.
+                  These Terms shall be governed by and construed in accordance with the laws of England and Wales. 
+                  Nothing in these Terms shall affect your statutory rights as a consumer under applicable UK law, 
+                  including the Consumer Rights Act 2015.
                 </p>
 
                 <h2>15. Severability</h2>
