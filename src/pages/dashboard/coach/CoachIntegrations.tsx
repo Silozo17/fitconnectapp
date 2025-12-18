@@ -3,8 +3,10 @@ import VideoProviderCard from "@/components/integrations/VideoProviderCard";
 import CalendarConnectionCard from "@/components/integrations/CalendarConnectionCard";
 import { useVideoConference, VideoProvider } from "@/hooks/useVideoConference";
 import { useCalendarSync, CalendarProvider } from "@/hooks/useCalendarSync";
-import { Video, Calendar } from "lucide-react";
+import { Video, Calendar, Shield } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { Link } from "react-router-dom";
+import { Card } from "@/components/ui/card";
 
 const videoProviders: {
   id: VideoProvider;
@@ -139,6 +141,31 @@ const CoachIntegrations = () => {
             })}
           </div>
         </div>
+
+        <Separator />
+
+        {/* Data & Privacy */}
+        <Card className="p-4 bg-muted/50 border-muted">
+          <div className="flex items-start gap-3">
+            <Shield className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+            <div className="space-y-2">
+              <h3 className="font-medium">Data & Privacy</h3>
+              <p className="text-sm text-muted-foreground">
+                When you connect integrations, your data is handled according to our privacy practices. 
+                Learn more about how we protect your data.
+              </p>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                <Link to="/privacy#integrations" className="text-primary hover:underline">
+                  Privacy Policy
+                </Link>
+                <span className="text-muted-foreground">•</span>
+                <Link to="/terms" className="text-primary hover:underline">
+                  Terms of Service
+                </Link>
+              </div>
+            </div>
+          </div>
+        </Card>
       </div>
     </DashboardLayout>
   );
