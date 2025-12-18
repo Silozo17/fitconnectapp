@@ -149,3 +149,15 @@ verify_jwt = false
 
 [functions.sitemap]
 verify_jwt = false
+
+[functions.send-otp-email]
+verify_jwt = false
+
+[functions.verify-otp]
+verify_jwt = false
+
+[functions.places-autocomplete]
+verify_jwt = false
+
+[functions.places-details]
+verify_jwt = false

@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dumbbell, ArrowRight, ArrowLeft, Check, Loader2, Crown, Zap, Sparkles, Star } from "lucide-react";
 import { toast } from "sonner";
 import { ProfileImageUpload } from "@/components/shared/ProfileImageUpload";
+import { LocationAutocomplete } from "@/components/shared/LocationAutocomplete";
 import StripeConnectOnboardingStep from "@/components/onboarding/StripeConnectOnboardingStep";
 import IntegrationsOnboardingStep from "@/components/onboarding/IntegrationsOnboardingStep";
 import DualAccountStep from "@/components/onboarding/DualAccountStep";
@@ -54,6 +55,17 @@ const getDisplayableTiers = () => {
     }));
 };
 
+interface LocationData {
+  place_id: string;
+  formatted_address: string;
+  city: string;
+  region: string;
+  country: string;
+  country_code: string;
+  lat: number;
+  lng: number;
+}
+
 const CoachOnboarding = () => {
   const [searchParams] = useSearchParams();
   const [currentStep, setCurrentStep] = useState(0);
@@ -71,6 +83,7 @@ const CoachOnboarding = () => {
     primaryCoachType: "" as string,
     hourlyRate: "",
     location: "",
+    locationData: null as LocationData | null,
     onlineAvailable: true,
     inPersonAvailable: false,
     subscriptionTier: "free",
@@ -110,6 +123,14 @@ const CoachOnboarding = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleLocationChange = (location: string, data: LocationData | null) => {
+    setFormData((prev) => ({ 
+      ...prev, 
+      location, 
+      locationData: data 
+    }));
+  };
+
   const handleMultiSelect = (field: string, value: string) => {
     setFormData((prev) => {
       const current = prev[field as keyof typeof formData] as string[];
@@ -144,6 +165,18 @@ const CoachOnboarding = () => {
       toast.error("Please select at least one specialty");
       return;
     }
+
+    // Validate availability step - require location if in-person is enabled
+    if (currentStep === 3) {
+      if (formData.inPersonAvailable && !formData.locationData) {
+        toast.error("Please select a valid location for in-person sessions");
+        return;
+      }
+      if (!formData.onlineAvailable && !formData.inPersonAvailable) {
+        toast.error("Please enable at least one session type (online or in-person)");
+        return;
+      }
+    }
     
     if (currentStep < STEPS.length - 1) {
       setCurrentStep((prev) => prev + 1);
@@ -171,23 +204,36 @@ const CoachOnboarding = () => {
       // For paid tiers, save as free first - payment will upgrade it
       const tierToSave = isPaidTier ? "free" : formData.subscriptionTier;
       
+      const updateData: Record<string, any> = {
+        display_name: formData.displayName || null,
+        bio: formData.bio || null,
+        experience_years: formData.experienceYears ? parseInt(formData.experienceYears) : null,
+        coach_types: formData.coachTypes,
+        primary_coach_type: formData.primaryCoachType || null,
+        hourly_rate: formData.hourlyRate ? parseFloat(formData.hourlyRate) : null,
+        location: formData.location || null,
+        online_available: formData.onlineAvailable,
+        in_person_available: formData.inPersonAvailable,
+        subscription_tier: tierToSave,
+        profile_image_url: formData.profileImageUrl,
+        also_client: formData.alsoClient,
+        onboarding_completed: true,
+      };
+
+      // Add structured location data if available
+      if (formData.locationData) {
+        updateData.location_city = formData.locationData.city;
+        updateData.location_region = formData.locationData.region;
+        updateData.location_country = formData.locationData.country;
+        updateData.location_country_code = formData.locationData.country_code;
+        updateData.location_lat = formData.locationData.lat;
+        updateData.location_lng = formData.locationData.lng;
+        updateData.location_place_id = formData.locationData.place_id;
+      }
+
       const { error } = await supabase
         .from("coach_profiles")
-        .update({
-          display_name: formData.displayName || null,
-          bio: formData.bio || null,
-          experience_years: formData.experienceYears ? parseInt(formData.experienceYears) : null,
-          coach_types: formData.coachTypes,
-          primary_coach_type: formData.primaryCoachType || null,
-          hourly_rate: formData.hourlyRate ? parseFloat(formData.hourlyRate) : null,
-          location: formData.location || null,
-          online_available: formData.onlineAvailable,
-          in_person_available: formData.inPersonAvailable,
-          subscription_tier: tierToSave,
-          profile_image_url: formData.profileImageUrl,
-          also_client: formData.alsoClient,
-          onboarding_completed: true,
-        })
+        .update(updateData)
         .eq("user_id", user.id);
 
       if (error) throw error;
@@ -445,17 +491,6 @@ const CoachOnboarding = () => {
                   <p className="text-muted-foreground">Let clients know how they can work with you.</p>
                 </div>
 
-                <div>
-                  <Label htmlFor="location" className="text-foreground">Location</Label>
-                  <Input
-                    id="location"
-                    value={formData.location}
-                    onChange={(e) => handleInputChange("location", e.target.value)}
-                    className="mt-1.5 bg-secondary border-border text-foreground"
-                    placeholder="London, UK"
-                  />
-                </div>
-
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-4 rounded-xl bg-secondary">
                     <div>
@@ -479,6 +514,24 @@ const CoachOnboarding = () => {
                     />
                   </div>
                 </div>
+
+                {/* Location - Required for in-person */}
+                {formData.inPersonAvailable && (
+                  <div>
+                    <Label className="text-foreground">
+                      Location <span className="text-destructive">*</span>
+                    </Label>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Select your city so clients can find you
+                    </p>
+                    <LocationAutocomplete
+                      value={formData.location}
+                      onLocationChange={handleLocationChange}
+                      placeholder="Search for your city..."
+                      required={formData.inPersonAvailable}
+                    />
+                  </div>
+                )}
               </div>
             )}
 

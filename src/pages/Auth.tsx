@@ -14,9 +14,11 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import BlobShape from "@/components/ui/blob-shape";
 import { PasswordStrengthIndicator } from "@/components/auth/PasswordStrengthIndicator";
+import { OTPVerification } from "@/components/auth/OTPVerification";
 import { validatePassword } from "@/utils/passwordValidation";
 import { usePasswordBreachCheck } from "@/hooks/usePasswordBreachCheck";
 import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
+import { supabase } from "@/integrations/supabase/client";
 
 const authSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -31,6 +33,8 @@ const Auth = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alsoFindCoach, setAlsoFindCoach] = useState(false);
   const [passwordValue, setPasswordValue] = useState("");
+  const [showOTPVerification, setShowOTPVerification] = useState(false);
+  const [pendingSignupData, setPendingSignupData] = useState<{ email: string; password: string } | null>(null);
   const { signIn, signUp, user, role } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -45,6 +49,7 @@ const Auth = () => {
     handleSubmit,
     formState: { errors },
     watch,
+    getValues,
   } = useForm<AuthFormData>({
     resolver: zodResolver(authSchema),
   });
@@ -71,6 +76,8 @@ const Auth = () => {
   useEffect(() => {
     resetBreachCheck();
     setPasswordValue("");
+    setShowOTPVerification(false);
+    setPendingSignupData(null);
   }, [isLogin, resetBreachCheck]);
 
   useEffect(() => {
@@ -92,6 +99,14 @@ const Auth = () => {
     }
   }, [user, role, navigate, returnUrl]);
 
+  // Send OTP email
+  const sendOTPEmail = async (email: string) => {
+    const { error } = await supabase.functions.invoke("send-otp-email", {
+      body: { email },
+    });
+    if (error) throw error;
+  };
+
   const onSubmit = async (data: AuthFormData) => {
     // For signup, validate password strength and breach status
     if (!isLogin) {
@@ -104,33 +119,35 @@ const Auth = () => {
         toast.error("This password was found in a data breach. Please choose a different password.");
         return;
       }
+
+      // Send OTP and show verification screen
+      setIsSubmitting(true);
+      try {
+        await sendOTPEmail(data.email);
+        setPendingSignupData({ email: data.email, password: data.password });
+        setShowOTPVerification(true);
+        toast.success("Verification code sent to your email");
+      } catch (error: any) {
+        console.error("Failed to send OTP:", error);
+        toast.error("Failed to send verification code. Please try again.");
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
     }
 
+    // Login flow
     setIsSubmitting(true);
-
     try {
-      if (isLogin) {
-        const { error } = await signIn(data.email, data.password);
-        if (error) {
-          if (error.message.includes("Invalid login credentials")) {
-            toast.error("Invalid email or password");
-          } else {
-            toast.error(error.message);
-          }
+      const { error } = await signIn(data.email, data.password);
+      if (error) {
+        if (error.message.includes("Invalid login credentials")) {
+          toast.error("Invalid email or password");
         } else {
-          toast.success("Welcome back!");
+          toast.error(error.message);
         }
       } else {
-        const { error } = await signUp(data.email, data.password, selectedRole);
-        if (error) {
-          if (error.message.includes("already registered")) {
-            toast.error("This email is already registered. Please log in instead.");
-          } else {
-            toast.error(error.message);
-          }
-        } else {
-          toast.success("Account created successfully!");
-        }
+        toast.success("Welcome back!");
       }
     } catch (error) {
       toast.error("An unexpected error occurred");
@@ -138,6 +155,90 @@ const Auth = () => {
       setIsSubmitting(false);
     }
   };
+
+  // Handle OTP verification success
+  const handleOTPVerified = async () => {
+    if (!pendingSignupData) return;
+
+    setIsSubmitting(true);
+    try {
+      const { error } = await signUp(pendingSignupData.email, pendingSignupData.password, selectedRole);
+      if (error) {
+        if (error.message.includes("already registered")) {
+          toast.error("This email is already registered. Please log in instead.");
+          setShowOTPVerification(false);
+          setIsLogin(true);
+        } else {
+          toast.error(error.message);
+        }
+      } else {
+        toast.success("Account created successfully!");
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred");
+    } finally {
+      setIsSubmitting(false);
+      setPendingSignupData(null);
+    }
+  };
+
+  // Handle going back from OTP screen
+  const handleOTPBack = () => {
+    setShowOTPVerification(false);
+    setPendingSignupData(null);
+  };
+
+  // Show OTP verification screen
+  if (showOTPVerification && pendingSignupData) {
+    return (
+      <>
+        <Helmet>
+          <title>Verify Your Email | FitConnect</title>
+        </Helmet>
+
+        <div className="min-h-screen bg-background flex">
+          {/* Left side - OTP Form */}
+          <div className="flex-1 flex items-center justify-center p-8">
+            <div className="w-full max-w-md">
+              {/* Logo */}
+              <Link to="/" className="flex items-center gap-2 mb-8">
+                <div className="w-10 h-10 rounded-xl gradient-bg-primary flex items-center justify-center">
+                  <Dumbbell className="w-5 h-5 text-white" />
+                </div>
+                <span className="font-display font-bold text-xl text-foreground">
+                  FitConnect
+                </span>
+              </Link>
+
+              <OTPVerification
+                email={pendingSignupData.email}
+                onVerified={handleOTPVerified}
+                onBack={handleOTPBack}
+              />
+            </div>
+          </div>
+
+          {/* Right side - Visual */}
+          <div className="hidden lg:flex flex-1 gradient-bg-primary items-center justify-center p-12 relative overflow-hidden">
+            <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+
+            <div className="text-center max-w-lg relative z-10">
+              <div className="w-24 h-24 rounded-3xl bg-white/20 backdrop-blur-xl flex items-center justify-center mx-auto mb-8">
+                <Dumbbell className="w-12 h-12 text-white" />
+              </div>
+              <h2 className="font-display text-4xl font-bold text-white mb-4">
+                One more step!
+              </h2>
+              <p className="text-white/80 text-lg">
+                Verify your email to complete registration and start your fitness journey.
+              </p>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
