@@ -675,6 +675,7 @@ export type Database = {
           connection_type: string | null
           created_at: string | null
           id: string
+          last_inbound_sync_at: string | null
           provider: Database["public"]["Enums"]["calendar_provider"]
           refresh_token: string | null
           sync_enabled: boolean | null
@@ -689,6 +690,7 @@ export type Database = {
           connection_type?: string | null
           created_at?: string | null
           id?: string
+          last_inbound_sync_at?: string | null
           provider: Database["public"]["Enums"]["calendar_provider"]
           refresh_token?: string | null
           sync_enabled?: boolean | null
@@ -703,6 +705,7 @@ export type Database = {
           connection_type?: string | null
           created_at?: string | null
           id?: string
+          last_inbound_sync_at?: string | null
           provider?: Database["public"]["Enums"]["calendar_provider"]
           refresh_token?: string | null
           sync_enabled?: boolean | null
@@ -3156,6 +3159,56 @@ export type Database = {
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      external_calendar_events: {
+        Row: {
+          calendar_connection_id: string | null
+          created_at: string | null
+          end_time: string
+          external_event_id: string
+          id: string
+          is_all_day: boolean | null
+          last_synced_at: string | null
+          source: string | null
+          start_time: string
+          title: string | null
+          user_id: string
+        }
+        Insert: {
+          calendar_connection_id?: string | null
+          created_at?: string | null
+          end_time: string
+          external_event_id: string
+          id?: string
+          is_all_day?: boolean | null
+          last_synced_at?: string | null
+          source?: string | null
+          start_time: string
+          title?: string | null
+          user_id: string
+        }
+        Update: {
+          calendar_connection_id?: string | null
+          created_at?: string | null
+          end_time?: string
+          external_event_id?: string
+          id?: string
+          is_all_day?: boolean | null
+          last_synced_at?: string | null
+          source?: string | null
+          start_time?: string
+          title?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_calendar_events_calendar_connection_id_fkey"
+            columns: ["calendar_connection_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_connections"
             referencedColumns: ["id"]
           },
         ]

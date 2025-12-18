@@ -146,10 +146,78 @@ async function createCalendarEvent(
         }
         return { success: true, eventId: data.id };
 
+      case "apple_calendar":
+        // Handle Apple Calendar via CalDAV
+        return await createCalDAVEvent(calendarConnection, session, title, sessionDate, endDate);
+
       default:
         return { success: false, error: "Unsupported calendar provider" };
     }
   } catch (error: any) {
     return { success: false, error: error?.message || "Unknown error" };
+  }
+}
+
+async function createCalDAVEvent(
+  connection: any,
+  session: any,
+  title: string,
+  startDate: Date,
+  endDate: Date
+): Promise<{ success: boolean; eventId?: string; error?: string }> {
+  try {
+    // Decrypt credentials
+    const credentials = JSON.parse(atob(connection.access_token));
+    const authString = btoa(`${credentials.email}:${credentials.password}`);
+
+    // Create iCalendar event
+    const eventUid = `fitconnect-${session.id}@getfitconnect.co.uk`;
+    
+    const formatDate = (date: Date) => {
+      return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    };
+
+    const icalEvent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//FitConnect//Coaching Session//EN
+BEGIN:VEVENT
+UID:${eventUid}
+DTSTAMP:${formatDate(new Date())}
+DTSTART:${formatDate(startDate)}
+DTEND:${formatDate(endDate)}
+SUMMARY:${title}
+DESCRIPTION:${session.session_type || 'Coaching'} session${session.is_online ? " (Online)" : ""}${session.notes ? `\\nNotes: ${session.notes}` : ""}
+LOCATION:${session.is_online ? (session.video_meeting_url || "Online") : (session.location || "TBD")}
+STATUS:CONFIRMED
+END:VEVENT
+END:VCALENDAR`;
+
+    // Build the calendar path
+    const caldavUrl = connection.caldav_server_url || "https://caldav.icloud.com";
+    const calendarPath = `${caldavUrl}/${credentials.email.split('@')[0]}/calendars/home/`;
+    const eventPath = `${calendarPath}${eventUid}.ics`;
+
+    // Create event using PUT
+    const putResponse = await fetch(eventPath, {
+      method: "PUT",
+      headers: {
+        "Authorization": `Basic ${authString}`,
+        "Content-Type": "text/calendar; charset=utf-8",
+      },
+      body: icalEvent,
+    });
+
+    console.log(`CalDAV PUT response for session ${session.id}: ${putResponse.status}`);
+
+    if (!putResponse.ok && putResponse.status !== 201 && putResponse.status !== 204) {
+      const errorText = await putResponse.text();
+      console.error("CalDAV PUT error:", errorText);
+      return { success: false, error: `Failed to sync event: ${putResponse.statusText}` };
+    }
+
+    return { success: true, eventId: eventUid };
+  } catch (error: any) {
+    console.error("CalDAV event creation error:", error);
+    return { success: false, error: error?.message || "CalDAV sync failed" };
   }
 }

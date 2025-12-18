@@ -262,6 +262,18 @@ export const useRespondToBooking = () => {
             // Video meeting creation is optional - don't fail the booking
           }
         }
+
+        // Auto-sync session to calendars (coach and client)
+        if (newSession) {
+          try {
+            await supabase.functions.invoke("calendar-sync-session", {
+              body: { sessionId: newSession.id },
+            });
+          } catch (err) {
+            console.error("Calendar sync failed (non-blocking):", err);
+            // Calendar sync is optional - don't fail the booking
+          }
+        }
       }
 
       return { status };
