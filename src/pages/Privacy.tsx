@@ -106,8 +106,21 @@ const Privacy = () => {
 
                 <h3>With Service Providers</h3>
                 <p>
-                  We share information with third-party service providers who perform services on our behalf, 
-                  including payment processing (Stripe), cloud hosting, analytics, and customer support.
+                  We share information with third-party service providers who perform services on our behalf:
+                </p>
+                <ul>
+                  <li><strong>Stripe:</strong> Payment processing and financial transactions</li>
+                  <li><strong>Supabase:</strong> Database hosting, authentication, and file storage</li>
+                  <li><strong>Resend:</strong> Transactional email delivery (booking confirmations, notifications)</li>
+                  <li><strong>Google Cloud:</strong> AI services for meal and workout suggestions</li>
+                  <li><strong>Zoom Video Communications:</strong> Video conferencing for online sessions</li>
+                  <li><strong>Apple (HealthKit):</strong> Health and fitness data synchronization</li>
+                  <li><strong>Fitbit:</strong> Activity and health data from Fitbit devices</li>
+                  <li><strong>Garmin:</strong> Training and activity data from Garmin devices</li>
+                </ul>
+                <p>
+                  These service providers are contractually obligated to protect your data and use it only for 
+                  the specific purposes we direct.
                 </p>
 
                 <h3>For Legal Purposes</h3>
@@ -241,7 +254,7 @@ const Privacy = () => {
                   other calendar events.
                 </p>
 
-                <h3>Google Fit Integration (Wearables)</h3>
+                <h3>Google Fit Integration</h3>
                 <p>
                   Clients can optionally connect Google Fit to sync fitness and health data. When you connect 
                   Google Fit, we may request access to:
@@ -274,22 +287,242 @@ const Privacy = () => {
                   synced data remains in your FitConnect account unless you request its deletion.
                 </p>
 
-                <h3>Google Data Retention</h3>
+                <h2>13. Apple HealthKit Integration</h2>
                 <p>
-                  Data synced from Google services is retained in accordance with our general data retention 
-                  policy (Section 11). Calendar event data is retained for the duration of your account. Fitness 
-                  data from Google Fit is retained for up to 2 years for progress tracking purposes, or until 
-                  you request deletion.
+                  FitConnect integrates with Apple HealthKit to provide comprehensive health and fitness tracking 
+                  for iOS users. This integration is optional and requires your explicit consent.
                 </p>
 
-                <h2>13. Changes to This Policy</h2>
+                <h3>Data We Access from HealthKit</h3>
+                <p>With your permission, we may read the following data types from Apple HealthKit:</p>
+                <ul>
+                  <li><strong>Activity Data:</strong> Steps, active energy burned, exercise minutes, stand hours</li>
+                  <li><strong>Workout Data:</strong> Workout type, duration, distance, calories burned</li>
+                  <li><strong>Body Measurements:</strong> Weight, height, body fat percentage, body mass index</li>
+                  <li><strong>Heart Data:</strong> Resting heart rate, heart rate variability (for recovery tracking)</li>
+                  <li><strong>Sleep Data:</strong> Sleep duration, sleep stages (if available)</li>
+                </ul>
+
+                <h3>How We Use HealthKit Data</h3>
+                <p>HealthKit data is used exclusively to:</p>
+                <ul>
+                  <li>Display your health metrics on your FitConnect dashboard</li>
+                  <li>Track progress toward fitness goals set with your coach</li>
+                  <li>Auto-complete habits linked to activity metrics (e.g., step goals)</li>
+                  <li>Verify challenge completion for gamification features</li>
+                  <li>Share relevant metrics with your connected coaches (with your explicit consent)</li>
+                </ul>
+
+                <h3>HealthKit Data Protection</h3>
+                <p>
+                  <strong>Important:</strong> In accordance with Apple's requirements and our commitment to your privacy:
+                </p>
+                <ul>
+                  <li>HealthKit data is <strong>never</strong> used for advertising or marketing purposes</li>
+                  <li>HealthKit data is <strong>never</strong> sold to third parties</li>
+                  <li>HealthKit data is <strong>never</strong> shared with third parties for their marketing purposes</li>
+                  <li>HealthKit data is stored securely using encryption and transmitted only over secure connections</li>
+                  <li>Access to your HealthKit data can be revoked at any time through iOS Settings</li>
+                </ul>
+
+                <h3>Revoking HealthKit Access</h3>
+                <p>You can revoke FitConnect's access to HealthKit at any time:</p>
+                <ul>
+                  <li>Go to iOS Settings → Privacy & Security → Health → FitConnect</li>
+                  <li>Toggle off any data types you no longer wish to share</li>
+                  <li>Or disable all access by turning off FitConnect entirely</li>
+                </ul>
+
+                <h2>14. Fitbit Integration</h2>
+                <p>
+                  FitConnect can connect to your Fitbit account to sync fitness and health data from your Fitbit 
+                  devices. This integration uses the official Fitbit Web API.
+                </p>
+
+                <h3>Data We Access from Fitbit</h3>
+                <p>With your authorization, we may access:</p>
+                <ul>
+                  <li><strong>Activity & Exercise:</strong> Steps, distance, floors climbed, active minutes, logged exercises</li>
+                  <li><strong>Body & Weight:</strong> Weight logs, body fat percentage, BMI</li>
+                  <li><strong>Sleep:</strong> Sleep duration, sleep stages, sleep score</li>
+                  <li><strong>Heart Rate:</strong> Resting heart rate, heart rate zones during exercise</li>
+                </ul>
+
+                <h3>How We Use Fitbit Data</h3>
+                <ul>
+                  <li>Sync your activity data to display on your FitConnect dashboard</li>
+                  <li>Track progress towards fitness goals and habits</li>
+                  <li>Share relevant metrics with your connected coaches</li>
+                  <li>Verify challenge completion for gamification features</li>
+                </ul>
+
+                <h3>Revoking Fitbit Access</h3>
+                <p>You can disconnect Fitbit from FitConnect at any time:</p>
+                <ul>
+                  <li>Through FitConnect: Settings → Integrations → Fitbit → Disconnect</li>
+                  <li>Through Fitbit: Visit <a href="https://www.fitbit.com/settings/applications" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">fitbit.com/settings/applications</a> and revoke FitConnect's access</li>
+                </ul>
+
+                <h2>15. Garmin Integration</h2>
+                <p>
+                  FitConnect integrates with Garmin Connect to sync training data from your Garmin devices. 
+                  This integration uses the official Garmin Connect API.
+                </p>
+
+                <h3>Data We Access from Garmin</h3>
+                <p>With your authorization, we may access:</p>
+                <ul>
+                  <li><strong>Activity Summaries:</strong> Daily steps, calories, distance, active minutes</li>
+                  <li><strong>Workout Data:</strong> Running, cycling, swimming, strength training activities with detailed metrics</li>
+                  <li><strong>Body Composition:</strong> Weight and body composition data from Garmin Index scales</li>
+                  <li><strong>Sleep Data:</strong> Sleep duration, sleep stages, sleep score</li>
+                  <li><strong>Stress & Recovery:</strong> Stress levels, Body Battery, HRV status</li>
+                </ul>
+
+                <h3>How We Use Garmin Data</h3>
+                <ul>
+                  <li>Display your training metrics and activity data on your dashboard</li>
+                  <li>Track progress towards fitness goals set with your coach</li>
+                  <li>Auto-complete habits linked to activity metrics</li>
+                  <li>Share relevant training data with your connected coaches</li>
+                </ul>
+
+                <h3>Revoking Garmin Access</h3>
+                <p>You can disconnect Garmin from FitConnect at any time:</p>
+                <ul>
+                  <li>Through FitConnect: Settings → Integrations → Garmin → Disconnect</li>
+                  <li>Through Garmin: Visit <a href="https://connect.garmin.com/modern/settings/accountInformation" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Garmin Connect Settings</a> → Connected Apps → Revoke FitConnect access</li>
+                </ul>
+
+                <h2>16. Video Conferencing (Zoom & Google Meet)</h2>
+                <p>
+                  FitConnect enables online coaching sessions through video conferencing integrations. 
+                  Coaches can create video meeting links for their sessions.
+                </p>
+
+                <h3>Zoom Integration</h3>
+                <p>When coaches connect their Zoom account, we request access to:</p>
+                <ul>
+                  <li>Create meeting links for scheduled coaching sessions</li>
+                  <li>Update or cancel meetings when sessions are rescheduled or cancelled</li>
+                </ul>
+                <p>
+                  <strong>Important:</strong> FitConnect does not record, store, or have access to the content of 
+                  your video calls. All video sessions are conducted directly through Zoom's infrastructure and 
+                  are subject to Zoom's Privacy Policy.
+                </p>
+
+                <h3>Google Meet Integration</h3>
+                <p>
+                  When Google Calendar is connected, coaches can generate Google Meet links for online sessions. 
+                  We only create meeting links; we do not record or access meeting content.
+                </p>
+
+                <h2>17. Mobile Application Permissions</h2>
+                <p>
+                  The FitConnect mobile application may request the following device permissions to provide our services:
+                </p>
+
+                <h3>Camera Access</h3>
+                <p>Used to:</p>
+                <ul>
+                  <li>Take and upload progress photos</li>
+                  <li>Take profile pictures</li>
+                  <li>Scan QR codes for quick actions</li>
+                </ul>
+                <p>Camera access is only activated when you explicitly use these features.</p>
+
+                <h3>Photo Library Access</h3>
+                <p>Used to:</p>
+                <ul>
+                  <li>Select existing photos for progress tracking</li>
+                  <li>Upload profile pictures from your gallery</li>
+                  <li>Save images generated by the app</li>
+                </ul>
+
+                <h3>Push Notifications</h3>
+                <p>Used to send you:</p>
+                <ul>
+                  <li>Session reminders and booking confirmations</li>
+                  <li>New message notifications</li>
+                  <li>Payment confirmations and receipts</li>
+                  <li>Challenge updates and achievement notifications</li>
+                  <li>Important account and security alerts</li>
+                </ul>
+                <p>You can manage notification preferences in your device settings or within the app.</p>
+
+                <h3>Location Services (Optional)</h3>
+                <p>If enabled, used to:</p>
+                <ul>
+                  <li>Find coaches near your location</li>
+                  <li>Display location-based leaderboards</li>
+                  <li>Improve coach discovery recommendations</li>
+                </ul>
+                <p>Location access is optional and can be disabled at any time in your device settings.</p>
+
+                <h3>Biometric Authentication (Optional)</h3>
+                <p>
+                  If your device supports Face ID or Touch ID, you can enable biometric authentication for 
+                  quick and secure login. Biometric data is processed entirely on your device and is never 
+                  transmitted to or stored by FitConnect.
+                </p>
+
+                <h2>18. Account Deletion</h2>
+                <p>
+                  You have the right to delete your FitConnect account at any time. This section explains 
+                  how to delete your account and what happens to your data.
+                </p>
+
+                <h3>How to Delete Your Account</h3>
+                <p>You can delete your account through the following methods:</p>
+                <ul>
+                  <li><strong>In-App:</strong> Go to Settings → Account → Delete Account</li>
+                  <li><strong>Email:</strong> Send a request to {contact.privacyEmail} with subject "Account Deletion Request"</li>
+                </ul>
+
+                <h3>What Happens When You Delete Your Account</h3>
+                <p><strong>Immediately deleted:</strong></p>
+                <ul>
+                  <li>Your profile information (name, bio, profile photo)</li>
+                  <li>Your fitness goals and preferences</li>
+                  <li>Your progress photos</li>
+                  <li>Your meal plans and workout plans</li>
+                  <li>Your connected device data (HealthKit, Fitbit, Garmin)</li>
+                  <li>Your notification preferences</li>
+                </ul>
+
+                <p><strong>Retained for 30 days (then deleted):</strong></p>
+                <ul>
+                  <li>Account recovery data (in case you change your mind)</li>
+                  <li>Backup copies in our disaster recovery systems</li>
+                </ul>
+
+                <p><strong>Retained as required by law:</strong></p>
+                <ul>
+                  <li>Payment transaction records (required for tax and accounting purposes, typically 7 years)</li>
+                  <li>Legal compliance records</li>
+                  <li>Fraud prevention data</li>
+                </ul>
+
+                <p><strong>Note for Coaches:</strong> If you have active clients or pending bookings, you will need 
+                  to complete or transfer these commitments before account deletion can be processed.</p>
+
+                <h3>Data Export Before Deletion</h3>
+                <p>
+                  Before deleting your account, you can request a copy of your data by going to Settings → 
+                  Privacy → Download My Data. We will provide your data in a machine-readable format (JSON/CSV) 
+                  within 30 days of your request.
+                </p>
+
+                <h2>19. Changes to This Policy</h2>
                 <p>
                   We may update this Privacy Policy from time to time. We will notify you of any changes by 
-                  posting the new Privacy Policy on this page and updating the "Last updated" date. We encourage 
-                  you to review this Privacy Policy periodically.
+                  posting the new Privacy Policy on this page and updating the "Last updated" date. For 
+                  material changes, we will provide additional notice through in-app notifications or email. 
+                  We encourage you to review this Privacy Policy periodically.
                 </p>
 
-                <h2>14. Contact Us</h2>
+                <h2>20. Contact Us</h2>
                 <p>If you have questions or concerns about this Privacy Policy or our data practices, please contact us:</p>
                 <ul>
                   <li>Email: {contact.privacyEmail}</li>
