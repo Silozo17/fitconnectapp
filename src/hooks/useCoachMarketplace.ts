@@ -24,6 +24,15 @@ export type MarketplaceCoach = {
   selected_avatar_id: string | null;
   created_at: string;
   onboarding_completed: boolean;
+  // New fields
+  who_i_work_with: string | null;
+  facebook_url: string | null;
+  instagram_url: string | null;
+  tiktok_url: string | null;
+  x_url: string | null;
+  threads_url: string | null;
+  linkedin_url: string | null;
+  youtube_url: string | null;
   // Joined avatar data
   avatars?: {
     slug: string;
@@ -159,7 +168,9 @@ export const useCoachById = (coachId: string) => {
             online_available, in_person_available, profile_image_url,
             card_image_url, booking_mode, is_verified, verified_at,
             gym_affiliation, marketplace_visible, selected_avatar_id,
-            created_at, onboarding_completed,
+            created_at, onboarding_completed, who_i_work_with,
+            facebook_url, instagram_url, tiktok_url, x_url,
+            threads_url, linkedin_url, youtube_url,
             avatars(slug, rarity, image_url)
           `)
           .eq("id", coachId)
