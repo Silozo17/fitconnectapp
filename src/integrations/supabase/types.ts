@@ -5091,6 +5091,7 @@ export type Database = {
         Args: { coach_profile_id: string }
         Returns: boolean
       }
+      coach_is_visible: { Args: { check_coach_id: string }; Returns: boolean }
       generate_product_slug: {
         Args: { product_id: string; title: string }
         Returns: string
