@@ -68,9 +68,10 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}) =>
 
       // Query the GDPR-safe public view instead of the base table
       // This view only exposes safe columns and filters for active/visible coaches
+      // Join avatars table to get avatar data for display
       let query = supabase
         .from("public_coach_profiles")
-        .select("*");
+        .select("*, avatars(slug, rarity, image_url)");
 
       // Apply filters
       if (options.search) {
