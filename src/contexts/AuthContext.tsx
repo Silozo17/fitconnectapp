@@ -102,7 +102,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       password,
     });
 
-    return { error };
+    // Return generic error message to prevent user enumeration attacks
+    if (error) {
+      return { error: new Error('Invalid email or password') };
+    }
+    return { error: null };
   };
 
   const signOut = async () => {
