@@ -125,7 +125,7 @@ const FeaturedCoaches = () => {
             {coachesToShow.map((coach) => (
               <Link
                 key={coach.id}
-                to={`/coaches/${coach.id}`}
+                to={`/coaches/${coach.username || coach.id}`}
                 className="group card-elevated overflow-hidden hover-lift"
               >
                 {/* Image */}

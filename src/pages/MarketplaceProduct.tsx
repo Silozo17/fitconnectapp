@@ -363,7 +363,7 @@ export default function MarketplaceProduct() {
                     <p className="text-sm text-muted-foreground mb-3">Created by</p>
                     <div 
                       className="flex items-center gap-3 cursor-pointer hover:bg-muted/50 p-2 rounded-lg -mx-2"
-                      onClick={() => navigate(`/coaches/${product.coach_id}`)}
+                      onClick={() => navigate(`/coaches/${product.coach_profiles?.username || product.coach_id}`)}
                     >
                       <UserAvatar
                         name={product.coach_profiles?.display_name || "Coach"}

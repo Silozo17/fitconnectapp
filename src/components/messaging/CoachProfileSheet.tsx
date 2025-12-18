@@ -31,12 +31,13 @@ export const CoachProfileSheet = ({
     queryFn: async () => {
       if (!coachProfileId) return null;
 
-      const [profileResult, reviewsResult, badgesResult] = await Promise.all([
+        const [profileResult, reviewsResult, badgesResult] = await Promise.all([
         supabase
           .from('coach_profiles')
           .select(`
             *,
-            avatars:selected_avatar_id(slug, rarity, image_url)
+            avatars:selected_avatar_id(slug, rarity, image_url),
+            username
           `)
           .eq('id', coachProfileId)
           .single(),
@@ -212,13 +213,13 @@ export const CoachProfileSheet = ({
             {/* Actions */}
             <div className="space-y-3">
               <Button asChild className="w-full" variant="outline">
-                <Link to={`/coaches/${coachProfileId}`}>
+                <Link to={`/coaches/${profile.username || coachProfileId}`}>
                   <ExternalLink className="h-4 w-4 mr-2" />
                   View Full Profile
                 </Link>
               </Button>
               <Button asChild className="w-full">
-                <Link to={`/coaches/${coachProfileId}?book=true`}>
+                <Link to={`/coaches/${profile.username || coachProfileId}?book=true`}>
                   <Calendar className="h-4 w-4 mr-2" />
                   Book a Session
                 </Link>

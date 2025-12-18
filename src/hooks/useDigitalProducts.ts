@@ -34,6 +34,7 @@ export interface DigitalProduct {
   coach_profiles?: {
     display_name: string | null;
     profile_image_url: string | null;
+    username?: string | null;
   };
   average_rating?: number;
   review_count?: number;
@@ -55,6 +56,7 @@ export interface DigitalBundle {
   coach_profiles?: {
     display_name: string | null;
     profile_image_url: string | null;
+    username?: string | null;
   };
   products?: DigitalProduct[];
 }
@@ -168,7 +170,8 @@ export function useDigitalProduct(productIdOrSlug: string) {
           coach_profiles (
             display_name,
             profile_image_url,
-            bio
+            bio,
+            username
           )
         `);
 
@@ -239,7 +242,8 @@ export function useDigitalBundle(bundleId: string) {
           *,
           coach_profiles (
             display_name,
-            profile_image_url
+            profile_image_url,
+            username
           )
         `)
         .eq("id", bundleId)
