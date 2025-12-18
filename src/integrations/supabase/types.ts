@@ -100,6 +100,13 @@ export type Database = {
             referencedRelation: "coach_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "admin_granted_subscriptions_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       admin_profiles: {
@@ -475,10 +482,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "booking_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "booking_requests_coach_id_fkey"
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_requests_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -543,10 +564,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "boost_client_attributions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "boost_client_attributions_coach_id_fkey"
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "boost_client_attributions_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -963,10 +998,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "client_notes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "client_notes_coach_id_fkey"
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_notes_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1198,10 +1247,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "client_progress_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "client_progress_coach_id_fkey"
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_progress_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -1327,6 +1390,13 @@ export type Database = {
             referencedRelation: "coach_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "coach_availability_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       coach_badges: {
@@ -1367,6 +1437,13 @@ export type Database = {
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_badges_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1411,6 +1488,13 @@ export type Database = {
             columns: ["coach_id"]
             isOneToOne: true
             referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_boosts_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: true
+            referencedRelation: "public_coach_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1462,10 +1546,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "coach_clients_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "coach_clients_coach_id_fkey"
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_clients_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1515,6 +1613,13 @@ export type Database = {
             referencedRelation: "coach_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "coach_dashboard_widgets_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       coach_feature_overrides: {
@@ -1554,6 +1659,13 @@ export type Database = {
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_feature_overrides_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -1618,10 +1730,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "coach_leads_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "coach_leads_coach_id_fkey"
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_leads_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1923,6 +2049,13 @@ export type Database = {
             referencedRelation: "coach_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "coach_verification_documents_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       coaching_sessions: {
@@ -2029,10 +2162,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "coaching_sessions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "coaching_sessions_coach_id_fkey"
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coaching_sessions_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -2081,10 +2228,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "connection_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "connection_requests_coach_id_fkey"
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "connection_requests_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -2189,6 +2350,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "content_purchases_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "content_purchases_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
@@ -2286,6 +2454,13 @@ export type Database = {
             referencedRelation: "coach_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "digital_bundles_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       digital_products: {
@@ -2376,6 +2551,13 @@ export type Database = {
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "digital_products_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -2529,6 +2711,13 @@ export type Database = {
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exercises_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -2687,6 +2876,13 @@ export type Database = {
             referencedRelation: "coach_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "foods_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       grocery_lists: {
@@ -2745,10 +2941,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "grocery_lists_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "grocery_lists_coach_id_fkey"
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grocery_lists_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -2895,6 +3105,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "health_data_sync_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "health_data_sync_wearable_connection_id_fkey"
             columns: ["wearable_connection_id"]
             isOneToOne: false
@@ -3006,6 +3223,13 @@ export type Database = {
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_templates_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -3195,10 +3419,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "plan_assignments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "plan_assignments_coach_id_fkey"
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_assignments_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -3388,6 +3626,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "review_disputes_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "review_disputes_review_id_fkey"
             columns: ["review_id"]
             isOneToOne: false
@@ -3446,10 +3691,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "reviews_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "reviews_coach_id_fkey"
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -3514,6 +3773,13 @@ export type Database = {
             referencedRelation: "coach_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "session_types_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       subscriptions: {
@@ -3559,6 +3825,13 @@ export type Database = {
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -3675,6 +3948,13 @@ export type Database = {
             referencedRelation: "coach_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "training_plans_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       transactions: {
@@ -3739,10 +4019,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "transactions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "transactions_coach_id_fkey"
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -3946,6 +4240,13 @@ export type Database = {
             referencedRelation: "coach_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "video_conference_settings_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       wearable_connections: {
@@ -4004,6 +4305,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wearable_connections_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -4070,6 +4378,121 @@ export type Database = {
           leaderboard_visible?: boolean | null
           selected_avatar_id?: string | null
           user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_profiles_selected_avatar_id_fkey"
+            columns: ["selected_avatar_id"]
+            isOneToOne: false
+            referencedRelation: "avatars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_coach_profiles: {
+        Row: {
+          bio: string | null
+          booking_mode: string | null
+          card_image_url: string | null
+          certifications: Json | null
+          coach_types: string[] | null
+          created_at: string | null
+          currency: string | null
+          display_name: string | null
+          experience_years: number | null
+          gym_affiliation: string | null
+          hourly_rate: number | null
+          id: string | null
+          in_person_available: boolean | null
+          is_verified: boolean | null
+          location: string | null
+          marketplace_visible: boolean | null
+          onboarding_completed: boolean | null
+          online_available: boolean | null
+          profile_image_url: string | null
+          selected_avatar_id: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          bio?: string | null
+          booking_mode?: string | null
+          card_image_url?: string | null
+          certifications?: Json | null
+          coach_types?: string[] | null
+          created_at?: string | null
+          currency?: string | null
+          display_name?: string | null
+          experience_years?: number | null
+          gym_affiliation?: string | null
+          hourly_rate?: number | null
+          id?: string | null
+          in_person_available?: boolean | null
+          is_verified?: boolean | null
+          location?: string | null
+          marketplace_visible?: boolean | null
+          onboarding_completed?: boolean | null
+          online_available?: boolean | null
+          profile_image_url?: string | null
+          selected_avatar_id?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          bio?: string | null
+          booking_mode?: string | null
+          card_image_url?: string | null
+          certifications?: Json | null
+          coach_types?: string[] | null
+          created_at?: string | null
+          currency?: string | null
+          display_name?: string | null
+          experience_years?: number | null
+          gym_affiliation?: string | null
+          hourly_rate?: number | null
+          id?: string | null
+          in_person_available?: boolean | null
+          is_verified?: boolean | null
+          location?: string | null
+          marketplace_visible?: boolean | null
+          onboarding_completed?: boolean | null
+          online_available?: boolean | null
+          profile_image_url?: string | null
+          selected_avatar_id?: string | null
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_profiles_selected_avatar_id_fkey"
+            columns: ["selected_avatar_id"]
+            isOneToOne: false
+            referencedRelation: "avatars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_leaderboard_profiles: {
+        Row: {
+          city: string | null
+          country: string | null
+          county: string | null
+          display_name: string | null
+          id: string | null
+          selected_avatar_id: string | null
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          county?: string | null
+          display_name?: never
+          id?: string | null
+          selected_avatar_id?: string | null
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          county?: string | null
+          display_name?: never
+          id?: string | null
+          selected_avatar_id?: string | null
         }
         Relationships: [
           {
