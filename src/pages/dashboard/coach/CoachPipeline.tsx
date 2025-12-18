@@ -84,10 +84,10 @@ const CoachPipeline = () => {
       const availableIds = clientIds.filter(id => !existingLeadClientIds.includes(id));
       if (availableIds.length === 0) return [];
       
-      // Fetch client profiles for available IDs
+      // Fetch client profiles for available IDs with unified avatar
       const { data: clients, error: clientError } = await supabase
         .from('client_profiles')
-        .select('id, first_name, last_name, location, fitness_goals, avatar_url')
+        .select('id, first_name, last_name, location, fitness_goals, avatar_url, user_profiles(avatar_url)')
         .in('id', availableIds);
       
       if (clientError) throw clientError;
@@ -157,6 +157,8 @@ const CoachPipeline = () => {
     const name = getFullName(lead);
     const stageIndex = STAGES.findIndex(s => s.key === lead.stage);
     const stage = STAGES[stageIndex];
+    // Use unified avatar from user_profiles, fallback to client_profiles avatar
+    const avatarUrl = lead.client_profile?.user_profiles?.avatar_url || lead.client_profile?.avatar_url || undefined;
     
     return (
       <Card key={lead.id} className={`mb-3 border-l-4 ${stage.borderColor} hover:shadow-md transition-shadow bg-card`}>
@@ -167,12 +169,12 @@ const CoachPipeline = () => {
               onClick={() => setProfileSheet({
                 clientId: lead.client_id,
                 name,
-                avatar: lead.client_profile?.avatar_url || undefined,
+                avatar: avatarUrl,
               })}
               className="flex-shrink-0"
             >
               <Avatar className="w-14 h-14 ring-2 ring-primary/20 hover:ring-primary/40 transition-all">
-                <AvatarImage src={lead.client_profile?.avatar_url || undefined} />
+                <AvatarImage src={avatarUrl} />
                 <AvatarFallback className="bg-primary/10 text-primary text-base font-medium">
                   {getInitials(lead.client_profile?.first_name, lead.client_profile?.last_name)}
                 </AvatarFallback>
@@ -206,7 +208,7 @@ const CoachPipeline = () => {
                       <DropdownMenuItem onClick={() => setProfileSheet({
                         clientId: lead.client_id,
                         name,
-                        avatar: lead.client_profile?.avatar_url || undefined,
+                        avatar: avatarUrl,
                       })}>
                         <Eye className="w-4 h-4 mr-2" />
                         View Profile
@@ -382,7 +384,7 @@ const CoachPipeline = () => {
                     className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
                   >
                     <Avatar className="w-12 h-12">
-                      <AvatarImage src={client.avatar_url || undefined} />
+                      <AvatarImage src={(client as any).user_profiles?.avatar_url || client.avatar_url || undefined} />
                       <AvatarFallback className="bg-primary/10 text-primary">
                         {getInitials(client.first_name, client.last_name)}
                       </AvatarFallback>
