@@ -42,15 +42,32 @@ const CreateProfileModal = ({
     setIsLoading(true);
 
     try {
-      // Generate a unique username
-      const baseUsername = (firstName || displayName || 'user').toLowerCase().replace(/[^a-z0-9]/g, '');
-      const randomSuffix = Math.floor(Math.random() * 9999);
-      const generatedUsername = `${baseUsername}${randomSuffix}`;
+      // Fetch existing user_profile to link and reuse username
+      const { data: existingUserProfile } = await supabase
+        .from("user_profiles")
+        .select("id, username")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      // Use existing username or generate a new one
+      let username: string;
+      let userProfileId: string | null = null;
+
+      if (existingUserProfile) {
+        username = existingUserProfile.username;
+        userProfileId = existingUserProfile.id;
+      } else {
+        // Generate a unique username if no user_profile exists (shouldn't happen normally)
+        const baseUsername = (firstName || displayName || 'user').toLowerCase().replace(/[^a-z0-9]/g, '');
+        const randomSuffix = Math.floor(Math.random() * 9999);
+        username = `${baseUsername}${randomSuffix}`;
+      }
 
       if (profileType === "client") {
         const { error } = await supabase.from("client_profiles").insert({
           user_id: user.id,
-          username: generatedUsername,
+          username,
+          user_profile_id: userProfileId,
           first_name: firstName || null,
           last_name: lastName || null,
           onboarding_completed: true,
@@ -62,7 +79,8 @@ const CreateProfileModal = ({
       } else {
         const { error } = await supabase.from("coach_profiles").insert({
           user_id: user.id,
-          username: generatedUsername,
+          username,
+          user_profile_id: userProfileId,
           display_name: displayName || `${firstName} ${lastName}`.trim() || null,
           subscription_tier: "free",
           onboarding_completed: true,

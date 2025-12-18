@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MessageSquare, UserMinus, MapPin, AtSign } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAdminView } from "@/contexts/AdminContext";
 import { toast } from "sonner";
 import { FriendProfileSheet } from "./FriendProfileSheet";
 import { UserAvatar } from "@/components/shared/UserAvatar";
@@ -33,7 +33,7 @@ interface ConnectionCardProps {
 
 export const ConnectionCard = ({ connection, currentUserId, onRemove }: ConnectionCardProps) => {
   const navigate = useNavigate();
-  const { role } = useAuth();
+  const { activeProfileType } = useAdminView();
   const [showProfile, setShowProfile] = useState(false);
   
   const profile = connection.profile;
@@ -53,7 +53,7 @@ export const ConnectionCard = ({ connection, currentUserId, onRemove }: Connecti
       toast.error("Unable to start conversation");
       return;
     }
-    const basePath = role === "coach" ? "/dashboard/coach" : "/dashboard/client";
+    const basePath = `/dashboard/${activeProfileType || "client"}`;
     navigate(`${basePath}/messages/${profileId}`);
   };
 
