@@ -29,41 +29,19 @@ const AddUserModal = ({ isOpen, onClose, onSuccess }: AddUserModalProps) => {
     setLoading(true);
 
     try {
-      // Create user with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            role: formData.role,
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-          },
+      // Use secure edge function for admin user creation
+      const { data, error } = await supabase.functions.invoke('admin-create-user', {
+        body: {
+          email: formData.email,
+          password: formData.password,
+          role: formData.role,
+          first_name: formData.first_name,
+          last_name: formData.last_name,
         },
       });
 
-      if (authError) throw authError;
-
-      // The trigger should handle profile creation
-      // But we can update the profile with additional data
-      if (authData.user) {
-        if (formData.role === "client") {
-          await supabase
-            .from("client_profiles")
-            .update({
-              first_name: formData.first_name,
-              last_name: formData.last_name,
-            })
-            .eq("user_id", authData.user.id);
-        } else if (formData.role === "coach") {
-          await supabase
-            .from("coach_profiles")
-            .update({
-              display_name: `${formData.first_name} ${formData.last_name}`.trim(),
-            })
-            .eq("user_id", authData.user.id);
-        }
-      }
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
       toast.success("User created successfully");
       onSuccess();
@@ -75,8 +53,9 @@ const AddUserModal = ({ isOpen, onClose, onSuccess }: AddUserModalProps) => {
         first_name: "",
         last_name: "",
       });
-    } catch (error: any) {
-      toast.error("Failed to create user: " + error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      toast.error("Failed to create user: " + errorMessage);
     } finally {
       setLoading(false);
     }

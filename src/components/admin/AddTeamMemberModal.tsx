@@ -30,40 +30,20 @@ const AddTeamMemberModal = ({ isOpen, onClose, onSuccess }: AddTeamMemberModalPr
     setLoading(true);
 
     try {
-      // Create user with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            role: formData.role,
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-          },
+      // Use secure edge function for admin user creation
+      const { data, error } = await supabase.functions.invoke('admin-create-user', {
+        body: {
+          email: formData.email,
+          password: formData.password,
+          role: formData.role,
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          department: formData.department,
         },
       });
 
-      if (authError) throw authError;
-
-      // Update the admin profile with additional data
-      if (authData.user) {
-        // Wait a moment for the trigger to create the profile
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        const { error: updateError } = await supabase
-          .from("admin_profiles")
-          .update({
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-            display_name: `${formData.first_name} ${formData.last_name}`.trim(),
-            department: formData.department,
-          })
-          .eq("user_id", authData.user.id);
-
-        if (updateError) {
-          console.error("Error updating profile:", updateError);
-        }
-      }
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
       toast.success("Team member added successfully");
       onSuccess();
@@ -76,8 +56,9 @@ const AddTeamMemberModal = ({ isOpen, onClose, onSuccess }: AddTeamMemberModalPr
         last_name: "",
         department: "",
       });
-    } catch (error: any) {
-      toast.error("Failed to add team member: " + error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      toast.error("Failed to add team member: " + errorMessage);
     } finally {
       setLoading(false);
     }
