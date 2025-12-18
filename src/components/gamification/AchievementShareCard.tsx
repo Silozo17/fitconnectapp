@@ -1,5 +1,4 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Trophy, Star, Target, TrendingUp, Zap } from 'lucide-react';
 import { ShareAchievementButton, ShareableAchievement } from './ShareAchievementButton';
 
@@ -43,9 +42,9 @@ export function AchievementShareCard({ achievement, userName }: AchievementShare
     <Card className={`overflow-hidden bg-gradient-to-br ${getGradient()} border-primary/20`}>
       <CardContent className="p-6">
         <div className="flex items-start justify-between mb-4">
-          <Badge variant="outline" className="text-xs">
+          <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold border-border bg-transparent">
             {getLabel()}
-          </Badge>
+          </span>
           <ShareAchievementButton achievement={achievement} />
         </div>
 
