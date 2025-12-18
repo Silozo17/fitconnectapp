@@ -1,15 +1,34 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tables } from "@/integrations/supabase/types";
 
-// Use the database type directly, with optional new fields
-export type MarketplaceCoach = Tables<"coach_profiles"> & {
+// Type for public coach profile data (GDPR-safe columns only)
+export type MarketplaceCoach = {
+  id: string;
+  display_name: string | null;
+  bio: string | null;
+  coach_types: string[] | null;
+  certifications: unknown | null;
+  experience_years: number | null;
+  hourly_rate: number | null;
+  currency: string | null;
+  location: string | null;
+  online_available: boolean | null;
+  in_person_available: boolean | null;
+  profile_image_url: string | null;
+  card_image_url: string | null;
+  booking_mode: string | null;
+  is_verified: boolean | null;
+  verified_at: string | null;
+  gym_affiliation: string | null;
+  marketplace_visible: boolean | null;
+  selected_avatar_id: string | null;
+  created_at: string;
+  onboarding_completed: boolean;
+  // Computed/added fields
   rating?: number | null;
   reviews_count?: number | null;
   is_sponsored?: boolean | null;
   tags?: string[] | null;
-  gym_affiliation?: string | null;
-  card_image_url?: string | null;
 };
 
 interface UseCoachMarketplaceOptions {
@@ -41,12 +60,11 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}) =>
         boostedCoachIds = (boosts || []).map(b => b.coach_id);
       }
 
+      // Query the GDPR-safe public view instead of the base table
+      // This view only exposes safe columns and filters for active/visible coaches
       let query = supabase
-        .from("coach_profiles")
-        .select("*")
-        .eq("onboarding_completed", true)
-        .eq("marketplace_visible", true)
-        .or("status.is.null,status.eq.active");
+        .from("public_coach_profiles")
+        .select("*");
 
       // Apply filters
       if (options.search) {
@@ -88,11 +106,12 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}) =>
 
       if (error) throw error;
 
-      // Mark sponsored coaches and sort them first
-      const coaches = (data || []).map(coach => ({
+      // Cast and mark sponsored coaches
+      const rawData = (data || []) as unknown as MarketplaceCoach[];
+      const coaches = rawData.map(coach => ({
         ...coach,
         is_sponsored: boostedCoachIds.includes(coach.id),
-      })) as MarketplaceCoach[];
+      }));
 
       // Sort: sponsored first (randomized among themselves), then non-sponsored
       if (showSponsoredFirst && boostedCoachIds.length > 0) {
@@ -118,14 +137,16 @@ export const useCoachById = (coachId: string) => {
   return useQuery({
     queryKey: ["coach", coachId],
     queryFn: async () => {
+      // For individual coach view, use the public view for unauthenticated users
+      // This ensures only safe columns are exposed
       const { data, error } = await supabase
-        .from("coach_profiles")
+        .from("public_coach_profiles")
         .select("*")
         .eq("id", coachId)
         .maybeSingle();
 
       if (error) throw error;
-      return data as MarketplaceCoach | null;
+      return (data as unknown as MarketplaceCoach) || null;
     },
     enabled: !!coachId,
     staleTime: 1000 * 60 * 5, // 5 minutes

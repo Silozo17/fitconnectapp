@@ -22,17 +22,27 @@ interface LocationOption {
   count: number;
 }
 
+// Type for the GDPR-safe public leaderboard view
+interface PublicLeaderboardProfile {
+  id: string;
+  display_name: string;
+  city: string | null;
+  county: string | null;
+  country: string | null;
+  selected_avatar_id: string | null;
+}
+
 const fetchLeaderboardData = async (
   locationType: 'global' | 'city' | 'county' | 'country',
   locationValue?: string,
   limit: number = 10,
   offset: number = 0
 ): Promise<LeaderboardResult> => {
-  // First get total count of opted-in users
+  // Query the GDPR-safe public view instead of the base table
+  // This view only exposes safe columns (no health data, no full names)
   let countQuery = supabase
-    .from('client_profiles')
-    .select('id', { count: 'exact', head: true })
-    .eq('leaderboard_visible', true);
+    .from('public_leaderboard_profiles')
+    .select('id', { count: 'exact', head: true });
 
   if (locationType !== 'global' && locationValue) {
     countQuery = countQuery.eq(locationType, locationValue);
@@ -40,11 +50,10 @@ const fetchLeaderboardData = async (
 
   const { count } = await countQuery;
 
-  // Get XP data for opted-in profiles
+  // Get profile data from the GDPR-safe view
   let profilesQuery = supabase
-    .from('client_profiles')
-    .select('id, first_name, leaderboard_display_name, city, county, country')
-    .eq('leaderboard_visible', true);
+    .from('public_leaderboard_profiles')
+    .select('id, display_name, city, county, country');
 
   if (locationType !== 'global' && locationValue) {
     profilesQuery = profilesQuery.eq(locationType, locationValue);
@@ -56,7 +65,8 @@ const fetchLeaderboardData = async (
     return { entries: [], totalParticipants: count || 0 };
   }
 
-  const profileIds = profiles.map(p => p.id);
+  const typedProfiles = profiles as unknown as PublicLeaderboardProfile[];
+  const profileIds = typedProfiles.map(p => p.id);
   
   const { data: xpData, error: xpError } = await supabase
     .from('client_xp')
@@ -69,13 +79,13 @@ const fetchLeaderboardData = async (
     return { entries: [], totalParticipants: count || 0 };
   }
 
-  const profileMap = new Map(profiles.map(p => [p.id, p]));
+  const profileMap = new Map(typedProfiles.map(p => [p.id, p]));
 
   const entries: PublicLeaderboardEntry[] = xpData.map((xp, index) => {
     const profile = profileMap.get(xp.client_id);
     return {
       rank: offset + index + 1,
-      displayName: profile?.leaderboard_display_name || profile?.first_name || 'Anonymous',
+      displayName: profile?.display_name || 'Anonymous',
       city: profile?.city || null,
       county: profile?.county || null,
       country: profile?.country || null,
@@ -90,17 +100,16 @@ const fetchLeaderboardData = async (
 const fetchLocationOptions = async (
   locationType: 'city' | 'county' | 'country'
 ): Promise<LocationOption[]> => {
+  // Query the GDPR-safe public view for location options
   const { data, error } = await supabase
-    .from('client_profiles')
-    .select(locationType)
-    .eq('leaderboard_visible', true)
-    .not(locationType, 'is', null);
+    .from('public_leaderboard_profiles')
+    .select(locationType);
 
   if (error || !data) return [];
 
   // Count occurrences
   const counts = new Map<string, number>();
-  data.forEach(row => {
+  (data as unknown as Record<string, string>[]).forEach((row) => {
     const value = row[locationType] as string;
     if (value) {
       counts.set(value, (counts.get(value) || 0) + 1);
