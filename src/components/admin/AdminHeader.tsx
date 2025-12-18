@@ -1,5 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useSelectedAvatar } from "@/hooks/useAvatars";
+import { useAdminView } from "@/contexts/AdminContext";
 import { Button } from "@/components/ui/button";
 import { LogOut, Search, User, Menu } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -25,6 +27,9 @@ const AdminHeader = ({ onMenuToggle }: AdminHeaderProps) => {
   const navigate = useNavigate();
   const { signOut, role } = useAuth();
   const { displayName, avatarUrl } = useUserProfile();
+  const { activeProfileType } = useAdminView();
+  const avatarProfileType = activeProfileType === 'admin' ? 'client' : activeProfileType as 'client' | 'coach';
+  const { data: selectedAvatar } = useSelectedAvatar(avatarProfileType);
 
   return (
     <header className="h-16 border-b border-border bg-card px-4 xl:px-6 flex items-center justify-between sticky top-0 z-10">
@@ -65,6 +70,8 @@ const AdminHeader = ({ onMenuToggle }: AdminHeaderProps) => {
               <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
                 <UserAvatar
                   src={avatarUrl}
+                  avatarSlug={selectedAvatar?.slug}
+                  avatarRarity={selectedAvatar?.rarity as any}
                   name={displayName}
                   className="h-10 w-10"
                 />
