@@ -140,7 +140,7 @@ const ProspectProfileSheet = ({
         ) : (
           <div className="mt-6 space-y-6">
             {/* Header */}
-            <div className="flex flex-col items-center text-center mt-8">
+            <div className="flex flex-col items-center text-center mt-20">
               <UserAvatar
                 src={clientProfile?.avatar_url || participantAvatar}
                 avatarSlug={(clientProfile?.avatars as any)?.slug}

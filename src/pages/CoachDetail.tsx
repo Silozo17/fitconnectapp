@@ -121,21 +121,15 @@ const CoachDetail = () => {
               <Card>
                 <CardContent className="p-6">
                   <div className="flex flex-col sm:flex-row gap-6">
-                    <div className="relative flex-shrink-0">
-                      {coach.profile_image_url ? (
-                        <img
-                          src={coach.profile_image_url}
-                          alt={coach.display_name || "Coach"}
-                          className="h-36 w-32 rounded-3xl object-cover ring-4 ring-border"
-                        />
-                      ) : (
-                        <UserAvatar
-                          src={null}
-                          name={coach.display_name}
-                          variant="squircle"
-                          size="lg"
-                        />
-                      )}
+                    <div className="relative flex-shrink-0 mt-10">
+                      <UserAvatar
+                        src={coach.profile_image_url}
+                        avatarSlug={coach.avatars?.slug}
+                        avatarRarity={coach.avatars?.rarity as any}
+                        name={coach.display_name}
+                        variant="squircle"
+                        size="lg"
+                      />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-start justify-between">

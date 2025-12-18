@@ -87,8 +87,8 @@ export const CoachProfileSheet = ({
           </div>
         ) : profile ? (
           <div className="space-y-6 mt-6">
-            {/* Profile Header */}
-            <div className="flex items-center gap-4">
+            {/* Profile Header - Centered Layout */}
+            <div className="flex flex-col items-center text-center mt-20">
               <UserAvatar
                 src={profile.profile_image_url || participantAvatar}
                 avatarSlug={profile.avatars?.slug}
@@ -98,16 +98,16 @@ export const CoachProfileSheet = ({
                 size="lg"
                 showRarityBorder
               />
-              <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-semibold truncate">{fullName}</h3>
+              <div className="mt-4">
+                <h3 className="text-lg font-semibold">{fullName}</h3>
                 {profile.location && (
-                  <p className="text-sm text-muted-foreground flex items-center gap-1">
+                  <p className="text-sm text-muted-foreground flex items-center justify-center gap-1 mt-1">
                     <MapPin className="h-3 w-3" />
                     {profile.location}
                   </p>
                 )}
                 {data?.reviewCount > 0 && (
-                  <div className="flex items-center gap-1 mt-1">
+                  <div className="flex items-center justify-center gap-1 mt-1">
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                     <span className="text-sm font-medium">{data.avgRating.toFixed(1)}</span>
                     <span className="text-xs text-muted-foreground">
