@@ -131,7 +131,9 @@ const Pricing = () => {
       <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-            {(Object.entries(SUBSCRIPTION_TIERS) as [TierKey, typeof SUBSCRIPTION_TIERS[TierKey]][]).map(([key, tier]) => {
+            {(Object.entries(SUBSCRIPTION_TIERS) as [TierKey, typeof SUBSCRIPTION_TIERS[TierKey]][])
+              .filter(([_, tier]) => !tier.adminOnly)
+              .map(([key, tier]) => {
               const Icon = tierIcons[key];
               const price = tier.prices[billingInterval];
               const isPopular = tier.highlighted;
