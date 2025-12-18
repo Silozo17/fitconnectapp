@@ -60,7 +60,10 @@ import { VerifiedBadge } from "@/components/verification/VerifiedBadge";
 import { AccountSecuritySection } from "@/components/shared/AccountSecuritySection";
 import { InvoiceSettingsSection } from "@/components/coach/InvoiceSettingsSection";
 import { format } from "date-fns";
-import { Upload, FileText, Trash2, CheckCircle, XCircle, Clock, AlertCircle, Eye } from "lucide-react";
+import { Upload, FileText, Trash2, CheckCircle, XCircle, Clock, AlertCircle, Eye, Users } from "lucide-react";
+import { CoachGalleryUpload } from "@/components/coach/CoachGalleryUpload";
+import { CoachGroupClassesManager } from "@/components/coach/CoachGroupClassesManager";
+import { CoachWhoIWorkWithSection } from "@/components/coach/CoachWhoIWorkWithSection";
 
 const coachTypes = ["Personal Trainer", "Nutritionist", "Boxing Coach", "MMA Coach", "Yoga Instructor", "CrossFit Coach"];
 
@@ -80,6 +83,7 @@ interface CoachProfile {
   card_image_url: string | null;
   subscription_tier: string | null;
   is_verified: boolean | null;
+  who_i_work_with: string | null;
 }
 
 const videoProviders: {
@@ -192,6 +196,7 @@ const CoachSettings = () => {
     card_image_url: null,
     subscription_tier: "free",
     is_verified: false,
+    who_i_work_with: null,
   });
 
   // Fetch coach profile with React Query
@@ -202,7 +207,7 @@ const CoachSettings = () => {
 
       const { data, error } = await supabase
         .from("coach_profiles")
-        .select("id, display_name, username, bio, location, gym_affiliation, experience_years, hourly_rate, currency, coach_types, online_available, in_person_available, profile_image_url, card_image_url, subscription_tier, is_verified")
+        .select("id, display_name, username, bio, location, gym_affiliation, experience_years, hourly_rate, currency, coach_types, online_available, in_person_available, profile_image_url, card_image_url, subscription_tier, is_verified, who_i_work_with")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -230,6 +235,7 @@ const CoachSettings = () => {
         card_image_url: coachData.card_image_url,
         subscription_tier: coachData.subscription_tier || "free",
         is_verified: coachData.is_verified ?? false,
+        who_i_work_with: coachData.who_i_work_with || null,
       });
     }
   }, [coachData]);
