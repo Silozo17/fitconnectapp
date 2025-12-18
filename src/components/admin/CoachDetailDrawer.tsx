@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,12 +19,14 @@ import { LockedAvatarsSection } from "./LockedAvatarsSection";
 import { useUserLastLogin } from "@/hooks/useUserLastLogin";
 import { useCoachAdminStats } from "@/hooks/useCoachAdminStats";
 import { useLogAdminAction } from "@/hooks/useAuditLog";
+import { usePlatformSettings } from "@/hooks/useAdminData";
+import { formatCurrency, type CurrencyCode } from "@/lib/currency";
 import { toast } from "sonner";
 import { 
   Users, Calendar, Package, CreditCard, Star, 
   Gift, Ban, RefreshCw, DollarSign, CheckCircle,
   Trophy, Trash2, Image, Loader2, Pencil, KeyRound, Pause, Clock,
-  ShieldCheck, ShieldX, ShieldAlert, Eye, EyeOff
+  ShieldCheck, ShieldX, ShieldAlert, Eye, EyeOff, ExternalLink
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -50,6 +53,10 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan,
   const [togglingVisibility, setTogglingVisibility] = useState(false);
   const queryClient = useQueryClient();
   const logAction = useLogAdminAction();
+
+  // Fetch platform settings for currency
+  const { data: platformSettings } = usePlatformSettings();
+  const platformCurrency = (platformSettings?.currency || 'GBP') as CurrencyCode;
 
   // Fetch last login
   const { data: lastLogin, isLoading: lastLoginLoading } = useUserLastLogin(coach?.user_id);
@@ -254,6 +261,14 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan,
               <Trash2 className="h-4 w-4 mr-2" />
               Delete Coach
             </Button>
+            {coach.username && (
+              <Button variant="outline" className="justify-start" asChild>
+                <Link to={`/coaches/${coach.username}`} target="_blank">
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  View Public Profile
+                </Link>
+              </Button>
+            )}
           </div>
 
           {/* Visibility Toggle Card */}
@@ -349,7 +364,7 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan,
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {pkg.session_count} sessions • £{pkg.price}
+                    {pkg.session_count} sessions • {formatCurrency(pkg.price, platformCurrency)}
                   </p>
                 </div>
               ))
@@ -370,7 +385,7 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan,
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
-                      £{plan.price}/{plan.billing_period}
+                      {formatCurrency(plan.price, platformCurrency)}/{plan.billing_period}
                     </p>
                   </div>
                 ))}
@@ -596,13 +611,13 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan,
               ) : (
                 <p className="flex items-center gap-1">
                   <DollarSign className="h-3 w-3 text-muted-foreground" />
-                  £{(adminStats?.totalCommissionPaid || 0).toFixed(2)}
+                  {formatCurrency(adminStats?.totalCommissionPaid || 0, platformCurrency)}
                 </p>
               )}
             </div>
             <div>
               <p className="text-muted-foreground">Hourly Rate</p>
-              <p>£{coach.hourly_rate || 0}/hr</p>
+              <p>{formatCurrency(coach.hourly_rate || 0, platformCurrency)}/hr</p>
             </div>
             <div>
               <p className="text-muted-foreground">Experience</p>
