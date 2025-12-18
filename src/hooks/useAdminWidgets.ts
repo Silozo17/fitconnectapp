@@ -365,7 +365,7 @@ export function useDashboardStats() {
           
         // Recent reviews
         supabase.from("reviews")
-          .select("id, rating, comment, created_at, client_profiles(first_name)")
+          .select("id, rating, review_text, created_at, client_profiles(first_name)")
           .order("created_at", { ascending: false }).limit(5),
           
         // Growth rate calculation
