@@ -13,9 +13,16 @@ interface BookedSession {
   duration_minutes: number;
 }
 
+interface ExternalEvent {
+  start_time: string;
+  end_time: string;
+  is_all_day: boolean;
+}
+
 interface AvailabilityCalendarProps {
   availability: CoachAvailability[];
   bookedSessions?: BookedSession[];
+  externalEvents?: ExternalEvent[];
   onSelectSlot?: (date: Date, time: string) => void;
   selectedDate?: Date | null;
   selectedTime?: string | null;
@@ -38,6 +45,7 @@ const fullDayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "F
 const AvailabilityCalendar = ({
   availability,
   bookedSessions = [],
+  externalEvents = [],
   onSelectSlot,
   selectedDate,
   selectedTime,
@@ -68,6 +76,25 @@ const AvailabilityCalendar = ({
       const sessionEnd = new Date(sessionStart.getTime() + (session.duration_minutes + postBookingBuffer) * 60 * 1000);
 
       return slotStart < sessionEnd && slotEnd > sessionStart;
+    });
+  };
+
+  // Check if a slot overlaps with any external calendar event
+  const isSlotBlockedByExternalEvent = (date: Date, time: string) => {
+    const [hours, minutes] = time.split(":").map(Number);
+    const slotStart = setMinutes(setHours(date, hours), minutes);
+    const slotEnd = new Date(slotStart.getTime() + sessionDuration * 60 * 1000);
+
+    return externalEvents.some((event) => {
+      const eventStart = parseISO(event.start_time);
+      const eventEnd = parseISO(event.end_time);
+
+      // For all-day events, block the entire day
+      if (event.is_all_day && isSameDay(slotStart, eventStart)) {
+        return true;
+      }
+
+      return slotStart < eventEnd && slotEnd > eventStart;
     });
   };
 
@@ -111,6 +138,7 @@ const AvailabilityCalendar = ({
     
     if (slotTime < startTime || sessionEndTimeOnly > endTime) return false;
     if (isSlotBlockedByBooking(date, time)) return false;
+    if (isSlotBlockedByExternalEvent(date, time)) return false;
     if (!wouldSessionFit(date, time)) return false;
     
     // Check pre-booking buffer (minimum notice)

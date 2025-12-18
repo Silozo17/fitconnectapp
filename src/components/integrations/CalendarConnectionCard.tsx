@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Loader2, Check, Calendar, Unlink } from "lucide-react";
+import { Loader2, Check, Calendar, Unlink, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface CalendarConnectionCardProps {
+export interface CalendarConnectionCardProps {
   provider: string;
   providerName: string;
   providerIcon: React.ReactNode;
@@ -17,6 +17,7 @@ interface CalendarConnectionCardProps {
   onDisconnect: () => void;
   onToggleSync?: (enabled: boolean) => void;
   isConnecting?: boolean;
+  supportsTwoWaySync?: boolean;
 }
 
 const CalendarConnectionCard = ({
@@ -30,6 +31,7 @@ const CalendarConnectionCard = ({
   onDisconnect,
   onToggleSync,
   isConnecting,
+  supportsTwoWaySync = false,
 }: CalendarConnectionCardProps) => {
   return (
     <Card className="bg-card/50 border-border/50 hover:border-primary/30 transition-all">
@@ -46,12 +48,20 @@ const CalendarConnectionCard = ({
             </div>
             <div>
               <CardTitle className="text-lg">{providerName}</CardTitle>
-              {isConnected && (
-                <Badge variant="outline" className="mt-1 text-xs text-primary border-primary/30">
-                  <Check className="w-3 h-3 mr-1" />
-                  Connected
-                </Badge>
-              )}
+              <div className="flex items-center gap-2 mt-1">
+                {isConnected && (
+                  <Badge variant="outline" className="text-xs text-primary border-primary/30">
+                    <Check className="w-3 h-3 mr-1" />
+                    Connected
+                  </Badge>
+                )}
+                {supportsTwoWaySync && (
+                  <Badge variant="secondary" className="text-xs">
+                    <RefreshCw className="w-3 h-3 mr-1" />
+                    2-Way Sync
+                  </Badge>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -70,6 +80,11 @@ const CalendarConnectionCard = ({
                   onCheckedChange={onToggleSync}
                 />
               </div>
+            )}
+            {supportsTwoWaySync && (
+              <p className="text-xs text-muted-foreground">
+                Your calendar events will be synced to block availability for booking.
+              </p>
             )}
             <Button
               size="sm"
