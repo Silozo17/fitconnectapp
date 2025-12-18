@@ -52,6 +52,7 @@ export const useCoachReviews = (coachId: string | undefined) => {
       return data as unknown as Review[];
     },
     enabled: !!coachId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
 

@@ -1,19 +1,67 @@
 import { Link } from "react-router-dom";
-import { Heart, Loader2, MapPin, Star, Video, Users } from "lucide-react";
+import { Heart, Loader2, MapPin, Video, Users } from "lucide-react";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useFavouriteCoaches } from "@/hooks/useFavourites";
-import { useCoachReviews, calculateAverageRating } from "@/hooks/useReviews";
+import { calculateAverageRating, Review } from "@/hooks/useReviews";
 import FavouriteButton from "@/components/favourites/FavouriteButton";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import StarRating from "@/components/reviews/StarRating";
 import { formatCurrency, type CurrencyCode } from "@/lib/currency";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
-const FavouriteCoachCard = ({ coach }: { coach: any }) => {
-  const { data: reviews = [] } = useCoachReviews(coach.id);
-  const averageRating = calculateAverageRating(reviews);
+// Batch fetch reviews for all coaches at once
+const useBatchCoachReviews = (coachIds: string[]) => {
+  return useQuery({
+    queryKey: ["batch-coach-reviews", coachIds],
+    queryFn: async () => {
+      if (coachIds.length === 0) return {};
+      
+      const { data, error } = await supabase
+        .from("reviews")
+        .select("coach_id, rating")
+        .in("coach_id", coachIds)
+        .eq("is_public", true);
+      
+      if (error) throw error;
+      
+      // Group reviews by coach_id
+      const reviewsByCoach: Record<string, { ratings: number[]; count: number; average: number }> = {};
+      
+      data?.forEach((review) => {
+        if (!reviewsByCoach[review.coach_id]) {
+          reviewsByCoach[review.coach_id] = { ratings: [], count: 0, average: 0 };
+        }
+        reviewsByCoach[review.coach_id].ratings.push(review.rating);
+        reviewsByCoach[review.coach_id].count++;
+      });
+      
+      // Calculate averages
+      Object.keys(reviewsByCoach).forEach((coachId) => {
+        const { ratings } = reviewsByCoach[coachId];
+        reviewsByCoach[coachId].average = ratings.length > 0 
+          ? Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10
+          : 0;
+      });
+      
+      return reviewsByCoach;
+    },
+    enabled: coachIds.length > 0,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+};
+
+interface FavouriteCoachCardProps {
+  coach: any;
+  reviewData?: { count: number; average: number };
+}
+
+const FavouriteCoachCard = ({ coach, reviewData }: FavouriteCoachCardProps) => {
+  const averageRating = reviewData?.average || 0;
+  const reviewCount = reviewData?.count || 0;
 
   return (
     <Card className="group overflow-hidden hover:shadow-lg transition-shadow">
@@ -70,7 +118,7 @@ const FavouriteCoachCard = ({ coach }: { coach: any }) => {
                 </p>
               )}
             </div>
-            <StarRating rating={averageRating} reviewCount={reviews.length} size="sm" />
+            <StarRating rating={averageRating} reviewCount={reviewCount} size="sm" />
           </div>
 
           {/* Coach Types */}
@@ -110,6 +158,10 @@ const FavouriteCoachCard = ({ coach }: { coach: any }) => {
 
 const ClientFavourites = () => {
   const { data: coaches = [], isLoading } = useFavouriteCoaches();
+  
+  // Batch fetch all reviews for favourite coaches
+  const coachIds = coaches.map((c) => c.id);
+  const { data: reviewsMap = {} } = useBatchCoachReviews(coachIds);
 
   return (
     <ClientDashboardLayout
@@ -143,7 +195,11 @@ const ClientFavourites = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {coaches.map((coach) => (
-            <FavouriteCoachCard key={coach.id} coach={coach} />
+            <FavouriteCoachCard 
+              key={coach.id} 
+              coach={coach} 
+              reviewData={reviewsMap[coach.id]}
+            />
           ))}
         </div>
       )}

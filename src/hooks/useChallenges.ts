@@ -127,14 +127,20 @@ export function useAvailableChallenges() {
         .order('start_date', { ascending: true });
       if (error) throw error;
       
+      if (!data || data.length === 0) return [];
+      
       const challengeIds = data.map(c => c.id);
-      const { data: participantCounts } = await supabase.from('challenge_participants').select('challenge_id').in('challenge_id', challengeIds);
+      
+      // Guard against empty array for .in() query
+      const { data: participantCounts } = challengeIds.length > 0
+        ? await supabase.from('challenge_participants').select('challenge_id').in('challenge_id', challengeIds)
+        : { data: [] };
       
       const counts: Record<string, number> = {};
       participantCounts?.forEach(p => { counts[p.challenge_id] = (counts[p.challenge_id] || 0) + 1; });
       
       let myParticipations: Record<string, ChallengeParticipant> = {};
-      if (profile?.id) {
+      if (profile?.id && challengeIds.length > 0) {
         const { data: myData } = await supabase.from('challenge_participants').select('*').eq('client_id', profile.id).in('challenge_id', challengeIds);
         myData?.forEach(p => { myParticipations[p.challenge_id] = p as ChallengeParticipant; });
       }
@@ -147,6 +153,7 @@ export function useAvailableChallenges() {
         badge_reward: c.badge_reward as ChallengeReward | null,
       })) as Challenge[];
     },
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
 

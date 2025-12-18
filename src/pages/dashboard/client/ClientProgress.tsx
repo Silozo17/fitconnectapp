@@ -17,16 +17,17 @@ const ClientProgress = () => {
   const progress = data?.progress || [];
   const clientId = data?.clientId;
 
-  const latestEntry = progress[progress.length - 1];
-  const previousEntry = progress[progress.length - 2];
+  // Safe array access with guards
+  const latestEntry = progress.length > 0 ? progress[progress.length - 1] : null;
+  const previousEntry = progress.length > 1 ? progress[progress.length - 2] : null;
 
   const weightChange =
-    latestEntry?.weight_kg && previousEntry?.weight_kg
+    latestEntry?.weight_kg != null && previousEntry?.weight_kg != null
       ? Number(latestEntry.weight_kg) - Number(previousEntry.weight_kg)
       : null;
 
   const bodyFatChange =
-    latestEntry?.body_fat_percentage && previousEntry?.body_fat_percentage
+    latestEntry?.body_fat_percentage != null && previousEntry?.body_fat_percentage != null
       ? Number(latestEntry.body_fat_percentage) - Number(previousEntry.body_fat_percentage)
       : null;
 

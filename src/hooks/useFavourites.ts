@@ -76,6 +76,7 @@ export const useFavouriteCoaches = () => {
       return coaches as MarketplaceCoach[];
     },
     enabled: !!user,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
 
