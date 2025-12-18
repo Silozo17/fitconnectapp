@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -34,6 +34,10 @@ const Auth = () => {
   const { signIn, signUp, user, role } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  
+  // Get return URL from query params or location state
+  const returnUrl = searchParams.get("returnUrl") || (location.state?.from?.pathname ? `${location.state.from.pathname}${location.state.from.search || ''}` : null);
   const { checkPassword, isChecking: isCheckingBreach, isBreached, reset: resetBreachCheck } = usePasswordBreachCheck();
 
   const {
@@ -71,15 +75,22 @@ const Auth = () => {
 
   useEffect(() => {
     if (user && role) {
+      // If there's a return URL, redirect there instead of default dashboard
+      if (returnUrl) {
+        navigate(decodeURIComponent(returnUrl), { replace: true });
+        return;
+      }
+      
+      // Default role-based redirects
       if (role === "admin") {
-        navigate("/dashboard/admin");
+        navigate("/dashboard/admin", { replace: true });
       } else if (role === "client") {
-        navigate("/onboarding/client");
+        navigate("/onboarding/client", { replace: true });
       } else if (role === "coach") {
-        navigate("/onboarding/coach");
+        navigate("/onboarding/coach", { replace: true });
       }
     }
-  }, [user, role, navigate]);
+  }, [user, role, navigate, returnUrl]);
 
   const onSubmit = async (data: AuthFormData) => {
     // For signup, validate password strength and breach status
