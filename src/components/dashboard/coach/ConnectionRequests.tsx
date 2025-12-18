@@ -158,6 +158,11 @@ const ConnectionRequests = () => {
       });
 
       if (insertError) throw insertError;
+      
+      // Send email to coach about new client
+      await supabase.functions.invoke("send-new-client-email", {
+        body: { coachId: request.coach_id, clientId: request.client_id },
+      }).catch((err) => console.error("Failed to send new client email:", err));
     },
     onSuccess: () => {
       toast.success("Connection request accepted! Client added to your roster.");

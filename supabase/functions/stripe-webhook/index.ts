@@ -116,6 +116,23 @@ serve(async (req) => {
               description: `${metadata.package_name || "Training Package"} (${metadata.sessions_total || 0} sessions)`,
               stripePaymentIntentId: session.payment_intent as string,
             });
+            
+            // Send payment receipt email
+            try {
+              await supabase.functions.invoke("send-payment-receipt", {
+                body: {
+                  clientId: metadata.client_id,
+                  coachId: metadata.coach_id,
+                  amount: parseFloat(metadata.amount || "0"),
+                  currency: metadata.currency || "GBP",
+                  description: `${metadata.package_name || "Training Package"} (${metadata.sessions_total || 0} sessions)`,
+                  paymentIntentId: session.payment_intent as string,
+                },
+              });
+              console.log("Payment receipt email sent for package");
+            } catch (emailErr) {
+              console.error("Failed to send payment receipt email:", emailErr);
+            }
           }
         } else if (metadata.type === "subscription") {
           // Record subscription
@@ -149,6 +166,23 @@ serve(async (req) => {
               description: `${metadata.plan_name || "Subscription Plan"} - ${metadata.billing_period || "monthly"}`,
               stripePaymentIntentId: session.payment_intent as string,
             });
+            
+            // Send payment receipt email
+            try {
+              await supabase.functions.invoke("send-payment-receipt", {
+                body: {
+                  clientId: metadata.client_id,
+                  coachId: metadata.coach_id,
+                  amount: parseFloat(metadata.amount || "0"),
+                  currency: metadata.currency || "GBP",
+                  description: `${metadata.plan_name || "Subscription Plan"} - ${metadata.billing_period || "monthly"}`,
+                  paymentIntentId: session.payment_intent as string,
+                },
+              });
+              console.log("Payment receipt email sent for subscription");
+            } catch (emailErr) {
+              console.error("Failed to send payment receipt email:", emailErr);
+            }
           }
         } else if (metadata.type === "platform_subscription") {
           // Coach platform subscription
@@ -215,6 +249,23 @@ serve(async (req) => {
               description: `${metadata.session_type || "Training Session"} - ${paymentType === 'full' ? 'Full Payment' : 'Deposit'}`,
               stripePaymentIntentId: session.payment_intent as string,
             });
+            
+            // Send payment receipt email
+            try {
+              await supabase.functions.invoke("send-payment-receipt", {
+                body: {
+                  clientId: metadata.client_id,
+                  coachId: metadata.coach_id,
+                  amount: amountPaid,
+                  currency: metadata.currency || "GBP",
+                  description: `${metadata.session_type || "Training Session"} - ${paymentType === 'full' ? 'Full Payment' : 'Deposit'}`,
+                  paymentIntentId: session.payment_intent as string,
+                },
+              });
+              console.log("Payment receipt email sent");
+            } catch (emailErr) {
+              console.error("Failed to send payment receipt email:", emailErr);
+            }
           }
 
           // Handle Boost attribution if applicable

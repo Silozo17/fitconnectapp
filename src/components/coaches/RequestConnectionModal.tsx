@@ -91,15 +91,24 @@ const RequestConnectionModal = ({
     mutationFn: async () => {
       if (!clientProfile?.id) throw new Error("Client profile not found");
 
-      const { error } = await supabase
-        .from("connection_requests" as any)
+      const { data, error } = await supabase
+        .from("connection_requests")
         .insert({
           client_id: clientProfile.id,
           coach_id: coach.id,
           message: message.trim() || null,
-        } as any);
+        })
+        .select("id")
+        .single();
 
       if (error) throw error;
+      
+      // Send email notification to coach
+      if (data?.id) {
+        await supabase.functions.invoke("send-connection-request-email", {
+          body: { connectionRequestId: data.id },
+        }).catch((err) => console.error("Failed to send connection request email:", err));
+      }
     },
     onSuccess: () => {
       toast.success("Connection request sent!");

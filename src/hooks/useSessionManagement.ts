@@ -24,7 +24,7 @@ export const useSessionManagement = () => {
       // Get session details first
       const { data: session, error: fetchError } = await supabase
         .from("coaching_sessions")
-        .select("scheduled_at, status")
+        .select("scheduled_at, status, coach_id, client_id")
         .eq("id", sessionId)
         .single();
 
@@ -54,6 +54,13 @@ export const useSessionManagement = () => {
         .eq("id", sessionId);
 
       if (error) throw error;
+      
+      // Send cancellation email
+      const cancelledByRole = user?.id === session.coach_id ? "coach" : "client";
+      await supabase.functions.invoke("send-booking-cancelled", {
+        body: { sessionId, cancelledBy: cancelledByRole, reason },
+      }).catch((err) => console.error("Failed to send cancellation email:", err));
+      
       return { late: hoursUntilSession < CANCELLATION_NOTICE_HOURS };
     },
     onSuccess: (data) => {
@@ -153,6 +160,11 @@ export const useSessionManagement = () => {
         .eq("id", sessionId);
 
       if (error) throw error;
+      
+      // Send review request email to client
+      await supabase.functions.invoke("send-review-request", {
+        body: { sessionId },
+      }).catch((err) => console.error("Failed to send review request email:", err));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["coaching-sessions"] });
