@@ -39,6 +39,7 @@ import {
   FileText,
   Plus,
   Users,
+  AlertCircle,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "react-router-dom";
@@ -53,7 +54,7 @@ const STAGES: { key: LeadStage; label: string; icon: React.ReactNode; color: str
 ];
 
 const CoachPipeline = () => {
-  const { leads, leadsByStage, isLoading, coachProfileId, addLead, updateStage, updateNotes, deleteLead } = useCoachPipeline();
+  const { leads, leadsByStage, isLoading, error, coachProfileId, addLead, updateStage, updateNotes, deleteLead } = useCoachPipeline();
   const [notesModal, setNotesModal] = useState<{ lead: Lead; notes: string } | null>(null);
   const [profileSheet, setProfileSheet] = useState<{ clientId: string; name: string; avatar?: string } | null>(null);
   const [showAddLeadModal, setShowAddLeadModal] = useState(false);
@@ -308,6 +309,14 @@ const CoachPipeline = () => {
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      ) : error ? (
+        <div className="text-center py-12">
+          <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
+          <p className="text-muted-foreground mb-4">Failed to load pipeline data</p>
+          <Button variant="outline" onClick={() => window.location.reload()}>
+            Retry
+          </Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

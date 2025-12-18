@@ -154,5 +154,6 @@ export const useCoachProfileCompletion = () => {
       };
     },
     enabled: !!user?.id,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };

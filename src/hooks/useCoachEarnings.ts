@@ -210,14 +210,80 @@ export const useCoachEarnings = (coachProfileId: string | null, period: PeriodTy
     stats.avgSession = netRevenue / stats.sessions;
   }
 
-  // Calculate monthly data for chart (last 6 months) - always show full 6 months regardless of period
+  // Fetch 6-month transactions for chart (independent of selected period)
+  const { data: sixMonthTransactions = [] } = useQuery({
+    queryKey: ["coach-transactions-6month", coachProfileId],
+    queryFn: async () => {
+      if (!coachProfileId) return [];
+
+      const sixMonthsAgo = subMonths(new Date(), 6);
+      const now = new Date();
+
+      // Fetch package purchases for 6 months
+      const { data: packages } = await supabase
+        .from("client_package_purchases")
+        .select(`
+          id,
+          amount_paid,
+          purchased_at,
+          status
+        `)
+        .eq("coach_id", coachProfileId)
+        .gte("purchased_at", startOfMonth(sixMonthsAgo).toISOString())
+        .lte("purchased_at", now.toISOString());
+
+      // Fetch subscription payments for 6 months
+      const { data: subscriptions } = await supabase
+        .from("client_subscriptions")
+        .select(`
+          id,
+          current_period_start,
+          status,
+          plan:coach_subscription_plans(price)
+        `)
+        .eq("coach_id", coachProfileId)
+        .gte("current_period_start", startOfMonth(sixMonthsAgo).toISOString())
+        .lte("current_period_start", now.toISOString());
+
+      const txs: Array<{ date: string; amount: number; netAmount: number; status: string }> = [];
+
+      packages?.forEach((p) => {
+        const grossAmount = p.amount_paid;
+        const commission = grossAmount * commissionRate;
+        txs.push({
+          date: p.purchased_at,
+          amount: grossAmount,
+          netAmount: grossAmount - commission,
+          status: p.status === "active" ? "completed" : p.status === "refunded" ? "refunded" : "pending",
+        });
+      });
+
+      subscriptions?.forEach((s) => {
+        const plan = s.plan as { price?: number } | null;
+        const grossAmount = plan?.price || 0;
+        const commission = grossAmount * commissionRate;
+        txs.push({
+          date: s.current_period_start,
+          amount: grossAmount,
+          netAmount: grossAmount - commission,
+          status: s.status === "active" ? "completed" : s.status === "cancelled" ? "refunded" : "pending",
+        });
+      });
+
+      return txs;
+    },
+    enabled: !!coachProfileId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  // Calculate monthly data for chart (last 6 months)
   const monthlyData: MonthlyData[] = [];
   for (let i = 5; i >= 0; i--) {
     const monthDate = subMonths(new Date(), i);
     const monthStart = startOfMonth(monthDate);
     const monthEnd = endOfMonth(monthDate);
     
-    const monthTxs = transactions.filter(t => {
+    const monthTxs = sixMonthTransactions.filter(t => {
       const txDate = new Date(t.date);
       return t.status === "completed" && txDate >= monthStart && txDate <= monthEnd;
     });
