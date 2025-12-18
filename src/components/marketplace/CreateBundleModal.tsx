@@ -161,8 +161,8 @@ export default function CreateBundleModal({ open, onOpenChange, products }: Crea
                                   className="w-full h-full object-cover"
                                 />
                               ) : (
-                                <div className="w-full h-full bg-muted flex items-center justify-center text-sm">
-                                  {contentType?.icon}
+                              <div className="w-full h-full bg-muted flex items-center justify-center text-sm">
+                                  {contentType && <contentType.icon className="h-6 w-6 text-muted-foreground" />}
                                 </div>
                               )}
                             </div>

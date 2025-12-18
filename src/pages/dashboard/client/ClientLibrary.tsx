@@ -99,7 +99,7 @@ export default function ClientLibrary() {
               {isBundle ? (
                 <Package className="h-12 w-12 text-primary" />
               ) : (
-                <span className="text-5xl">{contentType?.icon || "📦"}</span>
+                contentType ? <contentType.icon className="h-12 w-12 text-primary/50" /> : <span className="text-5xl">📦</span>
               )}
             </div>
           )}

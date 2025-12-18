@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { BookOpen, Video, Film, ClipboardList, Headphones, Package, type LucideIcon } from "lucide-react";
 
 export interface DigitalProduct {
   id: string;
@@ -583,12 +584,12 @@ export const CONTENT_CATEGORIES = [
   { value: "other", label: "Other", icon: "Package" },
 ];
 
-// Content types
-export const CONTENT_TYPES = [
-  { value: "ebook", label: "E-book", icon: "BookOpen" },
-  { value: "video_course", label: "Video Course", icon: "Video" },
-  { value: "single_video", label: "Single Video", icon: "Film" },
-  { value: "template", label: "Template", icon: "ClipboardList" },
-  { value: "audio", label: "Audio Content", icon: "Headphones" },
-  { value: "other", label: "Other", icon: "Package" },
+// Content types with actual Lucide icons
+export const CONTENT_TYPES: Array<{ value: string; label: string; icon: LucideIcon }> = [
+  { value: "ebook", label: "E-book", icon: BookOpen },
+  { value: "video_course", label: "Video Course", icon: Video },
+  { value: "single_video", label: "Single Video", icon: Film },
+  { value: "template", label: "Template", icon: ClipboardList },
+  { value: "audio", label: "Audio Content", icon: Headphones },
+  { value: "other", label: "Other", icon: Package },
 ];

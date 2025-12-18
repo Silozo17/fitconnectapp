@@ -152,8 +152,8 @@ export default function MarketplaceBundle() {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <div className="w-full h-full bg-muted flex items-center justify-center">
-                              <span className="text-2xl">{contentType?.icon || "📦"}</span>
+                          <div className="w-full h-full bg-muted flex items-center justify-center">
+                              {contentType ? <contentType.icon className="h-6 w-6 text-muted-foreground" /> : <span className="text-2xl">📦</span>}
                             </div>
                           )}
                         </div>
