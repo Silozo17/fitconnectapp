@@ -26,14 +26,14 @@ const SQUIRCLE_SIZES = {
 };
 
 // Size-aware positioning for character avatars in squircle variant
-// Larger sizes show proportionally more of the character's body
+// Height extends beyond container, positioned at bottom so head overflows above
 const SQUIRCLE_IMAGE_STYLES = {
-  '2xs': { height: '350%', bottom: '-190%' },
-  xs: { height: '350%', bottom: '-190%' },
-  sm: { height: '320%', bottom: '-170%' },
-  md: { height: '280%', bottom: '-140%' },
-  lg: { height: '260%', bottom: '-120%' },
-  xl: { height: '220%', bottom: '-80%' },  // Show more body for hero sections
+  '2xs': { height: '140%' },
+  xs: { height: '140%' },
+  sm: { height: '140%' },
+  md: { height: '145%' },
+  lg: { height: '150%' },
+  xl: { height: '155%' },  // More body visible for hero sections
 };
 
 // Size-aware clipPath - negative top inset allows head to overflow upward
@@ -139,7 +139,7 @@ export const UserAvatar = ({
   return (
     <div 
       className={cn(
-        "relative shrink-0 rounded-2xl overflow-hidden",
+        "relative shrink-0 rounded-2xl overflow-visible",
         // Only show gradient for character avatars, neutral background for uploaded photos
         hasCharacterAvatar && SQUIRCLE_GRADIENT,
         hasCharacterAvatar && SQUIRCLE_GLOW,
@@ -154,18 +154,18 @@ export const UserAvatar = ({
     >
       {/* Avatar image */}
       {imageUrl ? (
-        <img 
-          src={imageUrl} 
-          alt={name || "User"} 
-          className={cn(
-            hasCharacterAvatar 
-              ? "absolute w-full object-contain left-1/2 -translate-x-1/2 object-top"
-              : "absolute inset-0 w-full h-full object-cover rounded-2xl"
-          )}
-          style={hasCharacterAvatar ? {
-            height: imageStyle.height,
-            bottom: imageStyle.bottom,
-          } : undefined}
+          <img 
+            src={imageUrl} 
+            alt={name || "User"} 
+            className={cn(
+              hasCharacterAvatar 
+                ? "absolute w-full object-contain left-1/2 -translate-x-1/2 object-bottom bottom-0"
+                : "absolute inset-0 w-full h-full object-cover rounded-2xl"
+            )}
+            style={hasCharacterAvatar ? {
+              height: imageStyle.height,
+              bottom: '0',
+            } : undefined}
           onError={(e) => {
             (e.target as HTMLImageElement).src = '/placeholder.svg';
           }}
