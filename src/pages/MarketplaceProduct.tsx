@@ -109,7 +109,7 @@ export default function MarketplaceProduct() {
   return (
     <PageLayout title={product.title} description={product.short_description || product.description || "Digital content from FitConnect"}>
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 pt-24 md:pt-8 pb-8">
+        <div className="container mx-auto px-4 pt-24 md:pt-28 pb-8">
           {/* Back Button */}
           <Button
             variant="ghost"
