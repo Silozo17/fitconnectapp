@@ -83,6 +83,7 @@ export const useCoachPackages = (coachId?: string) => {
       return data as CoachPackage[];
     },
     enabled: !!coachId || !!user,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
 
@@ -116,6 +117,7 @@ export const useCoachSubscriptionPlans = (coachId?: string) => {
       })) as CoachSubscriptionPlan[];
     },
     enabled: !!coachId || !!user,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
 

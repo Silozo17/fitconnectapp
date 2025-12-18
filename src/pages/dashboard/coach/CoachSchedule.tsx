@@ -129,7 +129,7 @@ const CoachSchedule = () => {
   
   // Fetch coaching sessions for calendar
   const { data: sessions = [] } = useQuery({
-    queryKey: ["coaching-sessions", coachId],
+    queryKey: ["coaching-sessions", coachId, weekStart.toISOString()],
     queryFn: async () => {
       if (!coachId) return [];
       const { data, error } = await supabase
@@ -149,7 +149,33 @@ const CoachSchedule = () => {
       return data;
     },
     enabled: !!coachId,
+    staleTime: 1000 * 60 * 2, // 2 minutes
   });
+
+  // Real-time subscription for sessions (calendar updates)
+  useEffect(() => {
+    if (!coachId) return;
+
+    const channel = supabase
+      .channel("coaching-sessions-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "coaching_sessions",
+          filter: `coach_id=eq.${coachId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["coaching-sessions", coachId] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [coachId, queryClient]);
 
   // Mutations
   const updateAvailability = useUpdateAvailability();

@@ -75,6 +75,7 @@ export const useCoachAvailability = (coachId: string) => {
       return data as CoachAvailability[];
     },
     enabled: !!coachId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
 
@@ -94,6 +95,7 @@ export const useSessionTypes = (coachId: string) => {
       return data as SessionType[];
     },
     enabled: !!coachId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
 

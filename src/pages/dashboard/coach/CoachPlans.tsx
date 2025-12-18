@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Search,
@@ -35,33 +35,21 @@ import {
 } from "@/components/ui/alert-dialog";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { useTrainingPlans, useDeleteTrainingPlan, TrainingPlan } from "@/hooks/useTrainingPlans";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { useCoachProfileId } from "@/hooks/useCoachProfileId";
 import { format } from "date-fns";
 
 const CoachPlans = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
-  const [coachProfileId, setCoachProfileId] = useState<string | null>(null);
   const [planToDelete, setPlanToDelete] = useState<TrainingPlan | null>(null);
 
-  // Fetch coach profile ID
-  useEffect(() => {
-    const fetchCoachProfile = async () => {
-      if (!user) return;
-      const { data } = await supabase
-        .from("coach_profiles")
-        .select("id")
-        .eq("user_id", user.id)
-        .single();
-      if (data) setCoachProfileId(data.id);
-    };
-    fetchCoachProfile();
-  }, [user]);
+  // Use cached coach profile ID
+  const { data: coachProfileId, isLoading: loadingProfile } = useCoachProfileId();
 
-  const { data: plans = [], isLoading } = useTrainingPlans(coachProfileId || undefined);
+  const { data: plans = [], isLoading: loadingPlans } = useTrainingPlans(coachProfileId || undefined);
   const deletePlanMutation = useDeleteTrainingPlan();
+
+  const isLoading = loadingProfile || loadingPlans;
 
   // Filter plans by type
   const workoutPlans = plans.filter(p => p.plan_type === "workout");
