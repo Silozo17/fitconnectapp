@@ -67,13 +67,14 @@ const AdminHeader = ({ onMenuToggle }: AdminHeaderProps) => {
         <div className="hidden xl:block">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
+              <Button variant="ghost" className="relative h-auto p-0 pt-4 overflow-visible bg-transparent hover:bg-transparent">
                 <UserAvatar
                   src={avatarUrl}
                   avatarSlug={selectedAvatar?.slug}
                   avatarRarity={selectedAvatar?.rarity as any}
                   name={displayName}
-                  className="h-10 w-10"
+                  variant="squircle"
+                  size="xs"
                 />
               </Button>
             </DropdownMenuTrigger>

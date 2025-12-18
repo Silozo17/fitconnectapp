@@ -70,13 +70,14 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
           <div className="hidden xl:block">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2 p-1">
+                <Button variant="ghost" className="flex items-center gap-2 p-1 pt-5 overflow-visible bg-transparent hover:bg-transparent">
                   <UserAvatar
                     src={avatarUrl}
                     avatarSlug={selectedAvatar?.slug}
                     avatarRarity={selectedAvatar?.rarity as any}
                     name={displayName}
-                    className="w-8 h-8"
+                    variant="squircle"
+                    size="xs"
                   />
                   <span className="hidden md:block font-medium">{displayName || "Client"}</span>
                 </Button>

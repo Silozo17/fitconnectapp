@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/shared/UserAvatar";
 import { Switch } from "@/components/ui/switch";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -173,13 +173,15 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan,
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-[500px] overflow-y-auto">
         <SheetHeader>
-          <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
-              <AvatarImage src={coach.profile_image_url} />
-              <AvatarFallback className="text-lg">
-                {coach.display_name?.charAt(0) || "C"}
-              </AvatarFallback>
-            </Avatar>
+          <div className="flex items-center gap-4 pt-6">
+            <UserAvatar
+              src={coach.profile_image_url}
+              avatarSlug={selectedAvatarData?.avatar?.slug}
+              avatarRarity={selectedAvatarData?.avatar?.rarity as any}
+              name={coach.display_name}
+              variant="squircle"
+              size="sm"
+            />
             <div>
               <SheetTitle className="text-xl">{coach.display_name || "Unknown Coach"}</SheetTitle>
               <SheetDescription>{coach.location || "No location set"}</SheetDescription>

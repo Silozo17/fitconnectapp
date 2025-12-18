@@ -1,7 +1,8 @@
 import { Checkbox } from "@/components/ui/checkbox";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "./StatusBadge";
+import { UserAvatar } from "@/components/shared/UserAvatar";
+import { Rarity } from "@/lib/avatar-config";
 
 interface TeamMember {
   id: string;
@@ -12,6 +13,9 @@ interface TeamMember {
   department: string | null;
   status: string | null;
   role: string;
+  avatar_url?: string | null;
+  selected_avatar_slug?: string | null;
+  selected_avatar_rarity?: string | null;
 }
 
 interface AdminTeamCardProps {
@@ -41,7 +45,6 @@ export const AdminTeamCard = ({
   onClick,
 }: AdminTeamCardProps) => {
   const displayName = member.display_name || `${member.first_name || ""} ${member.last_name || ""}`.trim() || "Unnamed";
-  const initials = member.first_name?.[0] || member.display_name?.[0] || "T";
 
   return (
     <div
@@ -54,9 +57,16 @@ export const AdminTeamCard = ({
         <Checkbox checked={selected} onCheckedChange={onSelect} />
       </div>
 
-      <Avatar className="h-10 w-10 flex-shrink-0">
-        <AvatarFallback>{initials}</AvatarFallback>
-      </Avatar>
+      <div className="pt-3 flex-shrink-0">
+        <UserAvatar
+          src={member.avatar_url}
+          avatarSlug={member.selected_avatar_slug}
+          avatarRarity={member.selected_avatar_rarity as Rarity | undefined}
+          name={displayName}
+          variant="squircle"
+          size="xs"
+        />
+      </div>
 
       <div className="flex-1 min-w-0 overflow-hidden">
         <p className="font-medium text-sm leading-tight">{displayName}</p>

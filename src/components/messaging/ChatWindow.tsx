@@ -243,15 +243,15 @@ const ChatWindow = ({
             {/* Clickable header for profile view */}
             <button
               onClick={() => setProfileOpen(true)}
-              className="flex items-center gap-3 hover:opacity-80 transition-opacity flex-1"
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity flex-1 pt-3"
             >
               <UserAvatar
                 src={participantInfo.avatar}
                 avatarSlug={participantInfo.avatarSlug}
                 avatarRarity={participantInfo.avatarRarity}
                 name={participantInfo.name}
-                className="w-10 h-10 ring-2 ring-primary/20"
-                showRarityBorder
+                variant="squircle"
+                size="xs"
               />
               <div className="text-left">
                 <div className="flex items-center gap-2">
@@ -404,14 +404,14 @@ const ChatWindow = ({
               <SheetTitle>Profile</SheetTitle>
             </SheetHeader>
             
-            <div className="mt-6 flex flex-col items-center text-center">
+            <div className="mt-6 flex flex-col items-center text-center pt-8">
               <UserAvatar
                 src={participantInfo.avatar}
                 avatarSlug={participantInfo.avatarSlug}
                 avatarRarity={participantInfo.avatarRarity}
                 name={participantInfo.name}
-                className="w-24 h-24 mb-4 ring-4 ring-primary/20"
-                showRarityBorder
+                variant="squircle"
+                size="sm"
               />
               
               <h3 className="text-xl font-semibold text-foreground">

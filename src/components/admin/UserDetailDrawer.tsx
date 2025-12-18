@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/shared/UserAvatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -213,13 +213,15 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved, onEdit, on
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-[600px] overflow-y-auto">
         <SheetHeader>
-          <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
-              <AvatarImage src={user.avatar_url} />
-              <AvatarFallback className="text-lg">
-                {user.first_name?.charAt(0) || user.last_name?.charAt(0) || "U"}
-              </AvatarFallback>
-            </Avatar>
+          <div className="flex items-center gap-4 pt-6">
+            <UserAvatar
+              src={user.avatar_url}
+              avatarSlug={selectedAvatarData?.avatar?.slug}
+              avatarRarity={selectedAvatarData?.avatar?.rarity as any}
+              name={`${user.first_name || ""} ${user.last_name || ""}`.trim()}
+              variant="squircle"
+              size="sm"
+            />
             <div>
               <SheetTitle className="text-xl">
                 {user.first_name || ""} {user.last_name || "Unnamed User"}
@@ -603,11 +605,13 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved, onEdit, on
                   <div className="space-y-2">
                     {connectedCoaches.map((cc: any) => (
                       <div key={cc.id} className="flex items-center justify-between p-2 bg-muted/50 rounded">
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src={cc.coach_profiles?.profile_image_url} />
-                            <AvatarFallback>{cc.coach_profiles?.display_name?.charAt(0)}</AvatarFallback>
-                          </Avatar>
+                        <div className="flex items-center gap-2 pt-2">
+                          <UserAvatar
+                            src={cc.coach_profiles?.profile_image_url}
+                            name={cc.coach_profiles?.display_name}
+                            variant="squircle"
+                            size="2xs"
+                          />
                           <span className="text-sm font-medium">{cc.coach_profiles?.display_name}</span>
                         </div>
                         <Badge variant={cc.status === "active" ? "default" : "secondary"}>{cc.status}</Badge>

@@ -84,7 +84,7 @@ const ConversationList = ({ activeConversationId }: ConversationListProps) => {
                   e.preventDefault();
                   setSelectedProfile(conversation);
                 }}
-                className="flex-shrink-0 hover:opacity-80 transition-opacity"
+                className="flex-shrink-0 hover:opacity-80 transition-opacity pt-3"
                 title="View profile"
               >
                 <UserAvatar
@@ -92,7 +92,8 @@ const ConversationList = ({ activeConversationId }: ConversationListProps) => {
                   avatarSlug={conversation.participantAvatarSlug}
                   avatarRarity={conversation.participantAvatarRarity as Rarity | undefined}
                   name={conversation.participantName}
-                  className="w-10 h-10 ring-2 ring-primary/20"
+                  variant="squircle"
+                  size="xs"
                 />
               </button>
               
