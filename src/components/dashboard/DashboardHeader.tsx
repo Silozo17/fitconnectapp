@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useSelectedAvatar } from "@/hooks/useAvatars";
 import { useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
@@ -26,6 +27,7 @@ const DashboardHeader = ({ subscriptionTier, onMenuToggle }: DashboardHeaderProp
   const navigate = useNavigate();
   const { signOut, role } = useAuth();
   const { displayName, avatarUrl } = useUserProfile();
+  const { data: selectedAvatar } = useSelectedAvatar('coach');
 
   const tierLabel = subscriptionTier === "elite" ? "Elite" : subscriptionTier === "pro" ? "Pro" : "Free";
 
@@ -79,6 +81,8 @@ const DashboardHeader = ({ subscriptionTier, onMenuToggle }: DashboardHeaderProp
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
                   <UserAvatar
                     src={avatarUrl}
+                    avatarSlug={selectedAvatar?.slug}
+                    avatarRarity={selectedAvatar?.rarity as any}
                     name={displayName}
                     className="h-10 w-10"
                   />

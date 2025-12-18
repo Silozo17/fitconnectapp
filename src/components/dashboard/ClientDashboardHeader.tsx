@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useSelectedAvatar } from "@/hooks/useAvatars";
 import ViewSwitcher from "@/components/admin/ViewSwitcher";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
@@ -25,6 +26,7 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
   const navigate = useNavigate();
   const { signOut, role } = useAuth();
   const { displayName, avatarUrl } = useUserProfile();
+  const { data: selectedAvatar } = useSelectedAvatar('client');
 
   return (
     <header className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
@@ -71,6 +73,8 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
                 <Button variant="ghost" className="flex items-center gap-2 p-1">
                   <UserAvatar
                     src={avatarUrl}
+                    avatarSlug={selectedAvatar?.slug}
+                    avatarRarity={selectedAvatar?.rarity as any}
                     name={displayName}
                     className="w-8 h-8"
                   />
