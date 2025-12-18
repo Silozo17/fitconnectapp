@@ -47,6 +47,7 @@ export const useConnections = () => {
   const [pendingRequests, setPendingRequests] = useState<UserConnection[]>([]);
   const [sentRequests, setSentRequests] = useState<UserConnection[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const getProfileType = useCallback(() => {
     if (role === "client") return "client";
@@ -58,6 +59,7 @@ export const useConnections = () => {
   const fetchConnections = useCallback(async () => {
     if (!user) return;
     setLoading(true);
+    setError(null);
 
     try {
       // Fetch accepted connections
@@ -87,7 +89,7 @@ export const useConnections = () => {
 
       if (sentError) throw sentError;
 
-      // Enrich connections with profile data
+      // Enrich connections with profile data using batched queries
       const enrichedAccepted = await enrichConnectionsWithProfiles(acceptedData || [], user.id);
       const enrichedPending = await enrichConnectionsWithProfiles(pendingData || [], user.id, true);
       const enrichedSent = await enrichConnectionsWithProfiles(sentData || [], user.id, false);
@@ -95,23 +97,29 @@ export const useConnections = () => {
       setConnections(enrichedAccepted);
       setPendingRequests(enrichedPending);
       setSentRequests(enrichedSent);
-    } catch (error) {
-      console.error("Error fetching connections:", error);
+    } catch (err) {
+      console.error("Error fetching connections:", err);
+      setError("Failed to load connections. Please try again.");
     } finally {
       setLoading(false);
     }
   }, [user]);
 
-  // Enrich connections with profile data
+  // Enrich connections with profile data using BATCHED queries to avoid N+1
   const enrichConnectionsWithProfiles = async (
     connections: UserConnection[],
     currentUserId: string,
     showRequester: boolean = false
   ): Promise<UserConnection[]> => {
-    const enriched: UserConnection[] = [];
+    if (connections.length === 0) return [];
+
+    // Collect all target user IDs grouped by profile type
+    const clientUserIds: string[] = [];
+    const coachUserIds: string[] = [];
+    const adminUserIds: string[] = [];
+    const connectionTargets: { conn: UserConnection; targetUserId: string; targetProfileType: string }[] = [];
 
     for (const conn of connections) {
-      // Determine which user's profile to fetch (the other person)
       const isRequester = conn.requester_user_id === currentUserId;
       const targetUserId = showRequester 
         ? conn.requester_user_id 
@@ -120,14 +128,50 @@ export const useConnections = () => {
         ? conn.requester_profile_type 
         : (isRequester ? conn.addressee_profile_type : conn.requester_profile_type);
 
+      connectionTargets.push({ conn, targetUserId, targetProfileType });
+
+      if (targetProfileType === "client") {
+        clientUserIds.push(targetUserId);
+      } else if (targetProfileType === "coach") {
+        coachUserIds.push(targetUserId);
+      } else {
+        adminUserIds.push(targetUserId);
+      }
+    }
+
+    // Batch fetch all profiles in parallel
+    const [clientProfiles, coachProfiles, adminProfiles] = await Promise.all([
+      clientUserIds.length > 0
+        ? supabase
+            .from("client_profiles")
+            .select("id, user_id, first_name, last_name, username, avatar_url, location, avatars:selected_avatar_id(slug, rarity)")
+            .in("user_id", clientUserIds)
+        : Promise.resolve({ data: [] }),
+      coachUserIds.length > 0
+        ? supabase
+            .from("coach_profiles")
+            .select("id, user_id, display_name, username, profile_image_url, location, avatars:selected_avatar_id(slug, rarity)")
+            .in("user_id", coachUserIds)
+        : Promise.resolve({ data: [] }),
+      adminUserIds.length > 0
+        ? supabase
+            .from("admin_profiles")
+            .select("id, user_id, first_name, last_name, display_name, username, avatar_url")
+            .in("user_id", adminUserIds)
+        : Promise.resolve({ data: [] }),
+    ]);
+
+    // Create lookup maps by user_id
+    const clientMap = new Map((clientProfiles.data || []).map(p => [p.user_id, p]));
+    const coachMap = new Map((coachProfiles.data || []).map(p => [p.user_id, p]));
+    const adminMap = new Map((adminProfiles.data || []).map(p => [p.user_id, p]));
+
+    // Enrich connections with profile data
+    return connectionTargets.map(({ conn, targetUserId, targetProfileType }) => {
       let profile = null;
 
       if (targetProfileType === "client") {
-        const { data } = await supabase
-          .from("client_profiles")
-          .select("id, first_name, last_name, username, avatar_url, location, avatars:selected_avatar_id(slug, rarity)")
-          .eq("user_id", targetUserId)
-          .single();
+        const data = clientMap.get(targetUserId);
         if (data) {
           const avatarData = data.avatars as { slug: string; rarity: string } | null;
           profile = {
@@ -137,11 +181,7 @@ export const useConnections = () => {
           };
         }
       } else if (targetProfileType === "coach") {
-        const { data } = await supabase
-          .from("coach_profiles")
-          .select("id, display_name, username, profile_image_url, location, avatars:selected_avatar_id(slug, rarity)")
-          .eq("user_id", targetUserId)
-          .single();
+        const data = coachMap.get(targetUserId);
         if (data) {
           const avatarData = data.avatars as { slug: string; rarity: string } | null;
           profile = {
@@ -151,18 +191,11 @@ export const useConnections = () => {
           };
         }
       } else {
-        const { data } = await supabase
-          .from("admin_profiles")
-          .select("id, first_name, last_name, display_name, username, avatar_url")
-          .eq("user_id", targetUserId)
-          .single();
-        profile = data;
+        profile = adminMap.get(targetUserId) || null;
       }
 
-      enriched.push({ ...conn, profile: profile || undefined });
-    }
-
-    return enriched;
+      return { ...conn, profile: profile || undefined };
+    });
   };
 
   // Search users by username, name, or email
@@ -393,6 +426,7 @@ export const useConnections = () => {
     pendingRequests,
     sentRequests,
     loading,
+    error,
     searchUsers,
     sendConnectionRequest,
     acceptRequest,

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useSelectedAvatar, getAvatarImageUrl } from '@/hooks/useAvatars';
@@ -16,6 +16,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+
 interface StatItemProps {
   icon: React.ReactNode;
   label: string;
@@ -27,12 +28,25 @@ interface StatItemProps {
 
 function StatItem({ icon, label, value, suffix, color, delay }: StatItemProps) {
   const [displayValue, setDisplayValue] = useState(0);
-  const numericValue = typeof value === 'number' ? value : 0;
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   useEffect(() => {
+    // Cleanup function to clear both timer and interval
+    const cleanup = () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+    
     if (typeof value !== 'number') {
       setDisplayValue(0);
-      return;
+      return cleanup;
     }
     
     const duration = 1000;
@@ -40,21 +54,22 @@ function StatItem({ icon, label, value, suffix, color, delay }: StatItemProps) {
     const increment = value / steps;
     let current = 0;
     
-    const timer = setTimeout(() => {
-      const interval = setInterval(() => {
+    timeoutRef.current = setTimeout(() => {
+      intervalRef.current = setInterval(() => {
         current += increment;
         if (current >= value) {
           setDisplayValue(value);
-          clearInterval(interval);
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+          }
         } else {
           setDisplayValue(Math.floor(current));
         }
       }, duration / steps);
-      
-      return () => clearInterval(interval);
     }, delay);
     
-    return () => clearTimeout(timer);
+    return cleanup;
   }, [value, delay]);
 
   return (
