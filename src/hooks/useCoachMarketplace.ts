@@ -186,7 +186,7 @@ export const useCoachById = (identifier: string) => {
         // Anonymous users: use GDPR-safe public view (marketplace-visible only)
         const { data, error } = await supabase
           .from("public_coach_profiles")
-          .select("*")
+          .select("*, avatars(slug, rarity, image_url)")
           .eq(filterColumn as "id", identifier)
           .maybeSingle();
 
