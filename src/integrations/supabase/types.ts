@@ -2173,6 +2173,13 @@ export type Database = {
           is_verified: boolean | null
           linkedin_url: string | null
           location: string | null
+          location_city: string | null
+          location_country: string | null
+          location_country_code: string | null
+          location_lat: number | null
+          location_lng: number | null
+          location_place_id: string | null
+          location_region: string | null
           marketplace_visible: boolean | null
           onboarding_completed: boolean
           onboarding_progress: Json | null
@@ -2224,6 +2231,13 @@ export type Database = {
           is_verified?: boolean | null
           linkedin_url?: string | null
           location?: string | null
+          location_city?: string | null
+          location_country?: string | null
+          location_country_code?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          location_place_id?: string | null
+          location_region?: string | null
           marketplace_visible?: boolean | null
           onboarding_completed?: boolean
           onboarding_progress?: Json | null
@@ -2275,6 +2289,13 @@ export type Database = {
           is_verified?: boolean | null
           linkedin_url?: string | null
           location?: string | null
+          location_city?: string | null
+          location_country?: string | null
+          location_country_code?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          location_place_id?: string | null
+          location_region?: string | null
           marketplace_visible?: boolean | null
           onboarding_completed?: boolean
           onboarding_progress?: Json | null
@@ -3015,6 +3036,33 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
           weekly_digest?: boolean | null
+        }
+        Relationships: []
+      }
+      email_verifications: {
+        Row: {
+          code: string
+          created_at: string | null
+          email: string
+          expires_at: string
+          id: string
+          verified_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          email: string
+          expires_at: string
+          id?: string
+          verified_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          email?: string
+          expires_at?: string
+          id?: string
+          verified_at?: string | null
         }
         Relationships: []
       }
