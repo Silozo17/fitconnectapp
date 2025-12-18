@@ -1734,6 +1734,114 @@ export type Database = {
           },
         ]
       }
+      coach_gallery_images: {
+        Row: {
+          caption: string | null
+          coach_id: string
+          created_at: string
+          display_order: number
+          id: string
+          image_url: string
+        }
+        Insert: {
+          caption?: string | null
+          coach_id: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url: string
+        }
+        Update: {
+          caption?: string | null
+          coach_id?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_gallery_images_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_gallery_images_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coach_group_classes: {
+        Row: {
+          coach_id: string
+          created_at: string
+          currency: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          is_waitlist_open: boolean | null
+          location: string | null
+          max_participants: number | null
+          price: number | null
+          schedule_info: string | null
+          target_audience: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_waitlist_open?: boolean | null
+          location?: string | null
+          max_participants?: number | null
+          price?: number | null
+          schedule_info?: string | null
+          target_audience?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_waitlist_open?: boolean | null
+          location?: string | null
+          max_participants?: number | null
+          price?: number | null
+          schedule_info?: string | null
+          target_audience?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_group_classes_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_group_classes_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coach_invoice_settings: {
         Row: {
           accent_color: string | null
@@ -2068,6 +2176,7 @@ export type Database = {
           verification_status: string | null
           verified_at: string | null
           verified_by: string | null
+          who_i_work_with: string | null
         }
         Insert: {
           also_client?: boolean | null
@@ -2111,6 +2220,7 @@ export type Database = {
           verification_status?: string | null
           verified_at?: string | null
           verified_by?: string | null
+          who_i_work_with?: string | null
         }
         Update: {
           also_client?: boolean | null
@@ -2154,6 +2264,7 @@ export type Database = {
           verification_status?: string | null
           verified_at?: string | null
           verified_by?: string | null
+          who_i_work_with?: string | null
         }
         Relationships: [
           {
@@ -3193,6 +3304,59 @@ export type Database = {
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_class_waitlist: {
+        Row: {
+          client_id: string
+          group_class_id: string
+          id: string
+          joined_at: string
+          status: string
+        }
+        Insert: {
+          client_id: string
+          group_class_id: string
+          id?: string
+          joined_at?: string
+          status?: string
+        }
+        Update: {
+          client_id?: string
+          group_class_id?: string
+          id?: string
+          joined_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_class_waitlist_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_class_waitlist_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_class_waitlist_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_class_waitlist_group_class_id_fkey"
+            columns: ["group_class_id"]
+            isOneToOne: false
+            referencedRelation: "coach_group_classes"
             referencedColumns: ["id"]
           },
         ]
