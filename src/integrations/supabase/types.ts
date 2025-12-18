@@ -1937,7 +1937,10 @@ export type Database = {
           notes: string | null
           paid_at: string | null
           sent_at: string | null
+          source_id: string | null
+          source_type: string | null
           status: string | null
+          stripe_payment_intent_id: string | null
           subtotal: number | null
           tax_amount: number | null
           tax_rate: number | null
@@ -1958,7 +1961,10 @@ export type Database = {
           notes?: string | null
           paid_at?: string | null
           sent_at?: string | null
+          source_id?: string | null
+          source_type?: string | null
           status?: string | null
+          stripe_payment_intent_id?: string | null
           subtotal?: number | null
           tax_amount?: number | null
           tax_rate?: number | null
@@ -1979,7 +1985,10 @@ export type Database = {
           notes?: string | null
           paid_at?: string | null
           sent_at?: string | null
+          source_id?: string | null
+          source_type?: string | null
           status?: string | null
+          stripe_payment_intent_id?: string | null
           subtotal?: number | null
           tax_amount?: number | null
           tax_rate?: number | null

@@ -143,3 +143,6 @@ verify_jwt = false
 
 [functions.ai-product-assist]
 verify_jwt = true
+
+[functions.create-purchase-invoice]
+verify_jwt = false

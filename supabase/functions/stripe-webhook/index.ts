@@ -43,6 +43,35 @@ serve(async (req) => {
 
     console.log("Webhook event received (signature verified):", event.type);
 
+    // Helper function to create an invoice after purchase
+    const createInvoice = async (params: {
+      type: "package" | "subscription" | "booking";
+      purchaseId: string;
+      coachId: string;
+      clientId: string;
+      amount: number;
+      currency?: string;
+      description: string;
+      stripePaymentIntentId?: string;
+    }) => {
+      try {
+        console.log("Creating invoice for purchase:", params.type, params.purchaseId);
+        
+        const { data, error } = await supabase.functions.invoke("create-purchase-invoice", {
+          body: params,
+        });
+
+        if (error) {
+          console.error("Error invoking create-purchase-invoice:", error);
+        } else {
+          console.log("Invoice created successfully:", data);
+        }
+      } catch (err) {
+        console.error("Failed to create invoice:", err);
+        // Don't throw - invoice creation failure shouldn't fail the webhook
+      }
+    };
+
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
@@ -55,7 +84,7 @@ serve(async (req) => {
           const expiresAt = new Date();
           expiresAt.setDate(expiresAt.getDate() + parseInt(metadata.validity_days || "90"));
 
-          const { error } = await supabase
+          const { data: insertedPurchase, error } = await supabase
             .from("client_package_purchases")
             .insert({
               client_id: metadata.client_id,
@@ -67,16 +96,30 @@ serve(async (req) => {
               stripe_payment_intent_id: session.payment_intent as string,
               expires_at: expiresAt.toISOString(),
               status: "active",
-            });
+            })
+            .select()
+            .single();
 
           if (error) {
             console.error("Error recording package purchase:", error);
           } else {
             console.log("Package purchase recorded successfully");
+            
+            // Create invoice for package purchase
+            await createInvoice({
+              type: "package",
+              purchaseId: insertedPurchase.id,
+              coachId: metadata.coach_id,
+              clientId: metadata.client_id,
+              amount: parseFloat(metadata.amount || "0"),
+              currency: metadata.currency || "GBP",
+              description: `${metadata.package_name || "Training Package"} (${metadata.sessions_total || 0} sessions)`,
+              stripePaymentIntentId: session.payment_intent as string,
+            });
           }
         } else if (metadata.type === "subscription") {
           // Record subscription
-          const { error } = await supabase
+          const { data: insertedSub, error } = await supabase
             .from("client_subscriptions")
             .insert({
               client_id: metadata.client_id,
@@ -86,12 +129,26 @@ serve(async (req) => {
               stripe_customer_id: session.customer as string,
               status: "active",
               current_period_start: new Date().toISOString(),
-            });
+            })
+            .select()
+            .single();
 
           if (error) {
             console.error("Error recording subscription:", error);
           } else {
             console.log("Subscription recorded successfully");
+            
+            // Create invoice for subscription
+            await createInvoice({
+              type: "subscription",
+              purchaseId: insertedSub.id,
+              coachId: metadata.coach_id,
+              clientId: metadata.client_id,
+              amount: parseFloat(metadata.amount || "0"),
+              currency: metadata.currency || "GBP",
+              description: `${metadata.plan_name || "Subscription Plan"} - ${metadata.billing_period || "monthly"}`,
+              stripePaymentIntentId: session.payment_intent as string,
+            });
           }
         } else if (metadata.type === "platform_subscription") {
           // Coach platform subscription
@@ -146,6 +203,18 @@ serve(async (req) => {
             console.error("Error updating booking request payment:", error);
           } else {
             console.log("Booking payment recorded successfully:", paymentStatus);
+            
+            // Create invoice for booking payment
+            await createInvoice({
+              type: "booking",
+              purchaseId: bookingRequestId,
+              coachId: metadata.coach_id,
+              clientId: metadata.client_id,
+              amount: amountPaid,
+              currency: metadata.currency || "GBP",
+              description: `${metadata.session_type || "Training Session"} - ${paymentType === 'full' ? 'Full Payment' : 'Deposit'}`,
+              stripePaymentIntentId: session.payment_intent as string,
+            });
           }
 
           // Handle Boost attribution if applicable
@@ -216,6 +285,34 @@ serve(async (req) => {
           })
           .eq("stripe_subscription_id", subscription.id);
 
+        break;
+      }
+
+      case "charge.refunded": {
+        const charge = event.data.object as Stripe.Charge;
+        const paymentIntentId = charge.payment_intent as string;
+
+        console.log("Charge refunded, payment intent:", paymentIntentId);
+
+        if (paymentIntentId) {
+          // Find and update matching invoice to 'refunded'
+          const { data: updatedInvoices, error } = await supabase
+            .from("coach_invoices")
+            .update({ 
+              status: "refunded", 
+              updated_at: new Date().toISOString() 
+            })
+            .eq("stripe_payment_intent_id", paymentIntentId)
+            .select();
+
+          if (error) {
+            console.error("Error updating invoice to refunded:", error);
+          } else if (updatedInvoices && updatedInvoices.length > 0) {
+            console.log("Invoice(s) marked as refunded:", updatedInvoices.map(i => i.id));
+          } else {
+            console.log("No invoice found for payment intent:", paymentIntentId);
+          }
+        }
         break;
       }
 

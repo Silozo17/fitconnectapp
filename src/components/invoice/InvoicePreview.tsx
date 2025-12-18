@@ -41,7 +41,7 @@ interface InvoicePreviewProps {
   className?: string;
 }
 
-const defaultLogoUrl = "/FitConnect_Icon-2.png";
+const defaultLogoUrl = "/logo.svg";
 
 export function InvoicePreview({
   invoice,
