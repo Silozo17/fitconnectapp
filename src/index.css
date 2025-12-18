@@ -5,6 +5,13 @@
 @tailwind utilities;
 
 @layer base {
+  /* Prevent mobile browser zoom on form inputs - requires 16px minimum */
+  @media screen and (max-width: 768px) {
+    input, textarea, select {
+      font-size: 16px !important;
+    }
+  }
+
   :root {
     /* Light mode - kept for accessibility but dark-first design */
     --background: 0 0% 100%;
