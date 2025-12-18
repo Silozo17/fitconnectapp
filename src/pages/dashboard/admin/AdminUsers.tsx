@@ -162,26 +162,14 @@ const AdminUsers = () => {
     };
   }, [users]);
 
-  const handleDeleteUser = async (userId: string) => {
+  const handleDeleteUser = async (user: ClientUser) => {
     if (!confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
       return;
     }
 
-    const { error } = await supabase
-      .from("client_profiles")
-      .delete()
-      .eq("id", userId);
-
-    if (error) {
-      toast.error("Failed to delete user");
-      console.error(error);
-    } else {
-      logAction.log({
-        action: "DELETE_USER",
-        entityType: "client_profiles",
-        entityId: userId,
-      });
-      toast.success("User deleted successfully");
+    // Use bulkDelete with single user to ensure both profile AND auth user are deleted
+    const success = await bulkDelete([{ id: user.id, user_id: user.user_id }]);
+    if (success) {
       fetchUsers();
     }
   };
@@ -645,7 +633,7 @@ const AdminUsers = () => {
                                 <DropdownMenuItem
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleDeleteUser(user.id);
+                                    handleDeleteUser(user);
                                   }}
                                   className="text-destructive focus:text-destructive"
                                 >
@@ -704,7 +692,7 @@ const AdminUsers = () => {
         onEdit={() => viewingUser && setEditingUser(viewingUser)}
         onResetPassword={() => viewingUser && handleResetPassword(viewingUser)}
         onChangeStatus={() => viewingUser && setStatusUser(viewingUser)}
-        onDelete={() => viewingUser && handleDeleteUser(viewingUser.id)}
+        onDelete={() => viewingUser && handleDeleteUser(viewingUser)}
       />
     </AdminLayout>
   );

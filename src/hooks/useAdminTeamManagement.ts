@@ -103,7 +103,8 @@ export const useAdminTeamManagement = () => {
       const { error } = await supabase.functions.invoke("admin-user-management", {
         body: {
           action: "bulk_delete",
-          users: members,
+          profileIds: members.map((m) => m.id),
+          userIds: members.map((m) => m.user_id),
           userType: "team",
         },
       });

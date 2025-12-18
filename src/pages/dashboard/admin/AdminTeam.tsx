@@ -106,17 +106,10 @@ const AdminTeam = () => {
   const handleDeleteMember = async (member: TeamMember) => {
     if (!confirm("Are you sure you want to remove this team member?")) return;
 
-    try {
-      const { error } = await supabase
-        .from("admin_profiles")
-        .delete()
-        .eq("id", member.id);
-
-      if (error) throw error;
-      toast.success("Team member removed");
+    // Use bulkDelete with single member to ensure both profile AND auth user are deleted
+    const success = await bulkDelete([{ id: member.id, user_id: member.user_id }]);
+    if (success) {
       fetchTeamMembers();
-    } catch (error: any) {
-      toast.error("Failed to remove team member: " + error.message);
     }
   };
 
