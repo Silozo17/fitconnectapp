@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Share2, Twitter, Facebook, Linkedin, Link, Check, MessageCircle } from 'lucide-react';
+import { Share2, Twitter, Facebook, Linkedin, Link, Check, MessageCircle, Mail } from 'lucide-react';
 import { share, type ShareOptions } from '@/lib/share';
 
 export interface ShareableAchievement {
@@ -51,7 +51,7 @@ export function ShareAchievementButton({
     url: window.location.origin,
   };
 
-  const handleShare = async (platform: 'twitter' | 'facebook' | 'linkedin' | 'whatsapp' | 'copy') => {
+  const handleShare = async (platform: 'twitter' | 'facebook' | 'linkedin' | 'whatsapp' | 'email' | 'copy') => {
     const success = await share(platform, shareOptions);
     if (platform === 'copy' && success) {
       setCopied(true);
@@ -83,6 +83,10 @@ export function ShareAchievementButton({
         <DropdownMenuItem onClick={() => handleShare('whatsapp')}>
           <MessageCircle className="h-4 w-4 mr-2" />
           Share on WhatsApp
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleShare('email')}>
+          <Mail className="h-4 w-4 mr-2" />
+          Share via Email
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleShare('copy')}>
           {copied ? <Check className="h-4 w-4 mr-2" /> : <Link className="h-4 w-4 mr-2" />}

@@ -6,7 +6,7 @@ export interface ShareOptions {
   url: string;
 }
 
-export type SharePlatform = 'native' | 'twitter' | 'facebook' | 'linkedin' | 'whatsapp' | 'copy';
+export type SharePlatform = 'native' | 'twitter' | 'facebook' | 'linkedin' | 'whatsapp' | 'email' | 'copy';
 
 /**
  * Check if the Web Share API is available
@@ -43,28 +43,43 @@ async function shareNative(options: ShareOptions): Promise<boolean> {
 export function getShareUrl(platform: Exclude<SharePlatform, 'native' | 'copy'>, options: ShareOptions): string {
   const encodedUrl = encodeURIComponent(options.url);
   const encodedText = encodeURIComponent(options.text);
+  const encodedTitle = encodeURIComponent(options.title);
   const fullText = encodeURIComponent(`${options.text}\n\n${options.url}`);
 
   switch (platform) {
     case 'twitter':
       return `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`;
     case 'facebook':
-      // Facebook no longer supports custom text via sharer
       return `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
     case 'linkedin':
-      // LinkedIn only supports URL parameter now
       return `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
     case 'whatsapp':
       return `https://wa.me/?text=${fullText}`;
+    case 'email':
+      return `mailto:?subject=${encodedTitle}&body=${fullText}`;
     default:
       return options.url;
   }
 }
 
 /**
- * Open a share popup for a specific platform
+ * Open a share window for a specific platform
+ * Facebook and LinkedIn block popups with window features, so open in new tab
  */
-function openSharePopup(url: string, platform: string): void {
+function openShareWindow(url: string, platform: string): void {
+  // Email uses mailto: which doesn't need a window
+  if (platform === 'email') {
+    window.location.href = url;
+    return;
+  }
+  
+  // Facebook and LinkedIn block sized popups - open in new tab instead
+  if (platform === 'facebook' || platform === 'linkedin' || platform === 'whatsapp') {
+    window.open(url, '_blank', 'noopener,noreferrer');
+    return;
+  }
+  
+  // Twitter works fine with popups
   const width = 600;
   const height = 400;
   const left = (window.innerWidth - width) / 2;
@@ -121,7 +136,7 @@ export async function share(platform: SharePlatform, options: ShareOptions): Pro
     
     default:
       const shareUrl = getShareUrl(platform, options);
-      openSharePopup(shareUrl, platform);
+      openShareWindow(shareUrl, platform);
       return true;
   }
 }
