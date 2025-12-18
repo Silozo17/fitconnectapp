@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,6 +40,8 @@ import { LanguageSelector } from "@/components/shared/LanguageSelector";
 import { Separator } from "@/components/ui/separator";
 import { AccountSecuritySection } from "@/components/shared/AccountSecuritySection";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import { UnsavedChangesDialog } from "@/components/shared/UnsavedChangesDialog";
 
 interface PlanTier {
   id: string;
@@ -76,6 +78,8 @@ const AdminSettings = () => {
   const setOverride = useSetFeatureOverride();
   const removeOverride = useRemoveFeatureOverride();
 
+  const initialSettingsRef = useRef<typeof localSettings | null>(null);
+
   const [localSettings, setLocalSettings] = useState({
     email_notifications: true,
     auto_approve_coaches: false,
@@ -99,6 +103,15 @@ const AdminSettings = () => {
     legal_email: "",
     privacy_email: "",
   });
+  
+  const {
+    blocker,
+  } = useUnsavedChanges(localSettings, { enabled: true });
+  
+  const checkIsDirty = (): boolean => {
+    if (!initialSettingsRef.current) return false;
+    return JSON.stringify(localSettings) !== JSON.stringify(initialSettingsRef.current);
+  };
 
   const [editingTier, setEditingTier] = useState<PlanTier | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -138,8 +151,7 @@ const AdminSettings = () => {
 
   useEffect(() => {
     if (settings) {
-      setLocalSettings(prev => ({
-        ...prev,
+      const newSettings = {
         email_notifications: parseBoolean(settings.email_notifications, true),
         auto_approve_coaches: parseBoolean(settings.auto_approve_coaches, false),
         maintenance_mode: parseBoolean(settings.maintenance_mode, false),
@@ -161,7 +173,9 @@ const AdminSettings = () => {
         contact_address: settings.contact_address ?? "",
         legal_email: settings.legal_email ?? "",
         privacy_email: settings.privacy_email ?? "",
-      }));
+      };
+      setLocalSettings(newSettings);
+      initialSettingsRef.current = JSON.parse(JSON.stringify(newSettings));
     }
   }, [settings]);
 
@@ -171,6 +185,7 @@ const AdminSettings = () => {
     );
     
     await Promise.all(updates);
+    initialSettingsRef.current = JSON.parse(JSON.stringify(localSettings));
     toast.success("Settings saved successfully");
   };
 
@@ -1231,7 +1246,12 @@ const AdminSettings = () => {
           </Tabs>
 
           <div className="flex justify-end">
-            <Button className="w-full sm:w-auto" onClick={handleSave} disabled={updateSetting.isPending}>
+            <Button 
+              className="w-full sm:w-auto" 
+              onClick={handleSave} 
+              disabled={updateSetting.isPending || !checkIsDirty()}
+              variant={checkIsDirty() ? "default" : "outline"}
+            >
               {updateSetting.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -1243,6 +1263,9 @@ const AdminSettings = () => {
             </Button>
           </div>
         </div>
+        
+        {/* Unsaved Changes Dialog */}
+        <UnsavedChangesDialog blocker={blocker} />
       </AdminLayout>
     </>
   );

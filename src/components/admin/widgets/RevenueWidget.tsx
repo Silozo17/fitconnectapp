@@ -44,7 +44,7 @@ export function RevenueWidget({ type, stats }: RevenueWidgetProps) {
             </div>
             <div className="flex-1">
               <p className="text-2xl font-bold">£{(stats.commissionEarnings || 0).toLocaleString()}</p>
-              <p className="text-sm text-muted-foreground">Platform Commissions (15%)</p>
+              <p className="text-sm text-muted-foreground">Platform Commissions (Tier-based: 1-4%)</p>
             </div>
           </div>
         );
