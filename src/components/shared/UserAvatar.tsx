@@ -36,6 +36,16 @@ const SQUIRCLE_IMAGE_STYLES = {
   xl: { height: '220%', bottom: '-80%' },  // Show more body for hero sections
 };
 
+// Size-aware clipPath - negative top inset allows head to overflow upward
+const SQUIRCLE_CLIP_PATHS = {
+  '2xs': 'inset(-55% 0 0 0)',
+  xs: 'inset(-55% 0 0 0)',
+  sm: 'inset(-55% 0 0 0)',
+  md: 'inset(-50% 0 0 0)',
+  lg: 'inset(-45% 0 0 0)',
+  xl: 'inset(-35% 0 0 0)',  // Less clipping for hero size
+};
+
 // Always-vibrant gradient for squircle variant (regardless of rarity)
 const SQUIRCLE_GRADIENT = 'bg-gradient-to-br from-cyan-400 via-emerald-400 to-lime-400';
 const SQUIRCLE_GLOW = 'shadow-[0_0_30px_rgba(0,255,170,0.5)]';
@@ -126,12 +136,16 @@ export const UserAvatar = ({
   return (
     <div 
       className={cn(
-        "relative shrink-0 rounded-2xl overflow-hidden",
+        "relative shrink-0 rounded-2xl",
         SQUIRCLE_GRADIENT,  // Always vibrant cyan-lime gradient for squircle
         SQUIRCLE_GLOW,      // Always vibrant glow
         sizeClass,
         className
       )}
+      style={{ 
+        // Allow avatar to overflow at top only, clip sides and bottom cleanly
+        clipPath: hasCharacterAvatar ? SQUIRCLE_CLIP_PATHS[size] : undefined 
+      }}
     >
       {/* Avatar image - positioned so upper body shows, head extends above */}
       {imageUrl ? (
