@@ -173,3 +173,6 @@ verify_jwt = false
 
 [functions.places-details]
 verify_jwt = false
+
+[functions.send-session-confirmation]
+verify_jwt = true

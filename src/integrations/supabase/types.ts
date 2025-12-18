@@ -2472,13 +2472,14 @@ export type Database = {
           cancellation_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
-          client_id: string
+          client_id: string | null
           coach_id: string
           created_at: string
           currency: string | null
           deposit_amount: number | null
           duration_minutes: number
           external_calendar_event_id: string | null
+          external_client_id: string | null
           id: string
           is_online: boolean | null
           location: string | null
@@ -2501,13 +2502,14 @@ export type Database = {
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
-          client_id: string
+          client_id?: string | null
           coach_id: string
           created_at?: string
           currency?: string | null
           deposit_amount?: number | null
           duration_minutes?: number
           external_calendar_event_id?: string | null
+          external_client_id?: string | null
           id?: string
           is_online?: boolean | null
           location?: string | null
@@ -2530,13 +2532,14 @@ export type Database = {
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
-          client_id?: string
+          client_id?: string | null
           coach_id?: string
           created_at?: string
           currency?: string | null
           deposit_amount?: number | null
           duration_minutes?: number
           external_calendar_event_id?: string | null
+          external_client_id?: string | null
           id?: string
           is_online?: boolean | null
           location?: string | null
@@ -2588,6 +2591,13 @@ export type Database = {
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coaching_sessions_external_client_id_fkey"
+            columns: ["external_client_id"]
+            isOneToOne: false
+            referencedRelation: "external_session_clients"
             referencedColumns: ["id"]
           },
         ]
@@ -3209,6 +3219,48 @@ export type Database = {
             columns: ["calendar_connection_id"]
             isOneToOne: false
             referencedRelation: "calendar_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      external_session_clients: {
+        Row: {
+          coach_id: string
+          created_at: string
+          email: string
+          id: string
+          name: string
+          phone: string | null
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          phone?: string | null
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          phone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_session_clients_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_session_clients_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
             referencedColumns: ["id"]
           },
         ]
