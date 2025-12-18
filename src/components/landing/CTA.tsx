@@ -48,7 +48,7 @@ const CTA = () => {
               size="lg"
               className="border-gray-900 text-gray-900 hover:bg-gray-900/10 h-14 text-lg px-8 rounded-xl border-2"
             >
-              <Link to="/become-coach">Apply as Coach</Link>
+              <Link to="/for-coaches">Apply as Coach</Link>
             </Button>
           </div>
 

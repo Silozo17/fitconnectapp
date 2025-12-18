@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Package, Percent, ShoppingCart, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,15 +9,11 @@ import { useDigitalBundle, useHasPurchased, CONTENT_TYPES } from "@/hooks/useDig
 import { formatCurrency } from "@/lib/currency";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 
 export default function MarketplaceBundle() {
   const { bundleId } = useParams<{ bundleId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { toast } = useToast();
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   const { data: bundle, isLoading } = useDigitalBundle(bundleId || "");
   const { data: hasPurchased } = useHasPurchased(undefined, bundleId);
@@ -27,31 +22,19 @@ export default function MarketplaceBundle() {
     ? Math.round(((bundle.original_price - bundle.price) / bundle.original_price) * 100)
     : 0;
 
-  const handlePurchase = async () => {
+  const handlePurchase = () => {
     if (!user) {
       navigate("/auth?redirect=/marketplace/bundles/" + bundleId);
       return;
     }
 
-    setIsCheckingOut(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("content-checkout", {
-        body: {
-          bundleId: bundle?.id,
-          successUrl: `${window.location.origin}/dashboard/client/library?purchased=${bundle?.id}`,
-          cancelUrl: window.location.href,
-        },
-      });
-
-      if (error) throw error;
-      if (data?.url) {
-        window.open(data.url, "_blank");
-      }
-    } catch (error: any) {
-      toast({ title: "Checkout failed", description: error.message, variant: "destructive" });
-    } finally {
-      setIsCheckingOut(false);
-    }
+    // Navigate to embedded checkout page
+    const params = new URLSearchParams({
+      type: "digital-bundle",
+      itemId: bundle?.id || "",
+      returnUrl: `/marketplace/bundles/${bundleId}`,
+    });
+    navigate(`/checkout?${params.toString()}`);
   };
 
   if (isLoading) {
@@ -219,13 +202,8 @@ export default function MarketplaceBundle() {
                       className="w-full" 
                       size="lg"
                       onClick={handlePurchase}
-                      disabled={isCheckingOut}
                     >
-                      {isCheckingOut ? (
-                        <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full mr-2" />
-                      ) : (
-                        <ShoppingCart className="h-4 w-4 mr-2" />
-                      )}
+                      <ShoppingCart className="h-4 w-4 mr-2" />
                       Purchase Bundle
                     </Button>
                   )}

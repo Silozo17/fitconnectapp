@@ -41,8 +41,8 @@ serve(async (req) => {
     const user = userData.user;
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const { productId, bundleId, successUrl, cancelUrl } = await req.json();
-    logStep("Request body", { productId, bundleId });
+    const { productId, bundleId, successUrl, cancelUrl, embedded } = await req.json();
+    logStep("Request body", { productId, bundleId, embedded });
 
     if (!productId && !bundleId) {
       throw new Error("Either productId or bundleId is required");
@@ -113,7 +113,7 @@ serve(async (req) => {
     const platformFee = Math.round(itemPrice * 0.15 * 100); // In cents
     const priceInCents = Math.round(itemPrice * 100);
 
-    // Create checkout session
+    // Create checkout session params
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       customer: customerId,
       customer_email: customerId ? undefined : user.email!,
@@ -131,8 +131,6 @@ serve(async (req) => {
         },
       ],
       mode: "payment",
-      success_url: successUrl || `${req.headers.get("origin")}/dashboard/client/library`,
-      cancel_url: cancelUrl || `${req.headers.get("origin")}/marketplace`,
       metadata: {
         type: "digital_content",
         product_id: productId || "",
@@ -141,6 +139,15 @@ serve(async (req) => {
         coach_id: coachId,
       },
     };
+
+    // Add embedded mode support
+    if (embedded) {
+      sessionParams.ui_mode = "embedded";
+      sessionParams.return_url = successUrl || `${req.headers.get("origin")}/dashboard/client/library`;
+    } else {
+      sessionParams.success_url = successUrl || `${req.headers.get("origin")}/dashboard/client/library`;
+      sessionParams.cancel_url = cancelUrl || `${req.headers.get("origin")}/marketplace`;
+    }
 
     // If coach has Stripe Connect, split payment
     if (coach?.stripe_connect_id && coach?.stripe_connect_onboarded) {
@@ -157,7 +164,7 @@ serve(async (req) => {
     }
 
     const session = await stripe.checkout.sessions.create(sessionParams);
-    logStep("Checkout session created", { sessionId: session.id });
+    logStep("Checkout session created", { sessionId: session.id, embedded });
 
     // Create pending purchase record
     const purchaseData = {
@@ -178,7 +185,11 @@ serve(async (req) => {
       logStep("Warning: Could not create purchase record", { error: purchaseError.message });
     }
 
-    return new Response(JSON.stringify({ url: session.url, sessionId: session.id }), {
+    return new Response(JSON.stringify({ 
+      url: session.url, 
+      sessionId: session.id,
+      clientSecret: session.client_secret, // For embedded mode
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Library, Package, BookOpen, Video, FileText, Headphones, Download, Play, ExternalLink, Lock, RefreshCcw, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -8,8 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 import { useMyLibrary, CONTENT_TYPES, ContentPurchase } from "@/hooks/useDigitalProducts";
 import { useToast } from "@/hooks/use-toast";
-import { useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency } from "@/lib/currency";
 
 const getContentIcon = (type: string) => {
@@ -33,7 +31,6 @@ export default function ClientLibrary() {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { data: purchases, isLoading } = useMyLibrary();
-  const [checkingOut, setCheckingOut] = useState<string | null>(null);
 
   // Show success toast if redirected after purchase
   useEffect(() => {
@@ -51,29 +48,17 @@ export default function ClientLibrary() {
   const products = purchases?.filter(p => p.digital_products) || [];
   const bundles = purchases?.filter(p => p.digital_bundles) || [];
 
-  const handleBuyAgain = async (purchase: ContentPurchase) => {
+  const handleBuyAgain = (purchase: ContentPurchase) => {
     const product = purchase.digital_products;
     if (!product) return;
 
-    setCheckingOut(purchase.id);
-    try {
-      const { data, error } = await supabase.functions.invoke("content-checkout", {
-        body: {
-          productId: product.id,
-          successUrl: `${window.location.origin}/dashboard/client/library?purchased=${product.id}`,
-          cancelUrl: window.location.href,
-        },
-      });
-
-      if (error) throw error;
-      if (data?.url) {
-        window.open(data.url, "_blank");
-      }
-    } catch (error: any) {
-      toast({ title: "Checkout failed", description: error.message, variant: "destructive" });
-    } finally {
-      setCheckingOut(null);
-    }
+    // Navigate to embedded checkout page
+    const params = new URLSearchParams({
+      type: "digital-product",
+      itemId: product.id,
+      returnUrl: "/dashboard/client/library",
+    });
+    navigate(`/checkout?${params.toString()}`);
   };
 
   const renderPurchaseCard = (purchase: ContentPurchase, isBundle: boolean = false) => {
@@ -155,13 +140,8 @@ export default function ClientLibrary() {
               size="sm" 
               className="flex-1"
               onClick={() => handleBuyAgain(purchase)}
-              disabled={checkingOut === purchase.id}
             >
-              {checkingOut === purchase.id ? (
-                <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full mr-1" />
-              ) : (
-                <RefreshCcw className="h-4 w-4 mr-1" />
-              )}
+              <RefreshCcw className="h-4 w-4 mr-1" />
               Buy Again {product && product.price > 0 && `(${formatCurrency(product.price, (product.currency || "GBP") as "GBP" | "USD" | "EUR")})`}
             </Button>
           ) : (
