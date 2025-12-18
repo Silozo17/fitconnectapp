@@ -131,7 +131,7 @@ export function ListWidget({ type, items, title }: ListWidgetProps) {
                 ))}
               </p>
               <p className="text-xs text-muted-foreground line-clamp-1">
-                {item.comment || "No comment"}
+                {item.review_text || "No comment"}
               </p>
             </div>
             <span className="text-xs text-muted-foreground">
