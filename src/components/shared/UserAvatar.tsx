@@ -33,7 +33,7 @@ const SQUIRCLE_IMAGE_STYLES = {
   sm: { height: '140%' },
   md: { height: '145%' },
   lg: { height: '150%' },
-  xl: { height: '155%' },  // More body visible for hero sections
+  xl: { height: '200%' },  // Bigger avatar for hero sections
 };
 
 // Size-aware clipPath - negative top inset allows head to overflow upward
@@ -43,7 +43,7 @@ const SQUIRCLE_CLIP_PATHS = {
   sm: 'inset(-55% 0 0 0)',
   md: 'inset(-50% 0 0 0)',
   lg: 'inset(-45% 0 0 0)',
-  xl: 'inset(-35% 0 0 0)',  // Less clipping for hero size
+  xl: 'inset(-20% 0 0 0)',  // Less overflow, avatar appears lower  // Less clipping for hero size
 };
 
 // Always-vibrant gradient for squircle variant (regardless of rarity)
