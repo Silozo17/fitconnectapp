@@ -170,7 +170,7 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "FitConnect <reminders@resend.dev>",
+          from: "FitConnect <support@getfitconnect.co.uk>",
           to: [clientUser.email],
           subject: `${urgencyEmoji} ${reminderText}: Session with ${coachName}`,
           html: clientHtml,
@@ -225,7 +225,7 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "FitConnect <reminders@resend.dev>",
+          from: "FitConnect <support@getfitconnect.co.uk>",
           to: [coachUser.email],
           subject: `${urgencyEmoji} ${reminderText}: Session with ${clientName}`,
           html: coachHtml,

@@ -70,7 +70,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "FitConnect <noreply@fitconnect.app>",
+        from: "FitConnect <support@getfitconnect.co.uk>",
         to: [email],
         subject: "Your FitConnect verification code",
         html: `
