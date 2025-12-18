@@ -146,8 +146,8 @@ const ProspectProfileSheet = ({
                 avatarSlug={(clientProfile?.avatars as any)?.slug}
                 avatarRarity={(clientProfile?.avatars as any)?.rarity as Rarity}
                 name={fullName}
-                className="w-20 h-20 mb-3"
                 variant="squircle"
+                size="lg"
                 showRarityBorder
               />
               <h3 className="text-lg font-semibold text-foreground">{fullName}</h3>

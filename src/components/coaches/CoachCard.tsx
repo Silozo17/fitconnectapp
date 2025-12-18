@@ -81,7 +81,12 @@ const CoachCard = ({ coach, onBook, onRequestConnection }: CoachCardProps) => {
           <img src={coach.card_image_url || coach.profile_image_url || ""} alt={coach.display_name || "Coach"} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20">
-            <UserAvatar src={null} name={coach.display_name} className="w-24 h-24 text-3xl" />
+            <UserAvatar 
+              src={null} 
+              name={coach.display_name} 
+              variant="squircle"
+              size="lg"
+            />
           </div>
         )}
         <div className="absolute bottom-3 left-3 flex gap-2">

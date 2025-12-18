@@ -126,13 +126,14 @@ const CoachDetail = () => {
                         <img
                           src={coach.profile_image_url}
                           alt={coach.display_name || "Coach"}
-                          className="h-32 w-32 rounded-2xl object-cover ring-4 ring-border"
+                          className="h-36 w-32 rounded-3xl object-cover ring-4 ring-border"
                         />
                       ) : (
                         <UserAvatar
                           src={null}
                           name={coach.display_name}
-                          className="h-32 w-32 text-4xl ring-4 ring-border rounded-2xl"
+                          variant="squircle"
+                          size="lg"
                         />
                       )}
                     </div>
