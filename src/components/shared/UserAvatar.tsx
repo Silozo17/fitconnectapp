@@ -15,14 +15,25 @@ interface UserAvatarProps {
   size?: '2xs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl'; // Predefined sizes for squircle
 }
 
-// Predefined sizes for squircle variant (landscape ratio ~1.75:1)
+// Predefined sizes for squircle variant
 const SQUIRCLE_SIZES = {
   '2xs': 'w-10 h-6',    // Tiny - for very compact contexts
   xs: 'w-14 h-8',       // Extra small - for nav headers and lists
   sm: 'w-28 h-16',      // Small - for lists (1.75:1)
   md: 'w-44 h-24',      // Medium - for cards (~1.83:1)
   lg: 'w-56 h-32',      // Large - for profiles (1.75:1)
-  xl: 'w-72 h-40',      // Extra large - for hero sections (1.8:1)
+  xl: 'w-64 h-48',      // Extra large - for hero sections (taller to show more body)
+};
+
+// Size-aware positioning for character avatars in squircle variant
+// Larger sizes show proportionally more of the character's body
+const SQUIRCLE_IMAGE_STYLES = {
+  '2xs': { height: '350%', bottom: '-190%' },
+  xs: { height: '350%', bottom: '-190%' },
+  sm: { height: '320%', bottom: '-170%' },
+  md: { height: '280%', bottom: '-140%' },
+  lg: { height: '260%', bottom: '-120%' },
+  xl: { height: '220%', bottom: '-80%' },  // Show more body for hero sections
 };
 
 // Always-vibrant gradient for squircle variant (regardless of rarity)
@@ -110,20 +121,17 @@ export const UserAvatar = ({
   // NFT-style squircle variant with overflow effect
   // Avatar shows upper body only: head extends above, waist cut off at bottom
   const sizeClass = SQUIRCLE_SIZES[size];
+  const imageStyle = SQUIRCLE_IMAGE_STYLES[size];
   
   return (
     <div 
       className={cn(
-        "relative shrink-0 rounded-2xl",
+        "relative shrink-0 rounded-2xl overflow-hidden",
         SQUIRCLE_GRADIENT,  // Always vibrant cyan-lime gradient for squircle
         SQUIRCLE_GLOW,      // Always vibrant glow
         sizeClass,
         className
       )}
-      style={{ 
-        // Allow avatar to overflow at top only, clip sides and bottom cleanly
-        clipPath: hasCharacterAvatar ? 'inset(-55% 0 0 0)' : undefined 
-      }}
     >
       {/* Avatar image - positioned so upper body shows, head extends above */}
       {imageUrl ? (
@@ -131,11 +139,13 @@ export const UserAvatar = ({
           src={imageUrl} 
           alt={name || "User"} 
           className={cn(
-            "absolute w-full object-contain",
-            hasCharacterAvatar 
-              ? "h-[350%] left-1/2 -translate-x-1/2 -bottom-[190%] object-top"
-              : "inset-0 h-full object-cover"
+            "absolute w-full object-contain left-1/2 -translate-x-1/2",
+            hasCharacterAvatar ? "object-top" : "inset-0 h-full object-cover"
           )}
+          style={hasCharacterAvatar ? {
+            height: imageStyle.height,
+            bottom: imageStyle.bottom,
+          } : undefined}
           onError={(e) => {
             (e.target as HTMLImageElement).src = '/placeholder.svg';
           }}
