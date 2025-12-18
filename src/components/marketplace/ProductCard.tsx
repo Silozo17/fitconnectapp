@@ -66,8 +66,9 @@ export default function ProductCard({ product, viewMode = "grid", compact = fals
         <CardContent className="flex-1 p-4 flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Badge variant="secondary" className="text-xs">
-                {contentType?.icon} {contentType?.label}
+              <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                {contentType && <contentType.icon className="h-3 w-3" />}
+                {contentType?.label}
               </Badge>
               {product.price === 0 && (
                 <Badge className="bg-green-500/20 text-green-500 border-green-500/30">FREE</Badge>

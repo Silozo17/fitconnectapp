@@ -145,8 +145,8 @@ export default function MarketplaceProduct() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                    <span className="text-8xl">{contentType?.icon || "📦"}</span>
+                <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                    {contentType ? <contentType.icon className="h-20 w-20 text-primary/50" /> : <span className="text-8xl">📦</span>}
                   </div>
                 )}
               </div>

@@ -1,16 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Filter, Package, BookOpen, Video, FileText, Headphones, Grid, List, Film, ClipboardList, type LucideIcon } from "lucide-react";
-
-// Map string icon names to actual Lucide components
-const ICON_MAP: Record<string, LucideIcon> = {
-  BookOpen,
-  Video,
-  Film,
-  ClipboardList,
-  Headphones,
-  Package,
-};
+import { Search, Filter, Package, Grid, List, BookOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -116,11 +106,17 @@ export default function Marketplace() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Types</SelectItem>
-                    {CONTENT_TYPES.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.icon} {type.label}
-                      </SelectItem>
-                    ))}
+                    {CONTENT_TYPES.map((type) => {
+                      const IconComponent = type.icon;
+                      return (
+                        <SelectItem key={type.value} value={type.value}>
+                          <div className="flex items-center gap-2">
+                            <IconComponent className="h-4 w-4" />
+                            {type.label}
+                          </div>
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>
@@ -240,7 +236,7 @@ export default function Marketplace() {
                   className="flex flex-col items-center justify-center gap-1 sm:gap-2 min-h-[90px] sm:min-h-[110px] p-3 sm:p-4 lg:p-6 rounded-xl bg-card border border-border hover:border-primary/50 hover:bg-primary/5 transition-all"
                 >
                   {(() => {
-                    const IconComponent = ICON_MAP[type.icon] || Package;
+                    const IconComponent = type.icon;
                     return <IconComponent className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 text-primary" />;
                   })()}
                   <span className="text-xs sm:text-sm font-medium text-center line-clamp-2">{type.label}</span>

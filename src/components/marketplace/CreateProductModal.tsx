@@ -10,11 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useCreateProduct, CONTENT_CATEGORIES, CONTENT_TYPES } from "@/hooks/useDigitalProducts";
+import { useCreateProduct, CONTENT_TYPES } from "@/hooks/useDigitalProducts";
 import { useAIProductAssist } from "@/hooks/useAIProductAssist";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Sparkles, Upload, Link, Loader2 } from "lucide-react";
+import { Sparkles, Upload, Link, Loader2, FileUp } from "lucide-react";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -22,8 +22,8 @@ const formSchema = z.object({
   short_description: z.string().max(150).optional(),
   description: z.string().optional(),
   content_type: z.enum(["ebook", "video_course", "single_video", "template", "audio", "other"]),
-  category: z.string(),
-  difficulty_level: z.enum(["beginner", "intermediate", "advanced"]),
+  category: z.string().min(1, "Category is required"),
+  difficulty_level: z.enum(["none", "beginner", "intermediate", "advanced"]),
   price: z.coerce.number().min(0),
   compare_at_price: z.coerce.number().min(0).optional().or(z.literal("")),
   currency: z.string(),
@@ -55,14 +55,34 @@ const generateSlug = (title: string): string => {
     .replace(/^-+|-+$/g, '');
 };
 
+// Allowed file types for content upload
+const ALLOWED_CONTENT_TYPES = [
+  'application/pdf',
+  'video/mp4',
+  'video/quicktime',
+  'video/webm',
+  'audio/mpeg',
+  'audio/mp3',
+  'audio/wav',
+  'application/zip',
+  'application/x-zip-compressed',
+];
+
+const MAX_CONTENT_SIZE_MB = 100;
+
 export default function CreateProductModal({ open, onOpenChange }: CreateProductModalProps) {
   const createProduct = useCreateProduct();
   const { generateDescription, generateTags, isGeneratingDescription, isGeneratingTags } = useAIProductAssist();
   const { toast } = useToast();
   const [imageTab, setImageTab] = useState<"upload" | "url">("upload");
+  const [contentTab, setContentTab] = useState<"upload" | "url">("upload");
   const [isUploading, setIsUploading] = useState(false);
+  const [isUploadingContent, setIsUploadingContent] = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
+  const [uploadedContentUrl, setUploadedContentUrl] = useState<string | null>(null);
+  const [uploadedContentName, setUploadedContentName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const contentFileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -72,8 +92,8 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
       short_description: "",
       description: "",
       content_type: "ebook",
-      category: "other",
-      difficulty_level: "intermediate",
+      category: "",
+      difficulty_level: "none",
       price: 0,
       compare_at_price: "",
       currency: "GBP",
@@ -94,13 +114,16 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
   const title = form.watch("title");
   const category = form.watch("category");
 
-  // Auto-generate slug when title changes
+  // Auto-generate slug when title changes - FIXED: capture old title BEFORE updating
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
-    form.setValue("title", newTitle);
-    // Only auto-generate if slug is empty or matches the old auto-generated slug
+    const oldTitle = form.getValues("title");
     const currentSlug = form.getValues("slug");
-    if (!currentSlug || currentSlug === generateSlug(form.getValues("title"))) {
+    
+    form.setValue("title", newTitle);
+    
+    // Only auto-generate if slug is empty or matches the old auto-generated slug
+    if (!currentSlug || currentSlug === generateSlug(oldTitle)) {
       form.setValue("slug", generateSlug(newTitle));
     }
   };
@@ -149,6 +172,60 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
     }
   };
 
+  const handleContentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!ALLOWED_CONTENT_TYPES.includes(file.type)) {
+      toast({ 
+        title: "Invalid file type", 
+        description: "Supported formats: PDF, MP4, MP3, WAV, ZIP", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    // Validate file size
+    if (file.size > MAX_CONTENT_SIZE_MB * 1024 * 1024) {
+      toast({ 
+        title: "File too large", 
+        description: `File must be less than ${MAX_CONTENT_SIZE_MB}MB`, 
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    setIsUploadingContent(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}-${file.name}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("digital-content")
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("digital-content")
+        .getPublicUrl(fileName);
+
+      setUploadedContentUrl(publicUrl);
+      setUploadedContentName(file.name);
+      form.setValue("content_url", publicUrl);
+      form.setValue("is_downloadable", true);
+      toast({ title: "Content file uploaded successfully" });
+    } catch (error: any) {
+      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+    } finally {
+      setIsUploadingContent(false);
+    }
+  };
+
   const handleAIDescription = async () => {
     const result = await generateDescription(title, contentType, category);
     if (result) {
@@ -174,6 +251,11 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
       ? uploadedImageUrl 
       : values.cover_image_url;
 
+    // Use uploaded content file if available and tab is upload
+    const contentUrl = contentTab === "upload" && uploadedContentUrl
+      ? uploadedContentUrl
+      : values.content_url;
+
     await createProduct.mutateAsync({
       ...values,
       tags,
@@ -181,12 +263,16 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
       compare_at_price: values.compare_at_price ? Number(values.compare_at_price) : null,
       cover_image_url: coverImageUrl || null,
       preview_url: values.preview_url || null,
-      content_url: values.content_url || null,
+      content_url: contentUrl || null,
       video_url: values.video_url || null,
+      // Map "none" to empty string for database
+      difficulty_level: values.difficulty_level === "none" ? "" : values.difficulty_level,
     });
     
     form.reset();
     setUploadedImageUrl(null);
+    setUploadedContentUrl(null);
+    setUploadedContentName(null);
     onOpenChange(false);
   };
 
@@ -314,11 +400,17 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {CONTENT_TYPES.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.icon} {type.label}
-                          </SelectItem>
-                        ))}
+                        {CONTENT_TYPES.map((type) => {
+                          const IconComponent = type.icon;
+                          return (
+                            <SelectItem key={type.value} value={type.value}>
+                              <div className="flex items-center gap-2">
+                                <IconComponent className="h-4 w-4" />
+                                {type.label}
+                              </div>
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -332,20 +424,13 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Category *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {CONTENT_CATEGORIES.map((cat) => (
-                          <SelectItem key={cat.value} value={cat.value}>
-                            {cat.icon} {cat.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <Input 
+                        placeholder="e.g., Weight Loss, HIIT, Yoga..." 
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>Enter a custom category</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -366,6 +451,7 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
+                        <SelectItem value="none">None (Not Applicable)</SelectItem>
                         <SelectItem value="beginner">Beginner</SelectItem>
                         <SelectItem value="intermediate">Intermediate</SelectItem>
                         <SelectItem value="advanced">Advanced</SelectItem>
@@ -538,6 +624,91 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
               </Tabs>
             </div>
 
+            {/* Content File (for customers after purchase) */}
+            <div className="space-y-4">
+              <FormLabel>Content File (for customers after purchase)</FormLabel>
+              <Tabs value={contentTab} onValueChange={(v) => setContentTab(v as "upload" | "url")}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="upload" className="gap-2">
+                    <FileUp className="h-4 w-4" />
+                    Upload File
+                  </TabsTrigger>
+                  <TabsTrigger value="url" className="gap-2">
+                    <Link className="h-4 w-4" />
+                    Provide URL
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="upload" className="space-y-3">
+                  <input
+                    ref={contentFileInputRef}
+                    type="file"
+                    accept=".pdf,.mp4,.mov,.webm,.mp3,.wav,.zip"
+                    onChange={handleContentUpload}
+                    className="hidden"
+                  />
+                  {uploadedContentUrl ? (
+                    <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
+                      <div className="flex items-center gap-3">
+                        <FileUp className="h-8 w-8 text-primary" />
+                        <div>
+                          <p className="font-medium text-sm">{uploadedContentName}</p>
+                          <p className="text-xs text-muted-foreground">File uploaded successfully</p>
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => contentFileInputRef.current?.click()}
+                      >
+                        Replace
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full h-24 flex-col gap-2"
+                      onClick={() => contentFileInputRef.current?.click()}
+                      disabled={isUploadingContent}
+                    >
+                      {isUploadingContent ? (
+                        <>
+                          <Loader2 className="h-6 w-6 animate-spin" />
+                          <span>Uploading...</span>
+                        </>
+                      ) : (
+                        <>
+                          <FileUp className="h-6 w-6" />
+                          <span>Click to upload content file</span>
+                          <span className="text-xs text-muted-foreground">
+                            PDF, MP4, MP3, WAV, ZIP (max {MAX_CONTENT_SIZE_MB}MB)
+                          </span>
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </TabsContent>
+                <TabsContent value="url">
+                  <FormField
+                    control={form.control}
+                    name="content_url"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input placeholder="https://... (link to downloadable file)" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          External URL where customers can download the content
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TabsContent>
+              </Tabs>
+            </div>
+
             {/* Other URLs */}
             <div className="space-y-4">
               <FormField
@@ -570,20 +741,6 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
                   )}
                 />
               )}
-
-              <FormField
-                control={form.control}
-                name="content_url"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Download URL</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Downloadable file URL" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
 
             {/* Metadata */}

@@ -126,8 +126,8 @@ export default function CoachProducts() {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                            <span className="text-4xl">{contentType?.icon || "📦"}</span>
+                        <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                            {contentType ? <contentType.icon className="h-10 w-10 text-primary/50" /> : <span className="text-4xl">📦</span>}
                           </div>
                         )}
                         
@@ -179,8 +179,9 @@ export default function CoachProducts() {
 
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between mb-2">
-                          <Badge variant="outline" className="text-xs">
-                            {contentType?.icon} {contentType?.label}
+                        <Badge variant="outline" className="text-xs flex items-center gap-1">
+                            {contentType && <contentType.icon className="h-3 w-3" />}
+                            {contentType?.label}
                           </Badge>
                           <span className="font-bold text-primary">
                             {product.price === 0 ? "Free" : formatCurrency(product.price, (product.currency || "GBP") as "GBP" | "USD" | "EUR")}
