@@ -1,4 +1,5 @@
 import { Facebook, Instagram, Youtube, Linkedin, ExternalLink } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 // Custom icons for platforms without Lucide icons
@@ -30,8 +31,9 @@ interface SocialLinksData {
   youtube_url?: string | null;
 }
 
-interface CoachSocialLinksProps {
+interface CoachSocialLinksDisplayProps {
   socialLinks: SocialLinksData;
+  showCard?: boolean;
 }
 
 const socialPlatforms = [
@@ -86,7 +88,7 @@ const socialPlatforms = [
   },
 ];
 
-export function CoachSocialLinks({ socialLinks }: CoachSocialLinksProps) {
+export function CoachSocialLinksDisplay({ socialLinks, showCard = true }: CoachSocialLinksDisplayProps) {
   const activeSocialLinks = socialPlatforms.filter(
     (platform) => socialLinks[platform.key]
   );
@@ -96,30 +98,49 @@ export function CoachSocialLinks({ socialLinks }: CoachSocialLinksProps) {
     return null;
   }
 
-  return (
-    <div className="flex flex-wrap gap-3">
-      {activeSocialLinks.map((platform) => {
-        const Icon = platform.icon;
-        const url = socialLinks[platform.key];
-        
-        return (
-          <a
-            key={platform.key}
-            href={url || "#"}
-            target="_blank"
-            rel="noopener noreferrer"
-            title={platform.label}
-            className={cn(
-              "flex items-center justify-center w-10 h-10 rounded-full text-white",
-              "transition-all duration-200 hover:scale-110 hover:shadow-lg",
-              platform.bgClass,
-              platform.hoverClass
-            )}
-          >
-            <Icon />
-          </a>
-        );
-      })}
+  const content = (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <ExternalLink className="h-5 w-5 text-muted-foreground" />
+        <h3 className="text-lg font-semibold text-foreground">Connect With Me</h3>
+      </div>
+      
+      <div className="flex flex-wrap gap-3">
+        {activeSocialLinks.map((platform) => {
+          const Icon = platform.icon;
+          const url = socialLinks[platform.key];
+          
+          return (
+            <a
+              key={platform.key}
+              href={url || "#"}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                "flex items-center gap-2 px-4 py-2.5 rounded-full text-white font-medium",
+                "transition-all duration-200 hover:scale-105 hover:shadow-lg",
+                platform.bgClass,
+                platform.hoverClass
+              )}
+            >
+              <Icon />
+              <span className="hidden sm:inline">{platform.label}</span>
+            </a>
+          );
+        })}
+      </div>
     </div>
+  );
+
+  if (!showCard) {
+    return content;
+  }
+
+  return (
+    <Card className="overflow-hidden">
+      <CardContent className="p-6">
+        {content}
+      </CardContent>
+    </Card>
   );
 }
