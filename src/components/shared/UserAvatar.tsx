@@ -86,23 +86,23 @@ export const UserAvatar = ({
     return colors[index];
   };
 
-  // Priority: 1) Character avatar slug, 2) Uploaded photo, 3) Default avatar, 4) Initials
+  // Priority: 1) Uploaded photo, 2) Character avatar slug, 3) Default avatar
   const getImageUrl = () => {
+    if (src) {
+      return src;  // Uploaded photo takes top priority
+    }
     if (avatarSlug) {
       return getAvatarImageUrl(avatarSlug);
-    }
-    if (src) {
-      return src;
     }
     // Use default avatar if no photo and no selected avatar
     return getAvatarImageUrl(DEFAULT_AVATAR.slug);
   };
 
   const imageUrl = getImageUrl();
-  // Has character avatar if: explicitly set via avatarSlug, OR if no photo uploaded (uses default)
-  const hasCharacterAvatar = !!avatarSlug || !src;
-  // Has uploaded photo (not a character avatar)
-  const hasUploadedPhoto = !!src && !avatarSlug;
+  // Has uploaded photo - takes priority over character avatars
+  const hasUploadedPhoto = !!src;
+  // Has character avatar only when NO uploaded photo exists
+  const hasCharacterAvatar = !src;
   
   // Get rarity config for styling
   const rarityConfig = avatarRarity ? RARITY_CONFIG[avatarRarity] : RARITY_CONFIG.common;
