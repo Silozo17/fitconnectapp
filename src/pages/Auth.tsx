@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { z } from "zod";
@@ -13,6 +13,10 @@ import { Dumbbell, Loader2, User, Briefcase } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import BlobShape from "@/components/ui/blob-shape";
+import { PasswordStrengthIndicator } from "@/components/auth/PasswordStrengthIndicator";
+import { validatePassword } from "@/utils/passwordValidation";
+import { usePasswordBreachCheck } from "@/hooks/usePasswordBreachCheck";
+import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 
 const authSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -26,17 +30,44 @@ const Auth = () => {
   const [selectedRole, setSelectedRole] = useState<"client" | "coach">("client");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alsoFindCoach, setAlsoFindCoach] = useState(false);
+  const [passwordValue, setPasswordValue] = useState("");
   const { signIn, signUp, user, role } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { checkPassword, isChecking: isCheckingBreach, isBreached, reset: resetBreachCheck } = usePasswordBreachCheck();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<AuthFormData>({
     resolver: zodResolver(authSchema),
   });
+
+  // Debounced breach check
+  const debouncedBreachCheck = useDebouncedCallback((password: string) => {
+    if (password.length >= 8 && !isLogin) {
+      checkPassword(password);
+    }
+  }, 800);
+
+  // Watch password changes
+  const watchedPassword = watch("password");
+  useEffect(() => {
+    if (watchedPassword !== undefined) {
+      setPasswordValue(watchedPassword);
+      if (!isLogin) {
+        debouncedBreachCheck(watchedPassword);
+      }
+    }
+  }, [watchedPassword, isLogin, debouncedBreachCheck]);
+
+  // Reset breach check when switching modes
+  useEffect(() => {
+    resetBreachCheck();
+    setPasswordValue("");
+  }, [isLogin, resetBreachCheck]);
 
   useEffect(() => {
     if (user && role) {
@@ -51,6 +82,19 @@ const Auth = () => {
   }, [user, role, navigate]);
 
   const onSubmit = async (data: AuthFormData) => {
+    // For signup, validate password strength and breach status
+    if (!isLogin) {
+      const validation = validatePassword(data.password);
+      if (!validation.isValid) {
+        toast.error("Please choose a stronger password");
+        return;
+      }
+      if (isBreached) {
+        toast.error("This password was found in a data breach. Please choose a different password.");
+        return;
+      }
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -216,6 +260,13 @@ const Auth = () => {
                   <p className="text-destructive text-sm mt-1">
                     {errors.password.message}
                   </p>
+                )}
+                {!isLogin && (
+                  <PasswordStrengthIndicator 
+                    password={passwordValue}
+                    isBreached={isBreached ?? false}
+                    isCheckingBreach={isCheckingBreach}
+                  />
                 )}
               </div>
 
