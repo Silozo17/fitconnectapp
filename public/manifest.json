@@ -2,7 +2,7 @@
   "name": "FitConnect",
   "short_name": "FitConnect",
   "description": "Connect with world-class fitness coaches. Personal trainers, nutritionists, boxing, MMA and bodybuilding coaches.",
-  "start_url": "/",
+  "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#0D0D14",
   "theme_color": "#BEFF00",

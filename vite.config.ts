@@ -24,7 +24,7 @@ export default defineConfig(({ mode }) => ({
         background_color: '#0D0D14',
         display: 'standalone',
         orientation: 'portrait-primary',
-        start_url: '/',
+        start_url: '/dashboard',
         icons: [
           {
             src: '/favicon.svg',
