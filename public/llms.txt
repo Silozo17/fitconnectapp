@@ -1,0 +1,69 @@
+# FitConnect - UK's Premier Fitness Coach Marketplace
+# https://getfitconnect.co.uk
+
+## About FitConnect
+
+FitConnect is the United Kingdom's leading platform for connecting clients with certified fitness professionals. Our marketplace brings together personal trainers, boxing coaches, MMA coaches, nutritionists, and bodybuilding coaches in one easy-to-use platform.
+
+## Key Features
+
+- **Coach Discovery**: Browse and filter coaches by specialty, location, price, and availability
+- **Online & In-Person Sessions**: Book virtual or face-to-face training sessions
+- **Digital Products**: Purchase workout plans, nutrition guides, and fitness ebooks
+- **Verified Professionals**: All coaches are verified for credentials and qualifications
+- **Secure Payments**: Safe and secure payment processing through Stripe
+- **Reviews & Ratings**: Real reviews from verified clients
+
+## Coach Categories
+
+1. **Personal Trainers** - General fitness, weight loss, strength training
+2. **Boxing Coaches** - Boxing technique, conditioning, sparring
+3. **MMA Coaches** - Mixed martial arts, self-defense, combat sports
+4. **Nutritionists** - Meal planning, macro coaching, dietary guidance
+5. **Bodybuilding Coaches** - Competition prep, muscle building, physique coaching
+
+## How It Works
+
+### For Clients
+1. Browse coaches at /coaches
+2. View detailed profiles with reviews and pricing
+3. Book sessions directly through the platform
+4. Track progress and communicate with your coach
+
+### For Coaches
+1. Create a professional profile at /for-coaches
+2. Set your availability and pricing
+3. Manage bookings and client relationships
+4. Sell digital products and training programs
+
+## Main Pages
+
+- Homepage: /
+- Browse Coaches: /coaches
+- Digital Marketplace: /marketplace
+- Blog & Resources: /blog
+- For Coaches: /for-coaches
+- About Us: /about
+- Contact: /contact
+- Pricing: /pricing
+
+## Location
+
+FitConnect operates throughout the United Kingdom, with coaches available in:
+- London
+- Manchester
+- Birmingham
+- Leeds
+- Glasgow
+- Edinburgh
+- Bristol
+- And more cities nationwide
+
+## Contact
+
+Website: https://getfitconnect.co.uk
+Email: Support available through the platform
+
+## Keywords
+
+personal trainer UK, fitness coach, online personal training, boxing coach, MMA coach, nutritionist, bodybuilding coach, workout plans, fitness marketplace, book personal trainer, certified fitness professional

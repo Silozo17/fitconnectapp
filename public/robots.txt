@@ -1,6 +1,7 @@
 # FitConnect Robots.txt
 # https://getfitconnect.co.uk
 
+# Standard Search Engine Crawlers
 User-agent: Googlebot
 Allow: /
 
@@ -13,6 +14,47 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+# AI Crawlers - Explicitly Allow for AI Search Results
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: YouBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+# Default Rules
 User-agent: *
 Allow: /
 Disallow: /dashboard/
@@ -20,6 +62,7 @@ Disallow: /onboarding/
 Disallow: /auth
 Disallow: /subscribe
 Disallow: /api/
+Disallow: /checkout
 
-# Sitemap
-Sitemap: https://getfitconnect.co.uk/sitemap.xml
+# Sitemaps
+Sitemap: https://getfitconnect.co.uk/api/sitemap.xml

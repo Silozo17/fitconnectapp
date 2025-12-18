@@ -166,3 +166,136 @@ export function createCoachListSchema(coaches: { name: string; url: string }[]) 
     })),
   };
 }
+
+// Helper to create Product schema for digital products
+export function createProductSchema(product: {
+  name: string;
+  description: string;
+  image?: string;
+  url: string;
+  price: number;
+  currency: string;
+  availability?: "InStock" | "OutOfStock" | "PreOrder";
+  rating?: number;
+  reviewCount?: number;
+  seller?: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.name,
+    "description": product.description,
+    "image": product.image || "https://getfitconnect.co.uk/og-image.png",
+    "url": `https://getfitconnect.co.uk${product.url}`,
+    "offers": {
+      "@type": "Offer",
+      "price": product.price,
+      "priceCurrency": product.currency,
+      "availability": `https://schema.org/${product.availability || "InStock"}`,
+      "seller": {
+        "@type": "Organization",
+        "name": product.seller || "FitConnect",
+      },
+    },
+    ...(product.rating && product.reviewCount && {
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": product.rating.toFixed(1),
+        "reviewCount": product.reviewCount,
+        "bestRating": "5",
+        "worstRating": "1",
+      },
+    }),
+  };
+}
+
+// Helper to create LocalBusiness schema for coach profiles
+export function createLocalBusinessSchema(coach: {
+  name: string;
+  description?: string;
+  image?: string;
+  url: string;
+  location?: string;
+  priceRange?: string;
+  rating?: number;
+  reviewCount?: number;
+  coachTypes?: string[];
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "@id": `https://getfitconnect.co.uk${coach.url}`,
+    "name": coach.name,
+    "description": coach.description,
+    "image": coach.image,
+    "url": `https://getfitconnect.co.uk${coach.url}`,
+    ...(coach.location && {
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": coach.location,
+        "addressCountry": "GB",
+      },
+    }),
+    "priceRange": coach.priceRange || "££",
+    ...(coach.rating && coach.reviewCount && {
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": coach.rating.toFixed(1),
+        "reviewCount": coach.reviewCount,
+        "bestRating": "5",
+        "worstRating": "1",
+      },
+    }),
+    "areaServed": {
+      "@type": "Country",
+      "name": "United Kingdom",
+    },
+    ...(coach.coachTypes && {
+      "knowsAbout": coach.coachTypes,
+    }),
+  };
+}
+
+// Helper to create enhanced Article schema
+export function createArticleSchema(article: {
+  headline: string;
+  description: string;
+  image?: string;
+  url: string;
+  author?: string;
+  datePublished: string;
+  dateModified?: string;
+  keywords?: string[];
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": article.headline,
+    "description": article.description,
+    "image": article.image || "https://getfitconnect.co.uk/og-image.png",
+    "url": `https://getfitconnect.co.uk${article.url}`,
+    "author": {
+      "@type": "Organization",
+      "name": article.author || "FitConnect",
+      "url": "https://getfitconnect.co.uk",
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "FitConnect",
+      "url": "https://getfitconnect.co.uk",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://getfitconnect.co.uk/pwa-512x512.png",
+      },
+    },
+    "datePublished": article.datePublished,
+    "dateModified": article.dateModified || article.datePublished,
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `https://getfitconnect.co.uk${article.url}`,
+    },
+    ...(article.keywords && {
+      "keywords": article.keywords.join(", "),
+    }),
+  };
+}
