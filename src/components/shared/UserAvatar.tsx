@@ -131,7 +131,7 @@ export const UserAvatar = ({
           className={cn(
             "absolute w-full object-contain",
             hasCharacterAvatar 
-              ? "h-[350%] left-1/2 -translate-x-1/2 -bottom-[130%] object-top"
+              ? "h-[350%] left-1/2 -translate-x-1/2 -bottom-[160%] object-top"
               : "inset-0 h-full object-cover"
           )}
           onError={(e) => {
