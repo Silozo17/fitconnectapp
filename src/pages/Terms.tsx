@@ -279,6 +279,64 @@ const Terms = () => {
                   grant FitConnect a license to display such content on the Platform for service delivery purposes.
                 </p>
 
+                <h2>11A. Video Conferencing Services</h2>
+                <p>
+                  FitConnect integrates with third-party video conferencing services, including Zoom Video 
+                  Communications, Inc. ("Zoom") and Google Meet, to facilitate online coaching sessions. This 
+                  section governs your use of these integrated services.
+                </p>
+
+                <h3>Third-Party Service Terms</h3>
+                <p>
+                  When you use video conferencing features through FitConnect, you agree to also be bound by the 
+                  terms and privacy policies of the respective service providers:
+                </p>
+                <ul>
+                  <li><strong>Zoom:</strong> <a href="https://www.zoom.com/en/trust/terms/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Zoom Terms of Service</a> and <a href="https://www.zoom.com/en/trust/privacy/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Zoom Privacy Policy</a></li>
+                  <li><strong>Google Meet:</strong> <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google Terms of Service</a> and <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google Privacy Policy</a></li>
+                </ul>
+
+                <h3>Coach Responsibilities</h3>
+                <p>Coaches who connect video conferencing accounts agree to:</p>
+                <ul>
+                  <li>Use the integration solely for conducting legitimate coaching sessions with clients</li>
+                  <li>Comply with the terms of service of the connected video conferencing provider</li>
+                  <li>Not use the integration for any purpose unrelated to FitConnect coaching services</li>
+                  <li>Obtain appropriate consent before recording any video sessions</li>
+                  <li>Protect any recordings in accordance with applicable data protection laws</li>
+                </ul>
+
+                <h3>Client Responsibilities</h3>
+                <p>Clients participating in video coaching sessions agree to:</p>
+                <ul>
+                  <li>Conduct themselves professionally during video sessions</li>
+                  <li>Ensure their participation complies with the video provider's terms of service</li>
+                  <li>Not record sessions without the express consent of the Coach</li>
+                  <li>Not share meeting links with unauthorized third parties</li>
+                </ul>
+
+                <h3>Disclaimer of Liability for Video Services</h3>
+                <p>
+                  <strong>IMPORTANT:</strong> FitConnect is not responsible for the availability, performance, 
+                  security, or functionality of third-party video conferencing services. You acknowledge and agree that:
+                </p>
+                <ul>
+                  <li>FitConnect does not control and is not liable for any disruptions, outages, or technical 
+                    issues with Zoom, Google Meet, or any other video conferencing service</li>
+                  <li>FitConnect does not have access to, and is not responsible for, the content of your video calls</li>
+                  <li>Any recordings made during video sessions are the responsibility of the parties involved, 
+                    subject to applicable laws and the Coach's policies</li>
+                  <li>FitConnect is not liable for any data breaches or security incidents that occur within the 
+                    third-party video conferencing platforms</li>
+                </ul>
+
+                <h3>Disconnection of Video Services</h3>
+                <p>
+                  Coaches may disconnect their video conferencing accounts at any time through Settings → 
+                  Integrations. Upon disconnection, FitConnect will no longer be able to create or manage 
+                  video meetings on the Coach's behalf. Existing meeting links for scheduled sessions may 
+                  remain active until the meetings occur or are manually cancelled.</p>
+
                 <h2>12. Health and Fitness Disclaimer</h2>
                 <p>
                   <strong>IMPORTANT - READ CAREFULLY:</strong>
