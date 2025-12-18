@@ -30,7 +30,7 @@ export function CoachFeaturedBadges({ coachId }: CoachFeaturedBadgesProps) {
   }
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       <TooltipProvider>
         {featuredBadges.map((coachBadge) => {
           const badge = coachBadge.badge;
@@ -41,18 +41,21 @@ export function CoachFeaturedBadges({ coachId }: CoachFeaturedBadgesProps) {
           return (
             <Tooltip key={coachBadge.id}>
               <TooltipTrigger asChild>
-                <div
-                  className={cn(
-                    "flex items-center gap-1.5 px-2 py-1 rounded-full border text-xs font-medium cursor-default",
-                    rarityColors[badge.rarity]
-                  )}
-                >
+                <div className="cursor-pointer hover:scale-110 transition-transform">
                   {badge.image_url ? (
-                    <img src={badge.image_url} alt={badge.name} className="h-6 w-6 object-contain" />
+                    <img 
+                      src={badge.image_url} 
+                      alt={badge.name} 
+                      className="h-10 w-10 md:h-12 md:w-12 object-contain drop-shadow-md" 
+                    />
                   ) : (
-                    <IconComponent className="h-5 w-5" />
+                    <div className={cn(
+                      "h-10 w-10 md:h-12 md:w-12 rounded-full flex items-center justify-center",
+                      rarityColors[badge.rarity]
+                    )}>
+                      <IconComponent className="h-5 w-5 md:h-6 md:w-6" />
+                    </div>
                   )}
-                  <span className="max-w-[80px] truncate">{badge.name}</span>
                 </div>
               </TooltipTrigger>
               <TooltipContent>

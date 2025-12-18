@@ -30,28 +30,26 @@ export function CoachHeroSection({ coach, averageRating, reviewCount }: CoachHer
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-2xl" />
       
-      <div className="relative p-6 md:p-8">
-        <div className="flex flex-col md:flex-row gap-6 md:gap-8">
+      <div className="relative p-4 md:p-5">
+        <div className="flex flex-col md:flex-row gap-4 md:gap-6">
           {/* Profile Image */}
-          <div className="flex justify-center md:justify-start">
-            <div className="relative">
-              <UserAvatar
-                src={coach.profile_image_url}
-                avatarSlug={coach.avatars?.slug}
-                avatarRarity={coach.avatars?.rarity as any}
-                name={coach.display_name}
-                variant="squircle"
-                size="xl"
-                className="ring-4 ring-background shadow-xl"
-              />
-            </div>
+          <div className="flex justify-center md:justify-start shrink-0">
+            <UserAvatar
+              src={coach.profile_image_url}
+              avatarSlug={coach.avatars?.slug}
+              avatarRarity={coach.avatars?.rarity as any}
+              name={coach.display_name}
+              variant="squircle"
+              size="xl"
+              className="ring-4 ring-background shadow-xl"
+            />
           </div>
 
           {/* Coach Info */}
-          <div className="flex-1 text-center md:text-left">
+          <div className="flex-1 text-center md:text-left min-w-0">
             {/* Name & Verified */}
-            <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+            <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">
                 {coach.display_name || "Coach"}
               </h1>
               {coach.is_verified && (
@@ -59,60 +57,52 @@ export function CoachHeroSection({ coach, averageRating, reviewCount }: CoachHer
               )}
             </div>
 
-            {/* Location & Gym */}
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-muted-foreground mb-4">
+            {/* Location & Gym + Rating inline */}
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-1 text-muted-foreground mb-2">
               {coach.location && (
-                <span className="flex items-center gap-1.5">
-                  <MapPin className="h-4 w-4" />
+                <span className="flex items-center gap-1.5 text-sm">
+                  <MapPin className="h-3.5 w-3.5" />
                   {coach.location}
                 </span>
               )}
               {coach.gym_affiliation && (
-                <span className="flex items-center gap-1.5">
-                  <Building className="h-4 w-4" />
+                <span className="flex items-center gap-1.5 text-sm">
+                  <Building className="h-3.5 w-3.5" />
                   {coach.gym_affiliation}
                 </span>
               )}
-            </div>
-
-            {/* Rating - Prominent Display */}
-            <div className="flex items-center justify-center md:justify-start gap-4 mb-4">
               <StarRating 
                 rating={averageRating} 
                 reviewCount={reviewCount} 
-                size="lg"
+                size="sm"
                 showCount
               />
             </div>
 
-            {/* Coach Types */}
-            <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-4">
+            {/* Coach Types + Featured Badges inline */}
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
               {coach.coach_types?.map((type) => (
                 <Badge 
                   key={type} 
                   variant="secondary"
-                  className="px-3 py-1 text-sm font-medium"
+                  className="px-2.5 py-0.5 text-xs font-medium"
                 >
                   {type}
                 </Badge>
               ))}
-            </div>
-
-            {/* Featured Badges */}
-            <div className="flex justify-center md:justify-start">
               <CoachFeaturedBadges coachId={coach.id} />
             </div>
           </div>
 
           {/* Actions - Top Right */}
-          <div className="absolute top-4 right-4 flex items-center gap-2">
+          <div className="absolute top-3 right-3 flex items-center gap-1.5">
             <ShareButton
               title={`${coach.display_name} - Coach on FitConnect`}
               text={coach.bio || `Check out ${coach.display_name}'s coaching profile!`}
               url={window.location.href}
               variant="outline"
               size="icon"
-              className="bg-background/80 backdrop-blur-sm"
+              className="bg-background/80 backdrop-blur-sm h-8 w-8"
             />
             <FavouriteButton 
               coachId={coach.id} 
