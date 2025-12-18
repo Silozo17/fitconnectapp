@@ -112,7 +112,8 @@ export function CreateInvoiceModal({
   const resetForm = () => {
     setClientId("");
     setDueDate("");
-    setTaxRate(0);
+    // Use coach's saved VAT rate instead of resetting to 0
+    setTaxRate(invoiceSettings?.vat_registered && invoiceSettings.vat_rate ? invoiceSettings.vat_rate : 0);
     setNotes("");
     setLineItems([
       { id: crypto.randomUUID(), description: "", quantity: 1, unitPrice: 0 },

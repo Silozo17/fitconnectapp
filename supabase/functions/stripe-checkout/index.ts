@@ -38,13 +38,26 @@ serve(async (req) => {
     // Get coach's Stripe Connect account
     const { data: coachProfile, error: coachError } = await supabase
       .from("coach_profiles")
-      .select("stripe_connect_id, stripe_connect_onboarded, display_name")
+      .select("stripe_connect_id, stripe_connect_onboarded, display_name, currency")
       .eq("id", coachId)
       .single();
 
     if (coachError || !coachProfile?.stripe_connect_id || !coachProfile?.stripe_connect_onboarded) {
       throw new Error("Coach has not set up payment processing yet");
     }
+
+    // Get coach's VAT settings
+    const { data: invoiceSettings } = await supabase
+      .from("coach_invoice_settings")
+      .select("vat_registered, vat_rate, vat_inclusive")
+      .eq("coach_id", coachId)
+      .maybeSingle();
+
+    const isVatRegistered = invoiceSettings?.vat_registered || false;
+    const vatRate = invoiceSettings?.vat_rate || 0;
+    const isVatInclusive = invoiceSettings?.vat_inclusive || false;
+
+    console.log("VAT settings:", { isVatRegistered, vatRate, isVatInclusive });
 
     // Get coach's platform subscription to determine commission rate
     const { data: platformSub } = await supabase
@@ -68,6 +81,9 @@ serve(async (req) => {
       coach_id: coachId,
       type,
       item_id: itemId,
+      vat_registered: String(isVatRegistered),
+      vat_rate: String(vatRate),
+      vat_inclusive: String(isVatInclusive),
     };
 
     if (type === "package") {
@@ -82,14 +98,27 @@ serve(async (req) => {
         throw new Error("Package not found");
       }
 
+      const currency = (pkg.currency || coachProfile.currency || 'GBP').toLowerCase();
+      let unitAmount = Math.round(pkg.price * 100);
+      let description = `${pkg.session_count} sessions - Valid for ${pkg.validity_days} days`;
+
+      // Apply VAT if registered and NOT inclusive (i.e., add VAT on top)
+      if (isVatRegistered && vatRate > 0 && !isVatInclusive) {
+        const vatAmount = Math.round(unitAmount * vatRate / 100);
+        unitAmount = unitAmount + vatAmount;
+        description += ` (incl. ${vatRate}% VAT)`;
+      } else if (isVatRegistered && isVatInclusive) {
+        description += ` (incl. VAT)`;
+      }
+
       lineItems = [{
         price_data: {
-          currency: pkg.currency?.toLowerCase() || "gbp",
+          currency: currency,
           product_data: {
             name: pkg.name,
-            description: `${pkg.session_count} sessions - Valid for ${pkg.validity_days} days`,
+            description: description,
           },
-          unit_amount: Math.round(pkg.price * 100),
+          unit_amount: unitAmount,
         },
         quantity: 1,
       }];
@@ -97,6 +126,7 @@ serve(async (req) => {
       metadata.sessions_total = String(pkg.session_count);
       metadata.validity_days = String(pkg.validity_days);
       metadata.amount = String(pkg.price);
+      metadata.currency = currency.toUpperCase();
 
     } else if (type === "subscription") {
       // Get subscription plan details
@@ -110,6 +140,19 @@ serve(async (req) => {
         throw new Error("Subscription plan not found");
       }
 
+      const currency = (plan.currency || coachProfile.currency || 'GBP').toLowerCase();
+      let unitAmount = Math.round(plan.price * 100);
+      let description = plan.description || `${plan.billing_period} subscription`;
+
+      // Apply VAT if registered and NOT inclusive
+      if (isVatRegistered && vatRate > 0 && !isVatInclusive) {
+        const vatAmount = Math.round(unitAmount * vatRate / 100);
+        unitAmount = unitAmount + vatAmount;
+        description += ` (incl. ${vatRate}% VAT)`;
+      } else if (isVatRegistered && isVatInclusive) {
+        description += ` (incl. VAT)`;
+      }
+
       // Convert billing period to Stripe interval
       const intervalMap: Record<string, Stripe.Price.Recurring.Interval> = {
         monthly: "month",
@@ -120,12 +163,12 @@ serve(async (req) => {
 
       lineItems = [{
         price_data: {
-          currency: plan.currency?.toLowerCase() || "gbp",
+          currency: currency,
           product_data: {
             name: plan.name,
-            description: plan.description || `${plan.billing_period} subscription`,
+            description: description,
           },
-          unit_amount: Math.round(plan.price * 100),
+          unit_amount: unitAmount,
           recurring: {
             interval: intervalMap[plan.billing_period] || "month",
             interval_count: intervalCount,
@@ -137,6 +180,7 @@ serve(async (req) => {
       mode = "subscription";
       metadata.plan_name = plan.name;
       metadata.billing_period = plan.billing_period;
+      metadata.currency = currency.toUpperCase();
     }
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
