@@ -147,7 +147,7 @@ const FavouriteCoachCard = ({ coach, reviewData }: FavouriteCoachCardProps) => {
               <p className="text-sm text-muted-foreground">Contact for pricing</p>
             )}
             <Button size="sm" asChild>
-              <Link to={`/coaches/${coach.id}`}>View Profile</Link>
+              <Link to={`/coaches/${coach.username || coach.id}`}>View Profile</Link>
             </Button>
           </div>
         </div>

@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 // Type for public coach profile data (GDPR-safe columns only)
 export type MarketplaceCoach = {
   id: string;
+  username: string | null;
   display_name: string | null;
   bio: string | null;
   coach_types: string[] | null;
@@ -149,21 +150,24 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}) =>
   });
 };
 
-export const useCoachById = (coachId: string) => {
+export const useCoachById = (identifier: string) => {
+  // Check if identifier is a UUID
+  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
+
   return useQuery({
-    queryKey: ["coach", coachId],
+    queryKey: ["coach", identifier],
     queryFn: async () => {
       // Check if user is authenticated
       const { data: { session } } = await supabase.auth.getSession();
       
+      const filterColumn = isUUID ? "id" : "username";
+      
       if (session) {
         // Authenticated users: query base table (RLS handles access control)
-        // This allows clients to see coaches they've messaged/connected with
-        // even if those coaches have marketplace_visible = false
         const { data, error } = await supabase
           .from("coach_profiles")
           .select(`
-            id, display_name, bio, coach_types, certifications,
+            id, username, display_name, bio, coach_types, certifications,
             experience_years, hourly_rate, currency, location,
             online_available, in_person_available, profile_image_url,
             card_image_url, booking_mode, is_verified, verified_at,
@@ -173,7 +177,7 @@ export const useCoachById = (coachId: string) => {
             threads_url, linkedin_url, youtube_url,
             avatars(slug, rarity, image_url)
           `)
-          .eq("id", coachId)
+          .eq(filterColumn, identifier)
           .maybeSingle();
 
         if (error) throw error;
@@ -183,14 +187,14 @@ export const useCoachById = (coachId: string) => {
         const { data, error } = await supabase
           .from("public_coach_profiles")
           .select("*")
-          .eq("id", coachId)
+          .eq(filterColumn as "id", identifier)
           .maybeSingle();
 
         if (error) throw error;
         return (data as unknown as MarketplaceCoach) || null;
       }
     },
-    enabled: !!coachId,
+    enabled: !!identifier,
     staleTime: 1000 * 60 * 5,
   });
 };

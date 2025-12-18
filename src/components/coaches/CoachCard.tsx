@@ -212,7 +212,7 @@ const CoachCard = ({ coach, onBook, onRequestConnection }: CoachCardProps) => {
                 </Tooltip>
 
                 <Button asChild variant="lime-outline" size="sm">
-                  <Link to={`/coaches/${coach.id}`}>View</Link>
+                  <Link to={`/coaches/${coach.username || coach.id}`}>View</Link>
                 </Button>
               </div>
             </TooltipProvider>
@@ -222,7 +222,7 @@ const CoachCard = ({ coach, onBook, onRequestConnection }: CoachCardProps) => {
             </Button>
           ) : (
             <Button asChild variant="lime-outline" size="sm">
-              <Link to={`/coaches/${coach.id}`}>View Profile</Link>
+              <Link to={`/coaches/${coach.username || coach.id}`}>View Profile</Link>
             </Button>
           )}
         </div>
