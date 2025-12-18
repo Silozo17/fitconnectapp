@@ -5,17 +5,20 @@ import { Check } from "lucide-react";
 interface TierSelectorProps {
   selectedTier: TierKey;
   onTierChange: (tier: TierKey) => void;
+  includeFreeTier?: boolean;
 }
 
-export function TierSelector({ selectedTier, onTierChange }: TierSelectorProps) {
-  // Exclude free tier and admin-only tiers (like founder) from selector
-  const paidTiers = (Object.keys(SUBSCRIPTION_TIERS) as TierKey[]).filter(
-    key => key !== "free" && !SUBSCRIPTION_TIERS[key].adminOnly
-  );
+export function TierSelector({ selectedTier, onTierChange, includeFreeTier = false }: TierSelectorProps) {
+  // Exclude admin-only tiers (like founder) from selector, optionally include free tier
+  const displayTiers = (Object.keys(SUBSCRIPTION_TIERS) as TierKey[]).filter(key => {
+    if (SUBSCRIPTION_TIERS[key].adminOnly) return false;
+    if (key === "free" && !includeFreeTier) return false;
+    return true;
+  });
 
   return (
-    <div className="flex gap-2 p-1 bg-background/20 rounded-lg border border-border/30">
-      {paidTiers.map((tier) => {
+    <div className="flex flex-wrap gap-2 p-1 bg-background/20 rounded-lg border border-border/30">
+      {displayTiers.map((tier) => {
         const isSelected = selectedTier === tier;
         const tierData = SUBSCRIPTION_TIERS[tier];
         

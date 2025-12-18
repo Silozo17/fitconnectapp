@@ -166,6 +166,11 @@ const CoachOnboarding = () => {
     setIsSubmitting(true);
 
     try {
+      const isPaidTier = formData.subscriptionTier !== "free";
+      
+      // For paid tiers, save as free first - payment will upgrade it
+      const tierToSave = isPaidTier ? "free" : formData.subscriptionTier;
+      
       const { error } = await supabase
         .from("coach_profiles")
         .update({
@@ -178,7 +183,7 @@ const CoachOnboarding = () => {
           location: formData.location || null,
           online_available: formData.onlineAvailable,
           in_person_available: formData.inPersonAvailable,
-          subscription_tier: formData.subscriptionTier,
+          subscription_tier: tierToSave,
           profile_image_url: formData.profileImageUrl,
           also_client: formData.alsoClient,
           onboarding_completed: true,
@@ -187,12 +192,15 @@ const CoachOnboarding = () => {
 
       if (error) throw error;
 
-      toast.success("Profile completed! Welcome to FitConnect.");
-      
-      // If they also created a client account and want to set it up
-      if (formData.alsoClient) {
+      // If paid tier selected, redirect to payment
+      if (isPaidTier) {
+        toast.success("Profile saved! Complete your subscription to unlock all features.");
+        navigate(`/subscribe?tier=${formData.subscriptionTier}&billing=monthly`);
+      } else if (formData.alsoClient) {
+        toast.success("Profile completed! Welcome to FitConnect.");
         navigate("/onboarding/client");
       } else {
+        toast.success("Profile completed! Welcome to FitConnect.");
         navigate("/dashboard/coach");
       }
     } catch (error) {

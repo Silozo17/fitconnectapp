@@ -193,6 +193,7 @@ const EditCoachModal = ({ coach, open, onClose, onSaved }: EditCoachModalProps) 
                 <SelectItem value="starter">Starter</SelectItem>
                 <SelectItem value="pro">Pro</SelectItem>
                 <SelectItem value="enterprise">Enterprise</SelectItem>
+                <SelectItem value="founder">Founder</SelectItem>
               </SelectContent>
             </Select>
           </div>
