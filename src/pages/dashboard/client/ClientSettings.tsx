@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -506,6 +506,33 @@ const ClientSettings = () => {
                     })}
                   </div>
                 </div>
+
+                <Separator />
+
+                {/* Data & Privacy */}
+                <Card className="bg-muted/50 border-muted">
+                  <CardContent className="pt-4">
+                    <div className="flex items-start gap-3">
+                      <Shield className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+                      <div className="space-y-2">
+                        <h3 className="font-medium">Data & Privacy</h3>
+                        <p className="text-sm text-muted-foreground">
+                          When you connect integrations, your data is handled according to our privacy practices. 
+                          Learn more about how we protect your data.
+                        </p>
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                          <Link to="/privacy#integrations" className="text-primary hover:underline">
+                            Privacy Policy
+                          </Link>
+                          <span className="text-muted-foreground">•</span>
+                          <Link to="/terms" className="text-primary hover:underline">
+                            Terms of Service
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
 
                 <AppleCalendarConnectModal 
                   open={showAppleCalendarModal} 
