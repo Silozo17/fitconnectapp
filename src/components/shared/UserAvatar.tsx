@@ -99,7 +99,10 @@ export const UserAvatar = ({
   };
 
   const imageUrl = getImageUrl();
-  const hasCharacterAvatar = !!avatarSlug || (!src && !avatarSlug);
+  // Has character avatar if: explicitly set via avatarSlug, OR if no photo uploaded (uses default)
+  const hasCharacterAvatar = !!avatarSlug || !src;
+  // Has uploaded photo (not a character avatar)
+  const hasUploadedPhoto = !!src && !avatarSlug;
   
   // Get rarity config for styling
   const rarityConfig = avatarRarity ? RARITY_CONFIG[avatarRarity] : RARITY_CONFIG.common;
@@ -136,25 +139,28 @@ export const UserAvatar = ({
   return (
     <div 
       className={cn(
-        "relative shrink-0 rounded-2xl",
-        SQUIRCLE_GRADIENT,  // Always vibrant cyan-lime gradient for squircle
-        SQUIRCLE_GLOW,      // Always vibrant glow
+        "relative shrink-0 rounded-2xl overflow-hidden",
+        // Only show gradient for character avatars, neutral background for uploaded photos
+        hasCharacterAvatar && SQUIRCLE_GRADIENT,
+        hasCharacterAvatar && SQUIRCLE_GLOW,
+        hasUploadedPhoto && "bg-muted",
         sizeClass,
         className
       )}
       style={{ 
-        // Allow avatar to overflow at top only, clip sides and bottom cleanly
+        // Allow avatar to overflow at top only for character avatars
         clipPath: hasCharacterAvatar ? SQUIRCLE_CLIP_PATHS[size] : undefined 
       }}
     >
-      {/* Avatar image - positioned so upper body shows, head extends above */}
+      {/* Avatar image */}
       {imageUrl ? (
         <img 
           src={imageUrl} 
           alt={name || "User"} 
           className={cn(
-            "absolute w-full object-contain left-1/2 -translate-x-1/2",
-            hasCharacterAvatar ? "object-top" : "inset-0 h-full object-cover"
+            hasCharacterAvatar 
+              ? "absolute w-full object-contain left-1/2 -translate-x-1/2 object-top"
+              : "absolute inset-0 w-full h-full object-cover rounded-2xl"
           )}
           style={hasCharacterAvatar ? {
             height: imageStyle.height,
