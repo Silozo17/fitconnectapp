@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -27,6 +27,13 @@ export const TeamStatusModal = ({ isOpen, onClose, member, onStatusChange }: Tea
   const [status, setStatus] = useState<string>(member?.status || "active");
   const [reason, setReason] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (member && isOpen) {
+      setStatus(member.status || "active");
+      setReason("");
+    }
+  }, [member, isOpen]);
 
   const handleSubmit = async () => {
     if (!member) return;
