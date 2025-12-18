@@ -135,7 +135,7 @@ export const useCoachProfileCompletion = () => {
           name: "Verification",
           description: "Upload verification documents",
           completed: (documentsCount || 0) > 0,
-          link: "/dashboard/coach/verification",
+          link: "/dashboard/coach/settings?tab=verification",
           linkText: "Upload Docs",
         },
       ];
