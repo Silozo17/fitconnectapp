@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   User,
   Bell,
@@ -130,9 +130,15 @@ const statusConfig = {
 
 const CoachSettings = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, signOut } = useAuth();
   const { currency } = useLocale();
-  const [selectedTab, setSelectedTab] = useState("profile");
+  
+  // Read tab from URL params for deep linking (e.g., ?tab=verification)
+  const urlTab = searchParams.get("tab");
+  const validTabs = ["profile", "notifications", "preferences", "subscription", "integrations", "verification", "security"];
+  const initialTab = urlTab && validTabs.includes(urlTab) ? urlTab : "profile";
+  const [selectedTab, setSelectedTab] = useState(initialTab);
   const [saving, setSaving] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [checkingUsername, setCheckingUsername] = useState(false);

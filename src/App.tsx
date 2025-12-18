@@ -101,7 +101,7 @@ const CoachSettings = lazy(() => import("./pages/dashboard/coach/CoachSettings")
 const CoachPackages = lazy(() => import("./pages/dashboard/coach/CoachPackages"));
 const CoachIntegrations = lazy(() => import("./pages/dashboard/coach/CoachIntegrations"));
 const CoachReviews = lazy(() => import("./pages/dashboard/coach/CoachReviews"));
-const CoachVerification = lazy(() => import("./pages/dashboard/coach/CoachVerification"));
+
 const CoachPipeline = lazy(() => import("./pages/dashboard/coach/CoachPipeline"));
 const CoachBoost = lazy(() => import("./pages/dashboard/coach/CoachBoost"));
 const AdminBoosts = lazy(() => import("./pages/dashboard/admin/AdminBoosts"));
@@ -512,11 +512,6 @@ const App = () => (
                     <Route path="/dashboard/coach/notifications" element={
                       <ProtectedRoute allowedRoles={["coach"]}>
                         <Notifications />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/dashboard/coach/verification" element={
-                      <ProtectedRoute allowedRoles={["coach"]}>
-                        <CoachVerification />
                       </ProtectedRoute>
                     } />
                     <Route path="/dashboard/coach/integrations" element={
