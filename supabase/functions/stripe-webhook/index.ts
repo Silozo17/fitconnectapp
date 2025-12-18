@@ -13,22 +13,35 @@ serve(async (req) => {
       throw new Error("Missing environment variables");
     }
 
+    // SECURITY: Webhook signature validation is REQUIRED
+    if (!webhookSecret) {
+      console.error("STRIPE_WEBHOOK_SECRET is not configured - rejecting webhook");
+      throw new Error("Webhook secret not configured. Signature validation is required.");
+    }
+
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const body = await req.text();
     const signature = req.headers.get("stripe-signature");
 
-    let event: Stripe.Event;
-
-    if (webhookSecret && signature) {
-      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-    } else {
-      // For testing without webhook secret
-      event = JSON.parse(body);
+    // SECURITY: Signature validation is mandatory
+    if (!signature) {
+      console.error("Missing stripe-signature header - rejecting webhook");
+      throw new Error("Missing stripe-signature header. All webhook requests must be signed.");
     }
 
-    console.log("Webhook event received:", event.type);
+    let event: Stripe.Event;
+    
+    try {
+      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown signature error";
+      console.error("Webhook signature verification failed:", errorMessage);
+      throw new Error(`Webhook signature verification failed: ${errorMessage}`);
+    }
+
+    console.log("Webhook event received (signature verified):", event.type);
 
     switch (event.type) {
       case "checkout.session.completed": {
