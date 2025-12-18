@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Trash2, FileText } from "lucide-react";
 import {
   Dialog,
@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { useCoachClients, CoachClient } from "@/hooks/useCoachClients";
 import { useCreateInvoice } from "@/hooks/useCoachFinancial";
+import { useCoachInvoiceSettings } from "@/hooks/useCoachInvoiceSettings";
 import { formatCurrency } from "@/lib/currency";
 
 interface LineItem {
@@ -41,6 +42,7 @@ export function CreateInvoiceModal({
   coachId,
 }: CreateInvoiceModalProps) {
   const { data: clients } = useCoachClients();
+  const { data: invoiceSettings } = useCoachInvoiceSettings(coachId);
   const createInvoice = useCreateInvoice();
 
   const [clientId, setClientId] = useState<string>("");
@@ -50,6 +52,13 @@ export function CreateInvoiceModal({
   const [lineItems, setLineItems] = useState<LineItem[]>([
     { id: crypto.randomUUID(), description: "", quantity: 1, unitPrice: 0 },
   ]);
+
+  // Pre-populate VAT rate from coach's invoice settings
+  useEffect(() => {
+    if (invoiceSettings?.vat_registered && invoiceSettings.vat_rate) {
+      setTaxRate(invoiceSettings.vat_rate);
+    }
+  }, [invoiceSettings]);
 
   const addLineItem = () => {
     setLineItems([

@@ -1859,7 +1859,9 @@ export type Database = {
           logo_url: string | null
           template_id: string | null
           updated_at: string | null
+          vat_inclusive: boolean | null
           vat_number: string | null
+          vat_rate: number | null
           vat_registered: boolean | null
         }
         Insert: {
@@ -1878,7 +1880,9 @@ export type Database = {
           logo_url?: string | null
           template_id?: string | null
           updated_at?: string | null
+          vat_inclusive?: boolean | null
           vat_number?: string | null
+          vat_rate?: number | null
           vat_registered?: boolean | null
         }
         Update: {
@@ -1897,7 +1901,9 @@ export type Database = {
           logo_url?: string | null
           template_id?: string | null
           updated_at?: string | null
+          vat_inclusive?: boolean | null
           vat_number?: string | null
+          vat_rate?: number | null
           vat_registered?: boolean | null
         }
         Relationships: [

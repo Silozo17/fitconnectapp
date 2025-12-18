@@ -11,6 +11,8 @@ export interface InvoiceSettings {
   business_phone: string | null;
   vat_number: string | null;
   vat_registered: boolean;
+  vat_rate: number | null;
+  vat_inclusive: boolean;
   company_registration: string | null;
   logo_url: string | null;
   template_id: string;
@@ -132,8 +134,12 @@ export function useUploadInvoiceLogo() {
 
   return useMutation({
     mutationFn: async ({ coachId, file }: { coachId: string; file: File }) => {
+      // Get authenticated user ID for storage path (matches RLS policy)
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
       const fileExt = file.name.split(".").pop();
-      const fileName = `${coachId}/invoice-logo.${fileExt}`;
+      const fileName = `${user.id}/invoice-logo.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("profile-images")
