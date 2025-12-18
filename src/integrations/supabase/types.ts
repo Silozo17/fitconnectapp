@@ -1860,6 +1860,7 @@ export type Database = {
           template_id: string | null
           updated_at: string | null
           vat_number: string | null
+          vat_registered: boolean | null
         }
         Insert: {
           accent_color?: string | null
@@ -1878,6 +1879,7 @@ export type Database = {
           template_id?: string | null
           updated_at?: string | null
           vat_number?: string | null
+          vat_registered?: boolean | null
         }
         Update: {
           accent_color?: string | null
@@ -1896,6 +1898,7 @@ export type Database = {
           template_id?: string | null
           updated_at?: string | null
           vat_number?: string | null
+          vat_registered?: boolean | null
         }
         Relationships: [
           {

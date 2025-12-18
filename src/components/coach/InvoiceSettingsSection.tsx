@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { Loader2, Upload, X, Save } from "lucide-react";
 import { InvoiceTemplateSelector } from "@/components/invoice/InvoiceTemplateSelector";
 import { InvoicePreview, InvoiceData, BusinessDetails } from "@/components/invoice/InvoicePreview";
@@ -29,6 +30,7 @@ export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps)
     businessEmail: "",
     businessPhone: "",
     vatNumber: "",
+    vatRegistered: false,
     companyRegistration: "",
     templateId: "modern" as TemplateId,
     accentColor: "#BEFF00",
@@ -46,6 +48,7 @@ export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps)
         businessEmail: settings.business_email || "",
         businessPhone: settings.business_phone || "",
         vatNumber: settings.vat_number || "",
+        vatRegistered: settings.vat_registered || false,
         companyRegistration: settings.company_registration || "",
         templateId: (settings.template_id as TemplateId) || "modern",
         accentColor: settings.accent_color || "#BEFF00",
@@ -65,13 +68,15 @@ export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps)
         business_address: formData.businessAddress || null,
         business_email: formData.businessEmail || null,
         business_phone: formData.businessPhone || null,
-        vat_number: formData.vatNumber || null,
+        vat_number: formData.vatRegistered ? (formData.vatNumber || null) : null,
+        vat_registered: formData.vatRegistered,
         company_registration: formData.companyRegistration || null,
         template_id: formData.templateId,
         accent_color: formData.accentColor,
         default_payment_terms: formData.defaultPaymentTerms || null,
         default_notes: formData.defaultNotes || null,
         bank_details: formData.bankDetails || null,
+        logo_url: formData.logoUrl || null,
       },
     });
   };
@@ -88,7 +93,12 @@ export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps)
     setFormData((prev) => ({ ...prev, logoUrl: "" }));
   };
 
-  // Sample invoice for preview
+  // Sample invoice for preview - conditionally include VAT based on toggle
+  const subtotal = 290;
+  const taxRate = formData.vatRegistered ? 20 : undefined;
+  const taxAmount = formData.vatRegistered ? subtotal * 0.2 : undefined;
+  const total = formData.vatRegistered ? subtotal + (taxAmount || 0) : subtotal;
+
   const sampleInvoice: InvoiceData = {
     invoiceNumber: "INV-001",
     date: new Date(),
@@ -99,10 +109,10 @@ export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps)
       { description: "Personal Training Session (1hr)", quantity: 4, unitPrice: 60, total: 240 },
       { description: "Nutrition Consultation", quantity: 1, unitPrice: 50, total: 50 },
     ],
-    subtotal: 290,
-    taxRate: 20,
-    taxAmount: 58,
-    total: 348,
+    subtotal,
+    taxRate,
+    taxAmount,
+    total,
     notes: formData.defaultNotes || undefined,
   };
 
@@ -210,14 +220,34 @@ export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps)
                 placeholder="+44 123 456 7890"
               />
             </div>
-            <div>
-              <Label>VAT Number (optional)</Label>
-              <Input
-                value={formData.vatNumber}
-                onChange={(e) => setFormData({ ...formData, vatNumber: e.target.value })}
-                placeholder="GB123456789"
+          </div>
+
+          {/* VAT Section */}
+          <div className="border rounded-lg p-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="vat-toggle">VAT Registered</Label>
+                <p className="text-xs text-muted-foreground">
+                  Enable if your business is registered for VAT
+                </p>
+              </div>
+              <Switch
+                id="vat-toggle"
+                checked={formData.vatRegistered}
+                onCheckedChange={(checked) => setFormData({ ...formData, vatRegistered: checked })}
               />
             </div>
+            
+            {formData.vatRegistered && (
+              <div>
+                <Label>VAT Number</Label>
+                <Input
+                  value={formData.vatNumber}
+                  onChange={(e) => setFormData({ ...formData, vatNumber: e.target.value })}
+                  placeholder="GB123456789"
+                />
+              </div>
+            )}
           </div>
 
           <div>
