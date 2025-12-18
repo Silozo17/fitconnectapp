@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { usePlatformUrl } from "@/hooks/usePlatformUrl";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -57,6 +57,9 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan,
   // Fetch platform settings for currency
   const { data: platformSettings } = usePlatformSettings();
   const platformCurrency = (platformSettings?.currency || 'GBP') as CurrencyCode;
+  
+  // Get platform URL for external links
+  const { getAbsoluteUrl } = usePlatformUrl();
 
   // Fetch last login
   const { data: lastLogin, isLoading: lastLoginLoading } = useUserLastLogin(coach?.user_id);
@@ -263,10 +266,14 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan,
             </Button>
             {coach.username && (
               <Button variant="outline" className="justify-start" asChild>
-                <Link to={`/coaches/${coach.username}`} target="_blank">
+                <a 
+                  href={getAbsoluteUrl(`/coaches/${coach.username}`)} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                >
                   <ExternalLink className="h-4 w-4 mr-2" />
                   View Public Profile
-                </Link>
+                </a>
               </Button>
             )}
           </div>
