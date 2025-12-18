@@ -662,12 +662,12 @@ const CoachSettings = () => {
 
             {/* Verification Tab */}
             {selectedTab === "verification" && (
-              <div className="space-y-6">
+              <div className="space-y-6 overflow-hidden">
                 {/* Status Card */}
                 <Card>
                   <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-between gap-2 min-w-0 flex-wrap">
+                      <div className="flex items-center gap-3 min-w-0">
                         <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                           {isVerified ? (
                             <VerifiedBadge size="lg" showTooltip={false} />
@@ -684,7 +684,7 @@ const CoachSettings = () => {
                           </CardDescription>
                         </div>
                       </div>
-                      <Badge className={statusConfig[currentStatus as keyof typeof statusConfig]?.color}>
+                      <Badge className={`${statusConfig[currentStatus as keyof typeof statusConfig]?.color} shrink-0`}>
                         <StatusIcon className="w-3 h-3 mr-1" />
                         {statusConfig[currentStatus as keyof typeof statusConfig]?.label}
                       </Badge>
@@ -714,12 +714,12 @@ const CoachSettings = () => {
                     const isUploading = uploadingType === type;
 
                     return (
-                      <Card key={type}>
+                      <Card key={type} className="overflow-hidden">
                         <CardHeader className="pb-3">
                           <CardTitle className="text-base">{label}</CardTitle>
                           <CardDescription className="text-xs">{description}</CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-3">
+                        <CardContent className="space-y-3 overflow-hidden">
                           {/* Uploaded documents */}
                           {typeDocs.map((doc) => (
                           <div
