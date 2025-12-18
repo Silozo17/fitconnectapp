@@ -13,6 +13,7 @@ import {
   Plug,
   Video,
   Calendar,
+  Receipt,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,6 +58,7 @@ import {
 } from "@/hooks/useVerification";
 import { VerifiedBadge } from "@/components/verification/VerifiedBadge";
 import { AccountSecuritySection } from "@/components/shared/AccountSecuritySection";
+import { InvoiceSettingsSection } from "@/components/coach/InvoiceSettingsSection";
 import { format } from "date-fns";
 import { Upload, FileText, Trash2, CheckCircle, XCircle, Clock, AlertCircle, Eye } from "lucide-react";
 
@@ -136,7 +138,7 @@ const CoachSettings = () => {
   
   // Read tab from URL params for deep linking (e.g., ?tab=verification)
   const urlTab = searchParams.get("tab");
-  const validTabs = ["profile", "notifications", "preferences", "subscription", "integrations", "verification", "security"];
+  const validTabs = ["profile", "notifications", "preferences", "subscription", "invoice", "integrations", "verification", "security"];
   const initialTab = urlTab && validTabs.includes(urlTab) ? urlTab : "profile";
   const [selectedTab, setSelectedTab] = useState(initialTab);
   const [saving, setSaving] = useState(false);
@@ -386,6 +388,7 @@ const CoachSettings = () => {
               {[
                 { id: "profile", icon: User, label: "Profile" },
                 { id: "services", icon: CreditCard, label: "Services & Pricing" },
+                { id: "invoice", icon: Receipt, label: "Invoice Settings" },
                 { id: "verification", icon: Shield, label: "Verification" },
                 { id: "integrations", icon: Plug, label: "Integrations" },
                 { id: "preferences", icon: Globe, label: "Preferences" },
@@ -658,6 +661,11 @@ const CoachSettings = () => {
                   </div>
                 </div>
               </div>
+            )}
+
+            {/* Invoice Tab */}
+            {selectedTab === "invoice" && coachData?.id && (
+              <InvoiceSettingsSection coachId={coachData.id} />
             )}
 
             {/* Verification Tab */}

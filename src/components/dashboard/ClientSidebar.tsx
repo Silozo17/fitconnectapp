@@ -27,6 +27,7 @@ import {
   LogOut,
   User,
   Plug,
+  Receipt,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -122,6 +123,7 @@ const menuGroups: MenuGroup[] = [
     items: [
       { title: "Tools", icon: Calculator, path: "/dashboard/client/tools" },
       { title: "Shopping", icon: ShoppingCart, path: "/dashboard/client/grocery" },
+      { title: "Receipts", icon: Receipt, path: "/dashboard/client/receipts" },
       { title: "Integrations", icon: Plug, path: "/dashboard/client/integrations" },
       { title: "Favourites", icon: Heart, path: "/dashboard/client/favourites" },
     ],
