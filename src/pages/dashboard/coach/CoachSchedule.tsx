@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -16,6 +16,8 @@ import {
   CreditCard,
   Banknote,
   AlertCircle,
+  RefreshCw,
+  CalendarDays,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -55,6 +57,7 @@ import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { getCurrencySymbol, type CurrencyCode } from "@/lib/currency";
 import { useCoachBoostStatus } from "@/hooks/useCoachBoost";
+import { useExternalCalendarEvents, useSyncExternalCalendar } from "@/hooks/useExternalCalendarEvents";
 
 const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -98,6 +101,7 @@ const CoachSchedule = () => {
   const [postBookingBuffer, setPostBookingBuffer] = useState("15");
   const [defaultLocation, setDefaultLocation] = useState("");
   const [stripeConnected, setStripeConnected] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Get coach profile ID, currency, and booking settings
   useEffect(() => {
@@ -127,7 +131,14 @@ const CoachSchedule = () => {
   const { data: bookingRequests = [], isLoading: loadingRequests } = useBookingRequests();
   const { data: boostStatus } = useCoachBoostStatus();
   
-  // Fetch coaching sessions for calendar
+  // External calendar events
+  const weekEnd = addDays(weekStart, 7);
+  const { data: externalEvents = [], refetch: refetchExternalEvents } = useExternalCalendarEvents(
+    user?.id,
+    weekStart,
+    weekEnd
+  );
+  const { syncCalendar } = useSyncExternalCalendar();
   const { data: sessions = [] } = useQuery({
     queryKey: ["coaching-sessions", coachId, weekStart.toISOString()],
     queryFn: async () => {
@@ -209,6 +220,49 @@ const CoachSchedule = () => {
   }, [coachId, queryClient]);
 
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+
+  // Sync external calendars
+  const handleSyncCalendars = useCallback(async () => {
+    setIsSyncing(true);
+    try {
+      await syncCalendar();
+      await refetchExternalEvents();
+      toast.success("Calendars synced successfully");
+    } catch (error) {
+      console.error("Failed to sync calendars:", error);
+      toast.error("Failed to sync calendars");
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [syncCalendar, refetchExternalEvents]);
+
+  // Trigger initial sync on mount
+  useEffect(() => {
+    if (user?.id) {
+      // Delay initial sync slightly to avoid race conditions
+      const timer = setTimeout(() => {
+        syncCalendar()
+          .then(() => refetchExternalEvents())
+          .catch(console.error);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [user?.id]);
+
+  // Get external event for a time slot
+  const getExternalEventForSlot = (dayIndex: number, time: string) => {
+    const date = weekDates[dayIndex];
+    const slotStart = new Date(date);
+    const [hours, minutes] = time.split(':').map(Number);
+    slotStart.setHours(hours, minutes, 0, 0);
+    const slotEnd = new Date(slotStart.getTime() + 60 * 60 * 1000); // 1 hour slot
+
+    return externalEvents.find(event => {
+      const eventStart = new Date(event.start_time);
+      const eventEnd = new Date(event.end_time);
+      return eventStart < slotEnd && eventEnd > slotStart;
+    });
+  };
 
   const handleSaveSessionType = async () => {
     if (!coachId || !sessionTypeName || !sessionTypePrice) return;
@@ -412,7 +466,18 @@ const CoachSchedule = () => {
               <Button variant="ghost" size="icon" onClick={() => setWeekStart(prev => addDays(prev, -7))}>
                 <ChevronLeft className="w-5 h-5" />
               </Button>
-              <span className="font-display font-bold text-foreground">{currentWeekLabel}</span>
+              <div className="flex items-center gap-4">
+                <span className="font-display font-bold text-foreground">{currentWeekLabel}</span>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleSyncCalendars}
+                  disabled={isSyncing}
+                >
+                  <RefreshCw className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+                  Sync Calendars
+                </Button>
+              </div>
               <Button variant="ghost" size="icon" onClick={() => setWeekStart(prev => addDays(prev, 7))}>
                 <ChevronRight className="w-5 h-5" />
               </Button>
@@ -440,6 +505,7 @@ const CoachSchedule = () => {
                     <div className="p-3 text-sm text-muted-foreground">{time}</div>
                     {weekDates.map((_, dayIndex) => {
                       const session = getSessionForSlot(dayIndex, time);
+                      const externalEvent = !session ? getExternalEventForSlot(dayIndex, time) : null;
                       return (
                         <div
                           key={dayIndex}
@@ -465,6 +531,19 @@ const CoachSchedule = () => {
                               </div>
                             </div>
                           )}
+                          {externalEvent && (
+                            <div className="p-2 rounded-lg text-xs bg-muted/50 border border-muted-foreground/20">
+                              <p className="font-medium text-muted-foreground truncate">
+                                {externalEvent.title || "Busy"}
+                              </p>
+                              <div className="flex items-center gap-1 mt-1">
+                                <CalendarDays className="w-3 h-3 text-muted-foreground" />
+                                <span className="text-muted-foreground text-xs">
+                                  {externalEvent.source === 'apple_calendar' ? 'iCloud' : 'Google'}
+                                </span>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       );
                     })}
@@ -475,7 +554,7 @@ const CoachSchedule = () => {
           </div>
 
           {/* Legend */}
-          <div className="flex items-center gap-6 mt-4">
+          <div className="flex flex-wrap items-center gap-6 mt-4">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded bg-accent/20 border border-accent/30" />
               <span className="text-sm text-muted-foreground">In-Person</span>
@@ -483,6 +562,10 @@ const CoachSchedule = () => {
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded bg-primary/20 border border-primary/30" />
               <span className="text-sm text-muted-foreground">Online</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded bg-muted/50 border border-muted-foreground/20" />
+              <span className="text-sm text-muted-foreground">External Calendar (Busy)</span>
             </div>
           </div>
         </TabsContent>
