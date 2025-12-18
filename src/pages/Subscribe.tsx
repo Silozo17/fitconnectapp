@@ -1,5 +1,5 @@
 import { useState, Suspense, useEffect } from "react";
-import { Link, Navigate, useSearchParams, useLocation } from "react-router-dom";
+import { Link, Navigate, useSearchParams, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Zap } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { TierSelector, TierFeatures } from "@/components/payments/TierSelector";
@@ -9,6 +9,7 @@ import { SubscriptionCheckout, CheckoutLoading } from "@/components/payments/Sub
 import { SUBSCRIPTION_TIERS, TierKey, BillingInterval } from "@/lib/stripe-config";
 import { Button } from "@/components/ui/button";
 import { getAvatarImageUrl } from "@/hooks/useAvatars";
+import { toast } from "sonner";
 
 // Tier-to-avatar mapping - each tier gets a progressively better avatar
 const TIER_AVATARS: Record<TierKey, string> = {
@@ -23,6 +24,7 @@ export default function Subscribe() {
   const { user, role } = useAuth();
   const [searchParams] = useSearchParams();
   const location = useLocation();
+  const navigate = useNavigate();
   
   // Build return URL for auth redirect
   const currentUrl = `${location.pathname}${location.search}`;
@@ -33,8 +35,18 @@ export default function Subscribe() {
   const initialBilling = (searchParams.get("billing") as BillingInterval) || "monthly";
   
   const [selectedTier, setSelectedTier] = useState<TierKey>(
-    initialTier in SUBSCRIPTION_TIERS && initialTier !== "free" ? initialTier : "pro"
+    initialTier in SUBSCRIPTION_TIERS ? initialTier : "pro"
   );
+  
+  // Handle free tier selection - redirect to dashboard
+  const handleTierChange = (tier: TierKey) => {
+    if (tier === "free") {
+      toast.success("Continuing with the free plan");
+      navigate("/dashboard/coach");
+      return;
+    }
+    setSelectedTier(tier);
+  };
   const [billingInterval, setBillingInterval] = useState<BillingInterval>(
     initialBilling === "yearly" ? "yearly" : "monthly"
   );
@@ -92,7 +104,8 @@ export default function Subscribe() {
         <div className="mb-8">
           <TierSelector
             selectedTier={selectedTier}
-            onTierChange={setSelectedTier}
+            onTierChange={handleTierChange}
+            includeFreeTier={true}
           />
         </div>
 

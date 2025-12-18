@@ -49,7 +49,7 @@ interface EnhancedEditCoachModalProps {
   onSaved: () => void;
 }
 
-const SUBSCRIPTION_TIERS = ["free", "starter", "pro", "enterprise"];
+const SUBSCRIPTION_TIERS = ["free", "starter", "pro", "enterprise", "founder"];
 const VERIFICATION_STATUSES = ["not_submitted", "pending", "approved", "rejected"];
 const BOOKING_MODES = ["message_first", "direct"];
 
