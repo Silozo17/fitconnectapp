@@ -28,12 +28,12 @@ const SQUIRCLE_SIZES = {
 // Size-aware positioning for character avatars in squircle variant
 // Height extends beyond container, positioned at bottom so head overflows above
 const SQUIRCLE_IMAGE_STYLES = {
-  '2xs': { height: '140%' },
-  xs: { height: '140%' },
-  sm: { height: '140%' },
-  md: { height: '145%' },
-  lg: { height: '150%' },
-  xl: { height: '200%' },  // Bigger avatar for hero sections
+  '2xs': { height: '140%', bottom: '0' },
+  xs: { height: '140%', bottom: '0' },
+  sm: { height: '140%', bottom: '0' },
+  md: { height: '145%', bottom: '0' },
+  lg: { height: '150%', bottom: '0' },
+  xl: { height: '200%', bottom: '-50%' },  // Push avatar down to show upper body
 };
 
 // Size-aware clipPath - negative top inset allows head to overflow upward
@@ -164,7 +164,7 @@ export const UserAvatar = ({
             )}
             style={hasCharacterAvatar ? {
               height: imageStyle.height,
-              bottom: '0',
+              bottom: imageStyle.bottom,
             } : undefined}
           onError={(e) => {
             (e.target as HTMLImageElement).src = '/placeholder.svg';
