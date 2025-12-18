@@ -1,6 +1,7 @@
 import { Checkbox } from "@/components/ui/checkbox";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StatusBadge } from "./StatusBadge";
+import { UserAvatar } from "@/components/shared/UserAvatar";
+import { Rarity } from "@/lib/avatar-config";
 
 interface ClientUser {
   id: string;
@@ -9,6 +10,8 @@ interface ClientUser {
   last_name: string | null;
   avatar_url?: string | null;
   status?: string | null;
+  selected_avatar_slug?: string | null;
+  selected_avatar_rarity?: string | null;
 }
 
 interface AdminUserCardProps {
@@ -27,7 +30,6 @@ export const AdminUserCard = ({
   onClick,
 }: AdminUserCardProps) => {
   const fullName = `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Unnamed User";
-  const initials = `${user.first_name?.[0] || ""}${user.last_name?.[0] || ""}`.toUpperCase() || "U";
 
   return (
     <div
@@ -40,10 +42,16 @@ export const AdminUserCard = ({
         <Checkbox checked={selected} onCheckedChange={onSelect} />
       </div>
 
-      <Avatar className="h-10 w-10">
-        {user.avatar_url && <AvatarImage src={user.avatar_url} alt={fullName} />}
-        <AvatarFallback>{initials}</AvatarFallback>
-      </Avatar>
+      <div className="pt-3">
+        <UserAvatar
+          src={user.avatar_url}
+          avatarSlug={user.selected_avatar_slug}
+          avatarRarity={user.selected_avatar_rarity as Rarity | undefined}
+          name={fullName}
+          variant="squircle"
+          size="xs"
+        />
+      </div>
 
       <div className="flex-1 min-w-0 overflow-hidden">
         <p className="font-medium text-sm leading-tight">{fullName}</p>

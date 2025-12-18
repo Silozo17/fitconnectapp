@@ -77,17 +77,18 @@ const DashboardHeader = ({ subscriptionTier, onMenuToggle }: DashboardHeaderProp
           {/* Profile Dropdown - Hidden on mobile */}
           <div className="hidden xl:block">
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
-                  <UserAvatar
-                    src={avatarUrl}
-                    avatarSlug={selectedAvatar?.slug}
-                    avatarRarity={selectedAvatar?.rarity as any}
-                    name={displayName}
-                    className="h-10 w-10"
-                  />
-                </Button>
-              </DropdownMenuTrigger>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="relative h-auto p-0 pt-4 overflow-visible bg-transparent hover:bg-transparent">
+                <UserAvatar
+                  src={avatarUrl}
+                  avatarSlug={selectedAvatar?.slug}
+                  avatarRarity={selectedAvatar?.rarity as any}
+                  name={displayName}
+                  variant="squircle"
+                  size="xs"
+                />
+              </Button>
+            </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">

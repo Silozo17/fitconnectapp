@@ -57,11 +57,12 @@ export default function ProductCard({ product, viewMode = "grid" }: ProductCardP
             </p>
           </div>
           <div className="flex items-center justify-between mt-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 pt-2">
               <UserAvatar
                 name={product.coach_profiles?.display_name || "Coach"}
                 src={product.coach_profiles?.profile_image_url}
-                className="h-6 w-6"
+                variant="squircle"
+                size="2xs"
               />
               <span className="text-sm text-muted-foreground">
                 {product.coach_profiles?.display_name || "Unknown Coach"}
@@ -124,11 +125,12 @@ export default function ProductCard({ product, viewMode = "grid" }: ProductCardP
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 pt-2">
           <UserAvatar
             name={product.coach_profiles?.display_name || "Coach"}
             src={product.coach_profiles?.profile_image_url}
-            className="h-6 w-6"
+            variant="squircle"
+            size="2xs"
           />
           <span className="text-xs text-muted-foreground truncate max-w-[100px]">
             {product.coach_profiles?.display_name || "Unknown"}

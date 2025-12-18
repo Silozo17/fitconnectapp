@@ -12,11 +12,13 @@ interface UserAvatarProps {
   fallbackClassName?: string;
   showRarityBorder?: boolean;    // Whether to show rarity-colored border
   variant?: 'circle' | 'squircle'; // Avatar shape variant
-  size?: 'sm' | 'md' | 'lg' | 'xl'; // Predefined sizes for squircle
+  size?: '2xs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl'; // Predefined sizes for squircle
 }
 
 // Predefined sizes for squircle variant (landscape ratio ~1.75:1)
 const SQUIRCLE_SIZES = {
+  '2xs': 'w-10 h-6',    // Tiny - for very compact contexts
+  xs: 'w-14 h-8',       // Extra small - for nav headers and lists
   sm: 'w-28 h-16',      // Small - for lists (1.75:1)
   md: 'w-44 h-24',      // Medium - for cards (~1.83:1)
   lg: 'w-56 h-32',      // Large - for profiles (1.75:1)

@@ -1,7 +1,8 @@
 import { Checkbox } from "@/components/ui/checkbox";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StatusBadge } from "./StatusBadge";
 import { EyeOff } from "lucide-react";
+import { UserAvatar } from "@/components/shared/UserAvatar";
+import { Rarity } from "@/lib/avatar-config";
 
 interface CoachUser {
   id: string;
@@ -11,6 +12,8 @@ interface CoachUser {
   profile_image_url: string | null;
   status?: string | null;
   marketplace_visible?: boolean | null;
+  selected_avatar_slug?: string | null;
+  selected_avatar_rarity?: string | null;
 }
 
 interface AdminCoachCardProps {
@@ -27,7 +30,6 @@ export const AdminCoachCard = ({
   onClick,
 }: AdminCoachCardProps) => {
   const displayName = coach.display_name || "Unnamed Coach";
-  const initials = displayName.slice(0, 2).toUpperCase();
 
   return (
     <div
@@ -40,10 +42,16 @@ export const AdminCoachCard = ({
         <Checkbox checked={selected} onCheckedChange={onSelect} />
       </div>
 
-      <Avatar className="h-10 w-10 flex-shrink-0">
-        {coach.profile_image_url && <AvatarImage src={coach.profile_image_url} alt={displayName} />}
-        <AvatarFallback>{initials}</AvatarFallback>
-      </Avatar>
+      <div className="pt-3 flex-shrink-0">
+        <UserAvatar
+          src={coach.profile_image_url}
+          avatarSlug={coach.selected_avatar_slug}
+          avatarRarity={coach.selected_avatar_rarity as Rarity | undefined}
+          name={displayName}
+          variant="squircle"
+          size="xs"
+        />
+      </div>
 
       <div className="flex-1 min-w-0 overflow-hidden">
         <div className="flex items-center gap-1">

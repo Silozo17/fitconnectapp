@@ -62,7 +62,7 @@ export const ConnectionCard = ({ connection, currentUserId, onRemove }: Connecti
       <Card className="p-4 bg-card/50 border-border/50 hover:border-primary/30 transition-colors">
         <div className="flex items-center gap-4">
           <div 
-            className="cursor-pointer"
+            className="cursor-pointer pt-3"
             onClick={() => setShowProfile(true)}
           >
             <UserAvatar
@@ -70,7 +70,8 @@ export const ConnectionCard = ({ connection, currentUserId, onRemove }: Connecti
               avatarSlug={profile?.selected_avatar_slug}
               avatarRarity={profile?.selected_avatar_rarity as Rarity | undefined}
               name={displayName}
-              className="h-12 w-12 hover:ring-2 hover:ring-primary transition-all"
+              variant="squircle"
+              size="xs"
             />
           </div>
           
