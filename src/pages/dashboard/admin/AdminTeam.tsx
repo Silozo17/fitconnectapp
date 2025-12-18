@@ -43,6 +43,7 @@ const AdminTeam = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [memberEmails, setMemberEmails] = useState<Record<string, string | null>>({});
   
   // Modals
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -52,7 +53,7 @@ const AdminTeam = () => {
   const [isDetailDrawerOpen, setIsDetailDrawerOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
 
-  const { loading: actionLoading, updateStatus, bulkUpdateStatus, bulkDelete, resetPassword } = useAdminTeamManagement();
+  const { loading: actionLoading, getUserEmail, updateStatus, bulkUpdateStatus, bulkDelete, resetPassword } = useAdminTeamManagement();
 
   const fetchTeamMembers = async () => {
     setLoading(true);
@@ -77,6 +78,19 @@ const AdminTeam = () => {
       })) || [];
 
       setTeamMembers(mergedData);
+      
+      // Fetch emails for all team members
+      const emailPromises = mergedData.map(async (member) => {
+        const email = await getUserEmail(member.user_id);
+        return { userId: member.user_id, email };
+      });
+      
+      const emailResults = await Promise.all(emailPromises);
+      const emailMap: Record<string, string | null> = {};
+      emailResults.forEach(({ userId, email }) => {
+        emailMap[userId] = email;
+      });
+      setMemberEmails(emailMap);
     } catch (error: any) {
       toast.error("Failed to fetch team members");
       console.error(error);
@@ -369,6 +383,7 @@ const AdminTeam = () => {
                           />
                         </TableHead>
                         <TableHead>Member</TableHead>
+                        <TableHead>Email</TableHead>
                         <TableHead>Role</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Department</TableHead>
@@ -405,6 +420,9 @@ const AdminTeam = () => {
                                 </p>
                               </div>
                             </div>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {memberEmails[member.user_id] || "—"}
                           </TableCell>
                           <TableCell>
                             <Badge className={getRoleBadgeColor(member.role)}>

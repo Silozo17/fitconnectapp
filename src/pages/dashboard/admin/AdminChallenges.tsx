@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -203,13 +204,16 @@ export default function AdminChallenges() {
   
   return (
     <AdminLayout>
+      <Helmet>
+        <title>Challenges | Admin Dashboard</title>
+      </Helmet>
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Challenges</h1>
         <p className="text-muted-foreground">Create and manage platform challenges</p>
       </div>
       <div className="space-y-6">
         {/* Stats */}
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">

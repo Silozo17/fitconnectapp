@@ -65,6 +65,7 @@ const AdminCoaches = () => {
   const [resettingPassword, setResettingPassword] = useState<string | null>(null);
   const [selectedCoaches, setSelectedCoaches] = useState<Set<string>>(new Set());
   const [coachLastLogins, setCoachLastLogins] = useState<Record<string, string | null>>({});
+  const [coachEmails, setCoachEmails] = useState<Record<string, string | null>>({});
   const [togglingVisibility, setTogglingVisibility] = useState<string | null>(null);
   
   const { loading: actionLoading, bulkUpdateStatus, bulkDelete, getUserAuthInfo } = useAdminUserManagement("coach");
@@ -122,18 +123,21 @@ const AdminCoaches = () => {
     
     setCoaches(data || []);
     
-    // Fetch last login for all coaches
+    // Fetch last login and email for all coaches
     const authPromises = (data || []).map(async (coach) => {
       const info = await getUserAuthInfo(coach.user_id);
-      return { userId: coach.user_id, lastSignInAt: info.lastSignInAt };
+      return { userId: coach.user_id, lastSignInAt: info.lastSignInAt, email: info.email };
     });
     
     const authInfos = await Promise.all(authPromises);
     const lastLoginMap: Record<string, string | null> = {};
-    authInfos.forEach(({ userId, lastSignInAt }) => {
+    const emailMap: Record<string, string | null> = {};
+    authInfos.forEach(({ userId, lastSignInAt, email }) => {
       lastLoginMap[userId] = lastSignInAt;
+      emailMap[userId] = email;
     });
     setCoachLastLogins(lastLoginMap);
+    setCoachEmails(emailMap);
     
     setLoading(false);
   };
@@ -265,6 +269,7 @@ const AdminCoaches = () => {
   const handleExportCoaches = () => {
     const columns = [
       { key: "display_name", header: "Display Name" },
+      { key: "email", header: "Email" },
       { key: "coach_types", header: "Specialties" },
       { key: "bio", header: "Bio" },
       { key: "location", header: "Location" },
@@ -274,11 +279,13 @@ const AdminCoaches = () => {
       { key: "stripe_connected", header: "Stripe Connected" },
       { key: "status", header: "Account Status" },
       { key: "onboarding_completed", header: "Onboarding Completed" },
+      { key: "last_login", header: "Last Login" },
       { key: "created_at", header: "Joined Date" },
     ];
 
     const exportData = filteredCoaches.map((coach) => ({
       display_name: coach.display_name || "-",
+      email: coachEmails[coach.user_id] || "-",
       coach_types: formatArrayForCSV(coach.coach_types),
       bio: coach.bio || "-",
       location: coach.location || "-",
@@ -288,6 +295,7 @@ const AdminCoaches = () => {
       stripe_connected: coach.stripe_connect_onboarded ? "Yes" : "No",
       status: coach.status || "active",
       onboarding_completed: coach.onboarding_completed ? "Yes" : "No",
+      last_login: coachLastLogins[coach.user_id] ? formatDateForCSV(coachLastLogins[coach.user_id]!) : "-",
       created_at: formatDateForCSV(coach.created_at),
     }));
 
