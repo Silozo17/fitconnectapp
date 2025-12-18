@@ -72,17 +72,27 @@ serve(async (req) => {
         // Upsert health data
         if (healthData.length > 0) {
           const dataToUpsert = healthData.map((item) => ({
-            ...item,
-            connection_id: connection.id,
             client_id: connection.client_id,
+            wearable_connection_id: connection.id,
+            data_type: item.data_type,
+            value: item.value,
+            recorded_at: item.recorded_date, // Map recorded_date to recorded_at
+            source: item.source,
+            unit: getUnitForDataType(item.data_type),
           }));
 
-          const { error: upsertError } = await supabase
-            .from("health_data_sync")
-            .upsert(dataToUpsert, { onConflict: "connection_id,data_type,recorded_date" });
+          // Use insert with upsert behavior based on unique constraint
+          for (const dataPoint of dataToUpsert) {
+            const { error: upsertError } = await supabase
+              .from("health_data_sync")
+              .upsert(dataPoint, { 
+                onConflict: "client_id,data_type,recorded_at,source",
+                ignoreDuplicates: false 
+              });
 
-          if (upsertError) {
-            console.error(`Error upserting health data for ${connection.id}:`, upsertError);
+            if (upsertError) {
+              console.error(`Error upserting health data for ${connection.id}:`, upsertError);
+            }
           }
         }
 
@@ -236,6 +246,19 @@ async function syncGoogleFit(accessToken: string, startDate: Date, endDate: Date
   }
 
   return results;
+}
+
+function getUnitForDataType(dataType: string): string {
+  const units: Record<string, string> = {
+    steps: "count",
+    heart_rate: "bpm",
+    calories: "kcal",
+    active_minutes: "minutes",
+    sleep: "minutes",
+    sleep_minutes: "minutes",
+    distance: "meters",
+  };
+  return units[dataType] || "count";
 }
 
 async function syncFitbit(accessToken: string, startDate: Date, endDate: Date): Promise<any[]> {
