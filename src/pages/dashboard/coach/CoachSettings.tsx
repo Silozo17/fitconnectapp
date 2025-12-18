@@ -14,6 +14,7 @@ import {
   Video,
   Calendar,
   Receipt,
+  Store,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,6 +65,7 @@ import { Upload, FileText, Trash2, CheckCircle, XCircle, Clock, AlertCircle, Eye
 import { CoachGalleryUpload } from "@/components/coach/CoachGalleryUpload";
 import { CoachGroupClassesManager } from "@/components/coach/CoachGroupClassesManager";
 import { CoachWhoIWorkWithSection } from "@/components/coach/CoachWhoIWorkWithSection";
+import { CoachSocialLinksSection, type SocialLinks } from "@/components/coach/CoachSocialLinksSection";
 
 const coachTypes = ["Personal Trainer", "Nutritionist", "Boxing Coach", "MMA Coach", "Yoga Instructor", "CrossFit Coach"];
 
@@ -84,6 +86,14 @@ interface CoachProfile {
   subscription_tier: string | null;
   is_verified: boolean | null;
   who_i_work_with: string | null;
+  // Social media links
+  facebook_url: string | null;
+  instagram_url: string | null;
+  tiktok_url: string | null;
+  x_url: string | null;
+  threads_url: string | null;
+  linkedin_url: string | null;
+  youtube_url: string | null;
 }
 
 const videoProviders: {
@@ -197,6 +207,13 @@ const CoachSettings = () => {
     subscription_tier: "free",
     is_verified: false,
     who_i_work_with: null,
+    facebook_url: null,
+    instagram_url: null,
+    tiktok_url: null,
+    x_url: null,
+    threads_url: null,
+    linkedin_url: null,
+    youtube_url: null,
   });
 
   // Fetch coach profile with React Query
@@ -207,7 +224,7 @@ const CoachSettings = () => {
 
       const { data, error } = await supabase
         .from("coach_profiles")
-        .select("id, display_name, username, bio, location, gym_affiliation, experience_years, hourly_rate, currency, coach_types, online_available, in_person_available, profile_image_url, card_image_url, subscription_tier, is_verified, who_i_work_with")
+        .select("id, display_name, username, bio, location, gym_affiliation, experience_years, hourly_rate, currency, coach_types, online_available, in_person_available, profile_image_url, card_image_url, subscription_tier, is_verified, who_i_work_with, facebook_url, instagram_url, tiktok_url, x_url, threads_url, linkedin_url, youtube_url")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -236,6 +253,13 @@ const CoachSettings = () => {
         subscription_tier: coachData.subscription_tier || "free",
         is_verified: coachData.is_verified ?? false,
         who_i_work_with: coachData.who_i_work_with || null,
+        facebook_url: coachData.facebook_url || null,
+        instagram_url: coachData.instagram_url || null,
+        tiktok_url: coachData.tiktok_url || null,
+        x_url: coachData.x_url || null,
+        threads_url: coachData.threads_url || null,
+        linkedin_url: coachData.linkedin_url || null,
+        youtube_url: coachData.youtube_url || null,
       });
     }
   }, [coachData]);
@@ -259,6 +283,14 @@ const CoachSettings = () => {
         in_person_available: profile.in_person_available,
         profile_image_url: profile.profile_image_url,
         card_image_url: profile.card_image_url,
+        who_i_work_with: profile.who_i_work_with,
+        facebook_url: profile.facebook_url,
+        instagram_url: profile.instagram_url,
+        tiktok_url: profile.tiktok_url,
+        x_url: profile.x_url,
+        threads_url: profile.threads_url,
+        linkedin_url: profile.linkedin_url,
+        youtube_url: profile.youtube_url,
       })
       .eq("user_id", user.id);
 
@@ -393,6 +425,7 @@ const CoachSettings = () => {
             <div className="card-elevated p-2 space-y-1">
               {[
                 { id: "profile", icon: User, label: "Profile" },
+                { id: "marketplace", icon: Store, label: "My Marketplace Page" },
                 { id: "services", icon: CreditCard, label: "Services & Pricing" },
                 { id: "invoice", icon: Receipt, label: "Invoice Settings" },
                 { id: "verification", icon: Shield, label: "Verification" },
@@ -420,7 +453,7 @@ const CoachSettings = () => {
 
           {/* Content */}
           <div className="flex-1 min-w-0 overflow-hidden space-y-6">
-            {/* Profile Tab */}
+            {/* Profile Tab - Personal Identity Only */}
             {selectedTab === "profile" && (
               <div className="space-y-6">
                 {/* Link to My Profile */}
@@ -453,7 +486,12 @@ const CoachSettings = () => {
                     </div>
                   </CardContent>
                 </Card>
+              </div>
+            )}
 
+            {/* My Marketplace Page Tab */}
+            {selectedTab === "marketplace" && (
+              <div className="space-y-6">
                 {/* Marketplace Card Photo */}
                 <Card>
                   <CardHeader>
@@ -603,6 +641,32 @@ const CoachSettings = () => {
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Who I Work With */}
+                <CoachWhoIWorkWithSection
+                  value={profile.who_i_work_with || ""}
+                  onChange={(value) => setProfile({ ...profile, who_i_work_with: value })}
+                />
+
+                {/* Gallery Images */}
+                <CoachGalleryUpload />
+
+                {/* Group Classes */}
+                <CoachGroupClassesManager />
+
+                {/* Social Media Links */}
+                <CoachSocialLinksSection
+                  values={{
+                    facebook_url: profile.facebook_url,
+                    instagram_url: profile.instagram_url,
+                    tiktok_url: profile.tiktok_url,
+                    x_url: profile.x_url,
+                    threads_url: profile.threads_url,
+                    linkedin_url: profile.linkedin_url,
+                    youtube_url: profile.youtube_url,
+                  }}
+                  onChange={(field, value) => setProfile({ ...profile, [field]: value || null })}
+                />
 
                 {/* Save Button */}
                 <div className="flex justify-end">
