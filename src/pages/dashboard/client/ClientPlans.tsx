@@ -1,77 +1,15 @@
-import { useEffect, useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ClipboardList, Calendar, Loader2, FileX } from "lucide-react";
-
-interface PlanAssignment {
-  id: string;
-  status: string;
-  start_date: string | null;
-  end_date: string | null;
-  plan: {
-    id: string;
-    name: string;
-    description: string | null;
-    plan_type: string;
-    duration_weeks: number | null;
-  };
-  coach: {
-    display_name: string | null;
-  };
-}
+import { FileX, Loader2, Calendar, ClipboardList, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { useMyPlans } from "@/hooks/useMyPlans";
 
 const ClientPlans = () => {
-  const { user } = useAuth();
-  const [plans, setPlans] = useState<PlanAssignment[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchPlans = async () => {
-      if (!user) return;
-
-      const { data: profile } = await supabase
-        .from("client_profiles")
-        .select("id")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (!profile) {
-        setLoading(false);
-        return;
-      }
-
-      const { data } = await supabase
-        .from("plan_assignments")
-        .select(`
-          id,
-          status,
-          start_date,
-          end_date,
-          plan:training_plans!plan_assignments_plan_id_fkey (
-            id,
-            name,
-            description,
-            plan_type,
-            duration_weeks
-          ),
-          coach:coach_profiles!plan_assignments_coach_id_fkey (
-            display_name
-          )
-        `)
-        .eq("client_id", profile.id)
-        .order("created_at", { ascending: false });
-
-      setPlans((data as unknown as PlanAssignment[]) || []);
-      setLoading(false);
-    };
-
-    fetchPlans();
-  }, [user]);
+  const { data: plans = [], isLoading, error, refetch } = useMyPlans();
 
   const calculateProgress = (startDate: string | null, endDate: string | null) => {
     if (!startDate || !endDate) return 0;
@@ -109,7 +47,20 @@ const ClientPlans = () => {
         </p>
       </div>
 
-      {loading ? (
+      {error && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription className="flex items-center justify-between">
+            <span>Failed to load plans. Please try again.</span>
+            <Button variant="outline" size="sm" onClick={() => refetch()}>
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>

@@ -27,6 +27,84 @@ export interface Conversation {
   unreadCount: number;
 }
 
+interface ProfileData {
+  id: string;
+  name: string;
+  type: "client" | "coach" | "admin";
+  avatar: string | null;
+  location?: string | null;
+  avatarSlug?: string | null;
+  avatarRarity?: string | null;
+}
+
+// Batch fetch profiles by IDs - single function to reduce N+1 queries
+async function batchFetchProfiles(partnerIds: string[]): Promise<Map<string, ProfileData>> {
+  const profileMap = new Map<string, ProfileData>();
+  
+  if (partnerIds.length === 0) return profileMap;
+
+  // Fetch all profile types in parallel
+  const [coachResult, clientResult, adminResult] = await Promise.all([
+    supabase
+      .from("coach_profiles")
+      .select("id, display_name, profile_image_url, location, avatars:selected_avatar_id(slug, rarity)")
+      .in("id", partnerIds),
+    supabase
+      .from("client_profiles")
+      .select("id, first_name, last_name, avatar_url, avatars:selected_avatar_id(slug, rarity)")
+      .in("id", partnerIds),
+    supabase
+      .from("admin_profiles")
+      .select("id, display_name, first_name, last_name, avatar_url")
+      .in("id", partnerIds),
+  ]);
+
+  // Process coach profiles
+  coachResult.data?.forEach((coach) => {
+    if (coach.display_name) {
+      const avatarData = coach.avatars as { slug: string; rarity: string } | null;
+      profileMap.set(coach.id, {
+        id: coach.id,
+        name: coach.display_name,
+        type: "coach",
+        avatar: coach.profile_image_url,
+        location: coach.location,
+        avatarSlug: avatarData?.slug || null,
+        avatarRarity: avatarData?.rarity || null,
+      });
+    }
+  });
+
+  // Process client profiles (only if not already found as coach)
+  clientResult.data?.forEach((client) => {
+    if (!profileMap.has(client.id)) {
+      const avatarData = client.avatars as { slug: string; rarity: string } | null;
+      profileMap.set(client.id, {
+        id: client.id,
+        name: `${client.first_name || ""} ${client.last_name || ""}`.trim() || "Client",
+        type: "client",
+        avatar: client.avatar_url,
+        avatarSlug: avatarData?.slug || null,
+        avatarRarity: avatarData?.rarity || null,
+      });
+    }
+  });
+
+  // Process admin profiles (only if not already found)
+  adminResult.data?.forEach((admin) => {
+    if (!profileMap.has(admin.id)) {
+      profileMap.set(admin.id, {
+        id: admin.id,
+        name: admin.display_name || `${admin.first_name || ""} ${admin.last_name || ""}`.trim() || "Admin",
+        type: "admin",
+        avatar: admin.avatar_url,
+      });
+    }
+  });
+
+  return profileMap;
+}
+
 export const useMessages = (participantId?: string) => {
   const { user, role } = useAuth();
   const { activeProfileId, activeProfileType } = useAdminView();
@@ -95,7 +173,7 @@ export const useMessages = (participantId?: string) => {
     fetchProfileId();
   }, [user, role, activeProfileId]);
 
-  // Fetch conversations
+  // Fetch conversations with batched profile lookups
   const fetchConversations = useCallback(async () => {
     if (!currentProfileId) {
       return;
@@ -136,67 +214,16 @@ export const useMessages = (participantId?: string) => {
         conversationMap.get(partnerId)!.push(msg);
       });
 
+      // Batch fetch all partner profiles at once
+      const partnerIds = Array.from(conversationMap.keys());
+      const profileMap = await batchFetchProfiles(partnerIds);
+
       // Build conversation list with partner details
       const conversationList: Conversation[] = [];
       
       for (const [partnerId, msgs] of conversationMap) {
-        let participantName = "Unknown";
-        let participantType: "client" | "coach" | "admin" = "client";
-        let participantAvatar: string | null = null;
-        let participantLocation: string | null = null;
-        let participantAvatarSlug: string | null = null;
-        let participantAvatarRarity: string | null = null;
-
-        // Try to get coach profile first
-        const { data: coachData } = await supabase
-          .from("coach_profiles")
-          .select("display_name, profile_image_url, location, avatars:selected_avatar_id(slug, rarity)")
-          .eq("id", partnerId)
-          .single();
-
-        if (coachData?.display_name) {
-          participantName = coachData.display_name;
-          participantType = "coach";
-          participantAvatar = coachData.profile_image_url;
-          participantLocation = coachData.location;
-          const avatarData = coachData.avatars as { slug: string; rarity: string } | null;
-          participantAvatarSlug = avatarData?.slug || null;
-          participantAvatarRarity = avatarData?.rarity || null;
-        } else {
-          // Try client profile
-          const { data: clientData } = await supabase
-            .from("client_profiles")
-            .select("first_name, last_name, avatar_url, avatars:selected_avatar_id(slug, rarity)")
-            .eq("id", partnerId)
-            .single();
-
-          if (clientData) {
-            participantName = `${clientData.first_name || ""} ${clientData.last_name || ""}`.trim() || "Client";
-            participantType = "client";
-            participantAvatar = clientData.avatar_url;
-            const avatarData = clientData.avatars as { slug: string; rarity: string } | null;
-            participantAvatarSlug = avatarData?.slug || null;
-            participantAvatarRarity = avatarData?.rarity || null;
-          } else {
-            // Try admin profile
-            const { data: adminData } = await supabase
-              .from("admin_profiles")
-              .select("display_name, first_name, last_name, avatar_url")
-              .eq("id", partnerId)
-              .single();
-
-            if (adminData) {
-              participantName = adminData.display_name || 
-                `${adminData.first_name || ""} ${adminData.last_name || ""}`.trim() || "Admin";
-              participantType = "admin";
-              participantAvatar = adminData.avatar_url;
-            } else {
-              // No profile found - user was likely deleted
-              participantName = "Deleted User";
-            }
-          }
-        }
-
+        const profile = profileMap.get(partnerId);
+        
         const lastMsg = msgs[0];
         const unreadCount = msgs.filter(
           (m) => m.receiver_id === currentProfileId && !m.read_at
@@ -204,12 +231,12 @@ export const useMessages = (participantId?: string) => {
 
         conversationList.push({
           participantId: partnerId,
-          participantName,
-          participantType,
-          participantAvatar,
-          participantLocation,
-          participantAvatarSlug,
-          participantAvatarRarity,
+          participantName: profile?.name || "Deleted User",
+          participantType: profile?.type || "client",
+          participantAvatar: profile?.avatar || null,
+          participantLocation: profile?.location || null,
+          participantAvatarSlug: profile?.avatarSlug || null,
+          participantAvatarRarity: profile?.avatarRarity || null,
           lastMessage: lastMsg.content,
           lastMessageTime: lastMsg.created_at,
           unreadCount,
@@ -234,7 +261,6 @@ export const useMessages = (participantId?: string) => {
   const softRefreshConversations = useCallback(async () => {
     if (!currentProfileId) return;
     
-    // Don't set loading to true - this is a background refresh
     try {
       const { data: messagesData } = await supabase
         .from("messages")
@@ -253,63 +279,15 @@ export const useMessages = (participantId?: string) => {
         conversationMap.get(partnerId)!.push(msg);
       });
 
+      // Batch fetch all partner profiles at once
+      const partnerIds = Array.from(conversationMap.keys());
+      const profileMap = await batchFetchProfiles(partnerIds);
+
       const conversationList: Conversation[] = [];
       
       for (const [partnerId, msgs] of conversationMap) {
-        let participantName = "Unknown";
-        let participantType: "client" | "coach" | "admin" = "client";
-        let participantAvatar: string | null = null;
-        let participantLocation: string | null = null;
-        let participantAvatarSlug: string | null = null;
-        let participantAvatarRarity: string | null = null;
-
-        const { data: coachData } = await supabase
-          .from("coach_profiles")
-          .select("display_name, profile_image_url, location, avatars:selected_avatar_id(slug, rarity)")
-          .eq("id", partnerId)
-          .single();
-
-        if (coachData?.display_name) {
-          participantName = coachData.display_name;
-          participantType = "coach";
-          participantAvatar = coachData.profile_image_url;
-          participantLocation = coachData.location;
-          const avatarData = coachData.avatars as { slug: string; rarity: string } | null;
-          participantAvatarSlug = avatarData?.slug || null;
-          participantAvatarRarity = avatarData?.rarity || null;
-        } else {
-          const { data: clientData } = await supabase
-            .from("client_profiles")
-            .select("first_name, last_name, avatar_url, avatars:selected_avatar_id(slug, rarity)")
-            .eq("id", partnerId)
-            .single();
-
-          if (clientData) {
-            participantName = `${clientData.first_name || ""} ${clientData.last_name || ""}`.trim() || "Client";
-            participantType = "client";
-            participantAvatar = clientData.avatar_url;
-            const avatarData = clientData.avatars as { slug: string; rarity: string } | null;
-            participantAvatarSlug = avatarData?.slug || null;
-            participantAvatarRarity = avatarData?.rarity || null;
-          } else {
-            const { data: adminData } = await supabase
-              .from("admin_profiles")
-              .select("display_name, first_name, last_name, avatar_url")
-              .eq("id", partnerId)
-              .single();
-
-            if (adminData) {
-              participantName = adminData.display_name || 
-                `${adminData.first_name || ""} ${adminData.last_name || ""}`.trim() || "Admin";
-              participantType = "admin";
-              participantAvatar = adminData.avatar_url;
-            } else {
-              // No profile found - user was likely deleted
-              participantName = "Deleted User";
-            }
-          }
-        }
-
+        const profile = profileMap.get(partnerId);
+        
         const lastMsg = msgs[0];
         const unreadCount = msgs.filter(
           (m) => m.receiver_id === currentProfileId && !m.read_at
@@ -317,12 +295,12 @@ export const useMessages = (participantId?: string) => {
 
         conversationList.push({
           participantId: partnerId,
-          participantName,
-          participantType,
-          participantAvatar,
-          participantLocation,
-          participantAvatarSlug,
-          participantAvatarRarity,
+          participantName: profile?.name || "Deleted User",
+          participantType: profile?.type || "client",
+          participantAvatar: profile?.avatar || null,
+          participantLocation: profile?.location || null,
+          participantAvatarSlug: profile?.avatarSlug || null,
+          participantAvatarRarity: profile?.avatarRarity || null,
           lastMessage: lastMsg.content,
           lastMessageTime: lastMsg.created_at,
           unreadCount,
@@ -462,7 +440,7 @@ export const useMessages = (participantId?: string) => {
     }
   };
 
-  // Set up realtime subscription - simplified with wildcard event and manual filtering
+  // Set up realtime subscription
   useEffect(() => {
     if (!currentProfileId) {
       return;
@@ -498,14 +476,28 @@ export const useMessages = (participantId?: string) => {
                 (newMessage.sender_id === currentProfileId && newMessage.receiver_id === participantId);
               
               if (isInConversation) {
-                // Only add if not already in messages (avoid duplicates from optimistic update)
+                // Check if message already exists (from optimistic update)
                 setMessages((prev) => {
-                  const exists = prev.some(m => m.id === newMessage.id);
-                  if (exists) return prev;
+                  const exists = prev.some(
+                    (m) => m.id === newMessage.id || 
+                    (m.id.startsWith("temp-") && 
+                     m.content === newMessage.content && 
+                     m.sender_id === newMessage.sender_id)
+                  );
+                  if (exists) {
+                    // Replace temp message with real one
+                    return prev.map((m) => 
+                      m.id.startsWith("temp-") && 
+                      m.content === newMessage.content && 
+                      m.sender_id === newMessage.sender_id
+                        ? newMessage
+                        : m
+                    );
+                  }
                   return [...prev, newMessage];
                 });
                 
-                // Mark as read if received
+                // Mark as read if we received it
                 if (isReceived) {
                   supabase
                     .from("messages")
@@ -516,36 +508,19 @@ export const useMessages = (participantId?: string) => {
               }
             }
             
-            // Refresh conversations for any new message
+            // Refresh conversation list
             softRefreshConversations();
           }
           
           if (payload.eventType === "UPDATE") {
             const updatedMessage = payload.new as Message;
             
-            // Check if this message involves current user
-            const isReceived = updatedMessage.receiver_id === currentProfileId;
-            const isSent = updatedMessage.sender_id === currentProfileId;
+            // Update message in list if it's in the current conversation
+            setMessages((prev) =>
+              prev.map((m) => (m.id === updatedMessage.id ? updatedMessage : m))
+            );
             
-            if (!isReceived && !isSent) {
-              return; // Not relevant to current user
-            }
-            
-            // If viewing a specific conversation, check if message belongs to it
-            if (participantId) {
-              const isInConversation = 
-                (updatedMessage.sender_id === participantId && updatedMessage.receiver_id === currentProfileId) ||
-                (updatedMessage.sender_id === currentProfileId && updatedMessage.receiver_id === participantId);
-              
-              if (isInConversation) {
-                // Update the message in state (this includes read_at changes)
-                setMessages((prev) =>
-                  prev.map((m) => (m.id === updatedMessage.id ? updatedMessage : m))
-                );
-              }
-            }
-            
-            // Refresh conversations to update read status in conversation list
+            // Refresh conversations to update unread counts
             softRefreshConversations();
           }
         }
@@ -557,43 +532,36 @@ export const useMessages = (participantId?: string) => {
     };
   }, [currentProfileId, participantId, softRefreshConversations]);
 
-  // Auto-fetch conversations when profile ID is available
+  // Fetch data when profile ID changes
   useEffect(() => {
-    if (currentProfileId && !participantId) {
+    if (currentProfileId) {
+      if (participantId) {
+        fetchMessages();
+      }
       fetchConversations();
     }
-  }, [currentProfileId, participantId, fetchConversations]);
-
-  // Auto-fetch messages when viewing a conversation
-  useEffect(() => {
-    if (currentProfileId && participantId) {
-      fetchMessages();
-    }
-  }, [currentProfileId, participantId, fetchMessages]);
+  }, [currentProfileId, participantId, fetchMessages, fetchConversations]);
 
   return {
     messages,
     conversations,
     loading,
     error,
-    currentProfileId,
     sendMessage,
-    fetchMessages,
     fetchConversations,
     softRefreshConversations,
+    currentProfileId,
   };
 };
 
 // Hook to start a new conversation
 export const useStartConversation = () => {
   const { user, role } = useAuth();
+  const { activeProfileId } = useAdminView();
   const { toast } = useToast();
   const [sending, setSending] = useState(false);
 
-  const startConversation = async (
-    recipientId: string,
-    initialMessage: string
-  ): Promise<boolean> => {
+  const startConversation = async (recipientId: string, initialMessage: string): Promise<boolean> => {
     if (!user) {
       toast({
         title: "Error",
@@ -606,54 +574,42 @@ export const useStartConversation = () => {
     setSending(true);
 
     try {
-      // Get current user's profile ID
-      const table = role === "coach" ? "coach_profiles" : 
-                    (role === "admin" || role === "manager" || role === "staff") ? "admin_profiles" : 
-                    "client_profiles";
+      // Get current profile ID
+      let senderId = activeProfileId;
       
-      const { data: profile, error: profileError } = await supabase
-        .from(table)
-        .select("id")
-        .eq("user_id", user.id)
-        .single();
+      if (!senderId) {
+        const table = role === "coach" ? "coach_profiles" : 
+                      role === "admin" || role === "manager" || role === "staff" ? "admin_profiles" : 
+                      "client_profiles";
+        
+        const { data: profile } = await supabase
+          .from(table)
+          .select("id")
+          .eq("user_id", user.id)
+          .single();
 
-      if (profileError || !profile) {
-        toast({
-          title: "Error",
-          description: "Could not find your profile.",
-          variant: "destructive",
-        });
-        return false;
+        if (!profile) {
+          throw new Error("Profile not found");
+        }
+        senderId = profile.id;
       }
 
-      // Send the initial message
-      const { error: sendError } = await supabase.from("messages").insert({
-        sender_id: profile.id,
-        receiver_id: recipientId,
-        content: initialMessage.trim(),
-      });
-
-      if (sendError) {
-        console.error("[useStartConversation] Error:", sendError);
-        toast({
-          title: "Failed to send message",
-          description: sendError.message,
-          variant: "destructive",
+      const { error } = await supabase
+        .from("messages")
+        .insert({
+          sender_id: senderId,
+          receiver_id: recipientId,
+          content: initialMessage.trim(),
         });
-        return false;
-      }
 
-      toast({
-        title: "Message sent",
-        description: "Your conversation has been started.",
-      });
-      
+      if (error) throw error;
+
       return true;
     } catch (err) {
-      console.error("[useStartConversation] Unexpected error:", err);
+      console.error("[useStartConversation] Error:", err);
       toast({
-        title: "Error",
-        description: "An unexpected error occurred.",
+        title: "Failed to send message",
+        description: "Please try again later.",
         variant: "destructive",
       });
       return false;

@@ -1,72 +1,15 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Calendar, UserPlus, Loader2 } from "lucide-react";
-
-interface CoachConnection {
-  id: string;
-  status: string;
-  start_date: string | null;
-  coach: {
-    id: string;
-    display_name: string | null;
-    profile_image_url: string | null;
-    coach_types: string[] | null;
-    bio: string | null;
-  };
-}
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { MessageSquare, Calendar, UserPlus, Loader2, AlertCircle } from "lucide-react";
+import { useMyCoaches } from "@/hooks/useMyCoaches";
 
 const ClientCoaches = () => {
-  const { user } = useAuth();
-  const [coaches, setCoaches] = useState<CoachConnection[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchCoaches = async () => {
-      if (!user) return;
-
-      // Get client profile first
-      const { data: profile } = await supabase
-        .from("client_profiles")
-        .select("id")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (!profile) {
-        setLoading(false);
-        return;
-      }
-
-      // Fetch connected coaches
-      const { data } = await supabase
-        .from("coach_clients")
-        .select(`
-          id,
-          status,
-          start_date,
-          coach:coach_profiles!coach_clients_coach_id_fkey (
-            id,
-            display_name,
-            profile_image_url,
-            coach_types,
-            bio
-          )
-        `)
-        .eq("client_id", profile.id)
-        .eq("status", "active");
-
-      setCoaches((data as unknown as CoachConnection[]) || []);
-      setLoading(false);
-    };
-
-    fetchCoaches();
-  }, [user]);
+  const { data: coaches = [], isLoading, error, refetch } = useMyCoaches();
 
   return (
     <ClientDashboardLayout
@@ -88,7 +31,20 @@ const ClientCoaches = () => {
         </Button>
       </div>
 
-      {loading ? (
+      {error && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription className="flex items-center justify-between">
+            <span>Failed to load coaches. Please try again.</span>
+            <Button variant="outline" size="sm" onClick={() => refetch()}>
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>

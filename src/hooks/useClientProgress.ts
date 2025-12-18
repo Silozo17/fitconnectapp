@@ -124,7 +124,7 @@ export const useDeleteProgress = () => {
   });
 };
 
-// Upload progress photo
+// Upload progress photo - returns signed URL since bucket is private
 export const uploadProgressPhoto = async (userId: string, file: File) => {
   const fileExt = file.name.split('.').pop();
   const fileName = `${userId}/${Date.now()}.${fileExt}`;
@@ -135,9 +135,12 @@ export const uploadProgressPhoto = async (userId: string, file: File) => {
   
   if (uploadError) throw uploadError;
   
-  const { data: { publicUrl } } = supabase.storage
+  // Use signed URL for private bucket (valid for 1 year)
+  const { data: signedUrlData, error: signedUrlError } = await supabase.storage
     .from('transformation-photos')
-    .getPublicUrl(fileName);
+    .createSignedUrl(fileName, 60 * 60 * 24 * 365); // 1 year
   
-  return publicUrl;
+  if (signedUrlError) throw signedUrlError;
+  
+  return signedUrlData.signedUrl;
 };
