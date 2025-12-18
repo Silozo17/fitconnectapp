@@ -1,4 +1,5 @@
 import { useState } from "react";
+import DOMPurify from "dompurify";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -81,7 +82,10 @@ export const AIBlogSuggestions = ({ suggestions, onApply, onClose }: AIBlogSugge
           <ScrollArea className="h-48 border rounded-md p-3 bg-muted/30">
             <div 
               className="prose prose-sm max-w-none dark:prose-invert"
-              dangerouslySetInnerHTML={{ __html: suggestions.formattedContent }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(suggestions.formattedContent, {
+                ALLOWED_TAGS: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'em', 'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'br', 'span', 'div'],
+                ALLOWED_ATTR: ['href', 'src', 'alt', 'class', 'target', 'rel']
+              }) }}
             />
           </ScrollArea>
         </div>

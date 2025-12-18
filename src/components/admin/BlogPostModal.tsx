@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import DOMPurify from "dompurify";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -308,7 +309,10 @@ export const BlogPostModal = ({ open, onOpenChange, post }: BlogPostModalProps) 
                   {showPreview ? (
                     <div 
                       className="border rounded-md p-4 min-h-[300px] prose prose-sm max-w-none dark:prose-invert"
-                      dangerouslySetInnerHTML={{ __html: formData.content }}
+                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(formData.content, {
+                        ALLOWED_TAGS: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'em', 'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'br', 'span', 'div'],
+                        ALLOWED_ATTR: ['href', 'src', 'alt', 'class', 'target', 'rel']
+                      }) }}
                     />
                   ) : (
                     <Textarea
