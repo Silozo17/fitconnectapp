@@ -30,7 +30,7 @@ interface NewConversationModalProps {
 
 const NewConversationModal = ({ open, onOpenChange }: NewConversationModalProps) => {
   const { user, role } = useAuth();
-  const { activeProfileType } = useAdminView();
+  const { activeProfileType, activeProfileId } = useAdminView();
   const navigate = useNavigate();
   const [contacts, setContacts] = useState<MessageableContact[]>([]);
   const [loading, setLoading] = useState(true);
@@ -179,30 +179,33 @@ const NewConversationModal = ({ open, onOpenChange }: NewConversationModalProps)
     setSending(true);
 
     try {
-      // Get current user's profile ID for sending
-      let senderProfileId: string | null = null;
+      // Get current user's profile ID for sending - use activeProfileId first (handles view switching)
+      let senderProfileId: string | null = activeProfileId || null;
       
-      if (role === "coach") {
-        const { data } = await supabase
-          .from("coach_profiles")
-          .select("id")
-          .eq("user_id", user.id)
-          .single();
-        senderProfileId = data?.id || null;
-      } else if (role === "client") {
-        const { data } = await supabase
-          .from("client_profiles")
-          .select("id")
-          .eq("user_id", user.id)
-          .single();
-        senderProfileId = data?.id || null;
-      } else {
-        const { data } = await supabase
-          .from("admin_profiles")
-          .select("id")
-          .eq("user_id", user.id)
-          .single();
-        senderProfileId = data?.id || null;
+      // Only fetch if no activeProfileId (fallback for users without view switching)
+      if (!senderProfileId) {
+        if (role === "coach") {
+          const { data } = await supabase
+            .from("coach_profiles")
+            .select("id")
+            .eq("user_id", user.id)
+            .single();
+          senderProfileId = data?.id || null;
+        } else if (role === "client") {
+          const { data } = await supabase
+            .from("client_profiles")
+            .select("id")
+            .eq("user_id", user.id)
+            .single();
+          senderProfileId = data?.id || null;
+        } else {
+          const { data } = await supabase
+            .from("admin_profiles")
+            .select("id")
+            .eq("user_id", user.id)
+            .single();
+          senderProfileId = data?.id || null;
+        }
       }
 
       if (!senderProfileId) {
