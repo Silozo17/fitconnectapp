@@ -20,6 +20,7 @@ import {
   MapPin,
   Users as UsersIcon,
   Link as LinkIcon,
+  Apple,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,6 +76,7 @@ import { CoachTypeSelector } from "@/components/coach/CoachTypeSelector";
 import { MarketplaceSection } from "@/components/coach/MarketplaceSection";
 import { ProfileCompletionProgress } from "@/components/coach/ProfileCompletionProgress";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import AppleCalendarConnectModal from "@/components/integrations/AppleCalendarConnectModal";
 
 interface CoachProfile {
   display_name: string | null;
@@ -128,12 +130,22 @@ const calendarProviders: {
   name: string;
   icon: React.ReactNode;
   color: string;
+  isCalDAV?: boolean;
+  supportsTwoWaySync?: boolean;
 }[] = [
   {
     id: "google_calendar",
     name: "Google Calendar",
     icon: <Calendar className="w-6 h-6 text-white" />,
     color: "bg-gradient-to-br from-blue-500 to-blue-700",
+  },
+  {
+    id: "apple_calendar",
+    name: "Apple Calendar",
+    icon: <Apple className="w-6 h-6 text-white" />,
+    color: "bg-gradient-to-br from-gray-700 to-gray-900",
+    isCalDAV: true,
+    supportsTwoWaySync: true,
   },
 ];
 
@@ -196,6 +208,15 @@ const CoachSettings = () => {
   const signedUrlMutation = useDocumentSignedUrl();
   const [uploadingType, setUploadingType] = useState<DocumentType | null>(null);
   const [viewingDocId, setViewingDocId] = useState<string | null>(null);
+  const [showAppleCalendarModal, setShowAppleCalendarModal] = useState(false);
+
+  const handleCalendarConnect = (provider: typeof calendarProviders[0]) => {
+    if (provider.isCalDAV) {
+      setShowAppleCalendarModal(true);
+    } else {
+      connectCalendar.mutate(provider.id);
+    }
+  };
 
   // Track initial data for dirty state detection
   const initialProfileRef = useRef<CoachProfile | null>(null);
@@ -1031,7 +1052,8 @@ const CoachSettings = () => {
                           providerColor={provider.color}
                           isConnected={!!connection}
                           syncEnabled={connection?.sync_enabled}
-                          onConnect={() => connectCalendar.mutate(provider.id)}
+                          supportsTwoWaySync={provider.supportsTwoWaySync}
+                          onConnect={() => handleCalendarConnect(provider)}
                           onDisconnect={() => connection && disconnectCalendar.mutate(connection.id)}
                           onToggleSync={(enabled) =>
                             connection && toggleSync.mutate({ connectionId: connection.id, enabled })
@@ -1041,6 +1063,11 @@ const CoachSettings = () => {
                       );
                     })}
                   </div>
+                  
+                  <AppleCalendarConnectModal
+                    open={showAppleCalendarModal}
+                    onOpenChange={setShowAppleCalendarModal}
+                  />
                 </div>
 
                 <Separator />
