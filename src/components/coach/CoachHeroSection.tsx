@@ -30,7 +30,7 @@ export function CoachHeroSection({ coach, averageRating, reviewCount }: CoachHer
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-2xl" />
       
-      <div className="relative p-4 md:p-5">
+      <div className="relative p-4 md:p-5 pt-12 md:pt-14">
         <div className="flex flex-col md:flex-row gap-4 md:gap-6">
           {/* Profile Image */}
           <div className="flex justify-center md:justify-start shrink-0">
