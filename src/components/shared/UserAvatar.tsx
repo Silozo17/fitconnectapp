@@ -22,7 +22,7 @@ const SQUIRCLE_SIZES = {
   sm: 'w-28 h-16',      // Small - for lists (1.75:1)
   md: 'w-44 h-24',      // Medium - for cards (~1.83:1)
   lg: 'w-56 h-32',      // Large - for profiles (1.75:1)
-  xl: 'w-64 h-48',      // Extra large - for hero sections (taller to show more body)
+  xl: 'w-64 h-44',      // Extra large - for hero sections (reduced height)
 };
 
 // Size-aware positioning for character avatars in squircle variant
