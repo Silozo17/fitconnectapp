@@ -55,6 +55,7 @@ export const COACH_TYPES: CoachType[] = [
   // Fitness & Strength
   { id: "personal_training", label: "Personal Training", category: "fitness", icon: Dumbbell },
   { id: "strength_conditioning", label: "Strength & Conditioning", category: "fitness", icon: Activity },
+  { id: "strength_training", label: "Strength Training", category: "fitness", icon: Dumbbell },
   { id: "bodybuilding", label: "Bodybuilding", category: "fitness", icon: Trophy },
   { id: "crossfit", label: "CrossFit", category: "fitness", icon: Zap },
   { id: "hiit", label: "HIIT Training", category: "fitness", icon: Activity },
