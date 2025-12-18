@@ -57,6 +57,15 @@ verify_jwt = false
 [functions.calendar-sync-session]
 verify_jwt = true
 
+[functions.calendar-caldav-fetch-events]
+verify_jwt = true
+
+[functions.calendar-google-fetch-events]
+verify_jwt = true
+
+[functions.calendar-sync-all]
+verify_jwt = false
+
 [functions.admin-password-reset]
 verify_jwt = true
 

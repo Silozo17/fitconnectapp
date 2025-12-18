@@ -50,12 +50,42 @@ export const useSyncExternalCalendar = () => {
   const { user } = useAuth();
 
   const syncCalendar = async (connectionId?: string) => {
-    const { data, error } = await supabase.functions.invoke("calendar-caldav-fetch-events", {
-      body: connectionId ? { connectionId } : {},
-    });
+    // Call both Apple (CalDAV) and Google Calendar sync in parallel
+    const [caldavResult, googleResult] = await Promise.allSettled([
+      supabase.functions.invoke("calendar-caldav-fetch-events", {
+        body: connectionId ? { connectionId } : {},
+      }),
+      supabase.functions.invoke("calendar-google-fetch-events", {
+        body: connectionId ? { connectionId } : {},
+      }),
+    ]);
 
-    if (error) throw error;
-    return data;
+    // Check for errors
+    const errors: string[] = [];
+    if (caldavResult.status === 'rejected') {
+      console.error("CalDAV sync failed:", caldavResult.reason);
+      errors.push("Apple Calendar sync failed");
+    } else if (caldavResult.value.error) {
+      console.error("CalDAV sync error:", caldavResult.value.error);
+      errors.push("Apple Calendar sync error");
+    }
+
+    if (googleResult.status === 'rejected') {
+      console.error("Google sync failed:", googleResult.reason);
+      errors.push("Google Calendar sync failed");
+    } else if (googleResult.value.error) {
+      console.error("Google sync error:", googleResult.value.error);
+      errors.push("Google Calendar sync error");
+    }
+
+    if (errors.length === 2) {
+      throw new Error("All calendar syncs failed");
+    }
+
+    return {
+      apple: caldavResult.status === 'fulfilled' ? caldavResult.value.data : null,
+      google: googleResult.status === 'fulfilled' ? googleResult.value.data : null,
+    };
   };
 
   return { syncCalendar };
