@@ -15,12 +15,12 @@ interface UserAvatarProps {
   size?: 'sm' | 'md' | 'lg' | 'xl'; // Predefined sizes for squircle
 }
 
-// Predefined sizes for squircle variant (landscape ratio ~1.5:1)
+// Predefined sizes for squircle variant (landscape ratio ~1.75:1)
 const SQUIRCLE_SIZES = {
-  sm: 'w-24 h-16',      // Small - for lists (1.5:1)
-  md: 'w-36 h-24',      // Medium - for cards (1.5:1)
-  lg: 'w-48 h-32',      // Large - for profiles (1.5:1)
-  xl: 'w-60 h-40',      // Extra large - for hero sections (1.5:1)
+  sm: 'w-28 h-16',      // Small - for lists (1.75:1)
+  md: 'w-44 h-24',      // Medium - for cards (~1.83:1)
+  lg: 'w-56 h-32',      // Large - for profiles (1.75:1)
+  xl: 'w-72 h-40',      // Extra large - for hero sections (1.8:1)
 };
 
 // Always-vibrant gradient for squircle variant (regardless of rarity)
@@ -120,7 +120,7 @@ export const UserAvatar = ({
       )}
       style={{ 
         // Allow avatar to overflow at top only, clip sides and bottom cleanly
-        clipPath: hasCharacterAvatar ? 'inset(-60% 0 0 0)' : undefined 
+        clipPath: hasCharacterAvatar ? 'inset(-80% 0 0 0)' : undefined 
       }}
     >
       {/* Avatar image - positioned so upper body shows, head extends above */}
@@ -131,7 +131,7 @@ export const UserAvatar = ({
           className={cn(
             "absolute w-full object-contain",
             hasCharacterAvatar 
-              ? "h-[250%] left-1/2 -translate-x-1/2 -bottom-[65%] object-top" 
+              ? "h-[350%] left-1/2 -translate-x-1/2 -bottom-[100%] object-top" 
               : "inset-0 h-full object-cover"
           )}
           onError={(e) => {
