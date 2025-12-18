@@ -376,7 +376,7 @@ const CoachSettings = () => {
 
   return (
     <DashboardLayout title="Settings" description="Manage your account settings and preferences.">
-      <div className="max-w-4xl">
+      <div className="max-w-6xl">
         <h1 className="font-display text-2xl font-bold text-foreground mb-6">Settings</h1>
 
         <div className="flex flex-col lg:flex-row gap-6">
@@ -410,7 +410,7 @@ const CoachSettings = () => {
           </div>
 
           {/* Content */}
-          <div className="flex-1 space-y-6">
+          <div className="flex-1 min-w-0 overflow-hidden space-y-6">
             {/* Profile Tab */}
             {selectedTab === "profile" && (
               <div className="space-y-6">
