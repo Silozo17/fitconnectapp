@@ -1,10 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Footprints, Heart, Moon, Flame, Activity, Clock, Watch } from "lucide-react";
+import { Footprints, Heart, Moon, Flame, Activity, Clock, Watch, RefreshCw } from "lucide-react";
 import { useHealthData, HealthDataType } from "@/hooks/useHealthData";
 import { useWearables } from "@/hooks/useWearables";
+import { useSyncAllWearables } from "@/hooks/useSyncAllWearables";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
+import { formatDistanceToNow } from "date-fns";
 
 const metrics: {
   type: HealthDataType;
@@ -65,9 +67,18 @@ interface HealthDataWidgetProps {
 const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps) => {
   const { getTodayValue, isLoading, data } = useHealthData();
   const { connections, isLoading: wearablesLoading, error: wearablesError } = useWearables();
+  const { syncAll, isSyncing, lastSyncedAt } = useSyncAllWearables();
 
   const hasConnectedDevice = connections && connections.length > 0;
   const hasData = data && data.length > 0;
+
+  const handleSync = async () => {
+    try {
+      await syncAll();
+    } catch (error) {
+      // Error handled in hook
+    }
+  };
 
   if (isLoading && !wearablesError && wearablesLoading) {
     return (
@@ -125,10 +136,29 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
   return (
     <Card className={cn("bg-card/50 border-border/50", className)}>
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Activity className="w-5 h-5 text-primary" />
-          Today's Health
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Activity className="w-5 h-5 text-primary" />
+            Today's Health
+          </CardTitle>
+          <div className="flex items-center gap-2">
+            {lastSyncedAt && (
+              <span className="text-xs text-muted-foreground">
+                {formatDistanceToNow(lastSyncedAt, { addSuffix: true })}
+              </span>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleSync}
+              disabled={isSyncing}
+              className="h-8 w-8"
+              title="Sync wearable data"
+            >
+              <RefreshCw className={cn("w-4 h-4", isSyncing && "animate-spin")} />
+            </Button>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         <div className={cn(
