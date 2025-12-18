@@ -33,7 +33,7 @@ const SQUIRCLE_IMAGE_STYLES = {
   sm: { height: '140%', bottom: '0' },
   md: { height: '145%', bottom: '0' },
   lg: { height: '150%', bottom: '0' },
-  xl: { height: '200%', bottom: '-50%' },  // Push avatar down to show upper body
+  xl: { height: '200%', bottom: '-60%' },  // Push avatar down to show upper body
 };
 
 // Size-aware clipPath - negative top inset allows head to overflow upward
