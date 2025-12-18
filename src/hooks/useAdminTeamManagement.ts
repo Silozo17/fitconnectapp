@@ -69,7 +69,8 @@ export const useAdminTeamManagement = () => {
       const { error } = await supabase.functions.invoke("admin-user-management", {
         body: {
           action: "bulk_update_status",
-          users: members,
+          userIds: members.map((m) => m.user_id),
+          profileIds: members.map((m) => m.id),
           status,
           reason,
           userType: "team",
