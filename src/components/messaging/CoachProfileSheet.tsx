@@ -1,5 +1,4 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -8,6 +7,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { getBadgeIcon } from "@/lib/badge-icons";
+import { UserAvatar } from "@/components/shared/UserAvatar";
+import { Rarity } from "@/lib/avatar-config";
 
 interface CoachProfileSheetProps {
   open: boolean;
@@ -45,7 +46,7 @@ export const CoachProfileSheet = ({
           .eq('coach_id', coachProfileId),
         supabase
           .from('coach_badges')
-          .select('*, badge:badges(name, icon, description, rarity)')
+          .select('*, badge:badges(name, icon, description, rarity, image_url)')
           .eq('coach_id', coachProfileId)
           .limit(4)
       ]);
@@ -88,15 +89,14 @@ export const CoachProfileSheet = ({
           <div className="space-y-6 mt-6">
             {/* Profile Header */}
             <div className="flex items-center gap-4">
-              <Avatar className="h-20 w-20 border-2 border-primary/20">
-                <AvatarImage 
-                  src={profile.profile_image_url || participantAvatar || profile.avatars?.image_url} 
-                  alt={fullName} 
-                />
-                <AvatarFallback className="text-xl bg-primary/10 text-primary">
-                  {fullName.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+              <UserAvatar
+                src={profile.profile_image_url || participantAvatar}
+                avatarSlug={profile.avatars?.slug}
+                avatarRarity={profile.avatars?.rarity as Rarity}
+                name={fullName}
+                className="h-20 w-20"
+                showRarityBorder
+              />
               <div className="flex-1 min-w-0">
                 <h3 className="text-lg font-semibold truncate">{fullName}</h3>
                 {profile.location && (
@@ -185,8 +185,16 @@ export const CoachProfileSheet = ({
                     const BadgeIcon = getBadgeIcon(badge.badge?.icon || 'Trophy');
                     return (
                       <div key={badge.id} className="flex flex-col items-center text-center">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                          <BadgeIcon className="h-5 w-5 text-primary" />
+                        <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+                          {badge.badge?.image_url ? (
+                            <img 
+                              src={badge.badge.image_url} 
+                              alt={badge.badge?.name}
+                              className="h-12 w-12 object-contain"
+                            />
+                          ) : (
+                            <BadgeIcon className="h-8 w-8 text-primary" />
+                          )}
                         </div>
                         <span className="text-xs text-muted-foreground mt-1 line-clamp-1">
                           {badge.badge?.name}
