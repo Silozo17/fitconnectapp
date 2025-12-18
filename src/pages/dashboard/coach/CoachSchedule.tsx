@@ -21,6 +21,8 @@ import {
   Calendar as CalendarIcon,
 } from "lucide-react";
 import { AddCoachSessionModal } from "@/components/dashboard/coach/AddCoachSessionModal";
+import { MobileCalendarView } from "@/components/dashboard/coach/MobileCalendarView";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -113,6 +115,9 @@ const CoachSchedule = () => {
   
   // Calendar scroll ref
   const calendarScrollRef = useRef<HTMLDivElement>(null);
+  
+  // Responsive detection
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   // Get coach profile ID, currency, and booking settings
   useEffect(() => {
@@ -474,6 +479,7 @@ const CoachSchedule = () => {
     }
   };
 
+  // Get session for slot - return session if it STARTS at this slot
   const getSessionForSlot = (dayIndex: number, time: string) => {
     const date = weekDates[dayIndex];
     return sessions.find(s => {
@@ -481,6 +487,58 @@ const CoachSchedule = () => {
       const sessionTime = format(sessionDate, "HH:mm");
       return isSameDay(sessionDate, date) && sessionTime === time;
     });
+  };
+
+  // Check if a slot is covered by a multi-hour session that started earlier
+  const isSlotCoveredBySession = (dayIndex: number, time: string) => {
+    const date = weekDates[dayIndex];
+    const [slotHour] = time.split(':').map(Number);
+    
+    return sessions.find(s => {
+      const sessionDate = parseISO(s.scheduled_at);
+      if (!isSameDay(sessionDate, date)) return false;
+      
+      const sessionStartHour = sessionDate.getHours();
+      const sessionEndHour = sessionStartHour + Math.ceil(s.duration_minutes / 60);
+      
+      // Check if this slot is covered (but not the start slot)
+      return slotHour > sessionStartHour && slotHour < sessionEndHour;
+    });
+  };
+
+  // Check if a slot is covered by a multi-hour external event
+  const isSlotCoveredByEvent = (dayIndex: number, time: string) => {
+    const date = weekDates[dayIndex];
+    const [slotHour] = time.split(':').map(Number);
+    const slotStart = new Date(date);
+    slotStart.setHours(slotHour, 0, 0, 0);
+    
+    const event = externalEvents.find(e => {
+      if (e.is_all_day) return false;
+      const eventStart = new Date(e.start_time);
+      const eventEnd = new Date(e.end_time);
+      
+      // Check if slot is within the event but not at the start hour
+      if (!isSameDay(eventStart, date) && !isSameDay(eventEnd, date)) return false;
+      
+      const eventStartHour = eventStart.getHours();
+      return slotHour > eventStartHour && slotStart < eventEnd && slotStart >= eventStart;
+    });
+    
+    return event;
+  };
+
+  // Get session span in hours
+  const getSessionSpan = (session: typeof sessions[0]) => {
+    return Math.ceil(session.duration_minutes / 60);
+  };
+
+  // Get external event span in hours
+  const getEventSpan = (event: typeof externalEvents[0], dayIndex: number) => {
+    const eventStart = new Date(event.start_time);
+    const eventEnd = new Date(event.end_time);
+    const hoursSpan = (eventEnd.getTime() - eventStart.getTime()) / (1000 * 60 * 60);
+    return Math.max(1, Math.ceil(hoursSpan));
   };
 
   const currentWeekLabel = `${format(weekStart, "MMM d")} - ${format(addDays(weekStart, 6), "d, yyyy")}`;
@@ -518,150 +576,197 @@ const CoachSchedule = () => {
 
         {/* Calendar Tab */}
         <TabsContent value="calendar">
-          {/* Week Navigation */}
-          <div className="card-elevated p-4 mb-4">
-            <div className="flex items-center justify-between">
-              <Button variant="ghost" size="icon" onClick={() => setWeekStart(prev => addDays(prev, -7))}>
-                <ChevronLeft className="w-5 h-5" />
-              </Button>
-              <div className="flex items-center gap-4">
-                <span className="font-display font-bold text-foreground">{currentWeekLabel}</span>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleSyncCalendars}
-                  disabled={isSyncing}
-                >
-                  <RefreshCw className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
-                  Sync Calendars
-                </Button>
-              </div>
-              <Button variant="ghost" size="icon" onClick={() => setWeekStart(prev => addDays(prev, 7))}>
-                <ChevronRight className="w-5 h-5" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Calendar Grid */}
-          <div className="card-elevated overflow-hidden">
-            <div className="overflow-x-auto">
-              <div className="min-w-[800px]">
-                {/* Header */}
-                <div className="grid grid-cols-8 border-b border-border">
-                  <div className="p-3 text-sm text-muted-foreground"></div>
-                  {weekDates.map((date, index) => (
-                    <div key={index} className="p-3 text-center border-l border-border">
-                      <p className="text-sm text-muted-foreground">{weekDays[index]}</p>
-                      <p className="text-lg font-bold text-foreground">{format(date, "d")}</p>
-                    </div>
-                  ))}
-                </div>
-
-                {/* All-Day Events Row */}
-                <div className="grid grid-cols-8 border-b border-border bg-muted/30">
-                  <div className="p-2 text-xs text-muted-foreground flex items-center">
-                    <CalendarIcon className="w-3 h-3 mr-1" />
-                    All-Day
+          {isMobile ? (
+            <MobileCalendarView
+              sessions={sessions}
+              externalEvents={externalEvents}
+              onAddSession={(date, time) => {
+                setPreselectedDate(date);
+                setPreselectedTime(time);
+                setShowAddSessionModal(true);
+              }}
+              onSync={handleSyncCalendars}
+              isSyncing={isSyncing}
+            />
+          ) : (
+            <>
+              {/* Week Navigation */}
+              <div className="card-elevated p-4 mb-4">
+                <div className="flex items-center justify-between">
+                  <Button variant="ghost" size="icon" onClick={() => setWeekStart(prev => addDays(prev, -7))}>
+                    <ChevronLeft className="w-5 h-5" />
+                  </Button>
+                  <div className="flex items-center gap-4">
+                    <span className="font-display font-bold text-foreground">{currentWeekLabel}</span>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleSyncCalendars}
+                      disabled={isSyncing}
+                    >
+                      <RefreshCw className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+                      Sync Calendars
+                    </Button>
                   </div>
-                  {weekDates.map((_, dayIndex) => {
-                    const allDayEvents = getAllDayEventsForDate(dayIndex);
-                    return (
-                      <div key={dayIndex} className="p-1 border-l border-border min-h-[40px]">
-                        {allDayEvents.map((event, idx) => (
-                          <div key={idx} className="p-1.5 rounded text-xs bg-warning/20 border border-warning/30 mb-1">
-                            <p className="font-medium text-warning-foreground truncate">
-                              {event.title || "Busy"}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  })}
+                  <Button variant="ghost" size="icon" onClick={() => setWeekStart(prev => addDays(prev, 7))}>
+                    <ChevronRight className="w-5 h-5" />
+                  </Button>
                 </div>
+              </div>
 
-                {/* Time Slots - scrollable */}
-                <div ref={calendarScrollRef} className="max-h-[600px] overflow-y-auto">
-                  {timeSlots.map((time) => (
-                    <div key={time} className="grid grid-cols-8 border-b border-border">
-                      <div className="p-3 text-sm text-muted-foreground">{time}</div>
+              {/* Calendar Grid with absolute positioning for multi-hour events */}
+              <div className="card-elevated overflow-hidden">
+                <div className="overflow-x-auto">
+                  <div className="min-w-[800px]">
+                    {/* Header */}
+                    <div className="grid grid-cols-8 border-b border-border">
+                      <div className="p-3 text-sm text-muted-foreground"></div>
+                      {weekDates.map((date, index) => (
+                        <div key={index} className="p-3 text-center border-l border-border">
+                          <p className="text-sm text-muted-foreground">{weekDays[index]}</p>
+                          <p className="text-lg font-bold text-foreground">{format(date, "d")}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* All-Day Events Row */}
+                    <div className="grid grid-cols-8 border-b border-border bg-muted/30">
+                      <div className="p-2 text-xs text-muted-foreground flex items-center">
+                        <CalendarIcon className="w-3 h-3 mr-1" />
+                        All-Day
+                      </div>
                       {weekDates.map((_, dayIndex) => {
-                        const session = getSessionForSlot(dayIndex, time);
-                        const externalEvent = !session ? getExternalEventForSlot(dayIndex, time) : null;
-                        const isAvailable = isWithinAvailability(dayIndex, time);
+                        const allDayEvents = getAllDayEventsForDate(dayIndex);
                         return (
-                          <div
-                            key={dayIndex}
-                            className={`p-1 border-l border-border min-h-[60px] transition-colors cursor-pointer ${
-                              isAvailable ? 'bg-success/5 hover:bg-success/10' : 'hover:bg-secondary/30'
-                            }`}
-                            onClick={() => !session && !externalEvent && handleSlotClick(dayIndex, time)}
-                          >
-                            {session && (
-                              <div className={`p-2 rounded-lg text-xs ${
-                                session.is_online 
-                                  ? 'bg-primary/20 border border-primary/30' 
-                                  : 'bg-accent/20 border border-accent/30'
-                              }`}>
-                                <p className="font-medium text-foreground truncate">
-                                  {session.client?.first_name} {session.client?.last_name}
+                          <div key={dayIndex} className="p-1 border-l border-border min-h-[40px]">
+                            {allDayEvents.map((event, idx) => (
+                              <div key={idx} className="p-1.5 rounded text-xs bg-warning/20 border border-warning/30 mb-1">
+                                <p className="font-medium text-warning-foreground truncate">
+                                  {event.title || "Busy"}
                                 </p>
-                                <p className="text-muted-foreground truncate">{session.session_type}</p>
-                                <div className="flex items-center gap-1 mt-1">
-                                  {session.is_online ? (
-                                    <Video className="w-3 h-3 text-primary" />
-                                  ) : (
-                                    <MapPin className="w-3 h-3 text-accent" />
-                                  )}
-                                  <span className="text-muted-foreground">{session.duration_minutes}m</span>
-                                </div>
                               </div>
-                            )}
-                            {externalEvent && (
-                              <div className="p-2 rounded-lg text-xs bg-muted/50 border border-muted-foreground/20">
-                                <p className="font-medium text-muted-foreground truncate">
-                                  {externalEvent.title || "Busy"}
-                                </p>
-                                <div className="flex items-center gap-1 mt-1">
-                                  <CalendarDays className="w-3 h-3 text-muted-foreground" />
-                                  <span className="text-muted-foreground text-xs">
-                                    {externalEvent.source === 'apple_calendar' ? 'iCloud' : 'Google'}
-                                  </span>
-                                </div>
-                              </div>
-                            )}
+                            ))}
                           </div>
                         );
                       })}
                     </div>
-                  ))}
+
+                    {/* Time Slots with absolute positioned events */}
+                    <div ref={calendarScrollRef} className="max-h-[600px] overflow-y-auto relative">
+                      {/* Grid lines */}
+                      {timeSlots.map((time) => (
+                        <div key={time} className="grid grid-cols-8 border-b border-border">
+                          <div className="p-3 text-sm text-muted-foreground h-[60px]">{time}</div>
+                          {weekDates.map((_, dayIndex) => {
+                            const isAvailable = isWithinAvailability(dayIndex, time);
+                            const isCoveredBySession = isSlotCoveredBySession(dayIndex, time);
+                            const isCoveredByEvent = isSlotCoveredByEvent(dayIndex, time);
+                            
+                            // Skip rendering clickable area if covered by multi-hour event
+                            if (isCoveredBySession || isCoveredByEvent) {
+                              return (
+                                <div
+                                  key={dayIndex}
+                                  className={`border-l border-border h-[60px] ${
+                                    isAvailable ? 'bg-success/5' : ''
+                                  }`}
+                                />
+                              );
+                            }
+                            
+                            const session = getSessionForSlot(dayIndex, time);
+                            const externalEvent = !session ? getExternalEventForSlot(dayIndex, time) : null;
+                            
+                            return (
+                              <div
+                                key={dayIndex}
+                                className={`p-1 border-l border-border h-[60px] transition-colors cursor-pointer relative ${
+                                  isAvailable ? 'bg-success/5 hover:bg-success/10' : 'hover:bg-secondary/30'
+                                }`}
+                                onClick={() => !session && !externalEvent && handleSlotClick(dayIndex, time)}
+                              >
+                                {session && (
+                                  <div 
+                                    className={`absolute left-1 right-1 top-1 rounded-lg text-xs z-10 overflow-hidden ${
+                                      session.is_online 
+                                        ? 'bg-primary/20 border border-primary/30' 
+                                        : 'bg-accent/20 border border-accent/30'
+                                    }`}
+                                    style={{
+                                      height: `${getSessionSpan(session) * 60 - 8}px`
+                                    }}
+                                  >
+                                    <div className="p-2">
+                                      <p className="font-medium text-foreground truncate">
+                                        {session.client?.first_name} {session.client?.last_name || "External Client"}
+                                      </p>
+                                      <p className="text-muted-foreground truncate">{session.session_type}</p>
+                                      <div className="flex items-center gap-1 mt-1">
+                                        {session.is_online ? (
+                                          <Video className="w-3 h-3 text-primary" />
+                                        ) : (
+                                          <MapPin className="w-3 h-3 text-accent" />
+                                        )}
+                                        <span className="text-muted-foreground">{session.duration_minutes}m</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                                {externalEvent && (
+                                  <div 
+                                    className="absolute left-1 right-1 top-1 rounded-lg text-xs bg-muted/50 border border-muted-foreground/20 z-10 overflow-hidden"
+                                    style={{
+                                      height: `${getEventSpan(externalEvent, dayIndex) * 60 - 8}px`
+                                    }}
+                                  >
+                                    <div className="p-2">
+                                      <p className="font-medium text-muted-foreground truncate">
+                                        {externalEvent.title || "Busy"}
+                                      </p>
+                                      <div className="flex items-center gap-1 mt-1">
+                                        <CalendarDays className="w-3 h-3 text-muted-foreground" />
+                                        <span className="text-muted-foreground text-xs">
+                                          {externalEvent.source === 'apple_calendar' ? 'iCloud' : 'Google'}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
 
-          {/* Legend */}
-          <div className="flex flex-wrap items-center gap-6 mt-4">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-success/10 border border-success/30" />
-              <span className="text-sm text-muted-foreground">Available</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-accent/20 border border-accent/30" />
-              <span className="text-sm text-muted-foreground">In-Person</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-primary/20 border border-primary/30" />
-              <span className="text-sm text-muted-foreground">Online</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-muted/50 border border-muted-foreground/20" />
-              <span className="text-sm text-muted-foreground">External Calendar</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-warning/20 border border-warning/30" />
-              <span className="text-sm text-muted-foreground">All-Day / Holiday</span>
-            </div>
-          </div>
+              {/* Legend */}
+              <div className="flex flex-wrap items-center gap-6 mt-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded bg-success/10 border border-success/30" />
+                  <span className="text-sm text-muted-foreground">Available</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded bg-accent/20 border border-accent/30" />
+                  <span className="text-sm text-muted-foreground">In-Person</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded bg-primary/20 border border-primary/30" />
+                  <span className="text-sm text-muted-foreground">Online</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded bg-muted/50 border border-muted-foreground/20" />
+                  <span className="text-sm text-muted-foreground">External Calendar</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded bg-warning/20 border border-warning/30" />
+                  <span className="text-sm text-muted-foreground">All-Day / Holiday</span>
+                </div>
+              </div>
+            </>
+          )}
         </TabsContent>
 
         {/* Booking Requests Tab */}
