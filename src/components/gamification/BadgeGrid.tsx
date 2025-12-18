@@ -1,4 +1,4 @@
-import { useBadges, useClientBadges, Badge } from '@/hooks/useGamification';
+import { useClientBadgesAvailable, useClientBadges, Badge, RARITY_ORDER } from '@/hooks/useGamification';
 import { BadgeCard } from './BadgeCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,7 +15,7 @@ const BADGE_CATEGORIES = [
 ];
 
 export function BadgeGrid() {
-  const { data: badges, isLoading: badgesLoading } = useBadges();
+  const { data: badges, isLoading: badgesLoading } = useClientBadgesAvailable();
   const { data: clientBadges, isLoading: clientBadgesLoading } = useClientBadges();
   
   const isLoading = badgesLoading || clientBadgesLoading;
@@ -70,7 +70,10 @@ export function BadgeGrid() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {filterBadges(cat.value)
                 .sort((a, b) => {
-                  // Show earned badges first
+                  // Primary sort: by rarity (common first → legendary last)
+                  const rarityDiff = (RARITY_ORDER[a.rarity] || 0) - (RARITY_ORDER[b.rarity] || 0);
+                  if (rarityDiff !== 0) return rarityDiff;
+                  // Secondary sort: earned badges first within same rarity
                   const aEarned = earnedBadgeIds.has(a.id);
                   const bEarned = earnedBadgeIds.has(b.id);
                   if (aEarned && !bEarned) return -1;
