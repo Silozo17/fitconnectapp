@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,9 +53,9 @@ const AdminTeam = () => {
   const [isDetailDrawerOpen, setIsDetailDrawerOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
 
-  const { loading: actionLoading, getUserEmail, updateStatus, bulkUpdateStatus, bulkDelete, resetPassword } = useAdminTeamManagement();
+  const { loading: actionLoading, getUserEmailsBatch, updateStatus, bulkUpdateStatus, bulkDelete, resetPassword } = useAdminTeamManagement();
 
-  const fetchTeamMembers = async () => {
+  const fetchTeamMembers = useCallback(async () => {
     setLoading(true);
     try {
       const { data: profiles, error: profilesError } = await supabase
@@ -79,17 +79,9 @@ const AdminTeam = () => {
 
       setTeamMembers(mergedData);
       
-      // Fetch emails for all team members
-      const emailPromises = mergedData.map(async (member) => {
-        const email = await getUserEmail(member.user_id);
-        return { userId: member.user_id, email };
-      });
-      
-      const emailResults = await Promise.all(emailPromises);
-      const emailMap: Record<string, string | null> = {};
-      emailResults.forEach(({ userId, email }) => {
-        emailMap[userId] = email;
-      });
+      // Batch fetch emails for all team members in a single request
+      const userIds = mergedData.map(member => member.user_id);
+      const emailMap = await getUserEmailsBatch(userIds);
       setMemberEmails(emailMap);
     } catch (error: any) {
       toast.error("Failed to fetch team members");
@@ -97,11 +89,11 @@ const AdminTeam = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getUserEmailsBatch]);
 
   useEffect(() => {
     fetchTeamMembers();
-  }, []);
+  }, [fetchTeamMembers]);
 
   const handleDeleteMember = async (member: TeamMember) => {
     if (!confirm("Are you sure you want to remove this team member?")) return;
