@@ -64,5 +64,5 @@ Disallow: /subscribe
 Disallow: /api/
 Disallow: /checkout
 
-# Sitemaps
-Sitemap: https://getfitconnect.co.uk/api/sitemap.xml
+# Sitemaps - Dynamic sitemap from edge function
+Sitemap: https://ntgfihgneyoxxbwmtceq.supabase.co/functions/v1/sitemap

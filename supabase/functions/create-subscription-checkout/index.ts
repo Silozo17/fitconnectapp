@@ -7,19 +7,19 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Price IDs from Stripe
+// Price IDs from Stripe - must match stripe-config.ts
 const PRICE_IDS = {
   starter: {
-    monthly: "price_1Sf01iHCGP7kst5ZX70XwDK8",
-    yearly: "price_1Sf021HCGP7kst5ZIQ2wTxr5",
+    monthly: "price_1Sf80vEztIBHKDEerFCQIjUR",
+    yearly: "price_1Sf812EztIBHKDEevWTflleJ",
   },
   pro: {
-    monthly: "price_1Sf028HCGP7kst5ZYy1DsERS",
-    yearly: "price_1Sf029HCGP7kst5Z20Y6mbtW",
+    monthly: "price_1Sf80wEztIBHKDEeO6RxdYCU",
+    yearly: "price_1Sf813EztIBHKDEeqPNPZoRy",
   },
   enterprise: {
-    monthly: "price_1Sf02BHCGP7kst5ZqGTsWl4S",
-    yearly: "price_1Sf02DHCGP7kst5ZavA9AJvG",
+    monthly: "price_1Sf80xEztIBHKDEegrV6T1T7",
+    yearly: "price_1Sf814EztIBHKDEevMuXmU4J",
   },
 };
 
