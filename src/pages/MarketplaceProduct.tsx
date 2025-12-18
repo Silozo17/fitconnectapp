@@ -122,12 +122,12 @@ export default function MarketplaceProduct() {
   return (
     <PageLayout title={product.title} description={product.short_description || product.description || "Digital content from FitConnect"}>
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 pt-20 md:pt-8 pb-8">
           {/* Back Button */}
           <Button
             variant="ghost"
             onClick={() => navigate("/marketplace")}
-            className="mb-6"
+            className="mb-6 mt-4 md:mt-0"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Marketplace
