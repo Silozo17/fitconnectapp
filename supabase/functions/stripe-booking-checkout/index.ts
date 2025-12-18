@@ -59,15 +59,54 @@ serve(async (req) => {
 
     console.log("Creating booking checkout:", { sessionTypeId, clientId, coachId, bookingRequestId });
 
+    // Validate required fields
+    if (!sessionTypeId || !coachId) {
+      throw new Error("Missing required fields: sessionTypeId and coachId are required");
+    }
+
+    // Validate success/cancel URLs are from allowed domains
+    const allowedDomains = [
+      Deno.env.get("SITE_URL") || "",
+      "http://localhost:5173",
+      "http://localhost:3000",
+      "https://getfitconnect.co.uk",
+    ].filter(Boolean);
+    
+    const isValidUrl = (url: string) => {
+      try {
+        const parsed = new URL(url);
+        return allowedDomains.some(domain => {
+          const domainUrl = new URL(domain);
+          return parsed.origin === domainUrl.origin;
+        });
+      } catch {
+        return false;
+      }
+    };
+
+    if (successUrl && !isValidUrl(successUrl)) {
+      throw new Error("Invalid success URL");
+    }
+    if (cancelUrl && !isValidUrl(cancelUrl)) {
+      throw new Error("Invalid cancel URL");
+    }
+
     // Get session type with payment configuration
     const { data: sessionType, error: sessionTypeError } = await supabase
       .from("session_types")
       .select("*")
       .eq("id", sessionTypeId)
+      .eq("is_active", true) // Only allow active session types
       .single();
 
     if (sessionTypeError || !sessionType) {
-      throw new Error("Session type not found");
+      throw new Error("Session type not found or inactive");
+    }
+
+    // CRITICAL: Validate that the session type belongs to the specified coach
+    if (sessionType.coach_id !== coachId) {
+      console.error("Session type coach mismatch:", { sessionTypeCoach: sessionType.coach_id, providedCoach: coachId });
+      throw new Error("Invalid session type for this coach");
     }
 
     console.log("Session type payment config:", {

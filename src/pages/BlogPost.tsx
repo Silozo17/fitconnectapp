@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import DOMPurify from "dompurify";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { SEOHead, createBreadcrumbSchema } from "@/components/shared/SEOHead";
@@ -202,7 +203,10 @@ export default function BlogPost() {
             {/* Content */}
             <div 
               className="max-w-3xl mx-auto prose-blog"
-              dangerouslySetInnerHTML={{ __html: post.content }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content, { 
+                ALLOWED_TAGS: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'em', 'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'br', 'span', 'div'],
+                ALLOWED_ATTR: ['href', 'src', 'alt', 'class', 'target', 'rel']
+              }) }}
             />
 
             {/* CTA */}
