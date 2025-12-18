@@ -397,7 +397,7 @@ const Privacy = () => {
                 <h2>16. Video Conferencing (Zoom & Google Meet)</h2>
                 <p>
                   FitConnect enables online coaching sessions through video conferencing integrations. 
-                  Coaches can create video meeting links for their sessions.
+                  Coaches can connect their accounts to create video meeting links for their sessions.
                 </p>
 
                 <h3>Zoom Integration</h3>
@@ -405,12 +405,47 @@ const Privacy = () => {
                 <ul>
                   <li>Create meeting links for scheduled coaching sessions</li>
                   <li>Update or cancel meetings when sessions are rescheduled or cancelled</li>
+                  <li>Access basic user information (display name, email) to identify the connected account</li>
+                </ul>
+
+                <h4>Data We Store from Zoom</h4>
+                <p>When a coach connects their Zoom account, we store:</p>
+                <ul>
+                  <li><strong>OAuth Tokens:</strong> Encrypted access and refresh tokens to maintain the connection</li>
+                  <li><strong>Account Identifiers:</strong> Zoom user ID and account email to identify the connected account</li>
+                  <li><strong>Meeting IDs:</strong> References to meetings created for coaching sessions</li>
                 </ul>
                 <p>
                   <strong>Important:</strong> FitConnect does not record, store, or have access to the content of 
                   your video calls. All video sessions are conducted directly through Zoom's infrastructure and 
-                  are subject to Zoom's Privacy Policy.
+                  are subject to <a href="https://www.zoom.com/en/trust/privacy/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Zoom's Privacy Policy</a>.
                 </p>
+
+                <h4>Your Rights Regarding Zoom Data</h4>
+                <p>You have the following rights concerning Zoom data processed through FitConnect:</p>
+                <ul>
+                  <li><strong>Access:</strong> View your Zoom connection status and stored data in Settings → Integrations → Zoom</li>
+                  <li><strong>Disconnection:</strong> Remove the Zoom integration at any time through your integration settings</li>
+                  <li><strong>Deletion:</strong> Request deletion of all Zoom-related data by contacting {contact.privacyEmail}</li>
+                  <li><strong>Portability:</strong> Request a copy of your Zoom integration data in a machine-readable format</li>
+                </ul>
+
+                <h4>How to Exercise Your Zoom Data Rights</h4>
+                <p>You can exercise your rights regarding Zoom data through the following methods:</p>
+                <ul>
+                  <li><strong>In-App:</strong> Navigate to Settings → Integrations → Zoom → Disconnect to remove the integration and delete stored tokens</li>
+                  <li><strong>Email:</strong> Contact {contact.privacyEmail} with "Zoom Data Request" in the subject line for access, deletion, or portability requests</li>
+                  <li><strong>Via Zoom:</strong> Visit <a href="https://marketplace.zoom.us/user/installed" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">marketplace.zoom.us</a> → Installed Apps → Find FitConnect → Remove to revoke access directly through Zoom</li>
+                </ul>
+
+                <h4>What Happens When You Disconnect Zoom</h4>
+                <p>When you disconnect Zoom from FitConnect or revoke access through the Zoom Marketplace:</p>
+                <ul>
+                  <li>Your OAuth tokens are immediately deleted from our systems</li>
+                  <li>We can no longer create or manage Zoom meetings on your behalf</li>
+                  <li>Existing meeting links for future sessions will remain valid until the meetings occur or are manually deleted in Zoom</li>
+                  <li>Historical records of which sessions used Zoom may be retained for audit purposes</li>
+                </ul>
 
                 <h3>Google Meet Integration</h3>
                 <p>
