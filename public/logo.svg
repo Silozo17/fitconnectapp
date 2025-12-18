@@ -1,0 +1,15 @@
+<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+  <!-- Lime rounded square background -->
+  <rect width="48" height="48" rx="8" fill="#BEFF00"/>
+  <!-- Dumbbell icon -->
+  <g transform="translate(8, 8)" stroke="#0D0D14" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Left weight plates -->
+    <path d="M6.5 8v16"/>
+    <path d="M10.5 10v12"/>
+    <!-- Bar -->
+    <path d="M10.5 16h11"/>
+    <!-- Right weight plates -->
+    <path d="M21.5 10v12"/>
+    <path d="M25.5 8v16"/>
+  </g>
+</svg>
