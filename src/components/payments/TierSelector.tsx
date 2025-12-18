@@ -8,8 +8,10 @@ interface TierSelectorProps {
 }
 
 export function TierSelector({ selectedTier, onTierChange }: TierSelectorProps) {
-  // Exclude free tier from selector since you can't subscribe to it
-  const paidTiers = (Object.keys(SUBSCRIPTION_TIERS) as TierKey[]).filter(key => key !== "free");
+  // Exclude free tier and admin-only tiers (like founder) from selector
+  const paidTiers = (Object.keys(SUBSCRIPTION_TIERS) as TierKey[]).filter(
+    key => key !== "free" && !SUBSCRIPTION_TIERS[key].adminOnly
+  );
 
   return (
     <div className="flex gap-2 p-1 bg-background/20 rounded-lg border border-border/30">
