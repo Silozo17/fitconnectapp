@@ -147,22 +147,9 @@ const AdminCoaches = () => {
       return;
     }
 
-    const { error } = await supabase
-      .from("coach_profiles")
-      .delete()
-      .eq("id", coach.id);
-
-    if (error) {
-      toast.error("Failed to delete coach");
-      console.error(error);
-    } else {
-      logAction.log({
-        action: "DELETE_COACH",
-        entityType: "coach_profiles",
-        entityId: coach.id,
-        oldValues: { display_name: coach.display_name, tier: coach.subscription_tier },
-      });
-      toast.success("Coach deleted successfully");
+    // Use bulkDelete with single coach to ensure both profile AND auth user are deleted
+    const success = await bulkDelete([{ id: coach.id, user_id: coach.user_id }]);
+    if (success) {
       fetchCoaches();
     }
   };

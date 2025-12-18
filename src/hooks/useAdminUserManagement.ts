@@ -132,6 +132,7 @@ export const useAdminUserManagement = (userType: "client" | "coach") => {
         body: {
           action: "bulk_delete",
           profileIds: users.map((u) => u.id),
+          userIds: users.map((u) => u.user_id),
           userType,
         },
       });
