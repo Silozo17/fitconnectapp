@@ -239,7 +239,7 @@ export function FriendProfileSheet({
         ) : profile ? (
           <div className="space-y-6 mt-6">
             {/* Avatar & Name */}
-            <div className="flex flex-col items-center gap-3">
+            <div className="flex flex-col items-center gap-3 mt-20">
               <UserAvatar
                 src={profile.avatar_url}
                 avatarSlug={avatar?.slug}
