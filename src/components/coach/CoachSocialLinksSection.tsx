@@ -35,6 +35,7 @@ interface SocialLinks {
 interface CoachSocialLinksSectionProps {
   values: SocialLinks;
   onChange: (field: keyof SocialLinks, value: string) => void;
+  showCard?: boolean;
 }
 
 const socialPlatforms = [
@@ -89,7 +90,33 @@ const socialPlatforms = [
   },
 ];
 
-export function CoachSocialLinksSection({ values, onChange }: CoachSocialLinksSectionProps) {
+export function CoachSocialLinksSection({ values, onChange, showCard = true }: CoachSocialLinksSectionProps) {
+  const content = (
+    <div className="grid gap-4 sm:grid-cols-2">
+      {socialPlatforms.map((platform) => {
+        const Icon = platform.icon;
+        return (
+          <div key={platform.key} className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <Icon className={`w-4 h-4 ${platform.color}`} />
+              {platform.label}
+            </Label>
+            <Input
+              type="url"
+              value={values[platform.key] || ""}
+              onChange={(e) => onChange(platform.key, e.target.value)}
+              placeholder={platform.placeholder}
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  if (!showCard) {
+    return content;
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -99,25 +126,7 @@ export function CoachSocialLinksSection({ values, onChange }: CoachSocialLinksSe
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {socialPlatforms.map((platform) => {
-            const Icon = platform.icon;
-            return (
-              <div key={platform.key} className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <Icon className={`w-4 h-4 ${platform.color}`} />
-                  {platform.label}
-                </Label>
-                <Input
-                  type="url"
-                  value={values[platform.key] || ""}
-                  onChange={(e) => onChange(platform.key, e.target.value)}
-                  placeholder={platform.placeholder}
-                />
-              </div>
-            );
-          })}
-        </div>
+        {content}
       </CardContent>
     </Card>
   );

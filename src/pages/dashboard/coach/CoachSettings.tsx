@@ -15,6 +15,11 @@ import {
   Calendar,
   Receipt,
   Store,
+  Image,
+  UserCircle,
+  MapPin,
+  Users as UsersIcon,
+  Link as LinkIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -67,6 +72,8 @@ import { CoachGroupClassesManager } from "@/components/coach/CoachGroupClassesMa
 import { CoachWhoIWorkWithSection } from "@/components/coach/CoachWhoIWorkWithSection";
 import { CoachSocialLinksSection, type SocialLinks } from "@/components/coach/CoachSocialLinksSection";
 import { CoachTypeSelector } from "@/components/coach/CoachTypeSelector";
+import { MarketplaceSection } from "@/components/coach/MarketplaceSection";
+import { ProfileCompletionProgress } from "@/components/coach/ProfileCompletionProgress";
 
 interface CoachProfile {
   display_name: string | null;
@@ -490,58 +497,85 @@ const CoachSettings = () => {
 
             {/* My Marketplace Page Tab */}
             {selectedTab === "marketplace" && (
-              <div className="space-y-6">
-                {/* Marketplace Card Photo */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Marketplace Card Photo</CardTitle>
-                    <CardDescription>This landscape image appears on your card in search results and listings</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col lg:flex-row gap-6">
-                      <div className="flex-1">
-                        <CardImageUpload
-                          currentImageUrl={profile.card_image_url}
-                          userId={user?.id || ""}
-                          onImageChange={(url) => setProfile({ ...profile, card_image_url: url })}
-                        />
-                      </div>
-                      <div className="lg:w-80">
-                        <p className="text-sm font-medium mb-2 text-muted-foreground">Card Preview</p>
-                        <CoachCardPreview
-                          displayName={profile.display_name}
-                          cardImageUrl={profile.card_image_url}
-                          profileImageUrl={profile.profile_image_url}
-                          location={profile.location}
-                          bio={profile.bio}
-                          coachTypes={profile.coach_types}
-                          hourlyRate={profile.hourly_rate}
-                          currency={profile.currency}
-                          isVerified={profile.is_verified ?? false}
-                        />
+              <div className="space-y-6 pb-24">
+                {/* Profile Completion Progress */}
+                <ProfileCompletionProgress 
+                  profile={profile}
+                  galleryCount={0} // Will be updated when gallery loads
+                  groupClassCount={0} // Will be updated when classes load
+                />
+
+                {/* Section 1: Visual Identity */}
+                <MarketplaceSection
+                  icon={Image}
+                  title="Visual Identity"
+                  description="Photos that represent you and your work"
+                >
+                  <div className="space-y-6">
+                    {/* Marketplace Card Photo */}
+                    <div>
+                      <Label className="text-base font-medium mb-3 block">Marketplace Card Photo</Label>
+                      <p className="text-sm text-muted-foreground mb-4">This landscape image appears on your card in search results and listings</p>
+                      <div className="flex flex-col lg:flex-row gap-6">
+                        <div className="flex-1">
+                          <CardImageUpload
+                            currentImageUrl={profile.card_image_url}
+                            userId={user?.id || ""}
+                            onImageChange={(url) => setProfile({ ...profile, card_image_url: url })}
+                          />
+                        </div>
+                        <div className="lg:w-80">
+                          <p className="text-sm font-medium mb-2 text-muted-foreground">Card Preview</p>
+                          <CoachCardPreview
+                            displayName={profile.display_name}
+                            cardImageUrl={profile.card_image_url}
+                            profileImageUrl={profile.profile_image_url}
+                            location={profile.location}
+                            bio={profile.bio}
+                            coachTypes={profile.coach_types}
+                            hourlyRate={profile.hourly_rate}
+                            currency={profile.currency}
+                            isVerified={profile.is_verified ?? false}
+                          />
+                        </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
 
-                {/* Professional Details */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Professional Details</CardTitle>
-                    <CardDescription>Tell clients about your expertise and experience</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
+                    <Separator />
+
+                    {/* Gallery Images */}
                     <div>
-                      <Label>Bio</Label>
+                      <Label className="text-base font-medium mb-3 block">Gallery Images</Label>
+                      <p className="text-sm text-muted-foreground mb-4">Showcase your work, gym, or training sessions (up to 5 images)</p>
+                      <CoachGalleryUpload userId={user?.id || ''} />
+                    </div>
+                  </div>
+                </MarketplaceSection>
+
+                {/* Section 2: About You */}
+                <MarketplaceSection
+                  icon={UserCircle}
+                  title="About You"
+                  description="Tell clients about your expertise and background"
+                >
+                  <div className="space-y-6">
+                    {/* Bio */}
+                    <div>
+                      <Label className="text-base font-medium">Bio</Label>
+                      <p className="text-sm text-muted-foreground mb-2">Your professional story and coaching philosophy</p>
                       <Textarea
                         value={profile.bio || ""}
                         onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                        className="mt-1"
                         rows={4}
-                        placeholder="Tell clients about your background and coaching philosophy..."
+                        placeholder="Tell clients about your background, what motivates you, and your coaching approach..."
                       />
+                      <p className="text-xs text-muted-foreground mt-1 text-right">
+                        {(profile.bio?.length || 0)} characters
+                      </p>
                     </div>
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Years of Experience */}
                       <div>
                         <Label>Years of Experience</Label>
                         <Input
@@ -549,23 +583,43 @@ const CoachSettings = () => {
                           value={profile.experience_years || ""}
                           onChange={(e) => setProfile({ ...profile, experience_years: parseInt(e.target.value) || null })}
                           className="mt-1"
+                          placeholder="e.g., 5"
                         />
                       </div>
                     </div>
-                    <CoachTypeSelector
-                      selectedTypes={profile.coach_types || []}
-                      onChange={(types) => setProfile({ ...profile, coach_types: types })}
-                    />
-                  </CardContent>
-                </Card>
 
-                {/* Location & Workplace */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Location & Workplace</CardTitle>
-                    <CardDescription>Where do you train clients?</CardDescription>
-                  </CardHeader>
-                  <CardContent>
+                    {/* Coach Types */}
+                    <div>
+                      <Label className="text-base font-medium mb-2 block">Specialisations</Label>
+                      <CoachTypeSelector
+                        selectedTypes={profile.coach_types || []}
+                        onChange={(types) => setProfile({ ...profile, coach_types: types })}
+                      />
+                    </div>
+
+                    <Separator />
+
+                    {/* Who I Work With */}
+                    <div>
+                      <Label className="text-base font-medium">Who I Work With</Label>
+                      <p className="text-sm text-muted-foreground mb-2">Describe your ideal clients and who you specialise in helping</p>
+                      <Textarea
+                        value={profile.who_i_work_with || ""}
+                        onChange={(e) => setProfile({ ...profile, who_i_work_with: e.target.value })}
+                        rows={3}
+                        placeholder="e.g., Beginners looking to build confidence, busy professionals wanting flexible training, athletes preparing for competitions..."
+                      />
+                    </div>
+                  </div>
+                </MarketplaceSection>
+
+                {/* Section 3: Location & Availability */}
+                <MarketplaceSection
+                  icon={MapPin}
+                  title="Location & Availability"
+                  description="Where and how clients can train with you"
+                >
+                  <div className="space-y-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <Label>Location</Label>
@@ -573,7 +627,7 @@ const CoachSettings = () => {
                           value={profile.location || ""}
                           onChange={(e) => setProfile({ ...profile, location: e.target.value })}
                           className="mt-1"
-                          placeholder="London, UK"
+                          placeholder="e.g., London, UK"
                         />
                       </div>
                       <div>
@@ -585,75 +639,88 @@ const CoachSettings = () => {
                           placeholder="e.g., PureGym Manchester, Independent"
                         />
                         <p className="text-xs text-muted-foreground mt-1">
-                          Leave blank if you're an online-only coach.
+                          Leave blank if you're an online-only coach
                         </p>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
 
-                {/* Session Availability */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Session Availability</CardTitle>
-                    <CardDescription>How can clients train with you?</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col sm:flex-row gap-6">
-                      <div className="flex items-center gap-3">
-                        <Switch
-                          checked={profile.online_available ?? true}
-                          onCheckedChange={(checked) => setProfile({ ...profile, online_available: checked })}
-                        />
-                        <Label>Available for Online Sessions</Label>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Switch
-                          checked={profile.in_person_available ?? false}
-                          onCheckedChange={(checked) => setProfile({ ...profile, in_person_available: checked })}
-                        />
-                        <Label>Available for In-Person Sessions</Label>
+                    <Separator />
+
+                    <div>
+                      <Label className="text-base font-medium mb-3 block">Session Types</Label>
+                      <div className="flex flex-col sm:flex-row gap-6">
+                        <div className="flex items-center gap-3 p-3 rounded-lg border bg-muted/30">
+                          <Switch
+                            checked={profile.online_available ?? true}
+                            onCheckedChange={(checked) => setProfile({ ...profile, online_available: checked })}
+                          />
+                          <div>
+                            <Label className="cursor-pointer">Online Sessions</Label>
+                            <p className="text-xs text-muted-foreground">Video calls & remote coaching</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 p-3 rounded-lg border bg-muted/30">
+                          <Switch
+                            checked={profile.in_person_available ?? false}
+                            onCheckedChange={(checked) => setProfile({ ...profile, in_person_available: checked })}
+                          />
+                          <div>
+                            <Label className="cursor-pointer">In-Person Sessions</Label>
+                            <p className="text-xs text-muted-foreground">Face-to-face training</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </MarketplaceSection>
 
-                {/* Who I Work With */}
-                <CoachWhoIWorkWithSection
-                  value={profile.who_i_work_with || ""}
-                  onChange={(value) => setProfile({ ...profile, who_i_work_with: value })}
-                />
+                {/* Section 4: Group Classes */}
+                <MarketplaceSection
+                  icon={UsersIcon}
+                  title="Group Classes"
+                  description="Manage your group training sessions and waitlists"
+                  defaultOpen={false}
+                >
+                  <CoachGroupClassesManager />
+                </MarketplaceSection>
 
-                {/* Gallery Images */}
-                <CoachGalleryUpload userId={user?.id || ''} />
+                {/* Section 5: Social Media Links */}
+                <MarketplaceSection
+                  icon={LinkIcon}
+                  title="Social Media & Links"
+                  description="Connect your social profiles so clients can learn more about you"
+                  defaultOpen={false}
+                >
+                  <CoachSocialLinksSection
+                    values={{
+                      facebook_url: profile.facebook_url,
+                      instagram_url: profile.instagram_url,
+                      tiktok_url: profile.tiktok_url,
+                      x_url: profile.x_url,
+                      threads_url: profile.threads_url,
+                      linkedin_url: profile.linkedin_url,
+                      youtube_url: profile.youtube_url,
+                    }}
+                    onChange={(field, value) => setProfile({ ...profile, [field]: value || null })}
+                    showCard={false}
+                  />
+                </MarketplaceSection>
 
-                {/* Group Classes */}
-                <CoachGroupClassesManager />
-
-                {/* Social Media Links */}
-                <CoachSocialLinksSection
-                  values={{
-                    facebook_url: profile.facebook_url,
-                    instagram_url: profile.instagram_url,
-                    tiktok_url: profile.tiktok_url,
-                    x_url: profile.x_url,
-                    threads_url: profile.threads_url,
-                    linkedin_url: profile.linkedin_url,
-                    youtube_url: profile.youtube_url,
-                  }}
-                  onChange={(field, value) => setProfile({ ...profile, [field]: value || null })}
-                />
-
-                {/* Save Button */}
-                <div className="flex justify-end">
-                  <Button onClick={handleSaveProfile} disabled={saving}>
-                    {saving ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : (
-                      <Save className="w-4 h-4 mr-2" />
-                    )}
-                    Save Changes
-                  </Button>
+                {/* Sticky Save Button */}
+                <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-background/95 backdrop-blur border-t p-4 z-40">
+                  <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
+                    <p className="text-sm text-muted-foreground hidden sm:block">
+                      Remember to save your changes
+                    </p>
+                    <Button onClick={handleSaveProfile} disabled={saving} size="lg">
+                      {saving ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Save className="w-4 h-4 mr-2" />
+                      )}
+                      Save Changes
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
