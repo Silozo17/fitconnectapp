@@ -26,6 +26,9 @@ import { formatCurrency, type CurrencyCode } from "@/lib/currency";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { UserAvatar } from "@/components/shared/UserAvatar";
+import { CoachGallerySection } from "@/components/coach/CoachGallerySection";
+import { CoachGroupClassesSection } from "@/components/coach/CoachGroupClassesSection";
+import { CoachSocialLinks } from "@/components/coach/CoachSocialLinks";
 
 const CoachDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -225,6 +228,37 @@ const CoachDetail = () => {
                   )}
                 </CardContent>
               </Card>
+
+              {/* Who I Work With Section */}
+              {coach.who_i_work_with && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Who I Work With</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground whitespace-pre-wrap">{coach.who_i_work_with}</p>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Gallery Section */}
+              <CoachGallerySection coachId={id || ""} />
+
+              {/* Group Classes Section */}
+              <CoachGroupClassesSection coachId={id || ""} />
+
+              {/* Social Media Links */}
+              <CoachSocialLinks 
+                socialLinks={{
+                  facebook_url: coach.facebook_url,
+                  instagram_url: coach.instagram_url,
+                  tiktok_url: coach.tiktok_url,
+                  x_url: coach.x_url,
+                  threads_url: coach.threads_url,
+                  linkedin_url: coach.linkedin_url,
+                  youtube_url: coach.youtube_url,
+                }}
+              />
 
               {/* Pricing Section */}
               <CoachPricingSection coachId={id || ""} />

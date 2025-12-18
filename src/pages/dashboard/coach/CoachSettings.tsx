@@ -649,7 +649,7 @@ const CoachSettings = () => {
                 />
 
                 {/* Gallery Images */}
-                <CoachGalleryUpload />
+                <CoachGalleryUpload userId={user?.id || ''} />
 
                 {/* Group Classes */}
                 <CoachGroupClassesManager />
