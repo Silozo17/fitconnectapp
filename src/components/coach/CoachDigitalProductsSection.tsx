@@ -42,9 +42,9 @@ export function CoachDigitalProductsSection({ coachId }: CoachDigitalProductsSec
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {[1, 2].map((i) => (
-              <div key={i} className="h-64 bg-muted animate-pulse rounded-lg" />
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="aspect-[16/9] bg-muted animate-pulse rounded-lg" />
             ))}
           </div>
         </CardContent>
@@ -65,9 +65,9 @@ export function CoachDigitalProductsSection({ coachId }: CoachDigitalProductsSec
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard key={product.id} product={product} compact />
           ))}
         </div>
       </CardContent>

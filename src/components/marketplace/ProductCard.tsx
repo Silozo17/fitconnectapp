@@ -14,7 +14,13 @@ interface ProductWithSlug extends DigitalProduct {
 interface ProductCardProps {
   product: ProductWithSlug;
   viewMode?: "grid" | "list";
+  compact?: boolean;
 }
+
+const getDiscountPercentage = (originalPrice: number, salePrice: number) => {
+  if (originalPrice <= salePrice || originalPrice === 0) return 0;
+  return Math.round(((originalPrice - salePrice) / originalPrice) * 100);
+};
 
 const getProductUrl = (product: ProductWithSlug) => {
   return `/marketplace/${product.slug || product.id}`;
@@ -31,9 +37,11 @@ const getContentIcon = (type: string) => {
   }
 };
 
-export default function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
+export default function ProductCard({ product, viewMode = "grid", compact = false }: ProductCardProps) {
   const navigate = useNavigate();
   const contentType = CONTENT_TYPES.find(t => t.value === product.content_type);
+  const discountPercent = product.compare_at_price ? getDiscountPercentage(product.compare_at_price, product.price) : 0;
+  const hasDiscount = discountPercent > 0;
 
   if (viewMode === "list") {
     return (
@@ -41,13 +49,18 @@ export default function ProductCard({ product, viewMode = "grid" }: ProductCardP
         className="flex flex-row overflow-hidden hover:border-primary/50 transition-all cursor-pointer"
         onClick={() => navigate(getProductUrl(product))}
       >
-        <div className="w-48 h-32 flex-shrink-0">
+        <div className="w-48 h-32 flex-shrink-0 relative">
           {product.cover_image_url ? (
             <img src={product.cover_image_url} alt={product.title} className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
               {getContentIcon(product.content_type)}
             </div>
+          )}
+          {hasDiscount && (
+            <Badge className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-xs">
+              Save {discountPercent}%
+            </Badge>
           )}
         </div>
         <CardContent className="flex-1 p-4 flex flex-col justify-between">
@@ -77,15 +90,72 @@ export default function ProductCard({ product, viewMode = "grid" }: ProductCardP
                 {product.coach_profiles?.display_name || "Unknown Coach"}
               </span>
             </div>
-            <span className="text-lg font-bold text-primary">
-              {product.price === 0 ? "Free" : formatCurrency(product.price, product.currency as CurrencyCode)}
-            </span>
+            <div className="text-right">
+              {hasDiscount && (
+                <span className="text-sm text-muted-foreground line-through mr-2">
+                  {formatCurrency(product.compare_at_price!, product.currency as CurrencyCode)}
+                </span>
+              )}
+              <span className="text-lg font-bold text-primary">
+                {product.price === 0 ? "Free" : formatCurrency(product.price, product.currency as CurrencyCode)}
+              </span>
+            </div>
           </div>
         </CardContent>
       </Card>
     );
   }
 
+  // Compact variant for coach profile
+  if (compact) {
+    return (
+      <Card 
+        className="overflow-hidden hover:border-primary/50 transition-all cursor-pointer group"
+        onClick={() => navigate(getProductUrl(product))}
+      >
+        <div className="aspect-[16/9] relative overflow-hidden">
+          {product.cover_image_url ? (
+            <img src={product.cover_image_url} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+              <Package className="w-8 h-8 text-primary/40" />
+            </div>
+          )}
+          <Badge variant="secondary" className="absolute top-2 left-2 bg-background/80 backdrop-blur-sm text-xs">
+            {getContentIcon(product.content_type)}
+            <span className="ml-1">{contentType?.label}</span>
+          </Badge>
+          {hasDiscount && (
+            <Badge className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-xs">
+              -{discountPercent}%
+            </Badge>
+          )}
+          {product.price === 0 && !hasDiscount && (
+            <Badge className="absolute top-2 right-2 bg-green-500 text-white text-xs">FREE</Badge>
+          )}
+        </div>
+        <CardContent className="p-3">
+          <h3 className="font-semibold text-sm line-clamp-2 min-h-[2.5rem] group-hover:text-primary transition-colors">
+            {product.title}
+          </h3>
+          <div className="flex items-center justify-between mt-2">
+            <div className="text-right flex items-center gap-1">
+              {hasDiscount && (
+                <span className="text-xs text-muted-foreground line-through">
+                  {formatCurrency(product.compare_at_price!, product.currency as CurrencyCode)}
+                </span>
+              )}
+              <span className="text-sm font-bold text-primary">
+                {product.price === 0 ? "Free" : formatCurrency(product.price, product.currency as CurrencyCode)}
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Standard grid view
   return (
     <Card 
       className="overflow-hidden hover:border-primary/50 transition-all cursor-pointer group"
@@ -105,7 +175,12 @@ export default function ProductCard({ product, viewMode = "grid" }: ProductCardP
             <span className="ml-1">{contentType?.label}</span>
           </Badge>
         </div>
-        {product.price === 0 && (
+        {hasDiscount && (
+          <Badge className="absolute top-3 right-3 bg-destructive text-destructive-foreground">
+            Save {discountPercent}%
+          </Badge>
+        )}
+        {product.price === 0 && !hasDiscount && (
           <Badge className="absolute top-3 right-3 bg-green-500 text-white">FREE</Badge>
         )}
         {product.is_featured && (
@@ -145,9 +220,16 @@ export default function ProductCard({ product, viewMode = "grid" }: ProductCardP
             {product.coach_profiles?.display_name || "Unknown"}
           </span>
         </div>
-        <span className="text-lg font-bold text-primary">
-          {product.price === 0 ? "Free" : formatCurrency(product.price, product.currency as CurrencyCode)}
-        </span>
+        <div className="text-right">
+          {hasDiscount && (
+            <span className="text-sm text-muted-foreground line-through mr-2">
+              {formatCurrency(product.compare_at_price!, product.currency as CurrencyCode)}
+            </span>
+          )}
+          <span className="text-lg font-bold text-primary">
+            {product.price === 0 ? "Free" : formatCurrency(product.price, product.currency as CurrencyCode)}
+          </span>
+        </div>
       </CardFooter>
     </Card>
   );
