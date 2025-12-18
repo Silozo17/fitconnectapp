@@ -52,8 +52,22 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const isAdminUser = role === "admin" || role === "manager" || role === "staff";
   const canSwitchRoles = isAdminUser || role === "coach";
   
+  // Reset state when user logs out
+  useEffect(() => {
+    if (!user) {
+      setActiveProfileType("client");
+      setActiveProfileId(null);
+      setViewMode("client");
+      setAvailableProfiles({});
+      setIsLoadingProfiles(false);
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  }, [user]);
+  
   // Update state when role first becomes available (fixes race condition for notification clicks)
   useEffect(() => {
+    if (!user) return; // Guard against logout state
+    
     if (role === "client") {
       setActiveProfileType("client");
       setViewMode("client");
@@ -61,7 +75,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       setActiveProfileType("coach");
       setViewMode("coach");
     }
-  }, [role, isAdminUser]);
+  }, [role, isAdminUser, user]);
 
   // Fetch all profiles for the user
   const fetchProfiles = async () => {
