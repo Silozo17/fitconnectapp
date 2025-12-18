@@ -19,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import ConnectionRequests from "@/components/dashboard/coach/ConnectionRequests";
 import { ProfileCompletionCard } from "@/components/dashboard/coach/ProfileCompletionCard";
+import { PipelineOverviewCard } from "@/components/dashboard/coach/PipelineOverviewCard";
 import { CoachDashboardCustomizer } from "@/components/dashboard/coach/CoachDashboardCustomizer";
 import { AddClientModal } from "@/components/dashboard/clients/AddClientModal";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
@@ -175,6 +176,9 @@ const CoachOverview = () => {
       <div className="mb-6">
         <ConnectionRequests />
       </div>
+
+      {/* Pipeline Overview */}
+      <PipelineOverviewCard />
 
       {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
