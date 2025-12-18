@@ -4929,18 +4929,31 @@ export type Database = {
           currency: string | null
           display_name: string | null
           experience_years: number | null
+          facebook_url: string | null
           gym_affiliation: string | null
           hourly_rate: number | null
           id: string | null
           in_person_available: boolean | null
+          instagram_url: string | null
           is_verified: boolean | null
+          linkedin_url: string | null
           location: string | null
+          location_city: string | null
+          location_country: string | null
+          location_region: string | null
           marketplace_visible: boolean | null
           onboarding_completed: boolean | null
           online_available: boolean | null
+          primary_coach_type: string | null
           profile_image_url: string | null
           selected_avatar_id: string | null
+          threads_url: string | null
+          tiktok_url: string | null
+          username: string | null
           verified_at: string | null
+          who_i_work_with: string | null
+          x_url: string | null
+          youtube_url: string | null
         }
         Insert: {
           bio?: string | null
@@ -4952,18 +4965,31 @@ export type Database = {
           currency?: string | null
           display_name?: string | null
           experience_years?: number | null
+          facebook_url?: string | null
           gym_affiliation?: string | null
           hourly_rate?: number | null
           id?: string | null
           in_person_available?: boolean | null
+          instagram_url?: string | null
           is_verified?: boolean | null
+          linkedin_url?: string | null
           location?: string | null
+          location_city?: string | null
+          location_country?: string | null
+          location_region?: string | null
           marketplace_visible?: boolean | null
           onboarding_completed?: boolean | null
           online_available?: boolean | null
+          primary_coach_type?: string | null
           profile_image_url?: string | null
           selected_avatar_id?: string | null
+          threads_url?: string | null
+          tiktok_url?: string | null
+          username?: string | null
           verified_at?: string | null
+          who_i_work_with?: string | null
+          x_url?: string | null
+          youtube_url?: string | null
         }
         Update: {
           bio?: string | null
@@ -4975,18 +5001,31 @@ export type Database = {
           currency?: string | null
           display_name?: string | null
           experience_years?: number | null
+          facebook_url?: string | null
           gym_affiliation?: string | null
           hourly_rate?: number | null
           id?: string | null
           in_person_available?: boolean | null
+          instagram_url?: string | null
           is_verified?: boolean | null
+          linkedin_url?: string | null
           location?: string | null
+          location_city?: string | null
+          location_country?: string | null
+          location_region?: string | null
           marketplace_visible?: boolean | null
           onboarding_completed?: boolean | null
           online_available?: boolean | null
+          primary_coach_type?: string | null
           profile_image_url?: string | null
           selected_avatar_id?: string | null
+          threads_url?: string | null
+          tiktok_url?: string | null
+          username?: string | null
           verified_at?: string | null
+          who_i_work_with?: string | null
+          x_url?: string | null
+          youtube_url?: string | null
         }
         Relationships: [
           {

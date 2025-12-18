@@ -15,13 +15,16 @@ export const EMAIL_CONFIG = {
   },
   company: {
     name: 'FitConnect',
-    supportEmail: 'support@fitconnect.com',
-    website: 'https://fitconnect.com',
+    supportEmail: 'support@getfitconnect.co.uk',
+    website: 'https://getfitconnect.co.uk',
   },
   social: {
-    twitter: 'https://twitter.com/fitconnect',
-    instagram: 'https://instagram.com/fitconnect',
-    linkedin: 'https://linkedin.com/company/fitconnect',
+    facebook: 'https://facebook.com/FitConnectUK',
+    instagram: 'https://instagram.com/get_fit_connect',
+    x: 'https://x.com/FitConnectUK',
+    youtube: 'https://www.youtube.com/@GetFitConnect',
+    tiktok: 'https://tiktok.com/@getfitconnect',
+    linkedin: 'https://www.linkedin.com/company/getfitconnect',
   },
 };
 
@@ -124,11 +127,17 @@ export function baseEmailTemplate(content: string, previewText?: string): string
     <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1);">
       <!-- Social Links -->
       <div style="text-align: center; margin-bottom: 16px;">
-        <a href="${social.twitter}" style="display: inline-block; margin: 0 8px; color: ${colors.textMuted};">Twitter</a>
+        <a href="${social.instagram}" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted};">Instagram</a>
         <span style="color: ${colors.textDark};">•</span>
-        <a href="${social.instagram}" style="display: inline-block; margin: 0 8px; color: ${colors.textMuted};">Instagram</a>
+        <a href="${social.facebook}" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted};">Facebook</a>
         <span style="color: ${colors.textDark};">•</span>
-        <a href="${social.linkedin}" style="display: inline-block; margin: 0 8px; color: ${colors.textMuted};">LinkedIn</a>
+        <a href="${social.x}" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted};">X</a>
+        <span style="color: ${colors.textDark};">•</span>
+        <a href="${social.youtube}" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted};">YouTube</a>
+        <span style="color: ${colors.textDark};">•</span>
+        <a href="${social.tiktok}" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted};">TikTok</a>
+        <span style="color: ${colors.textDark};">•</span>
+        <a href="${social.linkedin}" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted};">LinkedIn</a>
       </div>
       
       <!-- Company Info -->
