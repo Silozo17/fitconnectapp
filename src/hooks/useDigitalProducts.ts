@@ -10,6 +10,7 @@ export interface DigitalProduct {
   short_description: string | null;
   content_type: 'ebook' | 'video_course' | 'single_video' | 'template' | 'audio' | 'other';
   price: number;
+  compare_at_price: number | null;
   currency: string;
   cover_image_url: string | null;
   preview_url: string | null;
@@ -65,6 +66,7 @@ export interface ContentPurchase {
   amount_paid: number;
   currency: string;
   purchased_at: string;
+  access_expires_at: string | null;
   digital_products?: DigitalProduct;
   digital_bundles?: DigitalBundle;
 }

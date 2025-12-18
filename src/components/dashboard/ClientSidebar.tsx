@@ -91,6 +91,7 @@ const menuGroups: MenuGroup[] = [
       { title: "My Coaches", icon: Users, path: "/dashboard/client/coaches" },
       { title: "Sessions", icon: Calendar, path: "/dashboard/client/sessions" },
       { title: "My Plans", icon: ClipboardList, path: "/dashboard/client/plans", badgeKey: "plans" },
+      { title: "My Library", icon: BookOpen, path: "/dashboard/client/library" },
     ],
   },
   {
@@ -101,7 +102,6 @@ const menuGroups: MenuGroup[] = [
     items: [
       { title: "Progress", icon: TrendingUp, path: "/dashboard/client/progress" },
       { title: "Habits", icon: Target, path: "/dashboard/client/habits" },
-      { title: "My Library", icon: BookOpen, path: "/dashboard/client/library" },
     ],
   },
   {

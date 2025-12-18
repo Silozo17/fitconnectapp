@@ -19,6 +19,7 @@ const formSchema = z.object({
   category: z.string(),
   difficulty_level: z.enum(["beginner", "intermediate", "advanced"]),
   price: z.coerce.number().min(0),
+  compare_at_price: z.coerce.number().min(0).optional().or(z.literal("")),
   currency: z.string(),
   cover_image_url: z.string().url().optional().or(z.literal("")),
   preview_url: z.string().url().optional().or(z.literal("")),
@@ -52,6 +53,7 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
       category: "other",
       difficulty_level: "intermediate",
       price: 0,
+      compare_at_price: "",
       currency: "GBP",
       cover_image_url: "",
       preview_url: "",
@@ -74,6 +76,7 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
     await createProduct.mutateAsync({
       ...values,
       tags,
+      compare_at_price: values.compare_at_price ? Number(values.compare_at_price) : null,
       cover_image_url: values.cover_image_url || null,
       preview_url: values.preview_url || null,
       content_url: values.content_url || null,
@@ -239,7 +242,7 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
             </div>
 
             {/* Pricing */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="price"
@@ -249,7 +252,22 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
                     <FormControl>
                       <Input type="number" min="0" step="0.01" {...field} />
                     </FormControl>
-                    <FormDescription>Set to 0 for free content</FormDescription>
+                    <FormDescription>Set to 0 for free</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="compare_at_price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Compare at Price</FormLabel>
+                    <FormControl>
+                      <Input type="number" min="0" step="0.01" placeholder="Original price" {...field} />
+                    </FormControl>
+                    <FormDescription>For discounts</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -300,10 +318,11 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
                 name="preview_url"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Preview URL</FormLabel>
+                    <FormLabel>Trial/Preview Video URL</FormLabel>
                     <FormControl>
-                      <Input placeholder="Free preview content URL" {...field} />
+                      <Input placeholder="https://youtube.com/watch?v=..." {...field} />
                     </FormControl>
+                    <FormDescription>Free preview so buyers can see what they're getting</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

@@ -2812,6 +2812,7 @@ export type Database = {
         Row: {
           category: string | null
           coach_id: string
+          compare_at_price: number | null
           content_type: Database["public"]["Enums"]["content_type"]
           content_url: string | null
           cover_image_url: string | null
@@ -2839,6 +2840,7 @@ export type Database = {
         Insert: {
           category?: string | null
           coach_id: string
+          compare_at_price?: number | null
           content_type?: Database["public"]["Enums"]["content_type"]
           content_url?: string | null
           cover_image_url?: string | null
@@ -2866,6 +2868,7 @@ export type Database = {
         Update: {
           category?: string | null
           coach_id?: string
+          compare_at_price?: number | null
           content_type?: Database["public"]["Enums"]["content_type"]
           content_url?: string | null
           cover_image_url?: string | null

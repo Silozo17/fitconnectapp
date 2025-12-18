@@ -2,13 +2,14 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { 
   ArrowLeft, BookOpen, Video, FileText, Headphones, Package, Star, 
-  Clock, FileDown, Play, ShoppingCart, Check, User
+  Clock, FileDown, Play, ShoppingCart, Check, User, Eye
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import PageLayout from "@/components/layout/PageLayout";
 import { useDigitalProduct, useProductReviews, useHasPurchased, CONTENT_TYPES, CONTENT_CATEGORIES } from "@/hooks/useDigitalProducts";
 import { formatCurrency } from "@/lib/currency";
@@ -35,6 +36,7 @@ export default function MarketplaceProduct() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   const { data: product, isLoading } = useDigitalProduct(productId || "");
   const { data: reviews } = useProductReviews(productId || "");
@@ -298,11 +300,35 @@ export default function MarketplaceProduct() {
                         FREE
                       </Badge>
                     ) : (
-                      <p className="text-4xl font-bold text-primary">
-                        {formatCurrency(product.price, (product.currency || "GBP") as "GBP" | "USD" | "EUR")}
-                      </p>
+                      <div className="space-y-1">
+                        {product.compare_at_price && product.compare_at_price > product.price && (
+                          <p className="text-lg text-muted-foreground line-through">
+                            {formatCurrency(product.compare_at_price, (product.currency || "GBP") as "GBP" | "USD" | "EUR")}
+                          </p>
+                        )}
+                        <p className="text-4xl font-bold text-primary">
+                          {formatCurrency(product.price, (product.currency || "GBP") as "GBP" | "USD" | "EUR")}
+                        </p>
+                        {product.compare_at_price && product.compare_at_price > product.price && (
+                          <Badge variant="destructive" className="mt-2">
+                            Save {Math.round(((product.compare_at_price - product.price) / product.compare_at_price) * 100)}%
+                          </Badge>
+                        )}
+                      </div>
                     )}
                   </div>
+
+                  {/* Preview Button */}
+                  {product.preview_url && (
+                    <Button 
+                      variant="outline" 
+                      className="w-full" 
+                      onClick={() => setShowPreview(true)}
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      Watch Free Preview
+                    </Button>
+                  )}
 
                   {hasPurchased ? (
                     <div className="space-y-3">
@@ -372,6 +398,40 @@ export default function MarketplaceProduct() {
             </div>
           </div>
         </div>
+
+        {/* Preview Dialog */}
+        <Dialog open={showPreview} onOpenChange={setShowPreview}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>Preview: {product.title}</DialogTitle>
+            </DialogHeader>
+            <div className="aspect-video">
+              {product.preview_url && (
+                product.preview_url.includes("youtube") || product.preview_url.includes("youtu.be") ? (
+                  <iframe
+                    src={product.preview_url.replace("watch?v=", "embed/").replace("youtu.be/", "youtube.com/embed/")}
+                    className="w-full h-full rounded-lg"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : product.preview_url.includes("vimeo") ? (
+                  <iframe
+                    src={product.preview_url.replace("vimeo.com/", "player.vimeo.com/video/")}
+                    className="w-full h-full rounded-lg"
+                    allow="autoplay; fullscreen; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : (
+                  <video
+                    src={product.preview_url}
+                    controls
+                    className="w-full h-full rounded-lg"
+                  />
+                )
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </PageLayout>
   );

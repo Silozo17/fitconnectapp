@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Package, MoreVertical, Pencil, Trash2, Eye, EyeOff, Star } from "lucide-react";
+import { Plus, Package, MoreVertical, Pencil, Trash2, Eye, EyeOff, Star, DollarSign } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,12 +9,14 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import CreateProductModal from "@/components/marketplace/CreateProductModal";
 import CreateBundleModal from "@/components/marketplace/CreateBundleModal";
+import BulkEditPricesModal from "@/components/marketplace/BulkEditPricesModal";
 import { useCoachProducts, useCoachBundles, useDeleteProduct, useDeleteBundle, useUpdateProduct, CONTENT_TYPES } from "@/hooks/useDigitalProducts";
 import { formatCurrency } from "@/lib/currency";
 
 export default function CoachProducts() {
   const [showCreateProduct, setShowCreateProduct] = useState(false);
   const [showCreateBundle, setShowCreateBundle] = useState(false);
+  const [showBulkEdit, setShowBulkEdit] = useState(false);
   const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
   const [deleteBundleId, setDeleteBundleId] = useState<string | null>(null);
 
@@ -51,7 +53,13 @@ export default function CoachProducts() {
               Create and manage your digital content
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            {products && products.length > 0 && (
+              <Button variant="outline" onClick={() => setShowBulkEdit(true)}>
+                <DollarSign className="h-4 w-4 mr-2" />
+                Bulk Edit Prices
+              </Button>
+            )}
             <Button variant="outline" onClick={() => setShowCreateBundle(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Create Bundle
@@ -303,6 +311,12 @@ export default function CoachProducts() {
       <CreateBundleModal 
         open={showCreateBundle} 
         onOpenChange={setShowCreateBundle}
+        products={products || []}
+      />
+
+      <BulkEditPricesModal
+        open={showBulkEdit}
+        onOpenChange={setShowBulkEdit}
         products={products || []}
       />
 
