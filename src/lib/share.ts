@@ -64,7 +64,7 @@ export function getShareUrl(platform: Exclude<SharePlatform, 'native' | 'copy'>,
 
 /**
  * Open a share window for a specific platform
- * Facebook and LinkedIn block popups with window features, so open in new tab
+ * Facebook and LinkedIn block popups with window features, so use anchor click method
  */
 function openShareWindow(url: string, platform: string): void {
   // Email uses mailto: which doesn't need a window
@@ -73,9 +73,17 @@ function openShareWindow(url: string, platform: string): void {
     return;
   }
   
-  // Facebook and LinkedIn block sized popups - open in new tab instead
+  // For Facebook, LinkedIn, WhatsApp - use anchor click method
+  // This bypasses COOP/COEP blocking that affects window.open
   if (platform === 'facebook' || platform === 'linkedin' || platform === 'whatsapp') {
-    window.open(url, '_blank', 'noopener,noreferrer');
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.target = '_blank';
+    anchor.rel = 'noopener noreferrer';
+    anchor.style.display = 'none';
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
     return;
   }
   
