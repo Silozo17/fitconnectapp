@@ -121,6 +121,15 @@ export const RARITY_COLORS: Record<string, { bg: string; border: string; text: s
   legendary: { bg: 'bg-yellow-500/20', border: 'border-yellow-500/50', text: 'text-yellow-500' },
 };
 
+// Rarity sort order: common (lowest) to legendary (highest)
+export const RARITY_ORDER: Record<string, number> = {
+  common: 1,
+  uncommon: 2,
+  rare: 3,
+  epic: 4,
+  legendary: 5,
+};
+
 // Helper hook to get client profile
 function useClientProfile() {
   const { user } = useAuth();
@@ -205,6 +214,23 @@ export function useBadges() {
         .select('*')
         .eq('is_active', true)
         .order('category', { ascending: true });
+      
+      if (error) throw error;
+      return data as Badge[];
+    },
+  });
+}
+
+// Client-specific badges hook - excludes coach-only badges
+export function useClientBadgesAvailable() {
+  return useQuery({
+    queryKey: ['client-badges-available'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('badges')
+        .select('*')
+        .eq('is_active', true)
+        .not('category', 'in', '("coach_profile","coach_milestone")');
       
       if (error) throw error;
       return data as Badge[];
