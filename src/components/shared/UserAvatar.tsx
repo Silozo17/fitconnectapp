@@ -15,12 +15,12 @@ interface UserAvatarProps {
   size?: 'sm' | 'md' | 'lg' | 'xl'; // Predefined sizes for squircle
 }
 
-// Predefined sizes for squircle variant (width x height)
+// Predefined sizes for squircle variant (landscape ratio ~1.25:1)
 const SQUIRCLE_SIZES = {
-  sm: 'w-16 h-20',      // Small - for lists
-  md: 'w-24 h-28',      // Medium - for cards  
-  lg: 'w-32 h-40',      // Large - for profiles
-  xl: 'w-40 h-52',      // Extra large - for hero sections
+  sm: 'w-20 h-16',      // Small - for lists
+  md: 'w-32 h-26',      // Medium - for cards  
+  lg: 'w-40 h-32',      // Large - for profiles
+  xl: 'w-48 h-40',      // Extra large - for hero sections
 };
 
 export const UserAvatar = ({ 
@@ -102,23 +102,24 @@ export const UserAvatar = ({
   }
 
   // NFT-style squircle variant with overflow effect
+  // Avatar shows upper body only: head extends above, waist cut off at bottom
   const sizeClass = SQUIRCLE_SIZES[size];
   
   return (
     <div 
       className={cn(
-        "relative shrink-0 rounded-3xl",
+        "relative shrink-0 rounded-2xl",
         rarityConfig.gradient,
         rarityConfig.glow,
         sizeClass,
         className
       )}
       style={{ 
-        // Allow avatar to overflow at top while containing sides/bottom
-        clipPath: hasCharacterAvatar ? 'inset(-30% -5% 0% -5%)' : undefined 
+        // Allow avatar to overflow at top only, clip sides and bottom cleanly
+        clipPath: hasCharacterAvatar ? 'inset(-50% 0 0 0)' : undefined 
       }}
     >
-      {/* Avatar image - positioned to extend ABOVE container */}
+      {/* Avatar image - positioned so upper body shows, head extends above */}
       {imageUrl ? (
         <img 
           src={imageUrl} 
@@ -126,7 +127,7 @@ export const UserAvatar = ({
           className={cn(
             "absolute w-full object-contain",
             hasCharacterAvatar 
-              ? "h-[140%] bottom-0 left-1/2 -translate-x-1/2 object-bottom" 
+              ? "h-[200%] left-1/2 -translate-x-1/2 -bottom-[50%] object-top" 
               : "inset-0 h-full object-cover"
           )}
           onError={(e) => {
