@@ -110,6 +110,7 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}) =>
 
       return coaches;
     },
+    staleTime: 1000 * 60 * 2, // 2 minutes - marketplace data refreshes frequently
   });
 };
 
@@ -127,5 +128,6 @@ export const useCoachById = (coachId: string) => {
       return data as MarketplaceCoach | null;
     },
     enabled: !!coachId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };

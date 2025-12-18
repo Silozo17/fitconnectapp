@@ -1,50 +1,18 @@
 import { useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 import ConversationList from "@/components/messaging/ConversationList";
 import ChatWindow from "@/components/messaging/ChatWindow";
 import NewConversationModal from "@/components/messaging/NewConversationModal";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { MessageSquare, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useParticipantName } from "@/hooks/useParticipantName";
 
 const CoachMessages = () => {
   const { id: participantId } = useParams();
-  const [participantName, setParticipantName] = useState<string>("");
+  const { data: participantName = "" } = useParticipantName(participantId);
   const [showNewConversation, setShowNewConversation] = useState(false);
   const [showSidePanel, setShowSidePanel] = useState(true);
-
-  // Fetch participant name
-  useEffect(() => {
-    const fetchParticipantName = async () => {
-      if (!participantId) return;
-
-      // Try client profile first
-      const { data: clientData } = await supabase
-        .from("client_profiles")
-        .select("first_name, last_name")
-        .eq("id", participantId)
-        .single();
-
-      if (clientData) {
-        setParticipantName(`${clientData.first_name || ""} ${clientData.last_name || ""}`.trim() || "Client");
-        return;
-      }
-
-      // Try coach profile
-      const { data: coachData } = await supabase
-        .from("coach_profiles")
-        .select("display_name")
-        .eq("id", participantId)
-        .single();
-
-      if (coachData?.display_name) {
-        setParticipantName(coachData.display_name);
-      }
-    };
-
-    fetchParticipantName();
-  }, [participantId]);
 
   return (
     <DashboardLayout title="Messages" description="Chat with your clients.">

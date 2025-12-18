@@ -88,6 +88,7 @@ export function useCoachWidgets() {
       return data as CoachDashboardWidget[];
     },
     enabled: !!coachProfile?.id,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
 

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+import { useCoachProfileId } from "./useCoachProfileId";
 import { toast } from "sonner";
 
 export interface CoachBoost {
@@ -43,46 +43,34 @@ export interface BoostSettings {
 }
 
 export const useCoachBoostStatus = () => {
-  const { user } = useAuth();
+  const { data: coachProfileId } = useCoachProfileId();
 
   return useQuery({
-    queryKey: ["coach-boost-status", user?.id],
+    queryKey: ["coach-boost-status", coachProfileId],
     queryFn: async () => {
-      // First get coach profile
-      const { data: coachProfile } = await supabase
-        .from("coach_profiles")
-        .select("id")
-        .eq("user_id", user!.id)
-        .single();
-
-      if (!coachProfile) return null;
+      if (!coachProfileId) return null;
 
       const { data, error } = await supabase
         .from("coach_boosts")
         .select("*")
-        .eq("coach_id", coachProfile.id)
+        .eq("coach_id", coachProfileId)
         .maybeSingle();
 
       if (error) throw error;
       return data as CoachBoost | null;
     },
-    enabled: !!user,
+    enabled: !!coachProfileId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
 
 export const useBoostAttributions = (limit = 10) => {
-  const { user } = useAuth();
+  const { data: coachProfileId } = useCoachProfileId();
 
   return useQuery({
-    queryKey: ["boost-attributions", user?.id, limit],
+    queryKey: ["boost-attributions", coachProfileId, limit],
     queryFn: async () => {
-      const { data: coachProfile } = await supabase
-        .from("coach_profiles")
-        .select("id")
-        .eq("user_id", user!.id)
-        .single();
-
-      if (!coachProfile) return [];
+      if (!coachProfileId) return [];
 
       const { data, error } = await supabase
         .from("boost_client_attributions")
@@ -94,14 +82,15 @@ export const useBoostAttributions = (limit = 10) => {
             avatar_url
           )
         `)
-        .eq("coach_id", coachProfile.id)
+        .eq("coach_id", coachProfileId)
         .order("attributed_at", { ascending: false })
         .limit(limit);
 
       if (error) throw error;
       return (data || []) as BoostAttribution[];
     },
-    enabled: !!user,
+    enabled: !!coachProfileId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
 
@@ -118,28 +107,23 @@ export const useBoostSettings = () => {
       if (error) throw error;
       return data as BoostSettings;
     },
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
 
 export const useToggleBoost = () => {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { data: coachProfileId } = useCoachProfileId();
 
   return useMutation({
     mutationFn: async (enable: boolean) => {
-      const { data: coachProfile } = await supabase
-        .from("coach_profiles")
-        .select("id")
-        .eq("user_id", user!.id)
-        .single();
-
-      if (!coachProfile) throw new Error("Coach profile not found");
+      if (!coachProfileId) throw new Error("Coach profile not found");
 
       // Check if boost record exists
       const { data: existingBoost } = await supabase
         .from("coach_boosts")
         .select("id")
-        .eq("coach_id", coachProfile.id)
+        .eq("coach_id", coachProfileId)
         .maybeSingle();
 
       if (existingBoost) {
@@ -151,7 +135,7 @@ export const useToggleBoost = () => {
             activated_at: enable ? new Date().toISOString() : null,
             deactivated_at: enable ? null : new Date().toISOString(),
           })
-          .eq("coach_id", coachProfile.id);
+          .eq("coach_id", coachProfileId);
 
         if (error) throw error;
       } else {
@@ -159,7 +143,7 @@ export const useToggleBoost = () => {
         const { error } = await supabase
           .from("coach_boosts")
           .insert({
-            coach_id: coachProfile.id,
+            coach_id: coachProfileId,
             is_active: enable,
             activated_at: enable ? new Date().toISOString() : null,
           });
