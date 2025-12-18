@@ -310,6 +310,14 @@ export const useCreateBookingRequest = () => {
         .single();
 
       if (error) throw error;
+      
+      // Send booking confirmation email
+      if (data?.id) {
+        supabase.functions.invoke("send-booking-confirmation", {
+          body: { bookingRequestId: data.id },
+        }).catch((err) => console.error("Failed to send booking confirmation email:", err));
+      }
+      
       return data;
     },
     onSuccess: () => {

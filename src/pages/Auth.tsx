@@ -173,6 +173,15 @@ const Auth = () => {
         }
       } else {
         toast.success("Account created successfully!");
+        
+        // Send welcome email (fire and forget)
+        supabase.functions.invoke("send-welcome-email", {
+          body: {
+            email: pendingSignupData.email,
+            firstName: "",
+            role: selectedRole,
+          },
+        }).catch((err) => console.error("Failed to send welcome email:", err));
       }
     } catch (error) {
       toast.error("An unexpected error occurred");

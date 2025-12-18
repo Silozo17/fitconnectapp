@@ -426,6 +426,13 @@ export const useMessages = (participantId?: string) => {
         prev.map((m) => m.id === optimisticMessage.id ? data : m)
       );
       
+      // Send message notification email (fire and forget)
+      if (data?.id) {
+        supabase.functions.invoke("send-message-notification", {
+          body: { messageId: data.id },
+        }).catch((err) => console.error("Failed to send message notification:", err));
+      }
+      
       return true;
     } catch (err) {
       console.error("[useMessages] Unexpected error sending message:", err);
