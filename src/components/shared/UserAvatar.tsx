@@ -43,7 +43,7 @@ const SQUIRCLE_CLIP_PATHS = {
   sm: 'inset(-55% 0 0 0)',
   md: 'inset(-50% 0 0 0)',
   lg: 'inset(-45% 0 0 0)',
-  xl: 'inset(-20% 0 0 0)',  // Less overflow, avatar appears lower  // Less clipping for hero size
+  xl: 'inset(-50% 0 0 0)',  // More room for head after avatar is pushed down
 };
 
 // Always-vibrant gradient for squircle variant (regardless of rarity)
