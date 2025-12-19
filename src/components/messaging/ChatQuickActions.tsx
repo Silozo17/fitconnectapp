@@ -122,7 +122,7 @@ const ChatQuickActions = ({ coachId, clientId, onSendMessage }: ChatQuickActions
 
   // Desktop quick actions bar
   const DesktopQuickActions = () => (
-    <div className="hidden sm:flex items-center gap-2 px-4 py-2 border-t border-border bg-card/50 overflow-x-auto">
+    <div className="hidden sm:flex items-center gap-2 px-4 py-2 border-t border-border bg-card relative z-10 overflow-x-auto">
       <span className="text-xs text-muted-foreground mr-2 flex-shrink-0">Quick:</span>
       
       {/* Templates Popover */}
@@ -237,7 +237,7 @@ const ChatQuickActions = ({ coachId, clientId, onSendMessage }: ChatQuickActions
 
   // Mobile quick actions button + drawer
   const MobileQuickActions = () => (
-    <div className="sm:hidden px-4 py-2 border-t border-border bg-card/50">
+    <div className="sm:hidden px-4 py-2 border-t border-border bg-card relative z-10">
       <Button 
         variant="outline" 
         size="sm" 
