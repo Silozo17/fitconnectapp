@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useMemo, useCallback, ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -220,7 +220,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [location.pathname, availableProfiles, isLoadingProfiles, isAdminUser]);
 
-  const setActiveProfile = (type: ViewMode, profileId: string | null) => {
+  const setActiveProfile = useCallback((type: ViewMode, profileId: string | null) => {
     setActiveProfileType(type);
     setActiveProfileId(profileId);
     setViewMode(type);
@@ -230,25 +230,25 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       STORAGE_KEY,
       JSON.stringify({ type, profileId })
     );
-  };
+  }, []);
 
-  const refreshProfiles = async () => {
+  const refreshProfiles = useCallback(async () => {
     await fetchProfiles();
-  };
+  }, []);
+
+  const value = useMemo(() => ({
+    viewMode,
+    setViewMode,
+    availableProfiles,
+    activeProfileType,
+    activeProfileId,
+    setActiveProfile,
+    isLoadingProfiles,
+    refreshProfiles,
+  }), [viewMode, availableProfiles, activeProfileType, activeProfileId, setActiveProfile, isLoadingProfiles, refreshProfiles]);
 
   return (
-    <AdminContext.Provider
-      value={{
-        viewMode,
-        setViewMode,
-        availableProfiles,
-        activeProfileType,
-        activeProfileId,
-        setActiveProfile,
-        isLoadingProfiles,
-        refreshProfiles,
-      }}
-    >
+    <AdminContext.Provider value={value}>
       {children}
     </AdminContext.Provider>
   );

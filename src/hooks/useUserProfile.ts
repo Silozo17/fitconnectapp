@@ -42,6 +42,7 @@ export const useUserProfile = () => {
       return data as UserProfile | null;
     },
     enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const updateProfileMutation = useMutation({
@@ -184,6 +185,7 @@ export const useUserProfileById = (userId: string | undefined) => {
       return data as UserProfile | null;
     },
     enabled: !!userId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
 

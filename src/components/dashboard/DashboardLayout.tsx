@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { useCoachOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { Loader2 } from "lucide-react";
 import CoachSidebar from "./CoachSidebar";
 import DashboardHeader from "./DashboardHeader";
@@ -16,34 +16,17 @@ interface DashboardLayoutProps {
 const DashboardLayout = ({ children, title = "Coach Dashboard", description }: DashboardLayoutProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [subscriptionTier, setSubscriptionTier] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: onboardingStatus, isLoading } = useCoachOnboardingStatus();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (!user) return;
+    if (!isLoading && onboardingStatus && !onboardingStatus.isOnboarded) {
+      navigate("/onboarding/coach");
+    }
+  }, [onboardingStatus, isLoading, navigate]);
 
-      const { data } = await supabase
-        .from("coach_profiles")
-        .select("subscription_tier, onboarding_completed")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (data && !data.onboarding_completed) {
-        navigate("/onboarding/coach");
-        return;
-      }
-
-      setSubscriptionTier(data?.subscription_tier || null);
-      setLoading(false);
-    };
-
-    fetchProfile();
-  }, [user, navigate]);
-
-  if (loading) {
+  if (isLoading || !onboardingStatus?.isOnboarded) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -68,7 +51,7 @@ const DashboardLayout = ({ children, title = "Coach Dashboard", description }: D
 
         <div className={`transition-all duration-300 h-full flex flex-col overflow-hidden ${sidebarCollapsed ? "xl:ml-16" : "xl:ml-64"}`}>
           <DashboardHeader 
-            subscriptionTier={subscriptionTier} 
+            subscriptionTier={onboardingStatus.subscriptionTier} 
             onMenuToggle={() => setMobileOpen(true)} 
           />
           <main className="flex-1 p-4 lg:p-6 pb-24 overflow-y-auto">{children}</main>

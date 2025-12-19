@@ -1,5 +1,6 @@
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -106,7 +107,6 @@ const ClientSettings = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [profile, setProfile] = useState<ClientProfile | null>(null);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [selectedTab, setSelectedTab] = useState(() => {
     const tabParam = searchParams.get('tab');
@@ -129,9 +129,11 @@ const ClientSettings = () => {
     return JSON.stringify(profile) !== JSON.stringify(initialProfileRef.current);
   };
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (!user) return;
+  // Use React Query for cached data fetching
+  const { data: fetchedProfile, isLoading: loading } = useQuery({
+    queryKey: ["client-settings-profile", user?.id],
+    queryFn: async () => {
+      if (!user) return null;
 
       const { data } = await supabase
         .from("client_profiles")
@@ -139,13 +141,19 @@ const ClientSettings = () => {
         .eq("user_id", user.id)
         .maybeSingle();
 
-      setProfile(data);
-      initialProfileRef.current = data ? JSON.parse(JSON.stringify(data)) : null;
-      setLoading(false);
-    };
+      return data;
+    },
+    enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
-    fetchProfile();
-  }, [user]);
+  // Sync fetched profile to local state for editing
+  useEffect(() => {
+    if (fetchedProfile && !profile) {
+      setProfile(fetchedProfile);
+      initialProfileRef.current = fetchedProfile ? JSON.parse(JSON.stringify(fetchedProfile)) : null;
+    }
+  }, [fetchedProfile]);
 
   const handleSave = async () => {
     if (!user || !profile) return;

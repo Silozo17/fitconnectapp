@@ -163,7 +163,16 @@ const DocsAdminBoosts = lazy(() => import("./pages/docs/admin/AdminBoostsDocs"))
 const DocsAdminIntegrations = lazy(() => import("./pages/docs/admin/AdminIntegrationsDocs"));
 const DocsAdminAudit = lazy(() => import("./pages/docs/admin/AdminAuditDocs"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes - data stays fresh longer
+      gcTime: 30 * 60 * 1000, // 30 minutes - keep unused data in cache
+      refetchOnWindowFocus: false, // Prevent refetches when switching tabs
+      retry: 1, // Single retry for failed requests
+    },
+  },
+});
 
 const App = () => (
   <HelmetProvider>
