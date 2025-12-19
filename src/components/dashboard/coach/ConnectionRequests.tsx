@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, memo, useMemo, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, X, Loader2, UserPlus, MessageSquare, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,7 @@ interface ConnectionRequest {
   } | null;
 }
 
-const ConnectionRequests = () => {
+const ConnectionRequests = memo(() => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { clientLimit, activeClientCount, canAddClient, isApproachingLimit, currentTier } = useFeatureAccess();
@@ -193,20 +193,20 @@ const ConnectionRequests = () => {
     },
   });
 
-  const getClientInitials = (profile: ConnectionRequest["client_profile"]) => {
+  const getClientInitials = useCallback((profile: ConnectionRequest["client_profile"]) => {
     if (!profile) return "?";
     const first = profile.first_name?.[0] || "";
     const last = profile.last_name?.[0] || "";
     return (first + last).toUpperCase() || "?";
-  };
+  }, []);
 
-  const getClientName = (profile: ConnectionRequest["client_profile"]) => {
+  const getClientName = useCallback((profile: ConnectionRequest["client_profile"]) => {
     if (!profile) return "Unknown Client";
     const name = [profile.first_name, profile.last_name].filter(Boolean).join(" ");
     return name || "Unknown Client";
-  };
+  }, []);
 
-  const atLimit = !canAddClient();
+  const atLimit = useMemo(() => !canAddClient(), [canAddClient]);
 
   if (isLoading) {
     return (
@@ -372,6 +372,8 @@ const ConnectionRequests = () => {
       </CardContent>
     </Card>
   );
-};
+});
+
+ConnectionRequests.displayName = "ConnectionRequests";
 
 export default ConnectionRequests;

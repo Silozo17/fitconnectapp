@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo, useCallback, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
@@ -137,7 +137,7 @@ interface CoachSidebarProps {
   setMobileOpen: (open: boolean) => void;
 }
 
-const CoachSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: CoachSidebarProps) => {
+const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: CoachSidebarProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
@@ -148,7 +148,7 @@ const CoachSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: CoachS
   const { hasFeature } = useFeatureAccess();
 
   // Initialize open groups based on current path
-  const getInitialOpenGroups = () => {
+  const getInitialOpenGroups = useCallback(() => {
     const openGroups: Record<string, boolean> = {};
     menuGroups.forEach((group) => {
       if (group.collapsible) {
@@ -157,7 +157,7 @@ const CoachSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: CoachS
       }
     });
     return openGroups;
-  };
+  }, [location.pathname]);
 
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(getInitialOpenGroups);
 
@@ -178,7 +178,7 @@ const CoachSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: CoachS
     setMobileOpen(false);
   }, [location.pathname, setMobileOpen]);
 
-  const getBadgeCount = (badgeKey?: BadgeKey): number => {
+  const getBadgeCount = useCallback((badgeKey?: BadgeKey): number => {
     switch (badgeKey) {
       case "messages":
         return unreadCount;
@@ -191,19 +191,19 @@ const CoachSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: CoachS
       default:
         return 0;
     }
-  };
+  }, [unreadCount, newLeads, pendingBookings, pendingConnections]);
 
-  const getGroupBadgeCount = (group: MenuGroup): number => {
+  const getGroupBadgeCount = useCallback((group: MenuGroup): number => {
     return group.items.reduce((sum, item) => sum + getBadgeCount(item.badgeKey), 0);
-  };
+  }, [getBadgeCount]);
 
-  const isGroupActive = (group: MenuGroup): boolean => {
+  const isGroupActive = useCallback((group: MenuGroup): boolean => {
     return group.items.some((item) => location.pathname === item.path);
-  };
+  }, [location.pathname]);
 
-  const toggleGroup = (groupId: string) => {
+  const toggleGroup = useCallback((groupId: string) => {
     setOpenGroups((prev) => ({ ...prev, [groupId]: !prev[groupId] }));
-  };
+  }, []);
 
   const renderMenuItem = (item: MenuItem, indented = false, isCollapsed = false) => {
     const isActive = location.pathname === item.path;
@@ -480,6 +480,8 @@ const CoachSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: CoachS
       </Sheet>
     </TooltipProvider>
   );
-};
+});
+
+CoachSidebar.displayName = "CoachSidebar";
 
 export default CoachSidebar;

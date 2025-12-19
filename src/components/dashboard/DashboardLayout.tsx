@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,12 +13,20 @@ interface DashboardLayoutProps {
   description?: string;
 }
 
-const DashboardLayout = ({ children, title = "Coach Dashboard", description }: DashboardLayoutProps) => {
+const DashboardLayout = memo(({ children, title = "Coach Dashboard", description }: DashboardLayoutProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { data: onboardingStatus, isLoading } = useCoachOnboardingStatus();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleToggleSidebar = useCallback(() => {
+    setSidebarCollapsed(prev => !prev);
+  }, []);
+
+  const handleOpenMobile = useCallback(() => {
+    setMobileOpen(true);
+  }, []);
 
   useEffect(() => {
     if (!isLoading && onboardingStatus && !onboardingStatus.isOnboarded) {
@@ -44,7 +52,7 @@ const DashboardLayout = ({ children, title = "Coach Dashboard", description }: D
       <div className="h-dvh bg-background overflow-hidden">
         <CoachSidebar
           collapsed={sidebarCollapsed}
-          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+          onToggle={handleToggleSidebar}
           mobileOpen={mobileOpen}
           setMobileOpen={setMobileOpen}
         />
@@ -52,13 +60,15 @@ const DashboardLayout = ({ children, title = "Coach Dashboard", description }: D
         <div className={`transition-all duration-300 h-full flex flex-col overflow-hidden ${sidebarCollapsed ? "xl:ml-16" : "xl:ml-64"}`}>
           <DashboardHeader 
             subscriptionTier={onboardingStatus.subscriptionTier} 
-            onMenuToggle={() => setMobileOpen(true)} 
+            onMenuToggle={handleOpenMobile} 
           />
           <main className="flex-1 p-4 lg:p-6 pb-24 overflow-y-auto">{children}</main>
         </div>
       </div>
     </>
   );
-};
+});
+
+DashboardLayout.displayName = "DashboardLayout";
 
 export default DashboardLayout;

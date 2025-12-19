@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { cn } from "@/lib/utils";
 
 interface SidebarBadgeProps {
@@ -12,7 +13,7 @@ const variantClasses = {
   urgent: "bg-red-500",
 };
 
-export const SidebarBadge = ({ count, collapsed, variant = "default" }: SidebarBadgeProps) => {
+export const SidebarBadge = memo(({ count, collapsed, variant = "default" }: SidebarBadgeProps) => {
   if (count === 0) return null;
 
   const displayCount = count > 99 ? "99+" : count;
@@ -41,4 +42,6 @@ export const SidebarBadge = ({ count, collapsed, variant = "default" }: SidebarB
       {displayCount}
     </span>
   );
-};
+});
+
+SidebarBadge.displayName = "SidebarBadge";
