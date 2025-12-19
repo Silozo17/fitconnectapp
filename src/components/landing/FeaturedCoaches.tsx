@@ -6,10 +6,10 @@ import { useCoachMarketplace } from "@/hooks/useCoachMarketplace";
 import { useUserLocation } from "@/hooks/useUserLocation";
 
 const FeaturedCoaches = () => {
-  const { city, region, country, isLoading: locationLoading } = useUserLocation();
+  const { location, isLoading: locationLoading } = useUserLocation();
   
   // Build location search string
-  const locationSearch = city || region || country || "";
+  const locationSearch = location?.city || location?.region || location?.country || "";
   
   const { data: coaches, isLoading: coachesLoading } = useCoachMarketplace({
     location: locationSearch,
@@ -25,7 +25,7 @@ const FeaturedCoaches = () => {
 
   const displayCoaches = coaches?.length ? coaches : fallbackCoaches;
   const isLoading = locationLoading || coachesLoading;
-  const locationLabel = city || region || country || "Your Area";
+  const locationLabel = location?.city || location?.region || location?.country || "Your Area";
 
   // Mock data fallback when no database coaches exist
   const mockCoaches = [

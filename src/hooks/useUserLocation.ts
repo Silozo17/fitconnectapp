@@ -1,15 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { CONSENT_STORAGE_KEY, CookieConsent } from "@/types/consent";
-
-interface LocationData {
-  city: string | null;
-  region: string | null;
-  country: string | null;
-  county: string | null;
-  isLoading: boolean;
-  error: string | null;
-}
+import { LocationData } from "@/types/ranking";
 
 const LOCATION_STORAGE_KEY = "fitconnect_user_location";
 const LOCATION_EXPIRY_DAYS = 7;
@@ -20,6 +12,13 @@ interface StoredLocation {
   country: string | null;
   county: string | null;
   timestamp: number;
+}
+
+interface UseUserLocationReturn {
+  location: LocationData | null;
+  isLoading: boolean;
+  error: string | null;
+  clearLocation: () => void;
 }
 
 // Helper to check if location consent is granted
@@ -34,29 +33,19 @@ const hasLocationConsent = (): boolean => {
   }
 };
 
-export const useUserLocation = () => {
-  const [location, setLocation] = useState<LocationData>({
-    city: null,
-    region: null,
-    country: null,
-    county: null,
-    isLoading: true,
-    error: null,
-  });
+export const useUserLocation = (): UseUserLocationReturn => {
+  const [location, setLocation] = useState<LocationData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const detectLocation = async () => {
       // Check if user has given consent for location cookies
       if (!hasLocationConsent()) {
         // No consent - return without location data
-        setLocation({
-          city: null,
-          region: null,
-          country: null,
-          county: null,
-          isLoading: false,
-          error: null,
-        });
+        setLocation(null);
+        setIsLoading(false);
+        setError(null);
         return;
       }
 
@@ -72,9 +61,9 @@ export const useUserLocation = () => {
               region: parsed.region,
               country: parsed.country,
               county: parsed.county,
-              isLoading: false,
-              error: null,
             });
+            setIsLoading(false);
+            setError(null);
             return;
           }
         } catch {
@@ -84,11 +73,11 @@ export const useUserLocation = () => {
 
       // Use edge function for geolocation
       try {
-        const { data, error } = await supabase.functions.invoke('get-user-location');
+        const { data, error: fetchError } = await supabase.functions.invoke('get-user-location');
         
-        if (error) throw error;
+        if (fetchError) throw fetchError;
         
-        const locationData = {
+        const locationData: LocationData = {
           city: data?.city || null,
           region: data?.region || null,
           country: data?.country || null,
@@ -97,27 +86,28 @@ export const useUserLocation = () => {
 
         // Store in localStorage
         const toStore: StoredLocation = {
-          ...locationData,
+          city: locationData.city,
+          region: locationData.region,
+          country: locationData.country,
+          county: locationData.county ?? null,
           timestamp: Date.now(),
         };
         localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify(toStore));
 
-        setLocation({
-          ...locationData,
-          isLoading: false,
-          error: null,
-        });
-      } catch (error) {
-        console.error('Location detection failed:', error);
+        setLocation(locationData);
+        setIsLoading(false);
+        setError(null);
+      } catch (err) {
+        console.error('Location detection failed:', err);
         // Default to UK if detection fails
         setLocation({
           city: null,
           region: null,
           country: "United Kingdom",
           county: null,
-          isLoading: false,
-          error: null,
         });
+        setIsLoading(false);
+        setError(null);
       }
     };
 
@@ -126,15 +116,10 @@ export const useUserLocation = () => {
 
   const clearLocation = () => {
     localStorage.removeItem(LOCATION_STORAGE_KEY);
-    setLocation({
-      city: null,
-      region: null,
-      country: null,
-      county: null,
-      isLoading: false,
-      error: null,
-    });
+    setLocation(null);
+    setIsLoading(false);
+    setError(null);
   };
 
-  return { ...location, clearLocation };
+  return { location, isLoading, error, clearLocation };
 };
