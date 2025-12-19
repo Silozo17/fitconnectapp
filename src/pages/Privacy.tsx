@@ -23,7 +23,7 @@ const Privacy = () => {
               Policy
             </span>
           </h1>
-          <p className="text-muted-foreground">Last updated: December 18, 2024</p>
+          <p className="text-muted-foreground">Last updated: December 19, 2024</p>
         </div>
       </section>
 
@@ -92,6 +92,7 @@ const Privacy = () => {
                   <li>Improve and optimize the Platform</li>
                   <li>Detect and prevent fraud, abuse, or security incidents</li>
                   <li>Comply with legal obligations</li>
+                  <li>Generate AI-assisted workout and meal plan suggestions (see Section 12A)</li>
                 </ul>
 
                 <h2>4. Information Sharing</h2>
@@ -106,20 +107,51 @@ const Privacy = () => {
 
                 <h3>With Service Providers</h3>
                 <p>
-                  We share information with third-party service providers who perform services on our behalf:
+                  We share information with third-party service providers who perform services on our behalf. 
+                  These providers are categorized below:
                 </p>
+
+                <h4>Infrastructure & Platform Services</h4>
                 <ul>
-                  <li><strong>Stripe:</strong> Payment processing and financial transactions</li>
                   <li><strong>Supabase:</strong> Database hosting, authentication, and file storage</li>
+                </ul>
+
+                <h4>Payment Services</h4>
+                <ul>
+                  <li><strong>Stripe:</strong> Payment processing, subscription billing, and financial transactions</li>
+                </ul>
+
+                <h4>Communication Services</h4>
+                <ul>
                   <li><strong>Resend:</strong> Transactional email delivery (booking confirmations, notifications)</li>
-                  <li><strong>Google Cloud:</strong> AI services for meal and workout suggestions</li>
-                  <li><strong>Zoom Video Communications:</strong> Video conferencing for online sessions</li>
-                  <li><strong>Apple (HealthKit):</strong> Health and fitness data synchronization</li>
+                  <li><strong>Zoom Video Communications:</strong> Video conferencing for online coaching sessions</li>
+                  <li><strong>Google (Meet):</strong> Video conferencing integration for online sessions</li>
+                </ul>
+
+                <h4>AI and Machine Learning Services</h4>
+                <ul>
+                  <li><strong>Google Cloud AI (Gemini):</strong> AI-powered features including workout plan generation, 
+                    meal plan suggestions, exercise alternatives, food substitutions, macro calculations, and progress 
+                    analysis. Personal data processed by AI services is used solely to generate personalized suggestions 
+                    and is not retained by the AI provider beyond the processing request.</li>
+                </ul>
+
+                <h4>Health and Fitness Data Integrations</h4>
+                <ul>
+                  <li><strong>Apple (HealthKit):</strong> Health and fitness data synchronization from Apple devices</li>
+                  <li><strong>Google (Fit):</strong> Fitness and activity data from Android devices</li>
                   <li><strong>Fitbit:</strong> Activity and health data from Fitbit devices</li>
                   <li><strong>Garmin:</strong> Training and activity data from Garmin devices</li>
                 </ul>
+
+                <h4>Calendar Integrations</h4>
+                <ul>
+                  <li><strong>Google Calendar:</strong> Session scheduling and calendar synchronization</li>
+                  <li><strong>Apple Calendar (CalDAV):</strong> Session scheduling via CalDAV protocol (see Section 12B)</li>
+                </ul>
+
                 <p>
-                  These service providers are contractually obligated to protect your data and use it only for 
+                  All service providers are contractually obligated to protect your data and use it only for 
                   the specific purposes we direct.
                 </p>
 
@@ -162,9 +194,23 @@ const Privacy = () => {
                   <li><strong>Opt-out:</strong> Unsubscribe from marketing communications</li>
                   <li><strong>Restriction:</strong> Request limitation of processing in certain circumstances</li>
                 </ul>
+
+                <h3>Data Export and Portability</h3>
                 <p>
-                  To exercise these rights, please contact us at {contact.privacyEmail}. We will respond to your 
-                  request within 30 days.
+                  You have the right to receive a copy of your personal data in a structured, commonly used, 
+                  machine-readable format (JSON or CSV). To request a data export:
+                </p>
+                <ul>
+                  <li><strong>In-App:</strong> Go to Settings → Privacy → Download My Data</li>
+                  <li><strong>Email:</strong> Contact {contact.privacyEmail} with subject "Data Export Request"</li>
+                </ul>
+                <p>
+                  We will fulfill data export requests within 30 days. Your export will include profile data, 
+                  workout logs, meal plans, progress photos, message history, and connected device data.
+                </p>
+                <p>
+                  To exercise any of these rights, please contact us at {contact.privacyEmail}. We will respond 
+                  to your request within 30 days.
                 </p>
 
                 <h2>7. Cookies and Tracking Technologies</h2>
@@ -190,11 +236,29 @@ const Privacy = () => {
                   privacy policies before providing any information.
                 </p>
 
+                <h3>External Shopping Links</h3>
+                <p>
+                  FitConnect provides links to external grocery retailers (Tesco, Asda, Sainsbury's, and others) 
+                  to help you purchase ingredients for your meal plans. When you use these shopping links:
+                </p>
+                <ul>
+                  <li>FitConnect only generates shopping list links based on your meal plan ingredients</li>
+                  <li><strong>No personal data</strong> is shared with grocery retailers by FitConnect</li>
+                  <li>Any information you provide to retailers is subject to their privacy policies</li>
+                  <li>Purchases, payments, and deliveries are handled entirely by the retailer</li>
+                  <li>FitConnect does not receive any information about your purchases from retailers</li>
+                </ul>
+
                 <h2>9. Children's Privacy</h2>
                 <p>
-                  The Platform is not intended for individuals under 18 years of age. We do not knowingly collect 
-                  personal information from children. If you believe we have collected information from a child, 
-                  please contact us immediately.
+                  <strong>FitConnect is intended for users aged 18 and older.</strong> We do not knowingly collect 
+                  or solicit personal information from anyone under 18 years of age. If you are under 18, please 
+                  do not attempt to register for the Platform or send any personal information to us.
+                </p>
+                <p>
+                  If we learn that we have collected personal information from a person under 18, we will delete 
+                  that information as quickly as possible. If you believe that a child under 18 has provided us 
+                  with personal information, please contact us immediately at {contact.privacyEmail}.
                 </p>
 
                 <h2>10. International Data Transfers</h2>
@@ -286,6 +350,104 @@ const Privacy = () => {
                   When you disconnect or revoke access, we stop receiving new data from Google services. Previously 
                   synced data remains in your FitConnect account unless you request its deletion.
                 </p>
+
+                <h2>12A. AI Services and Third-Party AI</h2>
+                <p>
+                  FitConnect uses artificial intelligence (AI) to enhance user experience and provide personalized 
+                  fitness and nutrition recommendations. This section explains how AI is used and how your data 
+                  is processed.
+                </p>
+
+                <h3>AI Features and Capabilities</h3>
+                <p>AI is used within FitConnect for:</p>
+                <ul>
+                  <li><strong>Workout Plan Generation:</strong> Creating personalized exercise routines based on 
+                    your goals, experience, equipment, and preferences</li>
+                  <li><strong>Meal Plan Suggestions:</strong> Generating meal ideas that meet nutritional targets 
+                    and accommodate dietary restrictions</li>
+                  <li><strong>Macro and Calorie Calculations:</strong> Computing personalized nutritional targets</li>
+                  <li><strong>Exercise Alternatives:</strong> Suggesting substitute exercises for injuries, 
+                    equipment limitations, or preferences</li>
+                  <li><strong>Food Substitutions:</strong> Recommending alternative ingredients for allergies, 
+                    dietary needs, or availability</li>
+                  <li><strong>Progress Analysis:</strong> Analyzing your fitness data to provide insights</li>
+                  <li><strong>Content Assistance:</strong> Helping coaches create product descriptions</li>
+                </ul>
+
+                <h3>Third-Party AI Provider</h3>
+                <p>
+                  FitConnect uses <strong>Google Cloud AI services (including Gemini models)</strong> to power 
+                  AI features. When you use AI-powered features:
+                </p>
+                <ul>
+                  <li>Your relevant data (goals, measurements, preferences) is sent to Google Cloud AI to generate 
+                    personalized suggestions</li>
+                  <li>Data is processed solely for the purpose of generating your requested content</li>
+                  <li>Google Cloud AI does not retain your personal data after processing the request</li>
+                  <li>AI responses are returned to FitConnect for display to you or your coach</li>
+                </ul>
+
+                <h3>AI Data Protection</h3>
+                <p>
+                  <strong>Important:</strong> In accordance with Apple App Store requirements and our commitment 
+                  to transparency:
+                </p>
+                <ul>
+                  <li>AI-generated content is clearly identified as AI-assisted within the Platform</li>
+                  <li>Personal data sent to AI services is minimized to only what's necessary for the request</li>
+                  <li>AI providers are bound by data processing agreements that protect your information</li>
+                  <li>AI features are optional; you can use FitConnect without AI-generated content</li>
+                  <li>Coaches review and approve all AI-generated content before it's shared with clients</li>
+                </ul>
+
+                <h3>Opting Out of AI Features</h3>
+                <p>
+                  You can choose not to use AI-powered features. AI suggestions are always optional, and coaches 
+                  can create all content manually. If you have concerns about AI processing your data, please 
+                  discuss with your coach or contact us at {contact.privacyEmail}.
+                </p>
+
+                <h2>12B. Apple Calendar (CalDAV) Integration</h2>
+                <p>
+                  FitConnect supports calendar synchronization with Apple Calendar and other CalDAV-compatible 
+                  calendar services (such as iCloud Calendar, Fastmail, and other providers).
+                </p>
+
+                <h3>How CalDAV Integration Works</h3>
+                <p>When you connect your Apple Calendar or CalDAV calendar:</p>
+                <ul>
+                  <li>You provide your CalDAV server credentials (username and app-specific password)</li>
+                  <li>FitConnect uses the CalDAV protocol to create, update, and delete calendar events</li>
+                  <li>We only create events for your FitConnect coaching sessions</li>
+                </ul>
+
+                <h3>Data We Store</h3>
+                <p>To maintain your calendar connection, we securely store:</p>
+                <ul>
+                  <li><strong>Encrypted Credentials:</strong> Your CalDAV access credentials, encrypted at rest</li>
+                  <li><strong>Server URL:</strong> The CalDAV server endpoint for your calendar provider</li>
+                  <li><strong>Calendar Identifier:</strong> Reference to the calendar where events are created</li>
+                  <li><strong>Event References:</strong> IDs of calendar events created by FitConnect</li>
+                </ul>
+
+                <h3>CalDAV Data Protection</h3>
+                <ul>
+                  <li>Credentials are encrypted using industry-standard encryption</li>
+                  <li>We only access your calendar to manage FitConnect session events</li>
+                  <li>We do not read or access your other calendar events</li>
+                  <li>We recommend using app-specific passwords rather than your main account password</li>
+                </ul>
+
+                <h3>Disconnecting CalDAV</h3>
+                <p>
+                  You can disconnect your CalDAV calendar at any time through Settings → Integrations → Apple 
+                  Calendar. Upon disconnection:
+                </p>
+                <ul>
+                  <li>Your credentials are immediately deleted from our systems</li>
+                  <li>Future sessions will not be added to your calendar</li>
+                  <li>Existing events remain on your calendar until manually deleted</li>
+                </ul>
 
                 <h2>13. Apple HealthKit Integration</h2>
                 <p>
@@ -475,6 +637,17 @@ const Privacy = () => {
                   <li>Save images generated by the app</li>
                 </ul>
 
+                <h3>Microphone Access</h3>
+                <p>Used for:</p>
+                <ul>
+                  <li>Audio during video coaching sessions (Zoom/Google Meet)</li>
+                  <li>Voice notes and audio messages (if enabled)</li>
+                </ul>
+                <p>
+                  Microphone access is only active during video calls or when you explicitly record audio. 
+                  FitConnect does not listen to or record audio in the background.
+                </p>
+
                 <h3>Push Notifications</h3>
                 <p>Used to send you:</p>
                 <ul>
@@ -500,6 +673,35 @@ const Privacy = () => {
                   If your device supports Face ID or Touch ID, you can enable biometric authentication for 
                   quick and secure login. Biometric data is processed entirely on your device and is never 
                   transmitted to or stored by FitConnect.
+                </p>
+
+                <h2>17A. Local Data Storage and Caching</h2>
+                <p>
+                  FitConnect stores certain data locally on your device to improve performance and enable 
+                  offline access to key features.
+                </p>
+
+                <h3>Data Stored Locally</h3>
+                <ul>
+                  <li><strong>Workout Plans:</strong> Your current workout programs for offline viewing</li>
+                  <li><strong>Meal Plans:</strong> Your current nutrition plans and recipes</li>
+                  <li><strong>Workout Logs:</strong> Recent workout entries pending sync</li>
+                  <li><strong>Profile Data:</strong> Your profile information for quick access</li>
+                  <li><strong>Preferences:</strong> App settings and display preferences</li>
+                </ul>
+
+                <h3>Local Data Protection</h3>
+                <ul>
+                  <li>Local data is encrypted using your device's native encryption capabilities</li>
+                  <li>Sensitive data (health metrics, progress photos) is stored in secure app storage</li>
+                  <li>Local data is synced to our servers when connectivity is available</li>
+                  <li>Clearing app data or uninstalling the app removes all locally stored information</li>
+                </ul>
+
+                <h3>Offline Mode</h3>
+                <p>
+                  When offline, you can view previously synced workout and meal plans, log workouts locally, 
+                  and access your profile. Changes made offline will sync automatically when you reconnect.
                 </p>
 
                 <h2>18. Account Deletion</h2>

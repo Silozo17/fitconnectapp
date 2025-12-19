@@ -23,7 +23,7 @@ const Terms = () => {
               Service
             </span>
           </h1>
-          <p className="text-muted-foreground">Last updated: December 18, 2024</p>
+          <p className="text-muted-foreground">Last updated: December 19, 2024</p>
         </div>
       </section>
 
@@ -105,10 +105,24 @@ const Terms = () => {
                   <li>Notify us immediately of any unauthorized use</li>
                 </ul>
 
-                <h3>Account Eligibility</h3>
+                <h3>Account Eligibility and Age Requirements</h3>
                 <p>
-                  You must be at least 18 years old to create an account. By creating an account, you represent that 
-                  you are at least 18 years of age and have the legal capacity to enter into these Terms.
+                  <strong>You must be at least 18 years old to create an account and use FitConnect.</strong> By 
+                  creating an account, you represent and warrant that:
+                </p>
+                <ul>
+                  <li>You are at least 18 years of age</li>
+                  <li>You have the legal capacity to enter into these Terms</li>
+                  <li>You are not using the Platform on behalf of any person under 18 years of age</li>
+                  <li>All registration information you submit is truthful and accurate</li>
+                </ul>
+                <p>
+                  <strong>Parental Consent:</strong> FitConnect does not knowingly collect or solicit personal 
+                  information from anyone under 18 years of age. If you are under 18, please do not attempt to 
+                  register for the Platform or send any personal information about yourself to us. If we learn 
+                  that we have collected personal information from a person under 18, we will delete that 
+                  information as quickly as possible and terminate the associated account. If you believe a 
+                  person under 18 has provided us with personal information, please contact us at {contact.email}.
                 </p>
 
                 <h2>5. Coach Requirements and Responsibilities</h2>
@@ -150,6 +164,19 @@ const Terms = () => {
                   processed through our secure payment system (powered by Stripe) at the time of booking. All fees 
                   are in GBP unless otherwise specified.
                 </p>
+
+                <h3>In-App Purchases (iOS and Android)</h3>
+                <p>
+                  When purchasing subscriptions or digital products through the FitConnect mobile app:
+                </p>
+                <ul>
+                  <li><strong>iOS Purchases:</strong> Payments made through the iOS app are processed by Apple and 
+                    subject to the <a href="https://www.apple.com/legal/internet-services/itunes/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Apple Media Services Terms and Conditions</a>. 
+                    Refunds for iOS purchases must be requested through Apple.</li>
+                  <li><strong>Android Purchases:</strong> Payments made through the Android app are processed by 
+                    Google Play and subject to <a href="https://play.google.com/intl/en_uk/about/play-terms/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google Play Terms of Service</a>. 
+                    Refunds for Android purchases must be requested through Google Play.</li>
+                </ul>
 
                 <h3>Coach Earnings</h3>
                 <p>
@@ -221,6 +248,50 @@ const Terms = () => {
                   agreements between you and the Coach, processed through our platform. The same auto-renewal 
                   terms apply. Coach subscription pricing, terms, and cancellation policies are displayed on 
                   each Coach's profile before purchase.
+                </p>
+
+                <h2>8A. Digital Products and Content</h2>
+                <p>
+                  Coaches may create and sell digital products ("Digital Content") through the Platform, including 
+                  but not limited to e-books, workout templates, video tutorials, training programs, meal plan 
+                  templates, and other downloadable or streamable content.
+                </p>
+
+                <h3>License to Digital Content</h3>
+                <p>
+                  When you purchase Digital Content, you are granted a limited, non-exclusive, non-transferable, 
+                  revocable license to access and use the Digital Content for your personal, non-commercial use only.
+                </p>
+
+                <h3>Restrictions on Digital Content</h3>
+                <p>You may not:</p>
+                <ul>
+                  <li>Resell, redistribute, or share purchased Digital Content with others</li>
+                  <li>Copy, reproduce, or create derivative works from Digital Content</li>
+                  <li>Use Digital Content for commercial purposes or in a commercial setting</li>
+                  <li>Upload, publish, or share Digital Content on file-sharing sites or social media</li>
+                  <li>Remove or alter any copyright notices or branding on Digital Content</li>
+                </ul>
+
+                <h3>Access Period</h3>
+                <p>
+                  Unless otherwise specified at the time of purchase, Digital Content remains accessible through 
+                  your FitConnect account for as long as your account is active and in good standing. Some Digital 
+                  Content may have expiration dates, which will be clearly stated at the time of purchase.
+                </p>
+
+                <h3>Digital Content Refunds</h3>
+                <p>
+                  <strong>Due to the nature of digital products, no refunds are provided once Digital Content has 
+                  been accessed, downloaded, or streamed.</strong> If you experience technical issues preventing 
+                  access to purchased content, please contact support at {contact.email} within 7 days of purchase.
+                </p>
+
+                <h3>Content Bundles</h3>
+                <p>
+                  Coaches may offer bundled Digital Content at a discounted price. When purchasing bundles, all 
+                  included items are subject to these Digital Content terms. Individual items within a bundle 
+                  cannot be refunded separately.
                 </p>
 
                 <h2>9. Cancellation Policy</h2>
@@ -335,7 +406,156 @@ const Terms = () => {
                   Coaches may disconnect their video conferencing accounts at any time through Settings → 
                   Integrations. Upon disconnection, FitConnect will no longer be able to create or manage 
                   video meetings on the Coach's behalf. Existing meeting links for scheduled sessions may 
-                  remain active until the meetings occur or are manually cancelled.</p>
+                  remain active until the meetings occur or are manually cancelled.
+                </p>
+
+                <h2>11B. AI-Generated Content and Features</h2>
+                <p>
+                  FitConnect incorporates artificial intelligence ("AI") features to assist Coaches and enhance 
+                  the user experience. This section governs the use of AI-powered functionality within the Platform.
+                </p>
+
+                <h3>AI-Assisted Features</h3>
+                <p>AI is used within FitConnect for the following purposes:</p>
+                <ul>
+                  <li><strong>Workout Plan Generation:</strong> AI may suggest workout routines based on client goals, 
+                    fitness level, available equipment, and preferences</li>
+                  <li><strong>Meal Plan Suggestions:</strong> AI may generate meal plan ideas based on nutritional 
+                    targets, dietary restrictions, and preferences</li>
+                  <li><strong>Macro and Calorie Calculations:</strong> AI assists in calculating nutritional targets 
+                    based on user data</li>
+                  <li><strong>Exercise Alternatives:</strong> AI may suggest alternative exercises when needed</li>
+                  <li><strong>Food Substitutions:</strong> AI may recommend food alternatives for dietary needs</li>
+                  <li><strong>Progress Analysis:</strong> AI may analyze user data to provide insights</li>
+                  <li><strong>Product Descriptions:</strong> AI may assist Coaches in creating product descriptions</li>
+                </ul>
+
+                <h3>AI Content Disclaimer</h3>
+                <p>
+                  <strong>IMPORTANT - PLEASE READ CAREFULLY:</strong>
+                </p>
+                <ul>
+                  <li>AI-generated content is provided as <strong>suggestions only</strong> and should not be 
+                    considered professional medical, nutritional, or fitness advice</li>
+                  <li>All AI-generated workout and meal plans are subject to <strong>Coach review and approval</strong> 
+                    before being delivered to Clients</li>
+                  <li>AI suggestions are based on general principles and may not account for your specific 
+                    individual circumstances, health conditions, or needs</li>
+                  <li>FitConnect does not guarantee the accuracy, completeness, or appropriateness of AI-generated content</li>
+                  <li>You should always consult with qualified healthcare professionals before making significant 
+                    changes to your diet or exercise routine</li>
+                </ul>
+
+                <h3>Coach Responsibility for AI Content</h3>
+                <p>
+                  Coaches who use AI features to assist in creating client programs are responsible for:
+                </p>
+                <ul>
+                  <li>Reviewing all AI-generated content before sharing with clients</li>
+                  <li>Modifying AI suggestions to suit individual client needs</li>
+                  <li>Ensuring AI-generated content is appropriate for each client's circumstances</li>
+                  <li>Taking full professional responsibility for any content delivered to clients, regardless 
+                    of whether it was AI-assisted</li>
+                </ul>
+
+                <h3>Limitation of Liability for AI</h3>
+                <p>
+                  FitConnect is not liable for any injuries, health issues, adverse effects, or damages resulting 
+                  from following AI-generated suggestions. AI features are tools to assist human professionals, 
+                  not replacements for professional judgment.
+                </p>
+
+                <h2>11C. Challenges and Gamification</h2>
+                <p>
+                  FitConnect offers challenges, badges, experience points (XP), levels, leaderboards, and other 
+                  gamification features to encourage engagement and fitness progress.
+                </p>
+
+                <h3>Virtual Rewards</h3>
+                <p>
+                  Badges, XP, levels, avatars, and other virtual rewards earned through FitConnect:
+                </p>
+                <ul>
+                  <li>Have <strong>no monetary value</strong> and cannot be exchanged for cash or other consideration</li>
+                  <li>Are for entertainment and motivational purposes only</li>
+                  <li>Remain the property of FitConnect and are licensed to you for use within the Platform</li>
+                  <li>May be modified, removed, or reset at FitConnect's discretion</li>
+                  <li>Are non-transferable between accounts</li>
+                </ul>
+
+                <h3>Challenge Participation</h3>
+                <p>When participating in challenges, you agree that:</p>
+                <ul>
+                  <li>Participation is entirely voluntary</li>
+                  <li>Challenge rules and requirements may vary and will be displayed before joining</li>
+                  <li>FitConnect reserves the right to verify challenge completion through wearable data or 
+                    other means</li>
+                  <li>Cheating, manipulating data, or fraudulent completion of challenges may result in 
+                    disqualification, badge removal, or account suspension</li>
+                  <li>FitConnect may modify or cancel challenges at any time with reasonable notice</li>
+                </ul>
+
+                <h3>Leaderboards</h3>
+                <p>
+                  Leaderboard participation may display your display name, location, and ranking publicly within 
+                  the Platform. You can control your leaderboard visibility through your privacy settings. By 
+                  appearing on leaderboards, you consent to this display of information.
+                </p>
+
+                <h3>Challenge Rewards</h3>
+                <p>
+                  Some challenges may offer prizes or rewards. Prize fulfillment is subject to challenge-specific 
+                  rules, eligibility requirements, and any applicable laws. FitConnect reserves the right to 
+                  substitute prizes of equal or greater value.
+                </p>
+
+                <h2>11D. External Links and Third-Party Services</h2>
+                <p>
+                  FitConnect may include links to external websites and third-party services for your convenience.
+                </p>
+
+                <h3>Shopping Links</h3>
+                <p>
+                  FitConnect provides links to external grocery retailers (including Tesco, Asda, Sainsbury's, 
+                  and others) to help you purchase ingredients for your meal plans. When using these links:
+                </p>
+                <ul>
+                  <li>FitConnect only generates shopping list links; we do not process any grocery purchases</li>
+                  <li>All purchases are conducted directly with the retailer and subject to their terms and conditions</li>
+                  <li>Prices, availability, and delivery options are determined by the retailer</li>
+                  <li>FitConnect is not responsible for product quality, delivery issues, or any disputes with retailers</li>
+                  <li>No personal or payment information is shared by FitConnect with grocery retailers</li>
+                </ul>
+
+                <h3>External Links Disclaimer</h3>
+                <p>
+                  FitConnect is not responsible for the content, accuracy, privacy practices, or availability of 
+                  third-party websites. Links to external sites do not imply endorsement. We encourage you to 
+                  review the terms and privacy policies of any external sites you visit.
+                </p>
+
+                <h2>11E. Beta and Pre-Release Features</h2>
+                <p>
+                  FitConnect may offer access to beta, preview, or pre-release features ("Beta Features") to 
+                  gather feedback and improve the Platform.
+                </p>
+
+                <h3>Beta Feature Terms</h3>
+                <p>By using Beta Features, you acknowledge and agree that:</p>
+                <ul>
+                  <li>Beta Features are provided "AS-IS" and "AS-AVAILABLE" without any warranties</li>
+                  <li>Beta Features may contain bugs, errors, or instabilities</li>
+                  <li>Beta Features may be changed, limited, or discontinued at any time without notice</li>
+                  <li>Data created using Beta Features may be lost or reset during development</li>
+                  <li>Your feedback about Beta Features may be used by FitConnect to improve the Platform 
+                    without compensation or attribution</li>
+                </ul>
+
+                <h3>Confidentiality</h3>
+                <p>
+                  Unless otherwise stated, Beta Features are confidential. You agree not to publicly discuss, 
+                  screenshot, or share information about Beta Features without FitConnect's prior written consent.
+                </p>
 
                 <h2>12. Health and Fitness Disclaimer</h2>
                 <p>
@@ -412,21 +632,35 @@ const Terms = () => {
                 </p>
 
                 <h2>16. Third-Party Beneficiaries</h2>
+                
+                <h3>Apple App Store</h3>
                 <p>
                   You acknowledge and agree that Apple Inc. and its subsidiaries are third-party beneficiaries of 
                   these Terms as they relate to your use of the App on iOS devices. Upon your acceptance of these 
                   Terms, Apple will have the right (and will be deemed to have accepted the right) to enforce these 
                   Terms against you as a third-party beneficiary thereof.
                 </p>
+
+                <h3>Google Play Store</h3>
                 <p>
                   Similarly, Google LLC and its subsidiaries are third-party beneficiaries of these Terms as they 
-                  relate to your use of the App on Android devices.
+                  relate to your use of the App on Android devices. You acknowledge that Google Play and its terms 
+                  apply to your use of the App.
                 </p>
+
+                <h3>App Store and Play Store Terms</h3>
                 <p>
                   You acknowledge that your use of the App is also subject to the terms and conditions of the 
                   Apple App Store Terms of Service and/or the Google Play Terms of Service, as applicable. In the 
                   event of any conflict between these Terms and the App Store or Play Store terms, the App Store 
                   or Play Store terms shall prevail with respect to your use of the App.
+                </p>
+
+                <h3>Google Play Data Safety Compliance</h3>
+                <p>
+                  FitConnect complies with the Google Play Developer Program Policies, including the User Data 
+                  policy. Our data collection, usage, and sharing practices are disclosed in our Privacy Policy 
+                  and the Google Play Data Safety section of our app listing.
                 </p>
 
                 <h2>17. Dispute Resolution</h2>
