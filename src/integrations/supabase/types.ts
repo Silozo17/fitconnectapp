@@ -2123,6 +2123,7 @@ export type Database = {
           name: string
           price: number
           session_count: number
+          session_duration_minutes: number | null
           updated_at: string
           validity_days: number | null
         }
@@ -2136,6 +2137,7 @@ export type Database = {
           name: string
           price: number
           session_count: number
+          session_duration_minutes?: number | null
           updated_at?: string
           validity_days?: number | null
         }
@@ -2149,6 +2151,7 @@ export type Database = {
           name?: string
           price?: number
           session_count?: number
+          session_duration_minutes?: number | null
           updated_at?: string
           validity_days?: number | null
         }
@@ -2184,6 +2187,7 @@ export type Database = {
           location_place_id: string | null
           location_region: string | null
           marketplace_visible: boolean | null
+          min_cancellation_hours: number | null
           onboarding_completed: boolean
           onboarding_progress: Json | null
           online_available: boolean | null
@@ -2242,6 +2246,7 @@ export type Database = {
           location_place_id?: string | null
           location_region?: string | null
           marketplace_visible?: boolean | null
+          min_cancellation_hours?: number | null
           onboarding_completed?: boolean
           onboarding_progress?: Json | null
           online_available?: boolean | null
@@ -2300,6 +2305,7 @@ export type Database = {
           location_place_id?: string | null
           location_region?: string | null
           marketplace_visible?: boolean | null
+          min_cancellation_hours?: number | null
           onboarding_completed?: boolean
           onboarding_progress?: Json | null
           online_available?: boolean | null
@@ -2484,6 +2490,7 @@ export type Database = {
           is_online: boolean | null
           location: string | null
           notes: string | null
+          package_purchase_id: string | null
           payment_status: string | null
           price: number | null
           remaining_balance: number | null
@@ -2492,6 +2499,9 @@ export type Database = {
           session_type: string
           status: string
           stripe_payment_intent_id: string | null
+          token_return_reason: string | null
+          token_returned: boolean | null
+          token_returned_by: string | null
           updated_at: string
           video_meeting_id: string | null
           video_meeting_url: string | null
@@ -2514,6 +2524,7 @@ export type Database = {
           is_online?: boolean | null
           location?: string | null
           notes?: string | null
+          package_purchase_id?: string | null
           payment_status?: string | null
           price?: number | null
           remaining_balance?: number | null
@@ -2522,6 +2533,9 @@ export type Database = {
           session_type?: string
           status?: string
           stripe_payment_intent_id?: string | null
+          token_return_reason?: string | null
+          token_returned?: boolean | null
+          token_returned_by?: string | null
           updated_at?: string
           video_meeting_id?: string | null
           video_meeting_url?: string | null
@@ -2544,6 +2558,7 @@ export type Database = {
           is_online?: boolean | null
           location?: string | null
           notes?: string | null
+          package_purchase_id?: string | null
           payment_status?: string | null
           price?: number | null
           remaining_balance?: number | null
@@ -2552,6 +2567,9 @@ export type Database = {
           session_type?: string
           status?: string
           stripe_payment_intent_id?: string | null
+          token_return_reason?: string | null
+          token_returned?: boolean | null
+          token_returned_by?: string | null
           updated_at?: string
           video_meeting_id?: string | null
           video_meeting_url?: string | null
@@ -2598,6 +2616,13 @@ export type Database = {
             columns: ["external_client_id"]
             isOneToOne: false
             referencedRelation: "external_session_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coaching_sessions_package_purchase_id_fkey"
+            columns: ["package_purchase_id"]
+            isOneToOne: false
+            referencedRelation: "client_package_purchases"
             referencedColumns: ["id"]
           },
         ]
@@ -4450,6 +4475,51 @@ export type Database = {
           {
             foreignKeyName: "session_offers_created_session_id_fkey"
             columns: ["created_session_id"]
+            isOneToOne: false
+            referencedRelation: "coaching_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      session_token_history: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          package_purchase_id: string | null
+          performed_by: string | null
+          reason: string | null
+          session_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          package_purchase_id?: string | null
+          performed_by?: string | null
+          reason?: string | null
+          session_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          package_purchase_id?: string | null
+          performed_by?: string | null
+          reason?: string | null
+          session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_token_history_package_purchase_id_fkey"
+            columns: ["package_purchase_id"]
+            isOneToOne: false
+            referencedRelation: "client_package_purchases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_token_history_session_id_fkey"
+            columns: ["session_id"]
             isOneToOne: false
             referencedRelation: "coaching_sessions"
             referencedColumns: ["id"]

@@ -49,7 +49,7 @@ export function SessionDetailModal({ open, onOpenChange, session, onRefresh }: S
     markNoShow,
     saveNotes,
     createVideoMeeting,
-    CANCELLATION_NOTICE_HOURS,
+    DEFAULT_CANCELLATION_NOTICE_HOURS,
   } = useSessionManagement();
 
   useEffect(() => {
@@ -273,7 +273,7 @@ export function SessionDetailModal({ open, onOpenChange, session, onRefresh }: S
         sessionDate={new Date(session.scheduledAt)}
         onCancel={handleCancel}
         isLoading={cancelSession.isPending}
-        cancellationNoticeHours={CANCELLATION_NOTICE_HOURS}
+        cancellationNoticeHours={DEFAULT_CANCELLATION_NOTICE_HOURS}
       />
     </>
   );

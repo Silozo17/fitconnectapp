@@ -3,28 +3,30 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
-// Cancellation policy: minimum hours notice required
-const CANCELLATION_NOTICE_HOURS = 24;
+// Default cancellation policy (can be overridden by coach setting)
+const DEFAULT_CANCELLATION_NOTICE_HOURS = 24;
 
 export const useSessionManagement = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  // Cancel a session with policy enforcement
+  // Cancel a session with policy enforcement and token handling
   const cancelSession = useMutation({
     mutationFn: async ({
       sessionId,
       reason,
       forceCancel = false,
+      returnToken = false,
     }: {
       sessionId: string;
       reason: string;
       forceCancel?: boolean;
+      returnToken?: boolean; // Coach can override to return token even on late cancellation
     }) => {
-      // Get session details first
+      // Get session details including package info
       const { data: session, error: fetchError } = await supabase
         .from("coaching_sessions")
-        .select("scheduled_at, status, coach_id, client_id")
+        .select("scheduled_at, status, coach_id, client_id, package_purchase_id, token_returned")
         .eq("id", sessionId)
         .single();
 
@@ -32,17 +34,29 @@ export const useSessionManagement = () => {
       if (!session) throw new Error("Session not found");
       if (session.status !== "scheduled") throw new Error("Can only cancel scheduled sessions");
 
+      // Get coach's cancellation policy
+      const { data: coachProfile } = await supabase
+        .from("coach_profiles")
+        .select("min_cancellation_hours, user_id")
+        .eq("id", session.coach_id)
+        .single();
+
+      const cancellationHours = coachProfile?.min_cancellation_hours ?? DEFAULT_CANCELLATION_NOTICE_HOURS;
+      const isCoachCancelling = user?.id === coachProfile?.user_id;
+
       // Check cancellation policy
       const scheduledTime = new Date(session.scheduled_at);
       const now = new Date();
       const hoursUntilSession = (scheduledTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+      const isLateCancellation = hoursUntilSession < cancellationHours;
 
-      if (hoursUntilSession < CANCELLATION_NOTICE_HOURS && !forceCancel) {
+      if (isLateCancellation && !forceCancel && !isCoachCancelling) {
         throw new Error(
-          `Sessions must be cancelled at least ${CANCELLATION_NOTICE_HOURS} hours in advance. This session is in ${Math.round(hoursUntilSession)} hours.`
+          `Sessions must be cancelled at least ${cancellationHours} hours in advance. This session is in ${Math.round(hoursUntilSession)} hours.`
         );
       }
 
+      // Cancel the session
       const { error } = await supabase
         .from("coaching_sessions")
         .update({
@@ -54,23 +68,82 @@ export const useSessionManagement = () => {
         .eq("id", sessionId);
 
       if (error) throw error;
+
+      // Handle token return logic
+      let tokenReturned = false;
+      if (session.package_purchase_id && !session.token_returned) {
+        // Return token if:
+        // 1. Coach is cancelling (always return)
+        // 2. Client is cancelling within policy window
+        // 3. Coach explicitly requests token return (override)
+        const shouldReturnToken = isCoachCancelling || !isLateCancellation || returnToken;
+        
+        if (shouldReturnToken) {
+          // Decrement sessions_used
+          const { data: purchase } = await supabase
+            .from("client_package_purchases")
+            .select("sessions_used")
+            .eq("id", session.package_purchase_id)
+            .single();
+
+          if (purchase) {
+            const newUsage = Math.max(0, (purchase.sessions_used || 1) - 1);
+            await supabase
+              .from("client_package_purchases")
+              .update({ sessions_used: newUsage })
+              .eq("id", session.package_purchase_id);
+
+            // Mark token as returned
+            await supabase
+              .from("coaching_sessions")
+              .update({ 
+                token_returned: true,
+                token_returned_by: user?.id,
+                token_return_reason: isCoachCancelling ? "Coach cancelled session" : reason,
+              })
+              .eq("id", sessionId);
+
+            // Log token return
+            await supabase
+              .from("session_token_history")
+              .insert({
+                package_purchase_id: session.package_purchase_id,
+                session_id: sessionId,
+                action: returnToken && isLateCancellation ? "manual_return" : "returned",
+                reason: isCoachCancelling ? "Coach cancelled session" : reason,
+                performed_by: user?.id,
+              });
+
+            tokenReturned = true;
+          }
+        }
+      }
       
       // Send cancellation email
-      const cancelledByRole = user?.id === session.coach_id ? "coach" : "client";
+      const cancelledByRole = isCoachCancelling ? "coach" : "client";
       await supabase.functions.invoke("send-booking-cancelled", {
         body: { sessionId, cancelledBy: cancelledByRole, reason },
       }).catch((err) => console.error("Failed to send cancellation email:", err));
       
-      return { late: hoursUntilSession < CANCELLATION_NOTICE_HOURS };
+      return { 
+        late: isLateCancellation, 
+        tokenReturned,
+        tokenForfeited: session.package_purchase_id && !tokenReturned && isLateCancellation,
+      };
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["coaching-sessions"] });
       queryClient.invalidateQueries({ queryKey: ["client-sessions"] });
-      toast.success(
-        data.late
-          ? "Session cancelled (late cancellation fee may apply)"
-          : "Session cancelled successfully"
-      );
+      queryClient.invalidateQueries({ queryKey: ["client-active-package"] });
+      queryClient.invalidateQueries({ queryKey: ["client-package-purchases"] });
+      
+      if (data.tokenForfeited) {
+        toast.success("Session cancelled. Token was forfeited due to late cancellation.");
+      } else if (data.tokenReturned) {
+        toast.success("Session cancelled. Token returned to package.");
+      } else {
+        toast.success(data.late ? "Session cancelled (late cancellation)" : "Session cancelled successfully");
+      }
     },
     onError: (error: Error) => {
       toast.error(error.message || "Failed to cancel session");
@@ -252,6 +325,6 @@ export const useSessionManagement = () => {
     markNoShow,
     saveNotes,
     createVideoMeeting,
-    CANCELLATION_NOTICE_HOURS,
+    DEFAULT_CANCELLATION_NOTICE_HOURS,
   };
 };

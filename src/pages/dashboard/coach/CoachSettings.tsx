@@ -1112,6 +1112,33 @@ const CoachSettings = () => {
                       This affects how prices are displayed for you and your clients throughout the platform.
                     </p>
                   </div>
+                  <Separator />
+                  <div className="max-w-xs">
+                    <Label htmlFor="cancellation-hours" className="text-base font-medium">Cancellation Policy</Label>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Minimum hours notice required for clients to cancel without forfeiting package tokens.
+                    </p>
+                    <Input
+                      id="cancellation-hours"
+                      type="number"
+                      min="1"
+                      max="168"
+                      defaultValue="24"
+                      placeholder="24"
+                      className="w-24"
+                      onChange={async (e) => {
+                        const hours = parseInt(e.target.value) || 24;
+                        if (user) {
+                          await supabase
+                            .from("coach_profiles")
+                            .update({ min_cancellation_hours: hours })
+                            .eq("user_id", user.id);
+                          toast.success("Cancellation policy updated");
+                        }
+                      }}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">hours</p>
+                  </div>
                 </div>
               </div>
             )}
