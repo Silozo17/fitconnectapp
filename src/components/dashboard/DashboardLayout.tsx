@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCoachOnboardingStatus } from "@/hooks/useOnboardingStatus";
+import { useCoachProfileRealtime } from "@/hooks/useCoachProfileRealtime";
 import { Loader2 } from "lucide-react";
 import CoachSidebar from "./CoachSidebar";
 import DashboardHeader from "./DashboardHeader";
@@ -20,7 +21,9 @@ const DashboardLayout = memo(({ children, title = "Coach Dashboard", description
   const { data: onboardingStatus, isLoading } = useCoachOnboardingStatus();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-
+  
+  // Subscribe to realtime updates for coach profile (e.g., admin changes subscription tier)
+  useCoachProfileRealtime();
   const handleToggleSidebar = useCallback(() => {
     setSidebarCollapsed(prev => !prev);
   }, []);
