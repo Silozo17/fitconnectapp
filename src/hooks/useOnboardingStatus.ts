@@ -51,7 +51,7 @@ export const useCoachOnboardingStatus = () => {
       };
     },
     enabled: !!user?.id,
-    staleTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes - subscription tier can change more frequently
     gcTime: 60 * 60 * 1000, // 1 hour
   });
 };
