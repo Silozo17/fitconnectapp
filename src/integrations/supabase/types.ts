@@ -5253,28 +5253,17 @@ export type Database = {
       }
       public_leaderboard_profiles: {
         Row: {
+          avatar_url: string | null
           city: string | null
           country: string | null
           county: string | null
-          display_name: string | null
+          current_level: number | null
           id: string | null
+          leaderboard_display_name: string | null
+          leaderboard_visible: boolean | null
           selected_avatar_id: string | null
-        }
-        Insert: {
-          city?: string | null
-          country?: string | null
-          county?: string | null
-          display_name?: never
-          id?: string | null
-          selected_avatar_id?: string | null
-        }
-        Update: {
-          city?: string | null
-          country?: string | null
-          county?: string | null
-          display_name?: never
-          id?: string | null
-          selected_avatar_id?: string | null
+          total_xp: number | null
+          username: string | null
         }
         Relationships: [
           {
