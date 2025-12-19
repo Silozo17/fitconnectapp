@@ -32,9 +32,12 @@ const CoachDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: coach, isLoading, error } = useCoachById(id || "");
-  const { data: availability = [] } = useCoachAvailability(id || "");
-  const { data: sessionTypes = [] } = useSessionTypes(id || "");
-  const { data: reviews = [] } = useCoachReviews(id);
+  
+  // Use coach.id (UUID) for all queries - only run after coach is loaded
+  const coachId = coach?.id;
+  const { data: availability = [] } = useCoachAvailability(coachId || "");
+  const { data: sessionTypes = [] } = useSessionTypes(coachId || "");
+  const { data: reviews = [] } = useCoachReviews(coachId);
   const averageRating = calculateAverageRating(reviews);
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
@@ -192,19 +195,19 @@ const CoachDetail = () => {
               />
 
               {/* 5. Gallery Section */}
-              <CoachGallerySection coachId={id || ""} />
+              <CoachGallerySection coachId={coach.id} />
 
               {/* 6. Pricing & Packages */}
-              <CoachPricingSection coachId={id || ""} />
+              <CoachPricingSection coachId={coach.id} />
 
               {/* 7. Group Classes */}
-              <CoachGroupClassesSection coachId={id || ""} />
+              <CoachGroupClassesSection coachId={coach.id} />
 
               {/* 8. Digital Products */}
-              <CoachDigitalProductsSection coachId={id || ""} />
+              <CoachDigitalProductsSection coachId={coach.id} />
 
               {/* 9. Reviews Section */}
-              <CoachReviewsSection coachId={id || ""} />
+              <CoachReviewsSection coachId={coach.id} />
             </div>
 
             {/* Sidebar - Booking Card */}
