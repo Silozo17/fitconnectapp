@@ -181,8 +181,8 @@ const App = () => (
         <Toaster />
         <Sonner />
         <ReloadPrompt />
-        <InstallBanner />
         <BrowserRouter>
+          <InstallBanner />
           <ScrollRestoration />
           <AuthProvider>
             <AdminProvider>
