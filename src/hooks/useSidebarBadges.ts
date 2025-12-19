@@ -131,12 +131,25 @@ export const useCoachBadges = () => {
   const fetchBadges = useCallback(async () => {
     if (!coachProfileId || !user) return;
 
-    // New leads (stage = 'new_lead')
-    const { count: leadsCount } = await supabase
+    // Get coach's last viewed timestamp for leads
+    const { data: coachProfile } = await supabase
+      .from("coach_profiles")
+      .select("leads_last_viewed_at")
+      .eq("id", coachProfileId)
+      .single();
+
+    // Count new leads created after last viewed (or all if never viewed)
+    let leadsQuery = supabase
       .from("coach_leads")
       .select("*", { count: "exact", head: true })
       .eq("coach_id", coachProfileId)
       .eq("stage", "new_lead");
+
+    if (coachProfile?.leads_last_viewed_at) {
+      leadsQuery = leadsQuery.gt("created_at", coachProfile.leads_last_viewed_at);
+    }
+
+    const { count: leadsCount } = await leadsQuery;
 
     // Pending booking requests
     const { count: bookingsCount } = await supabase
@@ -169,6 +182,18 @@ export const useCoachBadges = () => {
 
   useEffect(() => {
     if (coachProfileId) fetchBadges();
+  }, [coachProfileId, fetchBadges]);
+
+  // Mark leads as viewed and refresh badge
+  const markLeadsViewed = useCallback(async () => {
+    if (!coachProfileId) return;
+    
+    await supabase
+      .from("coach_profiles")
+      .update({ leads_last_viewed_at: new Date().toISOString() })
+      .eq("id", coachProfileId);
+    
+    fetchBadges();
   }, [coachProfileId, fetchBadges]);
 
   // Realtime subscriptions
@@ -223,7 +248,7 @@ export const useCoachBadges = () => {
     };
   }, [coachProfileId, user, fetchBadges]);
 
-  return badges;
+  return { badges, markLeadsViewed };
 };
 
 export const useAdminBadges = () => {

@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { useCoachPipeline, Lead, LeadStage } from "@/hooks/useCoachPipeline";
+import { useCoachBadges } from "@/hooks/useSidebarBadges";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -56,9 +57,15 @@ const STAGES: { key: LeadStage; label: string; icon: React.ReactNode; color: str
 
 const CoachPipeline = () => {
   const { leads, leadsByStage, isLoading, error, coachProfileId, addLead, updateStage, updateNotes, deleteLead } = useCoachPipeline();
+  const { markLeadsViewed } = useCoachBadges();
   const [notesModal, setNotesModal] = useState<{ lead: Lead; notes: string } | null>(null);
   const [profileSheet, setProfileSheet] = useState<{ clientId: string; name: string; avatar?: string } | null>(null);
   const [showAddLeadModal, setShowAddLeadModal] = useState(false);
+
+  // Mark leads as viewed when component mounts to clear the badge
+  useEffect(() => {
+    markLeadsViewed();
+  }, [markLeadsViewed]);
 
   // Fetch clients who messaged the coach but aren't in the pipeline
   const { data: availableClients = [], isLoading: loadingClients, refetch: refetchAvailableClients } = useQuery({
