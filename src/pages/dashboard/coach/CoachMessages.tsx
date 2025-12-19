@@ -4,18 +4,28 @@ import ConversationList from "@/components/messaging/ConversationList";
 import ChatWindow from "@/components/messaging/ChatWindow";
 import NewConversationModal from "@/components/messaging/NewConversationModal";
 import MessageSidePanel from "@/components/messaging/MessageSidePanel";
+import QuickSendFAB from "@/components/messaging/QuickSendFAB";
+import QuickSendSheet from "@/components/messaging/QuickSendSheet";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { MessageSquare, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useParticipantName } from "@/hooks/useParticipantName";
 import { useMessages } from "@/hooks/useMessages";
+import { useAdminView } from "@/contexts/AdminContext";
 
 const CoachMessages = () => {
   const { id: participantId } = useParams();
   const { data: participantName = "" } = useParticipantName(participantId);
   const [showNewConversation, setShowNewConversation] = useState(false);
   const [showSidePanel, setShowSidePanel] = useState(true);
+  const [showQuickSendSheet, setShowQuickSendSheet] = useState(false);
   const { sendMessage } = useMessages(participantId);
+  const { activeProfileType } = useAdminView();
+
+  const handleSendMessage = async (msg: string) => {
+    const success = await sendMessage(msg);
+    return success;
+  };
 
   return (
     <DashboardLayout title="Messages" description="Chat with your clients.">
@@ -65,22 +75,33 @@ const CoachMessages = () => {
             )}
           </div>
 
-          {/* Side Panel - Now at same level as chat area */}
+          {/* Side Panel - Desktop only */}
           {participantId && showSidePanel && (
             <div className="hidden lg:block border-l border-border">
               <MessageSidePanel
                 participantId={participantId}
                 clientId={participantId}
-                onSendMessage={async (msg) => {
-                  const success = await sendMessage(msg);
-                  return success;
-                }}
+                onSendMessage={handleSendMessage}
                 onClose={() => setShowSidePanel(false)}
               />
             </div>
           )}
         </div>
       </div>
+
+      {/* Mobile FAB and Sheet for Quick Send - Only for coaches */}
+      {participantId && activeProfileType === "coach" && (
+        <>
+          <QuickSendFAB onClick={() => setShowQuickSendSheet(true)} />
+          <QuickSendSheet
+            open={showQuickSendSheet}
+            onOpenChange={setShowQuickSendSheet}
+            participantId={participantId}
+            clientId={participantId}
+            onSendMessage={handleSendMessage}
+          />
+        </>
+      )}
 
       <NewConversationModal 
         open={showNewConversation} 
