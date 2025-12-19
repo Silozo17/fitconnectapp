@@ -15,7 +15,6 @@ import PageLoadingSpinner from "./components/shared/PageLoadingSpinner";
 import { ReloadPrompt } from "./components/pwa/ReloadPrompt";
 import { InstallBanner } from "./components/pwa/InstallBanner";
 import { ErrorBoundary } from "./components/shared/ErrorBoundary";
-import CookieBanner from "./components/shared/CookieBanner";
 
 // Eagerly loaded pages (critical path)
 import Index from "./pages/Index";
@@ -618,7 +617,6 @@ const App = () => (
                   </Routes>
                 </Suspense>
                 <ScrollToTop />
-                <CookieBanner />
               </LocaleProvider>
             </AdminProvider>
           </AuthProvider>

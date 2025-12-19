@@ -1,9 +1,8 @@
-import { useState, useMemo } from "react";
-import { Search, SlidersHorizontal, Loader2, Users, MapPin, X } from "lucide-react";
+import { useState } from "react";
+import { Search, SlidersHorizontal, Loader2, Users, X } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -11,9 +10,7 @@ import CoachCard from "@/components/coaches/CoachCard";
 import CoachFilters from "@/components/coaches/CoachFilters";
 import BookSessionModal from "@/components/booking/BookSessionModal";
 import RequestConnectionModal from "@/components/coaches/RequestConnectionModal";
-import { useCoachMarketplace, type MarketplaceCoach, type LocationFilter } from "@/hooks/useCoachMarketplace";
-import { useUserLocation } from "@/hooks/useUserLocation";
-import { useCookieConsent } from "@/hooks/useCookieConsent";
+import { useCoachMarketplace, type MarketplaceCoach } from "@/hooks/useCoachMarketplace";
 
 const Coaches = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -22,33 +19,10 @@ const Coaches = () => {
   const [priceRange, setPriceRange] = useState<{ min: number; max: number } | undefined>();
   const [onlineOnly, setOnlineOnly] = useState(false);
   const [inPersonOnly, setInPersonOnly] = useState(false);
-  const [locationFilterEnabled, setLocationFilterEnabled] = useState(true);
 
   // Modal state
   const [bookingCoach, setBookingCoach] = useState<MarketplaceCoach | null>(null);
   const [connectionCoach, setConnectionCoach] = useState<MarketplaceCoach | null>(null);
-
-  // Cookie consent and location
-  const { hasCategory } = useCookieConsent();
-  const canUseLocation = hasCategory("functional");
-  
-  // Only detect location if functional cookies are allowed
-  const { city, region, country, county, isLoading: locationLoading, getLocationLabel } = useUserLocation(!canUseLocation);
-  
-  // Build location filter from detected location
-  const locationFilter: LocationFilter | undefined = useMemo(() => {
-    if (!canUseLocation || !locationFilterEnabled) return undefined;
-    if (!city && !region && !country) return undefined;
-    
-    return {
-      city: city || undefined,
-      region: region || undefined,
-      country: country || undefined,
-      county: county || undefined,
-    };
-  }, [canUseLocation, locationFilterEnabled, city, region, country, county]);
-
-  const locationLabel = getLocationLabel();
 
   const { data: coaches, isLoading, error } = useCoachMarketplace({
     search: searchQuery || undefined,
@@ -56,8 +30,6 @@ const Coaches = () => {
     priceRange,
     onlineOnly,
     inPersonOnly,
-    locationFilter: locationFilter,
-    enableLocationMatching: locationFilterEnabled && canUseLocation,
   });
 
   const handleBook = (coach: MarketplaceCoach) => {
@@ -67,20 +39,6 @@ const Coaches = () => {
   const handleRequestConnection = (coach: MarketplaceCoach) => {
     setConnectionCoach(coach);
   };
-
-  const handleClearLocationFilter = () => {
-    setLocationFilterEnabled(false);
-  };
-
-  const handleEnableLocationFilter = () => {
-    setLocationFilterEnabled(true);
-  };
-
-  // Count local coaches (score >= 80 means city or region match)
-  const localCoachesCount = useMemo(() => {
-    if (!coaches || !locationFilter) return 0;
-    return coaches.filter(c => (c.location_score ?? 0) >= 80).length;
-  }, [coaches, locationFilter]);
 
   return (
     <>
@@ -105,45 +63,6 @@ const Coaches = () => {
               <p className="text-muted-foreground mb-6">
                 Browse our verified fitness professionals and start your transformation today.
               </p>
-
-              {/* Location Indicator */}
-              {canUseLocation && !locationLoading && locationLabel && (
-                <div className="flex items-center gap-2 mb-4">
-                  {locationFilterEnabled ? (
-                    <Badge 
-                      variant="secondary" 
-                      className="flex items-center gap-1.5 py-1.5 px-3 text-sm"
-                    >
-                      <MapPin className="h-3.5 w-3.5 text-primary" />
-                      <span>
-                        Showing coaches near <strong>{locationLabel}</strong>
-                        {localCoachesCount > 0 && (
-                          <span className="text-muted-foreground ml-1">
-                            ({localCoachesCount} local)
-                          </span>
-                        )}
-                      </span>
-                      <button 
-                        onClick={handleClearLocationFilter}
-                        className="ml-1 hover:text-destructive transition-colors"
-                        aria-label="Clear location filter"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
-                    </Badge>
-                  ) : (
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={handleEnableLocationFilter}
-                      className="flex items-center gap-1.5"
-                    >
-                      <MapPin className="h-3.5 w-3.5" />
-                      Show coaches near {locationLabel}
-                    </Button>
-                  )}
-                </div>
-              )}
 
               {/* Search Bar */}
               <div className="flex gap-3 max-w-2xl">
@@ -215,7 +134,7 @@ const Coaches = () => {
 
               {/* Coaches Grid */}
               <div className="flex-1">
-                {isLoading || (canUseLocation && locationLoading) ? (
+                {isLoading ? (
                   <div className="flex items-center justify-center py-20">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   </div>
@@ -229,11 +148,6 @@ const Coaches = () => {
                       <Users className="w-5 h-5" />
                       <span>
                         Showing <strong className="text-foreground">{coaches.length}</strong> coach{coaches.length !== 1 ? "es" : ""}
-                        {locationFilterEnabled && localCoachesCount > 0 && localCoachesCount < coaches.length && (
-                          <span className="text-primary ml-1">
-                            • {localCoachesCount} in your area
-                          </span>
-                        )}
                       </span>
                     </div>
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
@@ -255,17 +169,9 @@ const Coaches = () => {
                     <h3 className="font-display font-semibold text-xl text-foreground mb-2">
                       No coaches found
                     </h3>
-                    <p className="text-muted-foreground mb-4">
-                      {locationFilterEnabled && locationLabel 
-                        ? `No coaches found near ${locationLabel}. Try searching a different location.`
-                        : "Try adjusting your filters to see more results."
-                      }
+                    <p className="text-muted-foreground">
+                      Try adjusting your filters to see more results.
                     </p>
-                    {locationFilterEnabled && (
-                      <Button variant="outline" onClick={handleClearLocationFilter}>
-                        Show all coaches
-                      </Button>
-                    )}
                   </div>
                 )}
               </div>

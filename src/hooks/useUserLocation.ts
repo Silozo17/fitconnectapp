@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface LocationData {
@@ -21,19 +21,17 @@ interface StoredLocation {
   timestamp: number;
 }
 
-export const useUserLocation = (skipDetection = false) => {
+export const useUserLocation = () => {
   const [location, setLocation] = useState<LocationData>({
     city: null,
     region: null,
     country: null,
     county: null,
-    isLoading: !skipDetection,
+    isLoading: true,
     error: null,
   });
 
   useEffect(() => {
-    if (skipDetection) return;
-
     const detectLocation = async () => {
       // Check localStorage first
       const stored = localStorage.getItem(LOCATION_STORAGE_KEY);
@@ -97,9 +95,9 @@ export const useUserLocation = (skipDetection = false) => {
     };
 
     detectLocation();
-  }, [skipDetection]);
+  }, []);
 
-  const clearLocation = useCallback(() => {
+  const clearLocation = () => {
     localStorage.removeItem(LOCATION_STORAGE_KEY);
     setLocation({
       city: null,
@@ -109,48 +107,7 @@ export const useUserLocation = (skipDetection = false) => {
       isLoading: false,
       error: null,
     });
-  }, []);
-
-  const setManualLocation = useCallback((newLocation: {
-    city?: string | null;
-    region?: string | null;
-    country?: string | null;
-    county?: string | null;
-  }) => {
-    const locationData = {
-      city: newLocation.city || null,
-      region: newLocation.region || null,
-      country: newLocation.country || null,
-      county: newLocation.county || null,
-    };
-
-    // Store in localStorage
-    const toStore: StoredLocation = {
-      ...locationData,
-      timestamp: Date.now(),
-    };
-    localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify(toStore));
-
-    setLocation({
-      ...locationData,
-      isLoading: false,
-      error: null,
-    });
-  }, []);
-
-  // Get display label for location
-  const getLocationLabel = useCallback(() => {
-    if (location.city) return location.city;
-    if (location.county) return location.county;
-    if (location.region) return location.region;
-    if (location.country) return location.country;
-    return null;
-  }, [location]);
-
-  return { 
-    ...location, 
-    clearLocation, 
-    setManualLocation,
-    getLocationLabel,
   };
+
+  return { ...location, clearLocation };
 };
