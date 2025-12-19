@@ -213,20 +213,67 @@ const Privacy = () => {
                   to your request within 30 days.
                 </p>
 
-                <h2>7. Cookies and Tracking Technologies</h2>
+                <h2 id="cookies">7. Cookies and Tracking Technologies</h2>
                 <p>
                   We use cookies and similar tracking technologies to collect information about your browsing 
-                  activities. These technologies help us:
+                  activities. You can manage your cookie preferences at any time using the cookie banner or 
+                  by clicking "Cookie Preferences" in the footer.
+                </p>
+                
+                <h3>Cookie Categories</h3>
+                <table className="w-full text-sm border-collapse border border-border">
+                  <thead>
+                    <tr className="bg-muted">
+                      <th className="border border-border p-2 text-left">Category</th>
+                      <th className="border border-border p-2 text-left">Purpose</th>
+                      <th className="border border-border p-2 text-left">Required</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="border border-border p-2 font-medium">Essential</td>
+                      <td className="border border-border p-2">Authentication, security, basic site functionality. These are necessary for the Platform to work.</td>
+                      <td className="border border-border p-2">Yes</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-border p-2 font-medium">Functional</td>
+                      <td className="border border-border p-2">Location detection for showing nearby coaches, remembering preferences, language settings.</td>
+                      <td className="border border-border p-2">No</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-border p-2 font-medium">Analytics</td>
+                      <td className="border border-border p-2">Understanding how visitors use our Platform to improve the service.</td>
+                      <td className="border border-border p-2">No</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-border p-2 font-medium">Marketing</td>
+                      <td className="border border-border p-2">Displaying relevant sponsored content and advertisements.</td>
+                      <td className="border border-border p-2">No</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <h3>Location-Based Services</h3>
+                <p>
+                  When you enable Functional cookies, we use your IP address to detect your approximate location 
+                  (city, region, country). This allows us to:
                 </p>
                 <ul>
-                  <li>Remember your preferences and settings</li>
-                  <li>Understand how you use our Platform</li>
-                  <li>Provide personalized content and recommendations</li>
-                  <li>Analyze and improve our services</li>
+                  <li>Show coaches near you first in search results</li>
+                  <li>Display "coaches in your area" on the homepage</li>
+                  <li>Provide relevant local recommendations</li>
                 </ul>
                 <p>
-                  You can control cookies through your browser settings. Note that disabling cookies may affect 
-                  the functionality of certain features.
+                  Your detected location is stored locally on your device for 7 days. We do not track your 
+                  precise GPS location. You can clear your location data or disable location-based features 
+                  at any time through the cookie preferences.
+                </p>
+
+                <h3>Managing Cookie Preferences</h3>
+                <p>
+                  You can control cookies through our cookie consent banner or your browser settings. Note 
+                  that disabling cookies may affect the functionality of certain features, including 
+                  location-based coach discovery.
                 </p>
 
                 <h2>8. Third-Party Services</h2>
