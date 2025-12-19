@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useMessages } from "@/hooks/useMessages";
+import { useMessages, getQuickSendMetadata } from "@/hooks/useMessages";
 import { format } from "date-fns";
 import { Send, Loader2, ArrowLeft, Check, CheckCheck, User, Briefcase, Shield, MapPin, PanelRightOpen, PanelRightClose } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 
 import TypingIndicator, { useTypingBroadcast } from "./TypingIndicator";
 import ProspectProfileSheet from "./ProspectProfileSheet";
+import QuickSendMessageCard from "./QuickSendMessageCard";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import {
   Sheet,
@@ -291,6 +292,21 @@ const ChatWindow = ({
             ) : (
               messages.map((message) => {
                 const isMine = message.sender_id === currentProfileId;
+                const quickSendMetadata = getQuickSendMetadata(message.metadata);
+                
+                // Render interactive card for Quick Send messages
+                if (quickSendMetadata) {
+                  return (
+                    <QuickSendMessageCard
+                      key={message.id}
+                      message={message}
+                      isMine={isMine}
+                      currentProfileId={currentProfileId || ''}
+                    />
+                  );
+                }
+                
+                // Regular text message
                 return (
                   <div
                     key={message.id}

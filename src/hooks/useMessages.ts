@@ -4,13 +4,27 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAdminView } from "@/contexts/AdminContext";
 import { useToast } from "@/hooks/use-toast";
 
-interface Message {
+import { QuickSendMetadata } from "@/types/messaging";
+import type { Json } from "@/integrations/supabase/types";
+
+export interface Message {
   id: string;
   sender_id: string;
   receiver_id: string;
   content: string;
+  metadata?: Json | null;
   created_at: string;
   read_at: string | null;
+}
+
+// Helper to safely cast metadata to QuickSendMetadata
+export function getQuickSendMetadata(metadata: Json | null | undefined): QuickSendMetadata | null {
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return null;
+  const m = metadata as Record<string, unknown>;
+  if (m.type === 'quick_send' && typeof m.itemType === 'string' && typeof m.itemId === 'string') {
+    return metadata as unknown as QuickSendMetadata;
+  }
+  return null;
 }
 
 export interface Conversation {
@@ -447,7 +461,90 @@ export const useMessages = (participantId?: string) => {
     }
   };
 
-  // Set up realtime subscription
+  // Send message with metadata (for Quick Send offers)
+  const sendMessageWithMetadata = async (
+    content: string, 
+    metadata: QuickSendMetadata
+  ): Promise<boolean> => {
+    if (!currentProfileId) {
+      toast({
+        title: "Error",
+        description: "Your profile could not be loaded. Please refresh the page.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (!participantId) {
+      toast({
+        title: "Error",
+        description: "No recipient selected.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    // Create optimistic message for immediate UI update
+    const optimisticMessage: Message = {
+      id: `temp-${Date.now()}`,
+      sender_id: currentProfileId,
+      receiver_id: participantId,
+      content: content.trim(),
+      metadata: metadata as unknown as Json,
+      created_at: new Date().toISOString(),
+      read_at: null,
+    };
+
+    setMessages((prev) => [...prev, optimisticMessage]);
+
+    try {
+      const { data, error: sendError } = await supabase
+        .from("messages")
+        .insert({
+          sender_id: currentProfileId,
+          receiver_id: participantId,
+          content: content.trim(),
+          metadata: metadata as unknown as Json,
+        })
+        .select()
+        .single();
+
+      if (sendError) {
+        console.error("[useMessages] Error sending message with metadata:", sendError);
+        setMessages((prev) => prev.filter((m) => m.id !== optimisticMessage.id));
+        toast({
+          title: "Failed to send offer",
+          description: sendError.message,
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      // Replace optimistic message with real one
+      setMessages((prev) => 
+        prev.map((m) => m.id === optimisticMessage.id ? data : m)
+      );
+      
+      // Send notification
+      if (data?.id) {
+        supabase.functions.invoke("send-message-notification", {
+          body: { messageId: data.id },
+        }).catch((err) => console.error("Failed to send message notification:", err));
+      }
+      
+      return true;
+    } catch (err) {
+      console.error("[useMessages] Unexpected error sending message with metadata:", err);
+      setMessages((prev) => prev.filter((m) => m.id !== optimisticMessage.id));
+      toast({
+        title: "Failed to send offer",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+
   useEffect(() => {
     if (!currentProfileId) {
       return;
@@ -555,6 +652,7 @@ export const useMessages = (participantId?: string) => {
     loading,
     error,
     sendMessage,
+    sendMessageWithMetadata,
     fetchConversations,
     softRefreshConversations,
     currentProfileId,
