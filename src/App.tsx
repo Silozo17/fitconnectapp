@@ -8,12 +8,14 @@ import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AdminProvider } from "@/contexts/AdminContext";
 import { LocaleProvider } from "@/contexts/LocaleContext";
+import { CookieConsentProvider } from "@/contexts/CookieConsentContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import ScrollToTop from "./components/shared/ScrollToTop";
 import ScrollRestoration from "./components/shared/ScrollRestoration";
 import PageLoadingSpinner from "./components/shared/PageLoadingSpinner";
 import { ReloadPrompt } from "./components/pwa/ReloadPrompt";
 import { InstallBanner } from "./components/pwa/InstallBanner";
+import { CookieConsentBanner } from "./components/shared/CookieConsentBanner";
 import { ErrorBoundary } from "./components/shared/ErrorBoundary";
 
 // Eagerly loaded pages (critical path)
@@ -187,10 +189,12 @@ const App = () => (
         <BrowserRouter>
           <InstallBanner />
           <ScrollRestoration />
-          <AuthProvider>
-            <AdminProvider>
-              <LocaleProvider>
-                <Suspense fallback={<PageLoadingSpinner />}>
+          <CookieConsentProvider>
+            <CookieConsentBanner />
+            <AuthProvider>
+              <AdminProvider>
+                <LocaleProvider>
+                  <Suspense fallback={<PageLoadingSpinner />}>
                   <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/get-started" element={<GetStarted />} />
@@ -620,6 +624,7 @@ const App = () => (
               </LocaleProvider>
             </AdminProvider>
           </AuthProvider>
+          </CookieConsentProvider>
         </BrowserRouter>
       </TooltipProvider>
       </QueryClientProvider>
