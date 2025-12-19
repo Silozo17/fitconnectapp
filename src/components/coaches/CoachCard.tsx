@@ -217,9 +217,14 @@ const CoachCard = ({ coach, onBook, onRequestConnection }: CoachCardProps) => {
               </div>
             </TooltipProvider>
           ) : !isAuthenticated ? (
-            <Button variant="lime" size="sm" onClick={handleSignUp}>
-              Sign Up to Connect
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button asChild variant="lime-outline" size="sm">
+                <Link to={`/coaches/${coach.username || coach.id}`}>View</Link>
+              </Button>
+              <Button variant="lime" size="sm" onClick={handleSignUp}>
+                Connect
+              </Button>
+            </div>
           ) : (
             <Button asChild variant="lime-outline" size="sm">
               <Link to={`/coaches/${coach.username || coach.id}`}>View Profile</Link>
