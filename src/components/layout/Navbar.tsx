@@ -197,8 +197,8 @@ const Navbar = () => {
               </>
             ) : (
               <>
-                <Button asChild variant="ghost"><Link to="/auth">Log In</Link></Button>
-                <GradientButton asChild size="sm"><Link to="/auth">Get Started</Link></GradientButton>
+                <Button asChild variant="ghost"><Link to="/auth?mode=login">Log In</Link></Button>
+                <GradientButton asChild size="sm"><Link to="/auth?mode=signup">Get Started</Link></GradientButton>
               </>
             )}
           </div>
@@ -305,10 +305,10 @@ const Navbar = () => {
                 ) : (
                   <div className="flex flex-col gap-3">
                     <Button asChild variant="outline" className="w-full">
-                      <Link to="/auth" onClick={() => setIsOpen(false)}>Log In</Link>
+                      <Link to="/auth?mode=login" onClick={() => setIsOpen(false)}>Log In</Link>
                     </Button>
                     <GradientButton asChild className="w-full">
-                      <Link to="/auth" onClick={() => setIsOpen(false)}>Get Started</Link>
+                      <Link to="/auth?mode=signup" onClick={() => setIsOpen(false)}>Get Started</Link>
                     </GradientButton>
                   </div>
                 )}
