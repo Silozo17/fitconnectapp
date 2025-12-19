@@ -252,18 +252,31 @@ export const useRespondToBooking = () => {
 
         if (sessionError) throw sessionError;
 
-        // Auto-create video meeting for online sessions
+        // For online sessions: detect video provider, create meeting, then sync & email
         if (request.is_online && newSession) {
           try {
+            // Get coach's active video provider (Zoom or Google Meet)
+            const { data: videoSettings } = await supabase
+              .from("video_conference_settings")
+              .select("provider")
+              .eq("coach_id", request.coach_id)
+              .eq("is_active", true)
+              .single();
+
+            const provider = videoSettings?.provider || "google_meet";
+            console.log("Creating video meeting with provider:", provider);
+
+            // Create video meeting - wait for it to complete so calendar/email has the link
             await supabase.functions.invoke("video-create-meeting", {
-              body: { sessionId: newSession.id, provider: "google_meet" },
+              body: { sessionId: newSession.id, provider },
             });
-          } catch {
+          } catch (err) {
+            console.error("Video meeting creation failed (non-blocking):", err);
             // Video meeting creation is optional - don't fail the booking
           }
         }
 
-        // Auto-sync session to calendars (coach and client)
+        // Sync session to calendars (coach and client) - after video meeting so link is included
         if (newSession) {
           try {
             await supabase.functions.invoke("calendar-sync-session", {
@@ -271,7 +284,17 @@ export const useRespondToBooking = () => {
             });
           } catch (err) {
             console.error("Calendar sync failed (non-blocking):", err);
-            // Calendar sync is optional - don't fail the booking
+          }
+        }
+
+        // Send confirmation email to client - after everything is set up so email has all details
+        if (newSession) {
+          try {
+            await supabase.functions.invoke("send-booking-accepted", {
+              body: { sessionId: newSession.id },
+            });
+          } catch (err) {
+            console.error("Confirmation email failed (non-blocking):", err);
           }
         }
       }
