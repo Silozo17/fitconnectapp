@@ -9,7 +9,13 @@ import {
   TrendingUp, 
   Trophy, 
   Settings,
-  ArrowRight
+  ArrowRight,
+  Target,
+  ShoppingCart,
+  Sword,
+  Calculator,
+  Library,
+  Users
 } from "lucide-react";
 
 const clientGuides = [
@@ -54,6 +60,42 @@ const clientGuides = [
     description: "Connect wearables, manage notifications, and customise your experience.",
     href: "/docs/client/settings",
     icon: Settings,
+  },
+  {
+    title: "Habits & Streaks",
+    description: "Track daily habits assigned by your coach and build consistency streaks.",
+    href: "/docs/client/habits",
+    icon: Target,
+  },
+  {
+    title: "Shopping Lists",
+    description: "Create grocery lists from meal plans with supermarket integration.",
+    href: "/docs/client/grocery",
+    icon: ShoppingCart,
+  },
+  {
+    title: "Challenges",
+    description: "Join platform-wide or coach challenges and compete for rewards.",
+    href: "/docs/client/challenges",
+    icon: Sword,
+  },
+  {
+    title: "Fitness Tools",
+    description: "Access calculators for BMI, BMR, TDEE, body fat, and more.",
+    href: "/docs/client/tools",
+    icon: Calculator,
+  },
+  {
+    title: "Digital Library",
+    description: "View and access purchased e-books, videos, and training templates.",
+    href: "/docs/client/library",
+    icon: Library,
+  },
+  {
+    title: "Connections",
+    description: "Connect with friends, share progress, and view their achievements.",
+    href: "/docs/client/connections",
+    icon: Users,
   },
 ];
 
