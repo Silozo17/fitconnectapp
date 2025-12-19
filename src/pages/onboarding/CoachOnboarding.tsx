@@ -16,6 +16,7 @@ import { LocationAutocomplete } from "@/components/shared/LocationAutocomplete";
 import StripeConnectOnboardingStep from "@/components/onboarding/StripeConnectOnboardingStep";
 import IntegrationsOnboardingStep from "@/components/onboarding/IntegrationsOnboardingStep";
 import DualAccountStep from "@/components/onboarding/DualAccountStep";
+import VerificationOnboardingStep from "@/components/onboarding/VerificationOnboardingStep";
 import { COACH_TYPES, COACH_TYPE_CATEGORIES, getCoachTypesByCategory } from "@/constants/coachTypes";
 import { SUBSCRIPTION_TIERS, TierKey } from "@/lib/stripe-config";
 
@@ -27,6 +28,7 @@ const STEPS = [
   "Connect Payments",
   "Integrations",
   "Dual Account",
+  "Verification",
   "Choose Your Plan"
 ];
 
@@ -562,8 +564,17 @@ const CoachOnboarding = () => {
               />
             )}
 
-            {/* Step 8: Subscription Tier */}
-            {currentStep === 7 && (
+            {/* Step 8: Verification */}
+            {currentStep === 7 && coachProfileId && (
+              <VerificationOnboardingStep
+                coachId={coachProfileId}
+                onComplete={handleNext}
+                onSkip={handleNext}
+              />
+            )}
+
+            {/* Step 9: Subscription Tier */}
+            {currentStep === 8 && (
               <div className="space-y-6">
                 <div>
                   <h2 className="font-display text-2xl font-bold text-foreground mb-2">
@@ -626,7 +637,7 @@ const CoachOnboarding = () => {
             )}
 
             {/* Navigation - only show for steps that don't have their own navigation */}
-            {(currentStep <= 3 || currentStep === 7) && (
+            {(currentStep <= 3 || currentStep === 8) && (
               <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
                 <Button
                   variant="ghost"
