@@ -1294,6 +1294,15 @@ const CoachSchedule = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Add Session Modal */}
+      <AddCoachSessionModal
+        open={showAddSessionModal}
+        onOpenChange={setShowAddSessionModal}
+        preselectedDate={preselectedDate}
+        preselectedTime={preselectedTime}
+        coachId={coachId}
+      />
     </DashboardLayout>
   );
 };

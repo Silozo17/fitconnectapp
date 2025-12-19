@@ -350,7 +350,8 @@ const ChatWindow = ({
 
           {/* Quick Actions (for coaches) */}
           <ChatQuickActions 
-            coachId={participantId} 
+            coachId={currentProfileId || ""} 
+            clientId={participantInfo.type === "client" ? participantId : undefined}
             onSendMessage={async (msg) => {
               const success = await sendMessage(msg);
               return success;
