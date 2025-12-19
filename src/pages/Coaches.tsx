@@ -11,6 +11,7 @@ import CoachFilters from "@/components/coaches/CoachFilters";
 import BookSessionModal from "@/components/booking/BookSessionModal";
 import RequestConnectionModal from "@/components/coaches/RequestConnectionModal";
 import { useCoachMarketplace, type MarketplaceCoach } from "@/hooks/useCoachMarketplace";
+import { useUserLocation } from "@/hooks/useUserLocation";
 
 const Coaches = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -24,12 +25,23 @@ const Coaches = () => {
   const [bookingCoach, setBookingCoach] = useState<MarketplaceCoach | null>(null);
   const [connectionCoach, setConnectionCoach] = useState<MarketplaceCoach | null>(null);
 
+  // Get user location for proximity ranking
+  const userLocation = useUserLocation();
+
   const { data: coaches, isLoading, error } = useCoachMarketplace({
     search: searchQuery || undefined,
     coachTypes: selectedTypes.length > 0 ? selectedTypes : undefined,
     priceRange,
     onlineOnly,
     inPersonOnly,
+    // Pass user location for ranking algorithm
+    userLocation: userLocation.isLoading ? null : {
+      city: userLocation.city,
+      region: userLocation.region,
+      county: userLocation.county,
+      country: userLocation.country,
+    },
+    enableLocationRanking: true,
   });
 
   const handleBook = (coach: MarketplaceCoach) => {
