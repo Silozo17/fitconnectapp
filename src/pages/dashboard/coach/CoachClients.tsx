@@ -11,6 +11,7 @@ import {
   UserCheck,
   Clock,
   Loader2,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,7 @@ import { ScheduleSessionModal } from "@/components/dashboard/clients/ScheduleSes
 import { AssignPlanModal } from "@/components/dashboard/clients/AssignPlanModal";
 import { AddNoteModal } from "@/components/dashboard/clients/AddNoteModal";
 import { useCoachClients, CoachClient } from "@/hooks/useCoachClients";
+import ConnectionRequests from "@/components/dashboard/coach/ConnectionRequests";
 
 const CoachClients = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -120,6 +122,11 @@ const CoachClients = () => {
           <Plus className="w-4 h-4 mr-2" />
           Add Client
         </Button>
+      </div>
+
+      {/* Pending Client Requests */}
+      <div className="mb-6">
+        <ConnectionRequests />
       </div>
 
       {/* Stats Cards */}
