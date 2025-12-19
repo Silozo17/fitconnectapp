@@ -11,8 +11,11 @@ import {
   TrendingUp, Award
 } from "lucide-react";
 import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
+import { usePlatformStats } from "@/hooks/usePlatformStats";
+import { formatStatNumber } from "@/lib/formatStats";
 
 const ForCoaches = () => {
+  const { data: platformStats, isLoading } = usePlatformStats();
   const [numberOfClients, setNumberOfClients] = useState(15);
   const [adminHoursPerClient, setAdminHoursPerClient] = useState(2);
 
@@ -143,7 +146,7 @@ const ForCoaches = () => {
                 </span>
               </h1>
               <p className="text-xl text-muted-foreground mb-8">
-                Join 500+ coaches reaching clients worldwide. Set your own rates, build your brand, 
+                Join {isLoading ? "..." : formatStatNumber(platformStats?.totalCoaches || 0)} coaches reaching clients worldwide. Set your own rates, build your brand, 
                 and focus on what you do best—transforming lives.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
@@ -210,7 +213,7 @@ const ForCoaches = () => {
                       <div className="pt-4 border-t border-border text-center">
                         <div className="flex items-center justify-center gap-2 mb-1">
                           <Globe className="w-5 h-5 text-primary" />
-                          <p className="text-lg font-bold">10,000+ active clients</p>
+                          <p className="text-lg font-bold">{isLoading ? "..." : formatStatNumber(platformStats?.totalUsers || 0)} active clients</p>
                         </div>
                         <p className="text-xs text-muted-foreground">
                           looking for coaches like you
