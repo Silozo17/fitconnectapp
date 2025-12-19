@@ -103,6 +103,33 @@ const RequestConnectionModal = ({
 
       if (error) throw error;
       
+      const messageContent = message.trim() || `Hi, I'd like to connect with you for coaching.`;
+      
+      // Create a message from client to coach (so it shows in coach's Messages)
+      await supabase
+        .from("messages")
+        .insert({
+          sender_id: clientProfile.id,
+          receiver_id: coach.id,
+          content: messageContent,
+        })
+        .then(({ error: msgError }) => {
+          if (msgError) console.error("Failed to create message:", msgError);
+        });
+
+      // Add client to coach's pipeline as a new lead
+      await supabase
+        .from("coach_leads")
+        .upsert({
+          coach_id: coach.id,
+          client_id: clientProfile.id,
+          source: 'marketplace_request',
+          stage: 'new_lead',
+        }, { onConflict: 'coach_id,client_id' })
+        .then(({ error: leadError }) => {
+          if (leadError) console.error("Failed to create lead:", leadError);
+        });
+      
       // Send email notification to coach
       if (data?.id) {
         await supabase.functions.invoke("send-connection-request-email", {
