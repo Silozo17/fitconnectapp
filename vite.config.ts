@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'logo.svg', 'favicon.ico', 'apple-touch-icon.png', 'robots.txt', 'offline.html'],
+      includeAssets: ['favicon.svg', 'logo.svg', 'favicon.ico', 'apple-touch-icon.png', 'robots.txt'],
       manifest: {
         id: 'fitconnect-pwa',
         name: 'FitConnect',
@@ -73,8 +73,11 @@ export default defineConfig(({ mode }) => ({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        navigateFallback: '/offline.html',
-        navigateFallbackDenylist: [/^\/api/, /^\/supabase/, /^\/auth/],
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/api/, /^\/supabase/],
+        additionalManifestEntries: [
+          { url: '/offline.html', revision: '1' }
+        ],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
