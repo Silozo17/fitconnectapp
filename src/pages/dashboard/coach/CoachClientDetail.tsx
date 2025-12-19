@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -44,6 +44,7 @@ import { format } from "date-fns";
 
 const CoachClientDetail = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
   // Fetch real data
@@ -229,7 +230,7 @@ const CoachClientDetail = () => {
             </p>
           </div>
           <div className="flex gap-3">
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => navigate(`/dashboard/coach/messages/${id}`)}>
               <MessageSquare className="w-4 h-4 mr-2" />
               Message
             </Button>
