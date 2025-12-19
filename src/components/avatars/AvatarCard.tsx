@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Avatar, getAvatarImageUrl } from '@/hooks/useAvatars';
-import { RARITY_CONFIG, getUnlockDescription } from '@/lib/avatar-config';
+import { RARITY_CONFIG, getUnlockDescription } from '@/lib/avatar-utils';
 import { Lock, Crown, Check } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 

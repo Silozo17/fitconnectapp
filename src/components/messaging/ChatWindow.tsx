@@ -19,7 +19,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
-import { Rarity } from "@/lib/avatar-config";
+import { Rarity } from "@/lib/avatar-utils";
 
 interface ParticipantInfo {
   name: string;

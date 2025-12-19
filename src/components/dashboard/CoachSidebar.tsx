@@ -35,7 +35,7 @@ import { UserAvatar } from "@/components/shared/UserAvatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useSelectedAvatar } from "@/hooks/useAvatars";
-import { Rarity } from "@/lib/avatar-config";
+import { Rarity } from "@/lib/avatar-utils";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { FeatureKey } from "@/lib/feature-config";
 import {

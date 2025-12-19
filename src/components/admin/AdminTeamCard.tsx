@@ -2,7 +2,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "./StatusBadge";
 import { UserAvatar } from "@/components/shared/UserAvatar";
-import { Rarity } from "@/lib/avatar-config";
+import { Rarity } from "@/lib/avatar-utils";
 
 interface TeamMember {
   id: string;

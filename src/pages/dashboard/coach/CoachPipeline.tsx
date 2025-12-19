@@ -45,7 +45,7 @@ import { Link } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import ProspectProfileSheet from "@/components/messaging/ProspectProfileSheet";
 import { UserAvatar } from "@/components/shared/UserAvatar";
-import { Rarity } from "@/lib/avatar-config";
+import { Rarity } from "@/lib/avatar-utils";
 
 const STAGES: { key: LeadStage; label: string; icon: React.ReactNode; color: string; borderColor: string }[] = [
   { key: 'new_lead', label: 'New Leads', icon: <UserPlus className="w-4 h-4" />, color: 'bg-blue-500', borderColor: 'border-l-blue-500' },

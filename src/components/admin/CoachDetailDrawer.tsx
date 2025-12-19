@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { useUserAvatars, useUserSelectedAvatar, useRevokeAvatar, useAllAvatars } from "@/hooks/useAdminAvatars";
 import { getAvatarImageUrl } from "@/hooks/useAvatars";
-import { RARITY_CONFIG } from "@/lib/avatar-config";
+import { RARITY_CONFIG } from "@/lib/avatar-utils";
 import { GrantAvatarModal } from "./GrantAvatarModal";
 import { LockedAvatarsSection } from "./LockedAvatarsSection";
 import { useUserLastLogin } from "@/hooks/useUserLastLogin";

@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { getBadgeIcon } from "@/lib/badge-icons";
 import { UserAvatar } from "@/components/shared/UserAvatar";
-import { Rarity } from "@/lib/avatar-config";
+import { Rarity } from "@/lib/avatar-utils";
 
 interface CoachProfileSheetProps {
   open: boolean;

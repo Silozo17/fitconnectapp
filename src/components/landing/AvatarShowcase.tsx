@@ -5,7 +5,6 @@ import { Card } from '@/components/ui/card';
 import { ChevronRight, Lock, Sparkles, Trophy, Target } from 'lucide-react';
 import { useAvatars, getAvatarImageUrl } from '@/hooks/useAvatars';
 import { cn } from '@/lib/utils';
-import { getUnlockDescription } from '@/lib/avatar-unlocks';
 
 export function AvatarShowcase() {
   const { data: avatars } = useAvatars();

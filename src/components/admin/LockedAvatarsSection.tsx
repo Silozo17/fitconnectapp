@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAllAvatars, useGrantAvatar } from "@/hooks/useAdminAvatars";
 import { getAvatarImageUrl } from "@/hooks/useAvatars";
-import { RARITY_CONFIG } from "@/lib/avatar-config";
-import { getUnlockDescription } from "@/lib/avatar-unlocks";
+import { RARITY_CONFIG, getUnlockDescription } from "@/lib/avatar-utils";
 import { Lock, Gift, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 

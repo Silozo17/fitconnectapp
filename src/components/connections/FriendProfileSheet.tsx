@@ -26,7 +26,7 @@ import { calculateLevelFromXP, getLevelTitle, RARITY_COLORS } from "@/hooks/useG
 import { toast } from "sonner";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { getAvatarImageUrl } from "@/hooks/useAvatars";
-import { Rarity } from "@/lib/avatar-config";
+import { Rarity } from "@/lib/avatar-utils";
 
 interface FriendProfileSheetProps {
   open: boolean;

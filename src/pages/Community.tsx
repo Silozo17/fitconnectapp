@@ -20,7 +20,7 @@ import {
 } from "@/hooks/usePublicLeaderboard";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { useAvatars, getAvatarImageUrl } from "@/hooks/useAvatars";
-import { getUnlockDescription } from "@/lib/avatar-unlocks";
+import { getUnlockDescription } from "@/lib/avatar-utils";
 import { cn } from "@/lib/utils";
 import {
   Pagination,

@@ -7,7 +7,7 @@ import { useAdminView } from "@/contexts/AdminContext";
 import { toast } from "sonner";
 import { FriendProfileSheet } from "./FriendProfileSheet";
 import { UserAvatar } from "@/components/shared/UserAvatar";
-import { Rarity } from "@/lib/avatar-config";
+import { Rarity } from "@/lib/avatar-utils";
 
 interface ConnectionCardProps {
   connection: {

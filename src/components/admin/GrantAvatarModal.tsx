@@ -17,7 +17,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAllAvatars, useGrantMultipleAvatars } from "@/hooks/useAdminAvatars";
 import { getAvatarImageUrl } from "@/hooks/useAvatars";
-import { RARITY_CONFIG } from "@/lib/avatar-config";
+import { RARITY_CONFIG } from "@/lib/avatar-utils";
 import { Search, Gift, Loader2, Lock, CheckSquare, Square } from "lucide-react";
 import { cn } from "@/lib/utils";
 

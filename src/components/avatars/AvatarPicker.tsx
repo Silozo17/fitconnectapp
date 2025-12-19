@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Progress } from '@/components/ui/progress';
 import { Loader2, Pencil, Lock, Trophy } from 'lucide-react';
-import { getUnlockDescription, getUnlockProgress, UNLOCK_DESCRIPTIONS } from '@/lib/avatar-unlocks';
+import { getUnlockDescription, getUnlockProgress, UNLOCK_DESCRIPTIONS } from '@/lib/avatar-utils';
 
 interface AvatarPickerProps {
   selectedAvatar: Avatar | null;

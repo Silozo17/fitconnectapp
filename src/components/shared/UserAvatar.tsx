@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { getAvatarImageUrl } from "@/hooks/useAvatars";
-import { DEFAULT_AVATAR, RARITY_CONFIG, Rarity } from "@/lib/avatar-config";
+import { DEFAULT_AVATAR, RARITY_CONFIG, Rarity } from "@/lib/avatar-utils";
 
 interface UserAvatarProps {
   src?: string | null;           // Uploaded profile photo
