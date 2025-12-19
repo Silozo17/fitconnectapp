@@ -39,7 +39,11 @@ const DashboardHeader = memo(({ subscriptionTier, onMenuToggle }: DashboardHeade
   const handleSignOut = useCallback(() => signOut(), [signOut]);
 
   return (
-    <header className="h-16 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-30">
+    <header 
+      className="h-16 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-30"
+      role="banner"
+      aria-label="Dashboard header"
+    >
       <div className="h-full px-4 xl:px-6 flex items-center justify-between">
         {/* Left side - Hamburger + Search (search hidden on mobile) */}
         <div className="flex items-center gap-3 flex-1">
@@ -49,17 +53,20 @@ const DashboardHeader = memo(({ subscriptionTier, onMenuToggle }: DashboardHeade
             size="icon"
             className="xl:hidden"
             onClick={onMenuToggle}
+            aria-label="Open navigation menu"
+            aria-expanded="false"
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="w-5 h-5" aria-hidden="true" />
           </Button>
 
           {/* Search - Hidden on mobile */}
-          <div className="hidden xl:flex flex-1 max-w-md">
+          <div className="hidden xl:flex flex-1 max-w-md" role="search">
             <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
               <Input
                 placeholder="Search clients, sessions..."
                 className="pl-10 bg-secondary border-border"
+                aria-label="Search clients, sessions"
               />
             </div>
           </div>
@@ -85,7 +92,11 @@ const DashboardHeader = memo(({ subscriptionTier, onMenuToggle }: DashboardHeade
           <div className="hidden xl:block">
             <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-auto p-0 pt-4 overflow-visible bg-transparent hover:bg-transparent">
+              <Button 
+                variant="ghost" 
+                className="relative h-auto p-0 pt-4 overflow-visible bg-transparent hover:bg-transparent"
+                aria-label={`Account menu for ${displayName || "Coach"}`}
+              >
                 <UserAvatar
                   src={avatarUrl}
                   avatarSlug={selectedAvatar?.slug}

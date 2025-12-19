@@ -6,6 +6,7 @@ import { useCoachOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { Loader2 } from "lucide-react";
 import CoachSidebar from "./CoachSidebar";
 import DashboardHeader from "./DashboardHeader";
+import SkipNavigation from "@/components/shared/SkipNavigation";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -36,8 +37,9 @@ const DashboardLayout = memo(({ children, title = "Coach Dashboard", description
 
   if (isLoading || !onboardingStatus?.isOnboarded) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-background flex items-center justify-center" role="status" aria-label="Loading dashboard">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" aria-hidden="true" />
+        <span className="sr-only">Loading dashboard...</span>
       </div>
     );
   }
@@ -48,6 +50,8 @@ const DashboardLayout = memo(({ children, title = "Coach Dashboard", description
         <title>{title} | FitConnect</title>
         {description && <meta name="description" content={description} />}
       </Helmet>
+
+      <SkipNavigation />
 
       <div className="h-dvh bg-background overflow-hidden">
         <CoachSidebar
@@ -62,7 +66,15 @@ const DashboardLayout = memo(({ children, title = "Coach Dashboard", description
             subscriptionTier={onboardingStatus.subscriptionTier} 
             onMenuToggle={handleOpenMobile} 
           />
-          <main className="flex-1 p-4 lg:p-6 pb-24 overflow-y-auto">{children}</main>
+          <main 
+            id="main-content" 
+            className="flex-1 p-4 lg:p-6 pb-24 overflow-y-auto"
+            role="main"
+            aria-label={title}
+            tabIndex={-1}
+          >
+            {children}
+          </main>
         </div>
       </div>
     </>
