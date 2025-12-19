@@ -49,7 +49,15 @@ const CoachDashboard = () => {
     );
   }
 
-  const tierLabel = profile?.subscription_tier === "elite" ? "Elite" : profile?.subscription_tier === "pro" ? "Pro" : "Free";
+  const tierLabel = profile?.subscription_tier === "founder" 
+    ? "Founder" 
+    : profile?.subscription_tier === "enterprise" 
+    ? "Enterprise" 
+    : profile?.subscription_tier === "pro" 
+    ? "Pro" 
+    : profile?.subscription_tier === "starter" 
+    ? "Starter" 
+    : "Free";
 
   return (
     <>

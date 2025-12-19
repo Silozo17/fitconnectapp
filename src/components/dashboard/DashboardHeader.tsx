@@ -18,6 +18,7 @@ import { UserAvatar } from "@/components/shared/UserAvatar";
 import ViewSwitcher from "@/components/admin/ViewSwitcher";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { FeedbackModal } from "@/components/feedback/FeedbackModal";
+import { normalizeTier, SUBSCRIPTION_TIERS } from "@/lib/stripe-config";
 
 interface DashboardHeaderProps {
   subscriptionTier?: string | null;
@@ -30,10 +31,10 @@ const DashboardHeader = memo(({ subscriptionTier, onMenuToggle }: DashboardHeade
   const { displayName, avatarUrl } = useUserProfile();
   const { data: selectedAvatar } = useSelectedAvatar('coach');
 
-  const tierLabel = useMemo(() => 
-    subscriptionTier === "elite" ? "Elite" : subscriptionTier === "pro" ? "Pro" : "Free",
-    [subscriptionTier]
-  );
+  const tierLabel = useMemo(() => {
+    const normalizedTier = normalizeTier(subscriptionTier);
+    return SUBSCRIPTION_TIERS[normalizedTier]?.name || "Free";
+  }, [subscriptionTier]);
 
   const handleProfileClick = useCallback(() => navigate("/dashboard/profile"), [navigate]);
   const handleSignOut = useCallback(() => signOut(), [signOut]);

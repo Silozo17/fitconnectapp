@@ -24,8 +24,11 @@ import { CoachDashboardCustomizer } from "@/components/dashboard/coach/CoachDash
 import { AddClientModal } from "@/components/dashboard/clients/AddClientModal";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { useCoachDashboardStats } from "@/hooks/useCoachDashboardStats";
+import { useCoachProfileRealtime } from "@/hooks/useCoachProfileRealtime";
 
 const CoachOverview = () => {
+  // Subscribe to real-time coach profile updates (e.g., tier changes by admin)
+  useCoachProfileRealtime();
   const { unreadCount: unreadMessages } = useUnreadMessages();
   const { data, isLoading, error, refetch } = useCoachDashboardStats();
   const [customizerOpen, setCustomizerOpen] = useState(false);

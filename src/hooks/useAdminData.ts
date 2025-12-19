@@ -350,9 +350,13 @@ export const useGrantFreePlan = () => {
 
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["admin-granted-subscriptions"] });
       queryClient.invalidateQueries({ queryKey: ["coaches"] });
+      // Also invalidate the coach's own queries so their dashboard updates
+      queryClient.invalidateQueries({ queryKey: ["coach-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["coach-onboarding-status"] });
+      queryClient.invalidateQueries({ queryKey: ["coach-clients"] });
       toast.success("Free plan granted successfully");
     },
     onError: (error: any) => {
@@ -399,6 +403,10 @@ export const useRevokeGrantedPlan = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-granted-subscriptions"] });
       queryClient.invalidateQueries({ queryKey: ["coaches"] });
+      // Also invalidate the coach's own queries so their dashboard updates
+      queryClient.invalidateQueries({ queryKey: ["coach-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["coach-onboarding-status"] });
+      queryClient.invalidateQueries({ queryKey: ["coach-clients"] });
       toast.success("Granted plan revoked");
     },
     onError: (error: any) => {
