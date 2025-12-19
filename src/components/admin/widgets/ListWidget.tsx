@@ -14,14 +14,31 @@ type ListWidgetType =
   | "top_coaches" 
   | "flagged_documents";
 
+interface ListItem {
+  id: string;
+  document_type?: string;
+  coach_profiles?: { display_name?: string };
+  first_name?: string;
+  last_name?: string;
+  created_at?: string;
+  amount?: number;
+  type?: string;
+  status?: string;
+  rating?: number;
+  review_text?: string;
+  client_profiles?: { first_name?: string };
+  display_name?: string;
+  profile_image_url?: string;
+}
+
 interface ListWidgetProps {
   type: ListWidgetType;
-  items: any[];
+  items: ListItem[];
   title?: string;
 }
 
 const configMap: Record<ListWidgetType, { 
-  icon: React.ComponentType<any>; 
+  icon: React.ComponentType<{ className?: string }>; 
   title: string; 
   link: string;
   emptyMessage: string;
@@ -69,7 +86,7 @@ export function ListWidget({ type, items, title }: ListWidgetProps) {
   const Icon = config.icon;
   const displayTitle = title || config.title;
 
-  const renderItem = (item: any) => {
+  const renderItem = (item: ListItem) => {
     switch (type) {
       case "pending_verifications":
         return (
@@ -201,7 +218,7 @@ export function ListWidget({ type, items, title }: ListWidgetProps) {
         <ScrollArea className="h-[240px]">
           <div className="space-y-2">
             {items.length > 0 ? (
-              items.map((item: any) => (
+              items.map((item: ListItem) => (
                 <div 
                   key={item.id} 
                   className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"

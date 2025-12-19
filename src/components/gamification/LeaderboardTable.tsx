@@ -1,7 +1,5 @@
 import { XPLeaderboardEntry, getLevelTitle } from '@/hooks/useGamification';
-import { useAuth } from '@/contexts/AuthContext';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useClientProfileId } from '@/hooks/useClientProfileId';
 import { cn } from '@/lib/utils';
 import { Trophy, Medal, Award, Zap } from 'lucide-react';
 import { getAvatarImageUrl } from '@/hooks/useAvatars';
@@ -18,21 +16,8 @@ interface LeaderboardEntryWithAvatar extends XPLeaderboardEntry {
   selected_avatar_rarity?: string | null;
 }
 
-function useClientProfile() {
-  const { user } = useAuth();
-  return useQuery({
-    queryKey: ['my-client-profile', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      const { data } = await supabase.from('client_profiles').select('id').eq('user_id', user.id).maybeSingle();
-      return data;
-    },
-    enabled: !!user?.id,
-  });
-}
-
 export function LeaderboardTable({ entries, isLoading, emptyMessage = 'No entries yet' }: LeaderboardTableProps) {
-  const { data: profile } = useClientProfile();
+  const { data: clientProfileId } = useClientProfileId();
   
   if (isLoading) {
     return (
@@ -68,9 +53,9 @@ export function LeaderboardTable({ entries, isLoading, emptyMessage = 'No entrie
   
   return (
     <div className="space-y-2">
-      {entries.map((entry) => {
+    {entries.map((entry) => {
         const entryWithAvatar = entry as LeaderboardEntryWithAvatar;
-        const isMe = profile?.id === entry.client_id;
+        const isMe = clientProfileId === entry.client_id;
         // Privacy-safe display: only show first name or alias, no last name
         const displayName = entry.first_name || 'Anonymous';
         const initials = entry.first_name?.[0] || 'A';

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useClientProfileId } from "@/hooks/useClientProfileId";
 import type { MarketplaceCoach } from "@/hooks/useCoachMarketplace";
 
 export interface Favourite {
@@ -13,54 +14,40 @@ export interface Favourite {
 // Fetch all favourites for the current client
 export const useFavourites = () => {
   const { user } = useAuth();
+  const { data: clientProfileId } = useClientProfileId();
 
   return useQuery({
-    queryKey: ["favourites", user?.id],
+    queryKey: ["favourites", clientProfileId],
     queryFn: async () => {
-      if (!user) return [];
-
-      const { data: profile } = await supabase
-        .from("client_profiles")
-        .select("id")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (!profile) return [];
+      if (!clientProfileId) return [];
 
       const { data, error } = await supabase
         .from("favourites")
         .select("*")
-        .eq("client_id", profile.id)
+        .eq("client_id", clientProfileId)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
       return data as Favourite[];
     },
-    enabled: !!user,
+    enabled: !!user && !!clientProfileId,
   });
 };
 
 // Fetch favourite coaches with full profile data
 export const useFavouriteCoaches = () => {
   const { user } = useAuth();
+  const { data: clientProfileId } = useClientProfileId();
 
   return useQuery({
-    queryKey: ["favourite-coaches", user?.id],
+    queryKey: ["favourite-coaches", clientProfileId],
     queryFn: async () => {
-      if (!user) return [];
-
-      const { data: profile } = await supabase
-        .from("client_profiles")
-        .select("id")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (!profile) return [];
+      if (!clientProfileId) return [];
 
       const { data: favourites, error: favError } = await supabase
         .from("favourites")
         .select("coach_id")
-        .eq("client_id", profile.id);
+        .eq("client_id", clientProfileId);
 
       if (favError) throw favError;
       if (!favourites || favourites.length === 0) return [];
@@ -75,7 +62,7 @@ export const useFavouriteCoaches = () => {
       if (coachError) throw coachError;
       return coaches as MarketplaceCoach[];
     },
-    enabled: !!user,
+    enabled: !!user && !!clientProfileId,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };

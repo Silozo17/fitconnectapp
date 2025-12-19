@@ -1,21 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { useClientProfileId } from '@/hooks/useClientProfileId';
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 import { XPLeaderboardEntry } from '@/hooks/useGamification';
-
-function useClientProfile() {
-  const { user } = useAuth();
-  return useQuery({
-    queryKey: ['my-client-profile', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      const { data } = await supabase.from('client_profiles').select('id').eq('user_id', user.id).maybeSingle();
-      return data;
-    },
-    enabled: !!user?.id,
-  });
-}
 
 export function useWeeklyLeaderboard(limit = 20) {
   return useQuery({
@@ -170,14 +157,14 @@ export function useAllTimeLeaderboard(limit = 20) {
 }
 
 export function useMyRank() {
-  const { data: profile } = useClientProfile();
+  const { data: clientProfileId } = useClientProfileId();
   
   return useQuery({
-    queryKey: ['my-rank', profile?.id],
+    queryKey: ['my-rank', clientProfileId],
     queryFn: async () => {
-      if (!profile?.id) return null;
+      if (!clientProfileId) return null;
       
-      const { data: myXP } = await supabase.from('client_xp').select('total_xp').eq('client_id', profile.id).maybeSingle();
+      const { data: myXP } = await supabase.from('client_xp').select('total_xp').eq('client_id', clientProfileId).maybeSingle();
       if (!myXP) return { rank: null, total: 0 };
       
       // PRIVACY FIX: Only count visible users in rankings
@@ -203,6 +190,6 @@ export function useMyRank() {
       
       return { rank: (higherCount || 0) + 1, total: total || 0, xp: myXP.total_xp };
     },
-    enabled: !!profile?.id,
+    enabled: !!clientProfileId,
   });
 }
