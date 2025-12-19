@@ -7,6 +7,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const logStep = (step: string, details?: Record<string, unknown>) => {
+  if (Deno.env.get("DENO_ENV") !== "production") {
+    const detailsStr = details ? ` - ${JSON.stringify(details)}` : "";
+    console.log(`[STRIPE-CHECKOUT] ${step}${detailsStr}`);
+  }
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -31,10 +38,10 @@ serve(async (req) => {
       coachId,
       successUrl,
       cancelUrl,
-      embedded, // NEW: flag for embedded checkout mode
+      embedded, // flag for embedded checkout mode
     } = await req.json();
 
-    console.log("Creating checkout session:", { type, itemId, clientId, coachId, embedded });
+    logStep("Creating checkout session", { type, itemId, clientId, coachId, embedded });
 
     // Get coach's Stripe Connect account
     const { data: coachProfile, error: coachError } = await supabase
@@ -58,7 +65,7 @@ serve(async (req) => {
     const vatRate = invoiceSettings?.vat_rate || 0;
     const isVatInclusive = invoiceSettings?.vat_inclusive || false;
 
-    console.log("VAT settings:", { isVatRegistered, vatRate, isVatInclusive });
+    logStep("VAT settings", { isVatRegistered, vatRate, isVatInclusive });
 
     // Get coach's platform subscription to determine commission rate
     const { data: platformSub } = await supabase
@@ -73,7 +80,7 @@ serve(async (req) => {
     const commissionRates: Record<string, number> = { free: 4, starter: 3, pro: 2, enterprise: 1 };
     const applicationFeePercent = commissionRates[tier] || 4;
 
-    console.log("Coach subscription tier:", tier, "Commission rate:", applicationFeePercent);
+    logStep("Coach subscription tier", { tier, applicationFeePercent });
 
     let lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
     let mode: "payment" | "subscription" = "payment";
@@ -88,20 +95,33 @@ serve(async (req) => {
     };
 
     if (type === "package") {
-      // Get package details
+      // SECURITY: Fetch package price from database - never trust client-provided amounts
       const { data: pkg, error: pkgError } = await supabase
         .from("coach_packages")
-        .select("*")
+        .select("id, name, price, session_count, validity_days, currency, coach_id, is_active")
         .eq("id", itemId)
+        .eq("is_active", true)
         .single();
 
       if (pkgError || !pkg) {
-        throw new Error("Package not found");
+        throw new Error("Package not found or inactive");
+      }
+
+      // SECURITY: Validate package belongs to the specified coach
+      if (pkg.coach_id !== coachId) {
+        throw new Error("Package does not belong to this coach");
       }
 
       const currency = (pkg.currency || coachProfile.currency || 'GBP').toLowerCase();
       let unitAmount = Math.round(pkg.price * 100);
       let description = `${pkg.session_count} sessions - Valid for ${pkg.validity_days} days`;
+
+      logStep("Package validated from DB", { 
+        id: pkg.id, 
+        name: pkg.name, 
+        price: pkg.price,
+        currency 
+      });
 
       // Apply VAT if registered and NOT inclusive (i.e., add VAT on top)
       if (isVatRegistered && vatRate > 0 && !isVatInclusive) {
@@ -130,20 +150,33 @@ serve(async (req) => {
       metadata.currency = currency.toUpperCase();
 
     } else if (type === "subscription") {
-      // Get subscription plan details
+      // SECURITY: Fetch subscription plan price from database - never trust client-provided amounts
       const { data: plan, error: planError } = await supabase
         .from("coach_subscription_plans")
-        .select("*")
+        .select("id, name, price, description, billing_period, currency, coach_id, is_active")
         .eq("id", itemId)
+        .eq("is_active", true)
         .single();
 
       if (planError || !plan) {
-        throw new Error("Subscription plan not found");
+        throw new Error("Subscription plan not found or inactive");
+      }
+
+      // SECURITY: Validate plan belongs to the specified coach
+      if (plan.coach_id !== coachId) {
+        throw new Error("Subscription plan does not belong to this coach");
       }
 
       const currency = (plan.currency || coachProfile.currency || 'GBP').toLowerCase();
       let unitAmount = Math.round(plan.price * 100);
       let description = plan.description || `${plan.billing_period} subscription`;
+
+      logStep("Plan validated from DB", { 
+        id: plan.id, 
+        name: plan.name, 
+        price: plan.price,
+        currency 
+      });
 
       // Apply VAT if registered and NOT inclusive
       if (isVatRegistered && vatRate > 0 && !isVatInclusive) {
@@ -215,13 +248,13 @@ serve(async (req) => {
 
     const session = await stripe.checkout.sessions.create(sessionParams);
 
-    console.log("Checkout session created:", session.id);
+    logStep("Checkout session created", { sessionId: session.id });
 
     return new Response(
       JSON.stringify({ 
         sessionId: session.id,
         url: session.url,
-        clientSecret: session.client_secret, // For embedded mode
+        clientSecret: session.client_secret,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -230,7 +263,7 @@ serve(async (req) => {
     );
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error("Error in stripe-checkout:", error);
+    console.error("[STRIPE-CHECKOUT] ERROR:", errorMessage);
     return new Response(
       JSON.stringify({ error: errorMessage }),
       {

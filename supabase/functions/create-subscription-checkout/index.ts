@@ -7,7 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Price IDs from Stripe - must match stripe-config.ts
+// SECURITY: Price IDs are hardcoded server-side - amounts come from Stripe, not client
 const PRICE_IDS = {
   starter: {
     monthly: "price_1Sf80vEztIBHKDEerFCQIjUR",
@@ -21,6 +21,13 @@ const PRICE_IDS = {
     monthly: "price_1Sf80xEztIBHKDEegrV6T1T7",
     yearly: "price_1Sf814EztIBHKDEevMuXmU4J",
   },
+} as const;
+
+const logStep = (step: string, details?: Record<string, unknown>) => {
+  if (Deno.env.get("DENO_ENV") !== "production") {
+    const detailsStr = details ? ` - ${JSON.stringify(details)}` : "";
+    console.log(`[CREATE-SUBSCRIPTION-CHECKOUT] ${step}${detailsStr}`);
+  }
 };
 
 serve(async (req) => {
@@ -56,9 +63,9 @@ serve(async (req) => {
     const user = userData.user;
     const { tier, billingInterval } = await req.json();
 
-    console.log("Creating checkout for:", { tier, billingInterval, userId: user.id });
+    logStep("Creating checkout", { tier, billingInterval, userId: user.id });
 
-    // Validate tier and interval
+    // SECURITY: Validate tier and interval against known values
     if (!PRICE_IDS[tier as keyof typeof PRICE_IDS]) {
       throw new Error("Invalid subscription tier");
     }
@@ -66,7 +73,10 @@ serve(async (req) => {
       throw new Error("Invalid billing interval");
     }
 
+    // SECURITY: Price ID is fetched from server-side constant, not from client
     const priceId = PRICE_IDS[tier as keyof typeof PRICE_IDS][billingInterval as "monthly" | "yearly"];
+    
+    logStep("Using price ID", { priceId, tier, billingInterval });
 
     // Check if customer exists in Stripe
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
@@ -92,6 +102,7 @@ serve(async (req) => {
         metadata: { user_id: user.id },
       });
       customerId = customer.id;
+      logStep("Created new Stripe customer", { customerId });
     }
 
     const origin = req.headers.get("origin") || "http://localhost:3000";
@@ -116,7 +127,7 @@ serve(async (req) => {
       },
     });
 
-    console.log("Checkout session created:", session.id);
+    logStep("Checkout session created", { sessionId: session.id });
 
     return new Response(
       JSON.stringify({ 
@@ -130,7 +141,7 @@ serve(async (req) => {
     );
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error("Error in create-subscription-checkout:", error);
+    console.error("[CREATE-SUBSCRIPTION-CHECKOUT] ERROR:", errorMessage);
     return new Response(
       JSON.stringify({ error: errorMessage }),
       { 

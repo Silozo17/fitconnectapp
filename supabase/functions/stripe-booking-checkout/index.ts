@@ -7,6 +7,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const logStep = (step: string, details?: Record<string, unknown>) => {
+  if (Deno.env.get("DENO_ENV") !== "production") {
+    const detailsStr = details ? ` - ${JSON.stringify(details)}` : "";
+    console.log(`[STRIPE-BOOKING-CHECKOUT] ${step}${detailsStr}`);
+  }
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -25,14 +32,14 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { 
-      bookingRequestId, // optional - if paying after booking request created
+      bookingRequestId,
       sessionTypeId,
       clientId: providedClientId,
       coachId,
-      requestedAt, // ISO string of requested session time
+      requestedAt,
       durationMinutes,
       isOnline,
-      message, // client's message for the booking
+      message,
       successUrl,
       cancelUrl,
     } = await req.json();
@@ -57,7 +64,7 @@ serve(async (req) => {
       clientId = clientProfile.id;
     }
 
-    console.log("Creating booking checkout:", { sessionTypeId, clientId, coachId, bookingRequestId });
+    logStep("Creating booking checkout", { sessionTypeId, clientId, coachId, bookingRequestId });
 
     // Validate required fields
     if (!sessionTypeId || !coachId) {
@@ -91,29 +98,34 @@ serve(async (req) => {
       throw new Error("Invalid cancel URL");
     }
 
-    // Get session type with payment configuration
+    // SECURITY: Fetch session type price from database - never trust client-provided amounts
     const { data: sessionType, error: sessionTypeError } = await supabase
       .from("session_types")
       .select("*")
       .eq("id", sessionTypeId)
-      .eq("is_active", true) // Only allow active session types
+      .eq("is_active", true)
       .single();
 
     if (sessionTypeError || !sessionType) {
       throw new Error("Session type not found or inactive");
     }
 
-    // CRITICAL: Validate that the session type belongs to the specified coach
+    // SECURITY: Validate that the session type belongs to the specified coach
     if (sessionType.coach_id !== coachId) {
-      console.error("Session type coach mismatch:", { sessionTypeCoach: sessionType.coach_id, providedCoach: coachId });
+      console.error("[STRIPE-BOOKING-CHECKOUT] Session type coach mismatch:", { 
+        sessionTypeCoach: sessionType.coach_id, 
+        providedCoach: coachId 
+      });
       throw new Error("Invalid session type for this coach");
     }
 
-    console.log("Session type payment config:", {
+    logStep("Session type validated from DB", {
+      id: sessionType.id,
+      name: sessionType.name,
+      price: sessionType.price,
       payment_required: sessionType.payment_required,
       deposit_type: sessionType.deposit_type,
       deposit_value: sessionType.deposit_value,
-      price: sessionType.price,
     });
 
     // Check if payment is required
@@ -143,7 +155,7 @@ serve(async (req) => {
     const vatRate = invoiceSettings?.vat_rate || 0;
     const isVatInclusive = invoiceSettings?.vat_inclusive || false;
 
-    console.log("VAT settings:", { isVatRegistered, vatRate, isVatInclusive });
+    logStep("VAT settings", { isVatRegistered, vatRate, isVatInclusive });
 
     // Get coach's platform subscription to determine commission rate
     const { data: platformSub } = await supabase
@@ -157,7 +169,7 @@ serve(async (req) => {
     const commissionRates: Record<string, number> = { free: 4, starter: 3, pro: 2, enterprise: 1 };
     const applicationFeePercent = commissionRates[tier] || 4;
 
-    console.log("Coach tier:", tier, "Commission:", applicationFeePercent + "%");
+    logStep("Coach tier", { tier, commission: `${applicationFeePercent}%` });
 
     // Check if coach has Boost active
     const { data: coachBoost } = await supabase
@@ -177,7 +189,7 @@ serve(async (req) => {
     const isNewClient = (previousBookings || 0) === 0;
     const isBoostedAcquisition = !!(coachBoost?.is_active && isNewClient);
 
-    console.log("Boost check:", { boostActive: coachBoost?.is_active, isNewClient, isBoostedAcquisition });
+    logStep("Boost check", { boostActive: coachBoost?.is_active, isNewClient, isBoostedAcquisition });
 
     // Get Boost settings and calculate fee if applicable
     let boostFeeAmount = 0;
@@ -197,10 +209,10 @@ serve(async (req) => {
         Math.max((sessionType.price || 0) * commissionRate, minFee),
         maxFee
       );
-      console.log("Boost fee calculated:", boostFeeAmount);
+      logStep("Boost fee calculated", { boostFeeAmount });
     }
 
-    // Calculate payment amount
+    // SECURITY: Calculate payment amount from DB-fetched price only
     const sessionPrice = sessionType.price || 0;
     const currency = (sessionType.currency || coachProfile.currency || 'GBP').toLowerCase();
     const currencySymbol = currency === 'usd' ? '$' : currency === 'eur' ? '€' : '£';
@@ -236,7 +248,7 @@ serve(async (req) => {
       throw new Error("Invalid payment amount calculated");
     }
 
-    console.log("Payment amount:", amountDue, currency, "VAT:", vatAmount);
+    logStep("Payment amount calculated", { amountDue, currency, vatAmount });
 
     // Create or update booking request with payment status
     let finalBookingRequestId = bookingRequestId;
@@ -264,12 +276,12 @@ serve(async (req) => {
         .single();
 
       if (bookingError || !newBooking) {
-        console.error("Error creating booking request:", bookingError);
+        console.error("[STRIPE-BOOKING-CHECKOUT] Error creating booking request:", bookingError);
         throw new Error("Failed to create booking request");
       }
 
       finalBookingRequestId = newBooking.id;
-      console.log("Created booking request:", finalBookingRequestId);
+      logStep("Created booking request", { id: finalBookingRequestId });
     } else {
       // Update existing booking request with payment info
       const { error: updateError } = await supabase
@@ -282,7 +294,7 @@ serve(async (req) => {
         .eq("id", bookingRequestId);
 
       if (updateError) {
-        console.error("Error updating booking request:", updateError);
+        console.error("[STRIPE-BOOKING-CHECKOUT] Error updating booking request:", updateError);
       }
     }
 
@@ -293,7 +305,7 @@ serve(async (req) => {
       session_type_id: sessionTypeId,
       client_id: clientId,
       coach_id: coachId,
-      payment_type: sessionType.payment_required, // 'deposit' or 'full'
+      payment_type: sessionType.payment_required,
       session_price: String(sessionPrice),
       amount_due: String(amountDue),
       is_boosted_acquisition: isBoostedAcquisition ? 'true' : 'false',
@@ -308,7 +320,7 @@ serve(async (req) => {
     const boostFeeInCents = Math.round(boostFeeAmount * 100);
     const applicationFeeAmount = platformFeeAmount + boostFeeInCents;
 
-    console.log("Fees:", { platformFee: platformFeeAmount, boostFee: boostFeeInCents, totalFee: applicationFeeAmount });
+    logStep("Fees calculated", { platformFee: platformFeeAmount, boostFee: boostFeeInCents, totalFee: applicationFeeAmount });
 
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
@@ -344,7 +356,7 @@ serve(async (req) => {
       })
       .eq("id", finalBookingRequestId);
 
-    console.log("Stripe checkout session created:", session.id);
+    logStep("Stripe checkout session created", { sessionId: session.id });
 
     return new Response(
       JSON.stringify({ 
@@ -361,7 +373,7 @@ serve(async (req) => {
     );
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error("Error in stripe-booking-checkout:", error);
+    console.error("[STRIPE-BOOKING-CHECKOUT] ERROR:", errorMessage);
     return new Response(
       JSON.stringify({ error: errorMessage }),
       {
