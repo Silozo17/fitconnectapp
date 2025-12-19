@@ -20,7 +20,7 @@ import { useLogAdminAction } from "@/hooks/useAuditLog";
 import { useAdminUserStats } from "@/hooks/useAdminUserStats";
 import { useUserAvatars, useUserSelectedAvatar, useRevokeAvatar, useAllAvatars } from "@/hooks/useAdminAvatars";
 import { getAvatarImageUrl } from "@/hooks/useAvatars";
-import { RARITY_CONFIG } from "@/lib/avatar-config";
+import { RARITY_CONFIG } from "@/lib/avatar-utils";
 import { GrantAvatarModal } from "./GrantAvatarModal";
 import { LockedAvatarsSection } from "./LockedAvatarsSection";
 import { 

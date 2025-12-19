@@ -28,7 +28,7 @@ import { Link } from "react-router-dom";
 import { useCoachPipeline } from "@/hooks/useCoachPipeline";
 import { toast } from "@/hooks/use-toast";
 import { UserAvatar } from "@/components/shared/UserAvatar";
-import { Rarity } from "@/lib/avatar-config";
+import { Rarity } from "@/lib/avatar-utils";
 
 interface ProspectProfileSheetProps {
   open: boolean;

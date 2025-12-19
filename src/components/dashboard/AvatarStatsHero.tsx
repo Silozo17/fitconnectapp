@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useSelectedAvatar, getAvatarImageUrl } from '@/hooks/useAvatars';
 import { useUserStats } from '@/hooks/useUserStats';
-import { RARITY_CONFIG } from '@/lib/avatar-config';
+import { RARITY_CONFIG } from '@/lib/avatar-utils';
 import { AvatarPicker } from '@/components/avatars/AvatarPicker';
 import { 
   Zap, 

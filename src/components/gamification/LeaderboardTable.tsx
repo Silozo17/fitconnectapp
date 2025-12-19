@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { Trophy, Medal, Award, Zap } from 'lucide-react';
 import { getAvatarImageUrl } from '@/hooks/useAvatars';
-import { RARITY_CONFIG } from '@/lib/avatar-config';
+import { RARITY_CONFIG } from '@/lib/avatar-utils';
 
 interface LeaderboardTableProps {
   entries: XPLeaderboardEntry[];

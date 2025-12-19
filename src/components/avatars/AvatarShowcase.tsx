@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import { Avatar, getAvatarImageUrl } from '@/hooks/useAvatars';
 import { useUserStats } from '@/hooks/useUserStats';
-import { RARITY_CONFIG } from '@/lib/avatar-config';
+import { RARITY_CONFIG } from '@/lib/avatar-utils';
 import { Zap, Trophy, Target, Medal } from 'lucide-react';
 
 interface AvatarShowcaseProps {

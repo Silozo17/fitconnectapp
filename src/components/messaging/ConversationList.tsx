@@ -7,7 +7,7 @@ import { useState } from "react";
 import ProspectProfileSheet from "./ProspectProfileSheet";
 import { CoachProfileSheet } from "./CoachProfileSheet";
 import { UserAvatar } from "@/components/shared/UserAvatar";
-import { Rarity } from "@/lib/avatar-config";
+import { Rarity } from "@/lib/avatar-utils";
 
 interface ConversationListProps {
   activeConversationId?: string;

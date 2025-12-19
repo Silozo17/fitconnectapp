@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Check, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { FREE_AVATARS, RARITY_CONFIG } from "@/lib/avatar-config";
+import { FREE_AVATARS, RARITY_CONFIG } from "@/lib/avatar-utils";
 import { getAvatarImageUrl } from "@/hooks/useAvatars";
 import { supabase } from "@/integrations/supabase/client";
 
