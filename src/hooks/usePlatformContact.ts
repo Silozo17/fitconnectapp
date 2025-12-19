@@ -70,11 +70,11 @@ export const usePlatformContact = (): PlatformContactData => {
       threads: settings?.social_threads || "",
     },
     contact: {
-      email: settings?.contact_email || "support@fitconnect.com",
-      phone: settings?.contact_phone || "",
+      email: settings?.contact_email || "support@getfitconnect.co.uk",
+      phone: settings?.contact_phone || "+44 7488 8899 59",
       address: settings?.contact_address || "",
-      legalEmail: settings?.legal_email || "legal@fitconnect.com",
-      privacyEmail: settings?.privacy_email || "privacy@fitconnect.com",
+      legalEmail: settings?.legal_email || "support@getfitconnect.co.uk",
+      privacyEmail: settings?.privacy_email || "support@getfitconnect.co.uk",
     },
     isLoading,
   };
