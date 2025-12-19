@@ -86,7 +86,7 @@ export function baseEmailTemplate(content: string, previewText?: string): string
       text-decoration: none;
     }
     
-    .button {
+    .email-button {
       display: inline-block;
       background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryDark} 100%);
       color: ${colors.background} !important;
@@ -96,23 +96,108 @@ export function baseEmailTemplate(content: string, previewText?: string): string
       font-weight: 600;
       font-size: 16px;
       text-align: center;
-      transition: all 0.2s ease;
+      box-sizing: border-box;
     }
     
-    .button-secondary {
-      background: transparent;
+    .email-button-secondary {
+      background: transparent !important;
       border: 2px solid ${colors.primary};
       color: ${colors.primary} !important;
     }
     
+    /* Mobile Responsive Styles */
     @media only screen and (max-width: 600px) {
-      .container {
-        width: 100% !important;
-        padding: 20px !important;
+      body {
+        padding: 16px 12px !important;
       }
-      .button {
+      
+      .email-container {
+        width: 100% !important;
+        padding: 24px 16px !important;
+        border-radius: 12px !important;
+      }
+      
+      .email-headline {
+        font-size: 24px !important;
+      }
+      
+      .email-subheadline {
+        font-size: 18px !important;
+      }
+      
+      .email-button {
         display: block !important;
         width: 100% !important;
+        padding: 14px 20px !important;
+        box-sizing: border-box !important;
+        text-align: center !important;
+      }
+      
+      .email-button-secondary {
+        display: block !important;
+        width: 100% !important;
+        padding: 12px 20px !important;
+        box-sizing: border-box !important;
+        text-align: center !important;
+      }
+      
+      .info-card {
+        padding: 16px !important;
+      }
+      
+      .info-card-label {
+        font-size: 13px !important;
+      }
+      
+      .info-card-value {
+        font-size: 14px !important;
+      }
+      
+      .social-link {
+        display: block !important;
+        margin: 8px 0 !important;
+      }
+      
+      .social-separator {
+        display: none !important;
+      }
+      
+      .stats-cell {
+        display: block !important;
+        width: 100% !important;
+        padding: 12px 16px !important;
+        border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+      }
+      
+      .stats-cell:last-child {
+        border-bottom: none !important;
+      }
+      
+      .stats-value {
+        font-size: 20px !important;
+      }
+      
+      .stats-label {
+        font-size: 11px !important;
+      }
+      
+      .avatar-container {
+        width: 70px !important;
+        height: 70px !important;
+      }
+      
+      .squircle-container {
+        width: 80px !important;
+        height: 80px !important;
+      }
+      
+      .message-box {
+        padding: 14px 16px !important;
+        margin: 16px 0 !important;
+      }
+      
+      .footer-text {
+        font-size: 11px !important;
       }
     }
   </style>
@@ -120,43 +205,71 @@ export function baseEmailTemplate(content: string, previewText?: string): string
 <body style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: ${colors.background}; color: ${colors.text}; padding: 40px 20px; margin: 0;">
   ${previewText ? `<div style="display: none; max-height: 0px; overflow: hidden;">${previewText}</div>` : ''}
   
-  <div class="container" style="max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, ${colors.cardBg} 0%, ${colors.background} 100%); border-radius: 16px; padding: 40px; border: 1px solid ${colors.border};">
-    <!-- Header with Logo -->
-    <div style="text-align: center; margin-bottom: 32px;">
-      <h1 class="headline" style="color: ${colors.primary}; margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -0.5px;">
-        FitConnect
-      </h1>
-    </div>
-    
-    <!-- Main Content -->
-    ${content}
-    
-    <!-- Footer -->
-    <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1);">
-      <!-- Social Links -->
-      <div style="text-align: center; margin-bottom: 16px;">
-        <a href="${social.instagram}" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted};">Instagram</a>
-        <span style="color: ${colors.textDark};">•</span>
-        <a href="${social.facebook}" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted};">Facebook</a>
-        <span style="color: ${colors.textDark};">•</span>
-        <a href="${social.x}" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted};">X</a>
-        <span style="color: ${colors.textDark};">•</span>
-        <a href="${social.youtube}" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted};">YouTube</a>
-        <span style="color: ${colors.textDark};">•</span>
-        <a href="${social.tiktok}" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted};">TikTok</a>
-        <span style="color: ${colors.textDark};">•</span>
-        <a href="${social.linkedin}" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted};">LinkedIn</a>
-      </div>
-      
-      <!-- Company Info -->
-      <p style="color: ${colors.textDark}; font-size: 12px; text-align: center; margin: 0;">
-        © ${new Date().getFullYear()} ${company.name}. All rights reserved.
-      </p>
-      <p style="color: ${colors.textDark}; font-size: 12px; text-align: center; margin: 8px 0 0 0;">
-        Need help? <a href="mailto:${company.supportEmail}" style="color: ${colors.textMuted};">Contact Support</a>
-      </p>
-    </div>
-  </div>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+      <td align="center">
+        <table class="email-container" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; width: 100%; margin: 0 auto; background: linear-gradient(135deg, ${colors.cardBg} 0%, ${colors.background} 100%); border-radius: 16px; padding: 40px; border: 1px solid ${colors.border};">
+          <tr>
+            <td>
+              <!-- Header with Logo -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" style="padding-bottom: 32px;">
+                    <h1 class="headline email-headline" style="color: ${colors.primary}; margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -0.5px;">
+                      FitConnect
+                    </h1>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Main Content -->
+              ${content}
+              
+              <!-- Footer -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top: 40px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <tr>
+                  <td>
+                    <!-- Social Links -->
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 16px;">
+                      <tr>
+                        <td align="center">
+                          <a href="${social.instagram}" class="social-link" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted}; font-size: 13px;">Instagram</a>
+                          <span class="social-separator" style="color: ${colors.textDark};">•</span>
+                          <a href="${social.facebook}" class="social-link" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted}; font-size: 13px;">Facebook</a>
+                          <span class="social-separator" style="color: ${colors.textDark};">•</span>
+                          <a href="${social.x}" class="social-link" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted}; font-size: 13px;">X</a>
+                          <span class="social-separator" style="color: ${colors.textDark};">•</span>
+                          <a href="${social.youtube}" class="social-link" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted}; font-size: 13px;">YouTube</a>
+                          <span class="social-separator" style="color: ${colors.textDark};">•</span>
+                          <a href="${social.tiktok}" class="social-link" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted}; font-size: 13px;">TikTok</a>
+                          <span class="social-separator" style="color: ${colors.textDark};">•</span>
+                          <a href="${social.linkedin}" class="social-link" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted}; font-size: 13px;">LinkedIn</a>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <!-- Company Info -->
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td align="center">
+                          <p class="footer-text" style="color: ${colors.textDark}; font-size: 12px; text-align: center; margin: 0;">
+                            © ${new Date().getFullYear()} ${company.name}. All rights reserved.
+                          </p>
+                          <p class="footer-text" style="color: ${colors.textDark}; font-size: 12px; text-align: center; margin: 8px 0 0 0;">
+                            Need help? <a href="mailto:${company.supportEmail}" style="color: ${colors.textMuted};">Contact Support</a>
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>
   `.trim();
@@ -167,17 +280,27 @@ export function avatarComponent(avatarUrl: string | null, name: string, size: nu
   const { colors } = EMAIL_CONFIG;
   
   if (!avatarUrl) {
-    // Fallback with initials
+    // Fallback with initials - use table for better email client support
     const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
     return `
-      <div style="width: ${size}px; height: ${size}px; border-radius: 50%; background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent} 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto; border: 3px solid ${colors.primary};">
-        <span style="color: ${colors.background}; font-weight: 700; font-size: ${size / 3}px;">${initials}</span>
-      </div>
+      <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
+        <tr>
+          <td align="center" valign="middle" class="avatar-container" style="width: ${size}px; height: ${size}px; border-radius: 50%; background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent} 100%); border: 3px solid ${colors.primary};">
+            <span style="color: ${colors.background}; font-weight: 700; font-size: ${size / 3}px;">${initials}</span>
+          </td>
+        </tr>
+      </table>
     `;
   }
   
   return `
-    <img src="${avatarUrl}" alt="${name}" style="width: ${size}px; height: ${size}px; border-radius: 50%; object-fit: cover; border: 3px solid ${colors.primary}; display: block; margin: 0 auto;">
+    <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
+      <tr>
+        <td align="center">
+          <img src="${avatarUrl}" alt="${name}" class="avatar-container" style="width: ${size}px; height: ${size}px; border-radius: 50%; object-fit: cover; border: 3px solid ${colors.primary}; display: block;">
+        </td>
+      </tr>
+    </table>
   `;
 }
 
@@ -190,11 +313,19 @@ export function profileImageWithGlow(imageUrl: string | null, name: string, size
   }
   
   return `
-    <div style="text-align: center;">
-      <div style="display: inline-block; border-radius: 50%; box-shadow: 0 0 30px ${colors.primary}40; padding: 4px; background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent} 100%);">
-        <img src="${imageUrl}" alt="${name}" style="width: ${size}px; height: ${size}px; border-radius: 50%; object-fit: cover; display: block;">
-      </div>
-    </div>
+    <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
+      <tr>
+        <td align="center">
+          <table cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td style="border-radius: 50%; box-shadow: 0 0 30px ${colors.primary}40; padding: 4px; background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent} 100%);">
+                <img src="${imageUrl}" alt="${name}" class="avatar-container" style="width: ${size}px; height: ${size}px; border-radius: 50%; object-fit: cover; display: block;">
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   `;
 }
 
@@ -203,42 +334,32 @@ export function squircleAvatarComponent(avatarUrl: string, name: string, size: n
   const { colors } = EMAIL_CONFIG;
   
   return `
-    <div style="text-align: center; margin: 0 auto 24px auto;">
-      <div style="display: inline-block; position: relative;">
-        <!-- Glow effect behind squircle -->
-        <div style="
-          position: absolute; 
-          inset: -8px; 
-          background: linear-gradient(135deg, ${colors.primary}40 0%, ${colors.accent}40 100%);
-          border-radius: 30%;
-          filter: blur(12px);
-        "></div>
-        <!-- Squircle container with gradient border -->
-        <div style="
-          position: relative;
-          width: ${size}px; 
-          height: ${size}px; 
-          border-radius: 30%; 
-          background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent} 100%);
-          padding: 3px;
-          box-sizing: border-box;
-        ">
-          <img 
-            src="${avatarUrl}" 
-            alt="${name}" 
-            style="
-              width: 100%; 
-              height: 100%; 
-              border-radius: 30%; 
-              object-fit: cover;
-              object-position: top;
-              display: block;
-              background-color: ${colors.cardBg};
-            "
-          >
-        </div>
-      </div>
-    </div>
+    <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto 24px auto;">
+      <tr>
+        <td align="center">
+          <!-- Squircle container with gradient border -->
+          <table cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td class="squircle-container" style="width: ${size}px; height: ${size}px; border-radius: 30%; background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent} 100%); padding: 3px;">
+                <img 
+                  src="${avatarUrl}" 
+                  alt="${name}" 
+                  style="
+                    width: 100%; 
+                    height: 100%; 
+                    border-radius: 30%; 
+                    object-fit: cover;
+                    object-position: top;
+                    display: block;
+                    background-color: ${colors.cardBg};
+                  "
+                >
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   `;
 }
 
@@ -248,31 +369,47 @@ export function ctaButton(text: string, url: string, secondary: boolean = false)
   
   if (secondary) {
     return `
-      <a href="${url}" style="display: inline-block; background: transparent; border: 2px solid ${colors.primary}; color: ${colors.primary}; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">${text}</a>
+      <table cellpadding="0" cellspacing="0" border="0" width="100%">
+        <tr>
+          <td align="center">
+            <a href="${url}" class="email-button email-button-secondary" style="display: inline-block; background: transparent; border: 2px solid ${colors.primary}; color: ${colors.primary}; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-sizing: border-box;">${text}</a>
+          </td>
+        </tr>
+      </table>
     `;
   }
   
   return `
-    <a href="${url}" style="display: inline-block; background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryDark} 100%); color: ${colors.background}; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">${text}</a>
+    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+      <tr>
+        <td align="center">
+          <a href="${url}" class="email-button" style="display: inline-block; background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryDark} 100%); color: ${colors.background}; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-sizing: border-box;">${text}</a>
+        </td>
+      </tr>
+    </table>
   `;
 }
 
-// Info card component
+// Info card component - using tables for better email client support
 export function infoCard(title: string, items: { label: string; value: string }[]): string {
   const { colors } = EMAIL_CONFIG;
   
-  const itemsHtml = items.map(item => `
-    <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
-      <span style="color: ${colors.textMuted};">${item.label}</span>
-      <span style="color: ${colors.text}; font-weight: 500;">${item.value}</span>
-    </div>
+  const itemsHtml = items.map((item, index) => `
+    <tr>
+      <td class="info-card-label" style="color: ${colors.textMuted}; padding: 12px 0; ${index < items.length - 1 ? `border-bottom: 1px solid rgba(255,255,255,0.1);` : ''} font-size: 14px;">${item.label}</td>
+      <td class="info-card-value" style="color: ${colors.text}; font-weight: 500; padding: 12px 0; ${index < items.length - 1 ? `border-bottom: 1px solid rgba(255,255,255,0.1);` : ''} text-align: right; font-size: 14px;">${item.value}</td>
+    </tr>
   `).join('');
   
   return `
-    <div style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; margin: 24px 0;">
-      <h3 style="color: ${colors.primary}; margin: 0 0 16px 0; font-size: 16px; font-weight: 600;">${title}</h3>
+    <table class="info-card" width="100%" cellpadding="0" cellspacing="0" border="0" style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; margin: 24px 0;">
+      <tr>
+        <td colspan="2">
+          <h3 style="color: ${colors.primary}; margin: 0 0 16px 0; font-size: 16px; font-weight: 600;">${title}</h3>
+        </td>
+      </tr>
       ${itemsHtml}
-    </div>
+    </table>
   `;
 }
 
@@ -281,38 +418,46 @@ export function messageBox(message: string, author?: string): string {
   const { colors } = EMAIL_CONFIG;
   
   return `
-    <div style="background: rgba(190, 255, 0, 0.1); border-left: 3px solid ${colors.primary}; padding: 16px 20px; margin: 24px 0; border-radius: 0 8px 8px 0;">
-      <p style="color: ${colors.text}; margin: 0; font-style: italic; line-height: 1.6;">"${message}"</p>
-      ${author ? `<p style="color: ${colors.textMuted}; margin: 8px 0 0 0; font-size: 14px;">— ${author}</p>` : ''}
-    </div>
+    <table class="message-box" width="100%" cellpadding="0" cellspacing="0" border="0" style="background: rgba(190, 255, 0, 0.1); border-left: 3px solid ${colors.primary}; padding: 16px 20px; margin: 24px 0; border-radius: 0 8px 8px 0;">
+      <tr>
+        <td>
+          <p style="color: ${colors.text}; margin: 0; font-style: italic; line-height: 1.6; font-size: 15px;">"${message}"</p>
+          ${author ? `<p style="color: ${colors.textMuted}; margin: 8px 0 0 0; font-size: 14px;">— ${author}</p>` : ''}
+        </td>
+      </tr>
+    </table>
   `;
 }
 
-// Stats/metrics row
+// Stats/metrics row - responsive table
 export function statsRow(stats: { label: string; value: string; icon?: string }[]): string {
   const { colors } = EMAIL_CONFIG;
   
   const statsHtml = stats.map(stat => `
-    <td style="text-align: center; padding: 16px;">
-      <div style="font-size: 24px; font-weight: 700; color: ${colors.primary};">${stat.value}</div>
-      <div style="font-size: 12px; color: ${colors.textMuted}; margin-top: 4px;">${stat.label}</div>
+    <td class="stats-cell" style="text-align: center; padding: 16px; min-width: 80px;">
+      <div class="stats-value" style="font-size: 24px; font-weight: 700; color: ${colors.primary};">${stat.value}</div>
+      <div class="stats-label" style="font-size: 12px; color: ${colors.textMuted}; margin-top: 4px;">${stat.label}</div>
     </td>
   `).join('');
   
   return `
-    <table width="100%" cellpadding="0" cellspacing="0" style="background: rgba(255,255,255,0.05); border-radius: 12px; margin: 24px 0;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background: rgba(255,255,255,0.05); border-radius: 12px; margin: 24px 0;">
       <tr>${statsHtml}</tr>
     </table>
   `;
 }
 
-// Decorative avatar mascot in corner
+// Decorative avatar mascot in corner - simplified for mobile
 export function decorativeAvatar(avatarUrl: string, position: 'left' | 'right' = 'right'): string {
-  const positionStyle = position === 'right' ? 'right: -20px;' : 'left: -20px;';
+  const alignment = position === 'right' ? 'right' : 'left';
   
   return `
-    <div style="position: relative;">
-      <img src="${avatarUrl}" alt="" style="position: absolute; ${positionStyle} top: -30px; width: 60px; height: 60px; opacity: 0.3; transform: rotate(${position === 'right' ? '15' : '-15'}deg);">
-    </div>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr>
+        <td align="${alignment}">
+          <img src="${avatarUrl}" alt="" style="width: 60px; height: 60px; opacity: 0.3; transform: rotate(${position === 'right' ? '15' : '-15'}deg);">
+        </td>
+      </tr>
+    </table>
   `;
 }
