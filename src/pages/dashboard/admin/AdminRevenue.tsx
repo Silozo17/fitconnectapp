@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, CreditCard, Users, PoundSterling } from "lucide-react";
@@ -15,63 +15,77 @@ import { format, eachDayOfInterval } from "date-fns";
 
 const COLORS = ["hsl(var(--primary))", "hsl(var(--accent))", "hsl(var(--secondary))", "hsl(var(--muted))"];
 
+interface RevenueStats {
+  totalRevenue: number;
+  mrr: number;
+  commissionEarnings: number;
+  activeSubscriptions: number;
+}
+
 const AdminRevenue = () => {
   const { formatCurrency, formatDisplayDate } = useLocale();
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ totalRevenue: 0, mrr: 0, commissionEarnings: 0, activeSubscriptions: 0 });
-  const [comparison, setComparison] = useState<typeof stats | null>(null);
-  const [transactions, setTransactions] = useState<any[]>([]);
-  const [subscriptions, setSubscriptions] = useState<any[]>([]);
-  const [revenueData, setRevenueData] = useState<any[]>([]);
-  const [tierData, setTierData] = useState<any[]>([]);
-
   const dateRange = useDateRangeAnalytics('30d', 'none');
 
-  useEffect(() => { fetchData(); }, [dateRange.startDate, dateRange.endDate, dateRange.compareMode]);
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
+  const { data, isLoading } = useQuery({
+    queryKey: ['admin-revenue', dateRange.startDate.toISOString(), dateRange.endDate.toISOString(), dateRange.compareMode],
+    queryFn: async () => {
       const { start, end } = dateRange.getDateFilter();
       const compFilter = dateRange.getComparisonFilter();
 
-      const { data: txData } = await supabase.from("transactions").select("*").gte("created_at", start).lte("created_at", end).order("created_at", { ascending: false });
-      const { data: subData } = await supabase.from("subscriptions").select("*, coach_profiles (display_name)").order("created_at", { ascending: false });
+      const [txResult, subResult] = await Promise.all([
+        supabase.from("transactions").select("*").gte("created_at", start).lte("created_at", end).order("created_at", { ascending: false }),
+        supabase.from("subscriptions").select("*, coach_profiles (display_name)").order("created_at", { ascending: false })
+      ]);
 
-      const txList = txData || [];
-      const subList = (subData || []).map((s: any) => ({ ...s, coach_name: s.coach_profiles?.display_name || "Unknown" }));
-
-      setTransactions(txList.slice(0, 10));
-      setSubscriptions(subList);
+      const txList = txResult.data || [];
+      const subList = (subResult.data || []).map((s: any) => ({ ...s, coach_name: s.coach_profiles?.display_name || "Unknown" }));
 
       const totalRevenue = txList.reduce((sum, tx) => sum + Number(tx.amount), 0);
       const commissionEarnings = txList.reduce((sum, tx) => sum + Number(tx.commission_amount || 0), 0);
       const activeSubscriptions = subList.filter((s: any) => s.status === "active").length;
       const mrr = subList.filter((s: any) => s.status === "active").reduce((sum: number, s: any) => sum + Number(s.amount), 0);
 
-      setStats({ totalRevenue, mrr, commissionEarnings, activeSubscriptions });
+      const stats: RevenueStats = { totalRevenue, mrr, commissionEarnings, activeSubscriptions };
 
+      let comparison: RevenueStats | null = null;
       if (compFilter) {
         const { data: prevTx } = await supabase.from("transactions").select("*").gte("created_at", compFilter.start).lte("created_at", compFilter.end);
         const prevList = prevTx || [];
-        setComparison({ totalRevenue: prevList.reduce((s, t) => s + Number(t.amount), 0), mrr: mrr * 0.9, commissionEarnings: prevList.reduce((s, t) => s + Number(t.commission_amount || 0), 0), activeSubscriptions: Math.floor(activeSubscriptions * 0.9) });
-      } else {
-        setComparison(null);
+        comparison = {
+          totalRevenue: prevList.reduce((s, t) => s + Number(t.amount), 0),
+          mrr: mrr * 0.9,
+          commissionEarnings: prevList.reduce((s, t) => s + Number(t.commission_amount || 0), 0),
+          activeSubscriptions: Math.floor(activeSubscriptions * 0.9)
+        };
       }
 
       const days = eachDayOfInterval({ start: dateRange.startDate, end: dateRange.endDate }).slice(-14);
-      setRevenueData(days.map(d => ({ date: format(d, "MMM d"), revenue: txList.filter(t => format(new Date(t.created_at), "yyyy-MM-dd") === format(d, "yyyy-MM-dd")).reduce((s, t) => s + Number(t.amount), 0) })));
+      const revenueData = days.map(d => ({
+        date: format(d, "MMM d"),
+        revenue: txList.filter(t => format(new Date(t.created_at), "yyyy-MM-dd") === format(d, "yyyy-MM-dd")).reduce((s, t) => s + Number(t.amount), 0)
+      }));
 
       const tierCounts: Record<string, number> = {};
       subList.forEach((s: any) => { tierCounts[s.tier] = (tierCounts[s.tier] || 0) + 1; });
-      setTierData(Object.entries(tierCounts).map(([name, value]) => ({ name, value })));
-    } catch (error) {
-      console.error("Error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      const tierData = Object.entries(tierCounts).map(([name, value]) => ({ name, value }));
 
+      return {
+        stats,
+        comparison,
+        transactions: txList.slice(0, 10),
+        subscriptions: subList,
+        revenueData,
+        tierData
+      };
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  const stats = data?.stats ?? { totalRevenue: 0, mrr: 0, commissionEarnings: 0, activeSubscriptions: 0 };
+  const comparison = data?.comparison ?? null;
+  const transactions = data?.transactions ?? [];
+  const revenueData = data?.revenueData ?? [];
+  const tierData = data?.tierData ?? [];
   const showComp = dateRange.compareMode !== 'none' && comparison !== null;
 
   return (
@@ -82,7 +96,7 @@ const AdminRevenue = () => {
           <div><h1 className="text-2xl font-bold">Revenue</h1><p className="text-muted-foreground">Track subscriptions and earnings</p></div>
           <DateRangeFilter preset={dateRange.preset} startDate={dateRange.startDate} endDate={dateRange.endDate} compareMode={dateRange.compareMode} dateRangeLabel={dateRange.dateRangeLabel} comparisonLabel={dateRange.comparisonLabel} onPresetChange={dateRange.setPreset} onCustomRangeChange={dateRange.setCustomRange} onCompareModeChange={dateRange.setCompareMode} />
 
-          {loading ? <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div> : (
+          {isLoading ? <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div> : (
             <>
               <div className="grid gap-4 grid-cols-2 xl:grid-cols-4">
                 <ComparisonStatCard title="Total Revenue" value={stats.totalRevenue} previousValue={comparison?.totalRevenue} icon={PoundSterling} format="currency" showComparison={showComp} />
