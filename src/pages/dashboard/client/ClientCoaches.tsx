@@ -24,7 +24,7 @@ const ClientCoaches = () => {
           </p>
         </div>
         <Button asChild>
-          <Link to="/coaches">
+          <Link to="/dashboard/client/find-coaches">
             <UserPlus className="w-4 h-4 mr-2" />
             Find More Coaches
           </Link>
@@ -57,7 +57,7 @@ const ClientCoaches = () => {
               Browse our marketplace to find a coach that fits your goals.
             </p>
             <Button asChild>
-              <Link to="/coaches">Browse Coaches</Link>
+              <Link to="/dashboard/client/find-coaches">Browse Coaches</Link>
             </Button>
           </CardContent>
         </Card>

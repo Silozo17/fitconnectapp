@@ -78,6 +78,7 @@ const menuGroups: MenuGroup[] = [
     collapsible: false,
     items: [
       { title: "Home", icon: Home, path: "/dashboard/client" },
+      { title: "Find Coaches", icon: Search, path: "/dashboard/client/find-coaches" },
       { title: "Messages", icon: MessageSquare, path: "/dashboard/client/messages", badgeKey: "messages" },
       { title: "Connections", icon: UserPlus, path: "/dashboard/client/connections", badgeKey: "connections" },
     ],
