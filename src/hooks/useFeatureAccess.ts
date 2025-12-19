@@ -17,7 +17,8 @@ export const useFeatureAccess = () => {
   };
   
   // Get client limit for current tier
-  const clientLimit = tierConfig?.clientLimit ?? 3;
+  // Use ternary to preserve null (unlimited) - nullish coalescing would incorrectly treat null as missing
+  const clientLimit = tierConfig ? tierConfig.clientLimit : 3;
   
   // Get current client count
   const activeClientCount = clients?.filter(c => c.status === "active").length ?? 0;
