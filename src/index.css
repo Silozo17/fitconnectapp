@@ -446,4 +446,97 @@
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
   }
+
+  /* Consistent card hover states */
+  .card-interactive {
+    @apply transition-all duration-200 hover:shadow-md hover:border-border/80;
+  }
+
+  /* Consistent list item hover states */
+  .list-item-interactive {
+    @apply transition-colors duration-150 hover:bg-muted/50 cursor-pointer;
+  }
+
+  /* Consistent button group spacing */
+  .button-group {
+    @apply flex items-center gap-2;
+  }
+
+  .button-group-vertical {
+    @apply flex flex-col gap-2;
+  }
+
+  /* Consistent form field spacing */
+  .form-field-group {
+    @apply space-y-4;
+  }
+
+  /* Consistent section spacing */
+  .section-spacing {
+    @apply space-y-6;
+  }
+
+  /* Content max-width for readability */
+  .content-max-width {
+    @apply max-w-3xl;
+  }
+
+  /* Truncate with ellipsis for multiple lines */
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Consistent grid layouts */
+  .grid-auto-fit {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .grid-auto-fill {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  /* Smooth scroll behavior */
+  .scroll-smooth {
+    scroll-behavior: smooth;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Responsive text utilities */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-pretty {
+    text-wrap: pretty;
+  }
 }
