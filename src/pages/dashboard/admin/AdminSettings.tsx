@@ -101,6 +101,9 @@ const AdminSettings = () => {
     contact_address: "",
     legal_email: "",
     privacy_email: "",
+    stat_total_users: "0",
+    stat_total_coaches: "0",
+    stat_avg_rating: "4.9",
   });
   
   // Note: useUnsavedChanges provides beforeunload warning for browser close/refresh
@@ -172,6 +175,9 @@ const AdminSettings = () => {
         contact_address: settings.contact_address ?? "",
         legal_email: settings.legal_email ?? "",
         privacy_email: settings.privacy_email ?? "",
+        stat_total_users: settings.stat_total_users ?? "0",
+        stat_total_coaches: settings.stat_total_coaches ?? "0",
+        stat_avg_rating: settings.stat_avg_rating ?? "4.9",
       };
       setLocalSettings(newSettings);
       initialSettingsRef.current = JSON.parse(JSON.stringify(newSettings));
@@ -588,6 +594,52 @@ const AdminSettings = () => {
                       onChange={(e) => handleChange("contact_address", e.target.value)}
                     />
                     <p className="text-xs text-muted-foreground">Shown in footer and legal pages</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Platform Statistics</CardTitle>
+                  <CardDescription>Configure the stats displayed on the homepage. Set to 0 to show live counts from the database.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-3">
+                    <div className="space-y-2">
+                      <Label>Total Users</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        value={localSettings.stat_total_users || "0"}
+                        onChange={(e) => handleChange("stat_total_users", e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground">Set to 0 for live count</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Total Coaches</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        value={localSettings.stat_total_coaches || "0"}
+                        onChange={(e) => handleChange("stat_total_coaches", e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground">Set to 0 for live count</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Average Rating</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="5"
+                        step="0.1"
+                        placeholder="4.9"
+                        value={localSettings.stat_avg_rating || "4.9"}
+                        onChange={(e) => handleChange("stat_avg_rating", e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground">Rating shown on homepage</p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
