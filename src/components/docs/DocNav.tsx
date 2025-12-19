@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   BookOpen, 
   User, 
@@ -18,7 +19,22 @@ import {
   Users,
   MessageSquare,
   FileCheck,
-  BarChart3
+  BarChart3,
+  Flame,
+  ShoppingCart,
+  Target,
+  Calculator,
+  Library,
+  Link2,
+  Kanban,
+  Package,
+  Rocket,
+  Utensils,
+  Sparkles,
+  Star,
+  LayoutDashboard,
+  FileText,
+  Plug
 } from "lucide-react";
 
 interface NavItem {
@@ -26,6 +42,7 @@ interface NavItem {
   href: string;
   icon?: React.ElementType;
   children?: NavItem[];
+  adminOnly?: boolean;
 }
 
 const navItems: NavItem[] = [
@@ -45,6 +62,12 @@ const navItems: NavItem[] = [
       { title: "Booking Sessions", href: "/docs/client/sessions", icon: Calendar },
       { title: "Workout & Nutrition Plans", href: "/docs/client/plans", icon: ClipboardList },
       { title: "Tracking Progress", href: "/docs/client/progress", icon: TrendingUp },
+      { title: "Habits & Streaks", href: "/docs/client/habits", icon: Flame },
+      { title: "Shopping Lists", href: "/docs/client/grocery", icon: ShoppingCart },
+      { title: "Challenges", href: "/docs/client/challenges", icon: Target },
+      { title: "Fitness Tools", href: "/docs/client/tools", icon: Calculator },
+      { title: "Digital Library", href: "/docs/client/library", icon: Library },
+      { title: "Connections", href: "/docs/client/connections", icon: Link2 },
       { title: "Achievements & Leaderboards", href: "/docs/client/achievements", icon: Trophy },
       { title: "Settings & Integrations", href: "/docs/client/settings", icon: Settings },
     ],
@@ -58,10 +81,16 @@ const navItems: NavItem[] = [
       { title: "Getting Started", href: "/docs/coach/onboarding", icon: BookOpen },
       { title: "Profile Setup", href: "/docs/coach/profile", icon: UserPlus },
       { title: "Managing Clients", href: "/docs/coach/clients", icon: Users },
+      { title: "Sales Pipeline", href: "/docs/coach/pipeline", icon: Kanban },
       { title: "Messaging & Templates", href: "/docs/coach/messaging", icon: MessageSquare },
       { title: "Building Plans", href: "/docs/coach/plans", icon: ClipboardList },
+      { title: "Nutrition Builder", href: "/docs/coach/nutrition", icon: Utensils },
+      { title: "Digital Products", href: "/docs/coach/products", icon: Package },
       { title: "Schedule & Sessions", href: "/docs/coach/schedule", icon: Calendar },
       { title: "Packages & Pricing", href: "/docs/coach/packages", icon: CreditCard },
+      { title: "Boost Marketing", href: "/docs/coach/boost", icon: Rocket },
+      { title: "AI Tools", href: "/docs/coach/ai", icon: Sparkles },
+      { title: "Managing Reviews", href: "/docs/coach/reviews", icon: Star },
       { title: "Verification", href: "/docs/coach/verification", icon: FileCheck },
       { title: "Earnings & Stripe", href: "/docs/coach/earnings", icon: BarChart3 },
     ],
@@ -70,6 +99,21 @@ const navItems: NavItem[] = [
     title: "For Administrators",
     href: "/docs/admin",
     icon: Shield,
+    adminOnly: true,
+    children: [
+      { title: "Overview", href: "/docs/admin", icon: Home },
+      { title: "Dashboard", href: "/docs/admin/dashboard", icon: LayoutDashboard },
+      { title: "User Management", href: "/docs/admin/users", icon: Users },
+      { title: "Coach Management", href: "/docs/admin/coaches", icon: Dumbbell },
+      { title: "Team Management", href: "/docs/admin/team", icon: Shield },
+      { title: "Revenue", href: "/docs/admin/revenue", icon: CreditCard },
+      { title: "Analytics", href: "/docs/admin/analytics", icon: BarChart3 },
+      { title: "Challenges", href: "/docs/admin/challenges", icon: Trophy },
+      { title: "Blog", href: "/docs/admin/blog", icon: FileText },
+      { title: "Boosts", href: "/docs/admin/boosts", icon: Rocket },
+      { title: "Integrations", href: "/docs/admin/integrations", icon: Plug },
+      { title: "Audit Log", href: "/docs/admin/audit", icon: FileCheck },
+    ],
   },
 ];
 
@@ -80,6 +124,9 @@ interface DocNavProps {
 export function DocNav({ onNavigate }: DocNavProps) {
   const location = useLocation();
   const currentPath = location.pathname;
+  const { role } = useAuth();
+
+  const isAdmin = role === "admin" || role === "manager" || role === "staff";
 
   const isActive = (href: string) => currentPath === href;
   const isParentActive = (item: NavItem) => 
@@ -89,6 +136,9 @@ export function DocNav({ onNavigate }: DocNavProps) {
   const handleClick = () => {
     onNavigate?.();
   };
+
+  // Filter out admin-only items if user is not admin
+  const visibleNavItems = navItems.filter(item => !item.adminOnly || isAdmin);
 
   return (
     <nav className="w-full lg:w-64 flex-shrink-0 border-r border-border bg-card/50 p-4 overflow-y-auto">
@@ -100,7 +150,7 @@ export function DocNav({ onNavigate }: DocNavProps) {
       </div>
 
       <div className="space-y-1">
-        {navItems.map((item) => (
+        {visibleNavItems.map((item) => (
           <div key={item.href}>
             <Link
               to={item.href}

@@ -1,5 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   BookOpen, 
   User, 
@@ -12,44 +13,18 @@ import {
   CreditCard,
   MessageSquare,
   TrendingUp,
-  Trophy
+  Trophy,
+  Flame,
+  ShoppingCart,
+  Target,
+  Package,
+  Rocket
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-
-const quickLinks = [
-  {
-    title: "Getting Started",
-    description: "New to FitConnect? Start here for a quick overview.",
-    href: "/docs/getting-started",
-    icon: BookOpen,
-    color: "text-primary",
-  },
-  {
-    title: "For Clients",
-    description: "Find coaches, book sessions, and track your progress.",
-    href: "/docs/client",
-    icon: User,
-    color: "text-blue-500",
-  },
-  {
-    title: "For Coaches",
-    description: "Set up your profile, manage clients, and grow your business.",
-    href: "/docs/coach",
-    icon: Dumbbell,
-    color: "text-amber-500",
-  },
-  {
-    title: "For Administrators",
-    description: "Platform management and configuration guides.",
-    href: "/docs/admin",
-    icon: Shield,
-    color: "text-purple-500",
-  },
-];
 
 const popularArticles = [
   { title: "Creating your first account", href: "/docs/getting-started", icon: Sparkles },
@@ -58,11 +33,49 @@ const popularArticles = [
   { title: "Setting up Stripe payments", href: "/docs/coach/earnings", icon: CreditCard },
   { title: "Managing client conversations", href: "/docs/coach/messaging", icon: MessageSquare },
   { title: "Tracking your fitness progress", href: "/docs/client/progress", icon: TrendingUp },
+  { title: "Habits & streaks", href: "/docs/client/habits", icon: Flame },
+  { title: "Joining challenges", href: "/docs/client/challenges", icon: Target },
+  { title: "Creating digital products", href: "/docs/coach/products", icon: Package },
+  { title: "Using Boost marketing", href: "/docs/coach/boost", icon: Rocket },
   { title: "Understanding achievements", href: "/docs/client/achievements", icon: Trophy },
   { title: "Building workout plans", href: "/docs/coach/plans", icon: Dumbbell },
 ];
 
 export default function DocsHub() {
+  const { role } = useAuth();
+  const isAdmin = role === "admin" || role === "manager" || role === "staff";
+
+  const quickLinks = [
+    {
+      title: "Getting Started",
+      description: "New to FitConnect? Start here for a quick overview.",
+      href: "/docs/getting-started",
+      icon: BookOpen,
+      color: "text-primary",
+    },
+    {
+      title: "For Clients",
+      description: "Find coaches, book sessions, and track your progress.",
+      href: "/docs/client",
+      icon: User,
+      color: "text-blue-500",
+    },
+    {
+      title: "For Coaches",
+      description: "Set up your profile, manage clients, and grow your business.",
+      href: "/docs/coach",
+      icon: Dumbbell,
+      color: "text-amber-500",
+    },
+    ...(isAdmin ? [{
+      title: "For Administrators",
+      description: "Platform management and configuration guides.",
+      href: "/docs/admin",
+      icon: Shield,
+      color: "text-purple-500",
+    }] : []),
+  ];
+
   return (
     <>
       <Helmet>
@@ -98,7 +111,7 @@ export default function DocsHub() {
         {/* Main Categories */}
         <section className="py-12">
           <div className="container">
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className={`grid md:grid-cols-2 ${isAdmin ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-6`}>
               {quickLinks.map((link) => (
                 <Link key={link.href} to={link.href}>
                   <Card className="h-full hover:border-primary/50 transition-colors bg-card">
