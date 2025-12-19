@@ -28,7 +28,7 @@ interface ConnectionRequest {
   } | null;
 }
 
-const ConnectionRequests = memo(() => {
+const ClientRequests = memo(() => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { clientLimit, activeClientCount, canAddClient, isApproachingLimit, currentTier } = useFeatureAccess();
@@ -212,9 +212,9 @@ const ConnectionRequests = memo(() => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2">
             <UserPlus className="h-5 w-5" />
-            Connection Requests
+            Client Requests
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -232,7 +232,7 @@ const ConnectionRequests = memo(() => {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <UserPlus className="h-5 w-5" />
-            Connection Requests
+            Client Requests
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
@@ -363,9 +363,9 @@ const ConnectionRequests = memo(() => {
         ) : (
           <div className="text-center py-8">
             <UserPlus className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-            <p className="text-muted-foreground">No pending connection requests</p>
+            <p className="text-muted-foreground">No pending client requests</p>
             <p className="text-sm text-muted-foreground mt-1">
-              New requests from clients will appear here instantly
+              New requests from prospective clients will appear here instantly
             </p>
           </div>
         )}
@@ -374,6 +374,6 @@ const ConnectionRequests = memo(() => {
   );
 });
 
-ConnectionRequests.displayName = "ConnectionRequests";
+ClientRequests.displayName = "ClientRequests";
 
-export default ConnectionRequests;
+export default ClientRequests;

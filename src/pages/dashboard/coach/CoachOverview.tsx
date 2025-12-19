@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
-import ConnectionRequests from "@/components/dashboard/coach/ConnectionRequests";
+import ClientRequests from "@/components/dashboard/coach/ClientRequests";
 import { ProfileCompletionCard } from "@/components/dashboard/coach/ProfileCompletionCard";
 import { PipelineOverviewCard } from "@/components/dashboard/coach/PipelineOverviewCard";
 import { CoachDashboardCustomizer } from "@/components/dashboard/coach/CoachDashboardCustomizer";
@@ -172,9 +172,9 @@ const CoachOverview = () => {
         </Link>
       </div>
 
-      {/* Connection Requests */}
+      {/* Client Requests */}
       <div className="mb-6">
-        <ConnectionRequests />
+        <ClientRequests />
       </div>
 
       {/* Pipeline Overview */}

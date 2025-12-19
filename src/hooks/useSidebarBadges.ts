@@ -10,7 +10,8 @@ interface ClientBadges {
 interface CoachBadges {
   newLeads: number;
   pendingBookings: number;
-  pendingConnections: number;
+  pendingClientRequests: number;
+  pendingFriendRequests: number;
 }
 
 interface AdminBadges {
@@ -107,7 +108,8 @@ export const useCoachBadges = () => {
   const [badges, setBadges] = useState<CoachBadges>({
     newLeads: 0,
     pendingBookings: 0,
-    pendingConnections: 0,
+    pendingClientRequests: 0,
+    pendingFriendRequests: 0,
   });
   const [coachProfileId, setCoachProfileId] = useState<string | null>(null);
 
@@ -127,7 +129,7 @@ export const useCoachBadges = () => {
 
   // Fetch all badge counts
   const fetchBadges = useCallback(async () => {
-    if (!coachProfileId) return;
+    if (!coachProfileId || !user) return;
 
     // New leads (stage = 'new_lead')
     const { count: leadsCount } = await supabase
@@ -143,19 +145,27 @@ export const useCoachBadges = () => {
       .eq("coach_id", coachProfileId)
       .eq("status", "pending");
 
-    // Pending connection requests
-    const { count: connectionsCount } = await supabase
+    // Pending client requests (clients wanting to hire this coach)
+    const { count: clientRequestsCount } = await supabase
       .from("connection_requests")
       .select("*", { count: "exact", head: true })
       .eq("coach_id", coachProfileId)
       .eq("status", "pending");
 
+    // Pending friend requests (peer-to-peer connections where coach is addressee)
+    const { count: friendRequestsCount } = await supabase
+      .from("user_connections")
+      .select("*", { count: "exact", head: true })
+      .eq("addressee_user_id", user.id)
+      .eq("status", "pending");
+
     setBadges({
       newLeads: leadsCount || 0,
       pendingBookings: bookingsCount || 0,
-      pendingConnections: connectionsCount || 0,
+      pendingClientRequests: clientRequestsCount || 0,
+      pendingFriendRequests: friendRequestsCount || 0,
     });
-  }, [coachProfileId]);
+  }, [coachProfileId, user]);
 
   useEffect(() => {
     if (coachProfileId) fetchBadges();
@@ -163,7 +173,7 @@ export const useCoachBadges = () => {
 
   // Realtime subscriptions
   useEffect(() => {
-    if (!coachProfileId) return;
+    if (!coachProfileId || !user) return;
 
     const channel = supabase
       .channel(`coach-badges-${coachProfileId}`)
@@ -197,12 +207,21 @@ export const useCoachBadges = () => {
         },
         () => fetchBadges()
       )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "user_connections",
+        },
+        () => fetchBadges()
+      )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [coachProfileId, fetchBadges]);
+  }, [coachProfileId, user, fetchBadges]);
 
   return badges;
 };
