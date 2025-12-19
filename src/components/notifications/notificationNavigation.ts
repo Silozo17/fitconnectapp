@@ -28,6 +28,10 @@ export const getNotificationRoute = (
     
     case "connection_request":
     case "connection_accepted":
+      // Admins don't have a connections page - route to client connections
+      if (role === "admin" || role === "manager" || role === "staff") {
+        return "/dashboard/client/connections";
+      }
       return `${baseRoute}/connections`;
     
     case "review_received":
