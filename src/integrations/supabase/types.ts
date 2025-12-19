@@ -5154,6 +5154,9 @@ export type Database = {
           location: string | null
           location_city: string | null
           location_country: string | null
+          location_country_code: string | null
+          location_lat: number | null
+          location_lng: number | null
           location_region: string | null
           marketplace_visible: boolean | null
           onboarding_completed: boolean | null
@@ -5190,6 +5193,9 @@ export type Database = {
           location?: string | null
           location_city?: string | null
           location_country?: string | null
+          location_country_code?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
           location_region?: string | null
           marketplace_visible?: boolean | null
           onboarding_completed?: boolean | null
@@ -5226,6 +5232,9 @@ export type Database = {
           location?: string | null
           location_city?: string | null
           location_country?: string | null
+          location_country_code?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
           location_region?: string | null
           marketplace_visible?: boolean | null
           onboarding_completed?: boolean | null
