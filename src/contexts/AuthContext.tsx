@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useMemo, useCallback, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
@@ -70,7 +70,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, selectedRole: AppRole) => {
+  const signUp = useCallback(async (email: string, password: string, selectedRole: AppRole) => {
     const redirectUrl = `${window.location.origin}/`;
     
     const { data, error } = await supabase.auth.signUp({
@@ -94,9 +94,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     return { error: null };
-  };
+  }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -107,9 +107,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return { error: new Error('Invalid email or password') };
     }
     return { error: null };
-  };
+  }, []);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     try {
       await supabase.auth.signOut();
     } catch (error) {
@@ -120,20 +120,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setSession(null);
     setUser(null);
     setRole(null);
-  };
+  }, []);
+
+  const value = useMemo(() => ({
+    user,
+    session,
+    role,
+    loading,
+    signUp,
+    signIn,
+    signOut,
+  }), [user, session, role, loading, signUp, signIn, signOut]);
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        session,
-        role,
-        loading,
-        signUp,
-        signIn,
-        signOut,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
