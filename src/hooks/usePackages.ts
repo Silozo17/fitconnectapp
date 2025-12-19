@@ -8,6 +8,7 @@ export interface CoachPackage {
   name: string;
   description: string | null;
   session_count: number;
+  session_duration_minutes: number;
   price: number;
   currency: string;
   validity_days: number;
@@ -299,5 +300,178 @@ export const useClientPackages = () => {
       return data as ClientPackagePurchase[];
     },
     enabled: !!user,
+  });
+};
+
+// Get client's active package with available tokens for a specific coach
+export const useClientActivePackage = (clientId: string | undefined, coachId: string | undefined) => {
+  return useQuery({
+    queryKey: ["client-active-package", clientId, coachId],
+    queryFn: async () => {
+      if (!clientId || !coachId) return null;
+
+      const { data, error } = await supabase
+        .from("client_package_purchases")
+        .select("*, coach_packages(*)")
+        .eq("client_id", clientId)
+        .eq("coach_id", coachId)
+        .eq("status", "active")
+        .order("purchased_at", { ascending: true });
+
+      if (error) throw error;
+      
+      // Find the first package with available tokens and not expired
+      const activePackage = data?.find(pkg => {
+        const tokensRemaining = pkg.sessions_total - (pkg.sessions_used || 0);
+        const notExpired = !pkg.expires_at || new Date(pkg.expires_at) > new Date();
+        return tokensRemaining > 0 && notExpired;
+      });
+
+      return activePackage || null;
+    },
+    enabled: !!clientId && !!coachId,
+  });
+};
+
+// Use a token from a package purchase
+export const usePackageToken = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ 
+      packagePurchaseId, 
+      sessionId 
+    }: { 
+      packagePurchaseId: string; 
+      sessionId: string;
+    }) => {
+      // Get current usage
+      const { data: purchase, error: fetchError } = await supabase
+        .from("client_package_purchases")
+        .select("sessions_used, sessions_total")
+        .eq("id", packagePurchaseId)
+        .single();
+
+      if (fetchError) throw fetchError;
+      if (!purchase) throw new Error("Package purchase not found");
+
+      const newUsage = (purchase.sessions_used || 0) + 1;
+      if (newUsage > purchase.sessions_total) {
+        throw new Error("No tokens remaining in this package");
+      }
+
+      // Increment sessions_used
+      const { error: updateError } = await supabase
+        .from("client_package_purchases")
+        .update({ sessions_used: newUsage })
+        .eq("id", packagePurchaseId);
+
+      if (updateError) throw updateError;
+
+      // Link session to package
+      const { error: sessionError } = await supabase
+        .from("coaching_sessions")
+        .update({ package_purchase_id: packagePurchaseId })
+        .eq("id", sessionId);
+
+      if (sessionError) throw sessionError;
+
+      // Log token usage
+      const { error: logError } = await supabase
+        .from("session_token_history")
+        .insert({
+          package_purchase_id: packagePurchaseId,
+          session_id: sessionId,
+          action: "used",
+          reason: "Session scheduled",
+        });
+
+      if (logError) console.error("Failed to log token usage:", logError);
+
+      return { tokensRemaining: purchase.sessions_total - newUsage };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["client-active-package"] });
+      queryClient.invalidateQueries({ queryKey: ["client-package-purchases"] });
+    },
+  });
+};
+
+// Return a token to a package (for cancellations)
+export const useReturnPackageToken = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ 
+      sessionId,
+      reason,
+      isCoachOverride = false,
+    }: { 
+      sessionId: string;
+      reason: string;
+      isCoachOverride?: boolean;
+    }) => {
+      // Get session with package info
+      const { data: session, error: fetchError } = await supabase
+        .from("coaching_sessions")
+        .select("package_purchase_id, token_returned")
+        .eq("id", sessionId)
+        .single();
+
+      if (fetchError) throw fetchError;
+      if (!session?.package_purchase_id) throw new Error("Session is not linked to a package");
+      if (session.token_returned) throw new Error("Token already returned");
+
+      // Get current usage
+      const { data: purchase, error: purchaseError } = await supabase
+        .from("client_package_purchases")
+        .select("sessions_used")
+        .eq("id", session.package_purchase_id)
+        .single();
+
+      if (purchaseError) throw purchaseError;
+
+      // Decrement sessions_used
+      const newUsage = Math.max(0, (purchase?.sessions_used || 1) - 1);
+      const { error: updateError } = await supabase
+        .from("client_package_purchases")
+        .update({ sessions_used: newUsage })
+        .eq("id", session.package_purchase_id);
+
+      if (updateError) throw updateError;
+
+      // Mark token as returned on session
+      const { data: userData } = await supabase.auth.getUser();
+      const { error: sessionError } = await supabase
+        .from("coaching_sessions")
+        .update({ 
+          token_returned: true,
+          token_returned_by: userData.user?.id,
+          token_return_reason: reason,
+        })
+        .eq("id", sessionId);
+
+      if (sessionError) throw sessionError;
+
+      // Log token return
+      const { error: logError } = await supabase
+        .from("session_token_history")
+        .insert({
+          package_purchase_id: session.package_purchase_id,
+          session_id: sessionId,
+          action: isCoachOverride ? "manual_return" : "returned",
+          reason,
+          performed_by: userData.user?.id,
+        });
+
+      if (logError) console.error("Failed to log token return:", logError);
+
+      return { success: true };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["client-active-package"] });
+      queryClient.invalidateQueries({ queryKey: ["client-package-purchases"] });
+      queryClient.invalidateQueries({ queryKey: ["coaching-sessions"] });
+    },
   });
 };

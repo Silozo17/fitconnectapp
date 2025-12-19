@@ -25,6 +25,7 @@ const CreatePackageModal = ({ open, onOpenChange, editPackage }: CreatePackageMo
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [sessionCount, setSessionCount] = useState("5");
+  const [sessionDuration, setSessionDuration] = useState("60");
   const [price, setPrice] = useState("");
   const [validityDays, setValidityDays] = useState("90");
   const [isActive, setIsActive] = useState(true);
@@ -36,6 +37,7 @@ const CreatePackageModal = ({ open, onOpenChange, editPackage }: CreatePackageMo
         setName(editPackage.name || "");
         setDescription(editPackage.description || "");
         setSessionCount(editPackage.session_count?.toString() || "5");
+        setSessionDuration(editPackage.session_duration_minutes?.toString() || "60");
         setPrice(editPackage.price?.toString() || "");
         setValidityDays(editPackage.validity_days?.toString() || "90");
         setIsActive(editPackage.is_active ?? true);
@@ -59,6 +61,7 @@ const CreatePackageModal = ({ open, onOpenChange, editPackage }: CreatePackageMo
         name: name.trim(),
         description: description.trim() || null,
         session_count: parseInt(sessionCount),
+        session_duration_minutes: parseInt(sessionDuration) || 60,
         price: parseFloat(price),
         currency: "GBP",
         validity_days: parseInt(validityDays) || 90,
@@ -84,6 +87,7 @@ const CreatePackageModal = ({ open, onOpenChange, editPackage }: CreatePackageMo
     setName("");
     setDescription("");
     setSessionCount("5");
+    setSessionDuration("60");
     setPrice("");
     setValidityDays("90");
     setIsActive(true);
@@ -132,17 +136,33 @@ const CreatePackageModal = ({ open, onOpenChange, editPackage }: CreatePackageMo
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="price">Price (£) *</Label>
-              <Input
-                id="price"
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="0.00"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-              />
+              <Label htmlFor="duration">Session Duration</Label>
+              <select
+                id="duration"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                value={sessionDuration}
+                onChange={(e) => setSessionDuration(e.target.value)}
+              >
+                <option value="30">30 minutes</option>
+                <option value="45">45 minutes</option>
+                <option value="60">1 hour</option>
+                <option value="90">1.5 hours</option>
+                <option value="120">2 hours</option>
+              </select>
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="price">Price (£) *</Label>
+            <Input
+              id="price"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+            />
           </div>
 
           <div className="space-y-2">
