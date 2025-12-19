@@ -232,9 +232,7 @@ const ChatWindow = ({
   const isCoachView = activeProfileType === "coach";
 
   return (
-    <div className="flex h-full min-w-0 min-h-0">
-        {/* Main Chat Area */}
-        <div className="flex-1 flex flex-col h-full min-h-0">
+    <div className="flex flex-col h-full w-full min-w-0 overflow-hidden">
           {/* Header */}
           <div className="p-4 border-b border-border bg-card flex items-center gap-3">
             <Link to={basePath} className="lg:hidden">
@@ -375,7 +373,6 @@ const ChatWindow = ({
               </Button>
             </div>
           </form>
-        </div>
 
       {/* Profile Sheet - Use ProspectProfileSheet for coaches viewing clients */}
       {shouldUseProspectSheet ? (
