@@ -26,7 +26,7 @@ export default defineConfig(({ mode }) => ({
         display: 'standalone',
         orientation: 'portrait-primary',
         scope: '/',
-        start_url: 'https://getfitconnect.co.uk/get-started',
+        start_url: '/get-started',
         categories: ['fitness', 'health', 'sports', 'lifestyle'],
         lang: 'en-GB',
         icons: [
