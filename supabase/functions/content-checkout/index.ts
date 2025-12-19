@@ -7,9 +7,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const logStep = (step: string, details?: any) => {
-  const detailsStr = details ? ` - ${JSON.stringify(details)}` : "";
-  console.log(`[CONTENT-CHECKOUT] ${step}${detailsStr}`);
+const logStep = (step: string, details?: Record<string, unknown>) => {
+  if (Deno.env.get("DENO_ENV") !== "production") {
+    const detailsStr = details ? ` - ${JSON.stringify(details)}` : "";
+    console.log(`[CONTENT-CHECKOUT] ${step}${detailsStr}`);
+  }
 };
 
 serve(async (req) => {
@@ -48,7 +50,7 @@ serve(async (req) => {
       throw new Error("Either productId or bundleId is required");
     }
 
-    let item: any;
+    // SECURITY: All pricing data is fetched from database, never from client input
     let coachId: string;
     let itemName: string;
     let itemPrice: number;
@@ -56,38 +58,53 @@ serve(async (req) => {
     let isBundle = false;
 
     if (productId) {
-      // Fetch product
+      // SECURITY: Fetch product price from database - never trust client-provided amounts
       const { data: product, error: productError } = await supabase
         .from("digital_products")
-        .select("*")
+        .select("id, title, price, currency, coach_id, is_active")
         .eq("id", productId)
+        .eq("is_active", true)
         .single();
 
-      if (productError || !product) throw new Error("Product not found");
+      if (productError || !product) throw new Error("Product not found or inactive");
 
-      item = product;
       coachId = product.coach_id;
       itemName = product.title;
       itemPrice = product.price;
       itemCurrency = product.currency || "GBP";
-      logStep("Product found", { title: product.title, price: product.price });
+      logStep("Product validated from DB", { 
+        id: product.id, 
+        title: product.title, 
+        price: product.price,
+        currency: itemCurrency
+      });
     } else {
-      // Fetch bundle
+      // SECURITY: Fetch bundle price from database - never trust client-provided amounts
       const { data: bundle, error: bundleError } = await supabase
         .from("digital_bundles")
-        .select("*")
+        .select("id, title, price, currency, coach_id, is_active")
         .eq("id", bundleId)
+        .eq("is_active", true)
         .single();
 
-      if (bundleError || !bundle) throw new Error("Bundle not found");
+      if (bundleError || !bundle) throw new Error("Bundle not found or inactive");
 
-      item = bundle;
       coachId = bundle.coach_id;
       itemName = bundle.title;
       itemPrice = bundle.price;
       itemCurrency = bundle.currency || "GBP";
       isBundle = true;
-      logStep("Bundle found", { title: bundle.title, price: bundle.price });
+      logStep("Bundle validated from DB", { 
+        id: bundle.id, 
+        title: bundle.title, 
+        price: bundle.price,
+        currency: itemCurrency
+      });
+    }
+
+    // Validate price is positive
+    if (itemPrice <= 0) {
+      throw new Error("Invalid product price");
     }
 
     // Get coach's Stripe Connect ID
@@ -109,8 +126,8 @@ serve(async (req) => {
       logStep("Existing customer found", { customerId });
     }
 
-    // Calculate platform fee (15%)
-    const platformFee = Math.round(itemPrice * 0.15 * 100); // In cents
+    // Calculate platform fee (15%) - based on DB price, not client input
+    const platformFee = Math.round(itemPrice * 0.15 * 100);
     const priceInCents = Math.round(itemPrice * 100);
 
     // Create checkout session params
@@ -188,14 +205,15 @@ serve(async (req) => {
     return new Response(JSON.stringify({ 
       url: session.url, 
       sessionId: session.id,
-      clientSecret: session.client_secret, // For embedded mode
+      clientSecret: session.client_secret,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
-  } catch (error: any) {
-    logStep("ERROR", { message: error.message });
-    return new Response(JSON.stringify({ error: error.message }), {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("[CONTENT-CHECKOUT] ERROR:", errorMessage);
+    return new Response(JSON.stringify({ error: errorMessage }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
