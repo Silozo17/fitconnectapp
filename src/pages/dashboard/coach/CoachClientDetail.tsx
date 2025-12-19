@@ -366,7 +366,7 @@ const CoachClientDetail = () => {
             <div className="lg:col-span-1">
               <SessionCalendar 
                 sessions={calendarSessions}
-                onDateClick={(date) => console.log("Date clicked:", date)}
+                onDateClick={() => {}}
                 onSessionClick={handleCalendarSessionClick}
               />
             </div>

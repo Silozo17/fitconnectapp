@@ -264,7 +264,6 @@ export const useRespondToBooking = () => {
               .single();
 
             const provider = videoSettings?.provider || "google_meet";
-            console.log("Creating video meeting with provider:", provider);
 
             // Create video meeting - wait for it to complete so calendar/email has the link
             await supabase.functions.invoke("video-create-meeting", {
