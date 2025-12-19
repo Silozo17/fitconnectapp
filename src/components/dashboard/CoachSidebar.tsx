@@ -144,7 +144,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
   const { displayName, avatarUrl } = useUserProfile();
   const { data: selectedAvatar } = useSelectedAvatar('coach');
   const { unreadCount } = useUnreadMessages();
-  const { newLeads, pendingBookings, pendingClientRequests, pendingFriendRequests } = useCoachBadges();
+  const { badges: { newLeads, pendingBookings, pendingClientRequests, pendingFriendRequests } } = useCoachBadges();
   const { hasFeature } = useFeatureAccess();
 
   // Initialize open groups based on current path
