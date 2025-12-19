@@ -263,26 +263,26 @@ const Auth = () => {
         />
       </Helmet>
 
-      <div className="min-h-screen bg-background flex">
+      <div className="h-dvh bg-background flex overflow-hidden">
         {/* Left side - Form */}
-        <div className="flex-1 flex items-center justify-center p-8">
+        <div className="flex-1 flex items-center justify-center p-4 sm:p-8 overflow-y-auto">
           <div className="w-full max-w-md">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 mb-8">
-              <div className="w-10 h-10 rounded-xl gradient-bg-primary flex items-center justify-center">
-                <Dumbbell className="w-5 h-5 text-white" />
+            <Link to="/" className="flex items-center gap-2 mb-4 sm:mb-8">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl gradient-bg-primary flex items-center justify-center">
+                <Dumbbell className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
-              <span className="font-display font-bold text-xl text-foreground">
+              <span className="font-display font-bold text-lg sm:text-xl text-foreground">
                 FitConnect
               </span>
             </Link>
 
             {/* Header */}
-            <div className="mb-8">
-              <h1 className="font-display text-3xl font-bold text-foreground mb-2">
+            <div className="mb-4 sm:mb-8">
+              <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-1 sm:mb-2">
                 {isLogin ? "Welcome back" : "Create your account"}
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground text-sm sm:text-base">
                 {isLogin
                   ? "Log in to access your dashboard"
                   : "Start your fitness journey today"}
@@ -291,27 +291,27 @@ const Auth = () => {
 
             {/* Role Selection (Sign Up only) */}
             {!isLogin && (
-              <div className="mb-6">
-                <Label className="text-foreground mb-3 block">I want to:</Label>
-                <div className="grid grid-cols-2 gap-3">
+              <div className="mb-4 sm:mb-6">
+                <Label className="text-foreground mb-2 sm:mb-3 block text-sm sm:text-base">I want to:</Label>
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
                   <button
                     type="button"
                     onClick={() => setSelectedRole("client")}
-                    className={`p-4 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-2 ${
+                    className={`p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-1 sm:gap-2 ${
                       selectedRole === "client"
                         ? "border-primary bg-primary/10"
                         : "border-border hover:border-muted-foreground"
                     }`}
                   >
                     <User
-                      className={`w-6 h-6 ${
+                      className={`w-5 h-5 sm:w-6 sm:h-6 ${
                         selectedRole === "client"
                           ? "text-primary"
                           : "text-muted-foreground"
                       }`}
                     />
                     <span
-                      className={`font-medium ${
+                      className={`font-medium text-sm sm:text-base ${
                         selectedRole === "client"
                           ? "text-foreground"
                           : "text-muted-foreground"
@@ -323,21 +323,21 @@ const Auth = () => {
                   <button
                     type="button"
                     onClick={() => setSelectedRole("coach")}
-                    className={`p-4 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-2 ${
+                    className={`p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-1 sm:gap-2 ${
                       selectedRole === "coach"
                         ? "border-primary bg-primary/10"
                         : "border-border hover:border-muted-foreground"
                     }`}
                   >
                     <Briefcase
-                      className={`w-6 h-6 ${
+                      className={`w-5 h-5 sm:w-6 sm:h-6 ${
                         selectedRole === "coach"
                           ? "text-primary"
                           : "text-muted-foreground"
                       }`}
                     />
                     <span
-                      className={`font-medium ${
+                      className={`font-medium text-sm sm:text-base ${
                         selectedRole === "coach"
                           ? "text-foreground"
                           : "text-muted-foreground"
@@ -351,16 +351,16 @@ const Auth = () => {
             )}
 
             {/* Form */}
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
               <div>
-                <Label htmlFor="email" className="text-foreground">
+                <Label htmlFor="email" className="text-foreground text-sm sm:text-base">
                   Email
                 </Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="you@example.com"
-                  className="mt-1.5 bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12"
+                  className="mt-1 sm:mt-1.5 bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl h-10 sm:h-12"
                   {...register("email")}
                 />
                 {errors.email && (
@@ -371,14 +371,14 @@ const Auth = () => {
               </div>
 
               <div>
-                <Label htmlFor="password" className="text-foreground">
+                <Label htmlFor="password" className="text-foreground text-sm sm:text-base">
                   Password
                 </Label>
                 <Input
                   id="password"
                   type="password"
                   placeholder="••••••••"
-                  className="mt-1.5 bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12"
+                  className="mt-1 sm:mt-1.5 bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl h-10 sm:h-12"
                   {...register("password")}
                 />
                 {errors.password && (
@@ -398,10 +398,10 @@ const Auth = () => {
               <GradientButton
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full h-12 text-base"
+                className="w-full h-10 sm:h-12 text-sm sm:text-base"
               >
                 {isSubmitting ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                 ) : isLogin ? (
                   "Log In"
                 ) : (
@@ -411,7 +411,7 @@ const Auth = () => {
             </form>
 
             {/* Toggle */}
-            <p className="mt-6 text-center text-muted-foreground">
+            <p className="mt-4 sm:mt-6 text-center text-muted-foreground text-sm sm:text-base">
               {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
               <button
                 type="button"

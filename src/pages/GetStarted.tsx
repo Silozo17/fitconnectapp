@@ -60,23 +60,23 @@ const GetStarted = () => {
         <meta name="description" content="Start your fitness journey with FitConnect. Find coaches, get personalized plans, and track your progress." />
       </Helmet>
 
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="h-dvh bg-background flex flex-col overflow-hidden">
         {/* Skip button */}
-        <div className="absolute top-4 right-4 z-10">
+        <div className="absolute top-3 right-3 z-10">
           <Button variant="ghost" size="sm" onClick={handleSkip} className="text-muted-foreground">
             Skip
           </Button>
         </div>
 
         {/* Main content */}
-        <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+        <div className="flex-1 flex flex-col items-center justify-center px-6 py-4 sm:py-8">
           {/* Logo */}
-          <div className="mb-8">
+          <div className="mb-4 sm:mb-8">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <Dumbbell className="h-6 w-6 text-primary-foreground" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary rounded-lg flex items-center justify-center">
+                <Dumbbell className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
               </div>
-              <span className="text-2xl font-bold text-foreground">FitConnect</span>
+              <span className="text-xl sm:text-2xl font-bold text-foreground">FitConnect</span>
             </div>
           </div>
 
@@ -84,14 +84,14 @@ const GetStarted = () => {
           <div className="w-full max-w-sm">
             <div className="relative overflow-hidden">
               {/* Slide content */}
-              <div className="flex flex-col items-center text-center px-4 min-h-[280px]">
-                <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mb-6">
-                  <CurrentIcon className="h-12 w-12 text-primary" />
+              <div className="flex flex-col items-center text-center px-4 min-h-[180px] sm:min-h-[280px]">
+                <div className="w-16 h-16 sm:w-24 sm:h-24 bg-primary/10 rounded-full flex items-center justify-center mb-4 sm:mb-6">
+                  <CurrentIcon className="h-8 w-8 sm:h-12 sm:w-12 text-primary" />
                 </div>
-                <h2 className="text-2xl font-bold text-foreground mb-3">
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2 sm:mb-3">
                   {slides[currentSlide].title}
                 </h2>
-                <p className="text-muted-foreground text-lg leading-relaxed">
+                <p className="text-muted-foreground text-base sm:text-lg leading-relaxed">
                   {slides[currentSlide].description}
                 </p>
               </div>
@@ -120,12 +120,12 @@ const GetStarted = () => {
             </div>
 
             {/* Dots indicator */}
-            <div className="flex justify-center gap-2 mt-6">
+            <div className="flex justify-center gap-2 mt-4 sm:mt-6">
               {slides.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentSlide(index)}
-                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                  className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full transition-colors ${
                     index === currentSlide ? "bg-primary" : "bg-muted"
                   }`}
                   aria-label={`Go to slide ${index + 1}`}
@@ -136,10 +136,10 @@ const GetStarted = () => {
         </div>
 
         {/* Action buttons */}
-        <div className="px-6 pb-8 space-y-3 max-w-sm mx-auto w-full">
+        <div className="px-6 pb-6 sm:pb-8 space-y-2 sm:space-y-3 max-w-sm mx-auto w-full">
           <Button 
             onClick={handleGetStarted} 
-            className="w-full h-12 text-lg font-semibold"
+            className="w-full h-11 sm:h-12 text-base sm:text-lg font-semibold"
             size="lg"
           >
             Get Started
@@ -147,7 +147,7 @@ const GetStarted = () => {
           <Button 
             onClick={handleLogin} 
             variant="outline" 
-            className="w-full h-12 text-lg"
+            className="w-full h-11 sm:h-12 text-base sm:text-lg"
             size="lg"
           >
             I have an account
