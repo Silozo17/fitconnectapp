@@ -26,9 +26,10 @@ interface DocsLayoutProps {
   description?: string;
   breadcrumbs?: BreadcrumbItem[];
   children: React.ReactNode;
+  noIndex?: boolean;
 }
 
-export function DocsLayout({ title, description, breadcrumbs = [], children }: DocsLayoutProps) {
+export function DocsLayout({ title, description, breadcrumbs = [], children, noIndex = false }: DocsLayoutProps) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   return (
@@ -36,6 +37,7 @@ export function DocsLayout({ title, description, breadcrumbs = [], children }: D
       <Helmet>
         <title>{title} | FitConnect Help Center</title>
         <meta name="description" content={description || `Learn about ${title} on FitConnect`} />
+        {noIndex && <meta name="robots" content="noindex, nofollow" />}
       </Helmet>
 
       <div className="min-h-screen flex flex-col bg-background">

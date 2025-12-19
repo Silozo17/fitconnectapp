@@ -126,6 +126,12 @@ const DocsClientPlans = lazy(() => import("./pages/docs/client/ClientPlans"));
 const DocsClientProgress = lazy(() => import("./pages/docs/client/ClientProgress"));
 const DocsClientAchievements = lazy(() => import("./pages/docs/client/ClientAchievements"));
 const DocsClientSettings = lazy(() => import("./pages/docs/client/ClientSettingsDocs"));
+const DocsClientHabits = lazy(() => import("./pages/docs/client/ClientHabits"));
+const DocsClientGrocery = lazy(() => import("./pages/docs/client/ClientGrocery"));
+const DocsClientChallenges = lazy(() => import("./pages/docs/client/ClientChallenges"));
+const DocsClientTools = lazy(() => import("./pages/docs/client/ClientToolsDocs"));
+const DocsClientLibrary = lazy(() => import("./pages/docs/client/ClientLibrary"));
+const DocsClientConnections = lazy(() => import("./pages/docs/client/ClientConnectionsDocs"));
 const DocsCoachOverview = lazy(() => import("./pages/docs/coach/CoachOverview"));
 const DocsCoachOnboarding = lazy(() => import("./pages/docs/coach/CoachOnboarding"));
 const DocsCoachProfile = lazy(() => import("./pages/docs/coach/CoachProfile"));
@@ -136,7 +142,24 @@ const DocsCoachPlans = lazy(() => import("./pages/docs/coach/CoachPlansDocs"));
 const DocsCoachSchedule = lazy(() => import("./pages/docs/coach/CoachScheduleDocs"));
 const DocsCoachPackages = lazy(() => import("./pages/docs/coach/CoachPackagesDocs"));
 const DocsCoachVerification = lazy(() => import("./pages/docs/coach/CoachVerificationDocs"));
+const DocsCoachPipeline = lazy(() => import("./pages/docs/coach/CoachPipelineDocs"));
+const DocsCoachProducts = lazy(() => import("./pages/docs/coach/CoachProductsDocs"));
+const DocsCoachBoost = lazy(() => import("./pages/docs/coach/CoachBoostDocs"));
+const DocsCoachNutrition = lazy(() => import("./pages/docs/coach/CoachNutritionDocs"));
+const DocsCoachAI = lazy(() => import("./pages/docs/coach/CoachAIDocs"));
+const DocsCoachReviews = lazy(() => import("./pages/docs/coach/CoachReviewsDocs"));
 const DocsAdminOverview = lazy(() => import("./pages/docs/admin/AdminOverview"));
+const DocsAdminDashboard = lazy(() => import("./pages/docs/admin/AdminDashboardDocs"));
+const DocsAdminUsers = lazy(() => import("./pages/docs/admin/AdminUsersDocs"));
+const DocsAdminCoaches = lazy(() => import("./pages/docs/admin/AdminCoachesDocs"));
+const DocsAdminTeam = lazy(() => import("./pages/docs/admin/AdminTeamDocs"));
+const DocsAdminRevenue = lazy(() => import("./pages/docs/admin/AdminRevenueDocs"));
+const DocsAdminAnalytics = lazy(() => import("./pages/docs/admin/AdminAnalyticsDocs"));
+const DocsAdminChallenges = lazy(() => import("./pages/docs/admin/AdminChallengesDocs"));
+const DocsAdminBlog = lazy(() => import("./pages/docs/admin/AdminBlogDocs"));
+const DocsAdminBoosts = lazy(() => import("./pages/docs/admin/AdminBoostsDocs"));
+const DocsAdminIntegrations = lazy(() => import("./pages/docs/admin/AdminIntegrationsDocs"));
+const DocsAdminAudit = lazy(() => import("./pages/docs/admin/AdminAuditDocs"));
 
 const queryClient = new QueryClient();
 
@@ -192,6 +215,12 @@ const App = () => (
                     <Route path="/docs/client/progress" element={<DocsClientProgress />} />
                     <Route path="/docs/client/achievements" element={<DocsClientAchievements />} />
                     <Route path="/docs/client/settings" element={<DocsClientSettings />} />
+                    <Route path="/docs/client/habits" element={<DocsClientHabits />} />
+                    <Route path="/docs/client/grocery" element={<DocsClientGrocery />} />
+                    <Route path="/docs/client/challenges" element={<DocsClientChallenges />} />
+                    <Route path="/docs/client/tools" element={<DocsClientTools />} />
+                    <Route path="/docs/client/library" element={<DocsClientLibrary />} />
+                    <Route path="/docs/client/connections" element={<DocsClientConnections />} />
                     <Route path="/docs/coach" element={<DocsCoachOverview />} />
                     <Route path="/docs/coach/onboarding" element={<DocsCoachOnboarding />} />
                     <Route path="/docs/coach/profile" element={<DocsCoachProfile />} />
@@ -202,7 +231,26 @@ const App = () => (
                     <Route path="/docs/coach/schedule" element={<DocsCoachSchedule />} />
                     <Route path="/docs/coach/packages" element={<DocsCoachPackages />} />
                     <Route path="/docs/coach/verification" element={<DocsCoachVerification />} />
-                    <Route path="/docs/admin" element={<DocsAdminOverview />} />
+                    <Route path="/docs/coach/pipeline" element={<DocsCoachPipeline />} />
+                    <Route path="/docs/coach/products" element={<DocsCoachProducts />} />
+                    <Route path="/docs/coach/boost" element={<DocsCoachBoost />} />
+                    <Route path="/docs/coach/nutrition" element={<DocsCoachNutrition />} />
+                    <Route path="/docs/coach/ai" element={<DocsCoachAI />} />
+                    <Route path="/docs/coach/reviews" element={<DocsCoachReviews />} />
+                    
+                    {/* Protected Admin Documentation Routes */}
+                    <Route path="/docs/admin" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminOverview /></ProtectedRoute>} />
+                    <Route path="/docs/admin/dashboard" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminDashboard /></ProtectedRoute>} />
+                    <Route path="/docs/admin/users" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminUsers /></ProtectedRoute>} />
+                    <Route path="/docs/admin/coaches" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminCoaches /></ProtectedRoute>} />
+                    <Route path="/docs/admin/team" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminTeam /></ProtectedRoute>} />
+                    <Route path="/docs/admin/revenue" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminRevenue /></ProtectedRoute>} />
+                    <Route path="/docs/admin/analytics" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminAnalytics /></ProtectedRoute>} />
+                    <Route path="/docs/admin/challenges" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminChallenges /></ProtectedRoute>} />
+                    <Route path="/docs/admin/blog" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminBlog /></ProtectedRoute>} />
+                    <Route path="/docs/admin/boosts" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminBoosts /></ProtectedRoute>} />
+                    <Route path="/docs/admin/integrations" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminIntegrations /></ProtectedRoute>} />
+                    <Route path="/docs/admin/audit" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminAudit /></ProtectedRoute>} />
                     
                     {/* Dashboard Redirect */}
                     <Route path="/dashboard" element={
