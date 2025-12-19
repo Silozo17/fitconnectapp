@@ -1,3 +1,4 @@
+import { memo, useCallback, useMemo } from "react";
 import { Search, User, LogOut, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,13 +24,19 @@ interface DashboardHeaderProps {
   onMenuToggle: () => void;
 }
 
-const DashboardHeader = ({ subscriptionTier, onMenuToggle }: DashboardHeaderProps) => {
+const DashboardHeader = memo(({ subscriptionTier, onMenuToggle }: DashboardHeaderProps) => {
   const navigate = useNavigate();
   const { signOut, role } = useAuth();
   const { displayName, avatarUrl } = useUserProfile();
   const { data: selectedAvatar } = useSelectedAvatar('coach');
 
-  const tierLabel = subscriptionTier === "elite" ? "Elite" : subscriptionTier === "pro" ? "Pro" : "Free";
+  const tierLabel = useMemo(() => 
+    subscriptionTier === "elite" ? "Elite" : subscriptionTier === "pro" ? "Pro" : "Free",
+    [subscriptionTier]
+  );
+
+  const handleProfileClick = useCallback(() => navigate("/dashboard/profile"), [navigate]);
+  const handleSignOut = useCallback(() => signOut(), [signOut]);
 
   return (
     <header className="h-16 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-30">
@@ -99,11 +106,11 @@ const DashboardHeader = ({ subscriptionTier, onMenuToggle }: DashboardHeaderProp
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
+                <DropdownMenuItem onClick={handleProfileClick}>
                   <User className="h-4 w-4 mr-2" />
                   My Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => signOut()}>
+                <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign out
                 </DropdownMenuItem>
@@ -114,6 +121,8 @@ const DashboardHeader = ({ subscriptionTier, onMenuToggle }: DashboardHeaderProp
       </div>
     </header>
   );
-};
+});
+
+DashboardHeader.displayName = "DashboardHeader";
 
 export default DashboardHeader;
