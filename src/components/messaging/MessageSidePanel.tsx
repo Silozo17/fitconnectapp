@@ -8,9 +8,15 @@ import {
   CreditCard, 
   Send, 
   Loader2,
-  ChevronRight,
   X,
-  Pencil
+  Pencil,
+  ChevronDown,
+  Zap,
+  FileText,
+  DollarSign,
+  Calendar,
+  CalendarPlus,
+  ShoppingBag
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -44,9 +50,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { useSessionTypes } from "@/hooks/useCoachSchedule";
+import { useMessageTemplates } from "@/hooks/useMessageTemplates";
+import { useTrainingPlans } from "@/hooks/useTrainingPlans";
+import { useCoachProducts } from "@/hooks/useDigitalProducts";
+import SessionOfferDialog from "./SessionOfferDialog";
 
 interface MessageSidePanelProps {
   participantId: string;
+  clientId?: string;
   onSendMessage: (message: string) => Promise<boolean>;
   onClose?: () => void;
 }
@@ -109,12 +126,11 @@ interface EditingSubscription {
   };
 }
 
-const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSidePanelProps) => {
+const MessageSidePanel = ({ participantId, clientId, onSendMessage, onClose }: MessageSidePanelProps) => {
   const { activeProfileType } = useAdminView();
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState<string | null>(null);
   const [assignedPlans, setAssignedPlans] = useState<TrainingPlan[]>([]);
-  const [nutritionPlans, setNutritionPlans] = useState<NutritionPlan[]>([]);
   const [packages, setPackages] = useState<CoachPackage[]>([]);
   const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>([]);
   const [coachId, setCoachId] = useState<string | null>(null);
@@ -122,6 +138,34 @@ const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSide
   const [pendingSend, setPendingSend] = useState<PendingSend>(null);
   const [editingPackage, setEditingPackage] = useState<EditingPackage | null>(null);
   const [editingSubscription, setEditingSubscription] = useState<EditingSubscription | null>(null);
+  
+  // Quick Actions state
+  const [showPricingDialog, setShowPricingDialog] = useState(false);
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [showSessionOfferDialog, setShowSessionOfferDialog] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [paymentDescription, setPaymentDescription] = useState("");
+  
+  // Collapsible sections
+  const [openSections, setOpenSections] = useState({
+    quickActions: true,
+    digitalProducts: true,
+    workoutPlans: true,
+    mealPlans: true,
+    assignedPlans: true,
+    packages: true,
+    subscriptions: true,
+  });
+
+  // Hooks for data
+  const { data: sessionTypes = [] } = useSessionTypes(coachId || "");
+  const { templates, loading: templatesLoading } = useMessageTemplates();
+  const { data: trainingPlans = [], isLoading: plansLoading } = useTrainingPlans(coachId || undefined);
+  const { data: digitalProducts = [], isLoading: productsLoading } = useCoachProducts();
+
+  // Filter plans by type
+  const workoutPlans = trainingPlans.filter(plan => plan.plan_type === 'workout' || plan.plan_type === 'training');
+  const mealPlans = trainingPlans.filter(plan => plan.plan_type === 'nutrition' || plan.plan_type === 'meal');
 
   // Only show for coaches (including admins viewing as coach)
   if (activeProfileType !== "coach") return null;
@@ -199,8 +243,92 @@ const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSide
     fetchData();
   }, [participantId]);
 
-  const handleSendTrainingPlan = async (plan: TrainingPlan) => {
+  const toggleSection = (section: keyof typeof openSections) => {
+    setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  // Quick Actions handlers
+  const handleSendPricing = async () => {
+    setSending("pricing");
+    
+    let pricingMessage = "**My Session Pricing:**\n\n";
+    
+    if (sessionTypes.length > 0) {
+      sessionTypes.forEach(type => {
+        pricingMessage += `• **${type.name}** - ${type.duration_minutes} min - £${type.price}\n`;
+        if (type.description) {
+          pricingMessage += `  _${type.description}_\n`;
+        }
+      });
+    } else {
+      pricingMessage += "Please contact me to discuss pricing for your specific needs.";
+    }
+
+    await onSendMessage(pricingMessage);
+    setSending(null);
+    setShowPricingDialog(false);
+  };
+
+  const handleSendBookingLink = async () => {
+    setSending("booking");
+    const bookingMessage = `**Ready to book a session?**\n\nClick my profile to view my availability and book a time that works for you!`;
+    await onSendMessage(bookingMessage);
+    setSending(null);
+  };
+
+  const handleSendPaymentRequest = async () => {
+    if (!paymentAmount) return;
+    
+    setSending("payment");
+    const paymentMessage = `**Payment Request**\n\nAmount: £${paymentAmount}\n${paymentDescription ? `For: ${paymentDescription}\n` : ""}\n_Payment processing coming soon. For now, please arrange payment directly._`;
+    await onSendMessage(paymentMessage);
+    setSending(null);
+    setShowPaymentDialog(false);
+    setPaymentAmount("");
+    setPaymentDescription("");
+  };
+
+  const handleUseTemplate = async (content: string) => {
+    setSending("template");
+    await onSendMessage(content);
+    setSending(null);
+  };
+
+  // Digital Products handler
+  const handleSendDigitalProduct = async (product: any) => {
+    setSending(`product-${product.id}`);
+    let message = `**📚 ${product.title}**\n\n${product.description || "Check out this content I've created for you."}\n\n💰 Price: ${formatCurrency(product.price || 0, (product.currency || "GBP") as CurrencyCode)}`;
+    
+    if (product.content_type) {
+      message += `\n📁 Type: ${product.content_type}`;
+    }
+    
+    message += `\n\nInterested? Let me know and I'll send you the link!`;
+    
+    await onSendMessage(message);
+    setSending(null);
+  };
+
+  // Training/Meal Plans handlers
+  const handleSendPlan = async (plan: any) => {
     setSending(`plan-${plan.id}`);
+    const planType = plan.plan_type === 'nutrition' || plan.plan_type === 'meal' ? 'Meal Plan' : 'Workout Plan';
+    const icon = plan.plan_type === 'nutrition' || plan.plan_type === 'meal' ? '🥗' : '🏋️';
+    
+    let message = `**${icon} ${planType}: ${plan.name}**\n\n${plan.description || "A customized plan designed for your goals."}`;
+    
+    if (plan.duration_weeks) {
+      message += `\n\n📅 Duration: ${plan.duration_weeks} weeks`;
+    }
+    
+    message += `\n\nLet me know if you'd like me to assign this to you!`;
+    
+    await onSendMessage(message);
+    setSending(null);
+  };
+
+  const handleSendAssignedPlan = async (plan: TrainingPlan) => {
+    setSending(`assigned-${plan.id}`);
     const message = `**Training Plan: ${plan.name}**\n\n${plan.description || "A customized training program designed for you."}\n\nDuration: ${plan.weeks} weeks\n\nThis plan has been assigned to you. Check your Plans section to view the full details!`;
     await onSendMessage(message);
     setSending(null);
@@ -383,17 +511,59 @@ const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSide
     setPendingSend(null);
   };
 
+  // Group templates by category
+  const groupedTemplates = templates.reduce((acc, template) => {
+    const category = template.category || "general";
+    if (!acc[category]) acc[category] = [];
+    acc[category].push(template);
+    return acc;
+  }, {} as Record<string, typeof templates>);
+
   if (loading) {
     return (
-      <div className="w-72 border-l border-border bg-card flex items-center justify-center">
+      <div className="w-80 border-l border-border bg-card flex items-center justify-center">
         <Loader2 className="w-6 h-6 animate-spin text-primary" />
       </div>
     );
   }
 
+  const SectionHeader = ({ 
+    icon: Icon, 
+    title, 
+    count, 
+    isOpen, 
+    onToggle,
+    iconColor = "text-primary"
+  }: { 
+    icon: any; 
+    title: string; 
+    count?: number; 
+    isOpen: boolean; 
+    onToggle: () => void;
+    iconColor?: string;
+  }) => (
+    <CollapsibleTrigger 
+      onClick={onToggle}
+      className="flex items-center justify-between w-full py-2 px-1 hover:bg-muted/50 rounded-md transition-colors"
+    >
+      <div className="flex items-center gap-2">
+        <Icon className={`w-4 h-4 ${iconColor}`} />
+        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          {title}
+        </span>
+        {count !== undefined && count > 0 && (
+          <Badge variant="secondary" className="h-4 px-1 text-[10px]">
+            {count}
+          </Badge>
+        )}
+      </div>
+      <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+    </CollapsibleTrigger>
+  );
+
   return (
     <>
-      <div className="w-72 border-l border-border bg-card flex flex-col">
+      <div className="w-80 border-l border-border bg-card flex flex-col h-full">
         <div className="p-3 border-b border-border flex items-center justify-between">
           <h3 className="font-semibold text-sm text-foreground">Quick Send</h3>
           {onClose && (
@@ -404,17 +574,235 @@ const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSide
         </div>
 
         <ScrollArea className="flex-1">
-          <div className="p-3 space-y-4">
-            {/* Assigned Training Plans */}
-            {assignedPlans.length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Dumbbell className="w-4 h-4 text-primary" />
-                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                    Assigned Plans
-                  </span>
+          <div className="p-3 space-y-3">
+            
+            {/* Quick Actions Section */}
+            <Collapsible open={openSections.quickActions}>
+              <SectionHeader 
+                icon={Zap} 
+                title="Quick Actions" 
+                isOpen={openSections.quickActions} 
+                onToggle={() => toggleSection('quickActions')}
+                iconColor="text-amber-500"
+              />
+              <CollapsibleContent className="space-y-2 mt-2">
+                {/* Templates */}
+                {templates.length > 0 && (
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground px-1">Templates</p>
+                    {templates.slice(0, 3).map((template) => (
+                      <button
+                        key={template.id}
+                        onClick={() => handleUseTemplate(template.content)}
+                        disabled={sending === "template"}
+                        className="w-full text-left p-2 rounded-md hover:bg-muted transition-colors border border-border"
+                      >
+                        <p className="text-xs font-medium text-foreground truncate">{template.name}</p>
+                      </button>
+                    ))}
+                    {templates.length > 3 && (
+                      <p className="text-xs text-muted-foreground text-center py-1">
+                        +{templates.length - 3} more templates
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-10 text-xs flex-col gap-0.5"
+                    onClick={() => setShowPricingDialog(true)}
+                  >
+                    <DollarSign className="h-3.5 w-3.5" />
+                    <span>Pricing</span>
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-10 text-xs flex-col gap-0.5"
+                    onClick={handleSendBookingLink}
+                    disabled={sending === "booking"}
+                  >
+                    <Calendar className="h-3.5 w-3.5" />
+                    <span>Book</span>
+                  </Button>
+
+                  {clientId && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-10 text-xs flex-col gap-0.5 border-primary/30 text-primary hover:bg-primary/10"
+                      onClick={() => setShowSessionOfferDialog(true)}
+                    >
+                      <CalendarPlus className="h-3.5 w-3.5" />
+                      <span>Offer</span>
+                    </Button>
+                  )}
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-10 text-xs flex-col gap-0.5"
+                    onClick={() => setShowPaymentDialog(true)}
+                  >
+                    <CreditCard className="h-3.5 w-3.5" />
+                    <span>Payment</span>
+                  </Button>
                 </div>
-                <div className="space-y-2">
+              </CollapsibleContent>
+            </Collapsible>
+
+            {/* Digital Products Section */}
+            {digitalProducts.length > 0 && (
+              <Collapsible open={openSections.digitalProducts}>
+                <SectionHeader 
+                  icon={ShoppingBag} 
+                  title="Digital Products" 
+                  count={digitalProducts.length}
+                  isOpen={openSections.digitalProducts} 
+                  onToggle={() => toggleSection('digitalProducts')}
+                  iconColor="text-purple-500"
+                />
+                <CollapsibleContent className="space-y-2 mt-2">
+                  {digitalProducts.map((product) => (
+                    <div
+                      key={product.id}
+                      className="p-2 rounded-lg bg-muted/50 border border-border hover:border-primary/50 transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">{product.title}</p>
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <Badge variant="secondary" className="text-xs px-1 py-0">
+                              {product.content_type || 'Content'}
+                            </Badge>
+                            <span className="text-xs text-primary font-medium">
+                              {formatCurrency(product.price || 0, (product.currency || "GBP") as CurrencyCode)}
+                            </span>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 flex-shrink-0"
+                          onClick={() => handleSendDigitalProduct(product)}
+                          disabled={sending === `product-${product.id}`}
+                        >
+                          {sending === `product-${product.id}` ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <Send className="h-3 w-3" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </CollapsibleContent>
+              </Collapsible>
+            )}
+
+            {/* Workout Plans Section */}
+            {workoutPlans.length > 0 && (
+              <Collapsible open={openSections.workoutPlans}>
+                <SectionHeader 
+                  icon={Dumbbell} 
+                  title="Workout Plans" 
+                  count={workoutPlans.length}
+                  isOpen={openSections.workoutPlans} 
+                  onToggle={() => toggleSection('workoutPlans')}
+                  iconColor="text-blue-500"
+                />
+                <CollapsibleContent className="space-y-2 mt-2">
+                  {workoutPlans.map((plan) => (
+                    <div
+                      key={plan.id}
+                      className="p-2 rounded-lg bg-muted/50 border border-border hover:border-primary/50 transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">{plan.name}</p>
+                          {plan.duration_weeks && (
+                            <p className="text-xs text-muted-foreground">{plan.duration_weeks} weeks</p>
+                          )}
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 flex-shrink-0"
+                          onClick={() => handleSendPlan(plan)}
+                          disabled={sending === `plan-${plan.id}`}
+                        >
+                          {sending === `plan-${plan.id}` ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <Send className="h-3 w-3" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </CollapsibleContent>
+              </Collapsible>
+            )}
+
+            {/* Meal Plans Section */}
+            {mealPlans.length > 0 && (
+              <Collapsible open={openSections.mealPlans}>
+                <SectionHeader 
+                  icon={UtensilsCrossed} 
+                  title="Meal Plans" 
+                  count={mealPlans.length}
+                  isOpen={openSections.mealPlans} 
+                  onToggle={() => toggleSection('mealPlans')}
+                  iconColor="text-green-500"
+                />
+                <CollapsibleContent className="space-y-2 mt-2">
+                  {mealPlans.map((plan) => (
+                    <div
+                      key={plan.id}
+                      className="p-2 rounded-lg bg-muted/50 border border-border hover:border-primary/50 transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">{plan.name}</p>
+                          {plan.duration_weeks && (
+                            <p className="text-xs text-muted-foreground">{plan.duration_weeks} weeks</p>
+                          )}
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 flex-shrink-0"
+                          onClick={() => handleSendPlan(plan)}
+                          disabled={sending === `plan-${plan.id}`}
+                        >
+                          {sending === `plan-${plan.id}` ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <Send className="h-3 w-3" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </CollapsibleContent>
+              </Collapsible>
+            )}
+
+            {/* Assigned Plans Section */}
+            {assignedPlans.length > 0 && (
+              <Collapsible open={openSections.assignedPlans}>
+                <SectionHeader 
+                  icon={Dumbbell} 
+                  title="Assigned to Client" 
+                  count={assignedPlans.length}
+                  isOpen={openSections.assignedPlans} 
+                  onToggle={() => toggleSection('assignedPlans')}
+                />
+                <CollapsibleContent className="space-y-2 mt-2">
                   {assignedPlans.map((plan) => (
                     <div
                       key={plan.id}
@@ -429,10 +817,10 @@ const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSide
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 flex-shrink-0"
-                          onClick={() => handleSendTrainingPlan(plan)}
-                          disabled={sending === `plan-${plan.id}`}
+                          onClick={() => handleSendAssignedPlan(plan)}
+                          disabled={sending === `assigned-${plan.id}`}
                         >
-                          {sending === `plan-${plan.id}` ? (
+                          {sending === `assigned-${plan.id}` ? (
                             <Loader2 className="h-3 w-3 animate-spin" />
                           ) : (
                             <Send className="h-3 w-3" />
@@ -441,20 +829,22 @@ const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSide
                       </div>
                     </div>
                   ))}
-                </div>
-              </div>
+                </CollapsibleContent>
+              </Collapsible>
             )}
 
             {/* Packages */}
             {packages.length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Package className="w-4 h-4 text-orange-500" />
-                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                    Packages
-                  </span>
-                </div>
-                <div className="space-y-2">
+              <Collapsible open={openSections.packages}>
+                <SectionHeader 
+                  icon={Package} 
+                  title="Packages" 
+                  count={packages.length}
+                  isOpen={openSections.packages} 
+                  onToggle={() => toggleSection('packages')}
+                  iconColor="text-orange-500"
+                />
+                <CollapsibleContent className="space-y-2 mt-2">
                   {packages.map((pkg) => (
                     <div
                       key={pkg.id}
@@ -488,20 +878,22 @@ const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSide
                       </div>
                     </div>
                   ))}
-                </div>
-              </div>
+                </CollapsibleContent>
+              </Collapsible>
             )}
 
             {/* Subscription Plans */}
             {subscriptionPlans.length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <CreditCard className="w-4 h-4 text-green-500" />
-                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                    Subscriptions
-                  </span>
-                </div>
-                <div className="space-y-2">
+              <Collapsible open={openSections.subscriptions}>
+                <SectionHeader 
+                  icon={CreditCard} 
+                  title="Subscriptions" 
+                  count={subscriptionPlans.length}
+                  isOpen={openSections.subscriptions} 
+                  onToggle={() => toggleSection('subscriptions')}
+                  iconColor="text-emerald-500"
+                />
+                <CollapsibleContent className="space-y-2 mt-2">
                   {subscriptionPlans.map((plan) => (
                     <div
                       key={plan.id}
@@ -530,24 +922,122 @@ const MessageSidePanel = ({ participantId, onSendMessage, onClose }: MessageSide
                       </div>
                     </div>
                   ))}
-                </div>
-              </div>
+                </CollapsibleContent>
+              </Collapsible>
             )}
 
             {/* Empty State */}
-            {assignedPlans.length === 0 && packages.length === 0 && subscriptionPlans.length === 0 && (
+            {assignedPlans.length === 0 && packages.length === 0 && subscriptionPlans.length === 0 && 
+             digitalProducts.length === 0 && workoutPlans.length === 0 && mealPlans.length === 0 && (
               <div className="text-center py-8">
                 <p className="text-sm text-muted-foreground">
-                  No plans or packages to send yet.
+                  No content to send yet.
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Create packages in your Packages page.
+                  Create plans, packages, or products to send to clients.
                 </p>
               </div>
             )}
           </div>
         </ScrollArea>
       </div>
+
+      {/* Pricing Preview Dialog */}
+      <Dialog open={showPricingDialog} onOpenChange={setShowPricingDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Send Pricing Information</DialogTitle>
+            <DialogDescription>
+              This will send your session types and pricing to the client.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            {sessionTypes.length > 0 ? (
+              <div className="space-y-2 p-4 bg-secondary/50 rounded-lg">
+                {sessionTypes.map(type => (
+                  <div key={type.id} className="flex justify-between items-center">
+                    <div>
+                      <p className="font-medium text-foreground">{type.name}</p>
+                      <p className="text-xs text-muted-foreground">{type.duration_minutes} minutes</p>
+                    </div>
+                    <p className="font-bold text-primary">£{type.price}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-center py-4">
+                No session types configured yet. Go to Schedule → Session Types to add your offerings.
+              </p>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPricingDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSendPricing} disabled={sending === "pricing" || sessionTypes.length === 0}>
+              {sending === "pricing" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send Pricing"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Request Dialog */}
+      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Request Payment</DialogTitle>
+            <DialogDescription>
+              Send a payment request to the client.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="amount">Amount (£)</Label>
+              <Input
+                id="amount"
+                type="number"
+                placeholder="0.00"
+                value={paymentAmount}
+                onChange={(e) => setPaymentAmount(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">Description (Optional)</Label>
+              <Textarea
+                id="description"
+                placeholder="e.g., Personal Training Session - December 15"
+                value={paymentDescription}
+                onChange={(e) => setPaymentDescription(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPaymentDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSendPaymentRequest} disabled={sending === "payment" || !paymentAmount}>
+              {sending === "payment" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send Request"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Session Offer Dialog */}
+      {clientId && coachId && (
+        <SessionOfferDialog
+          open={showSessionOfferDialog}
+          onOpenChange={setShowSessionOfferDialog}
+          coachId={coachId}
+          clientId={clientId}
+          onOfferCreated={async (offerId, offerDetails) => {
+            await onSendMessage(offerDetails);
+          }}
+        />
+      )}
 
       {/* Edit Package Dialog */}
       <Dialog open={!!editingPackage} onOpenChange={(open) => !open && setEditingPackage(null)}>
