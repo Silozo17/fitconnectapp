@@ -557,6 +557,42 @@ const Terms = () => {
                   screenshot, or share information about Beta Features without FitConnect's prior written consent.
                 </p>
 
+                <h2>11F. Cookies and Local Storage</h2>
+                <p>
+                  FitConnect uses cookies and browser local storage to provide and improve the Platform. This 
+                  section summarizes our cookie practices; for full details, see Section 7 of our Privacy Policy.
+                </p>
+
+                <h3>Consent Banner</h3>
+                <p>
+                  When you first visit FitConnect, a cookie consent banner appears allowing you to accept, reject, 
+                  or customize your preferences. Your choice is stored and respected across all Platform features.
+                </p>
+
+                <h3>Cookie Categories</h3>
+                <ul>
+                  <li><strong>Essential:</strong> Required for core functionality (login, security, navigation). 
+                    These cannot be disabled.</li>
+                  <li><strong>Location:</strong> Optional. Enables automatic location detection for marketplace 
+                    personalization and local leaderboards.</li>
+                  <li><strong>Preferences:</strong> Optional. Remembers your UI settings and dismissed banners.</li>
+                  <li><strong>Analytics:</strong> Optional. Reserved for future usage improvements.</li>
+                </ul>
+
+                <h3>Your Choices</h3>
+                <p>
+                  You can change your cookie preferences at any time via the cookie preferences modal accessible 
+                  from the footer. Rejecting optional cookies does not affect core Platform functionality—you can 
+                  still use all features, though some personalization (like automatic location) will be disabled.
+                </p>
+
+                <h3>Continued Use</h3>
+                <p>
+                  By continuing to use FitConnect after making your consent choice, you agree to the storage and 
+                  use of cookies as described. Essential cookies are necessary for the Platform to function and 
+                  your use of the Platform constitutes acceptance of these essential cookies.
+                </p>
+
                 <h2>12. Health and Fitness Disclaimer</h2>
                 <p>
                   <strong>IMPORTANT - READ CAREFULLY:</strong>
