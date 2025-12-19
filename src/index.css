@@ -406,3 +406,44 @@
     @apply bg-transparent p-0;
   }
 }
+
+/* UX Polish - Focus states */
+@layer utilities {
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+
+  /* Smooth page transitions */
+  .page-transition {
+    @apply animate-fade-in;
+  }
+
+  /* Stagger children animations */
+  .stagger-children > * {
+    @apply animate-fade-in opacity-0;
+  }
+  .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger-children > *:nth-child(2) { animation-delay: 50ms; }
+  .stagger-children > *:nth-child(3) { animation-delay: 100ms; }
+  .stagger-children > *:nth-child(4) { animation-delay: 150ms; }
+  .stagger-children > *:nth-child(5) { animation-delay: 200ms; }
+  .stagger-children > *:nth-child(6) { animation-delay: 250ms; }
+
+  /* Interactive feedback */
+  .press-effect {
+    @apply transition-transform active:scale-[0.98];
+  }
+
+  /* Skeleton shimmer effect */
+  .skeleton-shimmer {
+    @apply relative overflow-hidden;
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--muted) / 0.5) 50%,
+      hsl(var(--muted)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+}
