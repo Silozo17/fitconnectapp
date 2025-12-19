@@ -3,16 +3,19 @@ import { useState } from "react";
 import ConversationList from "@/components/messaging/ConversationList";
 import ChatWindow from "@/components/messaging/ChatWindow";
 import NewConversationModal from "@/components/messaging/NewConversationModal";
+import MessageSidePanel from "@/components/messaging/MessageSidePanel";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { MessageSquare, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useParticipantName } from "@/hooks/useParticipantName";
+import { useMessages } from "@/hooks/useMessages";
 
 const CoachMessages = () => {
   const { id: participantId } = useParams();
   const { data: participantName = "" } = useParticipantName(participantId);
   const [showNewConversation, setShowNewConversation] = useState(false);
   const [showSidePanel, setShowSidePanel] = useState(true);
+  const { sendMessage } = useMessages(participantId);
 
   return (
     <DashboardLayout title="Messages" description="Chat with your clients.">
@@ -37,7 +40,7 @@ const CoachMessages = () => {
           </div>
 
           {/* Chat Area */}
-          <div className={`flex-1 flex flex-col ${!participantId ? "hidden lg:flex" : "flex"}`}>
+          <div className={`flex-1 flex flex-col min-w-0 ${!participantId ? "hidden lg:flex" : "flex"}`}>
             {participantId ? (
               <ChatWindow 
                 participantId={participantId} 
@@ -61,6 +64,20 @@ const CoachMessages = () => {
               </div>
             )}
           </div>
+
+          {/* Side Panel - Now at same level as chat area */}
+          {participantId && showSidePanel && (
+            <div className="hidden lg:block border-l border-border">
+              <MessageSidePanel
+                participantId={participantId}
+                onSendMessage={async (msg) => {
+                  const success = await sendMessage(msg);
+                  return success;
+                }}
+                onClose={() => setShowSidePanel(false)}
+              />
+            </div>
+          )}
         </div>
       </div>
 

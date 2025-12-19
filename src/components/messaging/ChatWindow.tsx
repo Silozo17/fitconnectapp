@@ -10,7 +10,6 @@ import { cn } from "@/lib/utils";
 import ChatQuickActions from "./ChatQuickActions";
 import TypingIndicator, { useTypingBroadcast } from "./TypingIndicator";
 import ProspectProfileSheet from "./ProspectProfileSheet";
-import MessageSidePanel from "./MessageSidePanel";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import {
   Sheet,
@@ -379,19 +378,6 @@ const ChatWindow = ({
           </form>
         </div>
 
-        {/* Side Panel - inside ChatWindow to share sendMessage */}
-        {isCoachView && showSidePanel && (
-          <div className="hidden lg:flex">
-            <MessageSidePanel
-              participantId={participantId}
-              onSendMessage={async (msg) => {
-                const success = await sendMessage(msg);
-                return success;
-              }}
-              onClose={onToggleSidePanel}
-            />
-          </div>
-        )}
       </div>
 
       {/* Profile Sheet - Use ProspectProfileSheet for coaches viewing clients */}
