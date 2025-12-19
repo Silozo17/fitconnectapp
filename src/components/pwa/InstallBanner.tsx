@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { Download, X, Share } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import fitconnectIcon from '@/assets/fitconnect-icon.png';
 
 const DISMISS_KEY = 'pwa-install-banner-dismissed';
 const DISMISS_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -59,9 +60,7 @@ export const InstallBanner = () => {
     return (
       <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-card border-t border-border shadow-lg safe-area-pb">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shrink-0">
-            <span className="text-primary-foreground font-bold text-sm">FC</span>
-          </div>
+          <img src={fitconnectIcon} alt="FitConnect" className="w-10 h-10 rounded-lg shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="font-medium text-sm">Install FitConnect</p>
             <p className="text-xs text-muted-foreground truncate">
@@ -91,9 +90,7 @@ export const InstallBanner = () => {
     return (
       <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-card border-t border-border shadow-lg safe-area-pb">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shrink-0">
-            <span className="text-primary-foreground font-bold text-sm">FC</span>
-          </div>
+          <img src={fitconnectIcon} alt="FitConnect" className="w-10 h-10 rounded-lg shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="font-medium text-sm">Install FitConnect</p>
             <p className="text-xs text-muted-foreground truncate">
@@ -121,9 +118,7 @@ export const InstallBanner = () => {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-card border-t border-border shadow-lg safe-area-pb">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shrink-0">
-          <span className="text-primary-foreground font-bold text-sm">FC</span>
-        </div>
+          <img src={fitconnectIcon} alt="FitConnect" className="w-10 h-10 rounded-lg shrink-0" />
         <div className="flex-1 min-w-0">
           <p className="font-medium text-sm">Install FitConnect</p>
           <p className="text-xs text-muted-foreground truncate">
