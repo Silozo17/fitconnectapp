@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Search, SlidersHorizontal, Loader2, Users } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { Input } from "@/components/ui/input";
@@ -54,13 +54,13 @@ const Coaches = () => {
     enableLocationRanking: true,
   });
 
-  const handleBook = (coach: MarketplaceCoach) => {
+  const handleBook = useCallback((coach: MarketplaceCoach) => {
     setBookingCoach(coach);
-  };
+  }, []);
 
-  const handleRequestConnection = (coach: MarketplaceCoach) => {
+  const handleRequestConnection = useCallback((coach: MarketplaceCoach) => {
     setConnectionCoach(coach);
-  };
+  }, []);
 
   return (
     <>

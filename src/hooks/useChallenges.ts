@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useClientProfileId } from '@/hooks/useClientProfileId';
+import { useCoachProfileId } from '@/hooks/useCoachProfileId';
 import { toast } from 'sonner';
 
 export interface ChallengeReward {
@@ -80,19 +82,6 @@ export const CHALLENGE_TYPES = [
   { value: 'distance_challenge', label: 'Distance Challenge', unit: 'km', description: 'Travel X kilometers', wearableRequired: true, dataType: 'distance' },
 ];
 
-function useClientProfile() {
-  const { user } = useAuth();
-  return useQuery({
-    queryKey: ['my-client-profile', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      const { data } = await supabase.from('client_profiles').select('id').eq('user_id', user.id).maybeSingle();
-      return data;
-    },
-    enabled: !!user?.id,
-  });
-}
-
 function useCoachProfile() {
   const { user } = useAuth();
   return useQuery({
@@ -107,7 +96,7 @@ function useCoachProfile() {
 }
 
 export function useAvailableChallenges() {
-  const { data: profile } = useClientProfile();
+  const { data: clientProfileId } = useClientProfileId();
   
   return useQuery({
     queryKey: ['available-challenges'],
@@ -140,8 +129,8 @@ export function useAvailableChallenges() {
       participantCounts?.forEach(p => { counts[p.challenge_id] = (counts[p.challenge_id] || 0) + 1; });
       
       let myParticipations: Record<string, ChallengeParticipant> = {};
-      if (profile?.id && challengeIds.length > 0) {
-        const { data: myData } = await supabase.from('challenge_participants').select('*').eq('client_id', profile.id).in('challenge_id', challengeIds);
+      if (clientProfileId && challengeIds.length > 0) {
+        const { data: myData } = await supabase.from('challenge_participants').select('*').eq('client_id', clientProfileId).in('challenge_id', challengeIds);
         myData?.forEach(p => { myParticipations[p.challenge_id] = p as ChallengeParticipant; });
       }
       
@@ -158,17 +147,17 @@ export function useAvailableChallenges() {
 }
 
 export function useMyChallenges() {
-  const { data: profile } = useClientProfile();
+  const { data: clientProfileId } = useClientProfileId();
   
   return useQuery({
-    queryKey: ['my-challenges', profile?.id],
+    queryKey: ['my-challenges', clientProfileId],
     queryFn: async () => {
-      if (!profile?.id) return [];
-      const { data, error } = await supabase.from('challenge_participants').select(`*, challenge:challenges(*)`).eq('client_id', profile.id).order('joined_at', { ascending: false });
+      if (!clientProfileId) return [];
+      const { data, error } = await supabase.from('challenge_participants').select(`*, challenge:challenges(*)`).eq('client_id', clientProfileId).order('joined_at', { ascending: false });
       if (error) throw error;
       return data as (ChallengeParticipant & { challenge: Challenge })[];
     },
-    enabled: !!profile?.id,
+    enabled: !!clientProfileId,
   });
 }
 
@@ -187,16 +176,16 @@ export function useChallengeLeaderboard(challengeId: string | undefined) {
 
 export function useJoinChallenge() {
   const queryClient = useQueryClient();
-  const { data: profile } = useClientProfile();
+  const { data: clientProfileId } = useClientProfileId();
   
   return useMutation({
     mutationFn: async (challengeId: string) => {
-      if (!profile?.id) throw new Error('No client profile');
+      if (!clientProfileId) throw new Error('No client profile');
       
-      const { data: existing } = await supabase.from('challenge_participants').select('id').eq('challenge_id', challengeId).eq('client_id', profile.id).maybeSingle();
+      const { data: existing } = await supabase.from('challenge_participants').select('id').eq('challenge_id', challengeId).eq('client_id', clientProfileId).maybeSingle();
       if (existing) throw new Error('Already joined this challenge');
       
-      const { data, error } = await supabase.from('challenge_participants').insert({ challenge_id: challengeId, client_id: profile.id }).select().single();
+      const { data, error } = await supabase.from('challenge_participants').insert({ challenge_id: challengeId, client_id: clientProfileId }).select().single();
       if (error) throw error;
       return data;
     },
@@ -245,12 +234,12 @@ export function useWithdrawChallenge() {
 
 export function useCreateChallenge() {
   const queryClient = useQueryClient();
-  const { data: profile } = useCoachProfile();
+  const { data: coachProfileId } = useCoachProfileId();
   
   return useMutation({
     mutationFn: async (challenge: { title: string; description?: string; challenge_type: string; target_value: number; target_unit: string; start_date: string; end_date: string; xp_reward: number; visibility: string; max_participants?: number; target_audience?: string; }) => {
-      if (!profile?.id) throw new Error('No coach profile');
-      const { data, error } = await supabase.from('challenges').insert({ ...challenge, created_by: profile.id }).select().single();
+      if (!coachProfileId) throw new Error('No coach profile');
+      const { data, error } = await supabase.from('challenges').insert({ ...challenge, created_by: coachProfileId }).select().single();
       if (error) throw error;
       return data;
     },

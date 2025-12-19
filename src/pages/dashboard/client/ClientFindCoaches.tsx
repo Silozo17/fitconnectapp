@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Search, SlidersHorizontal, Loader2, Users, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -53,13 +53,13 @@ const ClientFindCoaches = () => {
     enableLocationRanking: true,
   });
 
-  const handleBook = (coach: MarketplaceCoach) => {
+  const handleBook = useCallback((coach: MarketplaceCoach) => {
     setBookingCoach(coach);
-  };
+  }, []);
 
-  const handleRequestConnection = (coach: MarketplaceCoach) => {
+  const handleRequestConnection = useCallback((coach: MarketplaceCoach) => {
     setConnectionCoach(coach);
-  };
+  }, []);
 
   // Get display location name
   const locationDisplay = effectiveLocation?.city || effectiveLocation?.region || effectiveLocation?.country;
