@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Trophy, MapPin, Globe, Users, ChevronRight, Medal, Award, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -16,44 +16,48 @@ interface CachedLocation {
   timestamp: number;
 }
 
-function LeaderboardEntry({ entry, index }: { entry: PublicLeaderboardEntry; index: number }) {
-  const getRankDisplay = (rank: number) => {
-    if (rank === 1) return <Trophy className="w-6 h-6 text-yellow-500" />;
-    if (rank === 2) return <Medal className="w-6 h-6 text-gray-400" />;
-    if (rank === 3) return <Award className="w-6 h-6 text-amber-600" />;
-    return <span className="text-muted-foreground font-medium w-8 text-center">{rank}</span>;
-  };
+const LeaderboardEntry = React.forwardRef<HTMLDivElement, { entry: PublicLeaderboardEntry; index: number }>(
+  ({ entry, index }, ref) => {
+    const getRankDisplay = (rank: number) => {
+      if (rank === 1) return <Trophy className="w-6 h-6 text-yellow-500" />;
+      if (rank === 2) return <Medal className="w-6 h-6 text-gray-400" />;
+      if (rank === 3) return <Award className="w-6 h-6 text-amber-600" />;
+      return <span className="text-muted-foreground font-medium w-8 text-center">{rank}</span>;
+    };
 
-  const location = entry.city || entry.country || 'Unknown';
+    const location = entry.city || entry.country || 'Unknown';
 
-  return (
-    <div 
-      className="flex items-center gap-3 p-3 rounded-lg bg-card/50 border border-border/50 hover:border-primary/30 transition-all duration-300"
-      style={{ animationDelay: `${index * 100}ms` }}
-    >
-      <div className="flex items-center justify-center w-10">
-        {getRankDisplay(entry.rank)}
+    return (
+      <div 
+        ref={ref}
+        className="flex items-center gap-3 p-3 rounded-lg bg-card/50 border border-border/50 hover:border-primary/30 transition-all duration-300"
+        style={{ animationDelay: `${index * 100}ms` }}
+      >
+        <div className="flex items-center justify-center w-10">
+          {getRankDisplay(entry.rank)}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-foreground truncate">
+            {entry.displayName}
+          </p>
+          <p className="text-xs text-muted-foreground flex items-center gap-1">
+            <MapPin className="h-3 w-3" />
+            {location}
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-sm font-bold text-primary">
+            Level {entry.level}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {entry.totalXp.toLocaleString()} XP
+          </p>
+        </div>
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold text-foreground truncate">
-          {entry.displayName}
-        </p>
-        <p className="text-xs text-muted-foreground flex items-center gap-1">
-          <MapPin className="h-3 w-3" />
-          {location}
-        </p>
-      </div>
-      <div className="text-right">
-        <p className="text-sm font-bold text-primary">
-          Level {entry.level}
-        </p>
-        <p className="text-xs text-muted-foreground">
-          {entry.totalXp.toLocaleString()} XP
-        </p>
-      </div>
-    </div>
-  );
-}
+    );
+  }
+);
+LeaderboardEntry.displayName = "LeaderboardEntry";
 
 function LeaderboardColumn({ 
   title, 
