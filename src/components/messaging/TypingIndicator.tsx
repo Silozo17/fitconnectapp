@@ -17,13 +17,10 @@ const TypingIndicator = ({ conversationPartnerId, currentUserId }: TypingIndicat
 
   useEffect(() => {
     const channelName = getTypingChannelName(currentUserId, conversationPartnerId);
-    console.log("[TypingIndicator] Subscribing to channel:", channelName);
-    
     const channel = supabase.channel(channelName);
 
     channel
       .on("broadcast", { event: "typing" }, (payload) => {
-        console.log("[TypingIndicator] Received typing event:", payload);
         // Only show typing if it's from the conversation partner
         if (payload.payload?.userId === conversationPartnerId) {
           setIsTyping(true);
@@ -39,12 +36,9 @@ const TypingIndicator = ({ conversationPartnerId, currentUserId }: TypingIndicat
           }, 3000);
         }
       })
-      .subscribe((status) => {
-        console.log("[TypingIndicator] Subscription status:", status);
-      });
+      .subscribe();
 
     return () => {
-      console.log("[TypingIndicator] Cleaning up channel:", channelName);
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
@@ -74,16 +68,11 @@ export const useTypingBroadcast = (currentUserId: string, partnerId: string) => 
   useEffect(() => {
     // Create and subscribe to the channel once
     const channelName = getTypingChannelName(currentUserId, partnerId);
-    console.log("[useTypingBroadcast] Creating channel:", channelName);
-    
     channelRef.current = supabase.channel(channelName);
-    channelRef.current.subscribe((status) => {
-      console.log("[useTypingBroadcast] Channel status:", status);
-    });
+    channelRef.current.subscribe();
 
     return () => {
       if (channelRef.current) {
-        console.log("[useTypingBroadcast] Cleaning up channel");
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
       }
@@ -98,7 +87,6 @@ export const useTypingBroadcast = (currentUserId: string, partnerId: string) => 
     lastTypingTimeRef.current = now;
     
     if (channelRef.current) {
-      console.log("[useTypingBroadcast] Broadcasting typing event for user:", currentUserId);
       await channelRef.current.send({
         type: "broadcast",
         event: "typing",
