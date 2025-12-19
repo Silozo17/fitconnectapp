@@ -1,5 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useCoachEngagement, createEmptyEngagementMap } from "./useCoachEngagement";
+import { rankCoaches, filterByLocationWithExpansion } from "@/lib/coach-ranking";
+import type { LocationData, CoachLocationData, CoachProfileData, RankingScore } from "@/types/ranking";
 
 // Type for public coach profile data (GDPR-safe columns only)
 export type MarketplaceCoach = {
@@ -13,6 +16,9 @@ export type MarketplaceCoach = {
   hourly_rate: number | null;
   currency: string | null;
   location: string | null;
+  location_city: string | null;
+  location_region: string | null;
+  location_country: string | null;
   online_available: boolean | null;
   in_person_available: boolean | null;
   profile_image_url: string | null;
@@ -25,7 +31,7 @@ export type MarketplaceCoach = {
   selected_avatar_id: string | null;
   created_at: string;
   onboarding_completed: boolean;
-  // New fields
+  // Social links
   who_i_work_with: string | null;
   facebook_url: string | null;
   instagram_url: string | null;
@@ -45,9 +51,11 @@ export type MarketplaceCoach = {
   reviews_count?: number | null;
   is_sponsored?: boolean | null;
   tags?: string[] | null;
+  // Ranking data (added after ranking)
+  ranking?: RankingScore;
 };
 
-interface UseCoachMarketplaceOptions {
+export interface UseCoachMarketplaceOptions {
   search?: string;
   coachTypes?: string[];
   priceRange?: { min: number; max: number };
@@ -57,12 +65,61 @@ interface UseCoachMarketplaceOptions {
   featured?: boolean;
   location?: string;
   showSponsoredFirst?: boolean;
+  /** User's detected location for proximity ranking */
+  userLocation?: LocationData | null;
+  /** Enable location-based ranking (default: true) */
+  enableLocationRanking?: boolean;
+  /** Minimum results before expanding location radius (default: 5) */
+  minResultsBeforeExpansion?: number;
 }
 
-export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}) => {
-  const showSponsoredFirst = options.showSponsoredFirst !== false; // Default true
+export interface UseCoachMarketplaceResult {
+  data: MarketplaceCoach[] | undefined;
+  isLoading: boolean;
+  error: Error | null;
+  /** Whether location radius was expanded to get more results */
+  locationExpanded?: boolean;
+  /** The effective match level used after any expansion */
+  effectiveMatchLevel?: string;
+}
 
-  return useQuery({
+/**
+ * Extracts location and profile data from a coach for ranking
+ */
+function extractCoachRankingData(coach: MarketplaceCoach, boostedCoachIds: string[]): {
+  location: CoachLocationData;
+  profile: CoachProfileData;
+  isSponsored: boolean;
+} {
+  return {
+    location: {
+      location_city: coach.location_city,
+      location_region: coach.location_region,
+      location_country: coach.location_country,
+      online_available: coach.online_available,
+      in_person_available: coach.in_person_available,
+    },
+    profile: {
+      bio: coach.bio,
+      profile_image_url: coach.profile_image_url,
+      card_image_url: coach.card_image_url,
+      coach_types: coach.coach_types,
+      hourly_rate: coach.hourly_rate,
+      location: coach.location,
+      certifications: coach.certifications,
+      is_verified: coach.is_verified,
+    },
+    isSponsored: boostedCoachIds.includes(coach.id),
+  };
+}
+
+export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): UseCoachMarketplaceResult => {
+  const showSponsoredFirst = options.showSponsoredFirst !== false; // Default true
+  const enableLocationRanking = options.enableLocationRanking !== false; // Default true
+  const minResultsBeforeExpansion = options.minResultsBeforeExpansion ?? 5;
+
+  // Main query to fetch coaches
+  const coachesQuery = useQuery({
     queryKey: ["marketplace-coaches", options],
     queryFn: async () => {
       // First, get boosted coach IDs if showing sponsored first
@@ -76,12 +133,13 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}) =>
         boostedCoachIds = (boosts || []).map(b => b.coach_id);
       }
 
-      // Query the GDPR-safe public view instead of the base table
-      // This view only exposes safe columns and filters for active/visible coaches
-      // Join avatars table to get avatar data for display
+      // Query the GDPR-safe public view with location columns
       let query = supabase
         .from("public_coach_profiles")
-        .select("*, avatars(slug, rarity, image_url)");
+        .select(`
+          *,
+          avatars(slug, rarity, image_url)
+        `);
 
       // Apply filters
       if (options.search) {
@@ -112,42 +170,99 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}) =>
         query = query.eq("in_person_available", true);
       }
 
-      if (options.limit) {
-        query = query.limit(options.limit);
+      // Don't limit at DB level if we're doing ranking (we'll limit after)
+      const dbLimit = enableLocationRanking ? undefined : options.limit;
+      if (dbLimit) {
+        query = query.limit(dbLimit);
       }
 
-      // Default ordering by hourly_rate descending (as proxy for popularity)
+      // Default ordering by hourly_rate descending (will be overridden by ranking)
       query = query.order("hourly_rate", { ascending: false, nullsFirst: false });
 
       const { data, error } = await query;
 
       if (error) throw error;
 
-      // Cast and mark sponsored coaches
-      const rawData = (data || []) as unknown as MarketplaceCoach[];
-      const coaches = rawData.map(coach => ({
-        ...coach,
-        is_sponsored: boostedCoachIds.includes(coach.id),
-      }));
-
-      // Sort: sponsored first (randomized among themselves), then non-sponsored
-      if (showSponsoredFirst && boostedCoachIds.length > 0) {
-        const sponsored = coaches.filter(c => c.is_sponsored);
-        const nonSponsored = coaches.filter(c => !c.is_sponsored);
-        
-        // Randomize sponsored coaches for fair exposure
-        for (let i = sponsored.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [sponsored[i], sponsored[j]] = [sponsored[j], sponsored[i]];
-        }
-        
-        return [...sponsored, ...nonSponsored];
-      }
-
-      return coaches;
+      // Return raw data with boosted IDs for ranking step
+      return {
+        coaches: (data || []) as unknown as MarketplaceCoach[],
+        boostedCoachIds,
+      };
     },
-    staleTime: 1000 * 60 * 2, // 2 minutes - marketplace data refreshes frequently
+    staleTime: 1000 * 60 * 2, // 2 minutes
   });
+
+  // Get coach IDs for engagement query
+  const coachIds = coachesQuery.data?.coaches.map(c => c.id) ?? [];
+  const boostedCoachIds = coachesQuery.data?.boostedCoachIds ?? [];
+
+  // Fetch engagement data for ranking
+  const engagementQuery = useCoachEngagement({
+    coachIds,
+    enabled: coachIds.length > 0 && enableLocationRanking,
+  });
+
+  // Apply ranking algorithm
+  const rankedData = (() => {
+    if (!coachesQuery.data?.coaches) {
+      return undefined;
+    }
+
+    const coaches = coachesQuery.data.coaches;
+
+    // If ranking is disabled, just mark sponsored and return
+    if (!enableLocationRanking) {
+      return {
+        coaches: coaches.map(coach => ({
+          ...coach,
+          is_sponsored: boostedCoachIds.includes(coach.id),
+        })),
+        locationExpanded: false,
+        effectiveMatchLevel: undefined,
+      };
+    }
+
+    // Get engagement map (use empty map if still loading)
+    const engagementMap = engagementQuery.data ?? createEmptyEngagementMap(coachIds);
+
+    // Apply ranking algorithm
+    const ranked = rankCoaches(
+      coaches,
+      options.userLocation ?? null,
+      engagementMap,
+      (coach) => extractCoachRankingData(coach, boostedCoachIds)
+    );
+
+    // Apply location expansion if needed
+    const { coaches: filteredRanked, effectiveMatchLevel, expanded } = 
+      filterByLocationWithExpansion(ranked, minResultsBeforeExpansion);
+
+    // Map back to MarketplaceCoach with ranking data
+    let result = filteredRanked.map(({ coach, ranking }) => ({
+      ...coach,
+      is_sponsored: ranking.isSponsored,
+      ranking,
+    }));
+
+    // Apply limit if specified
+    if (options.limit && result.length > options.limit) {
+      result = result.slice(0, options.limit);
+    }
+
+    return {
+      coaches: result,
+      locationExpanded: expanded,
+      effectiveMatchLevel,
+    };
+  })();
+
+  return {
+    data: rankedData?.coaches,
+    isLoading: coachesQuery.isLoading || (enableLocationRanking && engagementQuery.isLoading),
+    error: coachesQuery.error ?? engagementQuery.error ?? null,
+    locationExpanded: rankedData?.locationExpanded,
+    effectiveMatchLevel: rankedData?.effectiveMatchLevel,
+  };
 };
 
 export const useCoachById = (identifier: string) => {
@@ -169,6 +284,7 @@ export const useCoachById = (identifier: string) => {
           .select(`
             id, username, display_name, bio, coach_types, certifications,
             experience_years, hourly_rate, currency, location,
+            location_city, location_region, location_country,
             online_available, in_person_available, profile_image_url,
             card_image_url, booking_mode, is_verified, verified_at,
             gym_affiliation, marketplace_visible, selected_avatar_id,
