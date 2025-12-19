@@ -19,6 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLogAdminAction } from "@/hooks/useAuditLog";
 import { Loader2, X, Star } from "lucide-react";
+import { getErrorMessage } from "@/lib/error-utils";
 import { COACH_TYPES, COACH_TYPE_CATEGORIES, getCoachTypesByCategory, getCoachTypeLabel } from "@/constants/coachTypes";
 
 interface CoachUser {
@@ -135,8 +136,8 @@ export function EnhancedEditCoachModal({ coach, open, onClose, onSaved }: Enhanc
       toast.success("Coach profile updated");
       onSaved();
       onClose();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update coach");
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Failed to update coach"));
     } finally {
       setSaving(false);
     }

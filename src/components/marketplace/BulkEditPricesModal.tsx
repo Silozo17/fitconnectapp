@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { DigitalProduct, useUpdateProduct } from "@/hooks/useDigitalProducts";
 import { formatCurrency } from "@/lib/currency";
 import { useToast } from "@/hooks/use-toast";
+import { getErrorMessage } from "@/lib/error-utils";
 
 interface BulkEditPricesModalProps {
   open: boolean;
@@ -82,8 +83,8 @@ export default function BulkEditPricesModal({ open, onOpenChange, products }: Bu
       }
       toast({ title: `Updated ${toUpdate.length} products` });
       onOpenChange(false);
-    } catch (error: any) {
-      toast({ title: "Failed to update", description: error.message, variant: "destructive" });
+    } catch (error: unknown) {
+      toast({ title: "Failed to update", description: getErrorMessage(error, "An error occurred"), variant: "destructive" });
     } finally {
       setIsSaving(false);
     }

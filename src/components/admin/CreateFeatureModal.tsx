@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { getErrorMessage } from "@/lib/error-utils";
 
 interface CreateFeatureModalProps {
   open: boolean;
@@ -90,8 +91,8 @@ export function CreateFeatureModal({ open, onOpenChange }: CreateFeatureModalPro
         value_type: "boolean",
         default_value: "false",
       });
-    } catch (error: any) {
-      toast.error(error.message || "Failed to create feature");
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Failed to create feature"));
     } finally {
       setSaving(false);
     }

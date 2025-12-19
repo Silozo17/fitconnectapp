@@ -43,6 +43,7 @@ import { useAdminUserManagement } from "@/hooks/useAdminUserManagement";
 import { useLogAdminAction } from "@/hooks/useAuditLog";
 import { useAdminBadges } from "@/hooks/useSidebarBadges";
 import { arrayToCSV, downloadCSV, formatDateForCSV, formatArrayForCSV, generateExportFilename } from "@/lib/csv-export";
+import { getErrorMessage, logError } from "@/lib/error-utils";
 
 interface ClientUser {
   id: string;
@@ -202,9 +203,9 @@ const AdminUsers = () => {
       });
 
       toast.success("Password reset email sent successfully");
-    } catch (error: any) {
-      console.error("Password reset error:", error);
-      toast.error(error.message || "Failed to send password reset email");
+    } catch (error: unknown) {
+      logError("AdminUsers", error);
+      toast.error(getErrorMessage(error, "Failed to send password reset email"));
     } finally {
       setResettingPassword(null);
     }

@@ -21,6 +21,7 @@ import { StatusBadge } from "@/components/admin/StatusBadge";
 import { BulkActionBar } from "@/components/admin/BulkActionBar";
 import { useAdminTeamManagement } from "@/hooks/useAdminTeamManagement";
 import { AdminTeamCard } from "@/components/admin/AdminTeamCard";
+import { logError } from "@/lib/error-utils";
 
 interface TeamMember {
   id: string;
@@ -83,9 +84,9 @@ const AdminTeam = () => {
       const userIds = mergedData.map(member => member.user_id);
       const emailMap = await getUserEmailsBatch(userIds);
       setMemberEmails(emailMap);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error("Failed to fetch team members");
-      console.error(error);
+      logError("AdminTeam", error);
     } finally {
       setLoading(false);
     }

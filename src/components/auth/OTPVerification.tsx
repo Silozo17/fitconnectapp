@@ -4,6 +4,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import { Loader2, Mail, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getErrorMessage, logError } from "@/lib/error-utils";
 
 interface OTPVerificationProps {
   email: string;
@@ -46,9 +47,9 @@ export function OTPVerification({ email, onVerified, onBack }: OTPVerificationPr
         toast.error(data.error || "Invalid verification code");
         setCode("");
       }
-    } catch (error: any) {
-      console.error("Verification error:", error);
-      toast.error(error.message || "Failed to verify code");
+    } catch (error: unknown) {
+      logError("OTPVerification", error);
+      toast.error(getErrorMessage(error, "Failed to verify code"));
       setCode("");
     } finally {
       setIsVerifying(false);
@@ -67,9 +68,9 @@ export function OTPVerification({ email, onVerified, onBack }: OTPVerificationPr
       toast.success("New code sent!");
       setCountdown(60); // 60 second cooldown
       setCode("");
-    } catch (error: any) {
-      console.error("Resend error:", error);
-      toast.error(error.message || "Failed to resend code");
+    } catch (error: unknown) {
+      logError("OTPVerification", error);
+      toast.error(getErrorMessage(error, "Failed to resend code"));
     } finally {
       setIsResending(false);
     }

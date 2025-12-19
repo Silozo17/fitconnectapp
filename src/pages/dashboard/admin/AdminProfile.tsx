@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2, Save, User } from "lucide-react";
+import { getErrorMessage } from "@/lib/error-utils";
 
 interface AdminProfile {
   id: string;
@@ -92,8 +93,8 @@ const AdminProfile = () => {
       }
 
       toast.success("Profile updated successfully");
-    } catch (error: any) {
-      toast.error("Failed to update profile: " + error.message);
+    } catch (error: unknown) {
+      toast.error("Failed to update profile: " + getErrorMessage(error, "Unknown error"));
     } finally {
       setSaving(false);
     }
