@@ -119,6 +119,8 @@ Remember: Return ONLY valid JSON, no markdown formatting around it.`;
 
     // Clean the response - remove markdown code blocks if present
     let cleanedContent = aiContent.trim();
+    
+    // Remove markdown code blocks
     if (cleanedContent.startsWith('```json')) {
       cleanedContent = cleanedContent.slice(7);
     } else if (cleanedContent.startsWith('```')) {
@@ -129,8 +131,49 @@ Remember: Return ONLY valid JSON, no markdown formatting around it.`;
     }
     cleanedContent = cleanedContent.trim();
 
-    // Parse the JSON response
-    const result = JSON.parse(cleanedContent);
+    // Try to extract JSON object if there's extra content
+    const jsonMatch = cleanedContent.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      cleanedContent = jsonMatch[0];
+    }
+
+    let result;
+    try {
+      result = JSON.parse(cleanedContent);
+    } catch (parseError) {
+      console.error('JSON parse error, attempting to fix common issues...');
+      console.error('Raw content (first 500 chars):', cleanedContent.substring(0, 500));
+      
+      // Try to fix common JSON issues - unescaped newlines in strings
+      let fixedContent = cleanedContent
+        .replace(/\n/g, '\\n')
+        .replace(/\r/g, '\\r')
+        .replace(/\t/g, '\\t');
+      
+      // Try parsing again
+      try {
+        result = JSON.parse(fixedContent);
+      } catch (secondError) {
+        // Last resort: try to extract fields manually
+        console.error('Second parse failed, extracting fields manually...');
+        
+        const formattedContentMatch = cleanedContent.match(/"formattedContent"\s*:\s*"([\s\S]*?)"\s*,\s*"suggestedExcerpt"/);
+        const excerptMatch = cleanedContent.match(/"suggestedExcerpt"\s*:\s*"([\s\S]*?)"\s*,\s*"suggestedMetaTitle"/);
+        const metaTitleMatch = cleanedContent.match(/"suggestedMetaTitle"\s*:\s*"([\s\S]*?)"\s*,\s*"suggestedMetaDescription"/);
+        const metaDescMatch = cleanedContent.match(/"suggestedMetaDescription"\s*:\s*"([\s\S]*?)"\s*,\s*"suggestedKeywords"/);
+        const keywordsMatch = cleanedContent.match(/"suggestedKeywords"\s*:\s*\[([\s\S]*?)\]/);
+
+        result = {
+          formattedContent: formattedContentMatch?.[1]?.replace(/\\n/g, '\n').replace(/\\"/g, '"') || content,
+          suggestedExcerpt: excerptMatch?.[1]?.replace(/\\n/g, '\n').replace(/\\"/g, '"') || '',
+          suggestedMetaTitle: metaTitleMatch?.[1]?.replace(/\\"/g, '"') || title || '',
+          suggestedMetaDescription: metaDescMatch?.[1]?.replace(/\\"/g, '"') || '',
+          suggestedKeywords: keywordsMatch?.[1]?.match(/"([^"]+)"/g)?.map((k: string) => k.replace(/"/g, '')) || []
+        };
+        
+        console.log('Extracted result manually:', Object.keys(result));
+      }
+    }
 
     return new Response(
       JSON.stringify(result),
