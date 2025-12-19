@@ -29,7 +29,13 @@ const authSchema = z.object({
 type AuthFormData = z.infer<typeof authSchema>;
 
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  
+  // Get mode from query params (login or signup)
+  const modeParam = searchParams.get("mode");
+  const [isLogin, setIsLogin] = useState(modeParam !== "signup");
   const [selectedRole, setSelectedRole] = useState<"client" | "coach">("client");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alsoFindCoach, setAlsoFindCoach] = useState(false);
@@ -37,9 +43,6 @@ const Auth = () => {
   const [showOTPVerification, setShowOTPVerification] = useState(false);
   const [pendingSignupData, setPendingSignupData] = useState<{ email: string; password: string } | null>(null);
   const { signIn, signUp, user, role } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [searchParams] = useSearchParams();
   
   // Get return URL from query params or location state
   const returnUrl = searchParams.get("returnUrl") || (location.state?.from?.pathname ? `${location.state.from.pathname}${location.state.from.search || ''}` : null);
