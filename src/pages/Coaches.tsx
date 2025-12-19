@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, SlidersHorizontal, Loader2, Users, X } from "lucide-react";
+import { Search, SlidersHorizontal, Loader2, Users } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import BookSessionModal from "@/components/booking/BookSessionModal";
 import RequestConnectionModal from "@/components/coaches/RequestConnectionModal";
 import { useCoachMarketplace, type MarketplaceCoach } from "@/hooks/useCoachMarketplace";
 import { useUserLocation } from "@/hooks/useUserLocation";
+import { useMarketplaceLocationFilter } from "@/hooks/useMarketplaceLocationFilter";
 
 const Coaches = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,8 +26,28 @@ const Coaches = () => {
   const [bookingCoach, setBookingCoach] = useState<MarketplaceCoach | null>(null);
   const [connectionCoach, setConnectionCoach] = useState<MarketplaceCoach | null>(null);
 
-  // Get user location for proximity ranking
-  const userLocation = useUserLocation();
+  // Get auto-detected user location
+  const autoLocation = useUserLocation();
+
+  // Manual location filter (persisted for session)
+  const {
+    manualLocation,
+    isManualSelection,
+    setManualLocation,
+    clearManualLocation,
+  } = useMarketplaceLocationFilter();
+
+  // Determine effective location (manual overrides auto)
+  const effectiveLocation = isManualSelection
+    ? manualLocation
+    : autoLocation.isLoading
+      ? null
+      : {
+          city: autoLocation.city,
+          region: autoLocation.region,
+          county: autoLocation.county,
+          country: autoLocation.country,
+        };
 
   const { data: coaches, isLoading, error } = useCoachMarketplace({
     search: searchQuery || undefined,
@@ -34,13 +55,7 @@ const Coaches = () => {
     priceRange,
     onlineOnly,
     inPersonOnly,
-    // Pass user location for ranking algorithm
-    userLocation: userLocation.isLoading ? null : {
-      city: userLocation.city,
-      region: userLocation.region,
-      county: userLocation.county,
-      country: userLocation.country,
-    },
+    userLocation: effectiveLocation,
     enableLocationRanking: true,
   });
 
@@ -119,6 +134,16 @@ const Coaches = () => {
                         onOnlineOnlyChange={setOnlineOnly}
                         inPersonOnly={inPersonOnly}
                         onInPersonOnlyChange={setInPersonOnly}
+                        autoLocation={autoLocation.isLoading ? null : {
+                          city: autoLocation.city,
+                          region: autoLocation.region,
+                          county: autoLocation.county,
+                          country: autoLocation.country,
+                        }}
+                        manualLocation={manualLocation}
+                        isAutoLocationLoading={autoLocation.isLoading}
+                        onLocationSelect={setManualLocation}
+                        onClearLocation={clearManualLocation}
                       />
                     </div>
                   </SheetContent>
@@ -140,6 +165,16 @@ const Coaches = () => {
                     onOnlineOnlyChange={setOnlineOnly}
                     inPersonOnly={inPersonOnly}
                     onInPersonOnlyChange={setInPersonOnly}
+                    autoLocation={autoLocation.isLoading ? null : {
+                      city: autoLocation.city,
+                      region: autoLocation.region,
+                      county: autoLocation.county,
+                      country: autoLocation.country,
+                    }}
+                    manualLocation={manualLocation}
+                    isAutoLocationLoading={autoLocation.isLoading}
+                    onLocationSelect={setManualLocation}
+                    onClearLocation={clearManualLocation}
                   />
                 </aside>
               )}

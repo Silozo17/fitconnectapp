@@ -10,6 +10,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { COACH_TYPE_CATEGORIES, getCoachTypesByCategory } from "@/constants/coachTypes";
+import { LocationFilter } from "./LocationFilter";
+import { LocationData } from "@/types/ranking";
 
 interface CoachFiltersProps {
   selectedTypes: string[];
@@ -20,6 +22,12 @@ interface CoachFiltersProps {
   onOnlineOnlyChange: (value: boolean) => void;
   inPersonOnly: boolean;
   onInPersonOnlyChange: (value: boolean) => void;
+  // Location filter props
+  autoLocation?: LocationData | null;
+  manualLocation?: LocationData | null;
+  isAutoLocationLoading?: boolean;
+  onLocationSelect?: (location: LocationData) => void;
+  onClearLocation?: () => void;
 }
 
 const CoachFilters = ({
@@ -31,6 +39,11 @@ const CoachFilters = ({
   onOnlineOnlyChange,
   inPersonOnly,
   onInPersonOnlyChange,
+  autoLocation,
+  manualLocation,
+  isAutoLocationLoading,
+  onLocationSelect,
+  onClearLocation,
 }: CoachFiltersProps) => {
   const handleTypeToggle = (typeId: string) => {
     if (selectedTypes.includes(typeId)) {
@@ -49,10 +62,11 @@ const CoachFilters = ({
     onPriceRangeChange(undefined);
     onOnlineOnlyChange(false);
     onInPersonOnlyChange(false);
+    onClearLocation?.();
   };
 
   const hasActiveFilters =
-    selectedTypes.length > 0 || priceRange || onlineOnly || inPersonOnly;
+    selectedTypes.length > 0 || priceRange || onlineOnly || inPersonOnly || manualLocation !== null;
 
   return (
     <Card className="sticky top-24">
@@ -67,6 +81,17 @@ const CoachFilters = ({
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Location Filter */}
+        {onLocationSelect && onClearLocation && (
+          <LocationFilter
+            autoLocation={autoLocation ?? null}
+            manualLocation={manualLocation ?? null}
+            isAutoLocationLoading={isAutoLocationLoading}
+            onLocationSelect={onLocationSelect}
+            onClearLocation={onClearLocation}
+          />
+        )}
+
         {/* Coach Type by Category */}
         <div>
           <h4 className="font-medium mb-3 text-sm">Specialty</h4>
