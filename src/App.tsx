@@ -19,6 +19,7 @@ import { ErrorBoundary } from "./components/shared/ErrorBoundary";
 // Eagerly loaded pages (critical path)
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import GetStarted from "./pages/GetStarted";
 import NotFound from "./pages/NotFound";
 
 // Lazy loaded public pages
@@ -192,6 +193,7 @@ const App = () => (
                 <Suspense fallback={<PageLoadingSpinner />}>
                   <Routes>
                     <Route path="/" element={<Index />} />
+                    <Route path="/get-started" element={<GetStarted />} />
                     <Route path="/coaches" element={<Coaches />} />
                     <Route path="/coaches/:id" element={<CoachDetail />} />
                     <Route path="/auth" element={<Auth />} />
