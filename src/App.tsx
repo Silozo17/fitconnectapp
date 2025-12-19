@@ -14,6 +14,7 @@ import ScrollRestoration from "./components/shared/ScrollRestoration";
 import PageLoadingSpinner from "./components/shared/PageLoadingSpinner";
 import { ReloadPrompt } from "./components/pwa/ReloadPrompt";
 import { InstallBanner } from "./components/pwa/InstallBanner";
+import { ErrorBoundary } from "./components/shared/ErrorBoundary";
 
 // Eagerly loaded pages (critical path)
 import Index from "./pages/Index";
@@ -175,8 +176,9 @@ const queryClient = new QueryClient({
 });
 
 const App = () => (
-  <HelmetProvider>
-    <QueryClientProvider client={queryClient}>
+  <ErrorBoundary>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -618,8 +620,9 @@ const App = () => (
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
-    </QueryClientProvider>
-  </HelmetProvider>
+      </QueryClientProvider>
+    </HelmetProvider>
+  </ErrorBoundary>
 );
 
 export default App;
