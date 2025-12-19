@@ -16,7 +16,7 @@ const QuickSendFAB = ({ onClick, className }: QuickSendFABProps) => {
         "fixed z-50 h-14 w-14 rounded-full shadow-lg",
         "bg-primary hover:bg-primary/90 text-primary-foreground",
         "transition-all duration-200 hover:scale-105 active:scale-95",
-        "bottom-36 right-4",
+        "bottom-48 right-4",
         "lg:hidden", // Hide on desktop
         className
       )}
