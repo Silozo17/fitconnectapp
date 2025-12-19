@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { ProfileImageUpload } from "@/components/shared/ProfileImageUpload";
 import { AtSign, Copy, Check, Loader2, MapPin } from "lucide-react";
 import { toast } from "sonner";
+import { LocationAutocomplete } from "@/components/shared/LocationAutocomplete";
 
 interface UnifiedProfileSettingsProps {
   showAvatar?: boolean;
@@ -223,47 +224,32 @@ export const UnifiedProfileSettings = ({
           </div>
           
           {showLocation && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="location" className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  Location
-                </Label>
-                <Input
-                  id="location"
-                  placeholder="e.g., London, UK"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                />
-              </div>
-              
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="city">City</Label>
-                  <Input
-                    id="city"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="county">County</Label>
-                  <Input
-                    id="county"
-                    value={county}
-                    onChange={(e) => setCounty(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="country">Country</Label>
-                  <Input
-                    id="country"
-                    value={country}
-                    onChange={(e) => setCountry(e.target.value)}
-                  />
-                </div>
-              </div>
-            </>
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <MapPin className="w-4 h-4" />
+                Location
+              </Label>
+              <LocationAutocomplete
+                value={city ? `${city}${country ? `, ${country}` : ''}` : location || ''}
+                onLocationChange={(loc, data) => {
+                  if (data) {
+                    setLocation(data.formatted_address);
+                    setCity(data.city);
+                    setCounty(data.region);
+                    setCountry(data.country);
+                  } else if (!loc) {
+                    setLocation('');
+                    setCity('');
+                    setCounty('');
+                    setCountry('');
+                  }
+                }}
+                placeholder="Search for your city..."
+              />
+              <p className="text-xs text-muted-foreground">
+                Search and select a location to auto-fill city, county, and country
+              </p>
+            </div>
           )}
 
           <Button onClick={saveProfile} disabled={isUpdating}>
