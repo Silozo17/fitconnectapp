@@ -117,9 +117,28 @@ const Install = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg mb-2">
+                <p className="text-sm font-medium text-primary">
+                  Important: Make sure you're on the Get Started page before adding to home screen
+                </p>
+                <Link to="/get-started" className="text-sm text-primary underline">
+                  Go to Get Started page first →
+                </Link>
+              </div>
               <div className="flex items-start gap-4">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                   <span className="text-sm font-medium text-primary">1</span>
+                </div>
+                <div>
+                  <p className="font-medium">Navigate to getfitconnect.co.uk/get-started</p>
+                  <p className="text-sm text-muted-foreground">
+                    This ensures the app opens to the right page
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <span className="text-sm font-medium text-primary">2</span>
                 </div>
                 <div>
                   <p className="font-medium">Tap the Share button</p>
@@ -130,7 +149,7 @@ const Install = () => {
               </div>
               <div className="flex items-start gap-4">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <span className="text-sm font-medium text-primary">2</span>
+                  <span className="text-sm font-medium text-primary">3</span>
                 </div>
                 <div>
                   <p className="font-medium">Scroll down and tap "Add to Home Screen"</p>
@@ -141,7 +160,7 @@ const Install = () => {
               </div>
               <div className="flex items-start gap-4">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <span className="text-sm font-medium text-primary">3</span>
+                  <span className="text-sm font-medium text-primary">4</span>
                 </div>
                 <div>
                   <p className="font-medium">Tap "Add"</p>
