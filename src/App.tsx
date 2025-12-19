@@ -13,6 +13,7 @@ import ScrollToTop from "./components/shared/ScrollToTop";
 import ScrollRestoration from "./components/shared/ScrollRestoration";
 import PageLoadingSpinner from "./components/shared/PageLoadingSpinner";
 import { ReloadPrompt } from "./components/pwa/ReloadPrompt";
+import { InstallBanner } from "./components/pwa/InstallBanner";
 
 // Eagerly loaded pages (critical path)
 import Index from "./pages/Index";
@@ -40,6 +41,7 @@ const BlogPost = lazy(() => import("./pages/BlogPost"));
 const Subscribe = lazy(() => import("./pages/Subscribe"));
 const SubscribeSuccess = lazy(() => import("./pages/SubscribeSuccess"));
 const Checkout = lazy(() => import("./pages/Checkout"));
+const Install = lazy(() => import("./pages/Install"));
 
 // Coach category pages
 const PersonalTrainers = lazy(() => import("./pages/coaches/PersonalTrainers"));
@@ -170,6 +172,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <ReloadPrompt />
+        <InstallBanner />
         <BrowserRouter>
           <ScrollRestoration />
           <AuthProvider>
@@ -203,6 +206,7 @@ const App = () => (
                     <Route path="/checkout" element={<Checkout />} />
                     <Route path="/blog" element={<Blog />} />
                     <Route path="/blog/:slug" element={<BlogPost />} />
+                    <Route path="/install" element={<Install />} />
                     
                     {/* Documentation Routes */}
                     <Route path="/docs" element={<DocsHub />} />

@@ -15,17 +15,39 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'logo.svg', 'favicon.ico', 'apple-touch-icon.png', 'robots.txt'],
+      includeAssets: ['favicon.svg', 'logo.svg', 'favicon.ico', 'apple-touch-icon.png', 'robots.txt', 'offline.html'],
       manifest: {
+        id: 'fitconnect-pwa',
         name: 'FitConnect',
         short_name: 'FitConnect',
-        description: 'Connect with world-class fitness coaches',
+        description: 'Connect with world-class fitness coaches. Personal trainers, nutritionists, boxing, MMA and bodybuilding coaches.',
         theme_color: '#BEFF00',
         background_color: '#0D0D14',
         display: 'standalone',
         orientation: 'portrait-primary',
-        start_url: '/dashboard',
+        scope: '/',
+        start_url: '/',
+        categories: ['fitness', 'health', 'sports', 'lifestyle'],
+        lang: 'en-GB',
         icons: [
+          {
+            src: '/pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/apple-touch-icon.png',
+            sizes: '180x180',
+            type: 'image/png',
+            purpose: 'any'
+          },
           {
             src: '/favicon.svg',
             sizes: 'any',
@@ -37,21 +59,22 @@ export default defineConfig(({ mode }) => ({
             sizes: 'any',
             type: 'image/svg+xml',
             purpose: 'maskable'
-          },
+          }
+        ],
+        screenshots: [
           {
-            src: '/pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: '/pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
+            src: '/screenshots/mobile-home.png',
+            sizes: '750x1334',
+            type: 'image/png',
+            form_factor: 'narrow',
+            label: 'FitConnect Home'
           }
         ]
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        navigateFallback: '/offline.html',
+        navigateFallbackDenylist: [/^\/api/, /^\/supabase/, /^\/auth/],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
