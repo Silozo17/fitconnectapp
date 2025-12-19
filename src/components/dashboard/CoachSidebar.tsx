@@ -366,10 +366,10 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-2 space-y-2 overflow-y-auto">
+      <nav className="flex-1 p-2 space-y-2 overflow-y-auto" aria-label="Dashboard navigation">
         {menuGroups.map((group, index) => (
-          <div key={group.id}>
-            {index > 0 && <div className="my-2 border-t border-sidebar-border/50" />}
+          <div key={group.id} role="group" aria-label={group.label || "Main menu"}>
+            {index > 0 && <div className="my-2 border-t border-sidebar-border/50" aria-hidden="true" />}
             {renderGroup(group, isCollapsed)}
           </div>
         ))}
@@ -390,6 +390,8 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
           "hidden xl:flex fixed left-0 top-0 h-screen bg-sidebar border-r border-sidebar-border flex-col transition-all duration-300 z-40",
           collapsed ? "w-16" : "w-64"
         )}
+        role="navigation"
+        aria-label="Main navigation"
       >
         <SidebarContent isCollapsed={collapsed} />
       </aside>

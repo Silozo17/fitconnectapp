@@ -29,7 +29,11 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
   const { data: selectedAvatar } = useSelectedAvatar('client');
 
   return (
-    <header className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+    <header 
+      className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border"
+      role="banner"
+      aria-label="Dashboard header"
+    >
       <div className="flex items-center justify-between h-16 px-4 xl:px-6">
         {/* Left side - Hamburger + Search (search hidden on mobile) */}
         <div className="flex items-center gap-3 flex-1">
@@ -39,17 +43,20 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
             size="icon"
             className="xl:hidden"
             onClick={onMenuToggle}
+            aria-label="Open navigation menu"
+            aria-expanded="false"
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="w-5 h-5" aria-hidden="true" />
           </Button>
 
           {/* Search - Hidden on mobile */}
-          <div className="hidden xl:flex flex-1 max-w-md">
+          <div className="hidden xl:flex flex-1 max-w-md" role="search">
             <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
               <Input
                 placeholder="Search..."
                 className="pl-10 bg-muted/50 border-transparent focus:border-primary"
+                aria-label="Search dashboard"
               />
             </div>
           </div>
@@ -70,7 +77,11 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
           <div className="hidden xl:block">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2 p-1 pt-5 overflow-visible bg-transparent hover:bg-transparent">
+                <Button 
+                  variant="ghost" 
+                  className="flex items-center gap-2 p-1 pt-5 overflow-visible bg-transparent hover:bg-transparent"
+                  aria-label={`Account menu for ${displayName || "Client"}`}
+                >
                   <UserAvatar
                     src={avatarUrl}
                     avatarSlug={selectedAvatar?.slug}

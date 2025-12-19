@@ -354,10 +354,10 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-2 space-y-2 overflow-y-auto">
+      <nav className="flex-1 p-2 space-y-2 overflow-y-auto" aria-label="Dashboard navigation">
         {menuGroups.map((group, index) => (
-          <div key={group.id}>
-            {index > 0 && <div className="my-2 border-t border-border/50" />}
+          <div key={group.id} role="group" aria-label={group.label || "Main menu"}>
+            {index > 0 && <div className="my-2 border-t border-border/50" aria-hidden="true" />}
             {renderGroup(group, isCollapsed)}
           </div>
         ))}
@@ -378,6 +378,8 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
           "hidden xl:flex fixed left-0 top-0 h-full bg-card border-r border-border transition-all duration-300 z-50 flex-col",
           collapsed ? "w-16" : "w-64"
         )}
+        role="navigation"
+        aria-label="Main navigation"
       >
         <SidebarContent isCollapsed={collapsed} />
       </aside>
