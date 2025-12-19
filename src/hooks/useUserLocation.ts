@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { CONSENT_STORAGE_KEY, CookieConsent } from "@/types/consent";
 
 interface LocationData {
   city: string | null;
@@ -21,6 +22,18 @@ interface StoredLocation {
   timestamp: number;
 }
 
+// Helper to check if location consent is granted
+const hasLocationConsent = (): boolean => {
+  try {
+    const stored = localStorage.getItem(CONSENT_STORAGE_KEY);
+    if (!stored) return false;
+    const consent = JSON.parse(stored) as CookieConsent;
+    return consent.location === true;
+  } catch {
+    return false;
+  }
+};
+
 export const useUserLocation = () => {
   const [location, setLocation] = useState<LocationData>({
     city: null,
@@ -33,7 +46,21 @@ export const useUserLocation = () => {
 
   useEffect(() => {
     const detectLocation = async () => {
-      // Check localStorage first
+      // Check if user has given consent for location cookies
+      if (!hasLocationConsent()) {
+        // No consent - return without location data
+        setLocation({
+          city: null,
+          region: null,
+          country: null,
+          county: null,
+          isLoading: false,
+          error: null,
+        });
+        return;
+      }
+
+      // Check localStorage first (only if consent granted)
       const stored = localStorage.getItem(LOCATION_STORAGE_KEY);
       if (stored) {
         try {
