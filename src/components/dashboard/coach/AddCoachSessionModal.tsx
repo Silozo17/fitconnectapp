@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { CalendarIcon, User, Mail, Phone, Clock, MapPin, Video, Loader2 } from "lucide-react";
+import { CalendarIcon, User, Mail, Phone, Clock, MapPin, Video, Loader2, Send } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -84,6 +85,7 @@ export const AddCoachSessionModal = ({
   const [isOnline, setIsOnline] = useState(true);
   const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
+  const [sendPlatformInvite, setSendPlatformInvite] = useState(false);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -105,6 +107,7 @@ export const AddCoachSessionModal = ({
       setIsOnline(true);
       setLocation("");
       setNotes("");
+      setSendPlatformInvite(false);
       if (!preselectedDate) setSelectedDate(undefined);
       if (!preselectedTime) setSelectedTime("10:00");
     }
@@ -190,6 +193,23 @@ export const AddCoachSessionModal = ({
         } catch (emailError) {
           console.error("Failed to send confirmation email:", emailError);
           // Don't fail the whole operation if email fails
+        }
+
+        // Send platform invite if requested
+        if (sendPlatformInvite) {
+          try {
+            await supabase.functions.invoke("send-platform-invite", {
+              body: {
+                email: externalEmail,
+                name: externalName,
+                coachId,
+              },
+            });
+            toast.success("Platform invitation sent!");
+          } catch (inviteError) {
+            console.error("Failed to send platform invite:", inviteError);
+            toast.error("Session created but failed to send platform invite");
+          }
         }
       }
 
@@ -299,6 +319,27 @@ export const AddCoachSessionModal = ({
               <p className="text-xs text-muted-foreground">
                 The client will receive an email confirmation with session details.
               </p>
+              
+              {/* Platform Invite Checkbox */}
+              <div className="flex items-center space-x-2 pt-2 border-t border-border/50">
+                <Checkbox
+                  id="platform-invite"
+                  checked={sendPlatformInvite}
+                  onCheckedChange={(checked) => setSendPlatformInvite(checked === true)}
+                />
+                <Label 
+                  htmlFor="platform-invite" 
+                  className="text-sm cursor-pointer flex items-center gap-2"
+                >
+                  <Send className="w-3 h-3" />
+                  Invite to join the platform
+                </Label>
+              </div>
+              {sendPlatformInvite && (
+                <p className="text-xs text-muted-foreground pl-6">
+                  They'll receive an email invitation to create an account and become your client.
+                </p>
+              )}
             </div>
           )}
 

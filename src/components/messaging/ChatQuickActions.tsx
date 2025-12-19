@@ -4,7 +4,8 @@ import {
   Calendar, 
   CreditCard, 
   Loader2, 
-  FileText 
+  FileText,
+  CalendarPlus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,16 +29,19 @@ import { Badge } from "@/components/ui/badge";
 import { useSessionTypes } from "@/hooks/useCoachSchedule";
 import { useMessageTemplates } from "@/hooks/useMessageTemplates";
 import { useAuth } from "@/contexts/AuthContext";
+import SessionOfferDialog from "./SessionOfferDialog";
 
 interface ChatQuickActionsProps {
   coachId: string;
+  clientId?: string;
   onSendMessage: (message: string) => Promise<boolean>;
 }
 
-const ChatQuickActions = ({ coachId, onSendMessage }: ChatQuickActionsProps) => {
+const ChatQuickActions = ({ coachId, clientId, onSendMessage }: ChatQuickActionsProps) => {
   const [showPricingDialog, setShowPricingDialog] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [showTemplatesPopover, setShowTemplatesPopover] = useState(false);
+  const [showSessionOfferDialog, setShowSessionOfferDialog] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState("");
   const [paymentDescription, setPaymentDescription] = useState("");
   const [sending, setSending] = useState(false);
@@ -196,6 +200,19 @@ const ChatQuickActions = ({ coachId, onSendMessage }: ChatQuickActionsProps) => 
           Book
         </Button>
 
+        {/* Session Offer Button */}
+        {clientId && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 text-xs flex-shrink-0 border-primary/30 text-primary hover:bg-primary/10"
+            onClick={() => setShowSessionOfferDialog(true)}
+          >
+            <CalendarPlus className="h-3 w-3 mr-1" />
+            Session Offer
+          </Button>
+        )}
+
         <Button
           variant="outline"
           size="sm"
@@ -290,6 +307,19 @@ const ChatQuickActions = ({ coachId, onSendMessage }: ChatQuickActionsProps) => 
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Session Offer Dialog */}
+      {clientId && (
+        <SessionOfferDialog
+          open={showSessionOfferDialog}
+          onOpenChange={setShowSessionOfferDialog}
+          coachId={coachId}
+          clientId={clientId}
+          onOfferCreated={async (offerId, offerDetails) => {
+            await onSendMessage(offerDetails);
+          }}
+        />
+      )}
     </>
   );
 };

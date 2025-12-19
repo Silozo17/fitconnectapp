@@ -4347,6 +4347,112 @@ export type Database = {
           },
         ]
       }
+      session_offers: {
+        Row: {
+          accepted_at: string | null
+          client_id: string
+          coach_id: string
+          created_at: string
+          created_session_id: string | null
+          currency: string
+          declined_at: string | null
+          duration_minutes: number
+          expires_at: string | null
+          id: string
+          is_free: boolean
+          is_online: boolean
+          location: string | null
+          notes: string | null
+          price: number
+          proposed_date: string
+          session_type: string
+          status: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          client_id: string
+          coach_id: string
+          created_at?: string
+          created_session_id?: string | null
+          currency?: string
+          declined_at?: string | null
+          duration_minutes?: number
+          expires_at?: string | null
+          id?: string
+          is_free?: boolean
+          is_online?: boolean
+          location?: string | null
+          notes?: string | null
+          price?: number
+          proposed_date: string
+          session_type: string
+          status?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          client_id?: string
+          coach_id?: string
+          created_at?: string
+          created_session_id?: string | null
+          currency?: string
+          declined_at?: string | null
+          duration_minutes?: number
+          expires_at?: string | null
+          id?: string
+          is_free?: boolean
+          is_online?: boolean
+          location?: string | null
+          notes?: string | null
+          price?: number
+          proposed_date?: string
+          session_type?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_offers_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_offers_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_offers_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_offers_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_offers_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_offers_created_session_id_fkey"
+            columns: ["created_session_id"]
+            isOneToOne: false
+            referencedRelation: "coaching_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       session_types: {
         Row: {
           coach_id: string
