@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import { useAdminView } from "@/contexts/AdminContext";
 import { cn } from "@/lib/utils";
-import ChatQuickActions from "./ChatQuickActions";
+
 import TypingIndicator, { useTypingBroadcast } from "./TypingIndicator";
 import ProspectProfileSheet from "./ProspectProfileSheet";
 import { UserAvatar } from "@/components/shared/UserAvatar";
@@ -344,15 +344,6 @@ const ChatWindow = ({
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick Actions (for coaches) */}
-          <ChatQuickActions 
-            coachId={currentProfileId || ""} 
-            clientId={participantInfo.type === "client" ? participantId : undefined}
-            onSendMessage={async (msg) => {
-              const success = await sendMessage(msg);
-              return success;
-            }}
-          />
 
           {/* Input */}
           <form onSubmit={handleSend} className="p-4 border-t border-border bg-card">

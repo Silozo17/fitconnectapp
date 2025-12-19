@@ -70,6 +70,7 @@ const CoachMessages = () => {
             <div className="hidden lg:block border-l border-border">
               <MessageSidePanel
                 participantId={participantId}
+                clientId={participantId}
                 onSendMessage={async (msg) => {
                   const success = await sendMessage(msg);
                   return success;
