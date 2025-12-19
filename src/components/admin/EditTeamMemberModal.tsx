@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { getErrorMessage } from "@/lib/error-utils";
 
 interface TeamMember {
   id: string;
@@ -76,8 +77,8 @@ const EditTeamMemberModal = ({
       toast.success("Team member updated successfully");
       onSuccess();
       onClose();
-    } catch (error: any) {
-      toast.error("Failed to update team member: " + error.message);
+    } catch (error: unknown) {
+      toast.error("Failed to update team member: " + getErrorMessage(error));
     } finally {
       setLoading(false);
     }

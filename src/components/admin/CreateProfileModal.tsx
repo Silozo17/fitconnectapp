@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { User, Briefcase } from "lucide-react";
+import { getErrorMessage, logError } from "@/lib/error-utils";
 
 interface CreateProfileModalProps {
   open: boolean;
@@ -99,9 +100,9 @@ const CreateProfileModal = ({
       setFirstName("");
       setLastName("");
       setDisplayName("");
-    } catch (error: any) {
-      console.error("Error creating profile:", error);
-      toast.error(error.message || "Failed to create profile");
+    } catch (error: unknown) {
+      logError("CreateProfileModal", error);
+      toast.error(getErrorMessage(error, "Failed to create profile"));
     } finally {
       setIsLoading(false);
     }

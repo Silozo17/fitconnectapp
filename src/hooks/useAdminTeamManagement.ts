@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLogAdminAction } from "@/hooks/useAuditLog";
 import { toast } from "sonner";
+import { getErrorMessage, logError } from "@/lib/error-utils";
 
 export const useAdminTeamManagement = () => {
   const [loading, setLoading] = useState(false);
@@ -15,8 +16,8 @@ export const useAdminTeamManagement = () => {
 
       if (error) throw error;
       return data?.email || null;
-    } catch (error) {
-      console.error("Failed to get user email:", error);
+    } catch (error: unknown) {
+      logError("useAdminTeamManagement.getUserEmail", error);
       return null;
     }
   }, []);
@@ -38,8 +39,8 @@ export const useAdminTeamManagement = () => {
         });
       }
       return emailMap;
-    } catch (error) {
-      console.error("Failed to get user emails batch:", error);
+    } catch (error: unknown) {
+      logError("useAdminTeamManagement.getUserEmailsBatch", error);
       return {};
     }
   }, []);
@@ -74,8 +75,8 @@ export const useAdminTeamManagement = () => {
 
       toast.success(`Team member ${status === "active" ? "activated" : status}`);
       return true;
-    } catch (error: any) {
-      toast.error("Failed to update status: " + error.message);
+    } catch (error: unknown) {
+      toast.error("Failed to update status: " + getErrorMessage(error));
       return false;
     } finally {
       setLoading(false);
@@ -111,8 +112,8 @@ export const useAdminTeamManagement = () => {
 
       toast.success(`${members.length} team member(s) ${status === "active" ? "activated" : status}`);
       return true;
-    } catch (error: any) {
-      toast.error("Failed to update status: " + error.message);
+    } catch (error: unknown) {
+      toast.error("Failed to update status: " + getErrorMessage(error));
       return false;
     } finally {
       setLoading(false);
@@ -144,8 +145,8 @@ export const useAdminTeamManagement = () => {
 
       toast.success(`${members.length} team member(s) deleted`);
       return true;
-    } catch (error: any) {
-      toast.error("Failed to delete team members: " + error.message);
+    } catch (error: unknown) {
+      toast.error("Failed to delete team members: " + getErrorMessage(error));
       return false;
     } finally {
       setLoading(false);
@@ -168,8 +169,8 @@ export const useAdminTeamManagement = () => {
       });
 
       return true;
-    } catch (error: any) {
-      toast.error("Failed to reset password: " + error.message);
+    } catch (error: unknown) {
+      toast.error("Failed to reset password: " + getErrorMessage(error));
       return false;
     } finally {
       setLoading(false);

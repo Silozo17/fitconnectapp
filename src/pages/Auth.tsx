@@ -19,6 +19,7 @@ import { validatePassword } from "@/utils/passwordValidation";
 import { usePasswordBreachCheck } from "@/hooks/usePasswordBreachCheck";
 import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 import { supabase } from "@/integrations/supabase/client";
+import { logError } from "@/lib/error-utils";
 
 const authSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -127,8 +128,8 @@ const Auth = () => {
         setPendingSignupData({ email: data.email, password: data.password });
         setShowOTPVerification(true);
         toast.success("Verification code sent to your email");
-      } catch (error: any) {
-        console.error("Failed to send OTP:", error);
+      } catch (error: unknown) {
+        logError("Auth.sendOTP", error);
         toast.error("Failed to send verification code. Please try again.");
       } finally {
         setIsSubmitting(false);

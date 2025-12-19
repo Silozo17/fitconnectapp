@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCoachProfile } from "@/hooks/useCoachClients";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { getErrorMessage, logError } from "@/lib/error-utils";
 
 interface AddClientModalProps {
   open: boolean;
@@ -88,18 +89,19 @@ export function AddClientModal({ open, onOpenChange }: AddClientModalProps) {
 
       resetForm();
       onOpenChange(false);
-    } catch (error: any) {
-      console.error("Add client error:", error);
+    } catch (error: unknown) {
+      logError("AddClientModal", error);
+      const message = getErrorMessage(error);
       
       // Handle specific error messages
-      if (error.message?.includes("already connected")) {
+      if (message.includes("already connected")) {
         toast.error("This client is already connected to you");
-      } else if (error.message?.includes("pending")) {
+      } else if (message.includes("pending")) {
         toast.error("A connection request is already pending with this client");
-      } else if (error.message?.includes("not registered as a client")) {
+      } else if (message.includes("not registered as a client")) {
         toast.error("This user exists but isn't registered as a client");
       } else {
-        toast.error(error.message || "Failed to send invitation");
+        toast.error(message || "Failed to send invitation");
       }
     } finally {
       setIsLoading(false);
