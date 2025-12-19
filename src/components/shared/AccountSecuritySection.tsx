@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { z } from "zod";
+import { getErrorMessage } from "@/lib/error-utils";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -68,9 +69,9 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
       });
       setShowEmailDialog(false);
       emailForm.reset();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error("Failed to update email", {
-        description: error.message || "Please try again later",
+        description: getErrorMessage(error, "Please try again later"),
       });
     } finally {
       setIsUpdatingEmail(false);
@@ -86,9 +87,9 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
       toast.success("Password updated successfully");
       setShowPasswordDialog(false);
       passwordForm.reset();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error("Failed to update password", {
-        description: error.message || "Please try again later",
+        description: getErrorMessage(error, "Please try again later"),
       });
     } finally {
       setIsUpdatingPassword(false);

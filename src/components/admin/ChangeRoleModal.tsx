@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2, Shield, Users, UserCog } from "lucide-react";
+import { getErrorMessage } from "@/lib/error-utils";
 
 interface TeamMember {
   id: string;
@@ -80,8 +81,8 @@ const ChangeRoleModal = ({
       toast.success(`Role updated to ${selectedRole}`);
       onSuccess();
       onClose();
-    } catch (error: any) {
-      toast.error("Failed to update role: " + error.message);
+    } catch (error: unknown) {
+      toast.error("Failed to update role: " + getErrorMessage(error));
     } finally {
       setLoading(false);
     }

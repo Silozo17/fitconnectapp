@@ -2,6 +2,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLogAdminAction } from "@/hooks/useAuditLog";
+import { getErrorMessage, logError } from "@/lib/error-utils";
 
 export const useAdminUserManagement = (userType: "client" | "coach") => {
   const [loading, setLoading] = useState(false);
@@ -14,8 +15,8 @@ export const useAdminUserManagement = (userType: "client" | "coach") => {
       });
       if (error) throw error;
       return { email: data.email, lastSignInAt: data.last_sign_in_at };
-    } catch (error: any) {
-      console.error("Get auth info error:", error);
+    } catch (error: unknown) {
+      logError("useAdminUserManagement.getUserAuthInfo", error);
       return { email: null, lastSignInAt: null };
     }
   };
@@ -42,9 +43,9 @@ export const useAdminUserManagement = (userType: "client" | "coach") => {
 
       toast.success("Email updated successfully");
       return true;
-    } catch (error: any) {
-      console.error("Update email error:", error);
-      toast.error(error.message || "Failed to update email");
+    } catch (error: unknown) {
+      logError("useAdminUserManagement.updateEmail", error);
+      toast.error(getErrorMessage(error, "Failed to update email"));
       return false;
     } finally {
       setLoading(false);
@@ -80,9 +81,9 @@ export const useAdminUserManagement = (userType: "client" | "coach") => {
 
       toast.success(`Account ${status === "active" ? "activated" : status}`);
       return true;
-    } catch (error: any) {
-      console.error("Update status error:", error);
-      toast.error(error.message || "Failed to update status");
+    } catch (error: unknown) {
+      logError("useAdminUserManagement.updateStatus", error);
+      toast.error(getErrorMessage(error, "Failed to update status"));
       return false;
     } finally {
       setLoading(false);
@@ -116,9 +117,9 @@ export const useAdminUserManagement = (userType: "client" | "coach") => {
 
       toast.success(`${data.count} accounts updated`);
       return true;
-    } catch (error: any) {
-      console.error("Bulk update error:", error);
-      toast.error(error.message || "Failed to update accounts");
+    } catch (error: unknown) {
+      logError("useAdminUserManagement.bulkUpdateStatus", error);
+      toast.error(getErrorMessage(error, "Failed to update accounts"));
       return false;
     } finally {
       setLoading(false);
@@ -146,9 +147,9 @@ export const useAdminUserManagement = (userType: "client" | "coach") => {
 
       toast.success(`${data.count} accounts deleted`);
       return true;
-    } catch (error: any) {
-      console.error("Bulk delete error:", error);
-      toast.error(error.message || "Failed to delete accounts");
+    } catch (error: unknown) {
+      logError("useAdminUserManagement.bulkDelete", error);
+      toast.error(getErrorMessage(error, "Failed to delete accounts"));
       return false;
     } finally {
       setLoading(false);

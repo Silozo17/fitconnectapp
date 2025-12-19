@@ -21,6 +21,7 @@ import { AlertTriangle, Ban, Pause, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLogAdminAction } from "@/hooks/useAuditLog";
+import { getErrorMessage, logError } from "@/lib/error-utils";
 
 interface AccountStatusModalProps {
   open: boolean;
@@ -79,9 +80,9 @@ export const AccountStatusModal = ({
       toast.success(`Account ${status === "active" ? "activated" : status}`);
       onSaved();
       onClose();
-    } catch (error: any) {
-      console.error("Status update error:", error);
-      toast.error(error.message || "Failed to update status");
+    } catch (error: unknown) {
+      logError("AccountStatusModal", error);
+      toast.error(getErrorMessage(error, "Failed to update status"));
     } finally {
       setSaving(false);
     }

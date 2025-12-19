@@ -23,6 +23,7 @@ import { getAvatarImageUrl } from "@/hooks/useAvatars";
 import { RARITY_CONFIG } from "@/lib/avatar-utils";
 import { GrantAvatarModal } from "./GrantAvatarModal";
 import { LockedAvatarsSection } from "./LockedAvatarsSection";
+import { getErrorMessage } from "@/lib/error-utils";
 import { 
   User, Heart, Target, MapPin, Calendar, Dumbbell,
   Save, Loader2, AlertTriangle, Apple, Activity,
@@ -198,8 +199,8 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved, onEdit, on
 
       toast.success("User profile updated");
       onSaved?.();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update user");
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Failed to update user"));
     } finally {
       setSaving(false);
     }

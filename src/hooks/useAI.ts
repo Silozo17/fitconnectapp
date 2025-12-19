@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { getErrorMessage } from '@/lib/error-utils';
 
 // Types for AI responses
 export interface WorkoutPlan {
@@ -135,8 +136,8 @@ export const useAIWorkoutGenerator = () => {
       if (data?.error) throw new Error(data.error);
 
       return data?.plan || null;
-    } catch (err: any) {
-      const message = err?.message || 'Failed to generate workout';
+    } catch (err: unknown) {
+      const message = getErrorMessage(err, 'Failed to generate workout');
       setError(message);
       toast.error(message);
       return null;
@@ -172,8 +173,8 @@ export const useAIExerciseAlternatives = () => {
       if (data?.error) throw new Error(data.error);
 
       return data || null;
-    } catch (err: any) {
-      const message = err?.message || 'Failed to find alternatives';
+    } catch (err: unknown) {
+      const message = getErrorMessage(err, 'Failed to find alternatives');
       setError(message);
       toast.error(message);
       return null;
@@ -209,8 +210,8 @@ export const useAIFoodSubstitutions = () => {
       if (data?.error) throw new Error(data.error);
 
       return data || null;
-    } catch (err: any) {
-      const message = err?.message || 'Failed to find substitutions';
+    } catch (err: unknown) {
+      const message = getErrorMessage(err, 'Failed to find substitutions');
       setError(message);
       toast.error(message);
       return null;
@@ -248,8 +249,8 @@ export const useAIMacroCalculator = () => {
       if (data?.error) throw new Error(data.error);
 
       return data || null;
-    } catch (err: any) {
-      const message = err?.message || 'Failed to calculate macros';
+    } catch (err: unknown) {
+      const message = getErrorMessage(err, 'Failed to calculate macros');
       setError(message);
       toast.error(message);
       return null;
@@ -267,7 +268,7 @@ export const useAIProgressAnalysis = () => {
   const [error, setError] = useState<string | null>(null);
 
   const analyzeProgress = async (params: {
-    progressData: any[];
+    progressData: unknown[];
     goal?: string;
     timeframeDays?: number;
   }): Promise<ProgressAnalysis | null> => {
@@ -283,8 +284,8 @@ export const useAIProgressAnalysis = () => {
       if (data?.error) throw new Error(data.error);
 
       return data || null;
-    } catch (err: any) {
-      const message = err?.message || 'Failed to analyze progress';
+    } catch (err: unknown) {
+      const message = getErrorMessage(err, 'Failed to analyze progress');
       setError(message);
       toast.error(message);
       return null;
