@@ -58,11 +58,14 @@ import { useMessageTemplates } from "@/hooks/useMessageTemplates";
 import { useTrainingPlans } from "@/hooks/useTrainingPlans";
 import { useCoachProducts } from "@/hooks/useDigitalProducts";
 import SessionOfferDialog from "./SessionOfferDialog";
+import { QuickSendMetadata } from "@/types/messaging";
+import { useToast } from "@/hooks/use-toast";
 
 export interface QuickSendContentProps {
   participantId: string;
   clientId?: string;
   onSendMessage: (message: string) => Promise<boolean>;
+  onSendMessageWithMetadata?: (message: string, metadata: QuickSendMetadata) => Promise<boolean>;
   variant?: 'sidebar' | 'sheet';
 }
 
@@ -118,7 +121,8 @@ interface EditingSubscription {
   };
 }
 
-const QuickSendContent = ({ participantId, clientId, onSendMessage, variant = 'sidebar' }: QuickSendContentProps) => {
+const QuickSendContent = ({ participantId, clientId, onSendMessage, onSendMessageWithMetadata, variant = 'sidebar' }: QuickSendContentProps) => {
+  const { toast } = useToast();
   const { activeProfileType } = useAdminView();
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState<string | null>(null);
@@ -281,32 +285,70 @@ const QuickSendContent = ({ participantId, clientId, onSendMessage, variant = 's
 
   const handleSendDigitalProduct = async (product: any) => {
     setSending(`product-${product.id}`);
-    let message = `**📚 ${product.title}**\n\n${product.description || "Check out this content I've created for you."}\n\n💰 Price: ${formatCurrency(product.price || 0, (product.currency || "GBP") as CurrencyCode)}`;
     
-    if (product.content_type) {
-      message += `\n📁 Type: ${product.content_type}`;
+    // If we have the metadata sender, use interactive message
+    if (onSendMessageWithMetadata && coachId) {
+      const metadata: QuickSendMetadata = {
+        type: 'quick_send',
+        itemType: 'digital-product',
+        itemId: product.id,
+        itemName: product.title,
+        itemDescription: product.description || undefined,
+        price: product.price || 0,
+        currency: product.currency || 'GBP',
+        coachId: coachId,
+        status: 'pending',
+      };
+      
+      const message = `📚 ${product.title} - ${formatCurrency(product.price || 0, (product.currency || "GBP") as CurrencyCode)}`;
+      await onSendMessageWithMetadata(message, metadata);
+      toast({ title: "Offer sent!", description: "The client will see Accept/Decline buttons." });
+    } else {
+      // Fallback to plain text
+      let message = `**📚 ${product.title}**\n\n${product.description || "Check out this content I've created for you."}\n\n💰 Price: ${formatCurrency(product.price || 0, (product.currency || "GBP") as CurrencyCode)}`;
+      if (product.content_type) {
+        message += `\n📁 Type: ${product.content_type}`;
+      }
+      message += `\n\nInterested? Let me know and I'll send you the link!`;
+      await onSendMessage(message);
     }
     
-    message += `\n\nInterested? Let me know and I'll send you the link!`;
-    
-    await onSendMessage(message);
     setSending(null);
   };
 
   const handleSendPlan = async (plan: any) => {
     setSending(`plan-${plan.id}`);
     const planType = plan.plan_type === 'nutrition' || plan.plan_type === 'meal' ? 'Meal Plan' : 'Workout Plan';
+    const itemType = plan.plan_type === 'nutrition' || plan.plan_type === 'meal' ? 'meal-plan' : 'training-plan';
     const icon = plan.plan_type === 'nutrition' || plan.plan_type === 'meal' ? '🥗' : '🏋️';
     
-    let message = `**${icon} ${planType}: ${plan.name}**\n\n${plan.description || "A customized plan designed for your goals."}`;
-    
-    if (plan.duration_weeks) {
-      message += `\n\n📅 Duration: ${plan.duration_weeks} weeks`;
+    // If we have the metadata sender, use interactive message
+    if (onSendMessageWithMetadata && coachId) {
+      const metadata: QuickSendMetadata = {
+        type: 'quick_send',
+        itemType: itemType as 'training-plan' | 'meal-plan',
+        itemId: plan.id,
+        itemName: plan.name,
+        itemDescription: plan.description || undefined,
+        price: 0, // Plans are typically free when assigned
+        currency: 'GBP',
+        coachId: coachId,
+        status: 'pending',
+      };
+      
+      const message = `${icon} ${planType}: ${plan.name}`;
+      await onSendMessageWithMetadata(message, metadata);
+      toast({ title: "Plan sent!", description: "The client will see Accept/Decline buttons." });
+    } else {
+      // Fallback to plain text
+      let message = `**${icon} ${planType}: ${plan.name}**\n\n${plan.description || "A customized plan designed for your goals."}`;
+      if (plan.duration_weeks) {
+        message += `\n\n📅 Duration: ${plan.duration_weeks} weeks`;
+      }
+      message += `\n\nLet me know if you'd like me to assign this to you!`;
+      await onSendMessage(message);
     }
     
-    message += `\n\nLet me know if you'd like me to assign this to you!`;
-    
-    await onSendMessage(message);
     setSending(null);
   };
 
@@ -320,76 +362,62 @@ const QuickSendContent = ({ participantId, clientId, onSendMessage, variant = 's
   const sendPackageMessage = async (pkg: CoachPackage, includeCheckout: boolean) => {
     setSending(`pkg-${pkg.id}`);
     
-    let checkoutUrl: string | null = null;
-    
-    if (includeCheckout) {
-      try {
-        const origin = window.location.origin;
-        const { data, error } = await supabase.functions.invoke('stripe-checkout', {
-          body: {
-            type: 'package',
-            itemId: pkg.id,
-            clientId: participantId,
-            coachId: coachId,
-            successUrl: `${origin}/dashboard/client/packages?success=true`,
-            cancelUrl: `${origin}/dashboard/client/messages`,
-          }
-        });
-        if (!error && data?.url) {
-          checkoutUrl = data.url;
-        }
-      } catch (e) {
-        console.error('Error generating checkout URL:', e);
-      }
-    }
-    
-    let message = `**📦 Package: ${pkg.name}**\n\n${pkg.description || "A great value package for your fitness journey."}\n\n💰 Price: ${formatCurrency(pkg.price, (pkg.currency || "GBP") as CurrencyCode)}\n📋 Sessions: ${pkg.session_count}`;
-    
-    if (checkoutUrl) {
-      message += `\n\n🛒 Ready to purchase? Click here:\n${checkoutUrl}`;
+    // Use interactive message with metadata
+    if (onSendMessageWithMetadata && coachId) {
+      const metadata: QuickSendMetadata = {
+        type: 'quick_send',
+        itemType: 'package',
+        itemId: pkg.id,
+        itemName: pkg.name,
+        itemDescription: pkg.description || undefined,
+        price: pkg.price,
+        currency: pkg.currency || 'GBP',
+        coachId: coachId,
+        status: 'pending',
+        sessionCount: pkg.session_count,
+      };
+      
+      const message = `📦 ${pkg.name} - ${formatCurrency(pkg.price, (pkg.currency || "GBP") as CurrencyCode)} (${pkg.session_count} sessions)`;
+      await onSendMessageWithMetadata(message, metadata);
+      toast({ title: "Package offer sent!", description: "The client will see Accept/Decline buttons." });
     } else {
-      message += `\n\nInterested? Let me know and I can set this up for you!`;
+      // Fallback to plain text
+      let message = `**📦 Package: ${pkg.name}**\n\n${pkg.description || "A great value package."}\n\n💰 Price: ${formatCurrency(pkg.price, (pkg.currency || "GBP") as CurrencyCode)}\n📋 Sessions: ${pkg.session_count}`;
+      message += `\n\nInterested? Let me know!`;
+      await onSendMessage(message);
     }
     
-    await onSendMessage(message);
     setSending(null);
   };
 
   const sendSubscriptionMessage = async (plan: SubscriptionPlan, includeCheckout: boolean) => {
     setSending(`sub-${plan.id}`);
     
-    let checkoutUrl: string | null = null;
-    
-    if (includeCheckout) {
-      try {
-        const origin = window.location.origin;
-        const { data, error } = await supabase.functions.invoke('stripe-checkout', {
-          body: {
-            type: 'subscription',
-            itemId: plan.id,
-            clientId: participantId,
-            coachId: coachId,
-            successUrl: `${origin}/dashboard/client/subscriptions?success=true`,
-            cancelUrl: `${origin}/dashboard/client/messages`,
-          }
-        });
-        if (!error && data?.url) {
-          checkoutUrl = data.url;
-        }
-      } catch (e) {
-        console.error('Error generating checkout URL:', e);
-      }
-    }
-    
-    let message = `**💳 Subscription Plan: ${plan.name}**\n\n${plan.description || "Ongoing coaching support to help you reach your goals."}\n\n💰 Price: ${formatCurrency(plan.price, (plan.currency || "GBP") as CurrencyCode)}/${plan.billing_period}\n\nThis includes regular coaching, plan updates, and support.`;
-    
-    if (checkoutUrl) {
-      message += `\n\n🛒 Ready to subscribe? Click here:\n${checkoutUrl}`;
+    // Use interactive message with metadata
+    if (onSendMessageWithMetadata && coachId) {
+      const metadata: QuickSendMetadata = {
+        type: 'quick_send',
+        itemType: 'subscription',
+        itemId: plan.id,
+        itemName: plan.name,
+        itemDescription: plan.description || undefined,
+        price: plan.price,
+        currency: plan.currency || 'GBP',
+        coachId: coachId,
+        status: 'pending',
+        billingPeriod: plan.billing_period,
+      };
+      
+      const message = `💳 ${plan.name} - ${formatCurrency(plan.price, (plan.currency || "GBP") as CurrencyCode)}/${plan.billing_period}`;
+      await onSendMessageWithMetadata(message, metadata);
+      toast({ title: "Subscription offer sent!", description: "The client will see Accept/Decline buttons." });
     } else {
+      // Fallback to plain text
+      let message = `**💳 Subscription: ${plan.name}**\n\n${plan.description || "Ongoing coaching support."}\n\n💰 Price: ${formatCurrency(plan.price, (plan.currency || "GBP") as CurrencyCode)}/${plan.billing_period}`;
       message += `\n\nLet me know if you'd like to subscribe!`;
+      await onSendMessage(message);
     }
     
-    await onSendMessage(message);
     setSending(null);
   };
 

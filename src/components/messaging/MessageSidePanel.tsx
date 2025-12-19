@@ -2,15 +2,17 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAdminView } from "@/contexts/AdminContext";
 import QuickSendContent from "./QuickSendContent";
+import { QuickSendMetadata } from "@/types/messaging";
 
 interface MessageSidePanelProps {
   participantId: string;
   clientId?: string;
   onSendMessage: (message: string) => Promise<boolean>;
+  onSendMessageWithMetadata?: (message: string, metadata: QuickSendMetadata) => Promise<boolean>;
   onClose?: () => void;
 }
 
-const MessageSidePanel = ({ participantId, clientId, onSendMessage, onClose }: MessageSidePanelProps) => {
+const MessageSidePanel = ({ participantId, clientId, onSendMessage, onSendMessageWithMetadata, onClose }: MessageSidePanelProps) => {
   const { activeProfileType } = useAdminView();
 
   // Only show for coaches (including admins viewing as coach)
@@ -31,6 +33,7 @@ const MessageSidePanel = ({ participantId, clientId, onSendMessage, onClose }: M
         participantId={participantId}
         clientId={clientId}
         onSendMessage={onSendMessage}
+        onSendMessageWithMetadata={onSendMessageWithMetadata}
         variant="sidebar"
       />
     </div>
