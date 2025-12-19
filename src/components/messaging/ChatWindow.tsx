@@ -54,6 +54,7 @@ const ChatWindow = ({
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [isDeleted, setIsDeleted] = useState(false);
   const [participantInfo, setParticipantInfo] = useState<ParticipantInfo>({
     name: participantName || "Conversation",
     avatar: participantAvatar || null,
@@ -87,6 +88,7 @@ const ChatWindow = ({
         .single();
 
       if (coachData?.display_name) {
+        setIsDeleted(false);
         setParticipantInfo({
           name: coachData.display_name,
           avatar: coachData.profile_image_url,
@@ -107,6 +109,7 @@ const ChatWindow = ({
         .single();
 
       if (clientData) {
+        setIsDeleted(false);
         setParticipantInfo({
           name: `${clientData.first_name || ""} ${clientData.last_name || ""}`.trim() || "Client",
           avatar: clientData.avatar_url,
@@ -127,6 +130,7 @@ const ChatWindow = ({
         .single();
 
       if (adminData) {
+        setIsDeleted(false);
         setParticipantInfo({
           name: adminData.display_name || `${adminData.first_name || ""} ${adminData.last_name || ""}`.trim() || "Admin",
           avatar: adminData.avatar_url,
@@ -136,7 +140,20 @@ const ChatWindow = ({
           location: null,
           username: null
         });
+        return;
       }
+
+      // No profile found - user has been deleted
+      setIsDeleted(true);
+      setParticipantInfo({
+        name: "Deleted User",
+        avatar: null,
+        avatarSlug: null,
+        avatarRarity: null,
+        type: "client",
+        location: null,
+        username: null
+      });
     };
 
     fetchParticipantInfo();
@@ -362,24 +379,32 @@ const ChatWindow = ({
 
 
           {/* Input */}
-          <form onSubmit={handleSend} className="p-4 border-t border-border bg-card">
-            <div className="flex gap-2">
-              <Input
-                value={newMessage}
-                onChange={handleInputChange}
-                placeholder="Type a message..."
-                className="flex-1 bg-background border-border"
-                disabled={sending}
-              />
-              <Button type="submit" disabled={sending || !newMessage.trim()}>
-                {sending ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Send className="w-4 h-4" />
-                )}
-              </Button>
+          {isDeleted ? (
+            <div className="p-4 border-t border-border bg-muted/50">
+              <p className="text-sm text-muted-foreground text-center">
+                This user's account has been deleted. You can view the conversation history but cannot send new messages.
+              </p>
             </div>
-          </form>
+          ) : (
+            <form onSubmit={handleSend} className="p-4 border-t border-border bg-card">
+              <div className="flex gap-2">
+                <Input
+                  value={newMessage}
+                  onChange={handleInputChange}
+                  placeholder="Type a message..."
+                  className="flex-1 bg-background border-border"
+                  disabled={sending}
+                />
+                <Button type="submit" disabled={sending || !newMessage.trim()}>
+                  {sending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
+                </Button>
+              </div>
+            </form>
+          )}
 
       {/* Profile Sheet - Use ProspectProfileSheet for coaches viewing clients */}
       {shouldUseProspectSheet ? (

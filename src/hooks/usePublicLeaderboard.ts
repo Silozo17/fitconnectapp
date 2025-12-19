@@ -25,7 +25,7 @@ interface LocationOption {
 // Type for the GDPR-safe public leaderboard view
 interface PublicLeaderboardProfile {
   id: string;
-  display_name: string;
+  leaderboard_display_name: string;
   city: string | null;
   county: string | null;
   country: string | null;
@@ -53,7 +53,7 @@ const fetchLeaderboardData = async (
   // Get profile data from the GDPR-safe view
   let profilesQuery = supabase
     .from('public_leaderboard_profiles')
-    .select('id, display_name, city, county, country');
+    .select('id, leaderboard_display_name, city, county, country');
 
   if (locationType !== 'global' && locationValue) {
     profilesQuery = profilesQuery.eq(locationType, locationValue);
@@ -85,7 +85,7 @@ const fetchLeaderboardData = async (
     const profile = profileMap.get(xp.client_id);
     return {
       rank: offset + index + 1,
-      displayName: profile?.display_name || 'Anonymous',
+      displayName: profile?.leaderboard_display_name || 'Anonymous',
       city: profile?.city || null,
       county: profile?.county || null,
       country: profile?.country || null,
