@@ -27,7 +27,7 @@ const Coaches = () => {
   const [connectionCoach, setConnectionCoach] = useState<MarketplaceCoach | null>(null);
 
   // Get auto-detected user location
-  const autoLocation = useUserLocation();
+  const { location: autoLocation, isLoading: autoLocationLoading } = useUserLocation();
 
   // Manual location filter (persisted for session)
   const {
@@ -40,14 +40,9 @@ const Coaches = () => {
   // Determine effective location (manual overrides auto)
   const effectiveLocation = isManualSelection
     ? manualLocation
-    : autoLocation.isLoading
+    : autoLocationLoading
       ? null
-      : {
-          city: autoLocation.city,
-          region: autoLocation.region,
-          county: autoLocation.county,
-          country: autoLocation.country,
-        };
+      : autoLocation;
 
   const { data: coaches, isLoading, error } = useCoachMarketplace({
     search: searchQuery || undefined,
@@ -134,14 +129,9 @@ const Coaches = () => {
                         onOnlineOnlyChange={setOnlineOnly}
                         inPersonOnly={inPersonOnly}
                         onInPersonOnlyChange={setInPersonOnly}
-                        autoLocation={autoLocation.isLoading ? null : {
-                          city: autoLocation.city,
-                          region: autoLocation.region,
-                          county: autoLocation.county,
-                          country: autoLocation.country,
-                        }}
+                        autoLocation={autoLocation}
                         manualLocation={manualLocation}
-                        isAutoLocationLoading={autoLocation.isLoading}
+                        isAutoLocationLoading={autoLocationLoading}
                         onLocationSelect={setManualLocation}
                         onClearLocation={clearManualLocation}
                       />
@@ -165,14 +155,9 @@ const Coaches = () => {
                     onOnlineOnlyChange={setOnlineOnly}
                     inPersonOnly={inPersonOnly}
                     onInPersonOnlyChange={setInPersonOnly}
-                    autoLocation={autoLocation.isLoading ? null : {
-                      city: autoLocation.city,
-                      region: autoLocation.region,
-                      county: autoLocation.county,
-                      country: autoLocation.country,
-                    }}
+                    autoLocation={autoLocation}
                     manualLocation={manualLocation}
-                    isAutoLocationLoading={autoLocation.isLoading}
+                    isAutoLocationLoading={autoLocationLoading}
                     onLocationSelect={setManualLocation}
                     onClearLocation={clearManualLocation}
                   />

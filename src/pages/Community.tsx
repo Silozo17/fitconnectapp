@@ -186,7 +186,10 @@ export default function Community() {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { city, region, country } = useUserLocation();
+  const { location: userLocation } = useUserLocation();
+  const city = userLocation?.city;
+  const region = userLocation?.region;
+  const country = userLocation?.country;
 
   useEffect(() => {
     if (country && !selectedCountry) {
