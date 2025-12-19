@@ -213,20 +213,99 @@ const Privacy = () => {
                   to your request within 30 days.
                 </p>
 
-                <h2>7. Cookies and Tracking Technologies</h2>
+                <h2>7. Cookies and Local Storage</h2>
+                
+                <h3>7.1 What Are Cookies and Local Storage</h3>
                 <p>
-                  We use cookies and similar tracking technologies to collect information about your browsing 
-                  activities. These technologies help us:
+                  Cookies and local storage are small pieces of data stored on your device that help websites 
+                  remember information about you. We use browser local storage (similar to cookies) to store 
+                  preferences and improve your experience on FitConnect.
+                </p>
+
+                <h3>7.2 Cookie Categories We Use</h3>
+                <p>We organize our cookies and local storage into four categories:</p>
+                
+                <h4>Essential (Required)</h4>
+                <p>
+                  These are necessary for the Platform to function and cannot be disabled. They include:
                 </p>
                 <ul>
-                  <li>Remember your preferences and settings</li>
-                  <li>Understand how you use our Platform</li>
-                  <li>Provide personalized content and recommendations</li>
-                  <li>Analyze and improve our services</li>
+                  <li>Authentication tokens to keep you logged in</li>
+                  <li>Security-related data to protect your account</li>
+                  <li>Core UI state (such as sidebar position)</li>
+                </ul>
+
+                <h4>Location Services (Optional)</h4>
+                <p>
+                  If you consent, we detect your approximate location to personalize your experience:
+                </p>
+                <ul>
+                  <li><strong>Purpose:</strong> Show coaches near you and display relevant local leaderboards</li>
+                  <li><strong>Storage key:</strong> <code>fitconnect_user_location</code></li>
+                  <li><strong>Data cached:</strong> City, region, and country (e.g., "Harrow", "Greater London", "United Kingdom")</li>
+                  <li><strong>Cache duration:</strong> 7 days, then refreshed automatically</li>
+                </ul>
+
+                <h4>Preferences (Optional)</h4>
+                <p>
+                  If you consent, we remember your choices to improve usability:
+                </p>
+                <ul>
+                  <li>Your cookie consent decision</li>
+                  <li>Dismissed banners and prompts</li>
+                  <li>Theme and display preferences</li>
+                </ul>
+
+                <h4>Analytics (Optional)</h4>
+                <p>
+                  If you consent, we may collect anonymized usage data to improve the Platform. Currently, we do 
+                  not use third-party analytics tracking. This category is reserved for future improvements.
+                </p>
+
+                <h3>7.3 How We Detect Your Location</h3>
+                <p>
+                  When you grant location consent, we use your IP address to determine your approximate location:
+                </p>
+                <ul>
+                  <li><strong>Method:</strong> IP-based geolocation (we do not use GPS or precise device location)</li>
+                  <li><strong>Precision:</strong> City or town level only (e.g., "High Wycombe", not your street address)</li>
+                  <li><strong>Third-party service:</strong> We use ipapi.co to perform the lookup</li>
+                  <li><strong>Data stored:</strong> Only your city, region, and country are cached locally</li>
+                  <li><strong>No tracking:</strong> Your IP address is not stored or logged by FitConnect</li>
                 </ul>
                 <p>
-                  You can control cookies through your browser settings. Note that disabling cookies may affect 
-                  the functionality of certain features.
+                  This location data enables the marketplace to show coaches near you and allows you to view 
+                  local leaderboards for your town, county, and country.
+                </p>
+
+                <h3>7.4 How to Manage Your Preferences</h3>
+                <p>
+                  When you first visit FitConnect, a consent banner will appear at the bottom of the screen. You can:
+                </p>
+                <ul>
+                  <li><strong>Accept All:</strong> Enable all optional cookies (location, preferences, analytics)</li>
+                  <li><strong>Reject All:</strong> Disable all optional cookies (essential cookies remain active)</li>
+                  <li><strong>Manage Preferences:</strong> Choose which categories to enable individually</li>
+                </ul>
+                <p>
+                  Your consent decision is stored in <code>fitconnect_cookie_consent</code> and applies immediately. 
+                  You can change your preferences at any time by clicking "Cookie Preferences" in the footer or 
+                  visiting your Privacy settings.
+                </p>
+
+                <h3>7.5 What Happens If You Reject Optional Cookies</h3>
+                <p>
+                  If you reject optional cookies, the Platform remains fully functional with the following differences:
+                </p>
+                <ul>
+                  <li><strong>Location:</strong> Automatic location detection is disabled. You can still manually 
+                    select your location when searching for coaches or viewing leaderboards.</li>
+                  <li><strong>Preferences:</strong> Some UI preferences may not persist between sessions.</li>
+                  <li><strong>Analytics:</strong> No usage data is collected (currently not implemented).</li>
+                </ul>
+                <p>
+                  Essential functionality including account access, bookings, payments, messaging, and all coaching 
+                  features work normally regardless of your cookie preferences.
                 </p>
 
                 <h2>8. Third-Party Services</h2>
