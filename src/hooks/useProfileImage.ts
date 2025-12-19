@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getErrorMessage, logError } from "@/lib/error-utils";
 
 interface UseProfileImageOptions {
   bucket?: "profile-images" | "documents" | "transformation-photos";
@@ -52,9 +53,9 @@ export const useProfileImage = (options: UseProfileImageOptions = {}) => {
 
       onSuccess?.(publicUrl);
       return publicUrl;
-    } catch (error: any) {
-      console.error("Upload error:", error);
-      toast.error(error.message || "Failed to upload image");
+    } catch (error: unknown) {
+      logError("useProfileImage", error);
+      toast.error(getErrorMessage(error, "Failed to upload image"));
       return null;
     } finally {
       setUploading(false);
@@ -77,8 +78,8 @@ export const useProfileImage = (options: UseProfileImageOptions = {}) => {
 
       if (error) throw error;
       return true;
-    } catch (error: any) {
-      console.error("Delete error:", error);
+    } catch (error: unknown) {
+      logError("useProfileImage", error);
       toast.error("Failed to delete image");
       return false;
     }

@@ -15,6 +15,7 @@ import { useAIProductAssist } from "@/hooks/useAIProductAssist";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Sparkles, Upload, Link, Loader2, FileUp } from "lucide-react";
+import { getErrorMessage } from "@/lib/error-utils";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -165,8 +166,8 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
       setUploadedImageUrl(publicUrl);
       form.setValue("cover_image_url", publicUrl);
       toast({ title: "Image uploaded successfully" });
-    } catch (error: any) {
-      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+    } catch (error: unknown) {
+      toast({ title: "Upload failed", description: getErrorMessage(error, "Failed to upload image"), variant: "destructive" });
     } finally {
       setIsUploading(false);
     }
@@ -219,8 +220,8 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
       form.setValue("content_url", publicUrl);
       form.setValue("is_downloadable", true);
       toast({ title: "Content file uploaded successfully" });
-    } catch (error: any) {
-      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+    } catch (error: unknown) {
+      toast({ title: "Upload failed", description: getErrorMessage(error, "Failed to upload content"), variant: "destructive" });
     } finally {
       setIsUploadingContent(false);
     }

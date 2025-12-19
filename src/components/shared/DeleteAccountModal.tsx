@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { getErrorMessage, logError } from "@/lib/error-utils";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -50,10 +51,10 @@ export const DeleteAccountModal = ({ open, onOpenChange, role }: DeleteAccountMo
       // Sign out and redirect
       await signOut();
       navigate("/");
-    } catch (error: any) {
-      console.error("Delete account error:", error);
+    } catch (error: unknown) {
+      logError("DeleteAccountModal", error);
       toast.error("Failed to delete account", {
-        description: error.message || "Please try again or contact support.",
+        description: getErrorMessage(error, "Please try again or contact support."),
       });
     } finally {
       setIsDeleting(false);
