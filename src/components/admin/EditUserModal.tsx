@@ -20,6 +20,7 @@ import { useAdminUserManagement } from "@/hooks/useAdminUserManagement";
 import { StatusBadge } from "./StatusBadge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { LocationAutocomplete } from "@/components/shared/LocationAutocomplete";
 
 interface ClientUser {
   id: string;
@@ -300,33 +301,28 @@ const EditUserModal = ({ user, open, onClose, onSaved }: EditUserModalProps) => 
             {/* Location Tab */}
             <TabsContent value="location" className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="city">City</Label>
-                <Input
-                  id="city"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  placeholder="Enter city"
+                <Label className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  Location
+                </Label>
+                <LocationAutocomplete
+                  value={city ? `${city}${country ? `, ${country}` : ''}` : ''}
+                  onLocationChange={(loc, data) => {
+                    if (data) {
+                      setCity(data.city);
+                      setCounty(data.region);
+                      setCountry(data.country);
+                    } else if (!loc) {
+                      setCity('');
+                      setCounty('');
+                      setCountry('');
+                    }
+                  }}
+                  placeholder="Search for a city..."
                 />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="county">County / State / Region</Label>
-                <Input
-                  id="county"
-                  value={county}
-                  onChange={(e) => setCounty(e.target.value)}
-                  placeholder="Enter county or state"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="country">Country</Label>
-                <Input
-                  id="country"
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value)}
-                  placeholder="Enter country"
-                />
+                <p className="text-xs text-muted-foreground">
+                  Search and select a location to auto-fill city, county, and country
+                </p>
               </div>
             </TabsContent>
 

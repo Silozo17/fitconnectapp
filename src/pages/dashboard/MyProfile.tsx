@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, AtSign, Copy, Check, Calendar, MapPin, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { LocationAutocomplete } from "@/components/shared/LocationAutocomplete";
 
 const MyProfile = () => {
   const navigate = useNavigate();
@@ -247,35 +248,24 @@ const MyProfile = () => {
                 <MapPin className="w-4 h-4" />
                 <span className="text-sm font-medium">Location</span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="city">City</Label>
-                  <Input
-                    id="city"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    placeholder="Your city"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="county">County/State</Label>
-                  <Input
-                    id="county"
-                    value={county}
-                    onChange={(e) => setCounty(e.target.value)}
-                    placeholder="Your county"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="country">Country</Label>
-                  <Input
-                    id="country"
-                    value={country}
-                    onChange={(e) => setCountry(e.target.value)}
-                    placeholder="Your country"
-                  />
-                </div>
-              </div>
+              <LocationAutocomplete
+                value={city ? `${city}${country ? `, ${country}` : ''}` : ''}
+                onLocationChange={(location, data) => {
+                  if (data) {
+                    setCity(data.city);
+                    setCounty(data.region);
+                    setCountry(data.country);
+                  } else if (!location) {
+                    setCity('');
+                    setCounty('');
+                    setCountry('');
+                  }
+                }}
+                placeholder="Search for your city..."
+              />
+              <p className="text-xs text-muted-foreground">
+                Search and select a location to auto-fill city, county, and country
+              </p>
             </div>
 
             <div className="flex justify-end">
