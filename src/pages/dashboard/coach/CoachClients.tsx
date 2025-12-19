@@ -35,7 +35,7 @@ import { ScheduleSessionModal } from "@/components/dashboard/clients/ScheduleSes
 import { AssignPlanModal } from "@/components/dashboard/clients/AssignPlanModal";
 import { AddNoteModal } from "@/components/dashboard/clients/AddNoteModal";
 import { useCoachClients, CoachClient } from "@/hooks/useCoachClients";
-import ConnectionRequests from "@/components/dashboard/coach/ConnectionRequests";
+import ClientRequests from "@/components/dashboard/coach/ClientRequests";
 
 const CoachClients = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -126,7 +126,7 @@ const CoachClients = () => {
 
       {/* Pending Client Requests */}
       <div className="mb-6">
-        <ConnectionRequests />
+        <ClientRequests />
       </div>
 
       {/* Stats Cards */}

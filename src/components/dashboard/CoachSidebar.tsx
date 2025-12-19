@@ -54,7 +54,7 @@ import {
   SheetContent,
 } from "@/components/ui/sheet";
 
-type BadgeKey = "messages" | "pipeline" | "schedule" | "clients";
+type BadgeKey = "messages" | "pipeline" | "schedule" | "clients" | "connections";
 
 interface MenuItem {
   title: string;
@@ -81,7 +81,7 @@ const menuGroups: MenuGroup[] = [
       { title: "Overview", icon: LayoutDashboard, path: "/dashboard/coach" },
       { title: "Pipeline", icon: Kanban, path: "/dashboard/coach/pipeline", badgeKey: "pipeline", badgeVariant: "warning" },
       { title: "Messages", icon: MessageSquare, path: "/dashboard/coach/messages", badgeKey: "messages" },
-      { title: "Connections", icon: UserPlus, path: "/dashboard/coach/connections" },
+      { title: "Connections", icon: UserPlus, path: "/dashboard/coach/connections", badgeKey: "connections", badgeVariant: "warning" },
     ],
   },
   {
@@ -144,7 +144,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
   const { displayName, avatarUrl } = useUserProfile();
   const { data: selectedAvatar } = useSelectedAvatar('coach');
   const { unreadCount } = useUnreadMessages();
-  const { newLeads, pendingBookings, pendingConnections } = useCoachBadges();
+  const { newLeads, pendingBookings, pendingClientRequests, pendingFriendRequests } = useCoachBadges();
   const { hasFeature } = useFeatureAccess();
 
   // Initialize open groups based on current path
@@ -187,11 +187,13 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
       case "schedule":
         return pendingBookings;
       case "clients":
-        return pendingConnections;
+        return pendingClientRequests;
+      case "connections":
+        return pendingFriendRequests;
       default:
         return 0;
     }
-  }, [unreadCount, newLeads, pendingBookings, pendingConnections]);
+  }, [unreadCount, newLeads, pendingBookings, pendingClientRequests, pendingFriendRequests]);
 
   const getGroupBadgeCount = useCallback((group: MenuGroup): number => {
     return group.items.reduce((sum, item) => sum + getBadgeCount(item.badgeKey), 0);
