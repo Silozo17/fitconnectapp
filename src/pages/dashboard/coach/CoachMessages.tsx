@@ -29,7 +29,7 @@ const CoachMessages = () => {
 
   return (
     <DashboardLayout title="Messages" description="Chat with your clients.">
-      <div className="flex flex-col h-[calc(100vh-180px)]">
+      <div className="flex flex-col h-full min-h-0">
         <div className="flex items-center justify-between mb-4">
           <h1 className="font-display text-2xl font-bold text-foreground">Messages</h1>
           <Button onClick={() => setShowNewConversation(true)} size="sm">

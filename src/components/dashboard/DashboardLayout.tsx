@@ -58,7 +58,7 @@ const DashboardLayout = ({ children, title = "Coach Dashboard", description }: D
         {description && <meta name="description" content={description} />}
       </Helmet>
 
-      <div className="min-h-screen bg-background">
+      <div className="h-dvh bg-background overflow-hidden">
         <CoachSidebar
           collapsed={sidebarCollapsed}
           onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -66,12 +66,12 @@ const DashboardLayout = ({ children, title = "Coach Dashboard", description }: D
           setMobileOpen={setMobileOpen}
         />
 
-        <div className={`transition-all duration-300 ${sidebarCollapsed ? "xl:ml-16" : "xl:ml-64"}`}>
+        <div className={`transition-all duration-300 h-full flex flex-col overflow-hidden ${sidebarCollapsed ? "xl:ml-16" : "xl:ml-64"}`}>
           <DashboardHeader 
             subscriptionTier={subscriptionTier} 
             onMenuToggle={() => setMobileOpen(true)} 
           />
-          <main className="p-4 lg:p-6">{children}</main>
+          <main className="flex-1 p-4 lg:p-6 pb-24 overflow-y-auto">{children}</main>
         </div>
       </div>
     </>
