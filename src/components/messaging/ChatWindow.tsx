@@ -232,7 +232,7 @@ const ChatWindow = ({
   const isCoachView = activeProfileType === "coach";
 
   return (
-    <div className="flex h-full w-full min-h-0">
+    <div className="flex h-full min-w-0 min-h-0">
         {/* Main Chat Area */}
         <div className="flex-1 flex flex-col h-full min-h-0">
           {/* Header */}
@@ -285,7 +285,7 @@ const ChatWindow = ({
           </div>
 
           {/* Messages */}
-          <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
+          <div ref={messagesContainerRef} className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-4 min-h-0">
             {messages.length === 0 ? (
               <div className="flex items-center justify-center h-full text-muted-foreground">
                 <p>No messages yet. Start the conversation!</p>
