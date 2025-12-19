@@ -11,7 +11,13 @@ import {
   CreditCard, 
   FileCheck,
   BarChart3,
-  ArrowRight
+  ArrowRight,
+  Kanban,
+  Package,
+  Rocket,
+  UtensilsCrossed,
+  Sparkles,
+  Star
 } from "lucide-react";
 
 const coachGuides = [
@@ -68,6 +74,42 @@ const coachGuides = [
     description: "Set up payments, track earnings, and manage your finances.",
     href: "/docs/coach/earnings",
     icon: BarChart3,
+  },
+  {
+    title: "Sales Pipeline",
+    description: "Track leads through stages and convert prospects into paying clients.",
+    href: "/docs/coach/pipeline",
+    icon: Kanban,
+  },
+  {
+    title: "Digital Products",
+    description: "Create and sell e-books, videos, and training templates.",
+    href: "/docs/coach/products",
+    icon: Package,
+  },
+  {
+    title: "Boost Marketing",
+    description: "Pay-for-performance client acquisition and marketplace visibility.",
+    href: "/docs/coach/boost",
+    icon: Rocket,
+  },
+  {
+    title: "Nutrition Builder",
+    description: "Create meal plans with macro targets and AI-powered suggestions.",
+    href: "/docs/coach/nutrition",
+    icon: UtensilsCrossed,
+  },
+  {
+    title: "AI Tools",
+    description: "Generate workouts, meal plans, and messages with AI assistance.",
+    href: "/docs/coach/ai",
+    icon: Sparkles,
+  },
+  {
+    title: "Managing Reviews",
+    description: "View, respond to, and leverage client reviews and testimonials.",
+    href: "/docs/coach/reviews",
+    icon: Star,
   },
 ];
 
