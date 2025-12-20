@@ -24,6 +24,7 @@ import {
   VerificationDocument
 } from "@/hooks/useVerification";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface VerificationOnboardingStepProps {
   coachId: string;
@@ -31,50 +32,12 @@ interface VerificationOnboardingStepProps {
   onSkip: () => void;
 }
 
-const DOCUMENT_TYPES: { 
-  type: DocumentType; 
-  label: string; 
-  description: string; 
-  required: boolean;
-}[] = [
-  { 
-    type: 'identity', 
-    label: 'Government ID', 
-    description: 'Passport, driving licence, or national ID', 
-    required: true 
-  },
-  { 
-    type: 'certification', 
-    label: 'Professional Certifications', 
-    description: 'PT certs, coaching qualifications', 
-    required: true 
-  },
-  { 
-    type: 'insurance', 
-    label: 'Insurance Certificate', 
-    description: 'Professional liability insurance', 
-    required: false 
-  },
-  { 
-    type: 'qualification', 
-    label: 'Other Qualifications', 
-    description: 'Degrees, additional training', 
-    required: false 
-  },
-];
-
-const BENEFITS = [
-  { icon: BadgeCheck, title: "Verified Badge", description: "Stand out with trust signals" },
-  { icon: TrendingUp, title: "Higher Ranking", description: "Appear higher in search" },
-  { icon: Users, title: "More Clients", description: "Build trust faster" },
-  { icon: Shield, title: "Premium Trust", description: "Show professionalism" },
-];
-
 export default function VerificationOnboardingStep({
   coachId,
   onComplete,
   onSkip,
 }: VerificationOnboardingStepProps) {
+  const { t } = useTranslation('common');
   const [uploadingType, setUploadingType] = useState<DocumentType | null>(null);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   
@@ -82,6 +45,45 @@ export default function VerificationOnboardingStep({
   const uploadMutation = useUploadVerificationDocument();
   const deleteMutation = useDeleteVerificationDocument();
   const submitMutation = useSubmitForVerification();
+
+  const DOCUMENT_TYPES: { 
+    type: DocumentType; 
+    label: string; 
+    description: string; 
+    required: boolean;
+  }[] = [
+    { 
+      type: 'identity', 
+      label: t('onboarding.governmentId'), 
+      description: t('onboarding.governmentIdDesc'), 
+      required: true 
+    },
+    { 
+      type: 'certification', 
+      label: t('onboarding.professionalCerts'), 
+      description: t('onboarding.professionalCertsDesc'), 
+      required: true 
+    },
+    { 
+      type: 'insurance', 
+      label: t('onboarding.insuranceCert'), 
+      description: t('onboarding.insuranceCertDesc'), 
+      required: false 
+    },
+    { 
+      type: 'qualification', 
+      label: t('onboarding.otherQualifications'), 
+      description: t('onboarding.otherQualificationsDesc'), 
+      required: false 
+    },
+  ];
+
+  const BENEFITS = [
+    { icon: BadgeCheck, title: t('onboarding.verifiedBadge'), description: t('onboarding.standOutTrust') },
+    { icon: TrendingUp, title: t('onboarding.higherRanking'), description: t('onboarding.appearHigher') },
+    { icon: Users, title: t('onboarding.moreClients'), description: t('onboarding.buildTrustFaster') },
+    { icon: Shield, title: t('onboarding.premiumTrust'), description: t('onboarding.showProfessionalism') },
+  ];
 
   const hasIdentity = documents.some(d => d.document_type === 'identity');
   const hasCertification = documents.some(d => d.document_type === 'certification');
@@ -137,10 +139,10 @@ export default function VerificationOnboardingStep({
       {/* Header */}
       <div>
         <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-          Get Verified
+          {t('onboarding.getVerified')}
         </h2>
         <p className="text-muted-foreground">
-          Stand out with a verified badge and rank higher in search results.
+          {t('onboarding.standOutWithBadge')}
         </p>
       </div>
 
@@ -170,15 +172,15 @@ export default function VerificationOnboardingStep({
       {/* Optional Notice */}
       <Alert className="bg-muted/50 border-border">
         <AlertCircle className="h-4 w-4" />
-        <AlertDescription className="text-sm">
-          Verification is <strong>optional</strong>. You can skip this and complete it later 
-          from your dashboard settings. Unverified profiles appear lower in search results.
-        </AlertDescription>
+        <AlertDescription 
+          className="text-sm"
+          dangerouslySetInnerHTML={{ __html: t('onboarding.verificationOptional') }}
+        />
       </Alert>
 
       {/* Document Upload Cards */}
       <div className="space-y-3">
-        <p className="text-sm font-medium text-foreground">Upload your documents</p>
+        <p className="text-sm font-medium text-foreground">{t('onboarding.uploadDocuments')}</p>
         
         {DOCUMENT_TYPES.map((docType) => {
           const uploadedDocs = getDocsForType(docType.type);
@@ -200,7 +202,7 @@ export default function VerificationOnboardingStep({
                   <div className="flex items-center gap-2">
                     <p className="font-medium text-foreground">{docType.label}</p>
                     {docType.required && (
-                      <Badge variant="outline" className="text-xs">Required</Badge>
+                      <Badge variant="outline" className="text-xs">{t('onboarding.required')}</Badge>
                     )}
                     {hasUpload && (
                       <CheckCircle2 className="w-4 h-4 text-primary" />
@@ -225,12 +227,12 @@ export default function VerificationOnboardingStep({
                           variant={doc.ai_flagged ? "destructive" : "secondary"} 
                           className="text-xs shrink-0"
                         >
-                          {doc.ai_flagged ? "Flagged" : `${doc.ai_confidence_score}%`}
+                          {doc.ai_flagged ? t('onboarding.flagged') : `${doc.ai_confidence_score}%`}
                         </Badge>
                       ) : (
                         <Badge variant="outline" className="text-xs shrink-0">
                           <Clock className="w-3 h-3 mr-1" />
-                          Analyzing
+                          {t('onboarding.analyzing')}
                         </Badge>
                       )}
                       <Button
@@ -267,7 +269,7 @@ export default function VerificationOnboardingStep({
                     ) : (
                       <>
                         <Upload className="w-4 h-4 mr-1.5" />
-                        {hasUpload ? "Add More" : "Upload"}
+                        {hasUpload ? t('onboarding.addMore') : t('onboarding.upload')}
                       </>
                     )}
                   </Button>
@@ -283,7 +285,7 @@ export default function VerificationOnboardingStep({
         <Alert className="bg-amber-500/10 border-amber-500/30">
           <AlertCircle className="h-4 w-4 text-amber-500" />
           <AlertDescription className="text-sm">
-            Upload both a Government ID and Professional Certification to submit for verification.
+            {t('onboarding.uploadBothRequired')}
           </AlertDescription>
         </Alert>
       )}
@@ -292,7 +294,7 @@ export default function VerificationOnboardingStep({
         <Alert className="bg-primary/10 border-primary/30">
           <CheckCircle2 className="h-4 w-4 text-primary" />
           <AlertDescription className="text-sm">
-            You have uploaded the required documents. Click "Submit & Continue" to send for review.
+            {t('onboarding.requiredDocsUploaded')}
           </AlertDescription>
         </Alert>
       )}
@@ -304,7 +306,7 @@ export default function VerificationOnboardingStep({
           onClick={onSkip}
           className="flex-1"
         >
-          Skip for now
+          {t('onboarding.skipForNow')}
         </Button>
         <Button 
           onClick={handleSubmitAndContinue}
@@ -314,7 +316,7 @@ export default function VerificationOnboardingStep({
           {submitMutation.isPending ? (
             <Loader2 className="w-4 h-4 animate-spin mr-2" />
           ) : null}
-          {hasAnyDocs ? "Submit & Continue" : "Continue"}
+          {hasAnyDocs ? t('onboarding.submitAndContinue') : t('actions.continue')}
         </Button>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { FREE_AVATARS, RARITY_CONFIG } from "@/lib/avatar-utils";
 import { getAvatarImageUrl } from "@/hooks/useAvatars";
 import { supabase } from "@/integrations/supabase/client";
+import { useTranslation } from "react-i18next";
 
 interface AvatarSelectionStepProps {
   selectedAvatarId: string | null;
@@ -18,6 +19,7 @@ interface AvatarOption {
 }
 
 export function AvatarSelectionStep({ selectedAvatarId, onSelect }: AvatarSelectionStepProps) {
+  const { t } = useTranslation('common');
   const [avatars, setAvatars] = useState<AvatarOption[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -58,9 +60,9 @@ export function AvatarSelectionStep({ selectedAvatarId, onSelect }: AvatarSelect
       <div className="space-y-6">
         <div>
           <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-            Choose Your Avatar
+            {t('onboarding.chooseAvatar')}
           </h2>
-          <p className="text-muted-foreground">Loading avatars...</p>
+          <p className="text-muted-foreground">{t('onboarding.loadingAvatars')}</p>
         </div>
         <div className="grid grid-cols-3 sm:grid-cols-5 gap-4">
           {[...Array(5)].map((_, i) => (
@@ -75,10 +77,10 @@ export function AvatarSelectionStep({ selectedAvatarId, onSelect }: AvatarSelect
     <div className="space-y-6">
       <div>
         <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-          Choose Your Avatar
+          {t('onboarding.chooseAvatar')}
         </h2>
         <p className="text-muted-foreground">
-          Pick a character to represent you on your fitness journey.
+          {t('onboarding.pickCharacter')}
         </p>
       </div>
 
@@ -140,7 +142,7 @@ export function AvatarSelectionStep({ selectedAvatarId, onSelect }: AvatarSelect
       <div className="flex items-center gap-2 p-4 rounded-lg bg-primary/10 border border-primary/20">
         <Sparkles className="w-5 h-5 text-primary shrink-0" />
         <p className="text-sm text-muted-foreground">
-          <span className="text-foreground font-medium">Tip:</span> Complete challenges and hit milestones to unlock more unique avatars!
+          <span className="text-foreground font-medium">{t('common.tip', 'Tip')}:</span> {t('onboarding.avatarTip')}
         </p>
       </div>
     </div>
