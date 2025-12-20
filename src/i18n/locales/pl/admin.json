@@ -303,6 +303,7 @@
     "subtitle": "Śledź działania administratorów",
     "allLogs": "Wszystkie logi",
     "search": "Szukaj w logach...",
+    "searchPlaceholder": "Szukaj po ID encji...",
     "action": "Akcja",
     "admin": "Administrator",
     "entity": "Encja",

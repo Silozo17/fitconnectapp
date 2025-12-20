@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,6 +69,7 @@ const typeConfig = {
 };
 
 export function AssignPlanModal({ open, onOpenChange, clientName }: AssignPlanModalProps) {
+  const { t } = useTranslation("coach");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
@@ -99,7 +101,7 @@ export function AssignPlanModal({ open, onOpenChange, clientName }: AssignPlanMo
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
             <ClipboardList className="h-5 w-5 text-primary" />
-            Assign Plan {clientName && `to ${clientName}`}
+            {t('plans.assignPlan')} {clientName && `${t('plans.to')} ${clientName}`}
           </DialogTitle>
         </DialogHeader>
         
@@ -109,7 +111,7 @@ export function AssignPlanModal({ open, onOpenChange, clientName }: AssignPlanMo
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search plans..."
+              placeholder={t('plans.searchPlans')}
               className="pl-10 bg-background border-border"
             />
           </div>

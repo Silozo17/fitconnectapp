@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useSelectedAvatar } from "@/hooks/useAvatars";
@@ -24,6 +25,7 @@ interface AdminHeaderProps {
 }
 
 const AdminHeader = ({ onMenuToggle }: AdminHeaderProps) => {
+  const { t } = useTranslation("admin");
   const navigate = useNavigate();
   const { signOut, role } = useAuth();
   const { displayName, avatarUrl } = useUserProfile();
@@ -49,7 +51,7 @@ const AdminHeader = ({ onMenuToggle }: AdminHeaderProps) => {
           <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search users, coaches..."
+              placeholder={t('users.search')}
               className="pl-10 bg-background"
             />
           </div>

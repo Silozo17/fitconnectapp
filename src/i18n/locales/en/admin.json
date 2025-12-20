@@ -303,6 +303,7 @@
     "subtitle": "Track admin actions",
     "allLogs": "All Logs",
     "search": "Search logs...",
+    "searchPlaceholder": "Search by entity ID...",
     "action": "Action",
     "admin": "Admin",
     "entity": "Entity",

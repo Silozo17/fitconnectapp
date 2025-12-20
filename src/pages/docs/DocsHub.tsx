@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -42,6 +43,7 @@ const popularArticles = [
 ];
 
 export default function DocsHub() {
+  const { t } = useTranslation();
   const { role } = useAuth();
   const isAdmin = role === "admin" || role === "manager" || role === "staff";
 
@@ -101,7 +103,7 @@ export default function DocsHub() {
             <div className="max-w-xl mx-auto relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input 
-                placeholder="Search documentation..." 
+                placeholder={t('placeholder.search')} 
                 className="pl-12 h-12 text-lg bg-card border-border"
               />
             </div>
