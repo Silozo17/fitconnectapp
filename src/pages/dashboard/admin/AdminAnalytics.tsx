@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +16,7 @@ import { useDateRangeAnalytics } from "@/hooks/useDateRangeAnalytics";
 import { format, eachDayOfInterval } from "date-fns";
 
 const AdminAnalytics = () => {
+  const { t } = useTranslation("admin");
   const [loading, setLoading] = useState(true);
   const [analytics, setAnalytics] = useState({ totalUsers: 0, totalCoaches: 0, totalSessions: 0, totalMessages: 0, sessionCompletionRate: 0 });
   const [comparison, setComparison] = useState<typeof analytics | null>(null);
@@ -77,10 +79,10 @@ const AdminAnalytics = () => {
   const handleExport = () => {
     const csv = arrayToCSV(
       [
-        { metric: "Total Clients", value: analytics.totalUsers },
-        { metric: "Total Coaches", value: analytics.totalCoaches },
-        { metric: "Total Sessions", value: analytics.totalSessions },
-        { metric: "Messages", value: analytics.totalMessages }
+        { metric: t("analytics.totalClients"), value: analytics.totalUsers },
+        { metric: t("analytics.totalCoaches"), value: analytics.totalCoaches },
+        { metric: t("analytics.totalSessions"), value: analytics.totalSessions },
+        { metric: t("analytics.messagesSent"), value: analytics.totalMessages }
       ],
       [
         { key: "metric", header: "Metric" },
@@ -88,35 +90,109 @@ const AdminAnalytics = () => {
       ]
     );
     downloadCSV(csv, `analytics-${format(new Date(), "yyyy-MM-dd")}.csv`);
-    toast.success("Exported");
+    toast.success(t("common:exported"));
   };
 
   const showComp = dateRange.compareMode !== 'none' && comparison !== null;
 
   return (
     <>
-      <Helmet><title>Platform Analytics | Admin</title></Helmet>
+      <Helmet><title>{t("analytics.title")} | Admin</title></Helmet>
       <AdminLayout>
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div><h1 className="text-2xl font-bold">Platform Analytics</h1><p className="text-muted-foreground">Track platform growth and engagement</p></div>
-            <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" />Export<ChevronDown className="w-4 h-4 ml-2" /></Button></DropdownMenuTrigger><DropdownMenuContent><DropdownMenuItem onClick={handleExport}>Export Summary</DropdownMenuItem></DropdownMenuContent></DropdownMenu>
+            <div>
+              <h1 className="text-2xl font-bold">{t("analytics.title")}</h1>
+              <p className="text-muted-foreground">{t("analytics.subtitle")}</p>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Download className="w-4 h-4 mr-2" />
+                  {t("analytics.export")}
+                  <ChevronDown className="w-4 h-4 ml-2" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={handleExport}>{t("analytics.exportSummary")}</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
-          <DateRangeFilter preset={dateRange.preset} startDate={dateRange.startDate} endDate={dateRange.endDate} compareMode={dateRange.compareMode} dateRangeLabel={dateRange.dateRangeLabel} comparisonLabel={dateRange.comparisonLabel} onPresetChange={dateRange.setPreset} onCustomRangeChange={dateRange.setCustomRange} onCompareModeChange={dateRange.setCompareMode} />
+          <DateRangeFilter 
+            preset={dateRange.preset} 
+            startDate={dateRange.startDate} 
+            endDate={dateRange.endDate} 
+            compareMode={dateRange.compareMode} 
+            dateRangeLabel={dateRange.dateRangeLabel} 
+            comparisonLabel={dateRange.comparisonLabel} 
+            onPresetChange={dateRange.setPreset} 
+            onCustomRangeChange={dateRange.setCustomRange} 
+            onCompareModeChange={dateRange.setCompareMode} 
+          />
 
-          {loading ? <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div> : (
+          {loading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+            </div>
+          ) : (
             <>
               <div className="grid gap-4 grid-cols-2 xl:grid-cols-4">
-                <ComparisonStatCard title="Total Clients" value={analytics.totalUsers} previousValue={comparison?.totalUsers} icon={Users} showComparison={showComp} />
-                <ComparisonStatCard title="Total Coaches" value={analytics.totalCoaches} previousValue={comparison?.totalCoaches} icon={Dumbbell} showComparison={showComp} />
-                <ComparisonStatCard title="Total Sessions" value={analytics.totalSessions} previousValue={comparison?.totalSessions} icon={Calendar} showComparison={showComp} />
-                <ComparisonStatCard title="Messages Sent" value={analytics.totalMessages} previousValue={comparison?.totalMessages} icon={MessageSquare} showComparison={showComp} />
+                <ComparisonStatCard title={t("analytics.totalClients")} value={analytics.totalUsers} previousValue={comparison?.totalUsers} icon={Users} showComparison={showComp} />
+                <ComparisonStatCard title={t("analytics.totalCoaches")} value={analytics.totalCoaches} previousValue={comparison?.totalCoaches} icon={Dumbbell} showComparison={showComp} />
+                <ComparisonStatCard title={t("analytics.totalSessions")} value={analytics.totalSessions} previousValue={comparison?.totalSessions} icon={Calendar} showComparison={showComp} />
+                <ComparisonStatCard title={t("analytics.messagesSent")} value={analytics.totalMessages} previousValue={comparison?.totalMessages} icon={MessageSquare} showComparison={showComp} />
               </div>
 
               <div className="grid gap-6 grid-cols-1 xl:grid-cols-2">
-                <Card><CardHeader><CardTitle className="flex items-center gap-2"><TrendingUp className="w-5 h-5 text-primary" />User Growth</CardTitle><CardDescription>New users over time</CardDescription></CardHeader><CardContent><div className="h-[300px]"><ResponsiveContainer width="100%" height="100%"><AreaChart data={userGrowthData}><CartesianGrid strokeDasharray="3 3" className="stroke-muted" /><XAxis dataKey="date" className="text-xs" /><YAxis className="text-xs" /><Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} /><Legend /><Area type="monotone" dataKey="clients" stackId="1" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.6} name="Clients" /><Area type="monotone" dataKey="coaches" stackId="1" stroke="hsl(var(--accent))" fill="hsl(var(--accent))" fillOpacity={0.6} name="Coaches" /></AreaChart></ResponsiveContainer></div></CardContent></Card>
-                <Card><CardHeader><CardTitle className="flex items-center gap-2"><Activity className="w-5 h-5 text-primary" />Session Activity</CardTitle><CardDescription>Scheduled vs completed</CardDescription></CardHeader><CardContent><div className="h-[300px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={sessionData}><CartesianGrid strokeDasharray="3 3" className="stroke-muted" /><XAxis dataKey="date" className="text-xs" /><YAxis className="text-xs" /><Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} /><Legend /><Bar dataKey="scheduled" fill="hsl(var(--muted-foreground))" name="Scheduled" radius={[4, 4, 0, 0]} /><Bar dataKey="completed" fill="hsl(var(--primary))" name="Completed" radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer></div></CardContent></Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-primary" />
+                      {t("analytics.userGrowth")}
+                    </CardTitle>
+                    <CardDescription>{t("analytics.newUsersOverTime")}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-[300px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={userGrowthData}>
+                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                          <XAxis dataKey="date" className="text-xs" />
+                          <YAxis className="text-xs" />
+                          <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} />
+                          <Legend />
+                          <Area type="monotone" dataKey="clients" stackId="1" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.6} name={t("analytics.clients")} />
+                          <Area type="monotone" dataKey="coaches" stackId="1" stroke="hsl(var(--accent))" fill="hsl(var(--accent))" fillOpacity={0.6} name={t("analytics.coaches")} />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Activity className="w-5 h-5 text-primary" />
+                      {t("analytics.sessionActivity")}
+                    </CardTitle>
+                    <CardDescription>{t("analytics.scheduledVsCompleted")}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-[300px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={sessionData}>
+                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                          <XAxis dataKey="date" className="text-xs" />
+                          <YAxis className="text-xs" />
+                          <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} />
+                          <Legend />
+                          <Bar dataKey="scheduled" fill="hsl(var(--muted-foreground))" name={t("analytics.scheduled")} radius={[4, 4, 0, 0]} />
+                          <Bar dataKey="completed" fill="hsl(var(--primary))" name={t("analytics.completed")} radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </>
           )}
