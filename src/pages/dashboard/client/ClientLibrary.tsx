@@ -9,6 +9,7 @@ import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout"
 import { useMyLibrary, CONTENT_TYPES, ContentPurchase } from "@/hooks/useDigitalProducts";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/currency";
+import { useMarketplaceLinkPrefix } from "@/hooks/useMarketplaceLinkPrefix";
 
 const getContentIcon = (type: string) => {
   switch (type) {
@@ -31,6 +32,7 @@ export default function ClientLibrary() {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { data: purchases, isLoading } = useMyLibrary();
+  const marketplaceLinkPrefix = useMarketplaceLinkPrefix();
 
   // Show success toast if redirected after purchase
   useEffect(() => {
@@ -166,7 +168,7 @@ export default function ClientLibrary() {
                 <Button 
                   size="sm" 
                   className="flex-1"
-                  onClick={() => navigate(`/marketplace/bundles/${purchase.bundle_id}`)}
+                  onClick={() => navigate(`${marketplaceLinkPrefix}/bundles/${purchase.bundle_id}`)}
                 >
                   <ExternalLink className="h-4 w-4 mr-1" />
                   View Bundle
@@ -193,7 +195,7 @@ export default function ClientLibrary() {
               Access your purchased content
             </p>
           </div>
-          <Button onClick={() => navigate("/marketplace")}>
+          <Button onClick={() => navigate(marketplaceLinkPrefix)}>
             Browse Marketplace
           </Button>
         </div>
@@ -238,7 +240,7 @@ export default function ClientLibrary() {
               <p className="text-muted-foreground mb-6">
                 Browse our marketplace to discover e-books, video courses, templates, and more from top coaches.
               </p>
-              <Button onClick={() => navigate("/marketplace")} size="lg">
+              <Button onClick={() => navigate(marketplaceLinkPrefix)} size="lg">
                 Explore Marketplace
               </Button>
             </div>

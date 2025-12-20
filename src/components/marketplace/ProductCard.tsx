@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { DigitalProduct, CONTENT_TYPES } from "@/hooks/useDigitalProducts";
 import { formatCurrency, CurrencyCode } from "@/lib/currency";
 import { UserAvatar } from "@/components/shared/UserAvatar";
+import { useMarketplaceLinkPrefix } from "@/hooks/useMarketplaceLinkPrefix";
 
 // Extended type to include slug
 interface ProductWithSlug extends DigitalProduct {
@@ -15,15 +16,12 @@ interface ProductCardProps {
   product: ProductWithSlug;
   viewMode?: "grid" | "list";
   compact?: boolean;
+  linkPrefix?: string;
 }
 
 const getDiscountPercentage = (originalPrice: number, salePrice: number) => {
   if (originalPrice <= salePrice || originalPrice === 0) return 0;
   return Math.round(((originalPrice - salePrice) / originalPrice) * 100);
-};
-
-const getProductUrl = (product: ProductWithSlug) => {
-  return `/marketplace/${product.slug || product.id}`;
 };
 
 const getContentIcon = (type: string) => {
@@ -37,8 +35,12 @@ const getContentIcon = (type: string) => {
   }
 };
 
-export default function ProductCard({ product, viewMode = "grid", compact = false }: ProductCardProps) {
+export default function ProductCard({ product, viewMode = "grid", compact = false, linkPrefix }: ProductCardProps) {
   const navigate = useNavigate();
+  const autoLinkPrefix = useMarketplaceLinkPrefix();
+  const effectiveLinkPrefix = linkPrefix ?? autoLinkPrefix;
+  const productUrl = `${effectiveLinkPrefix}/${product.slug || product.id}`;
+  
   const contentType = CONTENT_TYPES.find(t => t.value === product.content_type);
   const discountPercent = product.compare_at_price ? getDiscountPercentage(product.compare_at_price, product.price) : 0;
   const hasDiscount = discountPercent > 0;
@@ -47,7 +49,7 @@ export default function ProductCard({ product, viewMode = "grid", compact = fals
     return (
       <Card 
         className="flex flex-row overflow-hidden hover:border-primary/50 transition-all cursor-pointer"
-        onClick={() => navigate(getProductUrl(product))}
+        onClick={() => navigate(productUrl)}
       >
         <div className="w-48 h-32 flex-shrink-0 relative">
           {product.cover_image_url ? (
@@ -112,7 +114,7 @@ export default function ProductCard({ product, viewMode = "grid", compact = fals
     return (
       <Card 
         className="overflow-hidden hover:border-primary/50 transition-all cursor-pointer group"
-        onClick={() => navigate(getProductUrl(product))}
+        onClick={() => navigate(productUrl)}
       >
         <div className="aspect-[16/9] relative overflow-hidden">
           {product.cover_image_url ? (
@@ -160,7 +162,7 @@ export default function ProductCard({ product, viewMode = "grid", compact = fals
   return (
     <Card 
       className="overflow-hidden hover:border-primary/50 transition-all cursor-pointer group"
-      onClick={() => navigate(getProductUrl(product))}
+      onClick={() => navigate(productUrl)}
     >
       <div className="aspect-[4/3] relative overflow-hidden">
         {product.cover_image_url ? (
