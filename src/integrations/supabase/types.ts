@@ -417,6 +417,8 @@ export type Database = {
           message: string | null
           payment_required: string | null
           payment_status: string | null
+          refund_amount: number | null
+          refunded_at: string | null
           requested_at: string
           responded_at: string | null
           session_type_id: string | null
@@ -438,6 +440,8 @@ export type Database = {
           message?: string | null
           payment_required?: string | null
           payment_status?: string | null
+          refund_amount?: number | null
+          refunded_at?: string | null
           requested_at: string
           responded_at?: string | null
           session_type_id?: string | null
@@ -459,6 +463,8 @@ export type Database = {
           message?: string | null
           payment_required?: string | null
           payment_status?: string | null
+          refund_amount?: number | null
+          refunded_at?: string | null
           requested_at?: string
           responded_at?: string | null
           session_type_id?: string | null
@@ -1034,6 +1040,8 @@ export type Database = {
           id: string
           package_id: string
           purchased_at: string
+          refund_amount: number | null
+          refunded_at: string | null
           sessions_total: number
           sessions_used: number | null
           status: string | null
@@ -1050,6 +1058,8 @@ export type Database = {
           id?: string
           package_id: string
           purchased_at?: string
+          refund_amount?: number | null
+          refunded_at?: string | null
           sessions_total: number
           sessions_used?: number | null
           status?: string | null
@@ -1066,6 +1076,8 @@ export type Database = {
           id?: string
           package_id?: string
           purchased_at?: string
+          refund_amount?: number | null
+          refunded_at?: string | null
           sessions_total?: number
           sessions_used?: number | null
           status?: string | null
@@ -1939,6 +1951,8 @@ export type Database = {
           invoice_number: string
           notes: string | null
           paid_at: string | null
+          refund_amount: number | null
+          refunded_at: string | null
           sent_at: string | null
           source_id: string | null
           source_type: string | null
@@ -1963,6 +1977,8 @@ export type Database = {
           invoice_number: string
           notes?: string | null
           paid_at?: string | null
+          refund_amount?: number | null
+          refunded_at?: string | null
           sent_at?: string | null
           source_id?: string | null
           source_type?: string | null
@@ -1987,6 +2003,8 @@ export type Database = {
           invoice_number?: string
           notes?: string | null
           paid_at?: string | null
+          refund_amount?: number | null
+          refunded_at?: string | null
           sent_at?: string | null
           source_id?: string | null
           source_type?: string | null
@@ -2746,10 +2764,14 @@ export type Database = {
           amount_paid: number
           bundle_id: string | null
           coach_id: string
+          completed_at: string | null
           currency: string | null
           id: string
           product_id: string | null
           purchased_at: string | null
+          refund_amount: number | null
+          refunded_at: string | null
+          status: string | null
           stripe_checkout_session_id: string | null
           stripe_payment_intent_id: string | null
           user_id: string
@@ -2759,10 +2781,14 @@ export type Database = {
           amount_paid: number
           bundle_id?: string | null
           coach_id: string
+          completed_at?: string | null
           currency?: string | null
           id?: string
           product_id?: string | null
           purchased_at?: string | null
+          refund_amount?: number | null
+          refunded_at?: string | null
+          status?: string | null
           stripe_checkout_session_id?: string | null
           stripe_payment_intent_id?: string | null
           user_id: string
@@ -2772,10 +2798,14 @@ export type Database = {
           amount_paid?: number
           bundle_id?: string | null
           coach_id?: string
+          completed_at?: string | null
           currency?: string | null
           id?: string
           product_id?: string | null
           purchased_at?: string | null
+          refund_amount?: number | null
+          refunded_at?: string | null
+          status?: string | null
           stripe_checkout_session_id?: string | null
           stripe_payment_intent_id?: string | null
           user_id?: string

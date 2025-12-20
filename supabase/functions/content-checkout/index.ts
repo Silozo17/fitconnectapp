@@ -130,8 +130,8 @@ serve(async (req) => {
       .maybeSingle();
 
     const tier = platformSub?.tier || "free";
-    const commissionRates: Record<string, number> = { free: 4, starter: 3, pro: 2, enterprise: 1, founder: 0 };
-    const commissionPercent = commissionRates[tier] || 4;
+    const commissionRates: Record<string, number> = { free: 4, starter: 3, pro: 2, enterprise: 1, founder: 1 };
+    const commissionPercent = Math.max(1, Math.min(4, commissionRates[tier] || 4)); // Enforce 1-4% range
     logStep("Commission tier", { tier, commissionPercent });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
