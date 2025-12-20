@@ -95,15 +95,15 @@ serve(async (req) => {
       throw new Error("Receiver email not found");
     }
 
-    // Check email preferences
+    // Check email preferences (use notification_preferences table which is the single source of truth)
     const { data: prefs } = await supabase
-      .from("email_preferences")
-      .select("message_notifications")
+      .from("notification_preferences")
+      .select("email_messages")
       .eq("user_id", receiverUserId)
       .single();
 
-    if (prefs && prefs.message_notifications === false) {
-      console.log("User has disabled message notifications");
+    if (prefs && prefs.email_messages === false) {
+      console.log("User has disabled message email notifications");
       return new Response(JSON.stringify({ skipped: true, reason: "Notifications disabled" }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

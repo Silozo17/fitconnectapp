@@ -80,6 +80,22 @@ serve(async (req) => {
     const recipientUser = recipientIsClient ? clientUser : coachUser;
     const recipientName = recipientIsClient ? (session.client.first_name || 'there') : coachName;
     const cancellerName = cancelledBy === 'coach' ? coachName : clientName;
+    const recipientUserId = recipientIsClient ? session.client.user_id : session.coach.user_id;
+
+    // Check email preferences - skip if user has disabled booking emails
+    const { data: prefs } = await supabase
+      .from("notification_preferences")
+      .select("email_bookings")
+      .eq("user_id", recipientUserId)
+      .single();
+
+    if (prefs && prefs.email_bookings === false) {
+      console.log("User has disabled booking email notifications");
+      return new Response(JSON.stringify({ skipped: true, reason: "Notifications disabled" }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     if (recipientUser?.email) {
       const emailContent = `

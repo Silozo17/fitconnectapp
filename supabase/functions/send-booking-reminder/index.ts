@@ -71,6 +71,22 @@ serve(async (req) => {
     const coachUser = users?.find(u => u.id === session.coach.user_id);
     const clientUser = users?.find(u => u.id === session.client.user_id);
 
+    // Get email preferences for both users
+    const { data: clientPrefs } = await supabase
+      .from("notification_preferences")
+      .select("email_reminders")
+      .eq("user_id", session.client.user_id)
+      .single();
+
+    const { data: coachPrefs } = await supabase
+      .from("notification_preferences")
+      .select("email_reminders")
+      .eq("user_id", session.coach.user_id)
+      .single();
+
+    const clientEmailEnabled = clientPrefs?.email_reminders !== false;
+    const coachEmailEnabled = coachPrefs?.email_reminders !== false;
+
     // Format session time
     const sessionDate = new Date(session.scheduled_at);
     const formattedDate = sessionDate.toLocaleDateString('en-GB', { 
@@ -97,8 +113,8 @@ serve(async (req) => {
       ? "Online Session" 
       : session.location || "Location TBC";
 
-    // Send to client
-    if (clientUser?.email) {
+    // Send to client (only if email reminders are enabled)
+    if (clientUser?.email && clientEmailEnabled) {
       const clientContent = `
         <div style="text-align: center; margin-bottom: 24px;">
           <span style="font-size: 48px;">${urgencyEmoji}</span>
@@ -168,8 +184,8 @@ serve(async (req) => {
       });
     }
 
-    // Send to coach
-    if (coachUser?.email) {
+    // Send to coach (only if email reminders are enabled)
+    if (coachUser?.email && coachEmailEnabled) {
       const coachContent = `
         <div style="text-align: center; margin-bottom: 24px;">
           <span style="font-size: 48px;">${urgencyEmoji}</span>

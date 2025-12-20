@@ -77,6 +77,21 @@ serve(async (req) => {
       throw new Error("Client email not found");
     }
 
+    // Check email preferences - skip if user has disabled booking emails
+    const { data: prefs } = await supabase
+      .from("notification_preferences")
+      .select("email_bookings")
+      .eq("user_id", session.client.user_id)
+      .single();
+
+    if (prefs && prefs.email_bookings === false) {
+      console.log("User has disabled booking email notifications");
+      return new Response(JSON.stringify({ skipped: true, reason: "Notifications disabled" }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Use default FitConnect mascot avatar
     const avatarUrl = getDefaultAvatarUrl(supabaseUrl);
 
