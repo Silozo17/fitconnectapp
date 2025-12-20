@@ -3,38 +3,33 @@
  * INTERNATIONALIZATION (i18n) CONFIGURATION
  * ============================================================================
  * 
- * STATUS: Infrastructure ready, English default, Polish dev-only
+ * STATUS: PRODUCTION READY - English & Polish fully supported
  * 
- * This i18n system is fully configured and production-safe, but is NOT
- * currently being used to render UI text. All user-facing strings are
- * hardcoded in English throughout the application.
+ * This i18n system is fully configured and actively used throughout the
+ * application. All user-facing strings use the t('key') pattern.
  * 
- * WHY IS THIS UNUSED?
- * - The platform is launching in the UK market first (English-only)
- * - String extraction will be performed when multi-language support is prioritised
- * - This infrastructure exists to enable future internationalisation
+ * SUPPORTED LANGUAGES:
+ * - English (en) - Primary language, UK market
+ * - Polish (pl) - Fully translated
  * 
- * CURRENT GUARDRAILS (do not remove without explicit approval):
- * 1. App remains English-only in production
- * 2. Browser auto-translation is disabled (see index.html: translate="no")
- * 3. Language selector shows Polish only in development mode
- * 4. Browser language detection is PREPARED but disabled via feature flag
- * 5. Polish translation file exists but is hidden behind dev mode
- * 6. Language preference is persisted to localStorage
- * 7. Missing Polish keys fallback to English
+ * CURRENT FEATURES:
+ * 1. Multi-language support (English & Polish)
+ * 2. Browser auto-translation disabled (see index.html: translate="no")
+ * 3. Language selector available to all users
+ * 4. Browser language detection available via feature flag
+ * 5. Language preference persisted to localStorage
+ * 6. Missing keys fallback to English
  * 
- * FUTURE EXPANSION STEPS:
- * 1. Extract hardcoded strings from components using t('key') pattern
- * 2. Organise translations into namespaces (auth, coach, client, etc.)
- * 3. Add language files for target locales
- * 4. Enable browser detection: set I18N_FEATURE_FLAGS.ENABLE_BROWSER_DETECTION = true
- * 5. Move Polish from DEV_LANGUAGES to SUPPORTED_LANGUAGES when ready
+ * ADDING NEW LANGUAGES:
+ * 1. Create translation files in src/i18n/locales/{code}/
+ * 2. Import files and add to resources object below
+ * 3. Add language to SUPPORTED_LANGUAGES array
  * 
  * @see src/i18n/feature-flags.ts - Feature flags for i18n behavior
  * @see src/hooks/useTranslation.ts - Custom hook wrapper
- * @see src/components/shared/LanguageSelector.tsx - Language picker (Polish dev-only)
- * @see src/i18n/locales/en/common.json - English translation keys
- * @see src/i18n/locales/pl/common.json - Polish translation keys (dev-only)
+ * @see src/components/shared/LanguageSelector.tsx - Language picker
+ * @see src/i18n/locales/en/ - English translation files
+ * @see src/i18n/locales/pl/ - Polish translation files
  * ============================================================================
  */
 
@@ -72,12 +67,11 @@ import plGamification from './locales/pl/gamification.json';
 // Production-visible languages (what users see in production)
 export const SUPPORTED_LANGUAGES = [
   { code: 'en', name: 'English', nativeName: 'English' },
-] as const;
-
-// Dev-only languages (hidden from production users)
-export const DEV_LANGUAGES = [
   { code: 'pl', name: 'Polish', nativeName: 'Polski' },
 ] as const;
+
+// Dev-only languages (for testing new languages before production)
+export const DEV_LANGUAGES = [] as const;
 
 // Combined type for all language codes
 export type LanguageCode = 'en' | 'pl';
@@ -93,20 +87,14 @@ export const LANGUAGE_STORAGE_KEY = 'fitconnect-language';
 
 /**
  * Validate and retrieve stored language preference.
- * Always falls back to English if stored value is invalid or unavailable.
- * Polish is only allowed if in development mode.
+ * Falls back to English if stored value is invalid or unavailable.
  */
 const getStoredLanguage = (): LanguageCode => {
   try {
     const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    const supportedCodes = SUPPORTED_LANGUAGES.map(l => l.code) as string[];
     
-    // If Polish is stored but we're in production, force English
-    if (stored === 'pl' && !import.meta.env.DEV) {
-      return DEFAULT_LANGUAGE;
-    }
-    
-    const allCodes = ALL_LANGUAGES.map(l => l.code) as string[];
-    if (stored && allCodes.includes(stored)) {
+    if (stored && supportedCodes.includes(stored)) {
       return stored as LanguageCode;
     }
   } catch {

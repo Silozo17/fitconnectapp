@@ -103,6 +103,7 @@
     "title": "Preferencje",
     "language": "Język",
     "languageDescription": "Wybierz preferowany język",
+    "languageHint": "Więcej języków wkrótce",
     "currency": "Waluta",
     "currencyDescription": "Wybierz preferowaną walutę do wyświetlania"
   },

@@ -103,6 +103,7 @@
     "title": "Preferences",
     "language": "Language",
     "languageDescription": "Choose your preferred language",
+    "languageHint": "More languages coming soon",
     "currency": "Currency",
     "currencyDescription": "Choose your preferred currency for display"
   },
