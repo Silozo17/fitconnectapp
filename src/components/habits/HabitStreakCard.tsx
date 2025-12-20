@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Flame, Trophy, Target, Star, Salad, Dumbbell, Moon, Flower2, Pill, Droplet, Check } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -30,6 +31,7 @@ const getMilestoneIcon = (iconName: string) => {
 };
 
 const HabitStreakCard = ({ habit }: HabitStreakCardProps) => {
+  const { t } = useTranslation("client");
   const currentStreak = habit.streak?.current_streak || 0;
   const longestStreak = habit.streak?.longest_streak || 0;
   const totalCompletions = habit.streak?.total_completions || 0;
@@ -59,7 +61,7 @@ const HabitStreakCard = ({ habit }: HabitStreakCardProps) => {
             <span className="text-4xl font-bold text-primary">{currentStreak}</span>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            {currentStreak === 1 ? 'day streak' : 'days streak'}
+            {currentStreak === 1 ? t("habits.dayStreak") : t("habits.daysStreak")}
           </p>
           {milestone.label && (
             <p className="text-sm font-medium text-orange-500 mt-1 flex items-center justify-center gap-1">
@@ -71,7 +73,7 @@ const HabitStreakCard = ({ habit }: HabitStreakCardProps) => {
         {/* Progress to next milestone */}
         <div className="space-y-1">
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>Progress to {nextMilestone} days</span>
+            <span>{t("habits.progressTo", { days: nextMilestone })}</span>
             <span>{currentStreak}/{nextMilestone}</span>
           </div>
           <Progress value={progressPercent} className="h-2" />
@@ -84,14 +86,14 @@ const HabitStreakCard = ({ habit }: HabitStreakCardProps) => {
               <Trophy className="h-4 w-4 text-yellow-500" />
               <span className="font-semibold">{longestStreak}</span>
             </div>
-            <p className="text-xs text-muted-foreground">Best streak</p>
+            <p className="text-xs text-muted-foreground">{t("habits.bestStreak")}</p>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center gap-1">
               <Target className="h-4 w-4 text-primary" />
               <span className="font-semibold">{totalCompletions}</span>
             </div>
-            <p className="text-xs text-muted-foreground">Total completions</p>
+            <p className="text-xs text-muted-foreground">{t("habits.totalCompletions")}</p>
           </div>
         </div>
       </CardContent>

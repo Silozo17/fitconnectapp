@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
 import { Scale, Percent, Ruler, Calendar, Trash2, ImageIcon } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -22,6 +23,8 @@ interface ProgressEntryCardProps {
 }
 
 export const ProgressEntryCard = ({ entry }: ProgressEntryCardProps) => {
+  const { t } = useTranslation("client");
+  const { t: tCommon } = useTranslation("common");
   const deleteProgress = useDeleteProgress();
   const measurements = entry.measurements as ProgressMeasurements | null;
   const photoUrls = entry.photo_urls as string[] | null;
@@ -29,9 +32,9 @@ export const ProgressEntryCard = ({ entry }: ProgressEntryCardProps) => {
   const handleDelete = async () => {
     try {
       await deleteProgress.mutateAsync(entry.id);
-      toast.success('Progress entry deleted');
+      toast.success(t("progress.entryDeleted"));
     } catch (error) {
-      toast.error('Failed to delete entry');
+      toast.error(t("progress.failedToDelete"));
     }
   };
 
@@ -53,15 +56,15 @@ export const ProgressEntryCard = ({ entry }: ProgressEntryCardProps) => {
             </AlertDialogTrigger>
             <AlertDialogContent className="bg-card border-border">
               <AlertDialogHeader>
-                <AlertDialogTitle>Delete Progress Entry?</AlertDialogTitle>
+                <AlertDialogTitle>{t("progress.deleteEntry.title")}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will permanently delete this progress entry. This action cannot be undone.
+                  {t("progress.deleteEntry.description")}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel>{tCommon("actions.cancel")}</AlertDialogCancel>
                 <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
-                  Delete
+                  {tCommon("actions.delete")}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -74,14 +77,14 @@ export const ProgressEntryCard = ({ entry }: ProgressEntryCardProps) => {
             <div className="flex items-center gap-2">
               <Scale className="h-4 w-4 text-primary" />
               <span className="text-lg font-bold text-primary">{Number(entry.weight_kg).toFixed(1)}</span>
-              <span className="text-sm text-muted-foreground">kg</span>
+              <span className="text-sm text-muted-foreground">{t("progress.units.kg")}</span>
             </div>
           )}
           {entry.body_fat_percentage && (
             <div className="flex items-center gap-2">
               <Percent className="h-4 w-4 text-yellow-400" />
               <span className="text-lg font-bold text-yellow-400">{Number(entry.body_fat_percentage).toFixed(1)}</span>
-              <span className="text-sm text-muted-foreground">body fat</span>
+              <span className="text-sm text-muted-foreground">{t("progress.bodyFat").toLowerCase()}</span>
             </div>
           )}
         </div>
@@ -91,17 +94,17 @@ export const ProgressEntryCard = ({ entry }: ProgressEntryCardProps) => {
           <div className="mb-3">
             <div className="flex items-center gap-2 mb-2">
               <Ruler className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Measurements (cm)</span>
+              <span className="text-sm text-muted-foreground">{t("progress.measurementsCm")}</span>
             </div>
             <div className="flex flex-wrap gap-2">
-              {measurements.chest && <Badge variant="outline">Chest: {measurements.chest}</Badge>}
-              {measurements.waist && <Badge variant="outline">Waist: {measurements.waist}</Badge>}
-              {measurements.hips && <Badge variant="outline">Hips: {measurements.hips}</Badge>}
-              {measurements.shoulders && <Badge variant="outline">Shoulders: {measurements.shoulders}</Badge>}
-              {measurements.biceps && <Badge variant="outline">Biceps: {measurements.biceps}</Badge>}
-              {measurements.thighs && <Badge variant="outline">Thighs: {measurements.thighs}</Badge>}
-              {measurements.calves && <Badge variant="outline">Calves: {measurements.calves}</Badge>}
-              {measurements.neck && <Badge variant="outline">Neck: {measurements.neck}</Badge>}
+              {measurements.chest && <Badge variant="outline">{t("progress.fields.chest")}: {measurements.chest}</Badge>}
+              {measurements.waist && <Badge variant="outline">{t("progress.fields.waist")}: {measurements.waist}</Badge>}
+              {measurements.hips && <Badge variant="outline">{t("progress.fields.hips")}: {measurements.hips}</Badge>}
+              {measurements.shoulders && <Badge variant="outline">{t("progress.fields.shoulders")}: {measurements.shoulders}</Badge>}
+              {measurements.biceps && <Badge variant="outline">{t("progress.fields.biceps")}: {measurements.biceps}</Badge>}
+              {measurements.thighs && <Badge variant="outline">{t("progress.fields.thighs")}: {measurements.thighs}</Badge>}
+              {measurements.calves && <Badge variant="outline">{t("progress.fields.calves")}: {measurements.calves}</Badge>}
+              {measurements.neck && <Badge variant="outline">{t("progress.fields.neck")}: {measurements.neck}</Badge>}
             </div>
           </div>
         )}
@@ -111,7 +114,7 @@ export const ProgressEntryCard = ({ entry }: ProgressEntryCardProps) => {
           <div className="mb-3">
             <div className="flex items-center gap-2 mb-2">
               <ImageIcon className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Progress Photos</span>
+              <span className="text-sm text-muted-foreground">{t("progress.progressPhotos")}</span>
             </div>
             <div className="grid grid-cols-4 gap-2">
               {photoUrls.map((url, index) => (
@@ -122,7 +125,7 @@ export const ProgressEntryCard = ({ entry }: ProgressEntryCardProps) => {
                   rel="noopener noreferrer"
                   className="aspect-square rounded-lg overflow-hidden border border-border hover:border-primary/50 transition-colors"
                 >
-                  <img src={url} alt={`Progress ${index + 1}`} className="w-full h-full object-cover" />
+                  <img src={url} alt={`${t("progress.title")} ${index + 1}`} className="w-full h-full object-cover" />
                 </a>
               ))}
             </div>

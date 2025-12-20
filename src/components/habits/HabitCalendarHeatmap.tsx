@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useHabitLogs, HabitLog } from "@/hooks/useHabits";
@@ -11,6 +12,7 @@ interface HabitCalendarHeatmapProps {
 }
 
 const HabitCalendarHeatmap = ({ habitId, habitName, days = 90 }: HabitCalendarHeatmapProps) => {
+  const { t } = useTranslation("client");
   const { data: logs = [] } = useHabitLogs(habitId, days);
   
   // Generate array of dates for the past X days
@@ -63,7 +65,7 @@ const HabitCalendarHeatmap = ({ habitId, habitName, days = 90 }: HabitCalendarHe
         <div className="flex items-center justify-between">
           <CardTitle className="text-base">{habitName}</CardTitle>
           <span className="text-sm text-muted-foreground">
-            {completionRate}% completion
+            {completionRate}% {t("habits.completionRate").toLowerCase()}
           </span>
         </div>
       </CardHeader>
@@ -87,7 +89,7 @@ const HabitCalendarHeatmap = ({ habitId, habitName, days = 90 }: HabitCalendarHe
                     <TooltipContent>
                       <p className="font-medium">{formatDate(day.date)}</p>
                       <p className="text-xs text-muted-foreground">
-                        {day.completed ? '✓ Completed' : 'Not completed'}
+                        {day.completed ? `✓ ${t("habits.completed")}` : t("habits.notCompleted")}
                       </p>
                     </TooltipContent>
                   </Tooltip>
@@ -101,11 +103,11 @@ const HabitCalendarHeatmap = ({ habitId, habitName, days = 90 }: HabitCalendarHe
         <div className="flex items-center gap-4 mt-4 text-xs text-muted-foreground">
           <div className="flex items-center gap-1">
             <div className="w-3 h-3 rounded-sm bg-muted" />
-            <span>Not done</span>
+            <span>{t("habits.notCompleted")}</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-3 h-3 rounded-sm bg-primary" />
-            <span>Completed</span>
+            <span>{t("habits.completed")}</span>
           </div>
         </div>
       </CardContent>
