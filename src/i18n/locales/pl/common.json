@@ -5,6 +5,7 @@
   },
   "common": {
     "loading": "Ładowanie...",
+    "error": "Coś poszło nie tak",
     "save": "Zapisz",
     "cancel": "Anuluj",
     "delete": "Usuń",
@@ -25,7 +26,11 @@
     "share": "Udostępnij",
     "copy": "Kopiuj",
     "refresh": "Odśwież",
-    "retry": "Ponów"
+    "retry": "Ponów",
+    "yes": "Tak",
+    "no": "Nie",
+    "or": "lub",
+    "and": "i"
   },
   "auth": {
     "signIn": "Zaloguj się",
@@ -35,7 +40,9 @@
     "password": "Hasło",
     "forgotPassword": "Zapomniałeś hasła?",
     "resetPassword": "Zresetuj hasło",
-    "confirmPassword": "Potwierdź hasło"
+    "confirmPassword": "Potwierdź hasło",
+    "noAccount": "Nie masz konta?",
+    "hasAccount": "Masz już konto?"
   },
   "navigation": {
     "home": "Strona główna",
@@ -43,7 +50,62 @@
     "dashboard": "Panel",
     "messages": "Wiadomości",
     "settings": "Ustawienia",
-    "profile": "Profil"
+    "profile": "Profil",
+    "searchPlaceholder": "Szukaj...",
+    "myProfile": "Mój profil",
+    "signOut": "Wyloguj się",
+    "mainMenu": "Menu główne",
+    "upgradeRequired": "(Wymagana aktualizacja)",
+    "roleCoach": "Trener",
+    "roleClient": "Klient",
+    "connections": "Połączenia",
+    "coach": {
+      "overview": "Przegląd",
+      "pipeline": "Pipeline",
+      "messages": "Wiadomości",
+      "connections": "Połączenia",
+      "clientManagement": "Zarządzanie klientami",
+      "clients": "Klienci",
+      "schedule": "Harmonogram",
+      "trainingPlans": "Plany treningowe",
+      "productsPricing": "Produkty i ceny",
+      "packages": "Pakiety",
+      "digitalProducts": "Produkty cyfrowe",
+      "business": "Biznes",
+      "boost": "Boost",
+      "earnings": "Zarobki",
+      "financial": "Finanse",
+      "reviews": "Opinie",
+      "gamification": "Grywalizacja",
+      "achievements": "Osiągnięcia",
+      "settings": "Ustawienia"
+    },
+    "client": {
+      "home": "Strona główna",
+      "findCoaches": "Znajdź trenerów",
+      "marketplace": "Sklep",
+      "messages": "Wiadomości",
+      "connections": "Połączenia",
+      "myTraining": "Mój trening",
+      "myCoaches": "Moi trenerzy",
+      "sessions": "Sesje",
+      "myPlans": "Moje plany",
+      "myLibrary": "Moja biblioteka",
+      "progressHabits": "Postępy i nawyki",
+      "progress": "Postępy",
+      "habits": "Nawyki",
+      "competition": "Rywalizacja",
+      "achievements": "Osiągnięcia",
+      "leaderboard": "Ranking",
+      "challenges": "Wyzwania",
+      "utilities": "Narzędzia",
+      "tools": "Narzędzia",
+      "shopping": "Zakupy",
+      "receipts": "Paragony",
+      "integrations": "Integracje",
+      "favourites": "Ulubione",
+      "settings": "Ustawienia"
+    }
   },
   "coach": {
     "viewProfile": "Zobacz profil",
@@ -55,13 +117,18 @@
     "reviews": "Opinie",
     "rating": "Ocena",
     "verified": "Zweryfikowany",
-    "online": "Online"
+    "online": "Online",
+    "sendMessage": "Wyślij wiadomość",
+    "connect": "Połącz",
+    "location": "Lokalizacja",
+    "inPerson": "Osobiście"
   },
   "client": {
     "myCoaches": "Moi trenerzy",
     "mySessions": "Moje sesje",
     "myPlans": "Moje plany",
-    "progress": "Postępy"
+    "progress": "Postępy",
+    "myProgress": "Moje postępy"
   },
   "session": {
     "upcoming": "Nadchodzące",
@@ -75,7 +142,12 @@
     "usd": "Dolar amerykański",
     "eur": "Euro",
     "pln": "Złoty polski",
-    "symbol": "£"
+    "symbol": "£",
+    "GBP": "Funt brytyjski (£)",
+    "USD": "Dolar amerykański ($)",
+    "EUR": "Euro (€)",
+    "AUD": "Dolar australijski (A$)",
+    "CAD": "Dolar kanadyjski (C$)"
   },
   "time": {
     "today": "Dzisiaj",

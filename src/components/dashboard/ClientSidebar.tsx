@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import {
   Home,
@@ -59,7 +60,7 @@ import {
 type BadgeKey = "messages" | "plans" | "connections";
 
 interface MenuItem {
-  title: string;
+  titleKey: string;
   icon: typeof Home;
   path: string;
   badgeKey?: BadgeKey;
@@ -67,7 +68,7 @@ interface MenuItem {
 
 interface MenuGroup {
   id: string;
-  label?: string;
+  labelKey?: string;
   icon?: typeof Home;
   items: MenuItem[];
   collapsible: boolean;
@@ -78,62 +79,62 @@ const menuGroups: MenuGroup[] = [
     id: "main",
     collapsible: false,
     items: [
-      { title: "Home", icon: Home, path: "/dashboard/client" },
-      { title: "Find Coaches", icon: Search, path: "/dashboard/client/find-coaches" },
-      { title: "Marketplace", icon: ShoppingBag, path: "/dashboard/client/marketplace" },
-      { title: "Messages", icon: MessageSquare, path: "/dashboard/client/messages", badgeKey: "messages" },
-      { title: "Connections", icon: UserPlus, path: "/dashboard/client/connections", badgeKey: "connections" },
+      { titleKey: "navigation.client.home", icon: Home, path: "/dashboard/client" },
+      { titleKey: "navigation.client.findCoaches", icon: Search, path: "/dashboard/client/find-coaches" },
+      { titleKey: "navigation.client.marketplace", icon: ShoppingBag, path: "/dashboard/client/marketplace" },
+      { titleKey: "navigation.client.messages", icon: MessageSquare, path: "/dashboard/client/messages", badgeKey: "messages" },
+      { titleKey: "navigation.client.connections", icon: UserPlus, path: "/dashboard/client/connections", badgeKey: "connections" },
     ],
   },
   {
     id: "training",
-    label: "My Training",
+    labelKey: "navigation.client.myTraining",
     icon: Dumbbell,
     collapsible: true,
     items: [
-      { title: "My Coaches", icon: Users, path: "/dashboard/client/coaches" },
-      { title: "Sessions", icon: Calendar, path: "/dashboard/client/sessions" },
-      { title: "My Plans", icon: ClipboardList, path: "/dashboard/client/plans", badgeKey: "plans" },
-      { title: "My Library", icon: BookOpen, path: "/dashboard/client/library" },
+      { titleKey: "navigation.client.myCoaches", icon: Users, path: "/dashboard/client/coaches" },
+      { titleKey: "navigation.client.sessions", icon: Calendar, path: "/dashboard/client/sessions" },
+      { titleKey: "navigation.client.myPlans", icon: ClipboardList, path: "/dashboard/client/plans", badgeKey: "plans" },
+      { titleKey: "navigation.client.myLibrary", icon: BookOpen, path: "/dashboard/client/library" },
     ],
   },
   {
     id: "progress",
-    label: "Progress & Habits",
+    labelKey: "navigation.client.progressHabits",
     icon: TrendingUp,
     collapsible: true,
     items: [
-      { title: "Progress", icon: TrendingUp, path: "/dashboard/client/progress" },
-      { title: "Habits", icon: Target, path: "/dashboard/client/habits" },
+      { titleKey: "navigation.client.progress", icon: TrendingUp, path: "/dashboard/client/progress" },
+      { titleKey: "navigation.client.habits", icon: Target, path: "/dashboard/client/habits" },
     ],
   },
   {
     id: "competition",
-    label: "Competition",
+    labelKey: "navigation.client.competition",
     icon: Trophy,
     collapsible: true,
     items: [
-      { title: "Achievements", icon: Trophy, path: "/dashboard/client/achievements" },
-      { title: "Leaderboard", icon: Medal, path: "/dashboard/client/leaderboard" },
-      { title: "Challenges", icon: Flame, path: "/dashboard/client/challenges" },
+      { titleKey: "navigation.client.achievements", icon: Trophy, path: "/dashboard/client/achievements" },
+      { titleKey: "navigation.client.leaderboard", icon: Medal, path: "/dashboard/client/leaderboard" },
+      { titleKey: "navigation.client.challenges", icon: Flame, path: "/dashboard/client/challenges" },
     ],
   },
   {
     id: "utilities",
-    label: "Utilities",
+    labelKey: "navigation.client.utilities",
     icon: Wrench,
     collapsible: true,
     items: [
-      { title: "Tools", icon: Calculator, path: "/dashboard/client/tools" },
-      { title: "Shopping", icon: ShoppingCart, path: "/dashboard/client/grocery" },
-      { title: "Receipts", icon: Receipt, path: "/dashboard/client/receipts" },
-      { title: "Integrations", icon: Plug, path: "/dashboard/client/integrations" },
-      { title: "Favourites", icon: Heart, path: "/dashboard/client/favourites" },
+      { titleKey: "navigation.client.tools", icon: Calculator, path: "/dashboard/client/tools" },
+      { titleKey: "navigation.client.shopping", icon: ShoppingCart, path: "/dashboard/client/grocery" },
+      { titleKey: "navigation.client.receipts", icon: Receipt, path: "/dashboard/client/receipts" },
+      { titleKey: "navigation.client.integrations", icon: Plug, path: "/dashboard/client/integrations" },
+      { titleKey: "navigation.client.favourites", icon: Heart, path: "/dashboard/client/favourites" },
     ],
   },
 ];
 
-const settingsItem: MenuItem = { title: "Settings", icon: Settings, path: "/dashboard/client/settings" };
+const settingsItem: MenuItem = { titleKey: "navigation.client.settings", icon: Settings, path: "/dashboard/client/settings" };
 
 interface ClientSidebarProps {
   collapsed: boolean;
@@ -143,6 +144,7 @@ interface ClientSidebarProps {
 }
 
 const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: ClientSidebarProps) => {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
@@ -210,6 +212,7 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
   const renderMenuItem = (item: MenuItem, indented = false, isCollapsed = false) => {
     const isActive = location.pathname === item.path;
     const badgeCount = getBadgeCount(item.badgeKey);
+    const title = t(item.titleKey);
 
     if (isCollapsed) {
       return (
@@ -231,7 +234,7 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
             </Link>
           </TooltipTrigger>
           <TooltipContent side="right" className="font-medium">
-            {item.title}
+            {title}
           </TooltipContent>
         </Tooltip>
       );
@@ -250,7 +253,7 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
         )}
       >
         <item.icon className="w-4 h-4 flex-shrink-0" />
-        <span className="font-medium text-sm flex-1">{item.title}</span>
+        <span className="font-medium text-sm flex-1">{title}</span>
         {badgeCount > 0 && <SidebarBadge count={badgeCount} />}
       </Link>
     );
@@ -269,6 +272,7 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
     const groupBadgeCount = getGroupBadgeCount(group);
     const GroupIcon = group.icon!;
     const isActive = isGroupActive(group);
+    const groupLabel = group.labelKey ? t(group.labelKey) : "";
 
     if (isCollapsed) {
       return (
@@ -290,7 +294,7 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
             </button>
           </TooltipTrigger>
           <TooltipContent side="right" className="font-medium">
-            {group.label}
+            {groupLabel}
           </TooltipContent>
         </Tooltip>
       );
@@ -312,7 +316,7 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
             )}
           >
             <GroupIcon className="w-4 h-4 flex-shrink-0" />
-            <span className="font-semibold text-sm flex-1">{group.label}</span>
+            <span className="font-semibold text-sm flex-1">{groupLabel}</span>
             {groupBadgeCount > 0 && !isOpen && (
               <SidebarBadge count={groupBadgeCount} />
             )}
@@ -340,7 +344,7 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
             <Dumbbell className="w-5 h-5 text-primary-foreground" />
           </div>
           {!isCollapsed && (
-            <span className="font-bold text-lg text-foreground">FitConnect</span>
+            <span className="font-bold text-lg text-foreground">{t("app.name")}</span>
           )}
         </div>
         {/* Collapse Toggle - Desktop only */}
@@ -359,7 +363,7 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
       {/* Navigation */}
       <nav className="flex-1 p-2 space-y-2 overflow-y-auto" aria-label="Dashboard navigation">
         {menuGroups.map((group, index) => (
-          <div key={group.id} role="group" aria-label={group.label || "Main menu"}>
+          <div key={group.id} role="group" aria-label={group.labelKey ? t(group.labelKey) : t("navigation.mainMenu")}>
             {index > 0 && <div className="my-2 border-t border-border/50" aria-hidden="true" />}
             {renderGroup(group, isCollapsed)}
           </div>
@@ -396,7 +400,7 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <Dumbbell className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="font-bold text-lg text-foreground">FitConnect</span>
+              <span className="font-bold text-lg text-foreground">{t("app.name")}</span>
             </div>
           </div>
 
@@ -405,7 +409,7 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search..."
+                placeholder={t("navigation.searchPlaceholder")}
                 autoFocus={false}
                 className="pl-10 bg-muted/50 border-transparent focus:border-primary"
               />
@@ -439,8 +443,8 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
                 showRarityBorder
               />
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate">{displayName || "Client"}</p>
-                <p className="text-xs text-muted-foreground">Client</p>
+                <p className="font-medium text-sm truncate">{displayName || t("navigation.roleClient")}</p>
+                <p className="text-xs text-muted-foreground">{t("navigation.roleClient")}</p>
               </div>
             </div>
             <div className="space-y-1">
@@ -454,7 +458,7 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
                 }}
               >
                 <User className="w-4 h-4 mr-2" />
-                My Profile
+                {t("navigation.myProfile")}
               </Button>
               <Button
                 variant="ghost"
@@ -463,7 +467,7 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
                 onClick={() => signOut()}
               >
                 <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
+                {t("navigation.signOut")}
               </Button>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect, memo, useCallback, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -57,7 +58,7 @@ import {
 type BadgeKey = "messages" | "pipeline" | "schedule" | "clients" | "connections";
 
 interface MenuItem {
-  title: string;
+  titleKey: string;
   icon: typeof LayoutDashboard;
   path: string;
   badgeKey?: BadgeKey;
@@ -67,7 +68,7 @@ interface MenuItem {
 
 interface MenuGroup {
   id: string;
-  label?: string;
+  labelKey?: string;
   icon?: typeof LayoutDashboard;
   items: MenuItem[];
   collapsible: boolean;
@@ -78,57 +79,57 @@ const menuGroups: MenuGroup[] = [
     id: "main",
     collapsible: false,
     items: [
-      { title: "Overview", icon: LayoutDashboard, path: "/dashboard/coach" },
-      { title: "Pipeline", icon: Kanban, path: "/dashboard/coach/pipeline", badgeKey: "pipeline", badgeVariant: "warning" },
-      { title: "Messages", icon: MessageSquare, path: "/dashboard/coach/messages", badgeKey: "messages" },
-      { title: "Connections", icon: UserPlus, path: "/dashboard/coach/connections", badgeKey: "connections", badgeVariant: "warning" },
+      { titleKey: "navigation.coach.overview", icon: LayoutDashboard, path: "/dashboard/coach" },
+      { titleKey: "navigation.coach.pipeline", icon: Kanban, path: "/dashboard/coach/pipeline", badgeKey: "pipeline", badgeVariant: "warning" },
+      { titleKey: "navigation.coach.messages", icon: MessageSquare, path: "/dashboard/coach/messages", badgeKey: "messages" },
+      { titleKey: "navigation.coach.connections", icon: UserPlus, path: "/dashboard/coach/connections", badgeKey: "connections", badgeVariant: "warning" },
     ],
   },
   {
     id: "clients",
-    label: "Client Management",
+    labelKey: "navigation.coach.clientManagement",
     icon: Users,
     collapsible: true,
     items: [
-      { title: "Clients", icon: Users, path: "/dashboard/coach/clients", badgeKey: "clients", badgeVariant: "warning" },
-      { title: "Schedule", icon: Calendar, path: "/dashboard/coach/schedule", badgeKey: "schedule", badgeVariant: "warning" },
-      { title: "Training Plans", icon: ClipboardList, path: "/dashboard/coach/plans", requiredFeature: "workout_plan_builder" },
+      { titleKey: "navigation.coach.clients", icon: Users, path: "/dashboard/coach/clients", badgeKey: "clients", badgeVariant: "warning" },
+      { titleKey: "navigation.coach.schedule", icon: Calendar, path: "/dashboard/coach/schedule", badgeKey: "schedule", badgeVariant: "warning" },
+      { titleKey: "navigation.coach.trainingPlans", icon: ClipboardList, path: "/dashboard/coach/plans", requiredFeature: "workout_plan_builder" },
     ],
   },
   {
     id: "products",
-    label: "Products & Pricing",
+    labelKey: "navigation.coach.productsPricing",
     icon: Package,
     collapsible: true,
     items: [
-      { title: "Packages", icon: Package, path: "/dashboard/coach/packages" },
-      { title: "Digital Products", icon: ShoppingBag, path: "/dashboard/coach/products" },
+      { titleKey: "navigation.coach.packages", icon: Package, path: "/dashboard/coach/packages" },
+      { titleKey: "navigation.coach.digitalProducts", icon: ShoppingBag, path: "/dashboard/coach/products" },
     ],
   },
   {
     id: "business",
-    label: "Business",
+    labelKey: "navigation.coach.business",
     icon: DollarSign,
     collapsible: true,
     items: [
-      { title: "Boost", icon: Rocket, path: "/dashboard/coach/boost", requiredFeature: "boost_marketing" },
-      { title: "Earnings", icon: DollarSign, path: "/dashboard/coach/earnings" },
-      { title: "Financial", icon: Receipt, path: "/dashboard/coach/financial" },
-      { title: "Reviews", icon: Star, path: "/dashboard/coach/reviews" },
+      { titleKey: "navigation.coach.boost", icon: Rocket, path: "/dashboard/coach/boost", requiredFeature: "boost_marketing" },
+      { titleKey: "navigation.coach.earnings", icon: DollarSign, path: "/dashboard/coach/earnings" },
+      { titleKey: "navigation.coach.financial", icon: Receipt, path: "/dashboard/coach/financial" },
+      { titleKey: "navigation.coach.reviews", icon: Star, path: "/dashboard/coach/reviews" },
     ],
   },
   {
     id: "gamification",
-    label: "Gamification",
+    labelKey: "navigation.coach.gamification",
     icon: Trophy,
     collapsible: true,
     items: [
-      { title: "Achievements", icon: Trophy, path: "/dashboard/coach/achievements" },
+      { titleKey: "navigation.coach.achievements", icon: Trophy, path: "/dashboard/coach/achievements" },
     ],
   },
 ];
 
-const settingsItem: MenuItem = { title: "Settings", icon: Settings, path: "/dashboard/coach/settings" };
+const settingsItem: MenuItem = { titleKey: "navigation.coach.settings", icon: Settings, path: "/dashboard/coach/settings" };
 
 interface CoachSidebarProps {
   collapsed: boolean;
@@ -138,6 +139,7 @@ interface CoachSidebarProps {
 }
 
 const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: CoachSidebarProps) => {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
@@ -211,6 +213,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
     const isActive = location.pathname === item.path;
     const badgeCount = getBadgeCount(item.badgeKey);
     const isLocked = item.requiredFeature && !hasFeature(item.requiredFeature);
+    const title = t(item.titleKey);
 
     if (isCollapsed) {
       return (
@@ -237,7 +240,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
             </Link>
           </TooltipTrigger>
           <TooltipContent side="right" className="font-medium">
-            {item.title} {isLocked && "(Upgrade required)"}
+            {title} {isLocked && t("navigation.upgradeRequired")}
           </TooltipContent>
         </Tooltip>
       );
@@ -258,7 +261,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
         )}
       >
         <item.icon className="w-4 h-4 flex-shrink-0" />
-        <span className="font-medium text-sm flex-1">{item.title}</span>
+        <span className="font-medium text-sm flex-1">{title}</span>
         {isLocked && <Lock className="w-3.5 h-3.5 text-warning" />}
         {badgeCount > 0 && !isLocked && <SidebarBadge count={badgeCount} variant={item.badgeVariant} />}
       </Link>
@@ -278,6 +281,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
     const groupBadgeCount = getGroupBadgeCount(group);
     const GroupIcon = group.icon!;
     const isActive = isGroupActive(group);
+    const groupLabel = group.labelKey ? t(group.labelKey) : "";
 
     if (isCollapsed) {
       return (
@@ -299,7 +303,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
             </button>
           </TooltipTrigger>
           <TooltipContent side="right" className="font-medium">
-            {group.label}
+            {groupLabel}
           </TooltipContent>
         </Tooltip>
       );
@@ -321,7 +325,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
             )}
           >
             <GroupIcon className="w-4 h-4 flex-shrink-0" />
-            <span className="font-semibold text-sm flex-1">{group.label}</span>
+            <span className="font-semibold text-sm flex-1">{groupLabel}</span>
             {groupBadgeCount > 0 && !isOpen && (
               <SidebarBadge count={groupBadgeCount} />
             )}
@@ -350,7 +354,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
           </div>
           {!isCollapsed && (
             <span className="font-display font-bold text-xl text-sidebar-foreground">
-              FitConnect
+              {t("app.name")}
             </span>
           )}
         </div>
@@ -370,7 +374,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
       {/* Navigation */}
       <nav className="flex-1 p-2 space-y-2 overflow-y-auto" aria-label="Dashboard navigation">
         {menuGroups.map((group, index) => (
-          <div key={group.id} role="group" aria-label={group.label || "Main menu"}>
+          <div key={group.id} role="group" aria-label={group.labelKey ? t(group.labelKey) : t("navigation.mainMenu")}>
             {index > 0 && <div className="my-2 border-t border-sidebar-border/50" aria-hidden="true" />}
             {renderGroup(group, isCollapsed)}
           </div>
@@ -408,7 +412,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
                 <Dumbbell className="w-6 h-6 text-primary-foreground" />
               </div>
               <span className="font-display font-bold text-xl text-sidebar-foreground">
-                FitConnect
+                {t("app.name")}
               </span>
             </div>
           </div>
@@ -418,7 +422,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search..."
+                placeholder={t("navigation.searchPlaceholder")}
                 autoFocus={false}
                 className="pl-10 bg-sidebar-accent/50 border-transparent focus:border-primary"
               />
@@ -452,8 +456,8 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
                 showRarityBorder
               />
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate text-sidebar-foreground">{displayName || "Coach"}</p>
-                <p className="text-xs text-sidebar-foreground/60">Coach</p>
+                <p className="font-medium text-sm truncate text-sidebar-foreground">{displayName || t("navigation.roleCoach")}</p>
+                <p className="text-xs text-sidebar-foreground/60">{t("navigation.roleCoach")}</p>
               </div>
             </div>
             <div className="space-y-1">
@@ -467,7 +471,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
                 }}
               >
                 <User className="w-4 h-4 mr-2" />
-                My Profile
+                {t("navigation.myProfile")}
               </Button>
               <Button
                 variant="ghost"
@@ -476,7 +480,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
                 onClick={() => signOut()}
               >
                 <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
+                {t("navigation.signOut")}
               </Button>
             </div>
           </div>
