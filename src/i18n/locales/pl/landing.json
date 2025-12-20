@@ -1,0 +1,134 @@
+{
+  "hero": {
+    "badge": "#1 Platforma Trenerów Fitness",
+    "title": "Odmień Swoje Ciało",
+    "titleHighlight": "Z Elitarnymi Trenerami",
+    "description": "Połącz się ze światowej klasy trenerami personalnymi, dietetykami i trenerami sportów walki. Osiągnij swoje cele fitness dzięki spersonalizowanemu wsparciu.",
+    "ctaPrimary": "Znajdź Trenera",
+    "ctaSecondary": "Zostań Trenerem",
+    "stats": {
+      "activeUsers": "Aktywni Użytkownicy",
+      "expertCoaches": "Eksperci Trenerzy",
+      "averageRating": "Średnia Ocena"
+    },
+    "services": {
+      "personalTraining": "Trening Personalny",
+      "personalTrainingDesc": "Indywidualne plany treningowe dopasowane do Twoich celów",
+      "nutritionCoaching": "Coaching Żywieniowy",
+      "nutritionCoachingDesc": "Plany posiłków i śledzenie makroskładników",
+      "combatSports": "Sporty Walki",
+      "combatSportsDesc": "Boks, MMA i sztuki walki",
+      "mostPopular": "Najpopularniejsze"
+    }
+  },
+  "features": {
+    "badge": "FUNKCJE PLATFORMY",
+    "title": "Wszystko Czego Potrzebujesz Aby",
+    "titleHighlight": "Osiągnąć Sukces",
+    "description": "Nasza platforma zapewnia wszystkie narzędzia potrzebne do znalezienia odpowiedniego trenera, utrzymania motywacji i osiągnięcia celów fitness.",
+    "items": {
+      "smartDiscovery": {
+        "title": "Inteligentne Wyszukiwanie",
+        "description": "Znajdź idealnego trenera na podstawie celów, budżetu i preferencji. Filtruj według specjalizacji, lokalizacji i dostępności."
+      },
+      "easyBooking": {
+        "title": "Rezerwacja 24/7",
+        "description": "Rezerwuj sesje w dowolnym momencie z dostępnością w czasie rzeczywistym. Zarządzaj, zmieniaj terminy lub anuluj z łatwością."
+      },
+      "customPlans": {
+        "title": "Spersonalizowane Plany",
+        "description": "Otrzymaj spersonalizowane plany treningowe i żywieniowe dopasowane do Twoich celów. Śledź postępy i dostosowuj w miarę rozwoju."
+      },
+      "directMessaging": {
+        "title": "Bezpośrednie Wiadomości",
+        "description": "Bądź w kontakcie z trenerem przez komunikator. Dziel się aktualizacjami, zadawaj pytania i utrzymuj motywację."
+      },
+      "progressTracking": {
+        "title": "Śledzenie Postępów",
+        "description": "Monitoruj swoją transformację z szczegółową analizą. Śledź wagę, pomiary i wykonane treningi."
+      },
+      "verifiedCoaches": {
+        "title": "Zweryfikowani Trenerzy",
+        "description": "Wszyscy trenerzy są zweryfikowanymi profesjonalistami z potwierdzonymi kwalifikacjami. Trenuj z pewnością i zaufaniem."
+      }
+    }
+  },
+  "cta": {
+    "title": "Gotowy na Swoją Przemianę?",
+    "description": "Dołącz do tysięcy członków, którzy już znaleźli swojego idealnego trenera. Twoja podróż fitness zaczyna się od jednego kroku.",
+    "findCoach": "Znajdź Trenera",
+    "applyAsCoach": "Aplikuj jako Trener",
+    "trustBadges": {
+      "freeToJoin": "Darmowa rejestracja",
+      "noCommitment": "Bez zobowiązań",
+      "cancelAnytime": "Anuluj kiedy chcesz"
+    }
+  },
+  "testimonials": {
+    "badge": "HISTORIE SUKCESU",
+    "title": "Prawdziwe Rezultaty od",
+    "titleHighlight": "Prawdziwych Ludzi",
+    "description": "Dołącz do tysięcy członków, którzy odmienili swoje życie z naszymi ekspertami trenerami.",
+    "items": {
+      "james": {
+        "name": "Jakub Kowalski",
+        "role": "Schudł 15kg w 4 miesiące",
+        "content": "Znalezienie Marka przez FitConnect zmieniło moje życie. Spersonalizowane plany treningowe i stałe wsparcie pomogły mi osiągnąć to, co wydawało się niemożliwe."
+      },
+      "sophie": {
+        "name": "Anna Nowak",
+        "role": "Maratonka",
+        "content": "Coaching żywieniowy, który otrzymałam, był wyjątkowy. Mój trener zrozumiał moje potrzeby treningowe i stworzył plan, który napędził mój sukces w pierwszym maratonie."
+      },
+      "michael": {
+        "name": "Michał Wiśniewski",
+        "role": "Bokser Amator",
+        "content": "Zacząłem trening bokserski przez FitConnect i wystąpiłem w pierwszej amatorskiej walce w ciągu 8 miesięcy. Jakość trenerów tutaj jest niezrównana."
+      }
+    }
+  },
+  "featuredCoaches": {
+    "badge": "NAJWYŻEJ OCENIANI",
+    "title": "Polecani",
+    "titleHighlight": "Trenerzy",
+    "showingNear": "Pokazuję trenerów w pobliżu {{location}}",
+    "viewAll": "Zobacz Wszystkich Trenerów",
+    "verified": "Zweryfikowany",
+    "reviews": "opinii",
+    "perSession": "/sesja",
+    "viewProfile": "Zobacz Profil →"
+  },
+  "leaderboard": {
+    "badge": "Ranking Społeczności",
+    "title": "Dołącz do Tysięcy",
+    "titleHighlight": "Rywalizujących",
+    "titleSuffix": "o Bycie Najlepszym",
+    "description": "Śledź swoje postępy, zdobywaj XP i rywalizuj z entuzjastami fitness w Twojej okolicy i na całym świecie.",
+    "activeCompetitors": "aktywnych uczestników",
+    "topGlobally": "Najlepsi Globalnie",
+    "nearYou": "W Twojej Okolicy",
+    "nearYouWithCity": "W Twojej Okolicy ({{city}})",
+    "noParticipants": "Brak uczestników",
+    "moreCompeting": "+ {{count}} więcej rywalizuje",
+    "viewFull": "Zobacz Pełne Rankingi",
+    "joinCta": "Dołącz do Rywalizacji - Za Darmo",
+    "privacyNote": "Twoja prywatność jest chroniona. Pojawiaj się w rankingach tylko jeśli tego chcesz."
+  },
+  "avatarShowcase": {
+    "badge": "Odblokuj Awatary",
+    "title": "Zdobądź",
+    "titleHighlight": "Ekskluzywne Awatary",
+    "description": "Ukończ wyzwania, osiągnij kamienie milowe i odblokuj unikalne awatary reprezentujące Twoją podróż fitness. Pochwal się osiągnięciami w rankingu!",
+    "completeChallenges": "Ukończ Wyzwania",
+    "completeChallengesDesc": "Odblokuj awatary ukończając wyzwania fitness",
+    "hitMilestones": "Osiągnij Kamienie Milowe",
+    "hitMilestonesDesc": "Śledź treningi, nawyki i postępy aby zdobywać XP",
+    "viewAll": "Zobacz Wszystkie Awatary"
+  },
+  "blog": {
+    "badge": "Wiedza Fitness",
+    "title": "Najnowsze z Bloga",
+    "description": "Porady ekspertów, wskazówki treningowe i spostrzeżenia branżowe, które pomogą Ci w podróży fitness.",
+    "viewAll": "Zobacz Wszystkie Artykuły"
+  }
+}

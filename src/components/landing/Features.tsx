@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Search,
   Calendar,
@@ -8,47 +9,43 @@ import {
 } from "lucide-react";
 
 const Features = () => {
+  const { t } = useTranslation('landing');
+  
   const features = [
     {
       icon: Search,
-      title: "Smart Coach Discovery",
-      description:
-        "Find the perfect coach based on your goals, budget, and preferences. Filter by specialty, location, and availability.",
+      titleKey: "features.items.smartDiscovery.title",
+      descriptionKey: "features.items.smartDiscovery.description",
       gradient: "from-gradient-pink to-gradient-purple",
     },
     {
       icon: Calendar,
-      title: "24/7 Easy Booking",
-      description:
-        "Book sessions anytime with real-time availability. Manage, reschedule, or cancel appointments with ease.",
+      titleKey: "features.items.easyBooking.title",
+      descriptionKey: "features.items.easyBooking.description",
       gradient: "from-gradient-orange to-gradient-coral",
     },
     {
       icon: ClipboardList,
-      title: "Custom Training Plans",
-      description:
-        "Get personalized workout and nutrition plans tailored to your goals. Track progress and adjust as you grow.",
+      titleKey: "features.items.customPlans.title",
+      descriptionKey: "features.items.customPlans.description",
       gradient: "from-gradient-teal to-gradient-mint",
     },
     {
       icon: MessageSquare,
-      title: "Direct Messaging",
-      description:
-        "Stay connected with your coach through instant messaging. Share updates, ask questions, and stay motivated.",
+      titleKey: "features.items.directMessaging.title",
+      descriptionKey: "features.items.directMessaging.description",
       gradient: "from-gradient-purple to-gradient-blue",
     },
     {
       icon: TrendingUp,
-      title: "Progress Tracking",
-      description:
-        "Monitor your transformation with detailed analytics. Track weight, measurements, and workout completion.",
+      titleKey: "features.items.progressTracking.title",
+      descriptionKey: "features.items.progressTracking.description",
       gradient: "from-gradient-mint to-gradient-teal",
     },
     {
       icon: Shield,
-      title: "Verified Coaches",
-      description:
-        "All coaches are verified professionals with proven credentials. Train with confidence and trust.",
+      titleKey: "features.items.verifiedCoaches.title",
+      descriptionKey: "features.items.verifiedCoaches.description",
       gradient: "from-gradient-coral to-gradient-orange",
     },
   ];
@@ -59,15 +56,14 @@ const Features = () => {
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-medium text-sm mb-4">
-            PLATFORM FEATURES
+            {t('features.badge')}
           </span>
           <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-6">
-            Everything You Need to{" "}
-            <span className="gradient-text">Succeed</span>
+            {t('features.title')}{" "}
+            <span className="gradient-text">{t('features.titleHighlight')}</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Our platform provides all the tools you need to find the right coach,
-            stay on track, and achieve your fitness goals.
+            {t('features.description')}
           </p>
         </div>
 
@@ -84,10 +80,10 @@ const Features = () => {
                 <feature.icon className="w-6 h-6 text-white" />
               </div>
               <h3 className="font-display font-semibold text-xl text-foreground mb-3">
-                {feature.title}
+                {t(feature.titleKey)}
               </h3>
               <p className="text-muted-foreground leading-relaxed">
-                {feature.description}
+                {t(feature.descriptionKey)}
               </p>
             </div>
           ))}

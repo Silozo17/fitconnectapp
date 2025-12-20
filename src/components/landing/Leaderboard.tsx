@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Trophy, MapPin, Globe, Users, ChevronRight, Medal, Award, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGlobalLeaderboard, useLocalLeaderboard, PublicLeaderboardEntry } from "@/hooks/usePublicLeaderboard";
-import { getLevelTitle } from "@/hooks/useGamification";
 import { Link } from "react-router-dom";
 
 const LOCATION_CACHE_KEY = 'fitconnect_user_location';
@@ -72,6 +71,8 @@ function LeaderboardColumn({
   isLoading: boolean;
   totalParticipants: number;
 }) {
+  const { t } = useTranslation('landing');
+  
   return (
     <Card className="p-6 bg-card/80 backdrop-blur-sm border-border/50">
       <div className="flex items-center gap-2 mb-4">
@@ -90,14 +91,14 @@ function LeaderboardColumn({
           ))
         ) : (
           <p className="text-center text-muted-foreground py-8">
-            No participants yet
+            {t('leaderboard.noParticipants')}
           </p>
         )}
       </div>
 
       {totalParticipants > 5 && (
         <p className="text-center text-sm text-muted-foreground mt-4">
-          + {(totalParticipants - 5).toLocaleString()} more competing
+          {t('leaderboard.moreCompeting', { count: totalParticipants - 5 })}
         </p>
       )}
     </Card>
@@ -105,6 +106,7 @@ function LeaderboardColumn({
 }
 
 export default function Leaderboard() {
+  const { t } = useTranslation('landing');
   const [userLocation, setUserLocation] = useState<CachedLocation | null>(null);
   
   const { data: globalData, isLoading: globalLoading } = useGlobalLeaderboard(5);
@@ -157,17 +159,17 @@ export default function Leaderboard() {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-4">
             <Trophy className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium text-primary">Community Leaderboard</span>
+            <span className="text-sm font-medium text-primary">{t('leaderboard.badge')}</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Join Thousands{" "}
+            {t('leaderboard.title')}{" "}
             <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Competing
+              {t('leaderboard.titleHighlight')}
             </span>{" "}
-            to Be Their Best
+            {t('leaderboard.titleSuffix')}
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Track your progress, earn XP, and compete with fitness enthusiasts in your area and around the world.
+            {t('leaderboard.description')}
           </p>
         </div>
 
@@ -177,7 +179,7 @@ export default function Leaderboard() {
             <div className="flex items-center gap-2 text-muted-foreground">
               <Users className="h-5 w-5 text-primary" />
               <span className="font-semibold">{globalData?.totalParticipants.toLocaleString()}</span>
-              <span>active competitors</span>
+              <span>{t('leaderboard.activeCompetitors')}</span>
             </div>
           </div>
         )}
@@ -185,14 +187,14 @@ export default function Leaderboard() {
         {/* Leaderboard Grid */}
         <div className="grid md:grid-cols-2 gap-6 mb-10">
           <LeaderboardColumn
-            title="Top Globally"
+            title={t('leaderboard.topGlobally')}
             icon={Globe}
             entries={globalData?.entries || []}
             isLoading={globalLoading}
             totalParticipants={globalData?.totalParticipants || 0}
           />
           <LeaderboardColumn
-            title={userLocation?.city ? `Near You (${userLocation.city})` : "Near You"}
+            title={userLocation?.city ? t('leaderboard.nearYouWithCity', { city: userLocation.city }) : t('leaderboard.nearYou')}
             icon={MapPin}
             entries={localData?.entries || []}
             isLoading={localLoading || !userLocation}
@@ -204,7 +206,7 @@ export default function Leaderboard() {
         <div className="text-center space-y-4">
           <Link to="/community">
             <Button size="lg" variant="outline" className="gap-2">
-              View Full Leaderboards
+              {t('leaderboard.viewFull')}
               <ChevronRight className="h-4 w-4" />
             </Button>
           </Link>
@@ -212,14 +214,14 @@ export default function Leaderboard() {
             <Link to="/auth?tab=signup">
               <Button size="lg" className="gap-2 shadow-lg shadow-primary/25">
                 <Trophy className="h-5 w-5" />
-                Join the Competition - It's Free
+                {t('leaderboard.joinCta')}
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </Link>
           </div>
           <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
             <Lock className="w-3 h-3" />
-            Your privacy is protected. Only appear on leaderboards if you choose to.
+            {t('leaderboard.privacyNote')}
           </p>
         </div>
       </div>

@@ -1,8 +1,11 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
 
 const CTA = () => {
+  const { t } = useTranslation('landing');
+
   return (
     <section className="py-24 md:py-32 relative overflow-hidden">
       {/* Gradient Background */}
@@ -23,11 +26,10 @@ const CTA = () => {
 
           {/* Content */}
           <h2 className="font-display text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
-            Ready to Start Your Transformation?
+            {t('cta.title')}
           </h2>
           <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto mb-10">
-            Join thousands of members who have already found their perfect coach.
-            Your fitness journey starts with a single step.
+            {t('cta.description')}
           </p>
 
           {/* CTAs */}
@@ -38,7 +40,7 @@ const CTA = () => {
               className="bg-gray-900 text-white hover:bg-gray-800 h-14 px-8 text-lg font-semibold rounded-xl shadow-lg"
             >
               <Link to="/coaches">
-                Find Your Coach
+                {t('cta.findCoach')}
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Link>
             </Button>
@@ -48,7 +50,7 @@ const CTA = () => {
               size="lg"
               className="border-gray-900 text-gray-900 hover:bg-gray-900/10 h-14 text-lg px-8 rounded-xl border-2"
             >
-              <Link to="/for-coaches">Apply as Coach</Link>
+              <Link to="/for-coaches">{t('cta.applyAsCoach')}</Link>
             </Button>
           </div>
 
@@ -56,15 +58,15 @@ const CTA = () => {
           <div className="mt-12 flex flex-wrap justify-center gap-6 text-white/70 text-sm">
             <span className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-white/50" />
-              Free to join
+              {t('cta.trustBadges.freeToJoin')}
             </span>
             <span className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-white/50" />
-              No commitment
+              {t('cta.trustBadges.noCommitment')}
             </span>
             <span className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-white/50" />
-              Cancel anytime
+              {t('cta.trustBadges.cancelAnytime')}
             </span>
           </div>
         </div>

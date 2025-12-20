@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Star, MapPin, ArrowRight, CheckCircle, Loader2 } from "lucide-react";
@@ -6,6 +7,7 @@ import { useCoachMarketplace } from "@/hooks/useCoachMarketplace";
 import { useUserLocation } from "@/hooks/useUserLocation";
 
 const FeaturedCoaches = () => {
+  const { t } = useTranslation('landing');
   const { location, isLoading: locationLoading } = useUserLocation();
   
   // Build location search string
@@ -88,15 +90,15 @@ const FeaturedCoaches = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
           <div>
             <span className="inline-block px-4 py-1.5 rounded-full bg-gradient-teal/10 text-gradient-teal font-medium text-sm mb-4">
-              TOP RATED
+              {t('featuredCoaches.badge')}
             </span>
             <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
-              Featured <span className="gradient-text-teal">Coaches</span>
+              {t('featuredCoaches.title')} <span className="gradient-text-teal">{t('featuredCoaches.titleHighlight')}</span>
             </h2>
             {!isLoading && (
               <p className="text-muted-foreground mt-2 flex items-center gap-2">
                 <MapPin className="w-4 h-4" />
-                Showing coaches near {locationLabel}
+                {t('featuredCoaches.showingNear', { location: locationLabel })}
               </p>
             )}
           </div>
@@ -106,7 +108,7 @@ const FeaturedCoaches = () => {
             className="border-border text-foreground hover:bg-secondary rounded-xl"
           >
             <Link to="/coaches">
-              View All Coaches
+              {t('featuredCoaches.viewAll')}
               <ArrowRight className="ml-2 w-4 h-4" />
             </Link>
           </Button>
@@ -139,7 +141,7 @@ const FeaturedCoaches = () => {
                     <div className="absolute top-3 right-3">
                       <Badge className="gradient-bg-primary text-white border-0 gap-1">
                         <CheckCircle className="w-3 h-3" />
-                        Verified
+                        {t('featuredCoaches.verified')}
                       </Badge>
                     </div>
                   )}
@@ -153,7 +155,7 @@ const FeaturedCoaches = () => {
                       {coach.rating || 4.8}
                     </span>
                     <span className="text-muted-foreground text-sm">
-                      ({coach.reviews_count || 0} reviews)
+                      ({coach.reviews_count || 0} {t('featuredCoaches.reviews')})
                     </span>
                   </div>
 
@@ -183,10 +185,10 @@ const FeaturedCoaches = () => {
 
                   <div className="flex items-center justify-between pt-4 border-t border-border">
                     <span className="font-display font-bold text-foreground">
-                      £{coach.hourly_rate || 50}/session
+                      £{coach.hourly_rate || 50}{t('featuredCoaches.perSession')}
                     </span>
                     <span className="text-primary text-sm font-medium group-hover:underline">
-                      View Profile →
+                      {t('featuredCoaches.viewProfile')}
                     </span>
                   </div>
                 </div>
