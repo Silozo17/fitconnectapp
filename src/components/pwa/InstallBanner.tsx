@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
+import { useEnvironment } from '@/hooks/useEnvironment';
 import { Download, X, Share } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import fitconnectIcon from '@/assets/fitconnect-icon.png';
@@ -10,6 +11,7 @@ const DISMISS_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 export const InstallBanner = () => {
   const { canInstall, isInstalled, isIOS, triggerInstall } = usePWAInstall();
+  const { isBrowser, isStandalone, isNativeApp } = useEnvironment();
   const [isDismissed, setIsDismissed] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -50,8 +52,8 @@ export const InstallBanner = () => {
     }
   };
 
-  // Don't show if: already installed, dismissed, or not on mobile
-  if (isInstalled || isDismissed || !isMobile) {
+  // Don't show if: already installed, dismissed, not on mobile, or running in PWA/native context
+  if (isInstalled || isDismissed || !isMobile || !isBrowser || isStandalone || isNativeApp) {
     return null;
   }
 
