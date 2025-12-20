@@ -96,7 +96,7 @@ const CoachBoost = () => {
                 <AccordionItem value="item-1">
                   <AccordionTrigger>How much does Boost cost?</AccordionTrigger>
                   <AccordionContent>
-                    There's no monthly fee. You only pay when Boost brings you a NEW client. The fee is {commissionPercent}% of their first session booking, with a minimum of {minFee} and maximum of {maxFee} per client acquisition.
+                    There's no monthly fee. You only pay when Boost brings you a NEW client. The fee is {commissionPercent}% of their first session booking. Bookings under {minFee} are calculated at {minFee} (minimum fee: {settings ? formatCurrency(settings.min_fee * settings.commission_rate, "GBP") : "£9"}). Bookings over {maxFee} are capped at {maxFee} (maximum fee: {settings ? formatCurrency(settings.max_fee * settings.commission_rate, "GBP") : "£30"}).
                   </AccordionContent>
                 </AccordionItem>
 

@@ -280,12 +280,15 @@ export const useUpdateBoostSettings = () => {
 };
 
 // Calculate boost fee helper
+// Logic: Fee is 30% of booking, but calculated on a clamped range:
+// - Floor: min_fee (£30) - bookings below this still pay 30% of min_fee
+// - Cap: max_fee (£100) - bookings above this only pay 30% of max_fee
 export const calculateBoostFee = (
   bookingAmount: number,
   settings: BoostSettings
 ): number => {
-  let fee = bookingAmount * settings.commission_rate;
-  fee = Math.max(fee, settings.min_fee);
-  fee = Math.min(fee, settings.max_fee);
+  // Clamp the booking amount between min and max for fee calculation
+  const cappedAmount = Math.min(Math.max(bookingAmount, settings.min_fee), settings.max_fee);
+  const fee = cappedAmount * settings.commission_rate;
   return Math.round(fee * 100) / 100;
 };

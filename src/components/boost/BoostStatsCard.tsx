@@ -167,10 +167,12 @@ export const BoostStatsCard = () => {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
-              See how much you'd pay for different booking amounts:
+              Fee is {Math.round(settings.commission_rate * 100)}% of booking value. 
+              Minimum fee: {formatCurrency(settings.min_fee * settings.commission_rate, "GBP")} (on bookings under {formatCurrency(settings.min_fee, "GBP")}). 
+              Maximum fee: {formatCurrency(settings.max_fee * settings.commission_rate, "GBP")} (on bookings over {formatCurrency(settings.max_fee, "GBP")}).
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {[30, 50, 70, 100].map((amount) => {
+              {[20, 50, 100, 150].map((amount) => {
                 const fee = calculateBoostFee(amount, settings);
                 return (
                   <div key={amount} className="p-3 rounded-lg bg-muted/50 text-center">
