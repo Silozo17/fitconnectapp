@@ -71,6 +71,8 @@ interface ClientUser {
   leaderboard_visible?: boolean | null;
   leaderboard_display_name?: string | null;
   coach_count?: number;
+  selected_avatar_slug?: string | null;
+  selected_avatar_rarity?: string | null;
 }
 
 const AdminUsers = () => {
@@ -106,10 +108,10 @@ const AdminUsers = () => {
   const fetchUsers = async () => {
     setLoading(true);
     
-    // Fetch users with coach count
+    // Fetch users with avatar data via join
     const { data, error } = await supabase
       .from("client_profiles")
-      .select("*")
+      .select("*, avatars:selected_avatar_id(slug, rarity)")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -119,7 +121,7 @@ const AdminUsers = () => {
       return;
     }
 
-    // Fetch coach counts for each user
+    // Fetch coach counts for each user and extract avatar data
     const usersWithCoachCount = await Promise.all(
       (data || []).map(async (user) => {
         const { count } = await supabase
@@ -127,7 +129,13 @@ const AdminUsers = () => {
           .select("*", { count: "exact", head: true })
           .eq("client_id", user.id);
         
-        return { ...user, coach_count: count || 0 };
+        const avatarData = user.avatars as { slug: string; rarity: string } | null;
+        return { 
+          ...user, 
+          coach_count: count || 0,
+          selected_avatar_slug: avatarData?.slug || null,
+          selected_avatar_rarity: avatarData?.rarity || null,
+        };
       })
     );
 
