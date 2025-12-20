@@ -738,5 +738,176 @@
       "help": "Centrum pomocy",
       "careers": "Kariera"
     }
+  },
+  "integrations": {
+    "title": "Integracje",
+    "subtitle": "Połącz swoje aplikacje i usługi fitness",
+    "connected": "Połączono",
+    "connect": "Połącz",
+    "disconnect": "Rozłącz",
+    "connecting": "Łączenie...",
+    "disconnecting": "Rozłączanie...",
+    "syncNow": "Synchronizuj teraz",
+    "lastSync": "Ostatnia synchronizacja {{time}}",
+    "neverSynced": "Nigdy nie synchronizowano",
+    "connectionError": "Błąd połączenia",
+    "tryAgain": "Spróbuj ponownie",
+    "wearables": {
+      "title": "Urządzenia noszone",
+      "subtitle": "Połącz swoje trackery fitness i smartwatche",
+      "syncHealthData": "Automatycznie synchronizuj dane zdrowotne i fitness",
+      "appleHealth": {
+        "name": "Apple Health",
+        "description": "Synchronizuj dane zdrowotne z iPhone'a i Apple Watch"
+      },
+      "googleFit": {
+        "name": "Google Fit",
+        "description": "Połącz swoje konto Google Fit"
+      },
+      "fitbit": {
+        "name": "Fitbit",
+        "description": "Synchronizuj dane z urządzenia Fitbit"
+      },
+      "garmin": {
+        "name": "Garmin",
+        "description": "Połącz swoje urządzenie Garmin"
+      },
+      "strava": {
+        "name": "Strava",
+        "description": "Importuj swoje aktywności ze Strava"
+      },
+      "whoop": {
+        "name": "WHOOP",
+        "description": "Połącz swój pasek WHOOP"
+      }
+    },
+    "video": {
+      "title": "Wideokonferencje",
+      "subtitle": "Połącz platformy wideo dla sesji online",
+      "zoom": {
+        "name": "Zoom",
+        "description": "Prowadź i dołączaj do sesji wideo przez Zoom"
+      },
+      "googleMeet": {
+        "name": "Google Meet",
+        "description": "Używaj Google Meet do połączeń wideo"
+      },
+      "microsoftTeams": {
+        "name": "Microsoft Teams",
+        "description": "Połącz się z Microsoft Teams"
+      }
+    },
+    "calendar": {
+      "title": "Synchronizacja kalendarza",
+      "subtitle": "Synchronizuj harmonogram z zewnętrznymi kalendarzami",
+      "googleCalendar": {
+        "name": "Kalendarz Google",
+        "description": "Synchronizuj sesje z Kalendarzem Google"
+      },
+      "outlook": {
+        "name": "Kalendarz Outlook",
+        "description": "Synchronizuj z Microsoft Outlook"
+      },
+      "appleCalendar": {
+        "name": "Kalendarz Apple",
+        "description": "Synchronizuj z Kalendarzem Apple przez CalDAV"
+      }
+    },
+    "healthData": {
+      "title": "Dane zdrowotne",
+      "subtitle": "Śledź swoje metryki zdrowotne",
+      "addManually": "Dodaj ręcznie",
+      "syncFromDevice": "Synchronizuj z urządzenia",
+      "metrics": {
+        "steps": "Kroki",
+        "heartRate": "Tętno",
+        "caloriesBurned": "Spalone kalorie",
+        "sleep": "Sen",
+        "activeMinutes": "Aktywne minuty",
+        "distance": "Dystans",
+        "weight": "Waga",
+        "bodyFat": "Procent tkanki tłuszczowej",
+        "bloodPressure": "Ciśnienie krwi",
+        "bloodGlucose": "Poziom glukozy",
+        "oxygenSaturation": "Saturacja tlenu",
+        "restingHeartRate": "Tętno spoczynkowe",
+        "hrv": "Zmienność rytmu serca",
+        "vo2Max": "VO2 Max",
+        "flightsClimbed": "Pokonane piętra"
+      },
+      "units": {
+        "steps": "kroków",
+        "bpm": "ud./min",
+        "kcal": "kcal",
+        "hours": "godzin",
+        "minutes": "min",
+        "km": "km",
+        "miles": "mil",
+        "kg": "kg",
+        "lbs": "funtów",
+        "percent": "%"
+      },
+      "todaysSummary": "Podsumowanie dnia",
+      "weeklyAverage": "Średnia tygodniowa",
+      "noData": "Brak dostępnych danych",
+      "verified": "Zweryfikowano z urządzenia",
+      "manual": "Wprowadzono ręcznie"
+    }
+  },
+  "onboardingIntegrations": {
+    "wearables": {
+      "title": "Połącz swoje urządzenia fitness",
+      "subtitle": "Automatycznie synchronizuj dane zdrowotne z ulubionych urządzeń",
+      "continueButton": "Kontynuuj",
+      "skipButton": "Pomiń na razie",
+      "connectedCount": "{{count}} urządzenie połączone",
+      "connectedCountPlural": "{{count}} urządzeń połączonych"
+    },
+    "videoCalendar": {
+      "title": "Połącz swoje narzędzia",
+      "subtitle": "Skonfiguruj wideokonferencje i synchronizację kalendarza",
+      "videoSection": "Wideokonferencje",
+      "calendarSection": "Synchronizacja kalendarza",
+      "continueButton": "Kontynuuj",
+      "skipButton": "Pomiń na razie"
+    }
+  },
+  "viewSwitcher": {
+    "cardView": "Widok kart",
+    "tableView": "Widok tabeli",
+    "listView": "Widok listy",
+    "gridView": "Widok siatki"
+  },
+  "avatarManagement": {
+    "title": "Zarządzanie awatarami",
+    "lockedAvatars": "Zablokowane awatary",
+    "unlockedAvatars": "Odblokowane awatary",
+    "grantAvatar": "Przyznaj awatar",
+    "revokeAvatar": "Odbierz awatar",
+    "grantToUser": "Przyznaj użytkownikowi",
+    "selectUser": "Wybierz użytkownika",
+    "selectAvatar": "Wybierz awatar",
+    "reason": "Powód",
+    "reasonPlaceholder": "Podaj powód przyznania tego awatara",
+    "grantSuccess": "Awatar przyznany pomyślnie",
+    "revokeSuccess": "Awatar odebrany pomyślnie",
+    "grantError": "Nie udało się przyznać awatara",
+    "revokeError": "Nie udało się odebrać awatara",
+    "noLockedAvatars": "Brak zablokowanych awatarów",
+    "avatarDetails": "Szczegóły awatara",
+    "rarity": "Rzadkość",
+    "unlockType": "Typ odblokowania",
+    "unlockThreshold": "Próg odblokowania"
+  },
+  "bulkActions": {
+    "selectAll": "Zaznacz wszystko",
+    "deselectAll": "Odznacz wszystko",
+    "selectedCount": "{{count}} zaznaczonych",
+    "bulkDelete": "Usuń zaznaczone",
+    "bulkExport": "Eksportuj zaznaczone",
+    "bulkUpdate": "Aktualizuj zaznaczone",
+    "confirmBulkDelete": "Czy na pewno chcesz usunąć {{count}} elementów?",
+    "bulkActionSuccess": "Akcja zbiorcza zakończona pomyślnie",
+    "bulkActionError": "Niektóre elementy nie zostały przetworzone"
   }
 }

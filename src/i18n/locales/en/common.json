@@ -738,5 +738,176 @@
       "help": "Help Center",
       "careers": "Careers"
     }
+  },
+  "integrations": {
+    "title": "Integrations",
+    "subtitle": "Connect your fitness apps and services",
+    "connected": "Connected",
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "connecting": "Connecting...",
+    "disconnecting": "Disconnecting...",
+    "syncNow": "Sync Now",
+    "lastSync": "Last synced {{time}}",
+    "neverSynced": "Never synced",
+    "connectionError": "Connection error",
+    "tryAgain": "Try again",
+    "wearables": {
+      "title": "Wearable Devices",
+      "subtitle": "Connect your fitness trackers and smartwatches",
+      "syncHealthData": "Sync your health and fitness data automatically",
+      "appleHealth": {
+        "name": "Apple Health",
+        "description": "Sync health data from your iPhone and Apple Watch"
+      },
+      "googleFit": {
+        "name": "Google Fit",
+        "description": "Connect your Google Fit account"
+      },
+      "fitbit": {
+        "name": "Fitbit",
+        "description": "Sync data from your Fitbit device"
+      },
+      "garmin": {
+        "name": "Garmin",
+        "description": "Connect your Garmin device"
+      },
+      "strava": {
+        "name": "Strava",
+        "description": "Import your Strava activities"
+      },
+      "whoop": {
+        "name": "WHOOP",
+        "description": "Connect your WHOOP strap"
+      }
+    },
+    "video": {
+      "title": "Video Conferencing",
+      "subtitle": "Connect video platforms for online sessions",
+      "zoom": {
+        "name": "Zoom",
+        "description": "Host and join video sessions via Zoom"
+      },
+      "googleMeet": {
+        "name": "Google Meet",
+        "description": "Use Google Meet for video calls"
+      },
+      "microsoftTeams": {
+        "name": "Microsoft Teams",
+        "description": "Connect with Microsoft Teams"
+      }
+    },
+    "calendar": {
+      "title": "Calendar Sync",
+      "subtitle": "Sync your schedule with external calendars",
+      "googleCalendar": {
+        "name": "Google Calendar",
+        "description": "Sync sessions with Google Calendar"
+      },
+      "outlook": {
+        "name": "Outlook Calendar",
+        "description": "Sync with Microsoft Outlook"
+      },
+      "appleCalendar": {
+        "name": "Apple Calendar",
+        "description": "Sync with Apple Calendar via CalDAV"
+      }
+    },
+    "healthData": {
+      "title": "Health Data",
+      "subtitle": "Track your health metrics",
+      "addManually": "Add Manually",
+      "syncFromDevice": "Sync from Device",
+      "metrics": {
+        "steps": "Steps",
+        "heartRate": "Heart Rate",
+        "caloriesBurned": "Calories Burned",
+        "sleep": "Sleep",
+        "activeMinutes": "Active Minutes",
+        "distance": "Distance",
+        "weight": "Weight",
+        "bodyFat": "Body Fat %",
+        "bloodPressure": "Blood Pressure",
+        "bloodGlucose": "Blood Glucose",
+        "oxygenSaturation": "Oxygen Saturation",
+        "restingHeartRate": "Resting Heart Rate",
+        "hrv": "Heart Rate Variability",
+        "vo2Max": "VO2 Max",
+        "flightsClimbed": "Flights Climbed"
+      },
+      "units": {
+        "steps": "steps",
+        "bpm": "bpm",
+        "kcal": "kcal",
+        "hours": "hours",
+        "minutes": "min",
+        "km": "km",
+        "miles": "miles",
+        "kg": "kg",
+        "lbs": "lbs",
+        "percent": "%"
+      },
+      "todaysSummary": "Today's Summary",
+      "weeklyAverage": "Weekly Average",
+      "noData": "No data available",
+      "verified": "Verified from device",
+      "manual": "Manually entered"
+    }
+  },
+  "onboardingIntegrations": {
+    "wearables": {
+      "title": "Connect Your Fitness Devices",
+      "subtitle": "Sync your health data automatically from your favourite devices",
+      "continueButton": "Continue",
+      "skipButton": "Skip for now",
+      "connectedCount": "{{count}} device connected",
+      "connectedCountPlural": "{{count}} devices connected"
+    },
+    "videoCalendar": {
+      "title": "Connect Your Tools",
+      "subtitle": "Set up video conferencing and calendar sync for seamless scheduling",
+      "videoSection": "Video Conferencing",
+      "calendarSection": "Calendar Sync",
+      "continueButton": "Continue",
+      "skipButton": "Skip for now"
+    }
+  },
+  "viewSwitcher": {
+    "cardView": "Card View",
+    "tableView": "Table View",
+    "listView": "List View",
+    "gridView": "Grid View"
+  },
+  "avatarManagement": {
+    "title": "Avatar Management",
+    "lockedAvatars": "Locked Avatars",
+    "unlockedAvatars": "Unlocked Avatars",
+    "grantAvatar": "Grant Avatar",
+    "revokeAvatar": "Revoke Avatar",
+    "grantToUser": "Grant to User",
+    "selectUser": "Select User",
+    "selectAvatar": "Select Avatar",
+    "reason": "Reason",
+    "reasonPlaceholder": "Enter reason for granting this avatar",
+    "grantSuccess": "Avatar granted successfully",
+    "revokeSuccess": "Avatar revoked successfully",
+    "grantError": "Failed to grant avatar",
+    "revokeError": "Failed to revoke avatar",
+    "noLockedAvatars": "No locked avatars available",
+    "avatarDetails": "Avatar Details",
+    "rarity": "Rarity",
+    "unlockType": "Unlock Type",
+    "unlockThreshold": "Unlock Threshold"
+  },
+  "bulkActions": {
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "selectedCount": "{{count}} selected",
+    "bulkDelete": "Delete Selected",
+    "bulkExport": "Export Selected",
+    "bulkUpdate": "Update Selected",
+    "confirmBulkDelete": "Are you sure you want to delete {{count}} items?",
+    "bulkActionSuccess": "Bulk action completed successfully",
+    "bulkActionError": "Some items failed to process"
   }
 }
