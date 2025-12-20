@@ -1,0 +1,129 @@
+{
+  "client": {
+    "overview": {
+      "title": "Dashboard",
+      "description": "Your fitness journey overview",
+      "retry": "Retry",
+      "errorLoading": "Failed to load some dashboard data. Please try again."
+    },
+    "quickActions": {
+      "myCoaches": "My Coaches",
+      "activeCoaches": "{{count}} active coach",
+      "activeCoaches_plural": "{{count}} active coaches",
+      "sessions": "Sessions",
+      "upcoming": "{{count}} upcoming",
+      "messages": "Messages",
+      "unread": "{{count}} unread",
+      "allCaughtUp": "All caught up",
+      "myPlans": "My Plans",
+      "activePlans": "{{count}} active plan",
+      "activePlans_plural": "{{count}} active plans",
+      "habits": "Habits",
+      "trackHabits": "Track daily habits",
+      "progress": "Progress",
+      "trackJourney": "Track your journey"
+    },
+    "cta": {
+      "startJourney": "Start Your Fitness Journey",
+      "startJourneyDesc": "Connect with a certified fitness coach to create a personalized training plan and achieve your goals.",
+      "findCoach": "Find a Coach"
+    },
+    "sections": {
+      "todaysHealth": "Today's Health",
+      "friendRequests": "Friend Requests",
+      "recentActivity": "Recent Activity"
+    }
+  },
+  "coach": {
+    "overview": {
+      "title": "Coach Dashboard",
+      "description": "Manage your coaching business from here.",
+      "welcome": "Welcome back",
+      "welcomeWithName": "Welcome back, {{name}}!"
+    },
+    "stats": {
+      "activeClients": "Active Clients",
+      "thisWeek": "This Week",
+      "sessions": "sessions",
+      "messages": "Messages",
+      "unread": "unread",
+      "revenue": "Revenue",
+      "thisMonth": "this month"
+    },
+    "quickActions": {
+      "myClients": "My Clients",
+      "noClientsYet": "No clients yet",
+      "schedule": "Schedule",
+      "setupAvailability": "Set up your availability",
+      "settings": "Settings",
+      "editProfile": "Edit your profile"
+    },
+    "emptyState": {
+      "title": "Your profile is live!",
+      "description": "Clients can now find you in the marketplace. Set up your availability to start receiving bookings.",
+      "setupAvailability": "Set Up Availability"
+    },
+    "tiers": {
+      "founder": "Founder",
+      "enterprise": "Enterprise",
+      "pro": "Pro",
+      "starter": "Starter",
+      "free": "Free"
+    }
+  },
+  "admin": {
+    "overview": {
+      "title": "Admin Dashboard",
+      "description": "Platform overview and management",
+      "customize": "Customize",
+      "editLayout": "Edit Layout",
+      "done": "Done",
+      "dragToReorder": "Drag widgets to reorder them. Use the resize menu on each widget to change its size.",
+      "noWidgets": "No widgets enabled. Click \"Customize\" to add widgets."
+    },
+    "widgets": {
+      "totalUsers": "Total Users",
+      "activeCoaches": "Active Coaches",
+      "scheduledSessions": "Scheduled Sessions",
+      "monthlyRevenue": "Monthly Revenue",
+      "totalMessages": "Total Messages",
+      "totalReviews": "Total Reviews",
+      "userSignups": "User Signups (7 days)",
+      "revenue7Days": "Revenue (7 days)",
+      "sessions7Days": "Sessions (7 days)",
+      "recentActivity": "Recent Activity",
+      "quickActions": "Quick Actions",
+      "pendingVerifications": "Pending Verifications",
+      "recentSignups": "Recent Signups",
+      "recentTransactions": "Recent Transactions",
+      "recentReviews": "Recent Reviews",
+      "topCoaches": "Top Coaches",
+      "flaggedDocuments": "Flagged Documents"
+    },
+    "actions": {
+      "viewAll": "View All",
+      "approve": "Approve",
+      "reject": "Reject",
+      "suspend": "Suspend",
+      "delete": "Delete"
+    }
+  },
+  "header": {
+    "searchClients": "Search clients, sessions...",
+    "search": "Search...",
+    "searchDashboard": "Search dashboard",
+    "myProfile": "My Profile",
+    "signOut": "Sign out",
+    "plan": "{{tier}} Plan",
+    "roleClient": "Client",
+    "roleCoach": "Coach"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "noData": "No data available",
+    "viewAll": "View All",
+    "seeMore": "See More",
+    "showLess": "Show Less"
+  }
+}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ interface CoachProfile {
 }
 
 const CoachDashboard = () => {
+  const { t } = useTranslation('dashboard');
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<CoachProfile | null>(null);
@@ -49,21 +51,14 @@ const CoachDashboard = () => {
     );
   }
 
-  const tierLabel = profile?.subscription_tier === "founder" 
-    ? "Founder" 
-    : profile?.subscription_tier === "enterprise" 
-    ? "Enterprise" 
-    : profile?.subscription_tier === "pro" 
-    ? "Pro" 
-    : profile?.subscription_tier === "starter" 
-    ? "Starter" 
-    : "Free";
+  const tierKey = profile?.subscription_tier || 'free';
+  const tierLabel = t(`coach.tiers.${tierKey}`, { defaultValue: t('coach.tiers.free') });
 
   return (
     <>
       <Helmet>
-        <title>Coach Dashboard | FitConnect</title>
-        <meta name="description" content="Manage your coaching business, clients, and schedule." />
+        <title>{t('coach.overview.title')} | FitConnect</title>
+        <meta name="description" content={t('coach.overview.description')} />
       </Helmet>
 
       <div className="min-h-screen bg-background">
@@ -81,7 +76,7 @@ const CoachDashboard = () => {
                 {tierLabel}
               </span>
               <Button variant="ghost" onClick={() => signOut()} className="text-muted-foreground">
-                Sign Out
+                {t('header.signOut')}
               </Button>
             </div>
           </div>
@@ -92,16 +87,18 @@ const CoachDashboard = () => {
           {/* Welcome */}
           <div className="mb-8">
             <h1 className="font-display text-3xl font-bold text-foreground">
-              Welcome back{profile?.display_name ? `, ${profile.display_name}` : ""}! 💪
+              {profile?.display_name 
+                ? t('coach.overview.welcomeWithName', { name: profile.display_name })
+                : t('coach.overview.welcome')} 💪
             </h1>
-            <p className="text-muted-foreground mt-1">Manage your coaching business from here.</p>
+            <p className="text-muted-foreground mt-1">{t('coach.overview.description')}</p>
           </div>
 
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             <div className="card-elevated p-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-muted-foreground text-sm">Active Clients</span>
+                <span className="text-muted-foreground text-sm">{t('coach.stats.activeClients')}</span>
                 <Users className="w-5 h-5 text-primary" />
               </div>
               <p className="font-display text-3xl font-bold text-foreground">0</p>
@@ -109,29 +106,29 @@ const CoachDashboard = () => {
 
             <div className="card-elevated p-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-muted-foreground text-sm">This Week</span>
+                <span className="text-muted-foreground text-sm">{t('coach.stats.thisWeek')}</span>
                 <Calendar className="w-5 h-5 text-primary" />
               </div>
               <p className="font-display text-3xl font-bold text-foreground">0</p>
-              <p className="text-sm text-muted-foreground">sessions</p>
+              <p className="text-sm text-muted-foreground">{t('coach.stats.sessions')}</p>
             </div>
 
             <div className="card-elevated p-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-muted-foreground text-sm">Messages</span>
+                <span className="text-muted-foreground text-sm">{t('coach.stats.messages')}</span>
                 <MessageSquare className="w-5 h-5 text-primary" />
               </div>
               <p className="font-display text-3xl font-bold text-foreground">0</p>
-              <p className="text-sm text-muted-foreground">unread</p>
+              <p className="text-sm text-muted-foreground">{t('coach.stats.unread')}</p>
             </div>
 
             <div className="card-elevated p-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-muted-foreground text-sm">Revenue</span>
+                <span className="text-muted-foreground text-sm">{t('coach.stats.revenue')}</span>
                 <BarChart3 className="w-5 h-5 text-primary" />
               </div>
               <p className="font-display text-3xl font-bold text-foreground">£0</p>
-              <p className="text-sm text-muted-foreground">this month</p>
+              <p className="text-sm text-muted-foreground">{t('coach.stats.thisMonth')}</p>
             </div>
           </div>
 
@@ -141,24 +138,24 @@ const CoachDashboard = () => {
               <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center mb-4">
                 <Users className="w-6 h-6 text-muted-foreground" />
               </div>
-              <h3 className="font-display font-bold text-foreground mb-1">My Clients</h3>
-              <p className="text-sm text-muted-foreground">No clients yet</p>
+              <h3 className="font-display font-bold text-foreground mb-1">{t('coach.quickActions.myClients')}</h3>
+              <p className="text-sm text-muted-foreground">{t('coach.quickActions.noClientsYet')}</p>
             </div>
 
             <div className="card-elevated p-6 opacity-60">
               <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center mb-4">
                 <Calendar className="w-6 h-6 text-muted-foreground" />
               </div>
-              <h3 className="font-display font-bold text-foreground mb-1">Schedule</h3>
-              <p className="text-sm text-muted-foreground">Set up your availability</p>
+              <h3 className="font-display font-bold text-foreground mb-1">{t('coach.quickActions.schedule')}</h3>
+              <p className="text-sm text-muted-foreground">{t('coach.quickActions.setupAvailability')}</p>
             </div>
 
             <div className="card-elevated p-6 opacity-60">
               <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center mb-4">
                 <Settings className="w-6 h-6 text-muted-foreground" />
               </div>
-              <h3 className="font-display font-bold text-foreground mb-1">Settings</h3>
-              <p className="text-sm text-muted-foreground">Edit your profile</p>
+              <h3 className="font-display font-bold text-foreground mb-1">{t('coach.quickActions.settings')}</h3>
+              <p className="text-sm text-muted-foreground">{t('coach.quickActions.editProfile')}</p>
             </div>
           </div>
 
@@ -168,13 +165,13 @@ const CoachDashboard = () => {
               <Dumbbell className="w-10 h-10 text-primary" />
             </div>
             <h2 className="font-display text-2xl font-bold text-foreground mb-3">
-              Your profile is live!
+              {t('coach.emptyState.title')}
             </h2>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Clients can now find you in the marketplace. Set up your availability to start receiving bookings.
+              {t('coach.emptyState.description')}
             </p>
             <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-              Set Up Availability
+              {t('coach.emptyState.setupAvailability')}
             </Button>
           </div>
         </main>

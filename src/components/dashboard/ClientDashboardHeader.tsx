@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Search, LogOut, User, Menu } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ interface ClientDashboardHeaderProps {
 }
 
 const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => {
+  const { t } = useTranslation('dashboard');
   const navigate = useNavigate();
   const { signOut, role } = useAuth();
   const { displayName, avatarUrl } = useUserProfile();
@@ -54,9 +56,9 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
               <Input
-                placeholder="Search..."
+                placeholder={t('header.search')}
                 className="pl-10 bg-muted/50 border-transparent focus:border-primary"
-                aria-label="Search dashboard"
+                aria-label={t('header.searchDashboard')}
               />
             </div>
           </div>
@@ -80,7 +82,7 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
                 <Button 
                   variant="ghost" 
                   className="flex items-center gap-2 p-1 pt-5 overflow-visible bg-transparent hover:bg-transparent"
-                  aria-label={`Account menu for ${displayName || "Client"}`}
+                  aria-label={`Account menu for ${displayName || t('header.roleClient')}`}
                 >
                   <UserAvatar
                     src={avatarUrl}
@@ -90,27 +92,27 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
                     variant="squircle"
                     size="xs"
                   />
-                  <span className="hidden md:block font-medium">{displayName || "Client"}</span>
+                  <span className="hidden md:block font-medium">{displayName || t('header.roleClient')}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>
                   <div className="flex flex-col">
-                    <span>{displayName || "Client"}</span>
+                    <span>{displayName || t('header.roleClient')}</span>
                     <span className="text-xs text-muted-foreground font-normal">
-                      Client
+                      {t('header.roleClient')}
                     </span>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
                   <User className="w-4 h-4 mr-2" />
-                  My Profile
+                  {t('header.myProfile')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={signOut} className="text-destructive">
                   <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
+                  {t('header.signOut')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

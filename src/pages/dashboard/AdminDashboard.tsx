@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
+import { useTranslation } from "react-i18next";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Settings2, Loader2, Move, Check } from "lucide-react";
@@ -35,6 +36,7 @@ const getSizeClasses = (size: string | null | undefined) => {
 };
 
 const AdminDashboard = () => {
+  const { t } = useTranslation('dashboard');
   const [customizerOpen, setCustomizerOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const { data: widgets, isLoading: widgetsLoading } = useAdminWidgets();
@@ -68,17 +70,17 @@ const AdminDashboard = () => {
     switch (widgetType) {
       // Stats widgets
       case "stats_users":
-        return <StatWidget type="stats_users" title="Total Users" value={stats?.totalUsers || 0} size={widget.size} displayFormat={displayFormat} />;
+        return <StatWidget type="stats_users" title={t('admin.widgets.totalUsers')} value={stats?.totalUsers || 0} size={widget.size} displayFormat={displayFormat} />;
       case "stats_coaches":
-        return <StatWidget type="stats_coaches" title="Active Coaches" value={stats?.totalCoaches || 0} size={widget.size} displayFormat={displayFormat} />;
+        return <StatWidget type="stats_coaches" title={t('admin.widgets.activeCoaches')} value={stats?.totalCoaches || 0} size={widget.size} displayFormat={displayFormat} />;
       case "stats_sessions":
-        return <StatWidget type="stats_sessions" title="Scheduled Sessions" value={stats?.activeSessions || 0} size={widget.size} displayFormat={displayFormat} />;
+        return <StatWidget type="stats_sessions" title={t('admin.widgets.scheduledSessions')} value={stats?.activeSessions || 0} size={widget.size} displayFormat={displayFormat} />;
       case "stats_revenue":
-        return <StatWidget type="stats_revenue" title="Monthly Revenue" value={stats?.monthlyRevenue || 0} size={widget.size} displayFormat={displayFormat} />;
+        return <StatWidget type="stats_revenue" title={t('admin.widgets.monthlyRevenue')} value={stats?.monthlyRevenue || 0} size={widget.size} displayFormat={displayFormat} />;
       case "stats_messages":
-        return <StatWidget type="stats_messages" title="Total Messages" value={stats?.totalMessages || 0} size={widget.size} displayFormat={displayFormat} />;
+        return <StatWidget type="stats_messages" title={t('admin.widgets.totalMessages')} value={stats?.totalMessages || 0} size={widget.size} displayFormat={displayFormat} />;
       case "stats_reviews":
-        return <StatWidget type="stats_reviews" title="Total Reviews" value={stats?.totalReviews || 0} size={widget.size} displayFormat={displayFormat} />;
+        return <StatWidget type="stats_reviews" title={t('admin.widgets.totalReviews')} value={stats?.totalReviews || 0} size={widget.size} displayFormat={displayFormat} />;
 
       // Revenue widgets
       case "revenue_mrr":
@@ -102,11 +104,11 @@ const AdminDashboard = () => {
 
       // Chart widgets
       case "chart_signups":
-        return <ChartWidget type="area" title="User Signups (7 days)" data={stats?.signupChartData || []} />;
+        return <ChartWidget type="area" title={t('admin.widgets.userSignups')} data={stats?.signupChartData || []} />;
       case "chart_revenue":
-        return <ChartWidget type="line" title="Revenue (7 days)" data={stats?.revenueChartData || []} color="hsl(var(--chart-2))" />;
+        return <ChartWidget type="line" title={t('admin.widgets.revenue7Days')} data={stats?.revenueChartData || []} color="hsl(var(--chart-2))" />;
       case "chart_sessions":
-        return <ChartWidget type="bar" title="Sessions (7 days)" data={stats?.sessionChartData || []} color="hsl(var(--chart-3))" />;
+        return <ChartWidget type="bar" title={t('admin.widgets.sessions7Days')} data={stats?.sessionChartData || []} color="hsl(var(--chart-3))" />;
 
       // Integration widgets
       case "integration_health":
@@ -163,16 +165,16 @@ const AdminDashboard = () => {
   return (
     <>
       <Helmet>
-        <title>Admin Dashboard | FitConnect</title>
-        <meta name="description" content="FitConnect admin dashboard for platform management" />
+        <title>{t('admin.overview.title')} | FitConnect</title>
+        <meta name="description" content={t('admin.overview.description')} />
       </Helmet>
 
       <AdminLayout>
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Admin Dashboard</h1>
-              <p className="text-muted-foreground mt-1">Platform overview and management</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{t('admin.overview.title')}</h1>
+              <p className="text-muted-foreground mt-1">{t('admin.overview.description')}</p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <Button 
@@ -184,25 +186,25 @@ const AdminDashboard = () => {
                 {editMode ? (
                   <>
                     <Check className="h-4 w-4 mr-2" />
-                    Done
+                    {t('admin.overview.done')}
                   </>
                 ) : (
                   <>
                     <Move className="h-4 w-4 mr-2" />
-                    Edit Layout
+                    {t('admin.overview.editLayout')}
                   </>
                 )}
               </Button>
               <Button variant="outline" size="sm" onClick={() => setCustomizerOpen(true)} className="flex-1 sm:flex-none">
                 <Settings2 className="h-4 w-4 mr-2" />
-                Customize
+                {t('admin.overview.customize')}
               </Button>
             </div>
           </div>
 
           {editMode && (
             <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 text-sm text-primary">
-              Drag widgets to reorder them. Use the resize menu on each widget to change its size.
+              {t('admin.overview.dragToReorder')}
             </div>
           )}
 
@@ -221,7 +223,7 @@ const AdminDashboard = () => {
             />
           ) : (
             <div className="text-center py-12 text-muted-foreground">
-              <p>No widgets enabled. Click "Customize" to add widgets.</p>
+              <p>{t('admin.overview.noWidgets')}</p>
             </div>
           )}
         </div>

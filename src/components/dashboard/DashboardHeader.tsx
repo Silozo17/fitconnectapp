@@ -1,4 +1,5 @@
 import { memo, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Search, User, LogOut, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,7 @@ interface DashboardHeaderProps {
 }
 
 const DashboardHeader = memo(({ subscriptionTier, onMenuToggle }: DashboardHeaderProps) => {
+  const { t } = useTranslation('dashboard');
   const navigate = useNavigate();
   const { signOut, role } = useAuth();
   const { displayName, avatarUrl } = useUserProfile();
@@ -65,9 +67,9 @@ const DashboardHeader = memo(({ subscriptionTier, onMenuToggle }: DashboardHeade
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
               <Input
-                placeholder="Search clients, sessions..."
+                placeholder={t('header.searchClients')}
                 className="pl-10 bg-secondary border-border"
-                aria-label="Search clients, sessions"
+                aria-label={t('header.searchDashboard')}
               />
             </div>
           </div>
@@ -111,7 +113,7 @@ const DashboardHeader = memo(({ subscriptionTier, onMenuToggle }: DashboardHeade
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{displayName || "Coach"}</p>
+                    <p className="text-sm font-medium leading-none">{displayName || t('header.roleCoach')}</p>
                     <p className="text-xs leading-none text-muted-foreground">
                       {tierLabel} Plan
                     </p>
@@ -120,11 +122,11 @@ const DashboardHeader = memo(({ subscriptionTier, onMenuToggle }: DashboardHeade
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleProfileClick}>
                   <User className="h-4 w-4 mr-2" />
-                  My Profile
+                  {t('header.myProfile')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="h-4 w-4 mr-2" />
-                  Sign out
+                  {t('header.signOut')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
