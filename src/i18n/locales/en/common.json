@@ -817,18 +817,6 @@
         "description": "Sync with Apple Calendar via CalDAV"
       }
     },
-        "name": "Google Calendar",
-        "description": "Sync sessions with Google Calendar"
-      },
-      "outlook": {
-        "name": "Outlook Calendar",
-        "description": "Sync with Microsoft Outlook"
-      },
-      "appleCalendar": {
-        "name": "Apple Calendar",
-        "description": "Sync with Apple Calendar via CalDAV"
-      }
-    },
     "healthData": {
       "title": "Health Data",
       "subtitle": "Track your health metrics",
