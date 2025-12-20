@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   CookieConsent,
   CONSENT_STORAGE_KEY,
   DEFAULT_CONSENT,
   FULL_CONSENT,
 } from "@/types/consent";
+import { getEnvironment } from "@/hooks/useEnvironment";
 
 interface UseCookieConsentReturn {
   consent: CookieConsent | null;
@@ -19,6 +20,12 @@ interface UseCookieConsentReturn {
 export const useCookieConsent = (): UseCookieConsentReturn => {
   const [consent, setConsent] = useState<CookieConsent | null>(null);
   const [hasChecked, setHasChecked] = useState(false);
+
+  // Check if running in app context (PWA or native) - cookie consent not needed
+  const isAppContext = useMemo(() => {
+    const env = getEnvironment();
+    return env.isStandalone || env.isNativeApp;
+  }, []);
 
   // Load consent from localStorage on mount
   useEffect(() => {
@@ -70,7 +77,8 @@ export const useCookieConsent = (): UseCookieConsentReturn => {
   return {
     consent,
     hasConsented: consent !== null,
-    showBanner: hasChecked && consent === null,
+    // Only show banner in browser context (not PWA or native app)
+    showBanner: hasChecked && consent === null && !isAppContext,
     acceptAll,
     rejectAll,
     updateConsent,
