@@ -1,0 +1,101 @@
+{
+  "xp": {
+    "level": "Poziom",
+    "totalXp": "Łączne XP",
+    "xpToNextLevel": "{{xp}} XP do Poziomu {{level}}",
+    "lvl": "Poz"
+  },
+  "badges": {
+    "title": "Odznaki",
+    "unlocked": "{{earned}} z {{total}} odblokowanych",
+    "earned": "Zdobyto {{date}}",
+    "categories": {
+      "all": "Wszystkie",
+      "workout": "Trening",
+      "streak": "Serie",
+      "progress": "Postęp",
+      "nutrition": "Odżywianie",
+      "challenge": "Wyzwania",
+      "social": "Społeczność",
+      "milestone": "Kamienie milowe"
+    },
+    "rarity": {
+      "common": "Zwykła",
+      "uncommon": "Niezwykła",
+      "rare": "Rzadka",
+      "epic": "Epicka",
+      "legendary": "Legendarna"
+    }
+  },
+  "share": {
+    "button": "Udostępnij",
+    "shareOnX": "Udostępnij na X",
+    "shareOnFacebook": "Udostępnij na Facebook",
+    "shareOnLinkedin": "Udostępnij na LinkedIn",
+    "shareOnWhatsapp": "Udostępnij na WhatsApp",
+    "shareViaEmail": "Udostępnij przez email",
+    "copyLink": "Kopiuj link",
+    "copied": "Skopiowano!",
+    "achievement": {
+      "badge": "🏆 Właśnie zdobyłem odznakę \"{{title}}\" na FitConnect! {{description}}",
+      "level": "⬆️ Awans! Osiągnąłem Poziom {{value}} na FitConnect!\n💪 {{description}}",
+      "challenge": "🎯 Wyzwanie ukończone! Skończyłem \"{{title}}\" na FitConnect!\n{{description}}",
+      "rank": "📊 Jestem na #{{value}} miejscu {{title}} na FitConnect!\n{{description}}",
+      "default": "🎉 {{title}} - {{description}}"
+    }
+  },
+  "leaderboard": {
+    "title": "Ranking",
+    "noEntries": "Brak wpisów",
+    "you": "Ty",
+    "anonymous": "Anonim",
+    "settings": {
+      "title": "Ustawienia rankingu",
+      "description": "Kontroluj jak wyświetlasz się na publicznych rankingach. Twoja prywatność jest dla nas ważna.",
+      "gdprNotice": "Zgodność z RODO:",
+      "gdprDescription": "Rankingi są opcjonalne. Gdy jesteś widoczny, pokazywane jest tylko Twoje imię (lub pseudonim) i lokalizacja. Zdjęcia, nazwiska ani linki do profilu nigdy nie są wyświetlane.",
+      "showOnLeaderboards": "Pokaż mnie w rankingach",
+      "visibleDescription": "Jesteś widoczny w rankingach. Inni widzą Twój ranking i XP.",
+      "hiddenDescription": "Jesteś ukryty we wszystkich rankingach. Włącz aby rywalizować publicznie.",
+      "whatOthersSee": "Co inni zobaczą w rankingu:",
+      "displayName": "Wyświetlana nazwa (opcjonalnie)",
+      "displayNamePlaceholder": "Zostaw puste aby użyć imienia",
+      "displayNameHint": "Użyj pseudonimu dla większej prywatności. Jeśli puste, zostanie pokazane Twoje imię.",
+      "location": "Lokalizacja",
+      "locationPlaceholder": "Wyszukaj swoje miasto...",
+      "locationHint": "Twoja lokalizacja określa w których regionalnych rankingach się pojawisz.",
+      "city": "Miasto",
+      "county": "Powiat",
+      "country": "Kraj",
+      "preview": "Podgląd:",
+      "yourFirstName": "Twoje imię"
+    }
+  },
+  "challenges": {
+    "title": "Wyzwania",
+    "ended": "Zakończone",
+    "starts": "Start {{date}}",
+    "daysLeft": "{{days}} dni pozostało",
+    "verifiedOnly": "Tylko zweryfikowane",
+    "verifiedOnlyTooltip": "Liczy się tylko postęp zweryfikowany przez urządzenie. Połącz urządzenie fitness aby uczestniczyć.",
+    "wearableTracked": "Śledzenie przez urządzenie",
+    "wearableTrackedTooltip": "Postęp automatycznie śledzony z połączonych urządzeń",
+    "xpReward": "{{xp}} XP nagrody",
+    "joined": "{{count}} dołączyło",
+    "maxParticipants": "/ {{max}} maks",
+    "yourProgress": "Twój postęp",
+    "verified": "Zweryfikowane: {{value}}",
+    "manual": "Ręczne: {{value}}",
+    "joinedBadge": "Dołączono",
+    "requiresWearable": "Wymaga połączonego urządzenia",
+    "comingSoon": "Wkrótce",
+    "joinChallenge": "Dołącz do wyzwania"
+  },
+  "rewards": {
+    "exclusiveReward": "Ekskluzywna nagroda",
+    "badge": "Odznaka",
+    "avatar": "Awatar",
+    "unlockToEarn": "Ukończ to wyzwanie aby odblokować",
+    "unlocked": "Odblokowano!"
+  }
+}

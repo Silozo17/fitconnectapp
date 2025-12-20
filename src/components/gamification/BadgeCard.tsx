@@ -1,4 +1,5 @@
 import { forwardRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Badge as BadgeType, RARITY_COLORS } from '@/hooks/useGamification';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -14,6 +15,7 @@ interface BadgeCardProps {
 
 export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
   ({ badge, earned = false, earnedAt, showDetails = true }, ref) => {
+    const { t } = useTranslation('gamification');
     const rarityColors = RARITY_COLORS[badge.rarity] || RARITY_COLORS.common;
     
     return (
@@ -80,12 +82,12 @@ export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
                 rarityColors.bg,
                 rarityColors.text
               )}>
-                {badge.rarity}
+                {t(`badges.rarity.${badge.rarity}`)}
               </div>
               
               {earned && earnedAt && (
                 <div className="text-xs text-muted-foreground mt-2">
-                  Earned {format(new Date(earnedAt), 'MMM d, yyyy')}
+                  {t('badges.earned', { date: format(new Date(earnedAt), 'MMM d, yyyy') })}
                 </div>
               )}
               
