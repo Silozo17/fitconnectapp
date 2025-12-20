@@ -10,7 +10,9 @@ import { AdminProvider } from "@/contexts/AdminContext";
 import { LocaleProvider } from "@/contexts/LocaleContext";
 import { CookieConsentProvider } from "@/contexts/CookieConsentContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import GuestOnlyRoute from "@/components/auth/GuestOnlyRoute";
 import ScrollToTop from "./components/shared/ScrollToTop";
+import RouteRestorer from "./components/shared/RouteRestorer";
 import ScrollRestoration from "./components/shared/ScrollRestoration";
 import PageLoadingSpinner from "./components/shared/PageLoadingSpinner";
 import { ReloadPrompt } from "./components/pwa/ReloadPrompt";
@@ -199,10 +201,11 @@ const App = () => (
             <AuthProvider>
               <AdminProvider>
                 <LocaleProvider>
+                  <RouteRestorer />
                   <Suspense fallback={<PageLoadingSpinner />}>
                   <Routes>
                     <Route path="/" element={<Index />} />
-                    <Route path="/get-started" element={<GetStarted />} />
+                    <Route path="/get-started" element={<GuestOnlyRoute><GetStarted /></GuestOnlyRoute>} />
                     <Route path="/coaches" element={<Coaches />} />
                     <Route path="/coaches/:id" element={<CoachDetail />} />
                     <Route path="/auth" element={<Auth />} />
