@@ -4,10 +4,13 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCoachOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { useCoachProfileRealtime } from "@/hooks/useCoachProfileRealtime";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useEnvironment } from "@/hooks/useEnvironment";
 import { Loader2 } from "lucide-react";
 import CoachSidebar from "./CoachSidebar";
 import DashboardHeader from "./DashboardHeader";
 import SkipNavigation from "@/components/shared/SkipNavigation";
+import MobileBottomNav from "@/components/navigation/MobileBottomNav";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -21,6 +24,11 @@ const DashboardLayout = memo(({ children, title = "Coach Dashboard", description
   const { data: onboardingStatus, isLoading } = useCoachOnboardingStatus();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const isMobile = useIsMobile();
+  const { isPWA, isNativeApp } = useEnvironment();
+  
+  // Check if bottom nav will be shown
+  const showBottomNav = isMobile && (isPWA || isNativeApp);
   
   // Subscribe to realtime updates for coach profile (e.g., admin changes subscription tier)
   useCoachProfileRealtime();
@@ -71,7 +79,7 @@ const DashboardLayout = memo(({ children, title = "Coach Dashboard", description
           />
           <main 
             id="main-content" 
-            className="flex-1 p-4 lg:p-6 pb-24 overflow-y-auto"
+            className={`flex-1 p-4 lg:p-6 overflow-y-auto ${showBottomNav ? "pb-24" : "pb-6"}`}
             role="main"
             aria-label={title}
             tabIndex={-1}
@@ -80,6 +88,8 @@ const DashboardLayout = memo(({ children, title = "Coach Dashboard", description
           </main>
         </div>
       </div>
+
+      <MobileBottomNav variant="coach" />
     </>
   );
 });

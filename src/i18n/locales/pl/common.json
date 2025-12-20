@@ -446,6 +446,16 @@
       "integrations": "Integracje",
       "favourites": "Ulubione",
       "settings": "Ustawienia"
+    },
+    "bottomNav": {
+      "home": "Start",
+      "discover": "Odkryj",
+      "plans": "Plany",
+      "messages": "Wiadomości",
+      "profile": "Profil",
+      "clients": "Klienci",
+      "schedule": "Harmonogram",
+      "mobileNavigation": "Nawigacja mobilna"
     }
   },
   "coach": {
