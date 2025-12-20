@@ -95,6 +95,7 @@ const ClientLibrary = lazy(() => import("./pages/dashboard/client/ClientLibrary"
 const ClientTools = lazy(() => import("./pages/dashboard/client/ClientTools"));
 const ClientReceipts = lazy(() => import("./pages/dashboard/client/ClientReceipts"));
 const ClientFindCoaches = lazy(() => import("./pages/dashboard/client/ClientFindCoaches"));
+const ClientCoachProfile = lazy(() => import("./pages/dashboard/client/ClientCoachProfile"));
 
 // Coach Dashboard Pages
 const CoachOverview = lazy(() => import("./pages/dashboard/coach/CoachOverview"));
@@ -404,6 +405,11 @@ const App = () => (
                     <Route path="/dashboard/client/find-coaches" element={
                       <ProtectedRoute allowedRoles={["client", "admin"]}>
                         <ClientFindCoaches />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/client/find-coaches/:coachSlug" element={
+                      <ProtectedRoute allowedRoles={["client", "admin"]}>
+                        <ClientCoachProfile />
                       </ProtectedRoute>
                     } />
                     <Route path="/dashboard/client/favourites" element={

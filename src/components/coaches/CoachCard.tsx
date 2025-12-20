@@ -17,9 +17,10 @@ interface CoachCardProps {
   coach: MarketplaceCoach;
   onBook?: (coach: MarketplaceCoach) => void;
   onRequestConnection?: (coach: MarketplaceCoach) => void;
+  linkPrefix?: string;
 }
 
-const CoachCard = ({ coach, onBook, onRequestConnection }: CoachCardProps) => {
+const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix = "/coaches" }: CoachCardProps) => {
   const { data: reviews = [] } = useCoachReviews(coach.id);
   const averageRating = calculateAverageRating(reviews);
   const { user, role } = useAuth();
@@ -212,14 +213,14 @@ const CoachCard = ({ coach, onBook, onRequestConnection }: CoachCardProps) => {
                 </Tooltip>
 
                 <Button asChild variant="lime-outline" size="sm">
-                  <Link to={`/coaches/${coach.username || coach.id}`}>View</Link>
+                  <Link to={`${linkPrefix}/${coach.username || coach.id}`}>View</Link>
                 </Button>
               </div>
             </TooltipProvider>
           ) : !isAuthenticated ? (
             <div className="flex items-center gap-2">
               <Button asChild variant="lime-outline" size="sm">
-                <Link to={`/coaches/${coach.username || coach.id}`}>View</Link>
+                <Link to={`${linkPrefix}/${coach.username || coach.id}`}>View</Link>
               </Button>
               <Button variant="lime" size="sm" onClick={handleSignUp}>
                 Connect
@@ -227,7 +228,7 @@ const CoachCard = ({ coach, onBook, onRequestConnection }: CoachCardProps) => {
             </div>
           ) : (
             <Button asChild variant="lime-outline" size="sm">
-              <Link to={`/coaches/${coach.username || coach.id}`}>View Profile</Link>
+              <Link to={`${linkPrefix}/${coach.username || coach.id}`}>View Profile</Link>
             </Button>
           )}
         </div>
