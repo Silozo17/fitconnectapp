@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Lock, Trophy, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -54,6 +55,7 @@ export function ChallengeRewardPreview({
   isUnlocked,
   compact = false,
 }: ChallengeRewardPreviewProps) {
+  const { t } = useTranslation('gamification');
   const styles = RARITY_STYLES[rarity] || RARITY_STYLES.common;
 
   if (compact) {
@@ -90,7 +92,7 @@ export function ChallengeRewardPreview({
             {rewardName}
           </p>
           <p className="text-[10px] text-muted-foreground capitalize">
-            {rarity} {rewardType}
+            {t(`badges.rarity.${rarity}`)} {t(`rewards.${rewardType}`)}
           </p>
         </div>
       </div>
@@ -107,12 +109,11 @@ export function ChallengeRewardPreview({
       <div className="flex items-center gap-2 mb-2">
         <Sparkles className={cn("h-4 w-4", styles.text)} />
         <span className={cn("text-xs font-medium uppercase", styles.text)}>
-          Exclusive Reward
+          {t('rewards.exclusiveReward')}
         </span>
       </div>
 
       <div className="flex items-start gap-3">
-        {/* Image */}
         <div className={cn(
           "relative w-16 h-16 rounded-lg overflow-hidden border-2 shrink-0",
           styles.border,
@@ -141,7 +142,6 @@ export function ChallengeRewardPreview({
           )}
         </div>
 
-        {/* Info */}
         <div className="flex-1 min-w-0">
           <h4 className={cn("font-medium text-sm", !isUnlocked && 'text-muted-foreground')}>
             {rewardName}
@@ -154,7 +154,7 @@ export function ChallengeRewardPreview({
               styles.border
             )}
           >
-            {rarity} {rewardType}
+            {t(`badges.rarity.${rarity}`)} {t(`rewards.${rewardType}`)}
           </Badge>
           {rewardDescription && (
             <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
@@ -165,7 +165,7 @@ export function ChallengeRewardPreview({
             "text-xs mt-1",
             isUnlocked ? 'text-green-500' : 'text-muted-foreground'
           )}>
-            {isUnlocked ? '✓ Earned!' : 'Complete challenge to unlock'}
+            {isUnlocked ? `✓ ${t('rewards.unlocked')}` : t('rewards.unlockToEarn')}
           </p>
         </div>
       </div>

@@ -1,0 +1,101 @@
+{
+  "xp": {
+    "level": "Level",
+    "totalXp": "Total XP",
+    "xpToNextLevel": "{{xp}} XP to Level {{level}}",
+    "lvl": "Lvl"
+  },
+  "badges": {
+    "title": "Badges",
+    "unlocked": "{{earned}} of {{total}} unlocked",
+    "earned": "Earned {{date}}",
+    "categories": {
+      "all": "All",
+      "workout": "Workout",
+      "streak": "Streaks",
+      "progress": "Progress",
+      "nutrition": "Nutrition",
+      "challenge": "Challenges",
+      "social": "Social",
+      "milestone": "Milestones"
+    },
+    "rarity": {
+      "common": "Common",
+      "uncommon": "Uncommon",
+      "rare": "Rare",
+      "epic": "Epic",
+      "legendary": "Legendary"
+    }
+  },
+  "share": {
+    "button": "Share",
+    "shareOnX": "Share on X",
+    "shareOnFacebook": "Share on Facebook",
+    "shareOnLinkedin": "Share on LinkedIn",
+    "shareOnWhatsapp": "Share on WhatsApp",
+    "shareViaEmail": "Share via Email",
+    "copyLink": "Copy Link",
+    "copied": "Copied!",
+    "achievement": {
+      "badge": "🏆 I just earned the \"{{title}}\" badge on FitConnect! {{description}}",
+      "level": "⬆️ Level Up! I just reached Level {{value}} on FitConnect!\n💪 {{description}}",
+      "challenge": "🎯 Challenge Complete! I finished \"{{title}}\" on FitConnect!\n{{description}}",
+      "rank": "📊 I'm ranked #{{value}} {{title}} on FitConnect!\n{{description}}",
+      "default": "🎉 {{title}} - {{description}}"
+    }
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "noEntries": "No entries yet",
+    "you": "You",
+    "anonymous": "Anonymous",
+    "settings": {
+      "title": "Leaderboard Settings",
+      "description": "Control how you appear on public leaderboards. Your privacy is important to us.",
+      "gdprNotice": "GDPR Compliant:",
+      "gdprDescription": "Leaderboards are opt-in only. When visible, only your first name (or alias) and location are shown. No photos, last names, or profile links are ever displayed.",
+      "showOnLeaderboards": "Show me on leaderboards",
+      "visibleDescription": "You're visible on leaderboards. Others can see your rank and XP.",
+      "hiddenDescription": "You're hidden from all leaderboards. Toggle on to compete publicly.",
+      "whatOthersSee": "What others will see on the leaderboard:",
+      "displayName": "Display Name (Optional)",
+      "displayNamePlaceholder": "Leave empty to use your first name",
+      "displayNameHint": "Use an alias for extra privacy. If empty, your first name will be shown.",
+      "location": "Location",
+      "locationPlaceholder": "Search for your city...",
+      "locationHint": "Your location determines which regional leaderboards you appear on.",
+      "city": "City",
+      "county": "County",
+      "country": "Country",
+      "preview": "Preview:",
+      "yourFirstName": "Your First Name"
+    }
+  },
+  "challenges": {
+    "title": "Challenges",
+    "ended": "Ended",
+    "starts": "Starts {{date}}",
+    "daysLeft": "{{days}} days left",
+    "verifiedOnly": "Verified Only",
+    "verifiedOnlyTooltip": "Only wearable-verified progress counts. Connect a fitness device to participate.",
+    "wearableTracked": "Wearable Tracked",
+    "wearableTrackedTooltip": "Progress automatically tracks from connected wearables",
+    "xpReward": "{{xp}} XP reward",
+    "joined": "{{count}} joined",
+    "maxParticipants": "/ {{max}} max",
+    "yourProgress": "Your progress",
+    "verified": "Verified: {{value}}",
+    "manual": "Manual: {{value}}",
+    "joinedBadge": "Joined",
+    "requiresWearable": "Requires connected wearable device",
+    "comingSoon": "Coming Soon",
+    "joinChallenge": "Join Challenge"
+  },
+  "rewards": {
+    "exclusiveReward": "Exclusive Reward",
+    "badge": "Badge",
+    "avatar": "Avatar",
+    "unlockToEarn": "Complete this challenge to unlock",
+    "unlocked": "Unlocked!"
+  }
+}

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Progress } from '@/components/ui/progress';
 import { useClientXP, getLevelTitle, calculateLevelFromXP } from '@/hooks/useGamification';
 import { Zap } from 'lucide-react';
@@ -7,6 +8,7 @@ interface XPProgressBarProps {
 }
 
 export function XPProgressBar({ compact = false }: XPProgressBarProps) {
+  const { t } = useTranslation('gamification');
   const { data: clientXP, isLoading } = useClientXP();
   
   if (isLoading) {
@@ -27,7 +29,7 @@ export function XPProgressBar({ compact = false }: XPProgressBarProps) {
           <Zap className="h-4 w-4" />
           <span>{totalXP}</span>
         </div>
-        <span className="text-xs text-muted-foreground">Lvl {level}</span>
+        <span className="text-xs text-muted-foreground">{t('xp.lvl')} {level}</span>
       </div>
     );
   }
@@ -40,13 +42,13 @@ export function XPProgressBar({ compact = false }: XPProgressBarProps) {
             <Zap className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <div className="font-bold text-foreground">Level {level}</div>
+            <div className="font-bold text-foreground">{t('xp.level')} {level}</div>
             <div className="text-xs text-muted-foreground">{title}</div>
           </div>
         </div>
         <div className="text-right">
           <div className="text-2xl font-bold text-primary">{totalXP.toLocaleString()}</div>
-          <div className="text-xs text-muted-foreground">Total XP</div>
+          <div className="text-xs text-muted-foreground">{t('xp.totalXp')}</div>
         </div>
       </div>
       
@@ -57,7 +59,7 @@ export function XPProgressBar({ compact = false }: XPProgressBarProps) {
         />
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>{xpInLevel.toLocaleString()} XP</span>
-          <span>{xpForNextLevel.toLocaleString()} XP to Level {level + 1}</span>
+          <span>{t('xp.xpToNextLevel', { xp: xpForNextLevel.toLocaleString(), level: level + 1 })}</span>
         </div>
       </div>
     </div>

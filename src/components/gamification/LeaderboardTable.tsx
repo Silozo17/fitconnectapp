@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { XPLeaderboardEntry, getLevelTitle } from '@/hooks/useGamification';
 import { useClientProfileId } from '@/hooks/useClientProfileId';
 import { cn } from '@/lib/utils';
@@ -16,7 +17,8 @@ interface LeaderboardEntryWithAvatar extends XPLeaderboardEntry {
   selected_avatar_rarity?: string | null;
 }
 
-export function LeaderboardTable({ entries, isLoading, emptyMessage = 'No entries yet' }: LeaderboardTableProps) {
+export function LeaderboardTable({ entries, isLoading, emptyMessage }: LeaderboardTableProps) {
+  const { t } = useTranslation('gamification');
   const { data: clientProfileId } = useClientProfileId();
   
   if (isLoading) {
@@ -30,7 +32,7 @@ export function LeaderboardTable({ entries, isLoading, emptyMessage = 'No entrie
   }
   
   if (!entries || entries.length === 0) {
-    return <div className="text-center py-8 text-muted-foreground">{emptyMessage}</div>;
+    return <div className="text-center py-8 text-muted-foreground">{emptyMessage || t('leaderboard.noEntries')}</div>;
   }
   
   const getRankIcon = (rank: number) => {
@@ -56,8 +58,7 @@ export function LeaderboardTable({ entries, isLoading, emptyMessage = 'No entrie
     {entries.map((entry) => {
         const entryWithAvatar = entry as LeaderboardEntryWithAvatar;
         const isMe = clientProfileId === entry.client_id;
-        // Privacy-safe display: only show first name or alias, no last name
-        const displayName = entry.first_name || 'Anonymous';
+        const displayName = entry.first_name || t('leaderboard.anonymous');
         const initials = entry.first_name?.[0] || 'A';
         const locationDisplay = entry.city || entry.county || entry.country;
         
@@ -68,7 +69,6 @@ export function LeaderboardTable({ entries, isLoading, emptyMessage = 'No entrie
         return (
           <div key={entry.client_id} className={cn('flex items-center gap-4 p-3 rounded-lg border transition-all', getRankBg(entry.rank || 0), isMe && 'ring-2 ring-primary')}>
             <div className="w-8 flex justify-center">{getRankIcon(entry.rank || 0)}</div>
-            {/* Avatar or initials */}
             {hasAvatar ? (
               <div className={cn(
                 'h-10 w-10 rounded-full overflow-hidden border-2',
@@ -92,11 +92,11 @@ export function LeaderboardTable({ entries, isLoading, emptyMessage = 'No entrie
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <span className={cn('font-medium truncate', isMe && 'text-primary')}>{displayName}</span>
-                {isMe && <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">You</span>}
+                {isMe && <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">{t('leaderboard.you')}</span>}
               </div>
               <div className="text-xs text-muted-foreground">
                 {locationDisplay && <span>{locationDisplay} • </span>}
-                Level {entry.current_level} • {getLevelTitle(entry.current_level)}
+                {t('xp.level')} {entry.current_level} • {getLevelTitle(entry.current_level)}
               </div>
             </div>
             <div className="flex items-center gap-1 text-primary font-bold">

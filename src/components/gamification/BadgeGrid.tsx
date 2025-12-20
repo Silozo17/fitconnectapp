@@ -1,20 +1,22 @@
+import { useTranslation } from 'react-i18next';
 import { useClientBadgesAvailable, useClientBadges, Badge, RARITY_ORDER } from '@/hooks/useGamification';
 import { BadgeCard } from './BadgeCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const BADGE_CATEGORIES = [
-  { value: 'all', label: 'All' },
-  { value: 'workout', label: 'Workout' },
-  { value: 'streak', label: 'Streaks' },
-  { value: 'progress', label: 'Progress' },
-  { value: 'nutrition', label: 'Nutrition' },
-  { value: 'challenge', label: 'Challenges' },
-  { value: 'social', label: 'Social' },
-  { value: 'milestone', label: 'Milestones' },
-];
+  'all',
+  'workout',
+  'streak',
+  'progress',
+  'nutrition',
+  'challenge',
+  'social',
+  'milestone',
+] as const;
 
 export function BadgeGrid() {
+  const { t } = useTranslation('gamification');
   const { data: badges, isLoading: badgesLoading } = useClientBadgesAvailable();
   const { data: clientBadges, isLoading: clientBadgesLoading } = useClientBadges();
   
@@ -45,9 +47,9 @@ export function BadgeGrid() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-bold">Badges</h3>
+          <h3 className="text-lg font-bold">{t('badges.title')}</h3>
           <p className="text-sm text-muted-foreground">
-            {earnedCount} of {totalCount} unlocked
+            {t('badges.unlocked', { earned: earnedCount, total: totalCount })}
           </p>
         </div>
       </div>
@@ -56,24 +58,22 @@ export function BadgeGrid() {
         <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50">
           {BADGE_CATEGORIES.map(cat => (
             <TabsTrigger 
-              key={cat.value} 
-              value={cat.value}
+              key={cat} 
+              value={cat}
               className="text-xs px-3 py-1"
             >
-              {cat.label}
+              {t(`badges.categories.${cat}`)}
             </TabsTrigger>
           ))}
         </TabsList>
         
         {BADGE_CATEGORIES.map(cat => (
-          <TabsContent key={cat.value} value={cat.value} className="mt-4">
+          <TabsContent key={cat} value={cat} className="mt-4">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filterBadges(cat.value)
+              {filterBadges(cat)
                 .sort((a, b) => {
-                  // Primary sort: by rarity (common first → legendary last)
                   const rarityDiff = (RARITY_ORDER[a.rarity] || 0) - (RARITY_ORDER[b.rarity] || 0);
                   if (rarityDiff !== 0) return rarityDiff;
-                  // Secondary sort: earned badges first within same rarity
                   const aEarned = earnedBadgeIds.has(a.id);
                   const bEarned = earnedBadgeIds.has(b.id);
                   if (aEarned && !bEarned) return -1;

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -28,20 +29,21 @@ export function ShareAchievementButton({
   variant = 'outline',
   size = 'sm' 
 }: ShareAchievementButtonProps) {
+  const { t } = useTranslation('gamification');
   const [copied, setCopied] = useState(false);
 
   const getShareText = () => {
     switch (achievement.type) {
       case 'badge':
-        return `🏆 I just earned the "${achievement.title}" badge on FitConnect! ${achievement.description}`;
+        return t('share.achievement.badge', { title: achievement.title, description: achievement.description });
       case 'level':
-        return `⬆️ Level Up! I just reached Level ${achievement.value} on FitConnect!\n💪 ${achievement.description}`;
+        return t('share.achievement.level', { value: achievement.value, description: achievement.description });
       case 'challenge':
-        return `🎯 Challenge Complete! I finished "${achievement.title}" on FitConnect!\n${achievement.description}`;
+        return t('share.achievement.challenge', { title: achievement.title, description: achievement.description });
       case 'rank':
-        return `📊 I'm ranked #${achievement.value} ${achievement.title} on FitConnect!\n${achievement.description}`;
+        return t('share.achievement.rank', { value: achievement.value, title: achievement.title, description: achievement.description });
       default:
-        return `🎉 ${achievement.title} - ${achievement.description}`;
+        return t('share.achievement.default', { title: achievement.title, description: achievement.description });
     }
   };
 
@@ -64,33 +66,33 @@ export function ShareAchievementButton({
       <DropdownMenuTrigger asChild>
         <Button variant={variant} size={size}>
           <Share2 className="h-4 w-4 mr-2" />
-          Share
+          {t('share.button')}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuItem onClick={() => handleShare('twitter')}>
           <Twitter className="h-4 w-4 mr-2" />
-          Share on X
+          {t('share.shareOnX')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleShare('facebook')}>
           <Facebook className="h-4 w-4 mr-2" />
-          Share on Facebook
+          {t('share.shareOnFacebook')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleShare('linkedin')}>
           <Linkedin className="h-4 w-4 mr-2" />
-          Share on LinkedIn
+          {t('share.shareOnLinkedin')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleShare('whatsapp')}>
           <MessageCircle className="h-4 w-4 mr-2" />
-          Share on WhatsApp
+          {t('share.shareOnWhatsapp')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleShare('email')}>
           <Mail className="h-4 w-4 mr-2" />
-          Share via Email
+          {t('share.shareViaEmail')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleShare('copy')}>
           {copied ? <Check className="h-4 w-4 mr-2" /> : <Link className="h-4 w-4 mr-2" />}
-          {copied ? 'Copied!' : 'Copy Link'}
+          {copied ? t('share.copied') : t('share.copyLink')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
