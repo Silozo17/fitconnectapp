@@ -53,6 +53,8 @@ interface CoachUser {
   status?: string | null;
   status_reason?: string | null;
   marketplace_visible?: boolean | null;
+  selected_avatar_slug?: string | null;
+  selected_avatar_rarity?: string | null;
 }
 
 const AdminCoaches = () => {
@@ -112,7 +114,7 @@ const AdminCoaches = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("coach_profiles")
-      .select("*")
+      .select("*, avatars:selected_avatar_id(slug, rarity)")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -122,7 +124,17 @@ const AdminCoaches = () => {
       return;
     }
     
-    setCoaches(data || []);
+    // Extract avatar data from the join
+    const coachesWithAvatarData = (data || []).map(coach => {
+      const avatarData = coach.avatars as { slug: string; rarity: string } | null;
+      return {
+        ...coach,
+        selected_avatar_slug: avatarData?.slug || null,
+        selected_avatar_rarity: avatarData?.rarity || null,
+      };
+    });
+    
+    setCoaches(coachesWithAvatarData);
     
     // Fetch last login and email for all coaches
     const authPromises = (data || []).map(async (coach) => {
