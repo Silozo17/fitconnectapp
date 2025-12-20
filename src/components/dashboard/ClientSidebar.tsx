@@ -19,6 +19,7 @@ import {
   Medal,
   Flame,
   BookOpen,
+  ShoppingBag,
   ShoppingCart,
   Calculator,
   Wrench,
@@ -79,6 +80,7 @@ const menuGroups: MenuGroup[] = [
     items: [
       { title: "Home", icon: Home, path: "/dashboard/client" },
       { title: "Find Coaches", icon: Search, path: "/dashboard/client/find-coaches" },
+      { title: "Marketplace", icon: ShoppingBag, path: "/dashboard/client/marketplace" },
       { title: "Messages", icon: MessageSquare, path: "/dashboard/client/messages", badgeKey: "messages" },
       { title: "Connections", icon: UserPlus, path: "/dashboard/client/connections", badgeKey: "connections" },
     ],
