@@ -186,7 +186,7 @@ serve(async (req) => {
           }
         } else if (metadata.type === "platform_subscription") {
           // Coach platform subscription
-          const { error } = await supabase
+          const { data: insertedPlatformSub, error } = await supabase
             .from("platform_subscriptions")
             .upsert({
               coach_id: metadata.coach_id,
@@ -195,7 +195,9 @@ serve(async (req) => {
               stripe_customer_id: session.customer as string,
               status: "active",
               current_period_start: new Date().toISOString(),
-            }, { onConflict: "coach_id" });
+            }, { onConflict: "coach_id" })
+            .select()
+            .single();
 
           if (error) {
             console.error("Error recording platform subscription:", error);
@@ -207,6 +209,40 @@ serve(async (req) => {
               .eq("id", metadata.coach_id);
 
             console.log("Platform subscription recorded successfully");
+
+            // Create internal invoice for platform subscription payment if amount is provided
+            const subscriptionAmount = parseFloat(metadata.amount || "0");
+            if (subscriptionAmount > 0 && insertedPlatformSub) {
+              // Get the next invoice number for platform subscriptions
+              const { count } = await supabase
+                .from("coach_invoices")
+                .select("*", { count: "exact", head: true })
+                .eq("coach_id", metadata.coach_id);
+
+              const invoiceNumber = `PLATFORM-${metadata.coach_id.substring(0, 8).toUpperCase()}-${String((count || 0) + 1).padStart(4, "0")}`;
+
+              const { error: invoiceError } = await supabase
+                .from("coach_invoices")
+                .insert({
+                  coach_id: metadata.coach_id,
+                  invoice_number: invoiceNumber,
+                  total: subscriptionAmount,
+                  subtotal: subscriptionAmount,
+                  currency: metadata.currency || "GBP",
+                  status: "paid",
+                  paid_at: new Date().toISOString(),
+                  source_type: "platform_subscription",
+                  source_id: insertedPlatformSub.id,
+                  stripe_payment_intent_id: session.payment_intent as string,
+                  notes: `FitConnect ${metadata.tier} Plan - Monthly Subscription`,
+                });
+
+              if (invoiceError) {
+                console.error("Error creating platform subscription invoice:", invoiceError);
+              } else {
+                console.log("Platform subscription invoice created:", invoiceNumber);
+              }
+            }
           }
         } else if (metadata.type === "booking") {
           // Booking payment (deposit or full payment)
@@ -331,30 +367,70 @@ serve(async (req) => {
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
         const status = subscription.status;
+        const stripeSubId = subscription.id;
+        const periodEndDate = subscription.current_period_end 
+          ? new Date(subscription.current_period_end * 1000).toISOString() 
+          : null;
+        const newStatus = status === "active" ? "active" : "cancelled";
 
-        console.log("Subscription updated:", subscription.id, status);
+        console.log("Subscription updated:", stripeSubId, status);
 
-        // Update client subscription status
-        await supabase
-          .from("client_subscriptions")
-          .update({
-            status: status === "active" ? "active" : "cancelled",
-            current_period_end: subscription.current_period_end 
-              ? new Date(subscription.current_period_end * 1000).toISOString() 
-              : null,
-          })
-          .eq("stripe_subscription_id", subscription.id);
-
-        // Also check platform subscriptions
-        await supabase
+        // Check if this is a platform subscription first (more specific check)
+        const { data: platformSubMatch } = await supabase
           .from("platform_subscriptions")
-          .update({
-            status: status === "active" ? "active" : "cancelled",
-            current_period_end: subscription.current_period_end 
-              ? new Date(subscription.current_period_end * 1000).toISOString() 
-              : null,
-          })
-          .eq("stripe_subscription_id", subscription.id);
+          .select("id, coach_id")
+          .eq("stripe_subscription_id", stripeSubId)
+          .maybeSingle();
+
+        if (platformSubMatch) {
+          // This is a platform subscription - only update platform_subscriptions
+          console.log("Updating platform subscription:", platformSubMatch.id);
+          const { error: platformError } = await supabase
+            .from("platform_subscriptions")
+            .update({
+              status: newStatus,
+              current_period_end: periodEndDate,
+            })
+            .eq("id", platformSubMatch.id);
+
+          if (platformError) {
+            console.error("Error updating platform subscription:", platformError);
+          } else {
+            // Also update coach profile subscription tier if cancelled
+            if (newStatus === "cancelled") {
+              await supabase
+                .from("coach_profiles")
+                .update({ subscription_tier: "free" })
+                .eq("id", platformSubMatch.coach_id);
+              console.log("Coach subscription tier reset to free");
+            }
+          }
+        } else {
+          // Check if this is a client subscription
+          const { data: clientSubMatch } = await supabase
+            .from("client_subscriptions")
+            .select("id")
+            .eq("stripe_subscription_id", stripeSubId)
+            .maybeSingle();
+
+          if (clientSubMatch) {
+            // This is a client subscription - only update client_subscriptions
+            console.log("Updating client subscription:", clientSubMatch.id);
+            const { error: clientError } = await supabase
+              .from("client_subscriptions")
+              .update({
+                status: newStatus,
+                current_period_end: periodEndDate,
+              })
+              .eq("id", clientSubMatch.id);
+
+            if (clientError) {
+              console.error("Error updating client subscription:", clientError);
+            }
+          } else {
+            console.log("No matching subscription found for:", stripeSubId);
+          }
+        }
 
         break;
       }

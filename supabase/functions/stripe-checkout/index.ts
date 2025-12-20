@@ -73,11 +73,12 @@ serve(async (req) => {
       .select("tier")
       .eq("coach_id", coachId)
       .eq("status", "active")
-      .single();
+      .maybeSingle();
 
     // Determine commission based on tier (default to free tier if no subscription)
     const tier = platformSub?.tier || "free";
-    const commissionRates: Record<string, number> = { free: 4, starter: 3, pro: 2, enterprise: 1 };
+    // Commission rates: free=4%, starter=3%, pro=2%, enterprise=1%, founder=0%
+    const commissionRates: Record<string, number> = { free: 4, starter: 3, pro: 2, enterprise: 1, founder: 0 };
     const applicationFeePercent = commissionRates[tier] || 4;
 
     logStep("Coach subscription tier", { tier, applicationFeePercent });

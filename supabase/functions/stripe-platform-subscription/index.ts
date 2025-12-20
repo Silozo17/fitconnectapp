@@ -84,6 +84,8 @@ serve(async (req) => {
           coach_id: coachId,
           user_id: userId,
           tier,
+          amount: String(tierConfig.price / 100), // Store amount in pounds for invoice creation
+          currency: "GBP",
         },
       });
 
