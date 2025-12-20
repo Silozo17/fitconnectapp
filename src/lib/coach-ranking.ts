@@ -248,12 +248,27 @@ export function calculateCoachRankingScore(
 }
 
 /**
+ * Location match level priority (lower = better/closer)
+ */
+const LOCATION_LEVEL_PRIORITY: Record<LocationMatchLevel, number> = {
+  exact_city: 0,
+  same_region: 1,
+  same_country: 2,
+  online_only: 3,
+  no_match: 4,
+};
+
+/**
  * Ranks a list of coaches based on the ranking algorithm
  * 
  * Sort order:
- * 1. Sponsored coaches first (randomized within tier)
- * 2. By total score descending
- * 3. By display name alphabetically (deterministic tiebreaker)
+ * 1. By location match level (exact_city > same_region > same_country > online_only > no_match)
+ * 2. Within same location tier: sponsored coaches first
+ * 3. By total score descending
+ * 4. By display name alphabetically (deterministic tiebreaker)
+ * 
+ * This ensures a local non-sponsored coach appears above a distant sponsored coach,
+ * while still giving sponsored coaches priority within their location tier.
  * 
  * @param coaches - Array of coaches to rank
  * @param userLocation - User's location data
@@ -287,13 +302,20 @@ export function rankCoaches<T extends { id: string; display_name: string | null 
     return { coach, ranking };
   });
 
-  // Sort: sponsored first, then by score, then alphabetically
+  // Sort: location tier first, then sponsored within tier, then by score, then alphabetically
   rankedCoaches.sort((a, b) => {
-    // Sponsored coaches always come first
+    // First: sort by location match level (closer locations first)
+    const locationPriorityA = LOCATION_LEVEL_PRIORITY[a.ranking.matchLevel];
+    const locationPriorityB = LOCATION_LEVEL_PRIORITY[b.ranking.matchLevel];
+    if (locationPriorityA !== locationPriorityB) {
+      return locationPriorityA - locationPriorityB;
+    }
+
+    // Within same location tier: sponsored coaches first
     if (a.ranking.isSponsored && !b.ranking.isSponsored) return -1;
     if (!a.ranking.isSponsored && b.ranking.isSponsored) return 1;
 
-    // Within same sponsorship tier, sort by total score
+    // Within same sponsorship status, sort by total score
     if (a.ranking.totalScore !== b.ranking.totalScore) {
       return b.ranking.totalScore - a.ranking.totalScore;
     }
