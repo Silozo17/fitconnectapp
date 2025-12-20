@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import { getBadgeIcon } from "@/lib/badge-icons";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { Rarity } from "@/lib/avatar-utils";
+import { useCoachLinkPrefix } from "@/hooks/useCoachLinkPrefix";
 
 interface CoachProfileSheetProps {
   open: boolean;
@@ -25,6 +26,8 @@ export const CoachProfileSheet = ({
   participantName,
   participantAvatar,
 }: CoachProfileSheetProps) => {
+  const linkPrefix = useCoachLinkPrefix();
+  
   // Fetch coach profile data with all related info in parallel
   const { data, isLoading } = useQuery({
     queryKey: ['coach-profile-sheet', coachProfileId],
@@ -213,13 +216,13 @@ export const CoachProfileSheet = ({
             {/* Actions */}
             <div className="space-y-3">
               <Button asChild className="w-full" variant="outline">
-                <Link to={`/coaches/${profile.username || coachProfileId}`}>
+                <Link to={`${linkPrefix}/${profile.username || coachProfileId}`}>
                   <ExternalLink className="h-4 w-4 mr-2" />
                   View Full Profile
                 </Link>
               </Button>
               <Button asChild className="w-full">
-                <Link to={`/coaches/${profile.username || coachProfileId}?book=true`}>
+                <Link to={`${linkPrefix}/${profile.username || coachProfileId}?book=true`}>
                   <Calendar className="h-4 w-4 mr-2" />
                   Book a Session
                 </Link>

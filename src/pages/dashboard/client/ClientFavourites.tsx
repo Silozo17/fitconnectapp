@@ -12,7 +12,7 @@ import StarRating from "@/components/reviews/StarRating";
 import { formatCurrency, type CurrencyCode } from "@/lib/currency";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-
+import { useCoachLinkPrefix } from "@/hooks/useCoachLinkPrefix";
 // Batch fetch reviews for all coaches at once
 const useBatchCoachReviews = (coachIds: string[]) => {
   return useQuery({
@@ -57,9 +57,10 @@ const useBatchCoachReviews = (coachIds: string[]) => {
 interface FavouriteCoachCardProps {
   coach: any;
   reviewData?: { count: number; average: number };
+  linkPrefix: string;
 }
 
-const FavouriteCoachCard = ({ coach, reviewData }: FavouriteCoachCardProps) => {
+const FavouriteCoachCard = ({ coach, reviewData, linkPrefix }: FavouriteCoachCardProps) => {
   const averageRating = reviewData?.average || 0;
   const reviewCount = reviewData?.count || 0;
 
@@ -147,7 +148,7 @@ const FavouriteCoachCard = ({ coach, reviewData }: FavouriteCoachCardProps) => {
               <p className="text-sm text-muted-foreground">Contact for pricing</p>
             )}
             <Button size="sm" asChild>
-              <Link to={`/coaches/${coach.username || coach.id}`}>View Profile</Link>
+              <Link to={`${linkPrefix}/${coach.username || coach.id}`}>View Profile</Link>
             </Button>
           </div>
         </div>
@@ -158,6 +159,7 @@ const FavouriteCoachCard = ({ coach, reviewData }: FavouriteCoachCardProps) => {
 
 const ClientFavourites = () => {
   const { data: coaches = [], isLoading } = useFavouriteCoaches();
+  const linkPrefix = useCoachLinkPrefix();
   
   // Batch fetch all reviews for favourite coaches
   const coachIds = coaches.map((c) => c.id);
@@ -199,6 +201,7 @@ const ClientFavourites = () => {
               key={coach.id} 
               coach={coach} 
               reviewData={reviewsMap[coach.id]}
+              linkPrefix={linkPrefix}
             />
           ))}
         </div>

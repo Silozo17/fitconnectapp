@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { Rarity } from "@/lib/avatar-utils";
+import { useCoachLinkPrefix } from "@/hooks/useCoachLinkPrefix";
 
 interface ParticipantInfo {
   name: string;
@@ -68,6 +69,7 @@ const ChatWindow = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { activeProfileType } = useAdminView();
   const { broadcastTyping } = useTypingBroadcast(currentProfileId || "", participantId);
+  const coachLinkPrefix = useCoachLinkPrefix();
 
   const basePath = activeProfileType === "admin" 
     ? "/dashboard/admin/messages" 
@@ -451,7 +453,7 @@ const ChatWindow = ({
               {participantInfo.type === "coach" && (
                 <div className="mt-6 w-full">
                   <Link
-                    to={`/coaches/${participantInfo.username || participantId}`}
+                    to={`${coachLinkPrefix}/${participantInfo.username || participantId}`}
                     className="block w-full py-2 px-4 bg-primary text-primary-foreground rounded-md text-center hover:bg-primary/90 transition-colors"
                     onClick={() => setProfileOpen(false)}
                   >
