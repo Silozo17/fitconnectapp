@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Users,
   Calendar,
@@ -27,6 +28,7 @@ import { useCoachDashboardStats } from "@/hooks/useCoachDashboardStats";
 import { useCoachProfileRealtime } from "@/hooks/useCoachProfileRealtime";
 
 const CoachOverview = () => {
+  const { t } = useTranslation("coach");
   // Subscribe to real-time coach profile updates (e.g., tier changes by admin)
   useCoachProfileRealtime();
   const { unreadCount: unreadMessages } = useUnreadMessages();
@@ -38,16 +40,16 @@ const CoachOverview = () => {
   const upcomingSessions = data?.upcomingSessions || [];
 
   return (
-    <DashboardLayout title="Overview" description="Manage your coaching business from your dashboard.">
+    <DashboardLayout title={t("dashboard.overview")} description={t("dashboard.description")}>
       {/* Error State */}
       {error && (
         <Alert variant="destructive" className="mb-6">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="flex items-center justify-between">
-            <span>Failed to load dashboard data. Please try again.</span>
+            <span>{t("dashboard.failedToLoad")}</span>
             <Button variant="outline" size="sm" onClick={() => refetch()}>
               <RefreshCw className="w-4 h-4 mr-2" />
-              Retry
+              {t("dashboard.retry")}
             </Button>
           </AlertDescription>
         </Alert>
@@ -57,13 +59,13 @@ const CoachOverview = () => {
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="font-display text-3xl font-bold text-foreground mb-2">
-            Welcome back{stats?.displayName ? `, ${stats.displayName}` : ""}!
+            {t("dashboard.welcomeBack")}{stats?.displayName ? `, ${stats.displayName}` : ""}!
           </h1>
-          <p className="text-muted-foreground">Here's what's happening with your coaching business today.</p>
+          <p className="text-muted-foreground">{t("dashboard.whatsHappening")}</p>
         </div>
         <Button variant="outline" size="sm" onClick={() => setCustomizerOpen(true)}>
           <Settings2 className="w-4 h-4 mr-2" />
-          Customize
+          {t("dashboard.customize")}
         </Button>
       </div>
 
@@ -79,7 +81,7 @@ const CoachOverview = () => {
             </div>
             {!isLoading && (stats?.activeClients || 0) > 0 && (
               <span className="text-xs text-success flex items-center gap-1">
-                <TrendingUp className="w-3 h-3" /> Active
+                <TrendingUp className="w-3 h-3" /> {t("stats.active")}
               </span>
             )}
           </div>
@@ -88,7 +90,7 @@ const CoachOverview = () => {
           ) : (
             <p className="text-3xl font-display font-bold text-foreground">{stats?.activeClients || 0}</p>
           )}
-          <p className="text-sm text-muted-foreground">Active Clients</p>
+          <p className="text-sm text-muted-foreground">{t("stats.activeClients")}</p>
         </div>
 
         <div className="card-elevated p-6 hover-lift">
@@ -97,7 +99,7 @@ const CoachOverview = () => {
               <Calendar className="w-6 h-6 text-accent" />
             </div>
             <span className="text-xs text-muted-foreground flex items-center gap-1">
-              <Clock className="w-3 h-3" /> This week
+              <Clock className="w-3 h-3" /> {t("stats.thisWeek")}
             </span>
           </div>
           {isLoading ? (
@@ -105,7 +107,7 @@ const CoachOverview = () => {
           ) : (
             <p className="text-3xl font-display font-bold text-foreground">{stats?.sessionsThisWeek || 0}</p>
           )}
-          <p className="text-sm text-muted-foreground">Sessions Scheduled</p>
+          <p className="text-sm text-muted-foreground">{t("stats.sessionsScheduled")}</p>
         </div>
 
         <div className="card-elevated p-6 hover-lift">
@@ -120,7 +122,7 @@ const CoachOverview = () => {
             )}
           </div>
           <p className="text-3xl font-display font-bold text-foreground">{unreadMessages}</p>
-          <p className="text-sm text-muted-foreground">Unread Messages</p>
+          <p className="text-sm text-muted-foreground">{t("stats.unreadMessages")}</p>
         </div>
 
         <div className="card-elevated p-6 hover-lift">
@@ -130,7 +132,7 @@ const CoachOverview = () => {
             </div>
             {!isLoading && (stats?.totalReviews || 0) > 0 && (
               <span className="text-xs text-muted-foreground">
-                {stats?.totalReviews} reviews
+                {stats?.totalReviews} {t("stats.reviews")}
               </span>
             )}
           </div>
@@ -141,7 +143,7 @@ const CoachOverview = () => {
               {(stats?.averageRating || 0) > 0 ? stats?.averageRating.toFixed(1) : "—"}
             </p>
           )}
-          <p className="text-sm text-muted-foreground">Average Rating</p>
+          <p className="text-sm text-muted-foreground">{t("stats.averageRating")}</p>
         </div>
       </div>
 
@@ -153,24 +155,24 @@ const CoachOverview = () => {
           onClick={() => setAddClientOpen(true)}
         >
           <Plus className="w-5 h-5" />
-          <span className="text-sm">Add Client</span>
+          <span className="text-sm">{t("quickActions.addClient")}</span>
         </Button>
         <Link to="/dashboard/coach/schedule">
           <Button variant="outline" className="w-full h-auto py-4 flex flex-col gap-2 border-dashed">
             <Calendar className="w-5 h-5" />
-            <span className="text-sm">Set Availability</span>
+            <span className="text-sm">{t("quickActions.setAvailability")}</span>
           </Button>
         </Link>
         <Link to="/dashboard/coach/plans">
           <Button variant="outline" className="w-full h-auto py-4 flex flex-col gap-2 border-dashed">
             <Plus className="w-5 h-5" />
-            <span className="text-sm">Create Plan</span>
+            <span className="text-sm">{t("quickActions.createPlan")}</span>
           </Button>
         </Link>
         <Link to="/dashboard/coach/messages">
           <Button variant="outline" className="w-full h-auto py-4 flex flex-col gap-2 border-dashed">
             <MessageSquare className="w-5 h-5" />
-            <span className="text-sm">Send Message</span>
+            <span className="text-sm">{t("quickActions.sendMessage")}</span>
           </Button>
         </Link>
       </div>
@@ -188,10 +190,10 @@ const CoachOverview = () => {
         {/* Upcoming Sessions */}
         <div className="card-elevated">
           <div className="p-4 border-b border-border flex items-center justify-between">
-            <h2 className="font-display font-bold text-foreground">Upcoming Sessions</h2>
+            <h2 className="font-display font-bold text-foreground">{t("clients.upcomingSessions")}</h2>
             <Link to="/dashboard/coach/schedule">
               <Button variant="ghost" size="sm" className="text-primary">
-                View All <ArrowRight className="w-4 h-4 ml-1" />
+                {t("common:viewAll")} <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </Link>
           </div>
@@ -226,7 +228,7 @@ const CoachOverview = () => {
           {!isLoading && upcomingSessions.length === 0 && (
             <div className="p-8 text-center">
               <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground">No upcoming sessions</p>
+              <p className="text-muted-foreground">{t("dashboard.noUpcomingSessions")}</p>
             </div>
           )}
         </div>
@@ -234,10 +236,10 @@ const CoachOverview = () => {
         {/* Reviews Summary */}
         <div className="card-elevated">
           <div className="p-4 border-b border-border flex items-center justify-between">
-            <h2 className="font-display font-bold text-foreground">Your Reviews</h2>
+            <h2 className="font-display font-bold text-foreground">{t("dashboard.yourReviews")}</h2>
             <Link to="/dashboard/coach/reviews">
               <Button variant="ghost" size="sm" className="text-primary">
-                View All <ArrowRight className="w-4 h-4 ml-1" />
+                {t("common:viewAll")} <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </Link>
           </div>
@@ -257,13 +259,13 @@ const CoachOverview = () => {
                 {isLoading ? (
                   <Skeleton className="h-4 w-24" />
                 ) : (
-                  <p className="text-sm">{stats?.totalReviews || 0} total reviews</p>
+                  <p className="text-sm">{stats?.totalReviews || 0} {t("dashboard.totalReviews")}</p>
                 )}
               </div>
             </div>
             {!isLoading && (stats?.totalReviews || 0) === 0 && (
               <p className="text-muted-foreground text-center py-4">
-                No reviews yet. Complete sessions to start receiving feedback!
+                {t("dashboard.noReviewsYet")}
               </p>
             )}
           </div>
