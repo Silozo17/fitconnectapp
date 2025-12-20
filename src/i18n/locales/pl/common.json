@@ -602,6 +602,83 @@
     "description": "Obecnie nie ma danych do wyświetlenia.",
     "action": "Rozpocznij"
   },
+  "errors": {
+    "somethingWentWrong": "Coś poszło nie tak",
+    "couldntLoadData": "Nie udało się załadować danych. Spróbuj ponownie.",
+    "tryAgain": "Spróbuj ponownie",
+    "retry": "Ponów"
+  },
+  "cookies": {
+    "banner": {
+      "title": "Używamy plików cookie, aby poprawić Twoje doświadczenie",
+      "description": "Używamy plików cookie, aby pokazywać trenerów w Twojej okolicy, zapamiętywać Twoje preferencje i ulepszać naszą platformę.",
+      "privacyPolicy": "Polityka prywatności",
+      "manage": "Zarządzaj",
+      "rejectAll": "Odrzuć wszystkie",
+      "acceptAll": "Akceptuj wszystkie"
+    },
+    "preferences": {
+      "title": "Preferencje plików cookie",
+      "description": "Wybierz, które pliki cookie chcesz zezwolić. Twoje wybory zostaną zapisane na przyszłe wizyty.",
+      "learnMore": "Dowiedz się więcej",
+      "essential": {
+        "label": "Niezbędne pliki cookie",
+        "description": "Wymagane do logowania, bezpieczeństwa i podstawowej funkcjonalności aplikacji. Nie można wyłączyć."
+      },
+      "location": {
+        "label": "Usługi lokalizacyjne",
+        "description": "Używane do pokazywania trenerów i rankingów w Twojej okolicy na podstawie przybliżonej lokalizacji."
+      },
+      "preferences": {
+        "label": "Preferencje",
+        "description": "Zapamiętuje Twoje ustawienia, takie jak motyw i zamknięte banery między wizytami."
+      },
+      "analytics": {
+        "label": "Analityka",
+        "description": "Pomaga nam zrozumieć, jak korzystasz z platformy, abyśmy mogli ją ulepszać."
+      },
+      "rejectAll": "Odrzuć wszystkie",
+      "acceptAll": "Akceptuj wszystkie",
+      "savePreferences": "Zapisz preferencje"
+    }
+  },
+  "deleteAccount": {
+    "title": "Usunąć konto?",
+    "permanent": "Ta akcja jest <strong>trwała</strong> i nie można jej cofnąć. Następujące dane zostaną usunięte:",
+    "clientItems": {
+      "profile": "Twój profil i dane osobowe",
+      "sessions": "Wszystkie sesje i rezerwacje",
+      "messages": "Wiadomości i rozmowy",
+      "progress": "Dane postępów i zdjęcia",
+      "connections": "Połączenia z trenerami",
+      "subscriptions": "Subskrypcje i pakiety",
+      "achievements": "Osiągnięcia i odznaki"
+    },
+    "coachItems": {
+      "profile": "Twój profil trenera i informacje biznesowe",
+      "clients": "Wszystkie relacje z klientami",
+      "sessions": "Sesje i rezerwacje",
+      "messages": "Wiadomości i rozmowy",
+      "plans": "Plany treningowe i żywieniowe",
+      "packages": "Pakiety i plany subskrypcyjne",
+      "reviews": "Recenzje i oceny",
+      "documents": "Dokumenty weryfikacyjne"
+    },
+    "confirmLabel": "Wpisz <strong>DELETE</strong> aby potwierdzić:",
+    "confirmPlaceholder": "Wpisz DELETE",
+    "cancel": "Anuluj",
+    "deleteButton": "Usuń moje konto",
+    "success": "Konto zostało usunięte",
+    "successDescription": "Twoje konto i wszystkie powiązane dane zostały trwale usunięte.",
+    "error": "Nie udało się usunąć konta",
+    "errorDescription": "Spróbuj ponownie lub skontaktuj się z pomocą techniczną."
+  },
+  "unsavedChanges": {
+    "title": "Niezapisane zmiany",
+    "description": "Masz niezapisane zmiany, które zostaną utracone jeśli opuścisz tę stronę. Czy na pewno chcesz kontynuować?",
+    "stayOnPage": "Zostań na stronie",
+    "leaveWithoutSaving": "Wyjdź bez zapisywania"
+  },
   "accessibility": {
     "skipToContent": "Przejdź do głównej treści",
     "openMenu": "Otwórz menu",

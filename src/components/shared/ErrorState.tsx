@@ -1,4 +1,5 @@
 import { memo, ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { AlertCircle, RefreshCw, LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -15,15 +16,21 @@ interface ErrorStateProps {
 }
 
 export const ErrorState = memo(({ 
-  title = "Something went wrong",
-  description = "We couldn't load the data. Please try again.",
+  title,
+  description,
   icon: Icon = AlertCircle,
   onRetry,
-  retryLabel = "Try again",
+  retryLabel,
   className,
   children,
   variant = "default"
 }: ErrorStateProps) => {
+  const { t } = useTranslation();
+  
+  const displayTitle = title || t('errors.somethingWentWrong');
+  const displayDescription = description || t('errors.couldntLoadData');
+  const displayRetryLabel = retryLabel || t('errors.tryAgain');
+
   if (variant === "compact") {
     return (
       <div className={cn(
@@ -31,7 +38,7 @@ export const ErrorState = memo(({
         className
       )} role="alert">
         <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
-        <span className="text-sm font-medium">{title}</span>
+        <span className="text-sm font-medium">{displayTitle}</span>
         {onRetry && (
           <Button 
             variant="ghost" 
@@ -40,7 +47,7 @@ export const ErrorState = memo(({
             className="ml-auto h-7 px-2 text-destructive hover:text-destructive hover:bg-destructive/20"
           >
             <RefreshCw className="w-3 h-3 mr-1" />
-            Retry
+            {t('errors.retry')}
           </Button>
         )}
       </div>
@@ -56,14 +63,14 @@ export const ErrorState = memo(({
         <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center mb-3">
           <Icon className="w-5 h-5 text-destructive" aria-hidden="true" />
         </div>
-        <p className="text-sm font-medium text-foreground mb-1">{title}</p>
-        {description && (
-          <p className="text-xs text-muted-foreground mb-3">{description}</p>
+        <p className="text-sm font-medium text-foreground mb-1">{displayTitle}</p>
+        {displayDescription && (
+          <p className="text-xs text-muted-foreground mb-3">{displayDescription}</p>
         )}
         {onRetry && (
           <Button variant="outline" size="sm" onClick={onRetry}>
             <RefreshCw className="w-3 h-3 mr-1.5" />
-            {retryLabel}
+            {displayRetryLabel}
           </Button>
         )}
         {children}
@@ -81,19 +88,19 @@ export const ErrorState = memo(({
       </div>
       
       <h3 className="text-lg font-semibold text-foreground mb-1">
-        {title}
+        {displayTitle}
       </h3>
       
-      {description && (
+      {displayDescription && (
         <p className="text-sm text-muted-foreground max-w-sm mb-4">
-          {description}
+          {displayDescription}
         </p>
       )}
       
       {onRetry && (
         <Button onClick={onRetry} variant="outline">
           <RefreshCw className="w-4 h-4 mr-2" />
-          {retryLabel}
+          {displayRetryLabel}
         </Button>
       )}
       

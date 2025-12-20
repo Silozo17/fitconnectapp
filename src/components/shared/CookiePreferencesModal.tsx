@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Cookie, MapPin, Settings, BarChart3, Shield } from "lucide-react";
 import {
   Dialog,
@@ -24,6 +25,7 @@ export const CookiePreferencesModal = ({
   open,
   onOpenChange,
 }: CookiePreferencesModalProps) => {
+  const { t } = useTranslation();
   const { consent, updateConsent, acceptAll, rejectAll } = useCookieConsentContext();
   
   const [localPrefs, setLocalPrefs] = useState({
@@ -32,7 +34,6 @@ export const CookiePreferencesModal = ({
     analytics: consent?.analytics ?? false,
   });
 
-  // Sync local prefs when consent changes or modal opens
   useEffect(() => {
     if (open) {
       setLocalPrefs({
@@ -61,32 +62,32 @@ export const CookiePreferencesModal = ({
   const categories = [
     {
       id: "essential" as const,
-      label: "Essential Cookies",
-      description: "Required for login, security, and core app functionality. Cannot be disabled.",
+      label: t('cookies.preferences.essential.label'),
+      description: t('cookies.preferences.essential.description'),
       icon: Shield,
       enabled: true,
       disabled: true,
     },
     {
       id: "location" as const,
-      label: "Location Services",
-      description: "Used to show coaches and leaderboards near you based on your approximate location.",
+      label: t('cookies.preferences.location.label'),
+      description: t('cookies.preferences.location.description'),
       icon: MapPin,
       enabled: localPrefs.location,
       disabled: false,
     },
     {
       id: "preferences" as const,
-      label: "Preferences",
-      description: "Remembers your settings like theme preference and dismissed banners between visits.",
+      label: t('cookies.preferences.preferences.label'),
+      description: t('cookies.preferences.preferences.description'),
       icon: Settings,
       enabled: localPrefs.preferences,
       disabled: false,
     },
     {
       id: "analytics" as const,
-      label: "Analytics",
-      description: "Helps us understand how you use the platform so we can improve it.",
+      label: t('cookies.preferences.analytics.label'),
+      description: t('cookies.preferences.analytics.description'),
       icon: BarChart3,
       enabled: localPrefs.analytics,
       disabled: false,
@@ -101,12 +102,12 @@ export const CookiePreferencesModal = ({
             <div className="p-2 rounded-full bg-primary/10 text-primary">
               <Cookie className="h-5 w-5" />
             </div>
-            <DialogTitle>Cookie Preferences</DialogTitle>
+            <DialogTitle>{t('cookies.preferences.title')}</DialogTitle>
           </div>
           <DialogDescription>
-            Choose which cookies you'd like to allow. Your choices will be saved for future visits.{" "}
+            {t('cookies.preferences.description')}{" "}
             <Link to="/privacy" className="underline hover:text-primary">
-              Learn more
+              {t('cookies.preferences.learnMore')}
             </Link>
           </DialogDescription>
         </DialogHeader>
@@ -152,13 +153,13 @@ export const CookiePreferencesModal = ({
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
           <Button variant="outline" size="sm" onClick={handleRejectAll}>
-            Reject All
+            {t('cookies.preferences.rejectAll')}
           </Button>
           <Button variant="outline" size="sm" onClick={handleAcceptAll}>
-            Accept All
+            {t('cookies.preferences.acceptAll')}
           </Button>
           <Button size="sm" onClick={handleSave}>
-            Save Preferences
+            {t('cookies.preferences.savePreferences')}
           </Button>
         </DialogFooter>
       </DialogContent>

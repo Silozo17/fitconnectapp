@@ -602,6 +602,83 @@
     "description": "There's no data to display at the moment.",
     "action": "Get Started"
   },
+  "errors": {
+    "somethingWentWrong": "Something went wrong",
+    "couldntLoadData": "We couldn't load the data. Please try again.",
+    "tryAgain": "Try again",
+    "retry": "Retry"
+  },
+  "cookies": {
+    "banner": {
+      "title": "We use cookies to enhance your experience",
+      "description": "We use cookies to show coaches near you, remember your preferences, and improve our platform.",
+      "privacyPolicy": "Privacy Policy",
+      "manage": "Manage",
+      "rejectAll": "Reject All",
+      "acceptAll": "Accept All"
+    },
+    "preferences": {
+      "title": "Cookie Preferences",
+      "description": "Choose which cookies you'd like to allow. Your choices will be saved for future visits.",
+      "learnMore": "Learn more",
+      "essential": {
+        "label": "Essential Cookies",
+        "description": "Required for login, security, and core app functionality. Cannot be disabled."
+      },
+      "location": {
+        "label": "Location Services",
+        "description": "Used to show coaches and leaderboards near you based on your approximate location."
+      },
+      "preferences": {
+        "label": "Preferences",
+        "description": "Remembers your settings like theme preference and dismissed banners between visits."
+      },
+      "analytics": {
+        "label": "Analytics",
+        "description": "Helps us understand how you use the platform so we can improve it."
+      },
+      "rejectAll": "Reject All",
+      "acceptAll": "Accept All",
+      "savePreferences": "Save Preferences"
+    }
+  },
+  "deleteAccount": {
+    "title": "Delete Your Account?",
+    "permanent": "This action is <strong>permanent</strong> and cannot be reversed. The following will be deleted:",
+    "clientItems": {
+      "profile": "Your profile and personal information",
+      "sessions": "All sessions and bookings",
+      "messages": "Messages and conversations",
+      "progress": "Progress data and photos",
+      "connections": "Connections with coaches",
+      "subscriptions": "Subscriptions and packages",
+      "achievements": "Achievements and badges"
+    },
+    "coachItems": {
+      "profile": "Your coach profile and business information",
+      "clients": "All client relationships",
+      "sessions": "Sessions and bookings",
+      "messages": "Messages and conversations",
+      "plans": "Training and nutrition plans",
+      "packages": "Packages and subscription plans",
+      "reviews": "Reviews and ratings",
+      "documents": "Verification documents"
+    },
+    "confirmLabel": "Type <strong>DELETE</strong> to confirm:",
+    "confirmPlaceholder": "Type DELETE",
+    "cancel": "Cancel",
+    "deleteButton": "Delete My Account",
+    "success": "Account deleted successfully",
+    "successDescription": "Your account and all associated data have been permanently removed.",
+    "error": "Failed to delete account",
+    "errorDescription": "Please try again or contact support."
+  },
+  "unsavedChanges": {
+    "title": "Unsaved Changes",
+    "description": "You have unsaved changes that will be lost if you leave this page. Are you sure you want to continue?",
+    "stayOnPage": "Stay on Page",
+    "leaveWithoutSaving": "Leave Without Saving"
+  },
   "accessibility": {
     "skipToContent": "Skip to main content",
     "openMenu": "Open menu",

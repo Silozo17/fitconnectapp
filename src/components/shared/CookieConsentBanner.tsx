@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Cookie, Settings, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCookieConsentContext } from "@/contexts/CookieConsentContext";
 import { CookiePreferencesModal } from "./CookiePreferencesModal";
 
 export const CookieConsentBanner = () => {
+  const { t } = useTranslation();
   const { showBanner, acceptAll, rejectAll } = useCookieConsentContext();
   const [showPreferences, setShowPreferences] = useState(false);
 
@@ -22,12 +24,12 @@ export const CookieConsentBanner = () => {
               </div>
               <div className="space-y-1">
                 <p className="text-sm font-medium text-foreground">
-                  We use cookies to enhance your experience
+                  {t('cookies.banner.title')}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  We use cookies to show coaches near you, remember your preferences, and improve our platform.{" "}
+                  {t('cookies.banner.description')}{" "}
                   <Link to="/privacy" className="underline hover:text-primary">
-                    Privacy Policy
+                    {t('cookies.banner.privacyPolicy')}
                   </Link>
                 </p>
               </div>
@@ -41,20 +43,20 @@ export const CookieConsentBanner = () => {
                 className="gap-1.5"
               >
                 <Settings className="h-4 w-4" />
-                <span className="hidden xs:inline">Manage</span>
+                <span className="hidden xs:inline">{t('cookies.banner.manage')}</span>
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={rejectAll}
               >
-                Reject All
+                {t('cookies.banner.rejectAll')}
               </Button>
               <Button
                 size="sm"
                 onClick={acceptAll}
               >
-                Accept All
+                {t('cookies.banner.acceptAll')}
               </Button>
             </div>
           </div>
