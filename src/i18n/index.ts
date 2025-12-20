@@ -17,9 +17,10 @@
  * CURRENT GUARDRAILS (do not remove without explicit approval):
  * 1. App remains English-only
  * 2. Browser auto-translation is disabled (see index.html: translate="no")
- * 3. Language selector is disabled with "Coming Soon" label
+ * 3. Language selector is functional but only English is selectable
  * 4. No browser language detection is enabled
  * 5. No additional language files exist beyond en/common.json
+ * 6. Language preference is persisted to localStorage
  * 
  * FUTURE EXPANSION STEPS:
  * 1. Extract hardcoded strings from components using t('key') pattern
@@ -54,6 +55,26 @@ export type LanguageCode = typeof SUPPORTED_LANGUAGES[number]['code'];
 // Default language for UK launch
 export const DEFAULT_LANGUAGE: LanguageCode = 'en';
 
+// Storage key for persisted language preference
+export const LANGUAGE_STORAGE_KEY = 'fitconnect-language';
+
+/**
+ * Validate and retrieve stored language preference.
+ * Always falls back to English if stored value is invalid or unavailable.
+ */
+const getStoredLanguage = (): LanguageCode => {
+  try {
+    const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    const supportedCodes = SUPPORTED_LANGUAGES.map(l => l.code) as string[];
+    if (stored && supportedCodes.includes(stored)) {
+      return stored as LanguageCode;
+    }
+  } catch {
+    // localStorage not available (SSR, private browsing, etc.)
+  }
+  return DEFAULT_LANGUAGE;
+};
+
 // Translation resources
 const resources = {
   en: {
@@ -67,7 +88,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: DEFAULT_LANGUAGE,
+    lng: getStoredLanguage(),
     fallbackLng: DEFAULT_LANGUAGE,
     defaultNS: 'common',
     ns: ['common'],
