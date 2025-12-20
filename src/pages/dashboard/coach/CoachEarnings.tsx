@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   TrendingUp,
   TrendingDown,
@@ -41,6 +42,7 @@ type PeriodType = "week" | "month" | "quarter" | "year";
 
 const CoachEarnings = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation("coach");
   const { formatCurrency } = useLocale();
   const [period, setPeriod] = useState<PeriodType>("month");
   
@@ -61,7 +63,7 @@ const CoachEarnings = () => {
 
   if (profileLoading || isLoading) {
     return (
-      <DashboardLayout title="Earnings" description="Track your revenue and manage payouts.">
+      <DashboardLayout title={t("earnings.title")} description={t("earnings.pageDescription")}>
         <div className="flex items-center justify-center h-64">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
@@ -70,12 +72,12 @@ const CoachEarnings = () => {
   }
 
   return (
-    <DashboardLayout title="Earnings" description="Track your revenue and manage payouts.">
+    <DashboardLayout title={t("earnings.title")} description={t("earnings.pageDescription")}>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="font-display text-2xl font-bold text-foreground">Earnings</h1>
-          <p className="text-muted-foreground">Track your revenue, transactions, and payouts</p>
+          <h1 className="font-display text-2xl font-bold text-foreground">{t("earnings.title")}</h1>
+          <p className="text-muted-foreground">{t("earnings.pageSubtitle")}</p>
         </div>
         <div className="flex gap-3">
           <Select value={period} onValueChange={(v) => setPeriod(v as PeriodType)}>
@@ -83,15 +85,15 @@ const CoachEarnings = () => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="week">This Week</SelectItem>
-              <SelectItem value="month">This Month</SelectItem>
-              <SelectItem value="quarter">This Quarter</SelectItem>
-              <SelectItem value="year">This Year</SelectItem>
+              <SelectItem value="week">{t("earnings.thisWeek")}</SelectItem>
+              <SelectItem value="month">{t("earnings.thisMonth")}</SelectItem>
+              <SelectItem value="quarter">{t("earnings.thisQuarter")}</SelectItem>
+              <SelectItem value="year">{t("earnings.thisYear")}</SelectItem>
             </SelectContent>
           </Select>
           <Button variant="outline">
             <Download className="w-4 h-4 mr-2" />
-            Export
+            {t("earnings.export")}
           </Button>
         </div>
       </div>
@@ -102,11 +104,11 @@ const CoachEarnings = () => {
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-warning mt-0.5" />
             <div className="flex-1">
-              <p className="font-medium text-foreground">Connect Stripe to receive payments</p>
-              <p className="text-sm text-muted-foreground">Set up your Stripe account to accept client payments and receive payouts.</p>
+              <p className="font-medium text-foreground">{t("earnings.connectStripeNotice")}</p>
+              <p className="text-sm text-muted-foreground">{t("earnings.connectStripeDescription")}</p>
             </div>
             <Button size="sm" className="bg-primary text-primary-foreground" onClick={handleConnectStripe}>
-              Connect Stripe
+              {t("earnings.connectStripe")}
             </Button>
           </div>
         </div>
@@ -127,10 +129,10 @@ const CoachEarnings = () => {
                 </TooltipTrigger>
                 <TooltipContent>
                   <p className="text-sm">
-                    <span className="text-muted-foreground">Gross: </span>
+                    <span className="text-muted-foreground">{t("earnings.grossRevenue")}: </span>
                     <span className="font-medium">{formatCurrency(stats.grossRevenue)}</span>
                     <br />
-                    <span className="text-muted-foreground">Platform fee ({stats.commissionRate}%): </span>
+                    <span className="text-muted-foreground">{t("earnings.platformFee", { rate: stats.commissionRate })}: </span>
                     <span className="font-medium">-{formatCurrency(stats.commissionPaid)}</span>
                   </p>
                 </TooltipContent>
@@ -138,8 +140,8 @@ const CoachEarnings = () => {
             </TooltipProvider>
           </div>
           <p className="text-3xl font-display font-bold text-foreground">{formatCurrency(stats.netRevenue)}</p>
-          <p className="text-sm text-muted-foreground">Net Revenue</p>
-          <p className="text-xs text-muted-foreground mt-1">After {stats.commissionRate}% platform fee</p>
+          <p className="text-sm text-muted-foreground">{t("earnings.netRevenue")}</p>
+          <p className="text-xs text-muted-foreground mt-1">{t("earnings.afterPlatformFee", { rate: stats.commissionRate })}</p>
         </div>
 
         <div className="card-elevated p-6">
@@ -155,7 +157,7 @@ const CoachEarnings = () => {
             )}
           </div>
           <p className="text-3xl font-display font-bold text-foreground">{stats.sessions}</p>
-          <p className="text-sm text-muted-foreground">Sessions Completed</p>
+          <p className="text-sm text-muted-foreground">{t("earnings.sessionsCompleted")}</p>
         </div>
 
         <div className="card-elevated p-6">
@@ -165,7 +167,7 @@ const CoachEarnings = () => {
             </div>
           </div>
           <p className="text-3xl font-display font-bold text-foreground">{formatCurrency(stats.avgSession)}</p>
-          <p className="text-sm text-muted-foreground">Avg. Net per Session</p>
+          <p className="text-sm text-muted-foreground">{t("earnings.avgNetPerSession")}</p>
         </div>
 
         <div className="card-elevated p-6">
@@ -175,16 +177,16 @@ const CoachEarnings = () => {
             </div>
           </div>
           <p className="text-3xl font-display font-bold text-foreground">{formatCurrency(stats.pending)}</p>
-          <p className="text-sm text-muted-foreground">Pending (Net)</p>
+          <p className="text-sm text-muted-foreground">{t("earnings.pendingNet")}</p>
         </div>
       </div>
 
       {/* Revenue Chart */}
       <div className="card-elevated p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-display font-bold text-foreground">Revenue Overview</h3>
+          <h3 className="font-display font-bold text-foreground">{t("earnings.revenueOverview")}</h3>
           <Badge variant="outline" className="text-xs">
-            Net earnings after {stats.commissionRate}% fee
+            {t("earnings.netEarningsAfterFee", { rate: stats.commissionRate })}
           </Badge>
         </div>
         {transactions.length > 0 ? (
@@ -212,7 +214,7 @@ const CoachEarnings = () => {
           <div className="h-64 flex items-center justify-center text-muted-foreground">
             <div className="text-center">
               <PoundSterling className="w-12 h-12 mx-auto mb-3 opacity-30" />
-              <p>Revenue data will appear here as you receive payments</p>
+              <p>{t("earnings.revenueDataWillAppear")}</p>
             </div>
           </div>
         )}
@@ -221,19 +223,19 @@ const CoachEarnings = () => {
       {/* Tabs */}
       <Tabs defaultValue="transactions" className="space-y-6">
         <TabsList className="bg-secondary">
-          <TabsTrigger value="transactions">Transactions</TabsTrigger>
-          <TabsTrigger value="payouts">Payouts</TabsTrigger>
-          <TabsTrigger value="invoices">Invoices</TabsTrigger>
+          <TabsTrigger value="transactions">{t("earnings.tabs.transactions")}</TabsTrigger>
+          <TabsTrigger value="payouts">{t("earnings.tabs.payouts")}</TabsTrigger>
+          <TabsTrigger value="invoices">{t("earnings.tabs.invoices")}</TabsTrigger>
         </TabsList>
 
         {/* Transactions Tab */}
         <TabsContent value="transactions">
           <div className="card-elevated">
             <div className="p-4 border-b border-border flex items-center justify-between">
-              <h3 className="font-display font-bold text-foreground">Recent Transactions</h3>
+              <h3 className="font-display font-bold text-foreground">{t("earnings.recentTransactions")}</h3>
               <Button variant="outline" size="sm">
                 <Filter className="w-4 h-4 mr-2" />
-                Filter
+                {t("earnings.filter")}
               </Button>
             </div>
             {transactions.length > 0 ? (
@@ -268,7 +270,7 @@ const CoachEarnings = () => {
                           </TooltipTrigger>
                           <TooltipContent>
                             <p className="text-sm">
-                              <span className="text-muted-foreground">Gross: </span>
+                              <span className="text-muted-foreground">{t("earnings.grossRevenue")}: </span>
                               <span>{formatCurrency(tx.amount)}</span>
                               <br />
                               <span className="text-muted-foreground">Fee: </span>
@@ -297,8 +299,8 @@ const CoachEarnings = () => {
             ) : (
               <div className="p-12 text-center">
                 <CreditCard className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
-                <p className="text-muted-foreground">No transactions yet</p>
-                <p className="text-sm text-muted-foreground mt-1">Transactions will appear here when clients purchase your packages or subscriptions.</p>
+                <p className="text-muted-foreground">{t("earnings.noTransactions")}</p>
+                <p className="text-sm text-muted-foreground mt-1">{t("earnings.transactionsWillAppear")}</p>
               </div>
             )}
           </div>
@@ -310,29 +312,29 @@ const CoachEarnings = () => {
             <div className="lg:col-span-2">
               <div className="card-elevated">
                 <div className="p-4 border-b border-border">
-                  <h3 className="font-display font-bold text-foreground">Payout History</h3>
+                  <h3 className="font-display font-bold text-foreground">{t("earnings.payoutHistory")}</h3>
                 </div>
                 {hasStripeConnected ? (
                   <div className="p-12 text-center">
                     <CreditCard className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
-                    <p className="text-muted-foreground">No payouts yet</p>
-                    <p className="text-sm text-muted-foreground mt-1">Payouts will appear here once you start receiving payments.</p>
+                    <p className="text-muted-foreground">{t("earnings.noPayoutsYet")}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{t("earnings.payoutsWillAppear")}</p>
                     <Button variant="outline" className="mt-4" onClick={handleManageStripe} disabled={stripeExpressLogin.isPending}>
                       {stripeExpressLogin.isPending ? (
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       ) : (
                         <ExternalLink className="w-4 h-4 mr-2" />
                       )}
-                      View in Stripe Dashboard
+                      {t("earnings.viewInStripeDashboard")}
                     </Button>
                   </div>
                 ) : (
                   <div className="p-12 text-center">
                     <AlertCircle className="w-12 h-12 mx-auto mb-3 text-warning/50" />
-                    <p className="text-muted-foreground">Connect Stripe to receive payouts</p>
-                    <p className="text-sm text-muted-foreground mt-1">You need to connect your Stripe account to receive payouts from client payments.</p>
+                    <p className="text-muted-foreground">{t("earnings.connectStripeToReceive")}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{t("earnings.connectStripePayoutsDesc")}</p>
                     <Button className="mt-4 bg-primary text-primary-foreground" onClick={handleConnectStripe}>
-                      Connect Stripe
+                      {t("earnings.connectStripe")}
                     </Button>
                   </div>
                 )}
@@ -341,21 +343,21 @@ const CoachEarnings = () => {
 
             {/* Payout Settings */}
             <div className="card-elevated p-6">
-              <h3 className="font-display font-bold text-foreground mb-4">Payout Settings</h3>
+              <h3 className="font-display font-bold text-foreground mb-4">{t("earnings.payoutSettings")}</h3>
               {hasStripeConnected ? (
                 <div className="space-y-4">
                   <div className="p-4 bg-secondary/50 rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-1">Platform Fee</p>
+                    <p className="text-sm text-muted-foreground mb-1">{t("earnings.platformFee", { rate: "" }).replace("()", "")}</p>
                     <p className="font-medium text-foreground">{stats.commissionRate}% ({stats.tier} tier)</p>
                   </div>
                   <div className="p-4 bg-secondary/50 rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-1">Payout Schedule</p>
-                    <p className="font-medium text-foreground">Managed by Stripe</p>
+                    <p className="text-sm text-muted-foreground mb-1">{t("earnings.payoutSchedule")}</p>
+                    <p className="font-medium text-foreground">{t("earnings.managedByStripe")}</p>
                   </div>
                   <div className="p-4 bg-secondary/50 rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-1">Estimated Net Balance</p>
+                    <p className="text-sm text-muted-foreground mb-1">{t("earnings.estimatedNetBalance")}</p>
                     <p className="font-medium text-foreground">{formatCurrency(stats.netRevenue - stats.pending)}</p>
-                    <p className="text-xs text-muted-foreground mt-1">View actual balance in Stripe</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t("earnings.viewActualBalance")}</p>
                   </div>
                   <Button 
                     variant="outline" 
@@ -368,14 +370,14 @@ const CoachEarnings = () => {
                     ) : (
                       <ExternalLink className="w-4 h-4 mr-2" />
                     )}
-                    Manage in Stripe
+                    {t("earnings.manageInStripe")}
                   </Button>
                 </div>
               ) : (
                 <div className="text-center py-4">
-                  <p className="text-sm text-muted-foreground mb-4">Connect Stripe to configure payout settings</p>
+                  <p className="text-sm text-muted-foreground mb-4">{t("earnings.connectStripePayoutsDesc")}</p>
                   <Button className="w-full bg-primary text-primary-foreground" onClick={handleConnectStripe}>
-                    Connect Stripe
+                    {t("earnings.connectStripe")}
                   </Button>
                 </div>
               )}
@@ -385,10 +387,17 @@ const CoachEarnings = () => {
 
         {/* Invoices Tab */}
         <TabsContent value="invoices">
-          <div className="card-elevated p-12 text-center">
-            <CreditCard className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
-            <p className="text-muted-foreground">No invoices yet</p>
-            <p className="text-sm text-muted-foreground mt-1">Invoice history will appear here as transactions are completed.</p>
+          <div className="card-elevated">
+            <div className="p-4 border-b border-border flex items-center justify-between">
+              <h3 className="font-display font-bold text-foreground">{t("invoices.allInvoices")}</h3>
+              <Button className="bg-primary text-primary-foreground">
+                {t("invoices.createInvoice")}
+              </Button>
+            </div>
+            <div className="p-12 text-center">
+              <CreditCard className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
+              <p className="text-muted-foreground">{t("common:comingSoon")}</p>
+            </div>
           </div>
         </TabsContent>
       </Tabs>

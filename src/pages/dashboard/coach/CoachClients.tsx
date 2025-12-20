@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Search,
   Plus,
@@ -11,7 +12,6 @@ import {
   UserCheck,
   Clock,
   Loader2,
-  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +38,7 @@ import { useCoachClients, CoachClient } from "@/hooks/useCoachClients";
 import ClientRequests from "@/components/dashboard/coach/ClientRequests";
 
 const CoachClients = () => {
+  const { t } = useTranslation("coach");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [planFilter, setPlanFilter] = useState("all");
@@ -102,25 +103,25 @@ const CoachClients = () => {
 
   if (error) {
     return (
-      <DashboardLayout title="Clients" description="Manage your coaching clients.">
+      <DashboardLayout title={t("clients.pageTitle")} description={t("clients.pageDescription")}>
         <div className="card-elevated p-12 text-center">
-          <p className="text-destructive">Error loading clients: {error.message}</p>
+          <p className="text-destructive">{t("clients.errorLoading")}: {error.message}</p>
         </div>
       </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout title="Clients" description="Manage your coaching clients.">
+    <DashboardLayout title={t("clients.pageTitle")} description={t("clients.pageDescription")}>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="font-display text-2xl font-bold text-foreground">Clients</h1>
-          <p className="text-muted-foreground">Manage and track your client relationships</p>
+          <h1 className="font-display text-2xl font-bold text-foreground">{t("clients.pageTitle")}</h1>
+          <p className="text-muted-foreground">{t("clients.pageDescription")}</p>
         </div>
         <Button onClick={() => setIsAddClientOpen(true)} className="bg-primary text-primary-foreground">
           <Plus className="w-4 h-4 mr-2" />
-          Add Client
+          {t("clients.addClient")}
         </Button>
       </div>
 
@@ -134,28 +135,28 @@ const CoachClients = () => {
         <div className="card-elevated p-4 overflow-hidden">
           <div className="flex items-center gap-2 mb-2">
             <Users className="w-4 h-4 text-primary shrink-0" />
-            <p className="text-sm text-muted-foreground truncate">Total Clients</p>
+            <p className="text-sm text-muted-foreground truncate">{t("stats.totalClients")}</p>
           </div>
           <p className="text-2xl font-display font-bold text-foreground truncate">{stats.total}</p>
         </div>
         <div className="card-elevated p-4 overflow-hidden">
           <div className="flex items-center gap-2 mb-2">
             <UserCheck className="w-4 h-4 text-success shrink-0" />
-            <p className="text-sm text-muted-foreground truncate">Active</p>
+            <p className="text-sm text-muted-foreground truncate">{t("clients.active")}</p>
           </div>
           <p className="text-2xl font-display font-bold text-success truncate">{stats.active}</p>
         </div>
         <div className="card-elevated p-4 overflow-hidden">
           <div className="flex items-center gap-2 mb-2">
             <Clock className="w-4 h-4 text-warning shrink-0" />
-            <p className="text-sm text-muted-foreground truncate">Pending</p>
+            <p className="text-sm text-muted-foreground truncate">{t("clients.pending")}</p>
           </div>
           <p className="text-2xl font-display font-bold text-warning truncate">{stats.pending}</p>
         </div>
         <div className="card-elevated p-4 overflow-hidden">
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp className="w-4 h-4 text-accent shrink-0" />
-            <p className="text-sm text-muted-foreground truncate">This Month</p>
+            <p className="text-sm text-muted-foreground truncate">{t("stats.thisMonth")}</p>
           </div>
           <p className="text-2xl font-display font-bold text-accent truncate">
             {clients.filter(c => {
@@ -174,7 +175,7 @@ const CoachClients = () => {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Search clients by name..."
+              placeholder={t("clients.searchClients")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -182,22 +183,22 @@ const CoachClients = () => {
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-full sm:w-40">
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder={t("common:status")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
+              <SelectItem value="all">{t("clients.allStatus")}</SelectItem>
+              <SelectItem value="active">{t("clients.active")}</SelectItem>
+              <SelectItem value="pending">{t("clients.pending")}</SelectItem>
+              <SelectItem value="inactive">{t("clients.inactive")}</SelectItem>
             </SelectContent>
           </Select>
           {uniquePlans.length > 0 && (
             <Select value={planFilter} onValueChange={setPlanFilter}>
               <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Plan Type" />
+                <SelectValue placeholder={t("common:planType")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Plans</SelectItem>
+                <SelectItem value="all">{t("clients.allPlans")}</SelectItem>
                 {uniquePlans.map(plan => (
                   <SelectItem key={plan} value={plan.toLowerCase()}>{plan}</SelectItem>
                 ))}
@@ -221,12 +222,12 @@ const CoachClients = () => {
             <table className="w-full">
               <thead className="bg-secondary/50">
                 <tr>
-                  <th className="text-left p-4 text-sm font-medium text-muted-foreground">Client</th>
-                  <th className="text-left p-4 text-sm font-medium text-muted-foreground hidden md:table-cell">Plan</th>
-                  <th className="text-left p-4 text-sm font-medium text-muted-foreground">Status</th>
-                  <th className="text-left p-4 text-sm font-medium text-muted-foreground hidden lg:table-cell">Start Date</th>
-                  <th className="text-left p-4 text-sm font-medium text-muted-foreground hidden sm:table-cell">Goals</th>
-                  <th className="text-right p-4 text-sm font-medium text-muted-foreground">Actions</th>
+                  <th className="text-left p-4 text-sm font-medium text-muted-foreground">{t("clients.tableHeaders.client")}</th>
+                  <th className="text-left p-4 text-sm font-medium text-muted-foreground hidden md:table-cell">{t("clients.tableHeaders.plan")}</th>
+                  <th className="text-left p-4 text-sm font-medium text-muted-foreground">{t("clients.tableHeaders.status")}</th>
+                  <th className="text-left p-4 text-sm font-medium text-muted-foreground hidden lg:table-cell">{t("clients.tableHeaders.startDate")}</th>
+                  <th className="text-left p-4 text-sm font-medium text-muted-foreground hidden sm:table-cell">{t("clients.tableHeaders.goals")}</th>
+                  <th className="text-right p-4 text-sm font-medium text-muted-foreground">{t("clients.tableHeaders.actions")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -242,7 +243,7 @@ const CoachClients = () => {
                             {getFullName(client)}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            {client.client_profile?.weight_kg ? `${client.client_profile.weight_kg}kg` : 'No data'}
+                            {client.client_profile?.weight_kg ? `${client.client_profile.weight_kg}kg` : t("clients.noData")}
                           </p>
                         </div>
                       </Link>
@@ -278,13 +279,13 @@ const CoachClients = () => {
                     </td>
                     <td className="p-4">
                       <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="icon" title="Message">
+                        <Button variant="ghost" size="icon" title={t("clients.message")}>
                           <MessageSquare className="w-4 h-4" />
                         </Button>
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          title="Schedule Session"
+                          title={t("clients.scheduleSession")}
                           onClick={() => handleScheduleSession(client)}
                         >
                           <Calendar className="w-4 h-4" />
@@ -297,15 +298,15 @@ const CoachClients = () => {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem asChild>
-                              <Link to={`/dashboard/coach/clients/${client.client_id}`}>View Profile</Link>
+                              <Link to={`/dashboard/coach/clients/${client.client_id}`}>{t("clients.viewProfile")}</Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleAssignPlan(client)}>
-                              Assign Plan
+                              {t("clients.assignPlan")}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleAddNote(client)}>
-                              Add Notes
+                              {t("clients.addNotes")}
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">Remove Client</DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive">{t("clients.removeClient")}</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
@@ -320,11 +321,11 @@ const CoachClients = () => {
             <div className="p-12 text-center">
               <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground mb-4">
-                {clients.length === 0 ? "No clients yet" : "No clients match your filters"}
+                {clients.length === 0 ? t("clients.noClients") : t("clients.noClientsMatch")}
               </p>
               <Button onClick={() => setIsAddClientOpen(true)} variant="outline">
                 <Plus className="w-4 h-4 mr-2" />
-                Add Your First Client
+                {t("clients.addFirstClient")}
               </Button>
             </div>
           )}
