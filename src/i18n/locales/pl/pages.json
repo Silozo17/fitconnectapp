@@ -1,0 +1,301 @@
+{
+  "about": {
+    "title": "O nas",
+    "subtitle": "Łączymy klientów ze światowej klasy profesjonalistami fitness",
+    "mission": {
+      "title": "Nasza misja",
+      "description": "Uczynienie profesjonalnego coachingu fitness dostępnym dla wszystkich, wszędzie."
+    },
+    "vision": {
+      "title": "Nasza wizja",
+      "description": "Świat, w którym każdy ma dostęp do spersonalizowanego wsparcia fitness."
+    },
+    "story": {
+      "title": "Nasza historia",
+      "description": "Założona z pasją do fitness i technologii, postanowiliśmy zrewolucjonizować sposób, w jaki ludzie łączą się z profesjonalistami fitness."
+    },
+    "values": {
+      "title": "Nasze wartości",
+      "excellence": "Doskonałość",
+      "excellenceDesc": "Dążymy do doskonałości we wszystkim, co robimy.",
+      "integrity": "Uczciwość",
+      "integrityDesc": "Działamy uczciwie i przejrzyście.",
+      "innovation": "Innowacja",
+      "innovationDesc": "Nieustannie wprowadzamy innowacje, aby ulepszać naszą platformę.",
+      "community": "Społeczność",
+      "communityDesc": "Tworzymy wspierającą społeczność fitness."
+    },
+    "team": {
+      "title": "Nasz zespół",
+      "subtitle": "Poznaj ludzi stojących za platformą"
+    }
+  },
+  "contact": {
+    "title": "Kontakt",
+    "subtitle": "Chętnie Cię wysłuchamy",
+    "form": {
+      "name": "Twoje imię",
+      "email": "Adres e-mail",
+      "subject": "Temat",
+      "message": "Wiadomość",
+      "send": "Wyślij wiadomość",
+      "sending": "Wysyłanie...",
+      "success": "Wiadomość wysłana pomyślnie!",
+      "error": "Nie udało się wysłać wiadomości. Spróbuj ponownie."
+    },
+    "info": {
+      "title": "Skontaktuj się",
+      "email": "E-mail",
+      "phone": "Telefon",
+      "address": "Adres",
+      "hours": "Godziny pracy"
+    },
+    "support": {
+      "title": "Potrzebujesz pomocy?",
+      "description": "Nasz zespół wsparcia jest tutaj, aby odpowiedzieć na Twoje pytania.",
+      "helpCenter": "Odwiedź Centrum pomocy"
+    }
+  },
+  "faq": {
+    "title": "Najczęściej zadawane pytania",
+    "subtitle": "Znajdź odpowiedzi na częste pytania",
+    "search": "Szukaj w FAQ...",
+    "categories": {
+      "general": "Ogólne",
+      "clients": "Dla klientów",
+      "coaches": "Dla trenerów",
+      "billing": "Płatności i rozliczenia",
+      "technical": "Wsparcie techniczne"
+    },
+    "noResults": "Brak FAQ pasujących do wyszukiwania",
+    "contactSupport": "Nie możesz znaleźć tego, czego szukasz?",
+    "contactUs": "Skontaktuj się z zespołem wsparcia"
+  },
+  "howItWorks": {
+    "title": "Jak to działa",
+    "subtitle": "Rozpoczęcie jest łatwe",
+    "forClients": {
+      "title": "Dla klientów",
+      "step1": {
+        "title": "Utwórz profil",
+        "description": "Zarejestruj się i powiedz nam o swoich celach fitness, preferencjach i wymaganiach."
+      },
+      "step2": {
+        "title": "Znajdź trenera",
+        "description": "Przeglądaj nasz marketplace zweryfikowanych profesjonalistów fitness i znajdź idealnego trenera."
+      },
+      "step3": {
+        "title": "Zarezerwuj sesje",
+        "description": "Zaplanuj sesje pasujące do Twojego kalendarza, online lub stacjonarnie."
+      },
+      "step4": {
+        "title": "Osiągnij cele",
+        "description": "Postępuj zgodnie ze spersonalizowanymi planami, śledź postępy i osiągaj cele fitness."
+      }
+    },
+    "forCoaches": {
+      "title": "Dla trenerów",
+      "step1": {
+        "title": "Złóż aplikację",
+        "description": "Prześlij swoje poświadczenia i certyfikaty do weryfikacji."
+      },
+      "step2": {
+        "title": "Zbuduj profil",
+        "description": "Stwórz atrakcyjny profil prezentujący Twoją ekspertyzę i usługi."
+      },
+      "step3": {
+        "title": "Rozwijaj biznes",
+        "description": "Łącz się z klientami, zarządzaj rezerwacjami i poszerzaj zasięg."
+      },
+      "step4": {
+        "title": "Zarabiaj i prosperuj",
+        "description": "Otrzymuj płatności bezpiecznie i buduj trwałe relacje z klientami."
+      }
+    }
+  },
+  "forCoaches": {
+    "title": "Dla trenerów",
+    "subtitle": "Rozwijaj swój biznes fitness z nami",
+    "hero": {
+      "title": "Przenieś swój biznes coachingowy na wyższy poziom",
+      "description": "Dołącz do naszej platformy i połącz się z klientami gotowymi na transformację."
+    },
+    "benefits": {
+      "title": "Dlaczego warto dołączyć?",
+      "reach": {
+        "title": "Poszerzaj zasięg",
+        "description": "Uzyskaj dostęp do rosnącego rynku zmotywowanych klientów."
+      },
+      "tools": {
+        "title": "Potężne narzędzia",
+        "description": "Kreatory treningów, planery żywieniowe i zarządzanie klientami."
+      },
+      "payments": {
+        "title": "Bezpieczne płatności",
+        "description": "Otrzymuj płatności na czas dzięki zintegrowanemu systemowi płatności."
+      },
+      "flexibility": {
+        "title": "Pracuj po swojemu",
+        "description": "Ustal własny harmonogram, ceny i dostępność."
+      }
+    },
+    "features": {
+      "title": "Funkcje platformy",
+      "clientManagement": "Zarządzanie klientami",
+      "scheduling": "Inteligentne planowanie",
+      "programBuilder": "Kreator programów",
+      "nutritionPlanning": "Planowanie żywienia",
+      "progressTracking": "Śledzenie postępów",
+      "messaging": "Wiadomości w aplikacji",
+      "payments": "Przetwarzanie płatności",
+      "marketing": "Narzędzia marketingowe"
+    },
+    "pricing": {
+      "title": "Plany dla trenerów",
+      "subtitle": "Wybierz plan odpowiedni dla Twojego biznesu"
+    },
+    "cta": {
+      "title": "Gotowy, aby zacząć?",
+      "button": "Aplikuj teraz",
+      "subtext": "Dołącz do tysięcy trenerów już na naszej platformie"
+    }
+  },
+  "pricing": {
+    "title": "Cennik",
+    "subtitle": "Prosty, przejrzysty cennik",
+    "forClients": {
+      "title": "Dla klientów",
+      "description": "Utworzenie konta jest bezpłatne. Płacisz tylko za zarezerwowane usługi."
+    },
+    "forCoaches": {
+      "title": "Dla trenerów",
+      "description": "Wybierz plan odpowiadający potrzebom Twojego biznesu."
+    },
+    "plans": {
+      "starter": {
+        "name": "Starter",
+        "description": "Idealny dla nowych trenerów"
+      },
+      "professional": {
+        "name": "Professional",
+        "description": "Dla rozwijających się biznesów"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "description": "Dla doświadczonych profesjonalistów"
+      }
+    },
+    "features": {
+      "clients": "klientów",
+      "unlimited": "Bez limitu",
+      "basicSupport": "Podstawowe wsparcie",
+      "prioritySupport": "Priorytetowe wsparcie",
+      "dedicatedSupport": "Dedykowane wsparcie"
+    },
+    "perMonth": "/miesiąc",
+    "perYear": "/rok",
+    "billedAnnually": "rozliczane rocznie",
+    "billedMonthly": "rozliczane miesięcznie",
+    "choosePlan": "Wybierz plan",
+    "currentPlan": "Aktualny plan",
+    "mostPopular": "Najpopularniejszy",
+    "contactSales": "Skontaktuj się"
+  },
+  "privacy": {
+    "title": "Polityka prywatności",
+    "lastUpdated": "Ostatnia aktualizacja",
+    "sections": {
+      "introduction": "Wprowadzenie",
+      "dataCollection": "Zbierane dane",
+      "dataUse": "Jak wykorzystujemy Twoje dane",
+      "dataSecurity": "Bezpieczeństwo danych",
+      "cookies": "Pliki cookie",
+      "thirdParties": "Strony trzecie",
+      "yourRights": "Twoje prawa",
+      "contact": "Kontakt"
+    }
+  },
+  "terms": {
+    "title": "Regulamin",
+    "lastUpdated": "Ostatnia aktualizacja",
+    "sections": {
+      "acceptance": "Akceptacja warunków",
+      "eligibility": "Uprawnienia",
+      "accounts": "Konta użytkowników",
+      "services": "Usługi",
+      "payments": "Płatności",
+      "content": "Treści użytkowników",
+      "prohibited": "Zabronione działania",
+      "liability": "Ograniczenie odpowiedzialności",
+      "termination": "Rozwiązanie umowy",
+      "changes": "Zmiany regulaminu",
+      "contact": "Kontakt"
+    }
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Porady fitness, historie sukcesu i wglądy branżowe",
+    "readMore": "Czytaj więcej",
+    "readTime": "min czytania",
+    "categories": "Kategorie",
+    "allPosts": "Wszystkie wpisy",
+    "recentPosts": "Ostatnie wpisy",
+    "popularPosts": "Popularne wpisy",
+    "relatedPosts": "Powiązane wpisy",
+    "author": "Autor",
+    "publishedOn": "Opublikowano",
+    "share": "Udostępnij",
+    "tags": "Tagi",
+    "comments": "Komentarze",
+    "leaveComment": "Zostaw komentarz",
+    "noComments": "Brak komentarzy",
+    "noPosts": "Brak dostępnych wpisów",
+    "backToBlog": "Wróć do bloga"
+  },
+  "successStories": {
+    "title": "Historie sukcesu",
+    "subtitle": "Prawdziwe transformacje prawdziwych ludzi",
+    "readStory": "Przeczytaj historię",
+    "viewAll": "Zobacz wszystkie historie",
+    "featured": "Wyróżniona historia",
+    "before": "Przed",
+    "after": "Po",
+    "duration": "Czas trwania",
+    "goal": "Cel",
+    "achieved": "Osiągnięte",
+    "coach": "Trener",
+    "testimonial": "Co mówią",
+    "noStories": "Brak historii sukcesu"
+  },
+  "notFound": {
+    "title": "Strona nie znaleziona",
+    "subtitle": "Strona, której szukasz, nie istnieje lub została przeniesiona.",
+    "goHome": "Przejdź do strony głównej",
+    "goBack": "Wróć"
+  },
+  "community": {
+    "title": "Społeczność",
+    "subtitle": "Połącz się z innymi entuzjastami fitness",
+    "forums": "Fora",
+    "groups": "Grupy",
+    "events": "Wydarzenia",
+    "challenges": "Wyzwania",
+    "leaderboards": "Rankingi",
+    "join": "Dołącz do społeczności",
+    "comingSoon": "Wkrótce"
+  },
+  "careers": {
+    "title": "Kariera",
+    "subtitle": "Dołącz do naszego zespołu i kształtuj przyszłość fitness",
+    "openPositions": "Otwarte stanowiska",
+    "noPositions": "Obecnie brak otwartych stanowisk",
+    "applyNow": "Aplikuj teraz",
+    "benefits": {
+      "title": "Benefity i przywileje",
+      "remote": "Praca zdalna",
+      "flexible": "Elastyczne godziny",
+      "health": "Benefity zdrowotne",
+      "growth": "Rozwój kariery"
+    }
+  }
+}
