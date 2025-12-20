@@ -21,6 +21,7 @@ export const BoostToggleCard = () => {
   const remainingDays = getBoostRemainingDays(boostStatus);
   const isLoading = statusLoading || settingsLoading;
   const isPending = boostStatus?.payment_status === "pending";
+  const isMigratedFree = boostStatus?.payment_status === "migrated_free";
 
   // Handle payment success/cancel from URL params
   useEffect(() => {
@@ -89,20 +90,32 @@ export const BoostToggleCard = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         {isActive ? (
-          <div className="rounded-lg bg-primary/10 border border-primary/20 p-4">
-            <p className="text-sm text-primary font-medium flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              You're appearing at the top of search results!
-            </p>
-            <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {remainingDays} day{remainingDays !== 1 ? "s" : ""} remaining
-              {boostStatus?.boost_end_date && (
-                <span className="ml-1">
-                  (expires {new Date(boostStatus.boost_end_date).toLocaleDateString()})
-                </span>
-              )}
-            </p>
+          <div className="space-y-3">
+            {isMigratedFree && (
+              <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3">
+                <p className="text-sm text-amber-600 dark:text-amber-400 font-medium">
+                  🎁 Free Boost Extension
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  As an early adopter, you've been granted a free 30-day extension. After this expires, Boost requires a {formatCurrency(boostPrice, "GBP")} payment for {boostDuration} days.
+                </p>
+              </div>
+            )}
+            <div className="rounded-lg bg-primary/10 border border-primary/20 p-4">
+              <p className="text-sm text-primary font-medium flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                You're appearing at the top of search results!
+              </p>
+              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                {remainingDays} day{remainingDays !== 1 ? "s" : ""} remaining
+                {boostStatus?.boost_end_date && (
+                  <span className="ml-1">
+                    (expires {new Date(boostStatus.boost_end_date).toLocaleDateString()})
+                  </span>
+                )}
+              </p>
+            </div>
           </div>
         ) : (
           <div className="rounded-lg bg-muted/50 border border-border p-4">

@@ -16,7 +16,7 @@ export interface CoachBoost {
   // New paid boost fields
   boost_start_date: string | null;
   boost_end_date: string | null;
-  payment_status: 'none' | 'pending' | 'succeeded' | 'failed' | 'cancelled';
+  payment_status: 'none' | 'pending' | 'succeeded' | 'failed' | 'cancelled' | 'migrated_free';
   activation_payment_intent_id: string | null;
 }
 
@@ -51,10 +51,12 @@ export interface BoostSettings {
 }
 
 // Helper to check if boost is currently active based on end date
+// Accepts both 'succeeded' (paid) and 'migrated_free' (legacy migration) as valid statuses
 export const isBoostActive = (boost: CoachBoost | null): boolean => {
   if (!boost) return false;
   if (!boost.boost_end_date) return false;
-  if (boost.payment_status !== 'succeeded') return false;
+  // migrated_free = legacy boosts granted 30 days during paid model migration
+  if (boost.payment_status !== 'succeeded' && boost.payment_status !== 'migrated_free') return false;
   return new Date(boost.boost_end_date) > new Date();
 };
 

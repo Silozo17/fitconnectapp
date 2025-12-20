@@ -124,14 +124,15 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
     queryFn: async () => {
       // First, get boosted coach IDs if showing sponsored first
       // Only include coaches with active, non-expired boosts
+      // Accepts both 'succeeded' (paid) and 'migrated_free' (legacy migration) as valid statuses
       let boostedCoachIds: string[] = [];
       if (showSponsoredFirst) {
         const now = new Date().toISOString();
         const { data: boosts } = await supabase
           .from("coach_boosts")
-          .select("coach_id, boost_end_date")
+          .select("coach_id, boost_end_date, payment_status")
           .eq("is_active", true)
-          .eq("payment_status", "succeeded")
+          .in("payment_status", ["succeeded", "migrated_free"])
           .gt("boost_end_date", now);
         
         // Filter out any null end dates (shouldn't happen, but be safe)
