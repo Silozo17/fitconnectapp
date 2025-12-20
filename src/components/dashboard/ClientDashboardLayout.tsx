@@ -3,10 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
 import { useClientOnboardingStatus } from "@/hooks/useOnboardingStatus";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useEnvironment } from "@/hooks/useEnvironment";
 import { Loader2 } from "lucide-react";
 import ClientSidebar from "./ClientSidebar";
 import ClientDashboardHeader from "./ClientDashboardHeader";
 import SkipNavigation from "@/components/shared/SkipNavigation";
+import MobileBottomNav from "@/components/navigation/MobileBottomNav";
 
 interface ClientDashboardLayoutProps {
   children: React.ReactNode;
@@ -24,6 +27,11 @@ const ClientDashboardLayout = ({
   const { data: onboardingStatus, isLoading } = useClientOnboardingStatus();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const isMobile = useIsMobile();
+  const { isPWA, isNativeApp } = useEnvironment();
+  
+  // Check if bottom nav will be shown
+  const showBottomNav = isMobile && (isPWA || isNativeApp);
 
   useEffect(() => {
     if (!isLoading && onboardingStatus && !onboardingStatus.isOnboarded) {
@@ -61,7 +69,7 @@ const ClientDashboardLayout = ({
           <ClientDashboardHeader onMenuToggle={() => setMobileOpen(true)} />
           <main 
             id="main-content" 
-            className="flex-1 p-4 lg:p-6 pb-24 overflow-y-auto"
+            className={`flex-1 p-4 lg:p-6 overflow-y-auto ${showBottomNav ? "pb-24" : "pb-6"}`}
             role="main"
             aria-label={title}
             tabIndex={-1}
@@ -70,6 +78,8 @@ const ClientDashboardLayout = ({
           </main>
         </div>
       </div>
+
+      <MobileBottomNav variant="client" />
     </>
   );
 };

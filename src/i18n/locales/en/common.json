@@ -446,6 +446,16 @@
       "integrations": "Integrations",
       "favourites": "Favourites",
       "settings": "Settings"
+    },
+    "bottomNav": {
+      "home": "Home",
+      "discover": "Discover",
+      "plans": "Plans",
+      "messages": "Messages",
+      "profile": "Profile",
+      "clients": "Clients",
+      "schedule": "Schedule",
+      "mobileNavigation": "Mobile navigation"
     }
   },
   "coach": {
