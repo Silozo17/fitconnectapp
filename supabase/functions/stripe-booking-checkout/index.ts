@@ -175,7 +175,7 @@ serve(async (req) => {
     // Check if coach has Boost active (time-based entitlement)
     // Boost is active only if:
     // 1. is_active = true
-    // 2. payment_status = 'succeeded'
+    // 2. payment_status = 'succeeded' OR 'migrated_free' (legacy boosts)
     // 3. boost_end_date > current time
     const now = new Date().toISOString();
     const { data: coachBoost } = await supabase
@@ -183,7 +183,7 @@ serve(async (req) => {
       .select("is_active, boost_end_date, payment_status")
       .eq("coach_id", coachId)
       .eq("is_active", true)
-      .eq("payment_status", "succeeded")
+      .in("payment_status", ["succeeded", "migrated_free"])
       .gt("boost_end_date", now)
       .maybeSingle();
 
