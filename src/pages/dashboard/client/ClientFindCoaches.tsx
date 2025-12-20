@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Search, SlidersHorizontal, Loader2, Users, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ import { useUserLocation } from "@/hooks/useUserLocation";
 import { useMarketplaceLocationFilter } from "@/hooks/useMarketplaceLocationFilter";
 
 const ClientFindCoaches = () => {
+  const { t } = useTranslation("client");
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
@@ -66,22 +68,22 @@ const ClientFindCoaches = () => {
 
   return (
     <ClientDashboardLayout
-      title="Find Coaches"
-      description="Browse and connect with verified fitness coaches"
+      title={t('findCoaches.title')}
+      description={t('findCoaches.subtitle')}
     >
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Find Coaches</h1>
+            <h1 className="text-2xl font-bold text-foreground">{t('findCoaches.title')}</h1>
             <p className="text-muted-foreground">
-              Browse our verified fitness professionals
+              {t('findCoaches.description')}
             </p>
           </div>
           {locationDisplay && (
             <Badge variant="secondary" className="gap-1.5">
               <MapPin className="w-3.5 h-3.5" />
-              {isManualSelection ? "Filtered:" : "Near"} {locationDisplay}
+              {isManualSelection ? t('findCoaches.filtered') : t('findCoaches.near')} {locationDisplay}
             </Badge>
           )}
         </div>
@@ -91,7 +93,7 @@ const ClientFindCoaches = () => {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
-              placeholder="Search by name, specialty, or location..."
+              placeholder={t('findCoaches.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 h-11"
@@ -104,7 +106,7 @@ const ClientFindCoaches = () => {
             className="hidden md:flex h-11"
           >
             <SlidersHorizontal className="h-5 w-5 mr-2" />
-            Filters
+            {t('findCoaches.filters')}
           </Button>
 
           {/* Mobile Filter Sheet */}
@@ -116,7 +118,7 @@ const ClientFindCoaches = () => {
             </SheetTrigger>
             <SheetContent side="left" className="w-[300px] sm:w-[350px] p-0">
               <SheetHeader className="p-4 border-b border-border">
-                <SheetTitle>Filters</SheetTitle>
+                <SheetTitle>{t('findCoaches.filters')}</SheetTitle>
               </SheetHeader>
               <div className="p-4 overflow-y-auto max-h-[calc(100vh-80px)]">
                 <CoachFilters

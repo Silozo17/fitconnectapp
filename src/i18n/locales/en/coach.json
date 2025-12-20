@@ -534,5 +534,10 @@
     "viewParticipants": "View Participants",
     "noClasses": "No group classes",
     "createFirst": "Create your first group class"
+  },
+  "plans": {
+    "assignPlan": "Assign Plan",
+    "to": "to",
+    "searchPlans": "Search plans..."
   }
 }

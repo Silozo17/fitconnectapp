@@ -534,5 +534,10 @@
     "viewParticipants": "Zobacz uczestników",
     "noClasses": "Brak zajęć grupowych",
     "createFirst": "Utwórz swoje pierwsze zajęcia grupowe"
+  },
+  "plans": {
+    "assignPlan": "Przypisz plan",
+    "to": "do",
+    "searchPlans": "Szukaj planów..."
   }
 }

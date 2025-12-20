@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { NavLink } from "@/components/NavLink";
 import { 
   LayoutDashboard, Users, Dumbbell, Settings, ChevronLeft, ChevronRight, 
@@ -64,6 +65,7 @@ interface AdminSidebarProps {
 }
 
 const AdminSidebar = ({ mobileOpen, setMobileOpen }: AdminSidebarProps) => {
+  const { t } = useTranslation("admin");
   const [collapsed, setCollapsed] = useState(false);
   const { pendingVerifications, newUsers } = useAdminBadges();
   const { data: pendingFeedbackCount = 0 } = usePendingFeedbackCount();
@@ -196,7 +198,7 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }: AdminSidebarProps) => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search users, coaches..."
+                placeholder={t('users.search')}
                 autoFocus={false}
                 className="pl-10 bg-muted/50 border-transparent focus:border-primary"
               />
