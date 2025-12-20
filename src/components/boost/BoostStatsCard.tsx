@@ -178,7 +178,7 @@ export const BoostStatsCard = () => {
             </div>
           ) : (
             <p className="text-muted-foreground text-center py-8">
-              No clients acquired via Boost yet. Enable Boost to start appearing first in search results!
+              No clients acquired via Boost yet. Purchase Boost for £5 to start appearing first in search results for 30 days!
             </p>
           )}
         </CardContent>

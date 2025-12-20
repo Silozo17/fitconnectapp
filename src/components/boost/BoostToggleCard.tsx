@@ -118,33 +118,41 @@ export const BoostToggleCard = () => {
             </div>
           </div>
         ) : (
-          <div className="rounded-lg bg-muted/50 border border-border p-4">
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div>
-                <p className="text-sm font-medium">
-                  Activate Boost for {formatCurrency(boostPrice, "GBP")}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {boostDuration}-day visibility boost. Appear first in search results.
-                </p>
+          <div className="space-y-3">
+            <div className="rounded-lg bg-muted/50 border border-border p-4">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                  <p className="text-sm font-medium">
+                    Activate Boost for {formatCurrency(boostPrice, "GBP")}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {boostDuration}-day visibility boost. Appear first in search results.
+                  </p>
+                </div>
+                <Button 
+                  onClick={handlePurchase}
+                  disabled={purchaseBoost.isPending || isPending}
+                  className="gap-2"
+                >
+                  {purchaseBoost.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="h-4 w-4" />
+                      Purchase Boost
+                    </>
+                  )}
+                </Button>
               </div>
-              <Button 
-                onClick={handlePurchase}
-                disabled={purchaseBoost.isPending || isPending}
-                className="gap-2"
-              >
-                {purchaseBoost.isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="h-4 w-4" />
-                    Purchase Boost
-                  </>
-                )}
-              </Button>
+            </div>
+            <div className="rounded-lg bg-blue-500/5 border border-blue-500/20 p-3">
+              <p className="text-xs text-muted-foreground">
+                <span className="font-medium text-foreground">What you pay:</span> {formatCurrency(boostPrice, "GBP")} activation + {settings ? `${Math.round(settings.commission_rate * 100)}%` : "30%"} of first booking from new clients.
+                After {boostDuration} days, Boost expires automatically — no auto-renewal.
+              </p>
             </div>
           </div>
         )}
