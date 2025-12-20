@@ -1,33 +1,24 @@
+import { useTranslation } from "react-i18next";
 import { Star, Quote } from "lucide-react";
 import BlobShape from "@/components/ui/blob-shape";
 
 const Testimonials = () => {
+  const { t } = useTranslation('landing');
+  
   const testimonials = [
     {
-      name: "James Mitchell",
-      role: "Lost 15kg in 4 months",
-      image:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop",
-      content:
-        "Finding Marcus through FitConnect changed my life. The personalized training plans and constant support helped me achieve what I thought was impossible.",
+      key: "james",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop",
       rating: 5,
     },
     {
-      name: "Sophie Anderson",
-      role: "Marathon Runner",
-      image:
-        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop",
-      content:
-        "The nutrition coaching I received was exceptional. My coach understood my training needs and created a plan that fueled my first marathon success.",
+      key: "sophie",
+      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop",
       rating: 5,
     },
     {
-      name: "Michael Obi",
-      role: "Amateur Boxer",
-      image:
-        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop",
-      content:
-        "Started boxing training through FitConnect and competed in my first amateur bout within 8 months. The quality of coaches here is unmatched.",
+      key: "michael",
+      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop",
       rating: 5,
     },
   ];
@@ -42,15 +33,14 @@ const Testimonials = () => {
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="inline-block px-4 py-1.5 rounded-full bg-gradient-orange/10 text-gradient-orange font-medium text-sm mb-4">
-            SUCCESS STORIES
+            {t('testimonials.badge')}
           </span>
           <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-6">
-            Real Results from{" "}
-            <span className="gradient-text-orange">Real People</span>
+            {t('testimonials.title')}{" "}
+            <span className="gradient-text-orange">{t('testimonials.titleHighlight')}</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Join thousands of members who have transformed their lives with our
-            expert coaches.
+            {t('testimonials.description')}
           </p>
         </div>
 
@@ -77,22 +67,22 @@ const Testimonials = () => {
 
               {/* Content */}
               <p className="text-foreground leading-relaxed mb-6">
-                "{testimonial.content}"
+                "{t(`testimonials.items.${testimonial.key}.content`)}"
               </p>
 
               {/* Author */}
               <div className="flex items-center gap-4 pt-6 border-t border-border">
                 <img
                   src={testimonial.image}
-                  alt={testimonial.name}
+                  alt={t(`testimonials.items.${testimonial.key}.name`)}
                   className="w-12 h-12 rounded-xl object-cover ring-2 ring-primary/20"
                 />
                 <div>
                   <p className="font-display font-semibold text-foreground">
-                    {testimonial.name}
+                    {t(`testimonials.items.${testimonial.key}.name`)}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {testimonial.role}
+                    {t(`testimonials.items.${testimonial.key}.role`)}
                   </p>
                 </div>
               </div>

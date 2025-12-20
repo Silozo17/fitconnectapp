@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ChevronRight, Lock, Sparkles, Trophy, Target } from 'lucide-react';
@@ -7,6 +8,7 @@ import { useAvatars, getAvatarImageUrl } from '@/hooks/useAvatars';
 import { cn } from '@/lib/utils';
 
 export function AvatarShowcase() {
+  const { t } = useTranslation('landing');
   const { data: avatars } = useAvatars();
   const [activeIndex, setActiveIndex] = useState(0);
   
@@ -37,14 +39,13 @@ export function AvatarShowcase() {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-4">
             <Sparkles className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium text-primary">Unlock Avatars</span>
+            <span className="text-sm font-medium text-primary">{t('avatarShowcase.badge')}</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Earn <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Exclusive Avatars</span>
+            {t('avatarShowcase.title')} <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{t('avatarShowcase.titleHighlight')}</span>
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Complete challenges, hit milestones, and unlock unique avatars to represent your fitness journey.
-            Show off your achievements on the leaderboard!
+            {t('avatarShowcase.description')}
           </p>
         </div>
         
@@ -105,8 +106,8 @@ export function AvatarShowcase() {
                     <Trophy className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="font-medium text-sm">Complete Challenges</p>
-                    <p className="text-xs text-muted-foreground">Unlock avatars by completing fitness challenges</p>
+                    <p className="font-medium text-sm">{t('avatarShowcase.completeChallenges')}</p>
+                    <p className="text-xs text-muted-foreground">{t('avatarShowcase.completeChallengesDesc')}</p>
                   </div>
                 </div>
               </Card>
@@ -116,8 +117,8 @@ export function AvatarShowcase() {
                     <Target className="h-5 w-5 text-accent" />
                   </div>
                   <div>
-                    <p className="font-medium text-sm">Hit Milestones</p>
-                    <p className="text-xs text-muted-foreground">Track workouts, habits & progress to earn XP</p>
+                    <p className="font-medium text-sm">{t('avatarShowcase.hitMilestones')}</p>
+                    <p className="text-xs text-muted-foreground">{t('avatarShowcase.hitMilestonesDesc')}</p>
                   </div>
                 </div>
               </Card>
@@ -125,7 +126,7 @@ export function AvatarShowcase() {
             
             <Link to="/community?tab=avatars">
               <Button className="w-full gap-2">
-                View All Avatars
+                {t('avatarShowcase.viewAll')}
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </Link>

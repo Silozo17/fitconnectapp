@@ -1,0 +1,134 @@
+{
+  "hero": {
+    "badge": "#1 Fitness Coaching Platform",
+    "title": "Transform Your Body",
+    "titleHighlight": "With Elite Coaches",
+    "description": "Connect with world-class personal trainers, nutritionists, and combat sports coaches. Achieve your fitness goals with personalized guidance.",
+    "ctaPrimary": "Find Your Coach",
+    "ctaSecondary": "Become a Coach",
+    "stats": {
+      "activeUsers": "Active Users",
+      "expertCoaches": "Expert Coaches",
+      "averageRating": "Average Rating"
+    },
+    "services": {
+      "personalTraining": "Personal Training",
+      "personalTrainingDesc": "Custom workout plans tailored to your goals",
+      "nutritionCoaching": "Nutrition Coaching",
+      "nutritionCoachingDesc": "Meal plans and macro tracking for results",
+      "combatSports": "Combat Sports",
+      "combatSportsDesc": "Boxing, MMA, and martial arts training",
+      "mostPopular": "Most Popular"
+    }
+  },
+  "features": {
+    "badge": "PLATFORM FEATURES",
+    "title": "Everything You Need to",
+    "titleHighlight": "Succeed",
+    "description": "Our platform provides all the tools you need to find the right coach, stay on track, and achieve your fitness goals.",
+    "items": {
+      "smartDiscovery": {
+        "title": "Smart Coach Discovery",
+        "description": "Find the perfect coach based on your goals, budget, and preferences. Filter by specialty, location, and availability."
+      },
+      "easyBooking": {
+        "title": "24/7 Easy Booking",
+        "description": "Book sessions anytime with real-time availability. Manage, reschedule, or cancel appointments with ease."
+      },
+      "customPlans": {
+        "title": "Custom Training Plans",
+        "description": "Get personalized workout and nutrition plans tailored to your goals. Track progress and adjust as you grow."
+      },
+      "directMessaging": {
+        "title": "Direct Messaging",
+        "description": "Stay connected with your coach through instant messaging. Share updates, ask questions, and stay motivated."
+      },
+      "progressTracking": {
+        "title": "Progress Tracking",
+        "description": "Monitor your transformation with detailed analytics. Track weight, measurements, and workout completion."
+      },
+      "verifiedCoaches": {
+        "title": "Verified Coaches",
+        "description": "All coaches are verified professionals with proven credentials. Train with confidence and trust."
+      }
+    }
+  },
+  "cta": {
+    "title": "Ready to Start Your Transformation?",
+    "description": "Join thousands of members who have already found their perfect coach. Your fitness journey starts with a single step.",
+    "findCoach": "Find Your Coach",
+    "applyAsCoach": "Apply as Coach",
+    "trustBadges": {
+      "freeToJoin": "Free to join",
+      "noCommitment": "No commitment",
+      "cancelAnytime": "Cancel anytime"
+    }
+  },
+  "testimonials": {
+    "badge": "SUCCESS STORIES",
+    "title": "Real Results from",
+    "titleHighlight": "Real People",
+    "description": "Join thousands of members who have transformed their lives with our expert coaches.",
+    "items": {
+      "james": {
+        "name": "James Mitchell",
+        "role": "Lost 15kg in 4 months",
+        "content": "Finding Marcus through FitConnect changed my life. The personalized training plans and constant support helped me achieve what I thought was impossible."
+      },
+      "sophie": {
+        "name": "Sophie Anderson",
+        "role": "Marathon Runner",
+        "content": "The nutrition coaching I received was exceptional. My coach understood my training needs and created a plan that fueled my first marathon success."
+      },
+      "michael": {
+        "name": "Michael Obi",
+        "role": "Amateur Boxer",
+        "content": "Started boxing training through FitConnect and competed in my first amateur bout within 8 months. The quality of coaches here is unmatched."
+      }
+    }
+  },
+  "featuredCoaches": {
+    "badge": "TOP RATED",
+    "title": "Featured",
+    "titleHighlight": "Coaches",
+    "showingNear": "Showing coaches near {{location}}",
+    "viewAll": "View All Coaches",
+    "verified": "Verified",
+    "reviews": "reviews",
+    "perSession": "/session",
+    "viewProfile": "View Profile →"
+  },
+  "leaderboard": {
+    "badge": "Community Leaderboard",
+    "title": "Join Thousands",
+    "titleHighlight": "Competing",
+    "titleSuffix": "to Be Their Best",
+    "description": "Track your progress, earn XP, and compete with fitness enthusiasts in your area and around the world.",
+    "activeCompetitors": "active competitors",
+    "topGlobally": "Top Globally",
+    "nearYou": "Near You",
+    "nearYouWithCity": "Near You ({{city}})",
+    "noParticipants": "No participants yet",
+    "moreCompeting": "+ {{count}} more competing",
+    "viewFull": "View Full Leaderboards",
+    "joinCta": "Join the Competition - It's Free",
+    "privacyNote": "Your privacy is protected. Only appear on leaderboards if you choose to."
+  },
+  "avatarShowcase": {
+    "badge": "Unlock Avatars",
+    "title": "Earn",
+    "titleHighlight": "Exclusive Avatars",
+    "description": "Complete challenges, hit milestones, and unlock unique avatars to represent your fitness journey. Show off your achievements on the leaderboard!",
+    "completeChallenges": "Complete Challenges",
+    "completeChallengesDesc": "Unlock avatars by completing fitness challenges",
+    "hitMilestones": "Hit Milestones",
+    "hitMilestonesDesc": "Track workouts, habits & progress to earn XP",
+    "viewAll": "View All Avatars"
+  },
+  "blog": {
+    "badge": "Fitness Insights",
+    "title": "Latest from the Blog",
+    "description": "Expert advice, workout tips, and industry insights to help you on your fitness journey.",
+    "viewAll": "View All Articles"
+  }
+}

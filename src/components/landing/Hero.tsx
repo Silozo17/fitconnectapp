@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { NeonBadge } from "@/components/ui/neon-badge";
 import { DottedPattern } from "@/components/ui/dotted-pattern";
@@ -8,23 +9,24 @@ import { usePlatformStats } from "@/hooks/usePlatformStats";
 import { formatStatNumber } from "@/lib/formatStats";
 
 const Hero = () => {
+  const { t } = useTranslation('landing');
   const { data: platformStats, isLoading } = usePlatformStats();
 
   const stats = [
     { 
       icon: Users, 
       value: isLoading ? "..." : formatStatNumber(platformStats?.totalUsers || 0), 
-      label: "Active Users" 
+      label: t('hero.stats.activeUsers')
     },
     { 
       icon: Award, 
       value: isLoading ? "..." : formatStatNumber(platformStats?.totalCoaches || 0), 
-      label: "Expert Coaches" 
+      label: t('hero.stats.expertCoaches')
     },
     { 
       icon: Star, 
       value: platformStats?.avgRating?.toFixed(1) || "4.9", 
-      label: "Average Rating" 
+      label: t('hero.stats.averageRating')
     },
   ];
 
@@ -52,29 +54,28 @@ const Hero = () => {
           <div className="flex justify-center mb-8">
             <NeonBadge variant="lime" size="md" className="gap-2">
               <Zap className="w-4 h-4" />
-              <span>#1 Fitness Coaching Platform</span>
+              <span>{t('hero.badge')}</span>
             </NeonBadge>
           </div>
 
           <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-            Transform Your Body
-            <span className="block gradient-text-energy">With Elite Coaches</span>
+            {t('hero.title')}
+            <span className="block gradient-text-energy">{t('hero.titleHighlight')}</span>
           </h1>
 
           <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-            Connect with world-class personal trainers, nutritionists, and combat sports coaches. 
-            Achieve your fitness goals with personalized guidance.
+            {t('hero.description')}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
             <GradientButton size="lg" asChild>
               <Link to="/coaches" className="gap-2">
-                Find Your Coach
+                {t('hero.ctaPrimary')}
                 <ArrowRight className="w-5 h-5" />
               </Link>
             </GradientButton>
             <GradientButton variant="outline" size="lg" asChild>
-              <Link to="/for-coaches">Become a Coach</Link>
+              <Link to="/for-coaches">{t('hero.ctaSecondary')}</Link>
             </GradientButton>
           </div>
 
@@ -99,23 +100,23 @@ const Hero = () => {
               <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mb-4">
                 <Dumbbell className="w-8 h-8 text-primary" />
               </div>
-              <h3 className="font-display font-semibold text-lg mb-2">Personal Training</h3>
-              <p className="text-muted-foreground text-sm">Custom workout plans tailored to your goals</p>
+              <h3 className="font-display font-semibold text-lg mb-2">{t('hero.services.personalTraining')}</h3>
+              <p className="text-muted-foreground text-sm">{t('hero.services.personalTrainingDesc')}</p>
             </div>
             <div className="card-glow p-6 border-primary/30 glow-sm animate-float" style={{ animationDelay: '0.5s' }}>
               <div className="w-16 h-16 rounded-2xl bg-accent/20 flex items-center justify-center mb-4">
                 <Salad className="w-8 h-8 text-accent" />
               </div>
-              <h3 className="font-display font-semibold text-lg mb-2">Nutrition Coaching</h3>
-              <p className="text-muted-foreground text-sm">Meal plans and macro tracking for results</p>
-              <NeonBadge variant="purple" size="sm" className="mt-4">Most Popular</NeonBadge>
+              <h3 className="font-display font-semibold text-lg mb-2">{t('hero.services.nutritionCoaching')}</h3>
+              <p className="text-muted-foreground text-sm">{t('hero.services.nutritionCoachingDesc')}</p>
+              <NeonBadge variant="purple" size="sm" className="mt-4">{t('hero.services.mostPopular')}</NeonBadge>
             </div>
             <div className="card-glow p-6 animate-float" style={{ animationDelay: '1s' }}>
               <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mb-4">
                 <Swords className="w-8 h-8 text-primary" />
               </div>
-              <h3 className="font-display font-semibold text-lg mb-2">Combat Sports</h3>
-              <p className="text-muted-foreground text-sm">Boxing, MMA, and martial arts training</p>
+              <h3 className="font-display font-semibold text-lg mb-2">{t('hero.services.combatSports')}</h3>
+              <p className="text-muted-foreground text-sm">{t('hero.services.combatSportsDesc')}</p>
             </div>
           </div>
         </div>
