@@ -5,6 +5,7 @@ import { Loader2, Mail, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getErrorMessage, logError } from "@/lib/error-utils";
+import { useTranslation } from "react-i18next";
 
 interface OTPVerificationProps {
   email: string;
@@ -13,6 +14,7 @@ interface OTPVerificationProps {
 }
 
 export function OTPVerification({ email, onVerified, onBack }: OTPVerificationProps) {
+  const { t } = useTranslation('common');
   const [code, setCode] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
   const [isResending, setIsResending] = useState(false);
@@ -28,7 +30,7 @@ export function OTPVerification({ email, onVerified, onBack }: OTPVerificationPr
 
   const handleVerify = async () => {
     if (code.length !== 6) {
-      toast.error("Please enter the 6-digit code");
+      toast.error(t('otp.enter6Digit'));
       return;
     }
 
@@ -41,15 +43,15 @@ export function OTPVerification({ email, onVerified, onBack }: OTPVerificationPr
       if (error) throw error;
 
       if (data.success) {
-        toast.success("Email verified!");
+        toast.success(t('otp.emailVerified'));
         onVerified();
       } else {
-        toast.error(data.error || "Invalid verification code");
+        toast.error(data.error || t('otp.invalidCode'));
         setCode("");
       }
     } catch (error: unknown) {
       logError("OTPVerification", error);
-      toast.error(getErrorMessage(error, "Failed to verify code"));
+      toast.error(getErrorMessage(error, t('otp.failedVerify')));
       setCode("");
     } finally {
       setIsVerifying(false);
@@ -65,12 +67,12 @@ export function OTPVerification({ email, onVerified, onBack }: OTPVerificationPr
 
       if (error) throw error;
 
-      toast.success("New code sent!");
+      toast.success(t('otp.newCodeSent'));
       setCountdown(60); // 60 second cooldown
       setCode("");
     } catch (error: unknown) {
       logError("OTPVerification", error);
-      toast.error(getErrorMessage(error, "Failed to resend code"));
+      toast.error(getErrorMessage(error, t('otp.failedResend')));
     } finally {
       setIsResending(false);
     }
@@ -91,10 +93,10 @@ export function OTPVerification({ email, onVerified, onBack }: OTPVerificationPr
           <Mail className="w-8 h-8 text-primary" />
         </div>
         <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-          Check your email
+          {t('otp.checkEmail')}
         </h2>
         <p className="text-muted-foreground">
-          We sent a 6-digit code to<br />
+          {t('otp.sentCode')}<br />
           <span className="font-medium text-foreground">{email}</span>
         </p>
       </div>
@@ -127,7 +129,7 @@ export function OTPVerification({ email, onVerified, onBack }: OTPVerificationPr
         {isVerifying ? (
           <Loader2 className="w-5 h-5 animate-spin" />
         ) : (
-          "Verify Email"
+          t('otp.verifyEmail')
         )}
       </Button>
 
@@ -139,7 +141,7 @@ export function OTPVerification({ email, onVerified, onBack }: OTPVerificationPr
           className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back
+          {t('otp.back')}
         </button>
         
         <button
@@ -149,17 +151,17 @@ export function OTPVerification({ email, onVerified, onBack }: OTPVerificationPr
           className="text-sm text-primary hover:underline disabled:text-muted-foreground disabled:no-underline"
         >
           {isResending ? (
-            "Sending..."
+            t('otp.sending')
           ) : countdown > 0 ? (
-            `Resend in ${countdown}s`
+            t('otp.resendIn', { seconds: countdown })
           ) : (
-            "Resend code"
+            t('otp.resendCode')
           )}
         </button>
       </div>
 
       <p className="text-xs text-muted-foreground text-center">
-        Code expires in 5 minutes. Didn't receive it? Check your spam folder.
+        {t('otp.codeExpires')}
       </p>
     </div>
   );

@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { SUBSCRIPTION_TIERS, TierKey } from "@/lib/stripe-config";
+import { useTranslation } from "react-i18next";
 
 interface StripeConnectOnboardingStepProps {
   coachId: string;
@@ -15,6 +16,7 @@ interface StripeConnectOnboardingStepProps {
 }
 
 const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConnectOnboardingStepProps) => {
+  const { t } = useTranslation('common');
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showSkipWarning, setShowSkipWarning] = useState(false);
@@ -70,7 +72,7 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
       }
     } catch (error) {
       console.error("Error connecting Stripe:", error);
-      toast.error("Failed to start Stripe setup");
+      toast.error(t('onboarding.failedStartStripe'));
     } finally {
       setIsLoading(false);
     }
@@ -89,11 +91,11 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
         })
         .eq("id", coachId);
 
-      toast.success("Stripe account connected successfully!");
+      toast.success(t('onboarding.stripeSuccess'));
       refetch();
       onComplete();
     } catch (error) {
-      toast.error("Failed to complete setup");
+      toast.error(t('onboarding.failedCompleteSetup'));
     } finally {
       setIsLoading(false);
     }
@@ -117,9 +119,9 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
       <div className="space-y-6">
         <div>
           <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-            Payment Setup Complete
+            {t('onboarding.paymentSetupComplete')}
           </h2>
-          <p className="text-muted-foreground">Your Stripe account is connected and ready to receive payments.</p>
+          <p className="text-muted-foreground">{t('onboarding.stripeReady')}</p>
         </div>
 
         <div className="p-6 rounded-xl bg-green-500/10 border-2 border-green-500/30">
@@ -128,13 +130,13 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
               <CheckCircle className="h-6 w-6 text-green-500" />
             </div>
             <div className="flex-1">
-              <p className="font-medium text-foreground">Stripe Connected</p>
+              <p className="font-medium text-foreground">{t('onboarding.stripeConnected')}</p>
               <p className="text-sm text-muted-foreground">
-                You can receive payments from clients
+                {t('onboarding.canReceivePayments')}
               </p>
             </div>
             <Badge variant="outline" className="text-green-600 border-green-500/30">
-              Active
+              {t('status.active')}
             </Badge>
           </div>
         </div>
@@ -142,13 +144,13 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
         <div className="flex items-center gap-2 p-4 rounded-xl bg-secondary">
           <Percent className="w-5 h-5 text-primary" />
           <span className="text-sm">
-            <span className="font-medium">{commissionPercent}%</span> platform fee on transactions
-            <span className="text-muted-foreground ml-1">({tierData?.name || 'Free'} plan)</span>
+            <span className="font-medium">{commissionPercent}%</span> {t('onboarding.platformFee', { percent: '' }).replace('{{percent}}%', '')}
+            <span className="text-muted-foreground ml-1">({tierData?.name || 'Free'} {t('onboarding.plan')})</span>
           </span>
         </div>
 
         <Button onClick={onComplete} className="w-full bg-primary text-primary-foreground">
-          Continue
+          {t('actions.continue')}
         </Button>
       </div>
     );
@@ -159,16 +161,16 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
       <div className="space-y-6">
         <div>
           <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-            Almost there!
+            {t('onboarding.almostThere')}
           </h2>
-          <p className="text-muted-foreground">Complete your Stripe setup to start receiving payments.</p>
+          <p className="text-muted-foreground">{t('onboarding.completeStripeSetup')}</p>
         </div>
 
         <div className="p-6 rounded-xl bg-primary/10 border-2 border-primary/30 text-center">
           <CheckCircle className="h-12 w-12 text-primary mx-auto mb-4" />
-          <p className="font-medium text-foreground mb-2">Stripe account created</p>
+          <p className="font-medium text-foreground mb-2">{t('onboarding.stripeAccountCreated')}</p>
           <p className="text-sm text-muted-foreground">
-            Click below to finalize and activate your payment account
+            {t('onboarding.clickFinalize')}
           </p>
         </div>
 
@@ -178,7 +180,7 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
           className="w-full bg-primary text-primary-foreground"
         >
           {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-          Complete Setup
+          {t('onboarding.completeSetup')}
         </Button>
       </div>
     );
@@ -188,10 +190,10 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
     <div className="space-y-6">
       <div>
         <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-          Connect your payment account
+          {t('onboarding.connectPayment')}
         </h2>
         <p className="text-muted-foreground">
-          Connect Stripe to receive payments directly to your bank account.
+          {t('onboarding.connectStripeDesc')}
         </p>
       </div>
 
@@ -201,19 +203,19 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
             <CreditCard className="w-6 h-6 text-white" />
           </div>
           <div className="flex-1">
-            <h3 className="font-medium text-foreground mb-2">Why connect Stripe?</h3>
+            <h3 className="font-medium text-foreground mb-2">{t('onboarding.whyConnectStripe')}</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                Accept credit/debit card payments instantly
+                {t('onboarding.acceptCards')}
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                Automatic transfers to your bank account
+                {t('onboarding.automaticTransfers')}
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                Secure, PCI-compliant payment processing
+                {t('onboarding.securePayments')}
               </li>
             </ul>
           </div>
@@ -223,8 +225,8 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
       <div className="flex items-center gap-2 p-4 rounded-xl bg-primary/10">
         <Percent className="w-5 h-5 text-primary" />
         <span className="text-sm">
-          <span className="font-medium">{commissionPercent}%</span> platform fee per transaction
-          <span className="text-muted-foreground ml-1">({tierData?.name || 'Free'} plan)</span>
+          {t('onboarding.platformFee', { percent: commissionPercent })}
+          <span className="text-muted-foreground ml-1">({tierData?.name || 'Free'} {t('onboarding.plan')})</span>
         </span>
       </div>
 
@@ -233,10 +235,9 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
           <div className="flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="font-medium text-amber-600">Are you sure?</p>
+              <p className="font-medium text-amber-600">{t('onboarding.skipWarningTitle')}</p>
               <p className="text-sm text-muted-foreground mt-1">
-                Without Stripe, you won't be able to accept payments through FitConnect. 
-                You can always set this up later in your settings.
+                {t('onboarding.skipWarningMessage')}
               </p>
             </div>
           </div>
@@ -249,7 +250,7 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
           onClick={handleSkipClick}
           className="flex-1"
         >
-          {showSkipWarning ? "Skip anyway" : "Set up later"}
+          {showSkipWarning ? t('onboarding.skipAnyway') : t('onboarding.setUpLater')}
         </Button>
         <Button 
           onClick={handleConnect} 
@@ -261,7 +262,7 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
           ) : (
             <ExternalLink className="h-4 w-4 mr-2" />
           )}
-          Connect Stripe
+          {t('onboarding.connectStripe')}
         </Button>
       </div>
     </div>

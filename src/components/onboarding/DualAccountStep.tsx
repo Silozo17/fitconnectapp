@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface DualAccountStepProps {
   coachId: string;
@@ -12,6 +13,7 @@ interface DualAccountStepProps {
 }
 
 const DualAccountStep = ({ coachId, onComplete, onBack }: DualAccountStepProps) => {
+  const { t } = useTranslation('common');
   const { user } = useAuth();
   const [isCreating, setIsCreating] = useState(false);
   const [selectedOption, setSelectedOption] = useState<"coach_only" | "both" | null>(null);
@@ -35,7 +37,7 @@ const DualAccountStep = ({ coachId, onComplete, onBack }: DualAccountStepProps) 
           .update({ also_client: true })
           .eq("id", coachId);
         
-        toast.success("Your client account is already set up!");
+        toast.success(t('onboarding.clientAccountSetup'));
         onComplete(true);
         return;
       }
@@ -69,11 +71,11 @@ const DualAccountStep = ({ coachId, onComplete, onBack }: DualAccountStepProps) 
         .update({ also_client: true })
         .eq("id", coachId);
 
-      toast.success("Client account created! You can complete your client profile later.");
+      toast.success(t('onboarding.clientAccountCreated'));
       onComplete(true);
     } catch (error) {
       console.error("Error creating client account:", error);
-      toast.error("Failed to create client account");
+      toast.error(t('onboarding.failedCreateClient'));
       setIsCreating(false);
     }
   };
@@ -86,10 +88,10 @@ const DualAccountStep = ({ coachId, onComplete, onBack }: DualAccountStepProps) 
     <div className="space-y-6">
       <div>
         <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-          One more thing...
+          {t('onboarding.oneMoreThing')}
         </h2>
         <p className="text-muted-foreground">
-          Would you also like to find coaches for your own fitness journey?
+          {t('onboarding.alsoFindCoaches')}
         </p>
       </div>
 
@@ -114,24 +116,24 @@ const DualAccountStep = ({ coachId, onComplete, onBack }: DualAccountStepProps) 
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <h3 className="font-display text-lg font-bold text-foreground">Yes, create both accounts</h3>
+                <h3 className="font-display text-lg font-bold text-foreground">{t('onboarding.yesBothAccounts')}</h3>
                 {selectedOption === "both" && <CheckCircle className="w-5 h-5 text-primary" />}
               </div>
               <p className="text-muted-foreground text-sm mt-1">
-                Coach clients AND find coaches for yourself. Switch between roles anytime.
+                {t('onboarding.coachAndFindCoaches')}
               </p>
               <ul className="mt-3 space-y-1 text-sm text-muted-foreground">
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-primary" />
-                  Browse and book coaches
+                  {t('onboarding.browseBookCoaches')}
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-primary" />
-                  Track your own fitness progress
+                  {t('onboarding.trackOwnProgress')}
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-primary" />
-                  Participate in challenges & leaderboards
+                  {t('onboarding.participateChallenges')}
                 </li>
               </ul>
             </div>
@@ -155,11 +157,11 @@ const DualAccountStep = ({ coachId, onComplete, onBack }: DualAccountStepProps) 
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <h3 className="font-display text-lg font-bold text-foreground">No, coach only</h3>
+                <h3 className="font-display text-lg font-bold text-foreground">{t('onboarding.noCoachOnly')}</h3>
                 {selectedOption === "coach_only" && <CheckCircle className="w-5 h-5 text-primary" />}
               </div>
               <p className="text-muted-foreground text-sm mt-1">
-                Focus on building your coaching business. You can add a client account later.
+                {t('onboarding.focusOnBusiness')}
               </p>
             </div>
           </div>
@@ -170,7 +172,7 @@ const DualAccountStep = ({ coachId, onComplete, onBack }: DualAccountStepProps) 
         {onBack && (
           <Button variant="outline" onClick={onBack}>
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
+            {t('common.back')}
           </Button>
         )}
         <Button
@@ -181,10 +183,10 @@ const DualAccountStep = ({ coachId, onComplete, onBack }: DualAccountStepProps) 
           {isCreating ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Creating account...
+              {t('onboarding.creatingAccount')}
             </>
           ) : (
-            "Continue"
+            t('actions.continue')
           )}
         </Button>
       </div>
