@@ -12,6 +12,7 @@ import { formatCurrency, type CurrencyCode } from "@/lib/currency";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { getAvatarImageUrl } from "@/hooks/useAvatars";
 import type { MarketplaceCoach } from "@/hooks/useCoachMarketplace";
+import { useCoachLinkPrefix } from "@/hooks/useCoachLinkPrefix";
 
 interface CoachCardProps {
   coach: MarketplaceCoach;
@@ -20,11 +21,13 @@ interface CoachCardProps {
   linkPrefix?: string;
 }
 
-const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix = "/coaches" }: CoachCardProps) => {
+const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCardProps) => {
   const { data: reviews = [] } = useCoachReviews(coach.id);
   const averageRating = calculateAverageRating(reviews);
   const { user, role } = useAuth();
   const navigate = useNavigate();
+  const autoLinkPrefix = useCoachLinkPrefix();
+  const effectiveLinkPrefix = linkPrefix ?? autoLinkPrefix;
 
   const isClient = user && (role === "client" || role === "admin");
   const isAuthenticated = !!user;
@@ -213,14 +216,14 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix = "/coaches"
                 </Tooltip>
 
                 <Button asChild variant="lime-outline" size="sm">
-                  <Link to={`${linkPrefix}/${coach.username || coach.id}`}>View</Link>
+                  <Link to={`${effectiveLinkPrefix}/${coach.username || coach.id}`}>View</Link>
                 </Button>
               </div>
             </TooltipProvider>
           ) : !isAuthenticated ? (
             <div className="flex items-center gap-2">
               <Button asChild variant="lime-outline" size="sm">
-                <Link to={`${linkPrefix}/${coach.username || coach.id}`}>View</Link>
+                <Link to={`${effectiveLinkPrefix}/${coach.username || coach.id}`}>View</Link>
               </Button>
               <Button variant="lime" size="sm" onClick={handleSignUp}>
                 Connect
@@ -228,7 +231,7 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix = "/coaches"
             </div>
           ) : (
             <Button asChild variant="lime-outline" size="sm">
-              <Link to={`${linkPrefix}/${coach.username || coach.id}`}>View Profile</Link>
+              <Link to={`${effectiveLinkPrefix}/${coach.username || coach.id}`}>View Profile</Link>
             </Button>
           )}
         </div>
