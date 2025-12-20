@@ -179,20 +179,62 @@
 
   "bookSession": {
     "title": "Book Session",
+    "bookWith": "Book with {{name}}",
     "selectDate": "Select Date",
     "selectTime": "Select Time",
     "selectSessionType": "Select Session Type",
     "selectLocation": "Session Location",
+    "sessionFormat": "Session Format",
     "online": "Online",
     "inPerson": "In-Person",
     "addMessage": "Add a message (optional)",
-    "messagePlaceholder": "Any notes for your coach...",
+    "messagePlaceholder": "Tell the coach about your goals or any specific needs...",
     "confirm": "Confirm Booking",
     "processing": "Processing...",
+    "sending": "Sending...",
+    "redirectingToPayment": "Redirecting to payment...",
+    "requestBooking": "Request Booking",
     "success": "Session booked successfully!",
     "error": "Failed to book session",
+    "paymentError": "Failed to start payment process. Please try again.",
     "noAvailableSlots": "No available slots for this date",
-    "selectDifferentDate": "Please select a different date"
+    "selectDifferentDate": "Please select a different date",
+    "noSessionTypes": "No session types available yet.",
+    "defaultRate": "Default rate:",
+    "perHour": "/hour",
+    "steps": {
+      "selectType": "Select a session type",
+      "selectDateTime": "Choose your preferred date and time",
+      "reviewConfirm": "Review and confirm your booking"
+    },
+    "summary": {
+      "session": "Session",
+      "date": "Date",
+      "time": "Time",
+      "format": "Format",
+      "sessionPrice": "Session Price",
+      "depositDueNow": "Deposit Due Now",
+      "remainingAtSession": "Remaining (pay at session)",
+      "payNow": "Pay Now",
+      "payment": "Payment",
+      "payCoachDirectly": "Pay coach directly"
+    },
+    "buttons": {
+      "continue": "Continue",
+      "back": "Back",
+      "payAndBook": "Pay {{amount}} & Book",
+      "payDepositAndBook": "Pay {{amount}} Deposit & Book"
+    },
+    "messageFirst": {
+      "prefersChat": "This coach prefers to chat before booking sessions",
+      "discussFirst": "{{name}} likes to discuss your goals and preferences before scheduling sessions.",
+      "startConversation": "Start Conversation",
+      "viewSessionTypes": "View Session Types Anyway"
+    },
+    "badges": {
+      "payUpfront": "Pay Upfront",
+      "deposit": "{{value}} Deposit"
+    }
   },
 
   "addSession": {

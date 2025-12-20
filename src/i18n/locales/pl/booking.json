@@ -179,20 +179,62 @@
 
   "bookSession": {
     "title": "Rezerwuj sesję",
+    "bookWith": "Zarezerwuj z {{name}}",
     "selectDate": "Wybierz datę",
     "selectTime": "Wybierz godzinę",
     "selectSessionType": "Wybierz typ sesji",
     "selectLocation": "Lokalizacja sesji",
+    "sessionFormat": "Format sesji",
     "online": "Online",
     "inPerson": "Osobiście",
     "addMessage": "Dodaj wiadomość (opcjonalnie)",
-    "messagePlaceholder": "Jakieś notatki dla trenera...",
+    "messagePlaceholder": "Opowiedz trenerowi o swoich celach lub specjalnych potrzebach...",
     "confirm": "Potwierdź rezerwację",
     "processing": "Przetwarzanie...",
+    "sending": "Wysyłanie...",
+    "redirectingToPayment": "Przekierowywanie do płatności...",
+    "requestBooking": "Poproś o rezerwację",
     "success": "Sesja zarezerwowana pomyślnie!",
     "error": "Nie udało się zarezerwować sesji",
+    "paymentError": "Nie udało się rozpocząć procesu płatności. Spróbuj ponownie.",
     "noAvailableSlots": "Brak dostępnych terminów dla tej daty",
-    "selectDifferentDate": "Proszę wybrać inną datę"
+    "selectDifferentDate": "Proszę wybrać inną datę",
+    "noSessionTypes": "Brak dostępnych typów sesji.",
+    "defaultRate": "Domyślna stawka:",
+    "perHour": "/godz",
+    "steps": {
+      "selectType": "Wybierz typ sesji",
+      "selectDateTime": "Wybierz preferowaną datę i godzinę",
+      "reviewConfirm": "Przejrzyj i potwierdź rezerwację"
+    },
+    "summary": {
+      "session": "Sesja",
+      "date": "Data",
+      "time": "Godzina",
+      "format": "Format",
+      "sessionPrice": "Cena sesji",
+      "depositDueNow": "Zadatek do zapłaty teraz",
+      "remainingAtSession": "Pozostało (płatne na sesji)",
+      "payNow": "Zapłać teraz",
+      "payment": "Płatność",
+      "payCoachDirectly": "Zapłać trenerowi bezpośrednio"
+    },
+    "buttons": {
+      "continue": "Kontynuuj",
+      "back": "Wstecz",
+      "payAndBook": "Zapłać {{amount}} i zarezerwuj",
+      "payDepositAndBook": "Zapłać {{amount}} zadatku i zarezerwuj"
+    },
+    "messageFirst": {
+      "prefersChat": "Ten trener preferuje rozmowę przed rezerwacją sesji",
+      "discussFirst": "{{name}} lubi omówić Twoje cele i preferencje przed zaplanowaniem sesji.",
+      "startConversation": "Rozpocznij rozmowę",
+      "viewSessionTypes": "Zobacz typy sesji mimo wszystko"
+    },
+    "badges": {
+      "payUpfront": "Zapłać z góry",
+      "deposit": "{{value}} Zadatku"
+    }
   },
 
   "addSession": {

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -30,6 +31,7 @@ const WriteReviewModal = ({
   coachName,
   sessionId,
 }: WriteReviewModalProps) => {
+  const { t } = useTranslation("common");
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
@@ -37,9 +39,20 @@ const WriteReviewModal = ({
 
   const createReview = useCreateReview();
 
+  const getRatingLabel = (rating: number) => {
+    const labels: Record<number, string> = {
+      1: t("reviews.ratingLabels.poor"),
+      2: t("reviews.ratingLabels.fair"),
+      3: t("reviews.ratingLabels.good"),
+      4: t("reviews.ratingLabels.veryGood"),
+      5: t("reviews.ratingLabels.excellent"),
+    };
+    return labels[rating] || "";
+  };
+
   const handleSubmit = async () => {
     if (rating === 0) {
-      toast.error("Please select a rating");
+      toast.error(t("reviews.selectRating"));
       return;
     }
 
@@ -51,14 +64,14 @@ const WriteReviewModal = ({
         review_text: reviewText.trim() || undefined,
         is_public: isPublic,
       });
-      toast.success("Review submitted successfully!");
+      toast.success(t("reviews.success"));
       onOpenChange(false);
       // Reset form
       setRating(0);
       setReviewText("");
       setIsPublic(true);
     } catch (error) {
-      toast.error("Failed to submit review");
+      toast.error(t("reviews.error"));
     }
   };
 
@@ -66,13 +79,13 @@ const WriteReviewModal = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Review {coachName}</DialogTitle>
+          <DialogTitle>{t("reviews.reviewCoach", { name: coachName })}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           {/* Star Rating */}
           <div className="space-y-2">
-            <Label>Rating</Label>
+            <Label>{t("reviews.rating")}</Label>
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -95,20 +108,16 @@ const WriteReviewModal = ({
               ))}
             </div>
             <p className="text-sm text-muted-foreground">
-              {rating === 1 && "Poor"}
-              {rating === 2 && "Fair"}
-              {rating === 3 && "Good"}
-              {rating === 4 && "Very Good"}
-              {rating === 5 && "Excellent"}
+              {getRatingLabel(rating)}
             </p>
           </div>
 
           {/* Review Text */}
           <div className="space-y-2">
-            <Label htmlFor="review">Your Review (Optional)</Label>
+            <Label htmlFor="review">{t("reviews.yourReviewOptional")}</Label>
             <Textarea
               id="review"
-              placeholder="Share your experience with this coach..."
+              placeholder={t("reviews.placeholder")}
               value={reviewText}
               onChange={(e) => setReviewText(e.target.value)}
               rows={4}
@@ -122,9 +131,9 @@ const WriteReviewModal = ({
           {/* Public Toggle */}
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="public">Make Review Public</Label>
+              <Label htmlFor="public">{t("reviews.makePublic")}</Label>
               <p className="text-xs text-muted-foreground">
-                Public reviews are visible on the coach's profile
+                {t("reviews.publicDescription")}
               </p>
             </div>
             <Switch
@@ -137,13 +146,13 @@ const WriteReviewModal = ({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t("actions.cancel")}
           </Button>
           <Button onClick={handleSubmit} disabled={createReview.isPending}>
             {createReview.isPending && (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             )}
-            Submit Review
+            {t("reviews.submitReview")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -543,11 +543,14 @@
   "reviews": {
     "title": "Recenzje",
     "writeReview": "Napisz recenzję",
+    "reviewCoach": "Oceń {{name}}",
     "editReview": "Edytuj recenzję",
     "deleteReview": "Usuń recenzję",
     "yourRating": "Twoja ocena",
+    "rating": "Ocena",
     "yourReview": "Twoja recenzja",
-    "placeholder": "Podziel się swoim doświadczeniem...",
+    "yourReviewOptional": "Twoja recenzja (opcjonalnie)",
+    "placeholder": "Podziel się swoim doświadczeniem z tym trenerem...",
     "submitReview": "Prześlij recenzję",
     "updateReview": "Zaktualizuj recenzję",
     "averageRating": "Średnia ocena",
@@ -557,7 +560,20 @@
     "verified": "Zweryfikowane",
     "response": "Odpowiedź trenera",
     "noReviews": "Brak recenzji",
-    "beFirst": "Bądź pierwszym, który zostawi recenzję"
+    "beFirst": "Bądź pierwszym, który zostawi recenzję",
+    "makePublic": "Opublikuj recenzję",
+    "publicDescription": "Publiczne recenzje są widoczne na profilu trenera",
+    "submitting": "Przesyłanie...",
+    "success": "Recenzja przesłana pomyślnie!",
+    "error": "Nie udało się przesłać recenzji",
+    "selectRating": "Wybierz ocenę",
+    "ratingLabels": {
+      "poor": "Słaba",
+      "fair": "Średnia",
+      "good": "Dobra",
+      "veryGood": "Bardzo dobra",
+      "excellent": "Doskonała"
+    }
   },
   "sharing": {
     "title": "Udostępnij",
@@ -572,18 +588,26 @@
   },
   "feedback": {
     "title": "Opinia",
-    "subtitle": "Pomóż nam się poprawić",
-    "placeholder": "Powiedz nam, co myślisz...",
+    "sendFeedback": "Wyślij opinię",
+    "subtitle": "Podziel się swoimi przemyśleniami, zgłoś błędy lub zaproponuj nowe funkcje.",
+    "placeholder": "Opisz swoją opinię szczegółowo...",
+    "subject": "Temat",
+    "subjectPlaceholder": "Krótkie podsumowanie opinii",
+    "message": "Wiadomość",
     "category": "Kategoria",
+    "selectCategory": "Wybierz kategorię",
     "categories": {
       "bug": "Zgłoszenie błędu",
       "feature": "Prośba o funkcję",
       "improvement": "Ulepszenie",
-      "other": "Inne"
+      "general": "Ogólna opinia"
     },
     "submit": "Prześlij opinię",
-    "success": "Dziękujemy za opinię!",
-    "error": "Nie udało się przesłać opinii. Spróbuj ponownie."
+    "submitting": "Przesyłanie...",
+    "success": "Opinia przesłana",
+    "successDescription": "Dziękujemy za opinię! Wkrótce ją przejrzymy.",
+    "error": "Błąd",
+    "errorDescription": "Nie udało się przesłać opinii. Spróbuj ponownie."
   },
   "upload": {
     "dragDrop": "Przeciągnij i upuść pliki tutaj",

@@ -543,11 +543,14 @@
   "reviews": {
     "title": "Reviews",
     "writeReview": "Write a Review",
+    "reviewCoach": "Review {{name}}",
     "editReview": "Edit Review",
     "deleteReview": "Delete Review",
     "yourRating": "Your Rating",
+    "rating": "Rating",
     "yourReview": "Your Review",
-    "placeholder": "Share your experience...",
+    "yourReviewOptional": "Your Review (Optional)",
+    "placeholder": "Share your experience with this coach...",
     "submitReview": "Submit Review",
     "updateReview": "Update Review",
     "averageRating": "Average Rating",
@@ -557,7 +560,20 @@
     "verified": "Verified",
     "response": "Response from coach",
     "noReviews": "No reviews yet",
-    "beFirst": "Be the first to leave a review"
+    "beFirst": "Be the first to leave a review",
+    "makePublic": "Make Review Public",
+    "publicDescription": "Public reviews are visible on the coach's profile",
+    "submitting": "Submitting...",
+    "success": "Review submitted successfully!",
+    "error": "Failed to submit review",
+    "selectRating": "Please select a rating",
+    "ratingLabels": {
+      "poor": "Poor",
+      "fair": "Fair",
+      "good": "Good",
+      "veryGood": "Very Good",
+      "excellent": "Excellent"
+    }
   },
   "sharing": {
     "title": "Share",
@@ -572,18 +588,26 @@
   },
   "feedback": {
     "title": "Feedback",
-    "subtitle": "Help us improve",
-    "placeholder": "Tell us what you think...",
+    "sendFeedback": "Send Feedback",
+    "subtitle": "Share your thoughts, report bugs, or suggest new features.",
+    "placeholder": "Describe your feedback in detail...",
+    "subject": "Subject",
+    "subjectPlaceholder": "Brief summary of your feedback",
+    "message": "Message",
     "category": "Category",
+    "selectCategory": "Select a category",
     "categories": {
       "bug": "Bug Report",
       "feature": "Feature Request",
       "improvement": "Improvement",
-      "other": "Other"
+      "general": "General Feedback"
     },
     "submit": "Submit Feedback",
-    "success": "Thank you for your feedback!",
-    "error": "Failed to submit feedback. Please try again."
+    "submitting": "Submitting...",
+    "success": "Feedback Submitted",
+    "successDescription": "Thank you for your feedback! We'll review it soon.",
+    "error": "Error",
+    "errorDescription": "Failed to submit feedback. Please try again."
   },
   "upload": {
     "dragDrop": "Drag and drop files here",
