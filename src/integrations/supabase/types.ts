@@ -601,6 +601,8 @@ export type Database = {
       }
       boost_settings: {
         Row: {
+          boost_duration_days: number | null
+          boost_price: number | null
           commission_rate: number | null
           id: string
           is_active: boolean | null
@@ -610,6 +612,8 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          boost_duration_days?: number | null
+          boost_price?: number | null
           commission_rate?: number | null
           id?: string
           is_active?: boolean | null
@@ -619,6 +623,8 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          boost_duration_days?: number | null
+          boost_price?: number | null
           commission_rate?: number | null
           id?: string
           is_active?: boolean | null
@@ -1466,33 +1472,45 @@ export type Database = {
       coach_boosts: {
         Row: {
           activated_at: string | null
+          activation_payment_intent_id: string | null
+          boost_end_date: string | null
+          boost_start_date: string | null
           coach_id: string
           created_at: string | null
           deactivated_at: string | null
           id: string
           is_active: boolean
+          payment_status: string | null
           total_clients_acquired: number | null
           total_fees_paid: number | null
           updated_at: string | null
         }
         Insert: {
           activated_at?: string | null
+          activation_payment_intent_id?: string | null
+          boost_end_date?: string | null
+          boost_start_date?: string | null
           coach_id: string
           created_at?: string | null
           deactivated_at?: string | null
           id?: string
           is_active?: boolean
+          payment_status?: string | null
           total_clients_acquired?: number | null
           total_fees_paid?: number | null
           updated_at?: string | null
         }
         Update: {
           activated_at?: string | null
+          activation_payment_intent_id?: string | null
+          boost_end_date?: string | null
+          boost_start_date?: string | null
           coach_id?: string
           created_at?: string | null
           deactivated_at?: string | null
           id?: string
           is_active?: boolean
+          payment_status?: string | null
           total_clients_acquired?: number | null
           total_fees_paid?: number | null
           updated_at?: string | null
