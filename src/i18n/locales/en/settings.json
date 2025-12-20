@@ -1,0 +1,319 @@
+{
+  "title": "Settings",
+  "description": "Manage your account settings and preferences",
+  "saveChanges": "Save Changes",
+  "saving": "Saving...",
+  "profileUpdated": "Profile updated successfully",
+  "settingsSaved": "Settings saved successfully",
+  "failedToSave": "Failed to save changes",
+
+  "tabs": {
+    "profile": "Profile",
+    "marketplace": "My Marketplace Page",
+    "services": "Services & Pricing",
+    "invoice": "Invoice Settings",
+    "verification": "Verification",
+    "integrations": "Integrations",
+    "subscription": "Subscription",
+    "notifications": "Notifications",
+    "preferences": "Preferences",
+    "security": "Security",
+    "account": "Account",
+    "health": "Health Info",
+    "general": "General",
+    "branding": "Branding",
+    "plans": "Plans",
+    "features": "Features"
+  },
+
+  "profile": {
+    "title": "Profile",
+    "personalInfo": "Personal Information",
+    "personalInfoDesc": "Edit your name, username, and profile photo in My Profile",
+    "myProfile": "My Profile",
+    "displayName": "Display Name",
+    "displayNamePlaceholder": "Your display name",
+    "username": "Username",
+    "usernamePlaceholder": "your_username",
+    "usernameAvailable": "Username is available",
+    "usernameTaken": "This username is already taken",
+    "usernameMinLength": "Username must be at least 3 characters",
+    "usernameMaxLength": "Username must be 30 characters or less",
+    "usernameCopied": "Username copied!",
+    "bio": "Bio",
+    "bioPlaceholder": "Tell clients about yourself...",
+    "location": "Location",
+    "locationPlaceholder": "e.g., London, UK",
+    "gymAffiliation": "Gym Affiliation",
+    "gymAffiliationPlaceholder": "e.g., PureGym, The Gym Group",
+    "experienceYears": "Years of Experience",
+    "hourlyRate": "Hourly Rate",
+    "currency": "Currency",
+    "coachTypes": "Coach Types",
+    "sessionTypes": "Session Types",
+    "onlineAvailable": "Online Sessions",
+    "inPersonAvailable": "In-Person Sessions",
+    "profileImage": "Profile Image",
+    "cardImage": "Card Image"
+  },
+
+  "avatar": {
+    "title": "Your Avatar",
+    "description": "Choose an avatar to represent you on leaderboards and throughout the platform"
+  },
+
+  "bodyMetrics": {
+    "title": "Body Metrics",
+    "description": "Your current measurements",
+    "weight": "Weight (kg)",
+    "height": "Height (cm)"
+  },
+
+  "fitnessGoals": {
+    "title": "Fitness Goals",
+    "description": "Select your fitness objectives (choose multiple)"
+  },
+
+  "health": {
+    "dietary": {
+      "title": "Dietary Restrictions",
+      "description": "Any dietary preferences or restrictions",
+      "placeholder": "Add dietary restriction..."
+    },
+    "allergies": {
+      "title": "Allergies",
+      "description": "Food or environmental allergies your coach should know about",
+      "placeholder": "Add allergy...",
+      "coachNotice": "Your coach will see this information"
+    },
+    "medical": {
+      "title": "Medical Conditions",
+      "description": "Any medical conditions that may affect your training",
+      "placeholder": "Add medical condition...",
+      "notice": "Share any conditions that may affect your training"
+    }
+  },
+
+  "leaderboard": {
+    "title": "Leaderboard Settings",
+    "description": "Control how you appear on public leaderboards"
+  },
+
+  "preferences": {
+    "title": "Preferences",
+    "language": "Language",
+    "languageDescription": "Choose your preferred language",
+    "currency": "Currency",
+    "currencyDescription": "Choose your preferred currency for display"
+  },
+
+  "notifications": {
+    "title": "Notifications",
+    "description": "Configure how you receive notifications"
+  },
+
+  "integrations": {
+    "title": "Integrations",
+    "description": "Connect third-party services",
+    "video": {
+      "title": "Video Conferencing",
+      "description": "Connect your video platform for online sessions"
+    },
+    "calendar": {
+      "title": "Calendar Sync",
+      "description": "Sync your availability with external calendars"
+    },
+    "wearables": {
+      "title": "Wearable Devices",
+      "description": "Connect fitness trackers and smartwatches"
+    },
+    "healthData": {
+      "title": "Health Data",
+      "description": "View synced health metrics"
+    }
+  },
+
+  "verification": {
+    "title": "Coach Verification",
+    "description": "Upload documents to verify your credentials",
+    "status": {
+      "notSubmitted": "Not Submitted",
+      "pending": "Under Review",
+      "approved": "Verified",
+      "rejected": "Rejected"
+    },
+    "documents": {
+      "identity": {
+        "label": "Government ID",
+        "description": "Passport, driver's license, or national ID"
+      },
+      "certification": {
+        "label": "Professional Certification",
+        "description": "Personal training, nutrition, or coaching certification"
+      },
+      "insurance": {
+        "label": "Liability Insurance",
+        "description": "Professional indemnity or liability insurance"
+      },
+      "qualification": {
+        "label": "Qualifications",
+        "description": "Relevant degrees, diplomas, or qualifications"
+      }
+    },
+    "uploadDocument": "Upload Document",
+    "viewDocument": "View Document",
+    "deleteDocument": "Delete Document",
+    "submitForReview": "Submit for Review",
+    "resubmit": "Resubmit for Review"
+  },
+
+  "security": {
+    "title": "Security",
+    "description": "Manage your account security settings",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm New Password",
+    "updatePassword": "Update Password",
+    "twoFactor": "Two-Factor Authentication",
+    "twoFactorDescription": "Add an extra layer of security to your account",
+    "enableTwoFactor": "Enable 2FA",
+    "disableTwoFactor": "Disable 2FA"
+  },
+
+  "account": {
+    "title": "Account",
+    "signOut": "Sign Out",
+    "signOutDescription": "Sign out of your account on this device",
+    "dangerZone": "Danger Zone",
+    "deleteAccount": "Delete Account",
+    "deleteAccountDescription": "Permanently delete your account and all associated data",
+    "deleteAccountWarning": "This action cannot be undone. All your data will be permanently deleted."
+  },
+
+  "subscription": {
+    "title": "Subscription",
+    "description": "Manage your platform subscription",
+    "currentPlan": "Current Plan",
+    "changePlan": "Change Plan",
+    "cancelSubscription": "Cancel Subscription"
+  },
+
+  "invoice": {
+    "title": "Invoice Settings",
+    "description": "Configure your invoice details and branding",
+    "businessName": "Business Name",
+    "businessAddress": "Business Address",
+    "businessEmail": "Business Email",
+    "businessPhone": "Business Phone",
+    "vatNumber": "VAT Number",
+    "companyRegistration": "Company Registration",
+    "bankDetails": "Bank Details",
+    "defaultNotes": "Default Invoice Notes",
+    "paymentTerms": "Payment Terms"
+  },
+
+  "admin": {
+    "platformSettings": "Platform Settings",
+    "platformDescription": "Configure platform-wide settings and preferences",
+    
+    "general": {
+      "title": "General Settings",
+      "description": "Platform-wide configuration options",
+      "maintenanceMode": "Maintenance Mode",
+      "maintenanceModeDesc": "Put the platform in maintenance mode (users can't access)",
+      "autoApproveCoaches": "Auto-Approve Coaches",
+      "autoApproveCoachesDesc": "Automatically approve new coach registrations",
+      "requireVerification": "Require Coach Verification",
+      "requireVerificationDesc": "Coaches must verify their credentials before accepting clients",
+      "anonymousReviews": "Allow Anonymous Reviews",
+      "anonymousReviewsDesc": "Allow users to leave reviews without showing their name"
+    },
+
+    "pricing": {
+      "title": "Pricing Settings",
+      "description": "Configure commission and pricing limits",
+      "commissionRate": "Commission Rate (%)",
+      "commissionRateDesc": "Platform commission on coach earnings",
+      "minSessionPrice": "Minimum Session Price",
+      "maxSessionPrice": "Maximum Session Price"
+    },
+
+    "branding": {
+      "title": "Branding & Social",
+      "description": "Platform branding and social media links",
+      "socialLinks": "Social Media Links",
+      "facebook": "Facebook URL",
+      "instagram": "Instagram URL",
+      "tiktok": "TikTok URL",
+      "twitter": "X (Twitter) URL",
+      "youtube": "YouTube URL",
+      "linkedin": "LinkedIn URL",
+      "threads": "Threads URL",
+      "contactInfo": "Contact Information",
+      "contactEmail": "Contact Email",
+      "contactPhone": "Contact Phone",
+      "contactAddress": "Contact Address",
+      "legalEmail": "Legal Email",
+      "privacyEmail": "Privacy Email"
+    },
+
+    "plans": {
+      "title": "Subscription Plans",
+      "description": "Configure coach subscription tiers",
+      "editPlan": "Edit Plan",
+      "planName": "Plan Name",
+      "price": "Price",
+      "billingPeriod": "Billing Period",
+      "planDescription": "Description",
+      "isActive": "Active"
+    },
+
+    "features": {
+      "title": "Feature Configuration",
+      "description": "Configure features per subscription tier",
+      "overrides": "Feature Overrides",
+      "overridesDesc": "Grant individual coaches access to specific features",
+      "addOverride": "Add Override",
+      "selectCoach": "Select Coach",
+      "selectFeature": "Select Feature",
+      "value": "Value",
+      "reason": "Reason",
+      "removeOverride": "Remove Override"
+    }
+  },
+
+  "validation": {
+    "required": "This field is required",
+    "invalidEmail": "Please enter a valid email address",
+    "invalidPhone": "Please enter a valid phone number",
+    "invalidUrl": "Please enter a valid URL",
+    "minLength": "Must be at least {{min}} characters",
+    "maxLength": "Must be no more than {{max}} characters",
+    "minValue": "Must be at least {{min}}",
+    "maxValue": "Must be no more than {{max}}",
+    "passwordMismatch": "Passwords do not match",
+    "invalidFormat": "Invalid format"
+  },
+
+  "forms": {
+    "select": "Select...",
+    "selectOption": "Select an option",
+    "enterValue": "Enter a value",
+    "optional": "(optional)",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "update": "Update",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "remove": "Remove",
+    "upload": "Upload",
+    "download": "Download",
+    "loading": "Loading...",
+    "processing": "Processing...",
+    "noResults": "No results found",
+    "searchPlaceholder": "Search..."
+  }
+}

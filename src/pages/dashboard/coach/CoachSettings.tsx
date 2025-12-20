@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   User,
   Bell,
@@ -149,25 +150,29 @@ const calendarProviders: {
   },
 ];
 
-const documentTypes: { type: DocumentType; label: string; description: string }[] = [
-  { type: "identity", label: "Government ID", description: "Passport, driver's license, or national ID" },
-  { type: "certification", label: "Professional Certification", description: "Personal training, nutrition, or coaching certification" },
-  { type: "insurance", label: "Liability Insurance", description: "Professional indemnity or liability insurance" },
-  { type: "qualification", label: "Qualifications", description: "Relevant degrees, diplomas, or qualifications" },
+const getDocumentTypeConfig = (t: any) => [
+  { type: "identity" as DocumentType, label: t('verification.documents.identity.label'), description: t('verification.documents.identity.description') },
+  { type: "certification" as DocumentType, label: t('verification.documents.certification.label'), description: t('verification.documents.certification.description') },
+  { type: "insurance" as DocumentType, label: t('verification.documents.insurance.label'), description: t('verification.documents.insurance.description') },
+  { type: "qualification" as DocumentType, label: t('verification.documents.qualification.label'), description: t('verification.documents.qualification.description') },
 ];
 
-const statusConfig = {
-  not_submitted: { label: "Not Submitted", color: "bg-muted text-muted-foreground", icon: AlertCircle },
-  pending: { label: "Under Review", color: "bg-amber-500/10 text-amber-500", icon: Clock },
-  approved: { label: "Verified", color: "bg-primary/10 text-primary", icon: CheckCircle },
-  rejected: { label: "Rejected", color: "bg-destructive/10 text-destructive", icon: XCircle },
-};
+const getStatusConfig = (t: any) => ({
+  not_submitted: { label: t('verification.status.notSubmitted'), color: "bg-muted text-muted-foreground", icon: AlertCircle },
+  pending: { label: t('verification.status.pending'), color: "bg-amber-500/10 text-amber-500", icon: Clock },
+  approved: { label: t('verification.status.approved'), color: "bg-primary/10 text-primary", icon: CheckCircle },
+  rejected: { label: t('verification.status.rejected'), color: "bg-destructive/10 text-destructive", icon: XCircle },
+});
 
 const CoachSettings = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, signOut } = useAuth();
   const { currency } = useLocale();
+  const { t } = useTranslation('settings');
+  
+  const documentTypes = getDocumentTypeConfig(t);
+  const statusConfig = getStatusConfig(t);
   
   // Read tab from URL params for deep linking (e.g., ?tab=verification)
   const urlTab = searchParams.get("tab");
@@ -460,25 +465,25 @@ const CoachSettings = () => {
   }
 
   return (
-    <DashboardLayout title="Settings" description="Manage your account settings and preferences.">
+    <DashboardLayout title={t('title')} description={t('description')}>
       <div className="max-w-6xl">
-        <h1 className="font-display text-2xl font-bold text-foreground mb-6">Settings</h1>
+        <h1 className="font-display text-2xl font-bold text-foreground mb-6">{t('title')}</h1>
 
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar Navigation */}
           <div className="lg:w-64 shrink-0">
             <div className="card-elevated p-2 space-y-1">
               {[
-                { id: "profile", icon: User, label: "Profile" },
-                { id: "marketplace", icon: Store, label: "My Marketplace Page" },
-                { id: "services", icon: CreditCard, label: "Services & Pricing" },
-                { id: "invoice", icon: Receipt, label: "Invoice Settings" },
-                { id: "verification", icon: Shield, label: "Verification" },
-                { id: "integrations", icon: Plug, label: "Integrations" },
-                { id: "preferences", icon: Globe, label: "Preferences" },
-                { id: "notifications", icon: Bell, label: "Notifications" },
-                { id: "subscription", icon: CreditCard, label: "Subscription" },
-                { id: "account", icon: Shield, label: "Account & Security" },
+                { id: "profile", icon: User, label: t('tabs.profile') },
+                { id: "marketplace", icon: Store, label: t('tabs.marketplace') },
+                { id: "services", icon: CreditCard, label: t('tabs.services') },
+                { id: "invoice", icon: Receipt, label: t('tabs.invoice') },
+                { id: "verification", icon: Shield, label: t('tabs.verification') },
+                { id: "integrations", icon: Plug, label: t('tabs.integrations') },
+                { id: "preferences", icon: Globe, label: t('tabs.preferences') },
+                { id: "notifications", icon: Bell, label: t('tabs.notifications') },
+                { id: "subscription", icon: CreditCard, label: t('tabs.subscription') },
+                { id: "account", icon: Shield, label: t('tabs.account') },
               ].map((item) => (
                 <button
                   key={item.id}
@@ -507,12 +512,12 @@ const CoachSettings = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-muted-foreground">
-                          Edit your name, username, and profile photo in <span className="font-medium text-foreground">My Profile</span>
+                          {t('profile.personalInfoDesc')}
                         </p>
                       </div>
                       <Button variant="outline" size="sm" onClick={() => navigate("/dashboard/profile")}>
                         <User className="w-4 h-4 mr-2" />
-                        My Profile
+                        {t('profile.myProfile')}
                       </Button>
                     </div>
                   </CardContent>
@@ -521,8 +526,8 @@ const CoachSettings = () => {
                 {/* Avatar Selection */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Your Avatar</CardTitle>
-                    <CardDescription>Choose an avatar to represent you on the platform</CardDescription>
+                    <CardTitle className="text-lg">{t('avatar.title')}</CardTitle>
+                    <CardDescription>{t('avatar.description')}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-col sm:flex-row items-center gap-4">
