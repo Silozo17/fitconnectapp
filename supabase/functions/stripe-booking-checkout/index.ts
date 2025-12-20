@@ -237,7 +237,8 @@ serve(async (req) => {
     // Apply VAT if registered and NOT inclusive
     let vatAmount = 0;
     if (isVatRegistered && vatRate > 0 && !isVatInclusive) {
-      vatAmount = Math.round(amountDue * vatRate) / 100;
+      // Fix: proper rounding for VAT calculation (vatRate is percentage like 20)
+      vatAmount = Math.round(amountDue * vatRate / 100 * 100) / 100;
       amountDue = amountDue + vatAmount;
       paymentDescription += ` (incl. ${vatRate}% VAT)`;
     } else if (isVatRegistered && isVatInclusive) {

@@ -74,31 +74,9 @@ const StripeConnectButton = ({ coachId, onSuccess }: StripeConnectButtonProps) =
     }
   };
 
-  const handleCompleteOnboarding = async () => {
-    if (!coachProfile?.stripe_connect_id) return;
-
-    setIsLoading(true);
-    try {
-      // Mark as onboarded (in real scenario, this would be done by webhook)
-      await supabase
-        .from("coach_profiles")
-        .update({ stripe_connect_onboarded: true })
-        .eq("id", coachId);
-
-      toast.success("Stripe account connected successfully!");
-      refetch();
-      onSuccess?.();
-    } catch (error) {
-      toast.error("Failed to complete setup");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   // Check URL params for returning from Stripe
   const urlParams = new URLSearchParams(window.location.search);
   const isReturningFromStripe = urlParams.get("stripe") === "connect";
-  const wasSuccessful = urlParams.get("success") === "true";
 
   if (coachProfile?.stripe_connect_onboarded) {
     return (
@@ -137,21 +115,22 @@ const StripeConnectButton = ({ coachId, onSuccess }: StripeConnectButtonProps) =
     );
   }
 
-  if (isReturningFromStripe && wasSuccessful && coachProfile?.stripe_connect_id) {
+  // Show verification status when returning from Stripe (webhook will complete the verification)
+  if (isReturningFromStripe && coachProfile?.stripe_connect_id && !coachProfile?.stripe_connect_onboarded) {
     return (
       <Card>
         <CardContent className="pt-6">
           <div className="text-center space-y-4">
-            <CheckCircle className="h-12 w-12 text-green-500 mx-auto" />
+            <Loader2 className="h-12 w-12 text-primary mx-auto animate-spin" />
             <div>
-              <h3 className="font-semibold">Almost there!</h3>
+              <h3 className="font-semibold">Verifying your account...</h3>
               <p className="text-sm text-muted-foreground">
-                Click below to complete your Stripe setup
+                Stripe is verifying your account. This may take a few moments.
               </p>
             </div>
-            <Button onClick={handleCompleteOnboarding} disabled={isLoading}>
+            <Button variant="outline" onClick={() => refetch()} disabled={isLoading}>
               {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Complete Setup
+              Check Status
             </Button>
           </div>
         </CardContent>

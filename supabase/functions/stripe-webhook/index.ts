@@ -303,6 +303,26 @@ serve(async (req) => {
               console.log("Boost stats updated successfully");
             }
           }
+        } else if (metadata.type === "digital_content") {
+          // Handle digital content purchase completion
+          const productId = metadata.product_id || null;
+          const bundleId = metadata.bundle_id || null;
+
+          console.log("Digital content purchase completed:", { productId, bundleId, sessionId: session.id });
+
+          const { error: contentError } = await supabase
+            .from("content_purchases")
+            .update({
+              status: "completed",
+              completed_at: new Date().toISOString(),
+            })
+            .eq("stripe_checkout_session_id", session.id);
+
+          if (contentError) {
+            console.error("Error updating content purchase:", contentError);
+          } else {
+            console.log("Content purchase marked as completed");
+          }
         }
         break;
       }
