@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
     // Remove duplicates
     userIds = [...new Set(userIds)];
 
-    console.log(`Notifying ${userIds.length} users about new challenge: ${title}`);
+    console.log(`Checking preferences for ${userIds.length} users about new challenge: ${title}`);
 
     if (userIds.length === 0) {
       return new Response(JSON.stringify({ success: true, notified: 0 }), {
@@ -61,8 +61,30 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Get notification preferences for all users
+    const { data: prefsData } = await supabase
+      .from('notification_preferences')
+      .select('user_id, push_bookings')
+      .in('user_id', userIds);
+
+    // Filter to only users who have push notifications enabled (default is enabled if no pref record)
+    const userPrefsMap = new Map(prefsData?.map(p => [p.user_id, p.push_bookings]) || []);
+    const enabledUserIds = userIds.filter(userId => {
+      const pref = userPrefsMap.get(userId);
+      // Default to enabled if no preference exists or if explicitly true
+      return pref !== false;
+    });
+
+    console.log(`Notifying ${enabledUserIds.length} users (${userIds.length - enabledUserIds.length} disabled) about new challenge: ${title}`);
+
+    if (enabledUserIds.length === 0) {
+      return new Response(JSON.stringify({ success: true, notified: 0, skippedDueToPrefs: userIds.length }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Create notifications in batch
-    const notifications = userIds.map(userId => ({
+    const notifications = enabledUserIds.map(userId => ({
       user_id: userId,
       type: 'new_challenge',
       title: 'New Challenge Available!',
