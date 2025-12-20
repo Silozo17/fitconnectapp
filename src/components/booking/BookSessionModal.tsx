@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { format, setHours, setMinutes, parseISO } from "date-fns";
 import { Calendar, Clock, Video, MapPin, MessageSquare, Loader2, CreditCard, Banknote } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -60,6 +61,7 @@ const formatCurrency = (amount: number, currency: string = 'GBP'): string => {
 };
 
 const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSessionModalProps) => {
+  const { t } = useTranslation('booking');
   const [step, setStep] = useState<"type" | "datetime" | "details">("type");
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -205,9 +207,9 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
       <Dialog open={open} onOpenChange={handleClose}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Book with {coach.display_name}</DialogTitle>
+            <DialogTitle>{t('bookSession.bookWith', { name: coach.display_name })}</DialogTitle>
             <DialogDescription>
-              This coach prefers to chat before booking sessions
+              {t('bookSession.messageFirst.prefersChat')}
             </DialogDescription>
           </DialogHeader>
 
@@ -215,7 +217,7 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
             <div className="flex items-center gap-3 p-4 bg-amber-500/10 rounded-lg border border-amber-500/20">
               <MessageSquare className="h-5 w-5 text-amber-500" />
               <p className="text-sm text-foreground">
-                {coach.display_name} likes to discuss your goals and preferences before scheduling sessions.
+                {t('bookSession.messageFirst.discussFirst', { name: coach.display_name })}
               </p>
             </div>
 
@@ -225,10 +227,10 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
                 onMessageFirst?.();
               }}>
                 <MessageSquare className="h-4 w-4 mr-2" />
-                Start Conversation
+                {t('bookSession.messageFirst.startConversation')}
               </Button>
               <Button variant="outline" onClick={() => setBypassMessageFirst(true)}>
-                View Session Types Anyway
+                {t('bookSession.messageFirst.viewSessionTypes')}
               </Button>
             </div>
           </div>
@@ -241,11 +243,11 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-lg max-w-[calc(100vw-2rem)] max-h-[90vh] overflow-y-auto overflow-x-hidden p-4 sm:p-6">
         <DialogHeader>
-          <DialogTitle>Book with {coach.display_name}</DialogTitle>
+          <DialogTitle>{t('bookSession.bookWith', { name: coach.display_name })}</DialogTitle>
           <DialogDescription>
-            {step === "type" && "Select a session type"}
-            {step === "datetime" && "Choose your preferred date and time"}
-            {step === "details" && "Review and confirm your booking"}
+            {step === "type" && t('bookSession.steps.selectType')}
+            {step === "datetime" && t('bookSession.steps.selectDateTime')}
+            {step === "details" && t('bookSession.steps.reviewConfirm')}
           </DialogDescription>
         </DialogHeader>
 
@@ -280,34 +282,35 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
                         <div className="flex flex-wrap items-center gap-2 mt-2">
                           <Badge variant="secondary" className="text-xs">
                             <Clock className="h-3 w-3 mr-1" />
-                            {type.duration_minutes} min
+                            {type.duration_minutes} {t('time.minutes', { count: type.duration_minutes })}
                           </Badge>
                           {type.is_online && (
                             <Badge variant="outline" className="text-xs">
                               <Video className="h-3 w-3 mr-1" />
-                              Online
+                              {t('bookSession.online')}
                             </Badge>
                           )}
                           {type.is_in_person && (
                             <Badge variant="outline" className="text-xs">
                               <MapPin className="h-3 w-3 mr-1" />
-                              In-Person
+                              {t('bookSession.inPerson')}
                             </Badge>
                           )}
                           {/* Payment requirement badge */}
                           {type.payment_required === 'full' && (
                             <Badge className="text-xs bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
                               <CreditCard className="h-3 w-3 mr-1" />
-                              Pay Upfront
+                              {t('bookSession.badges.payUpfront')}
                             </Badge>
                           )}
                           {type.payment_required === 'deposit' && (
                             <Badge className="text-xs bg-amber-500/20 text-amber-400 border-amber-500/30">
                               <Banknote className="h-3 w-3 mr-1" />
-                              {type.deposit_type === 'percentage' 
-                                ? `${type.deposit_value}% Deposit`
-                                : `${formatCurrency(typeDepositAmount, typeCurrency)} Deposit`
-                              }
+                              {t('bookSession.badges.deposit', { 
+                                value: type.deposit_type === 'percentage' 
+                                  ? `${type.deposit_value}%`
+                                  : formatCurrency(typeDepositAmount, typeCurrency)
+                              })}
                             </Badge>
                           )}
                         </div>
@@ -319,11 +322,11 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
             ) : (
               <div className="text-center py-8">
                 <p className="text-muted-foreground mb-4">
-                  No session types available yet.
+                  {t('bookSession.noSessionTypes')}
                 </p>
                 {coach.hourly_rate && (
                   <p className="text-sm">
-                    Default rate: <span className="font-bold text-primary">{formatCurrency(coach.hourly_rate, coach.currency || 'GBP')}/hour</span>
+                    {t('bookSession.defaultRate')} <span className="font-bold text-primary">{formatCurrency(coach.hourly_rate, coach.currency || 'GBP')}{t('bookSession.perHour')}</span>
                   </p>
                 )}
               </div>
@@ -334,7 +337,7 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
                 onClick={() => setStep("datetime")} 
                 disabled={!selectedType && sessionTypes.length > 0}
               >
-                Continue
+                {t('bookSession.buttons.continue')}
               </Button>
             </div>
           </div>
@@ -355,7 +358,7 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
             {/* Online/In-Person Toggle */}
             {selectedSessionType && (selectedSessionType.is_online && selectedSessionType.is_in_person) && (
               <div className="space-y-2">
-                <Label>Session Format</Label>
+                <Label>{t('bookSession.sessionFormat')}</Label>
                 <RadioGroup 
                   value={isOnline ? "online" : "in-person"} 
                   onValueChange={(v) => setIsOnline(v === "online")}
@@ -367,7 +370,7 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
                   )}>
                     <RadioGroupItem value="online" />
                     <Video className="h-4 w-4" />
-                    <span>Online</span>
+                    <span>{t('bookSession.online')}</span>
                   </label>
                   <label className={cn(
                     "flex items-center gap-2 p-3 rounded-lg border cursor-pointer",
@@ -375,7 +378,7 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
                   )}>
                     <RadioGroupItem value="in-person" />
                     <MapPin className="h-4 w-4" />
-                    <span>In-Person</span>
+                    <span>{t('bookSession.inPerson')}</span>
                   </label>
                 </RadioGroup>
               </div>
@@ -383,13 +386,13 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
 
             <div className="flex justify-between">
               <Button variant="outline" onClick={() => setStep("type")}>
-                Back
+                {t('bookSession.buttons.back')}
               </Button>
               <Button 
                 onClick={() => setStep("details")} 
                 disabled={!selectedDate || !selectedTime}
               >
-                Continue
+                {t('bookSession.buttons.continue')}
               </Button>
             </div>
           </div>
@@ -401,35 +404,35 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
             {/* Booking Summary */}
             <div className="p-4 bg-secondary/50 rounded-lg space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Session</span>
+                <span className="text-muted-foreground">{t('bookSession.summary.session')}</span>
                 <span className="font-medium text-foreground">{selectedSessionType.name}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Date</span>
+                <span className="text-muted-foreground">{t('bookSession.summary.date')}</span>
                 <span className="font-medium text-foreground flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
                   {format(selectedDate, "EEEE, MMM d, yyyy")}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Time</span>
+                <span className="text-muted-foreground">{t('bookSession.summary.time')}</span>
                 <span className="font-medium text-foreground flex items-center gap-2">
                   <Clock className="h-4 w-4" />
                   {selectedTime}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Format</span>
+                <span className="text-muted-foreground">{t('bookSession.summary.format')}</span>
                 <span className="font-medium text-foreground flex items-center gap-2">
                   {effectiveIsOnline ? <Video className="h-4 w-4" /> : <MapPin className="h-4 w-4" />}
-                  {effectiveIsOnline ? "Online" : "In-Person"}
+                  {effectiveIsOnline ? t('bookSession.online') : t('bookSession.inPerson')}
                 </span>
               </div>
               
               {/* Payment breakdown */}
               <div className="pt-2 border-t border-border space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Session Price</span>
+                  <span className="text-muted-foreground">{t('bookSession.summary.sessionPrice')}</span>
                   <span className="font-medium text-foreground">{formatCurrency(selectedSessionType.price, currency)}</span>
                 </div>
                 
@@ -438,12 +441,12 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
                     <div className="flex items-center justify-between text-amber-400">
                       <span className="flex items-center gap-1">
                         <Banknote className="h-4 w-4" />
-                        Deposit Due Now
+                        {t('bookSession.summary.depositDueNow')}
                       </span>
                       <span className="font-bold">{formatCurrency(depositAmount, currency)}</span>
                     </div>
                     <div className="flex items-center justify-between text-muted-foreground text-sm">
-                      <span>Remaining (pay at session)</span>
+                      <span>{t('bookSession.summary.remainingAtSession')}</span>
                       <span>{formatCurrency(remainingBalance, currency)}</span>
                     </div>
                   </>
@@ -453,7 +456,7 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
                   <div className="flex items-center justify-between text-emerald-400">
                     <span className="flex items-center gap-1">
                       <CreditCard className="h-4 w-4" />
-                      Pay Now
+                      {t('bookSession.summary.payNow')}
                     </span>
                     <span className="font-bold">{formatCurrency(selectedSessionType.price, currency)}</span>
                   </div>
@@ -461,8 +464,8 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
                 
                 {paymentRequired === 'none' && (
                   <div className="flex items-center justify-between text-muted-foreground text-sm">
-                    <span>Payment</span>
-                    <span>Pay coach directly</span>
+                    <span>{t('bookSession.summary.payment')}</span>
+                    <span>{t('bookSession.summary.payCoachDirectly')}</span>
                   </div>
                 )}
               </div>
@@ -470,10 +473,10 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
 
             {/* Optional Message */}
             <div className="space-y-2">
-              <Label htmlFor="message">Message (Optional)</Label>
+              <Label htmlFor="message">{t('bookSession.addMessage')}</Label>
               <Textarea
                 id="message"
-                placeholder="Tell the coach about your goals or any specific needs..."
+                placeholder={t('bookSession.messagePlaceholder')}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 rows={3}
@@ -482,7 +485,7 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
 
             <div className="flex justify-between">
               <Button variant="outline" onClick={() => setStep("datetime")}>
-                Back
+                {t('bookSession.buttons.back')}
               </Button>
               <Button 
                 onClick={handleSubmit} 
@@ -494,20 +497,20 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
                 {(createBooking.isPending || isProcessingPayment) ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    {isProcessingPayment ? "Redirecting to payment..." : "Sending..."}
+                    {isProcessingPayment ? t('bookSession.redirectingToPayment') : t('bookSession.sending')}
                   </>
                 ) : paymentRequired === 'full' ? (
                   <>
                     <CreditCard className="h-4 w-4 mr-2" />
-                    Pay {formatCurrency(selectedSessionType.price, currency)} & Book
+                    {t('bookSession.buttons.payAndBook', { amount: formatCurrency(selectedSessionType.price, currency) })}
                   </>
                 ) : paymentRequired === 'deposit' ? (
                   <>
                     <Banknote className="h-4 w-4 mr-2" />
-                    Pay {formatCurrency(depositAmount, currency)} Deposit & Book
+                    {t('bookSession.buttons.payDepositAndBook', { amount: formatCurrency(depositAmount, currency) })}
                   </>
                 ) : (
-                  "Request Booking"
+                  t('bookSession.requestBooking')
                 )}
               </Button>
             </div>

@@ -784,6 +784,7 @@
     "video": {
       "title": "Video Conferencing",
       "subtitle": "Connect video platforms for online sessions",
+      "autoCreateMeetings": "Auto-create meetings for sessions",
       "zoom": {
         "name": "Zoom",
         "description": "Host and join video sessions via Zoom"
@@ -800,7 +801,22 @@
     "calendar": {
       "title": "Calendar Sync",
       "subtitle": "Sync your schedule with external calendars",
+      "syncToCalendar": "Sync sessions to calendar",
+      "twoWaySync": "2-Way Sync",
+      "twoWaySyncDescription": "Your calendar events will be synced to block availability for booking.",
       "googleCalendar": {
+        "name": "Google Calendar",
+        "description": "Sync sessions with Google Calendar"
+      },
+      "outlook": {
+        "name": "Outlook Calendar",
+        "description": "Sync with Microsoft Outlook"
+      },
+      "appleCalendar": {
+        "name": "Apple Calendar",
+        "description": "Sync with Apple Calendar via CalDAV"
+      }
+    },
         "name": "Google Calendar",
         "description": "Sync sessions with Google Calendar"
       },

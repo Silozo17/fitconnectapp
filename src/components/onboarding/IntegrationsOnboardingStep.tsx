@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Video, Calendar, CheckCircle, ExternalLink, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,22 +19,22 @@ interface IntegrationsOnboardingStepProps {
 
 const VIDEO_PROVIDERS: {
   id: VideoProvider;
-  name: string;
-  description: string;
+  nameKey: string;
+  descriptionKey: string;
   icon: typeof Video;
   color: string;
 }[] = [
   {
     id: "zoom",
-    name: "Zoom",
-    description: "Video meetings for online sessions",
+    nameKey: "integrations.video.zoom.name",
+    descriptionKey: "integrations.video.zoom.description",
     icon: Video,
     color: "bg-blue-500",
   },
   {
     id: "google_meet",
-    name: "Google Meet",
-    description: "Free video calls with Google",
+    nameKey: "integrations.video.googleMeet.name",
+    descriptionKey: "integrations.video.googleMeet.description",
     icon: Video,
     color: "bg-green-500",
   },
@@ -41,21 +42,22 @@ const VIDEO_PROVIDERS: {
 
 const CALENDAR_PROVIDERS: {
   id: CalendarProvider;
-  name: string;
-  description: string;
+  nameKey: string;
+  descriptionKey: string;
   icon: typeof Calendar;
   color: string;
 }[] = [
   {
     id: "google_calendar",
-    name: "Google Calendar",
-    description: "Sync your schedule automatically",
+    nameKey: "integrations.calendar.googleCalendar.name",
+    descriptionKey: "integrations.calendar.googleCalendar.description",
     icon: Calendar,
     color: "bg-red-500",
   },
 ];
 
 const IntegrationsOnboardingStep = ({ coachId, onComplete, onSkip }: IntegrationsOnboardingStepProps) => {
+  const { t } = useTranslation('common');
   const { user } = useAuth();
   const [connectingProvider, setConnectingProvider] = useState<string | null>(null);
 
@@ -105,7 +107,7 @@ const IntegrationsOnboardingStep = ({ coachId, onComplete, onSkip }: Integration
         window.location.href = data.authUrl;
       }
     } catch (error) {
-      toast.error("Failed to connect. Please try again.");
+      toast.error(t('integrations.connectionError'));
     } finally {
       setConnectingProvider(null);
     }
@@ -125,7 +127,7 @@ const IntegrationsOnboardingStep = ({ coachId, onComplete, onSkip }: Integration
         window.location.href = data.authUrl;
       }
     } catch (error) {
-      toast.error("Failed to connect. Please try again.");
+      toast.error(t('integrations.connectionError'));
     } finally {
       setConnectingProvider(null);
     }
@@ -137,16 +139,16 @@ const IntegrationsOnboardingStep = ({ coachId, onComplete, onSkip }: Integration
     <div className="space-y-6">
       <div>
         <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-          Connect your tools
+          {t('onboardingIntegrations.videoCalendar.title')}
         </h2>
         <p className="text-muted-foreground">
-          Connect video conferencing and calendar apps to streamline your workflow.
+          {t('onboardingIntegrations.videoCalendar.subtitle')}
         </p>
       </div>
 
       {/* Video Conferencing */}
       <div className="space-y-3">
-        <h3 className="font-medium text-foreground">Video Conferencing</h3>
+        <h3 className="font-medium text-foreground">{t('onboardingIntegrations.videoCalendar.videoSection')}</h3>
         <div className="space-y-2">
           {VIDEO_PROVIDERS.map((provider) => {
             const isConnected = videoConnections?.includes(provider.id);
@@ -168,14 +170,14 @@ const IntegrationsOnboardingStep = ({ coachId, onComplete, onSkip }: Integration
                       <Icon className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <p className="font-medium text-foreground">{provider.name}</p>
-                      <p className="text-sm text-muted-foreground">{provider.description}</p>
+                      <p className="font-medium text-foreground">{t(provider.nameKey)}</p>
+                      <p className="text-sm text-muted-foreground">{t(provider.descriptionKey)}</p>
                     </div>
                   </div>
                   {isConnected ? (
                     <div className="flex items-center gap-2 text-green-600">
                       <CheckCircle className="w-5 h-5" />
-                      <span className="text-sm font-medium">Connected</span>
+                      <span className="text-sm font-medium">{t('integrations.connected')}</span>
                     </div>
                   ) : (
                     <Button
@@ -189,7 +191,7 @@ const IntegrationsOnboardingStep = ({ coachId, onComplete, onSkip }: Integration
                       ) : (
                         <>
                           <ExternalLink className="w-4 h-4 mr-1" />
-                          Connect
+                          {t('integrations.connect')}
                         </>
                       )}
                     </Button>
@@ -203,7 +205,7 @@ const IntegrationsOnboardingStep = ({ coachId, onComplete, onSkip }: Integration
 
       {/* Calendar Sync */}
       <div className="space-y-3">
-        <h3 className="font-medium text-foreground">Calendar Sync</h3>
+        <h3 className="font-medium text-foreground">{t('onboardingIntegrations.videoCalendar.calendarSection')}</h3>
         <div className="space-y-2">
           {CALENDAR_PROVIDERS.map((provider) => {
             const isConnected = calendarConnections?.includes(provider.id);
@@ -225,14 +227,14 @@ const IntegrationsOnboardingStep = ({ coachId, onComplete, onSkip }: Integration
                       <Icon className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <p className="font-medium text-foreground">{provider.name}</p>
-                      <p className="text-sm text-muted-foreground">{provider.description}</p>
+                      <p className="font-medium text-foreground">{t(provider.nameKey)}</p>
+                      <p className="text-sm text-muted-foreground">{t(provider.descriptionKey)}</p>
                     </div>
                   </div>
                   {isConnected ? (
                     <div className="flex items-center gap-2 text-green-600">
                       <CheckCircle className="w-5 h-5" />
-                      <span className="text-sm font-medium">Connected</span>
+                      <span className="text-sm font-medium">{t('integrations.connected')}</span>
                     </div>
                   ) : (
                     <Button
@@ -246,7 +248,7 @@ const IntegrationsOnboardingStep = ({ coachId, onComplete, onSkip }: Integration
                       ) : (
                         <>
                           <ExternalLink className="w-4 h-4 mr-1" />
-                          Connect
+                          {t('integrations.connect')}
                         </>
                       )}
                     </Button>
@@ -258,15 +260,11 @@ const IntegrationsOnboardingStep = ({ coachId, onComplete, onSkip }: Integration
         </div>
       </div>
 
-      <p className="text-sm text-muted-foreground">
-        You can connect more integrations anytime from your Settings.
-      </p>
-
       <Button 
         onClick={hasAnyConnection ? onComplete : onSkip} 
         className="w-full bg-primary text-primary-foreground"
       >
-        {hasAnyConnection ? "Continue" : "Skip for now"}
+        {hasAnyConnection ? t('onboardingIntegrations.videoCalendar.continueButton') : t('onboardingIntegrations.videoCalendar.skipButton')}
       </Button>
     </div>
   );
