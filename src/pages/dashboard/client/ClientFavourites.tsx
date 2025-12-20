@@ -190,7 +190,7 @@ const ClientFavourites = () => {
               Save coaches to your favourites for quick access
             </p>
             <Button asChild>
-              <Link to="/coaches">Browse Coaches</Link>
+              <Link to={linkPrefix}>Browse Coaches</Link>
             </Button>
           </CardContent>
         </Card>
