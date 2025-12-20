@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useCoachLinkPrefix } from "@/hooks/useCoachLinkPrefix";
 import { useAuth } from "@/contexts/AuthContext";
 import { useActiveProfile } from "@/hooks/useActiveProfile";
@@ -31,6 +32,7 @@ interface DashboardStats {
 }
 
 const ClientOverview = () => {
+  const { t } = useTranslation('dashboard');
   const { user } = useAuth();
   const { profileId, isRoleSwitching, userId } = useActiveProfile();
   const coachLinkPrefix = useCoachLinkPrefix();
@@ -127,7 +129,7 @@ const ClientOverview = () => {
       });
     } catch (err) {
       console.error("Error fetching dashboard stats:", err);
-      setError("Failed to load some dashboard data. Please try again.");
+      setError(t('client.overview.errorLoading'));
     }
   };
 
@@ -143,43 +145,45 @@ const ClientOverview = () => {
 
   const quickActions = [
     {
-      title: "My Coaches",
-      description: `${stats.coachCount} active coach${stats.coachCount !== 1 ? "es" : ""}`,
+      title: t('client.quickActions.myCoaches'),
+      description: t('client.quickActions.activeCoaches', { count: stats.coachCount }),
       icon: Users,
       href: "/dashboard/client/coaches",
       color: "text-blue-500",
     },
     {
-      title: "Sessions",
-      description: `${stats.upcomingSessions} upcoming`,
+      title: t('client.quickActions.sessions'),
+      description: t('client.quickActions.upcoming', { count: stats.upcomingSessions }),
       icon: Calendar,
       href: "/dashboard/client/sessions",
       color: "text-green-500",
     },
     {
-      title: "Messages",
-      description: stats.unreadMessages > 0 ? `${stats.unreadMessages} unread` : "All caught up",
+      title: t('client.quickActions.messages'),
+      description: stats.unreadMessages > 0 
+        ? t('client.quickActions.unread', { count: stats.unreadMessages })
+        : t('client.quickActions.allCaughtUp'),
       icon: MessageSquare,
       href: "/dashboard/client/messages",
       color: "text-purple-500",
     },
     {
-      title: "My Plans",
-      description: `${stats.activePlans} active plan${stats.activePlans !== 1 ? "s" : ""}`,
+      title: t('client.quickActions.myPlans'),
+      description: t('client.quickActions.activePlans', { count: stats.activePlans }),
       icon: ClipboardList,
       href: "/dashboard/client/plans",
       color: "text-orange-500",
     },
     {
-      title: "Habits",
-      description: "Track daily habits",
+      title: t('client.quickActions.habits'),
+      description: t('client.quickActions.trackHabits'),
       icon: Target,
       href: "/dashboard/client/habits",
       color: "text-cyan-500",
     },
     {
-      title: "Progress",
-      description: "Track your journey",
+      title: t('client.quickActions.progress'),
+      description: t('client.quickActions.trackJourney'),
       icon: TrendingUp,
       href: "/dashboard/client/progress",
       color: "text-pink-500",
@@ -188,8 +192,8 @@ const ClientOverview = () => {
 
   return (
     <ClientDashboardLayout
-      title="Dashboard"
-      description="Your fitness journey overview"
+      title={t('client.overview.title')}
+      description={t('client.overview.description')}
     >
       {/* Error Alert */}
       {error && (
@@ -205,7 +209,7 @@ const ClientOverview = () => {
               className="ml-4"
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${isRetrying ? 'animate-spin' : ''}`} />
-              Retry
+              {t('client.overview.retry')}
             </Button>
           </AlertDescription>
         </Alert>
@@ -252,15 +256,14 @@ const ClientOverview = () => {
       {stats.coachCount === 0 && (
         <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
           <CardHeader>
-            <CardTitle>Start Your Fitness Journey</CardTitle>
+            <CardTitle>{t('client.cta.startJourney')}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground mb-4">
-              Connect with a certified fitness coach to create a personalized
-              training plan and achieve your goals.
+              {t('client.cta.startJourneyDesc')}
             </p>
             <Button asChild>
-              <Link to={coachLinkPrefix}>Find a Coach</Link>
+              <Link to={coachLinkPrefix}>{t('client.cta.findCoach')}</Link>
             </Button>
           </CardContent>
         </Card>

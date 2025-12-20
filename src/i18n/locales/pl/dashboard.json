@@ -1,0 +1,129 @@
+{
+  "client": {
+    "overview": {
+      "title": "Panel",
+      "description": "Przegląd Twojej podróży fitness",
+      "retry": "Ponów",
+      "errorLoading": "Nie udało się załadować niektórych danych. Spróbuj ponownie."
+    },
+    "quickActions": {
+      "myCoaches": "Moi Trenerzy",
+      "activeCoaches": "{{count}} aktywny trener",
+      "activeCoaches_plural": "{{count}} aktywnych trenerów",
+      "sessions": "Sesje",
+      "upcoming": "{{count}} nadchodząca",
+      "messages": "Wiadomości",
+      "unread": "{{count}} nieprzeczytanych",
+      "allCaughtUp": "Wszystko przeczytane",
+      "myPlans": "Moje Plany",
+      "activePlans": "{{count}} aktywny plan",
+      "activePlans_plural": "{{count}} aktywnych planów",
+      "habits": "Nawyki",
+      "trackHabits": "Śledź codzienne nawyki",
+      "progress": "Postępy",
+      "trackJourney": "Śledź swoją podróż"
+    },
+    "cta": {
+      "startJourney": "Rozpocznij Swoją Podróż Fitness",
+      "startJourneyDesc": "Połącz się z certyfikowanym trenerem fitness, aby stworzyć spersonalizowany plan treningowy i osiągnąć swoje cele.",
+      "findCoach": "Znajdź Trenera"
+    },
+    "sections": {
+      "todaysHealth": "Dzisiejsze Zdrowie",
+      "friendRequests": "Zaproszenia od Znajomych",
+      "recentActivity": "Ostatnia Aktywność"
+    }
+  },
+  "coach": {
+    "overview": {
+      "title": "Panel Trenera",
+      "description": "Zarządzaj swoim biznesem coachingowym stąd.",
+      "welcome": "Witaj ponownie",
+      "welcomeWithName": "Witaj ponownie, {{name}}!"
+    },
+    "stats": {
+      "activeClients": "Aktywni Klienci",
+      "thisWeek": "Ten Tydzień",
+      "sessions": "sesji",
+      "messages": "Wiadomości",
+      "unread": "nieprzeczytanych",
+      "revenue": "Przychód",
+      "thisMonth": "w tym miesiącu"
+    },
+    "quickActions": {
+      "myClients": "Moi Klienci",
+      "noClientsYet": "Brak klientów",
+      "schedule": "Harmonogram",
+      "setupAvailability": "Ustaw swoją dostępność",
+      "settings": "Ustawienia",
+      "editProfile": "Edytuj swój profil"
+    },
+    "emptyState": {
+      "title": "Twój profil jest aktywny!",
+      "description": "Klienci mogą Cię teraz znaleźć w marketplace. Ustaw swoją dostępność, aby zacząć otrzymywać rezerwacje.",
+      "setupAvailability": "Ustaw Dostępność"
+    },
+    "tiers": {
+      "founder": "Founder",
+      "enterprise": "Enterprise",
+      "pro": "Pro",
+      "starter": "Starter",
+      "free": "Bezpłatny"
+    }
+  },
+  "admin": {
+    "overview": {
+      "title": "Panel Administratora",
+      "description": "Przegląd i zarządzanie platformą",
+      "customize": "Dostosuj",
+      "editLayout": "Edytuj Układ",
+      "done": "Gotowe",
+      "dragToReorder": "Przeciągnij widgety, aby zmienić ich kolejność. Użyj menu rozmiaru na każdym widgecie, aby zmienić jego rozmiar.",
+      "noWidgets": "Brak włączonych widgetów. Kliknij \"Dostosuj\", aby dodać widgety."
+    },
+    "widgets": {
+      "totalUsers": "Łączna Liczba Użytkowników",
+      "activeCoaches": "Aktywni Trenerzy",
+      "scheduledSessions": "Zaplanowane Sesje",
+      "monthlyRevenue": "Miesięczny Przychód",
+      "totalMessages": "Łączna Liczba Wiadomości",
+      "totalReviews": "Łączna Liczba Opinii",
+      "userSignups": "Rejestracje Użytkowników (7 dni)",
+      "revenue7Days": "Przychód (7 dni)",
+      "sessions7Days": "Sesje (7 dni)",
+      "recentActivity": "Ostatnia Aktywność",
+      "quickActions": "Szybkie Akcje",
+      "pendingVerifications": "Oczekujące Weryfikacje",
+      "recentSignups": "Ostatnie Rejestracje",
+      "recentTransactions": "Ostatnie Transakcje",
+      "recentReviews": "Ostatnie Opinie",
+      "topCoaches": "Najlepsi Trenerzy",
+      "flaggedDocuments": "Oznaczone Dokumenty"
+    },
+    "actions": {
+      "viewAll": "Zobacz Wszystko",
+      "approve": "Zatwierdź",
+      "reject": "Odrzuć",
+      "suspend": "Zawieś",
+      "delete": "Usuń"
+    }
+  },
+  "header": {
+    "searchClients": "Szukaj klientów, sesji...",
+    "search": "Szukaj...",
+    "searchDashboard": "Przeszukaj panel",
+    "myProfile": "Mój Profil",
+    "signOut": "Wyloguj się",
+    "plan": "Plan {{tier}}",
+    "roleClient": "Klient",
+    "roleCoach": "Trener"
+  },
+  "common": {
+    "loading": "Ładowanie...",
+    "error": "Błąd",
+    "noData": "Brak dostępnych danych",
+    "viewAll": "Zobacz Wszystko",
+    "seeMore": "Zobacz Więcej",
+    "showLess": "Pokaż Mniej"
+  }
+}
