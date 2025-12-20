@@ -5,20 +5,26 @@ import { Badge } from "@/components/ui/badge";
 import { DigitalBundle } from "@/hooks/useDigitalProducts";
 import { formatCurrency, CurrencyCode } from "@/lib/currency";
 import { UserAvatar } from "@/components/shared/UserAvatar";
+import { useMarketplaceLinkPrefix } from "@/hooks/useMarketplaceLinkPrefix";
 
 interface BundleCardProps {
   bundle: DigitalBundle;
+  linkPrefix?: string;
 }
 
-export default function BundleCard({ bundle }: BundleCardProps) {
+export default function BundleCard({ bundle, linkPrefix }: BundleCardProps) {
   const navigate = useNavigate();
+  const autoLinkPrefix = useMarketplaceLinkPrefix();
+  const effectiveLinkPrefix = linkPrefix ?? autoLinkPrefix;
+  const bundleUrl = `${effectiveLinkPrefix}/bundles/${bundle.id}`;
+  
   const savings = bundle.original_price 
     ? Math.round(((bundle.original_price - bundle.price) / bundle.original_price) * 100) : 0;
 
   return (
     <Card 
       className="overflow-hidden hover:border-primary/50 transition-all cursor-pointer group"
-      onClick={() => navigate(`/marketplace/bundles/${bundle.id}`)}
+      onClick={() => navigate(bundleUrl)}
     >
       <div className="aspect-[16/10] relative overflow-hidden">
         {bundle.cover_image_url ? (
