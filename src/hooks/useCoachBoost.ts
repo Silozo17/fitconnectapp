@@ -258,7 +258,7 @@ export const useBoostStats = () => {
         .from("coach_boosts")
         .select("*", { count: "exact", head: true })
         .gt("boost_end_date", now)
-        .eq("payment_status", "succeeded");
+        .in("payment_status", ["succeeded", "migrated_free"]);
 
       // Get total revenue from attributions (30% commission)
       const { data: revenueData } = await supabase
