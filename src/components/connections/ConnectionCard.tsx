@@ -13,7 +13,9 @@ interface ConnectionCardProps {
   connection: {
     id: string;
     requester_user_id: string;
+    requester_profile_type: string;
     addressee_user_id: string;
+    addressee_profile_type: string;
     profile?: {
       id?: string;
       first_name?: string | null;
@@ -42,10 +44,14 @@ export const ConnectionCard = ({ connection, currentUserId, onRemove }: Connecti
     "Unknown User";
   const avatarUrl = profile?.avatar_url || profile?.profile_image_url;
 
-  // Determine the friend's user_id (the other person in the connection)
-  const friendUserId = connection.requester_user_id === currentUserId 
+  // Determine the friend's user_id and profile type (the other person in the connection)
+  const isRequester = connection.requester_user_id === currentUserId;
+  const friendUserId = isRequester 
     ? connection.addressee_user_id 
     : connection.requester_user_id;
+  const friendProfileType = isRequester
+    ? connection.addressee_profile_type
+    : connection.requester_profile_type;
 
   const handleMessage = () => {
     const profileId = profile?.id;
@@ -124,6 +130,7 @@ export const ConnectionCard = ({ connection, currentUserId, onRemove }: Connecti
         connectionId={connection.id}
         friendUserId={friendUserId}
         friendProfileId={profile?.id}
+        friendProfileType={friendProfileType}
         onRemove={onRemove}
       />
     </>

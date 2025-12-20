@@ -34,6 +34,7 @@ interface FriendProfileSheetProps {
   connectionId: string;
   friendUserId: string;
   friendProfileId?: string;
+  friendProfileType?: string;
   onRemove: (id: string) => void;
 }
 
@@ -89,6 +90,7 @@ export function FriendProfileSheet({
   connectionId,
   friendUserId,
   friendProfileId,
+  friendProfileType = "client",
   onRemove,
 }: FriendProfileSheetProps) {
   const navigate = useNavigate();
@@ -104,17 +106,69 @@ export function FriendProfileSheet({
     if (open && friendUserId) {
       fetchFriendData();
     }
-  }, [open, friendUserId]);
+  }, [open, friendUserId, friendProfileType]);
 
   const fetchFriendData = async () => {
     setIsLoading(true);
     try {
-      // Fetch client profile
-      const { data: profileData } = await supabase
-        .from("client_profiles")
-        .select("id, first_name, last_name, username, avatar_url, location, city, county, country, fitness_goals, selected_avatar_id")
-        .eq("user_id", friendUserId)
-        .single();
+      let profileData: FriendProfile | null = null;
+
+      if (friendProfileType === "coach") {
+        // Fetch coach profile
+        const { data: coachData } = await supabase
+          .from("coach_profiles")
+          .select("id, user_id, display_name, username, profile_image_url, location, location_city, location_country, selected_avatar_id")
+          .eq("user_id", friendUserId)
+          .single();
+
+        if (coachData) {
+          profileData = {
+            id: coachData.id,
+            first_name: null,
+            last_name: null,
+            username: coachData.username,
+            avatar_url: coachData.profile_image_url,
+            location: coachData.location,
+            city: coachData.location_city,
+            county: null,
+            country: coachData.location_country,
+            fitness_goals: null,
+            selected_avatar_id: coachData.selected_avatar_id,
+          };
+        }
+      } else if (friendProfileType === "admin") {
+        // Fetch admin profile
+        const { data: adminData } = await supabase
+          .from("admin_profiles")
+          .select("id, user_id, display_name, first_name, last_name, username, avatar_url")
+          .eq("user_id", friendUserId)
+          .single();
+
+        if (adminData) {
+          profileData = {
+            id: adminData.id,
+            first_name: adminData.first_name,
+            last_name: adminData.last_name,
+            username: adminData.username,
+            avatar_url: adminData.avatar_url,
+            location: null,
+            city: null,
+            county: null,
+            country: null,
+            fitness_goals: null,
+            selected_avatar_id: null,
+          };
+        }
+      } else {
+        // Fetch client profile (default)
+        const { data: clientData } = await supabase
+          .from("client_profiles")
+          .select("id, first_name, last_name, username, avatar_url, location, city, county, country, fitness_goals, selected_avatar_id")
+          .eq("user_id", friendUserId)
+          .single();
+
+        profileData = clientData;
+      }
 
       if (profileData) {
         setProfile(profileData);
@@ -130,60 +184,74 @@ export function FriendProfileSheet({
           if (avatarData) {
             setAvatar(avatarData);
           }
+        } else {
+          setAvatar(null);
         }
 
-        // Fetch XP data
-        const { data: xpData } = await supabase
-          .from("client_xp")
-          .select("total_xp, current_level")
-          .eq("client_id", profileData.id)
-          .single();
+        // Gamification data is only for clients
+        if (friendProfileType === "client") {
+          // Fetch XP data
+          const { data: xpData } = await supabase
+            .from("client_xp")
+            .select("total_xp, current_level")
+            .eq("client_id", profileData.id)
+            .single();
 
-        if (xpData) {
-          setXp(xpData);
+          if (xpData) {
+            setXp(xpData);
+          } else {
+            setXp(null);
+          }
+
+          // Fetch badges (up to 6)
+          let badgeCount = 0;
+          const { data: badgesData } = await supabase
+            .from("client_badges")
+            .select("id, earned_at, badge_id")
+            .eq("client_id", profileData.id)
+            .order("earned_at", { ascending: false })
+            .limit(6);
+
+          if (badgesData && badgesData.length > 0) {
+            const badgeIds = badgesData.map(b => b.badge_id);
+            const { data: badgeDetails } = await supabase
+              .from("badges")
+              .select("id, name, icon, rarity, description")
+              .in("id", badgeIds);
+
+            const enrichedBadges = badgesData.map(b => ({
+              id: b.id,
+              earned_at: b.earned_at,
+              badge: badgeDetails?.find(bd => bd.id === b.badge_id) || null
+            })).filter(b => b.badge);
+
+            setBadges(enrichedBadges as FriendBadge[]);
+            badgeCount = enrichedBadges.length;
+          } else {
+            setBadges([]);
+          }
+
+          // Fetch stats
+          const { count: progressCount } = await supabase
+            .from("client_progress")
+            .select("id", { count: "exact", head: true })
+            .eq("client_id", profileData.id);
+
+          // Get habit streak from XP data level approximation
+          const habitStreak = xpData?.current_level ? Math.floor(xpData.current_level * 0.5) : 0;
+
+          setStats({
+            workoutCount: 0,
+            habitStreak: habitStreak,
+            progressEntries: progressCount || 0,
+            badgesEarned: badgeCount,
+          });
+        } else {
+          // Clear gamification data for non-clients
+          setXp(null);
+          setBadges([]);
+          setStats(null);
         }
-
-        // Fetch badges (up to 6)
-        let badgeCount = 0;
-        const { data: badgesData } = await supabase
-          .from("client_badges")
-          .select("id, earned_at, badge_id")
-          .eq("client_id", profileData.id)
-          .order("earned_at", { ascending: false })
-          .limit(6);
-
-        if (badgesData && badgesData.length > 0) {
-          const badgeIds = badgesData.map(b => b.badge_id);
-          const { data: badgeDetails } = await supabase
-            .from("badges")
-            .select("id, name, icon, rarity, description")
-            .in("id", badgeIds);
-
-          const enrichedBadges = badgesData.map(b => ({
-            id: b.id,
-            earned_at: b.earned_at,
-            badge: badgeDetails?.find(bd => bd.id === b.badge_id) || null
-          })).filter(b => b.badge);
-
-          setBadges(enrichedBadges as FriendBadge[]);
-          badgeCount = enrichedBadges.length;
-        }
-
-        // Fetch stats
-        const { count: progressCount } = await supabase
-          .from("client_progress")
-          .select("id", { count: "exact", head: true })
-          .eq("client_id", profileData.id);
-
-        // Get habit streak from XP data level approximation
-        const habitStreak = xpData?.current_level ? Math.floor(xpData.current_level * 0.5) : 0;
-
-        setStats({
-          workoutCount: 0,
-          habitStreak: habitStreak,
-          progressEntries: progressCount || 0,
-          badgesEarned: badgeCount,
-        });
       }
     } catch (error) {
       console.error("Error fetching friend data:", error);
@@ -207,6 +275,7 @@ export function FriendProfileSheet({
     onOpenChange(false);
   };
 
+  // For coaches, we need to get display_name from profile data differently
   const displayName = profile?.first_name 
     ? `${profile.first_name}${profile.last_name ? ` ${profile.last_name}` : ""}`
     : profile?.username || "Friend";
