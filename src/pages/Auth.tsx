@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { GradientButton } from "@/components/ui/gradient-button";
@@ -32,6 +33,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  const { t } = useTranslation();
   
   // Get mode from query params (login or signup)
   const modeParam = searchParams.get("mode");
@@ -116,11 +118,11 @@ const Auth = () => {
     if (!isLogin) {
       const validation = validatePassword(data.password);
       if (!validation.isValid) {
-        toast.error("Please choose a stronger password");
+        toast.error(t("auth.chooseStrongerPassword"));
         return;
       }
       if (isBreached) {
-        toast.error("This password was found in a data breach. Please choose a different password.");
+        toast.error(t("auth.passwordBreached"));
         return;
       }
 
@@ -130,10 +132,10 @@ const Auth = () => {
         await sendOTPEmail(data.email);
         setPendingSignupData({ email: data.email, password: data.password });
         setShowOTPVerification(true);
-        toast.success("Verification code sent to your email");
+        toast.success(t("otp.verificationSent"));
       } catch (error: unknown) {
         logError("Auth.sendOTP", error);
-        toast.error("Failed to send verification code. Please try again.");
+        toast.error(t("otp.failedSendCode"));
       } finally {
         setIsSubmitting(false);
       }
@@ -146,15 +148,15 @@ const Auth = () => {
       const { error } = await signIn(data.email, data.password);
       if (error) {
         if (error.message.includes("Invalid login credentials")) {
-          toast.error("Invalid email or password");
+          toast.error(t("auth.invalidCredentials"));
         } else {
           toast.error(error.message);
         }
       } else {
-        toast.success("Welcome back!");
+        toast.success(t("auth.welcomeBack") + "!");
       }
     } catch (error) {
-      toast.error("An unexpected error occurred");
+      toast.error(t("auth.unexpectedError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -169,14 +171,14 @@ const Auth = () => {
       const { error } = await signUp(pendingSignupData.email, pendingSignupData.password, selectedRole);
       if (error) {
         if (error.message.includes("already registered")) {
-          toast.error("This email is already registered. Please log in instead.");
+          toast.error(t("auth.emailAlreadyRegistered"));
           setShowOTPVerification(false);
           setIsLogin(true);
         } else {
           toast.error(error.message);
         }
       } else {
-        toast.success("Account created successfully!");
+        toast.success(t("auth.accountCreated"));
         
         // Send welcome email (fire and forget)
         supabase.functions.invoke("send-welcome-email", {
@@ -188,7 +190,7 @@ const Auth = () => {
         }).catch((err) => console.error("Failed to send welcome email:", err));
       }
     } catch (error) {
-      toast.error("An unexpected error occurred");
+      toast.error(t("auth.unexpectedError"));
     } finally {
       setIsSubmitting(false);
       setPendingSignupData(null);
@@ -206,7 +208,7 @@ const Auth = () => {
     return (
       <>
         <Helmet>
-          <title>Verify Your Email | FitConnect</title>
+          <title>{t("auth.verifyEmail")} | FitConnect</title>
         </Helmet>
 
         <div className="min-h-screen bg-background flex">
@@ -241,10 +243,10 @@ const Auth = () => {
                 <Dumbbell className="w-12 h-12 text-white" />
               </div>
               <h2 className="font-display text-4xl font-bold text-white mb-4">
-                One more step!
+                {t("auth.oneMoreStep")}
               </h2>
               <p className="text-white/80 text-lg">
-                Verify your email to complete registration and start your fitness journey.
+                {t("auth.verifyToComplete")}
               </p>
             </div>
           </div>
@@ -256,7 +258,7 @@ const Auth = () => {
   return (
     <>
       <Helmet>
-        <title>{isLogin ? "Log In" : "Sign Up"} | FitConnect</title>
+        <title>{isLogin ? t("actions.logIn") : t("actions.signUp")} | FitConnect</title>
         <meta
           name="description"
           content="Access your FitConnect account to connect with fitness coaches or manage your coaching business."
@@ -280,19 +282,19 @@ const Auth = () => {
             {/* Header */}
             <div className="mb-4 sm:mb-8">
               <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-1 sm:mb-2">
-                {isLogin ? "Welcome back" : "Create your account"}
+                {isLogin ? t("auth.welcomeBack") : t("auth.createAccount")}
               </h1>
               <p className="text-muted-foreground text-sm sm:text-base">
                 {isLogin
-                  ? "Log in to access your dashboard"
-                  : "Start your fitness journey today"}
+                  ? t("auth.logInAccess")
+                  : t("auth.startJourney")}
               </p>
             </div>
 
             {/* Role Selection (Sign Up only) */}
             {!isLogin && (
               <div className="mb-4 sm:mb-6">
-                <Label className="text-foreground mb-2 sm:mb-3 block text-sm sm:text-base">I want to:</Label>
+                <Label className="text-foreground mb-2 sm:mb-3 block text-sm sm:text-base">{t("auth.iWantTo")}</Label>
                 <div className="grid grid-cols-2 gap-2 sm:gap-3">
                   <button
                     type="button"
@@ -317,7 +319,7 @@ const Auth = () => {
                           : "text-muted-foreground"
                       }`}
                     >
-                      Find a Coach
+                      {t("auth.findCoach")}
                     </span>
                   </button>
                   <button
@@ -343,7 +345,7 @@ const Auth = () => {
                           : "text-muted-foreground"
                       }`}
                     >
-                      Become a Coach
+                      {t("auth.becomeCoach")}
                     </span>
                   </button>
                 </div>
@@ -354,7 +356,7 @@ const Auth = () => {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
               <div>
                 <Label htmlFor="email" className="text-foreground text-sm sm:text-base">
-                  Email
+                  {t("auth.email")}
                 </Label>
                 <Input
                   id="email"
@@ -372,7 +374,7 @@ const Auth = () => {
 
               <div>
                 <Label htmlFor="password" className="text-foreground text-sm sm:text-base">
-                  Password
+                  {t("auth.password")}
                 </Label>
                 <Input
                   id="password"
@@ -403,22 +405,22 @@ const Auth = () => {
                 {isSubmitting ? (
                   <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                 ) : isLogin ? (
-                  "Log In"
+                  t("actions.logIn")
                 ) : (
-                  "Create Account"
+                  t("auth.createAccount")
                 )}
               </GradientButton>
             </form>
 
             {/* Toggle */}
             <p className="mt-4 sm:mt-6 text-center text-muted-foreground text-sm sm:text-base">
-              {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
+              {isLogin ? t("auth.noAccount") : t("auth.hasAccount")}{" "}
               <button
                 type="button"
                 onClick={() => setIsLogin(!isLogin)}
                 className="text-primary hover:underline font-medium"
               >
-                {isLogin ? "Sign up" : "Log in"}
+                {isLogin ? t("actions.signUp") : t("actions.logIn")}
               </button>
             </p>
           </div>
@@ -436,17 +438,17 @@ const Auth = () => {
             </div>
             <h2 className="font-display text-4xl font-bold text-white mb-4">
               {isLogin
-                ? "Ready to crush your goals?"
+                ? t("auth.readyToGoals")
                 : selectedRole === "client"
-                ? "Find your perfect coach"
-                : "Grow your coaching business"}
+                ? t("auth.findPerfectCoach")
+                : t("auth.growBusiness")}
             </h2>
             <p className="text-white/80 text-lg">
               {isLogin
-                ? "Your personalized fitness journey awaits."
+                ? t("auth.journeyAwaits")
                 : selectedRole === "client"
-                ? "Connect with certified trainers, nutritionists, and martial arts instructors."
-                : "Reach more clients, manage your schedule, and scale your impact."}
+                ? t("auth.connectWithTrainers")
+                : t("auth.reachMoreClients")}
             </p>
           </div>
         </div>
