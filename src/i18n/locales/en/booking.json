@@ -1,0 +1,248 @@
+{
+  "title": "Schedule",
+  "description": "Manage your calendar, sessions, and availability",
+
+  "tabs": {
+    "calendar": "Calendar",
+    "requests": "Requests",
+    "sessionTypes": "Session Types",
+    "availability": "Availability",
+    "settings": "Settings"
+  },
+
+  "calendar": {
+    "title": "Calendar",
+    "today": "Today",
+    "week": "Week",
+    "month": "Month",
+    "previousWeek": "Previous week",
+    "nextWeek": "Next week",
+    "noSessions": "No sessions scheduled",
+    "syncCalendars": "Sync Calendars",
+    "syncing": "Syncing...",
+    "syncSuccess": "Calendars synced successfully",
+    "syncError": "Failed to sync calendars",
+    "externalEvent": "External Event",
+    "allDay": "All day"
+  },
+
+  "weekDays": {
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "sunday": "Sunday",
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat",
+    "sun": "Sun"
+  },
+
+  "sessions": {
+    "title": "Sessions",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "cancelled": "Cancelled",
+    "noUpcoming": "No upcoming sessions",
+    "noPast": "No past sessions",
+    "addSession": "Add Session",
+    "editSession": "Edit Session",
+    "cancelSession": "Cancel Session",
+    "rescheduleSession": "Reschedule",
+    "viewDetails": "View Details",
+    "joinSession": "Join Session",
+    "duration": "Duration",
+    "minutes": "{{count}} min",
+    "online": "Online",
+    "inPerson": "In-Person",
+    "hybrid": "Hybrid",
+    "completed": "Completed",
+    "scheduled": "Scheduled",
+    "inProgress": "In Progress",
+    "noShow": "No Show"
+  },
+
+  "requests": {
+    "title": "Booking Requests",
+    "pending": "Pending",
+    "approved": "Approved",
+    "declined": "Declined",
+    "noPending": "No pending requests",
+    "newRequest": "New booking request received!",
+    "approve": "Approve",
+    "decline": "Decline",
+    "approveRequest": "Approve Request",
+    "declineRequest": "Decline Request",
+    "requestedAt": "Requested",
+    "message": "Message",
+    "sessionType": "Session Type",
+    "requestedTime": "Requested Time"
+  },
+
+  "sessionTypes": {
+    "title": "Session Types",
+    "description": "Define the types of sessions you offer",
+    "addNew": "Add Session Type",
+    "edit": "Edit Session Type",
+    "name": "Name",
+    "namePlaceholder": "e.g., Personal Training",
+    "sessionDescription": "Description",
+    "descriptionPlaceholder": "Describe what this session includes...",
+    "durationLabel": "Duration",
+    "price": "Price",
+    "pricePlaceholder": "0.00",
+    "sessionMode": "Session Mode",
+    "allowOnline": "Allow Online",
+    "allowInPerson": "Allow In-Person",
+    "active": "Active",
+    "inactive": "Inactive",
+    "noSessionTypes": "No session types defined yet",
+    "createFirst": "Create your first session type to start accepting bookings"
+  },
+
+  "payment": {
+    "title": "Payment Settings",
+    "required": "Payment Required",
+    "none": "No payment required",
+    "deposit": "Deposit required",
+    "full": "Full payment required",
+    "depositType": "Deposit Type",
+    "percentage": "Percentage",
+    "fixed": "Fixed Amount",
+    "depositValue": "Deposit Value",
+    "depositPercentage": "Deposit Percentage",
+    "status": {
+      "notRequired": "No payment required",
+      "pending": "Payment pending",
+      "paid": "Paid",
+      "depositPaid": "Deposit paid",
+      "refunded": "Refunded",
+      "failed": "Payment failed"
+    },
+    "awaiting": "Awaiting {{amount}}",
+    "stripeRequired": "Connect Stripe to accept payments",
+    "boostWarning": "Cannot remove payment requirement - Boost requires at least one session type with payment enabled. Disable Boost first if you want to remove all payment requirements."
+  },
+
+  "availability": {
+    "title": "Availability",
+    "description": "Set your available hours for each day",
+    "editDay": "Edit Availability",
+    "startTime": "Start Time",
+    "endTime": "End Time",
+    "enabled": "Available",
+    "disabled": "Not Available",
+    "noAvailability": "Not set",
+    "copyToAll": "Copy to all days",
+    "clearAll": "Clear all"
+  },
+
+  "bookingSettings": {
+    "title": "Booking Settings",
+    "description": "Configure how clients book sessions with you",
+    "bookingMode": "Booking Mode",
+    "directBooking": "Direct Booking",
+    "directBookingDesc": "Clients can book directly into your calendar",
+    "messageFirst": "Message First",
+    "messageFirstDesc": "Clients send a request, you approve before booking",
+    "buffers": "Buffer Times",
+    "preBookingBuffer": "Time before session",
+    "preBookingBufferDesc": "Minimum time required before a session can be booked",
+    "postBookingBuffer": "Time after session",
+    "postBookingBufferDesc": "Buffer time after each session",
+    "defaultLocation": "Default Location",
+    "defaultLocationPlaceholder": "e.g., My Gym, 123 Fitness Street",
+    "cancellationPolicy": "Cancellation Policy",
+    "minCancellationHours": "Minimum cancellation notice (hours)",
+    "saveSettings": "Save Settings",
+    "settingsSaved": "Booking settings saved"
+  },
+
+  "clientSessions": {
+    "title": "My Sessions",
+    "description": "View and manage your coaching sessions",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "noUpcoming": "No upcoming sessions",
+    "noUpcomingDesc": "Book a session with a coach to get started",
+    "noPast": "No past sessions",
+    "findCoaches": "Find Coaches",
+    "leaveReview": "Leave Review",
+    "reviewSubmitted": "Review Submitted",
+    "withCoach": "with {{coach}}"
+  },
+
+  "bookSession": {
+    "title": "Book Session",
+    "selectDate": "Select Date",
+    "selectTime": "Select Time",
+    "selectSessionType": "Select Session Type",
+    "selectLocation": "Session Location",
+    "online": "Online",
+    "inPerson": "In-Person",
+    "addMessage": "Add a message (optional)",
+    "messagePlaceholder": "Any notes for your coach...",
+    "confirm": "Confirm Booking",
+    "processing": "Processing...",
+    "success": "Session booked successfully!",
+    "error": "Failed to book session",
+    "noAvailableSlots": "No available slots for this date",
+    "selectDifferentDate": "Please select a different date"
+  },
+
+  "addSession": {
+    "title": "Add Session",
+    "selectClient": "Select Client",
+    "selectExternalClient": "Or enter external client",
+    "externalClientName": "Client Name",
+    "externalClientEmail": "Client Email (optional)",
+    "date": "Date",
+    "time": "Time",
+    "notes": "Notes",
+    "notesPlaceholder": "Session notes...",
+    "create": "Create Session",
+    "creating": "Creating...",
+    "success": "Session created successfully",
+    "error": "Failed to create session"
+  },
+
+  "cancelSession": {
+    "title": "Cancel Session",
+    "confirm": "Are you sure you want to cancel this session?",
+    "reason": "Cancellation Reason",
+    "reasonPlaceholder": "Optional reason for cancellation...",
+    "cancel": "Cancel Session",
+    "cancelling": "Cancelling...",
+    "success": "Session cancelled",
+    "error": "Failed to cancel session",
+    "refundNote": "Any payments will be refunded according to your cancellation policy."
+  },
+
+  "status": {
+    "scheduled": "Scheduled",
+    "confirmed": "Confirmed",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "noShow": "No Show",
+    "pending": "Pending",
+    "inProgress": "In Progress"
+  },
+
+  "time": {
+    "minutes": "{{count}} min",
+    "hours": "{{count}} hr",
+    "hoursMinutes": "{{hours}} hr {{minutes}} min"
+  },
+
+  "empty": {
+    "noSessions": "No sessions yet",
+    "noSessionsDesc": "Your sessions will appear here once you start booking",
+    "noRequests": "No booking requests",
+    "noRequestsDesc": "Requests from clients will appear here"
+  }
+}

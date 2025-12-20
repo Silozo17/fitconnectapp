@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
@@ -39,6 +40,7 @@ interface Session {
 
 const ClientSessions = () => {
   const { user } = useAuth();
+  const { t } = useTranslation('booking');
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [clientProfileId, setClientProfileId] = useState<string | null>(null);
@@ -135,7 +137,12 @@ const ClientSessions = () => {
       completed: "secondary",
       cancelled: "destructive",
     };
-    return <Badge variant={variants[status] || "outline"}>{status}</Badge>;
+    const statusLabels: Record<string, string> = {
+      scheduled: t('status.scheduled'),
+      completed: t('status.completed'),
+      cancelled: t('status.cancelled'),
+    };
+    return <Badge variant={variants[status] || "outline"}>{statusLabels[status] || status}</Badge>;
   };
 
   const SessionCard = ({ session }: { session: Session }) => {
@@ -171,7 +178,7 @@ const ClientSessions = () => {
             <div className="flex items-center gap-2 text-muted-foreground">
               <Clock className="w-4 h-4" />
               <span>
-                {format(new Date(session.scheduled_at), "p")} ({session.duration_minutes} min)
+                {format(new Date(session.scheduled_at), "p")} ({t('sessions.minutes', { count: session.duration_minutes })})
               </span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
@@ -179,7 +186,7 @@ const ClientSessions = () => {
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-2">
                     <Video className="w-4 h-4" />
-                    <span>Online Session</span>
+                    <span>{t('sessions.online')}</span>
                   </div>
                   {session.video_meeting_url && session.status === "scheduled" && (
                     <a
@@ -189,14 +196,14 @@ const ClientSessions = () => {
                       className="flex items-center gap-1 text-xs text-primary hover:underline"
                     >
                       <ExternalLink className="h-3 w-3" />
-                      Join
+                      {t('sessions.joinSession')}
                     </a>
                   )}
                 </div>
               ) : (
                 <>
                   <MapPin className="w-4 h-4" />
-                  <span>{session.location || "In Person"}</span>
+                  <span>{session.location || t('sessions.inPerson')}</span>
                 </>
               )}
             </div>
@@ -209,13 +216,13 @@ const ClientSessions = () => {
               onClick={handleWriteReview}
             >
               <Star className="w-4 h-4 mr-2" />
-              Write Review
+              {t('clientSessions.leaveReview')}
             </Button>
           )}
           {isCompleted && hasReviewed && (
             <p className="text-xs text-muted-foreground text-center mt-4 flex items-center justify-center gap-1">
               <Check className="w-3 h-3" />
-              Review submitted
+              {t('clientSessions.reviewSubmitted')}
             </p>
           )}
         </CardContent>
@@ -234,13 +241,13 @@ const ClientSessions = () => {
 
   return (
     <ClientDashboardLayout
-      title="Sessions"
-      description="View and manage your coaching sessions"
+      title={t('clientSessions.title')}
+      description={t('clientSessions.description')}
     >
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Sessions</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t('clientSessions.title')}</h1>
         <p className="text-muted-foreground">
-          Manage your coaching sessions
+          {t('clientSessions.description')}
         </p>
       </div>
 
@@ -252,16 +259,16 @@ const ClientSessions = () => {
         <Tabs defaultValue="upcoming" className="space-y-4">
           <TabsList>
             <TabsTrigger value="upcoming">
-              Upcoming ({upcomingSessions.length})
+              {t('clientSessions.upcoming')} ({upcomingSessions.length})
             </TabsTrigger>
             <TabsTrigger value="past">
-              Past ({pastSessions.length})
+              {t('clientSessions.past')} ({pastSessions.length})
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="upcoming">
             {upcomingSessions.length === 0 ? (
-              <EmptyState message="No upcoming sessions scheduled" />
+              <EmptyState message={t('clientSessions.noUpcoming')} />
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {upcomingSessions.map((session) => (
@@ -273,7 +280,7 @@ const ClientSessions = () => {
 
           <TabsContent value="past">
             {pastSessions.length === 0 ? (
-              <EmptyState message="No past sessions" />
+              <EmptyState message={t('clientSessions.noPast')} />
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {pastSessions.map((session) => (

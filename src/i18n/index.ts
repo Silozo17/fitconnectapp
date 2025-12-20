@@ -48,10 +48,12 @@ import enCommon from './locales/en/common.json';
 import enLanding from './locales/en/landing.json';
 import enDashboard from './locales/en/dashboard.json';
 import enSettings from './locales/en/settings.json';
+import enBooking from './locales/en/booking.json';
 import plCommon from './locales/pl/common.json';
 import plLanding from './locales/pl/landing.json';
 import plDashboard from './locales/pl/dashboard.json';
 import plSettings from './locales/pl/settings.json';
+import plBooking from './locales/pl/booking.json';
 
 // Production-visible languages (what users see in production)
 export const SUPPORTED_LANGUAGES = [
@@ -106,12 +108,14 @@ const resources = {
     landing: enLanding,
     dashboard: enDashboard,
     settings: enSettings,
+    booking: enBooking,
   },
   pl: {
     common: plCommon,
     landing: plLanding,
     dashboard: plDashboard,
     settings: plSettings,
+    booking: plBooking,
   },
 };
 
@@ -158,7 +162,7 @@ i18nInstance.init({
   fallbackLng: DEFAULT_LANGUAGE,
   supportedLngs: getWhitelistedLanguages(),
   defaultNS: 'common',
-  ns: ['common', 'landing', 'dashboard', 'settings'],
+  ns: ['common', 'landing', 'dashboard', 'settings', 'booking'],
   
   // Detection config (only used if detector is added)
   detection: detectionOptions,
