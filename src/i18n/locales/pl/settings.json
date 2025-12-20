@@ -1,0 +1,319 @@
+{
+  "title": "Ustawienia",
+  "description": "Zarządzaj ustawieniami swojego konta i preferencjami",
+  "saveChanges": "Zapisz zmiany",
+  "saving": "Zapisywanie...",
+  "profileUpdated": "Profil zaktualizowany pomyślnie",
+  "settingsSaved": "Ustawienia zapisane pomyślnie",
+  "failedToSave": "Nie udało się zapisać zmian",
+
+  "tabs": {
+    "profile": "Profil",
+    "marketplace": "Moja strona w marketplace",
+    "services": "Usługi i cennik",
+    "invoice": "Ustawienia faktur",
+    "verification": "Weryfikacja",
+    "integrations": "Integracje",
+    "subscription": "Subskrypcja",
+    "notifications": "Powiadomienia",
+    "preferences": "Preferencje",
+    "security": "Bezpieczeństwo",
+    "account": "Konto",
+    "health": "Informacje zdrowotne",
+    "general": "Ogólne",
+    "branding": "Marka",
+    "plans": "Plany",
+    "features": "Funkcje"
+  },
+
+  "profile": {
+    "title": "Profil",
+    "personalInfo": "Dane osobowe",
+    "personalInfoDesc": "Edytuj swoje imię, nazwę użytkownika i zdjęcie profilowe w Moim profilu",
+    "myProfile": "Mój profil",
+    "displayName": "Nazwa wyświetlana",
+    "displayNamePlaceholder": "Twoja nazwa wyświetlana",
+    "username": "Nazwa użytkownika",
+    "usernamePlaceholder": "twoja_nazwa",
+    "usernameAvailable": "Nazwa użytkownika jest dostępna",
+    "usernameTaken": "Ta nazwa użytkownika jest już zajęta",
+    "usernameMinLength": "Nazwa użytkownika musi mieć co najmniej 3 znaki",
+    "usernameMaxLength": "Nazwa użytkownika może mieć maksymalnie 30 znaków",
+    "usernameCopied": "Nazwa użytkownika skopiowana!",
+    "bio": "O mnie",
+    "bioPlaceholder": "Opowiedz klientom o sobie...",
+    "location": "Lokalizacja",
+    "locationPlaceholder": "np. Warszawa, Polska",
+    "gymAffiliation": "Afiliacja siłowni",
+    "gymAffiliationPlaceholder": "np. Zdrofit, CityFit",
+    "experienceYears": "Lata doświadczenia",
+    "hourlyRate": "Stawka godzinowa",
+    "currency": "Waluta",
+    "coachTypes": "Typy trenera",
+    "sessionTypes": "Typy sesji",
+    "onlineAvailable": "Sesje online",
+    "inPersonAvailable": "Sesje osobiste",
+    "profileImage": "Zdjęcie profilowe",
+    "cardImage": "Zdjęcie karty"
+  },
+
+  "avatar": {
+    "title": "Twój awatar",
+    "description": "Wybierz awatar, który będzie Cię reprezentować na rankingach i w całej platformie"
+  },
+
+  "bodyMetrics": {
+    "title": "Wymiary ciała",
+    "description": "Twoje aktualne pomiary",
+    "weight": "Waga (kg)",
+    "height": "Wzrost (cm)"
+  },
+
+  "fitnessGoals": {
+    "title": "Cele fitness",
+    "description": "Wybierz swoje cele fitness (możesz wybrać kilka)"
+  },
+
+  "health": {
+    "dietary": {
+      "title": "Ograniczenia dietetyczne",
+      "description": "Wszelkie preferencje lub ograniczenia dietetyczne",
+      "placeholder": "Dodaj ograniczenie dietetyczne..."
+    },
+    "allergies": {
+      "title": "Alergie",
+      "description": "Alergie pokarmowe lub środowiskowe, o których Twój trener powinien wiedzieć",
+      "placeholder": "Dodaj alergię...",
+      "coachNotice": "Twój trener zobaczy te informacje"
+    },
+    "medical": {
+      "title": "Schorzenia",
+      "description": "Wszelkie schorzenia, które mogą wpływać na Twój trening",
+      "placeholder": "Dodaj schorzenie...",
+      "notice": "Udostępnij wszelkie schorzenia, które mogą wpływać na Twój trening"
+    }
+  },
+
+  "leaderboard": {
+    "title": "Ustawienia rankingu",
+    "description": "Kontroluj, jak wyświetlasz się na publicznych rankingach"
+  },
+
+  "preferences": {
+    "title": "Preferencje",
+    "language": "Język",
+    "languageDescription": "Wybierz preferowany język",
+    "currency": "Waluta",
+    "currencyDescription": "Wybierz preferowaną walutę do wyświetlania"
+  },
+
+  "notifications": {
+    "title": "Powiadomienia",
+    "description": "Skonfiguruj sposób otrzymywania powiadomień"
+  },
+
+  "integrations": {
+    "title": "Integracje",
+    "description": "Połącz usługi zewnętrzne",
+    "video": {
+      "title": "Wideokonferencje",
+      "description": "Połącz swoją platformę wideo dla sesji online"
+    },
+    "calendar": {
+      "title": "Synchronizacja kalendarza",
+      "description": "Synchronizuj swoją dostępność z zewnętrznymi kalendarzami"
+    },
+    "wearables": {
+      "title": "Urządzenia noszone",
+      "description": "Połącz trackery fitness i smartwatche"
+    },
+    "healthData": {
+      "title": "Dane zdrowotne",
+      "description": "Zobacz zsynchronizowane wskaźniki zdrowia"
+    }
+  },
+
+  "verification": {
+    "title": "Weryfikacja trenera",
+    "description": "Prześlij dokumenty, aby zweryfikować swoje kwalifikacje",
+    "status": {
+      "notSubmitted": "Nie przesłano",
+      "pending": "W trakcie przeglądu",
+      "approved": "Zweryfikowany",
+      "rejected": "Odrzucony"
+    },
+    "documents": {
+      "identity": {
+        "label": "Dowód tożsamości",
+        "description": "Paszport, prawo jazdy lub dowód osobisty"
+      },
+      "certification": {
+        "label": "Certyfikat zawodowy",
+        "description": "Certyfikat trenera personalnego, dietetyka lub coacha"
+      },
+      "insurance": {
+        "label": "Ubezpieczenie OC",
+        "description": "Ubezpieczenie od odpowiedzialności zawodowej"
+      },
+      "qualification": {
+        "label": "Kwalifikacje",
+        "description": "Odpowiednie dyplomy, certyfikaty lub kwalifikacje"
+      }
+    },
+    "uploadDocument": "Prześlij dokument",
+    "viewDocument": "Zobacz dokument",
+    "deleteDocument": "Usuń dokument",
+    "submitForReview": "Prześlij do przeglądu",
+    "resubmit": "Prześlij ponownie do przeglądu"
+  },
+
+  "security": {
+    "title": "Bezpieczeństwo",
+    "description": "Zarządzaj ustawieniami bezpieczeństwa konta",
+    "changePassword": "Zmień hasło",
+    "currentPassword": "Aktualne hasło",
+    "newPassword": "Nowe hasło",
+    "confirmPassword": "Potwierdź nowe hasło",
+    "updatePassword": "Zaktualizuj hasło",
+    "twoFactor": "Uwierzytelnianie dwuskładnikowe",
+    "twoFactorDescription": "Dodaj dodatkową warstwę bezpieczeństwa do swojego konta",
+    "enableTwoFactor": "Włącz 2FA",
+    "disableTwoFactor": "Wyłącz 2FA"
+  },
+
+  "account": {
+    "title": "Konto",
+    "signOut": "Wyloguj się",
+    "signOutDescription": "Wyloguj się z konta na tym urządzeniu",
+    "dangerZone": "Strefa niebezpieczna",
+    "deleteAccount": "Usuń konto",
+    "deleteAccountDescription": "Trwale usuń swoje konto i wszystkie powiązane dane",
+    "deleteAccountWarning": "Ta akcja jest nieodwracalna. Wszystkie Twoje dane zostaną trwale usunięte."
+  },
+
+  "subscription": {
+    "title": "Subskrypcja",
+    "description": "Zarządzaj swoją subskrypcją platformy",
+    "currentPlan": "Obecny plan",
+    "changePlan": "Zmień plan",
+    "cancelSubscription": "Anuluj subskrypcję"
+  },
+
+  "invoice": {
+    "title": "Ustawienia faktur",
+    "description": "Skonfiguruj szczegóły i branding faktur",
+    "businessName": "Nazwa firmy",
+    "businessAddress": "Adres firmy",
+    "businessEmail": "Email firmowy",
+    "businessPhone": "Telefon firmowy",
+    "vatNumber": "Numer VAT",
+    "companyRegistration": "Numer KRS",
+    "bankDetails": "Dane bankowe",
+    "defaultNotes": "Domyślne notatki na fakturze",
+    "paymentTerms": "Warunki płatności"
+  },
+
+  "admin": {
+    "platformSettings": "Ustawienia platformy",
+    "platformDescription": "Konfiguruj ustawienia i preferencje dla całej platformy",
+    
+    "general": {
+      "title": "Ustawienia ogólne",
+      "description": "Opcje konfiguracji dla całej platformy",
+      "maintenanceMode": "Tryb konserwacji",
+      "maintenanceModeDesc": "Przełącz platformę w tryb konserwacji (użytkownicy nie mają dostępu)",
+      "autoApproveCoaches": "Automatyczne zatwierdzanie trenerów",
+      "autoApproveCoachesDesc": "Automatycznie zatwierdzaj nowe rejestracje trenerów",
+      "requireVerification": "Wymagaj weryfikacji trenera",
+      "requireVerificationDesc": "Trenerzy muszą zweryfikować swoje kwalifikacje przed przyjmowaniem klientów",
+      "anonymousReviews": "Zezwalaj na anonimowe opinie",
+      "anonymousReviewsDesc": "Pozwól użytkownikom wystawiać opinie bez pokazywania ich nazwy"
+    },
+
+    "pricing": {
+      "title": "Ustawienia cenowe",
+      "description": "Skonfiguruj prowizje i limity cenowe",
+      "commissionRate": "Stawka prowizji (%)",
+      "commissionRateDesc": "Prowizja platformy od zarobków trenera",
+      "minSessionPrice": "Minimalna cena sesji",
+      "maxSessionPrice": "Maksymalna cena sesji"
+    },
+
+    "branding": {
+      "title": "Marka i social media",
+      "description": "Linki do marki platformy i mediów społecznościowych",
+      "socialLinks": "Linki do mediów społecznościowych",
+      "facebook": "URL Facebook",
+      "instagram": "URL Instagram",
+      "tiktok": "URL TikTok",
+      "twitter": "URL X (Twitter)",
+      "youtube": "URL YouTube",
+      "linkedin": "URL LinkedIn",
+      "threads": "URL Threads",
+      "contactInfo": "Informacje kontaktowe",
+      "contactEmail": "Email kontaktowy",
+      "contactPhone": "Telefon kontaktowy",
+      "contactAddress": "Adres kontaktowy",
+      "legalEmail": "Email prawny",
+      "privacyEmail": "Email ds. prywatności"
+    },
+
+    "plans": {
+      "title": "Plany subskrypcji",
+      "description": "Konfiguruj poziomy subskrypcji dla trenerów",
+      "editPlan": "Edytuj plan",
+      "planName": "Nazwa planu",
+      "price": "Cena",
+      "billingPeriod": "Okres rozliczeniowy",
+      "planDescription": "Opis",
+      "isActive": "Aktywny"
+    },
+
+    "features": {
+      "title": "Konfiguracja funkcji",
+      "description": "Konfiguruj funkcje dla każdego poziomu subskrypcji",
+      "overrides": "Nadpisania funkcji",
+      "overridesDesc": "Przyznaj poszczególnym trenerom dostęp do określonych funkcji",
+      "addOverride": "Dodaj nadpisanie",
+      "selectCoach": "Wybierz trenera",
+      "selectFeature": "Wybierz funkcję",
+      "value": "Wartość",
+      "reason": "Powód",
+      "removeOverride": "Usuń nadpisanie"
+    }
+  },
+
+  "validation": {
+    "required": "To pole jest wymagane",
+    "invalidEmail": "Proszę podać prawidłowy adres email",
+    "invalidPhone": "Proszę podać prawidłowy numer telefonu",
+    "invalidUrl": "Proszę podać prawidłowy URL",
+    "minLength": "Musi mieć co najmniej {{min}} znaków",
+    "maxLength": "Nie może mieć więcej niż {{max}} znaków",
+    "minValue": "Musi być co najmniej {{min}}",
+    "maxValue": "Nie może być więcej niż {{max}}",
+    "passwordMismatch": "Hasła nie są zgodne",
+    "invalidFormat": "Nieprawidłowy format"
+  },
+
+  "forms": {
+    "select": "Wybierz...",
+    "selectOption": "Wybierz opcję",
+    "enterValue": "Wprowadź wartość",
+    "optional": "(opcjonalne)",
+    "cancel": "Anuluj",
+    "confirm": "Potwierdź",
+    "save": "Zapisz",
+    "update": "Zaktualizuj",
+    "delete": "Usuń",
+    "edit": "Edytuj",
+    "add": "Dodaj",
+    "remove": "Usuń",
+    "upload": "Prześlij",
+    "download": "Pobierz",
+    "loading": "Ładowanie...",
+    "processing": "Przetwarzanie...",
+    "noResults": "Nie znaleziono wyników",
+    "searchPlaceholder": "Szukaj..."
+  }
+}

@@ -47,9 +47,11 @@ import { I18N_FEATURE_FLAGS } from './feature-flags';
 import enCommon from './locales/en/common.json';
 import enLanding from './locales/en/landing.json';
 import enDashboard from './locales/en/dashboard.json';
+import enSettings from './locales/en/settings.json';
 import plCommon from './locales/pl/common.json';
 import plLanding from './locales/pl/landing.json';
 import plDashboard from './locales/pl/dashboard.json';
+import plSettings from './locales/pl/settings.json';
 
 // Production-visible languages (what users see in production)
 export const SUPPORTED_LANGUAGES = [
@@ -103,11 +105,13 @@ const resources = {
     common: enCommon,
     landing: enLanding,
     dashboard: enDashboard,
+    settings: enSettings,
   },
   pl: {
     common: plCommon,
     landing: plLanding,
     dashboard: plDashboard,
+    settings: plSettings,
   },
 };
 
@@ -154,7 +158,7 @@ i18nInstance.init({
   fallbackLng: DEFAULT_LANGUAGE,
   supportedLngs: getWhitelistedLanguages(),
   defaultNS: 'common',
-  ns: ['common', 'landing', 'dashboard'],
+  ns: ['common', 'landing', 'dashboard', 'settings'],
   
   // Detection config (only used if detector is added)
   detection: detectionOptions,
