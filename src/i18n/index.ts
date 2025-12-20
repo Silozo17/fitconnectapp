@@ -3,17 +3,17 @@
  * INTERNATIONALIZATION (i18n) CONFIGURATION
  * ============================================================================
  * 
- * STATUS: PRODUCTION READY - English & Polish fully supported
+ * STATUS: English production-ready, Polish in development
  * 
  * This i18n system is fully configured and actively used throughout the
  * application. All user-facing strings use the t('key') pattern.
  * 
  * SUPPORTED LANGUAGES:
- * - English (en) - Primary language, UK market
- * - Polish (pl) - Fully translated
+ * - English (en) - Primary language, UK market (PRODUCTION)
+ * - Polish (pl) - In development (DEV ONLY)
  * 
  * CURRENT FEATURES:
- * 1. Multi-language support (English & Polish)
+ * 1. Multi-language support (English production, Polish dev)
  * 2. Browser auto-translation disabled (see index.html: translate="no")
  * 3. Language selector available to all users
  * 4. Browser language detection available via feature flag
@@ -29,7 +29,7 @@
  * @see src/hooks/useTranslation.ts - Custom hook wrapper
  * @see src/components/shared/LanguageSelector.tsx - Language picker
  * @see src/i18n/locales/en/ - English translation files
- * @see src/i18n/locales/pl/ - Polish translation files
+ * @see src/i18n/locales/pl/ - Polish translation files (dev only)
  * ============================================================================
  */
 
@@ -67,11 +67,12 @@ import plGamification from './locales/pl/gamification.json';
 // Production-visible languages (what users see in production)
 export const SUPPORTED_LANGUAGES = [
   { code: 'en', name: 'English', nativeName: 'English' },
-  { code: 'pl', name: 'Polish', nativeName: 'Polski' },
 ] as const;
 
 // Dev-only languages (for testing new languages before production)
-export const DEV_LANGUAGES = [] as const;
+export const DEV_LANGUAGES = [
+  { code: 'pl', name: 'Polish', nativeName: 'Polski' },
+] as const;
 
 // Combined type for all language codes
 export type LanguageCode = 'en' | 'pl';
