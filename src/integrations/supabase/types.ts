@@ -4079,6 +4079,36 @@ export type Database = {
         }
         Relationships: []
       }
+      oauth_temp_tokens: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          oauth_token: string
+          oauth_token_secret: string
+          provider: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          oauth_token: string
+          oauth_token_secret: string
+          provider: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          oauth_token?: string
+          oauth_token_secret?: string
+          provider?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       plan_assignments: {
         Row: {
           assigned_at: string
@@ -5126,6 +5156,7 @@ export type Database = {
           refresh_token: string | null
           scopes: string[] | null
           token_expires_at: string | null
+          token_secret: string | null
           updated_at: string | null
         }
         Insert: {
@@ -5140,6 +5171,7 @@ export type Database = {
           refresh_token?: string | null
           scopes?: string[] | null
           token_expires_at?: string | null
+          token_secret?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -5154,6 +5186,7 @@ export type Database = {
           refresh_token?: string | null
           scopes?: string[] | null
           token_expires_at?: string | null
+          token_secret?: string | null
           updated_at?: string | null
         }
         Relationships: [
