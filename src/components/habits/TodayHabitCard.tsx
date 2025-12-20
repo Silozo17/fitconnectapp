@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Check, Flame, Undo2, Salad, Dumbbell, Moon, Flower2, Pill, Droplet, Watch, ShieldCheck } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,48 +25,8 @@ const getCategoryIcon = (iconName: string, className: string = "h-6 w-6") => {
   return icons[iconName] || <Check className={className} />;
 };
 
-const getVerificationBadge = (verificationType: string | undefined, wearableType: string | null) => {
-  if (verificationType === 'wearable_auto') {
-    return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger>
-            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/30 text-xs gap-1">
-              <ShieldCheck className="h-3 w-3" />
-              Verified
-            </Badge>
-          </TooltipTrigger>
-          <TooltipContent>Auto-verified by wearable device</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    );
-  }
-  if (verificationType === 'coach_verified') {
-    return (
-      <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/30 text-xs">
-        Coach Verified
-      </Badge>
-    );
-  }
-  if (wearableType) {
-    return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger>
-            <Badge variant="outline" className="bg-muted text-muted-foreground text-xs gap-1">
-              <Watch className="h-3 w-3" />
-              Auto-track
-            </Badge>
-          </TooltipTrigger>
-          <TooltipContent>This habit will auto-complete from your wearable data</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    );
-  }
-  return null;
-};
-
 const TodayHabitCard = ({ habit }: TodayHabitCardProps) => {
+  const { t } = useTranslation("client");
   const [isAnimating, setIsAnimating] = useState(false);
   const logHabit = useLogHabit();
   const unlogHabit = useUnlogHabit();
@@ -73,6 +34,47 @@ const TodayHabitCard = ({ habit }: TodayHabitCardProps) => {
   const category = getHabitCategory(habit.category);
   const isCompleted = !!habit.todayLog;
   const currentStreak = habit.streak?.current_streak || 0;
+  
+  const getVerificationBadge = (verificationType: string | undefined, wearableType: string | null) => {
+    if (verificationType === 'wearable_auto') {
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/30 text-xs gap-1">
+                <ShieldCheck className="h-3 w-3" />
+                {t("habits.verification.verified")}
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>{t("habits.verification.autoVerifiedByWearable")}</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    }
+    if (verificationType === 'coach_verified') {
+      return (
+        <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/30 text-xs">
+          {t("habits.verification.coachVerified")}
+        </Badge>
+      );
+    }
+    if (wearableType) {
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <Badge variant="outline" className="bg-muted text-muted-foreground text-xs gap-1">
+                <Watch className="h-3 w-3" />
+                {t("habits.verification.autoTrack")}
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>{t("habits.verification.autoCompleteFromWearable")}</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    }
+    return null;
+  };
   
   const handleToggle = async () => {
     if (isCompleted && habit.todayLog) {
@@ -134,11 +136,11 @@ const TodayHabitCard = ({ habit }: TodayHabitCardProps) => {
             )}
             <div className="flex items-center gap-2 mt-1 flex-wrap">
               <span className={cn("text-xs", category.color)}>
-                {category.label}
+                {t(`habits.categories.${category.label.toLowerCase()}`)}
               </span>
               {habit.target_count > 1 && (
                 <span className="text-xs text-muted-foreground">
-                  • {habit.target_count}x daily
+                  • {t("habits.xDaily", { count: habit.target_count })}
                 </span>
               )}
               {getVerificationBadge(habit.todayLog?.verification_type, habit.wearable_target_type)}

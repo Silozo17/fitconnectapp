@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ClientProgress, ProgressMeasurements } from '@/hooks/useClientProgress';
@@ -10,6 +11,8 @@ interface ProgressChartProps {
 }
 
 export const ProgressChart = ({ data, type }: ProgressChartProps) => {
+  const { t } = useTranslation("client");
+  
   const chartData = useMemo(() => {
     return data.map((entry) => {
       const measurements = entry.measurements as ProgressMeasurements | null;
@@ -32,17 +35,21 @@ export const ProgressChart = ({ data, type }: ProgressChartProps) => {
     });
   }, [data, type]);
 
+  const getTitle = () => {
+    if (type === 'bodyFat') return `${t("progress.bodyFatPercent")} ${t("progress.trend")}`;
+    if (type === 'measurements') return `${t("progress.bodyMeasurements")} ${t("progress.trend")}`;
+    return `${t("progress.weight")} ${t("progress.trend")}`;
+  };
+
   if (chartData.length < 2) {
     return (
       <Card className="bg-card border-border">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg capitalize">
-            {type === 'bodyFat' ? 'Body Fat %' : type} Trend
-          </CardTitle>
+          <CardTitle className="text-lg">{getTitle()}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[200px] flex items-center justify-center text-muted-foreground">
-            Need at least 2 entries to show trend
+            {t("progress.needTwoEntries")}
           </div>
         </CardContent>
       </Card>
@@ -67,7 +74,7 @@ export const ProgressChart = ({ data, type }: ProgressChartProps) => {
           <Line
             type="monotone"
             dataKey="weight"
-            name="Weight (kg)"
+            name={`${t("progress.weight")} (${t("progress.units.kg")})`}
             stroke="hsl(var(--primary))"
             strokeWidth={2}
             dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2 }}
@@ -94,7 +101,7 @@ export const ProgressChart = ({ data, type }: ProgressChartProps) => {
           <Line
             type="monotone"
             dataKey="bodyFat"
-            name="Body Fat %"
+            name={t("progress.bodyFatPercent")}
             stroke="#eab308"
             strokeWidth={2}
             dot={{ fill: '#eab308', strokeWidth: 2 }}
@@ -118,11 +125,11 @@ export const ProgressChart = ({ data, type }: ProgressChartProps) => {
           labelStyle={{ color: 'hsl(var(--foreground))' }}
         />
         <Legend />
-        <Line type="monotone" dataKey="chest" name="Chest" stroke="#ef4444" strokeWidth={2} dot={{ fill: '#ef4444' }} />
-        <Line type="monotone" dataKey="waist" name="Waist" stroke="#f59e0b" strokeWidth={2} dot={{ fill: '#f59e0b' }} />
-        <Line type="monotone" dataKey="hips" name="Hips" stroke="#22c55e" strokeWidth={2} dot={{ fill: '#22c55e' }} />
-        <Line type="monotone" dataKey="biceps" name="Biceps" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6' }} />
-        <Line type="monotone" dataKey="thighs" name="Thighs" stroke="#a855f7" strokeWidth={2} dot={{ fill: '#a855f7' }} />
+        <Line type="monotone" dataKey="chest" name={t("progress.fields.chest")} stroke="#ef4444" strokeWidth={2} dot={{ fill: '#ef4444' }} />
+        <Line type="monotone" dataKey="waist" name={t("progress.fields.waist")} stroke="#f59e0b" strokeWidth={2} dot={{ fill: '#f59e0b' }} />
+        <Line type="monotone" dataKey="hips" name={t("progress.fields.hips")} stroke="#22c55e" strokeWidth={2} dot={{ fill: '#22c55e' }} />
+        <Line type="monotone" dataKey="biceps" name={t("progress.fields.biceps")} stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6' }} />
+        <Line type="monotone" dataKey="thighs" name={t("progress.fields.thighs")} stroke="#a855f7" strokeWidth={2} dot={{ fill: '#a855f7' }} />
       </LineChart>
     );
   };
@@ -130,9 +137,7 @@ export const ProgressChart = ({ data, type }: ProgressChartProps) => {
   return (
     <Card className="bg-card border-border">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg capitalize">
-          {type === 'bodyFat' ? 'Body Fat %' : type === 'measurements' ? 'Body Measurements' : 'Weight'} Trend
-        </CardTitle>
+        <CardTitle className="text-lg">{getTitle()}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-[250px]">
