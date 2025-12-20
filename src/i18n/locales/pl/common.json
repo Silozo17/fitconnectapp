@@ -1,0 +1,95 @@
+{
+  "app": {
+    "name": "FitConnect",
+    "tagline": "Znajdź swojego idealnego trenera fitness"
+  },
+  "common": {
+    "loading": "Ładowanie...",
+    "save": "Zapisz",
+    "cancel": "Anuluj",
+    "delete": "Usuń",
+    "edit": "Edytuj",
+    "create": "Utwórz",
+    "update": "Aktualizuj",
+    "submit": "Wyślij",
+    "confirm": "Potwierdź",
+    "back": "Wstecz",
+    "next": "Dalej",
+    "close": "Zamknij",
+    "search": "Szukaj",
+    "filter": "Filtruj",
+    "sort": "Sortuj",
+    "view": "Zobacz",
+    "download": "Pobierz",
+    "upload": "Prześlij",
+    "share": "Udostępnij",
+    "copy": "Kopiuj",
+    "refresh": "Odśwież",
+    "retry": "Ponów"
+  },
+  "auth": {
+    "signIn": "Zaloguj się",
+    "signUp": "Zarejestruj się",
+    "signOut": "Wyloguj się",
+    "email": "Email",
+    "password": "Hasło",
+    "forgotPassword": "Zapomniałeś hasła?",
+    "resetPassword": "Zresetuj hasło",
+    "confirmPassword": "Potwierdź hasło"
+  },
+  "navigation": {
+    "home": "Strona główna",
+    "coaches": "Trenerzy",
+    "dashboard": "Panel",
+    "messages": "Wiadomości",
+    "settings": "Ustawienia",
+    "profile": "Profil"
+  },
+  "coach": {
+    "viewProfile": "Zobacz profil",
+    "bookSession": "Zarezerwuj sesję",
+    "hourlyRate": "Stawka godzinowa",
+    "experience": "Doświadczenie",
+    "specializations": "Specjalizacje",
+    "availability": "Dostępność",
+    "reviews": "Opinie",
+    "rating": "Ocena",
+    "verified": "Zweryfikowany",
+    "online": "Online"
+  },
+  "client": {
+    "myCoaches": "Moi trenerzy",
+    "mySessions": "Moje sesje",
+    "myPlans": "Moje plany",
+    "progress": "Postępy"
+  },
+  "session": {
+    "upcoming": "Nadchodzące",
+    "past": "Poprzednie",
+    "book": "Zarezerwuj sesję",
+    "cancel": "Anuluj sesję",
+    "reschedule": "Przełóż sesję"
+  },
+  "currency": {
+    "gbp": "Funt brytyjski",
+    "usd": "Dolar amerykański",
+    "eur": "Euro",
+    "pln": "Złoty polski",
+    "symbol": "£"
+  },
+  "time": {
+    "today": "Dzisiaj",
+    "tomorrow": "Jutro",
+    "yesterday": "Wczoraj",
+    "thisWeek": "Ten tydzień",
+    "thisMonth": "Ten miesiąc"
+  },
+  "status": {
+    "success": "Sukces",
+    "error": "Błąd",
+    "warning": "Ostrzeżenie",
+    "pending": "Oczekujące",
+    "inactive": "Nieaktywne",
+    "info": "Informacja"
+  }
+}
