@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,6 +17,8 @@ interface UnsavedChangesDialogProps {
 }
 
 export function UnsavedChangesDialog({ open, onStay, onLeave }: UnsavedChangesDialogProps) {
+  const { t } = useTranslation();
+
   if (!open) {
     return null;
   }
@@ -24,21 +27,20 @@ export function UnsavedChangesDialog({ open, onStay, onLeave }: UnsavedChangesDi
     <AlertDialog open={true}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+          <AlertDialogTitle>{t('unsavedChanges.title')}</AlertDialogTitle>
           <AlertDialogDescription>
-            You have unsaved changes that will be lost if you leave this page.
-            Are you sure you want to continue?
+            {t('unsavedChanges.description')}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel onClick={onStay}>
-            Stay on Page
+            {t('unsavedChanges.stayOnPage')}
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={onLeave}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            Leave Without Saving
+            {t('unsavedChanges.leaveWithoutSaving')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -24,6 +25,7 @@ interface DeleteAccountModalProps {
 }
 
 export const DeleteAccountModal = ({ open, onOpenChange, role }: DeleteAccountModalProps) => {
+  const { t } = useTranslation();
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const [confirmText, setConfirmText] = useState("");
@@ -44,17 +46,16 @@ export const DeleteAccountModal = ({ open, onOpenChange, role }: DeleteAccountMo
         throw new Error(data.error);
       }
 
-      toast.success("Account deleted successfully", {
-        description: "Your account and all associated data have been permanently removed.",
+      toast.success(t('deleteAccount.success'), {
+        description: t('deleteAccount.successDescription'),
       });
 
-      // Sign out and redirect
       await signOut();
       navigate("/");
     } catch (error: unknown) {
       logError("DeleteAccountModal", error);
-      toast.error("Failed to delete account", {
-        description: getErrorMessage(error, "Please try again or contact support."),
+      toast.error(t('deleteAccount.error'), {
+        description: getErrorMessage(error, t('deleteAccount.errorDescription')),
       });
     } finally {
       setIsDeleting(false);
@@ -70,23 +71,23 @@ export const DeleteAccountModal = ({ open, onOpenChange, role }: DeleteAccountMo
 
   const deletedItems = role === "client" 
     ? [
-        "Your profile and personal information",
-        "All sessions and bookings",
-        "Messages and conversations",
-        "Progress data and photos",
-        "Connections with coaches",
-        "Subscriptions and packages",
-        "Achievements and badges",
+        t('deleteAccount.clientItems.profile'),
+        t('deleteAccount.clientItems.sessions'),
+        t('deleteAccount.clientItems.messages'),
+        t('deleteAccount.clientItems.progress'),
+        t('deleteAccount.clientItems.connections'),
+        t('deleteAccount.clientItems.subscriptions'),
+        t('deleteAccount.clientItems.achievements'),
       ]
     : [
-        "Your coach profile and business information",
-        "All client relationships",
-        "Sessions and bookings",
-        "Messages and conversations",
-        "Training and nutrition plans",
-        "Packages and subscription plans",
-        "Reviews and ratings",
-        "Verification documents",
+        t('deleteAccount.coachItems.profile'),
+        t('deleteAccount.coachItems.clients'),
+        t('deleteAccount.coachItems.sessions'),
+        t('deleteAccount.coachItems.messages'),
+        t('deleteAccount.coachItems.plans'),
+        t('deleteAccount.coachItems.packages'),
+        t('deleteAccount.coachItems.reviews'),
+        t('deleteAccount.coachItems.documents'),
       ];
 
   return (
@@ -95,14 +96,11 @@ export const DeleteAccountModal = ({ open, onOpenChange, role }: DeleteAccountMo
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2 text-destructive">
             <AlertTriangle className="w-5 h-5" />
-            Delete Your Account?
+            {t('deleteAccount.title')}
           </AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div className="space-y-4">
-              <p>
-                This action is <strong>permanent</strong> and cannot be reversed. 
-                The following will be deleted:
-              </p>
+              <p dangerouslySetInnerHTML={{ __html: t('deleteAccount.permanent') }} />
               <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
                 {deletedItems.map((item, index) => (
                   <li key={index}>{item}</li>
@@ -113,14 +111,12 @@ export const DeleteAccountModal = ({ open, onOpenChange, role }: DeleteAccountMo
         </AlertDialogHeader>
 
         <div className="space-y-2 py-4">
-          <Label htmlFor="confirm-delete">
-            Type <span className="font-mono font-bold text-destructive">DELETE</span> to confirm:
-          </Label>
+          <Label htmlFor="confirm-delete" dangerouslySetInnerHTML={{ __html: t('deleteAccount.confirmLabel') }} />
           <Input
             id="confirm-delete"
             value={confirmText}
             onChange={(e) => setConfirmText(e.target.value.toUpperCase())}
-            placeholder="Type DELETE"
+            placeholder={t('deleteAccount.confirmPlaceholder')}
             disabled={isDeleting}
             className="font-mono"
           />
@@ -132,7 +128,7 @@ export const DeleteAccountModal = ({ open, onOpenChange, role }: DeleteAccountMo
             onClick={handleClose}
             disabled={isDeleting}
           >
-            Cancel
+            {t('deleteAccount.cancel')}
           </Button>
           <Button
             variant="destructive"
@@ -140,7 +136,7 @@ export const DeleteAccountModal = ({ open, onOpenChange, role }: DeleteAccountMo
             disabled={!isConfirmed || isDeleting}
           >
             {isDeleting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            Delete My Account
+            {t('deleteAccount.deleteButton')}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
