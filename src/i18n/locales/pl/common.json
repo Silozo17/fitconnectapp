@@ -784,6 +784,7 @@
     "video": {
       "title": "Wideokonferencje",
       "subtitle": "Połącz platformy wideo dla sesji online",
+      "autoCreateMeetings": "Automatycznie twórz spotkania dla sesji",
       "zoom": {
         "name": "Zoom",
         "description": "Prowadź i dołączaj do sesji wideo przez Zoom"
@@ -800,7 +801,22 @@
     "calendar": {
       "title": "Synchronizacja kalendarza",
       "subtitle": "Synchronizuj harmonogram z zewnętrznymi kalendarzami",
+      "syncToCalendar": "Synchronizuj sesje z kalendarzem",
+      "twoWaySync": "Synchronizacja dwukierunkowa",
+      "twoWaySyncDescription": "Twoje wydarzenia z kalendarza będą synchronizowane, aby blokować dostępność do rezerwacji.",
       "googleCalendar": {
+        "name": "Kalendarz Google",
+        "description": "Synchronizuj sesje z Kalendarzem Google"
+      },
+      "outlook": {
+        "name": "Kalendarz Outlook",
+        "description": "Synchronizuj z Microsoft Outlook"
+      },
+      "appleCalendar": {
+        "name": "Kalendarz Apple",
+        "description": "Synchronizuj z Kalendarzem Apple przez CalDAV"
+      }
+    },
         "name": "Kalendarz Google",
         "description": "Synchronizuj sesje z Kalendarzem Google"
       },

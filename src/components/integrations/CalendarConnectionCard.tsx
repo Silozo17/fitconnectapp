@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +34,8 @@ const CalendarConnectionCard = ({
   isConnecting,
   supportsTwoWaySync = false,
 }: CalendarConnectionCardProps) => {
+  const { t } = useTranslation('common');
+
   return (
     <Card className="bg-card/50 border-border/50 hover:border-primary/30 transition-all">
       <CardHeader className="pb-3">
@@ -52,13 +55,13 @@ const CalendarConnectionCard = ({
                 {isConnected && (
                   <Badge variant="outline" className="text-xs text-primary border-primary/30">
                     <Check className="w-3 h-3 mr-1" />
-                    Connected
+                    {t('integrations.connected')}
                   </Badge>
                 )}
                 {supportsTwoWaySync && (
                   <Badge variant="secondary" className="text-xs">
                     <RefreshCw className="w-3 h-3 mr-1" />
-                    2-Way Sync
+                    {t('integrations.calendar.twoWaySync')}
                   </Badge>
                 )}
               </div>
@@ -72,7 +75,7 @@ const CalendarConnectionCard = ({
             {onToggleSync && (
               <div className="flex items-center justify-between">
                 <Label htmlFor={`sync-${provider}`} className="text-sm">
-                  Sync sessions to calendar
+                  {t('integrations.calendar.syncToCalendar')}
                 </Label>
                 <Switch
                   id={`sync-${provider}`}
@@ -83,7 +86,7 @@ const CalendarConnectionCard = ({
             )}
             {supportsTwoWaySync && (
               <p className="text-xs text-muted-foreground">
-                Your calendar events will be synced to block availability for booking.
+                {t('integrations.calendar.twoWaySyncDescription')}
               </p>
             )}
             <Button
@@ -93,7 +96,7 @@ const CalendarConnectionCard = ({
               className="w-full text-destructive hover:text-destructive"
             >
               <Unlink className="w-4 h-4 mr-2" />
-              Disconnect
+              {t('integrations.disconnect')}
             </Button>
           </div>
         ) : (
@@ -107,7 +110,7 @@ const CalendarConnectionCard = ({
             ) : (
               <Calendar className="w-4 h-4 mr-2" />
             )}
-            Connect {providerName}
+            {t('integrations.connect')} {providerName}
           </Button>
         )}
       </CardContent>

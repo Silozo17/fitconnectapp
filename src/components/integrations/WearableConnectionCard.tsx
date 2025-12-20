@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +37,8 @@ const WearableConnectionCard = ({
   comingSoon,
   comingSoonDescription,
 }: WearableConnectionCardProps) => {
+  const { t } = useTranslation('common');
+
   return (
     <Card className={cn(
       "bg-card/50 border-border/50 hover:border-primary/30 transition-all min-h-[160px]",
@@ -56,12 +59,12 @@ const WearableConnectionCard = ({
             {comingSoon ? (
               <Badge variant="secondary" className="mt-1 text-[10px] px-1.5 py-0">
                 <Clock className="w-2.5 h-2.5 mr-0.5" />
-                Soon
+                {t('common.comingSoon')}
               </Badge>
             ) : isConnected ? (
               <Badge variant="outline" className="mt-1 text-[10px] px-1.5 py-0 text-primary border-primary/30">
                 <Check className="w-2.5 h-2.5 mr-0.5" />
-                Connected
+                {t('integrations.connected')}
               </Badge>
             ) : null}
           </div>
@@ -71,17 +74,17 @@ const WearableConnectionCard = ({
         {comingSoon ? (
           <div className="space-y-2">
             <p className="text-xs text-muted-foreground line-clamp-2">
-              {comingSoonDescription || "This integration is coming soon."}
+              {comingSoonDescription || t('common.comingSoon')}
             </p>
             <Button disabled className="w-full" variant="secondary" size="sm">
-              Coming Soon
+              {t('common.comingSoon')}
             </Button>
           </div>
         ) : isConnected ? (
           <div className="space-y-2">
             {lastSynced && (
               <p className="text-xs text-muted-foreground truncate">
-                Synced: {format(new Date(lastSynced), "MMM d, h:mm a")}
+                {t('integrations.lastSync', { time: format(new Date(lastSynced), "MMM d, h:mm a") })}
               </p>
             )}
             <div className="flex gap-2">
@@ -97,7 +100,7 @@ const WearableConnectionCard = ({
                 ) : (
                   <RefreshCw className="w-3 h-3 mr-1" />
                 )}
-                Sync
+                {t('integrations.syncNow')}
               </Button>
               <Button
                 size="sm"
@@ -119,7 +122,7 @@ const WearableConnectionCard = ({
             {isConnecting ? (
               <Loader2 className="w-3 h-3 animate-spin mr-1" />
             ) : null}
-            Connect
+            {t('integrations.connect')}
           </Button>
         )}
       </CardContent>

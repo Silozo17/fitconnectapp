@@ -1,4 +1,5 @@
 import { Activity, Heart, Watch, CheckCircle, ExternalLink, Loader2, Apple, Clock } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useWearables, WearableProvider } from "@/hooks/useWearables";
@@ -10,44 +11,45 @@ interface WearablesOnboardingStepProps {
 
 const WEARABLE_PROVIDERS: {
   id: WearableProvider;
-  name: string;
-  description: string;
+  nameKey: string;
+  descriptionKey: string;
   icon: React.ReactNode;
   color: string;
   comingSoon?: boolean;
 }[] = [
   {
     id: "apple_health",
-    name: "Apple Health",
-    description: "Requires FitConnect iOS app",
+    nameKey: "integrations.wearables.appleHealth.name",
+    descriptionKey: "integrations.wearables.appleHealth.description",
     icon: <Apple className="w-5 h-5 text-white" />,
     color: "bg-gradient-to-br from-pink-500 to-red-500",
     comingSoon: true,
   },
   {
     id: "google_fit",
-    name: "Google Fit",
-    description: "Steps, heart rate, workouts",
+    nameKey: "integrations.wearables.googleFit.name",
+    descriptionKey: "integrations.wearables.googleFit.description",
     icon: <Activity className="w-5 h-5 text-white" />,
     color: "bg-gradient-to-br from-blue-500 to-green-500",
   },
   {
     id: "fitbit",
-    name: "Fitbit",
-    description: "Activity, sleep, heart rate",
+    nameKey: "integrations.wearables.fitbit.name",
+    descriptionKey: "integrations.wearables.fitbit.description",
     icon: <Heart className="w-5 h-5 text-white" />,
     color: "bg-gradient-to-br from-teal-500 to-cyan-500",
   },
   {
     id: "garmin",
-    name: "Garmin",
-    description: "Workouts, GPS, performance",
+    nameKey: "integrations.wearables.garmin.name",
+    descriptionKey: "integrations.wearables.garmin.description",
     icon: <Watch className="w-5 h-5 text-white" />,
     color: "bg-gradient-to-br from-blue-600 to-blue-800",
   },
 ];
 
 const WearablesOnboardingStep = ({ onComplete, onSkip }: WearablesOnboardingStepProps) => {
+  const { t } = useTranslation('common');
   const {
     connections,
     isLoading,
@@ -62,9 +64,9 @@ const WearablesOnboardingStep = ({ onComplete, onSkip }: WearablesOnboardingStep
       <div className="space-y-6">
         <div>
           <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-            Connect your devices
+            {t('onboardingIntegrations.wearables.title')}
           </h2>
-          <p className="text-muted-foreground">Loading your connections...</p>
+          <p className="text-muted-foreground">{t('loading.default')}</p>
         </div>
         <div className="flex justify-center py-8">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -77,10 +79,10 @@ const WearablesOnboardingStep = ({ onComplete, onSkip }: WearablesOnboardingStep
     <div className="space-y-6">
       <div>
         <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-          Connect your fitness devices
+          {t('onboardingIntegrations.wearables.title')}
         </h2>
         <p className="text-muted-foreground">
-          Sync your health data to track progress and share insights with your coaches.
+          {t('onboardingIntegrations.wearables.subtitle')}
         </p>
       </div>
 
@@ -108,25 +110,25 @@ const WearablesOnboardingStep = ({ onComplete, onSkip }: WearablesOnboardingStep
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <p className="font-medium text-foreground">{provider.name}</p>
+                      <p className="font-medium text-foreground">{t(provider.nameKey)}</p>
                       {provider.comingSoon && (
                         <Badge variant="secondary" className="text-xs">
                           <Clock className="w-3 h-3 mr-1" />
-                          Soon
+                          {t('common.comingSoon')}
                         </Badge>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground">{provider.description}</p>
+                    <p className="text-sm text-muted-foreground">{t(provider.descriptionKey)}</p>
                   </div>
                 </div>
                 {provider.comingSoon ? (
                   <Button variant="outline" size="sm" disabled>
-                    Coming Soon
+                    {t('common.comingSoon')}
                   </Button>
                 ) : isConnected ? (
                   <div className="flex items-center gap-2 text-green-600">
                     <CheckCircle className="w-5 h-5" />
-                    <span className="text-sm font-medium">Connected</span>
+                    <span className="text-sm font-medium">{t('integrations.connected')}</span>
                   </div>
                 ) : (
                   <Button
@@ -144,7 +146,7 @@ const WearablesOnboardingStep = ({ onComplete, onSkip }: WearablesOnboardingStep
                     ) : (
                       <>
                         <ExternalLink className="w-4 h-4 mr-1" />
-                        Connect
+                        {t('integrations.connect')}
                       </>
                     )}
                   </Button>
@@ -157,8 +159,7 @@ const WearablesOnboardingStep = ({ onComplete, onSkip }: WearablesOnboardingStep
 
       <div className="p-4 rounded-xl bg-secondary">
         <p className="text-sm text-muted-foreground">
-          <strong className="text-foreground">Why connect?</strong> Your health data helps coaches create better, 
-          personalized plans. All data is private and only shared with coaches you choose to work with.
+          <strong className="text-foreground">{t('integrations.wearables.syncHealthData')}</strong>
         </p>
       </div>
 
@@ -166,7 +167,7 @@ const WearablesOnboardingStep = ({ onComplete, onSkip }: WearablesOnboardingStep
         onClick={hasAnyConnection ? onComplete : onSkip} 
         className="w-full bg-primary text-primary-foreground"
       >
-        {hasAnyConnection ? "Continue" : "Skip for now"}
+        {hasAnyConnection ? t('onboardingIntegrations.wearables.continueButton') : t('onboardingIntegrations.wearables.skipButton')}
       </Button>
     </div>
   );
