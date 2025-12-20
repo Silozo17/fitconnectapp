@@ -80,5 +80,13 @@
     "yesterday": "Yesterday",
     "thisWeek": "This Week",
     "thisMonth": "This Month"
+  },
+  "status": {
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "pending": "Pending",
+    "inactive": "Inactive",
+    "info": "Info"
   }
 }

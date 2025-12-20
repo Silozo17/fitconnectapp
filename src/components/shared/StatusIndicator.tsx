@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { cn } from "@/lib/utils";
 import { CheckCircle, XCircle, Clock, AlertCircle, MinusCircle, LucideIcon } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 type StatusType = 
   | "success" 
@@ -10,60 +11,53 @@ type StatusType =
   | "inactive" 
   | "info";
 
-interface StatusIndicatorProps {
-  status: StatusType;
-  label?: string;
-  showIcon?: boolean;
-  showDot?: boolean;
-  size?: "sm" | "default" | "lg";
-  className?: string;
-}
-
-const statusConfig: Record<StatusType, { 
-  icon: LucideIcon; 
-  label: string;
+interface StatusConfig {
+  icon: LucideIcon;
+  labelKey: string;
   dotClass: string;
   textClass: string;
   bgClass: string;
-}> = {
+}
+
+const statusConfig: Record<StatusType, StatusConfig> = {
   success: {
     icon: CheckCircle,
-    label: "Success",
+    labelKey: "status.success",
     dotClass: "bg-emerald-500",
     textClass: "text-emerald-600 dark:text-emerald-400",
     bgClass: "bg-emerald-500/10",
   },
   error: {
     icon: XCircle,
-    label: "Error",
+    labelKey: "status.error",
     dotClass: "bg-destructive",
     textClass: "text-destructive",
     bgClass: "bg-destructive/10",
   },
   warning: {
     icon: AlertCircle,
-    label: "Warning",
+    labelKey: "status.warning",
     dotClass: "bg-amber-500",
     textClass: "text-amber-600 dark:text-amber-400",
     bgClass: "bg-amber-500/10",
   },
   pending: {
     icon: Clock,
-    label: "Pending",
+    labelKey: "status.pending",
     dotClass: "bg-blue-500",
     textClass: "text-blue-600 dark:text-blue-400",
     bgClass: "bg-blue-500/10",
   },
   inactive: {
     icon: MinusCircle,
-    label: "Inactive",
+    labelKey: "status.inactive",
     dotClass: "bg-muted-foreground",
     textClass: "text-muted-foreground",
     bgClass: "bg-muted",
   },
   info: {
     icon: AlertCircle,
-    label: "Info",
+    labelKey: "status.info",
     dotClass: "bg-primary",
     textClass: "text-primary",
     bgClass: "bg-primary/10",
@@ -91,6 +85,15 @@ const sizeClasses = {
   },
 };
 
+interface StatusIndicatorProps {
+  status: StatusType;
+  label?: string;
+  showIcon?: boolean;
+  showDot?: boolean;
+  size?: "sm" | "default" | "lg";
+  className?: string;
+}
+
 export const StatusIndicator = memo(({ 
   status, 
   label,
@@ -99,10 +102,11 @@ export const StatusIndicator = memo(({
   size = "default",
   className
 }: StatusIndicatorProps) => {
+  const { t } = useTranslation();
   const config = statusConfig[status];
   const sizes = sizeClasses[size];
   const Icon = config.icon;
-  const displayLabel = label || config.label;
+  const displayLabel = label || t(config.labelKey);
 
   return (
     <span 
@@ -140,6 +144,7 @@ interface StatusBadgeProps {
 }
 
 export const StatusBadge = memo(({ status, className }: StatusBadgeProps) => {
+  const { t } = useTranslation();
   const config = statusConfig[status];
   
   return (
@@ -150,7 +155,7 @@ export const StatusBadge = memo(({ status, className }: StatusBadgeProps) => {
         className
       )}
       role="status"
-      aria-label={config.label}
+      aria-label={t(config.labelKey)}
     />
   );
 });
