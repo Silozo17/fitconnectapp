@@ -25,11 +25,10 @@ export function useCoachAdminStats(coachId: string | undefined, userId: string |
       }
 
       // Fetch platform subscription
-      // @ts-expect-error - Supabase type instantiation too deep
       const subResult = await supabase
         .from("platform_subscriptions")
         .select("status, tier")
-        .eq("user_id", userId)
+        .eq("coach_id", coachId)
         .order("created_at", { ascending: false })
         .limit(1);
       
