@@ -498,5 +498,142 @@
     "weeks": "tygodni",
     "month": "miesiąc",
     "months": "miesięcy"
+  },
+  "modals": {
+    "confirm": {
+      "title": "Potwierdź akcję",
+      "description": "Czy na pewno chcesz kontynuować?",
+      "confirmButton": "Tak, potwierdź",
+      "cancelButton": "Anuluj"
+    },
+    "delete": {
+      "title": "Usuń element",
+      "description": "Czy na pewno chcesz to usunąć? Tej akcji nie można cofnąć.",
+      "confirmButton": "Tak, usuń",
+      "cancelButton": "Anuluj"
+    },
+    "unsavedChanges": {
+      "title": "Niezapisane zmiany",
+      "description": "Masz niezapisane zmiany. Czy na pewno chcesz wyjść?",
+      "confirmButton": "Wyjdź",
+      "cancelButton": "Zostań"
+    }
+  },
+  "notifications": {
+    "title": "Powiadomienia",
+    "markAllRead": "Oznacz wszystkie jako przeczytane",
+    "clearAll": "Wyczyść wszystkie",
+    "noNotifications": "Brak powiadomień",
+    "viewAll": "Zobacz wszystkie powiadomienia",
+    "preferences": "Preferencje powiadomień",
+    "types": {
+      "booking": "Rezerwacja",
+      "message": "Wiadomość",
+      "payment": "Płatność",
+      "reminder": "Przypomnienie",
+      "achievement": "Osiągnięcie",
+      "system": "System"
+    },
+    "settings": {
+      "email": "Powiadomienia e-mail",
+      "push": "Powiadomienia push",
+      "sms": "Powiadomienia SMS"
+    }
+  },
+  "reviews": {
+    "title": "Recenzje",
+    "writeReview": "Napisz recenzję",
+    "editReview": "Edytuj recenzję",
+    "deleteReview": "Usuń recenzję",
+    "yourRating": "Twoja ocena",
+    "yourReview": "Twoja recenzja",
+    "placeholder": "Podziel się swoim doświadczeniem...",
+    "submitReview": "Prześlij recenzję",
+    "updateReview": "Zaktualizuj recenzję",
+    "averageRating": "Średnia ocena",
+    "basedOn": "Na podstawie {{count}} recenzji",
+    "helpful": "Pomocne",
+    "report": "Zgłoś",
+    "verified": "Zweryfikowane",
+    "response": "Odpowiedź trenera",
+    "noReviews": "Brak recenzji",
+    "beFirst": "Bądź pierwszym, który zostawi recenzję"
+  },
+  "sharing": {
+    "title": "Udostępnij",
+    "copyLink": "Kopiuj link",
+    "linkCopied": "Link skopiowany do schowka!",
+    "shareOn": "Udostępnij na",
+    "facebook": "Facebook",
+    "twitter": "Twitter",
+    "linkedin": "LinkedIn",
+    "whatsapp": "WhatsApp",
+    "email": "E-mail"
+  },
+  "feedback": {
+    "title": "Opinia",
+    "subtitle": "Pomóż nam się poprawić",
+    "placeholder": "Powiedz nam, co myślisz...",
+    "category": "Kategoria",
+    "categories": {
+      "bug": "Zgłoszenie błędu",
+      "feature": "Prośba o funkcję",
+      "improvement": "Ulepszenie",
+      "other": "Inne"
+    },
+    "submit": "Prześlij opinię",
+    "success": "Dziękujemy za opinię!",
+    "error": "Nie udało się przesłać opinii. Spróbuj ponownie."
+  },
+  "upload": {
+    "dragDrop": "Przeciągnij i upuść pliki tutaj",
+    "or": "lub",
+    "browse": "Przeglądaj pliki",
+    "maxSize": "Maksymalny rozmiar pliku: {{size}}",
+    "allowedTypes": "Dozwolone typy plików: {{types}}",
+    "uploading": "Przesyłanie...",
+    "uploadComplete": "Przesyłanie zakończone",
+    "uploadFailed": "Przesyłanie nie powiodło się",
+    "remove": "Usuń",
+    "preview": "Podgląd"
+  },
+  "empty": {
+    "title": "Jeszcze nic tu nie ma",
+    "description": "Obecnie nie ma danych do wyświetlenia.",
+    "action": "Rozpocznij"
+  },
+  "accessibility": {
+    "skipToContent": "Przejdź do głównej treści",
+    "openMenu": "Otwórz menu",
+    "closeMenu": "Zamknij menu",
+    "toggleTheme": "Przełącz motyw",
+    "expandSection": "Rozwiń sekcję",
+    "collapseSection": "Zwiń sekcję",
+    "loading": "Ładowanie treści",
+    "required": "Pole wymagane"
+  },
+  "layout": {
+    "sidebar": {
+      "collapse": "Zwiń panel boczny",
+      "expand": "Rozwiń panel boczny"
+    },
+    "header": {
+      "search": "Szukaj...",
+      "notifications": "Powiadomienia",
+      "profile": "Profil",
+      "settings": "Ustawienia",
+      "help": "Pomoc",
+      "logout": "Wyloguj się"
+    },
+    "footer": {
+      "copyright": "© {{year}} FitConnect. Wszelkie prawa zastrzeżone.",
+      "privacy": "Polityka prywatności",
+      "terms": "Regulamin",
+      "contact": "Kontakt",
+      "about": "O nas",
+      "blog": "Blog",
+      "help": "Centrum pomocy",
+      "careers": "Kariera"
+    }
   }
 }
