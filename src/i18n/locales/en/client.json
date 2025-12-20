@@ -1,0 +1,334 @@
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back",
+    "overview": "Overview",
+    "quickActions": "Quick Actions",
+    "recentActivity": "Recent Activity",
+    "noActivity": "No recent activity"
+  },
+  "challenges": {
+    "title": "Challenges",
+    "subtitle": "Join challenges and compete with others",
+    "active": "Active",
+    "upcoming": "Upcoming",
+    "completed": "Completed",
+    "joined": "Joined",
+    "join": "Join Challenge",
+    "leave": "Leave Challenge",
+    "progress": "Progress",
+    "participants": "Participants",
+    "daysLeft": "days left",
+    "startsIn": "Starts in",
+    "endsIn": "Ends in",
+    "goal": "Goal",
+    "currentProgress": "Current Progress",
+    "leaderboard": "Leaderboard",
+    "rewards": "Rewards",
+    "xpReward": "XP Reward",
+    "badgeReward": "Badge Reward",
+    "avatarReward": "Avatar Reward",
+    "empty": {
+      "title": "No challenges available",
+      "description": "Check back later for new challenges to join",
+      "active": "You haven't joined any challenges yet",
+      "completed": "You haven't completed any challenges yet"
+    },
+    "status": {
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "notStarted": "Not Started",
+      "failed": "Failed"
+    }
+  },
+  "progress": {
+    "title": "My Progress",
+    "subtitle": "Track your fitness journey",
+    "logProgress": "Log Progress",
+    "addEntry": "Add Entry",
+    "weight": "Weight",
+    "bodyFat": "Body Fat",
+    "measurements": "Measurements",
+    "photos": "Progress Photos",
+    "notes": "Notes",
+    "recordedAt": "Recorded at",
+    "dataSource": "Data Source",
+    "manual": "Manual Entry",
+    "wearable": "Wearable Device",
+    "trends": "Trends",
+    "history": "History",
+    "noData": "No progress data yet",
+    "startTracking": "Start tracking your progress",
+    "fields": {
+      "chest": "Chest",
+      "waist": "Waist",
+      "hips": "Hips",
+      "biceps": "Biceps",
+      "thighs": "Thighs",
+      "calves": "Calves",
+      "shoulders": "Shoulders",
+      "neck": "Neck"
+    },
+    "units": {
+      "kg": "kg",
+      "lbs": "lbs",
+      "cm": "cm",
+      "inches": "inches",
+      "percent": "%"
+    }
+  },
+  "habits": {
+    "title": "Habits",
+    "subtitle": "Build healthy routines",
+    "addHabit": "Add Habit",
+    "editHabit": "Edit Habit",
+    "deleteHabit": "Delete Habit",
+    "today": "Today",
+    "thisWeek": "This Week",
+    "streak": "Streak",
+    "currentStreak": "Current Streak",
+    "longestStreak": "Longest Streak",
+    "completionRate": "Completion Rate",
+    "markComplete": "Mark Complete",
+    "markIncomplete": "Mark Incomplete",
+    "completed": "Completed",
+    "pending": "Pending",
+    "missed": "Missed",
+    "categories": {
+      "nutrition": "Nutrition",
+      "exercise": "Exercise",
+      "sleep": "Sleep",
+      "hydration": "Hydration",
+      "mindfulness": "Mindfulness",
+      "other": "Other"
+    },
+    "frequency": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "specificDays": "Specific Days"
+    },
+    "empty": {
+      "title": "No habits yet",
+      "description": "Your coach will assign habits for you to track"
+    }
+  },
+  "achievements": {
+    "title": "Achievements",
+    "subtitle": "Celebrate your milestones",
+    "badges": "Badges",
+    "avatars": "Avatars",
+    "xp": "Experience Points",
+    "level": "Level",
+    "currentLevel": "Current Level",
+    "nextLevel": "Next Level",
+    "xpToNext": "XP to next level",
+    "totalXp": "Total XP",
+    "earned": "Earned",
+    "locked": "Locked",
+    "unlocked": "Unlocked",
+    "featured": "Featured",
+    "setFeatured": "Set as Featured",
+    "rarity": {
+      "common": "Common",
+      "uncommon": "Uncommon",
+      "rare": "Rare",
+      "epic": "Epic",
+      "legendary": "Legendary"
+    },
+    "empty": {
+      "title": "No achievements yet",
+      "description": "Complete challenges and habits to earn badges"
+    }
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "subtitle": "See how you rank against others",
+    "rank": "Rank",
+    "user": "User",
+    "score": "Score",
+    "change": "Change",
+    "you": "You",
+    "top10": "Top 10",
+    "myRank": "My Rank",
+    "filters": {
+      "all": "All Time",
+      "weekly": "This Week",
+      "monthly": "This Month",
+      "country": "My Country",
+      "county": "My County",
+      "city": "My City"
+    },
+    "empty": {
+      "title": "No leaderboard data",
+      "description": "Join challenges to appear on the leaderboard"
+    }
+  },
+  "plans": {
+    "title": "My Plans",
+    "subtitle": "Your training and nutrition programmes",
+    "workout": "Workout Plans",
+    "nutrition": "Nutrition Plans",
+    "active": "Active",
+    "completed": "Completed",
+    "upcoming": "Upcoming",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "duration": "Duration",
+    "weeks": "weeks",
+    "days": "days",
+    "exercises": "Exercises",
+    "meals": "Meals",
+    "calories": "Calories",
+    "macros": "Macros",
+    "protein": "Protein",
+    "carbs": "Carbs",
+    "fat": "Fat",
+    "viewPlan": "View Plan",
+    "downloadPlan": "Download Plan",
+    "logWorkout": "Log Workout",
+    "logMeal": "Log Meal",
+    "empty": {
+      "title": "No plans assigned",
+      "description": "Your coach will create personalised plans for you"
+    }
+  },
+  "marketplace": {
+    "title": "Marketplace",
+    "subtitle": "Discover products and bundles",
+    "products": "Products",
+    "bundles": "Bundles",
+    "featured": "Featured",
+    "allProducts": "All Products",
+    "categories": "Categories",
+    "price": "Price",
+    "free": "Free",
+    "purchased": "Purchased",
+    "purchase": "Purchase",
+    "download": "Download",
+    "preview": "Preview",
+    "addToCart": "Add to Cart",
+    "buyNow": "Buy Now",
+    "includes": "Includes",
+    "description": "Description",
+    "reviews": "Reviews",
+    "rating": "Rating",
+    "by": "by",
+    "empty": {
+      "title": "No products available",
+      "description": "Check back later for new products"
+    }
+  },
+  "grocery": {
+    "title": "Grocery List",
+    "subtitle": "Shopping made easy",
+    "addItem": "Add Item",
+    "clearCompleted": "Clear Completed",
+    "clearAll": "Clear All",
+    "item": "Item",
+    "quantity": "Quantity",
+    "unit": "Unit",
+    "category": "Category",
+    "checked": "Checked",
+    "unchecked": "Unchecked",
+    "generateFromPlan": "Generate from Meal Plan",
+    "sendToStore": "Send to Store",
+    "stores": {
+      "tesco": "Tesco",
+      "sainsburys": "Sainsbury's",
+      "asda": "Asda",
+      "morrisons": "Morrisons"
+    },
+    "empty": {
+      "title": "Your grocery list is empty",
+      "description": "Add items or generate from your meal plan"
+    }
+  },
+  "tools": {
+    "title": "Tools",
+    "subtitle": "Fitness calculators and utilities",
+    "bmiCalculator": "BMI Calculator",
+    "calorieCalculator": "Calorie Calculator",
+    "macroCalculator": "Macro Calculator",
+    "oneRepMax": "One Rep Max Calculator",
+    "bodyFatCalculator": "Body Fat Calculator",
+    "waterIntake": "Water Intake Calculator",
+    "heartRateZones": "Heart Rate Zones",
+    "calculate": "Calculate",
+    "result": "Result",
+    "yourResult": "Your Result"
+  },
+  "favourites": {
+    "title": "Favourites",
+    "subtitle": "Your saved coaches and content",
+    "coaches": "Favourite Coaches",
+    "exercises": "Favourite Exercises",
+    "recipes": "Favourite Recipes",
+    "remove": "Remove from Favourites",
+    "add": "Add to Favourites",
+    "empty": {
+      "title": "No favourites yet",
+      "description": "Save coaches and content you like"
+    }
+  },
+  "connections": {
+    "title": "Connections",
+    "subtitle": "Manage your wearable devices",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "sync": "Sync Now",
+    "lastSync": "Last Synced",
+    "devices": {
+      "appleHealth": "Apple Health",
+      "googleFit": "Google Fit",
+      "fitbit": "Fitbit",
+      "garmin": "Garmin",
+      "strava": "Strava"
+    },
+    "empty": {
+      "title": "No devices connected",
+      "description": "Connect your wearable to sync health data"
+    }
+  },
+  "library": {
+    "title": "Library",
+    "subtitle": "Your purchased content",
+    "ebooks": "E-Books",
+    "programs": "Programs",
+    "videos": "Videos",
+    "all": "All",
+    "download": "Download",
+    "view": "View",
+    "purchased": "Purchased",
+    "empty": {
+      "title": "Your library is empty",
+      "description": "Purchase products to see them here"
+    }
+  },
+  "messages": {
+    "title": "Messages",
+    "subtitle": "Chat with your coaches",
+    "newMessage": "New Message",
+    "typeMessage": "Type a message...",
+    "send": "Send",
+    "attachFile": "Attach File",
+    "noMessages": "No messages yet",
+    "online": "Online",
+    "offline": "Offline",
+    "lastSeen": "Last seen"
+  },
+  "bookings": {
+    "title": "My Bookings",
+    "subtitle": "Upcoming and past sessions",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "cancelled": "Cancelled",
+    "reschedule": "Reschedule",
+    "cancel": "Cancel Booking",
+    "join": "Join Session",
+    "noUpcoming": "No upcoming bookings",
+    "noPast": "No past bookings",
+    "bookNew": "Book a Session"
+  }
+}

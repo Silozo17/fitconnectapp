@@ -1,0 +1,334 @@
+{
+  "dashboard": {
+    "title": "Panel",
+    "welcome": "Witaj ponownie",
+    "overview": "Przegląd",
+    "quickActions": "Szybkie akcje",
+    "recentActivity": "Ostatnia aktywność",
+    "noActivity": "Brak ostatniej aktywności"
+  },
+  "challenges": {
+    "title": "Wyzwania",
+    "subtitle": "Dołącz do wyzwań i rywalizuj z innymi",
+    "active": "Aktywne",
+    "upcoming": "Nadchodzące",
+    "completed": "Ukończone",
+    "joined": "Dołączono",
+    "join": "Dołącz do wyzwania",
+    "leave": "Opuść wyzwanie",
+    "progress": "Postęp",
+    "participants": "Uczestnicy",
+    "daysLeft": "dni pozostało",
+    "startsIn": "Rozpoczyna się za",
+    "endsIn": "Kończy się za",
+    "goal": "Cel",
+    "currentProgress": "Aktualny postęp",
+    "leaderboard": "Ranking",
+    "rewards": "Nagrody",
+    "xpReward": "Nagroda XP",
+    "badgeReward": "Nagroda odznaki",
+    "avatarReward": "Nagroda awatara",
+    "empty": {
+      "title": "Brak dostępnych wyzwań",
+      "description": "Sprawdź później, czy pojawiły się nowe wyzwania",
+      "active": "Nie dołączyłeś jeszcze do żadnego wyzwania",
+      "completed": "Nie ukończyłeś jeszcze żadnego wyzwania"
+    },
+    "status": {
+      "inProgress": "W trakcie",
+      "completed": "Ukończone",
+      "notStarted": "Nie rozpoczęte",
+      "failed": "Nieudane"
+    }
+  },
+  "progress": {
+    "title": "Mój postęp",
+    "subtitle": "Śledź swoją drogę fitness",
+    "logProgress": "Zapisz postęp",
+    "addEntry": "Dodaj wpis",
+    "weight": "Waga",
+    "bodyFat": "Tkanka tłuszczowa",
+    "measurements": "Pomiary",
+    "photos": "Zdjęcia postępu",
+    "notes": "Notatki",
+    "recordedAt": "Zapisano",
+    "dataSource": "Źródło danych",
+    "manual": "Wpis ręczny",
+    "wearable": "Urządzenie noszone",
+    "trends": "Trendy",
+    "history": "Historia",
+    "noData": "Brak danych o postępie",
+    "startTracking": "Zacznij śledzić swój postęp",
+    "fields": {
+      "chest": "Klatka piersiowa",
+      "waist": "Talia",
+      "hips": "Biodra",
+      "biceps": "Bicepsy",
+      "thighs": "Uda",
+      "calves": "Łydki",
+      "shoulders": "Ramiona",
+      "neck": "Szyja"
+    },
+    "units": {
+      "kg": "kg",
+      "lbs": "lbs",
+      "cm": "cm",
+      "inches": "cale",
+      "percent": "%"
+    }
+  },
+  "habits": {
+    "title": "Nawyki",
+    "subtitle": "Buduj zdrowe rutyny",
+    "addHabit": "Dodaj nawyk",
+    "editHabit": "Edytuj nawyk",
+    "deleteHabit": "Usuń nawyk",
+    "today": "Dzisiaj",
+    "thisWeek": "Ten tydzień",
+    "streak": "Seria",
+    "currentStreak": "Aktualna seria",
+    "longestStreak": "Najdłuższa seria",
+    "completionRate": "Wskaźnik ukończenia",
+    "markComplete": "Oznacz jako ukończone",
+    "markIncomplete": "Oznacz jako nieukończone",
+    "completed": "Ukończone",
+    "pending": "Oczekujące",
+    "missed": "Pominięte",
+    "categories": {
+      "nutrition": "Odżywianie",
+      "exercise": "Ćwiczenia",
+      "sleep": "Sen",
+      "hydration": "Nawodnienie",
+      "mindfulness": "Uważność",
+      "other": "Inne"
+    },
+    "frequency": {
+      "daily": "Codziennie",
+      "weekly": "Co tydzień",
+      "specificDays": "Określone dni"
+    },
+    "empty": {
+      "title": "Brak nawyków",
+      "description": "Twój trener przypisze nawyki do śledzenia"
+    }
+  },
+  "achievements": {
+    "title": "Osiągnięcia",
+    "subtitle": "Świętuj swoje kamienie milowe",
+    "badges": "Odznaki",
+    "avatars": "Awatary",
+    "xp": "Punkty doświadczenia",
+    "level": "Poziom",
+    "currentLevel": "Aktualny poziom",
+    "nextLevel": "Następny poziom",
+    "xpToNext": "XP do następnego poziomu",
+    "totalXp": "Całkowite XP",
+    "earned": "Zdobyte",
+    "locked": "Zablokowane",
+    "unlocked": "Odblokowane",
+    "featured": "Wyróżnione",
+    "setFeatured": "Ustaw jako wyróżnione",
+    "rarity": {
+      "common": "Pospolite",
+      "uncommon": "Niepospolite",
+      "rare": "Rzadkie",
+      "epic": "Epickie",
+      "legendary": "Legendarne"
+    },
+    "empty": {
+      "title": "Brak osiągnięć",
+      "description": "Ukończ wyzwania i nawyki, aby zdobyć odznaki"
+    }
+  },
+  "leaderboard": {
+    "title": "Ranking",
+    "subtitle": "Zobacz swoją pozycję w rankingu",
+    "rank": "Pozycja",
+    "user": "Użytkownik",
+    "score": "Wynik",
+    "change": "Zmiana",
+    "you": "Ty",
+    "top10": "Top 10",
+    "myRank": "Moja pozycja",
+    "filters": {
+      "all": "Cały czas",
+      "weekly": "Ten tydzień",
+      "monthly": "Ten miesiąc",
+      "country": "Mój kraj",
+      "county": "Moje województwo",
+      "city": "Moje miasto"
+    },
+    "empty": {
+      "title": "Brak danych rankingu",
+      "description": "Dołącz do wyzwań, aby pojawić się w rankingu"
+    }
+  },
+  "plans": {
+    "title": "Moje plany",
+    "subtitle": "Twoje programy treningowe i żywieniowe",
+    "workout": "Plany treningowe",
+    "nutrition": "Plany żywieniowe",
+    "active": "Aktywne",
+    "completed": "Ukończone",
+    "upcoming": "Nadchodzące",
+    "startDate": "Data rozpoczęcia",
+    "endDate": "Data zakończenia",
+    "duration": "Czas trwania",
+    "weeks": "tygodni",
+    "days": "dni",
+    "exercises": "Ćwiczenia",
+    "meals": "Posiłki",
+    "calories": "Kalorie",
+    "macros": "Makroskładniki",
+    "protein": "Białko",
+    "carbs": "Węglowodany",
+    "fat": "Tłuszcz",
+    "viewPlan": "Zobacz plan",
+    "downloadPlan": "Pobierz plan",
+    "logWorkout": "Zapisz trening",
+    "logMeal": "Zapisz posiłek",
+    "empty": {
+      "title": "Brak przypisanych planów",
+      "description": "Twój trener stworzy dla Ciebie spersonalizowane plany"
+    }
+  },
+  "marketplace": {
+    "title": "Marketplace",
+    "subtitle": "Odkryj produkty i pakiety",
+    "products": "Produkty",
+    "bundles": "Pakiety",
+    "featured": "Polecane",
+    "allProducts": "Wszystkie produkty",
+    "categories": "Kategorie",
+    "price": "Cena",
+    "free": "Bezpłatne",
+    "purchased": "Zakupione",
+    "purchase": "Kup",
+    "download": "Pobierz",
+    "preview": "Podgląd",
+    "addToCart": "Dodaj do koszyka",
+    "buyNow": "Kup teraz",
+    "includes": "Zawiera",
+    "description": "Opis",
+    "reviews": "Recenzje",
+    "rating": "Ocena",
+    "by": "od",
+    "empty": {
+      "title": "Brak dostępnych produktów",
+      "description": "Sprawdź później, czy pojawiły się nowe produkty"
+    }
+  },
+  "grocery": {
+    "title": "Lista zakupów",
+    "subtitle": "Zakupy stały się proste",
+    "addItem": "Dodaj produkt",
+    "clearCompleted": "Wyczyść ukończone",
+    "clearAll": "Wyczyść wszystko",
+    "item": "Produkt",
+    "quantity": "Ilość",
+    "unit": "Jednostka",
+    "category": "Kategoria",
+    "checked": "Zaznaczone",
+    "unchecked": "Niezaznaczone",
+    "generateFromPlan": "Generuj z planu posiłków",
+    "sendToStore": "Wyślij do sklepu",
+    "stores": {
+      "tesco": "Tesco",
+      "sainsburys": "Sainsbury's",
+      "asda": "Asda",
+      "morrisons": "Morrisons"
+    },
+    "empty": {
+      "title": "Twoja lista zakupów jest pusta",
+      "description": "Dodaj produkty lub wygeneruj z planu posiłków"
+    }
+  },
+  "tools": {
+    "title": "Narzędzia",
+    "subtitle": "Kalkulatory fitness i narzędzia",
+    "bmiCalculator": "Kalkulator BMI",
+    "calorieCalculator": "Kalkulator kalorii",
+    "macroCalculator": "Kalkulator makroskładników",
+    "oneRepMax": "Kalkulator maksymalnego ciężaru",
+    "bodyFatCalculator": "Kalkulator tkanki tłuszczowej",
+    "waterIntake": "Kalkulator spożycia wody",
+    "heartRateZones": "Strefy tętna",
+    "calculate": "Oblicz",
+    "result": "Wynik",
+    "yourResult": "Twój wynik"
+  },
+  "favourites": {
+    "title": "Ulubione",
+    "subtitle": "Zapisani trenerzy i treści",
+    "coaches": "Ulubieni trenerzy",
+    "exercises": "Ulubione ćwiczenia",
+    "recipes": "Ulubione przepisy",
+    "remove": "Usuń z ulubionych",
+    "add": "Dodaj do ulubionych",
+    "empty": {
+      "title": "Brak ulubionych",
+      "description": "Zapisz trenerów i treści, które Ci się podobają"
+    }
+  },
+  "connections": {
+    "title": "Połączenia",
+    "subtitle": "Zarządzaj urządzeniami noszonymi",
+    "connected": "Połączono",
+    "disconnected": "Rozłączono",
+    "connect": "Połącz",
+    "disconnect": "Rozłącz",
+    "sync": "Synchronizuj teraz",
+    "lastSync": "Ostatnia synchronizacja",
+    "devices": {
+      "appleHealth": "Apple Health",
+      "googleFit": "Google Fit",
+      "fitbit": "Fitbit",
+      "garmin": "Garmin",
+      "strava": "Strava"
+    },
+    "empty": {
+      "title": "Brak połączonych urządzeń",
+      "description": "Połącz urządzenie noszone, aby synchronizować dane zdrowotne"
+    }
+  },
+  "library": {
+    "title": "Biblioteka",
+    "subtitle": "Zakupione treści",
+    "ebooks": "E-Booki",
+    "programs": "Programy",
+    "videos": "Filmy",
+    "all": "Wszystkie",
+    "download": "Pobierz",
+    "view": "Zobacz",
+    "purchased": "Zakupione",
+    "empty": {
+      "title": "Twoja biblioteka jest pusta",
+      "description": "Kup produkty, aby zobaczyć je tutaj"
+    }
+  },
+  "messages": {
+    "title": "Wiadomości",
+    "subtitle": "Czatuj ze swoimi trenerami",
+    "newMessage": "Nowa wiadomość",
+    "typeMessage": "Wpisz wiadomość...",
+    "send": "Wyślij",
+    "attachFile": "Załącz plik",
+    "noMessages": "Brak wiadomości",
+    "online": "Online",
+    "offline": "Offline",
+    "lastSeen": "Ostatnio widziany"
+  },
+  "bookings": {
+    "title": "Moje rezerwacje",
+    "subtitle": "Nadchodzące i przeszłe sesje",
+    "upcoming": "Nadchodzące",
+    "past": "Przeszłe",
+    "cancelled": "Anulowane",
+    "reschedule": "Przełóż",
+    "cancel": "Anuluj rezerwację",
+    "join": "Dołącz do sesji",
+    "noUpcoming": "Brak nadchodzących rezerwacji",
+    "noPast": "Brak przeszłych rezerwacji",
+    "bookNew": "Zarezerwuj sesję"
+  }
+}
