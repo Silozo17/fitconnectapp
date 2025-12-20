@@ -123,14 +123,21 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
     queryKey: ["marketplace-coaches", options],
     queryFn: async () => {
       // First, get boosted coach IDs if showing sponsored first
+      // Only include coaches with active, non-expired boosts
       let boostedCoachIds: string[] = [];
       if (showSponsoredFirst) {
+        const now = new Date().toISOString();
         const { data: boosts } = await supabase
           .from("coach_boosts")
-          .select("coach_id")
-          .eq("is_active", true);
+          .select("coach_id, boost_end_date")
+          .eq("is_active", true)
+          .eq("payment_status", "succeeded")
+          .gt("boost_end_date", now);
         
-        boostedCoachIds = (boosts || []).map(b => b.coach_id);
+        // Filter out any null end dates (shouldn't happen, but be safe)
+        boostedCoachIds = (boosts || [])
+          .filter(b => b.boost_end_date !== null)
+          .map(b => b.coach_id);
       }
 
       // Query the GDPR-safe public view with location columns
