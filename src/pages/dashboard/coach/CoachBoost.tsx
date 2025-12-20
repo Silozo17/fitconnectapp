@@ -10,8 +10,15 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { FeatureGate } from "@/components/FeatureGate";
+import { useBoostSettings } from "@/hooks/useCoachBoost";
+import { formatCurrency } from "@/lib/currency";
 
 const CoachBoost = () => {
+  const { data: settings } = useBoostSettings();
+  
+  const commissionPercent = settings ? Math.round(settings.commission_rate * 100) : 30;
+  const minFee = settings ? formatCurrency(settings.min_fee, "GBP") : "£30";
+  const maxFee = settings ? formatCurrency(settings.max_fee, "GBP") : "£100";
   return (
     <DashboardLayout>
       <FeatureGate feature="boost_marketing">
@@ -89,7 +96,7 @@ const CoachBoost = () => {
                 <AccordionItem value="item-1">
                   <AccordionTrigger>How much does Boost cost?</AccordionTrigger>
                   <AccordionContent>
-                    There's no monthly fee. You only pay when Boost brings you a NEW client. The fee is 30% of their first booking, with a minimum of £10 and maximum of £100 per client acquisition.
+                    There's no monthly fee. You only pay when Boost brings you a NEW client. The fee is {commissionPercent}% of their first session booking, with a minimum of {minFee} and maximum of {maxFee} per client acquisition.
                   </AccordionContent>
                 </AccordionItem>
 
@@ -103,7 +110,7 @@ const CoachBoost = () => {
                 <AccordionItem value="item-3">
                   <AccordionTrigger>Do I pay for repeat bookings?</AccordionTrigger>
                   <AccordionContent>
-                    No! You only pay the Boost fee on a client's FIRST booking with you. All subsequent bookings from that client are 100% yours with no additional Boost fees.
+                    No! You only pay the Boost fee on a client's FIRST session booking with you. All subsequent bookings from that client are 100% yours with no additional Boost fees.
                   </AccordionContent>
                 </AccordionItem>
 
@@ -125,6 +132,13 @@ const CoachBoost = () => {
                   <AccordionTrigger>How are boosted coaches ordered?</AccordionTrigger>
                   <AccordionContent>
                     All boosted coaches appear above non-boosted coaches in search results. Among boosted coaches, the order is randomized to give everyone fair exposure.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-7">
+                  <AccordionTrigger>Does Boost apply to package purchases or digital products?</AccordionTrigger>
+                  <AccordionContent>
+                    Boost fees only apply to individual session bookings. If a new client purchases a session package or digital product (e.g., training plans, e-books), no Boost fee is charged. Boost is designed to help you acquire clients through 1-on-1 session bookings.
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
