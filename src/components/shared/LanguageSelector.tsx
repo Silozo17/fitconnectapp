@@ -5,8 +5,6 @@ import { Globe } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { 
   SUPPORTED_LANGUAGES, 
-  DEV_LANGUAGES,
-  ALL_LANGUAGES,
   LANGUAGE_STORAGE_KEY, 
   DEFAULT_LANGUAGE, 
   type LanguageCode 
@@ -19,19 +17,11 @@ const comingSoonLanguages = [
 ];
 
 const LanguageSelector = () => {
-  const { currentLanguage, changeLanguage } = useTranslation();
-  
-  // Show dev languages only in development mode
-  const availableLanguages = import.meta.env.DEV 
-    ? ALL_LANGUAGES 
-    : SUPPORTED_LANGUAGES;
-  
-  // Dev language codes for badge display
-  const devLanguageCodes = DEV_LANGUAGES.map(l => l.code) as string[];
+  const { currentLanguage, changeLanguage, t } = useTranslation();
 
   const handleLanguageChange = (languageCode: string) => {
-    // Validate against available languages (includes Polish in dev mode)
-    const validCodes = availableLanguages.map(l => l.code) as string[];
+    // Validate against supported languages
+    const validCodes = SUPPORTED_LANGUAGES.map(l => l.code) as string[];
     if (!validCodes.includes(languageCode)) {
       console.warn(`Unsupported language: ${languageCode}, falling back to English`);
       languageCode = DEFAULT_LANGUAGE;
@@ -52,24 +42,17 @@ const LanguageSelector = () => {
     <div className="space-y-2">
       <Label className="flex items-center gap-2">
         <Globe className="w-4 h-4" />
-        Platform Language
+        {t('settings.preferences.language')}
       </Label>
       <Select value={currentLanguage} onValueChange={handleLanguageChange}>
         <SelectTrigger className="w-full max-w-xs">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {/* Available languages (includes Polish in dev mode) */}
-          {availableLanguages.map((lang) => (
+          {/* Supported languages */}
+          {SUPPORTED_LANGUAGES.map((lang) => (
             <SelectItem key={lang.code} value={lang.code}>
-              <div className="flex items-center gap-2">
-                <span>{lang.nativeName}</span>
-                {devLanguageCodes.includes(lang.code) && (
-                  <Badge variant="outline" className="text-xs px-1.5 py-0 text-amber-600 border-amber-400">
-                    Dev
-                  </Badge>
-                )}
-              </div>
+              <span>{lang.nativeName}</span>
             </SelectItem>
           ))}
           {/* Coming soon languages (disabled) */}
@@ -78,7 +61,7 @@ const LanguageSelector = () => {
               <div className="flex items-center justify-between gap-3">
                 <span>{lang.name}</span>
                 <Badge variant="secondary" className="text-xs">
-                  Coming Soon
+                  {t('common.comingSoon')}
                 </Badge>
               </div>
             </SelectItem>
@@ -86,9 +69,7 @@ const LanguageSelector = () => {
         </SelectContent>
       </Select>
       <p className="text-xs text-muted-foreground">
-        {import.meta.env.DEV 
-          ? "Dev mode: Polish available for testing" 
-          : "More languages coming soon"}
+        {t('settings.preferences.languageHint')}
       </p>
     </div>
   );

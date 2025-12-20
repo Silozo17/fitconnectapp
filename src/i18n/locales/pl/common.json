@@ -23,7 +23,8 @@
     "yes": "Tak",
     "no": "Nie",
     "or": "lub",
-    "and": "i"
+    "and": "i",
+    "comingSoon": "Wkrótce"
   },
   "actions": {
     "save": "Zapisz",
