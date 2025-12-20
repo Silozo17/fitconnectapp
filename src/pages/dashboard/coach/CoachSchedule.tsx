@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import {
   ChevronLeft,
   ChevronRight,
@@ -73,6 +74,7 @@ type DepositType = "percentage" | "fixed";
 
 const CoachSchedule = () => {
   const { user } = useAuth();
+  const { t } = useTranslation('booking');
   const queryClient = useQueryClient();
   const [coachId, setCoachId] = useState<string | null>(null);
   const [coachCurrency, setCoachCurrency] = useState<CurrencyCode>("GBP");

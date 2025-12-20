@@ -1,0 +1,248 @@
+{
+  "title": "Harmonogram",
+  "description": "Zarządzaj swoim kalendarzem, sesjami i dostępnością",
+
+  "tabs": {
+    "calendar": "Kalendarz",
+    "requests": "Prośby",
+    "sessionTypes": "Typy sesji",
+    "availability": "Dostępność",
+    "settings": "Ustawienia"
+  },
+
+  "calendar": {
+    "title": "Kalendarz",
+    "today": "Dziś",
+    "week": "Tydzień",
+    "month": "Miesiąc",
+    "previousWeek": "Poprzedni tydzień",
+    "nextWeek": "Następny tydzień",
+    "noSessions": "Brak zaplanowanych sesji",
+    "syncCalendars": "Synchronizuj kalendarze",
+    "syncing": "Synchronizowanie...",
+    "syncSuccess": "Kalendarze zsynchronizowane pomyślnie",
+    "syncError": "Nie udało się zsynchronizować kalendarzy",
+    "externalEvent": "Zewnętrzne wydarzenie",
+    "allDay": "Cały dzień"
+  },
+
+  "weekDays": {
+    "monday": "Poniedziałek",
+    "tuesday": "Wtorek",
+    "wednesday": "Środa",
+    "thursday": "Czwartek",
+    "friday": "Piątek",
+    "saturday": "Sobota",
+    "sunday": "Niedziela",
+    "mon": "Pon",
+    "tue": "Wt",
+    "wed": "Śr",
+    "thu": "Czw",
+    "fri": "Pt",
+    "sat": "Sob",
+    "sun": "Ndz"
+  },
+
+  "sessions": {
+    "title": "Sesje",
+    "upcoming": "Nadchodzące",
+    "past": "Przeszłe",
+    "cancelled": "Anulowane",
+    "noUpcoming": "Brak nadchodzących sesji",
+    "noPast": "Brak przeszłych sesji",
+    "addSession": "Dodaj sesję",
+    "editSession": "Edytuj sesję",
+    "cancelSession": "Anuluj sesję",
+    "rescheduleSession": "Przełóż",
+    "viewDetails": "Zobacz szczegóły",
+    "joinSession": "Dołącz do sesji",
+    "duration": "Czas trwania",
+    "minutes": "{{count}} min",
+    "online": "Online",
+    "inPerson": "Osobiście",
+    "hybrid": "Hybrydowo",
+    "completed": "Zakończona",
+    "scheduled": "Zaplanowana",
+    "inProgress": "W trakcie",
+    "noShow": "Nieobecność"
+  },
+
+  "requests": {
+    "title": "Prośby o rezerwację",
+    "pending": "Oczekujące",
+    "approved": "Zatwierdzone",
+    "declined": "Odrzucone",
+    "noPending": "Brak oczekujących próśb",
+    "newRequest": "Otrzymano nową prośbę o rezerwację!",
+    "approve": "Zatwierdź",
+    "decline": "Odrzuć",
+    "approveRequest": "Zatwierdź prośbę",
+    "declineRequest": "Odrzuć prośbę",
+    "requestedAt": "Data prośby",
+    "message": "Wiadomość",
+    "sessionType": "Typ sesji",
+    "requestedTime": "Wybrany termin"
+  },
+
+  "sessionTypes": {
+    "title": "Typy sesji",
+    "description": "Zdefiniuj rodzaje sesji, które oferujesz",
+    "addNew": "Dodaj typ sesji",
+    "edit": "Edytuj typ sesji",
+    "name": "Nazwa",
+    "namePlaceholder": "np. Trening personalny",
+    "sessionDescription": "Opis",
+    "descriptionPlaceholder": "Opisz, co obejmuje ta sesja...",
+    "durationLabel": "Czas trwania",
+    "price": "Cena",
+    "pricePlaceholder": "0.00",
+    "sessionMode": "Tryb sesji",
+    "allowOnline": "Zezwalaj online",
+    "allowInPerson": "Zezwalaj osobiście",
+    "active": "Aktywny",
+    "inactive": "Nieaktywny",
+    "noSessionTypes": "Brak zdefiniowanych typów sesji",
+    "createFirst": "Stwórz swój pierwszy typ sesji, aby zacząć przyjmować rezerwacje"
+  },
+
+  "payment": {
+    "title": "Ustawienia płatności",
+    "required": "Wymagana płatność",
+    "none": "Płatność niewymagana",
+    "deposit": "Wymagany zadatek",
+    "full": "Wymagana pełna płatność",
+    "depositType": "Typ zadatku",
+    "percentage": "Procent",
+    "fixed": "Stała kwota",
+    "depositValue": "Wartość zadatku",
+    "depositPercentage": "Procent zadatku",
+    "status": {
+      "notRequired": "Płatność niewymagana",
+      "pending": "Oczekuje na płatność",
+      "paid": "Opłacone",
+      "depositPaid": "Zadatek opłacony",
+      "refunded": "Zwrócone",
+      "failed": "Płatność nieudana"
+    },
+    "awaiting": "Oczekuje {{amount}}",
+    "stripeRequired": "Połącz Stripe, aby przyjmować płatności",
+    "boostWarning": "Nie można usunąć wymogu płatności - Boost wymaga co najmniej jednego typu sesji z włączoną płatnością. Najpierw wyłącz Boost, jeśli chcesz usunąć wszystkie wymagania dotyczące płatności."
+  },
+
+  "availability": {
+    "title": "Dostępność",
+    "description": "Ustaw swoje dostępne godziny dla każdego dnia",
+    "editDay": "Edytuj dostępność",
+    "startTime": "Godzina rozpoczęcia",
+    "endTime": "Godzina zakończenia",
+    "enabled": "Dostępny",
+    "disabled": "Niedostępny",
+    "noAvailability": "Nie ustawiono",
+    "copyToAll": "Kopiuj na wszystkie dni",
+    "clearAll": "Wyczyść wszystko"
+  },
+
+  "bookingSettings": {
+    "title": "Ustawienia rezerwacji",
+    "description": "Skonfiguruj sposób rezerwacji sesji przez klientów",
+    "bookingMode": "Tryb rezerwacji",
+    "directBooking": "Bezpośrednia rezerwacja",
+    "directBookingDesc": "Klienci mogą rezerwować bezpośrednio w Twoim kalendarzu",
+    "messageFirst": "Najpierw wiadomość",
+    "messageFirstDesc": "Klienci wysyłają prośbę, zatwierdzasz przed rezerwacją",
+    "buffers": "Czasy buforowe",
+    "preBookingBuffer": "Czas przed sesją",
+    "preBookingBufferDesc": "Minimalny czas wymagany przed zarezerwowaniem sesji",
+    "postBookingBuffer": "Czas po sesji",
+    "postBookingBufferDesc": "Czas buforowy po każdej sesji",
+    "defaultLocation": "Domyślna lokalizacja",
+    "defaultLocationPlaceholder": "np. Moja siłownia, ul. Fitness 123",
+    "cancellationPolicy": "Polityka anulowania",
+    "minCancellationHours": "Minimalne wyprzedzenie anulowania (godziny)",
+    "saveSettings": "Zapisz ustawienia",
+    "settingsSaved": "Ustawienia rezerwacji zapisane"
+  },
+
+  "clientSessions": {
+    "title": "Moje sesje",
+    "description": "Przeglądaj i zarządzaj swoimi sesjami coachingowymi",
+    "upcoming": "Nadchodzące",
+    "past": "Przeszłe",
+    "noUpcoming": "Brak nadchodzących sesji",
+    "noUpcomingDesc": "Zarezerwuj sesję z trenerem, aby rozpocząć",
+    "noPast": "Brak przeszłych sesji",
+    "findCoaches": "Znajdź trenerów",
+    "leaveReview": "Zostaw opinię",
+    "reviewSubmitted": "Opinia przesłana",
+    "withCoach": "z {{coach}}"
+  },
+
+  "bookSession": {
+    "title": "Rezerwuj sesję",
+    "selectDate": "Wybierz datę",
+    "selectTime": "Wybierz godzinę",
+    "selectSessionType": "Wybierz typ sesji",
+    "selectLocation": "Lokalizacja sesji",
+    "online": "Online",
+    "inPerson": "Osobiście",
+    "addMessage": "Dodaj wiadomość (opcjonalnie)",
+    "messagePlaceholder": "Jakieś notatki dla trenera...",
+    "confirm": "Potwierdź rezerwację",
+    "processing": "Przetwarzanie...",
+    "success": "Sesja zarezerwowana pomyślnie!",
+    "error": "Nie udało się zarezerwować sesji",
+    "noAvailableSlots": "Brak dostępnych terminów dla tej daty",
+    "selectDifferentDate": "Proszę wybrać inną datę"
+  },
+
+  "addSession": {
+    "title": "Dodaj sesję",
+    "selectClient": "Wybierz klienta",
+    "selectExternalClient": "Lub wprowadź zewnętrznego klienta",
+    "externalClientName": "Imię klienta",
+    "externalClientEmail": "Email klienta (opcjonalnie)",
+    "date": "Data",
+    "time": "Godzina",
+    "notes": "Notatki",
+    "notesPlaceholder": "Notatki z sesji...",
+    "create": "Utwórz sesję",
+    "creating": "Tworzenie...",
+    "success": "Sesja utworzona pomyślnie",
+    "error": "Nie udało się utworzyć sesji"
+  },
+
+  "cancelSession": {
+    "title": "Anuluj sesję",
+    "confirm": "Czy na pewno chcesz anulować tę sesję?",
+    "reason": "Powód anulowania",
+    "reasonPlaceholder": "Opcjonalny powód anulowania...",
+    "cancel": "Anuluj sesję",
+    "cancelling": "Anulowanie...",
+    "success": "Sesja anulowana",
+    "error": "Nie udało się anulować sesji",
+    "refundNote": "Wszelkie płatności zostaną zwrócone zgodnie z polityką anulowania."
+  },
+
+  "status": {
+    "scheduled": "Zaplanowana",
+    "confirmed": "Potwierdzona",
+    "completed": "Zakończona",
+    "cancelled": "Anulowana",
+    "noShow": "Nieobecność",
+    "pending": "Oczekująca",
+    "inProgress": "W trakcie"
+  },
+
+  "time": {
+    "minutes": "{{count}} min",
+    "hours": "{{count}} godz",
+    "hoursMinutes": "{{hours}} godz {{minutes}} min"
+  },
+
+  "empty": {
+    "noSessions": "Brak sesji",
+    "noSessionsDesc": "Twoje sesje pojawią się tutaj po rozpoczęciu rezerwacji",
+    "noRequests": "Brak próśb o rezerwację",
+    "noRequestsDesc": "Prośby od klientów pojawią się tutaj"
+  }
+}
