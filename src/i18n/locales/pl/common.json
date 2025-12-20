@@ -817,18 +817,6 @@
         "description": "Synchronizuj z Kalendarzem Apple przez CalDAV"
       }
     },
-        "name": "Kalendarz Google",
-        "description": "Synchronizuj sesje z Kalendarzem Google"
-      },
-      "outlook": {
-        "name": "Kalendarz Outlook",
-        "description": "Synchronizuj z Microsoft Outlook"
-      },
-      "appleCalendar": {
-        "name": "Kalendarz Apple",
-        "description": "Synchronizuj z Kalendarzem Apple przez CalDAV"
-      }
-    },
     "healthData": {
       "title": "Dane zdrowotne",
       "subtitle": "Śledź swoje metryki zdrowotne",
