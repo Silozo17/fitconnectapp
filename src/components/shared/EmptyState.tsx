@@ -1,11 +1,12 @@
 import { memo, ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface EmptyStateProps {
   icon: LucideIcon;
-  title: string;
+  title?: string;
   description?: string;
   action?: {
     label: string;
@@ -24,6 +25,11 @@ export const EmptyState = memo(({
   className,
   children 
 }: EmptyStateProps) => {
+  const { t } = useTranslation();
+  
+  const displayTitle = title || t('empty.nothingHere');
+  const displayDescription = description || t('empty.getStarted');
+
   return (
     <div className={cn(
       "flex flex-col items-center justify-center py-12 px-4 text-center animate-fade-in",
@@ -34,12 +40,12 @@ export const EmptyState = memo(({
       </div>
       
       <h3 className="text-lg font-semibold text-foreground mb-1">
-        {title}
+        {displayTitle}
       </h3>
       
-      {description && (
+      {displayDescription && (
         <p className="text-sm text-muted-foreground max-w-sm mb-4">
-          {description}
+          {displayDescription}
         </p>
       )}
       

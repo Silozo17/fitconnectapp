@@ -135,7 +135,8 @@
     "deleting": "Usuwanie...",
     "creating": "Tworzenie...",
     "preparing": "Przygotowywanie...",
-    "pleaseWait": "Proszę czekać..."
+    "pleaseWait": "Proszę czekać...",
+    "loadingPage": "Ładowanie"
   },
   "empty": {
     "noResults": "Brak wyników",
