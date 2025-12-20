@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +30,9 @@ interface CreateSubscriptionPlanModalProps {
 }
 
 const CreateSubscriptionPlanModal = ({ open, onOpenChange, editPlan }: CreateSubscriptionPlanModalProps) => {
+  const { t } = useTranslation("coach");
+  const { t: tCommon } = useTranslation("common");
+  
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -71,7 +75,7 @@ const CreateSubscriptionPlanModal = ({ open, onOpenChange, editPlan }: CreateSub
 
   const handleSubmit = async () => {
     if (!name.trim() || !price) {
-      toast.error("Please fill in all required fields");
+      toast.error(t("subscriptionPlans.fillRequired"));
       return;
     }
 
@@ -89,16 +93,16 @@ const CreateSubscriptionPlanModal = ({ open, onOpenChange, editPlan }: CreateSub
 
       if (editPlan) {
         await updatePlan.mutateAsync({ id: editPlan.id, ...planData });
-        toast.success("Plan updated successfully");
+        toast.success(t("subscriptionPlans.planUpdated"));
       } else {
         await createPlan.mutateAsync(planData);
-        toast.success("Plan created successfully");
+        toast.success(t("subscriptionPlans.planCreated"));
       }
       
       onOpenChange(false);
       resetForm();
     } catch (error) {
-      toast.error("Failed to save plan");
+      toast.error(t("subscriptionPlans.failedToSave"));
     }
   };
 
@@ -119,25 +123,27 @@ const CreateSubscriptionPlanModal = ({ open, onOpenChange, editPlan }: CreateSub
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{editPlan ? "Edit Subscription Plan" : "Create Subscription Plan"}</DialogTitle>
+          <DialogTitle>
+            {editPlan ? t("subscriptionPlans.editPlan") : t("subscriptionPlans.createPlan")}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
           <div className="space-y-2">
-            <Label htmlFor="name">Plan Name *</Label>
+            <Label htmlFor="name">{t("subscriptionPlans.planNameRequired")}</Label>
             <Input
               id="name"
-              placeholder="e.g., Pro Coaching"
+              placeholder={t("subscriptionPlans.planNamePlaceholder")}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t("subscriptionPlans.description")}</Label>
             <Textarea
               id="description"
-              placeholder="Describe your subscription plan..."
+              placeholder={t("subscriptionPlans.descriptionPlaceholder")}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
@@ -146,7 +152,7 @@ const CreateSubscriptionPlanModal = ({ open, onOpenChange, editPlan }: CreateSub
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="price">Price (£) *</Label>
+              <Label htmlFor="price">{t("subscriptionPlans.priceRequired")}</Label>
               <Input
                 id="price"
                 type="number"
@@ -158,37 +164,37 @@ const CreateSubscriptionPlanModal = ({ open, onOpenChange, editPlan }: CreateSub
               />
             </div>
             <div className="space-y-2">
-              <Label>Billing Period</Label>
+              <Label>{t("subscriptionPlans.billingPeriod")}</Label>
               <Select value={billingPeriod} onValueChange={setBillingPeriod}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="monthly">Monthly</SelectItem>
-                  <SelectItem value="quarterly">Quarterly</SelectItem>
-                  <SelectItem value="yearly">Yearly</SelectItem>
+                  <SelectItem value="monthly">{t("subscriptionPlans.periods.monthly")}</SelectItem>
+                  <SelectItem value="quarterly">{t("subscriptionPlans.periods.quarterly")}</SelectItem>
+                  <SelectItem value="yearly">{t("subscriptionPlans.periods.yearly")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="sessions">Sessions per Period (optional)</Label>
+            <Label htmlFor="sessions">{t("subscriptionPlans.sessionsPerPeriod")}</Label>
             <Input
               id="sessions"
               type="number"
               min="0"
-              placeholder="Unlimited if empty"
+              placeholder={t("subscriptionPlans.unlimitedIfEmpty")}
               value={sessionsPerPeriod}
               onChange={(e) => setSessionsPerPeriod(e.target.value)}
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Features Included</Label>
+            <Label>{t("subscriptionPlans.featuresIncluded")}</Label>
             <div className="flex gap-2">
               <Input
-                placeholder="Add a feature..."
+                placeholder={t("subscriptionPlans.addFeature")}
                 value={newFeature}
                 onChange={(e) => setNewFeature(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddFeature())}
@@ -219,9 +225,9 @@ const CreateSubscriptionPlanModal = ({ open, onOpenChange, editPlan }: CreateSub
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="active">Active</Label>
+              <Label htmlFor="active">{t("subscriptionPlans.active")}</Label>
               <p className="text-xs text-muted-foreground">
-                Visible to clients on your profile
+                {t("subscriptionPlans.activeDescription")}
               </p>
             </div>
             <Switch id="active" checked={isActive} onCheckedChange={setIsActive} />
@@ -230,11 +236,11 @@ const CreateSubscriptionPlanModal = ({ open, onOpenChange, editPlan }: CreateSub
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {tCommon("actions.cancel")}
           </Button>
           <Button onClick={handleSubmit} disabled={isPending}>
             {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            {editPlan ? "Save Changes" : "Create Plan"}
+            {editPlan ? tCommon("actions.saveChanges") : t("subscriptionPlans.createPlan")}
           </Button>
         </DialogFooter>
       </DialogContent>

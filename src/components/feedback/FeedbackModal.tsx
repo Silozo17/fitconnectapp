@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -45,14 +46,15 @@ const feedbackSchema = z.object({
 
 type FeedbackFormData = z.infer<typeof feedbackSchema>;
 
-const CATEGORIES = [
-  { value: "bug", label: "Bug Report", icon: Bug },
-  { value: "feature", label: "Feature Request", icon: Lightbulb },
-  { value: "improvement", label: "Improvement", icon: Sparkles },
-  { value: "general", label: "General Feedback", icon: HelpCircle },
-] as const;
+const CATEGORY_ICONS = {
+  bug: Bug,
+  feature: Lightbulb,
+  improvement: Sparkles,
+  general: HelpCircle,
+} as const;
 
 export const FeedbackModal = () => {
+  const { t } = useTranslation("common");
   const [open, setOpen] = useState(false);
   const { mutate: submitFeedback, isPending } = useSubmitFeedback();
   const { toast } = useToast();
@@ -76,16 +78,16 @@ export const FeedbackModal = () => {
       {
         onSuccess: () => {
           toast({
-            title: "Feedback Submitted",
-            description: "Thank you for your feedback! We'll review it soon.",
+            title: t("feedback.success"),
+            description: t("feedback.successDescription"),
           });
           form.reset();
           setOpen(false);
         },
         onError: () => {
           toast({
-            title: "Error",
-            description: "Failed to submit feedback. Please try again.",
+            title: t("feedback.error"),
+            description: t("feedback.errorDescription"),
             variant: "destructive",
           });
         },
@@ -104,17 +106,17 @@ export const FeedbackModal = () => {
           </DialogTrigger>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Send Feedback</p>
+          <p>{t("feedback.sendFeedback")}</p>
         </TooltipContent>
       </Tooltip>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MessageSquarePlus className="h-5 w-5 text-primary" />
-            Send Feedback
+            {t("feedback.sendFeedback")}
           </DialogTitle>
           <DialogDescription>
-            Share your thoughts, report bugs, or suggest new features.
+            {t("feedback.subtitle")}
           </DialogDescription>
         </DialogHeader>
 
@@ -125,22 +127,25 @@ export const FeedbackModal = () => {
               name="category"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Category</FormLabel>
+                  <FormLabel>{t("feedback.category")}</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
+                        <SelectValue placeholder={t("feedback.selectCategory")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {CATEGORIES.map((cat) => (
-                        <SelectItem key={cat.value} value={cat.value}>
-                          <div className="flex items-center gap-2">
-                            <cat.icon className="h-4 w-4" />
-                            {cat.label}
-                          </div>
-                        </SelectItem>
-                      ))}
+                      {(["bug", "feature", "improvement", "general"] as const).map((cat) => {
+                        const Icon = CATEGORY_ICONS[cat];
+                        return (
+                          <SelectItem key={cat} value={cat}>
+                            <div className="flex items-center gap-2">
+                              <Icon className="h-4 w-4" />
+                              {t(`feedback.categories.${cat}`)}
+                            </div>
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -153,9 +158,9 @@ export const FeedbackModal = () => {
               name="subject"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Subject</FormLabel>
+                  <FormLabel>{t("feedback.subject")}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Brief summary of your feedback" {...field} />
+                    <Input placeholder={t("feedback.subjectPlaceholder")} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -167,10 +172,10 @@ export const FeedbackModal = () => {
               name="message"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Message</FormLabel>
+                  <FormLabel>{t("feedback.message")}</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Describe your feedback in detail..."
+                      placeholder={t("feedback.placeholder")}
                       className="min-h-[120px] resize-none"
                       {...field}
                     />
@@ -186,10 +191,10 @@ export const FeedbackModal = () => {
                 variant="outline"
                 onClick={() => setOpen(false)}
               >
-                Cancel
+                {t("actions.cancel")}
               </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending ? "Submitting..." : "Submit Feedback"}
+                {isPending ? t("feedback.submitting") : t("feedback.submit")}
               </Button>
             </div>
           </form>

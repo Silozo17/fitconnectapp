@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +23,9 @@ interface CreatePackageModalProps {
 }
 
 const CreatePackageModal = ({ open, onOpenChange, editPackage }: CreatePackageModalProps) => {
+  const { t } = useTranslation("coach");
+  const { t: tCommon } = useTranslation("common");
+  
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [sessionCount, setSessionCount] = useState("5");
@@ -52,7 +56,7 @@ const CreatePackageModal = ({ open, onOpenChange, editPackage }: CreatePackageMo
 
   const handleSubmit = async () => {
     if (!name.trim() || !sessionCount || !price) {
-      toast.error("Please fill in all required fields");
+      toast.error(t("packages.fillRequired"));
       return;
     }
 
@@ -70,16 +74,16 @@ const CreatePackageModal = ({ open, onOpenChange, editPackage }: CreatePackageMo
 
       if (editPackage) {
         await updatePackage.mutateAsync({ id: editPackage.id, ...packageData });
-        toast.success("Package updated successfully");
+        toast.success(t("packages.packageUpdated"));
       } else {
         await createPackage.mutateAsync(packageData);
-        toast.success("Package created successfully");
+        toast.success(t("packages.packageCreated"));
       }
       
       onOpenChange(false);
       resetForm();
     } catch (error) {
-      toast.error("Failed to save package");
+      toast.error(t("packages.failedToSave"));
     }
   };
 
@@ -99,25 +103,27 @@ const CreatePackageModal = ({ open, onOpenChange, editPackage }: CreatePackageMo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{editPackage ? "Edit Package" : "Create Session Package"}</DialogTitle>
+          <DialogTitle>
+            {editPackage ? t("packages.editPackage") : t("packages.createSessionPackage")}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Package Name *</Label>
+            <Label htmlFor="name">{t("packages.packageNameRequired")}</Label>
             <Input
               id="name"
-              placeholder="e.g., Starter Pack"
+              placeholder={t("packages.packageNamePlaceholder")}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t("packages.description")}</Label>
             <Textarea
               id="description"
-              placeholder="Describe what's included..."
+              placeholder={t("packages.descriptionPlaceholder")}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
@@ -126,7 +132,7 @@ const CreatePackageModal = ({ open, onOpenChange, editPackage }: CreatePackageMo
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="sessions">Number of Sessions *</Label>
+              <Label htmlFor="sessions">{t("packages.numberOfSessions")}</Label>
               <Input
                 id="sessions"
                 type="number"
@@ -136,24 +142,24 @@ const CreatePackageModal = ({ open, onOpenChange, editPackage }: CreatePackageMo
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="duration">Session Duration</Label>
+              <Label htmlFor="duration">{t("packages.sessionDuration")}</Label>
               <select
                 id="duration"
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 value={sessionDuration}
                 onChange={(e) => setSessionDuration(e.target.value)}
               >
-                <option value="30">30 minutes</option>
-                <option value="45">45 minutes</option>
-                <option value="60">1 hour</option>
-                <option value="90">1.5 hours</option>
-                <option value="120">2 hours</option>
+                <option value="30">{t("packages.durations.30min")}</option>
+                <option value="45">{t("packages.durations.45min")}</option>
+                <option value="60">{t("packages.durations.1hr")}</option>
+                <option value="90">{t("packages.durations.1.5hr")}</option>
+                <option value="120">{t("packages.durations.2hr")}</option>
               </select>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="price">Price (£) *</Label>
+            <Label htmlFor="price">{t("packages.priceRequired")}</Label>
             <Input
               id="price"
               type="number"
@@ -166,7 +172,7 @@ const CreatePackageModal = ({ open, onOpenChange, editPackage }: CreatePackageMo
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="validity">Valid for (days)</Label>
+            <Label htmlFor="validity">{t("packages.validFor")}</Label>
             <Input
               id="validity"
               type="number"
@@ -175,15 +181,15 @@ const CreatePackageModal = ({ open, onOpenChange, editPackage }: CreatePackageMo
               onChange={(e) => setValidityDays(e.target.value)}
             />
             <p className="text-xs text-muted-foreground">
-              Sessions must be used within this period
+              {t("packages.validityNote")}
             </p>
           </div>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="active">Active</Label>
+              <Label htmlFor="active">{t("packages.active")}</Label>
               <p className="text-xs text-muted-foreground">
-                Visible to clients on your profile
+                {t("packages.activeDescription")}
               </p>
             </div>
             <Switch id="active" checked={isActive} onCheckedChange={setIsActive} />
@@ -192,11 +198,11 @@ const CreatePackageModal = ({ open, onOpenChange, editPackage }: CreatePackageMo
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {tCommon("actions.cancel")}
           </Button>
           <Button onClick={handleSubmit} disabled={isPending}>
             {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            {editPackage ? "Save Changes" : "Create Package"}
+            {editPackage ? tCommon("actions.saveChanges") : t("packages.createPackage")}
           </Button>
         </DialogFooter>
       </DialogContent>
