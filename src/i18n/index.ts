@@ -1,7 +1,43 @@
+/**
+ * ============================================================================
+ * INTERNATIONALIZATION (i18n) CONFIGURATION
+ * ============================================================================
+ * 
+ * STATUS: Infrastructure ready, intentionally unused
+ * 
+ * This i18n system is fully configured and production-safe, but is NOT
+ * currently being used to render UI text. All user-facing strings are
+ * hardcoded in English throughout the application.
+ * 
+ * WHY IS THIS UNUSED?
+ * - The platform is launching in the UK market first (English-only)
+ * - String extraction will be performed when multi-language support is prioritised
+ * - This infrastructure exists to enable future internationalisation
+ * 
+ * CURRENT GUARDRAILS (do not remove without explicit approval):
+ * 1. App remains English-only
+ * 2. Browser auto-translation is disabled (see index.html: translate="no")
+ * 3. Language selector is disabled with "Coming Soon" label
+ * 4. No browser language detection is enabled
+ * 5. No additional language files exist beyond en/common.json
+ * 
+ * FUTURE EXPANSION STEPS:
+ * 1. Extract hardcoded strings from components using t('key') pattern
+ * 2. Organise translations into namespaces (auth, coach, client, etc.)
+ * 3. Add language files for target locales
+ * 4. Enable browser language detection (i18next-browser-languagedetector)
+ * 5. Enable the LanguageSelector component
+ * 
+ * @see src/hooks/useTranslation.ts - Custom hook wrapper
+ * @see src/components/settings/LanguageSelector.tsx - Disabled language picker
+ * @see src/i18n/locales/en/common.json - English translation keys
+ * ============================================================================
+ */
+
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-// Import translation files
+// Import translation files (English only for now)
 import enCommon from './locales/en/common.json';
 
 // Define supported languages
