@@ -1,0 +1,117 @@
+{
+  "title": "Find Fitness Coaches",
+  "seoDescription": "Browse and connect with verified fitness coaches near you. Filter by specialty, location, price, and session type to find your perfect match.",
+  
+  "header": {
+    "title": "Find Your",
+    "titleHighlight": "Perfect Coach",
+    "subtitle": "Browse our verified fitness professionals and start your transformation today."
+  },
+
+  "search": {
+    "placeholder": "Search by name, specialty, or location...",
+    "filters": "Filters"
+  },
+
+  "results": {
+    "showing": "Showing",
+    "coach": "coach",
+    "coaches": "coaches",
+    "noCoaches": "No coaches found",
+    "noCoachesDesc": "Try adjusting your filters to see more results.",
+    "loadFailed": "Failed to load coaches. Please try again."
+  },
+
+  "filters": {
+    "title": "Filters",
+    "coachType": "Coach Type",
+    "priceRange": "Price Range",
+    "minPrice": "Min Price",
+    "maxPrice": "Max Price",
+    "sessionType": "Session Type",
+    "onlineOnly": "Online Only",
+    "inPersonOnly": "In-Person Only",
+    "location": "Location",
+    "clearFilters": "Clear Filters",
+    "applyFilters": "Apply Filters"
+  },
+
+  "card": {
+    "verified": "Verified",
+    "boosted": "Featured",
+    "perSession": "per session",
+    "online": "Online",
+    "inPerson": "In-Person",
+    "reviews": "reviews",
+    "noReviews": "New coach",
+    "viewProfile": "View Profile",
+    "bookSession": "Book Session",
+    "connect": "Connect",
+    "message": "Message"
+  },
+
+  "detail": {
+    "backToCoaches": "Back to Coaches",
+    "coachNotFound": "Coach not found",
+    "browseCoaches": "Browse Coaches",
+    "loading": "Loading coach profile",
+    "perSession": "per session",
+    "contactForPricing": "Contact for pricing",
+    "messageCoach": "Message Coach",
+    "bookSession": "Book Session",
+    "requestConnection": "Request Connection",
+    "signUpToConnect": "Sign Up to Connect",
+    "createAccountToConnect": "Create an account to connect with coaches",
+    "signInAsClient": "Sign in as a client to connect with this coach",
+    "respondsWithin": "Usually responds within 24 hours",
+    "sessionTypesAvailable": "{{count}} session type{{plural}} available",
+    "availableDays": "Available Days",
+    "about": "About",
+    "whoIWorkWith": "Who I Work With",
+    "gallery": "Gallery",
+    "pricing": "Pricing & Packages",
+    "groupClasses": "Group Classes",
+    "digitalProducts": "Digital Products",
+    "reviews": "Reviews"
+  },
+
+  "booking": {
+    "title": "Book a Session",
+    "selectDate": "Select Date",
+    "selectTime": "Select Time",
+    "selectSession": "Select Session Type",
+    "noAvailability": "No availability for this date",
+    "bookNow": "Book Now",
+    "confirmBooking": "Confirm Booking",
+    "processing": "Processing...",
+    "bookingConfirmed": "Booking Confirmed!",
+    "bookingFailed": "Booking failed. Please try again."
+  },
+
+  "connection": {
+    "title": "Request Connection",
+    "description": "Send a connection request to this coach",
+    "message": "Message (optional)",
+    "messagePlaceholder": "Introduce yourself and your fitness goals...",
+    "send": "Send Request",
+    "sent": "Request Sent!",
+    "pending": "Request Pending",
+    "accepted": "Connected",
+    "declined": "Request Declined"
+  },
+
+  "types": {
+    "personal_trainer": "Personal Trainer",
+    "nutritionist": "Nutritionist",
+    "boxing": "Boxing Coach",
+    "mma": "MMA Coach",
+    "bodybuilding": "Bodybuilding Coach",
+    "yoga": "Yoga Instructor",
+    "pilates": "Pilates Instructor",
+    "strength": "Strength Coach",
+    "crossfit": "CrossFit Coach",
+    "running": "Running Coach",
+    "swimming": "Swimming Coach",
+    "wellness": "Wellness Coach"
+  }
+}

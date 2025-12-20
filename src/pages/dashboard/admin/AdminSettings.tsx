@@ -26,6 +26,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Settings, Bell, Shield, Globe, Loader2, Plug, User, LogOut, CreditCard, Sliders, Plus, Edit, Trash2, Crown, Zap, Rocket, Star, Share2, Facebook, Instagram, Youtube, Linkedin } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 // Threads icon - custom since lucide doesn't have it
 const ThreadsIcon = ({ className }: { className?: string }) => (
@@ -67,6 +68,7 @@ const tierIcons: Record<string, any> = {
 };
 
 const AdminSettings = () => {
+  const { t } = useTranslation('settings');
   const { data: settings, isLoading } = usePlatformSettings();
   const { signOut } = useAuth();
   const updateSetting = useUpdatePlatformSetting();
@@ -191,7 +193,7 @@ const AdminSettings = () => {
     
     await Promise.all(updates);
     initialSettingsRef.current = JSON.parse(JSON.stringify(localSettings));
-    toast.success("Settings saved successfully");
+    toast.success(t('settingsSaved'));
   };
 
   const handleToggle = (key: string, value: boolean) => {
@@ -298,14 +300,14 @@ const AdminSettings = () => {
   return (
     <>
       <Helmet>
-        <title>Settings | Admin</title>
+        <title>{t('title')} | Admin</title>
       </Helmet>
 
       <AdminLayout>
         <div className="space-y-6 max-w-5xl">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Platform Settings</h1>
-            <p className="text-muted-foreground mt-1 text-sm sm:text-base">Configure platform-wide settings and preferences</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{t('admin.platformSettings')}</h1>
+            <p className="text-muted-foreground mt-1 text-sm sm:text-base">{t('admin.platformDescription')}</p>
           </div>
 
           <Tabs defaultValue="general" className="space-y-4">
@@ -365,16 +367,16 @@ const AdminSettings = () => {
             <TabsContent value="general" className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>General Settings</CardTitle>
-                  <CardDescription>Platform-wide configuration options</CardDescription>
+                  <CardTitle>{t('admin.general.title')}</CardTitle>
+                  <CardDescription>{t('admin.general.description')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 sm:space-y-6">
                   {/* Responsive toggle row */}
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div className="space-y-0.5 min-w-0">
-                      <Label>Maintenance Mode</Label>
+                      <Label>{t('admin.general.maintenanceMode')}</Label>
                       <p className="text-sm text-muted-foreground line-clamp-2 sm:line-clamp-none">
-                        Put the platform in maintenance mode (users can't access)
+                        {t('admin.general.maintenanceModeDesc')}
                       </p>
                     </div>
                     <Switch
@@ -386,9 +388,9 @@ const AdminSettings = () => {
 
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div className="space-y-0.5 min-w-0">
-                      <Label>Auto-Approve Coaches</Label>
+                      <Label>{t('admin.general.autoApproveCoaches')}</Label>
                       <p className="text-sm text-muted-foreground line-clamp-2 sm:line-clamp-none">
-                        Automatically approve new coach registrations
+                        {t('admin.general.autoApproveCoachesDesc')}
                       </p>
                     </div>
                     <Switch
@@ -400,9 +402,9 @@ const AdminSettings = () => {
 
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div className="space-y-0.5 min-w-0">
-                      <Label>Require Coach Verification</Label>
+                      <Label>{t('admin.general.requireVerification')}</Label>
                       <p className="text-sm text-muted-foreground line-clamp-2 sm:line-clamp-none">
-                        Coaches must be verified before appearing in marketplace
+                        {t('admin.general.requireVerificationDesc')}
                       </p>
                     </div>
                     <Switch
