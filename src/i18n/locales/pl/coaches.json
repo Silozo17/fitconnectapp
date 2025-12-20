@@ -1,0 +1,117 @@
+{
+  "title": "Znajdź Trenerów Fitness",
+  "seoDescription": "Przeglądaj i łącz się ze zweryfikowanymi trenerami fitness w Twojej okolicy. Filtruj według specjalizacji, lokalizacji, ceny i typu sesji, aby znaleźć idealne dopasowanie.",
+  
+  "header": {
+    "title": "Znajdź Swojego",
+    "titleHighlight": "Idealnego Trenera",
+    "subtitle": "Przeglądaj naszych zweryfikowanych profesjonalistów fitness i rozpocznij swoją transformację już dziś."
+  },
+
+  "search": {
+    "placeholder": "Szukaj po imieniu, specjalizacji lub lokalizacji...",
+    "filters": "Filtry"
+  },
+
+  "results": {
+    "showing": "Wyświetlono",
+    "coach": "trener",
+    "coaches": "trenerów",
+    "noCoaches": "Nie znaleziono trenerów",
+    "noCoachesDesc": "Spróbuj dostosować filtry, aby zobaczyć więcej wyników.",
+    "loadFailed": "Nie udało się załadować trenerów. Spróbuj ponownie."
+  },
+
+  "filters": {
+    "title": "Filtry",
+    "coachType": "Typ trenera",
+    "priceRange": "Zakres cenowy",
+    "minPrice": "Cena minimalna",
+    "maxPrice": "Cena maksymalna",
+    "sessionType": "Typ sesji",
+    "onlineOnly": "Tylko online",
+    "inPersonOnly": "Tylko osobiście",
+    "location": "Lokalizacja",
+    "clearFilters": "Wyczyść filtry",
+    "applyFilters": "Zastosuj filtry"
+  },
+
+  "card": {
+    "verified": "Zweryfikowany",
+    "boosted": "Wyróżniony",
+    "perSession": "za sesję",
+    "online": "Online",
+    "inPerson": "Osobiście",
+    "reviews": "opinii",
+    "noReviews": "Nowy trener",
+    "viewProfile": "Zobacz profil",
+    "bookSession": "Zarezerwuj sesję",
+    "connect": "Połącz",
+    "message": "Wiadomość"
+  },
+
+  "detail": {
+    "backToCoaches": "Wróć do trenerów",
+    "coachNotFound": "Nie znaleziono trenera",
+    "browseCoaches": "Przeglądaj trenerów",
+    "loading": "Ładowanie profilu trenera",
+    "perSession": "za sesję",
+    "contactForPricing": "Skontaktuj się w sprawie ceny",
+    "messageCoach": "Napisz do trenera",
+    "bookSession": "Zarezerwuj sesję",
+    "requestConnection": "Poproś o połączenie",
+    "signUpToConnect": "Zarejestruj się, aby połączyć",
+    "createAccountToConnect": "Utwórz konto, aby połączyć się z trenerami",
+    "signInAsClient": "Zaloguj się jako klient, aby połączyć się z tym trenerem",
+    "respondsWithin": "Zwykle odpowiada w ciągu 24 godzin",
+    "sessionTypesAvailable": "{{count}} typ{{plural}} sesji dostępnych",
+    "availableDays": "Dostępne dni",
+    "about": "O mnie",
+    "whoIWorkWith": "Z kim pracuję",
+    "gallery": "Galeria",
+    "pricing": "Cennik i pakiety",
+    "groupClasses": "Zajęcia grupowe",
+    "digitalProducts": "Produkty cyfrowe",
+    "reviews": "Opinie"
+  },
+
+  "booking": {
+    "title": "Zarezerwuj sesję",
+    "selectDate": "Wybierz datę",
+    "selectTime": "Wybierz godzinę",
+    "selectSession": "Wybierz typ sesji",
+    "noAvailability": "Brak dostępności na ten dzień",
+    "bookNow": "Zarezerwuj teraz",
+    "confirmBooking": "Potwierdź rezerwację",
+    "processing": "Przetwarzanie...",
+    "bookingConfirmed": "Rezerwacja potwierdzona!",
+    "bookingFailed": "Rezerwacja nie powiodła się. Spróbuj ponownie."
+  },
+
+  "connection": {
+    "title": "Poproś o połączenie",
+    "description": "Wyślij prośbę o połączenie do tego trenera",
+    "message": "Wiadomość (opcjonalna)",
+    "messagePlaceholder": "Przedstaw się i opisz swoje cele fitness...",
+    "send": "Wyślij prośbę",
+    "sent": "Prośba wysłana!",
+    "pending": "Prośba oczekuje",
+    "accepted": "Połączono",
+    "declined": "Prośba odrzucona"
+  },
+
+  "types": {
+    "personal_trainer": "Trener personalny",
+    "nutritionist": "Dietetyk",
+    "boxing": "Trener boksu",
+    "mma": "Trener MMA",
+    "bodybuilding": "Trener kulturystyki",
+    "yoga": "Instruktor jogi",
+    "pilates": "Instruktor pilates",
+    "strength": "Trener siłowy",
+    "crossfit": "Trener CrossFit",
+    "running": "Trener biegania",
+    "swimming": "Trener pływania",
+    "wellness": "Coach wellness"
+  }
+}

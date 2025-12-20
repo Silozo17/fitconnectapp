@@ -50,12 +50,14 @@ import enDashboard from './locales/en/dashboard.json';
 import enSettings from './locales/en/settings.json';
 import enBooking from './locales/en/booking.json';
 import enMessaging from './locales/en/messaging.json';
+import enCoaches from './locales/en/coaches.json';
 import plCommon from './locales/pl/common.json';
 import plLanding from './locales/pl/landing.json';
 import plDashboard from './locales/pl/dashboard.json';
 import plSettings from './locales/pl/settings.json';
 import plBooking from './locales/pl/booking.json';
 import plMessaging from './locales/pl/messaging.json';
+import plCoaches from './locales/pl/coaches.json';
 
 // Production-visible languages (what users see in production)
 export const SUPPORTED_LANGUAGES = [
@@ -112,6 +114,7 @@ const resources = {
     settings: enSettings,
     booking: enBooking,
     messaging: enMessaging,
+    coaches: enCoaches,
   },
   pl: {
     common: plCommon,
@@ -120,6 +123,7 @@ const resources = {
     settings: plSettings,
     booking: plBooking,
     messaging: plMessaging,
+    coaches: plCoaches,
   },
 };
 
@@ -166,7 +170,7 @@ i18nInstance.init({
   fallbackLng: DEFAULT_LANGUAGE,
   supportedLngs: getWhitelistedLanguages(),
   defaultNS: 'common',
-  ns: ['common', 'landing', 'dashboard', 'settings', 'booking', 'messaging'],
+  ns: ['common', 'landing', 'dashboard', 'settings', 'booking', 'messaging', 'coaches'],
   
   // Detection config (only used if detector is added)
   detection: detectionOptions,

@@ -21,6 +21,7 @@ import { LeaderboardSettings } from "@/components/gamification/LeaderboardSettin
 import { AvatarPicker } from "@/components/avatars/AvatarPicker";
 import { AvatarShowcase } from "@/components/avatars/AvatarShowcase";
 import { useSelectedAvatar } from "@/hooks/useAvatars";
+import { useTranslation } from "react-i18next";
 
 import WearableConnectionList from "@/components/integrations/WearableConnectionList";
 import CalendarConnectionCard from "@/components/integrations/CalendarConnectionCard";
@@ -71,43 +72,45 @@ const FITNESS_GOALS = [
   "Reduce Stress", "Improve Posture", "Build Core Strength", "General Fitness"
 ];
 
-const calendarProviders: {
-  id: CalendarProvider;
-  name: string;
-  icon: React.ReactNode;
-  color: string;
-  isCalDav?: boolean;
-}[] = [
-  {
-    id: "google_calendar",
-    name: "Google Calendar",
-    icon: <Calendar className="w-5 h-5 text-white" />,
-    color: "bg-gradient-to-br from-blue-500 to-blue-700",
-  },
-  {
-    id: "apple_calendar",
-    name: "Apple Calendar",
-    icon: <Apple className="w-5 h-5 text-white" />,
-    color: "bg-gradient-to-br from-gray-700 to-gray-900",
-    isCalDav: true,
-  },
-];
-
-const settingsTabs = [
-  { id: "profile", icon: User, label: "Profile" },
-  { id: "health", icon: Heart, label: "Health Info" },
-  { id: "preferences", icon: Globe, label: "Preferences" },
-  { id: "integrations", icon: Plug, label: "Integrations" },
-  { id: "notifications", icon: Bell, label: "Notifications" },
-  { id: "account", icon: Shield, label: "Account" },
-];
-
 const ClientSettings = () => {
+  const { t } = useTranslation('settings');
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [profile, setProfile] = useState<ClientProfile | null>(null);
   const [saving, setSaving] = useState(false);
+  
+  const calendarProviders: {
+    id: CalendarProvider;
+    name: string;
+    icon: React.ReactNode;
+    color: string;
+    isCalDav?: boolean;
+  }[] = [
+    {
+      id: "google_calendar",
+      name: "Google Calendar",
+      icon: <Calendar className="w-5 h-5 text-white" />,
+      color: "bg-gradient-to-br from-blue-500 to-blue-700",
+    },
+    {
+      id: "apple_calendar",
+      name: "Apple Calendar",
+      icon: <Apple className="w-5 h-5 text-white" />,
+      color: "bg-gradient-to-br from-gray-700 to-gray-900",
+      isCalDav: true,
+    },
+  ];
+
+  const settingsTabs = [
+    { id: "profile", icon: User, label: t('tabs.profile') },
+    { id: "health", icon: Heart, label: t('tabs.health') },
+    { id: "preferences", icon: Globe, label: t('tabs.preferences') },
+    { id: "integrations", icon: Plug, label: t('tabs.integrations') },
+    { id: "notifications", icon: Bell, label: t('tabs.notifications') },
+    { id: "account", icon: Shield, label: t('tabs.account') },
+  ];
+
   const [selectedTab, setSelectedTab] = useState(() => {
     const tabParam = searchParams.get('tab');
     return tabParam && settingsTabs.some(t => t.id === tabParam) ? tabParam : 'profile';
@@ -185,11 +188,11 @@ const ClientSettings = () => {
     setSaving(false);
 
     if (error) {
-      toast.error("Failed to save changes");
+      toast.error(t('failedToSave'));
     } else {
       // Reset dirty state after successful save
       initialProfileRef.current = profile ? JSON.parse(JSON.stringify(profile)) : null;
-      toast.success("Settings saved successfully");
+      toast.success(t('settingsSaved'));
     }
   };
 
@@ -201,7 +204,7 @@ const ClientSettings = () => {
 
   if (loading) {
     return (
-      <ClientDashboardLayout title="Settings">
+      <ClientDashboardLayout title={t('title')}>
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
@@ -211,11 +214,11 @@ const ClientSettings = () => {
 
   return (
     <ClientDashboardLayout
-      title="Settings"
-      description="Manage your account settings"
+      title={t('title')}
+      description={t('description')}
     >
       <div className="max-w-6xl">
-        <h1 className="font-display text-2xl font-bold text-foreground mb-6">Settings</h1>
+        <h1 className="font-display text-2xl font-bold text-foreground mb-6">{t('title')}</h1>
 
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar Navigation */}
@@ -248,14 +251,14 @@ const ClientSettings = () => {
                   <CardContent className="pt-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium">Personal Information</p>
+                        <p className="font-medium">{t('profile.personalInfo')}</p>
                         <p className="text-sm text-muted-foreground">
-                          Edit your name, username, and profile photo in My Profile
+                          {t('profile.personalInfoDesc')}
                         </p>
                       </div>
                       <Button variant="outline" size="sm" onClick={() => navigate("/dashboard/profile")}>
                         <User className="w-4 h-4 mr-2" />
-                        My Profile
+                        {t('profile.myProfile')}
                       </Button>
                     </div>
                   </CardContent>
@@ -264,8 +267,8 @@ const ClientSettings = () => {
                 {/* Avatar Selection */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Your Avatar</CardTitle>
-                    <CardDescription>Choose an avatar to represent you on leaderboards and throughout the platform</CardDescription>
+                    <CardTitle>{t('avatar.title')}</CardTitle>
+                    <CardDescription>{t('avatar.description')}</CardDescription>
                   </CardHeader>
                   <CardContent className="flex flex-col items-center gap-4">
                     <AvatarShowcase avatar={selectedAvatar} size="lg" />
@@ -276,13 +279,13 @@ const ClientSettings = () => {
                 {/* Body Metrics */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Body Metrics</CardTitle>
-                    <CardDescription>Your current measurements</CardDescription>
+                    <CardTitle>{t('bodyMetrics.title')}</CardTitle>
+                    <CardDescription>{t('bodyMetrics.description')}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="weight">Weight (kg)</Label>
+                        <Label htmlFor="weight">{t('bodyMetrics.weight')}</Label>
                         <Input
                           id="weight"
                           type="number"
@@ -292,7 +295,7 @@ const ClientSettings = () => {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="height">Height (cm)</Label>
+                        <Label htmlFor="height">{t('bodyMetrics.height')}</Label>
                         <Input
                           id="height"
                           type="number"
@@ -307,8 +310,8 @@ const ClientSettings = () => {
                 {/* Fitness Goals */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Fitness Goals</CardTitle>
-                    <CardDescription>Select your fitness objectives (choose multiple)</CardDescription>
+                    <CardTitle>{t('fitnessGoals.title')}</CardTitle>
+                    <CardDescription>{t('fitnessGoals.description')}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
@@ -350,7 +353,7 @@ const ClientSettings = () => {
                     ) : (
                       <Save className="w-4 h-4 mr-2" />
                     )}
-                    Save Changes
+                    {t('saveChanges')}
                   </Button>
                 </div>
               </>
@@ -362,15 +365,15 @@ const ClientSettings = () => {
                 {/* Dietary Restrictions */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Dietary Restrictions</CardTitle>
-                    <CardDescription>Any dietary preferences or restrictions</CardDescription>
+                    <CardTitle>{t('health.dietary.title')}</CardTitle>
+                    <CardDescription>{t('health.dietary.description')}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <HealthTagInput
                       tags={profile?.dietary_restrictions || []}
                       onChange={(tags) => updateField("dietary_restrictions", tags)}
                       suggestions={DIETARY_SUGGESTIONS}
-                      placeholder="Add dietary restriction..."
+                      placeholder={t('health.dietary.placeholder')}
                       variant="default"
                     />
                   </CardContent>
@@ -381,21 +384,21 @@ const ClientSettings = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <AlertTriangle className="w-5 h-5 text-warning" />
-                      Allergies
+                      {t('health.allergies.title')}
                     </CardTitle>
-                    <CardDescription>Food or environmental allergies your coach should know about</CardDescription>
+                    <CardDescription>{t('health.allergies.description')}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <HealthTagInput
                       tags={profile?.allergies || []}
                       onChange={(tags) => updateField("allergies", tags)}
                       suggestions={ALLERGY_SUGGESTIONS}
-                      placeholder="Add allergy..."
+                      placeholder={t('health.allergies.placeholder')}
                       variant="warning"
                     />
                     <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
                       <Info className="w-3 h-3" />
-                      Your coach will see this information
+                      {t('health.allergies.coachNotice')}
                     </p>
                   </CardContent>
                 </Card>
@@ -405,21 +408,21 @@ const ClientSettings = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Info className="w-5 h-5 text-destructive" />
-                      Medical Conditions
+                      {t('health.medical.title')}
                     </CardTitle>
-                    <CardDescription>Any medical conditions that may affect your training</CardDescription>
+                    <CardDescription>{t('health.medical.description')}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <HealthTagInput
                       tags={profile?.medical_conditions || []}
                       onChange={(tags) => updateField("medical_conditions", tags)}
                       suggestions={MEDICAL_SUGGESTIONS}
-                      placeholder="Add medical condition..."
+                      placeholder={t('health.medical.placeholder')}
                       variant="danger"
                     />
                     <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
                       <Info className="w-3 h-3" />
-                      Share any conditions that may affect your training
+                      {t('health.medical.notice')}
                     </p>
                   </CardContent>
                 </Card>
@@ -435,7 +438,7 @@ const ClientSettings = () => {
                     ) : (
                       <Save className="w-4 h-4 mr-2" />
                     )}
-                    Save Changes
+                    {t('saveChanges')}
                   </Button>
                 </div>
               </>
@@ -446,8 +449,8 @@ const ClientSettings = () => {
               <>
                 <Card>
                   <CardHeader>
-                    <CardTitle>Display Preferences</CardTitle>
-                    <CardDescription>Language and regional settings</CardDescription>
+                    <CardTitle>{t('preferences.title')}</CardTitle>
+                    <CardDescription>{t('preferences.languageDescription')}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <LanguageSelector />
@@ -455,7 +458,7 @@ const ClientSettings = () => {
                     <div>
                       <CurrencySelector />
                       <p className="text-xs text-muted-foreground mt-2">
-                        This affects how prices are displayed throughout the platform
+                        {t('preferences.currencyDescription')}
                       </p>
                     </div>
                   </CardContent>
@@ -482,7 +485,7 @@ const ClientSettings = () => {
                     ) : (
                       <Save className="w-4 h-4 mr-2" />
                     )}
-                    Save Changes
+                    {t('saveChanges')}
                   </Button>
                 </div>
               </>
@@ -499,9 +502,9 @@ const ClientSettings = () => {
                 {/* Wearable Devices */}
                 <div className="space-y-4">
                   <div>
-                    <h2 className="text-xl font-semibold mb-1">Fitness Wearables</h2>
+                    <h2 className="text-xl font-semibold mb-1">{t('integrations.wearables.title')}</h2>
                     <p className="text-sm text-muted-foreground">
-                      Connect your fitness tracker to automatically sync steps, heart rate, sleep, and more
+                      {t('integrations.wearables.description')}
                     </p>
                   </div>
                   <WearableConnectionList />
@@ -512,9 +515,9 @@ const ClientSettings = () => {
                 {/* Calendar Integration */}
                 <div className="space-y-4">
                   <div>
-                    <h2 className="text-xl font-semibold mb-1">Calendar Sync</h2>
+                    <h2 className="text-xl font-semibold mb-1">{t('integrations.calendar.title')}</h2>
                     <p className="text-sm text-muted-foreground">
-                      Automatically add your coaching sessions to your calendar
+                      {t('integrations.calendar.description')}
                     </p>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -552,10 +555,9 @@ const ClientSettings = () => {
                     <div className="flex items-start gap-3">
                       <Shield className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
                       <div className="space-y-2">
-                        <h3 className="font-medium">Data & Privacy</h3>
+                        <h3 className="font-medium">{t('security.title')}</h3>
                         <p className="text-sm text-muted-foreground">
-                          When you connect integrations, your data is handled according to our privacy practices. 
-                          Learn more about how we protect your data.
+                          {t('security.description')}
                         </p>
                         <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
                           <Link to="/privacy#integrations" className="text-primary hover:underline">
@@ -590,13 +592,13 @@ const ClientSettings = () => {
                 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Session</CardTitle>
-                    <CardDescription>Manage your current session</CardDescription>
+                    <CardTitle>{t('account.title')}</CardTitle>
+                    <CardDescription>{t('account.signOutDescription')}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <Button variant="outline" onClick={signOut}>
                       <LogOut className="w-4 h-4 mr-2" />
-                      Sign Out
+                      {t('account.signOut')}
                     </Button>
                   </CardContent>
                 </Card>
