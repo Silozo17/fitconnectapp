@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import { useAdminView } from "@/contexts/AdminContext";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 import TypingIndicator, { useTypingBroadcast } from "./TypingIndicator";
 import ProspectProfileSheet from "./ProspectProfileSheet";
@@ -51,6 +52,7 @@ const ChatWindow = ({
   showSidePanel = false,
   onToggleSidePanel
 }: ChatWindowProps) => {
+  const { t } = useTranslation('messaging');
   const { messages, loading, error, sendMessage, currentProfileId } = useMessages(participantId);
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
@@ -148,7 +150,7 @@ const ChatWindow = ({
       // No profile found - user has been deleted
       setIsDeleted(true);
       setParticipantInfo({
-        name: "Deleted User",
+        name: t('chatWindow.deletedUser'),
         avatar: null,
         avatarSlug: null,
         avatarRarity: null,
@@ -239,7 +241,7 @@ const ChatWindow = ({
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center p-4">
-        <p className="text-destructive font-medium mb-2">Unable to load messages</p>
+        <p className="text-destructive font-medium mb-2">{t('chatWindow.unableToLoad')}</p>
         <p className="text-muted-foreground text-sm">{error}</p>
       </div>
     );
@@ -281,7 +283,7 @@ const ChatWindow = ({
                     {getTypeIcon(participantInfo.type)}
                   </span>
                 </div>
-                <p className="text-xs text-muted-foreground">Tap to view profile</p>
+                <p className="text-xs text-muted-foreground">{t('chatWindow.tapToViewProfile')}</p>
               </div>
             </button>
 
@@ -306,7 +308,7 @@ const ChatWindow = ({
           <div ref={messagesContainerRef} className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-4 min-h-0">
             {messages.length === 0 ? (
               <div className="flex items-center justify-center h-full text-muted-foreground">
-                <p>No messages yet. Start the conversation!</p>
+                <p>{t('chatWindow.noMessages')}</p>
               </div>
             ) : (
               messages.map((message) => {
@@ -384,7 +386,7 @@ const ChatWindow = ({
           {isDeleted ? (
             <div className="p-4 border-t border-border bg-muted/50">
               <p className="text-sm text-muted-foreground text-center">
-                This user's account has been deleted. You can view the conversation history but cannot send new messages.
+                {t('chatWindow.deletedUserNotice')}
               </p>
             </div>
           ) : (
@@ -393,7 +395,7 @@ const ChatWindow = ({
                 <Input
                   value={newMessage}
                   onChange={handleInputChange}
-                  placeholder="Type a message..."
+                  placeholder={t('typeMessage')}
                   className="flex-1 bg-background border-border"
                   disabled={sending}
                 />
@@ -421,7 +423,7 @@ const ChatWindow = ({
         <Sheet open={profileOpen} onOpenChange={setProfileOpen}>
           <SheetContent side="right" className="w-[320px] sm:w-[400px]">
             <SheetHeader>
-              <SheetTitle>Profile</SheetTitle>
+              <SheetTitle>{t('chatWindow.profile')}</SheetTitle>
             </SheetHeader>
             
             <div className="mt-6 flex flex-col items-center text-center pt-8">
@@ -457,7 +459,7 @@ const ChatWindow = ({
                     className="block w-full py-2 px-4 bg-primary text-primary-foreground rounded-md text-center hover:bg-primary/90 transition-colors"
                     onClick={() => setProfileOpen(false)}
                   >
-                    View Full Profile
+                    {t('chatWindow.viewFullProfile')}
                   </Link>
                 </div>
               )}

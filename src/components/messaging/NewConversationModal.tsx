@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminView } from "@/contexts/AdminContext";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +30,7 @@ interface NewConversationModalProps {
 }
 
 const NewConversationModal = ({ open, onOpenChange }: NewConversationModalProps) => {
+  const { t } = useTranslation('messaging');
   const { user, role } = useAuth();
   const { activeProfileType, activeProfileId } = useAdminView();
   const navigate = useNavigate();
@@ -209,7 +211,7 @@ const NewConversationModal = ({ open, onOpenChange }: NewConversationModalProps)
       }
 
       if (!senderProfileId) {
-        toast.error("Unable to find your profile");
+        toast.error(t('newConversation.unableToFindProfile'));
         setSending(false);
         return;
       }
@@ -223,13 +225,13 @@ const NewConversationModal = ({ open, onOpenChange }: NewConversationModalProps)
 
         if (error) {
           console.error("Error sending message:", error);
-          toast.error("Failed to send message");
+          toast.error(t('newConversation.failedToSend'));
           setSending(false);
           return;
         }
       }
 
-      toast.success("Conversation started!");
+      toast.success(t('newConversation.conversationStarted'));
       setSending(false);
       onOpenChange(false);
       setSelectedContact(null);
@@ -237,7 +239,7 @@ const NewConversationModal = ({ open, onOpenChange }: NewConversationModalProps)
       navigate(`${basePath}/${selectedContact.id}`);
     } catch (error) {
       console.error("Error starting conversation:", error);
-      toast.error("Failed to start conversation");
+      toast.error(t('newConversation.failedToStart'));
       setSending(false);
     }
   };
@@ -246,9 +248,9 @@ const NewConversationModal = ({ open, onOpenChange }: NewConversationModalProps)
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>New Conversation</DialogTitle>
+          <DialogTitle>{t('newConversation.title')}</DialogTitle>
           <DialogDescription>
-            Select a contact to start a conversation
+            {t('newConversation.description')}
           </DialogDescription>
         </DialogHeader>
 
@@ -257,7 +259,7 @@ const NewConversationModal = ({ open, onOpenChange }: NewConversationModalProps)
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search contacts..."
+                placeholder={t('newConversation.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -272,8 +274,8 @@ const NewConversationModal = ({ open, onOpenChange }: NewConversationModalProps)
               ) : filteredContacts.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <User className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                  <p>No contacts found</p>
-                  <p className="text-xs mt-1">Add connections to message them</p>
+                  <p>{t('newConversation.noContacts')}</p>
+                  <p className="text-xs mt-1">{t('newConversation.addConnectionsHint')}</p>
                 </div>
               ) : (
                 filteredContacts.map((contact) => (
@@ -319,23 +321,23 @@ const NewConversationModal = ({ open, onOpenChange }: NewConversationModalProps)
                 <p className="font-medium text-foreground">
                   {selectedContact.name}
                 </p>
-                <p className="text-xs text-muted-foreground">Selected</p>
+                <p className="text-xs text-muted-foreground">{t('newConversation.selected')}</p>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setSelectedContact(null)}
               >
-                Change
+                {t('newConversation.change')}
               </Button>
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
-                Message (optional)
+                {t('newConversation.messageLabel')}
               </label>
               <Textarea
-                placeholder="Write your first message..."
+                placeholder={t('newConversation.messagePlaceholder')}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 rows={3}
@@ -344,7 +346,7 @@ const NewConversationModal = ({ open, onOpenChange }: NewConversationModalProps)
 
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
+                {t('newConversation.cancel')}
               </Button>
               <Button onClick={handleStartConversation} disabled={sending}>
                 {sending ? (
@@ -352,7 +354,7 @@ const NewConversationModal = ({ open, onOpenChange }: NewConversationModalProps)
                 ) : (
                   <>
                     <MessageSquare className="h-4 w-4 mr-2" />
-                    Start Chat
+                    {t('newConversation.startChat')}
                   </>
                 )}
               </Button>

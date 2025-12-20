@@ -104,5 +104,193 @@
     "unarchiveConversation": "Przywróć z archiwum",
     "moveToSpam": "Przenieś do spamu",
     "removeFromSpam": "Usuń ze spamu"
+  },
+
+  "chatWindow": {
+    "unableToLoad": "Nie można załadować wiadomości",
+    "noMessages": "Brak wiadomości. Rozpocznij rozmowę!",
+    "tapToViewProfile": "Kliknij aby zobaczyć profil",
+    "deletedUser": "Usunięty użytkownik",
+    "deletedUserNotice": "Konto tego użytkownika zostało usunięte. Możesz przeglądać historię rozmów, ale nie możesz wysyłać nowych wiadomości.",
+    "profile": "Profil",
+    "viewFullProfile": "Zobacz pełny profil",
+    "client": "Klient",
+    "coach": "Trener",
+    "admin": "Administrator"
+  },
+
+  "conversationList": {
+    "coachEmptyState": "Rozpocznij rozmowę z jednym ze swoich klientów",
+    "clientEmptyState": "Napisz do trenera, aby rozpocząć",
+    "unableToLoad": "Nie można załadować rozmów"
+  },
+
+  "newConversation": {
+    "title": "Nowa rozmowa",
+    "description": "Wybierz kontakt, aby rozpocząć rozmowę",
+    "searchPlaceholder": "Szukaj kontaktów...",
+    "noContacts": "Nie znaleziono kontaktów",
+    "addConnectionsHint": "Dodaj połączenia, aby móc pisać",
+    "selected": "Wybrano",
+    "change": "Zmień",
+    "messageLabel": "Wiadomość (opcjonalnie)",
+    "messagePlaceholder": "Napisz pierwszą wiadomość...",
+    "cancel": "Anuluj",
+    "startChat": "Rozpocznij czat",
+    "conversationStarted": "Rozmowa rozpoczęta!",
+    "unableToFindProfile": "Nie można znaleźć Twojego profilu",
+    "failedToStart": "Nie udało się rozpocząć rozmowy",
+    "failedToSend": "Nie udało się wysłać wiadomości"
+  },
+
+  "templates": {
+    "title": "Szablony wiadomości",
+    "newTemplate": "Nowy szablon",
+    "noTemplates": "Brak szablonów",
+    "createTemplatesHint": "Utwórz szablony do szybkich odpowiedzi",
+    "createFirst": "Utwórz pierwszy szablon",
+    "templateCount": "{{count}} szablon",
+    "templateCount_few": "{{count}} szablony",
+    "templateCount_many": "{{count}} szablonów",
+    "use": "Użyj",
+    "createDialog": {
+      "title": "Utwórz szablon",
+      "description": "Zapisz szablon wiadomości do szybkiego użycia w rozmowach.",
+      "nameLabel": "Nazwa szablonu",
+      "namePlaceholder": "np. Wiadomość powitalna",
+      "categoryLabel": "Kategoria",
+      "contentLabel": "Treść wiadomości",
+      "contentPlaceholder": "Wpisz treść szablonu...",
+      "cancel": "Anuluj",
+      "create": "Utwórz szablon"
+    },
+    "editDialog": {
+      "title": "Edytuj szablon",
+      "description": "Zaktualizuj swój szablon wiadomości.",
+      "save": "Zapisz zmiany"
+    },
+    "deleteDialog": {
+      "title": "Usuń szablon",
+      "description": "Czy na pewno chcesz usunąć \"{{name}}\"? Tej operacji nie można cofnąć.",
+      "cancel": "Anuluj",
+      "delete": "Usuń"
+    },
+    "categories": {
+      "welcome": "Powitanie",
+      "followup": "Kontynuacja",
+      "pricing": "Cennik",
+      "plans": "Plany",
+      "motivation": "Motywacja",
+      "general": "Ogólne"
+    }
+  },
+
+  "sessionOffer": {
+    "title": "Oferta sesji",
+    "onlineSession": "Sesja online",
+    "inPerson": "Osobiście",
+    "price": "Cena",
+    "free": "BEZPŁATNIE",
+    "decline": "Odrzuć",
+    "accept": "Akceptuj",
+    "waitingForResponse": "Oczekiwanie na odpowiedź klienta...",
+    "status": {
+      "pending": "Oczekuje",
+      "accepted": "Zaakceptowano",
+      "declined": "Odrzucono",
+      "expired": "Wygasła",
+      "cancelled": "Anulowana"
+    }
+  },
+
+  "sessionOfferDialog": {
+    "title": "Wyślij ofertę sesji",
+    "description": "Utwórz spersonalizowaną ofertę sesji dla swojego klienta",
+    "dateLabel": "Data",
+    "datePlaceholder": "Wybierz datę",
+    "timeLabel": "Godzina",
+    "timePlaceholder": "Wybierz godzinę",
+    "durationLabel": "Czas trwania",
+    "durationPlaceholder": "Wybierz czas trwania",
+    "sessionTypeLabel": "Typ sesji",
+    "sessionTypePlaceholder": "Wybierz typ sesji",
+    "formatLabel": "Format",
+    "online": "Online",
+    "inPerson": "Osobiście",
+    "locationLabel": "Lokalizacja",
+    "locationPlaceholder": "Wpisz lokalizację sesji",
+    "pricingLabel": "Cena",
+    "pricePlaceholder": "Wpisz cenę",
+    "freeSession": "Sesja bezpłatna",
+    "notesLabel": "Notatki (opcjonalnie)",
+    "notesPlaceholder": "Dodaj specjalne instrukcje lub notatki...",
+    "cancel": "Anuluj",
+    "sendOffer": "Wyślij ofertę",
+    "minutes": "{{count}} minut"
+  },
+
+  "quickActions": {
+    "quick": "Szybkie:",
+    "templates": "Szablony",
+    "pricing": "Cennik",
+    "book": "Rezerwuj",
+    "sessionOffer": "Oferta sesji",
+    "payment": "Płatność",
+    "quickActions": "Szybkie akcje",
+    "messageTemplates": "Szablony wiadomości",
+    "clickToSend": "Kliknij aby wysłać",
+    "noTemplatesYet": "Brak szablonów",
+    "createTemplatesHint": "Utwórz szablony w Ustawienia → Wiadomości"
+  },
+
+  "pricingDialog": {
+    "title": "Wyślij informacje o cenach",
+    "description": "Wysłane zostaną typy sesji i ceny do klienta.",
+    "noSessionTypes": "Brak skonfigurowanych typów sesji. Przejdź do Harmonogram → Typy sesji, aby dodać swoje oferty.",
+    "cancel": "Anuluj",
+    "send": "Wyślij cennik",
+    "messageIntro": "**Mój cennik sesji:**",
+    "contactForPricing": "Skontaktuj się ze mną, aby omówić ceny dostosowane do Twoich potrzeb."
+  },
+
+  "paymentDialog": {
+    "title": "Żądanie płatności",
+    "description": "Wyślij żądanie płatności do klienta.",
+    "amountLabel": "Kwota (£)",
+    "amountPlaceholder": "0.00",
+    "descriptionLabel": "Opis (opcjonalnie)",
+    "descriptionPlaceholder": "np. Sesja treningowa - 15 grudnia",
+    "cancel": "Anuluj",
+    "send": "Wyślij żądanie"
+  },
+
+  "bookingMessage": {
+    "title": "**Gotowy zarezerwować sesję?**",
+    "body": "Kliknij mój profil, aby zobaczyć moją dostępność i zarezerwować termin!"
+  },
+
+  "quickSend": {
+    "title": "Szybkie wysyłanie",
+    "packageOffer": "Oferta pakietu",
+    "subscriptionPlan": "Plan subskrypcji",
+    "digitalProduct": "Produkt cyfrowy",
+    "digitalBundle": "Pakiet cyfrowy",
+    "trainingPlan": "Plan treningowy",
+    "mealPlan": "Plan żywieniowy",
+    "sessions": "{{count}} sesji",
+    "accept": "Akceptuj i zapłać",
+    "decline": "Odrzuć",
+    "status": {
+      "pending": "Oczekuje",
+      "accepted": "Zaakceptowano",
+      "declined": "Odrzucono"
+    },
+    "offerAccepted": "Oferta zaakceptowana!",
+    "redirectingToCheckout": "Przekierowanie do płatności...",
+    "offerDeclined": "Oferta odrzucona",
+    "coachNotified": "Trener został powiadomiony.",
+    "error": "Błąd",
+    "failedToAccept": "Nie udało się zaakceptować oferty. Spróbuj ponownie.",
+    "failedToDecline": "Nie udało się odrzucić oferty. Spróbuj ponownie."
   }
 }

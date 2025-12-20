@@ -4,6 +4,7 @@ import { MessageSquare, Loader2, User, Briefcase, AlertCircle, Shield } from "lu
 import { Link } from "react-router-dom";
 import { useAdminView } from "@/contexts/AdminContext";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import ProspectProfileSheet from "./ProspectProfileSheet";
 import { CoachProfileSheet } from "./CoachProfileSheet";
 import { UserAvatar } from "@/components/shared/UserAvatar";
@@ -14,6 +15,7 @@ interface ConversationListProps {
 }
 
 const ConversationList = ({ activeConversationId }: ConversationListProps) => {
+  const { t } = useTranslation('messaging');
   const { conversations, loading, error } = useMessages();
   const { activeProfileType } = useAdminView();
   const [selectedProfile, setSelectedProfile] = useState<Conversation | null>(null);
@@ -47,7 +49,7 @@ const ConversationList = ({ activeConversationId }: ConversationListProps) => {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center">
         <AlertCircle className="w-12 h-12 text-destructive mb-4" />
-        <h3 className="font-medium text-foreground mb-1">Unable to load conversations</h3>
+        <h3 className="font-medium text-foreground mb-1">{t('conversationList.unableToLoad')}</h3>
         <p className="text-sm text-muted-foreground">{error}</p>
       </div>
     );
@@ -57,11 +59,11 @@ const ConversationList = ({ activeConversationId }: ConversationListProps) => {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center">
         <MessageSquare className="w-12 h-12 text-muted-foreground mb-4" />
-        <h3 className="font-medium text-foreground mb-1">No conversations yet</h3>
+        <h3 className="font-medium text-foreground mb-1">{t('noConversations')}</h3>
         <p className="text-sm text-muted-foreground">
           {activeProfileType === "coach" 
-            ? "Start a conversation with one of your clients"
-            : "Message a coach to get started"}
+            ? t('conversationList.coachEmptyState')
+            : t('conversationList.clientEmptyState')}
         </p>
       </div>
     );

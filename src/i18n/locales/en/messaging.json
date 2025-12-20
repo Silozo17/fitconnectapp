@@ -104,5 +104,192 @@
     "unarchiveConversation": "Unarchive",
     "moveToSpam": "Move to spam",
     "removeFromSpam": "Remove from spam"
+  },
+
+  "chatWindow": {
+    "unableToLoad": "Unable to load messages",
+    "noMessages": "No messages yet. Start the conversation!",
+    "tapToViewProfile": "Tap to view profile",
+    "deletedUser": "Deleted User",
+    "deletedUserNotice": "This user's account has been deleted. You can view the conversation history but cannot send new messages.",
+    "profile": "Profile",
+    "viewFullProfile": "View Full Profile",
+    "client": "Client",
+    "coach": "Coach",
+    "admin": "Admin"
+  },
+
+  "conversationList": {
+    "coachEmptyState": "Start a conversation with one of your clients",
+    "clientEmptyState": "Message a coach to get started",
+    "unableToLoad": "Unable to load conversations"
+  },
+
+  "newConversation": {
+    "title": "New Conversation",
+    "description": "Select a contact to start a conversation",
+    "searchPlaceholder": "Search contacts...",
+    "noContacts": "No contacts found",
+    "addConnectionsHint": "Add connections to message them",
+    "selected": "Selected",
+    "change": "Change",
+    "messageLabel": "Message (optional)",
+    "messagePlaceholder": "Write your first message...",
+    "cancel": "Cancel",
+    "startChat": "Start Chat",
+    "conversationStarted": "Conversation started!",
+    "unableToFindProfile": "Unable to find your profile",
+    "failedToStart": "Failed to start conversation",
+    "failedToSend": "Failed to send message"
+  },
+
+  "templates": {
+    "title": "Message Templates",
+    "newTemplate": "New Template",
+    "noTemplates": "No templates yet",
+    "createTemplatesHint": "Create templates for quick responses",
+    "createFirst": "Create Your First Template",
+    "templateCount": "{{count}} template",
+    "templateCount_other": "{{count}} templates",
+    "use": "Use",
+    "createDialog": {
+      "title": "Create Template",
+      "description": "Save a message template for quick use in conversations.",
+      "nameLabel": "Template Name",
+      "namePlaceholder": "e.g., Welcome Message",
+      "categoryLabel": "Category",
+      "contentLabel": "Message Content",
+      "contentPlaceholder": "Type your template message...",
+      "cancel": "Cancel",
+      "create": "Create Template"
+    },
+    "editDialog": {
+      "title": "Edit Template",
+      "description": "Update your message template.",
+      "save": "Save Changes"
+    },
+    "deleteDialog": {
+      "title": "Delete Template",
+      "description": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "categories": {
+      "welcome": "Welcome",
+      "followup": "Follow-up",
+      "pricing": "Pricing",
+      "plans": "Plans",
+      "motivation": "Motivation",
+      "general": "General"
+    }
+  },
+
+  "sessionOffer": {
+    "title": "Session Offer",
+    "onlineSession": "Online Session",
+    "inPerson": "In-Person",
+    "price": "Price",
+    "free": "FREE",
+    "decline": "Decline",
+    "accept": "Accept",
+    "waitingForResponse": "Waiting for client response...",
+    "status": {
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "declined": "Declined",
+      "expired": "Expired",
+      "cancelled": "Cancelled"
+    }
+  },
+
+  "sessionOfferDialog": {
+    "title": "Send Session Offer",
+    "description": "Create a personalized session offer for your client",
+    "dateLabel": "Date",
+    "datePlaceholder": "Pick a date",
+    "timeLabel": "Time",
+    "timePlaceholder": "Select time",
+    "durationLabel": "Duration",
+    "durationPlaceholder": "Select duration",
+    "sessionTypeLabel": "Session Type",
+    "sessionTypePlaceholder": "Select session type",
+    "formatLabel": "Format",
+    "online": "Online",
+    "inPerson": "In-Person",
+    "locationLabel": "Location",
+    "locationPlaceholder": "Enter session location",
+    "pricingLabel": "Pricing",
+    "pricePlaceholder": "Enter price",
+    "freeSession": "Free session",
+    "notesLabel": "Notes (Optional)",
+    "notesPlaceholder": "Add any special instructions or notes...",
+    "cancel": "Cancel",
+    "sendOffer": "Send Offer",
+    "minutes": "{{count}} minutes"
+  },
+
+  "quickActions": {
+    "quick": "Quick:",
+    "templates": "Templates",
+    "pricing": "Pricing",
+    "book": "Book",
+    "sessionOffer": "Session Offer",
+    "payment": "Payment",
+    "quickActions": "Quick Actions",
+    "messageTemplates": "Message Templates",
+    "clickToSend": "Click to send",
+    "noTemplatesYet": "No templates yet",
+    "createTemplatesHint": "Create templates in Settings → Messages"
+  },
+
+  "pricingDialog": {
+    "title": "Send Pricing Information",
+    "description": "This will send your session types and pricing to the client.",
+    "noSessionTypes": "No session types configured yet. Go to Schedule → Session Types to add your offerings.",
+    "cancel": "Cancel",
+    "send": "Send Pricing",
+    "messageIntro": "**My Session Pricing:**",
+    "contactForPricing": "Please contact me to discuss pricing for your specific needs."
+  },
+
+  "paymentDialog": {
+    "title": "Request Payment",
+    "description": "Send a payment request to the client.",
+    "amountLabel": "Amount (£)",
+    "amountPlaceholder": "0.00",
+    "descriptionLabel": "Description (Optional)",
+    "descriptionPlaceholder": "e.g., Personal Training Session - December 15",
+    "cancel": "Cancel",
+    "send": "Send Request"
+  },
+
+  "bookingMessage": {
+    "title": "**Ready to book a session?**",
+    "body": "Click my profile to view my availability and book a time that works for you!"
+  },
+
+  "quickSend": {
+    "title": "Quick Send",
+    "packageOffer": "Package Offer",
+    "subscriptionPlan": "Subscription Plan",
+    "digitalProduct": "Digital Product",
+    "digitalBundle": "Digital Bundle",
+    "trainingPlan": "Training Plan",
+    "mealPlan": "Meal Plan",
+    "sessions": "{{count}} sessions",
+    "accept": "Accept & Pay",
+    "decline": "Decline",
+    "status": {
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "declined": "Declined"
+    },
+    "offerAccepted": "Offer accepted!",
+    "redirectingToCheckout": "Redirecting to checkout...",
+    "offerDeclined": "Offer declined",
+    "coachNotified": "The coach has been notified.",
+    "error": "Error",
+    "failedToAccept": "Failed to accept offer. Please try again.",
+    "failedToDecline": "Failed to decline offer. Please try again."
   }
 }
