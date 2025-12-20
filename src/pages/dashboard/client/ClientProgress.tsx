@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { ProgressEntryCard } from "@/components/progress/ProgressEntryCard";
 import { AIProgressInsights } from "@/components/ai/AIProgressInsights";
 
 const ClientProgress = () => {
+  const { t } = useTranslation('client');
   const { data, isLoading, error } = useMyProgress();
   const [logModalOpen, setLogModalOpen] = useState(false);
 
@@ -33,17 +35,17 @@ const ClientProgress = () => {
 
   return (
     <ClientDashboardLayout
-      title="Progress"
-      description="Track your fitness progress"
+      title={t('progress.title')}
+      description={t('progress.subtitle')}
     >
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">My Progress</h1>
-          <p className="text-muted-foreground">Track your fitness journey over time</p>
+          <h1 className="text-2xl font-bold text-foreground">{t('progress.pageTitle')}</h1>
+          <p className="text-muted-foreground">{t('progress.description')}</p>
         </div>
         <Button onClick={() => setLogModalOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
-          Log Progress
+          {t('progress.logProgress')}
         </Button>
       </div>
 
@@ -55,13 +57,13 @@ const ClientProgress = () => {
         <Card className="border-border">
           <CardContent className="py-12 text-center">
             <BarChart3 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No progress data yet</h3>
+            <h3 className="text-lg font-semibold mb-2">{t('progress.noData')}</h3>
             <p className="text-muted-foreground mb-4">
-              Start logging your progress to see trends and track your transformation.
+              {t('progress.noDataDescription')}
             </p>
             <Button onClick={() => setLogModalOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              Log Your First Entry
+              {t('progress.logFirstEntry')}
             </Button>
           </CardContent>
         </Card>
@@ -76,7 +78,7 @@ const ClientProgress = () => {
                     <Scale className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Current Weight</p>
+                    <p className="text-sm text-muted-foreground">{t('progress.currentWeight')}</p>
                     <p className="text-xl font-bold text-foreground">
                       {latestEntry?.weight_kg ? Number(latestEntry.weight_kg).toFixed(1) : "-"} kg
                     </p>
@@ -97,7 +99,7 @@ const ClientProgress = () => {
                     <Percent className="w-5 h-5 text-yellow-500" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Body Fat</p>
+                    <p className="text-sm text-muted-foreground">{t('progress.bodyFat')}</p>
                     <p className="text-xl font-bold text-foreground">
                       {latestEntry?.body_fat_percentage ? Number(latestEntry.body_fat_percentage).toFixed(1) : "-"}%
                     </p>
@@ -118,9 +120,9 @@ const ClientProgress = () => {
                     <TrendingUp className="w-5 h-5 text-green-500" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Total Entries</p>
+                    <p className="text-sm text-muted-foreground">{t('progress.totalEntries')}</p>
                     <p className="text-xl font-bold text-foreground">{progress.length}</p>
-                    <p className="text-xs text-muted-foreground">logged</p>
+                    <p className="text-xs text-muted-foreground">{t('progress.logged')}</p>
                   </div>
                 </div>
               </CardContent>
@@ -133,11 +135,11 @@ const ClientProgress = () => {
                     <Calendar className="w-5 h-5 text-accent" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Photos</p>
+                    <p className="text-sm text-muted-foreground">{t('progress.photosCount')}</p>
                     <p className="text-xl font-bold text-foreground">
                       {progress.reduce((acc, p) => acc + ((p.photo_urls as string[])?.length || 0), 0)}
                     </p>
-                    <p className="text-xs text-muted-foreground">uploaded</p>
+                    <p className="text-xs text-muted-foreground">{t('progress.uploaded')}</p>
                   </div>
                 </div>
               </CardContent>
@@ -147,9 +149,9 @@ const ClientProgress = () => {
           {/* Charts & History Tabs */}
           <Tabs defaultValue="charts" className="space-y-6">
             <TabsList className="bg-secondary">
-              <TabsTrigger value="charts">Charts</TabsTrigger>
-              <TabsTrigger value="history">History</TabsTrigger>
-              <TabsTrigger value="insights">AI Insights</TabsTrigger>
+              <TabsTrigger value="charts">{t('progress.charts')}</TabsTrigger>
+              <TabsTrigger value="history">{t('progress.history')}</TabsTrigger>
+              <TabsTrigger value="insights">{t('progress.insights')}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="charts" className="space-y-6">
