@@ -116,6 +116,24 @@ serve(async (req) => {
 
     if (coachError) throw new Error("Coach not found");
 
+    // SECURITY: Require Stripe Connect for content purchases
+    if (!coach?.stripe_connect_id || !coach?.stripe_connect_onboarded) {
+      throw new Error("This coach has not set up payment processing yet. Please contact them.");
+    }
+
+    // Get coach's platform subscription to determine tier-based commission rate
+    const { data: platformSub } = await supabase
+      .from("platform_subscriptions")
+      .select("tier")
+      .eq("coach_id", coachId)
+      .eq("status", "active")
+      .maybeSingle();
+
+    const tier = platformSub?.tier || "free";
+    const commissionRates: Record<string, number> = { free: 4, starter: 3, pro: 2, enterprise: 1, founder: 0 };
+    const commissionPercent = commissionRates[tier] || 4;
+    logStep("Commission tier", { tier, commissionPercent });
+
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
     // Check if customer exists
@@ -126,8 +144,8 @@ serve(async (req) => {
       logStep("Existing customer found", { customerId });
     }
 
-    // Calculate platform fee (15%) - based on DB price, not client input
-    const platformFee = Math.round(itemPrice * 0.15 * 100);
+    // Calculate platform fee based on tier commission rate
+    const platformFee = Math.round(itemPrice * (commissionPercent / 100) * 100);
     const priceInCents = Math.round(itemPrice * 100);
 
     // Create checkout session params
@@ -166,19 +184,19 @@ serve(async (req) => {
       sessionParams.cancel_url = cancelUrl || `${req.headers.get("origin")}/marketplace`;
     }
 
-    // If coach has Stripe Connect, split payment
-    if (coach?.stripe_connect_id && coach?.stripe_connect_onboarded) {
-      sessionParams.payment_intent_data = {
-        application_fee_amount: platformFee,
-        transfer_data: {
-          destination: coach.stripe_connect_id,
-        },
-      };
-      logStep("Using Stripe Connect", { 
-        coachStripeId: coach.stripe_connect_id, 
-        platformFee 
-      });
-    }
+    // Split payment with coach via Stripe Connect (already validated above)
+    sessionParams.payment_intent_data = {
+      application_fee_amount: platformFee,
+      transfer_data: {
+        destination: coach.stripe_connect_id,
+      },
+    };
+    logStep("Using Stripe Connect", { 
+      coachStripeId: coach.stripe_connect_id, 
+      platformFee,
+      tier,
+      commissionPercent
+    });
 
     const session = await stripe.checkout.sessions.create(sessionParams);
     logStep("Checkout session created", { sessionId: session.id, embedded });
