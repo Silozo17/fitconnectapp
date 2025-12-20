@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,11 +28,13 @@ const sizeClasses = {
 };
 
 export const InlineLoader = memo(({ 
-  text = "Loading...", 
+  text, 
   size = "default",
   className 
 }: InlineLoaderProps) => {
+  const { t } = useTranslation();
   const sizes = sizeClasses[size];
+  const displayText = text || t('loading.default');
 
   return (
     <div 
@@ -41,14 +44,14 @@ export const InlineLoader = memo(({
         className
       )}
       role="status"
-      aria-label={text}
+      aria-label={displayText}
     >
       <Loader2 
         className={cn("animate-spin text-primary", sizes.icon)} 
         aria-hidden="true" 
       />
       <span className={cn("text-muted-foreground font-medium", sizes.text)}>
-        {text}
+        {displayText}
       </span>
     </div>
   );
@@ -62,12 +65,14 @@ interface AreaLoaderProps extends InlineLoaderProps {
 }
 
 export const AreaLoader = memo(({ 
-  text = "Loading...", 
+  text, 
   size = "default",
   minHeight = "200px",
   className 
 }: AreaLoaderProps) => {
+  const { t } = useTranslation();
   const sizes = sizeClasses[size];
+  const displayText = text || t('loading.default');
 
   return (
     <div 
@@ -78,14 +83,14 @@ export const AreaLoader = memo(({
       )}
       style={{ minHeight }}
       role="status"
-      aria-label={text}
+      aria-label={displayText}
     >
       <Loader2 
         className={cn("animate-spin text-primary", sizes.icon)} 
         aria-hidden="true" 
       />
       <span className={cn("text-muted-foreground font-medium", sizes.text)}>
-        {text}
+        {displayText}
       </span>
     </div>
   );
