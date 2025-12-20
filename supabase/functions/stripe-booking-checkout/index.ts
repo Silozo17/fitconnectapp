@@ -166,9 +166,9 @@ serve(async (req) => {
       .maybeSingle();
 
     const tier = platformSub?.tier || "free";
-    // Commission rates: free=4%, starter=3%, pro=2%, enterprise=1%, founder=0%
-    const commissionRates: Record<string, number> = { free: 4, starter: 3, pro: 2, enterprise: 1, founder: 0 };
-    const applicationFeePercent = commissionRates[tier] || 4;
+    // Commission rates: free=4%, starter=3%, pro=2%, enterprise=1%, founder=1% (min 1%)
+    const commissionRates: Record<string, number> = { free: 4, starter: 3, pro: 2, enterprise: 1, founder: 1 };
+    const applicationFeePercent = Math.max(1, Math.min(4, commissionRates[tier] || 4)); // Enforce 1-4% range
 
     logStep("Coach tier", { tier, commission: `${applicationFeePercent}%` });
 

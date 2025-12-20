@@ -120,7 +120,7 @@ export const SUBSCRIPTION_TIERS = {
     name: "Founder",
     description: "Lifetime unlimited access - Admin grant only",
     clientLimit: null, // Unlimited
-    commissionPercent: 0,
+    commissionPercent: 1, // Changed from 0 to 1% - minimum platform fee
     prices: {
       monthly: {
         amount: 0,
@@ -137,7 +137,7 @@ export const SUBSCRIPTION_TIERS = {
       "Unlimited clients",
       "All Pro & Enterprise features",
       "Priority support",
-      "0% platform fee forever",
+      "1% platform fee",
       "Early access to new features",
     ],
     highlighted: false,

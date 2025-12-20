@@ -438,28 +438,124 @@ serve(async (req) => {
       case "charge.refunded": {
         const charge = event.data.object as Stripe.Charge;
         const paymentIntentId = charge.payment_intent as string;
+        const amountRefunded = charge.amount_refunded; // In cents
+        const totalAmount = charge.amount; // In cents
+        const isPartialRefund = amountRefunded < totalAmount;
+        const refundAmountDecimal = amountRefunded / 100;
 
-        console.log("Charge refunded, payment intent:", paymentIntentId);
+        console.log("Charge refunded:", {
+          paymentIntentId,
+          amountRefunded,
+          totalAmount,
+          isPartialRefund,
+        });
 
         if (paymentIntentId) {
-          // Find and update matching invoice to 'refunded'
-          const { data: updatedInvoices, error } = await supabase
+          const refundStatus = isPartialRefund ? "partially_refunded" : "refunded";
+          const now = new Date().toISOString();
+
+          // Update invoice with refund details
+          const { data: updatedInvoices, error: invoiceError } = await supabase
             .from("coach_invoices")
-            .update({ 
-              status: "refunded", 
-              updated_at: new Date().toISOString() 
+            .update({
+              status: refundStatus,
+              refund_amount: refundAmountDecimal,
+              refunded_at: now,
+              updated_at: now,
             })
             .eq("stripe_payment_intent_id", paymentIntentId)
             .select();
 
-          if (error) {
-            console.error("Error updating invoice to refunded:", error);
+          if (invoiceError) {
+            console.error("Error updating invoice to refunded:", invoiceError);
           } else if (updatedInvoices && updatedInvoices.length > 0) {
-            console.log("Invoice(s) marked as refunded:", updatedInvoices.map(i => i.id));
+            console.log("Invoice(s) marked as", refundStatus, ":", updatedInvoices.map(i => i.id));
+          }
+
+          // Update booking requests
+          await supabase
+            .from("booking_requests")
+            .update({
+              payment_status: refundStatus,
+              refund_amount: refundAmountDecimal,
+              refunded_at: now,
+            })
+            .eq("stripe_payment_intent_id", paymentIntentId);
+
+          // Update package purchases
+          await supabase
+            .from("client_package_purchases")
+            .update({
+              status: refundStatus,
+              refund_amount: refundAmountDecimal,
+              refunded_at: now,
+            })
+            .eq("stripe_payment_intent_id", paymentIntentId);
+
+          // Update content purchases
+          await supabase
+            .from("content_purchases")
+            .update({
+              status: refundStatus,
+              refund_amount: refundAmountDecimal,
+              refunded_at: now,
+            })
+            .eq("stripe_payment_intent_id", paymentIntentId);
+
+          console.log("Refund processed:", {
+            refundStatus,
+            amount: refundAmountDecimal,
+            invoicesUpdated: updatedInvoices?.length || 0,
+          });
+        }
+        break;
+      }
+
+      case "payment_intent.payment_failed": {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        const metadata = paymentIntent.metadata || {};
+        const failureMessage = paymentIntent.last_payment_error?.message || "Payment failed";
+
+        console.log("Payment failed:", paymentIntent.id, metadata.type, failureMessage);
+
+        // Update booking request if it's a booking payment
+        if (metadata.type === "booking" && metadata.booking_request_id) {
+          const { error } = await supabase
+            .from("booking_requests")
+            .update({ payment_status: "failed" })
+            .eq("id", metadata.booking_request_id);
+
+          if (error) {
+            console.error("Error updating booking to failed:", error);
           } else {
-            console.log("No invoice found for payment intent:", paymentIntentId);
+            console.log("Booking payment marked as failed:", metadata.booking_request_id);
           }
         }
+
+        // Update content purchase if it's a digital content payment
+        if (metadata.type === "digital_content") {
+          const { error } = await supabase
+            .from("content_purchases")
+            .update({ status: "failed" })
+            .eq("stripe_checkout_session_id", paymentIntent.id);
+
+          if (error) {
+            console.error("Error updating content purchase to failed:", error);
+          }
+        }
+
+        // Update package purchase if applicable
+        if (metadata.type === "package") {
+          const { error } = await supabase
+            .from("client_package_purchases")
+            .update({ status: "failed" })
+            .eq("stripe_payment_intent_id", paymentIntent.id);
+
+          if (error) {
+            console.error("Error updating package purchase to failed:", error);
+          }
+        }
+
         break;
       }
 
