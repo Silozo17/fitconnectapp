@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useCoachLinkPrefix } from "@/hooks/useCoachLinkPrefix";
 import { useAuth } from "@/contexts/AuthContext";
 import { useActiveProfile } from "@/hooks/useActiveProfile";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,6 +33,7 @@ interface DashboardStats {
 const ClientOverview = () => {
   const { user } = useAuth();
   const { profileId, isRoleSwitching, userId } = useActiveProfile();
+  const coachLinkPrefix = useCoachLinkPrefix();
   const [stats, setStats] = useState<DashboardStats>({
     coachCount: 0,
     upcomingSessions: 0,
@@ -258,7 +260,7 @@ const ClientOverview = () => {
               training plan and achieve your goals.
             </p>
             <Button asChild>
-              <Link to="/coaches">Find a Coach</Link>
+              <Link to={coachLinkPrefix}>Find a Coach</Link>
             </Button>
           </CardContent>
         </Card>
