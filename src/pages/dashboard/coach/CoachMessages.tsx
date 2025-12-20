@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import ConversationList from "@/components/messaging/ConversationList";
 import ChatWindow from "@/components/messaging/ChatWindow";
 import NewConversationModal from "@/components/messaging/NewConversationModal";
@@ -14,6 +15,7 @@ import { useMessages } from "@/hooks/useMessages";
 import { useAdminView } from "@/contexts/AdminContext";
 
 const CoachMessages = () => {
+  const { t } = useTranslation('messaging');
   const { id: participantId } = useParams();
   const { data: participantName = "" } = useParticipantName(participantId);
   const [showNewConversation, setShowNewConversation] = useState(false);
@@ -28,13 +30,13 @@ const CoachMessages = () => {
   };
 
   return (
-    <DashboardLayout title="Messages" description="Chat with your clients.">
+    <DashboardLayout title={t('title')} description={t('description')}>
       <div className="flex flex-col h-full min-h-0">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="font-display text-2xl font-bold text-foreground">Messages</h1>
+          <h1 className="font-display text-2xl font-bold text-foreground">{t('title')}</h1>
           <Button onClick={() => setShowNewConversation(true)} size="sm">
             <Plus className="h-4 w-4 mr-2" />
-            New Chat
+            {t('newMessage')}
           </Button>
         </div>
 
@@ -42,7 +44,7 @@ const CoachMessages = () => {
           {/* Conversations List - Hidden on mobile when in chat */}
           <div className={`w-full lg:w-80 border-r border-border flex flex-col ${participantId ? "hidden lg:flex" : "flex"}`}>
             <div className="p-4 border-b border-border">
-              <h2 className="font-semibold text-foreground">Conversations</h2>
+              <h2 className="font-semibold text-foreground">{t('inbox.title')}</h2>
             </div>
             <div className="flex-1 overflow-y-auto">
               <ConversationList activeConversationId={participantId} />
@@ -63,13 +65,13 @@ const CoachMessages = () => {
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                   <MessageSquare className="w-8 h-8 text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">Select a conversation</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{t('selectConversation')}</h3>
                 <p className="text-muted-foreground max-w-sm mb-4">
-                  Choose a client from the list to start chatting
+                  {t('selectConversationDescription')}
                 </p>
                 <Button onClick={() => setShowNewConversation(true)}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Start New Conversation
+                  {t('startConversation')}
                 </Button>
               </div>
             )}
