@@ -359,6 +359,67 @@ serve(async (req) => {
           } else {
             console.log("Content purchase marked as completed");
           }
+        } else if (metadata.type === "boost_activation") {
+          // Handle Boost activation payment
+          const coachId = metadata.coach_id;
+          const durationDays = parseInt(metadata.duration_days || "30");
+          const pricePaid = parseInt(metadata.price_paid || "500");
+
+          console.log("Boost activation payment completed:", { coachId, durationDays, pricePaid });
+
+          const now = new Date();
+          const endDate = new Date(now);
+          endDate.setDate(endDate.getDate() + durationDays);
+
+          // Update coach_boosts with activation details
+          const { error: boostError } = await supabase
+            .from("coach_boosts")
+            .update({
+              is_active: true,
+              boost_start_date: now.toISOString(),
+              boost_end_date: endDate.toISOString(),
+              payment_status: "succeeded",
+              activation_payment_intent_id: session.payment_intent as string,
+              activated_at: now.toISOString(),
+              deactivated_at: null,
+              updated_at: now.toISOString(),
+            })
+            .eq("coach_id", coachId);
+
+          if (boostError) {
+            console.error("Error activating boost:", boostError);
+          } else {
+            console.log("Boost activated successfully until:", endDate.toISOString());
+          }
+
+          // Create invoice for boost purchase
+          const { count } = await supabase
+            .from("coach_invoices")
+            .select("*", { count: "exact", head: true })
+            .eq("coach_id", coachId);
+
+          const invoiceNumber = `BOOST-${coachId.substring(0, 8).toUpperCase()}-${String((count || 0) + 1).padStart(4, "0")}`;
+
+          const { error: invoiceError } = await supabase
+            .from("coach_invoices")
+            .insert({
+              coach_id: coachId,
+              invoice_number: invoiceNumber,
+              total: pricePaid / 100, // Convert pence to pounds
+              subtotal: pricePaid / 100,
+              currency: "GBP",
+              status: "paid",
+              paid_at: now.toISOString(),
+              source_type: "boost_activation",
+              stripe_payment_intent_id: session.payment_intent as string,
+              notes: `Boost Activation - ${durationDays} days`,
+            });
+
+          if (invoiceError) {
+            console.error("Error creating boost invoice:", invoiceError);
+          } else {
+            console.log("Boost invoice created:", invoiceNumber);
+          }
         }
         break;
       }
@@ -553,6 +614,20 @@ serve(async (req) => {
 
           if (error) {
             console.error("Error updating package purchase to failed:", error);
+          }
+        }
+
+        // Update boost activation if applicable
+        if (metadata.type === "boost_activation" && metadata.coach_id) {
+          const { error } = await supabase
+            .from("coach_boosts")
+            .update({ payment_status: "failed" })
+            .eq("coach_id", metadata.coach_id);
+
+          if (error) {
+            console.error("Error updating boost to failed:", error);
+          } else {
+            console.log("Boost payment marked as failed for coach:", metadata.coach_id);
           }
         }
 

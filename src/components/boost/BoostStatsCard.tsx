@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, DollarSign, TrendingUp, Calendar } from "lucide-react";
-import { useCoachBoostStatus, useBoostAttributions, useBoostSettings, calculateBoostFee } from "@/hooks/useCoachBoost";
+import { Users, DollarSign, TrendingUp, Calendar, Clock } from "lucide-react";
+import { useCoachBoostStatus, useBoostAttributions, useBoostSettings, calculateBoostFee, isBoostActive, getBoostRemainingDays } from "@/hooks/useCoachBoost";
 import { formatCurrency } from "@/lib/currency";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
@@ -33,6 +33,8 @@ export const BoostStatsCard = () => {
 
   const totalClients = boostStatus?.total_clients_acquired || 0;
   const totalFees = boostStatus?.total_fees_paid || 0;
+  const boostActive = isBoostActive(boostStatus);
+  const remainingDays = getBoostRemainingDays(boostStatus);
   
   // Calculate estimated value (assuming average 3 repeat bookings per client)
   const avgBookingValue = attributions && attributions.length > 0 
@@ -43,7 +45,30 @@ export const BoostStatsCard = () => {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        {/* Boost Status */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              Boost Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {boostActive ? (
+              <>
+                <p className="text-2xl font-bold text-primary">{remainingDays} days</p>
+                <p className="text-xs text-muted-foreground">remaining</p>
+              </>
+            ) : (
+              <>
+                <p className="text-2xl font-bold text-muted-foreground">Inactive</p>
+                <p className="text-xs text-muted-foreground">Purchase to activate</p>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -61,12 +86,12 @@ export const BoostStatsCard = () => {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <DollarSign className="h-4 w-4" />
-              Boost Fees Paid
+              Commission Paid
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{formatCurrency(totalFees, "GBP")}</p>
-            <p className="text-xs text-muted-foreground">total spent</p>
+            <p className="text-xs text-muted-foreground">on new clients</p>
           </CardContent>
         </Card>
 
