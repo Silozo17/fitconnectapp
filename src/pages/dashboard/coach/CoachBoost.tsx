@@ -54,9 +54,9 @@ const CoachBoost = () => {
                   <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
                     <span className="text-xl font-bold text-primary">1</span>
                   </div>
-                  <h3 className="font-semibold mb-1">Enable Boost</h3>
+                  <h3 className="font-semibold mb-1">Purchase Boost</h3>
                   <p className="text-sm text-muted-foreground">
-                    Toggle Boost on to start appearing at the top of search results with a "Sponsored" badge.
+                    Pay {settings ? formatCurrency(settings.boost_price / 100, "GBP") : "£5"} for {settings?.boost_duration_days || 30} days of priority visibility in search results.
                   </p>
                 </div>
 
@@ -66,7 +66,7 @@ const CoachBoost = () => {
                   </div>
                   <h3 className="font-semibold mb-1">Get New Clients</h3>
                   <p className="text-sm text-muted-foreground">
-                    When new clients find you via Boost and book their first session, you pay a one-time fee.
+                    When new clients find you via Boost and book their first session, you pay a {commissionPercent}% commission.
                   </p>
                 </div>
 
@@ -96,49 +96,49 @@ const CoachBoost = () => {
                 <AccordionItem value="item-1">
                   <AccordionTrigger>How much does Boost cost?</AccordionTrigger>
                   <AccordionContent>
-                    There's no monthly fee. You only pay when Boost brings you a NEW client. The fee is {commissionPercent}% of their first session booking. Bookings under {minFee} are calculated at {minFee} (minimum fee: {settings ? formatCurrency(settings.min_fee * settings.commission_rate, "GBP") : "£9"}). Bookings over {maxFee} are capped at {maxFee} (maximum fee: {settings ? formatCurrency(settings.max_fee * settings.commission_rate, "GBP") : "£30"}).
+                    Boost costs {settings ? formatCurrency(settings.boost_price / 100, "GBP") : "£5"} for {settings?.boost_duration_days || 30} days. This is a one-time payment with no auto-renewal. Additionally, when Boost brings you a NEW client, you pay {commissionPercent}% of their first session booking. Bookings under {minFee} are calculated at {minFee} (minimum fee: {settings ? formatCurrency(settings.min_fee * settings.commission_rate, "GBP") : "£9"}). Bookings over {maxFee} are capped at {maxFee} (maximum fee: {settings ? formatCurrency(settings.max_fee * settings.commission_rate, "GBP") : "£30"}).
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-2">
-                  <AccordionTrigger>What if a client doesn't show up?</AccordionTrigger>
+                  <AccordionTrigger>What happens after 30 days?</AccordionTrigger>
                   <AccordionContent>
-                    If a client acquired via Boost doesn't show up for their first appointment, you can mark them as a no-show and the fee will be waived. We want you to only pay for real results.
+                    After {settings?.boost_duration_days || 30} days, your Boost expires and you'll return to normal search ranking. There's no auto-renewal - you'll need to purchase Boost again if you want to continue appearing first in results.
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-3">
-                  <AccordionTrigger>Do I pay for repeat bookings?</AccordionTrigger>
+                  <AccordionTrigger>What if a client doesn't show up?</AccordionTrigger>
                   <AccordionContent>
-                    No! You only pay the Boost fee on a client's FIRST session booking with you. All subsequent bookings from that client are 100% yours with no additional Boost fees.
+                    If a client acquired via Boost doesn't show up for their first appointment, you can mark them as a no-show and the commission fee will be waived. We want you to only pay for real results.
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-4">
-                  <AccordionTrigger>How do I know which clients came from Boost?</AccordionTrigger>
+                  <AccordionTrigger>Do I pay commission for repeat bookings?</AccordionTrigger>
                   <AccordionContent>
-                    All clients acquired through Boost are tracked in your "Recent Acquisitions" list above. You can see exactly when they found you, their first booking amount, and the fee charged.
+                    No! You only pay the Boost commission on a client's FIRST session booking with you. All subsequent bookings from that client are 100% yours with no additional fees.
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-5">
-                  <AccordionTrigger>Can I turn Boost off anytime?</AccordionTrigger>
+                  <AccordionTrigger>How do I know which clients came from Boost?</AccordionTrigger>
                   <AccordionContent>
-                    Yes! You can enable or disable Boost at any time with no penalty. When Boost is off, you'll still appear in search results, just not at the top with the sponsored badge.
+                    All clients acquired through Boost are tracked in your "Recent Acquisitions" list above. You can see exactly when they found you, their first booking amount, and the commission charged.
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-6">
-                  <AccordionTrigger>How are boosted coaches ordered?</AccordionTrigger>
+                  <AccordionTrigger>Can I renew before my Boost expires?</AccordionTrigger>
                   <AccordionContent>
-                    All boosted coaches appear above non-boosted coaches in search results. Among boosted coaches, the order is randomized to give everyone fair exposure.
+                    Yes! You can purchase a new Boost period when your current one is about to expire. The new period will start when your current one ends, giving you continuous visibility.
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-7">
                   <AccordionTrigger>Does Boost apply to package purchases or digital products?</AccordionTrigger>
                   <AccordionContent>
-                    Boost fees only apply to individual session bookings. If a new client purchases a session package or digital product (e.g., training plans, e-books), no Boost fee is charged. Boost is designed to help you acquire clients through 1-on-1 session bookings.
+                    Boost commission only applies to individual session bookings. If a new client purchases a session package or digital product (e.g., training plans, e-books), no commission is charged. Boost is designed to help you acquire clients through 1-on-1 session bookings.
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>

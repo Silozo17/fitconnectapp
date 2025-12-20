@@ -13,6 +13,11 @@ export interface CoachBoost {
   total_fees_paid: number;
   created_at: string;
   updated_at: string;
+  // New paid boost fields
+  boost_start_date: string | null;
+  boost_end_date: string | null;
+  payment_status: 'none' | 'pending' | 'succeeded' | 'failed' | 'cancelled';
+  activation_payment_intent_id: string | null;
 }
 
 export interface BoostAttribution {
@@ -40,7 +45,27 @@ export interface BoostSettings {
   max_fee: number;
   is_active: boolean;
   updated_at: string;
+  // New pricing fields
+  boost_price: number; // in pence
+  boost_duration_days: number;
 }
+
+// Helper to check if boost is currently active based on end date
+export const isBoostActive = (boost: CoachBoost | null): boolean => {
+  if (!boost) return false;
+  if (!boost.boost_end_date) return false;
+  if (boost.payment_status !== 'succeeded') return false;
+  return new Date(boost.boost_end_date) > new Date();
+};
+
+// Helper to get remaining days
+export const getBoostRemainingDays = (boost: CoachBoost | null): number => {
+  if (!boost?.boost_end_date) return 0;
+  const endDate = new Date(boost.boost_end_date);
+  const now = new Date();
+  const diffMs = endDate.getTime() - now.getTime();
+  return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+};
 
 export const useCoachBoostStatus = () => {
   const { data: coachProfileId } = useCoachProfileId();
@@ -111,6 +136,33 @@ export const useBoostSettings = () => {
   });
 };
 
+// New: Purchase boost mutation
+export const usePurchaseBoost = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke("boost-checkout");
+      
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      
+      return data as { url: string };
+    },
+    onSuccess: (data) => {
+      // Redirect to Stripe Checkout
+      if (data.url) {
+        window.open(data.url, "_blank");
+      }
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Failed to start checkout");
+      console.error(error);
+    },
+  });
+};
+
+// Keep legacy toggle for backwards compatibility, but it now only disables
 export const useToggleBoost = () => {
   const queryClient = useQueryClient();
   const { data: coachProfileId } = useCoachProfileId();
@@ -119,44 +171,27 @@ export const useToggleBoost = () => {
     mutationFn: async (enable: boolean) => {
       if (!coachProfileId) throw new Error("Coach profile not found");
 
-      // Check if boost record exists
-      const { data: existingBoost } = await supabase
-        .from("coach_boosts")
-        .select("id")
-        .eq("coach_id", coachProfileId)
-        .maybeSingle();
-
-      if (existingBoost) {
-        // Update existing
-        const { error } = await supabase
-          .from("coach_boosts")
-          .update({
-            is_active: enable,
-            activated_at: enable ? new Date().toISOString() : null,
-            deactivated_at: enable ? null : new Date().toISOString(),
-          })
-          .eq("coach_id", coachProfileId);
-
-        if (error) throw error;
-      } else {
-        // Insert new
-        const { error } = await supabase
-          .from("coach_boosts")
-          .insert({
-            coach_id: coachProfileId,
-            is_active: enable,
-            activated_at: enable ? new Date().toISOString() : null,
-          });
-
-        if (error) throw error;
+      // Can only disable via toggle now - enabling requires purchase
+      if (enable) {
+        throw new Error("Please purchase Boost to enable it");
       }
+
+      const { error } = await supabase
+        .from("coach_boosts")
+        .update({
+          is_active: false,
+          deactivated_at: new Date().toISOString(),
+        })
+        .eq("coach_id", coachProfileId);
+
+      if (error) throw error;
     },
-    onSuccess: (_, enable) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["coach-boost-status"] });
-      toast.success(enable ? "Boost enabled! You'll now appear first in search results." : "Boost disabled.");
+      toast.success("Boost disabled. Note: Your paid period will still be valid.");
     },
     onError: (error) => {
-      toast.error("Failed to update boost status");
+      toast.error(error instanceof Error ? error.message : "Failed to update boost status");
       console.error(error);
     },
   });
@@ -215,19 +250,29 @@ export const useBoostStats = () => {
   return useQuery({
     queryKey: ["admin-boost-stats"],
     queryFn: async () => {
-      // Get active boosts count
+      // Get active boosts count - now based on boost_end_date
+      const now = new Date().toISOString();
       const { count: activeBoosts } = await supabase
         .from("coach_boosts")
         .select("*", { count: "exact", head: true })
-        .eq("is_active", true);
+        .gt("boost_end_date", now)
+        .eq("payment_status", "succeeded");
 
-      // Get total revenue from attributions
+      // Get total revenue from attributions (30% commission)
       const { data: revenueData } = await supabase
         .from("boost_client_attributions")
         .select("fee_amount")
         .eq("fee_status", "charged");
 
       const totalRevenue = revenueData?.reduce((sum, item) => sum + (item.fee_amount || 0), 0) || 0;
+
+      // Get activation fee revenue (£5 per activation)
+      const { data: activationData } = await supabase
+        .from("coach_invoices")
+        .select("total")
+        .eq("source_type", "boost_activation");
+
+      const activationRevenue = activationData?.reduce((sum, item) => sum + (item.total || 0), 0) || 0;
 
       // Get this month's attributions
       const startOfMonth = new Date();
@@ -250,6 +295,7 @@ export const useBoostStats = () => {
       return {
         activeBoosts: activeBoosts || 0,
         totalRevenue,
+        activationRevenue,
         monthlyClients: monthlyClients || 0,
         monthlyRevenue,
       };
