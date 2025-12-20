@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 import ConversationList from "@/components/messaging/ConversationList";
 import ChatWindow from "@/components/messaging/ChatWindow";
@@ -7,12 +8,13 @@ import { Button } from "@/components/ui/button";
 import { useParticipantName } from "@/hooks/useParticipantName";
 
 const ClientMessages = () => {
+  const { t } = useTranslation('messaging');
   const { id: participantId } = useParams();
   const navigate = useNavigate();
   const { data: participantName } = useParticipantName(participantId);
 
   return (
-    <ClientDashboardLayout title="Messages" description="Chat with your coaches">
+    <ClientDashboardLayout title={t('title')} description={t('description')}>
       <div className="flex flex-col h-full min-h-0">
         <div className="flex items-center gap-2 mb-4">
           {participantId && (
@@ -25,7 +27,7 @@ const ClientMessages = () => {
               <ArrowLeft className="w-5 h-5" />
             </Button>
           )}
-          <h1 className="text-2xl font-bold text-foreground">Messages</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t('title')}</h1>
         </div>
 
         <div className="flex-1 bg-card border border-border rounded-lg overflow-hidden flex">
@@ -36,7 +38,7 @@ const ClientMessages = () => {
             }`}
           >
             <div className="p-4 border-b border-border">
-              <h2 className="font-semibold text-foreground">Conversations</h2>
+              <h2 className="font-semibold text-foreground">{t('inbox.title')}</h2>
             </div>
             <div className="flex-1 overflow-y-auto">
               <ConversationList activeConversationId={participantId} />
@@ -57,10 +59,10 @@ const ClientMessages = () => {
                   <MessageSquare className="w-8 h-8 text-primary" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-2">
-                  Select a conversation
+                  {t('selectConversation')}
                 </h3>
                 <p className="text-muted-foreground max-w-sm">
-                  Choose a coach from the list to start chatting
+                  {t('selectConversationDescription')}
                 </p>
               </div>
             )}
