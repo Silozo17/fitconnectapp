@@ -20,7 +20,9 @@ import {
   Trophy,
   Target,
   Dumbbell,
-  Flame
+  Flame,
+  Star,
+  User
 } from "lucide-react";
 import { calculateLevelFromXP, getLevelTitle, RARITY_COLORS } from "@/hooks/useGamification";
 import { toast } from "sonner";
@@ -42,6 +44,7 @@ interface FriendProfile {
   id: string;
   first_name: string | null;
   last_name: string | null;
+  display_name: string | null;
   username: string;
   avatar_url: string | null;
   location: string | null;
@@ -50,6 +53,10 @@ interface FriendProfile {
   country: string | null;
   fitness_goals: string[] | null;
   selected_avatar_id: string | null;
+  // Coach-specific fields
+  bio: string | null;
+  coach_types: string[] | null;
+  primary_coach_type: string | null;
 }
 
 interface FriendAvatar {
@@ -101,6 +108,7 @@ export function FriendProfileSheet({
   const [badges, setBadges] = useState<FriendBadge[]>([]);
   const [stats, setStats] = useState<FriendStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [coachRating, setCoachRating] = useState<{ avg: number | null; count: number }>({ avg: null, count: 0 });
 
   useEffect(() => {
     if (open && friendUserId) {
@@ -114,10 +122,10 @@ export function FriendProfileSheet({
       let profileData: FriendProfile | null = null;
 
       if (friendProfileType === "coach") {
-        // Fetch coach profile
+        // Fetch coach profile with extended fields
         const { data: coachData } = await supabase
           .from("coach_profiles")
-          .select("id, user_id, display_name, username, profile_image_url, location, location_city, location_country, selected_avatar_id")
+          .select("id, user_id, display_name, username, profile_image_url, location, location_city, location_region, location_country, selected_avatar_id, bio, coach_types, primary_coach_type")
           .eq("user_id", friendUserId)
           .single();
 
@@ -126,15 +134,33 @@ export function FriendProfileSheet({
             id: coachData.id,
             first_name: null,
             last_name: null,
+            display_name: coachData.display_name,
             username: coachData.username,
             avatar_url: coachData.profile_image_url,
             location: coachData.location,
             city: coachData.location_city,
-            county: null,
+            county: coachData.location_region,
             country: coachData.location_country,
             fitness_goals: null,
             selected_avatar_id: coachData.selected_avatar_id,
+            bio: coachData.bio,
+            coach_types: coachData.coach_types,
+            primary_coach_type: coachData.primary_coach_type,
           };
+
+          // Fetch coach rating from reviews
+          const { data: reviewData } = await supabase
+            .from("reviews")
+            .select("rating")
+            .eq("coach_id", coachData.id)
+            .eq("is_public", true);
+
+          if (reviewData && reviewData.length > 0) {
+            const sum = reviewData.reduce((acc, r) => acc + (r.rating || 0), 0);
+            setCoachRating({ avg: sum / reviewData.length, count: reviewData.length });
+          } else {
+            setCoachRating({ avg: null, count: 0 });
+          }
         }
       } else if (friendProfileType === "admin") {
         // Fetch admin profile
@@ -149,6 +175,7 @@ export function FriendProfileSheet({
             id: adminData.id,
             first_name: adminData.first_name,
             last_name: adminData.last_name,
+            display_name: adminData.display_name,
             username: adminData.username,
             avatar_url: adminData.avatar_url,
             location: null,
@@ -157,6 +184,9 @@ export function FriendProfileSheet({
             country: null,
             fitness_goals: null,
             selected_avatar_id: null,
+            bio: null,
+            coach_types: null,
+            primary_coach_type: null,
           };
         }
       } else {
@@ -167,7 +197,17 @@ export function FriendProfileSheet({
           .eq("user_id", friendUserId)
           .single();
 
-        profileData = clientData;
+        if (clientData) {
+          profileData = {
+            ...clientData,
+            display_name: null,
+            bio: null,
+            coach_types: null,
+            primary_coach_type: null,
+          };
+        }
+        // Reset coach rating for non-coaches
+        setCoachRating({ avg: null, count: 0 });
       }
 
       if (profileData) {
@@ -275,10 +315,13 @@ export function FriendProfileSheet({
     onOpenChange(false);
   };
 
-  // For coaches, we need to get display_name from profile data differently
-  const displayName = profile?.first_name 
-    ? `${profile.first_name}${profile.last_name ? ` ${profile.last_name}` : ""}`
-    : profile?.username || "Friend";
+  // Priority: display_name (coaches/admins) > first_name + last_name > username
+  const displayName = profile?.display_name 
+    || (profile?.first_name 
+        ? `${profile.first_name}${profile.last_name ? ` ${profile.last_name}` : ""}`
+        : null)
+    || profile?.username 
+    || "Friend";
 
   const locationDisplay = [profile?.city, profile?.county, profile?.country]
     .filter(Boolean)
@@ -334,103 +377,150 @@ export function FriendProfileSheet({
 
             <Separator />
 
-            {/* Level & XP */}
-            <div className="bg-card border border-border rounded-xl p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="bg-primary/20 rounded-full p-2">
-                    <Zap className="h-5 w-5 text-primary" />
+            {/* Coach-specific content */}
+            {friendProfileType === "coach" && (
+              <>
+                {/* Rating */}
+                {coachRating.count > 0 && (
+                  <div className="flex items-center gap-2 justify-center">
+                    <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+                    <span className="font-semibold text-foreground">{coachRating.avg?.toFixed(1)}</span>
+                    <span className="text-sm text-muted-foreground">({coachRating.count} reviews)</span>
                   </div>
+                )}
+
+                {/* Bio */}
+                {profile.bio && (
+                  <div className="bg-card border border-border rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium text-foreground">About</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{profile.bio}</p>
+                  </div>
+                )}
+
+                {/* Specialties */}
+                {profile.coach_types && profile.coach_types.length > 0 && (
                   <div>
-                    <div className="font-bold text-foreground">Level {level}</div>
-                    <div className="text-xs text-muted-foreground">{levelTitle}</div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Target className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium text-foreground">Specialties</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {profile.coach_types.map((type, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs capitalize">
+                          {type.replace(/_/g, " ")}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Client-specific content */}
+            {friendProfileType === "client" && (
+              <>
+                {/* Level & XP */}
+                <div className="bg-card border border-border rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="bg-primary/20 rounded-full p-2">
+                        <Zap className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <div className="font-bold text-foreground">Level {level}</div>
+                        <div className="text-xs text-muted-foreground">{levelTitle}</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xl font-bold text-primary">{totalXP.toLocaleString()}</div>
+                      <div className="text-xs text-muted-foreground">Total XP</div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <Progress value={progressPercent} className="h-2 bg-muted" />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>{xpInLevel.toLocaleString()} XP</span>
+                      <span>{xpForNextLevel.toLocaleString()} to Level {level + 1}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-xl font-bold text-primary">{totalXP.toLocaleString()}</div>
-                  <div className="text-xs text-muted-foreground">Total XP</div>
-                </div>
-              </div>
-              
-              <div className="space-y-1">
-                <Progress value={progressPercent} className="h-2 bg-muted" />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{xpInLevel.toLocaleString()} XP</span>
-                  <span>{xpForNextLevel.toLocaleString()} to Level {level + 1}</span>
-                </div>
-              </div>
-            </div>
 
-            {/* Stats Grid */}
-            {stats && (
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-card border border-border rounded-lg p-3 text-center">
-                  <Flame className="h-5 w-5 text-orange-500 mx-auto mb-1" />
-                  <div className="text-lg font-bold text-foreground">{stats.habitStreak}</div>
-                  <div className="text-xs text-muted-foreground">Day Streak</div>
-                </div>
-                <div className="bg-card border border-border rounded-lg p-3 text-center">
-                  <Dumbbell className="h-5 w-5 text-blue-500 mx-auto mb-1" />
-                  <div className="text-lg font-bold text-foreground">{stats.progressEntries}</div>
-                  <div className="text-xs text-muted-foreground">Check-ins</div>
-                </div>
-                <div className="bg-card border border-border rounded-lg p-3 text-center">
-                  <Trophy className="h-5 w-5 text-yellow-500 mx-auto mb-1" />
-                  <div className="text-lg font-bold text-foreground">{stats.badgesEarned}</div>
-                  <div className="text-xs text-muted-foreground">Badges</div>
-                </div>
-                <div className="bg-card border border-border rounded-lg p-3 text-center">
-                  <Zap className="h-5 w-5 text-primary mx-auto mb-1" />
-                  <div className="text-lg font-bold text-foreground">{level}</div>
-                  <div className="text-xs text-muted-foreground">Level</div>
-                </div>
-              </div>
-            )}
+                {/* Stats Grid */}
+                {stats && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-card border border-border rounded-lg p-3 text-center">
+                      <Flame className="h-5 w-5 text-orange-500 mx-auto mb-1" />
+                      <div className="text-lg font-bold text-foreground">{stats.habitStreak}</div>
+                      <div className="text-xs text-muted-foreground">Day Streak</div>
+                    </div>
+                    <div className="bg-card border border-border rounded-lg p-3 text-center">
+                      <Dumbbell className="h-5 w-5 text-blue-500 mx-auto mb-1" />
+                      <div className="text-lg font-bold text-foreground">{stats.progressEntries}</div>
+                      <div className="text-xs text-muted-foreground">Check-ins</div>
+                    </div>
+                    <div className="bg-card border border-border rounded-lg p-3 text-center">
+                      <Trophy className="h-5 w-5 text-yellow-500 mx-auto mb-1" />
+                      <div className="text-lg font-bold text-foreground">{stats.badgesEarned}</div>
+                      <div className="text-xs text-muted-foreground">Badges</div>
+                    </div>
+                    <div className="bg-card border border-border rounded-lg p-3 text-center">
+                      <Zap className="h-5 w-5 text-primary mx-auto mb-1" />
+                      <div className="text-lg font-bold text-foreground">{level}</div>
+                      <div className="text-xs text-muted-foreground">Level</div>
+                    </div>
+                  </div>
+                )}
 
-            {/* Fitness Goals */}
-            {profile.fitness_goals && profile.fitness_goals.length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Target className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">Fitness Goals</span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {profile.fitness_goals.map((goal, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs">
-                      {goal}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
+                {/* Fitness Goals */}
+                {profile.fitness_goals && profile.fitness_goals.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Target className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium text-foreground">Fitness Goals</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {profile.fitness_goals.map((goal, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs">
+                          {goal}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-            {/* Badges/Achievements */}
-            {badges.length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Trophy className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">Recent Achievements</span>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  {badges.map((badgeItem) => {
-                    const badgeRarity = badgeItem.badge?.rarity || "common";
-                    const colors = RARITY_COLORS[badgeRarity as keyof typeof RARITY_COLORS] || RARITY_COLORS.common;
-                    return (
-                      <div 
-                        key={badgeItem.id}
-                        className="bg-card border rounded-lg p-2 text-center"
-                        style={{ borderColor: colors.border }}
-                        title={badgeItem.badge?.description}
-                      >
-                        <span className="text-2xl">{badgeItem.badge?.icon || "🏆"}</span>
-                        <p className="text-xs text-muted-foreground truncate mt-1">
-                          {badgeItem.badge?.name}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+                {/* Badges/Achievements */}
+                {badges.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Trophy className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium text-foreground">Recent Achievements</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {badges.map((badgeItem) => {
+                        const badgeRarity = badgeItem.badge?.rarity || "common";
+                        const colors = RARITY_COLORS[badgeRarity as keyof typeof RARITY_COLORS] || RARITY_COLORS.common;
+                        return (
+                          <div 
+                            key={badgeItem.id}
+                            className="bg-card border rounded-lg p-2 text-center"
+                            style={{ borderColor: colors.border }}
+                            title={badgeItem.badge?.description}
+                          >
+                            <span className="text-2xl">{badgeItem.badge?.icon || "🏆"}</span>
+                            <p className="text-xs text-muted-foreground truncate mt-1">
+                              {badgeItem.badge?.name}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
             <Separator />
