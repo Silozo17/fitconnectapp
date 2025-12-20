@@ -172,25 +172,61 @@ serve(async (req) => {
 
     logStep("Coach tier", { tier, commission: `${applicationFeePercent}%` });
 
-    // Check if coach has Boost active
+    // Check if coach has Boost active (time-based entitlement)
+    // Boost is active only if:
+    // 1. is_active = true
+    // 2. payment_status = 'succeeded'
+    // 3. boost_end_date > current time
+    const now = new Date().toISOString();
     const { data: coachBoost } = await supabase
       .from("coach_boosts")
-      .select("is_active")
+      .select("is_active, boost_end_date, payment_status")
       .eq("coach_id", coachId)
       .eq("is_active", true)
+      .eq("payment_status", "succeeded")
+      .gt("boost_end_date", now)
       .maybeSingle();
 
-    // Check if this is a NEW client (never booked with this coach)
+    // Determine if boost is truly active (not expired)
+    const isBoostActive = !!(coachBoost?.is_active && coachBoost?.boost_end_date);
+
+    // Check if this is a NEW client (never booked with this coach before)
+    // This is tracked via boost_client_attributions to ensure first-booking fee
+    // only applies ONCE per client-coach relationship
+    const { data: existingAttribution } = await supabase
+      .from("boost_client_attributions")
+      .select("id")
+      .eq("coach_id", coachId)
+      .eq("client_id", clientId)
+      .maybeSingle();
+
+    // Also check coaching_sessions as a fallback
     const { count: previousBookings } = await supabase
       .from("coaching_sessions")
       .select("*", { count: "exact", head: true })
       .eq("coach_id", coachId)
       .eq("client_id", clientId);
 
-    const isNewClient = (previousBookings || 0) === 0;
-    const isBoostedAcquisition = !!(coachBoost?.is_active && isNewClient);
+    // Client is NEW only if:
+    // 1. No existing attribution record (haven't been charged first-booking fee before)
+    // 2. No previous coaching sessions
+    const isNewClient = !existingAttribution && (previousBookings || 0) === 0;
+    
+    // First-booking 30% fee applies when:
+    // 1. Coach has an ACTIVE (non-expired) Boost entitlement
+    // 2. This is a NEW client (first booking ever with this coach)
+    // Note: The £5 Boost activation fee is INDEPENDENT of this 30% first-booking fee
+    const isBoostedAcquisition = isBoostActive && isNewClient;
 
-    logStep("Boost check", { boostActive: coachBoost?.is_active, isNewClient, isBoostedAcquisition });
+    logStep("Boost check", { 
+      isBoostActive, 
+      boostEndDate: coachBoost?.boost_end_date,
+      paymentStatus: coachBoost?.payment_status,
+      isNewClient, 
+      hasExistingAttribution: !!existingAttribution,
+      previousBookings,
+      isBoostedAcquisition 
+    });
 
     // Get Boost settings and calculate fee if applicable
     let boostFeeAmount = 0;
