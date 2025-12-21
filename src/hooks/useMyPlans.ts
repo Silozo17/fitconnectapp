@@ -10,7 +10,6 @@ interface PlanAssignment {
   status: string;
   start_date: string | null;
   end_date: string | null;
-  notes: string | null;
   created_at: string;
   plan: {
     id: string;
@@ -18,12 +17,12 @@ interface PlanAssignment {
     description: string | null;
     plan_type: string;
     duration_weeks: number | null;
-  };
+  } | null;
   coach: {
     id: string;
     display_name: string | null;
     profile_image_url: string | null;
-  };
+  } | null;
 }
 
 export const useMyPlans = () => {
@@ -54,7 +53,6 @@ export const useMyPlans = () => {
           status,
           start_date,
           end_date,
-          notes,
           created_at,
           plan:training_plans!plan_assignments_plan_id_fkey (
             id,
@@ -73,7 +71,17 @@ export const useMyPlans = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return (data as unknown as PlanAssignment[]) || [];
+      
+      // Defensive: filter out assignments with missing plan data and normalize
+      const safeData = (data || [])
+        .filter(item => item.plan) // Only include assignments with valid plan data
+        .map(item => ({
+          ...item,
+          plan: item.plan || { id: '', name: 'Unknown Plan', description: null, plan_type: 'workout', duration_weeks: null },
+          coach: item.coach || { id: '', display_name: null, profile_image_url: null }
+        }));
+      
+      return safeData as PlanAssignment[];
     },
     enabled: !!user,
     staleTime: 1000 * 60 * 5, // 5 minutes
