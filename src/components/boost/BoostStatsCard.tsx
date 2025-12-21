@@ -1,18 +1,24 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, DollarSign, TrendingUp, Calendar, Clock } from "lucide-react";
 import { useCoachBoostStatus, useBoostAttributions, useBoostSettings, calculateBoostFee, isBoostActive, getBoostRemainingDays } from "@/hooks/useCoachBoost";
-import { formatCurrency } from "@/lib/currency";
+import { formatCurrency, convertBoostFeeForDisplay, getBoostDisplayCurrency } from "@/lib/currency";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { Badge } from "@/components/ui/badge";
+import { useCoachProfile } from "@/hooks/useCoachEarnings";
 
 export const BoostStatsCard = () => {
   const { data: boostStatus, isLoading: statusLoading } = useCoachBoostStatus();
   const { data: attributions, isLoading: attributionsLoading } = useBoostAttributions(5);
   const { data: settings } = useBoostSettings();
+  const { data: coachProfile } = useCoachProfile();
 
   const isLoading = statusLoading || attributionsLoading;
+  
+  // Currency conversion for PLN display
+  const displayCurrency = getBoostDisplayCurrency(coachProfile?.currency);
+  const convertForDisplay = (amountGBP: number) => convertBoostFeeForDisplay(amountGBP, displayCurrency);
 
   if (isLoading) {
     return (
@@ -90,7 +96,7 @@ export const BoostStatsCard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{formatCurrency(totalFees, "GBP")}</p>
+            <p className="text-3xl font-bold">{formatCurrency(convertForDisplay(totalFees), displayCurrency)}</p>
             <p className="text-xs text-muted-foreground">on new clients</p>
           </CardContent>
         </Card>
@@ -103,7 +109,7 @@ export const BoostStatsCard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{formatCurrency(estimatedLifetimeValue, "GBP")}</p>
+            <p className="text-3xl font-bold">{formatCurrency(convertForDisplay(estimatedLifetimeValue), displayCurrency)}</p>
             <p className="text-xs text-muted-foreground">from repeat visits</p>
           </CardContent>
         </Card>
@@ -159,7 +165,7 @@ export const BoostStatsCard = () => {
                     <div className="text-right">
                       <p className="text-sm font-medium">
                         {attribution.booking_amount 
-                          ? formatCurrency(attribution.booking_amount, "GBP") 
+                          ? formatCurrency(convertForDisplay(attribution.booking_amount), displayCurrency) 
                           : "Pending booking"}
                       </p>
                       {attribution.fee_amount && (
@@ -167,7 +173,7 @@ export const BoostStatsCard = () => {
                           variant={attribution.fee_status === "charged" ? "secondary" : attribution.fee_status === "waived" ? "outline" : "default"}
                           className="text-xs"
                         >
-                          Fee: {formatCurrency(attribution.fee_amount, "GBP")}
+                          Fee: {formatCurrency(convertForDisplay(attribution.fee_amount), displayCurrency)}
                           {attribution.fee_status === "waived" && " (waived)"}
                         </Badge>
                       )}
@@ -178,7 +184,7 @@ export const BoostStatsCard = () => {
             </div>
           ) : (
             <p className="text-muted-foreground text-center py-8">
-              No clients acquired via Boost yet. Purchase Boost for £5 to start appearing first in search results for 30 days!
+              No clients acquired via Boost yet. Purchase Boost for {formatCurrency(convertForDisplay(5), displayCurrency)} to start appearing first in search results for 30 days!
             </p>
           )}
         </CardContent>
@@ -193,16 +199,16 @@ export const BoostStatsCard = () => {
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
               Fee is {Math.round(settings.commission_rate * 100)}% of booking value. 
-              Minimum fee: {formatCurrency(settings.min_fee * settings.commission_rate, "GBP")} (on bookings under {formatCurrency(settings.min_fee, "GBP")}). 
-              Maximum fee: {formatCurrency(settings.max_fee * settings.commission_rate, "GBP")} (on bookings over {formatCurrency(settings.max_fee, "GBP")}).
+              Minimum fee: {formatCurrency(convertForDisplay(settings.min_fee * settings.commission_rate), displayCurrency)} (on bookings under {formatCurrency(convertForDisplay(settings.min_fee), displayCurrency)}). 
+              Maximum fee: {formatCurrency(convertForDisplay(settings.max_fee * settings.commission_rate), displayCurrency)} (on bookings over {formatCurrency(convertForDisplay(settings.max_fee), displayCurrency)}).
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[20, 50, 100, 150].map((amount) => {
                 const fee = calculateBoostFee(amount, settings);
                 return (
                   <div key={amount} className="p-3 rounded-lg bg-muted/50 text-center">
-                    <p className="text-sm text-muted-foreground">{formatCurrency(amount, "GBP")} booking</p>
-                    <p className="text-lg font-bold text-primary">{formatCurrency(fee, "GBP")} fee</p>
+                    <p className="text-sm text-muted-foreground">{formatCurrency(convertForDisplay(amount), displayCurrency)} booking</p>
+                    <p className="text-lg font-bold text-primary">{formatCurrency(convertForDisplay(fee), displayCurrency)} fee</p>
                   </div>
                 );
               })}
