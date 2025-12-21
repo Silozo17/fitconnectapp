@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format, addDays } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogContent,
@@ -65,6 +66,7 @@ interface AISuggestion {
 }
 
 export function CreateChallengeModal({ open, onOpenChange, challenge }: CreateChallengeModalProps) {
+  const { t } = useTranslation('admin');
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([]);
@@ -351,7 +353,7 @@ export function CreateChallengeModal({ open, onOpenChange, challenge }: CreateCh
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEdit ? 'Edit Challenge' : 'Create Challenge'}</DialogTitle>
+          <DialogTitle>{isEdit ? t('challenges.editChallenge') : t('challenges.createChallenge')}</DialogTitle>
         </DialogHeader>
         
         {/* AI Suggestions */}
@@ -360,7 +362,7 @@ export function CreateChallengeModal({ open, onOpenChange, challenge }: CreateCh
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-primary" />
-                AI Challenge Ideas
+                {t('challenges.aiChallengeIdeas')}
               </span>
               <Button
                 type="button"
@@ -374,7 +376,7 @@ export function CreateChallengeModal({ open, onOpenChange, challenge }: CreateCh
                 ) : (
                   <>
                     <RefreshCw className="h-4 w-4 mr-1" />
-                    Generate Ideas
+                    {t('challenges.generateIdeas')}
                   </>
                 )}
               </Button>
@@ -408,7 +410,7 @@ export function CreateChallengeModal({ open, onOpenChange, challenge }: CreateCh
         <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
-              <Label htmlFor="title">Title</Label>
+              <Label htmlFor="title">{t('challenges.title')}</Label>
               <Input
                 id="title"
                 {...form.register('title')}
@@ -420,7 +422,7 @@ export function CreateChallengeModal({ open, onOpenChange, challenge }: CreateCh
             </div>
             
             <div className="col-span-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{t('challenges.description')}</Label>
               <Textarea
                 id="description"
                 {...form.register('description')}
@@ -430,7 +432,7 @@ export function CreateChallengeModal({ open, onOpenChange, challenge }: CreateCh
             </div>
             
             <div>
-              <Label>Challenge Type</Label>
+              <Label>{t('challenges.challengeType')}</Label>
               <Select
                 value={form.watch('challenge_type')}
                 onValueChange={(v) => {
@@ -453,7 +455,7 @@ export function CreateChallengeModal({ open, onOpenChange, challenge }: CreateCh
             </div>
             
             <div>
-              <Label>Target Audience</Label>
+              <Label>{t('challenges.targetAudience')}</Label>
               <Select
                 value={form.watch('target_audience')}
                 onValueChange={(v: any) => form.setValue('target_audience', v)}
@@ -462,15 +464,15 @@ export function CreateChallengeModal({ open, onOpenChange, challenge }: CreateCh
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="clients">Clients Only</SelectItem>
-                  <SelectItem value="coaches">Coaches Only</SelectItem>
-                  <SelectItem value="all">Everyone</SelectItem>
+                  <SelectItem value="clients">{t('challenges.clientsOnly')}</SelectItem>
+                  <SelectItem value="coaches">{t('challenges.coachesOnly')}</SelectItem>
+                  <SelectItem value="all">{t('challenges.everyone')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div>
-              <Label htmlFor="target_value">Target Value</Label>
+              <Label htmlFor="target_value">{t('challenges.targetValue')}</Label>
               <Input
                 id="target_value"
                 type="number"
@@ -479,7 +481,7 @@ export function CreateChallengeModal({ open, onOpenChange, challenge }: CreateCh
             </div>
             
             <div>
-              <Label htmlFor="target_unit">Target Unit</Label>
+              <Label htmlFor="target_unit">{t('challenges.targetUnit')}</Label>
               <Input
                 id="target_unit"
                 {...form.register('target_unit')}
@@ -488,13 +490,65 @@ export function CreateChallengeModal({ open, onOpenChange, challenge }: CreateCh
             </div>
             
             <div>
-              <Label htmlFor="xp_reward">XP Reward</Label>
+              <Label htmlFor="xp_reward">{t('challenges.xpReward')}</Label>
               <Input
                 id="xp_reward"
                 type="number"
                 {...form.register('xp_reward', { valueAsNumber: true })}
               />
             </div>
+            
+            <div>
+              <Label htmlFor="max_participants">{t('challenges.maxParticipants')}</Label>
+              <Input
+                id="max_participants"
+                type="number"
+                {...form.register('max_participants', { 
+                  valueAsNumber: true,
+                  setValueAs: v => v === '' ? null : Number(v)
+                })}
+                placeholder={t('challenges.maxParticipantsPlaceholder')}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="start_date">{t('challenges.startDate')}</Label>
+              <Input
+                id="start_date"
+                type="date"
+                {...form.register('start_date')}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="end_date">{t('challenges.endDate')}</Label>
+              <Input
+                id="end_date"
+                type="date"
+                {...form.register('end_date')}
+              />
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="is_active"
+                  checked={form.watch('is_active')}
+                  onCheckedChange={(v) => form.setValue('is_active', v)}
+                />
+                <Label htmlFor="is_active">{t('challenges.isActive')}</Label>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="visibility"
+                  checked={form.watch('visibility') === 'public'}
+                  onCheckedChange={(v) => form.setValue('visibility', v ? 'public' : 'private')}
+                />
+                <Label htmlFor="visibility">{t('challenges.public')}</Label>
+              </div>
+            </div>
+          </div>
             
             <div>
               <Label htmlFor="max_participants">Max Participants (optional)</Label>
@@ -557,11 +611,11 @@ export function CreateChallengeModal({ open, onOpenChange, challenge }: CreateCh
           
           <div className="flex justify-end gap-3 pt-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t('forms.cancel', { ns: 'settings' })}
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
               {mutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {isEdit ? 'Update' : 'Create'} Challenge
+              {isEdit ? t('challenges.updateChallenge') : t('challenges.createChallenge')}
             </Button>
           </div>
         </form>
