@@ -908,51 +908,6 @@
     "join": "Join Community",
     "comingSoon": "Coming Soon"
   },
-  "pages": {
-    "community": {
-      "leaderboard": {
-        "table": {
-          "rank": "Rank",
-          "name": "Name",
-          "location": "Location",
-          "level": "Level"
-        }
-      },
-      "avatars": {
-        "tabs": {
-          "all": "All",
-          "free": "Free",
-          "challenge": "Challenge",
-          "coach": "Coach"
-        },
-        "categories": {
-          "free": "Free Avatars",
-          "challenge": "Challenge Avatars",
-          "coach": "Coach Exclusive"
-        },
-        "unlock": {
-          "challenges": {
-            "title": "Complete Challenges",
-            "description": "Finish community challenges to unlock exclusive avatars"
-          },
-          "milestones": {
-            "title": "Hit Milestones",
-            "description": "Reach workout and nutrition milestones"
-          },
-          "streaks": {
-            "title": "Build Streaks",
-            "description": "Maintain daily habits to earn rare avatars"
-          }
-        }
-      },
-      "cta": {
-        "title": "Ready to Join the Community?",
-        "description": "Start your fitness journey today and compete with thousands of others.",
-        "getStarted": "Get Started",
-        "findCoach": "Find a Coach"
-      }
-    }
-  },
   "careers": {
     "title": "Careers",
     "subtitle": "Join our team and help shape the future of fitness",
@@ -975,9 +930,11 @@
       },
       "hero": {
         "badge": "Boxing Training",
-        "title": "Learn to Box with",
+        "titleStart": "Learn to Box with",
         "titleHighlight": "Expert Coaches",
-        "description": "Train with experienced boxing coaches who teach proper technique, build your fitness, and help you achieve your goals—whether that's fitness, competition, or self-defence."
+        "description": "Train with experienced boxing coaches who teach proper technique, build your fitness, and help you achieve your goals—whether that's fitness, competition, or self-defence.",
+        "browseButton": "Browse Boxing Coaches",
+        "howItWorks": "How It Works"
       },
       "benefits": {
         "title": "Why Train Boxing?",
@@ -986,15 +943,15 @@
           "title": "Full-Body Workout",
           "description": "Boxing engages every muscle group, burning up to 800 calories per session."
         },
-        "realSkills": {
+        "skills": {
           "title": "Learn Real Skills",
           "description": "Master proper technique from footwork to combinations with expert coaching."
         },
-        "selfDefence": {
+        "selfDefense": {
           "title": "Self-Defence",
           "description": "Gain confidence and practical self-defence skills that last a lifetime."
         },
-        "stressRelief": {
+        "stress": {
           "title": "Stress Relief",
           "description": "Release tension and boost mental clarity through focused training."
         }
@@ -1003,8 +960,16 @@
         "title": "Top-Rated Boxing Coaches",
         "description": "Train with experienced boxing coaches who know how to get results.",
         "viewAll": "View All Boxing Coaches",
-        "fightsCoached": "{{count}} fights coached",
-        "clients": "{{count}}+ clients"
+        "specialties": {
+          "amateur": "Amateur Boxing Coach",
+          "fitness": "Boxing Fitness",
+          "womens": "Women's Boxing"
+        },
+        "stats": {
+          "fights": "{{count}} fights coached",
+          "clients": "{{count}}+ clients"
+        },
+        "experience": "{{years}} years experience"
       },
       "faq": {
         "title": "Frequently Asked Questions",
@@ -1047,10 +1012,12 @@
       },
       "hero": {
         "badge": "Mixed Martial Arts",
-        "title": "Train",
+        "titleStart": "Train",
         "titleHighlight": "MMA",
         "titleEnd": "with the Best",
-        "description": "Learn mixed martial arts from experienced fighters and coaches. Master multiple disciplines, build elite conditioning, and develop complete fighting skills."
+        "description": "Learn mixed martial arts from experienced fighters and coaches. Master multiple disciplines, build elite conditioning, and develop complete fighting skills.",
+        "browseButton": "Browse MMA Coaches",
+        "howItWorks": "How It Works"
       },
       "disciplines": {
         "title": "Disciplines You'll Learn",
@@ -1074,19 +1041,19 @@
       "benefits": {
         "title": "Why Train MMA?",
         "description": "MMA offers the most complete martial arts training available, combining multiple disciplines for real-world effectiveness.",
-        "completeCombat": {
+        "combat": {
           "title": "Complete Combat System",
           "description": "Learn striking, wrestling, and ground fighting in one comprehensive training program."
         },
-        "eliteConditioning": {
+        "conditioning": {
           "title": "Elite Conditioning",
           "description": "Build functional strength, explosive power, and combat-ready endurance."
         },
-        "realSelfDefence": {
+        "selfDefense": {
           "title": "Real Self-Defence",
           "description": "Develop practical skills for any situation with complete martial arts training."
         },
-        "expertCoaches": {
+        "coaches": {
           "title": "Expert Coaches",
           "description": "Train with coaches who have real competitive experience and proven teaching methods."
         }
@@ -1095,8 +1062,16 @@
         "title": "Top-Rated MMA Coaches",
         "description": "Train with coaches who have real fighting experience.",
         "viewAll": "View All MMA Coaches",
-        "proFights": "{{count}} pro fights",
-        "clients": "{{count}}+ clients"
+        "specialties": {
+          "bjj": "BJJ Specialist",
+          "striking": "Striking Coach",
+          "wrestling": "Wrestling Coach"
+        },
+        "stats": {
+          "fights": "{{count}} pro fights",
+          "clients": "{{count}}+ clients"
+        },
+        "proFighter": "Pro Fighter"
       },
       "faq": {
         "title": "Frequently Asked Questions",
@@ -1109,7 +1084,7 @@
           "question": "What does MMA training involve?",
           "answer": "MMA training combines multiple disciplines including striking (boxing, Muay Thai), wrestling, and grappling (Brazilian Jiu-Jitsu). Your coach will create a well-rounded program based on your goals."
         },
-        "danger": {
+        "safety": {
           "question": "Is MMA training dangerous?",
           "answer": "With proper coaching, MMA training is very safe. Beginners focus on technique, conditioning, and controlled drilling. Sparring is optional and only introduced when you're ready."
         },
@@ -1139,22 +1114,24 @@
       },
       "hero": {
         "badge": "Personal Training",
-        "title": "Find Your Perfect",
+        "titleStart": "Find Your Perfect",
         "titleHighlight": "Personal Trainer",
-        "description": "Work with certified personal trainers who create customised workout programs, keep you accountable, and help you achieve results faster than training alone."
+        "description": "Work with certified personal trainers who create customised workout programs, keep you accountable, and help you achieve results faster than training alone.",
+        "browseButton": "Browse Personal Trainers",
+        "howItWorks": "How It Works"
       },
       "benefits": {
         "title": "Why Work with a Personal Trainer?",
         "description": "Personal training is the fastest way to reach your fitness goals with expert guidance every step of the way.",
-        "personalised": {
+        "programs": {
           "title": "Personalised Programs",
           "description": "Custom workout plans designed specifically for your goals, fitness level, and schedule."
         },
-        "trackProgress": {
+        "progress": {
           "title": "Track Your Progress",
           "description": "Monitor your improvements with detailed tracking and regular assessments."
         },
-        "expertGuidance": {
+        "guidance": {
           "title": "Expert Guidance",
           "description": "Work with certified professionals who keep you motivated and accountable."
         },
@@ -1167,7 +1144,14 @@
         "title": "Top-Rated Personal Trainers",
         "description": "Discover highly-rated personal trainers ready to help you transform.",
         "viewAll": "View All Personal Trainers",
-        "sessions": "{{count}}+ sessions"
+        "specialties": {
+          "weightLoss": "Weight Loss Specialist",
+          "strength": "Strength Training",
+          "functional": "Functional Fitness"
+        },
+        "stats": {
+          "sessions": "{{count}}+ sessions"
+        }
       },
       "faq": {
         "title": "Frequently Asked Questions",
@@ -1210,9 +1194,11 @@
       },
       "hero": {
         "badge": "Nutrition Coaching",
-        "title": "Expert",
+        "titleStart": "Expert",
         "titleHighlight": "Nutrition Coaching",
-        "description": "Work with qualified nutritionists who create personalised meal plans, help you build healthy habits, and guide you towards optimal health and performance."
+        "description": "Work with qualified nutritionists who create personalised meal plans, help you build healthy habits, and guide you towards optimal health and performance.",
+        "browseButton": "Browse Nutritionists",
+        "howItWorks": "How It Works"
       },
       "benefits": {
         "title": "Why Work with a Nutritionist?",
@@ -1221,15 +1207,15 @@
           "title": "Custom Meal Plans",
           "description": "Personalised nutrition plans designed around your goals, preferences, and dietary requirements."
         },
-        "weightManagement": {
+        "weight": {
           "title": "Weight Management",
           "description": "Science-based approaches to achieve and maintain your ideal weight sustainably."
         },
-        "healthOptimisation": {
+        "health": {
           "title": "Health Optimisation",
           "description": "Improve energy, sleep, digestion, and overall wellbeing through proper nutrition."
         },
-        "dietarySupport": {
+        "dietary": {
           "title": "Dietary Support",
           "description": "Expert guidance for special diets including vegan, keto, gluten-free, and more."
         }
@@ -1238,7 +1224,14 @@
         "title": "Top-Rated Nutritionists",
         "description": "Discover highly-rated nutrition experts ready to help you eat better.",
         "viewAll": "View All Nutritionists",
-        "clients": "{{count}}+ clients"
+        "specialties": {
+          "weightLoss": "Weight Loss Specialist",
+          "sports": "Sports Nutrition",
+          "plantBased": "Plant-Based Nutrition"
+        },
+        "stats": {
+          "clients": "{{count}}+ clients"
+        }
       },
       "faq": {
         "title": "Frequently Asked Questions",
