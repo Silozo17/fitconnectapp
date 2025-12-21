@@ -17,6 +17,8 @@ export interface LocationData {
   region: string | null;
   county?: string | null;
   country: string | null;
+  /** ISO 3166-1 alpha-2 country code (e.g., 'GB', 'PL') */
+  countryCode?: string | null;
 }
 
 export interface CoachLocationData {
