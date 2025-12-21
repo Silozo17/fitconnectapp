@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Challenge, useJoinChallenge, CHALLENGE_TYPES } from '@/hooks/useChallenges';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -5,10 +6,19 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { format, differenceInDays, isAfter, isBefore } from 'date-fns';
-import { Calendar, Users, Zap, Trophy, Clock, Target, ShieldCheck, Watch, AlertTriangle, Gift } from 'lucide-react';
+import { Calendar, Users, Zap, Trophy, Clock, Target, ShieldCheck, Watch, AlertTriangle, Gift, Share2, Twitter, Facebook, Linkedin, MessageCircle, Mail, Link, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ChallengeRewardPreview } from './ChallengeRewardPreview';
+import { share, canUseNativeShare } from '@/lib/share';
+import { getChallengeShareOptions } from '@/lib/shareHelpers';
+import { isDespia } from '@/lib/despia';
 
 interface ChallengeCardProps {
   challenge: Challenge;
@@ -19,6 +29,7 @@ interface ChallengeCardProps {
 export function ChallengeCard({ challenge, showJoinButton = true, showProgress = false }: ChallengeCardProps) {
   const { t } = useTranslation('gamification');
   const joinChallenge = useJoinChallenge();
+  const [copied, setCopied] = useState(false);
   
   const today = new Date();
   const startDate = new Date(challenge.start_date);
@@ -94,6 +105,67 @@ export function ChallengeCard({ challenge, showJoinButton = true, showProgress =
   const rewardType = challenge.reward_type;
   const isRewardUnlocked = challenge.my_participation?.status === 'completed';
   
+  const shareOptions = getChallengeShareOptions(challenge);
+  
+  const handleNativeShare = async () => {
+    await share('native', shareOptions);
+  };
+
+  const handleShare = async (platform: 'twitter' | 'facebook' | 'linkedin' | 'whatsapp' | 'email' | 'copy') => {
+    const success = await share(platform, shareOptions);
+    if (platform === 'copy' && success) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const ShareButton = () => {
+    // For Despia, use native share directly
+    if (isDespia() || canUseNativeShare()) {
+      return (
+        <Button variant="ghost" size="icon" onClick={handleNativeShare} className="h-8 w-8">
+          <Share2 className="h-4 w-4" />
+        </Button>
+      );
+    }
+
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Share2 className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuItem onClick={() => handleShare('twitter')}>
+            <Twitter className="h-4 w-4 mr-2" />
+            {t('share.shareOnX')}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleShare('facebook')}>
+            <Facebook className="h-4 w-4 mr-2" />
+            {t('share.shareOnFacebook')}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleShare('linkedin')}>
+            <Linkedin className="h-4 w-4 mr-2" />
+            {t('share.shareOnLinkedin')}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleShare('whatsapp')}>
+            <MessageCircle className="h-4 w-4 mr-2" />
+            {t('share.shareOnWhatsapp')}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleShare('email')}>
+            <Mail className="h-4 w-4 mr-2" />
+            {t('share.shareViaEmail')}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleShare('copy')}>
+            {copied ? <Check className="h-4 w-4 mr-2" /> : <Link className="h-4 w-4 mr-2" />}
+            {copied ? t('share.copied') : t('share.copyLink')}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
+  
   return (
     <Card className={cn(
       'transition-all',
@@ -112,7 +184,10 @@ export function ChallengeCard({ challenge, showJoinButton = true, showProgress =
               </p>
             )}
           </div>
-          {getStatusBadge()}
+          <div className="flex items-center gap-2">
+            <ShareButton />
+            {getStatusBadge()}
+          </div>
         </div>
       </CardHeader>
       
