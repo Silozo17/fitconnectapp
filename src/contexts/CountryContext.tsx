@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 import { RouteLocationCode, SUPPORTED_LOCATIONS, isValidLocation, COUNTRY_TO_LOCATION } from "@/lib/locale-routing";
+import { User } from "@supabase/supabase-js";
 
 // Storage key for country preference (localStorage fallback for unauthenticated users)
 const COUNTRY_STORAGE_KEY = "fitconnect_country";
@@ -218,11 +218,27 @@ interface CountryProviderProps {
  * IMPORTANT: Currency is NEVER inferred from language - only from country.
  */
 export function CountryProvider({ children }: CountryProviderProps) {
-  const { user } = useAuth();
+  // Use direct Supabase auth instead of useAuth to avoid circular dependency
+  const [user, setUser] = useState<User | null>(null);
   const [countryCode, setCountryCode] = useState<RouteLocationCode>(DEFAULT_COUNTRY);
   const [detectedCountry, setDetectedCountry] = useState<RouteLocationCode | null>(null);
   const [isManualOverride, setIsManualOverride] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Listen to auth state changes directly from Supabase
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Resolve country using priority order
   useEffect(() => {
