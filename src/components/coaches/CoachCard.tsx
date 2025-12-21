@@ -104,13 +104,14 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
             />
           </div>
         ) : (
-          // Priority 3: Fallback to initials
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20">
+          // Priority 3: Fallback to initials with matching gradient
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-cyan-400 via-emerald-400 to-lime-400 overflow-hidden">
             <UserAvatar 
               src={null} 
               name={coach.display_name} 
               variant="squircle"
-              size="lg"
+              size="xl"
+              className="scale-150"
             />
           </div>
         )}
