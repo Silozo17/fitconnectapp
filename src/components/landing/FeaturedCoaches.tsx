@@ -7,6 +7,8 @@ import { useUserLocation } from "@/hooks/useUserLocation";
 import { useFeaturedCoaches } from "@/hooks/useFeaturedCoaches";
 import { getDisplayLocation } from "@/lib/location-utils";
 import { BenefitCard } from "./BenefitCard";
+import { getAvatarImageUrl } from "@/hooks/useAvatars";
+import { UserAvatar } from "@/components/shared/UserAvatar";
 
 const FeaturedCoaches = () => {
   const { t } = useTranslation('landing');
@@ -118,13 +120,33 @@ const FeaturedCoaches = () => {
                 to={`/coaches/${coach.username || coach.id}`}
                 className="group card-elevated overflow-hidden hover-lift"
               >
-                {/* Image */}
+                {/* Image - 3-tier fallback matching CoachCard */}
                 <div className="relative aspect-square overflow-hidden">
-                  <img
-                    src={coach.profile_image_url || coach.card_image_url || ""}
-                    alt={coach.display_name || "Coach"}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
+                  {(coach.card_image_url || coach.profile_image_url) ? (
+                    <img
+                      src={coach.card_image_url || coach.profile_image_url || ""}
+                      alt={coach.display_name || "Coach"}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : coach.avatars?.slug ? (
+                    <div className="w-full h-full overflow-hidden bg-gradient-to-br from-cyan-400 via-emerald-400 to-lime-400 group-hover:scale-105 transition-transform duration-500">
+                      <img 
+                        src={getAvatarImageUrl(coach.avatars.slug)} 
+                        alt={coach.display_name || "Coach"} 
+                        className="w-full h-[180%] object-contain object-top"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-cyan-400 via-emerald-400 to-lime-400 group-hover:scale-105 transition-transform duration-500">
+                      <UserAvatar 
+                        src={null} 
+                        name={coach.display_name} 
+                        variant="squircle"
+                        size="xl"
+                        className="scale-150"
+                      />
+                    </div>
+                  )}
                   {coach.is_verified && (
                     <div className="absolute top-3 right-3">
                       <Badge className="gradient-bg-primary text-white border-0 gap-1">
