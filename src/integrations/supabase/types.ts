@@ -5322,49 +5322,24 @@ export type Database = {
     Views: {
       leaderboard_profiles: {
         Row: {
+          avatar_url: string | null
           city: string | null
           country: string | null
           county: string | null
-          display_name: string | null
+          current_level: number | null
+          first_name: string | null
           id: string | null
+          last_name: string | null
+          leaderboard_display_name: string | null
           leaderboard_visible: boolean | null
-          selected_avatar_id: string | null
-          user_id: string | null
+          total_xp: number | null
+          username: string | null
         }
-        Insert: {
-          city?: string | null
-          country?: string | null
-          county?: string | null
-          display_name?: never
-          id?: string | null
-          leaderboard_visible?: boolean | null
-          selected_avatar_id?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          city?: string | null
-          country?: string | null
-          county?: string | null
-          display_name?: never
-          id?: string | null
-          leaderboard_visible?: boolean | null
-          selected_avatar_id?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_profiles_selected_avatar_id_fkey"
-            columns: ["selected_avatar_id"]
-            isOneToOne: false
-            referencedRelation: "avatars"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       public_coach_profiles: {
         Row: {
           bio: string | null
-          booking_mode: string | null
           card_image_url: string | null
           certifications: Json | null
           coach_types: string[] | null
@@ -5389,22 +5364,19 @@ export type Database = {
           location_lng: number | null
           location_region: string | null
           marketplace_visible: boolean | null
-          onboarding_completed: boolean | null
           online_available: boolean | null
           primary_coach_type: string | null
           profile_image_url: string | null
-          selected_avatar_id: string | null
           threads_url: string | null
           tiktok_url: string | null
           username: string | null
-          verified_at: string | null
+          verification_status: string | null
           who_i_work_with: string | null
           x_url: string | null
           youtube_url: string | null
         }
         Insert: {
           bio?: string | null
-          booking_mode?: string | null
           card_image_url?: string | null
           certifications?: Json | null
           coach_types?: string[] | null
@@ -5429,22 +5401,19 @@ export type Database = {
           location_lng?: number | null
           location_region?: string | null
           marketplace_visible?: boolean | null
-          onboarding_completed?: boolean | null
           online_available?: boolean | null
           primary_coach_type?: string | null
           profile_image_url?: string | null
-          selected_avatar_id?: string | null
           threads_url?: string | null
           tiktok_url?: string | null
           username?: string | null
-          verified_at?: string | null
+          verification_status?: string | null
           who_i_work_with?: string | null
           x_url?: string | null
           youtube_url?: string | null
         }
         Update: {
           bio?: string | null
-          booking_mode?: string | null
           card_image_url?: string | null
           certifications?: Json | null
           coach_types?: string[] | null
@@ -5469,28 +5438,18 @@ export type Database = {
           location_lng?: number | null
           location_region?: string | null
           marketplace_visible?: boolean | null
-          onboarding_completed?: boolean | null
           online_available?: boolean | null
           primary_coach_type?: string | null
           profile_image_url?: string | null
-          selected_avatar_id?: string | null
           threads_url?: string | null
           tiktok_url?: string | null
           username?: string | null
-          verified_at?: string | null
+          verification_status?: string | null
           who_i_work_with?: string | null
           x_url?: string | null
           youtube_url?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "coach_profiles_selected_avatar_id_fkey"
-            columns: ["selected_avatar_id"]
-            isOneToOne: false
-            referencedRelation: "avatars"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       public_leaderboard_profiles: {
         Row: {
@@ -5501,20 +5460,9 @@ export type Database = {
           current_level: number | null
           id: string | null
           leaderboard_display_name: string | null
-          leaderboard_visible: boolean | null
-          selected_avatar_id: string | null
           total_xp: number | null
-          username: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "client_profiles_selected_avatar_id_fkey"
-            columns: ["selected_avatar_id"]
-            isOneToOne: false
-            referencedRelation: "avatars"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Functions: {

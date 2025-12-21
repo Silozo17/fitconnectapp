@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import DOMPurify from "dompurify";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -174,7 +175,7 @@ export default function VerificationOnboardingStep({
         <AlertCircle className="h-4 w-4" />
         <AlertDescription 
           className="text-sm"
-          dangerouslySetInnerHTML={{ __html: t('onboarding.verificationOptional') }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(t('onboarding.verificationOptional')) }}
         />
       </Alert>
 
