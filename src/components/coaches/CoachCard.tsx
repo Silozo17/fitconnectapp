@@ -157,8 +157,8 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
           </div>
         )}
 
-        <div className="flex items-center justify-between pt-4 border-t border-border">
-          <div>
+        <div className="flex items-center justify-between gap-3 pt-4 border-t border-border">
+          <div className="min-w-0 flex-shrink">
             {coach.hourly_rate ? (
               <>
                 <span className="font-display font-bold text-xl text-foreground">{formatCurrency(coach.hourly_rate, (coach.currency as CurrencyCode) || 'GBP')}</span>
@@ -172,7 +172,7 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
           {/* Action Buttons */}
           {isClient ? (
             <TooltipProvider>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 flex-shrink-0">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button 
@@ -221,7 +221,7 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
               </div>
             </TooltipProvider>
           ) : !isAuthenticated ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <Button asChild variant="lime-outline" size="sm">
                 <Link to={`${effectiveLinkPrefix}/${coach.username || coach.id}`}>View</Link>
               </Button>
