@@ -43,10 +43,14 @@ const DashboardLayout = memo(({ children, title = "Coach Dashboard", description
 
   if (isLoading || !onboardingStatus?.isOnboarded) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center" role="status" aria-label="Loading dashboard">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" aria-hidden="true" />
-        <span className="sr-only">Loading dashboard...</span>
-      </div>
+      <>
+        <div className="min-h-screen bg-background flex items-center justify-center" role="status" aria-label="Loading dashboard">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" aria-hidden="true" />
+          <span className="sr-only">Loading dashboard...</span>
+        </div>
+        {/* Always render bottom nav for immediate visibility in PWA/Despia */}
+        <MobileBottomNav variant="coach" />
+      </>
     );
   }
 

@@ -36,11 +36,6 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
-  // Show on all mobile screens (browser, PWA, native)
-  if (!isMobile) {
-    return null;
-  }
-
   const navItems = variant === "client" ? clientNavItems : coachNavItems;
 
   const isActive = (route: string) => {
@@ -52,10 +47,19 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
     return location.pathname.startsWith(route);
   };
 
+  // Use CSS md:hidden for immediate visibility on mobile, with JS fallback
+  // This ensures nav is visible before JS hydrates in PWA/Despia
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+      className={cn(
+        "fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border",
+        "md:hidden" // CSS-based hiding on desktop (≥768px)
+      )}
+      style={{ 
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        // JS fallback for edge cases where CSS hasn't applied yet
+        display: isMobile === false ? 'none' : undefined
+      }}
       role="navigation"
       aria-label={t("bottomNav.mobileNavigation")}
     >
