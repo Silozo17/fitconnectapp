@@ -42,6 +42,7 @@ import PlatformSubscription from "@/components/payments/PlatformSubscription";
 import { useQuery } from "@tanstack/react-query";
 import { CurrencySelector } from "@/components/shared/CurrencySelector";
 import { LanguageSelector } from "@/components/shared/LanguageSelector";
+import { LocationAutocomplete } from "@/components/shared/LocationAutocomplete";
 import { LocationSelector } from "@/components/shared/LocationSelector";
 import { useLocale } from "@/contexts/LocaleContext";
 import { getCurrencySymbol } from "@/lib/currency";
@@ -85,6 +86,14 @@ interface CoachProfile {
   username: string;
   bio: string | null;
   location: string | null;
+  // Structured location fields (from Google Places)
+  location_city: string | null;
+  location_region: string | null;
+  location_country: string | null;
+  location_country_code: string | null;
+  location_lat: number | null;
+  location_lng: number | null;
+  location_place_id: string | null;
   gym_affiliation: string | null;
   experience_years: number | null;
   hourly_rate: number | null;
@@ -232,6 +241,13 @@ const CoachSettings = () => {
     username: "",
     bio: "",
     location: "",
+    location_city: null,
+    location_region: null,
+    location_country: null,
+    location_country_code: null,
+    location_lat: null,
+    location_lng: null,
+    location_place_id: null,
     gym_affiliation: "",
     experience_years: null,
     hourly_rate: null,
@@ -271,7 +287,7 @@ const CoachSettings = () => {
 
       const { data, error } = await supabase
         .from("coach_profiles")
-        .select("id, display_name, username, bio, location, gym_affiliation, experience_years, hourly_rate, currency, coach_types, online_available, in_person_available, profile_image_url, card_image_url, subscription_tier, is_verified, who_i_work_with, facebook_url, instagram_url, tiktok_url, x_url, threads_url, linkedin_url, youtube_url")
+        .select("id, display_name, username, bio, location, location_city, location_region, location_country, location_country_code, location_lat, location_lng, location_place_id, gym_affiliation, experience_years, hourly_rate, currency, coach_types, online_available, in_person_available, profile_image_url, card_image_url, subscription_tier, is_verified, who_i_work_with, facebook_url, instagram_url, tiktok_url, x_url, threads_url, linkedin_url, youtube_url")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -288,6 +304,13 @@ const CoachSettings = () => {
         username: coachData.username || "",
         bio: coachData.bio || "",
         location: coachData.location || "",
+        location_city: coachData.location_city || null,
+        location_region: coachData.location_region || null,
+        location_country: coachData.location_country || null,
+        location_country_code: coachData.location_country_code || null,
+        location_lat: coachData.location_lat || null,
+        location_lng: coachData.location_lng || null,
+        location_place_id: coachData.location_place_id || null,
         gym_affiliation: coachData.gym_affiliation || "",
         experience_years: coachData.experience_years,
         hourly_rate: coachData.hourly_rate,
@@ -323,6 +346,13 @@ const CoachSettings = () => {
         display_name: profile.display_name || null,
         bio: profile.bio || null,
         location: profile.location || null,
+        location_city: profile.location_city,
+        location_region: profile.location_region,
+        location_country: profile.location_country,
+        location_country_code: profile.location_country_code,
+        location_lat: profile.location_lat,
+        location_lng: profile.location_lng,
+        location_place_id: profile.location_place_id,
         gym_affiliation: profile.gym_affiliation || null,
         experience_years: profile.experience_years,
         hourly_rate: profile.hourly_rate,
@@ -668,11 +698,23 @@ const CoachSettings = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <Label>Location</Label>
-                        <Input
+                        <LocationAutocomplete
                           value={profile.location || ""}
-                          onChange={(e) => setProfile({ ...profile, location: e.target.value })}
+                          onLocationChange={(location, data) => {
+                            setProfile(prev => ({
+                              ...prev,
+                              location,
+                              location_city: data?.city || null,
+                              location_region: data?.region || null,
+                              location_country: data?.country || null,
+                              location_country_code: data?.country_code || null,
+                              location_lat: data?.lat || null,
+                              location_lng: data?.lng || null,
+                              location_place_id: data?.place_id || null,
+                            }));
+                          }}
+                          placeholder="Search for your city..."
                           className="mt-1"
-                          placeholder="e.g., London, UK"
                         />
                       </div>
                       <div>
