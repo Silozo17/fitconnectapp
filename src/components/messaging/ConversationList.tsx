@@ -104,8 +104,8 @@ const ConversationList = ({ activeConversationId }: ConversationListProps) => {
                 to={`${basePath}/${conversation.participantId}`}
                 className="flex-1 min-w-0"
               >
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
                     <span className="font-medium text-foreground truncate">
                       {conversation.participantName}
                     </span>
@@ -113,7 +113,7 @@ const ConversationList = ({ activeConversationId }: ConversationListProps) => {
                       {getTypeIcon(conversation.participantType)}
                     </span>
                   </div>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground flex-shrink-0 whitespace-nowrap">
                     {formatDistanceToNow(new Date(conversation.lastMessageTime), { addSuffix: true })}
                   </span>
                 </div>
