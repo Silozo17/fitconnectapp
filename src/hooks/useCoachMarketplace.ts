@@ -181,9 +181,12 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
         query = query.eq("in_person_available", true);
       }
 
-      // Apply country filter (case-insensitive match on location_country_code)
+      // Apply country filter with fallback for legacy coaches
+      // Include coaches with matching country code OR NULL country code (legacy coaches)
       if (options.countryCode) {
-        query = query.ilike("location_country_code", options.countryCode);
+        query = query.or(
+          `location_country_code.ilike.${options.countryCode},location_country_code.is.null`
+        );
       }
 
       // Don't limit at DB level if we're doing ranking (we'll limit after)
