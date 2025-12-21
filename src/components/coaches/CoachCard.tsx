@@ -100,7 +100,7 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
             <img 
               src={getAvatarImageUrl(coach.avatars.slug)} 
               alt={coach.display_name || "Coach"} 
-              className="h-full max-h-[calc(100%-8px)] object-contain"
+              className="h-full max-h-[calc(100%-8px)] object-contain object-top"
             />
           </div>
         ) : (
