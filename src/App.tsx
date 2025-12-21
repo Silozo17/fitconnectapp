@@ -10,6 +10,7 @@ import { AdminProvider } from "@/contexts/AdminContext";
 import { LocaleProvider } from "@/contexts/LocaleContext";
 import { LocaleRoutingProvider } from "@/contexts/LocaleRoutingContext";
 import { CookieConsentProvider } from "@/contexts/CookieConsentContext";
+import { CountryProvider } from "@/contexts/CountryContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import GuestOnlyRoute from "@/components/auth/GuestOnlyRoute";
 import ScrollToTop from "./components/shared/ScrollToTop";
@@ -199,11 +200,12 @@ const App = () => (
           <ScrollRestoration />
           <CookieConsentProvider>
             <CookieConsentBanner />
-            <AuthProvider>
-              <AdminProvider>
-                <LocaleProvider>
-                  <LocaleRoutingProvider>
-                    <RouteRestorer />
+            <CountryProvider>
+              <AuthProvider>
+                <AdminProvider>
+                  <LocaleProvider>
+                    <LocaleRoutingProvider>
+                      <RouteRestorer />
                     <Suspense fallback={<PageLoadingSpinner />}>
                     <Routes>
                       {/* Non-locale routes (work as-is) */}
@@ -657,10 +659,11 @@ const App = () => (
                     </Routes>
                   </Suspense>
                   <ScrollToTop />
-                  </LocaleRoutingProvider>
-                </LocaleProvider>
-            </AdminProvider>
-          </AuthProvider>
+                    </LocaleRoutingProvider>
+                  </LocaleProvider>
+                </AdminProvider>
+              </AuthProvider>
+            </CountryProvider>
           </CookieConsentProvider>
         </BrowserRouter>
       </TooltipProvider>
