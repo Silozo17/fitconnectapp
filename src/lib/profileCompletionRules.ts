@@ -44,13 +44,13 @@ export const PROFILE_COMPLETION_RULES: CompletionRule[] = [
   {
     id: "profile_photo",
     label: "Profile photo",
-    weight: 15,
+    weight: 10,
     check: (ctx) => !!ctx.profile.card_image_url,
   },
   {
     id: "bio",
     label: "Bio",
-    weight: 15,
+    weight: 10,
     check: (ctx) => !!ctx.profile.bio && ctx.profile.bio.length > 50,
   },
   {
@@ -62,7 +62,7 @@ export const PROFILE_COMPLETION_RULES: CompletionRule[] = [
   {
     id: "experience",
     label: "Years of experience",
-    weight: 5,
+    weight: 10,
     check: (ctx) => ctx.profile.experience_years !== null && ctx.profile.experience_years !== undefined,
   },
   {
@@ -106,7 +106,7 @@ export const PROFILE_COMPLETION_RULES: CompletionRule[] = [
   {
     id: "stripe_connected",
     label: "Connect Stripe",
-    weight: 5,
+    weight: 10,
     check: (ctx) => !!ctx.profile.stripe_connect_id && !!ctx.profile.stripe_connect_onboarded,
   },
 ];
