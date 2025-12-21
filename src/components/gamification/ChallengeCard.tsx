@@ -16,9 +16,8 @@ import { format, differenceInDays, isAfter, isBefore } from 'date-fns';
 import { Calendar, Users, Zap, Trophy, Clock, Target, ShieldCheck, Watch, AlertTriangle, Gift, Share2, Twitter, Facebook, Linkedin, MessageCircle, Mail, Link, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ChallengeRewardPreview } from './ChallengeRewardPreview';
-import { share, canUseNativeShare } from '@/lib/share';
+import { useShareManager } from '@/hooks/useShareManager';
 import { getChallengeShareOptions } from '@/lib/shareHelpers';
-import { isDespia } from '@/lib/despia';
 
 interface ChallengeCardProps {
   challenge: Challenge;
@@ -30,6 +29,7 @@ export function ChallengeCard({ challenge, showJoinButton = true, showProgress =
   const { t } = useTranslation('gamification');
   const joinChallenge = useJoinChallenge();
   const [copied, setCopied] = useState(false);
+  const { share, shouldShowNativeButton, isDespia } = useShareManager();
   
   const today = new Date();
   const startDate = new Date(challenge.start_date);
@@ -120,8 +120,8 @@ export function ChallengeCard({ challenge, showJoinButton = true, showProgress =
   };
 
   const ShareButton = () => {
-    // For Despia, use native share directly
-    if (isDespia() || canUseNativeShare()) {
+    // For Despia or mobile with native share, show simple button
+    if (isDespia || shouldShowNativeButton()) {
       return (
         <Button variant="ghost" size="icon" onClick={handleNativeShare} className="h-8 w-8">
           <Share2 className="h-4 w-4" />

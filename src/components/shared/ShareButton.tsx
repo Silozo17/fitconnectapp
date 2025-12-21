@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Share2, Twitter, Facebook, Linkedin, Link, Check, MessageCircle, Mail } from 'lucide-react';
-import { share, canUseNativeShare, type ShareOptions } from '@/lib/share';
+import { useShareManager, type ShareOptions } from '@/hooks/useShareManager';
 
 interface ShareButtonProps {
   title: string;
@@ -27,13 +27,12 @@ export function ShareButton({
   className = ''
 }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
+  const { share, shouldShowNativeButton, isDespia } = useShareManager();
 
   const shareOptions: ShareOptions = { title, text, url };
 
   const handleNativeShare = async () => {
-    if (canUseNativeShare()) {
-      await share('native', shareOptions);
-    }
+    await share('native', shareOptions);
   };
 
   const handleShare = async (platform: 'twitter' | 'facebook' | 'linkedin' | 'whatsapp' | 'email' | 'copy') => {
@@ -44,8 +43,8 @@ export function ShareButton({
     }
   };
 
-  // On mobile, try native share first
-  if (canUseNativeShare() && size === 'icon') {
+  // For Despia or mobile with native share and icon size, show simple button
+  if (isDespia || (size === 'icon' && shouldShowNativeButton())) {
     return (
       <Button 
         variant={variant} 
