@@ -80,13 +80,16 @@ export const RANKING_WEIGHTS = {
 
 /**
  * Location match scores by proximity level
+ * 
+ * Note: 'no_match' means different country - these coaches should be
+ * excluded when strict country filtering is enabled (the default)
  */
 export const LOCATION_SCORES: Record<LocationMatchLevel, number> = {
-  exact_city: 100,
-  same_region: 70,
-  same_country: 40,
-  online_only: 30,
-  no_match: 10,
+  exact_city: 100,     // Same city as user
+  same_region: 70,     // Same region/county as user
+  same_country: 40,    // Same country as user
+  online_only: 30,     // Online-only coach from same country
+  no_match: 0,         // Different country - excluded in strict mode
 } as const;
 
 /**
