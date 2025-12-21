@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCoachEngagement, createEmptyEngagementMap } from "./useCoachEngagement";
 import { rankCoaches, filterByLocationWithExpansion } from "@/lib/coach-ranking";
+import { matchesCountryFilterStrict } from "@/lib/location-utils";
 import type { LocationData, CoachLocationData, CoachProfileData, RankingScore } from "@/types/ranking";
 
 // Type for public coach profile data (GDPR-safe columns only)
@@ -181,8 +182,7 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
         query = query.eq("in_person_available", true);
       }
 
-      // Apply country filter with fallback for legacy coaches
-      // Include coaches with matching country code OR NULL country code (legacy coaches)
+      // Apply country filter at DB level - fetch matching codes + NULL for legacy parsing
       if (options.countryCode) {
         query = query.or(
           `location_country_code.ilike.${options.countryCode},location_country_code.is.null`
@@ -202,9 +202,17 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
 
       if (error) throw error;
 
-      // Return raw data with boosted IDs for ranking step
+      let coaches = (data || []) as unknown as MarketplaceCoach[];
+
+      // STRICT COUNTRY FILTERING: Post-query filter to handle legacy coaches
+      // Only include coaches that definitively match the country filter
+      if (options.countryCode) {
+        coaches = coaches.filter(coach => matchesCountryFilterStrict(coach, options.countryCode));
+      }
+
+      // Return filtered data with boosted IDs for ranking step
       return {
-        coaches: (data || []) as unknown as MarketplaceCoach[],
+        coaches,
         boostedCoachIds,
       };
     },

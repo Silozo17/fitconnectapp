@@ -337,28 +337,39 @@ export function rankCoaches<T extends { id: string; display_name: string | null 
 /**
  * Filters coaches by location match level, expanding radius as needed
  * 
+ * In strict mode (default), expansion stops at 'same_country' level.
+ * This ensures users NEVER see coaches from other countries.
+ * 
  * @param rankedCoaches - Pre-ranked coaches
  * @param minResults - Minimum results before stopping expansion
+ * @param strictCountryFilter - If true (default), never expand beyond same_country
  * @returns Filtered coaches with the match level used
  */
 export function filterByLocationWithExpansion<T>(
   rankedCoaches: RankedCoach<T>[],
-  minResults: number = MIN_RESULTS_BEFORE_EXPANSION
+  minResults: number = MIN_RESULTS_BEFORE_EXPANSION,
+  strictCountryFilter: boolean = true
 ): { 
   coaches: RankedCoach<T>[]; 
   effectiveMatchLevel: LocationMatchLevel;
   expanded: boolean;
 } {
-  const levels: LocationMatchLevel[] = ['exact_city', 'same_region', 'same_country', 'online_only', 'no_match'];
+  // In strict mode, max level is same_country (never show foreign coaches)
+  const levels: LocationMatchLevel[] = strictCountryFilter 
+    ? ['exact_city', 'same_region', 'same_country']
+    : ['exact_city', 'same_region', 'same_country', 'online_only', 'no_match'];
+  
+  const maxLevel = levels[levels.length - 1];
 
   for (const level of levels) {
     const filtered = rankedCoaches.filter(rc => {
       const levelIndex = levels.indexOf(rc.ranking.matchLevel);
       const targetIndex = levels.indexOf(level);
-      return levelIndex <= targetIndex;
+      // Only include if match level exists in our levels array and is <= target
+      return levelIndex !== -1 && levelIndex <= targetIndex;
     });
 
-    if (filtered.length >= minResults || level === 'no_match') {
+    if (filtered.length >= minResults || level === maxLevel) {
       return {
         coaches: filtered,
         effectiveMatchLevel: level,
@@ -367,10 +378,15 @@ export function filterByLocationWithExpansion<T>(
     }
   }
 
-  // Fallback: return all
+  // Fallback: return coaches within the max allowed level
+  const fallbackFiltered = rankedCoaches.filter(rc => {
+    const levelIndex = levels.indexOf(rc.ranking.matchLevel);
+    return levelIndex !== -1;
+  });
+  
   return {
-    coaches: rankedCoaches,
-    effectiveMatchLevel: 'no_match',
+    coaches: fallbackFiltered,
+    effectiveMatchLevel: maxLevel,
     expanded: true,
   };
 }

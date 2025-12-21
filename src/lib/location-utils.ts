@@ -440,7 +440,7 @@ export function hasInferredLocation(coach: CoachLocationFields): boolean {
 }
 
 /**
- * Checks if a coach matches a country filter
+ * Checks if a coach matches a country filter (lenient mode)
  * Returns true if:
  * - Coach has matching country_code (structured or parsed from legacy)
  * - Coach has no determinable country (legacy - include for visibility)
@@ -469,6 +469,41 @@ export function matchesCountryFilter(
   // (they may be in the right country, we just don't know)
   // This ensures legacy coaches remain visible and are not broken
   return true;
+}
+
+/**
+ * Strictly checks if a coach matches a country filter
+ * Returns true ONLY if coach has matching country code (structured or parsed)
+ * Returns false for coaches with undeterminable country (strict mode)
+ * 
+ * Use this for strict country visibility - coaches from other countries are excluded
+ */
+export function matchesCountryFilterStrict(
+  coach: CoachLocationFields,
+  countryCode: string | null | undefined
+): boolean {
+  // No filter = all coaches match
+  if (!countryCode) {
+    return true;
+  }
+  
+  const normalizedFilter = countryCode.toUpperCase();
+  
+  // Get country code from structured data first
+  if (coach.location_country_code) {
+    return coach.location_country_code.toUpperCase() === normalizedFilter;
+  }
+  
+  // Try parsing legacy location
+  if (coach.location) {
+    const parsed = parseLegacyLocation(coach.location);
+    if (parsed.countryCode) {
+      return parsed.countryCode.toUpperCase() === normalizedFilter;
+    }
+  }
+  
+  // Cannot determine country - EXCLUDE in strict mode
+  return false;
 }
 
 /**
