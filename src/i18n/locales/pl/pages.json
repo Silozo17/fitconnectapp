@@ -518,6 +518,67 @@
   "pricing": {
     "title": "Cennik",
     "subtitle": "Prosty, przejrzysty cennik",
+    "meta": {
+      "title": "Cennik dla trenerów | FitConnect",
+      "description": "Wybierz odpowiedni plan dla swojego biznesu trenerskiego. Od bezpłatnego do enterprise, mamy plan dopasowany do Twoich potrzeb."
+    },
+    "hero": {
+      "badge": "Dla trenerów",
+      "titleStart": "Plany, które",
+      "titleHighlight": "rosną z Tobą",
+      "description": "Zacznij za darmo, ulepszaj w miarę rozwoju. Bez ukrytych opłat, anuluj kiedy chcesz."
+    },
+    "billing": {
+      "monthly": "Miesięcznie",
+      "yearly": "Rocznie",
+      "savePercent": "Oszczędź 17%",
+      "perMonth": "/mies.",
+      "perYear": "/rok",
+      "saveAmount": "Oszczędź {{amount}}/rok"
+    },
+    "tiers": {
+      "mostPopular": "Najpopularniejszy",
+      "platformFee": "Tylko {{percent}}% prowizji",
+      "unlimitedClients": "Bez limitu klientów",
+      "upToClients": "Do {{count}} klientów",
+      "getStartedFree": "Zacznij za darmo",
+      "subscribeNow": "Subskrybuj teraz"
+    },
+    "platformFeatures": {
+      "title": "Zawarte w",
+      "titleHighlight": "każdym planie",
+      "description": "Wszyscy trenerzy mają dostęp do pełnego zestawu funkcji platformy",
+      "unlimitedMessaging": {
+        "title": "Nielimitowane wiadomości",
+        "description": "Rozmawiaj z klientami między sesjami, udzielając wsparcia"
+      },
+      "easyScheduling": {
+        "title": "Łatwe planowanie",
+        "description": "Rezerwuj i zarządzaj sesjami dzięki intuicyjnemu systemowi kalendarza"
+      },
+      "progressTracking": {
+        "title": "Śledzenie postępów",
+        "description": "Monitoruj postępy klientów dzięki szczegółowym metrykom i wizualizacjom"
+      },
+      "videoSessions": {
+        "title": "Sesje wideo",
+        "description": "Trenuj zdalnie dzięki rozmowom wideo HD wbudowanym w platformę"
+      },
+      "customPlans": {
+        "title": "Własne plany",
+        "description": "Twórz spersonalizowane plany treningowe i żywieniowe dla klientów"
+      },
+      "securePayments": {
+        "title": "Bezpieczne płatności",
+        "description": "Bezpieczne, szyfrowane transakcje z automatycznymi wypłatami"
+      }
+    },
+    "faqCta": {
+      "title": "Masz pytania?",
+      "description": "Sprawdź nasze FAQ lub skontaktuj się z nami, aby uzyskać więcej informacji o planach i funkcjach.",
+      "getStarted": "Zacznij",
+      "viewFaq": "Zobacz FAQ"
+    },
     "forClients": {
       "title": "Dla klientów",
       "description": "Utworzenie konta jest bezpłatne. Płacisz tylko za zarezerwowane usługi."
@@ -610,6 +671,33 @@
   "successStories": {
     "title": "Historie sukcesu",
     "subtitle": "Prawdziwe transformacje prawdziwych ludzi",
+    "meta": {
+      "title": "Historie sukcesu | FitConnect - Prawdziwe transformacje",
+      "description": "Przeczytaj inspirujące historie sukcesu klientów FitConnect, którzy odmienili swoje życie z naszymi trenerami światowej klasy."
+    },
+    "hero": {
+      "badge": "Prawdziwe rezultaty",
+      "title": "Historie",
+      "titleHighlight": "sukcesu",
+      "description": "Prawdziwi ludzie, prawdziwe transformacje. Zobacz, jak nasi klienci osiągnęli swoje cele fitness z trenerami FitConnect."
+    },
+    "filters": {
+      "all": "Wszystkie historie",
+      "weightLoss": "Utrata wagi",
+      "muscleGain": "Przyrost mięśni",
+      "boxing": "Boks",
+      "mma": "MMA",
+      "nutrition": "Żywienie"
+    },
+    "card": {
+      "coach": "Trener",
+      "weightChange": "{{before}} → {{after}}"
+    },
+    "cta": {
+      "title": "Gotowy napisać swoją historię sukcesu?",
+      "description": "Dołącz do tysięcy osób, które odmieniły swoje życie z FitConnect.",
+      "button": "Znajdź swojego trenera"
+    },
     "readStory": "Przeczytaj historię",
     "viewAll": "Zobacz wszystkie historie",
     "featured": "Wyróżniona historia",
@@ -630,6 +718,60 @@
   "community": {
     "title": "Społeczność",
     "subtitle": "Połącz się z innymi entuzjastami fitness",
+    "meta": {
+      "title": "Społeczność | Rankingi i awatary | FitConnect",
+      "description": "Rywalizuj w rankingach i odblokowuj ekskluzywne awatary. Dołącz do tysięcy entuzjastów fitness w społeczności FitConnect."
+    },
+    "hero": {
+      "badge": "Centrum społeczności",
+      "title": "Rywalizuj i",
+      "titleHighlight": "zbieraj",
+      "description": "Wspinaj się w rankingach i odblokowuj ekskluzywne awatary, aby pokazać swoją podróż fitness."
+    },
+    "tabs": {
+      "leaderboards": "Rankingi",
+      "avatars": "Awatary"
+    },
+    "leaderboard": {
+      "filters": "Filtry",
+      "scope": {
+        "global": "Globalnie",
+        "byCountry": "Wg kraju",
+        "byCounty": "Wg regionu",
+        "byCity": "Wg miasta"
+      },
+      "selectCountry": "Wybierz kraj",
+      "selectCounty": "Wybierz region",
+      "selectCity": "Wybierz miasto",
+      "searchLocation": "Szukaj lokalizacji...",
+      "perPage": "{{count}} na stronę",
+      "participants": "uczestników",
+      "participantsIn": "w {{location}}",
+      "participantsGlobal": "Globalnie",
+      "tableHeaders": {
+        "rank": "Pozycja",
+        "name": "Nazwa",
+        "location": "Lokalizacja",
+        "level": "Poziom",
+        "xp": "XP"
+      },
+      "unknown": "Nieznane",
+      "noResults": "Nie znaleziono uczestników",
+      "noResultsDesc": "Spróbuj dostosować filtry lub sprawdź później."
+    },
+    "avatars": {
+      "freeTitle": "Darmowe awatary",
+      "freeDescription": "Dostępne dla wszystkich członków",
+      "challengeTitle": "Awatary z wyzwań",
+      "challengeDescription": "Odblokuj, ukończając wyzwania",
+      "coachTitle": "Ekskluzywne dla trenerów",
+      "coachDescription": "Dostępne dla zweryfikowanych trenerów",
+      "viewAll": "Zobacz wszystkie {{count}} awatarów"
+    },
+    "pagination": {
+      "previous": "Poprzednia",
+      "next": "Następna"
+    },
     "forums": "Fora",
     "groups": "Grupy",
     "events": "Wydarzenia",
@@ -650,6 +792,314 @@
       "flexible": "Elastyczne godziny",
       "health": "Benefity zdrowotne",
       "growth": "Rozwój kariery"
+    }
+  },
+  "coachTypes": {
+    "boxing": {
+      "meta": {
+        "title": "Trenerzy boksu | FitConnect - Ucz się boksu z ekspertami",
+        "description": "Znajdź ekspertów boksu na FitConnect. Naucz się prawidłowej techniki, popraw kondycję i trenuj z profesjonalistami od początkującego do poziomu zawodniczego."
+      },
+      "hero": {
+        "badge": "Trening boksu",
+        "title": "Naucz się boksu z",
+        "titleHighlight": "ekspertami",
+        "description": "Trenuj z doświadczonymi trenerami boksu, którzy uczą prawidłowej techniki, budują Twoją kondycję i pomagają osiągnąć cele — czy to fitness, zawody, czy samoobrona."
+      },
+      "benefits": {
+        "title": "Dlaczego trenować boks?",
+        "description": "Boks oferuje niesamowite korzyści fizyczne i mentalne dla osób na każdym poziomie sprawności.",
+        "fullBody": {
+          "title": "Trening całego ciała",
+          "description": "Boks angażuje każdą grupę mięśni, spalając do 800 kalorii na sesję."
+        },
+        "realSkills": {
+          "title": "Ucz się prawdziwych umiejętności",
+          "description": "Opanuj prawidłową technikę od pracy nóg po kombinacje z eksperckim coachingiem."
+        },
+        "selfDefence": {
+          "title": "Samoobrona",
+          "description": "Zdobądź pewność siebie i praktyczne umiejętności samoobrony na całe życie."
+        },
+        "stressRelief": {
+          "title": "Redukcja stresu",
+          "description": "Uwolnij napięcie i popraw jasność umysłu poprzez skoncentrowany trening."
+        }
+      },
+      "featured": {
+        "title": "Najlepiej oceniani trenerzy boksu",
+        "description": "Trenuj z doświadczonymi trenerami boksu, którzy wiedzą, jak osiągać wyniki.",
+        "viewAll": "Zobacz wszystkich trenerów boksu",
+        "fightsCoached": "{{count}} walk prowadzonych",
+        "clients": "{{count}}+ klientów"
+      },
+      "faq": {
+        "title": "Najczęściej zadawane pytania",
+        "description": "Wszystko, co musisz wiedzieć o treningu boksu.",
+        "experience": {
+          "question": "Czy potrzebuję doświadczenia, żeby zacząć boksować?",
+          "answer": "Absolutnie nie! Nasi trenerzy pracują z kompletnie początkującymi aż po zawodników. Będziesz się uczył we własnym tempie z prawidłową techniką od pierwszego dnia."
+        },
+        "equipment": {
+          "question": "Jakiego sprzętu potrzebuję?",
+          "answer": "Na pierwszą sesję wystarczy wygodny strój sportowy i buty. Trener zapewni rękawice i tarcze. W miarę postępów możesz zainwestować we własne rękawice i bandaże."
+        },
+        "safety": {
+          "question": "Czy boks jest bezpieczny?",
+          "answer": "Tak! Z właściwym coachingiem boks jest bardzo bezpieczny. Początkujący skupiają się na technice, pracy na tarczach i kondycji, a nie na sparingach. Twój trener zadba o bezpieczny postęp."
+        },
+        "weightLoss": {
+          "question": "Czy boks pomoże mi schudnąć?",
+          "answer": "Boks jest jednym z najskuteczniejszych treningów do odchudzania i kondycjonowania. Spodziewaj się spalenia 500-800 kalorii na sesję, budując szczupłą muskulaturę."
+        },
+        "results": {
+          "question": "Jak szybko zobaczę rezultaty?",
+          "answer": "Większość osób zauważa poprawę kondycji i koordynacji w ciągu 2-4 tygodni. Zauważalne zmiany w budowie ciała zazwyczaj pojawiają się w ciągu 6-8 tygodni regularnego treningu."
+        }
+      },
+      "cta": {
+        "title": "Gotowy wejść na ring?",
+        "description": "Połącz się z trenerem boksu już dziś i rozpocznij swoją podróż.",
+        "button": "Znajdź swojego trenera"
+      },
+      "buttons": {
+        "browseCoaches": "Przeglądaj trenerów boksu",
+        "howItWorks": "Jak to działa"
+      }
+    },
+    "mma": {
+      "meta": {
+        "title": "Trenerzy MMA | FitConnect - Trening sztuk walki mieszanych",
+        "description": "Znajdź ekspertów MMA na FitConnect. Naucz się mieszanych sztuk walki, w tym BJJ, Muay Thai, zapasów i więcej od doświadczonych zawodników i trenerów."
+      },
+      "hero": {
+        "badge": "Mieszane sztuki walki",
+        "title": "Trenuj",
+        "titleHighlight": "MMA",
+        "titleEnd": "z najlepszymi",
+        "description": "Ucz się mieszanych sztuk walki od doświadczonych zawodników i trenerów. Opanuj wiele dyscyplin, zbuduj elitarną kondycję i rozwiń kompletne umiejętności walki."
+      },
+      "disciplines": {
+        "title": "Dyscypliny, których się nauczysz",
+        "bjj": {
+          "name": "Brazylijskie Jiu-Jitsu",
+          "description": "Walka w parterze i dźwignie"
+        },
+        "muayThai": {
+          "name": "Muay Thai",
+          "description": "Uderzenia rękami, łokciami, kolanami i kopnięcia"
+        },
+        "wrestling": {
+          "name": "Zapasy",
+          "description": "Obalenia i kontrola"
+        },
+        "boxing": {
+          "name": "Boks",
+          "description": "Podstawy uderzeń"
+        }
+      },
+      "benefits": {
+        "title": "Dlaczego trenować MMA?",
+        "description": "MMA oferuje najkompletniejszy trening sztuk walki, łącząc wiele dyscyplin dla realnej skuteczności.",
+        "completeCombat": {
+          "title": "Kompletny system walki",
+          "description": "Naucz się uderzeń, zapasów i walki w parterze w jednym kompleksowym programie treningowym."
+        },
+        "eliteConditioning": {
+          "title": "Elitarna kondycja",
+          "description": "Zbuduj funkcjonalną siłę, eksplozywną moc i wytrzymałość gotową do walki."
+        },
+        "realSelfDefence": {
+          "title": "Prawdziwa samoobrona",
+          "description": "Rozwiń praktyczne umiejętności na każdą sytuację dzięki kompletnemu treningowi sztuk walki."
+        },
+        "expertCoaches": {
+          "title": "Eksperci-trenerzy",
+          "description": "Trenuj z trenerami, którzy mają prawdziwe doświadczenie zawodnicze i sprawdzone metody nauczania."
+        }
+      },
+      "featured": {
+        "title": "Najlepiej oceniani trenerzy MMA",
+        "description": "Trenuj z trenerami, którzy mają prawdziwe doświadczenie bojowe.",
+        "viewAll": "Zobacz wszystkich trenerów MMA",
+        "proFights": "{{count}} walk zawodowych",
+        "clients": "{{count}}+ klientów"
+      },
+      "faq": {
+        "title": "Najczęściej zadawane pytania",
+        "description": "Wszystko, co musisz wiedzieć o treningu MMA.",
+        "experience": {
+          "question": "Czy potrzebuję doświadczenia w sztukach walki, żeby zacząć MMA?",
+          "answer": "Wcale nie! Wielu naszych trenerów specjalizuje się w programach dla początkujących. Nauczysz się podstaw bezpiecznie i będziesz postępować we własnym tempie. Żadne wcześniejsze doświadczenie nie jest wymagane."
+        },
+        "training": {
+          "question": "Co obejmuje trening MMA?",
+          "answer": "Trening MMA łączy wiele dyscyplin, w tym uderzenia (boks, Muay Thai), zapasy i grę w parterze (brazylijskie Jiu-Jitsu). Twój trener stworzy wszechstronny program oparty na Twoich celach."
+        },
+        "danger": {
+          "question": "Czy trening MMA jest niebezpieczny?",
+          "answer": "Z właściwym coachingiem trening MMA jest bardzo bezpieczny. Początkujący skupiają się na technice, kondycji i kontrolowanych ćwiczeniach. Sparingi są opcjonalne i wprowadzane dopiero, gdy jesteś gotowy."
+        },
+        "fitness": {
+          "question": "Czy MMA może pomóc w kondycji i odchudzaniu?",
+          "answer": "Absolutnie! MMA zapewnia niesamowity trening całego ciała. Wielu ludzi trenuje MMA wyłącznie dla kondycji, spalając 700-1000 kalorii na sesję, budując funkcjonalną siłę."
+        },
+        "compete": {
+          "question": "Czy muszę walczyć, żeby trenować MMA?",
+          "answer": "Nie! Większość praktyków MMA trenuje dla kondycji, samoobrony lub rozwoju osobistego, nigdy nie startując w zawodach. Twój trener wesprze wszystkie Twoje cele."
+        }
+      },
+      "cta": {
+        "title": "Gotowy trenować jak zawodnik?",
+        "description": "Połącz się z trenerem MMA już dziś i rozpocznij swoją przygodę ze sztukami walki.",
+        "button": "Znajdź swojego trenera"
+      },
+      "buttons": {
+        "browseCoaches": "Przeglądaj trenerów MMA",
+        "howItWorks": "Jak to działa"
+      }
+    },
+    "personalTrainers": {
+      "meta": {
+        "title": "Trenerzy personalni | FitConnect - Znajdź idealnego trenera",
+        "description": "Znajdź certyfikowanych trenerów personalnych na FitConnect. Otrzymaj spersonalizowane plany treningowe, eksperckie wsparcie i osiągnij swoje cele fitness z profesjonalną pomocą."
+      },
+      "hero": {
+        "badge": "Trening personalny",
+        "title": "Znajdź idealnego",
+        "titleHighlight": "trenera personalnego",
+        "description": "Pracuj z certyfikowanymi trenerami personalnymi, którzy tworzą spersonalizowane programy treningowe, motywują Cię i pomagają osiągać wyniki szybciej niż trening samodzielny."
+      },
+      "benefits": {
+        "title": "Dlaczego warto pracować z trenerem personalnym?",
+        "description": "Trening personalny to najszybsza droga do osiągnięcia celów fitness z eksperckim wsparciem na każdym kroku.",
+        "personalised": {
+          "title": "Spersonalizowane programy",
+          "description": "Niestandardowe plany treningowe zaprojektowane specjalnie dla Twoich celów, poziomu sprawności i harmonogramu."
+        },
+        "trackProgress": {
+          "title": "Śledź swoje postępy",
+          "description": "Monitoruj swoje ulepszenia dzięki szczegółowemu śledzeniu i regularnym ocenom."
+        },
+        "expertGuidance": {
+          "title": "Eksperckie wsparcie",
+          "description": "Pracuj z certyfikowanymi profesjonalistami, którzy motywują Cię i utrzymują odpowiedzialność."
+        },
+        "flexible": {
+          "title": "Elastyczny trening",
+          "description": "Trenuj online lub stacjonarnie, według własnej wygody z elastycznym harmonogramem."
+        }
+      },
+      "featured": {
+        "title": "Najlepiej oceniani trenerzy personalni",
+        "description": "Odkryj wysoko ocenianych trenerów personalnych gotowych pomóc Ci w transformacji.",
+        "viewAll": "Zobacz wszystkich trenerów personalnych",
+        "sessions": "{{count}}+ sesji"
+      },
+      "faq": {
+        "title": "Najczęściej zadawane pytania",
+        "description": "Wszystko, co musisz wiedzieć o treningu personalnym.",
+        "choose": {
+          "question": "Jak wybrać odpowiedniego trenera personalnego?",
+          "answer": "Sprawdź ich certyfikaty, doświadczenie, specjalizacje i recenzje od innych klientów. Nasza platforma pozwala filtrować trenerów według ekspertyzy, lokalizacji i przedziału cenowego, aby znaleźć idealne dopasowanie."
+        },
+        "cost": {
+          "question": "Ile kosztuje trening personalny?",
+          "answer": "Ceny różnią się w zależności od doświadczenia i lokalizacji trenera. Na FitConnect znajdziesz trenerów w cenie od 120 do 600+ zł za sesję, często z rabatami na pakiety."
+        },
+        "online": {
+          "question": "Czy mogę trenować online z trenerem personalnym?",
+          "answer": "Tak! Wielu naszych trenerów personalnych oferuje coaching online przez wideorozmowy, spersonalizowane plany treningowe i wsparcie przez wiadomości. To elastyczna i często bardziej przystępna opcja."
+        },
+        "frequency": {
+          "question": "Jak często powinienem trenować z trenerem personalnym?",
+          "answer": "Większość klientów zaczyna od 2-3 sesji tygodniowo. Twój trener zaleci optymalną częstotliwość w oparciu o Twoje cele i obecny poziom sprawności."
+        },
+        "firstSession": {
+          "question": "Czego mogę się spodziewać na pierwszej sesji?",
+          "answer": "Pierwsza sesja zazwyczaj obejmuje ocenę sprawności, dyskusję o celach i wprowadzenie do podstawowych ćwiczeń. Twój trener stworzy punkt odniesienia do śledzenia postępów."
+        }
+      },
+      "cta": {
+        "title": "Gotowy rozpocząć swoją podróż fitness?",
+        "description": "Połącz się z trenerem personalnym już dziś i zrób pierwszy krok w kierunku swoich celów.",
+        "button": "Znajdź swojego trenera"
+      },
+      "buttons": {
+        "browseCoaches": "Przeglądaj trenerów personalnych",
+        "howItWorks": "Jak to działa"
+      }
+    },
+    "nutritionists": {
+      "meta": {
+        "title": "Dietetycy | FitConnect - Profesjonalny coaching żywieniowy",
+        "description": "Znajdź wykwalifikowanych dietetyków na FitConnect. Otrzymaj spersonalizowane plany żywieniowe, eksperckie porady dietetyczne i osiągnij cele zdrowotne z profesjonalnym coachingiem żywieniowym."
+      },
+      "hero": {
+        "badge": "Coaching żywieniowy",
+        "title": "Profesjonalny",
+        "titleHighlight": "coaching żywieniowy",
+        "description": "Pracuj z wykwalifikowanymi dietetykami, którzy tworzą spersonalizowane plany żywieniowe, pomagają budować zdrowe nawyki i prowadzą Cię ku optymalnej zdrowiu i wydajności."
+      },
+      "benefits": {
+        "title": "Dlaczego warto pracować z dietetykiem?",
+        "description": "Właściwe odżywianie jest fundamentem zdrowia, energii i wydajności. Otrzymaj eksperckie wsparcie dostosowane do Ciebie.",
+        "mealPlans": {
+          "title": "Spersonalizowane plany żywieniowe",
+          "description": "Spersonalizowane plany żywieniowe zaprojektowane wokół Twoich celów, preferencji i wymagań dietetycznych."
+        },
+        "weightManagement": {
+          "title": "Zarządzanie wagą",
+          "description": "Naukowo uzasadnione podejścia do osiągnięcia i utrzymania idealnej wagi w sposób zrównoważony."
+        },
+        "healthOptimisation": {
+          "title": "Optymalizacja zdrowia",
+          "description": "Popraw energię, sen, trawienie i ogólne samopoczucie poprzez właściwe odżywianie."
+        },
+        "dietarySupport": {
+          "title": "Wsparcie dietetyczne",
+          "description": "Eksperckie wsparcie dla specjalnych diet, w tym wegańskiej, keto, bezglutenowej i więcej."
+        }
+      },
+      "featured": {
+        "title": "Najlepiej oceniani dietetycy",
+        "description": "Odkryj wysoko ocenianych ekspertów żywienia gotowych pomóc Ci jeść lepiej.",
+        "viewAll": "Zobacz wszystkich dietetyków",
+        "clients": "{{count}}+ klientów"
+      },
+      "faq": {
+        "title": "Najczęściej zadawane pytania",
+        "description": "Wszystko, co musisz wiedzieć o coachingu żywieniowym.",
+        "difference": {
+          "question": "Jaka jest różnica między dietetykiem a technologiem żywienia?",
+          "answer": "Obaj mogą udzielać doskonałych porad żywieniowych. Dietetycy mają chroniony tytuł zawodowy i specyficzne kwalifikacje kliniczne. Technolodzy żywienia mogą mieć różne certyfikaty i często specjalizują się w wellness, żywieniu sportowym lub zarządzaniu wagą."
+        },
+        "weightLoss": {
+          "question": "Jak dietetyk może pomóc mi schudnąć?",
+          "answer": "Dietetyk tworzy zrównoważony, spersonalizowany plan żywieniowy oparty na Twoim metabolizmie, stylu życia i preferencjach. Pomaga zrozumieć wielkość porcji, czas posiłków i dokonywać zdrowych wyborów bez ekstremalnych ograniczeń."
+        },
+        "strictDiet": {
+          "question": "Czy muszę stosować ścisłą dietę?",
+          "answer": "Nie! Dobry coaching żywieniowy skupia się na zrównoważonych nawykach, a nie restrykcyjnych dietach. Twój dietetyk będzie pracował z Twoimi preferencjami żywieniowymi, tworząc przyjemny plan żywieniowy."
+        },
+        "medical": {
+          "question": "Czy dietetycy mogą pomóc w schorzeniach?",
+          "answer": "Wielu dietetyków specjalizuje się w schorzeniach takich jak cukrzyca, problemy trawienne i nietolerancje pokarmowe. Zawsze sprawdź kwalifikacje dietetyka i skonsultuj się z lekarzem w sprawie terapii żywieniowej."
+        },
+        "frequency": {
+          "question": "Jak często powinienem spotykać się z dietetykiem?",
+          "answer": "Większość klientów zaczyna od cotygodniowych spotkań kontrolnych, a następnie przechodzi na spotkania co dwa tygodnie lub miesięcznie, gdy wypracują zdrowe nawyki. Twój dietetyk zaleci najlepszą częstotliwość dla Twoich celów."
+        }
+      },
+      "cta": {
+        "title": "Gotowy odmienić swoją dietę?",
+        "description": "Połącz się z dietetykiem już dziś i zacznij jeść zgodnie ze swoimi celami.",
+        "button": "Znajdź swojego dietetyka"
+      },
+      "buttons": {
+        "browseCoaches": "Przeglądaj dietetyków",
+        "howItWorks": "Jak to działa"
+      }
     }
   }
 }

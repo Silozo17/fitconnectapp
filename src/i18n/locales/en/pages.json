@@ -518,6 +518,67 @@
   "pricing": {
     "title": "Pricing",
     "subtitle": "Simple, transparent pricing",
+    "meta": {
+      "title": "Coach Pricing | FitConnect",
+      "description": "Choose the right plan for your coaching business. From free to enterprise, we have a plan that fits your needs."
+    },
+    "hero": {
+      "badge": "For Coaches",
+      "titleStart": "Plans That",
+      "titleHighlight": "Grow With You",
+      "description": "Start free, upgrade as you grow. No hidden fees, cancel anytime."
+    },
+    "billing": {
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "savePercent": "Save 17%",
+      "perMonth": "/mo",
+      "perYear": "/yr",
+      "saveAmount": "Save {{amount}}/year"
+    },
+    "tiers": {
+      "mostPopular": "Most Popular",
+      "platformFee": "Only {{percent}}% platform fee",
+      "unlimitedClients": "Unlimited clients",
+      "upToClients": "Up to {{count}} clients",
+      "getStartedFree": "Get Started Free",
+      "subscribeNow": "Subscribe Now"
+    },
+    "platformFeatures": {
+      "title": "Included With",
+      "titleHighlight": "Every Plan",
+      "description": "All coaches get access to our full suite of platform features",
+      "unlimitedMessaging": {
+        "title": "Unlimited Messaging",
+        "description": "Chat with your clients between sessions for guidance and support"
+      },
+      "easyScheduling": {
+        "title": "Easy Scheduling",
+        "description": "Book and manage sessions with our intuitive calendar system"
+      },
+      "progressTracking": {
+        "title": "Progress Tracking",
+        "description": "Monitor client journeys with detailed metrics and visualizations"
+      },
+      "videoSessions": {
+        "title": "Video Sessions",
+        "description": "Train remotely with HD video calls built into the platform"
+      },
+      "customPlans": {
+        "title": "Custom Plans",
+        "description": "Create personalized workout and nutrition plans for clients"
+      },
+      "securePayments": {
+        "title": "Secure Payments",
+        "description": "Safe, encrypted transactions with automatic payouts"
+      }
+    },
+    "faqCta": {
+      "title": "Have Questions?",
+      "description": "Check out our FAQ or contact us for more information about our plans and features.",
+      "getStarted": "Get Started",
+      "viewFaq": "View FAQ"
+    },
     "forClients": {
       "title": "For Clients",
       "description": "Creating an account is free. You only pay for the services you book."
@@ -610,6 +671,33 @@
   "successStories": {
     "title": "Success Stories",
     "subtitle": "Real transformations from real people",
+    "meta": {
+      "title": "Success Stories | FitConnect - Real Transformations",
+      "description": "Read inspiring success stories from FitConnect clients who transformed their lives with our world-class coaches."
+    },
+    "hero": {
+      "badge": "Real Results",
+      "title": "Success",
+      "titleHighlight": "Stories",
+      "description": "Real people, real transformations. See how our clients achieved their fitness goals with FitConnect coaches."
+    },
+    "filters": {
+      "all": "All Stories",
+      "weightLoss": "Weight Loss",
+      "muscleGain": "Muscle Gain",
+      "boxing": "Boxing",
+      "mma": "MMA",
+      "nutrition": "Nutrition"
+    },
+    "card": {
+      "coach": "Coach",
+      "weightChange": "{{before}} → {{after}}"
+    },
+    "cta": {
+      "title": "Ready to Write Your Success Story?",
+      "description": "Join thousands of others who have transformed their lives with FitConnect.",
+      "button": "Find Your Coach"
+    },
     "readStory": "Read Story",
     "viewAll": "View All Stories",
     "featured": "Featured Story",
@@ -630,6 +718,60 @@
   "community": {
     "title": "Community",
     "subtitle": "Connect with fellow fitness enthusiasts",
+    "meta": {
+      "title": "Community | Leaderboards & Avatars | FitConnect",
+      "description": "Compete on leaderboards and unlock exclusive avatars. Join thousands of fitness enthusiasts in the FitConnect community."
+    },
+    "hero": {
+      "badge": "Community Hub",
+      "title": "Compete &",
+      "titleHighlight": "Collect",
+      "description": "Rise through the ranks on our leaderboards and unlock exclusive avatars to showcase your fitness journey."
+    },
+    "tabs": {
+      "leaderboards": "Leaderboards",
+      "avatars": "Avatars"
+    },
+    "leaderboard": {
+      "filters": "Filters",
+      "scope": {
+        "global": "Global",
+        "byCountry": "By Country",
+        "byCounty": "By County",
+        "byCity": "By City"
+      },
+      "selectCountry": "Select country",
+      "selectCounty": "Select county",
+      "selectCity": "Select city",
+      "searchLocation": "Search location...",
+      "perPage": "{{count}} per page",
+      "participants": "participants",
+      "participantsIn": "in {{location}}",
+      "participantsGlobal": "Global",
+      "tableHeaders": {
+        "rank": "Rank",
+        "name": "Name",
+        "location": "Location",
+        "level": "Level",
+        "xp": "XP"
+      },
+      "unknown": "Unknown",
+      "noResults": "No participants found",
+      "noResultsDesc": "Try adjusting your filters or check back later."
+    },
+    "avatars": {
+      "freeTitle": "Free Avatars",
+      "freeDescription": "Available to all members",
+      "challengeTitle": "Challenge Avatars",
+      "challengeDescription": "Unlock by completing challenges",
+      "coachTitle": "Coach Exclusive",
+      "coachDescription": "Available to verified coaches",
+      "viewAll": "View all {{count}} avatars"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next"
+    },
     "forums": "Forums",
     "groups": "Groups",
     "events": "Events",
@@ -650,6 +792,314 @@
       "flexible": "Flexible Hours",
       "health": "Health Benefits",
       "growth": "Career Growth"
+    }
+  },
+  "coachTypes": {
+    "boxing": {
+      "meta": {
+        "title": "Boxing Coaches | FitConnect - Learn Boxing with Experts",
+        "description": "Find expert boxing coaches on FitConnect. Learn proper technique, improve fitness, and train with professionals from beginner to competitive level."
+      },
+      "hero": {
+        "badge": "Boxing Training",
+        "title": "Learn to Box with",
+        "titleHighlight": "Expert Coaches",
+        "description": "Train with experienced boxing coaches who teach proper technique, build your fitness, and help you achieve your goals—whether that's fitness, competition, or self-defence."
+      },
+      "benefits": {
+        "title": "Why Train Boxing?",
+        "description": "Boxing offers incredible physical and mental benefits for people of all fitness levels.",
+        "fullBody": {
+          "title": "Full-Body Workout",
+          "description": "Boxing engages every muscle group, burning up to 800 calories per session."
+        },
+        "realSkills": {
+          "title": "Learn Real Skills",
+          "description": "Master proper technique from footwork to combinations with expert coaching."
+        },
+        "selfDefence": {
+          "title": "Self-Defence",
+          "description": "Gain confidence and practical self-defence skills that last a lifetime."
+        },
+        "stressRelief": {
+          "title": "Stress Relief",
+          "description": "Release tension and boost mental clarity through focused training."
+        }
+      },
+      "featured": {
+        "title": "Top-Rated Boxing Coaches",
+        "description": "Train with experienced boxing coaches who know how to get results.",
+        "viewAll": "View All Boxing Coaches",
+        "fightsCoached": "{{count}} fights coached",
+        "clients": "{{count}}+ clients"
+      },
+      "faq": {
+        "title": "Frequently Asked Questions",
+        "description": "Everything you need to know about boxing training.",
+        "experience": {
+          "question": "Do I need any experience to start boxing?",
+          "answer": "Absolutely not! Our coaches work with complete beginners through to competitive boxers. You'll learn at your own pace with proper technique from day one."
+        },
+        "equipment": {
+          "question": "What equipment do I need?",
+          "answer": "For your first session, just wear comfortable workout clothes and trainers. Your coach will provide gloves and pads. As you progress, you may want to invest in your own gloves and wraps."
+        },
+        "safety": {
+          "question": "Is boxing safe?",
+          "answer": "Yes! With proper coaching, boxing is very safe. Beginners focus on technique, pad work, and fitness rather than sparring. Your coach will ensure you progress safely."
+        },
+        "weightLoss": {
+          "question": "Will boxing help me lose weight?",
+          "answer": "Boxing is one of the most effective workouts for weight loss and conditioning. Expect to burn 500-800 calories per session while building lean muscle."
+        },
+        "results": {
+          "question": "How quickly will I see results?",
+          "answer": "Most people notice improved fitness and coordination within 2-4 weeks. Noticeable body composition changes typically occur within 6-8 weeks of consistent training."
+        }
+      },
+      "cta": {
+        "title": "Ready to Step in the Ring?",
+        "description": "Connect with a boxing coach today and start your journey.",
+        "button": "Find Your Coach"
+      },
+      "buttons": {
+        "browseCoaches": "Browse Boxing Coaches",
+        "howItWorks": "How It Works"
+      }
+    },
+    "mma": {
+      "meta": {
+        "title": "MMA Coaches | FitConnect - Mixed Martial Arts Training",
+        "description": "Find expert MMA coaches on FitConnect. Learn mixed martial arts including BJJ, Muay Thai, wrestling, and more from experienced fighters and coaches."
+      },
+      "hero": {
+        "badge": "Mixed Martial Arts",
+        "title": "Train",
+        "titleHighlight": "MMA",
+        "titleEnd": "with the Best",
+        "description": "Learn mixed martial arts from experienced fighters and coaches. Master multiple disciplines, build elite conditioning, and develop complete fighting skills."
+      },
+      "disciplines": {
+        "title": "Disciplines You'll Learn",
+        "bjj": {
+          "name": "Brazilian Jiu-Jitsu",
+          "description": "Ground fighting & submissions"
+        },
+        "muayThai": {
+          "name": "Muay Thai",
+          "description": "Striking with hands, elbows, knees & kicks"
+        },
+        "wrestling": {
+          "name": "Wrestling",
+          "description": "Takedowns & control"
+        },
+        "boxing": {
+          "name": "Boxing",
+          "description": "Fundamental striking"
+        }
+      },
+      "benefits": {
+        "title": "Why Train MMA?",
+        "description": "MMA offers the most complete martial arts training available, combining multiple disciplines for real-world effectiveness.",
+        "completeCombat": {
+          "title": "Complete Combat System",
+          "description": "Learn striking, wrestling, and ground fighting in one comprehensive training program."
+        },
+        "eliteConditioning": {
+          "title": "Elite Conditioning",
+          "description": "Build functional strength, explosive power, and combat-ready endurance."
+        },
+        "realSelfDefence": {
+          "title": "Real Self-Defence",
+          "description": "Develop practical skills for any situation with complete martial arts training."
+        },
+        "expertCoaches": {
+          "title": "Expert Coaches",
+          "description": "Train with coaches who have real competitive experience and proven teaching methods."
+        }
+      },
+      "featured": {
+        "title": "Top-Rated MMA Coaches",
+        "description": "Train with coaches who have real fighting experience.",
+        "viewAll": "View All MMA Coaches",
+        "proFights": "{{count}} pro fights",
+        "clients": "{{count}}+ clients"
+      },
+      "faq": {
+        "title": "Frequently Asked Questions",
+        "description": "Everything you need to know about MMA training.",
+        "experience": {
+          "question": "Do I need martial arts experience to start MMA?",
+          "answer": "Not at all! Many of our coaches specialise in beginner programs. You'll learn fundamentals safely and progress at your own pace. No prior experience is necessary."
+        },
+        "training": {
+          "question": "What does MMA training involve?",
+          "answer": "MMA training combines multiple disciplines including striking (boxing, Muay Thai), wrestling, and grappling (Brazilian Jiu-Jitsu). Your coach will create a well-rounded program based on your goals."
+        },
+        "danger": {
+          "question": "Is MMA training dangerous?",
+          "answer": "With proper coaching, MMA training is very safe. Beginners focus on technique, conditioning, and controlled drilling. Sparring is optional and only introduced when you're ready."
+        },
+        "fitness": {
+          "question": "Can MMA help with fitness and weight loss?",
+          "answer": "Absolutely! MMA provides an incredible full-body workout. Many people train MMA purely for fitness, burning 700-1000 calories per session while building functional strength."
+        },
+        "compete": {
+          "question": "Do I need to compete to train MMA?",
+          "answer": "No! Most MMA practitioners train for fitness, self-defence, or personal development without ever competing. Your coach will support whatever goals you have."
+        }
+      },
+      "cta": {
+        "title": "Ready to Train Like a Fighter?",
+        "description": "Connect with an MMA coach today and begin your martial arts journey.",
+        "button": "Find Your Coach"
+      },
+      "buttons": {
+        "browseCoaches": "Browse MMA Coaches",
+        "howItWorks": "How It Works"
+      }
+    },
+    "personalTrainers": {
+      "meta": {
+        "title": "Personal Trainers | FitConnect - Find Your Perfect PT",
+        "description": "Find certified personal trainers on FitConnect. Get customised workout plans, expert guidance, and achieve your fitness goals with professional support."
+      },
+      "hero": {
+        "badge": "Personal Training",
+        "title": "Find Your Perfect",
+        "titleHighlight": "Personal Trainer",
+        "description": "Work with certified personal trainers who create customised workout programs, keep you accountable, and help you achieve results faster than training alone."
+      },
+      "benefits": {
+        "title": "Why Work with a Personal Trainer?",
+        "description": "Personal training is the fastest way to reach your fitness goals with expert guidance every step of the way.",
+        "personalised": {
+          "title": "Personalised Programs",
+          "description": "Custom workout plans designed specifically for your goals, fitness level, and schedule."
+        },
+        "trackProgress": {
+          "title": "Track Your Progress",
+          "description": "Monitor your improvements with detailed tracking and regular assessments."
+        },
+        "expertGuidance": {
+          "title": "Expert Guidance",
+          "description": "Work with certified professionals who keep you motivated and accountable."
+        },
+        "flexible": {
+          "title": "Flexible Training",
+          "description": "Train online or in-person, at your convenience with flexible scheduling."
+        }
+      },
+      "featured": {
+        "title": "Top-Rated Personal Trainers",
+        "description": "Discover highly-rated personal trainers ready to help you transform.",
+        "viewAll": "View All Personal Trainers",
+        "sessions": "{{count}}+ sessions"
+      },
+      "faq": {
+        "title": "Frequently Asked Questions",
+        "description": "Everything you need to know about personal training.",
+        "choose": {
+          "question": "How do I choose the right personal trainer?",
+          "answer": "Look at their certifications, experience, specialisations, and reviews from other clients. Our platform lets you filter trainers by expertise, location, and price range to find your perfect match."
+        },
+        "cost": {
+          "question": "How much does personal training cost?",
+          "answer": "Prices vary depending on the trainer's experience and location. On FitConnect, you'll find trainers ranging from £30 to £150+ per session, with package discounts often available."
+        },
+        "online": {
+          "question": "Can I train online with a personal trainer?",
+          "answer": "Yes! Many of our personal trainers offer online coaching via video calls, custom workout plans, and messaging support. This is a flexible and often more affordable option."
+        },
+        "frequency": {
+          "question": "How often should I train with a personal trainer?",
+          "answer": "Most clients start with 2-3 sessions per week. Your trainer will recommend the optimal frequency based on your goals and current fitness level."
+        },
+        "firstSession": {
+          "question": "What should I expect in my first session?",
+          "answer": "Your first session typically includes a fitness assessment, goal setting discussion, and introduction to basic exercises. Your trainer will create a baseline to track your progress."
+        }
+      },
+      "cta": {
+        "title": "Ready to Start Your Fitness Journey?",
+        "description": "Connect with a personal trainer today and take the first step towards your goals.",
+        "button": "Find Your Trainer"
+      },
+      "buttons": {
+        "browseCoaches": "Browse Personal Trainers",
+        "howItWorks": "How It Works"
+      }
+    },
+    "nutritionists": {
+      "meta": {
+        "title": "Nutritionists | FitConnect - Expert Nutrition Coaching",
+        "description": "Find qualified nutritionists on FitConnect. Get personalised meal plans, expert dietary advice, and achieve your health goals with professional nutrition coaching."
+      },
+      "hero": {
+        "badge": "Nutrition Coaching",
+        "title": "Expert",
+        "titleHighlight": "Nutrition Coaching",
+        "description": "Work with qualified nutritionists who create personalised meal plans, help you build healthy habits, and guide you towards optimal health and performance."
+      },
+      "benefits": {
+        "title": "Why Work with a Nutritionist?",
+        "description": "Proper nutrition is the foundation of health, energy, and performance. Get expert guidance tailored to you.",
+        "mealPlans": {
+          "title": "Custom Meal Plans",
+          "description": "Personalised nutrition plans designed around your goals, preferences, and dietary requirements."
+        },
+        "weightManagement": {
+          "title": "Weight Management",
+          "description": "Science-based approaches to achieve and maintain your ideal weight sustainably."
+        },
+        "healthOptimisation": {
+          "title": "Health Optimisation",
+          "description": "Improve energy, sleep, digestion, and overall wellbeing through proper nutrition."
+        },
+        "dietarySupport": {
+          "title": "Dietary Support",
+          "description": "Expert guidance for special diets including vegan, keto, gluten-free, and more."
+        }
+      },
+      "featured": {
+        "title": "Top-Rated Nutritionists",
+        "description": "Discover highly-rated nutrition experts ready to help you eat better.",
+        "viewAll": "View All Nutritionists",
+        "clients": "{{count}}+ clients"
+      },
+      "faq": {
+        "title": "Frequently Asked Questions",
+        "description": "Everything you need to know about nutrition coaching.",
+        "difference": {
+          "question": "What's the difference between a nutritionist and a dietitian?",
+          "answer": "Both can provide excellent nutrition advice. Dietitians have protected titles and specific clinical qualifications. Nutritionists may have various certifications and often specialise in wellness, sports nutrition, or weight management."
+        },
+        "weightLoss": {
+          "question": "How can a nutritionist help me lose weight?",
+          "answer": "A nutritionist creates a sustainable, personalised eating plan based on your metabolism, lifestyle, and preferences. They help you understand portion sizes, meal timing, and make healthy choices without extreme restriction."
+        },
+        "strictDiet": {
+          "question": "Do I need to follow a strict diet?",
+          "answer": "No! Good nutrition coaching focuses on sustainable habits, not restrictive diets. Your nutritionist will work with your food preferences to create an enjoyable eating plan."
+        },
+        "medical": {
+          "question": "Can nutritionists help with medical conditions?",
+          "answer": "Many nutritionists specialise in conditions like diabetes, digestive issues, and food intolerances. Always check your nutritionist's qualifications and consult your doctor for medical nutrition therapy."
+        },
+        "frequency": {
+          "question": "How often should I meet with my nutritionist?",
+          "answer": "Most clients start with weekly check-ins, then move to bi-weekly or monthly as they establish healthy habits. Your nutritionist will recommend the best frequency for your goals."
+        }
+      },
+      "cta": {
+        "title": "Ready to Transform Your Diet?",
+        "description": "Connect with a nutritionist today and start eating for your goals.",
+        "button": "Find Your Nutritionist"
+      },
+      "buttons": {
+        "browseCoaches": "Browse Nutritionists",
+        "howItWorks": "How It Works"
+      }
     }
   }
 }
