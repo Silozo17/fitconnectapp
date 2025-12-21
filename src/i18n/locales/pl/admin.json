@@ -354,7 +354,31 @@
   "viewSwitcher": {
     "cardView": "Widok kart",
     "tableView": "Widok tabeli",
-    "listView": "Widok listy"
+    "listView": "Widok listy",
+    "selectView": "Wybierz widok",
+    "adminView": "Widok administratora",
+    "coachView": "Widok trenera",
+    "clientView": "Widok klienta"
+  },
+  "sidebar": {
+    "dashboard": "Panel",
+    "users": "Użytkownicy",
+    "coaches": "Trenerzy",
+    "team": "Zespół",
+    "revenue": "Przychody",
+    "boosts": "Boosty",
+    "analytics": "Analityka",
+    "platform": "Platforma",
+    "challenges": "Wyzwania",
+    "blog": "Blog",
+    "verification": "Weryfikacja",
+    "integrations": "Integracje",
+    "feedback": "Opinie",
+    "reviewsDisputes": "Recenzje i spory",
+    "auditLog": "Dziennik audytu",
+    "settings": "Ustawienia",
+    "myProfile": "Mój profil",
+    "signOut": "Wyloguj się"
   },
   "avatars": {
     "title": "Zarządzanie awatarami",
@@ -387,12 +411,27 @@
     "grantError": "Nie udało się przyznać awatara",
     "revokeSuccess": "Awatar odebrany pomyślnie",
     "revokeError": "Nie udało się odebrać awatara",
+    "grantAvatarsTo": "Przyznaj awatary użytkownikowi {{name}}",
+    "selectAvatarsToGrant": "Wybierz jeden lub więcej awatarów do przyznania. Pokazane są tylko awatary, których użytkownik nie posiada.",
+    "searchAvatars": "Szukaj awatarów...",
+    "selectAll": "Zaznacz wszystko",
+    "clearAll": "Odznacz wszystko",
+    "noAvatarsToGrant": "Brak awatarów do przyznania",
+    "userHasAll": "Użytkownik może posiadać wszystkie awatary",
+    "reasonOptional": "Powód (opcjonalnie)",
+    "grantCount": "Przyznaj {{count}} awatar(ów)",
+    "allAvatarsUnlocked": "Wszystkie awatary odblokowane!",
+    "selected": "{{count}} zaznaczonych",
     "categories": {
+      "all": "Wszystkie",
       "starter": "Początkowy",
       "achievement": "Osiągnięcie",
       "seasonal": "Sezonowy",
       "premium": "Premium",
-      "challenge": "Wyzwanie"
+      "challenge": "Wyzwanie",
+      "free": "Darmowy",
+      "challenge_unlock": "Wyzwanie",
+      "coach_exclusive": "Trener"
     },
     "rarities": {
       "common": "Pospolity",
@@ -440,5 +479,16 @@
     "coach": "Trener",
     "expiresAt": "Wygasa",
     "noOverrides": "Brak nadpisań funkcji"
+  },
+  "featureValues": {
+    "enabled": "Włączone",
+    "disabled": "Wyłączone",
+    "none": "Brak",
+    "basic": "Podstawowy",
+    "standard": "Standardowy",
+    "full": "Pełny",
+    "advanced": "Zaawansowany",
+    "limited": "Ograniczony",
+    "unlimited": "Nieograniczony"
   }
 }

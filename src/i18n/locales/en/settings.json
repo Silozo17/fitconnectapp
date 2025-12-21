@@ -71,7 +71,19 @@
 
   "fitnessGoals": {
     "title": "Fitness Goals",
-    "description": "Select your fitness objectives (choose multiple)"
+    "description": "Select your fitness objectives (choose multiple)",
+    "loseWeight": "Lose Weight",
+    "buildMuscle": "Build Muscle",
+    "improveEndurance": "Improve Endurance",
+    "increaseStrength": "Increase Strength",
+    "getToned": "Get Toned",
+    "improveFlexibility": "Improve Flexibility",
+    "betterCardioHealth": "Better Cardio Health",
+    "trainForEvent": "Train for Event",
+    "generalFitness": "General Fitness",
+    "sportsPerformance": "Sports Performance",
+    "rehabilitation": "Rehabilitation",
+    "stressRelief": "Stress Relief"
   },
 
   "health": {

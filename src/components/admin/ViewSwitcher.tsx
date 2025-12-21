@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAdminView } from "@/contexts/AdminContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -30,6 +31,7 @@ import { Shield, User, Briefcase, Check, Plus, Loader2 } from "lucide-react";
 import CreateProfileModal from "./CreateProfileModal";
 
 const ViewSwitcher = () => {
+  const { t } = useTranslation("admin");
   const { role } = useAuth();
   const {
     activeProfileType,
@@ -105,7 +107,7 @@ const ViewSwitcher = () => {
     <>
       <Select value={activeProfileType} onValueChange={handleViewChange}>
         <SelectTrigger className="w-[180px] bg-card border-border">
-          <SelectValue placeholder="Select view" />
+          <SelectValue placeholder={t('viewSwitcher.selectView')} />
         </SelectTrigger>
         <SelectContent>
           {/* Admin View - Only for admin users */}
@@ -113,7 +115,7 @@ const ViewSwitcher = () => {
             <SelectItem value="admin">
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4 text-primary" />
-                <span>Admin View</span>
+                <span>{t('viewSwitcher.adminView')}</span>
                 {availableProfiles.admin && (
                   <Check className="w-3 h-3 text-green-500 ml-auto" />
                 )}
@@ -126,7 +128,7 @@ const ViewSwitcher = () => {
             <SelectItem value="coach">
               <div className="flex items-center gap-2">
                 <Briefcase className="w-4 h-4 text-orange-500" />
-                <span>Coach View</span>
+                <span>{t('viewSwitcher.coachView')}</span>
                 <Check className="w-3 h-3 text-green-500 ml-auto" />
               </div>
             </SelectItem>
@@ -134,7 +136,7 @@ const ViewSwitcher = () => {
             <SelectItem value="create-coach">
               <div className="flex items-center gap-2">
                 <Briefcase className="w-4 h-4 text-orange-500/50" />
-                <span className="text-muted-foreground">Coach View</span>
+                <span className="text-muted-foreground">{t('viewSwitcher.coachView')}</span>
                 <Plus className="w-3 h-3 text-muted-foreground ml-auto" />
               </div>
             </SelectItem>
@@ -145,7 +147,7 @@ const ViewSwitcher = () => {
             <SelectItem value="client">
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4 text-blue-500" />
-                <span>Client View</span>
+                <span>{t('viewSwitcher.clientView')}</span>
                 <Check className="w-3 h-3 text-green-500 ml-auto" />
               </div>
             </SelectItem>
@@ -153,7 +155,7 @@ const ViewSwitcher = () => {
             <SelectItem value="create-client">
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4 text-blue-500/50" />
-                <span className="text-muted-foreground">Client View</span>
+                <span className="text-muted-foreground">{t('viewSwitcher.clientView')}</span>
                 <Plus className="w-3 h-3 text-muted-foreground ml-auto" />
               </div>
             </SelectItem>
