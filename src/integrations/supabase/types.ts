@@ -4006,8 +4006,12 @@ export type Database = {
           email_messages: boolean | null
           email_reminders: boolean | null
           id: string
+          push_achievements: boolean | null
           push_bookings: boolean | null
+          push_challenges: boolean | null
+          push_connections: boolean | null
           push_messages: boolean | null
+          push_motivation: boolean | null
           push_reminders: boolean | null
           reminder_hours_before: number | null
           updated_at: string
@@ -4020,8 +4024,12 @@ export type Database = {
           email_messages?: boolean | null
           email_reminders?: boolean | null
           id?: string
+          push_achievements?: boolean | null
           push_bookings?: boolean | null
+          push_challenges?: boolean | null
+          push_connections?: boolean | null
           push_messages?: boolean | null
+          push_motivation?: boolean | null
           push_reminders?: boolean | null
           reminder_hours_before?: number | null
           updated_at?: string
@@ -4034,8 +4042,12 @@ export type Database = {
           email_messages?: boolean | null
           email_reminders?: boolean | null
           id?: string
+          push_achievements?: boolean | null
           push_bookings?: boolean | null
+          push_challenges?: boolean | null
+          push_connections?: boolean | null
           push_messages?: boolean | null
+          push_motivation?: boolean | null
           push_reminders?: boolean | null
           reminder_hours_before?: number | null
           updated_at?: string
@@ -4323,6 +4335,39 @@ export type Database = {
           stripe_product_id?: string | null
           tier?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      push_tokens: {
+        Row: {
+          created_at: string | null
+          device_name: string | null
+          device_type: string | null
+          id: string
+          is_active: boolean | null
+          player_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          device_name?: string | null
+          device_type?: string | null
+          id?: string
+          is_active?: boolean | null
+          player_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          device_name?: string | null
+          device_type?: string | null
+          id?: string
+          is_active?: boolean | null
+          player_id?: string
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
