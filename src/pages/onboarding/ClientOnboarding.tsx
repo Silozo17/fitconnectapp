@@ -196,7 +196,7 @@ const ClientOnboarding = () => {
 
   if (isCheckingProfile) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="h-[100dvh] bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
@@ -211,267 +211,270 @@ const ClientOnboarding = () => {
         <meta name="description" content="Set up your fitness profile to get personalized coach recommendations." />
       </Helmet>
 
-      <div className="min-h-screen bg-background">
-        {/* Header */}
-        <div className="border-b border-border">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+      <div className="h-[100dvh] flex flex-col bg-background overflow-hidden">
+        {/* Header - compact */}
+        <div className="shrink-0 border-b border-border">
+          <div className="container mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-                <Dumbbell className="w-6 h-6 text-primary-foreground" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary flex items-center justify-center">
+                <Dumbbell className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
               </div>
-              <span className="font-display font-bold text-xl text-foreground">FitConnect</span>
+              <span className="font-display font-bold text-lg sm:text-xl text-foreground">FitConnect</span>
             </div>
-            <Button variant="ghost" onClick={handleSkip} className="text-muted-foreground">
-              Skip for now
+            <Button variant="ghost" size="sm" onClick={handleSkip} className="text-muted-foreground text-sm">
+              Skip
             </Button>
           </div>
         </div>
 
-        {/* Progress */}
-        <div className="container mx-auto px-4 py-6 max-w-2xl">
-          <div className="mb-2 flex items-center justify-between text-sm">
+        {/* Progress - compact */}
+        <div className="shrink-0 container mx-auto px-3 sm:px-4 py-3 sm:py-4 max-w-2xl">
+          <div className="mb-1.5 flex items-center justify-between text-xs sm:text-sm">
             <span className="text-muted-foreground">Step {currentStep + 1} of {STEPS.length}</span>
             <span className="text-foreground font-medium">{STEPS[currentStep]}</span>
           </div>
-          <Progress value={progress} className="h-2" />
+          <Progress value={progress} className="h-1.5 sm:h-2" />
         </div>
 
-        {/* Form Content */}
-        <div className="container mx-auto px-4 py-8 max-w-2xl">
-          <div className="card-elevated p-8">
-            {/* Step 0: Choose Avatar */}
-            {currentStep === 0 && (
-              <AvatarSelectionStep
-                selectedAvatarId={formData.selectedAvatarId}
-                onSelect={handleAvatarSelect}
-              />
-            )}
+        {/* Form Content - flexible, takes remaining space */}
+        <div className="flex-1 min-h-0 container mx-auto px-3 sm:px-4 pb-3 sm:pb-4 max-w-2xl">
+          <div className="card-elevated h-full p-4 sm:p-6 flex flex-col">
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              {/* Step 0: Choose Avatar */}
+              {currentStep === 0 && (
+                <AvatarSelectionStep
+                  selectedAvatarId={formData.selectedAvatarId}
+                  onSelect={handleAvatarSelect}
+                />
+              )}
 
-            {/* Step 1: Personal Info */}
-            {currentStep === 1 && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-                    Let's get to know you
-                  </h2>
-                  <p className="text-muted-foreground">Tell us a bit about yourself.</p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Step 1: Personal Info */}
+              {currentStep === 1 && (
+                <div className="space-y-4 sm:space-y-5">
                   <div>
-                    <Label htmlFor="firstName" className="text-foreground">
-                      First Name <span className="text-destructive">*</span>
-                    </Label>
-                    <Input
-                      id="firstName"
-                      value={formData.firstName}
-                      onChange={(e) => handleInputChange("firstName", e.target.value)}
-                      className="mt-1.5 bg-secondary border-border text-foreground"
-                      placeholder="John"
-                      required
-                    />
+                    <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-1">
+                      Let's get to know you
+                    </h2>
+                    <p className="text-sm text-muted-foreground">Tell us a bit about yourself.</p>
                   </div>
+
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                    <div>
+                      <Label htmlFor="firstName" className="text-foreground text-sm">
+                        First Name <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        id="firstName"
+                        value={formData.firstName}
+                        onChange={(e) => handleInputChange("firstName", e.target.value)}
+                        className="mt-1 bg-secondary border-border text-foreground h-9 sm:h-10"
+                        placeholder="John"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="lastName" className="text-foreground text-sm">Last Name</Label>
+                      <Input
+                        id="lastName"
+                        value={formData.lastName}
+                        onChange={(e) => handleInputChange("lastName", e.target.value)}
+                        className="mt-1 bg-secondary border-border text-foreground h-9 sm:h-10"
+                        placeholder="Doe"
+                      />
+                    </div>
+                  </div>
+
                   <div>
-                    <Label htmlFor="lastName" className="text-foreground">Last Name</Label>
+                    <Label htmlFor="age" className="text-foreground text-sm">Age</Label>
                     <Input
-                      id="lastName"
-                      value={formData.lastName}
-                      onChange={(e) => handleInputChange("lastName", e.target.value)}
-                      className="mt-1.5 bg-secondary border-border text-foreground"
-                      placeholder="Doe"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="age" className="text-foreground">Age</Label>
-                  <Input
-                    id="age"
-                    type="number"
-                    value={formData.age}
-                    onChange={(e) => handleInputChange("age", e.target.value)}
-                    className="mt-1.5 bg-secondary border-border text-foreground w-full sm:w-32"
-                    placeholder="25"
-                  />
-                </div>
-
-                <div>
-                  <Label className="text-foreground mb-3 block">Pronouns</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {PRONOUNS.map((pronoun) => (
-                      <button
-                        key={pronoun.id}
-                        type="button"
-                        onClick={() => handleInputChange("genderPronouns", pronoun.id)}
-                        className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                          formData.genderPronouns === pronoun.id
-                            ? "border-primary bg-primary/10 text-foreground"
-                            : "border-border hover:border-muted-foreground text-muted-foreground"
-                        }`}
-                      >
-                        {pronoun.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Step 2: Body Metrics */}
-            {currentStep === 2 && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-                    Your body metrics
-                  </h2>
-                  <p className="text-muted-foreground">This helps coaches create personalized plans.</p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="height" className="text-foreground">Height (cm)</Label>
-                    <Input
-                      id="height"
+                      id="age"
                       type="number"
-                      value={formData.heightCm}
-                      onChange={(e) => handleInputChange("heightCm", e.target.value)}
-                      className="mt-1.5 bg-secondary border-border text-foreground"
-                      placeholder="175"
+                      value={formData.age}
+                      onChange={(e) => handleInputChange("age", e.target.value)}
+                      className="mt-1 bg-secondary border-border text-foreground w-24 h-9 sm:h-10"
+                      placeholder="25"
                     />
                   </div>
+
                   <div>
-                    <Label htmlFor="weight" className="text-foreground">Weight (kg)</Label>
-                    <Input
-                      id="weight"
-                      type="number"
-                      value={formData.weightKg}
-                      onChange={(e) => handleInputChange("weightKg", e.target.value)}
-                      className="mt-1.5 bg-secondary border-border text-foreground"
-                      placeholder="70"
-                    />
+                    <Label className="text-foreground text-sm mb-2 block">Pronouns</Label>
+                    <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                      {PRONOUNS.map((pronoun) => (
+                        <button
+                          key={pronoun.id}
+                          type="button"
+                          onClick={() => handleInputChange("genderPronouns", pronoun.id)}
+                          className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg border-2 transition-all text-sm ${
+                            formData.genderPronouns === pronoun.id
+                              ? "border-primary bg-primary/10 text-foreground"
+                              : "border-border hover:border-muted-foreground text-muted-foreground"
+                          }`}
+                        >
+                          {pronoun.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
+              )}
 
-                <p className="text-sm text-muted-foreground">
-                  Your metrics are private and only shared with coaches you choose to work with.
-                </p>
-              </div>
-            )}
+              {/* Step 2: Body Metrics */}
+              {currentStep === 2 && (
+                <div className="space-y-4 sm:space-y-5">
+                  <div>
+                    <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-1">
+                      Your body metrics
+                    </h2>
+                    <p className="text-sm text-muted-foreground">This helps coaches create personalized plans.</p>
+                  </div>
 
-            {/* Step 3: Fitness Goals */}
-            {currentStep === 3 && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-                    What are your fitness goals?
-                  </h2>
-                  <p className="text-muted-foreground">Select all that apply.</p>
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                    <div>
+                      <Label htmlFor="height" className="text-foreground text-sm">Height (cm)</Label>
+                      <Input
+                        id="height"
+                        type="number"
+                        value={formData.heightCm}
+                        onChange={(e) => handleInputChange("heightCm", e.target.value)}
+                        className="mt-1 bg-secondary border-border text-foreground h-9 sm:h-10"
+                        placeholder="175"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="weight" className="text-foreground text-sm">Weight (kg)</Label>
+                      <Input
+                        id="weight"
+                        type="number"
+                        value={formData.weightKg}
+                        onChange={(e) => handleInputChange("weightKg", e.target.value)}
+                        className="mt-1 bg-secondary border-border text-foreground h-9 sm:h-10"
+                        placeholder="70"
+                      />
+                    </div>
+                  </div>
+
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    Your metrics are private and only shared with coaches you choose to work with.
+                  </p>
                 </div>
+              )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {FITNESS_GOALS.map((goal) => {
-                    const IconComponent = goal.icon;
-                    return (
-                      <button
-                        key={goal.id}
-                        type="button"
-                        onClick={() => handleMultiSelect("fitnessGoals", goal.id)}
-                        className={`p-4 rounded-xl border-2 transition-all text-left flex items-center gap-3 ${
-                          formData.fitnessGoals.includes(goal.id)
-                            ? "border-primary bg-primary/10"
-                            : "border-border hover:border-muted-foreground"
-                        }`}
-                      >
-                        <IconComponent className={`w-6 h-6 ${formData.fitnessGoals.includes(goal.id) ? "text-primary" : "text-muted-foreground"}`} />
-                        <span className={formData.fitnessGoals.includes(goal.id) ? "text-foreground font-medium" : "text-muted-foreground"}>
-                          {goal.label}
-                        </span>
-                        {formData.fitnessGoals.includes(goal.id) && (
-                          <Check className="w-5 h-5 text-primary ml-auto" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+              {/* Step 3: Fitness Goals */}
+              {currentStep === 3 && (
+                <div className="space-y-4">
+                  <div>
+                    <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-1">
+                      What are your fitness goals?
+                    </h2>
+                    <p className="text-sm text-muted-foreground">Select all that apply.</p>
+                  </div>
 
-            {/* Step 4: Dietary Info */}
-            {currentStep === 4 && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-                    Dietary preferences
-                  </h2>
-                  <p className="text-muted-foreground">Help your nutritionist create the perfect plan.</p>
-                </div>
-
-                <div>
-                  <Label className="text-foreground mb-3 block">Dietary Restrictions</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {DIETARY_RESTRICTIONS.map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => handleMultiSelect("dietaryRestrictions", item.id)}
-                        className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                          formData.dietaryRestrictions.includes(item.id)
-                            ? "border-primary bg-primary/10 text-foreground"
-                            : "border-border hover:border-muted-foreground text-muted-foreground"
-                        }`}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                    {FITNESS_GOALS.map((goal) => {
+                      const IconComponent = goal.icon;
+                      return (
+                        <button
+                          key={goal.id}
+                          type="button"
+                          onClick={() => handleMultiSelect("fitnessGoals", goal.id)}
+                          className={`p-2.5 sm:p-3 rounded-xl border-2 transition-all text-left flex items-center gap-2 sm:gap-3 ${
+                            formData.fitnessGoals.includes(goal.id)
+                              ? "border-primary bg-primary/10"
+                              : "border-border hover:border-muted-foreground"
+                          }`}
+                        >
+                          <IconComponent className={`w-5 h-5 shrink-0 ${formData.fitnessGoals.includes(goal.id) ? "text-primary" : "text-muted-foreground"}`} />
+                          <span className={`text-xs sm:text-sm ${formData.fitnessGoals.includes(goal.id) ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+                            {goal.label}
+                          </span>
+                          {formData.fitnessGoals.includes(goal.id) && (
+                            <Check className="w-4 h-4 text-primary ml-auto shrink-0" />
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
+              )}
 
-                <div>
-                  <Label className="text-foreground mb-3 block">Allergies</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {ALLERGIES.map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => handleMultiSelect("allergies", item.id)}
-                        className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                          formData.allergies.includes(item.id)
-                            ? "border-primary bg-primary/10 text-foreground"
-                            : "border-border hover:border-muted-foreground text-muted-foreground"
-                        }`}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
+              {/* Step 4: Dietary Info */}
+              {currentStep === 4 && (
+                <div className="space-y-4">
+                  <div>
+                    <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-1">
+                      Dietary preferences
+                    </h2>
+                    <p className="text-sm text-muted-foreground">Help your nutritionist create the perfect plan.</p>
+                  </div>
+
+                  <div>
+                    <Label className="text-foreground text-sm mb-2 block">Dietary Restrictions</Label>
+                    <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                      {DIETARY_RESTRICTIONS.map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => handleMultiSelect("dietaryRestrictions", item.id)}
+                          className={`px-3 py-1.5 rounded-lg border-2 transition-all text-sm ${
+                            formData.dietaryRestrictions.includes(item.id)
+                              ? "border-primary bg-primary/10 text-foreground"
+                              : "border-border hover:border-muted-foreground text-muted-foreground"
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-foreground text-sm mb-2 block">Allergies</Label>
+                    <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                      {ALLERGIES.map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => handleMultiSelect("allergies", item.id)}
+                          className={`px-3 py-1.5 rounded-lg border-2 transition-all text-sm ${
+                            formData.allergies.includes(item.id)
+                              ? "border-primary bg-primary/10 text-foreground"
+                              : "border-border hover:border-muted-foreground text-muted-foreground"
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Step 5: Wearables */}
-            {currentStep === 5 && (
-              <WearablesOnboardingStep
-                onComplete={handleComplete}
-                onSkip={handleComplete}
-              />
-            )}
+              {/* Step 5: Wearables */}
+              {currentStep === 5 && (
+                <WearablesOnboardingStep
+                  onComplete={handleComplete}
+                  onSkip={handleComplete}
+                />
+              )}
+            </div>
 
             {/* Navigation - only show for steps that don't have their own navigation */}
             {currentStep < 5 && (
-              <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
+              <div className="shrink-0 flex items-center justify-between mt-4 pt-3 sm:pt-4 border-t border-border">
                 <Button
                   variant="ghost"
+                  size="sm"
                   onClick={handleBack}
                   disabled={currentStep === 0}
                   className="text-muted-foreground"
                 >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  <ArrowLeft className="w-4 h-4 mr-1.5" />
                   Back
                 </Button>
 
-                <Button onClick={handleNext} className="bg-primary text-primary-foreground hover:bg-primary/90">
+                <Button size="sm" onClick={handleNext} className="bg-primary text-primary-foreground hover:bg-primary/90">
                   Next
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                  <ArrowRight className="w-4 h-4 ml-1.5" />
                 </Button>
               </div>
             )}
