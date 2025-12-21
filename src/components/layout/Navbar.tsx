@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -9,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { HeaderLocaleSelector } from "@/components/shared/HeaderLocaleSelector";
 
 const Navbar = () => {
+  const { t } = useTranslation("common");
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -31,27 +33,27 @@ const Navbar = () => {
   }, []);
 
   const coachTypes = [
-    { name: "All Coaches", href: "/coaches", icon: Users, description: "Browse all fitness professionals" },
-    { name: "Personal Trainers", href: "/coaches/personal-trainers", icon: Dumbbell, description: "Custom workout programs" },
-    { name: "Nutritionists", href: "/coaches/nutritionists", icon: Apple, description: "Expert diet & meal plans" },
-    { name: "Boxing Coaches", href: "/coaches/boxing", icon: Swords, description: "Learn the sweet science" },
-    { name: "MMA Coaches", href: "/coaches/mma", icon: Flame, description: "Mixed martial arts training" },
+    { name: t("website.coachTypes.allCoaches"), href: "/coaches", icon: Users, description: t("website.coachTypes.allCoachesDesc") },
+    { name: t("website.coachTypes.personalTrainers"), href: "/coaches/personal-trainers", icon: Dumbbell, description: t("website.coachTypes.personalTrainersDesc") },
+    { name: t("website.coachTypes.nutritionists"), href: "/coaches/nutritionists", icon: Apple, description: t("website.coachTypes.nutritionistsDesc") },
+    { name: t("website.coachTypes.boxingCoaches"), href: "/coaches/boxing", icon: Swords, description: t("website.coachTypes.boxingCoachesDesc") },
+    { name: t("website.coachTypes.mmaCoaches"), href: "/coaches/mma", icon: Flame, description: t("website.coachTypes.mmaCoachesDesc") },
   ];
 
   const resources = [
-    { name: "How It Works", href: "/how-it-works", icon: BookOpen, description: "Learn about the platform" },
-    { name: "Success Stories", href: "/success-stories", icon: Trophy, description: "Real client transformations" },
-    { name: "FAQ", href: "/faq", icon: HelpCircle, description: "Common questions answered" },
+    { name: t("website.resourceLinks.howItWorks"), href: "/how-it-works", icon: BookOpen, description: t("website.resourceLinks.howItWorksDesc") },
+    { name: t("website.resourceLinks.successStories"), href: "/success-stories", icon: Trophy, description: t("website.resourceLinks.successStoriesDesc") },
+    { name: t("website.resourceLinks.faq"), href: "/faq", icon: HelpCircle, description: t("website.resourceLinks.faqDesc") },
   ];
 
   const forCoaches = [
-    { name: "Why FitConnect", href: "/for-coaches", icon: Users, description: "Benefits for coaches" },
-    { name: "Pricing & Plans", href: "/pricing", icon: BookOpen, description: "Platform subscription tiers" },
+    { name: t("website.forCoachesLinks.whyFitConnect"), href: "/for-coaches", icon: Users, description: t("website.forCoachesLinks.whyFitConnectDesc") },
+    { name: t("website.forCoachesLinks.pricingPlans"), href: "/pricing", icon: BookOpen, description: t("website.forCoachesLinks.pricingPlansDesc") },
   ];
 
   const navLinks = [
-    { name: "Community", href: "/community" },
-    { name: "Marketplace", href: "/marketplace" },
+    { name: t("website.nav.community"), href: "/community" },
+    { name: t("website.nav.marketplace"), href: "/marketplace" },
   ];
 
   const dashboardLink = role === "coach" ? "/dashboard/coach" : role === "admin" ? "/dashboard/admin" : "/dashboard/client";
@@ -90,7 +92,7 @@ const Navbar = () => {
               onMouseLeave={handleDropdownLeave}
             >
               <button className="px-4 py-2 text-muted-foreground hover:text-foreground font-medium transition-colors rounded-lg hover:bg-secondary/50 flex items-center gap-1">
-                Find Coaches
+                {t("website.nav.findCoaches")}
                 <ChevronDown className={cn("w-4 h-4 transition-transform", activeDropdown === "coaches" && "rotate-180")} />
               </button>
               
@@ -98,7 +100,7 @@ const Navbar = () => {
                 <div className="absolute top-full left-0 mt-2 w-72 bg-card border border-border rounded-xl shadow-lg p-2 animate-in fade-in slide-in-from-top-2">
                   {coachTypes.map((item) => (
                     <Link
-                      key={item.name}
+                      key={item.href}
                       to={item.href}
                       className="flex items-start gap-3 p-3 rounded-lg hover:bg-secondary/50 transition-colors group"
                       onClick={() => setActiveDropdown(null)}
@@ -123,7 +125,7 @@ const Navbar = () => {
               onMouseLeave={handleDropdownLeave}
             >
               <button className="px-4 py-2 text-muted-foreground hover:text-foreground font-medium transition-colors rounded-lg hover:bg-secondary/50 flex items-center gap-1">
-                Resources
+                {t("website.nav.resources")}
                 <ChevronDown className={cn("w-4 h-4 transition-transform", activeDropdown === "resources" && "rotate-180")} />
               </button>
               
@@ -131,7 +133,7 @@ const Navbar = () => {
                 <div className="absolute top-full left-0 mt-2 w-72 bg-card border border-border rounded-xl shadow-lg p-2 animate-in fade-in slide-in-from-top-2">
                   {resources.map((item) => (
                     <Link
-                      key={item.name}
+                      key={item.href}
                       to={item.href}
                       className="flex items-start gap-3 p-3 rounded-lg hover:bg-secondary/50 transition-colors group"
                       onClick={() => setActiveDropdown(null)}
@@ -156,7 +158,7 @@ const Navbar = () => {
               onMouseLeave={handleDropdownLeave}
             >
               <button className="px-4 py-2 text-muted-foreground hover:text-foreground font-medium transition-colors rounded-lg hover:bg-secondary/50 flex items-center gap-1">
-                For Coaches
+                {t("website.nav.forCoaches")}
                 <ChevronDown className={cn("w-4 h-4 transition-transform", activeDropdown === "forcoaches" && "rotate-180")} />
               </button>
               
@@ -164,7 +166,7 @@ const Navbar = () => {
                 <div className="absolute top-full left-0 mt-2 w-72 bg-card border border-border rounded-xl shadow-lg p-2 animate-in fade-in slide-in-from-top-2">
                   {forCoaches.map((item) => (
                     <Link
-                      key={item.name}
+                      key={item.href}
                       to={item.href}
                       className="flex items-start gap-3 p-3 rounded-lg hover:bg-secondary/50 transition-colors group"
                       onClick={() => setActiveDropdown(null)}
@@ -183,7 +185,7 @@ const Navbar = () => {
             </div>
 
             {navLinks.map((link) => (
-              <Link key={link.name} to={link.href} className="px-4 py-2 text-muted-foreground hover:text-foreground font-medium transition-colors rounded-lg hover:bg-secondary/50">
+              <Link key={link.href} to={link.href} className="px-4 py-2 text-muted-foreground hover:text-foreground font-medium transition-colors rounded-lg hover:bg-secondary/50">
                 {link.name}
               </Link>
             ))}
@@ -194,13 +196,13 @@ const Navbar = () => {
             <HeaderLocaleSelector />
             {user ? (
               <>
-                <Button asChild variant="ghost"><Link to={dashboardLink}>Dashboard</Link></Button>
-                <Button onClick={() => signOut()} variant="outline">Sign Out</Button>
+                <Button asChild variant="ghost"><Link to={dashboardLink}>{t("website.nav.dashboard")}</Link></Button>
+                <Button onClick={() => signOut()} variant="outline">{t("website.nav.signOut")}</Button>
               </>
             ) : (
               <>
-                <Button asChild variant="ghost"><Link to="/auth?mode=login">Log In</Link></Button>
-                <GradientButton asChild size="sm"><Link to="/auth?mode=signup">Get Started</Link></GradientButton>
+                <Button asChild variant="ghost"><Link to="/auth?mode=login">{t("website.nav.logIn")}</Link></Button>
+                <GradientButton asChild size="sm"><Link to="/auth?mode=signup">{t("website.nav.getStarted")}</Link></GradientButton>
               </>
             )}
           </div>
@@ -210,7 +212,7 @@ const Navbar = () => {
             <SheetTrigger asChild>
               <button className="xl:hidden p-2 text-foreground rounded-lg hover:bg-secondary transition-colors">
                 <Menu className="w-6 h-6" />
-                <span className="sr-only">Open menu</span>
+                <span className="sr-only">{t("website.nav.openMenu")}</span>
               </button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] sm:w-[350px] p-0 flex flex-col h-full">
@@ -226,10 +228,10 @@ const Navbar = () => {
               <div className="flex-1 overflow-y-auto">
                 {/* Mobile Find Coaches Section */}
                 <div className="px-6 py-4">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Find Coaches</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t("website.nav.findCoaches")}</p>
                   {coachTypes.map((item) => (
                     <Link
-                      key={item.name}
+                      key={item.href}
                       to={item.href}
                       className="flex items-center gap-3 py-2.5 text-foreground hover:text-primary transition-colors"
                       onClick={() => setIsOpen(false)}
@@ -244,10 +246,10 @@ const Navbar = () => {
 
                 {/* Mobile Resources Section */}
                 <div className="px-6 py-4">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Resources</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t("website.nav.resources")}</p>
                   {resources.map((item) => (
                     <Link
-                      key={item.name}
+                      key={item.href}
                       to={item.href}
                       className="flex items-center gap-3 py-2.5 text-foreground hover:text-primary transition-colors"
                       onClick={() => setIsOpen(false)}
@@ -262,10 +264,10 @@ const Navbar = () => {
 
                 {/* Mobile For Coaches Section */}
                 <div className="px-6 py-4">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">For Coaches</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t("website.nav.forCoaches")}</p>
                   {forCoaches.map((item) => (
                     <Link
-                      key={item.name}
+                      key={item.href}
                       to={item.href}
                       className="flex items-center gap-3 py-2.5 text-foreground hover:text-primary transition-colors"
                       onClick={() => setIsOpen(false)}
@@ -282,7 +284,7 @@ const Navbar = () => {
                 <div className="px-6 py-4">
                   {navLinks.map((link) => (
                     <Link 
-                      key={link.name} 
+                      key={link.href} 
                       to={link.href} 
                       className="block py-2.5 text-foreground hover:text-primary font-medium transition-colors" 
                       onClick={() => setIsOpen(false)}
@@ -298,19 +300,19 @@ const Navbar = () => {
                 {user ? (
                   <div className="flex flex-col gap-3">
                     <Button asChild variant="outline" className="w-full">
-                      <Link to={dashboardLink} onClick={() => setIsOpen(false)}>Dashboard</Link>
+                      <Link to={dashboardLink} onClick={() => setIsOpen(false)}>{t("website.nav.dashboard")}</Link>
                     </Button>
                     <Button onClick={() => { signOut(); setIsOpen(false); }} variant="ghost" className="w-full">
-                      Sign Out
+                      {t("website.nav.signOut")}
                     </Button>
                   </div>
                 ) : (
                   <div className="flex flex-col gap-3">
                     <Button asChild variant="outline" className="w-full">
-                      <Link to="/auth?mode=login" onClick={() => setIsOpen(false)}>Log In</Link>
+                      <Link to="/auth?mode=login" onClick={() => setIsOpen(false)}>{t("website.nav.logIn")}</Link>
                     </Button>
                     <GradientButton asChild className="w-full">
-                      <Link to="/auth?mode=signup" onClick={() => setIsOpen(false)}>Get Started</Link>
+                      <Link to="/auth?mode=signup" onClick={() => setIsOpen(false)}>{t("website.nav.getStarted")}</Link>
                     </GradientButton>
                   </div>
                 )}
