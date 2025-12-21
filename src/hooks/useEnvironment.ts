@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { isDespia } from "@/lib/despia";
 
 export interface EnvironmentInfo {
   /** Running in standard browser (not PWA, not native) */
@@ -7,7 +8,9 @@ export interface EnvironmentInfo {
   isPWA: boolean;
   /** Running in Capacitor/Cordova native wrapper */
   isNativeApp: boolean;
-  /** Either PWA or native (not browser) */
+  /** Running inside Despia native runtime */
+  isDespia: boolean;
+  /** Either PWA, native, or Despia (not browser) */
   isStandalone: boolean;
   /** iOS device detected */
   isIOS: boolean;
@@ -22,6 +25,7 @@ export interface EnvironmentInfo {
 export const useEnvironment = (): EnvironmentInfo => {
   const [isPWA, setIsPWA] = useState(false);
   const [isNativeApp, setIsNativeApp] = useState(false);
+  const [isDespiaEnv, setIsDespiaEnv] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
 
@@ -38,6 +42,9 @@ export const useEnvironment = (): EnvironmentInfo => {
     const isCapacitor = !!(window as any).Capacitor;
     const isCordova = !!(window as any).cordova;
     setIsNativeApp(isCapacitor || isCordova);
+
+    // Detect Despia native runtime
+    setIsDespiaEnv(isDespia());
 
     // Detect PWA (standalone mode)
     // Method 1: display-mode media query
@@ -65,17 +72,18 @@ export const useEnvironment = (): EnvironmentInfo => {
     return () => standaloneMediaQuery.removeEventListener("change", handleChange);
   }, []);
 
-  const isStandalone = isPWA || isNativeApp;
+  const isStandalone = isPWA || isNativeApp || isDespiaEnv;
   const isBrowser = !isStandalone;
 
   return useMemo(() => ({
     isBrowser,
     isPWA,
     isNativeApp,
+    isDespia: isDespiaEnv,
     isStandalone,
     isIOS,
     isAndroid,
-  }), [isBrowser, isPWA, isNativeApp, isStandalone, isIOS, isAndroid]);
+  }), [isBrowser, isPWA, isNativeApp, isDespiaEnv, isStandalone, isIOS, isAndroid]);
 };
 
 /**
@@ -86,6 +94,7 @@ export const getEnvironment = (): EnvironmentInfo => {
   const isCapacitor = typeof window !== "undefined" && !!(window as any).Capacitor;
   const isCordova = typeof window !== "undefined" && !!(window as any).cordova;
   const isNativeApp = isCapacitor || isCordova;
+  const isDespiaEnv = isDespia();
 
   const isStandaloneMode = typeof window !== "undefined" && 
     window.matchMedia("(display-mode: standalone)").matches;
@@ -94,8 +103,8 @@ export const getEnvironment = (): EnvironmentInfo => {
   const isFullscreen = typeof window !== "undefined" && 
     window.matchMedia("(display-mode: fullscreen)").matches;
 
-  const isPWA = (isStandaloneMode || isIOSStandalone || isFullscreen) && !isNativeApp;
-  const isStandalone = isPWA || isNativeApp;
+  const isPWA = (isStandaloneMode || isIOSStandalone || isFullscreen) && !isNativeApp && !isDespiaEnv;
+  const isStandalone = isPWA || isNativeApp || isDespiaEnv;
   const isBrowser = !isStandalone;
 
   const isIOS = typeof navigator !== "undefined" && 
@@ -107,6 +116,7 @@ export const getEnvironment = (): EnvironmentInfo => {
     isBrowser,
     isPWA,
     isNativeApp,
+    isDespia: isDespiaEnv,
     isStandalone,
     isIOS,
     isAndroid,
