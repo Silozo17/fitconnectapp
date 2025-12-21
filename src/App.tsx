@@ -15,7 +15,7 @@ import { CelebrationListeners } from "@/components/gamification/CelebrationListe
 import { CountryProvider } from "@/contexts/CountryContext";
 import { useLanguagePersistence } from "@/hooks/useLanguagePersistence";
 import { useAppInitialization } from "@/hooks/useAppInitialization";
-import ScrollToTop from "./components/shared/ScrollToTop";
+
 import ScrollRestoration from "./components/shared/ScrollRestoration";
 import { ReloadPrompt } from "./components/pwa/ReloadPrompt";
 import { InstallBanner } from "./components/pwa/InstallBanner";
@@ -627,8 +627,7 @@ const App = () => (
                             
                             {/* Website routes - WITH locale URL logic (must be last) */}
                             <Route path="/*" element={<WebsiteRouter />} />
-                          </Routes>
-                          <ScrollToTop />
+                        </Routes>
                         </LocaleProvider>
                       </AdminProvider>
                     </CelebrationProvider>
