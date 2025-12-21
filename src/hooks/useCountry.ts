@@ -1,11 +1,14 @@
 import { useCountryContext, useOptionalCountryContext } from "@/contexts/CountryContext";
+import { useOptionalLocaleRouting } from "@/contexts/LocaleRoutingContext";
 import { RouteLocationCode, LOCATION_TO_CURRENCY, LOCATION_TO_DATE_LOCALE } from "@/lib/locale-routing";
 import { CurrencyCode } from "@/lib/currency";
 
 interface UseCountryReturn {
-  /** Current country code */
+  /** Current country code - from URL locale if on locale route, otherwise from context */
   countryCode: RouteLocationCode;
-  /** Whether user manually selected the country */
+  /** Whether the country is from the URL route */
+  isFromRoute: boolean;
+  /** Whether user manually selected the country (only applies when not from route) */
   isManualOverride: boolean;
   /** Loading state */
   isLoading: boolean;
@@ -13,26 +16,43 @@ interface UseCountryReturn {
   currency: CurrencyCode;
   /** Date locale for current country */
   dateLocale: string;
-  /** Set country manually */
+  /** Set country manually (updates URL when on locale route) */
   setCountry: (code: RouteLocationCode) => void;
   /** Reset to auto-detected country */
   resetToDetected: () => void;
 }
 
 /**
- * Simple hook to access country information and settings.
- * Includes derived values like currency and date locale.
+ * Unified hook to access country information.
+ * 
+ * Priority:
+ * 1. URL locale route (e.g., /en-gb/ → 'gb')
+ * 2. Country context (auto-detected or manually set)
+ * 
+ * This ensures that:
+ * - On /pl-gb/coaches → shows UK coaches
+ * - On /pl-pl/coaches → shows Polish coaches
  */
 export function useCountry(): UseCountryReturn {
+  const localeRouting = useOptionalLocaleRouting();
   const context = useCountryContext();
   
+  // If on a locale-prefixed route, use URL location
+  const isFromRoute = localeRouting?.isLocaleRoute ?? false;
+  const countryCode = isFromRoute 
+    ? (localeRouting?.location ?? context.countryCode)
+    : context.countryCode;
+  
   return {
-    countryCode: context.countryCode,
-    isManualOverride: context.isManualOverride,
+    countryCode,
+    isFromRoute,
+    isManualOverride: isFromRoute ? false : context.isManualOverride,
     isLoading: context.isLoading,
-    currency: LOCATION_TO_CURRENCY[context.countryCode] || 'GBP',
-    dateLocale: LOCATION_TO_DATE_LOCALE[context.countryCode] || 'en-GB',
-    setCountry: context.setCountry,
+    currency: LOCATION_TO_CURRENCY[countryCode] || 'GBP',
+    dateLocale: LOCATION_TO_DATE_LOCALE[countryCode] || 'en-GB',
+    setCountry: isFromRoute 
+      ? (code: RouteLocationCode) => localeRouting?.changeLocation(code)
+      : context.setCountry,
     resetToDetected: context.resetToDetected,
   };
 }
@@ -41,17 +61,26 @@ export function useCountry(): UseCountryReturn {
  * Optional version that won't throw if outside provider
  */
 export function useOptionalCountry(): UseCountryReturn | null {
+  const localeRouting = useOptionalLocaleRouting();
   const context = useOptionalCountryContext();
   
   if (!context) return null;
   
+  const isFromRoute = localeRouting?.isLocaleRoute ?? false;
+  const countryCode = isFromRoute 
+    ? (localeRouting?.location ?? context.countryCode)
+    : context.countryCode;
+  
   return {
-    countryCode: context.countryCode,
-    isManualOverride: context.isManualOverride,
+    countryCode,
+    isFromRoute,
+    isManualOverride: isFromRoute ? false : context.isManualOverride,
     isLoading: context.isLoading,
-    currency: LOCATION_TO_CURRENCY[context.countryCode] || 'GBP',
-    dateLocale: LOCATION_TO_DATE_LOCALE[context.countryCode] || 'en-GB',
-    setCountry: context.setCountry,
+    currency: LOCATION_TO_CURRENCY[countryCode] || 'GBP',
+    dateLocale: LOCATION_TO_DATE_LOCALE[countryCode] || 'en-GB',
+    setCountry: isFromRoute 
+      ? (code: RouteLocationCode) => localeRouting?.changeLocation(code)
+      : context.setCountry,
     resetToDetected: context.resetToDetected,
   };
 }
