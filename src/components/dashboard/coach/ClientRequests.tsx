@@ -12,6 +12,7 @@ import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "react-router-dom";
+import { triggerHaptic } from "@/lib/despia";
 
 interface ConnectionRequest {
   id: string;
@@ -99,6 +100,7 @@ const ClientRequests = memo(() => {
           filter: `coach_id=eq.${coachProfile.id}`,
         },
         (payload) => {
+          triggerHaptic('heavy');
           toast.info("New connection request received!");
           queryClient.invalidateQueries({ queryKey: ["connection-requests", coachProfile.id] });
         }
