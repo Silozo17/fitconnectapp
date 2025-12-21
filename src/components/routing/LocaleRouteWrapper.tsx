@@ -1,5 +1,5 @@
 import { Outlet, useParams } from 'react-router-dom';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocale } from '@/contexts/LocaleContext';
 import {
   isValidLanguage,
@@ -20,6 +20,7 @@ import i18n from '@/i18n';
 export function LocaleRouteWrapper() {
   const { locale } = useParams<{ locale: string }>();
   const { setCurrency, setLocale } = useLocale();
+  const [isI18nReady, setIsI18nReady] = useState(false);
   
   // Parse the locale param (e.g., "en-gb" -> { lang: "en", loc: "gb" })
   const parsedLocale = useMemo(() => {
@@ -37,17 +38,26 @@ export function LocaleRouteWrapper() {
     };
   }, [locale]);
   
-  // Apply locale settings when valid
+  // Apply locale settings when valid - wait for i18n to be ready
   useEffect(() => {
-    if (!parsedLocale) return;
+    if (!parsedLocale) {
+      setIsI18nReady(true);
+      return;
+    }
     
     const { language, location } = parsedLocale;
     
-    // Update i18n language
+    // Update i18n language and wait for it to complete
     const i18nLang = LANGUAGE_TO_I18N[language];
-    if (i18n.language !== i18nLang) {
-      i18n.changeLanguage(i18nLang);
-    }
+    
+    const updateLanguage = async () => {
+      if (i18n.language !== i18nLang) {
+        await i18n.changeLanguage(i18nLang);
+      }
+      setIsI18nReady(true);
+    };
+    
+    updateLanguage();
     
     // Update currency and date locale
     setCurrency(LOCATION_TO_CURRENCY[location]);
@@ -57,6 +67,16 @@ export function LocaleRouteWrapper() {
     // Note: setStoredLocalePreference will NOT overwrite a 'manual' source
     setStoredLocalePreference(language, location, 'url');
   }, [parsedLocale, setCurrency, setLocale]);
+  
+  // Reset ready state when locale changes
+  useEffect(() => {
+    setIsI18nReady(false);
+  }, [locale]);
+  
+  // Don't render children until i18n is ready
+  if (!isI18nReady) {
+    return null;
+  }
   
   return <Outlet />;
 }
