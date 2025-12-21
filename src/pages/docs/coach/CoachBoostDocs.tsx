@@ -27,10 +27,10 @@ export default function CoachBoostDocs() {
           Pricing
         </h2>
         <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-          <li><strong>Activation Fee:</strong> £5 one-time payment for 30 days of priority visibility</li>
+          <li><strong>Activation Fee:</strong> £5 / 25 zł one-time payment for 30 days of priority visibility</li>
           <li><strong>First-Booking Commission:</strong> 30% of the first session booking from each new client</li>
-          <li><strong>Minimum Fee:</strong> £9 (on bookings under £30)</li>
-          <li><strong>Maximum Fee:</strong> £30 (on bookings over £100)</li>
+          <li><strong>Minimum Fee:</strong> £9 / 45 zł (on bookings under £30 / 150 zł)</li>
+          <li><strong>Maximum Fee:</strong> £30 / 150 zł (on bookings over £100 / 500 zł)</li>
           <li>No auto-renewal — you choose when to purchase again</li>
         </ul>
       </section>
@@ -41,7 +41,7 @@ export default function CoachBoostDocs() {
           How It Works
         </h2>
         <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
-          <li>Purchase Boost for £5 from your dashboard</li>
+          <li>Purchase Boost for £5 / 25 zł from your dashboard</li>
           <li>Your profile gets priority placement in search results for 30 days</li>
           <li>When a new client books their first session, you pay 30% commission</li>
           <li>All repeat bookings from that client are 100% yours — no more fees</li>
@@ -77,7 +77,7 @@ export default function CoachBoostDocs() {
 
       <DocTip>
         Boost works best when you have a complete profile with reviews and competitive pricing. 
-        The £5 activation fee is a small investment that can lead to long-term client relationships.
+        The £5 / 25 zł activation fee is a small investment that can lead to long-term client relationships.
       </DocTip>
     </DocsLayout>
   );
