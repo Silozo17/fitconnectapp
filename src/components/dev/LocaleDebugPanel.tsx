@@ -7,10 +7,8 @@ import { useMarketplaceLocationFilter } from '@/hooks/useMarketplaceLocationFilt
 import { getStoredLocalePreference } from '@/lib/locale-routing';
 import { useAuth } from '@/contexts/AuthContext';
 
-// Only render in development mode
-if (!import.meta.env.DEV) {
-  throw new Error('LocaleDebugPanel should only be used in development mode');
-}
+// This component should only be used in development mode
+// The parent component handles the DEV check
 
 interface DebugRowProps {
   label: string;
