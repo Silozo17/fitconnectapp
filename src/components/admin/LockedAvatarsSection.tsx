@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,8 @@ interface LockedAvatarsSectionProps {
 }
 
 export function LockedAvatarsSection({ userId, unlockedAvatarIds }: LockedAvatarsSectionProps) {
+  const { t } = useTranslation("admin");
+  const { t: tCommon } = useTranslation("common");
   const { data: allAvatars, isLoading } = useAllAvatars();
   const grantAvatar = useGrantAvatar();
 
@@ -30,7 +33,7 @@ export function LockedAvatarsSection({ userId, unlockedAvatarIds }: LockedAvatar
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
-            <Lock className="h-4 w-4 text-muted-foreground" /> Locked Avatars
+            <Lock className="h-4 w-4 text-muted-foreground" /> {t('avatars.lockedAvatars')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -47,13 +50,13 @@ export function LockedAvatarsSection({ userId, unlockedAvatarIds }: LockedAvatar
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex items-center gap-2">
           <Lock className="h-4 w-4 text-muted-foreground" /> 
-          Locked Avatars ({lockedAvatars.length}/{totalAvatars})
+          {t('avatars.lockedAvatars')} ({lockedAvatars.length}/{totalAvatars})
         </CardTitle>
       </CardHeader>
       <CardContent>
         {lockedAvatars.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-4">
-            All avatars unlocked!
+            {t('avatars.allAvatarsUnlocked')}
           </p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -91,7 +94,7 @@ export function LockedAvatarsSection({ userId, unlockedAvatarIds }: LockedAvatar
                         <p className="text-xs font-medium line-clamp-2 leading-tight">{avatar.name}</p>
                         <div className="flex items-center justify-between mt-1">
                           <Badge variant="outline" className={cn("text-[10px]", rarityConfig?.color)}>
-                            {avatar.rarity}
+                            {t(`avatars.rarities.${avatar.rarity}`)}
                           </Badge>
                           <Button
                             variant="ghost"

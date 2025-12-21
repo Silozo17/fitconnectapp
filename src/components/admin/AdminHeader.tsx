@@ -92,11 +92,11 @@ const AdminHeader = ({ onMenuToggle }: AdminHeaderProps) => {
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
                 <User className="h-4 w-4 mr-2" />
-                My Profile
+                {t('sidebar.myProfile')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={signOut}>
                 <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
+                {t('sidebar.signOut')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

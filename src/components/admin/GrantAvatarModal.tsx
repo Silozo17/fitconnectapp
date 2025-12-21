@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -36,6 +37,8 @@ export function GrantAvatarModal({
   userName,
   unlockedAvatarIds,
 }: GrantAvatarModalProps) {
+  const { t } = useTranslation("admin");
+  const { t: tCommon } = useTranslation("common");
   const [selectedAvatarIds, setSelectedAvatarIds] = useState<Set<string>>(new Set());
   const [reason, setReason] = useState("");
   const [search, setSearch] = useState("");
@@ -106,10 +109,10 @@ export function GrantAvatarModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Gift className="h-5 w-5 text-primary" />
-            Grant Avatars to {userName}
+            {t('avatars.grantAvatarsTo', { name: userName })}
           </DialogTitle>
           <DialogDescription>
-            Select one or more avatars to grant. Only avatars the user doesn't have are shown.
+            {t('avatars.selectAvatarsToGrant')}
           </DialogDescription>
         </DialogHeader>
 
@@ -118,7 +121,7 @@ export function GrantAvatarModal({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search avatars..."
+              placeholder={t('avatars.searchAvatars')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
@@ -128,10 +131,10 @@ export function GrantAvatarModal({
           {/* Category Tabs */}
           <Tabs value={category} onValueChange={setCategory}>
             <TabsList className="grid grid-cols-4 w-full">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="free">Free</TabsTrigger>
-              <TabsTrigger value="challenge_unlock">Challenge</TabsTrigger>
-              <TabsTrigger value="coach_exclusive">Coach</TabsTrigger>
+              <TabsTrigger value="all">{t('avatars.categories.all')}</TabsTrigger>
+              <TabsTrigger value="free">{t('avatars.categories.free')}</TabsTrigger>
+              <TabsTrigger value="challenge_unlock">{t('avatars.categories.challenge_unlock')}</TabsTrigger>
+              <TabsTrigger value="coach_exclusive">{t('avatars.categories.coach_exclusive')}</TabsTrigger>
             </TabsList>
           </Tabs>
 
@@ -139,14 +142,14 @@ export function GrantAvatarModal({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={selectAll} disabled={filteredAvatars.length === 0}>
-                <CheckSquare className="h-4 w-4 mr-1" /> Select All
+                <CheckSquare className="h-4 w-4 mr-1" /> {t('avatars.selectAll')}
               </Button>
               <Button variant="outline" size="sm" onClick={clearAll} disabled={selectedAvatarIds.size === 0}>
-                <Square className="h-4 w-4 mr-1" /> Clear All
+                <Square className="h-4 w-4 mr-1" /> {t('avatars.clearAll')}
               </Button>
             </div>
             {selectedAvatarIds.size > 0 && (
-              <Badge variant="secondary">{selectedAvatarIds.size} selected</Badge>
+              <Badge variant="secondary">{t('avatars.selected', { count: selectedAvatarIds.size })}</Badge>
             )}
           </div>
 
@@ -159,8 +162,8 @@ export function GrantAvatarModal({
             ) : filteredAvatars.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                 <Lock className="h-8 w-8 mb-2" />
-                <p>No avatars available to grant</p>
-                <p className="text-sm">User may already have all avatars</p>
+                <p>{t('avatars.noAvatarsToGrant')}</p>
+                <p className="text-sm">{t('avatars.userHasAll')}</p>
               </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -197,7 +200,7 @@ export function GrantAvatarModal({
                         variant="outline"
                         className={cn("text-[10px] mt-1", rarityConfig?.color)}
                       >
-                        {avatar.rarity}
+                        {t(`avatars.rarities.${avatar.rarity}`)}
                       </Badge>
                     </button>
                   );
@@ -230,9 +233,9 @@ export function GrantAvatarModal({
 
           {/* Reason */}
           <div className="space-y-2">
-            <Label>Reason (optional)</Label>
+            <Label>{t('avatars.reasonOptional')}</Label>
             <Textarea
-              placeholder="Why are you granting these avatars? (for audit log)"
+              placeholder={t('avatars.grantReason')}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               rows={2}
@@ -242,14 +245,14 @@ export function GrantAvatarModal({
 
         <DialogFooter>
           <Button variant="outline" onClick={handleClose}>
-            Cancel
+            {tCommon('actions.cancel')}
           </Button>
           <Button
             onClick={handleGrant}
             disabled={selectedAvatarIds.size === 0 || grantAvatars.isPending}
           >
             {grantAvatars.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            Grant {selectedAvatarIds.size > 0 ? `${selectedAvatarIds.size} Avatar${selectedAvatarIds.size > 1 ? 's' : ''}` : 'Avatar'}
+            {t('avatars.grantCount', { count: selectedAvatarIds.size })}
           </Button>
         </DialogFooter>
       </DialogContent>

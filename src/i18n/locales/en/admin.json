@@ -354,7 +354,31 @@
   "viewSwitcher": {
     "cardView": "Card View",
     "tableView": "Table View",
-    "listView": "List View"
+    "listView": "List View",
+    "selectView": "Select view",
+    "adminView": "Admin View",
+    "coachView": "Coach View",
+    "clientView": "Client View"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "coaches": "Coaches",
+    "team": "Team",
+    "revenue": "Revenue",
+    "boosts": "Boosts",
+    "analytics": "Analytics",
+    "platform": "Platform",
+    "challenges": "Challenges",
+    "blog": "Blog",
+    "verification": "Verification",
+    "integrations": "Integrations",
+    "feedback": "Feedback",
+    "reviewsDisputes": "Reviews & Disputes",
+    "auditLog": "Audit Log",
+    "settings": "Settings",
+    "myProfile": "My Profile",
+    "signOut": "Sign Out"
   },
   "avatars": {
     "title": "Avatar Management",
@@ -387,12 +411,27 @@
     "grantError": "Failed to grant avatar",
     "revokeSuccess": "Avatar revoked successfully",
     "revokeError": "Failed to revoke avatar",
+    "grantAvatarsTo": "Grant Avatars to {{name}}",
+    "selectAvatarsToGrant": "Select one or more avatars to grant. Only avatars the user doesn't have are shown.",
+    "searchAvatars": "Search avatars...",
+    "selectAll": "Select All",
+    "clearAll": "Clear All",
+    "noAvatarsToGrant": "No avatars available to grant",
+    "userHasAll": "User may already have all avatars",
+    "reasonOptional": "Reason (optional)",
+    "grantCount": "Grant {{count}} Avatar(s)",
+    "allAvatarsUnlocked": "All avatars unlocked!",
+    "selected": "{{count}} selected",
     "categories": {
+      "all": "All",
       "starter": "Starter",
       "achievement": "Achievement",
       "seasonal": "Seasonal",
       "premium": "Premium",
-      "challenge": "Challenge"
+      "challenge": "Challenge",
+      "free": "Free",
+      "challenge_unlock": "Challenge",
+      "coach_exclusive": "Coach"
     },
     "rarities": {
       "common": "Common",
@@ -440,5 +479,16 @@
     "coach": "Coach",
     "expiresAt": "Expires At",
     "noOverrides": "No feature overrides"
+  },
+  "featureValues": {
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "none": "None",
+    "basic": "Basic",
+    "standard": "Standard",
+    "full": "Full",
+    "advanced": "Advanced",
+    "limited": "Limited",
+    "unlimited": "Unlimited"
   }
 }

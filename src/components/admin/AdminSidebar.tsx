@@ -35,28 +35,28 @@ interface NavItem {
   badgeVariant?: "default" | "warning" | "urgent";
 }
 
-const mainNavItems: NavItem[] = [
-  { title: "Dashboard", url: "/dashboard/admin", icon: LayoutDashboard },
-  { title: "Users", url: "/dashboard/admin/users", icon: Users, badgeKey: "users" },
-  { title: "Coaches", url: "/dashboard/admin/coaches", icon: Dumbbell },
-  { title: "Team", url: "/dashboard/admin/team", icon: UsersRound },
-  { title: "Revenue", url: "/dashboard/admin/revenue", icon: DollarSign },
-  { title: "Boosts", url: "/dashboard/admin/boosts", icon: Rocket },
-  { title: "Analytics", url: "/dashboard/admin/analytics", icon: BarChart3 },
+const getMainNavItems = (t: (key: string) => string): NavItem[] => [
+  { title: t('sidebar.dashboard'), url: "/dashboard/admin", icon: LayoutDashboard },
+  { title: t('sidebar.users'), url: "/dashboard/admin/users", icon: Users, badgeKey: "users" },
+  { title: t('sidebar.coaches'), url: "/dashboard/admin/coaches", icon: Dumbbell },
+  { title: t('sidebar.team'), url: "/dashboard/admin/team", icon: UsersRound },
+  { title: t('sidebar.revenue'), url: "/dashboard/admin/revenue", icon: DollarSign },
+  { title: t('sidebar.boosts'), url: "/dashboard/admin/boosts", icon: Rocket },
+  { title: t('sidebar.analytics'), url: "/dashboard/admin/analytics", icon: BarChart3 },
 ];
 
-const platformNavItems: NavItem[] = [
-  { title: "Challenges", url: "/dashboard/admin/challenges", icon: Trophy },
-  { title: "Blog", url: "/dashboard/admin/blog", icon: FileText },
-  { title: "Verification", url: "/dashboard/admin/verification", icon: Shield, badgeKey: "verification", badgeVariant: "warning" },
-  { title: "Integrations", url: "/dashboard/admin/integrations", icon: Plug },
-  { title: "Feedback", url: "/dashboard/admin/feedback", icon: MessageSquarePlus, badgeKey: "feedback" },
-  { title: "Reviews & Disputes", url: "/dashboard/admin/reviews", icon: MessageSquare },
-  { title: "Audit Log", url: "/dashboard/admin/audit", icon: ClipboardList },
+const getPlatformNavItems = (t: (key: string) => string): NavItem[] => [
+  { title: t('sidebar.challenges'), url: "/dashboard/admin/challenges", icon: Trophy },
+  { title: t('sidebar.blog'), url: "/dashboard/admin/blog", icon: FileText },
+  { title: t('sidebar.verification'), url: "/dashboard/admin/verification", icon: Shield, badgeKey: "verification", badgeVariant: "warning" },
+  { title: t('sidebar.integrations'), url: "/dashboard/admin/integrations", icon: Plug },
+  { title: t('sidebar.feedback'), url: "/dashboard/admin/feedback", icon: MessageSquarePlus, badgeKey: "feedback" },
+  { title: t('sidebar.reviewsDisputes'), url: "/dashboard/admin/reviews", icon: MessageSquare },
+  { title: t('sidebar.auditLog'), url: "/dashboard/admin/audit", icon: ClipboardList },
 ];
 
-const bottomNavItems: NavItem[] = [
-  { title: "Settings", url: "/dashboard/admin/settings", icon: Settings },
+const getBottomNavItems = (t: (key: string) => string): NavItem[] => [
+  { title: t('sidebar.settings'), url: "/dashboard/admin/settings", icon: Settings },
 ];
 
 interface AdminSidebarProps {
@@ -123,6 +123,10 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }: AdminSidebarProps) => {
     );
   };
 
+  const mainNavItems = getMainNavItems(t);
+  const platformNavItems = getPlatformNavItems(t);
+  const bottomNavItems = getBottomNavItems(t);
+
   const SidebarContent = ({ isCollapsed = false }: { isCollapsed?: boolean }) => (
     <>
       <div className="p-4 border-b border-border flex items-center justify-between">
@@ -153,7 +157,7 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }: AdminSidebarProps) => {
         {!isCollapsed && (
           <div className="pt-4 pb-2">
             <p className="px-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Platform
+              {t('sidebar.platform')}
             </p>
           </div>
         )}
@@ -211,7 +215,7 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }: AdminSidebarProps) => {
 
             <div className="pt-4 pb-2">
               <p className="px-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Platform
+                {t('sidebar.platform')}
               </p>
             </div>
 
@@ -250,7 +254,7 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }: AdminSidebarProps) => {
                 }}
               >
                 <User className="w-4 h-4 mr-2" />
-                My Profile
+                {t('sidebar.myProfile')}
               </Button>
               <Button
                 variant="ghost"
@@ -259,7 +263,7 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }: AdminSidebarProps) => {
                 onClick={() => signOut()}
               >
                 <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
+                {t('sidebar.signOut')}
               </Button>
             </div>
           </div>

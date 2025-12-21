@@ -71,7 +71,19 @@
 
   "fitnessGoals": {
     "title": "Cele fitness",
-    "description": "Wybierz swoje cele fitness (możesz wybrać kilka)"
+    "description": "Wybierz swoje cele fitness (możesz wybrać kilka)",
+    "loseWeight": "Schudnąć",
+    "buildMuscle": "Zbudować mięśnie",
+    "improveEndurance": "Poprawić wytrzymałość",
+    "increaseStrength": "Zwiększyć siłę",
+    "getToned": "Wyrzeźbić sylwetkę",
+    "improveFlexibility": "Poprawić elastyczność",
+    "betterCardioHealth": "Lepsza kondycja sercowo-naczyniowa",
+    "trainForEvent": "Trening do wydarzenia",
+    "generalFitness": "Ogólna sprawność",
+    "sportsPerformance": "Wydajność sportowa",
+    "rehabilitation": "Rehabilitacja",
+    "stressRelief": "Redukcja stresu"
   },
 
   "health": {
