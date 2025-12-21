@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import DOMPurify from "dompurify";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -100,7 +101,7 @@ export const DeleteAccountModal = ({ open, onOpenChange, role }: DeleteAccountMo
           </AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div className="space-y-4">
-              <p dangerouslySetInnerHTML={{ __html: t('deleteAccount.permanent') }} />
+              <p dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(t('deleteAccount.permanent')) }} />
               <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
                 {deletedItems.map((item, index) => (
                   <li key={index}>{item}</li>
@@ -111,7 +112,7 @@ export const DeleteAccountModal = ({ open, onOpenChange, role }: DeleteAccountMo
         </AlertDialogHeader>
 
         <div className="space-y-2 py-4">
-          <Label htmlFor="confirm-delete" dangerouslySetInnerHTML={{ __html: t('deleteAccount.confirmLabel') }} />
+          <Label htmlFor="confirm-delete" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(t('deleteAccount.confirmLabel')) }} />
           <Input
             id="confirm-delete"
             value={confirmText}
