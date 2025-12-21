@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { SUBSCRIPTION_TIERS, TierKey, normalizeTier, getTierPosition } from "@/lib/stripe-config";
+import { useActivePricing } from "@/hooks/useActivePricing";
 
 interface PlatformSubscriptionProps {
   coachId: string;
@@ -20,6 +21,7 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
+  const pricing = useActivePricing();
 
   const { data: subscription } = useQuery({
     queryKey: ["platform-subscription", coachId],
@@ -123,7 +125,11 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
                   <h3 className="font-semibold text-lg mb-1">{tier.name}</h3>
                   <div className="flex items-baseline gap-1 mb-4">
                     <span className="text-3xl font-bold">
-                      {tier.prices.monthly.amount === 0 ? "Free" : `£${tier.prices.monthly.amount}`}
+                      {tier.prices.monthly.amount === 0 
+                        ? "Free" 
+                        : (['starter', 'pro', 'enterprise'].includes(tierKey)
+                            ? pricing.formatPrice(pricing.getSubscriptionPrice(tierKey as 'starter' | 'pro' | 'enterprise', 'monthly'))
+                            : `${pricing.currencySymbol}${tier.prices.monthly.amount}`)}
                     </span>
                     {tier.prices.monthly.amount > 0 && (
                       <span className="text-muted-foreground">/month</span>
