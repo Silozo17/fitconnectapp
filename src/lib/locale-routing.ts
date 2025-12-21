@@ -93,17 +93,18 @@ export function isValidLocation(code: string): code is RouteLocationCode {
 }
 
 // ============================================
-// Locale string format: "en-gb", "pl-pl", etc.
+// Locale string format: "gb-en", "pl-pl", etc.
+// Format: {location}-{language}
 // ============================================
 export function formatLocaleString(language: RouteLanguageCode, location: RouteLocationCode): string {
-  return `${language}-${location}`;
+  return `${location}-${language}`;
 }
 
 export function parseLocaleString(locale: string): { language: RouteLanguageCode; location: RouteLocationCode } | null {
   const parts = locale.toLowerCase().split('-');
   if (parts.length !== 2) return null;
   
-  const [lang, loc] = parts;
+  const [loc, lang] = parts; // Location first, then language
   if (isValidLanguage(lang) && isValidLocation(loc)) {
     return { language: lang, location: loc };
   }
@@ -144,7 +145,8 @@ function isProtectedPath(path: string): boolean {
 
 /**
  * Parse locale from URL path
- * Matches pattern: /en-gb/... or /pl-pl/...
+ * Matches pattern: /gb-en/... or /pl-pl/...
+ * Format: /{location}-{language}/...
  * Protected paths (dashboard, onboarding, docs, auth, subscribe) are never locale routes
  */
 export function parseLocaleFromPath(pathname: string): ParsedLocaleRoute {
@@ -152,7 +154,7 @@ export function parseLocaleFromPath(pathname: string): ParsedLocaleRoute {
   const match = pathname.match(/^\/([a-z]{2})-([a-z]{2})(\/.*)?$/);
   
   if (match) {
-    const [, lang, loc, rest] = match;
+    const [, loc, lang, rest] = match; // Location first, then language
     if (isValidLanguage(lang) && isValidLocation(loc)) {
       const restOfPath = rest || '/';
       
@@ -184,6 +186,7 @@ export function parseLocaleFromPath(pathname: string): ParsedLocaleRoute {
 
 /**
  * Build a locale-prefixed path
+ * Format: /{location}-{language}/path
  */
 export function buildLocalePath(
   language: RouteLanguageCode,
@@ -193,11 +196,11 @@ export function buildLocalePath(
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
   // Remove trailing slash unless it's just "/"
   const normalizedPath = cleanPath === '/' ? '' : cleanPath;
-  return `/${language}-${location}${normalizedPath}`;
+  return `/${location}-${language}${normalizedPath}`;
 }
 
 /**
- * Check if the locale matches the default (en-gb)
+ * Check if the locale matches the default (gb-en)
  */
 export function isDefaultLocale(language: RouteLanguageCode, location: RouteLocationCode): boolean {
   return language === DEFAULT_ROUTE_LOCALE.language && location === DEFAULT_ROUTE_LOCALE.location;
