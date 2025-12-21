@@ -28,6 +28,7 @@ import { CoachSocialLinksDisplay } from "@/components/coach/CoachSocialLinksDisp
 import { CoachSocialLinksSection } from "@/components/coach/CoachSocialLinksSection";
 import { CoachDigitalProductsSection } from "@/components/coach/CoachDigitalProductsSection";
 import { useExchangeRates } from "@/hooks/useExchangeRates";
+import { getDisplayLocation } from "@/lib/location-utils";
 
 const CoachDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -99,13 +100,14 @@ const CoachDetail = () => {
     ? convertForViewer(coach.hourly_rate, coachCurrency)
     : null;
 
-  // Generate SEO schema
+  // Generate SEO schema - use unified location display
+  const displayLocation = getDisplayLocation(coach);
   const coachSchema = createLocalBusinessSchema({
     name: coach.display_name || "Fitness Coach",
     description: coach.bio || undefined,
     image: coach.profile_image_url || undefined,
     url: `/coaches/${coach.username}`,
-    location: coach.location || undefined,
+    location: displayLocation !== "Location not set" ? displayLocation : undefined,
     priceRange: coach.hourly_rate ? (coach.hourly_rate > 80 ? "£££" : coach.hourly_rate > 40 ? "££" : "£") : "££",
     rating: averageRating > 0 ? averageRating : undefined,
     reviewCount: reviews.length > 0 ? reviews.length : undefined,
@@ -122,8 +124,8 @@ const CoachDetail = () => {
     `${type.toLowerCase()} coach UK`
   ) || [];
 
-  const locationKeywords = coach.location 
-    ? [`personal trainer ${coach.location}`, `fitness coach ${coach.location}`] 
+  const locationKeywords = displayLocation !== "Location not set"
+    ? [`personal trainer ${displayLocation}`, `fitness coach ${displayLocation}`] 
     : [];
 
   const primaryCoachType = coach.coach_types?.[0] || "Fitness";

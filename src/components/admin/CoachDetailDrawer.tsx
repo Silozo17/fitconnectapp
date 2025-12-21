@@ -36,6 +36,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { getDisplayLocation } from "@/lib/location-utils";
 
 interface CoachDetailDrawerProps {
   open: boolean;
@@ -195,7 +196,7 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan,
             />
             <div>
               <SheetTitle className="text-xl">{coach.display_name || "Unknown Coach"}</SheetTitle>
-              <SheetDescription>{coach.location || "No location set"}</SheetDescription>
+              <SheetDescription>{getDisplayLocation(coach)}</SheetDescription>
               <div className="flex items-center gap-2 mt-1">
                 <Badge className={tierColors[coach.subscription_tier] || tierColors.free}>
                   {coach.subscription_tier || "Free"}

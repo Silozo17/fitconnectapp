@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Search, UserPlus, AtSign, MapPin, Loader2 } from "lucide-react";
 import { useConnections } from "@/hooks/useConnections";
+import { getDisplayLocation } from "@/lib/location-utils";
 
 interface AddConnectionModalProps {
   open: boolean;
@@ -160,7 +161,7 @@ export const AddConnectionModal = ({
                     {result.location && (
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <MapPin className="w-3 h-3" />
-                        <span className="truncate">{result.location}</span>
+                        <span className="truncate">{getDisplayLocation(result)}</span>
                       </div>
                     )}
                   </div>

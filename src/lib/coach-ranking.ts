@@ -21,6 +21,7 @@ import {
   LOCATION_SCORES,
   MIN_RESULTS_BEFORE_EXPANSION,
 } from '@/types/ranking';
+import { getStructuredLocationWithFallbacks, type CoachLocationFields } from '@/lib/location-utils';
 
 /**
  * Normalizes a string for comparison (lowercase, trimmed)
@@ -40,14 +41,15 @@ function locationsMatch(a: string | null | undefined, b: string | null | undefin
 
 /**
  * Calculates location proximity score between user and coach
+ * Uses structured location data with fallback to parsed legacy location
  * 
  * @param userLocation - User's detected/selected location
- * @param coachLocation - Coach's registered location
+ * @param coachLocation - Coach's registered location (may include legacy location field)
  * @returns Score (0-100) and match level
  */
 export function calculateLocationScore(
   userLocation: LocationData | null,
-  coachLocation: CoachLocationData
+  coachLocation: CoachLocationData & CoachLocationFields
 ): { score: number; matchLevel: LocationMatchLevel } {
   // If user has no location data, give neutral score with online boost
   if (!userLocation || (!userLocation.city && !userLocation.region && !userLocation.country)) {
@@ -58,20 +60,23 @@ export function calculateLocationScore(
     };
   }
 
+  // Get structured location with fallbacks from legacy data
+  const resolvedLocation = getStructuredLocationWithFallbacks(coachLocation);
+
   // Check for exact city match (highest priority)
-  if (locationsMatch(userLocation.city, coachLocation.location_city)) {
+  if (locationsMatch(userLocation.city, resolvedLocation.city)) {
     return { score: LOCATION_SCORES.exact_city, matchLevel: 'exact_city' };
   }
 
   // Check for same region match (county/region level)
   // We check both region and county from user location against coach's region
   const userRegion = userLocation.region || userLocation.county;
-  if (locationsMatch(userRegion, coachLocation.location_region)) {
+  if (locationsMatch(userRegion, resolvedLocation.region)) {
     return { score: LOCATION_SCORES.same_region, matchLevel: 'same_region' };
   }
 
   // Check for same country match
-  if (locationsMatch(userLocation.country, coachLocation.location_country)) {
+  if (locationsMatch(userLocation.country, resolvedLocation.country)) {
     // If coach is online-only (no in-person), give them a slight boost within country
     if (coachLocation.online_available && !coachLocation.in_person_available) {
       return { score: LOCATION_SCORES.same_country + 5, matchLevel: 'online_only' };

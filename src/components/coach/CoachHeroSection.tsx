@@ -6,6 +6,7 @@ import FavouriteButton from "@/components/favourites/FavouriteButton";
 import { VerifiedBadge } from "@/components/verification/VerifiedBadge";
 import { CoachFeaturedBadges } from "@/components/coaches/CoachFeaturedBadges";
 import StarRating from "@/components/reviews/StarRating";
+import { getDisplayLocation } from "@/lib/location-utils";
 
 interface CoachHeroSectionProps {
   coach: {
@@ -17,6 +18,8 @@ interface CoachHeroSectionProps {
     is_verified: boolean | null;
     verified_at: string | null;
     location: string | null;
+    location_city?: string | null;
+    location_country?: string | null;
     gym_affiliation: string | null;
     coach_types: string[] | null;
     bio: string | null;
@@ -60,10 +63,10 @@ export function CoachHeroSection({ coach, averageRating, reviewCount }: CoachHer
 
             {/* Location & Gym + Rating inline */}
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-1 text-muted-foreground mb-2">
-              {coach.location && (
+              {(coach.location || coach.location_city) && (
                 <span className="flex items-center gap-1.5 text-sm">
                   <MapPin className="h-3.5 w-3.5" />
-                  {coach.location}
+                  {getDisplayLocation(coach)}
                 </span>
               )}
               {coach.gym_affiliation && (

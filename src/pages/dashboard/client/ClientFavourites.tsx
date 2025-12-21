@@ -13,6 +13,7 @@ import { formatCurrency, type CurrencyCode } from "@/lib/currency";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCoachLinkPrefix } from "@/hooks/useCoachLinkPrefix";
+import { getDisplayLocation } from "@/lib/location-utils";
 // Batch fetch reviews for all coaches at once
 const useBatchCoachReviews = (coachIds: string[]) => {
   return useQuery({
@@ -112,10 +113,10 @@ const FavouriteCoachCard = ({ coach, reviewData, linkPrefix }: FavouriteCoachCar
               <h3 className="font-semibold text-foreground">
                 {coach.display_name || "Coach"}
               </h3>
-              {coach.location && (
+              {(coach.location || coach.location_city) && (
                 <p className="text-sm text-muted-foreground flex items-center gap-1">
                   <MapPin className="h-3 w-3" />
-                  {coach.location}
+                  {getDisplayLocation(coach)}
                 </p>
               )}
             </div>
