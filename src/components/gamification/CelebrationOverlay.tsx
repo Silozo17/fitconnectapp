@@ -1,9 +1,10 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Trophy, Sparkles, Star, Flame, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { triggerConfetti, confettiPresets } from '@/lib/confetti';
+import { triggerConfetti, confettiPresets, cancelConfetti } from '@/lib/confetti';
 import { triggerHaptic } from '@/lib/despia';
+import { useAnimationSettings } from '@/contexts/AnimationSettingsContext';
 
 export type CelebrationType = 
   | 'challenge_complete' 
@@ -63,6 +64,14 @@ export function CelebrationOverlay({
   const { t } = useTranslation('gamification');
   const [displayedXp, setDisplayedXp] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  
+  // Animation settings for safeguards
+  const { shouldAnimate, overlayTransitionsEnabled, prefersReducedMotion } = useAnimationSettings();
+  
+  // Compute whether to use transitions (CSS containment for performance)
+  const useTransitions = useMemo(() => {
+    return shouldAnimate && overlayTransitionsEnabled && !prefersReducedMotion;
+  }, [shouldAnimate, overlayTransitionsEnabled, prefersReducedMotion]);
 
   // XP counting animation
   useEffect(() => {
@@ -95,22 +104,32 @@ export function CelebrationOverlay({
   useEffect(() => {
     if (isOpen && data) {
       setIsAnimating(true);
+      
+      // Always trigger haptic feedback (works even with animations disabled)
       triggerHaptic('success');
       
-      // Use appropriate confetti based on type
-      if (data.type === 'challenge_complete') {
-        triggerConfetti(confettiPresets.challengeComplete);
-      } else if (data.type === 'level_up') {
-        triggerConfetti(confettiPresets.levelUp);
-      } else if (data.type === 'badge_earned') {
-        triggerConfetti(confettiPresets.badgeEarned);
-      } else {
-        triggerConfetti(confettiPresets.achievement);
+      // Only trigger confetti if animations are enabled
+      if (shouldAnimate) {
+        // Use appropriate confetti based on type
+        if (data.type === 'challenge_complete') {
+          triggerConfetti(confettiPresets.challengeComplete);
+        } else if (data.type === 'level_up') {
+          triggerConfetti(confettiPresets.levelUp);
+        } else if (data.type === 'badge_earned') {
+          triggerConfetti(confettiPresets.badgeEarned);
+        } else {
+          triggerConfetti(confettiPresets.achievement);
+        }
       }
     } else {
       setIsAnimating(false);
     }
-  }, [isOpen, data]);
+    
+    // Cleanup confetti on unmount
+    return () => {
+      cancelConfetti();
+    };
+  }, [isOpen, data, shouldAnimate]);
 
   // Auto-dismiss
   useEffect(() => {
@@ -180,19 +199,28 @@ export function CelebrationOverlay({
       className={cn(
         'fixed inset-0 z-[100] flex items-center justify-center p-4',
         'bg-black/70 backdrop-blur-sm',
-        isAnimating && 'animate-fade-in'
+        // CSS containment to prevent layout shift and improve performance
+        'contain-layout contain-paint',
+        // Only animate if transitions are enabled
+        useTransitions && isAnimating && 'animate-fade-in'
       )}
+      style={{ contain: 'layout paint' }} // Fallback for browsers without Tailwind class
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="celebration-title"
+      aria-hidden={!isOpen}
     >
       <div
         className={cn(
           'relative max-w-sm w-full bg-card rounded-2xl p-6 text-center',
           'shadow-2xl border border-border/50',
-          isAnimating && 'animate-scale-in'
+          // CSS containment for the modal content
+          'contain-content',
+          // Only animate if transitions are enabled, apply will-change only during animation
+          useTransitions && isAnimating && 'animate-scale-in'
         )}
+        style={{ contain: 'content' }} // Isolate from rest of page
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}

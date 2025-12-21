@@ -11,6 +11,7 @@ import { LocaleProvider } from "@/contexts/LocaleContext";
 import { LocaleRoutingProvider } from "@/contexts/LocaleRoutingContext";
 import { CookieConsentProvider } from "@/contexts/CookieConsentContext";
 import { CelebrationProvider } from "@/contexts/CelebrationContext";
+import { AnimationSettingsProvider } from "@/contexts/AnimationSettingsContext";
 import { CelebrationListeners } from "@/components/gamification/CelebrationListeners";
 import { CountryProvider } from "@/contexts/CountryContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
@@ -204,8 +205,9 @@ const App = () => (
             <CookieConsentBanner />
             <CountryProvider>
               <AuthProvider>
-                <CelebrationProvider>
-                  <CelebrationListeners />
+                <AnimationSettingsProvider>
+                  <CelebrationProvider>
+                    <CelebrationListeners />
                 <AdminProvider>
                   <LocaleProvider>
                     <LocaleRoutingProvider>
@@ -667,6 +669,7 @@ const App = () => (
                   </LocaleProvider>
                 </AdminProvider>
                 </CelebrationProvider>
+                </AnimationSettingsProvider>
               </AuthProvider>
             </CountryProvider>
           </CookieConsentProvider>
