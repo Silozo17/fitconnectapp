@@ -10,55 +10,58 @@ import {
   MessageSquare, Star, Zap, Award
 } from "lucide-react";
 import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
+import { useTranslation } from "react-i18next";
 
 const HowItWorks = () => {
+  const { t } = useTranslation("pages");
+
   const clientSteps = [
     {
       step: "01",
       icon: Search,
-      title: "Browse & Discover",
-      description: "Search our curated network of certified coaches. Filter by specialty, location, price, and availability to find your perfect match.",
+      title: t("howItWorks.clientSteps.browse.title"),
+      description: t("howItWorks.clientSteps.browse.description"),
       details: [
-        "Personal trainers, nutritionists, boxing coaches & more",
-        "Read detailed profiles and verified reviews",
-        "Compare rates and specialties",
-        "View real results from other clients"
+        t("howItWorks.clientSteps.browse.details.0"),
+        t("howItWorks.clientSteps.browse.details.1"),
+        t("howItWorks.clientSteps.browse.details.2"),
+        t("howItWorks.clientSteps.browse.details.3")
       ]
     },
     {
       step: "02",
       icon: MessageSquare,
-      title: "Connect & Consult",
-      description: "Message coaches directly and book a free discovery call to discuss your goals and ensure it's a great fit.",
+      title: t("howItWorks.clientSteps.connect.title"),
+      description: t("howItWorks.clientSteps.connect.description"),
       details: [
-        "Free 15-minute consultation with most coaches",
-        "Discuss your goals and limitations",
-        "Get a feel for their coaching style",
-        "No commitment until you're ready"
+        t("howItWorks.clientSteps.connect.details.0"),
+        t("howItWorks.clientSteps.connect.details.1"),
+        t("howItWorks.clientSteps.connect.details.2"),
+        t("howItWorks.clientSteps.connect.details.3")
       ]
     },
     {
       step: "03",
       icon: Calendar,
-      title: "Book & Train",
-      description: "Schedule sessions that fit your life. Train online from anywhere or meet in person with local coaches.",
+      title: t("howItWorks.clientSteps.book.title"),
+      description: t("howItWorks.clientSteps.book.description"),
       details: [
-        "Flexible scheduling to match your calendar",
-        "Online or in-person sessions available",
-        "HD video for remote training",
-        "Easy rescheduling when needed"
+        t("howItWorks.clientSteps.book.details.0"),
+        t("howItWorks.clientSteps.book.details.1"),
+        t("howItWorks.clientSteps.book.details.2"),
+        t("howItWorks.clientSteps.book.details.3")
       ]
     },
     {
       step: "04",
       icon: TrendingUp,
-      title: "Track & Transform",
-      description: "Monitor your progress with built-in tracking tools. Celebrate milestones and adjust your plan as you grow.",
+      title: t("howItWorks.clientSteps.track.title"),
+      description: t("howItWorks.clientSteps.track.description"),
       details: [
-        "Visual progress charts and metrics",
-        "Custom workout and meal plans",
-        "Regular check-ins with your coach",
-        "Achieve sustainable results"
+        t("howItWorks.clientSteps.track.details.0"),
+        t("howItWorks.clientSteps.track.details.1"),
+        t("howItWorks.clientSteps.track.details.2"),
+        t("howItWorks.clientSteps.track.details.3")
       ]
     }
   ];
@@ -67,49 +70,49 @@ const HowItWorks = () => {
     {
       step: "01",
       icon: FileText,
-      title: "Apply & Verify",
-      description: "Submit your application with credentials. We verify certifications and conduct background checks to maintain quality standards.",
+      title: t("howItWorks.coachSteps.apply.title"),
+      description: t("howItWorks.coachSteps.apply.description"),
       details: [
-        "Quick online application process",
-        "Submit certifications and experience",
-        "Background check for client safety",
-        "Review typically takes 3-5 days"
+        t("howItWorks.coachSteps.apply.details.0"),
+        t("howItWorks.coachSteps.apply.details.1"),
+        t("howItWorks.coachSteps.apply.details.2"),
+        t("howItWorks.coachSteps.apply.details.3")
       ]
     },
     {
       step: "02",
       icon: Users,
-      title: "Build Your Profile",
-      description: "Create a compelling profile that showcases your expertise. Set your rates, availability, and service offerings.",
+      title: t("howItWorks.coachSteps.build.title"),
+      description: t("howItWorks.coachSteps.build.description"),
       details: [
-        "Upload photos and videos",
-        "Highlight specialties and achievements",
-        "Set your own rates and packages",
-        "Define your service area"
+        t("howItWorks.coachSteps.build.details.0"),
+        t("howItWorks.coachSteps.build.details.1"),
+        t("howItWorks.coachSteps.build.details.2"),
+        t("howItWorks.coachSteps.build.details.3")
       ]
     },
     {
       step: "03",
       icon: Zap,
-      title: "Get Discovered",
-      description: "Your profile goes live in our marketplace. Clients searching for your expertise will find you organically.",
+      title: t("howItWorks.coachSteps.discover.title"),
+      description: t("howItWorks.coachSteps.discover.description"),
       details: [
-        "Appear in relevant search results",
-        "Featured placement for top coaches",
-        "Receive client inquiries directly",
-        "Build your reputation with reviews"
+        t("howItWorks.coachSteps.discover.details.0"),
+        t("howItWorks.coachSteps.discover.details.1"),
+        t("howItWorks.coachSteps.discover.details.2"),
+        t("howItWorks.coachSteps.discover.details.3")
       ]
     },
     {
       step: "04",
       icon: Award,
-      title: "Coach & Earn",
-      description: "Accept bookings, deliver amazing sessions, and get paid securely. Focus on coaching while we handle the business side.",
+      title: t("howItWorks.coachSteps.coach.title"),
+      description: t("howItWorks.coachSteps.coach.description"),
       details: [
-        "Manage clients from your dashboard",
-        "Automatic payment processing",
-        "Build recurring client relationships",
-        "Grow your business sustainably"
+        t("howItWorks.coachSteps.coach.details.0"),
+        t("howItWorks.coachSteps.coach.details.1"),
+        t("howItWorks.coachSteps.coach.details.2"),
+        t("howItWorks.coachSteps.coach.details.3")
       ]
     }
   ];
@@ -117,40 +120,40 @@ const HowItWorks = () => {
   const features = [
     {
       icon: Video,
-      title: "HD Video Sessions",
-      description: "Crystal-clear video calls with screen sharing for form checks and demonstrations"
+      title: t("howItWorks.features.video.title"),
+      description: t("howItWorks.features.video.description")
     },
     {
       icon: MessageSquare,
-      title: "Secure Messaging",
-      description: "Stay connected between sessions with in-app chat and file sharing"
+      title: t("howItWorks.features.messaging.title"),
+      description: t("howItWorks.features.messaging.description")
     },
     {
       icon: Calendar,
-      title: "Smart Scheduling",
-      description: "Book sessions easily with calendar sync and automatic reminders"
+      title: t("howItWorks.features.scheduling.title"),
+      description: t("howItWorks.features.scheduling.description")
     },
     {
       icon: TrendingUp,
-      title: "Progress Tracking",
-      description: "Visualize your journey with charts, photos, and milestone celebrations"
+      title: t("howItWorks.features.progress.title"),
+      description: t("howItWorks.features.progress.description")
     },
     {
       icon: FileText,
-      title: "Custom Plans",
-      description: "Receive personalized workout and nutrition plans tailored to your goals"
+      title: t("howItWorks.features.plans.title"),
+      description: t("howItWorks.features.plans.description")
     },
     {
       icon: Shield,
-      title: "Safe & Secure",
-      description: "Bank-level encryption protects your data and payments"
+      title: t("howItWorks.features.security.title"),
+      description: t("howItWorks.features.security.description")
     }
   ];
 
   return (
     <PageLayout
-      title="How It Works"
-      description="Learn how FitConnect connects you with expert fitness coaches. Simple steps for clients to find coaches and coaches to grow their business."
+      title={t("howItWorks.meta.title")}
+      description={t("howItWorks.meta.description")}
     >
       {/* Decorative Avatars */}
       <DecorativeAvatar 
@@ -177,17 +180,16 @@ const HowItWorks = () => {
         
         <div className="container mx-auto px-4 text-center">
           <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary font-medium text-sm mb-6">
-            Getting Started
+            {t("howItWorks.hero.badge")}
           </span>
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Your Fitness Journey,{" "}
+            {t("howItWorks.hero.titleStart")}{" "}
             <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-              Simplified
+              {t("howItWorks.hero.titleHighlight")}
             </span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Whether you're looking for a coach or ready to grow your coaching business, 
-            FitConnect makes it easy to get started.
+            {t("howItWorks.hero.description")}
           </p>
         </div>
       </section>
@@ -199,10 +201,10 @@ const HowItWorks = () => {
             <div className="flex justify-center mb-12">
               <TabsList className="h-auto p-1 bg-muted/50">
                 <TabsTrigger value="clients" className="px-8 py-3 data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                  I'm Looking for a Coach
+                  {t("howItWorks.tabs.lookingForCoach")}
                 </TabsTrigger>
                 <TabsTrigger value="coaches" className="px-8 py-3 data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                  I'm a Coach
+                  {t("howItWorks.tabs.imACoach")}
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -242,7 +244,7 @@ const HowItWorks = () => {
               
               <div className="text-center mt-16">
                 <Link to="/coaches">
-                  <GradientButton size="lg">Find Your Coach Now</GradientButton>
+                  <GradientButton size="lg">{t("howItWorks.cta.findCoachNow")}</GradientButton>
                 </Link>
               </div>
             </TabsContent>
@@ -282,7 +284,7 @@ const HowItWorks = () => {
               
               <div className="text-center mt-16">
                 <Link to="/for-coaches">
-                  <GradientButton size="lg">Start Your Application</GradientButton>
+                  <GradientButton size="lg">{t("howItWorks.cta.startApplication")}</GradientButton>
                 </Link>
               </div>
             </TabsContent>
@@ -295,13 +297,13 @@ const HowItWorks = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Everything You Need,{" "}
+              {t("howItWorks.featuresSection.titleStart")}{" "}
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Built In
+                {t("howItWorks.featuresSection.titleHighlight")}
               </span>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Our platform includes all the tools you need for a seamless coaching experience
+              {t("howItWorks.featuresSection.description")}
             </p>
           </div>
           
@@ -331,14 +333,14 @@ const HowItWorks = () => {
               ))}
             </div>
             <blockquote className="text-2xl md:text-3xl font-medium mb-6 italic">
-              "FitConnect made finding the right coach so easy. Within a week, I was training with someone who truly understood my goals. 
+              "{t("howItWorks.testimonial.quoteStart")}
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                {" "}Best decision I ever made for my health.
+                {" "}{t("howItWorks.testimonial.quoteHighlight")}
               </span>"
             </blockquote>
             <div>
-              <p className="font-semibold">Amanda K.</p>
-              <p className="text-muted-foreground">Lost 30 lbs in 4 months</p>
+              <p className="font-semibold">{t("howItWorks.testimonial.author")}</p>
+              <p className="text-muted-foreground">{t("howItWorks.testimonial.result")}</p>
             </div>
           </div>
         </div>
@@ -348,21 +350,20 @@ const HowItWorks = () => {
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Ready to Get{" "}
+            {t("howItWorks.finalCta.titleStart")}{" "}
             <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Started?
+              {t("howItWorks.finalCta.titleHighlight")}
             </span>
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
-            Whether you're looking to transform your body or grow your coaching business, 
-            your journey starts here.
+            {t("howItWorks.finalCta.description")}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/coaches">
-              <GradientButton size="lg">Find a Coach</GradientButton>
+              <GradientButton size="lg">{t("howItWorks.finalCta.findCoach")}</GradientButton>
             </Link>
             <Link to="/for-coaches">
-              <GradientButton size="lg" variant="outline">Become a Coach</GradientButton>
+              <GradientButton size="lg" variant="outline">{t("howItWorks.finalCta.becomeCoach")}</GradientButton>
             </Link>
           </div>
         </div>

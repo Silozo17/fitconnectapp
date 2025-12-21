@@ -13,9 +13,11 @@ import {
 import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
 import { usePlatformStats } from "@/hooks/usePlatformStats";
 import { formatStatNumber } from "@/lib/formatStats";
+import { useTranslation } from "react-i18next";
 
 const ForCoaches = () => {
   const { data: platformStats, isLoading } = usePlatformStats();
+  const { t } = useTranslation("pages");
   const [numberOfClients, setNumberOfClients] = useState(15);
   const [adminHoursPerClient, setAdminHoursPerClient] = useState(2);
 
@@ -26,70 +28,70 @@ const ForCoaches = () => {
   const benefits = [
     {
       icon: Users,
-      title: "Reach Thousands of Clients",
-      description: "Get discovered by motivated individuals actively seeking your expertise. Our platform drives qualified leads directly to you."
+      title: t("forCoaches.benefits.reach.title"),
+      description: t("forCoaches.benefits.reach.description")
     },
     {
       icon: Calendar,
-      title: "Built-in Scheduling",
-      description: "Manage your availability with our powerful scheduling system. Sync with your calendar and let clients book automatically."
+      title: t("forCoaches.benefits.scheduling.title"),
+      description: t("forCoaches.benefits.scheduling.description")
     },
     {
       icon: DollarSign,
-      title: "Secure Payments",
-      description: "Get paid reliably after every session. We handle all payment processing so you can focus on coaching."
+      title: t("forCoaches.benefits.payments.title"),
+      description: t("forCoaches.benefits.payments.description")
     },
     {
       icon: BarChart3,
-      title: "Client Management Tools",
-      description: "Track client progress, create custom plans, and manage your entire business from one dashboard."
+      title: t("forCoaches.benefits.management.title"),
+      description: t("forCoaches.benefits.management.description")
     },
     {
       icon: Globe,
-      title: "Train Clients Anywhere",
-      description: "Offer online sessions to clients worldwide. Our HD video platform makes remote coaching seamless."
+      title: t("forCoaches.benefits.global.title"),
+      description: t("forCoaches.benefits.global.description")
     },
     {
       icon: Shield,
-      title: "Business Protection",
-      description: "Clear terms, cancellation policies, and our support team backing you up if issues arise."
+      title: t("forCoaches.benefits.protection.title"),
+      description: t("forCoaches.benefits.protection.description")
     }
   ];
 
   const platformTools = [
-    { icon: Calendar, label: "Smart Scheduling" },
-    { icon: MessageSquare, label: "In-App Messaging" },
-    { icon: Video, label: "Video Sessions" },
-    { icon: FileText, label: "Plan Builder" },
-    { icon: TrendingUp, label: "Progress Tracking" },
-    { icon: DollarSign, label: "Payment Processing" }
+    { icon: Calendar, label: t("forCoaches.tools.scheduling") },
+    { icon: MessageSquare, label: t("forCoaches.tools.messaging") },
+    { icon: Video, label: t("forCoaches.tools.video") },
+    { icon: FileText, label: t("forCoaches.tools.planBuilder") },
+    { icon: TrendingUp, label: t("forCoaches.tools.progress") },
+    { icon: DollarSign, label: t("forCoaches.tools.payments") }
   ];
 
   const requirements = [
-    "Valid certification from an accredited organization (NASM, ACE, ISSA, NSCA, etc.)",
-    "Minimum 2 years of professional coaching experience",
-    "Pass a comprehensive background check",
-    "Maintain professional liability insurance",
-    "Commitment to FitConnect's code of conduct and quality standards"
+    t("forCoaches.requirements.certification"),
+    t("forCoaches.requirements.experience"),
+    t("forCoaches.requirements.background"),
+    t("forCoaches.requirements.insurance"),
+    t("forCoaches.requirements.conduct")
   ];
 
   const testimonials = [
     {
-      quote: "FitConnect transformed my coaching business. I went from 5 local clients to over 30 clients worldwide in just 6 months.",
-      author: "Mike Thompson",
-      role: "Personal Trainer",
+      quote: t("forCoaches.testimonials.mike.quote"),
+      author: t("forCoaches.testimonials.mike.author"),
+      role: t("forCoaches.testimonials.mike.role"),
       rating: 5
     },
     {
-      quote: "The platform handles all the admin work I used to dread—scheduling, payments, client management. Now I just focus on coaching.",
-      author: "Sarah Chen",
-      role: "Nutritionist",
+      quote: t("forCoaches.testimonials.sarah.quote"),
+      author: t("forCoaches.testimonials.sarah.author"),
+      role: t("forCoaches.testimonials.sarah.role"),
       rating: 5
     },
     {
-      quote: "As a boxing coach, I never thought online training would work. FitConnect proved me wrong. My online clients are crushing their goals.",
-      author: "Marcus Williams",
-      role: "Boxing Coach",
+      quote: t("forCoaches.testimonials.marcus.quote"),
+      author: t("forCoaches.testimonials.marcus.author"),
+      role: t("forCoaches.testimonials.marcus.role"),
       rating: 5
     }
   ];
@@ -97,25 +99,25 @@ const ForCoaches = () => {
   const steps = [
     {
       step: "01",
-      title: "Apply & Get Verified",
-      description: "Submit your credentials and complete our verification process. We review certifications and conduct background checks."
+      title: t("forCoaches.steps.apply.title"),
+      description: t("forCoaches.steps.apply.description")
     },
     {
       step: "02",
-      title: "Build Your Profile",
-      description: "Create a compelling profile showcasing your expertise, experience, and training philosophy. Set your rates and availability."
+      title: t("forCoaches.steps.build.title"),
+      description: t("forCoaches.steps.build.description")
     },
     {
       step: "03",
-      title: "Start Coaching & Earning",
-      description: "Accept client bookings, deliver amazing sessions, and grow your business. We handle the rest."
+      title: t("forCoaches.steps.start.title"),
+      description: t("forCoaches.steps.start.description")
     }
   ];
 
   return (
     <PageLayout
-      title="Become a Coach"
-      description="Grow your coaching business with FitConnect. Reach thousands of clients, manage your schedule, and focus on what you love—coaching."
+      title={t("forCoaches.meta.title")}
+      description={t("forCoaches.meta.description")}
     >
       {/* Decorative Avatar */}
       <DecorativeAvatar 
@@ -137,24 +139,23 @@ const ForCoaches = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary font-medium text-sm mb-6">
-                For Fitness Professionals
+                {t("forCoaches.hero.badge")}
               </span>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-                Grow Your Coaching Business With{" "}
+                {t("forCoaches.hero.titleStart")}{" "}
                 <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
                   FitConnect
                 </span>
               </h1>
               <p className="text-xl text-muted-foreground mb-8">
-                Join {isLoading ? "..." : formatStatNumber(platformStats?.totalCoaches || 0)} coaches reaching clients worldwide. Set your own rates, build your brand, 
-                and focus on what you do best—transforming lives.
+                {t("forCoaches.hero.description", { coachCount: isLoading ? "..." : formatStatNumber(platformStats?.totalCoaches || 0) })}
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/auth?mode=signup&role=coach">
-                  <GradientButton size="lg">Apply Now</GradientButton>
+                  <GradientButton size="lg">{t("forCoaches.hero.applyNow")}</GradientButton>
                 </Link>
                 <Link to="/how-it-works">
-                  <GradientButton size="lg" variant="outline">Learn More</GradientButton>
+                  <GradientButton size="lg" variant="outline">{t("forCoaches.hero.learnMore")}</GradientButton>
                 </Link>
               </div>
             </div>
@@ -163,13 +164,13 @@ const ForCoaches = () => {
                 <CardContent className="p-8">
                   <div className="text-center mb-6">
                     <Clock className="w-12 h-12 text-primary mx-auto mb-4" />
-                    <h3 className="text-xl font-bold">Value Calculator</h3>
-                    <p className="text-muted-foreground text-sm">See what FitConnect saves you</p>
+                    <h3 className="text-xl font-bold">{t("forCoaches.calculator.title")}</h3>
+                    <p className="text-muted-foreground text-sm">{t("forCoaches.calculator.subtitle")}</p>
                   </div>
                   <div className="space-y-6">
                     <div>
                       <label className="block text-sm font-medium mb-2">
-                        Number of clients: {numberOfClients}
+                        {t("forCoaches.calculator.clientsLabel", { count: numberOfClients })}
                       </label>
                       <Input
                         type="range"
@@ -182,7 +183,7 @@ const ForCoaches = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-2">
-                        Admin hours per client/week: {adminHoursPerClient}
+                        {t("forCoaches.calculator.hoursLabel", { count: adminHoursPerClient })}
                       </label>
                       <Input
                         type="range"
@@ -196,27 +197,27 @@ const ForCoaches = () => {
                     <div className="pt-4 border-t border-border">
                       <div className="grid grid-cols-2 gap-4 text-center mb-4">
                         <div>
-                          <p className="text-sm text-muted-foreground">Weekly</p>
+                          <p className="text-sm text-muted-foreground">{t("forCoaches.calculator.weekly")}</p>
                           <p className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                            {weeklyTimeSaved} hours
+                            {weeklyTimeSaved} {t("forCoaches.calculator.hours")}
                           </p>
-                          <p className="text-xs text-muted-foreground">saved</p>
+                          <p className="text-xs text-muted-foreground">{t("forCoaches.calculator.saved")}</p>
                         </div>
                         <div>
-                          <p className="text-sm text-muted-foreground">Yearly</p>
+                          <p className="text-sm text-muted-foreground">{t("forCoaches.calculator.yearly")}</p>
                           <p className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                            {yearlyTimeSaved.toLocaleString()} hours
+                            {yearlyTimeSaved.toLocaleString()} {t("forCoaches.calculator.hours")}
                           </p>
-                          <p className="text-xs text-muted-foreground">saved</p>
+                          <p className="text-xs text-muted-foreground">{t("forCoaches.calculator.saved")}</p>
                         </div>
                       </div>
                       <div className="pt-4 border-t border-border text-center">
                         <div className="flex items-center justify-center gap-2 mb-1">
                           <Globe className="w-5 h-5 text-primary" />
-                          <p className="text-lg font-bold">{isLoading ? "..." : formatStatNumber(platformStats?.totalUsers || 0)} active clients</p>
+                          <p className="text-lg font-bold">{isLoading ? "..." : formatStatNumber(platformStats?.totalUsers || 0)} {t("forCoaches.calculator.activeClients")}</p>
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          looking for coaches like you
+                          {t("forCoaches.calculator.lookingForCoaches")}
                         </p>
                       </div>
                     </div>
@@ -234,13 +235,13 @@ const ForCoaches = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Why Coaches Choose{" "}
+              {t("forCoaches.benefitsSection.titleStart")}{" "}
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 FitConnect
               </span>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Everything you need to run a successful coaching business, all in one platform
+              {t("forCoaches.benefitsSection.description")}
             </p>
           </div>
           
@@ -265,9 +266,9 @@ const ForCoaches = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Powerful Tools at Your{" "}
+              {t("forCoaches.toolsSection.titleStart")}{" "}
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Fingertips
+                {t("forCoaches.toolsSection.titleHighlight")}
               </span>
             </h2>
           </div>
@@ -291,9 +292,9 @@ const ForCoaches = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Get Started in{" "}
+              {t("forCoaches.stepsSection.titleStart")}{" "}
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                3 Simple Steps
+                {t("forCoaches.stepsSection.titleHighlight")}
               </span>
             </h2>
           </div>
@@ -322,9 +323,9 @@ const ForCoaches = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              What Coaches{" "}
+              {t("forCoaches.testimonialsSection.titleStart")}{" "}
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Are Saying
+                {t("forCoaches.testimonialsSection.titleHighlight")}
               </span>
             </h2>
           </div>
@@ -357,10 +358,10 @@ const ForCoaches = () => {
             <div className="text-center mb-12">
               <Award className="w-12 h-12 text-primary mx-auto mb-4" />
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Coach Requirements
+                {t("forCoaches.requirementsSection.title")}
               </h2>
               <p className="text-muted-foreground">
-                We maintain high standards to ensure the best experience for our clients
+                {t("forCoaches.requirementsSection.description")}
               </p>
             </div>
             
@@ -385,25 +386,25 @@ const ForCoaches = () => {
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Ready to Grow Your{" "}
+              {t("forCoaches.cta.titleStart")}{" "}
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Coaching Business?
+                {t("forCoaches.cta.titleHighlight")}
               </span>
             </h2>
             <p className="text-xl text-muted-foreground mb-8">
-              Join FitConnect today and start reaching clients who are ready to transform their lives with your help.
+              {t("forCoaches.cta.description")}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/auth?mode=signup&role=coach">
-                <GradientButton size="lg">Apply to Become a Coach</GradientButton>
+                <GradientButton size="lg">{t("forCoaches.cta.apply")}</GradientButton>
               </Link>
               <Link to="/faq">
-                <GradientButton size="lg" variant="outline">Coach FAQ</GradientButton>
+                <GradientButton size="lg" variant="outline">{t("forCoaches.cta.faq")}</GradientButton>
               </Link>
             </div>
             <p className="text-sm text-muted-foreground mt-6">
               <Clock className="w-4 h-4 inline mr-1" />
-              Application review typically takes 3-5 business days
+              {t("forCoaches.cta.reviewTime")}
             </p>
           </div>
         </div>
