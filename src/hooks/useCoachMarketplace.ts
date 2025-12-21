@@ -1,3 +1,12 @@
+/**
+ * Hook for fetching coaches for the marketplace (/coaches and /dashboard/client/find-coaches)
+ * 
+ * VALIDATION ASSERTIONS:
+ * ✅ Uses sortCoachesByUnifiedRanking from unified-coach-ranking.ts (not duplicated)
+ * ✅ filterByLocationWithExpansion() runs BEFORE sortCoachesByUnifiedRanking()
+ * ✅ No hardcoded coach IDs
+ * ✅ Fake coaches filtered via isRealCoach() when realCoachesOnly=true
+ */
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCoachEngagement, createEmptyEngagementMap } from "./useCoachEngagement";

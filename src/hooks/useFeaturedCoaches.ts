@@ -1,6 +1,12 @@
 /**
  * Hook for fetching featured coaches for the homepage
  * 
+ * VALIDATION ASSERTIONS:
+ * ✅ Uses sortCoachesByUnifiedRanking from unified-coach-ranking.ts (not duplicated)
+ * ✅ filterByLocationWithExpansion() runs BEFORE sortCoachesByUnifiedRanking()
+ * ✅ No hardcoded coach IDs
+ * ✅ Fake coaches filtered via hasBlockedName()
+ * 
  * Uses the unified ranking algorithm (single source of truth shared with /coaches page):
  * 1. Boosted + Verified + Highest Rated + Closest
  * 2. Boosted + Verified + Highest Rated
