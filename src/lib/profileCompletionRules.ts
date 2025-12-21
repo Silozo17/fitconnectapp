@@ -101,12 +101,6 @@ export const PROFILE_COMPLETION_RULES: CompletionRule[] = [
       ctx.profile.threads_url
     ),
   },
-  {
-    id: "group_classes",
-    label: "Group classes",
-    weight: 5,
-    check: (ctx) => ctx.groupClassCount >= 1,
-  },
 ];
 
 export interface CompletionResult {
