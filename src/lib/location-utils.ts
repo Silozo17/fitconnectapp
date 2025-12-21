@@ -10,6 +10,7 @@
  * 2. INFERS location components from legacy freetext when structured data is missing
  * 3. MARKS inferred values so they can be distinguished from explicit data
  * 4. NEVER requires coaches to re-save their profiles
+ * 5. DETECTS common UK cities without country suffix and assigns GB code
  * 
  * Behavior guarantees:
  * - Legacy coaches appear in all searches and filters
@@ -17,6 +18,22 @@
  * - Coaches without determinable country remain visible (not excluded)
  * - Display is consistent whether using structured or legacy data
  */
+
+/**
+ * Common UK cities - used to auto-assign GB country code for city-only locations
+ * This helps legacy coaches with entries like "High Wycombe" (no country) get properly assigned
+ */
+export const UK_CITIES = new Set([
+  'high wycombe', 'london', 'manchester', 'birmingham', 'leeds', 'glasgow',
+  'liverpool', 'bristol', 'sheffield', 'edinburgh', 'leicester', 'coventry',
+  'bradford', 'cardiff', 'belfast', 'nottingham', 'newcastle', 'sunderland',
+  'brighton', 'hull', 'plymouth', 'stoke', 'wolverhampton', 'derby',
+  'swansea', 'southampton', 'portsmouth', 'oxford', 'cambridge', 'york',
+  'bath', 'exeter', 'bournemouth', 'reading', 'luton', 'bolton', 'blackpool',
+  'middlesbrough', 'stockport', 'norwich', 'wycombe', 'aylesbury', 'watford',
+  'northampton', 'milton keynes', 'peterborough', 'swindon', 'warrington',
+  'slough', 'ipswich', 'wigan', 'croydon', 'dudley', 'wakefield', 'crawley'
+]);
 
 export interface CoachLocationFields {
   location?: string | null;
@@ -206,8 +223,10 @@ const CODE_TO_COUNTRY: Record<string, string> = {
 
 /**
  * Parses a legacy freetext location string into structured components
+ * Now includes UK city detection for city-only locations
+ * 
  * Examples:
- *   "High Wycombe" → { city: "High Wycombe", country: null }
+ *   "High Wycombe" → { city: "High Wycombe", country: "United Kingdom", countryCode: "GB" }
  *   "London, United Kingdom" → { city: "London", country: "United Kingdom", countryCode: "GB" }
  *   "Rzeszów, Poland" → { city: "Rzeszów", country: "Poland", countryCode: "PL" }
  */
@@ -223,10 +242,21 @@ export function parseLegacyLocation(location: string | null | undefined): Parsed
     return { city: null, region: null, country: null, countryCode: null };
   }
 
-  // Single part - assume it's a city
+  // Single part - check if it's a known UK city or country name
   if (parts.length === 1) {
-    // Check if it's actually a country name
     const normalized = parts[0].toLowerCase();
+    
+    // Check if it's a known UK city
+    if (UK_CITIES.has(normalized)) {
+      return {
+        city: parts[0],
+        region: null,
+        country: 'United Kingdom',
+        countryCode: 'GB',
+      };
+    }
+    
+    // Check if it's actually a country name
     if (COUNTRY_MAP[normalized]) {
       return {
         city: null,
@@ -235,6 +265,8 @@ export function parseLegacyLocation(location: string | null | undefined): Parsed
         countryCode: COUNTRY_MAP[normalized],
       };
     }
+    
+    // Unknown single city - no country assignable
     return { city: parts[0], region: null, country: null, countryCode: null };
   }
 
@@ -244,8 +276,17 @@ export function parseLegacyLocation(location: string | null | undefined): Parsed
   const normalizedLast = lastPart.toLowerCase();
   
   // Check if last part is a known country
-  const countryCode = COUNTRY_MAP[normalizedLast] || null;
-  const country = countryCode ? lastPart : null;
+  let countryCode = COUNTRY_MAP[normalizedLast] || null;
+  let country = countryCode ? lastPart : null;
+  
+  // If last part isn't a country, check if first part is a UK city
+  if (!countryCode) {
+    const normalizedCity = city.toLowerCase();
+    if (UK_CITIES.has(normalizedCity)) {
+      countryCode = 'GB';
+      country = 'United Kingdom';
+    }
+  }
   
   // If we have 3+ parts and last is country, middle parts are region
   const region = parts.length >= 3 && country ? parts.slice(1, -1).join(', ') : null;

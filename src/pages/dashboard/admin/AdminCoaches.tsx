@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
-import { Search, MoreHorizontal, Pencil, Trash2, KeyRound, Eye, Gift, Users, DollarSign, Loader2, Pause, Ban, CheckCircle, Download } from "lucide-react";
+import { Search, MoreHorizontal, Pencil, Trash2, KeyRound, Eye, Gift, Users, DollarSign, Loader2, Pause, Ban, CheckCircle, Download, MapPin } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -73,9 +73,38 @@ const AdminCoaches = () => {
   const [coachLastLogins, setCoachLastLogins] = useState<Record<string, string | null>>({});
   const [coachEmails, setCoachEmails] = useState<Record<string, string | null>>({});
   const [togglingVisibility, setTogglingVisibility] = useState<string | null>(null);
+  const [normalizingLocations, setNormalizingLocations] = useState(false);
   
   const { loading: actionLoading, bulkUpdateStatus, bulkDelete, getUserAuthInfo } = useAdminUserManagement("coach");
   const logAction = useLogAdminAction();
+
+  const handleNormalizeLocations = async () => {
+    if (!confirm("This will geocode all legacy coach locations using Google Places API. Continue?")) {
+      return;
+    }
+    
+    setNormalizingLocations(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-normalize-locations", {
+        body: { dryRun: false },
+      });
+      
+      if (error) throw error;
+      
+      const summary = data?.summary || {};
+      toast.success(
+        `Location normalization complete: ${summary.migrated || 0} geocoded, ${summary.parsed || 0} parsed, ${summary.unresolved || 0} unresolved`
+      );
+      
+      // Refresh coaches to show updated locations
+      fetchCoaches();
+    } catch (error) {
+      console.error("Failed to normalize locations:", error);
+      toast.error("Failed to normalize locations");
+    } finally {
+      setNormalizingLocations(false);
+    }
+  };
 
   const handleToggleVisibility = async (coach: CoachUser, newValue: boolean) => {
     setTogglingVisibility(coach.id);
@@ -315,10 +344,26 @@ const AdminCoaches = () => {
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Coaches Management</h1>
             <p className="text-muted-foreground mt-1">Manage all coach accounts, subscriptions, and features</p>
           </div>
-          <Button variant="outline" size="sm" onClick={handleExportCoaches} disabled={filteredCoaches.length === 0} className="w-full sm:w-auto">
-            <Download className="h-4 w-4 mr-2" />
-            Export CSV
-          </Button>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleNormalizeLocations} 
+              disabled={normalizingLocations}
+              className="flex-1 sm:flex-none"
+            >
+              {normalizingLocations ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <MapPin className="h-4 w-4 mr-2" />
+              )}
+              Fix Locations
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExportCoaches} disabled={filteredCoaches.length === 0} className="flex-1 sm:flex-none">
+              <Download className="h-4 w-4 mr-2" />
+              Export CSV
+            </Button>
+          </div>
         </div>
 
         {/* Stats */}

@@ -197,3 +197,6 @@ verify_jwt = false
 
 [functions.send-daily-motivation]
 verify_jwt = false
+
+[functions.admin-normalize-locations]
+verify_jwt = true
