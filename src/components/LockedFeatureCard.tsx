@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { FeatureKey, FEATURE_NAMES, FEATURE_DESCRIPTIONS } from "@/lib/feature-config";
 import { TierKey, SUBSCRIPTION_TIERS } from "@/lib/stripe-config";
+import { useActivePricing } from "@/hooks/useActivePricing";
 
 interface LockedFeatureCardProps {
   feature: FeatureKey;
@@ -15,6 +16,11 @@ export const LockedFeatureCard = ({ feature, requiredTier, className }: LockedFe
   const tierConfig = SUBSCRIPTION_TIERS[requiredTier];
   const featureName = FEATURE_NAMES[feature];
   const featureDescription = FEATURE_DESCRIPTIONS[feature];
+  const pricing = useActivePricing();
+  const isPricedTier = ['starter', 'pro', 'enterprise'].includes(requiredTier);
+  const monthlyPrice = isPricedTier 
+    ? pricing.getSubscriptionPrice(requiredTier as 'starter' | 'pro' | 'enterprise', 'monthly')
+    : tierConfig.prices.monthly.amount;
   
   return (
     <Card className={`border-dashed border-2 border-muted-foreground/30 bg-muted/20 ${className}`}>
@@ -32,8 +38,8 @@ export const LockedFeatureCard = ({ feature, requiredTier, className }: LockedFe
           <p className="text-sm">
             <span className="text-muted-foreground">Available on </span>
             <span className="font-semibold text-primary">{tierConfig.name}</span>
-            {tierConfig.prices.monthly.amount > 0 && (
-              <span className="text-muted-foreground"> (£{tierConfig.prices.monthly.amount}/month)</span>
+            {monthlyPrice > 0 && (
+              <span className="text-muted-foreground"> ({pricing.formatPrice(monthlyPrice)}/month)</span>
             )}
           </p>
         </div>

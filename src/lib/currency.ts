@@ -39,6 +39,9 @@ export function inferCoachCountry(currency: CurrencyCode | null | undefined): Ro
 const GBP_TO_PLN_RATE = 5;
 
 /**
+ * @deprecated Use getActivePricing() from pricing-config.ts instead.
+ * This function uses conversion logic - new approach uses native currency pricing.
+ * 
  * Convert platform price from GBP to display currency based on country
  * Fixed rate: £1 = 5 PLN (for Poland only)
  * All other countries display in GBP
