@@ -4730,6 +4730,24 @@ export type Database = {
           },
         ]
       }
+      system_cache: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       team_feature_permissions: {
         Row: {
           admin_id: string

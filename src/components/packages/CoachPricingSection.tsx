@@ -5,7 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCoachPackages, useCoachSubscriptionPlans } from "@/hooks/usePackages";
 import { Skeleton } from "@/components/ui/skeleton";
 import CheckoutButton from "@/components/payments/CheckoutButton";
-import { useLocale } from "@/contexts/LocaleContext";
+import { formatCurrency, type CurrencyCode } from "@/lib/currency";
+import { useExchangeRates } from "@/hooks/useExchangeRates";
 
 interface CoachPricingSectionProps {
   coachId: string;
@@ -14,7 +15,7 @@ interface CoachPricingSectionProps {
 }
 
 const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPricingSectionProps) => {
-  const { formatCurrency } = useLocale();
+  const { convertForViewer } = useExchangeRates();
   const { data: packages = [], isLoading: packagesLoading } = useCoachPackages(coachId);
   const { data: plans = [], isLoading: plansLoading } = useCoachSubscriptionPlans(coachId);
 
@@ -65,95 +66,120 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
 
           {hasPackages && (
             <TabsContent value="packages" className="space-y-4">
-              {packages.map((pkg) => (
-                <div
-                  key={pkg.id}
-                  className="border border-border rounded-lg p-4 hover:border-primary/50 transition-colors"
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h4 className="font-semibold text-foreground">{pkg.name}</h4>
-                      {pkg.description && (
-                        <p className="text-sm text-muted-foreground">{pkg.description}</p>
-                      )}
+              {packages.map((pkg) => {
+                const pkgCurrency = (pkg.currency as CurrencyCode) || 'GBP';
+                const convertedPrice = convertForViewer(pkg.price, pkgCurrency);
+                const convertedPerSession = convertForViewer(pkg.price / pkg.session_count, pkgCurrency);
+
+                return (
+                  <div
+                    key={pkg.id}
+                    className="border border-border rounded-lg p-4 hover:border-primary/50 transition-colors"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <h4 className="font-semibold text-foreground">{pkg.name}</h4>
+                        {pkg.description && (
+                          <p className="text-sm text-muted-foreground">{pkg.description}</p>
+                        )}
+                      </div>
+                      <Badge variant="secondary">{pkg.session_count} sessions</Badge>
                     </div>
-                    <Badge variant="secondary">{pkg.session_count} sessions</Badge>
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4">
-                    <div className="min-w-0">
-                      <span className="text-2xl font-bold text-primary">{formatCurrency(pkg.price)}</span>
-                      <span className="text-sm text-muted-foreground ml-2 block sm:inline">
-                        ({formatCurrency(pkg.price / pkg.session_count)}/session)
-                      </span>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4">
+                      <div className="min-w-0">
+                        <span className="text-2xl font-bold text-primary">
+                          {formatCurrency(convertedPrice.amount, convertedPrice.currency)}
+                        </span>
+                        <span className="text-sm text-muted-foreground ml-2 block sm:inline">
+                          ({formatCurrency(convertedPerSession.amount, convertedPerSession.currency)}/session)
+                        </span>
+                        {convertedPrice.wasConverted && (
+                          <span className="text-xs text-muted-foreground block">
+                            Original: {formatCurrency(convertedPrice.originalAmount, convertedPrice.originalCurrency)}
+                          </span>
+                        )}
+                      </div>
+                      <CheckoutButton
+                        type="package"
+                        itemId={pkg.id}
+                        coachId={coachId}
+                        label="Purchase"
+                        size="sm"
+                        className="w-full sm:w-auto"
+                      />
                     </div>
-                    <CheckoutButton
-                      type="package"
-                      itemId={pkg.id}
-                      coachId={coachId}
-                      label="Purchase"
-                      size="sm"
-                      className="w-full sm:w-auto"
-                    />
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Valid for {pkg.validity_days} days after purchase
+                    </p>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Valid for {pkg.validity_days} days after purchase
-                  </p>
-                </div>
-              ))}
+                );
+              })}
             </TabsContent>
           )}
 
           {hasPlans && (
             <TabsContent value="subscriptions" className="space-y-4">
-              {plans.map((plan) => (
-                <div
-                  key={plan.id}
-                  className="border border-border rounded-lg p-4 hover:border-primary/50 transition-colors"
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h4 className="font-semibold text-foreground">{plan.name}</h4>
-                      {plan.description && (
-                        <p className="text-sm text-muted-foreground">{plan.description}</p>
-                      )}
-                    </div>
-                    <Badge variant="outline" className="capitalize">
-                      {plan.billing_period}
-                    </Badge>
-                  </div>
+              {plans.map((plan) => {
+                const planCurrency = (plan.currency as CurrencyCode) || 'GBP';
+                const convertedPrice = convertForViewer(plan.price, planCurrency);
 
-                  {plan.features && plan.features.length > 0 && (
-                    <ul className="space-y-1 my-3">
-                      {plan.features.slice(0, 4).map((feature, i) => (
-                        <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Check className="h-3 w-3 text-primary" />
-                          {feature}
-                        </li>
-                      ))}
-                      {plan.features.length > 4 && (
-                        <li className="text-xs text-muted-foreground">
-                          +{plan.features.length - 4} more features
-                        </li>
-                      )}
-                    </ul>
-                  )}
-
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4">
-                    <div className="min-w-0">
-                      <span className="text-2xl font-bold text-primary">{formatCurrency(plan.price)}</span>
-                      <span className="text-sm text-muted-foreground">/{plan.billing_period}</span>
+                return (
+                  <div
+                    key={plan.id}
+                    className="border border-border rounded-lg p-4 hover:border-primary/50 transition-colors"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <h4 className="font-semibold text-foreground">{plan.name}</h4>
+                        {plan.description && (
+                          <p className="text-sm text-muted-foreground">{plan.description}</p>
+                        )}
+                      </div>
+                      <Badge variant="outline" className="capitalize">
+                        {plan.billing_period}
+                      </Badge>
                     </div>
-                    <CheckoutButton
-                      type="subscription"
-                      itemId={plan.id}
-                      coachId={coachId}
-                      label="Subscribe"
-                      size="sm"
-                      className="w-full sm:w-auto"
-                    />
+
+                    {plan.features && plan.features.length > 0 && (
+                      <ul className="space-y-1 my-3">
+                        {plan.features.slice(0, 4).map((feature, i) => (
+                          <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Check className="h-3 w-3 text-primary" />
+                            {feature}
+                          </li>
+                        ))}
+                        {plan.features.length > 4 && (
+                          <li className="text-xs text-muted-foreground">
+                            +{plan.features.length - 4} more features
+                          </li>
+                        )}
+                      </ul>
+                    )}
+
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4">
+                      <div className="min-w-0">
+                        <span className="text-2xl font-bold text-primary">
+                          {formatCurrency(convertedPrice.amount, convertedPrice.currency)}
+                        </span>
+                        <span className="text-sm text-muted-foreground">/{plan.billing_period}</span>
+                        {convertedPrice.wasConverted && (
+                          <span className="text-xs text-muted-foreground block">
+                            Original: {formatCurrency(convertedPrice.originalAmount, convertedPrice.originalCurrency)}
+                          </span>
+                        )}
+                      </div>
+                      <CheckoutButton
+                        type="subscription"
+                        itemId={plan.id}
+                        coachId={coachId}
+                        label="Subscribe"
+                        size="sm"
+                        className="w-full sm:w-auto"
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </TabsContent>
           )}
         </Tabs>

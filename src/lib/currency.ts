@@ -17,6 +17,24 @@ export const CURRENCIES: Record<CurrencyCode, CurrencyConfig> = {
   PLN: { code: 'PLN', symbol: 'zł', name: 'Polish Zloty', locale: 'pl-PL' },
 };
 
+// Route location code type for country mapping
+export type RouteLocationCode = 'gb' | 'pl' | 'us' | 'ie' | 'de' | 'fr' | 'es' | 'it' | 'au' | 'ca';
+
+/**
+ * Infer a coach's country from their currency setting
+ */
+export function inferCoachCountry(currency: CurrencyCode | null | undefined): RouteLocationCode {
+  const currencyToCountry: Record<CurrencyCode, RouteLocationCode> = {
+    'GBP': 'gb',
+    'PLN': 'pl',
+    'USD': 'us',
+    'EUR': 'ie', // default to Ireland for EUR
+    'AUD': 'au',
+    'CAD': 'ca',
+  };
+  return currencyToCountry[currency || 'GBP'] || 'gb';
+}
+
 // Fixed conversion rate for platform prices (GBP to PLN)
 const GBP_TO_PLN_RATE = 5;
 
