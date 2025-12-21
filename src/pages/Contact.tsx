@@ -32,7 +32,7 @@ const Contact = () => {
     e.preventDefault();
     
     if (!formData.name || !formData.email || !formData.subject || !formData.message) {
-      toast.error(t("contact.form.validation.allFields"));
+      toast.error(t("contact.form.fillAllFields"));
       return;
     }
 
