@@ -194,6 +194,30 @@ serve(async (req) => {
 
     console.log("Message notification email sent successfully");
 
+    // Send push notification
+    try {
+      const pushResponse = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${supabaseServiceKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userIds: [receiverUserId],
+          title: `💬 ${senderName}`,
+          message: messagePreview,
+          preferenceKey: "push_messages",
+          data: { type: "message", senderId: message.sender_id, messageId },
+        }),
+      });
+      
+      if (pushResponse.ok) {
+        console.log("Push notification sent successfully");
+      }
+    } catch (pushError) {
+      console.error("Push notification failed (non-blocking):", pushError);
+    }
+
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

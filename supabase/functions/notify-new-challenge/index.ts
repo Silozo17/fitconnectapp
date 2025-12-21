@@ -110,6 +110,28 @@ Deno.serve(async (req) => {
 
     console.log(`Successfully created ${totalInserted} notifications`);
 
+    // Send push notifications to all enabled users
+    try {
+      await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${supabaseServiceKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userIds: enabledUserIds,
+          title: "🏆 New Challenge Available!",
+          message: `"${title}" - Earn ${xp_reward} XP!`,
+          preferenceKey: "push_challenges",
+          data: { type: "new_challenge", challengeId: challenge_id },
+        }),
+      });
+      
+      console.log("Push notifications sent for new challenge");
+    } catch (pushError) {
+      console.error("Push notification failed (non-blocking):", pushError);
+    }
+
     return new Response(JSON.stringify({ success: true, notified: totalInserted }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

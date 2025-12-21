@@ -182,3 +182,18 @@ verify_jwt = true
 
 [functions.get-exchange-rates]
 verify_jwt = false
+
+[functions.send-push-notification]
+verify_jwt = false
+
+[functions.notify-challenge-expiring]
+verify_jwt = false
+
+[functions.notify-challenge-completed]
+verify_jwt = false
+
+[functions.notify-achievement-earned]
+verify_jwt = false
+
+[functions.send-daily-motivation]
+verify_jwt = false

@@ -24,6 +24,10 @@ export interface NotificationPreferences {
   push_bookings: boolean;
   push_messages: boolean;
   push_reminders: boolean;
+  push_challenges: boolean;
+  push_achievements: boolean;
+  push_connections: boolean;
+  push_motivation: boolean;
   reminder_hours_before: number;
 }
 

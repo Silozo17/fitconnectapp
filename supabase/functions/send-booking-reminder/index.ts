@@ -241,6 +241,45 @@ serve(async (req) => {
 
     console.log("Booking reminder emails sent successfully");
 
+    // Send push notifications to both client and coach
+    try {
+      // Push to client
+      await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${supabaseServiceKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userIds: [session.client.user_id],
+          title: `${urgencyEmoji} ${reminderText}`,
+          message: `Session with ${coachName} at ${formattedTime}`,
+          preferenceKey: "push_reminders",
+          data: { type: "booking_reminder", sessionId, reminderType },
+        }),
+      });
+
+      // Push to coach
+      await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${supabaseServiceKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userIds: [session.coach.user_id],
+          title: `${urgencyEmoji} ${reminderText}`,
+          message: `Session with ${clientName} at ${formattedTime}`,
+          preferenceKey: "push_reminders",
+          data: { type: "booking_reminder", sessionId, reminderType },
+        }),
+      });
+      
+      console.log("Push notifications sent successfully");
+    } catch (pushError) {
+      console.error("Push notification failed (non-blocking):", pushError);
+    }
+
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
