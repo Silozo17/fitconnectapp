@@ -10,6 +10,7 @@ import { getBadgeIcon } from "@/lib/badge-icons";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { Rarity } from "@/lib/avatar-utils";
 import { useCoachLinkPrefix } from "@/hooks/useCoachLinkPrefix";
+import { RARITY_ORDER } from "@/hooks/useGamification";
 
 interface CoachProfileSheetProps {
   open: boolean;
@@ -186,7 +187,13 @@ export const CoachProfileSheet = ({
                   Achievements
                 </h4>
                 <div className="grid grid-cols-4 gap-2">
-                  {data.badges.map((badge: any) => {
+                  {[...data.badges]
+                    .sort((a: any, b: any) => {
+                      const rarityA = RARITY_ORDER[a.badge?.rarity || 'common'] || 0;
+                      const rarityB = RARITY_ORDER[b.badge?.rarity || 'common'] || 0;
+                      return rarityA - rarityB;
+                    })
+                    .map((badge: any) => {
                     const BadgeIcon = getBadgeIcon(badge.badge?.icon || 'Trophy');
                     return (
                       <div key={badge.id} className="flex flex-col items-center text-center">

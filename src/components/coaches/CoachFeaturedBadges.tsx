@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useCoachFeaturedBadges } from "@/hooks/useFeaturedBadges";
 import { getBadgeIcon } from "@/lib/badge-icons";
 import { cn } from "@/lib/utils";
+import { RARITY_ORDER } from "@/hooks/useGamification";
 import {
   Tooltip,
   TooltipContent,
@@ -29,10 +30,17 @@ export function CoachFeaturedBadges({ coachId }: CoachFeaturedBadgesProps) {
     return null;
   }
 
+  // Sort badges by rarity (common first, legendary last)
+  const sortedBadges = [...featuredBadges].sort((a, b) => {
+    const rarityA = RARITY_ORDER[a.badge?.rarity || 'common'] || 0;
+    const rarityB = RARITY_ORDER[b.badge?.rarity || 'common'] || 0;
+    return rarityA - rarityB;
+  });
+
   return (
     <div className="flex flex-wrap items-center gap-2">
       <TooltipProvider>
-        {featuredBadges.map((coachBadge) => {
+        {sortedBadges.map((coachBadge) => {
           const badge = coachBadge.badge;
           if (!badge) return null;
           
