@@ -183,7 +183,6 @@ const queryClient = new QueryClient({
 
 const App = () => (
   <ErrorBoundary>
-    {import.meta.env.DEV && <Suspense fallback={null}><LocaleDebugPanel /></Suspense>}
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
@@ -204,6 +203,7 @@ const App = () => (
                       <AdminProvider>
                         <LocaleProvider>
                           <LanguagePersistence />
+                          {import.meta.env.DEV && <Suspense fallback={null}><LocaleDebugPanel /></Suspense>}
                           <Routes>
                             {/* App routes - wrapped with AppLocaleWrapper (layout route pattern) */}
                             <Route element={<AppLocaleWrapper />}>
