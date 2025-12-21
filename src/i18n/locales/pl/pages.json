@@ -531,9 +531,11 @@
     "billing": {
       "monthly": "Miesięcznie",
       "yearly": "Rocznie",
+      "save": "Oszczędź 17%",
       "savePercent": "Oszczędź 17%",
-      "perMonth": "/mies.",
-      "perYear": "/rok",
+      "perMonth": "mies.",
+      "perYear": "rok",
+      "free": "Bezpłatnie",
       "saveAmount": "Oszczędź {{amount}}/rok"
     },
     "tiers": {
@@ -543,6 +545,51 @@
       "upToClients": "Do {{count}} klientów",
       "getStartedFree": "Zacznij za darmo",
       "subscribeNow": "Subskrybuj teraz"
+    },
+    "tierFeatures": {
+      "free": {
+        "clients": "Do 3 klientów",
+        "workoutPlans": "Podstawowe plany treningowe",
+        "messaging": "Wiadomości z klientami",
+        "scheduling": "Planowanie sesji",
+        "platformFee": "4% prowizji"
+      },
+      "starter": {
+        "clients": "Do 10 klientów",
+        "analytics": "Podstawowa analityka",
+        "support": "Wsparcie e-mail",
+        "workoutBuilder": "Kreator planów treningowych",
+        "messaging": "Wiadomości z klientami",
+        "scheduling": "Planowanie sesji",
+        "platformFee": "3% prowizji"
+      },
+      "pro": {
+        "includesStarter": "Wszystko ze Starter, plus:",
+        "clients": "Do 50 klientów",
+        "analytics": "Zaawansowana analityka",
+        "support": "Priorytetowe wsparcie",
+        "branding": "Własny branding",
+        "aiTools": "AI planer treningów i posiłków",
+        "nutrition": "Kreator planów żywieniowych",
+        "progress": "Śledzenie postępów klientów",
+        "platformFee": "2% prowizji"
+      },
+      "enterprise": {
+        "includesPro": "Wszystko z Pro, plus:",
+        "clients": "Bez limitu klientów",
+        "accountManager": "Dedykowany opiekun konta",
+        "integrations": "Własne integracje",
+        "reporting": "Zaawansowane raporty",
+        "support": "Wsparcie telefoniczne",
+        "platformFee": "1% prowizji"
+      },
+      "founder": {
+        "clients": "Bez limitu klientów",
+        "allFeatures": "Wszystkie funkcje Pro i Enterprise",
+        "support": "Priorytetowe wsparcie",
+        "platformFee": "1% prowizji",
+        "earlyAccess": "Wczesny dostęp do nowych funkcji"
+      }
     },
     "platformFeatures": {
       "title": "Zawarte w",
@@ -572,6 +619,12 @@
         "title": "Bezpieczne płatności",
         "description": "Bezpieczne, szyfrowane transakcje z automatycznymi wypłatami"
       }
+    },
+    "cta": {
+      "title": "Masz pytania?",
+      "description": "Sprawdź nasze FAQ lub skontaktuj się z nami, aby uzyskać więcej informacji o planach i funkcjach.",
+      "getStarted": "Zacznij",
+      "viewFaq": "Zobacz FAQ"
     },
     "faqCta": {
       "title": "Masz pytania?",

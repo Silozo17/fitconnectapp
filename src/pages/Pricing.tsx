@@ -28,33 +28,33 @@ const Pricing = () => {
   const platformFeatures = [
     {
       icon: MessageSquare,
-      title: t('pricing.features.messaging.title'),
-      description: t('pricing.features.messaging.description')
+      title: t('pricing.platformFeatures.unlimitedMessaging.title'),
+      description: t('pricing.platformFeatures.unlimitedMessaging.description')
     },
     {
       icon: Calendar,
-      title: t('pricing.features.scheduling.title'),
-      description: t('pricing.features.scheduling.description')
+      title: t('pricing.platformFeatures.easyScheduling.title'),
+      description: t('pricing.platformFeatures.easyScheduling.description')
     },
     {
       icon: TrendingUp,
-      title: t('pricing.features.progress.title'),
-      description: t('pricing.features.progress.description')
+      title: t('pricing.platformFeatures.progressTracking.title'),
+      description: t('pricing.platformFeatures.progressTracking.description')
     },
     {
       icon: Video,
-      title: t('pricing.features.video.title'),
-      description: t('pricing.features.video.description')
+      title: t('pricing.platformFeatures.videoSessions.title'),
+      description: t('pricing.platformFeatures.videoSessions.description')
     },
     {
       icon: FileText,
-      title: t('pricing.features.plans.title'),
-      description: t('pricing.features.plans.description')
+      title: t('pricing.platformFeatures.customPlans.title'),
+      description: t('pricing.platformFeatures.customPlans.description')
     },
     {
       icon: Shield,
-      title: t('pricing.features.payments.title'),
-      description: t('pricing.features.payments.description')
+      title: t('pricing.platformFeatures.securePayments.title'),
+      description: t('pricing.platformFeatures.securePayments.description')
     }
   ];
 
@@ -157,7 +157,7 @@ const Pricing = () => {
                   {isPopular && (
                     <div className="absolute top-4 right-4">
                       <span className="px-3 py-1 rounded-full bg-gradient-to-r from-primary to-secondary text-white text-xs font-semibold">
-                        {t('pricing.tiers.popular')}
+                        {t('pricing.tiers.mostPopular')}
                       </span>
                     </div>
                   )}
@@ -177,7 +177,7 @@ const Pricing = () => {
                     <div className="mb-6">
                       <div className="flex items-baseline gap-1">
                         <span className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                          {isFree ? t('pricing.tiers.free') : formatCurrency(converted.amount, converted.currency)}
+                          {isFree ? t('pricing.billing.free') : formatCurrency(converted.amount, converted.currency)}
                         </span>
                         {!isFree && (
                           <span className="text-muted-foreground">
@@ -187,7 +187,7 @@ const Pricing = () => {
                       </div>
                       {billingInterval === "yearly" && !isFree && "savings" in priceData && priceData.savings > 0 && (
                         <p className="text-sm text-primary font-medium mt-1">
-                          {t('pricing.tiers.saveAmount', { amount: formatCurrency(convertPlatformPriceForDisplay(priceData.savings, countryCode).amount, converted.currency) })}
+                          {t('pricing.billing.saveAmount', { amount: formatCurrency(convertPlatformPriceForDisplay(priceData.savings, countryCode).amount, converted.currency) })}
                         </p>
                       )}
                     </div>
@@ -240,7 +240,7 @@ const Pricing = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              {t('pricing.platformFeatures.titleStart')}{" "}
+              {t('pricing.platformFeatures.title')}{" "}
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 {t('pricing.platformFeatures.titleHighlight')}
               </span>
