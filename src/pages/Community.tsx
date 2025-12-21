@@ -74,7 +74,7 @@ const UnlockIcon = ({ type, className = "h-5 w-5 text-white" }: { type: string |
 };
 
 // Leaderboard Components
-function LeaderboardRow({ entry }: { entry: PublicLeaderboardEntry }) {
+function LeaderboardRow({ entry, t }: { entry: PublicLeaderboardEntry; t: any }) {
   const getRankDisplay = (rank: number) => {
     if (rank === 1) return <Trophy className="w-6 h-6 text-yellow-500" />;
     if (rank === 2) return <Medal className="w-6 h-6 text-gray-400" />;
@@ -91,18 +91,18 @@ function LeaderboardRow({ entry }: { entry: PublicLeaderboardEntry }) {
       <TableCell className="text-muted-foreground">
         <div className="flex items-center gap-1.5">
           <MapPin className="h-3.5 w-3.5" />
-          {location || 'Unknown'}
+          {location || t('pages.community.leaderboard.unknown')}
         </div>
       </TableCell>
       <TableCell className="text-center">
-        <span className="px-2 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">Level {entry.level}</span>
+        <span className="px-2 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">{t('pages.community.leaderboard.level')} {entry.level}</span>
       </TableCell>
       <TableCell className="text-right font-bold text-primary">{entry.totalXp.toLocaleString()} XP</TableCell>
     </TableRow>
   );
 }
 
-function LeaderboardCard({ entry }: { entry: PublicLeaderboardEntry }) {
+function LeaderboardCard({ entry, t }: { entry: PublicLeaderboardEntry; t: any }) {
   const getRankDisplay = (rank: number) => {
     if (rank === 1) return <Trophy className="w-6 h-6 text-yellow-500" />;
     if (rank === 2) return <Medal className="w-6 h-6 text-gray-400" />;
@@ -120,11 +120,11 @@ function LeaderboardCard({ entry }: { entry: PublicLeaderboardEntry }) {
           <p className="font-semibold text-foreground truncate">{entry.displayName}</p>
           <p className="text-xs text-muted-foreground flex items-center gap-1">
             <MapPin className="h-3 w-3" />
-            {location || 'Unknown'}
+            {location || t('pages.community.leaderboard.unknown')}
           </p>
         </div>
         <div className="text-right">
-          <p className="text-sm font-bold text-primary">Level {entry.level}</p>
+          <p className="text-sm font-bold text-primary">{t('pages.community.leaderboard.level')} {entry.level}</p>
           <p className="text-xs text-muted-foreground">{entry.totalXp.toLocaleString()} XP</p>
         </div>
       </div>
@@ -233,10 +233,10 @@ export default function Community() {
 
   const getScopeLabel = () => {
     switch (scope) {
-      case 'country': return selectedCountry ? `in ${selectedCountry}` : 'by Country';
-      case 'county': return selectedCounty ? `in ${selectedCounty}` : 'by County';
-      case 'city': return selectedCity ? `in ${selectedCity}` : 'by City';
-      default: return 'Global';
+      case 'country': return selectedCountry ? t('pages.community.leaderboard.inLocation', { location: selectedCountry }) : t('pages.community.leaderboard.byCountry');
+      case 'county': return selectedCounty ? t('pages.community.leaderboard.inLocation', { location: selectedCounty }) : t('pages.community.leaderboard.byCounty');
+      case 'city': return selectedCity ? t('pages.community.leaderboard.inLocation', { location: selectedCity }) : t('pages.community.leaderboard.byCity');
+      default: return t('pages.community.leaderboard.global');
     }
   };
 
@@ -253,8 +253,8 @@ export default function Community() {
   return (
     <>
       <Helmet>
-        <title>Community | Leaderboards & Avatars | FitConnect</title>
-        <meta name="description" content="Compete on leaderboards and unlock exclusive avatars. Join thousands of fitness enthusiasts in the FitConnect community." />
+        <title>{t('pages.community.meta.title')}</title>
+        <meta name="description" content={t('pages.community.meta.description')} />
       </Helmet>
 
       <div className="min-h-screen bg-background relative">
@@ -274,16 +274,16 @@ export default function Community() {
             <div className="text-center mb-10">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-4">
                 <Users className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-primary">Community Hub</span>
+                <span className="text-sm font-medium text-primary">{t('pages.community.hero.badge')}</span>
               </div>
               <h1 className="text-3xl md:text-5xl font-bold mb-4">
-                Compete &{" "}
+                {t('pages.community.hero.titleStart')}{" "}
                 <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  Collect
+                  {t('pages.community.hero.titleHighlight')}
                 </span>
               </h1>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                Rise through the ranks on our leaderboards and unlock exclusive avatars to showcase your fitness journey.
+                {t('pages.community.hero.description')}
               </p>
             </div>
 
@@ -292,11 +292,11 @@ export default function Community() {
               <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto">
                 <TabsTrigger value="leaderboards" className="gap-2">
                   <Trophy className="h-4 w-4" />
-                  Leaderboards
+                  {t('pages.community.tabs.leaderboards')}
                 </TabsTrigger>
                 <TabsTrigger value="avatars" className="gap-2">
                   <Sparkles className="h-4 w-4" />
-                  Avatars
+                  {t('pages.community.tabs.avatars')}
                 </TabsTrigger>
               </TabsList>
 
@@ -306,26 +306,26 @@ export default function Community() {
                 <Card className="p-4 md:p-6 bg-card/80 border-border/50">
                   <div className="flex items-center gap-2 mb-4">
                     <Filter className="h-4 w-4 text-primary" />
-                    <span className="font-semibold text-sm">Filters</span>
+                    <span className="font-semibold text-sm">{t('pages.community.leaderboard.filters')}</span>
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                     <Select value={scope} onValueChange={(v) => setScope(v as ScopeType)}>
                       <SelectTrigger>
                         <Globe className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <SelectValue placeholder="Scope" />
+                        <SelectValue placeholder={t('pages.community.leaderboard.scope')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="global"><Globe className="h-4 w-4 inline mr-2" />Global</SelectItem>
-                        <SelectItem value="country"><Flag className="h-4 w-4 inline mr-2" />By Country</SelectItem>
-                        <SelectItem value="county"><MapPin className="h-4 w-4 inline mr-2" />By County</SelectItem>
-                        <SelectItem value="city"><Building2 className="h-4 w-4 inline mr-2" />By City</SelectItem>
+                        <SelectItem value="global"><Globe className="h-4 w-4 inline mr-2" />{t('pages.community.leaderboard.global')}</SelectItem>
+                        <SelectItem value="country"><Flag className="h-4 w-4 inline mr-2" />{t('pages.community.leaderboard.byCountry')}</SelectItem>
+                        <SelectItem value="county"><MapPin className="h-4 w-4 inline mr-2" />{t('pages.community.leaderboard.byCounty')}</SelectItem>
+                        <SelectItem value="city"><Building2 className="h-4 w-4 inline mr-2" />{t('pages.community.leaderboard.byCity')}</SelectItem>
                       </SelectContent>
                     </Select>
 
                     {scope === 'country' && (
                       <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                        <SelectTrigger><SelectValue placeholder="Select country" /></SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder={t('pages.community.leaderboard.selectCountry')} /></SelectTrigger>
                         <SelectContent>
                           {filterOptions(countries)?.map(c => (
                             <SelectItem key={c.value} value={c.value}>{c.label} ({c.count})</SelectItem>
@@ -336,7 +336,7 @@ export default function Community() {
 
                     {scope === 'county' && (
                       <Select value={selectedCounty} onValueChange={setSelectedCounty}>
-                        <SelectTrigger><SelectValue placeholder="Select county" /></SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder={t('pages.community.leaderboard.selectCounty')} /></SelectTrigger>
                         <SelectContent>
                           {filterOptions(counties)?.map(c => (
                             <SelectItem key={c.value} value={c.value}>{c.label} ({c.count})</SelectItem>
@@ -347,7 +347,7 @@ export default function Community() {
 
                     {scope === 'city' && (
                       <Select value={selectedCity} onValueChange={setSelectedCity}>
-                        <SelectTrigger><SelectValue placeholder="Select city" /></SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder={t('pages.community.leaderboard.selectCity')} /></SelectTrigger>
                         <SelectContent>
                           {filterOptions(cities)?.map(c => (
                             <SelectItem key={c.value} value={c.value}>{c.label} ({c.count})</SelectItem>
@@ -358,16 +358,16 @@ export default function Community() {
 
                     <div className="relative col-span-1 sm:col-span-2 lg:col-span-1">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input placeholder="Search location..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9" />
+                      <Input placeholder={t('pages.community.leaderboard.searchLocation')} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9" />
                     </div>
 
                     <Select value={perPage.toString()} onValueChange={(v) => setPerPage(Number(v))}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="10">10 per page</SelectItem>
-                        <SelectItem value="25">25 per page</SelectItem>
-                        <SelectItem value="50">50 per page</SelectItem>
-                        <SelectItem value="100">100 per page</SelectItem>
+                        <SelectItem value="10">{t('pages.community.leaderboard.perPage', { count: 10 })}</SelectItem>
+                        <SelectItem value="25">{t('pages.community.leaderboard.perPage', { count: 25 })}</SelectItem>
+                        <SelectItem value="50">{t('pages.community.leaderboard.perPage', { count: 50 })}</SelectItem>
+                        <SelectItem value="100">{t('pages.community.leaderboard.perPage', { count: 100 })}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -379,7 +379,7 @@ export default function Community() {
                     <Users className="h-4 w-4 text-primary" />
                     <span>
                       <strong className="text-foreground">{leaderboardData?.totalParticipants.toLocaleString() || 0}</strong>{" "}
-                      participants {getScopeLabel()}
+                      {t('pages.community.leaderboard.participants')} {getScopeLabel()}
                     </span>
                   </div>
                 </div>
@@ -390,10 +390,10 @@ export default function Community() {
                     <Table>
                       <TableHeader>
                         <TableRow className="bg-muted/50">
-                          <TableHead className="w-16 text-center">Rank</TableHead>
-                          <TableHead>Name</TableHead>
-                          <TableHead>Location</TableHead>
-                          <TableHead className="text-center">Level</TableHead>
+                          <TableHead className="w-16 text-center">{t('pages.community.leaderboard.table.rank')}</TableHead>
+                          <TableHead>{t('pages.community.leaderboard.table.name')}</TableHead>
+                          <TableHead>{t('pages.community.leaderboard.table.location')}</TableHead>
+                          <TableHead className="text-center">{t('pages.community.leaderboard.table.level')}</TableHead>
                           <TableHead className="text-right">XP</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -406,7 +406,7 @@ export default function Community() {
                           ))
                         ) : leaderboardData?.entries.length ? (
                           leaderboardData.entries.map((entry) => (
-                            <LeaderboardRow key={`${entry.rank}-${entry.displayName}`} entry={entry} />
+                            <LeaderboardRow key={`${entry.rank}-${entry.displayName}`} entry={entry} t={t} />
                           ))
                         ) : (
                           <TableRow>
@@ -428,7 +428,7 @@ export default function Community() {
                     ))
                   ) : leaderboardData?.entries.length ? (
                     leaderboardData.entries.map((entry) => (
-                      <LeaderboardCard key={`${entry.rank}-${entry.displayName}`} entry={entry} />
+                      <LeaderboardCard key={`${entry.rank}-${entry.displayName}`} entry={entry} t={t} />
                     ))
                   ) : (
                     <Card className="p-8 text-center text-muted-foreground">
@@ -499,8 +499,8 @@ export default function Community() {
                         <Trophy className="h-6 w-6 text-primary" />
                       </div>
                       <div>
-                        <h3 className="font-semibold">Complete Challenges</h3>
-                        <p className="text-sm text-muted-foreground">Join weekly & monthly challenges</p>
+                        <h3 className="font-semibold">{t('pages.community.avatars.unlock.challenges.title')}</h3>
+                        <p className="text-sm text-muted-foreground">{t('pages.community.avatars.unlock.challenges.description')}</p>
                       </div>
                     </div>
                   </Card>
@@ -510,8 +510,8 @@ export default function Community() {
                         <Target className="h-6 w-6 text-accent" />
                       </div>
                       <div>
-                        <h3 className="font-semibold">Hit Milestones</h3>
-                        <p className="text-sm text-muted-foreground">Track workouts, habits & progress</p>
+                        <h3 className="font-semibold">{t('pages.community.avatars.unlock.milestones.title')}</h3>
+                        <p className="text-sm text-muted-foreground">{t('pages.community.avatars.unlock.milestones.description')}</p>
                       </div>
                     </div>
                   </Card>
@@ -521,8 +521,8 @@ export default function Community() {
                         <Flame className="h-6 w-6 text-orange-500" />
                       </div>
                       <div>
-                        <h3 className="font-semibold">Build Streaks</h3>
-                        <p className="text-sm text-muted-foreground">Maintain daily habit streaks</p>
+                        <h3 className="font-semibold">{t('pages.community.avatars.unlock.streaks.title')}</h3>
+                        <p className="text-sm text-muted-foreground">{t('pages.community.avatars.unlock.streaks.description')}</p>
                       </div>
                     </div>
                   </Card>
@@ -531,10 +531,10 @@ export default function Community() {
                 {/* Avatar Sub-Tabs */}
                 <Tabs defaultValue="all" className="space-y-6">
                   <TabsList className="grid w-full grid-cols-4 max-w-md mx-auto">
-                    <TabsTrigger value="all">All</TabsTrigger>
-                    <TabsTrigger value="free">Free</TabsTrigger>
-                    <TabsTrigger value="challenge">Challenge</TabsTrigger>
-                    <TabsTrigger value="coach">Coach</TabsTrigger>
+                    <TabsTrigger value="all">{t('pages.community.avatars.tabs.all')}</TabsTrigger>
+                    <TabsTrigger value="free">{t('pages.community.avatars.tabs.free')}</TabsTrigger>
+                    <TabsTrigger value="challenge">{t('pages.community.avatars.tabs.challenge')}</TabsTrigger>
+                    <TabsTrigger value="coach">{t('pages.community.avatars.tabs.coach')}</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="all">
@@ -548,7 +548,7 @@ export default function Community() {
                           <div>
                             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                               <Sparkles className="h-5 w-5 text-primary" />
-                              Free Avatars
+                              {t('pages.community.avatars.categories.free')}
                             </h2>
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                               {freeAvatars.map(avatar => <AvatarCard key={avatar.id} avatar={avatar} />)}
@@ -560,7 +560,7 @@ export default function Community() {
                           <div>
                             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                               <Trophy className="h-5 w-5 text-yellow-500" />
-                              Challenge Avatars
+                              {t('pages.community.avatars.categories.challenge')}
                             </h2>
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                               {challengeAvatars.map(avatar => <AvatarCard key={avatar.id} avatar={avatar} locked />)}
@@ -572,7 +572,7 @@ export default function Community() {
                           <div>
                             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                               <Crown className="h-5 w-5 text-purple-500" />
-                              Coach Exclusive
+                              {t('pages.community.avatars.categories.coach')}
                             </h2>
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                               {coachAvatars.map(avatar => <AvatarCard key={avatar.id} avatar={avatar} locked />)}
@@ -607,20 +607,20 @@ export default function Community() {
             {/* CTA */}
             <Card className="mt-10 p-6 md:p-8 bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20 text-center">
               <Users className="h-10 w-10 text-primary mx-auto mb-4" />
-              <h2 className="text-xl md:text-2xl font-bold mb-2">Join the Community</h2>
+              <h2 className="text-xl md:text-2xl font-bold mb-2">{t('pages.community.cta.title')}</h2>
               <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                Sign up for free to compete on leaderboards, unlock avatars, and track your fitness journey!
+                {t('pages.community.cta.description')}
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Link to="/auth?tab=signup">
                   <Button size="lg" className="gap-2">
-                    Get Started Free
+                    {t('pages.community.cta.getStarted')}
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </Link>
                 <Link to="/coaches">
                   <Button size="lg" variant="outline" className="gap-2">
-                    Find a Coach
+                    {t('pages.community.cta.findCoach')}
                   </Button>
                 </Link>
               </div>

@@ -7,65 +7,68 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dumbbell, Target, TrendingUp, Users, CheckCircle, ArrowRight, Star } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const PersonalTrainers = () => {
+  const { t } = useTranslation();
+
   const benefits = [
     {
       icon: Target,
-      title: "Personalised Programs",
-      description: "Custom workout plans designed specifically for your goals, fitness level, and schedule.",
+      title: t('pages.coachTypes.personalTrainers.benefits.programs.title'),
+      description: t('pages.coachTypes.personalTrainers.benefits.programs.description'),
     },
     {
       icon: TrendingUp,
-      title: "Track Your Progress",
-      description: "Monitor your improvements with detailed tracking and regular assessments.",
+      title: t('pages.coachTypes.personalTrainers.benefits.progress.title'),
+      description: t('pages.coachTypes.personalTrainers.benefits.progress.description'),
     },
     {
       icon: Users,
-      title: "Expert Guidance",
-      description: "Work with certified professionals who keep you motivated and accountable.",
+      title: t('pages.coachTypes.personalTrainers.benefits.guidance.title'),
+      description: t('pages.coachTypes.personalTrainers.benefits.guidance.description'),
     },
     {
       icon: CheckCircle,
-      title: "Flexible Training",
-      description: "Train online or in-person, at your convenience with flexible scheduling.",
+      title: t('pages.coachTypes.personalTrainers.benefits.flexible.title'),
+      description: t('pages.coachTypes.personalTrainers.benefits.flexible.description'),
     },
   ];
 
   const faqs = [
     {
-      question: "How do I choose the right personal trainer?",
-      answer: "Look at their certifications, experience, specialisations, and reviews from other clients. Our platform lets you filter trainers by expertise, location, and price range to find your perfect match.",
+      question: t('pages.coachTypes.personalTrainers.faq.choose.question'),
+      answer: t('pages.coachTypes.personalTrainers.faq.choose.answer'),
     },
     {
-      question: "How much does personal training cost?",
-      answer: "Prices vary depending on the trainer's experience and location. On FitConnect, you'll find trainers ranging from £30 to £150+ per session, with package discounts often available.",
+      question: t('pages.coachTypes.personalTrainers.faq.cost.question'),
+      answer: t('pages.coachTypes.personalTrainers.faq.cost.answer'),
     },
     {
-      question: "Can I train online with a personal trainer?",
-      answer: "Yes! Many of our personal trainers offer online coaching via video calls, custom workout plans, and messaging support. This is a flexible and often more affordable option.",
+      question: t('pages.coachTypes.personalTrainers.faq.online.question'),
+      answer: t('pages.coachTypes.personalTrainers.faq.online.answer'),
     },
     {
-      question: "How often should I train with a personal trainer?",
-      answer: "Most clients start with 2-3 sessions per week. Your trainer will recommend the optimal frequency based on your goals and current fitness level.",
+      question: t('pages.coachTypes.personalTrainers.faq.frequency.question'),
+      answer: t('pages.coachTypes.personalTrainers.faq.frequency.answer'),
     },
     {
-      question: "What should I expect in my first session?",
-      answer: "Your first session typically includes a fitness assessment, goal setting discussion, and introduction to basic exercises. Your trainer will create a baseline to track your progress.",
+      question: t('pages.coachTypes.personalTrainers.faq.firstSession.question'),
+      answer: t('pages.coachTypes.personalTrainers.faq.firstSession.answer'),
     },
   ];
 
   const featuredTrainers = [
-    { name: "James Wilson", specialty: "Weight Loss", rating: 4.9, sessions: 500 },
-    { name: "Sarah Chen", specialty: "Strength Training", rating: 4.8, sessions: 350 },
-    { name: "Mike Johnson", specialty: "Functional Fitness", rating: 4.9, sessions: 420 },
+    { name: "James Wilson", specialty: t('pages.coachTypes.personalTrainers.featured.specialties.weightLoss'), rating: 4.9, sessions: 500 },
+    { name: "Sarah Chen", specialty: t('pages.coachTypes.personalTrainers.featured.specialties.strength'), rating: 4.8, sessions: 350 },
+    { name: "Mike Johnson", specialty: t('pages.coachTypes.personalTrainers.featured.specialties.functional'), rating: 4.9, sessions: 420 },
   ];
 
   return (
     <>
       <Helmet>
-        <title>Personal Trainers | FitConnect - Find Your Perfect PT</title>
-        <meta name="description" content="Find certified personal trainers on FitConnect. Get customised workout plans, expert guidance, and achieve your fitness goals with professional support." />
+        <title>{t('pages.coachTypes.personalTrainers.meta.title')}</title>
+        <meta name="description" content={t('pages.coachTypes.personalTrainers.meta.description')} />
       </Helmet>
       
       <div className="min-h-screen bg-background">
@@ -77,23 +80,23 @@ const PersonalTrainers = () => {
           <div className="container mx-auto relative z-10">
             <div className="max-w-3xl">
               <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
-                <Dumbbell className="w-3 h-3 mr-1" /> Personal Training
+                <Dumbbell className="w-3 h-3 mr-1" /> {t('pages.coachTypes.personalTrainers.hero.badge')}
               </Badge>
               <h1 className="font-display text-4xl md:text-6xl font-bold mb-6">
-                Find Your Perfect <span className="text-gradient-primary">Personal Trainer</span>
+                {t('pages.coachTypes.personalTrainers.hero.titleStart')} <span className="text-gradient-primary">{t('pages.coachTypes.personalTrainers.hero.titleHighlight')}</span>
               </h1>
               <p className="text-muted-foreground text-lg md:text-xl mb-8">
-                Work with certified personal trainers who create customised workout programs, keep you accountable, and help you achieve results faster than training alone.
+                {t('pages.coachTypes.personalTrainers.hero.description')}
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link to="/coaches?type=personal-trainer">
                   <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                    Browse Personal Trainers <ArrowRight className="ml-2 w-5 h-5" />
+                    {t('pages.coachTypes.personalTrainers.hero.browseButton')} <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>
                 </Link>
                 <Link to="/how-it-works">
                   <Button size="lg" variant="outline">
-                    How It Works
+                    {t('pages.coachTypes.personalTrainers.hero.howItWorks')}
                   </Button>
                 </Link>
               </div>
@@ -106,10 +109,10 @@ const PersonalTrainers = () => {
           <div className="container mx-auto">
             <div className="text-center mb-12">
               <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-                Why Work with a Personal Trainer?
+                {t('pages.coachTypes.personalTrainers.benefits.title')}
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                Personal training is the fastest way to reach your fitness goals with expert guidance every step of the way.
+                {t('pages.coachTypes.personalTrainers.benefits.description')}
               </p>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -133,10 +136,10 @@ const PersonalTrainers = () => {
           <div className="container mx-auto">
             <div className="text-center mb-12">
               <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-                Top-Rated Personal Trainers
+                {t('pages.coachTypes.personalTrainers.featured.title')}
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                Discover highly-rated personal trainers ready to help you transform.
+                {t('pages.coachTypes.personalTrainers.featured.description')}
               </p>
             </div>
             <div className="grid md:grid-cols-3 gap-6 mb-8">
@@ -157,7 +160,7 @@ const PersonalTrainers = () => {
                         <Star className="w-4 h-4 fill-primary text-primary" />
                         <span className="text-foreground font-medium">{trainer.rating}</span>
                       </div>
-                      <span className="text-muted-foreground">{trainer.sessions}+ sessions</span>
+                      <span className="text-muted-foreground">{t('pages.coachTypes.personalTrainers.featured.stats.sessions', { count: trainer.sessions })}</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -166,7 +169,7 @@ const PersonalTrainers = () => {
             <div className="text-center">
               <Link to="/coaches?type=personal-trainer">
                 <Button variant="outline" size="lg">
-                  View All Personal Trainers <ArrowRight className="ml-2 w-5 h-5" />
+                  {t('pages.coachTypes.personalTrainers.featured.viewAll')} <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
             </div>
@@ -178,10 +181,10 @@ const PersonalTrainers = () => {
           <div className="container mx-auto max-w-3xl">
             <div className="text-center mb-12">
               <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-                Frequently Asked Questions
+                {t('pages.coachTypes.personalTrainers.faq.title')}
               </h2>
               <p className="text-muted-foreground">
-                Everything you need to know about personal training.
+                {t('pages.coachTypes.personalTrainers.faq.description')}
               </p>
             </div>
             <Accordion type="single" collapsible className="space-y-4">
@@ -203,14 +206,14 @@ const PersonalTrainers = () => {
         <section className="py-20 px-4">
           <div className="container mx-auto text-center">
             <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-              Ready to Start Your Fitness Journey?
+              {t('pages.coachTypes.personalTrainers.cta.title')}
             </h2>
             <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-              Connect with a personal trainer today and take the first step towards your goals.
+              {t('pages.coachTypes.personalTrainers.cta.description')}
             </p>
             <Link to="/coaches?type=personal-trainer">
               <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                Find Your Trainer <ArrowRight className="ml-2 w-5 h-5" />
+                {t('pages.coachTypes.personalTrainers.cta.button')} <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
           </div>

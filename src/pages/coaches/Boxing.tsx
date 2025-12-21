@@ -7,65 +7,68 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Swords, Target, Zap, Shield, Heart, ArrowRight, Star } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const Boxing = () => {
+  const { t } = useTranslation();
+
   const benefits = [
     {
       icon: Zap,
-      title: "Full-Body Workout",
-      description: "Boxing engages every muscle group, burning up to 800 calories per session.",
+      title: t('pages.coachTypes.boxing.benefits.fullBody.title'),
+      description: t('pages.coachTypes.boxing.benefits.fullBody.description'),
     },
     {
       icon: Target,
-      title: "Learn Real Skills",
-      description: "Master proper technique from footwork to combinations with expert coaching.",
+      title: t('pages.coachTypes.boxing.benefits.skills.title'),
+      description: t('pages.coachTypes.boxing.benefits.skills.description'),
     },
     {
       icon: Shield,
-      title: "Self-Defence",
-      description: "Gain confidence and practical self-defence skills that last a lifetime.",
+      title: t('pages.coachTypes.boxing.benefits.selfDefense.title'),
+      description: t('pages.coachTypes.boxing.benefits.selfDefense.description'),
     },
     {
       icon: Heart,
-      title: "Stress Relief",
-      description: "Release tension and boost mental clarity through focused training.",
+      title: t('pages.coachTypes.boxing.benefits.stress.title'),
+      description: t('pages.coachTypes.boxing.benefits.stress.description'),
     },
   ];
 
   const faqs = [
     {
-      question: "Do I need any experience to start boxing?",
-      answer: "Absolutely not! Our coaches work with complete beginners through to competitive boxers. You'll learn at your own pace with proper technique from day one.",
+      question: t('pages.coachTypes.boxing.faq.experience.question'),
+      answer: t('pages.coachTypes.boxing.faq.experience.answer'),
     },
     {
-      question: "What equipment do I need?",
-      answer: "For your first session, just wear comfortable workout clothes and trainers. Your coach will provide gloves and pads. As you progress, you may want to invest in your own gloves and wraps.",
+      question: t('pages.coachTypes.boxing.faq.equipment.question'),
+      answer: t('pages.coachTypes.boxing.faq.equipment.answer'),
     },
     {
-      question: "Is boxing safe?",
-      answer: "Yes! With proper coaching, boxing is very safe. Beginners focus on technique, pad work, and fitness rather than sparring. Your coach will ensure you progress safely.",
+      question: t('pages.coachTypes.boxing.faq.safety.question'),
+      answer: t('pages.coachTypes.boxing.faq.safety.answer'),
     },
     {
-      question: "Will boxing help me lose weight?",
-      answer: "Boxing is one of the most effective workouts for weight loss and conditioning. Expect to burn 500-800 calories per session while building lean muscle.",
+      question: t('pages.coachTypes.boxing.faq.weightLoss.question'),
+      answer: t('pages.coachTypes.boxing.faq.weightLoss.answer'),
     },
     {
-      question: "How quickly will I see results?",
-      answer: "Most people notice improved fitness and coordination within 2-4 weeks. Noticeable body composition changes typically occur within 6-8 weeks of consistent training.",
+      question: t('pages.coachTypes.boxing.faq.results.question'),
+      answer: t('pages.coachTypes.boxing.faq.results.answer'),
     },
   ];
 
   const featuredCoaches = [
-    { name: "Mike Rodriguez", specialty: "Amateur Boxing", rating: 4.9, fights: 50 },
-    { name: "Tommy Williams", specialty: "Fitness Boxing", rating: 4.8, clients: 300 },
-    { name: "Sarah Jones", specialty: "Women's Boxing", rating: 4.9, experience: "15 years" },
+    { name: "Mike Rodriguez", specialty: t('pages.coachTypes.boxing.featured.specialties.amateur'), rating: 4.9, fights: 50 },
+    { name: "Tommy Williams", specialty: t('pages.coachTypes.boxing.featured.specialties.fitness'), rating: 4.8, clients: 300 },
+    { name: "Sarah Jones", specialty: t('pages.coachTypes.boxing.featured.specialties.womens'), rating: 4.9, experience: t('pages.coachTypes.boxing.featured.experience', { years: 15 }) },
   ];
 
   return (
     <>
       <Helmet>
-        <title>Boxing Coaches | FitConnect - Learn Boxing with Experts</title>
-        <meta name="description" content="Find expert boxing coaches on FitConnect. Learn proper technique, improve fitness, and train with professionals from beginner to competitive level." />
+        <title>{t('pages.coachTypes.boxing.meta.title')}</title>
+        <meta name="description" content={t('pages.coachTypes.boxing.meta.description')} />
       </Helmet>
       
       <div className="min-h-screen bg-background">
@@ -77,23 +80,23 @@ const Boxing = () => {
           <div className="container mx-auto relative z-10">
             <div className="max-w-3xl">
               <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
-                <Swords className="w-3 h-3 mr-1" /> Boxing Training
+                <Swords className="w-3 h-3 mr-1" /> {t('pages.coachTypes.boxing.hero.badge')}
               </Badge>
               <h1 className="font-display text-4xl md:text-6xl font-bold mb-6">
-                Learn to Box with <span className="text-gradient-primary">Expert Coaches</span>
+                {t('pages.coachTypes.boxing.hero.titleStart')} <span className="text-gradient-primary">{t('pages.coachTypes.boxing.hero.titleHighlight')}</span>
               </h1>
               <p className="text-muted-foreground text-lg md:text-xl mb-8">
-                Train with experienced boxing coaches who teach proper technique, build your fitness, and help you achieve your goals—whether that's fitness, competition, or self-defence.
+                {t('pages.coachTypes.boxing.hero.description')}
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link to="/coaches?type=boxing">
                   <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                    Browse Boxing Coaches <ArrowRight className="ml-2 w-5 h-5" />
+                    {t('pages.coachTypes.boxing.hero.browseButton')} <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>
                 </Link>
                 <Link to="/how-it-works">
                   <Button size="lg" variant="outline">
-                    How It Works
+                    {t('pages.coachTypes.boxing.hero.howItWorks')}
                   </Button>
                 </Link>
               </div>
@@ -106,10 +109,10 @@ const Boxing = () => {
           <div className="container mx-auto">
             <div className="text-center mb-12">
               <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-                Why Train Boxing?
+                {t('pages.coachTypes.boxing.benefits.title')}
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                Boxing offers incredible physical and mental benefits for people of all fitness levels.
+                {t('pages.coachTypes.boxing.benefits.description')}
               </p>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -133,10 +136,10 @@ const Boxing = () => {
           <div className="container mx-auto">
             <div className="text-center mb-12">
               <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-                Top-Rated Boxing Coaches
+                {t('pages.coachTypes.boxing.featured.title')}
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                Train with experienced boxing coaches who know how to get results.
+                {t('pages.coachTypes.boxing.featured.description')}
               </p>
             </div>
             <div className="grid md:grid-cols-3 gap-6 mb-8">
@@ -158,8 +161,8 @@ const Boxing = () => {
                         <span className="text-foreground font-medium">{coach.rating}</span>
                       </div>
                       <span className="text-muted-foreground">
-                        {coach.fights ? `${coach.fights} fights coached` : 
-                         coach.clients ? `${coach.clients}+ clients` : 
+                        {coach.fights ? t('pages.coachTypes.boxing.featured.stats.fights', { count: coach.fights }) : 
+                         coach.clients ? t('pages.coachTypes.boxing.featured.stats.clients', { count: coach.clients }) : 
                          coach.experience}
                       </span>
                     </div>
@@ -170,7 +173,7 @@ const Boxing = () => {
             <div className="text-center">
               <Link to="/coaches?type=boxing">
                 <Button variant="outline" size="lg">
-                  View All Boxing Coaches <ArrowRight className="ml-2 w-5 h-5" />
+                  {t('pages.coachTypes.boxing.featured.viewAll')} <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
             </div>
@@ -182,10 +185,10 @@ const Boxing = () => {
           <div className="container mx-auto max-w-3xl">
             <div className="text-center mb-12">
               <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-                Frequently Asked Questions
+                {t('pages.coachTypes.boxing.faq.title')}
               </h2>
               <p className="text-muted-foreground">
-                Everything you need to know about boxing training.
+                {t('pages.coachTypes.boxing.faq.description')}
               </p>
             </div>
             <Accordion type="single" collapsible className="space-y-4">
@@ -207,14 +210,14 @@ const Boxing = () => {
         <section className="py-20 px-4">
           <div className="container mx-auto text-center">
             <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-              Ready to Step in the Ring?
+              {t('pages.coachTypes.boxing.cta.title')}
             </h2>
             <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-              Connect with a boxing coach today and start your journey.
+              {t('pages.coachTypes.boxing.cta.description')}
             </p>
             <Link to="/coaches?type=boxing">
               <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                Find Your Coach <ArrowRight className="ml-2 w-5 h-5" />
+                {t('pages.coachTypes.boxing.cta.button')} <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
           </div>
