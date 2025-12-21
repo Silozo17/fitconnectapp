@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminView } from "@/contexts/AdminContext";
+import { triggerHaptic } from "@/lib/despia";
 
 export const useUnreadMessages = () => {
   const { user, role } = useAuth();
@@ -94,7 +95,8 @@ export const useUnreadMessages = () => {
           filter: `receiver_id=eq.${currentProfileId}`,
         },
         () => {
-          // New message received - increment count
+          // New message received - increment count and trigger haptic
+          triggerHaptic('light');
           setUnreadCount((prev) => prev + 1);
         }
       )

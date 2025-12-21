@@ -41,4 +41,31 @@ export const withDespia = <T>(
   return fallback?.();
 };
 
+/**
+ * Haptic feedback patterns available in Despia
+ */
+export type HapticPattern = 'light' | 'heavy' | 'success' | 'warning' | 'error';
+
+/**
+ * Trigger haptic feedback on the device
+ * @param pattern The haptic pattern to trigger
+ */
+export const triggerHaptic = (pattern: HapticPattern): void => {
+  if (!isDespia()) return;
+  
+  const commands: Record<HapticPattern, string> = {
+    light: 'lighthaptic://',
+    heavy: 'heavyhaptic://',
+    success: 'successhaptic://',
+    warning: 'warninghaptic://',
+    error: 'errorhaptic://',
+  };
+  
+  try {
+    despia(commands[pattern]);
+  } catch (e) {
+    console.warn('Haptic feedback failed:', e);
+  }
+};
+
 export default despia;

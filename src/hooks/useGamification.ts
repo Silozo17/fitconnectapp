@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { triggerHaptic } from '@/lib/despia';
 
 export interface ClientXP {
   id: string;
@@ -376,6 +377,7 @@ export function useAwardBadge() {
     onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ['client-badges'] });
       if (!data.alreadyEarned && data.badge) {
+        triggerHaptic('success');
         toast.success(`Badge Earned! ${data.badge.icon}`, { description: `${data.badge.name} - ${data.badge.description}`, duration: 5000 });
         if (data.badge.xp_reward > 0) {
           awardXP.mutate({ amount: data.badge.xp_reward, source: 'badge_earned', description: `Earned "${data.badge.name}" badge`, sourceId: data.badge.id });
