@@ -54,11 +54,12 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border safe-area-bottom"
+      className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       role="navigation"
       aria-label={t("bottomNav.mobileNavigation")}
     >
-      <div className="flex items-center justify-around h-16 px-2">
+      <div className="flex items-center justify-around h-24 px-4">
         {navItems.map((item) => {
           const active = isActive(item.route);
           const Icon = item.icon;
@@ -68,28 +69,22 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
               key={item.route}
               onClick={() => navigate(item.route)}
               className={cn(
-                "flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors",
-                "min-w-[64px] touch-manipulation",
+                "flex items-center justify-center w-14 h-14 rounded-2xl transition-all duration-200",
+                "touch-manipulation",
                 active
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
               )}
               aria-current={active ? "page" : undefined}
               aria-label={t(item.labelKey)}
             >
               <Icon
                 className={cn(
-                  "h-5 w-5 transition-transform",
+                  "h-6 w-6 transition-transform duration-200",
                   active && "scale-110"
                 )}
                 strokeWidth={active ? 2.5 : 2}
               />
-              <span className={cn(
-                "text-[10px] font-medium truncate max-w-full",
-                active && "font-semibold"
-              )}>
-                {t(item.labelKey)}
-              </span>
             </button>
           );
         })}
