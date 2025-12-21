@@ -15,6 +15,7 @@ import { Loader2, Save, LogOut, AlertTriangle, Info, Bell, User, Heart, Globe, P
 import { HealthTagInput } from "@/components/dashboard/clients/HealthTagInput";
 import { CurrencySelector } from "@/components/shared/CurrencySelector";
 import { LanguageSelector } from "@/components/shared/LanguageSelector";
+import { LocationSelector } from "@/components/shared/LocationSelector";
 import { NotificationPreferences } from "@/components/notifications/NotificationPreferences";
 import { AccountSecuritySection } from "@/components/shared/AccountSecuritySection";
 import { LeaderboardSettings } from "@/components/gamification/LeaderboardSettings";
@@ -454,6 +455,8 @@ const ClientSettings = () => {
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <LanguageSelector />
+                    <Separator />
+                    <LocationSelector />
                     <Separator />
                     <div>
                       <CurrencySelector />

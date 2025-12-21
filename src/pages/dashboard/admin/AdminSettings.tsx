@@ -38,6 +38,7 @@ const ThreadsIcon = ({ className }: { className?: string }) => (
 import { TikTokIcon } from "@/components/icons/TikTokIcon";
 import { NotificationPreferences } from "@/components/notifications/NotificationPreferences";
 import { LanguageSelector } from "@/components/shared/LanguageSelector";
+import { LocationSelector } from "@/components/shared/LocationSelector";
 import { Separator } from "@/components/ui/separator";
 import { AccountSecuritySection } from "@/components/shared/AccountSecuritySection";
 import { useAuth } from "@/contexts/AuthContext";
@@ -425,6 +426,8 @@ const AdminSettings = () => {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <LanguageSelector />
+                  <Separator />
+                  <LocationSelector />
                   <Separator />
                   <div className="space-y-2">
                     <Label>Default Currency</Label>

@@ -42,6 +42,7 @@ import PlatformSubscription from "@/components/payments/PlatformSubscription";
 import { useQuery } from "@tanstack/react-query";
 import { CurrencySelector } from "@/components/shared/CurrencySelector";
 import { LanguageSelector } from "@/components/shared/LanguageSelector";
+import { LocationSelector } from "@/components/shared/LocationSelector";
 import { useLocale } from "@/contexts/LocaleContext";
 import { getCurrencySymbol } from "@/lib/currency";
 import { NotificationPreferences } from "@/components/notifications/NotificationPreferences";
@@ -1110,6 +1111,8 @@ const CoachSettings = () => {
                 <h2 className="font-display font-bold text-foreground mb-6">Display Preferences</h2>
                 <div className="space-y-6">
                   <LanguageSelector />
+                  <Separator />
+                  <LocationSelector />
                   <Separator />
                   <div className="max-w-xs">
                     <CurrencySelector />
