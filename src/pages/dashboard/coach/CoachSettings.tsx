@@ -39,7 +39,7 @@ import { CardImageUpload } from "@/components/shared/CardImageUpload";
 import { CoachCardPreview } from "@/components/coaches/CoachCardPreview";
 import StripeConnectButton from "@/components/payments/StripeConnectButton";
 import PlatformSubscription from "@/components/payments/PlatformSubscription";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { CurrencySelector } from "@/components/shared/CurrencySelector";
 import { LanguageSelector } from "@/components/shared/LanguageSelector";
 import { AnimationSettingsCard } from "@/components/settings/AnimationSettingsCard";
@@ -181,6 +181,7 @@ const CoachSettings = () => {
   const { user, signOut } = useAuth();
   const { currency } = useLocale();
   const { t } = useTranslation('settings');
+  const queryClient = useQueryClient();
   
   const documentTypes = getDocumentTypeConfig(t);
   const statusConfig = getStatusConfig(t);
@@ -381,6 +382,8 @@ const CoachSettings = () => {
     } else {
       // Reset dirty state after successful save
       initialProfileRef.current = JSON.parse(JSON.stringify(profile));
+      // Invalidate profile completion query to update reactively
+      queryClient.invalidateQueries({ queryKey: ["coach-profile-completion", user.id] });
       toast.success("Profile updated successfully");
     }
   };
@@ -597,7 +600,20 @@ const CoachSettings = () => {
                           <CardImageUpload
                             currentImageUrl={profile.card_image_url}
                             userId={user?.id || ""}
-                            onImageChange={(url) => setProfile({ ...profile, card_image_url: url })}
+                            onImageChange={async (url) => {
+                              // Update local state immediately for UI feedback
+                              setProfile(prev => ({ ...prev, card_image_url: url }));
+                              // Auto-save to DB so profile completion updates reactively
+                              if (user) {
+                                const { error } = await supabase
+                                  .from("coach_profiles")
+                                  .update({ card_image_url: url })
+                                  .eq("user_id", user.id);
+                                if (!error) {
+                                  queryClient.invalidateQueries({ queryKey: ["coach-profile-completion", user.id] });
+                                }
+                              }
+                            }}
                           />
                         </div>
                         <div className="lg:w-80">
