@@ -4,7 +4,6 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
 import { useClientOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useEnvironment } from "@/hooks/useEnvironment";
 import { Loader2 } from "lucide-react";
 import ClientSidebar from "./ClientSidebar";
 import ClientDashboardHeader from "./ClientDashboardHeader";
@@ -28,10 +27,6 @@ const ClientDashboardLayout = ({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const isMobile = useIsMobile();
-  const { isPWA, isNativeApp } = useEnvironment();
-  
-  // Check if bottom nav will be shown
-  const showBottomNav = isMobile && (isPWA || isNativeApp);
 
   useEffect(() => {
     if (!isLoading && onboardingStatus && !onboardingStatus.isOnboarded) {
@@ -69,7 +64,7 @@ const ClientDashboardLayout = ({
           <ClientDashboardHeader onMenuToggle={() => setMobileOpen(true)} />
           <main 
             id="main-content" 
-            className={`flex-1 p-4 lg:p-6 overflow-y-auto ${showBottomNav ? "pb-24" : "pb-6"}`}
+            className={`flex-1 p-4 lg:p-6 overflow-y-auto ${isMobile ? "pb-24" : "pb-6"}`}
             role="main"
             aria-label={title}
             tabIndex={-1}

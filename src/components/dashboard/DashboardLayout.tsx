@@ -5,7 +5,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useCoachOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { useCoachProfileRealtime } from "@/hooks/useCoachProfileRealtime";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useEnvironment } from "@/hooks/useEnvironment";
 import { Loader2 } from "lucide-react";
 import CoachSidebar from "./CoachSidebar";
 import DashboardHeader from "./DashboardHeader";
@@ -25,10 +24,6 @@ const DashboardLayout = memo(({ children, title = "Coach Dashboard", description
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const isMobile = useIsMobile();
-  const { isPWA, isNativeApp } = useEnvironment();
-  
-  // Check if bottom nav will be shown
-  const showBottomNav = isMobile && (isPWA || isNativeApp);
   
   // Subscribe to realtime updates for coach profile (e.g., admin changes subscription tier)
   useCoachProfileRealtime();
@@ -79,7 +74,7 @@ const DashboardLayout = memo(({ children, title = "Coach Dashboard", description
           />
           <main 
             id="main-content" 
-            className={`flex-1 p-4 lg:p-6 overflow-y-auto ${showBottomNav ? "pb-24" : "pb-6"}`}
+            className={`flex-1 p-4 lg:p-6 overflow-y-auto ${isMobile ? "pb-24" : "pb-6"}`}
             role="main"
             aria-label={title}
             tabIndex={-1}
