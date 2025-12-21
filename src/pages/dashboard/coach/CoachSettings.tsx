@@ -382,8 +382,9 @@ const CoachSettings = () => {
     } else {
       // Reset dirty state after successful save
       initialProfileRef.current = JSON.parse(JSON.stringify(profile));
-      // Invalidate profile completion query to update reactively
+      // Invalidate profile completion queries to update reactively
       queryClient.invalidateQueries({ queryKey: ["coach-profile-completion", user.id] });
+      queryClient.invalidateQueries({ queryKey: ["marketplace-profile-completion", user.id] });
       toast.success("Profile updated successfully");
     }
   };
@@ -607,6 +608,7 @@ const CoachSettings = () => {
                                   .eq("user_id", user.id);
                                 if (!error) {
                                   queryClient.invalidateQueries({ queryKey: ["coach-profile-completion", user.id] });
+                                  queryClient.invalidateQueries({ queryKey: ["marketplace-profile-completion", user.id] });
                                 }
                               }
                             }}

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 const invalidateProfileCompletion = (queryClient: ReturnType<typeof useQueryClient>, userId?: string) => {
   if (userId) {
     queryClient.invalidateQueries({ queryKey: ["coach-profile-completion", userId] });
+    queryClient.invalidateQueries({ queryKey: ["marketplace-profile-completion", userId] });
   }
 };
 

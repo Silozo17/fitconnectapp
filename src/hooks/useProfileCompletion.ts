@@ -20,7 +20,7 @@ export function useProfileCompletion() {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: ["coach-profile-completion", user?.id],
+    queryKey: ["marketplace-profile-completion", user?.id],
     queryFn: async (): Promise<ProfileCompletionData> => {
       if (!user?.id) throw new Error("Not authenticated");
 
@@ -46,9 +46,10 @@ export function useProfileCompletion() {
           threads_url
         `)
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
       if (profileError) throw profileError;
+      if (!coachProfile) throw new Error("Coach profile not found");
 
       // Fetch gallery count
       const { count: galleryCount, error: galleryError } = await supabase
