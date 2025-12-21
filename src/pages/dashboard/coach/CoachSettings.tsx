@@ -578,11 +578,7 @@ const CoachSettings = () => {
             {selectedTab === "marketplace" && (
               <div className="space-y-6 pb-24">
                 {/* Profile Completion Progress */}
-                <ProfileCompletionProgress 
-                  profile={profile}
-                  galleryCount={0} // Will be updated when gallery loads
-                  groupClassCount={0} // Will be updated when classes load
-                />
+                <ProfileCompletionProgress />
 
                 {/* Section 1: Visual Identity */}
                 <MarketplaceSection

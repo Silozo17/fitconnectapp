@@ -3,6 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
+// Helper to invalidate profile completion when gallery changes
+const invalidateProfileCompletion = (queryClient: ReturnType<typeof useQueryClient>, userId?: string) => {
+  if (userId) {
+    queryClient.invalidateQueries({ queryKey: ["coach-profile-completion", userId] });
+  }
+};
+
 export interface GalleryImage {
   id: string;
   coach_id: string;
@@ -104,8 +111,9 @@ export const useAddGalleryImage = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (_, __, context) => {
       queryClient.invalidateQueries({ queryKey: ["my-coach-gallery"] });
+      invalidateProfileCompletion(queryClient, user?.id);
       toast.success("Image added to gallery");
     },
     onError: (error: Error) => {
@@ -137,6 +145,7 @@ export const useUpdateGalleryImage = () => {
 
 export const useDeleteGalleryImage = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async (id: string) => {
@@ -149,6 +158,7 @@ export const useDeleteGalleryImage = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-coach-gallery"] });
+      invalidateProfileCompletion(queryClient, user?.id);
       toast.success("Image removed from gallery");
     },
     onError: () => {

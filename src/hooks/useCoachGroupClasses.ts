@@ -3,6 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
+// Helper to invalidate profile completion when group classes change
+const invalidateProfileCompletion = (queryClient: ReturnType<typeof useQueryClient>, userId?: string) => {
+  if (userId) {
+    queryClient.invalidateQueries({ queryKey: ["coach-profile-completion", userId] });
+  }
+};
+
 export interface GroupClass {
   id: string;
   coach_id: string;
@@ -115,6 +122,7 @@ export const useCreateGroupClass = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-group-classes"] });
+      invalidateProfileCompletion(queryClient, user?.id);
       toast.success("Group class created");
     },
     onError: () => {
@@ -152,6 +160,7 @@ export const useUpdateGroupClass = () => {
 // Delete a group class
 export const useDeleteGroupClass = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async (id: string) => {
@@ -164,6 +173,7 @@ export const useDeleteGroupClass = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-group-classes"] });
+      invalidateProfileCompletion(queryClient, user?.id);
       toast.success("Group class deleted");
     },
     onError: () => {
