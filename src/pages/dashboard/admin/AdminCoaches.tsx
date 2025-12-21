@@ -35,6 +35,7 @@ import { useAdminUserManagement } from "@/hooks/useAdminUserManagement";
 import { useLogAdminAction } from "@/hooks/useAuditLog";
 import { arrayToCSV, downloadCSV, formatDateForCSV, formatArrayForCSV, generateExportFilename } from "@/lib/csv-export";
 import { getErrorMessage, logError } from "@/lib/error-utils";
+import { getDisplayLocation } from "@/lib/location-utils";
 
 interface CoachUser {
   id: string;
@@ -207,7 +208,7 @@ const AdminCoaches = () => {
     const query = searchQuery.toLowerCase();
     return coaches.filter((coach) => {
       const name = (coach.display_name || "").toLowerCase();
-      const location = (coach.location || "").toLowerCase();
+      const location = getDisplayLocation(coach).toLowerCase();
       return name.includes(query) || location.includes(query);
     });
   }, [coaches, searchQuery]);
@@ -288,7 +289,7 @@ const AdminCoaches = () => {
       email: coachEmails[coach.user_id] || "-",
       coach_types: formatArrayForCSV(coach.coach_types),
       bio: coach.bio || "-",
-      location: coach.location || "-",
+      location: getDisplayLocation(coach),
       hourly_rate: coach.hourly_rate || "-",
       experience_years: coach.experience_years || "-",
       subscription_tier: coach.subscription_tier || "free",

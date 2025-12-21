@@ -14,6 +14,7 @@ import { getAvatarImageUrl } from "@/hooks/useAvatars";
 import type { MarketplaceCoach } from "@/hooks/useCoachMarketplace";
 import { useCoachLinkPrefix } from "@/hooks/useCoachLinkPrefix";
 import { useExchangeRates } from "@/hooks/useExchangeRates";
+import { getDisplayLocation } from "@/lib/location-utils";
 
 interface CoachCardProps {
   coach: MarketplaceCoach;
@@ -140,11 +141,11 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
           <p className="text-primary text-sm font-medium mb-2">{coach.coach_types[0]}</p>
         )}
 
-        {(coach.location || coach.gym_affiliation) && (
+        {(coach.location || coach.location_city || coach.gym_affiliation) && (
           <div className="flex flex-col gap-1 text-muted-foreground text-sm mb-4">
-            {coach.location && (
+            {(coach.location || coach.location_city) && (
               <div className="flex items-center gap-1">
-                <MapPin className="w-3 h-3" />{coach.location}
+                <MapPin className="w-3 h-3" />{getDisplayLocation(coach)}
               </div>
             )}
             {coach.gym_affiliation && (

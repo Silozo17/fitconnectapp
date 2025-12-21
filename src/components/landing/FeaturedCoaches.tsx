@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Star, MapPin, ArrowRight, CheckCircle, Loader2 } from "lucide-react";
 import { useCoachMarketplace } from "@/hooks/useCoachMarketplace";
 import { useUserLocation } from "@/hooks/useUserLocation";
+import { getDisplayLocation } from "@/lib/location-utils";
 
 const FeaturedCoaches = () => {
   const { t } = useTranslation('landing');
@@ -168,7 +169,7 @@ const FeaturedCoaches = () => {
 
                   <div className="flex items-center gap-1 text-muted-foreground text-sm mb-4">
                     <MapPin className="w-3 h-3" />
-                    {coach.location || "United Kingdom"}
+                    {getDisplayLocation(coach)}
                   </div>
 
                   <div className="flex flex-wrap gap-2 mb-4">
