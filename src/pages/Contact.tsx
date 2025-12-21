@@ -15,6 +15,7 @@ import { Mail, MessageSquare, Clock, HelpCircle, Send } from "lucide-react";
 import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
 import { SocialLinks } from "@/components/shared/SocialLinks";
 import { usePlatformContact } from "@/hooks/usePlatformContact";
+import { useTranslation } from "react-i18next";
 
 const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,12 +26,13 @@ const Contact = () => {
     message: "",
   });
   const { contact } = usePlatformContact();
+  const { t } = useTranslation("pages");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.name || !formData.email || !formData.subject || !formData.message) {
-      toast.error("Please fill in all fields");
+      toast.error(t("contact.form.validation.allFields"));
       return;
     }
 
@@ -48,11 +50,11 @@ const Contact = () => {
 
       if (error) throw error;
 
-      toast.success("Message sent successfully! We'll get back to you soon.");
+      toast.success(t("contact.form.success"));
       setFormData({ name: "", email: "", subject: "", message: "" });
     } catch (error) {
       console.error("Error submitting contact form:", error);
-      toast.error("Failed to send message. Please try again.");
+      toast.error(t("contact.form.error"));
     } finally {
       setIsSubmitting(false);
     }
@@ -61,36 +63,36 @@ const Contact = () => {
   const contactInfo = [
     {
       icon: Mail,
-      title: "Email Us",
+      title: t("contact.info.email.title"),
       description: contact.email,
-      subtext: "We'll respond within 24 hours",
+      subtext: t("contact.info.email.subtext"),
     },
     {
       icon: MessageSquare,
-      title: "Live Chat",
-      description: "Chat with our team",
-      subtext: "Available Mon-Fri, 9am-6pm GMT",
+      title: t("contact.info.chat.title"),
+      description: t("contact.info.chat.description"),
+      subtext: t("contact.info.chat.subtext"),
     },
     {
       icon: Clock,
-      title: "Response Time",
-      description: "Under 24 hours",
-      subtext: "For all enquiries",
+      title: t("contact.info.response.title"),
+      description: t("contact.info.response.description"),
+      subtext: t("contact.info.response.subtext"),
     },
   ];
 
   const quickLinks = [
-    { title: "How do I find a coach?", href: "/how-it-works" },
-    { title: "What are the pricing options?", href: "/pricing" },
-    { title: "How do I become a coach?", href: "/for-coaches" },
-    { title: "View all FAQs", href: "/faq" },
+    { title: t("contact.quickLinks.findCoach"), href: "/how-it-works" },
+    { title: t("contact.quickLinks.pricing"), href: "/pricing" },
+    { title: t("contact.quickLinks.becomeCoach"), href: "/for-coaches" },
+    { title: t("contact.quickLinks.faqs"), href: "/faq" },
   ];
 
   return (
     <>
       <Helmet>
-        <title>Contact Us | FitConnect - Get in Touch</title>
-        <meta name="description" content="Have questions about FitConnect? Contact our support team. We're here to help you find the perfect fitness coach." />
+        <title>{t("contact.meta.title")}</title>
+        <meta name="description" content={t("contact.meta.description")} />
       </Helmet>
       
       <div className="min-h-screen bg-background relative">
@@ -110,13 +112,13 @@ const Contact = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
           <div className="container mx-auto text-center relative z-10">
             <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
-              Get in Touch
+              {t("contact.hero.badge")}
             </Badge>
             <h1 className="font-display text-4xl md:text-6xl font-bold mb-6">
-              Contact <span className="text-gradient-primary">Us</span>
+              {t("contact.hero.titleStart")} <span className="text-gradient-primary">{t("contact.hero.titleHighlight")}</span>
             </h1>
             <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto">
-              Have a question or need help? We're here for you. Send us a message and we'll get back to you as soon as possible.
+              {t("contact.hero.description")}
             </p>
           </div>
         </section>
@@ -149,27 +151,27 @@ const Contact = () => {
               <div className="lg:col-span-2">
                 <Card className="border-border/50">
                   <CardHeader>
-                    <CardTitle className="font-display text-2xl">Send us a Message</CardTitle>
+                    <CardTitle className="font-display text-2xl">{t("contact.form.title")}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-6">
                       <div className="grid md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="name">Your Name</Label>
+                          <Label htmlFor="name">{t("contact.form.name")}</Label>
                           <Input
                             id="name"
-                            placeholder="John Doe"
+                            placeholder={t("contact.form.namePlaceholder")}
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                             required
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="email">Email Address</Label>
+                          <Label htmlFor="email">{t("contact.form.email")}</Label>
                           <Input
                             id="email"
                             type="email"
-                            placeholder="john@example.com"
+                            placeholder={t("contact.form.emailPlaceholder")}
                             value={formData.email}
                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                             required
@@ -177,20 +179,20 @@ const Contact = () => {
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="subject">Subject</Label>
+                        <Label htmlFor="subject">{t("contact.form.subject")}</Label>
                         <Input
                           id="subject"
-                          placeholder="How can we help?"
+                          placeholder={t("contact.form.subjectPlaceholder")}
                           value={formData.subject}
                           onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                           required
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="message">Message</Label>
+                        <Label htmlFor="message">{t("contact.form.message")}</Label>
                         <Textarea
                           id="message"
-                          placeholder="Tell us more about your enquiry..."
+                          placeholder={t("contact.form.messagePlaceholder")}
                           rows={6}
                           value={formData.message}
                           onChange={(e) => setFormData({ ...formData, message: e.target.value })}
@@ -203,10 +205,10 @@ const Contact = () => {
                         disabled={isSubmitting}
                       >
                         {isSubmitting ? (
-                          "Sending..."
+                          t("contact.form.sending")
                         ) : (
                           <>
-                            Send Message <Send className="ml-2 w-4 h-4" />
+                            {t("contact.form.send")} <Send className="ml-2 w-4 h-4" />
                           </>
                         )}
                       </Button>
@@ -222,7 +224,7 @@ const Contact = () => {
                   <CardHeader>
                     <CardTitle className="font-display text-lg flex items-center gap-2">
                       <HelpCircle className="w-5 h-5 text-primary" />
-                      Quick Answers
+                      {t("contact.quickAnswers")}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
@@ -241,7 +243,7 @@ const Contact = () => {
                 {/* Social Links */}
                 <Card className="border-border/50">
                   <CardHeader>
-                    <CardTitle className="font-display text-lg">Follow Us</CardTitle>
+                    <CardTitle className="font-display text-lg">{t("contact.followUs")}</CardTitle>
                   </CardHeader>
                   <CardContent>
                 <SocialLinks iconSize="w-5 h-5" className="gap-3" />

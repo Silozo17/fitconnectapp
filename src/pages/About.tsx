@@ -5,65 +5,68 @@ import { GradientButton } from "@/components/ui/gradient-button";
 import { Link } from "react-router-dom";
 import { Award, Users, Heart, Target, TrendingUp, Shield, Sparkles, Globe } from "lucide-react";
 import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
+import { useTranslation } from "react-i18next";
 
 const About = () => {
+  const { t } = useTranslation("pages");
+
   const values = [
     {
       icon: Award,
-      title: "Excellence",
-      description: "We partner only with verified, top-tier coaches who have proven track records of transforming lives."
+      title: t("about.values.excellence.title"),
+      description: t("about.values.excellence.description")
     },
     {
       icon: Users,
-      title: "Accessibility",
-      description: "Fitness coaching for every budget and schedule. Everyone deserves access to expert guidance."
+      title: t("about.values.accessibility.title"),
+      description: t("about.values.accessibility.description")
     },
     {
       icon: Heart,
-      title: "Community",
-      description: "Building meaningful connections that motivate, inspire, and support your fitness journey."
+      title: t("about.values.community.title"),
+      description: t("about.values.community.description")
     },
     {
       icon: Target,
-      title: "Results",
-      description: "Data-driven approach focused on measurable outcomes and sustainable transformation."
+      title: t("about.values.results.title"),
+      description: t("about.values.results.description")
     }
   ];
 
   const stats = [
-    { value: "10K+", label: "Active Users" },
-    { value: "500+", label: "Expert Coaches" },
-    { value: "50K+", label: "Sessions Completed" },
-    { value: "98%", label: "Satisfaction Rate" }
+    { value: "10K+", label: t("about.stats.activeUsers") },
+    { value: "500+", label: t("about.stats.expertCoaches") },
+    { value: "50K+", label: t("about.stats.sessionsCompleted") },
+    { value: "98%", label: t("about.stats.satisfactionRate") }
   ];
 
   const team = [
     {
       name: "Sarah Mitchell",
-      role: "CEO & Co-Founder",
-      bio: "Former Olympic athlete with 15 years in fitness industry"
+      role: t("about.team.sarah.role"),
+      bio: t("about.team.sarah.bio")
     },
     {
       name: "Marcus Chen",
-      role: "CTO & Co-Founder",
-      bio: "Tech entrepreneur passionate about health innovation"
+      role: t("about.team.marcus.role"),
+      bio: t("about.team.marcus.bio")
     },
     {
       name: "Dr. Emily Rodriguez",
-      role: "Head of Coach Success",
-      bio: "Sports psychologist and certified strength coach"
+      role: t("about.team.emily.role"),
+      bio: t("about.team.emily.bio")
     },
     {
       name: "James Okonkwo",
-      role: "Head of Community",
-      bio: "Former personal trainer with 10K+ client sessions"
+      role: t("about.team.james.role"),
+      bio: t("about.team.james.bio")
     }
   ];
 
   return (
     <PageLayout
-      title="About Us"
-      description="Learn about FitConnect's mission to make personalized fitness coaching accessible to everyone. Meet our team and discover our story."
+      title={t("about.meta.title")}
+      description={t("about.meta.description")}
     >
       {/* Decorative Avatars */}
       <DecorativeAvatar 
@@ -90,17 +93,16 @@ const About = () => {
         
         <div className="container mx-auto px-4 text-center">
           <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary font-medium text-sm mb-6">
-            Our Story
+            {t("about.hero.badge")}
           </span>
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Transforming Lives Through{" "}
+            {t("about.hero.titleStart")}{" "}
             <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-              Expert Coaching
+              {t("about.hero.titleHighlight")}
             </span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            We believe everyone deserves access to world-class fitness coaching. 
-            FitConnect bridges the gap between ambitious individuals and the coaches who can help them achieve their dreams.
+            {t("about.hero.description")}
           </p>
         </div>
       </section>
@@ -111,26 +113,15 @@ const About = () => {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                How It All{" "}
+                {t("about.story.titleStart")}{" "}
                 <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  Started
+                  {t("about.story.titleHighlight")}
                 </span>
               </h2>
               <div className="space-y-4 text-muted-foreground">
-                <p>
-                  Founded in 2024, FitConnect was born from a simple observation: while incredible fitness coaches exist everywhere, 
-                  finding the right match remains frustratingly difficult for most people.
-                </p>
-                <p>
-                  Our founders, Sarah and Marcus, experienced this firsthand. Sarah, a former Olympic athlete turned coach, 
-                  struggled to reach clients beyond her local gym. Marcus, a busy tech entrepreneur, couldn't find a coach 
-                  who understood his schedule constraints and specific goals.
-                </p>
-                <p>
-                  Together, they built FitConnect—a platform that uses smart matching technology to connect clients with 
-                  coaches who truly fit their needs, whether that's a nutritionist for meal planning, a personal trainer 
-                  for strength goals, or a boxing coach for stress relief.
-                </p>
+                <p>{t("about.story.paragraph1")}</p>
+                <p>{t("about.story.paragraph2")}</p>
+                <p>{t("about.story.paragraph3")}</p>
               </div>
             </div>
             <div className="relative">
@@ -138,9 +129,9 @@ const About = () => {
                 <div className="text-center p-8">
                   <Sparkles className="w-16 h-16 text-primary mx-auto mb-4" />
                   <p className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                    Est. 2024
+                    {t("about.story.established")}
                   </p>
-                  <p className="text-muted-foreground">San Francisco, CA</p>
+                  <p className="text-muted-foreground">{t("about.story.location")}</p>
                 </div>
               </div>
               <BlobShape className="absolute -bottom-10 -right-10 w-40 h-40 opacity-50" variant="orange" />
@@ -154,13 +145,13 @@ const About = () => {
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-4xl mx-auto">
             <Globe className="w-16 h-16 text-primary mx-auto mb-6" />
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">Our Mission</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">{t("about.mission.title")}</h2>
             <p className="text-2xl text-muted-foreground leading-relaxed">
-              "To make personalized fitness coaching{" "}
+              "{t("about.mission.quoteStart")}{" "}
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent font-semibold">
-                accessible, affordable, and effective
+                {t("about.mission.quoteHighlight")}
               </span>{" "}
-              for everyone, regardless of location, budget, or experience level."
+              {t("about.mission.quoteEnd")}"
             </p>
           </div>
         </div>
@@ -171,13 +162,13 @@ const About = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Our{" "}
+              {t("about.valuesSection.titleStart")}{" "}
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Core Values
+                {t("about.valuesSection.titleHighlight")}
               </span>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              These principles guide everything we do at FitConnect
+              {t("about.valuesSection.description")}
             </p>
           </div>
           
@@ -222,13 +213,13 @@ const About = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Meet Our{" "}
+              {t("about.teamSection.titleStart")}{" "}
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Leadership
+                {t("about.teamSection.titleHighlight")}
               </span>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Passionate experts dedicated to revolutionizing fitness coaching
+              {t("about.teamSection.description")}
             </p>
           </div>
           
@@ -262,28 +253,26 @@ const About = () => {
                     <Shield className="w-16 h-16 text-primary" />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold mb-4">Your Trust, Our Priority</h3>
+                    <h3 className="text-2xl font-bold mb-4">{t("about.trust.title")}</h3>
                     <p className="text-muted-foreground mb-4">
-                      Every coach on FitConnect undergoes rigorous verification including credential checks, 
-                      background screening, and ongoing performance monitoring. We maintain the highest standards 
-                      so you can focus on what matters—your fitness journey.
+                      {t("about.trust.description")}
                     </p>
                     <ul className="space-y-2 text-muted-foreground">
                       <li className="flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                        Verified certifications and credentials
+                        {t("about.trust.items.credentials")}
                       </li>
                       <li className="flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                        Comprehensive background checks
+                        {t("about.trust.items.background")}
                       </li>
                       <li className="flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                        Ongoing quality monitoring and reviews
+                        {t("about.trust.items.quality")}
                       </li>
                       <li className="flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                        Secure payment and data protection
+                        {t("about.trust.items.security")}
                       </li>
                     </ul>
                   </div>
@@ -298,21 +287,20 @@ const About = () => {
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Join the FitConnect{" "}
+            {t("about.cta.titleStart")}{" "}
             <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Community
+              {t("about.cta.titleHighlight")}
             </span>
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
-            Whether you're looking to transform your body, improve your health, or grow your coaching business, 
-            FitConnect is here to help you succeed.
+            {t("about.cta.description")}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/coaches">
-              <GradientButton size="lg">Find Your Coach</GradientButton>
+              <GradientButton size="lg">{t("about.cta.findCoach")}</GradientButton>
             </Link>
             <Link to="/for-coaches">
-              <GradientButton size="lg" variant="outline">Become a Coach</GradientButton>
+              <GradientButton size="lg" variant="outline">{t("about.cta.becomeCoach")}</GradientButton>
             </Link>
           </div>
         </div>
