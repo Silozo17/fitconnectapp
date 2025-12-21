@@ -1,4 +1,15 @@
 {
+  "celebration": {
+    "congratulations": "Congratulations!",
+    "challengeComplete": "Challenge Completed!",
+    "youCompleted": "You completed \"{{title}}\"",
+    "xpEarned": "+{{xp}} XP",
+    "badgeUnlocked": "Badge Unlocked!",
+    "avatarUnlocked": "Avatar Unlocked!",
+    "levelUp": "Level Up!",
+    "reachedLevel": "You reached Level {{level}}",
+    "tapToDismiss": "Tap to dismiss"
+  },
   "xp": {
     "level": "Level",
     "totalXp": "Total XP",

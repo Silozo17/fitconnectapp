@@ -10,6 +10,8 @@ import { AdminProvider } from "@/contexts/AdminContext";
 import { LocaleProvider } from "@/contexts/LocaleContext";
 import { LocaleRoutingProvider } from "@/contexts/LocaleRoutingContext";
 import { CookieConsentProvider } from "@/contexts/CookieConsentContext";
+import { CelebrationProvider } from "@/contexts/CelebrationContext";
+import { CelebrationListeners } from "@/components/gamification/CelebrationListeners";
 import { CountryProvider } from "@/contexts/CountryContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import GuestOnlyRoute from "@/components/auth/GuestOnlyRoute";
@@ -202,6 +204,8 @@ const App = () => (
             <CookieConsentBanner />
             <CountryProvider>
               <AuthProvider>
+                <CelebrationProvider>
+                  <CelebrationListeners />
                 <AdminProvider>
                   <LocaleProvider>
                     <LocaleRoutingProvider>
@@ -662,6 +666,7 @@ const App = () => (
                     </LocaleRoutingProvider>
                   </LocaleProvider>
                 </AdminProvider>
+                </CelebrationProvider>
               </AuthProvider>
             </CountryProvider>
           </CookieConsentProvider>
