@@ -27,12 +27,13 @@ export function ShareButton({
   className = ''
 }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
-  const { share, shouldShowNativeButton, isDespia } = useShareManager();
+  const { share, triggerNativeShare, shouldShowNativeButton, isDespia } = useShareManager();
 
   const shareOptions: ShareOptions = { title, text, url };
 
-  const handleNativeShare = async () => {
-    await share('native', shareOptions);
+  // Synchronous handler - preserves user gesture for Safari iOS
+  const handleNativeShare = () => {
+    triggerNativeShare(shareOptions);
   };
 
   const handleShare = async (platform: 'twitter' | 'facebook' | 'linkedin' | 'whatsapp' | 'email' | 'copy') => {
