@@ -30,6 +30,7 @@ export function useCoachProfileRealtime() {
           queryClient.invalidateQueries({ queryKey: ["coach-profile", user.id] });
           queryClient.invalidateQueries({ queryKey: ["coach-onboarding-status", user.id] });
           queryClient.invalidateQueries({ queryKey: ["coach-clients"] });
+          queryClient.invalidateQueries({ queryKey: ["coach-profile-completion", user.id] });
         }
       )
       .subscribe();
