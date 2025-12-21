@@ -22,6 +22,7 @@ import { BulkActionBar } from "@/components/admin/BulkActionBar";
 import { useAdminTeamManagement } from "@/hooks/useAdminTeamManagement";
 import { AdminTeamCard } from "@/components/admin/AdminTeamCard";
 import { logError } from "@/lib/error-utils";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface TeamMember {
   id: string;
@@ -38,6 +39,7 @@ interface TeamMember {
 }
 
 const AdminTeam = () => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -337,7 +339,7 @@ const AdminTeam = () => {
               </div>
             ) : filteredMembers.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                No team members found
+                {t('empty.noTeamMembers')}
               </div>
             ) : (
               <>

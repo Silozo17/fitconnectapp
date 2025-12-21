@@ -36,6 +36,7 @@ import { useLogAdminAction } from "@/hooks/useAuditLog";
 import { arrayToCSV, downloadCSV, formatDateForCSV, formatArrayForCSV, generateExportFilename } from "@/lib/csv-export";
 import { getErrorMessage, logError } from "@/lib/error-utils";
 import { getDisplayLocation } from "@/lib/location-utils";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface CoachUser {
   id: string;
@@ -59,6 +60,7 @@ interface CoachUser {
 }
 
 const AdminCoaches = () => {
+  const { t } = useTranslation();
   const [coaches, setCoaches] = useState<CoachUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -404,9 +406,9 @@ const AdminCoaches = () => {
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div className="text-center py-8 text-muted-foreground">Loading coaches...</div>
+              <div className="text-center py-8 text-muted-foreground">{t('loading.coaches')}</div>
             ) : filteredCoaches.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">No coaches found</div>
+              <div className="text-center py-8 text-muted-foreground">{t('empty.noCoaches')}</div>
             ) : (
               <>
                 {/* Mobile Card View */}

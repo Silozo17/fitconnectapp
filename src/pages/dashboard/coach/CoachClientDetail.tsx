@@ -41,8 +41,10 @@ import {
   useCoachProfile
 } from "@/hooks/useCoachClients";
 import { format } from "date-fns";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const CoachClientDetail = () => {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -167,7 +169,7 @@ const CoachClientDetail = () => {
 
   if (isLoading) {
     return (
-      <DashboardLayout title="Client Details" description="Loading...">
+      <DashboardLayout title="Client Details" description={t('loading.default')}>
         <div className="flex items-center justify-center p-12">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>

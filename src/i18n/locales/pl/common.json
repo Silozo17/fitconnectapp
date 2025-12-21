@@ -137,7 +137,11 @@
     "creating": "Tworzenie...",
     "preparing": "Przygotowywanie...",
     "pleaseWait": "Proszę czekać...",
-    "loadingPage": "Ładowanie"
+    "loadingPage": "Ładowanie",
+    "coaches": "Ładowanie trenerów...",
+    "foods": "Ładowanie produktów...",
+    "cities": "Ładowanie miast...",
+    "exercises": "Ładowanie ćwiczeń..."
   },
   "empty": {
     "noResults": "Brak wyników",
@@ -146,7 +150,22 @@
     "noItems": "Brak elementów do wyświetlenia",
     "noMatches": "Nie znaleziono dopasowań",
     "tryAdjusting": "Spróbuj dostosować wyszukiwanie lub filtry",
-    "getStarted": "Rozpocznij dodając swój pierwszy element"
+    "getStarted": "Rozpocznij dodając swój pierwszy element",
+    "noCoaches": "Nie znaleziono trenerów",
+    "noExercises": "Nie znaleziono ćwiczeń",
+    "noFoods": "Nie znaleziono produktów",
+    "noCities": "Nie znaleziono miast",
+    "noUsers": "Nie znaleziono użytkowników",
+    "noUsersMatching": "Nie znaleziono użytkowników pasujących do \"{{query}}\"",
+    "noContent": "Nie znaleziono treści",
+    "noPosts": "Nie znaleziono postów",
+    "noParticipants": "Nie znaleziono uczestników dla tego filtra",
+    "noTeamMembers": "Nie znaleziono członków zespołu",
+    "noWorkoutPlans": "Nie znaleziono planów treningowych. Stwórz swój pierwszy!",
+    "noNutritionPlans": "Nie znaleziono planów żywieniowych. Stwórz swój pierwszy!",
+    "noProducts": "Brak produktów",
+    "noGroupClasses": "Brak zajęć grupowych",
+    "noBundles": "Brak pakietów"
   },
   "form": {
     "required": "Wymagane",

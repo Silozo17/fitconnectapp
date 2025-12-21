@@ -10,9 +10,11 @@ import PageLayout from "@/components/layout/PageLayout";
 import { useMarketplaceProducts, useMarketplaceBundles, useFeaturedProducts, CONTENT_CATEGORIES, CONTENT_TYPES } from "@/hooks/useDigitalProducts";
 import ProductCard from "@/components/marketplace/ProductCard";
 import BundleCard from "@/components/marketplace/BundleCard";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function Marketplace() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [contentType, setContentType] = useState("all");
@@ -165,9 +167,9 @@ export default function Marketplace() {
                 ) : (
                   <div className="text-center py-16">
                     <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">No content found</h3>
+                    <h3 className="text-xl font-semibold mb-2">{t('empty.noContent')}</h3>
                     <p className="text-muted-foreground">
-                      Try adjusting your filters or search terms
+                      {t('empty.tryAdjusting')}
                     </p>
                   </div>
                 )}
@@ -210,9 +212,9 @@ export default function Marketplace() {
                 ) : (
                   <div className="text-center py-16">
                     <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">No bundles available</h3>
+                    <h3 className="text-xl font-semibold mb-2">{t('empty.noBundles')}</h3>
                     <p className="text-muted-foreground">
-                      Bundles offer great value with multiple products
+                      {t('empty.tryAdjusting')}
                     </p>
                   </div>
                 )}

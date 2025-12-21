@@ -499,7 +499,7 @@ const AdminUsers = () => {
                 Loading users...
               </div>
             ) : filteredUsers.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">No users found</div>
+              <div className="text-center py-8 text-muted-foreground">{t('admin.noUsersFound', { defaultValue: 'No users found' })}</div>
             ) : (
               <>
                 {/* Mobile Card View */}
