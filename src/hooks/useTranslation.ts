@@ -1,37 +1,89 @@
 import { useTranslation as useI18nTranslation } from 'react-i18next';
 
+const isDev = import.meta.env.DEV;
+
+/**
+ * Checks if a translation result is an unresolved key (raw key string).
+ * i18next returns the key itself when no translation is found.
+ */
+function isUnresolvedKey(key: string, result: string): boolean {
+  // If the result equals the key exactly, it's likely unresolved
+  // Also check for common patterns like "namespace.key.subkey"
+  return result === key || (result.includes('.') && !result.includes(' ') && result.split('.').length >= 2);
+}
+
+/**
+ * Creates a safe translation function that:
+ * - Logs warnings in development for missing keys
+ * - Falls back to English in production
+ * - Never renders raw key strings to users
+ */
+function createSafeT(t: ReturnType<typeof useI18nTranslation>['t'], i18n: any, namespace: string) {
+  return ((key: string, options?: any) => {
+    const result = t(key, options);
+    
+    // If result is not a string (e.g., object for plurals), return as-is
+    if (typeof result !== 'string') {
+      return result;
+    }
+    
+    // Check if this looks like an unresolved key
+    if (isUnresolvedKey(key, result)) {
+      const fullKey = key.includes('.') ? key : `${namespace}.${key}`;
+      
+      if (isDev) {
+        console.warn(
+          `[i18n] Missing translation key: "${fullKey}" for language "${i18n.language}". ` +
+          `Add this key to src/i18n/locales/${i18n.language}/${namespace}.json`
+        );
+      }
+      
+      // Try to get English fallback
+      const englishResult = i18n.getFixedT('en', namespace)(key, options);
+      
+      if (typeof englishResult === 'string' && !isUnresolvedKey(key, englishResult)) {
+        return englishResult;
+      }
+      
+      // Last resort: return empty string or a user-friendly placeholder
+      // This prevents raw keys from ever showing to users
+      if (isDev) {
+        // In dev, show a visible indicator that translation is missing
+        return `[${key}]`;
+      }
+      
+      // In production, return empty string to avoid showing raw keys
+      return '';
+    }
+    
+    return result;
+  }) as ReturnType<typeof useI18nTranslation>['t'];
+}
+
 /**
  * Custom translation hook that wraps react-i18next's useTranslation
- * with project-specific defaults and type safety.
+ * with project-specific defaults, type safety, and missing key protection.
  * 
- * STATUS: Production-ready but NOT currently used
- * 
- * This hook is safe to import anywhere, but is intentionally not being used
- * to render UI text yet. All user-facing strings are currently hardcoded
- * in English throughout the application.
- * 
- * CURRENT STATE:
- * - The hook works correctly and can be imported safely
- * - Calling t('key') will return the key string if no translation exists
- * - Fallback to English is guaranteed via i18n configuration
- * - String extraction has NOT been performed on components
- * 
- * WHEN TO USE:
- * - Do NOT use this hook until string extraction is prioritised
- * - When ready, replace hardcoded text with: {t('namespace.key')}
+ * FEATURES:
+ * - Logs warnings in development when translation keys are missing
+ * - Falls back to English if the current language lacks a translation
+ * - Never renders raw key strings (e.g., "common.save") to users
+ * - Returns empty string in production for completely missing keys
  * 
  * @example
- * // Future usage (not implemented yet):
- * const { t } = useTranslation();
- * <span>{t('common.save')}</span>
+ * const { t } = useTranslation('pages');
+ * <span>{t('successStories.hero.title')}</span>
  * 
- * @see src/i18n/index.ts - Main i18n configuration with full documentation
+ * @see src/i18n/index.ts - Main i18n configuration
  */
 export function useTranslation(namespace: string = 'common') {
   const { t, i18n, ready } = useI18nTranslation(namespace);
 
+  // Wrap t function with safety checks
+  const safeT = createSafeT(t, i18n, namespace);
+
   return {
-    t,
+    t: safeT,
     i18n,
     ready,
     currentLanguage: i18n.language,
