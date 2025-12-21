@@ -15,21 +15,22 @@ import i18n from '@/i18n';
 
 /**
  * Wrapper component for locale-prefixed routes.
- * Parses /:locale param (e.g., "en-gb") and sets language/location contexts.
+ * Parses /:locale param (e.g., "gb-en") and sets language/location contexts.
+ * Format: /{location}-{language}/ where location = country, language = i18n
  */
 export function LocaleRouteWrapper() {
   const { locale } = useParams<{ locale: string }>();
   const { setCurrency, setLocale } = useLocale();
   const [isI18nReady, setIsI18nReady] = useState(false);
   
-  // Parse the locale param (e.g., "en-gb" -> { lang: "en", loc: "gb" })
+  // Parse the locale param (e.g., "gb-en" -> { loc: "gb", lang: "en" })
   const parsedLocale = useMemo(() => {
     if (!locale) return null;
     
     const match = locale.match(/^([a-z]{2})-([a-z]{2})$/);
     if (!match) return null;
     
-    const [, lang, loc] = match;
+    const [, loc, lang] = match; // Location first, then language
     if (!isValidLanguage(lang) || !isValidLocation(loc)) return null;
     
     return {
