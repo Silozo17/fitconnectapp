@@ -23,10 +23,8 @@ import { CookieConsentBanner } from "./components/shared/CookieConsentBanner";
 import { ErrorBoundary } from "./components/shared/ErrorBoundary";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
-// Dev-only debug panel
-const LocaleDebugPanel = import.meta.env.DEV 
-  ? require('./components/dev/LocaleDebugPanel').LocaleDebugPanel 
-  : () => null;
+// Dev-only debug panel (lazy loaded)
+const LocaleDebugPanel = lazy(() => import('./components/dev/LocaleDebugPanel').then(m => ({ default: m.LocaleDebugPanel })));
 import PageLoadingSpinner from "@/components/shared/PageLoadingSpinner";
 
 // Layout wrapper for app routes (provides AppLocaleProvider)
@@ -185,7 +183,7 @@ const queryClient = new QueryClient({
 
 const App = () => (
   <ErrorBoundary>
-    {import.meta.env.DEV && <LocaleDebugPanel />}
+    {import.meta.env.DEV && <Suspense fallback={null}><LocaleDebugPanel /></Suspense>}
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
