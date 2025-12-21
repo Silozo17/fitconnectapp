@@ -15,16 +15,42 @@ export type WebSharePlatform = 'web-native' | 'twitter' | 'facebook' | 'linkedin
 
 /**
  * Check if Web Share API is available (browser-only, no Despia check)
+ * Uses strict feature detection for Safari iOS compatibility
  */
 export function canUseWebShare(): boolean {
-  return typeof navigator !== 'undefined' && !!navigator.share;
+  return typeof navigator !== 'undefined' && 'share' in navigator;
 }
 
 /**
- * Share using Web Share API only
+ * SYNCHRONOUS Web Share - must be called directly from click handler
+ * This preserves the user gesture context required by Safari iOS
+ * Returns void because it must not be awaited in the call chain
+ */
+export function triggerWebShare(options: ShareOptions): void {
+  if (!('share' in navigator)) {
+    console.warn('Web Share API not supported');
+    return;
+  }
+  
+  // Call navigator.share() directly - DO NOT await
+  // The promise is handled internally to preserve user gesture
+  navigator.share({
+    title: options.title,
+    text: options.text,
+    url: options.url,
+  }).catch((error) => {
+    if (error.name !== 'AbortError') {
+      console.error('Web share failed:', error);
+    }
+  });
+}
+
+/**
+ * Share using Web Share API only (async version for compatibility)
+ * NOTE: Prefer triggerWebShare() for direct click handlers on Safari iOS
  */
 export async function shareWebNative(options: ShareOptions): Promise<boolean> {
-  if (!canUseWebShare()) return false;
+  if (!('share' in navigator)) return false;
   
   try {
     await navigator.share({

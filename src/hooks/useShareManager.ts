@@ -7,7 +7,8 @@
 import { useEnvironment } from './useEnvironment';
 import { 
   shareWeb, 
-  canUseWebShare, 
+  canUseWebShare,
+  triggerWebShare,
   type ShareOptions, 
   type WebSharePlatform 
 } from '@/lib/share.web';
@@ -57,8 +58,22 @@ export function useShareManager() {
     return isDespia || canUseWebShare();
   };
   
+  /**
+   * SYNCHRONOUS share trigger for native sharing
+   * MUST be called directly from click handler, not in async chain
+   * This preserves user gesture context required by Safari iOS
+   */
+  const triggerNativeShare = (options: ShareOptions): void => {
+    if (isDespia) {
+      shareNative(options);
+      return;
+    }
+    triggerWebShare(options);
+  };
+  
   return {
     share,
+    triggerNativeShare,
     canShare,
     shouldShowNativeButton,
     isDespia,

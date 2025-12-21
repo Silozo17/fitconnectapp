@@ -31,7 +31,7 @@ export function ShareAchievementButton({
 }: ShareAchievementButtonProps) {
   const { t } = useTranslation('gamification');
   const [copied, setCopied] = useState(false);
-  const { share, shouldShowNativeButton, isDespia } = useShareManager();
+  const { share, triggerNativeShare, shouldShowNativeButton, isDespia } = useShareManager();
 
   const getShareText = () => {
     switch (achievement.type) {
@@ -54,8 +54,9 @@ export function ShareAchievementButton({
     url: window.location.origin,
   };
 
-  const handleNativeShare = async () => {
-    await share('native', shareOptions);
+  // Synchronous handler - preserves user gesture for Safari iOS
+  const handleNativeShare = () => {
+    triggerNativeShare(shareOptions);
   };
 
   const handleShare = async (platform: 'twitter' | 'facebook' | 'linkedin' | 'whatsapp' | 'email' | 'copy') => {
