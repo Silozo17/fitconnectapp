@@ -96,7 +96,7 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
           <img src={coach.card_image_url || coach.profile_image_url || ""} alt={coach.display_name || "Coach"} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         ) : coach.avatars?.slug ? (
           // Priority 2: Selected character avatar displayed full-width
-        <div className="w-full h-full flex items-start justify-center pt-[3px] overflow-hidden bg-gradient-to-br from-cyan-400 via-emerald-400 to-lime-400">
+        <div className="w-full h-full flex items-start justify-center pt-0 overflow-hidden bg-gradient-to-br from-cyan-400 via-emerald-400 to-lime-400">
             <img 
               src={getAvatarImageUrl(coach.avatars.slug)} 
               alt={coach.display_name || "Coach"} 
