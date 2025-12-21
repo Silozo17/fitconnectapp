@@ -1,19 +1,19 @@
 import React, { createContext, useContext, useEffect, ReactNode } from 'react';
 import { useLocale } from './LocaleContext';
+import { useUserLocalePreference } from '@/hooks/useUserLocalePreference';
 import {
   RouteLanguageCode,
   RouteLocationCode,
-  DEFAULT_ROUTE_LOCALE,
   LOCATION_TO_CURRENCY,
   LOCATION_TO_DATE_LOCALE,
   LANGUAGE_TO_I18N,
-  getStoredLocalePreference,
 } from '@/lib/locale-routing';
 import i18n from '@/i18n';
 
 interface AppLocaleContextType {
   language: RouteLanguageCode;
   location: RouteLocationCode;
+  isLoading: boolean;
 }
 
 const AppLocaleContext = createContext<AppLocaleContextType | undefined>(undefined);
@@ -23,17 +23,16 @@ interface AppLocaleProviderProps {
 }
 
 /**
- * Simplified locale provider for app routes (dashboard, onboarding, etc.)
- * Reads language/location ONLY from stored preferences - no URL involvement.
- * This ensures dashboard routes never read or write locale to URLs.
+ * Locale provider for app routes (dashboard, onboarding, etc.)
+ * Uses DB-backed preferences for authenticated users.
+ * No URL involvement - preferences are stored in user_profiles table.
  */
 export function AppLocaleProvider({ children }: AppLocaleProviderProps) {
   const { setCurrency, setLocale } = useLocale();
+  const userLocale = useUserLocalePreference();
   
-  // Read from storage only - no URL involvement
-  const stored = getStoredLocalePreference();
-  const language = stored?.language ?? DEFAULT_ROUTE_LOCALE.language;
-  const location = stored?.location ?? DEFAULT_ROUTE_LOCALE.location;
+  const language = userLocale.languagePreference;
+  const location = userLocale.countryPreference;
   
   // Sync currency and date locale when location changes
   useEffect(() => {
@@ -55,6 +54,7 @@ export function AppLocaleProvider({ children }: AppLocaleProviderProps) {
   const value: AppLocaleContextType = {
     language,
     location,
+    isLoading: userLocale.isLoading,
   };
   
   return (

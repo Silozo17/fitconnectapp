@@ -3,6 +3,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Globe } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useUserLocalePreference } from "@/hooks/useUserLocalePreference";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   SUPPORTED_LANGUAGES,
   DEV_LANGUAGES,
@@ -11,6 +13,7 @@ import {
   DEFAULT_LANGUAGE, 
   type LanguageCode 
 } from "@/i18n";
+import { RouteLanguageCode } from "@/lib/locale-routing";
 
 // Languages that will be available in future releases (not yet translated)
 const comingSoonLanguages = [
@@ -23,6 +26,8 @@ const isDev = import.meta.env.DEV;
 const LanguageSelector = () => {
   const { currentLanguage, changeLanguage, t } = useTranslation('settings');
   const { t: tCommon } = useTranslation('common');
+  const { user } = useAuth();
+  const userLocale = useUserLocalePreference();
 
   const handleLanguageChange = (languageCode: string) => {
     // Validate against available languages (include dev languages in dev mode)
@@ -42,6 +47,15 @@ const LanguageSelector = () => {
     
     // Change i18n language
     changeLanguage(languageCode as LanguageCode);
+
+    // If user is authenticated, also update DB preference
+    if (user) {
+      // Map i18n language code to RouteLanguageCode
+      const routeLanguage = languageCode as RouteLanguageCode;
+      if (routeLanguage === 'en' || routeLanguage === 'pl') {
+        userLocale.updateLanguage(routeLanguage);
+      }
+    }
   };
 
   return (
