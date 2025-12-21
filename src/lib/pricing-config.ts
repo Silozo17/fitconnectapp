@@ -197,3 +197,60 @@ export function isSupportedPricingCountry(countryCode: string | null | undefined
   const normalized = countryCode?.toUpperCase();
   return normalized === 'GB' || normalized === 'PL';
 }
+
+/**
+ * ActivePricing - Complete pricing object for a country.
+ * Returns everything needed for pricing display in one object.
+ * Use this as the primary interface for all pricing needs.
+ */
+export interface ActivePricing {
+  country: PricingCountry;
+  currency: PricingCurrency;
+  currencySymbol: string;
+  locale: string;
+  
+  // Stripe Price IDs
+  stripePriceIds: {
+    subscriptions: Record<SubscriptionTier, SubscriptionPriceIds>;
+    boost: string;
+  };
+  
+  // Display prices (already in correct currency - no conversion needed)
+  prices: {
+    subscriptions: Record<SubscriptionTier, SubscriptionPricing>;
+    boost: number;
+  };
+  
+  // Helper methods bound to this country
+  formatPrice: (amount: number) => string;
+  getSubscriptionPrice: (tier: SubscriptionTier, interval: BillingInterval) => number;
+  getSubscriptionPriceId: (tier: SubscriptionTier, interval: BillingInterval) => string;
+  getSubscriptionSavings: (tier: SubscriptionTier) => number;
+}
+
+/**
+ * Get complete pricing configuration for a country.
+ * This is the primary function for all pricing needs.
+ * Returns prices in the correct currency - NEVER use conversion.
+ */
+export function getActivePricing(countryCode: string | null | undefined): ActivePricing {
+  const config = getPricingConfig(countryCode);
+  
+  return {
+    country: config.country,
+    currency: config.currency,
+    currencySymbol: config.currencySymbol,
+    locale: config.locale,
+    stripePriceIds: config.stripePriceIds,
+    prices: config.pricing,
+    
+    // Bound helper methods
+    formatPrice: (amount: number) => formatPrice(amount, countryCode),
+    getSubscriptionPrice: (tier: SubscriptionTier, interval: BillingInterval) => 
+      config.pricing.subscriptions[tier][interval],
+    getSubscriptionPriceId: (tier: SubscriptionTier, interval: BillingInterval) => 
+      config.stripePriceIds.subscriptions[tier][interval],
+    getSubscriptionSavings: (tier: SubscriptionTier) => 
+      config.pricing.subscriptions[tier].savings,
+  };
+}

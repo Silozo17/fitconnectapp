@@ -11,23 +11,26 @@ import {
 } from "@/components/ui/accordion";
 import { FeatureGate } from "@/components/FeatureGate";
 import { useBoostSettings } from "@/hooks/useCoachBoost";
-import { formatCurrency, convertPlatformPriceForDisplay } from "@/lib/currency";
-import { useCountryContext } from "@/contexts/CountryContext";
+import { useActivePricing } from "@/hooks/useActivePricing";
 
 const CoachBoost = () => {
   const { data: settings } = useBoostSettings();
-  const { countryCode } = useCountryContext();
+  const pricing = useActivePricing();
   
-  // Currency conversion based on country
-  const convertForDisplay = (amountGBP: number) => convertPlatformPriceForDisplay(amountGBP, countryCode);
+  // Get boost price from pricing config (no conversion)
+  const boostPrice = pricing.prices.boost;
+  const formattedBoostPrice = pricing.formatPrice(boostPrice);
   
   const commissionPercent = settings ? Math.round(settings.commission_rate * 100) : 30;
-  const minFeeValue = settings ? settings.min_fee : 30;
-  const maxFeeValue = settings ? settings.max_fee : 100;
-  const minFeeConverted = convertForDisplay(minFeeValue);
-  const maxFeeConverted = convertForDisplay(maxFeeValue);
-  const minFee = formatCurrency(minFeeConverted.amount, minFeeConverted.currency);
-  const maxFee = formatCurrency(maxFeeConverted.amount, maxFeeConverted.currency);
+  const boostDuration = settings?.boost_duration_days || 30;
+  
+  // Calculate min/max fees using commission rate
+  const minFeeBase = settings?.min_fee || 30;
+  const maxFeeBase = settings?.max_fee || 100;
+  const minFee = pricing.formatPrice(minFeeBase);
+  const maxFee = pricing.formatPrice(maxFeeBase);
+  const minCommission = pricing.formatPrice(Math.round(minFeeBase * (settings?.commission_rate || 0.3)));
+  const maxCommission = pricing.formatPrice(Math.round(maxFeeBase * (settings?.commission_rate || 0.3)));
   
   return (
     <DashboardLayout>
@@ -66,7 +69,7 @@ const CoachBoost = () => {
                   </div>
                   <h3 className="font-semibold mb-1">Purchase Boost</h3>
                   <p className="text-sm text-muted-foreground">
-                    Pay {settings ? formatCurrency(convertForDisplay(settings.boost_price / 100).amount, convertForDisplay(settings.boost_price / 100).currency) : formatCurrency(convertForDisplay(5).amount, convertForDisplay(5).currency)} for {settings?.boost_duration_days || 30} days of priority visibility in search results.
+                    Pay {formattedBoostPrice} for {boostDuration} days of priority visibility in search results.
                   </p>
                 </div>
 
@@ -106,14 +109,14 @@ const CoachBoost = () => {
                 <AccordionItem value="item-1">
                   <AccordionTrigger>How much does Boost cost?</AccordionTrigger>
                   <AccordionContent>
-                    Boost costs {settings ? formatCurrency(convertForDisplay(settings.boost_price / 100).amount, convertForDisplay(settings.boost_price / 100).currency) : formatCurrency(convertForDisplay(5).amount, convertForDisplay(5).currency)} for {settings?.boost_duration_days || 30} days. This is a one-time payment with no auto-renewal. Additionally, when Boost brings you a NEW client, you pay {commissionPercent}% of their first session booking. Bookings under {minFee} are calculated at {minFee} (minimum fee: {settings ? formatCurrency(convertForDisplay(settings.min_fee * settings.commission_rate).amount, convertForDisplay(settings.min_fee * settings.commission_rate).currency) : formatCurrency(convertForDisplay(9).amount, convertForDisplay(9).currency)}). Bookings over {maxFee} are capped at {maxFee} (maximum fee: {settings ? formatCurrency(convertForDisplay(settings.max_fee * settings.commission_rate).amount, convertForDisplay(settings.max_fee * settings.commission_rate).currency) : formatCurrency(convertForDisplay(30).amount, convertForDisplay(30).currency)}).
+                    Boost costs {formattedBoostPrice} for {boostDuration} days. This is a one-time payment with no auto-renewal. Additionally, when Boost brings you a NEW client, you pay {commissionPercent}% of their first session booking. Bookings under {minFee} are calculated at {minFee} (minimum fee: {minCommission}). Bookings over {maxFee} are capped at {maxFee} (maximum fee: {maxCommission}).
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-2">
                   <AccordionTrigger>What happens after 30 days?</AccordionTrigger>
                   <AccordionContent>
-                    After {settings?.boost_duration_days || 30} days, your Boost expires and you'll return to normal search ranking. There's no auto-renewal - you'll need to purchase Boost again if you want to continue appearing first in results.
+                    After {boostDuration} days, your Boost expires and you'll return to normal search ranking. There's no auto-renewal - you'll need to purchase Boost again if you want to continue appearing first in results.
                   </AccordionContent>
                 </AccordionItem>
 
