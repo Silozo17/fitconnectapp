@@ -144,3 +144,39 @@ export function getCurrency(countryCode: string | null | undefined): PricingCurr
   const config = getPricingConfig(countryCode);
   return config.currency;
 }
+
+/**
+ * ActivePricing - Complete pricing object for a country.
+ * Use this as the primary interface for all pricing needs in edge functions.
+ */
+export interface ActivePricing {
+  country: PricingCountry;
+  currency: PricingCurrency;
+  currencySymbol: string;
+  locale: string;
+  stripePriceIds: {
+    subscriptions: Record<SubscriptionTier, SubscriptionPriceIds>;
+    boost: string;
+  };
+  prices: {
+    subscriptions: Record<SubscriptionTier, SubscriptionPricing>;
+    boost: number;
+  };
+}
+
+/**
+ * Get complete pricing configuration for a country.
+ * This is the primary function for all pricing needs in edge functions.
+ */
+export function getActivePricing(countryCode: string | null | undefined): ActivePricing {
+  const config = getPricingConfig(countryCode);
+  
+  return {
+    country: config.country,
+    currency: config.currency,
+    currencySymbol: config.currencySymbol,
+    locale: config.locale,
+    stripePriceIds: config.stripePriceIds,
+    prices: config.pricing,
+  };
+}
