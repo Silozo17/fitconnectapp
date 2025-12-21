@@ -942,5 +942,83 @@
     "confirmBulkDelete": "Czy na pewno chcesz usunąć {{count}} elementów?",
     "bulkActionSuccess": "Akcja zbiorcza zakończona pomyślnie",
     "bulkActionError": "Niektóre elementy nie zostały przetworzone"
+  },
+  "website": {
+    "nav": {
+      "findCoaches": "Znajdź trenerów",
+      "resources": "Zasoby",
+      "forCoaches": "Dla trenerów",
+      "community": "Społeczność",
+      "marketplace": "Sklep",
+      "logIn": "Zaloguj się",
+      "getStarted": "Rozpocznij",
+      "dashboard": "Panel",
+      "signOut": "Wyloguj się",
+      "openMenu": "Otwórz menu"
+    },
+    "coachTypes": {
+      "allCoaches": "Wszyscy trenerzy",
+      "allCoachesDesc": "Przeglądaj wszystkich profesjonalistów fitness",
+      "personalTrainers": "Trenerzy personalni",
+      "personalTrainersDesc": "Indywidualne programy treningowe",
+      "nutritionists": "Dietetycy",
+      "nutritionistsDesc": "Profesjonalne plany dietetyczne",
+      "boxingCoaches": "Trenerzy boksu",
+      "boxingCoachesDesc": "Naucz się szlachetnej sztuki boksu",
+      "mmaCoaches": "Trenerzy MMA",
+      "mmaCoachesDesc": "Trening sztuk walki mieszanych"
+    },
+    "resourceLinks": {
+      "howItWorks": "Jak to działa",
+      "howItWorksDesc": "Poznaj platformę",
+      "successStories": "Historie sukcesu",
+      "successStoriesDesc": "Prawdziwe transformacje klientów",
+      "faq": "FAQ",
+      "faqDesc": "Odpowiedzi na częste pytania"
+    },
+    "forCoachesLinks": {
+      "whyFitConnect": "Dlaczego FitConnect",
+      "whyFitConnectDesc": "Korzyści dla trenerów",
+      "pricingPlans": "Cennik i plany",
+      "pricingPlansDesc": "Poziomy subskrypcji platformy"
+    },
+    "footer": {
+      "brandDescription": "Połącz się z najlepszymi trenerami fitness i przekształć swoją drogę do zdrowia. Twoje cele, Twój sposób.",
+      "newsletterTitle": "Bądź na bieżąco",
+      "newsletterDescription": "Otrzymuj porady fitness, wyróżnienia trenerów i aktualizacje platformy na swoją skrzynkę.",
+      "emailPlaceholder": "Wpisz swój email",
+      "subscribeSuccess": "Dziękujemy za subskrypcję!",
+      "alreadySubscribed": "Już jesteś zapisany!",
+      "subscribeFailed": "Nie udało się zapisać. Spróbuj ponownie.",
+      "invalidEmail": "Wprowadź prawidłowy adres email",
+      "copyright": "© {{year}} FitConnect. Wszelkie prawa zastrzeżone.",
+      "madeWith": "Stworzone z pasją do fitnessu",
+      "sections": {
+        "findCoaches": "Znajdź trenerów",
+        "resources": "Zasoby",
+        "forCoaches": "Dla trenerów",
+        "legal": "Informacje prawne"
+      },
+      "links": {
+        "allCoaches": "Wszyscy trenerzy",
+        "personalTrainers": "Trenerzy personalni",
+        "nutritionists": "Dietetycy",
+        "boxingCoaches": "Trenerzy boksu",
+        "mmaCoaches": "Trenerzy MMA",
+        "howItWorks": "Jak to działa",
+        "successStories": "Historie sukcesu",
+        "blog": "Blog",
+        "community": "Społeczność",
+        "helpCenter": "Centrum pomocy",
+        "faq": "FAQ",
+        "marketplace": "Sklep",
+        "whyFitConnect": "Dlaczego FitConnect",
+        "pricingPlans": "Cennik i plany",
+        "contactUs": "Kontakt",
+        "aboutUs": "O nas",
+        "privacyPolicy": "Polityka prywatności",
+        "termsOfService": "Regulamin"
+      }
+    }
   }
 }

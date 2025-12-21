@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Dumbbell, Mail, ArrowRight, Zap } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,13 +10,14 @@ import { SocialLinks } from "@/components/shared/SocialLinks";
 import { FooterLocaleSelector } from "@/components/shared/FooterLocaleSelector";
 
 const Footer = () => {
+  const { t } = useTranslation("common");
   const [email, setEmail] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !email.includes("@")) {
-      toast.error("Please enter a valid email address");
+      toast.error(t("website.footer.invalidEmail"));
       return;
     }
 
@@ -27,48 +29,48 @@ const Footer = () => {
 
       if (error) {
         if (error.code === "23505") {
-          toast.info("You're already subscribed!");
+          toast.info(t("website.footer.alreadySubscribed"));
         } else {
           throw error;
         }
       } else {
-        toast.success("Thanks for subscribing!");
+        toast.success(t("website.footer.subscribeSuccess"));
         setEmail("");
       }
     } catch (error) {
       console.error("Newsletter error:", error);
-      toast.error("Failed to subscribe. Please try again.");
+      toast.error(t("website.footer.subscribeFailed"));
     } finally {
       setIsSubscribing(false);
     }
   };
 
   const footerLinks = {
-    "Find Coaches": [
-      { name: "All Coaches", href: "/coaches" },
-      { name: "Personal Trainers", href: "/coaches/personal-trainers" },
-      { name: "Nutritionists", href: "/coaches/nutritionists" },
-      { name: "Boxing Coaches", href: "/coaches/boxing" },
-      { name: "MMA Coaches", href: "/coaches/mma" },
+    [t("website.footer.sections.findCoaches")]: [
+      { name: t("website.footer.links.allCoaches"), href: "/coaches" },
+      { name: t("website.footer.links.personalTrainers"), href: "/coaches/personal-trainers" },
+      { name: t("website.footer.links.nutritionists"), href: "/coaches/nutritionists" },
+      { name: t("website.footer.links.boxingCoaches"), href: "/coaches/boxing" },
+      { name: t("website.footer.links.mmaCoaches"), href: "/coaches/mma" },
     ],
-    Resources: [
-      { name: "How It Works", href: "/how-it-works" },
-      { name: "Success Stories", href: "/success-stories" },
-      { name: "Blog", href: "/blog" },
-      { name: "Community", href: "/community" },
-      { name: "Help Center", href: "/docs" },
-      { name: "FAQ", href: "/faq" },
-      { name: "Marketplace", href: "/marketplace" },
+    [t("website.footer.sections.resources")]: [
+      { name: t("website.footer.links.howItWorks"), href: "/how-it-works" },
+      { name: t("website.footer.links.successStories"), href: "/success-stories" },
+      { name: t("website.footer.links.blog"), href: "/blog" },
+      { name: t("website.footer.links.community"), href: "/community" },
+      { name: t("website.footer.links.helpCenter"), href: "/docs" },
+      { name: t("website.footer.links.faq"), href: "/faq" },
+      { name: t("website.footer.links.marketplace"), href: "/marketplace" },
     ],
-    "For Coaches": [
-      { name: "Why FitConnect", href: "/for-coaches" },
-      { name: "Pricing & Plans", href: "/pricing" },
-      { name: "Contact Us", href: "/contact" },
+    [t("website.footer.sections.forCoaches")]: [
+      { name: t("website.footer.links.whyFitConnect"), href: "/for-coaches" },
+      { name: t("website.footer.links.pricingPlans"), href: "/pricing" },
+      { name: t("website.footer.links.contactUs"), href: "/contact" },
     ],
-    Legal: [
-      { name: "About Us", href: "/about" },
-      { name: "Privacy Policy", href: "/privacy" },
-      { name: "Terms of Service", href: "/terms" },
+    [t("website.footer.sections.legal")]: [
+      { name: t("website.footer.links.aboutUs"), href: "/about" },
+      { name: t("website.footer.links.privacyPolicy"), href: "/privacy" },
+      { name: t("website.footer.links.termsOfService"), href: "/terms" },
     ],
   };
 
@@ -81,14 +83,14 @@ const Footer = () => {
             <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
               <Mail className="w-6 h-6 text-primary" />
             </div>
-            <h3 className="font-display text-2xl font-bold mb-2">Stay in the Loop</h3>
+            <h3 className="font-display text-2xl font-bold mb-2">{t("website.footer.newsletterTitle")}</h3>
             <p className="text-muted-foreground mb-6">
-              Get fitness tips, coach spotlights, and platform updates delivered to your inbox.
+              {t("website.footer.newsletterDescription")}
             </p>
             <form onSubmit={handleNewsletterSubmit} className="flex gap-3 max-w-md mx-auto">
               <Input
                 type="email"
-                placeholder="Enter your email"
+                placeholder={t("website.footer.emailPlaceholder")}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="flex-1"
@@ -118,8 +120,7 @@ const Footer = () => {
               </span>
             </Link>
             <p className="text-muted-foreground mb-6 text-sm">
-              Connect with world-class fitness coaches and transform your health
-              journey. Your goals, your way.
+              {t("website.footer.brandDescription")}
             </p>
             <SocialLinks 
               iconSize="w-5 h-5"
@@ -135,7 +136,7 @@ const Footer = () => {
               </h4>
               <ul className="space-y-3">
                 {links.map((link) => (
-                  <li key={link.name}>
+                  <li key={link.href}>
                     <Link
                       to={link.href}
                       className="text-muted-foreground hover:text-primary transition-colors text-sm"
@@ -157,10 +158,10 @@ const Footer = () => {
         {/* Bottom */}
         <div className="mt-8 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-muted-foreground text-sm">
-            © {new Date().getFullYear()} FitConnect. All rights reserved.
+            {t("website.footer.copyright", { year: new Date().getFullYear() })}
           </p>
           <p className="text-muted-foreground text-sm flex items-center gap-2">
-            Made with passion for fitness 
+            {t("website.footer.madeWith")}
             <Zap className="w-4 h-4 text-primary" />
           </p>
         </div>
