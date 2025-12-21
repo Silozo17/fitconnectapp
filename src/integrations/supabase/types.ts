@@ -5088,12 +5088,15 @@ export type Database = {
           avatar_url: string | null
           city: string | null
           country: string | null
+          country_preference: string | null
           county: string | null
           created_at: string | null
           display_name: string | null
           first_name: string | null
           id: string
+          language_preference: string | null
           last_name: string | null
+          locale_initialized_at: string | null
           location: string | null
           updated_at: string | null
           user_id: string
@@ -5103,12 +5106,15 @@ export type Database = {
           avatar_url?: string | null
           city?: string | null
           country?: string | null
+          country_preference?: string | null
           county?: string | null
           created_at?: string | null
           display_name?: string | null
           first_name?: string | null
           id?: string
+          language_preference?: string | null
           last_name?: string | null
+          locale_initialized_at?: string | null
           location?: string | null
           updated_at?: string | null
           user_id: string
@@ -5118,12 +5124,15 @@ export type Database = {
           avatar_url?: string | null
           city?: string | null
           country?: string | null
+          country_preference?: string | null
           county?: string | null
           created_at?: string | null
           display_name?: string | null
           first_name?: string | null
           id?: string
+          language_preference?: string | null
           last_name?: string | null
+          locale_initialized_at?: string | null
           location?: string | null
           updated_at?: string | null
           user_id?: string

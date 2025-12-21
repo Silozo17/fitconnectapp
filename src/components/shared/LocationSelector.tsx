@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { MapPin } from "lucide-react";
 import { useOptionalLocaleRouting } from "@/contexts/LocaleRoutingContext";
 import { useEnvironment } from "@/hooks/useEnvironment";
+import { useUserLocalePreference } from "@/hooks/useUserLocalePreference";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   SUPPORTED_LOCATIONS,
   RouteLocationCode,
@@ -28,26 +30,39 @@ const LOCATION_NAMES: Record<RouteLocationCode, { name: string; flag: string }> 
 export const LocationSelector = () => {
   const localeRouting = useOptionalLocaleRouting();
   const { isPWA, isNativeApp } = useEnvironment();
+  const { user } = useAuth();
+  const userLocale = useUserLocalePreference();
 
   // Hide on PWA/native app
   if (isPWA || isNativeApp) {
     return null;
   }
 
-  // Graceful fallback if not in locale routing context
-  if (!localeRouting) {
-    return null;
-  }
+  // Determine which mode we're in:
+  // - Website mode: use LocaleRoutingContext (URL-based)
+  // - Dashboard mode: use DB-backed preferences
+  const isWebsiteMode = !!localeRouting;
 
-  const { location, changeLocation } = localeRouting;
+  // Get current location based on mode
+  const currentLocation = isWebsiteMode 
+    ? localeRouting.location 
+    : userLocale.countryPreference;
 
   const handleLocationChange = (newLocation: string) => {
-    if (SUPPORTED_LOCATIONS.includes(newLocation as RouteLocationCode)) {
-      changeLocation(newLocation as RouteLocationCode);
+    if (!SUPPORTED_LOCATIONS.includes(newLocation as RouteLocationCode)) {
+      return;
+    }
+
+    if (isWebsiteMode) {
+      // Website mode: update URL
+      localeRouting.changeLocation(newLocation as RouteLocationCode);
+    } else {
+      // Dashboard mode: update DB preference
+      userLocale.updateCountry(newLocation as RouteLocationCode);
     }
   };
 
-  const currentLocation = LOCATION_NAMES[location];
+  const locationInfo = LOCATION_NAMES[currentLocation];
 
   return (
     <div className="space-y-2">
@@ -55,13 +70,13 @@ export const LocationSelector = () => {
         <MapPin className="w-4 h-4" />
         Location
       </Label>
-      <Select value={location} onValueChange={handleLocationChange}>
+      <Select value={currentLocation} onValueChange={handleLocationChange}>
         <SelectTrigger className="w-full max-w-xs">
           <SelectValue>
-            {currentLocation && (
+            {locationInfo && (
               <span className="flex items-center gap-2">
-                <span>{currentLocation.flag}</span>
-                <span>{currentLocation.name}</span>
+                <span>{locationInfo.flag}</span>
+                <span>{locationInfo.name}</span>
               </span>
             )}
           </SelectValue>
