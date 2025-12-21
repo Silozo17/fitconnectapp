@@ -98,9 +98,27 @@
     "perSession": "/sesja",
     "viewProfile": "Zobacz Profil →",
     "noCoachesTitle": "Rozwijamy Naszą Sieć",
-    "noCoachesMessage": "Budujemy sieć zweryfikowanych profesjonalistów fitness. Sprawdź ponownie wkrótce lub przeglądaj wszystkich dostępnych trenerów.",
+    "noCoachesMessage": "Starannie weryfikujemy profesjonalistów fitness, aby zapewnić Ci najlepsze doświadczenie coachingowe. Dołącz wcześnie, aby być pierwszym.",
     "becomeCoach": "Zostań Trenerem",
-    "exploreAll": "Przeglądaj Wszystkich"
+    "exploreAll": "Przeglądaj Dostępnych Trenerów",
+    "benefits": {
+      "verified": {
+        "title": "Zweryfikowani Profesjonaliści",
+        "description": "Każdy trener jest sprawdzany pod kątem kwalifikacji i doświadczenia"
+      },
+      "personalized": {
+        "title": "Spersonalizowane Plany",
+        "description": "Indywidualne treningi i dieta dopasowane do Twoich celów"
+      },
+      "flexible": {
+        "title": "Lokalnie i Online",
+        "description": "Trenuj osobiście w pobliżu lub zdalnie z dowolnego miejsca"
+      },
+      "quality": {
+        "title": "Gwarantowana Jakość",
+        "description": "Pokazujemy tylko kompletne, zatwierdzone profile trenerów"
+      }
+    }
   },
   "leaderboard": {
     "badge": "Ranking Społeczności",

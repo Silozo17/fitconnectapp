@@ -2,10 +2,11 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, ArrowRight, CheckCircle, Loader2, Users } from "lucide-react";
+import { Star, MapPin, ArrowRight, CheckCircle, Loader2, Users, Target, Globe, ShieldCheck } from "lucide-react";
 import { useCoachMarketplace } from "@/hooks/useCoachMarketplace";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { getDisplayLocation } from "@/lib/location-utils";
+import { BenefitCard } from "./BenefitCard";
 
 const FeaturedCoaches = () => {
   const { t } = useTranslation('landing');
@@ -72,26 +73,53 @@ const FeaturedCoaches = () => {
           </div>
         )}
 
-        {/* Empty State */}
+        {/* Empty State - Benefits Grid */}
         {!isLoading && coachesToShow.length === 0 && (
-          <div className="text-center py-16 bg-secondary/30 rounded-2xl border border-border/50">
-            <div className="max-w-md mx-auto px-4">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                <Users className="w-8 h-8 text-primary" />
-              </div>
-              <h3 className="font-display text-xl font-semibold text-foreground mb-3">
-                {t('featuredCoaches.noCoachesTitle')}
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                {t('featuredCoaches.noCoachesMessage')}
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button asChild variant="outline" className="rounded-xl">
-                  <Link to="/for-coaches">{t('featuredCoaches.becomeCoach')}</Link>
-                </Button>
-                <Button asChild className="rounded-xl">
-                  <Link to="/coaches">{t('featuredCoaches.exploreAll')}</Link>
-                </Button>
+          <div className="space-y-8">
+            {/* Benefits Grid - Maintains same layout as coach cards */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <BenefitCard 
+                icon={<ShieldCheck className="w-6 h-6" />}
+                title={t('featuredCoaches.benefits.verified.title')}
+                description={t('featuredCoaches.benefits.verified.description')}
+              />
+              <BenefitCard 
+                icon={<Target className="w-6 h-6" />}
+                title={t('featuredCoaches.benefits.personalized.title')}
+                description={t('featuredCoaches.benefits.personalized.description')}
+              />
+              <BenefitCard 
+                icon={<Globe className="w-6 h-6" />}
+                title={t('featuredCoaches.benefits.flexible.title')}
+                description={t('featuredCoaches.benefits.flexible.description')}
+              />
+              <BenefitCard 
+                icon={<Star className="w-6 h-6" />}
+                title={t('featuredCoaches.benefits.quality.title')}
+                description={t('featuredCoaches.benefits.quality.description')}
+              />
+            </div>
+            
+            {/* CTA Section */}
+            <div className="text-center py-10 bg-gradient-to-br from-primary/5 to-secondary/30 rounded-2xl border border-border/50">
+              <div className="max-w-md mx-auto px-4">
+                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5">
+                  <Users className="w-7 h-7 text-primary" />
+                </div>
+                <h3 className="font-display text-xl font-semibold text-foreground mb-3">
+                  {t('featuredCoaches.noCoachesTitle')}
+                </h3>
+                <p className="text-muted-foreground mb-6">
+                  {t('featuredCoaches.noCoachesMessage')}
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button asChild className="rounded-xl">
+                    <Link to="/for-coaches">{t('featuredCoaches.becomeCoach')}</Link>
+                  </Button>
+                  <Button asChild variant="outline" className="rounded-xl">
+                    <Link to="/coaches">{t('featuredCoaches.exploreAll')}</Link>
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
