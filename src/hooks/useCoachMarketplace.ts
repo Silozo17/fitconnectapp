@@ -271,8 +271,11 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
     );
 
     // Apply location expansion if needed
+    // When countryCode is explicitly set (from URL/manual selection), disable strict country filtering
+    // since we've already filtered by country at the DB level - ranking should only sort by proximity
+    const hasExplicitCountryFilter = !!options.countryCode;
     const { coaches: filteredRanked, effectiveMatchLevel, expanded } = 
-      filterByLocationWithExpansion(ranked, minResultsBeforeExpansion);
+      filterByLocationWithExpansion(ranked, minResultsBeforeExpansion, !hasExplicitCountryFilter);
 
     // Map back to MarketplaceCoach with ranking data
     let result = filteredRanked.map(({ coach, ranking }) => ({
