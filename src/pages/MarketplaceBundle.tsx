@@ -16,7 +16,8 @@ export default function MarketplaceBundle() {
   const { bundleId } = useParams<{ bundleId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { t } = useTranslation();
+  const { t } = useTranslation('marketplace');
+  const { t: tCommon } = useTranslation('common');
 
   const { data: bundle, isLoading } = useDigitalBundle(bundleId || "");
   const { data: hasPurchased } = useHasPurchased(undefined, bundleId);
@@ -42,7 +43,7 @@ export default function MarketplaceBundle() {
 
   if (isLoading) {
     return (
-      <PageLayout title={t('loading.default')} description={t('loading.default')}>
+      <PageLayout title={tCommon('loading.default')} description={tCommon('loading.default')}>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
         </div>
@@ -52,11 +53,11 @@ export default function MarketplaceBundle() {
 
   if (!bundle) {
     return (
-      <PageLayout title="Bundle Not Found" description="The bundle you're looking for doesn't exist">
+      <PageLayout title={t('bundle.notFound')} description={t('bundle.notFoundDesc')}>
         <div className="min-h-screen bg-background flex flex-col items-center justify-center">
           <Package className="h-16 w-16 text-muted-foreground mb-4" />
-          <h1 className="text-2xl font-bold mb-2">Bundle Not Found</h1>
-          <Button onClick={() => navigate("/marketplace")}>Back to Marketplace</Button>
+          <h1 className="text-2xl font-bold mb-2">{t('bundle.notFound')}</h1>
+          <Button onClick={() => navigate("/marketplace")}>{t('product.backToMarketplace')}</Button>
         </div>
       </PageLayout>
     );
@@ -106,7 +107,7 @@ export default function MarketplaceBundle() {
               className="mb-6"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Marketplace
+              {t('product.backToMarketplace')}
             </Button>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -132,12 +133,12 @@ export default function MarketplaceBundle() {
                 <div className="flex flex-wrap items-center gap-2 mb-3">
                   <Badge className="bg-accent text-accent-foreground">
                     <Package className="h-3 w-3 mr-1" />
-                    Bundle
+                    {t('bundle.badge')}
                   </Badge>
                   {savings > 0 && (
                     <Badge className="bg-green-500 text-white">
                       <Percent className="h-3 w-3 mr-1" />
-                      Save {savings}%
+                      {t('product.savePercent', { percent: savings })}
                     </Badge>
                   )}
                 </div>
@@ -152,7 +153,7 @@ export default function MarketplaceBundle() {
               {/* Included Products */}
               <Card>
                 <CardHeader>
-                  <CardTitle>What's Included ({bundle.products?.length || 0} items)</CardTitle>
+                  <CardTitle>{t('bundle.whatsIncluded', { count: bundle.products?.length || 0 })}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {bundle.products?.map((product, index) => {
@@ -192,7 +193,7 @@ export default function MarketplaceBundle() {
                             {formatCurrency(product.price, (product.currency || "GBP") as "GBP" | "USD" | "EUR")}
                           </p>
                           <Badge variant="outline" className="text-xs">
-                            Included
+                            {t('bundle.included')}
                           </Badge>
                         </div>
                       </div>
@@ -218,7 +219,7 @@ export default function MarketplaceBundle() {
                     </p>
                     {savings > 0 && (
                       <Badge className="bg-green-500/20 text-green-500 border-green-500/30">
-                        You save {formatCurrency((bundle.original_price || 0) - bundle.price, (bundle.currency || "GBP") as "GBP" | "USD" | "EUR")}
+                        {t('bundle.youSave', { amount: formatCurrency((bundle.original_price || 0) - bundle.price, (bundle.currency || "GBP") as "GBP" | "USD" | "EUR") })}
                       </Badge>
                     )}
                   </div>
@@ -227,10 +228,10 @@ export default function MarketplaceBundle() {
                     <div className="space-y-3">
                       <Button className="w-full" size="lg" onClick={() => navigate("/dashboard/client/library")}>
                         <Check className="h-4 w-4 mr-2" />
-                        Go to Library
+                        {t('product.goToLibrary')}
                       </Button>
                       <p className="text-sm text-center text-muted-foreground">
-                        You already own this bundle
+                        {t('bundle.alreadyOwned')}
                       </p>
                     </div>
                   ) : (
@@ -240,7 +241,7 @@ export default function MarketplaceBundle() {
                       onClick={handlePurchase}
                     >
                       <ShoppingCart className="h-4 w-4 mr-2" />
-                      Purchase Bundle
+                      {t('bundle.purchaseBundle')}
                     </Button>
                   )}
 
@@ -248,7 +249,7 @@ export default function MarketplaceBundle() {
 
                   {/* Coach Info */}
                   <div>
-                    <p className="text-sm text-muted-foreground mb-3">Created by</p>
+                    <p className="text-sm text-muted-foreground mb-3">{t('product.createdBy')}</p>
                     <div 
                       className="flex items-center gap-3 cursor-pointer hover:bg-muted/50 p-2 rounded-lg -mx-2"
                       onClick={() => navigate(`/coaches/${bundle.coach_profiles?.username || bundle.coach_id}`)}
@@ -260,7 +261,7 @@ export default function MarketplaceBundle() {
                       />
                       <div>
                         <p className="font-medium">{bundle.coach_profiles?.display_name}</p>
-                        <p className="text-xs text-muted-foreground">View Profile</p>
+                        <p className="text-xs text-muted-foreground">{t('product.viewProfile')}</p>
                       </div>
                     </div>
                   </div>
@@ -271,11 +272,11 @@ export default function MarketplaceBundle() {
                   <div className="grid grid-cols-2 gap-4 text-center">
                     <div className="p-3 rounded-lg bg-muted/50">
                       <p className="text-2xl font-bold text-primary">{bundle.products?.length || 0}</p>
-                      <p className="text-xs text-muted-foreground">Items</p>
+                      <p className="text-xs text-muted-foreground">{t('bundle.stats.items')}</p>
                     </div>
                     <div className="p-3 rounded-lg bg-muted/50">
                       <p className="text-2xl font-bold text-green-500">{savings}%</p>
-                      <p className="text-xs text-muted-foreground">Savings</p>
+                      <p className="text-xs text-muted-foreground">{t('bundle.stats.savings')}</p>
                     </div>
                   </div>
                 </CardContent>

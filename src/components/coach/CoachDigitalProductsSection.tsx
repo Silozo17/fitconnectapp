@@ -4,12 +4,15 @@ import { Package } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ProductCard from "@/components/marketplace/ProductCard";
 import { DigitalProduct } from "@/hooks/useDigitalProducts";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface CoachDigitalProductsSectionProps {
   coachId: string;
 }
 
 export function CoachDigitalProductsSection({ coachId }: CoachDigitalProductsSectionProps) {
+  const { t } = useTranslation('coaches');
+  
   const { data: products, isLoading } = useQuery({
     queryKey: ["coach-public-products", coachId],
     queryFn: async () => {
@@ -38,7 +41,7 @@ export function CoachDigitalProductsSection({ coachId }: CoachDigitalProductsSec
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
-            Digital Products
+            {t('profile.digitalProducts')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -61,7 +64,7 @@ export function CoachDigitalProductsSection({ coachId }: CoachDigitalProductsSec
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Package className="h-5 w-5" />
-          Digital Products ({products.length})
+          {t('profile.digitalProducts')} ({products.length})
         </CardTitle>
       </CardHeader>
       <CardContent>

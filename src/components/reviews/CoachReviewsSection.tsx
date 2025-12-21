@@ -3,12 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCoachReviews, calculateAverageRating } from "@/hooks/useReviews";
 import ReviewCard from "./ReviewCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface CoachReviewsSectionProps {
   coachId: string;
 }
 
 const CoachReviewsSection = ({ coachId }: CoachReviewsSectionProps) => {
+  const { t } = useTranslation('coaches');
   const { data: reviews = [], isLoading } = useCoachReviews(coachId);
   const averageRating = calculateAverageRating(reviews);
 
@@ -32,7 +34,7 @@ const CoachReviewsSection = ({ coachId }: CoachReviewsSectionProps) => {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <MessageSquareText className="h-5 w-5" />
-            Reviews
+            {t('profile.reviews')}
           </CardTitle>
           {reviews.length > 0 && (
             <div className="flex items-center gap-2">
@@ -41,7 +43,7 @@ const CoachReviewsSection = ({ coachId }: CoachReviewsSectionProps) => {
                 <span className="font-semibold text-amber-600">{averageRating}</span>
               </div>
               <span className="text-sm text-muted-foreground">
-                ({reviews.length} review{reviews.length !== 1 ? "s" : ""})
+                ({reviews.length} {reviews.length !== 1 ? t('profile.reviewPlural') : t('profile.review')})
               </span>
             </div>
           )}
@@ -51,9 +53,9 @@ const CoachReviewsSection = ({ coachId }: CoachReviewsSectionProps) => {
         {reviews.length === 0 ? (
           <div className="text-center py-8">
             <MessageSquareText className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
-            <p className="text-muted-foreground">No reviews yet</p>
+            <p className="text-muted-foreground">{t('profile.noReviewsEmpty')}</p>
             <p className="text-sm text-muted-foreground">
-              Be the first to leave a review!
+              {t('profile.beFirstReview')}
             </p>
           </div>
         ) : (
