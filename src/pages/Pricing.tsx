@@ -10,6 +10,7 @@ import { formatCurrency, convertPlatformPriceForDisplay } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
 import { useCountryContext } from "@/contexts/CountryContext";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const tierIcons: Record<TierKey, typeof Zap> = {
   free: Sparkles,
@@ -20,46 +21,47 @@ const tierIcons: Record<TierKey, typeof Zap> = {
 };
 
 const Pricing = () => {
+  const { t } = useTranslation();
   const [billingInterval, setBillingInterval] = useState<BillingInterval>("monthly");
   const { countryCode } = useCountryContext();
 
   const platformFeatures = [
     {
       icon: MessageSquare,
-      title: "Unlimited Messaging",
-      description: "Chat with your clients between sessions for guidance and support"
+      title: t('pages.pricing.features.messaging.title'),
+      description: t('pages.pricing.features.messaging.description')
     },
     {
       icon: Calendar,
-      title: "Easy Scheduling",
-      description: "Book and manage sessions with our intuitive calendar system"
+      title: t('pages.pricing.features.scheduling.title'),
+      description: t('pages.pricing.features.scheduling.description')
     },
     {
       icon: TrendingUp,
-      title: "Progress Tracking",
-      description: "Monitor client journeys with detailed metrics and visualizations"
+      title: t('pages.pricing.features.progress.title'),
+      description: t('pages.pricing.features.progress.description')
     },
     {
       icon: Video,
-      title: "Video Sessions",
-      description: "Train remotely with HD video calls built into the platform"
+      title: t('pages.pricing.features.video.title'),
+      description: t('pages.pricing.features.video.description')
     },
     {
       icon: FileText,
-      title: "Custom Plans",
-      description: "Create personalized workout and nutrition plans for clients"
+      title: t('pages.pricing.features.plans.title'),
+      description: t('pages.pricing.features.plans.description')
     },
     {
       icon: Shield,
-      title: "Secure Payments",
-      description: "Safe, encrypted transactions with automatic payouts"
+      title: t('pages.pricing.features.payments.title'),
+      description: t('pages.pricing.features.payments.description')
     }
   ];
 
   return (
     <PageLayout
-      title="Coach Pricing"
-      description="Choose the right plan for your coaching business. From free to enterprise, we have a plan that fits your needs."
+      title={t('pages.pricing.meta.title')}
+      description={t('pages.pricing.meta.description')}
     >
       {/* Decorative Avatars - placed at PageLayout level */}
       <DecorativeAvatar 
@@ -86,16 +88,16 @@ const Pricing = () => {
         
         <div className="container mx-auto px-4 text-center">
           <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary font-medium text-sm mb-6">
-            For Coaches
+            {t('pages.pricing.hero.badge')}
           </span>
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Plans That{" "}
+            {t('pages.pricing.hero.titleStart')}{" "}
             <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-              Grow With You
+              {t('pages.pricing.hero.titleHighlight')}
             </span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-10">
-            Start free, upgrade as you grow. No hidden fees, cancel anytime.
+            {t('pages.pricing.hero.description')}
           </p>
 
           {/* Billing Toggle */}
@@ -109,7 +111,7 @@ const Pricing = () => {
                   : "bg-muted text-muted-foreground hover:bg-muted/80"
               )}
             >
-              Monthly
+              {t('pages.pricing.billing.monthly')}
             </button>
             <button
               onClick={() => setBillingInterval("yearly")}
@@ -120,9 +122,9 @@ const Pricing = () => {
                   : "bg-muted text-muted-foreground hover:bg-muted/80"
               )}
             >
-              Yearly
+              {t('pages.pricing.billing.yearly')}
               <span className="text-xs px-2 py-0.5 rounded-full bg-accent text-accent-foreground">
-                Save 17%
+                {t('pages.pricing.billing.save')}
               </span>
             </button>
           </div>
@@ -155,7 +157,7 @@ const Pricing = () => {
                   {isPopular && (
                     <div className="absolute top-4 right-4">
                       <span className="px-3 py-1 rounded-full bg-gradient-to-r from-primary to-secondary text-white text-xs font-semibold">
-                        Most Popular
+                        {t('pages.pricing.tiers.popular')}
                       </span>
                     </div>
                   )}
@@ -175,17 +177,17 @@ const Pricing = () => {
                     <div className="mb-6">
                       <div className="flex items-baseline gap-1">
                         <span className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                          {isFree ? "Free" : formatCurrency(converted.amount, converted.currency)}
+                          {isFree ? t('pages.pricing.tiers.free') : formatCurrency(converted.amount, converted.currency)}
                         </span>
                         {!isFree && (
                           <span className="text-muted-foreground">
-                            /{billingInterval === "monthly" ? "mo" : "yr"}
+                            /{billingInterval === "monthly" ? t('pages.pricing.billing.perMonth') : t('pages.pricing.billing.perYear')}
                           </span>
                         )}
                       </div>
                       {billingInterval === "yearly" && !isFree && "savings" in priceData && priceData.savings > 0 && (
                         <p className="text-sm text-primary font-medium mt-1">
-                          Save {formatCurrency(convertPlatformPriceForDisplay(priceData.savings, countryCode).amount, converted.currency)}/year
+                          {t('pages.pricing.tiers.saveAmount', { amount: formatCurrency(convertPlatformPriceForDisplay(priceData.savings, countryCode).amount, converted.currency) })}
                         </p>
                       )}
                     </div>
@@ -194,7 +196,7 @@ const Pricing = () => {
                     <div className="flex items-center gap-2 mb-3 p-3 rounded-lg bg-primary/10 border border-primary/20">
                       <Percent className="w-5 h-5 text-primary" />
                       <span className="font-semibold text-primary">
-                        Only {tier.commissionPercent}% platform fee
+                        {t('pages.pricing.tiers.platformFee', { percent: tier.commissionPercent })}
                       </span>
                     </div>
 
@@ -203,8 +205,8 @@ const Pricing = () => {
                       <Users className="w-5 h-5 text-primary" />
                       <span className="font-semibold">
                         {tier.clientLimit === null 
-                          ? "Unlimited clients" 
-                          : `Up to ${tier.clientLimit} clients`}
+                          ? t('pages.pricing.tiers.unlimitedClients')
+                          : t('pages.pricing.tiers.upToClients', { count: tier.clientLimit })}
                       </span>
                     </div>
 
@@ -222,7 +224,7 @@ const Pricing = () => {
                         className="w-full" 
                         variant={isPopular ? "primary" : isFree ? "outline" : "primary"}
                       >
-                        {isFree ? "Get Started Free" : "Subscribe Now"}
+                        {isFree ? t('pages.pricing.tiers.getStartedFree') : t('pages.pricing.tiers.subscribeNow')}
                       </GradientButton>
                     </Link>
                   </CardContent>
@@ -238,13 +240,13 @@ const Pricing = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Included With{" "}
+              {t('pages.pricing.platformFeatures.titleStart')}{" "}
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Every Plan
+                {t('pages.pricing.platformFeatures.titleHighlight')}
               </span>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              All coaches get access to our full suite of platform features
+              {t('pages.pricing.platformFeatures.description')}
             </p>
           </div>
           
@@ -272,16 +274,16 @@ const Pricing = () => {
       <section className="py-20">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl font-bold mb-4">Have Questions?</h2>
+            <h2 className="text-2xl font-bold mb-4">{t('pages.pricing.cta.title')}</h2>
             <p className="text-muted-foreground mb-8">
-              Check out our FAQ or contact us for more information about our plans and features.
+              {t('pages.pricing.cta.description')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/subscribe">
-                <GradientButton size="lg">Get Started</GradientButton>
+                <GradientButton size="lg">{t('pages.pricing.cta.getStarted')}</GradientButton>
               </Link>
               <Link to="/faq">
-                <GradientButton size="lg" variant="outline">View FAQ</GradientButton>
+                <GradientButton size="lg" variant="outline">{t('pages.pricing.cta.viewFaq')}</GradientButton>
               </Link>
             </div>
           </div>

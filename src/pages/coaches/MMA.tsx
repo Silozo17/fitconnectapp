@@ -7,72 +7,75 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Flame, Target, Zap, Shield, Users, ArrowRight, Star } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const MMA = () => {
+  const { t } = useTranslation();
+
   const benefits = [
     {
       icon: Zap,
-      title: "Complete Combat System",
-      description: "Learn striking, wrestling, and ground fighting in one comprehensive training program.",
+      title: t('pages.coachTypes.mma.benefits.combat.title'),
+      description: t('pages.coachTypes.mma.benefits.combat.description'),
     },
     {
       icon: Target,
-      title: "Elite Conditioning",
-      description: "Build functional strength, explosive power, and combat-ready endurance.",
+      title: t('pages.coachTypes.mma.benefits.conditioning.title'),
+      description: t('pages.coachTypes.mma.benefits.conditioning.description'),
     },
     {
       icon: Shield,
-      title: "Real Self-Defence",
-      description: "Develop practical skills for any situation with complete martial arts training.",
+      title: t('pages.coachTypes.mma.benefits.selfDefense.title'),
+      description: t('pages.coachTypes.mma.benefits.selfDefense.description'),
     },
     {
       icon: Users,
-      title: "Expert Coaches",
-      description: "Train with coaches who have real competitive experience and proven teaching methods.",
+      title: t('pages.coachTypes.mma.benefits.coaches.title'),
+      description: t('pages.coachTypes.mma.benefits.coaches.description'),
     },
   ];
 
   const disciplines = [
-    { name: "Brazilian Jiu-Jitsu", description: "Ground fighting & submissions" },
-    { name: "Muay Thai", description: "Striking with hands, elbows, knees & kicks" },
-    { name: "Wrestling", description: "Takedowns & control" },
-    { name: "Boxing", description: "Fundamental striking" },
+    { name: t('pages.coachTypes.mma.disciplines.bjj.name'), description: t('pages.coachTypes.mma.disciplines.bjj.description') },
+    { name: t('pages.coachTypes.mma.disciplines.muayThai.name'), description: t('pages.coachTypes.mma.disciplines.muayThai.description') },
+    { name: t('pages.coachTypes.mma.disciplines.wrestling.name'), description: t('pages.coachTypes.mma.disciplines.wrestling.description') },
+    { name: t('pages.coachTypes.mma.disciplines.boxing.name'), description: t('pages.coachTypes.mma.disciplines.boxing.description') },
   ];
 
   const faqs = [
     {
-      question: "Do I need martial arts experience to start MMA?",
-      answer: "Not at all! Many of our coaches specialise in beginner programs. You'll learn fundamentals safely and progress at your own pace. No prior experience is necessary.",
+      question: t('pages.coachTypes.mma.faq.experience.question'),
+      answer: t('pages.coachTypes.mma.faq.experience.answer'),
     },
     {
-      question: "What does MMA training involve?",
-      answer: "MMA training combines multiple disciplines including striking (boxing, Muay Thai), wrestling, and grappling (Brazilian Jiu-Jitsu). Your coach will create a well-rounded program based on your goals.",
+      question: t('pages.coachTypes.mma.faq.training.question'),
+      answer: t('pages.coachTypes.mma.faq.training.answer'),
     },
     {
-      question: "Is MMA training dangerous?",
-      answer: "With proper coaching, MMA training is very safe. Beginners focus on technique, conditioning, and controlled drilling. Sparring is optional and only introduced when you're ready.",
+      question: t('pages.coachTypes.mma.faq.safety.question'),
+      answer: t('pages.coachTypes.mma.faq.safety.answer'),
     },
     {
-      question: "Can MMA help with fitness and weight loss?",
-      answer: "Absolutely! MMA provides an incredible full-body workout. Many people train MMA purely for fitness, burning 700-1000 calories per session while building functional strength.",
+      question: t('pages.coachTypes.mma.faq.fitness.question'),
+      answer: t('pages.coachTypes.mma.faq.fitness.answer'),
     },
     {
-      question: "Do I need to compete to train MMA?",
-      answer: "No! Most MMA practitioners train for fitness, self-defence, or personal development without ever competing. Your coach will support whatever goals you have.",
+      question: t('pages.coachTypes.mma.faq.compete.question'),
+      answer: t('pages.coachTypes.mma.faq.compete.answer'),
     },
   ];
 
   const featuredCoaches = [
-    { name: "Carlos Silva", specialty: "BJJ & MMA", rating: 4.9, fights: 25 },
-    { name: "Amanda Torres", specialty: "Striking Coach", rating: 4.8, experience: "Pro MMA Fighter" },
-    { name: "Jake Morrison", specialty: "Wrestling & MMA", rating: 4.9, clients: 200 },
+    { name: "Carlos Silva", specialty: t('pages.coachTypes.mma.featured.specialties.bjj'), rating: 4.9, fights: 25 },
+    { name: "Amanda Torres", specialty: t('pages.coachTypes.mma.featured.specialties.striking'), rating: 4.8, experience: t('pages.coachTypes.mma.featured.proFighter') },
+    { name: "Jake Morrison", specialty: t('pages.coachTypes.mma.featured.specialties.wrestling'), rating: 4.9, clients: 200 },
   ];
 
   return (
     <>
       <Helmet>
-        <title>MMA Coaches | FitConnect - Mixed Martial Arts Training</title>
-        <meta name="description" content="Find expert MMA coaches on FitConnect. Learn mixed martial arts including BJJ, Muay Thai, wrestling, and more from experienced fighters and coaches." />
+        <title>{t('pages.coachTypes.mma.meta.title')}</title>
+        <meta name="description" content={t('pages.coachTypes.mma.meta.description')} />
       </Helmet>
       
       <div className="min-h-screen bg-background">
@@ -84,23 +87,23 @@ const MMA = () => {
           <div className="container mx-auto relative z-10">
             <div className="max-w-3xl">
               <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
-                <Flame className="w-3 h-3 mr-1" /> Mixed Martial Arts
+                <Flame className="w-3 h-3 mr-1" /> {t('pages.coachTypes.mma.hero.badge')}
               </Badge>
               <h1 className="font-display text-4xl md:text-6xl font-bold mb-6">
-                Train <span className="text-gradient-primary">MMA</span> with the Best
+                {t('pages.coachTypes.mma.hero.titleStart')} <span className="text-gradient-primary">{t('pages.coachTypes.mma.hero.titleHighlight')}</span> {t('pages.coachTypes.mma.hero.titleEnd')}
               </h1>
               <p className="text-muted-foreground text-lg md:text-xl mb-8">
-                Learn mixed martial arts from experienced fighters and coaches. Master multiple disciplines, build elite conditioning, and develop complete fighting skills.
+                {t('pages.coachTypes.mma.hero.description')}
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link to="/coaches?type=mma">
                   <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                    Browse MMA Coaches <ArrowRight className="ml-2 w-5 h-5" />
+                    {t('pages.coachTypes.mma.hero.browseButton')} <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>
                 </Link>
                 <Link to="/how-it-works">
                   <Button size="lg" variant="outline">
-                    How It Works
+                    {t('pages.coachTypes.mma.hero.howItWorks')}
                   </Button>
                 </Link>
               </div>
@@ -112,7 +115,7 @@ const MMA = () => {
         <section className="py-12 px-4 bg-card/50">
           <div className="container mx-auto">
             <div className="text-center mb-8">
-              <h2 className="font-display text-2xl font-bold mb-2">Disciplines You'll Learn</h2>
+              <h2 className="font-display text-2xl font-bold mb-2">{t('pages.coachTypes.mma.disciplines.title')}</h2>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {disciplines.map((discipline, index) => (
@@ -132,10 +135,10 @@ const MMA = () => {
           <div className="container mx-auto">
             <div className="text-center mb-12">
               <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-                Why Train MMA?
+                {t('pages.coachTypes.mma.benefits.title')}
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                MMA offers the most complete martial arts training available, combining multiple disciplines for real-world effectiveness.
+                {t('pages.coachTypes.mma.benefits.description')}
               </p>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -159,10 +162,10 @@ const MMA = () => {
           <div className="container mx-auto">
             <div className="text-center mb-12">
               <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-                Top-Rated MMA Coaches
+                {t('pages.coachTypes.mma.featured.title')}
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                Train with coaches who have real fighting experience.
+                {t('pages.coachTypes.mma.featured.description')}
               </p>
             </div>
             <div className="grid md:grid-cols-3 gap-6 mb-8">
@@ -184,8 +187,8 @@ const MMA = () => {
                         <span className="text-foreground font-medium">{coach.rating}</span>
                       </div>
                       <span className="text-muted-foreground">
-                        {coach.fights ? `${coach.fights} pro fights` : 
-                         coach.clients ? `${coach.clients}+ clients` : 
+                        {coach.fights ? t('pages.coachTypes.mma.featured.stats.fights', { count: coach.fights }) : 
+                         coach.clients ? t('pages.coachTypes.mma.featured.stats.clients', { count: coach.clients }) : 
                          coach.experience}
                       </span>
                     </div>
@@ -196,7 +199,7 @@ const MMA = () => {
             <div className="text-center">
               <Link to="/coaches?type=mma">
                 <Button variant="outline" size="lg">
-                  View All MMA Coaches <ArrowRight className="ml-2 w-5 h-5" />
+                  {t('pages.coachTypes.mma.featured.viewAll')} <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
             </div>
@@ -208,10 +211,10 @@ const MMA = () => {
           <div className="container mx-auto max-w-3xl">
             <div className="text-center mb-12">
               <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-                Frequently Asked Questions
+                {t('pages.coachTypes.mma.faq.title')}
               </h2>
               <p className="text-muted-foreground">
-                Everything you need to know about MMA training.
+                {t('pages.coachTypes.mma.faq.description')}
               </p>
             </div>
             <Accordion type="single" collapsible className="space-y-4">
@@ -233,14 +236,14 @@ const MMA = () => {
         <section className="py-20 px-4 bg-card/50">
           <div className="container mx-auto text-center">
             <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-              Ready to Train Like a Fighter?
+              {t('pages.coachTypes.mma.cta.title')}
             </h2>
             <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-              Connect with an MMA coach today and begin your martial arts journey.
+              {t('pages.coachTypes.mma.cta.description')}
             </p>
             <Link to="/coaches?type=mma">
               <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                Find Your Coach <ArrowRight className="ml-2 w-5 h-5" />
+                {t('pages.coachTypes.mma.cta.button')} <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
           </div>
