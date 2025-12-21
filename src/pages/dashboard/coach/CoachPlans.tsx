@@ -38,8 +38,10 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { useTrainingPlans, useDeleteTrainingPlan, TrainingPlan } from "@/hooks/useTrainingPlans";
 import { useCoachProfileId } from "@/hooks/useCoachProfileId";
 import { format } from "date-fns";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const CoachPlans = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [planToDelete, setPlanToDelete] = useState<TrainingPlan | null>(null);
@@ -241,7 +243,7 @@ const CoachPlans = () => {
 
           {filterPlans(workoutPlans).length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
-              No workout plans found. Create your first one!
+              {t('empty.noWorkoutPlans')}
             </div>
           )}
         </TabsContent>
@@ -314,7 +316,7 @@ const CoachPlans = () => {
 
           {filterPlans(nutritionPlans).length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
-              No nutrition plans found. Create your first one!
+              {t('empty.noNutritionPlans')}
             </div>
           )}
         </TabsContent>

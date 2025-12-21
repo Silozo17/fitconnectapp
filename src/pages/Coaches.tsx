@@ -14,8 +14,10 @@ import { useCoachMarketplace, type MarketplaceCoach } from "@/hooks/useCoachMark
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { useMarketplaceLocationFilter } from "@/hooks/useMarketplaceLocationFilter";
 import { useCountry } from "@/hooks/useCountry";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const Coaches = () => {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
@@ -204,10 +206,10 @@ const Coaches = () => {
                       <Users className="w-8 h-8 text-muted-foreground" />
                     </div>
                     <h3 className="font-display font-semibold text-xl text-foreground mb-2">
-                      No coaches found
+                      {t('empty.noCoaches')}
                     </h3>
                     <p className="text-muted-foreground">
-                      Try adjusting your filters to see more results.
+                      {t('empty.tryAdjusting')}
                     </p>
                   </div>
                 )}

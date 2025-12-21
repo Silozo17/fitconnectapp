@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, BookOpen, Filter } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const CATEGORIES = [
   "All",
@@ -21,6 +22,7 @@ const CATEGORIES = [
 ];
 
 export default function Blog() {
+  const { t } = useTranslation();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -151,11 +153,11 @@ export default function Blog() {
               ) : (
                 <div className="text-center py-16">
                   <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-foreground mb-2">No articles found</h3>
+                  <h3 className="text-lg font-semibold text-foreground mb-2">{t('empty.noPosts')}</h3>
                   <p className="text-muted-foreground">
                     {searchQuery 
-                      ? "Try adjusting your search terms" 
-                      : "Check back soon for new content"}
+                      ? t('empty.tryAdjusting')
+                      : t('empty.nothingHere')}
                   </p>
                 </div>
               )}

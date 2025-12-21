@@ -137,7 +137,11 @@
     "creating": "Creating...",
     "preparing": "Preparing...",
     "pleaseWait": "Please wait...",
-    "loadingPage": "Loading"
+    "loadingPage": "Loading",
+    "coaches": "Loading coaches...",
+    "foods": "Loading foods...",
+    "cities": "Loading cities...",
+    "exercises": "Loading exercises..."
   },
   "empty": {
     "noResults": "No results found",
@@ -146,7 +150,22 @@
     "noItems": "No items to display",
     "noMatches": "No matches found",
     "tryAdjusting": "Try adjusting your search or filters",
-    "getStarted": "Get started by adding your first item"
+    "getStarted": "Get started by adding your first item",
+    "noCoaches": "No coaches found",
+    "noExercises": "No exercises found",
+    "noFoods": "No foods found",
+    "noCities": "No cities found",
+    "noUsers": "No users found",
+    "noUsersMatching": "No users found matching \"{{query}}\"",
+    "noContent": "No content found",
+    "noPosts": "No posts found",
+    "noParticipants": "No participants found for this filter",
+    "noTeamMembers": "No team members found",
+    "noWorkoutPlans": "No workout plans found. Create your first one!",
+    "noNutritionPlans": "No nutrition plans found. Create your first one!",
+    "noProducts": "No products yet",
+    "noGroupClasses": "No group classes yet",
+    "noBundles": "No bundles yet"
   },
   "form": {
     "required": "Required",

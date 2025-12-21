@@ -10,11 +10,13 @@ import { useDigitalBundle, useHasPurchased, CONTENT_TYPES } from "@/hooks/useDig
 import { formatCurrency } from "@/lib/currency";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function MarketplaceBundle() {
   const { bundleId } = useParams<{ bundleId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const { data: bundle, isLoading } = useDigitalBundle(bundleId || "");
   const { data: hasPurchased } = useHasPurchased(undefined, bundleId);
@@ -40,7 +42,7 @@ export default function MarketplaceBundle() {
 
   if (isLoading) {
     return (
-      <PageLayout title="Loading..." description="Loading bundle details">
+      <PageLayout title={t('loading.default')} description={t('loading.default')}>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
         </div>

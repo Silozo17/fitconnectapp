@@ -19,6 +19,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import StarRating from "@/components/reviews/StarRating";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const getContentIcon = (type: string) => {
   switch (type) {
@@ -36,6 +37,7 @@ export default function MarketplaceProduct() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [showPreview, setShowPreview] = useState(false);
 
   const { data: product, isLoading } = useDigitalProduct(productId || "");
@@ -87,7 +89,7 @@ export default function MarketplaceProduct() {
 
   if (isLoading) {
     return (
-      <PageLayout title="Loading..." description="Loading product details">
+      <PageLayout title={t('loading.default')} description={t('loading.default')}>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
         </div>

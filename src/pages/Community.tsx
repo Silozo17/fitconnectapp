@@ -22,6 +22,7 @@ import { useUserLocation } from "@/hooks/useUserLocation";
 import { useAvatars, getAvatarImageUrl } from "@/hooks/useAvatars";
 import { getUnlockDescription } from "@/lib/avatar-utils";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/hooks/useTranslation";
 import {
   Pagination,
   PaginationContent,
@@ -174,6 +175,7 @@ function AvatarCard({ avatar, locked = false }: { avatar: any; locked?: boolean 
 }
 
 export default function Community() {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'leaderboards';
   
@@ -409,7 +411,7 @@ export default function Community() {
                         ) : (
                           <TableRow>
                             <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
-                              No participants found for this filter
+                              {t('empty.noParticipants')}
                             </TableCell>
                           </TableRow>
                         )}
@@ -430,7 +432,7 @@ export default function Community() {
                     ))
                   ) : (
                     <Card className="p-8 text-center text-muted-foreground">
-                      No participants found for this filter
+                      {t('empty.noParticipants')}
                     </Card>
                   )}
                 </div>
