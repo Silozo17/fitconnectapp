@@ -1,7 +1,12 @@
 /**
  * Unified Coach Ranking Algorithm
  * 
- * Single source of truth for ranking coaches across Homepage and /coaches page.
+ * VALIDATION RULES - DO NOT REMOVE:
+ * ✅ This is the SINGLE SOURCE OF TRUTH for coach ranking
+ * ✅ All ranking MUST go through sortCoachesByUnifiedRanking()
+ * ✅ No hardcoded coach IDs are permitted
+ * ✅ Location filtering MUST execute BEFORE this function is called
+ * ✅ Fake coaches MUST be filtered via hasBlockedName() or isRealCoach()
  * 
  * Priority buckets (lower = higher priority):
  * 1. Boosted + Verified + Highest Rated + Closest
@@ -150,4 +155,29 @@ export function extractRankingFactors(
     locationScore,
     matchLevel,
   };
+}
+
+/**
+ * DEV-ONLY: Validates ranking invariants at runtime
+ * Logs warnings if any violations are detected
+ */
+export function validateRankingInvariants<T extends { id: string }>(
+  coaches: T[],
+  context: string = 'unknown'
+): void {
+  if (import.meta.env.PROD) return;
+  
+  const ids = coaches.map(c => c.id);
+  
+  // Check for duplicate IDs
+  const duplicates = ids.filter((id, i) => ids.indexOf(id) !== i);
+  if (duplicates.length > 0) {
+    console.warn(`[Ranking:${context}] Duplicate coach IDs detected:`, duplicates);
+  }
+  
+  // Check for empty/invalid IDs (would indicate hardcoded data)
+  const invalidIds = ids.filter(id => !id || typeof id !== 'string' || id.length < 10);
+  if (invalidIds.length > 0) {
+    console.warn(`[Ranking:${context}] Invalid coach IDs detected:`, invalidIds);
+  }
 }
