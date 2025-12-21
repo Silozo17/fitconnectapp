@@ -2212,6 +2212,7 @@ export type Database = {
           id: string
           in_person_available: boolean | null
           instagram_url: string | null
+          is_complete_profile: boolean | null
           is_verified: boolean | null
           leads_last_viewed_at: string | null
           linkedin_url: string | null
@@ -2272,6 +2273,7 @@ export type Database = {
           id?: string
           in_person_available?: boolean | null
           instagram_url?: string | null
+          is_complete_profile?: boolean | null
           is_verified?: boolean | null
           leads_last_viewed_at?: string | null
           linkedin_url?: string | null
@@ -2332,6 +2334,7 @@ export type Database = {
           id?: string
           in_person_available?: boolean | null
           instagram_url?: string | null
+          is_complete_profile?: boolean | null
           is_verified?: boolean | null
           leads_last_viewed_at?: string | null
           linkedin_url?: string | null
@@ -5366,6 +5369,7 @@ export type Database = {
           id: string | null
           in_person_available: boolean | null
           instagram_url: string | null
+          is_complete_profile: boolean | null
           is_verified: boolean | null
           linkedin_url: string | null
           location: string | null
@@ -5405,6 +5409,7 @@ export type Database = {
           id?: string | null
           in_person_available?: boolean | null
           instagram_url?: string | null
+          is_complete_profile?: boolean | null
           is_verified?: boolean | null
           linkedin_url?: string | null
           location?: string | null
@@ -5444,6 +5449,7 @@ export type Database = {
           id?: string | null
           in_person_available?: boolean | null
           instagram_url?: string | null
+          is_complete_profile?: boolean | null
           is_verified?: boolean | null
           linkedin_url?: string | null
           location?: string | null

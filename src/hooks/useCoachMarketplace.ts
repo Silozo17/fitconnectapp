@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCoachEngagement, createEmptyEngagementMap } from "./useCoachEngagement";
 import { rankCoaches, filterByLocationWithExpansion } from "@/lib/coach-ranking";
 import { matchesCountryFilterStrict } from "@/lib/location-utils";
+import { isRealCoach } from "@/lib/coach-validation";
 import type { LocationData, CoachLocationData, CoachProfileData, RankingScore } from "@/types/ranking";
 
 // Type for public coach profile data (GDPR-safe columns only)
@@ -48,6 +49,8 @@ export type MarketplaceCoach = {
     rarity: string;
     image_url: string | null;
   } | null;
+  // Profile completeness (from database computed column)
+  is_complete_profile?: boolean | null;
   // Computed/added fields
   rating?: number | null;
   reviews_count?: number | null;
@@ -75,6 +78,8 @@ export interface UseCoachMarketplaceOptions {
   minResultsBeforeExpansion?: number;
   /** Filter coaches by country code (e.g., 'gb', 'pl') - case insensitive */
   countryCode?: string;
+  /** Only show coaches with complete profiles (real coaches, not test/placeholder) */
+  realCoachesOnly?: boolean;
 }
 
 export interface UseCoachMarketplaceResult {
@@ -208,6 +213,11 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
       // Only include coaches that definitively match the country filter
       if (options.countryCode) {
         coaches = coaches.filter(coach => matchesCountryFilterStrict(coach, options.countryCode));
+      }
+
+      // REAL COACH FILTERING: Only show complete profiles (excludes test/placeholder)
+      if (options.realCoachesOnly) {
+        coaches = coaches.filter(coach => isRealCoach(coach));
       }
 
       // Return filtered data with boosted IDs for ranking step

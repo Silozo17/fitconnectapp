@@ -19,9 +19,11 @@ export function useAvailableCities() {
     queryKey: ["available-cities"],
     queryFn: async (): Promise<CityOption[]> => {
       // Fetch coaches with both structured and legacy location data
+      // Only include coaches with complete profiles (real coaches)
       const { data, error } = await supabase
         .from("public_coach_profiles")
-        .select("location_city, location_region, location_country, location")
+        .select("location_city, location_region, location_country, location, is_complete_profile")
+        .eq("is_complete_profile", true)
         .order("location_city");
 
       if (error) throw error;
