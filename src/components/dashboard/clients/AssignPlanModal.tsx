@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ClipboardList, Search, Dumbbell, Utensils, CheckCircle } from "lucide-react";
+import { ClipboardList, Search, Dumbbell, Utensils, CheckCircle, Construction } from "lucide-react";
 import { toast } from "sonner";
 
 interface Plan {
@@ -103,7 +103,21 @@ export function AssignPlanModal({ open, onOpenChange, clientName }: AssignPlanMo
             <ClipboardList className="h-5 w-5 text-primary" />
             {t('plans.assignPlan')} {clientName && `${t('plans.to')} ${clientName}`}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Select a training or nutrition plan to assign to this client
+          </DialogDescription>
         </DialogHeader>
+        
+        {/* Coming Soon Notice */}
+        <div className="flex items-center gap-3 p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
+          <Construction className="h-5 w-5 text-amber-500 flex-shrink-0" />
+          <div>
+            <p className="text-sm font-medium text-amber-500">Coming Soon</p>
+            <p className="text-xs text-muted-foreground">
+              Plan assignment will connect to your saved workout and nutrition plans. This preview shows example plans.
+            </p>
+          </div>
+        </div>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="relative">

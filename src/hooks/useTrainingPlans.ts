@@ -110,8 +110,8 @@ export const useCreateTrainingPlan = () => {
       queryClient.invalidateQueries({ queryKey: ["training-plans"] });
       toast.success("Plan created successfully");
     },
-    onError: (error: Error) => {
-      toast.error("Failed to create plan: " + error.message);
+    onError: () => {
+      toast.error("Failed to create plan. Please try again.");
     },
   });
 };
@@ -141,8 +141,8 @@ export const useUpdateTrainingPlan = () => {
       queryClient.invalidateQueries({ queryKey: ["training-plan", variables.id] });
       toast.success("Plan updated successfully");
     },
-    onError: (error: Error) => {
-      toast.error("Failed to update plan: " + error.message);
+    onError: () => {
+      toast.error("Failed to update plan. Please try again.");
     },
   });
 };
@@ -163,8 +163,8 @@ export const useDeleteTrainingPlan = () => {
       queryClient.invalidateQueries({ queryKey: ["training-plans"] });
       toast.success("Plan deleted successfully");
     },
-    onError: (error: Error) => {
-      toast.error("Failed to delete plan: " + error.message);
+    onError: () => {
+      toast.error("Failed to delete plan. Please try again.");
     },
   });
 };

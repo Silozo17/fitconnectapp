@@ -117,8 +117,8 @@ export const useGroceryList = () => {
       queryClient.invalidateQueries({ queryKey: ["grocery-lists"] });
       toast.success("Shopping list created");
     },
-    onError: (error) => {
-      toast.error("Failed to create list: " + error.message);
+    onError: () => {
+      toast.error("Failed to create list. Please try again.");
     },
   });
 
@@ -192,8 +192,8 @@ export const useGroceryList = () => {
       queryClient.invalidateQueries({ queryKey: ["grocery-lists"] });
       toast.success("Shopping list generated from meal plan!");
     },
-    onError: (error) => {
-      toast.error("Failed to generate list: " + error.message);
+    onError: () => {
+      toast.error("Failed to generate list. Please try again.");
     },
   });
 

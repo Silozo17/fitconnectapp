@@ -120,8 +120,8 @@ export function useGrantAvatar() {
       
       toast.success(`Avatar "${data.avatar?.name}" granted successfully`);
     },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Failed to grant avatar');
+    onError: () => {
+      toast.error('Failed to grant avatar. Please try again.');
     },
   });
 }
@@ -180,8 +180,8 @@ export function useGrantMultipleAvatars() {
       
       toast.success(`${data?.length || 0} avatars granted successfully`);
     },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Failed to grant avatars');
+    onError: () => {
+      toast.error('Failed to grant avatars. Please try again.');
     },
   });
 }
@@ -228,8 +228,8 @@ export function useRevokeAvatar() {
       
       toast.success(`Avatar "${avatarName}" revoked`);
     },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Failed to revoke avatar');
+    onError: () => {
+      toast.error('Failed to revoke avatar. Please try again.');
     },
   });
 }

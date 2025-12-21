@@ -47,7 +47,20 @@ const Auth = () => {
   const { signIn, signUp, user, role } = useAuth();
   
   // Get return URL from query params or location state
-  const returnUrl = searchParams.get("returnUrl") || (location.state?.from?.pathname ? `${location.state.from.pathname}${location.state.from.search || ''}` : null);
+  const rawReturnUrl = searchParams.get("returnUrl") || (location.state?.from?.pathname ? `${location.state.from.pathname}${location.state.from.search || ''}` : null);
+  
+  // Validate returnUrl to prevent open redirect attacks
+  const isValidReturnUrl = (url: string | null): boolean => {
+    if (!url) return false;
+    try {
+      const decoded = decodeURIComponent(url);
+      // Must start with / and not contain protocol (prevents //evil.com)
+      return decoded.startsWith('/') && !decoded.includes('://') && !decoded.startsWith('//');
+    } catch {
+      return false;
+    }
+  };
+  const returnUrl = isValidReturnUrl(rawReturnUrl) ? rawReturnUrl : null;
   const { checkPassword, isChecking: isCheckingBreach, isBreached, reset: resetBreachCheck } = usePasswordBreachCheck();
 
   const {
@@ -150,7 +163,7 @@ const Auth = () => {
         if (error.message.includes("Invalid login credentials")) {
           toast.error(t("auth.invalidCredentials"));
         } else {
-          toast.error(error.message);
+          toast.error(t("auth.unexpectedError"));
         }
       } else {
         toast.success(t("auth.welcomeBack") + "!");
@@ -175,7 +188,7 @@ const Auth = () => {
           setShowOTPVerification(false);
           setIsLogin(true);
         } else {
-          toast.error(error.message);
+          toast.error(t("auth.unexpectedError"));
         }
       } else {
         toast.success(t("auth.accountCreated"));
