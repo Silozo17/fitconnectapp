@@ -70,6 +70,7 @@ const tierIcons: Record<string, any> = {
 
 const AdminSettings = () => {
   const { t } = useTranslation('settings');
+  const { t: tAdmin } = useTranslation('admin');
   const { data: settings, isLoading } = usePlatformSettings();
   const { signOut } = useAuth();
   const updateSetting = useUpdatePlatformSetting();
@@ -249,15 +250,16 @@ const AdminSettings = () => {
   const getFeatureValueDisplay = (value: any) => {
     if (typeof value === "boolean") {
       return value ? (
-        <Badge variant="default" className="bg-green-500/10 text-green-500">Enabled</Badge>
+        <Badge variant="default" className="bg-green-500/10 text-green-500">{tAdmin('featureValues.enabled')}</Badge>
       ) : (
-        <Badge variant="secondary">Disabled</Badge>
+        <Badge variant="secondary">{tAdmin('featureValues.disabled')}</Badge>
       );
     }
     if (typeof value === "number") {
       return <Badge variant="outline">{value}</Badge>;
     }
-    return <Badge variant="outline">{String(value)}</Badge>;
+    const labelKey = `featureValues.${value}`;
+    return <Badge variant="outline">{tAdmin(labelKey, { defaultValue: String(value) })}</Badge>;
   };
 
   const handleAddOverride = async () => {
@@ -318,48 +320,48 @@ const AdminSettings = () => {
                 <TabsList className="inline-flex w-max sm:w-auto h-auto flex-nowrap">
                   <TabsTrigger value="general" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
                     <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">General</span>
-                    <span className="sm:hidden">Gen</span>
+                    <span className="hidden sm:inline">{tAdmin('settings.tabs.general')}</span>
+                    <span className="sm:hidden">{tAdmin('settings.tabs.general').slice(0, 3)}</span>
                   </TabsTrigger>
                   <TabsTrigger value="preferences" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
                     <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Preferences</span>
-                    <span className="sm:hidden">Pref</span>
+                    <span className="hidden sm:inline">{tAdmin('settings.tabs.preferences')}</span>
+                    <span className="sm:hidden">{tAdmin('settings.tabs.preferences').slice(0, 4)}</span>
                   </TabsTrigger>
                   <TabsTrigger value="branding" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
                     <Share2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Branding</span>
-                    <span className="sm:hidden">Brand</span>
+                    <span className="hidden sm:inline">{tAdmin('settings.tabs.branding')}</span>
+                    <span className="sm:hidden">{tAdmin('settings.tabs.branding').slice(0, 5)}</span>
                   </TabsTrigger>
                   <TabsTrigger value="plans" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
                     <CreditCard className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Plans</span>
-                    <span className="sm:hidden">Plans</span>
+                    <span className="hidden sm:inline">{tAdmin('settings.tabs.plans')}</span>
+                    <span className="sm:hidden">{tAdmin('settings.tabs.plans')}</span>
                   </TabsTrigger>
                   <TabsTrigger value="features" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
                     <Sliders className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Features</span>
-                    <span className="sm:hidden">Feat</span>
+                    <span className="hidden sm:inline">{tAdmin('settings.tabs.features')}</span>
+                    <span className="sm:hidden">{tAdmin('settings.tabs.features').slice(0, 4)}</span>
                   </TabsTrigger>
                   <TabsTrigger value="notifications" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
                     <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Notifications</span>
-                    <span className="sm:hidden">Notif</span>
+                    <span className="hidden sm:inline">{tAdmin('settings.tabs.notifications')}</span>
+                    <span className="sm:hidden">{tAdmin('settings.tabs.notifications').slice(0, 5)}</span>
                   </TabsTrigger>
                   <TabsTrigger value="integrations" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
                     <Plug className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Integrations</span>
-                    <span className="sm:hidden">Integ</span>
+                    <span className="hidden sm:inline">{tAdmin('settings.tabs.integrations')}</span>
+                    <span className="sm:hidden">{tAdmin('settings.tabs.integrations').slice(0, 5)}</span>
                   </TabsTrigger>
                   <TabsTrigger value="security" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
                     <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Security</span>
-                    <span className="sm:hidden">Sec</span>
+                    <span className="hidden sm:inline">{tAdmin('settings.tabs.security')}</span>
+                    <span className="sm:hidden">{tAdmin('settings.tabs.security').slice(0, 3)}</span>
                   </TabsTrigger>
                   <TabsTrigger value="account" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
                     <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Account</span>
-                    <span className="sm:hidden">Acct</span>
+                    <span className="hidden sm:inline">{tAdmin('settings.tabs.account')}</span>
+                    <span className="sm:hidden">{tAdmin('settings.tabs.account').slice(0, 4)}</span>
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -421,8 +423,8 @@ const AdminSettings = () => {
             <TabsContent value="preferences" className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>Display Preferences</CardTitle>
-                  <CardDescription>Language and regional settings</CardDescription>
+                  <CardTitle>{tAdmin('settings.preferences.title')}</CardTitle>
+                  <CardDescription>{tAdmin('settings.preferences.description')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <LanguageSelector />
@@ -430,7 +432,7 @@ const AdminSettings = () => {
                   <LocationSelector />
                   <Separator />
                   <div className="space-y-2">
-                    <Label>Default Currency</Label>
+                    <Label>{tAdmin('settings.preferences.defaultCurrency')}</Label>
                     <Select
                       value={localSettings.currency}
                       onValueChange={(value) => handleChange("currency", value)}
@@ -444,18 +446,17 @@ const AdminSettings = () => {
                         <SelectItem value="EUR">EUR (€)</SelectItem>
                       </SelectContent>
                     </Select>
-                    <p className="text-xs text-muted-foreground">Default currency for new users</p>
+                    <p className="text-xs text-muted-foreground">{tAdmin('settings.preferences.defaultCurrencyDesc')}</p>
                   </div>
                 </CardContent>
               </Card>
             </TabsContent>
 
-            {/* Branding Tab - Social Media & Contact Settings */}
             <TabsContent value="branding" className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>Social Media Links</CardTitle>
-                  <CardDescription>Configure social media links displayed across the website</CardDescription>
+                  <CardTitle>{tAdmin('settings.branding.socialMedia')}</CardTitle>
+                  <CardDescription>{tAdmin('settings.branding.socialMediaDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid gap-4 sm:grid-cols-2">
@@ -544,74 +545,74 @@ const AdminSettings = () => {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Contact Information</CardTitle>
-                  <CardDescription>Business contact details displayed on the website</CardDescription>
+                  <CardTitle>{tAdmin('settings.branding.contactInfo')}</CardTitle>
+                  <CardDescription>{tAdmin('settings.branding.contactInfoDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label>Support Email</Label>
+                      <Label>{tAdmin('settings.branding.supportEmail')}</Label>
                       <Input
                         type="email"
                         placeholder="support@example.com"
                         value={localSettings.contact_email || ""}
                         onChange={(e) => handleChange("contact_email", e.target.value)}
                       />
-                      <p className="text-xs text-muted-foreground">Primary contact email shown on website</p>
+                      <p className="text-xs text-muted-foreground">{tAdmin('settings.branding.supportEmailDesc')}</p>
                     </div>
                     <div className="space-y-2">
-                      <Label>Business Phone</Label>
+                      <Label>{tAdmin('settings.branding.businessPhone')}</Label>
                       <Input
                         type="tel"
                         placeholder="+44 800 123 4567"
                         value={localSettings.contact_phone || ""}
                         onChange={(e) => handleChange("contact_phone", e.target.value)}
                       />
-                      <p className="text-xs text-muted-foreground">Business phone number</p>
+                      <p className="text-xs text-muted-foreground">{tAdmin('settings.branding.businessPhoneDesc')}</p>
                     </div>
                     <div className="space-y-2">
-                      <Label>Legal Email</Label>
+                      <Label>{tAdmin('settings.branding.legalEmail')}</Label>
                       <Input
                         type="email"
                         placeholder="legal@example.com"
                         value={localSettings.legal_email || ""}
                         onChange={(e) => handleChange("legal_email", e.target.value)}
                       />
-                      <p className="text-xs text-muted-foreground">Shown on Terms of Service page</p>
+                      <p className="text-xs text-muted-foreground">{tAdmin('settings.branding.legalEmailDesc')}</p>
                     </div>
                     <div className="space-y-2">
-                      <Label>Privacy Email</Label>
+                      <Label>{tAdmin('settings.branding.privacyEmail')}</Label>
                       <Input
                         type="email"
                         placeholder="privacy@example.com"
                         value={localSettings.privacy_email || ""}
                         onChange={(e) => handleChange("privacy_email", e.target.value)}
                       />
-                      <p className="text-xs text-muted-foreground">Shown on Privacy Policy page</p>
+                      <p className="text-xs text-muted-foreground">{tAdmin('settings.branding.privacyEmailDesc')}</p>
                     </div>
                   </div>
                   <Separator />
                   <div className="space-y-2">
-                    <Label>Business Address</Label>
+                    <Label>{tAdmin('settings.branding.businessAddress')}</Label>
                     <Input
                       placeholder="Company Name, City, Country"
                       value={localSettings.contact_address || ""}
                       onChange={(e) => handleChange("contact_address", e.target.value)}
                     />
-                    <p className="text-xs text-muted-foreground">Shown in footer and legal pages</p>
+                    <p className="text-xs text-muted-foreground">{tAdmin('settings.branding.businessAddressDesc')}</p>
                   </div>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Platform Statistics</CardTitle>
-                  <CardDescription>Configure the stats displayed on the homepage. Set to 0 to show live counts from the database.</CardDescription>
+                  <CardTitle>{tAdmin('settings.branding.platformStats')}</CardTitle>
+                  <CardDescription>{tAdmin('settings.branding.platformStatsDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid gap-4 sm:grid-cols-3">
                     <div className="space-y-2">
-                      <Label>Total Users</Label>
+                      <Label>{tAdmin('settings.branding.totalUsers')}</Label>
                       <Input
                         type="number"
                         min="0"
@@ -619,10 +620,10 @@ const AdminSettings = () => {
                         value={localSettings.stat_total_users || "0"}
                         onChange={(e) => handleChange("stat_total_users", e.target.value)}
                       />
-                      <p className="text-xs text-muted-foreground">Set to 0 for live count</p>
+                      <p className="text-xs text-muted-foreground">{tAdmin('settings.branding.setToZeroForLive')}</p>
                     </div>
                     <div className="space-y-2">
-                      <Label>Total Coaches</Label>
+                      <Label>{tAdmin('settings.branding.totalCoaches')}</Label>
                       <Input
                         type="number"
                         min="0"
@@ -630,10 +631,10 @@ const AdminSettings = () => {
                         value={localSettings.stat_total_coaches || "0"}
                         onChange={(e) => handleChange("stat_total_coaches", e.target.value)}
                       />
-                      <p className="text-xs text-muted-foreground">Set to 0 for live count</p>
+                      <p className="text-xs text-muted-foreground">{tAdmin('settings.branding.setToZeroForLive')}</p>
                     </div>
                     <div className="space-y-2">
-                      <Label>Average Rating</Label>
+                      <Label>{tAdmin('settings.branding.averageRating')}</Label>
                       <Input
                         type="number"
                         min="0"
@@ -643,7 +644,7 @@ const AdminSettings = () => {
                         value={localSettings.stat_avg_rating || "4.9"}
                         onChange={(e) => handleChange("stat_avg_rating", e.target.value)}
                       />
-                      <p className="text-xs text-muted-foreground">Rating shown on homepage</p>
+                      <p className="text-xs text-muted-foreground">{tAdmin('settings.branding.setToZeroForLive')}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -684,26 +685,26 @@ const AdminSettings = () => {
                           if (!open) setEditingTier(null);
                         }}>
                           <DialogTrigger asChild>
-                            <Button 
+                          <Button 
                               variant="outline" 
                               className="w-full"
                               onClick={() => setEditingTier(tier)}
                             >
                               <Edit className="h-4 w-4 mr-2" />
-                              Edit Plan
+                              {tAdmin('settings.plans.editPlan')}
                             </Button>
                           </DialogTrigger>
                           <DialogContent className="max-w-[95vw] sm:max-w-lg">
                             <DialogHeader>
-                              <DialogTitle>Edit {tier.name} Plan</DialogTitle>
+                              <DialogTitle>{tAdmin('settings.plans.editPlan')} - {tier.name}</DialogTitle>
                               <DialogDescription>
-                                Update the pricing and details for this tier
+                                {tAdmin('settings.plans.updatePricing')}
                               </DialogDescription>
                             </DialogHeader>
                             
                             <div className="space-y-4 py-4">
                               <div className="space-y-2">
-                                <Label>Plan Name</Label>
+                                <Label>{tAdmin('settings.plans.planName')}</Label>
                                 <Input 
                                   value={editingTier?.name || ""} 
                                   onChange={(e) => setEditingTier(prev => prev ? {...prev, name: e.target.value} : null)}
@@ -712,7 +713,7 @@ const AdminSettings = () => {
                               
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                  <Label>Price (£)</Label>
+                                  <Label>{tAdmin('settings.plans.price')}</Label>
                                   <Input 
                                     type="number"
                                     value={editingTier?.price || 0} 
@@ -720,7 +721,7 @@ const AdminSettings = () => {
                                   />
                                 </div>
                                 <div className="space-y-2">
-                                  <Label>Billing Period</Label>
+                                  <Label>{tAdmin('settings.plans.billingPeriod')}</Label>
                                   <Select 
                                     value={editingTier?.billingPeriod}
                                     onValueChange={(value) => setEditingTier(prev => prev ? {...prev, billingPeriod: value} : null)}
@@ -729,15 +730,15 @@ const AdminSettings = () => {
                                       <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="monthly">Monthly</SelectItem>
-                                      <SelectItem value="yearly">Yearly</SelectItem>
+                                      <SelectItem value="monthly">{tAdmin('settings.plans.monthly')}</SelectItem>
+                                      <SelectItem value="yearly">{tAdmin('settings.plans.yearly')}</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </div>
                               </div>
                               
                               <div className="space-y-2">
-                                <Label>Description</Label>
+                                <Label>{tAdmin('challenges.description')}</Label>
                                 <Textarea 
                                   value={editingTier?.description || ""} 
                                   onChange={(e) => setEditingTier(prev => prev ? {...prev, description: e.target.value} : null)}
