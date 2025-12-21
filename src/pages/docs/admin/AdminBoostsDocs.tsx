@@ -17,7 +17,7 @@ export default function AdminBoostsDocs() {
         </h2>
         <p className="text-muted-foreground mb-4">
           Boost is the paid marketing feature that helps coaches acquire new clients. 
-          Coaches pay £5 for 30 days of priority visibility, plus a 30% commission on 
+          Coaches pay £5 / 25 zł for 30 days of priority visibility, plus a 30% commission on 
           the first booking from each new client acquired through Boost.
         </p>
       </section>
@@ -28,7 +28,7 @@ export default function AdminBoostsDocs() {
           Revenue Streams
         </h2>
         <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-          <li><strong>Activation Fees:</strong> £5 per 30-day Boost period (one-time payment)</li>
+          <li><strong>Activation Fees:</strong> £5 / 25 zł per 30-day Boost period (one-time payment)</li>
           <li><strong>First-Booking Commission:</strong> 30% of first session booking from new clients</li>
           <li>Track total Boost revenue by period</li>
           <li>Monitor pending vs. collected commissions</li>
@@ -54,7 +54,7 @@ export default function AdminBoostsDocs() {
           Boost Settings
         </h2>
         <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-          <li><strong>Boost Price:</strong> Activation fee in pence (default: 500 = £5)</li>
+          <li><strong>Boost Price:</strong> Activation fee (£5 GBP / 25 zł PLN)</li>
           <li><strong>Boost Duration:</strong> Days per period (default: 30)</li>
           <li><strong>Commission Rate:</strong> Percentage charged on first bookings (default: 30%)</li>
           <li><strong>Min/Max Fee:</strong> Floor and ceiling for commission amounts</li>
