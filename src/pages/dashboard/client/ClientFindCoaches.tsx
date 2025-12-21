@@ -14,6 +14,7 @@ import { useCoachMarketplace, type MarketplaceCoach } from "@/hooks/useCoachMark
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { useMarketplaceLocationFilter } from "@/hooks/useMarketplaceLocationFilter";
 import { useCountry } from "@/hooks/useCountry";
+import { useUserLocalePreference } from "@/hooks/useUserLocalePreference";
 
 const ClientFindCoaches = () => {
   const { t } = useTranslation("client");
@@ -40,17 +41,19 @@ const ClientFindCoaches = () => {
     clearManualLocation,
   } = useMarketplaceLocationFilter();
 
-  // Get country from context (geo-detected or stored preference)
-  const { countryCode: contextCountryCode, isLoading: countryLoading } = useCountry();
+  // Get country from context (geo-detected fallback)
+  const { countryCode: contextCountryCode } = useCountry();
+
+  // Get user's saved location preference from DB (for authenticated users)
+  const { countryPreference: userCountryPreference } = useUserLocalePreference();
 
   /**
    * Effective country code priority:
-   * 1. Manual selection from marketplace filter (user explicitly chose)
-   * 2. Context country (from URL locale, stored preference, or geo-detection)
-   * 
-   * This ensures manual location selection ALWAYS overrides geo-detection.
+   * 1. Manual selection from marketplace filter (user explicitly chose in this session)
+   * 2. User's saved preference in DB (from dashboard settings)
+   * 3. Context country (geo-detection fallback)
    */
-  const effectiveCountryCode = manualCountryCode ?? contextCountryCode;
+  const effectiveCountryCode = manualCountryCode ?? userCountryPreference ?? contextCountryCode;
 
   // Determine effective location for city-level ranking (manual overrides auto)
   const effectiveLocation = isManualSelection
