@@ -1,15 +1,15 @@
 <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-  <!-- Lime rounded square background -->
+  <!-- Lime rounded square background matching FitConnect brand -->
   <rect width="32" height="32" rx="6" fill="#BEFF00"/>
-  <!-- Dumbbell icon -->
-  <g transform="translate(5, 5)" stroke="#0D0D14" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Dumbbell icon matching brand design -->
+  <g transform="translate(4, 4)" stroke="#0D0D14" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
     <!-- Left weight plates -->
-    <path d="M4.5 5v12"/>
-    <path d="M7.5 6.5v9"/>
+    <rect x="2" y="6" width="3" height="12" rx="1"/>
+    <rect x="5" y="8" width="2.5" height="8" rx="0.5"/>
     <!-- Bar -->
-    <path d="M7.5 11h7"/>
+    <line x1="7.5" y1="12" x2="16.5" y2="12"/>
     <!-- Right weight plates -->
-    <path d="M14.5 6.5v9"/>
-    <path d="M17.5 5v12"/>
+    <rect x="16.5" y="8" width="2.5" height="8" rx="0.5"/>
+    <rect x="19" y="6" width="3" height="12" rx="1"/>
   </g>
 </svg>
