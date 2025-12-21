@@ -105,7 +105,18 @@
     "languageDescription": "Wybierz preferowany język",
     "languageHint": "Więcej języków wkrótce",
     "currency": "Waluta",
-    "currencyDescription": "Wybierz preferowaną walutę do wyświetlania"
+    "currencyDescription": "Wybierz preferowaną walutę do wyświetlania",
+    "animations": {
+      "title": "Animacje celebracji",
+      "description": "Skonfiguruj efekty celebracji dla osiągnięć i kamieni milowych",
+      "enableCelebrations": "Włącz celebracje",
+      "enableCelebrationsDesc": "Pokazuj wizualne celebracje przy osiąganiu kamieni milowych",
+      "enableConfetti": "Efekty konfetti",
+      "enableConfettiDesc": "Pokazuj animacje konfetti przy osiągnięciach",
+      "reducedMotionTitle": "Włączono ograniczony ruch",
+      "reducedMotionNotice": "Twój system preferuje ograniczony ruch. Animacje są automatycznie wyłączone dla dostępności.",
+      "accessibilityNote": "Animacje automatycznie respektują ustawienia dostępności Twojego systemu."
+    }
   },
 
   "notifications": {

@@ -105,7 +105,18 @@
     "languageDescription": "Choose your preferred language",
     "languageHint": "More languages coming soon",
     "currency": "Currency",
-    "currencyDescription": "Choose your preferred currency for display"
+    "currencyDescription": "Choose your preferred currency for display",
+    "animations": {
+      "title": "Celebration Animations",
+      "description": "Configure celebration effects for achievements and milestones",
+      "enableCelebrations": "Enable Celebrations",
+      "enableCelebrationsDesc": "Show visual celebrations when you achieve milestones",
+      "enableConfetti": "Confetti Effects",
+      "enableConfettiDesc": "Show confetti burst animations for achievements",
+      "reducedMotionTitle": "Reduced Motion Enabled",
+      "reducedMotionNotice": "Your system prefers reduced motion. Animations are automatically disabled for accessibility.",
+      "accessibilityNote": "Animations respect your system accessibility settings automatically."
+    }
   },
 
   "notifications": {

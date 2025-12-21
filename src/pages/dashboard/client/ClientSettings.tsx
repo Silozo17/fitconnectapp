@@ -19,6 +19,7 @@ import { LocationSelector } from "@/components/shared/LocationSelector";
 import { NotificationPreferences } from "@/components/notifications/NotificationPreferences";
 import { AccountSecuritySection } from "@/components/shared/AccountSecuritySection";
 import { LeaderboardSettings } from "@/components/gamification/LeaderboardSettings";
+import { AnimationSettingsCard } from "@/components/settings/AnimationSettingsCard";
 import { AvatarPicker } from "@/components/avatars/AvatarPicker";
 import { AvatarShowcase } from "@/components/avatars/AvatarShowcase";
 import { useSelectedAvatar } from "@/hooks/useAvatars";
@@ -466,6 +467,9 @@ const ClientSettings = () => {
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Animation Settings */}
+                <AnimationSettingsCard />
 
                 {/* Leaderboard Settings */}
                 <LeaderboardSettings
