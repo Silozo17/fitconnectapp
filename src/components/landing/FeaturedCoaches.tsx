@@ -3,8 +3,8 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Star, MapPin, ArrowRight, CheckCircle, Loader2, Users, Target, Globe, ShieldCheck } from "lucide-react";
-import { useCoachMarketplace } from "@/hooks/useCoachMarketplace";
 import { useUserLocation } from "@/hooks/useUserLocation";
+import { useFeaturedCoaches } from "@/hooks/useFeaturedCoaches";
 import { getDisplayLocation } from "@/lib/location-utils";
 import { BenefitCard } from "./BenefitCard";
 
@@ -12,28 +12,12 @@ const FeaturedCoaches = () => {
   const { t } = useTranslation('landing');
   const { location, isLoading: locationLoading } = useUserLocation();
   
-  // Build location search string
-  const locationSearch = location?.city || location?.region || location?.country || "";
-  
-  const { data: coaches, isLoading: coachesLoading } = useCoachMarketplace({
-    location: locationSearch,
-    limit: 4,
-    featured: true,
-    realCoachesOnly: true,
+  // Use dedicated hook for featured coaches with quality-based sorting
+  const { coaches: coachesToShow, isLoading: coachesLoading, locationLabel } = useFeaturedCoaches({
+    userLocation: location,
   });
 
-  // Fallback to all coaches if no local coaches found
-  const { data: fallbackCoaches } = useCoachMarketplace({
-    limit: 4,
-    featured: true,
-    realCoachesOnly: true,
-  });
-
-  const displayCoaches = coaches?.length ? coaches : fallbackCoaches;
   const isLoading = locationLoading || coachesLoading;
-  const locationLabel = location?.city || location?.region || location?.country || "Your Area";
-
-  const coachesToShow = displayCoaches || [];
 
   return (
     <section className="py-24 md:py-32 bg-background">
