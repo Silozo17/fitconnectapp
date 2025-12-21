@@ -93,9 +93,11 @@ export const LANGUAGE_STORAGE_KEY = 'fitconnect-language';
 const getStoredLanguage = (): LanguageCode => {
   try {
     const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
-    const supportedCodes = SUPPORTED_LANGUAGES.map(l => l.code) as string[];
+    // Include dev languages in dev mode for proper persistence
+    const availableLanguages = import.meta.env.DEV ? ALL_LANGUAGES : SUPPORTED_LANGUAGES;
+    const validCodes = availableLanguages.map(l => l.code) as string[];
     
-    if (stored && supportedCodes.includes(stored)) {
+    if (stored && validCodes.includes(stored)) {
       return stored as LanguageCode;
     }
   } catch {
