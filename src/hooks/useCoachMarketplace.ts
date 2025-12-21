@@ -19,6 +19,7 @@ export type MarketplaceCoach = {
   location_city: string | null;
   location_region: string | null;
   location_country: string | null;
+  location_country_code: string | null;
   online_available: boolean | null;
   in_person_available: boolean | null;
   profile_image_url: string | null;
@@ -71,6 +72,8 @@ export interface UseCoachMarketplaceOptions {
   enableLocationRanking?: boolean;
   /** Minimum results before expanding location radius (default: 5) */
   minResultsBeforeExpansion?: number;
+  /** Filter coaches by country code (e.g., 'gb', 'pl') - case insensitive */
+  countryCode?: string;
 }
 
 export interface UseCoachMarketplaceResult {
@@ -176,6 +179,11 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
 
       if (options.inPersonOnly) {
         query = query.eq("in_person_available", true);
+      }
+
+      // Apply country filter (case-insensitive match on location_country_code)
+      if (options.countryCode) {
+        query = query.ilike("location_country_code", options.countryCode);
       }
 
       // Don't limit at DB level if we're doing ranking (we'll limit after)

@@ -13,6 +13,7 @@ import RequestConnectionModal from "@/components/coaches/RequestConnectionModal"
 import { useCoachMarketplace, type MarketplaceCoach } from "@/hooks/useCoachMarketplace";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { useMarketplaceLocationFilter } from "@/hooks/useMarketplaceLocationFilter";
+import { useCountry } from "@/hooks/useCountry";
 
 const Coaches = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -44,6 +45,9 @@ const Coaches = () => {
       ? null
       : autoLocation;
 
+  // Get country from context for filtering
+  const { countryCode } = useCountry();
+
   const { data: coaches, isLoading, error } = useCoachMarketplace({
     search: searchQuery || undefined,
     coachTypes: selectedTypes.length > 0 ? selectedTypes : undefined,
@@ -52,6 +56,7 @@ const Coaches = () => {
     inPersonOnly,
     userLocation: effectiveLocation,
     enableLocationRanking: true,
+    countryCode,
   });
 
   const handleBook = useCallback((coach: MarketplaceCoach) => {
