@@ -277,7 +277,7 @@ export default function Community() {
                 <span className="text-sm font-medium text-primary">{t('community.hero.badge')}</span>
               </div>
               <h1 className="text-3xl md:text-5xl font-bold mb-4">
-                {t('community.hero.titleStart')}{" "}
+                {t('community.hero.title')}{" "}
                 <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   {t('community.hero.titleHighlight')}
                 </span>
@@ -390,10 +390,10 @@ export default function Community() {
                     <Table>
                       <TableHeader>
                         <TableRow className="bg-muted/50">
-                          <TableHead className="w-16 text-center">{t('pages.community.leaderboard.table.rank')}</TableHead>
-                          <TableHead>{t('pages.community.leaderboard.table.name')}</TableHead>
-                          <TableHead>{t('pages.community.leaderboard.table.location')}</TableHead>
-                          <TableHead className="text-center">{t('pages.community.leaderboard.table.level')}</TableHead>
+                          <TableHead className="w-16 text-center">{t('community.leaderboard.table.rank')}</TableHead>
+                          <TableHead>{t('community.leaderboard.table.name')}</TableHead>
+                          <TableHead>{t('community.leaderboard.table.location')}</TableHead>
+                          <TableHead className="text-center">{t('community.leaderboard.table.level')}</TableHead>
                           <TableHead className="text-right">XP</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -411,7 +411,7 @@ export default function Community() {
                         ) : (
                           <TableRow>
                             <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
-                              {t('empty.noParticipants')}
+                              {t('community.leaderboard.noResults')}
                             </TableCell>
                           </TableRow>
                         )}
@@ -432,7 +432,7 @@ export default function Community() {
                     ))
                   ) : (
                     <Card className="p-8 text-center text-muted-foreground">
-                      {t('empty.noParticipants')}
+                      {t('community.leaderboard.noResults')}
                     </Card>
                   )}
                 </div>
@@ -499,8 +499,8 @@ export default function Community() {
                         <Trophy className="h-6 w-6 text-primary" />
                       </div>
                       <div>
-                        <h3 className="font-semibold">{t('pages.community.avatars.unlock.challenges.title')}</h3>
-                        <p className="text-sm text-muted-foreground">{t('pages.community.avatars.unlock.challenges.description')}</p>
+                        <h3 className="font-semibold">{t('community.avatars.unlock.challenges.title')}</h3>
+                        <p className="text-sm text-muted-foreground">{t('community.avatars.unlock.challenges.description')}</p>
                       </div>
                     </div>
                   </Card>
@@ -510,8 +510,8 @@ export default function Community() {
                         <Target className="h-6 w-6 text-accent" />
                       </div>
                       <div>
-                        <h3 className="font-semibold">{t('pages.community.avatars.unlock.milestones.title')}</h3>
-                        <p className="text-sm text-muted-foreground">{t('pages.community.avatars.unlock.milestones.description')}</p>
+                        <h3 className="font-semibold">{t('community.avatars.unlock.milestones.title')}</h3>
+                        <p className="text-sm text-muted-foreground">{t('community.avatars.unlock.milestones.description')}</p>
                       </div>
                     </div>
                   </Card>
@@ -521,8 +521,8 @@ export default function Community() {
                         <Flame className="h-6 w-6 text-orange-500" />
                       </div>
                       <div>
-                        <h3 className="font-semibold">{t('pages.community.avatars.unlock.streaks.title')}</h3>
-                        <p className="text-sm text-muted-foreground">{t('pages.community.avatars.unlock.streaks.description')}</p>
+                        <h3 className="font-semibold">{t('community.avatars.unlock.streaks.title')}</h3>
+                        <p className="text-sm text-muted-foreground">{t('community.avatars.unlock.streaks.description')}</p>
                       </div>
                     </div>
                   </Card>
@@ -531,10 +531,10 @@ export default function Community() {
                 {/* Avatar Sub-Tabs */}
                 <Tabs defaultValue="all" className="space-y-6">
                   <TabsList className="grid w-full grid-cols-4 max-w-md mx-auto">
-                    <TabsTrigger value="all">{t('pages.community.avatars.tabs.all')}</TabsTrigger>
-                    <TabsTrigger value="free">{t('pages.community.avatars.tabs.free')}</TabsTrigger>
-                    <TabsTrigger value="challenge">{t('pages.community.avatars.tabs.challenge')}</TabsTrigger>
-                    <TabsTrigger value="coach">{t('pages.community.avatars.tabs.coach')}</TabsTrigger>
+                    <TabsTrigger value="all">{t('community.avatars.tabs.all')}</TabsTrigger>
+                    <TabsTrigger value="free">{t('community.avatars.tabs.free')}</TabsTrigger>
+                    <TabsTrigger value="challenge">{t('community.avatars.tabs.challenge')}</TabsTrigger>
+                    <TabsTrigger value="coach">{t('community.avatars.tabs.coach')}</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="all">
@@ -548,7 +548,7 @@ export default function Community() {
                           <div>
                             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                               <Sparkles className="h-5 w-5 text-primary" />
-                              {t('pages.community.avatars.categories.free')}
+                              {t('community.avatars.categories.free')}
                             </h2>
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                               {freeAvatars.map(avatar => <AvatarCard key={avatar.id} avatar={avatar} />)}
@@ -560,7 +560,7 @@ export default function Community() {
                           <div>
                             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                               <Trophy className="h-5 w-5 text-yellow-500" />
-                              {t('pages.community.avatars.categories.challenge')}
+                              {t('community.avatars.categories.challenge')}
                             </h2>
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                               {challengeAvatars.map(avatar => <AvatarCard key={avatar.id} avatar={avatar} locked />)}
@@ -572,7 +572,7 @@ export default function Community() {
                           <div>
                             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                               <Crown className="h-5 w-5 text-purple-500" />
-                              {t('pages.community.avatars.categories.coach')}
+                              {t('community.avatars.categories.coach')}
                             </h2>
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                               {coachAvatars.map(avatar => <AvatarCard key={avatar.id} avatar={avatar} locked />)}
@@ -607,20 +607,20 @@ export default function Community() {
             {/* CTA */}
             <Card className="mt-10 p-6 md:p-8 bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20 text-center">
               <Users className="h-10 w-10 text-primary mx-auto mb-4" />
-              <h2 className="text-xl md:text-2xl font-bold mb-2">{t('pages.community.cta.title')}</h2>
+              <h2 className="text-xl md:text-2xl font-bold mb-2">{t('community.cta.title')}</h2>
               <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                {t('pages.community.cta.description')}
+                {t('community.cta.description')}
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Link to="/auth?tab=signup">
                   <Button size="lg" className="gap-2">
-                    {t('pages.community.cta.getStarted')}
+                    {t('community.cta.getStarted')}
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </Link>
                 <Link to="/coaches">
                   <Button size="lg" variant="outline" className="gap-2">
-                    {t('pages.community.cta.findCoach')}
+                    {t('community.cta.findCoach')}
                   </Button>
                 </Link>
               </div>

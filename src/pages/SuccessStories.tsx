@@ -132,7 +132,7 @@ const SuccessStories = () => {
               {t('successStories.hero.badge')}
             </Badge>
             <h1 className="font-display text-4xl md:text-6xl font-bold mb-6">
-              {t('successStories.hero.titleStart')} <span className="text-gradient-primary">{t('successStories.hero.titleHighlight')}</span>
+              {t('successStories.hero.title')} <span className="text-gradient-primary">{t('successStories.hero.titleHighlight')}</span>
             </h1>
             <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto">
               {t('successStories.hero.description')}
