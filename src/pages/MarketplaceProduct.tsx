@@ -37,7 +37,8 @@ export default function MarketplaceProduct() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t } = useTranslation('marketplace');
+  const { t: tCommon } = useTranslation('common');
   const [showPreview, setShowPreview] = useState(false);
 
   const { data: product, isLoading } = useDigitalProduct(productId || "");
@@ -89,7 +90,7 @@ export default function MarketplaceProduct() {
 
   if (isLoading) {
     return (
-      <PageLayout title={t('loading.default')} description={t('loading.default')}>
+      <PageLayout title={tCommon('loading.default')} description={tCommon('loading.default')}>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
         </div>
@@ -99,11 +100,11 @@ export default function MarketplaceProduct() {
 
   if (!product) {
     return (
-      <PageLayout title="Product Not Found" description="The product you're looking for doesn't exist">
+      <PageLayout title={t('product.notFound')} description={t('product.notFoundDesc')}>
         <div className="min-h-screen bg-background flex flex-col items-center justify-center">
           <Package className="h-16 w-16 text-muted-foreground mb-4" />
-          <h1 className="text-2xl font-bold mb-2">Product Not Found</h1>
-          <Button onClick={() => navigate("/marketplace")}>Back to Marketplace</Button>
+          <h1 className="text-2xl font-bold mb-2">{t('product.notFound')}</h1>
+          <Button onClick={() => navigate("/marketplace")}>{t('product.backToMarketplace')}</Button>
         </div>
       </PageLayout>
     );
@@ -156,7 +157,7 @@ export default function MarketplaceProduct() {
               className="mb-6"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Marketplace
+              {t('product.backToMarketplace')}
             </Button>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -208,25 +209,25 @@ export default function MarketplaceProduct() {
                   {product.duration_minutes && (
                     <span className="flex items-center gap-1">
                       <Clock className="h-4 w-4" />
-                      {product.duration_minutes} minutes
+                      {t('product.minutes', { count: product.duration_minutes })}
                     </span>
                   )}
                   {product.page_count && (
                     <span className="flex items-center gap-1">
                       <FileText className="h-4 w-4" />
-                      {product.page_count} pages
+                      {t('product.pages', { count: product.page_count })}
                     </span>
                   )}
                   {product.is_downloadable && (
                     <span className="flex items-center gap-1">
                       <FileDown className="h-4 w-4" />
-                      Downloadable
+                      {t('product.downloadable')}
                     </span>
                   )}
                   {product.is_streamable && (
                     <span className="flex items-center gap-1">
                       <Play className="h-4 w-4" />
-                      Streamable
+                      {t('product.streamable')}
                     </span>
                   )}
                 </div>
@@ -235,8 +236,8 @@ export default function MarketplaceProduct() {
               {/* Tabs */}
               <Tabs defaultValue="description" className="space-y-4">
                 <TabsList>
-                  <TabsTrigger value="description">Description</TabsTrigger>
-                  <TabsTrigger value="reviews">Reviews ({reviews?.length || 0})</TabsTrigger>
+                  <TabsTrigger value="description">{t('product.tabs.description')}</TabsTrigger>
+                  <TabsTrigger value="reviews">{t('product.tabs.reviews')} ({reviews?.length || 0})</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="description" className="space-y-4">
@@ -250,7 +251,7 @@ export default function MarketplaceProduct() {
                   {product.preview_url && (
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-lg">Preview</CardTitle>
+                        <CardTitle className="text-lg">{t('product.preview')}</CardTitle>
                       </CardHeader>
                       <CardContent>
                         {product.content_type.includes("video") ? (
@@ -266,7 +267,7 @@ export default function MarketplaceProduct() {
                             rel="noopener noreferrer"
                             className="text-primary hover:underline"
                           >
-                            View Preview
+                            {t('product.viewPreview')}
                           </a>
                         )}
                       </CardContent>
@@ -283,7 +284,7 @@ export default function MarketplaceProduct() {
                             <div className="flex items-center gap-2">
                               <User className="h-8 w-8 p-1 rounded-full bg-muted" />
                               <div>
-                                <p className="font-medium">User</p>
+                                <p className="font-medium">{t('product.user')}</p>
                                 <p className="text-xs text-muted-foreground">
                                   {new Date(review.created_at).toLocaleDateString()}
                                 </p>
@@ -297,7 +298,7 @@ export default function MarketplaceProduct() {
                           {review.is_verified_purchase && (
                             <Badge variant="outline" className="mt-2 text-xs">
                               <Check className="h-3 w-3 mr-1" />
-                              Verified Purchase
+                              {t('product.verifiedPurchase')}
                             </Badge>
                           )}
                         </CardContent>
@@ -307,7 +308,7 @@ export default function MarketplaceProduct() {
                     <Card>
                       <CardContent className="p-8 text-center">
                         <Star className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-                        <p className="text-muted-foreground">No reviews yet</p>
+                        <p className="text-muted-foreground">{t('product.noReviews')}</p>
                       </CardContent>
                     </Card>
                   )}
@@ -323,7 +324,7 @@ export default function MarketplaceProduct() {
                   <div className="text-center">
                     {product.price === 0 ? (
                       <Badge className="text-lg px-4 py-2 bg-green-500 text-white">
-                        FREE
+                        {t('product.free')}
                       </Badge>
                     ) : (
                       <div className="space-y-1">
@@ -337,7 +338,7 @@ export default function MarketplaceProduct() {
                         </p>
                         {product.compare_at_price && product.compare_at_price > product.price && (
                           <Badge variant="destructive" className="mt-2">
-                            Save {Math.round(((product.compare_at_price - product.price) / product.compare_at_price) * 100)}%
+                            {t('product.savePercent', { percent: Math.round(((product.compare_at_price - product.price) / product.compare_at_price) * 100) })}
                           </Badge>
                         )}
                       </div>
@@ -352,7 +353,7 @@ export default function MarketplaceProduct() {
                       onClick={() => setShowPreview(true)}
                     >
                       <Eye className="h-4 w-4 mr-2" />
-                      Watch Free Preview
+                      {t('product.watchFreePreview')}
                     </Button>
                   )}
 
@@ -360,10 +361,10 @@ export default function MarketplaceProduct() {
                     <div className="space-y-3">
                       <Button className="w-full" size="lg" onClick={() => navigate("/dashboard/client/library")}>
                         <Check className="h-4 w-4 mr-2" />
-                        Go to Library
+                        {t('product.goToLibrary')}
                       </Button>
                       <p className="text-sm text-center text-muted-foreground">
-                        You already own this content
+                        {t('product.alreadyOwned')}
                       </p>
                     </div>
                   ) : (
@@ -373,7 +374,7 @@ export default function MarketplaceProduct() {
                       onClick={handlePurchase}
                     >
                       <ShoppingCart className="h-4 w-4 mr-2" />
-                      {product.price === 0 ? "Get for Free" : "Purchase Now"}
+                      {product.price === 0 ? t('product.getForFree') : t('product.purchaseNow')}
                     </Button>
                   )}
 
@@ -381,7 +382,7 @@ export default function MarketplaceProduct() {
 
                   {/* Coach Info */}
                   <div>
-                    <p className="text-sm text-muted-foreground mb-3">Created by</p>
+                    <p className="text-sm text-muted-foreground mb-3">{t('product.createdBy')}</p>
                     <div 
                       className="flex items-center gap-3 cursor-pointer hover:bg-muted/50 p-2 rounded-lg -mx-2"
                       onClick={() => navigate(`/coaches/${product.coach_profiles?.username || product.coach_id}`)}
@@ -393,7 +394,7 @@ export default function MarketplaceProduct() {
                       />
                       <div>
                         <p className="font-medium">{product.coach_profiles?.display_name}</p>
-                        <p className="text-xs text-muted-foreground">View Profile</p>
+                        <p className="text-xs text-muted-foreground">{t('product.viewProfile')}</p>
                       </div>
                     </div>
                   </div>
@@ -403,7 +404,7 @@ export default function MarketplaceProduct() {
                     <>
                       <Separator />
                       <div>
-                        <p className="text-sm text-muted-foreground mb-2">Tags</p>
+                        <p className="text-sm text-muted-foreground mb-2">{t('product.tags')}</p>
                         <div className="flex flex-wrap gap-2">
                           {product.tags.map((tag) => (
                             <Badge key={tag} variant="outline" className="text-xs">
@@ -424,32 +425,23 @@ export default function MarketplaceProduct() {
         <Dialog open={showPreview} onOpenChange={setShowPreview}>
           <DialogContent className="max-w-4xl">
             <DialogHeader>
-              <DialogTitle>Preview: {product.title}</DialogTitle>
+              <DialogTitle>{t('product.preview')}: {product.title}</DialogTitle>
             </DialogHeader>
             <div className="aspect-video">
-              {product.preview_url && (
-                product.preview_url.includes("youtube") || product.preview_url.includes("youtu.be") ? (
-                  <iframe
-                    src={product.preview_url.replace("watch?v=", "embed/").replace("youtu.be/", "youtube.com/embed/")}
-                    className="w-full h-full rounded-lg"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                ) : product.preview_url.includes("vimeo") ? (
-                  <iframe
-                    src={product.preview_url.replace("vimeo.com/", "player.vimeo.com/video/")}
-                    className="w-full h-full rounded-lg"
-                    allow="autoplay; fullscreen; picture-in-picture"
-                    allowFullScreen
-                  />
-                ) : (
-                  <video
-                    src={product.preview_url}
-                    controls
-                    className="w-full h-full rounded-lg"
-                  />
-                )
-              )}
+              {product.preview_url && product.content_type.includes("video") ? (
+                <video
+                  src={product.preview_url}
+                  controls
+                  autoPlay
+                  className="w-full h-full rounded-lg"
+                />
+              ) : product.preview_url ? (
+                <iframe
+                  src={product.preview_url}
+                  className="w-full h-full rounded-lg"
+                  title="Preview"
+                />
+              ) : null}
             </div>
           </DialogContent>
         </Dialog>

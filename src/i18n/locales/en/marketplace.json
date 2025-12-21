@@ -1,0 +1,44 @@
+{
+  "product": {
+    "notFound": "Product Not Found",
+    "notFoundDesc": "The product you're looking for doesn't exist",
+    "backToMarketplace": "Back to Marketplace",
+    "minutes": "{{count}} minutes",
+    "pages": "{{count}} pages",
+    "downloadable": "Downloadable",
+    "streamable": "Streamable",
+    "tabs": {
+      "description": "Description",
+      "reviews": "Reviews"
+    },
+    "preview": "Preview",
+    "viewPreview": "View Preview",
+    "watchFreePreview": "Watch Free Preview",
+    "verifiedPurchase": "Verified Purchase",
+    "noReviews": "No reviews yet",
+    "free": "FREE",
+    "savePercent": "Save {{percent}}%",
+    "goToLibrary": "Go to Library",
+    "alreadyOwned": "You already own this content",
+    "purchaseNow": "Purchase Now",
+    "getForFree": "Get for Free",
+    "createdBy": "Created by",
+    "viewProfile": "View Profile",
+    "tags": "Tags",
+    "user": "User"
+  },
+  "bundle": {
+    "notFound": "Bundle Not Found",
+    "notFoundDesc": "The bundle you're looking for doesn't exist",
+    "badge": "Bundle",
+    "whatsIncluded": "What's Included ({{count}} items)",
+    "included": "Included",
+    "youSave": "You save {{amount}}",
+    "alreadyOwned": "You already own this bundle",
+    "purchaseBundle": "Purchase Bundle",
+    "stats": {
+      "items": "Items",
+      "savings": "Savings"
+    }
+  }
+}

@@ -29,10 +29,12 @@ import { CoachSocialLinksSection } from "@/components/coach/CoachSocialLinksSect
 import { CoachDigitalProductsSection } from "@/components/coach/CoachDigitalProductsSection";
 import { useExchangeRates } from "@/hooks/useExchangeRates";
 import { getDisplayLocation } from "@/lib/location-utils";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const CoachDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation('coaches');
   const { data: coach, isLoading, error } = useCoachById(id || "");
   const { convertForViewer } = useExchangeRates();
   
@@ -73,7 +75,7 @@ const CoachDetail = () => {
 
   if (isLoading) {
     return (
-      <PageLayout title="Loading Coach" description="Loading coach profile">
+      <PageLayout title={t('detail.loading')} description={t('detail.loading')}>
         <div className="min-h-screen flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -83,11 +85,11 @@ const CoachDetail = () => {
 
   if (error || !coach) {
     return (
-      <PageLayout title="Coach Not Found" description="The requested coach profile could not be found">
+      <PageLayout title={t('detail.coachNotFound')} description={t('detail.coachNotFound')}>
         <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-          <p className="text-muted-foreground">Coach not found</p>
+          <p className="text-muted-foreground">{t('detail.coachNotFound')}</p>
           <Button asChild>
-            <Link to="/coaches">Browse Coaches</Link>
+            <Link to="/coaches">{t('detail.browseCoaches')}</Link>
           </Button>
         </div>
       </PageLayout>
@@ -157,7 +159,7 @@ const CoachDetail = () => {
             <Button variant="ghost" asChild size="sm">
               <Link to="/coaches">
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Coaches
+                {t('detail.backToCoaches')}
               </Link>
             </Button>
           </div>
@@ -231,7 +233,7 @@ const CoachDetail = () => {
                         <p className="text-4xl font-bold text-foreground">
                           {formatCurrency(convertedRate.amount, convertedRate.currency)}
                         </p>
-                        <p className="text-muted-foreground mt-1">per session</p>
+                        <p className="text-muted-foreground mt-1">{t('detail.perSession')}</p>
                         {convertedRate.wasConverted && (
                           <p className="text-sm text-muted-foreground mt-1">
                             ({formatCurrency(convertedRate.originalAmount, convertedRate.originalCurrency)})
@@ -239,7 +241,7 @@ const CoachDetail = () => {
                         )}
                       </>
                     ) : (
-                      <p className="text-lg text-muted-foreground">Contact for pricing</p>
+                      <p className="text-lg text-muted-foreground">{t('detail.contactForPricing')}</p>
                     )}
                   </div>
 
@@ -258,7 +260,7 @@ const CoachDetail = () => {
                           ) : (
                             <MessageSquare className="h-4 w-4 mr-2" />
                           )}
-                          Message Coach
+                          {t('detail.messageCoach')}
                         </Button>
                         <Button 
                           className="w-full" 
@@ -267,7 +269,7 @@ const CoachDetail = () => {
                           onClick={() => setShowBookingModal(true)}
                         >
                           <Calendar className="h-4 w-4 mr-2" />
-                          Book Session
+                          {t('detail.bookSession')}
                         </Button>
                         <div className="pt-2">
                           <Button 
@@ -276,23 +278,23 @@ const CoachDetail = () => {
                             size="sm"
                             onClick={() => setShowRequestModal(true)}
                           >
-                            Request Connection
+                            {t('detail.requestConnection')}
                           </Button>
                         </div>
                       </>
                     ) : user ? (
                       <p className="text-sm text-muted-foreground text-center py-4">
-                        Sign in as a client to connect with this coach
+                        {t('detail.signInAsClient')}
                       </p>
                     ) : (
                       <>
                         <Button className="w-full" size="lg" asChild>
                           <Link to="/auth?tab=register&role=client">
-                            Sign Up to Connect
+                            {t('detail.signUpToConnect')}
                           </Link>
                         </Button>
                         <p className="text-xs text-muted-foreground text-center mt-2">
-                          Create an account to connect with coaches
+                          {t('detail.createAccountToConnect')}
                         </p>
                       </>
                     )}
@@ -304,7 +306,7 @@ const CoachDetail = () => {
                       <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-muted">
                         <Clock className="h-4 w-4 text-muted-foreground" />
                       </div>
-                      <span className="text-muted-foreground">Usually responds within 24 hours</span>
+                      <span className="text-muted-foreground">{t('detail.respondsWithin')}</span>
                     </div>
                     {sessionTypes.length > 0 && (
                       <div className="flex items-center gap-3 text-sm">
@@ -312,7 +314,7 @@ const CoachDetail = () => {
                           <Calendar className="h-4 w-4 text-muted-foreground" />
                         </div>
                         <span className="text-muted-foreground">
-                          {sessionTypes.length} session type{sessionTypes.length > 1 ? 's' : ''} available
+                          {t('detail.sessionTypesAvailable', { count: sessionTypes.length, plural: sessionTypes.length > 1 ? 's' : '' })}
                         </span>
                       </div>
                     )}
@@ -321,7 +323,7 @@ const CoachDetail = () => {
                   {/* Mini Availability Preview */}
                   {availability.length > 0 && (
                     <div className="mt-6 pt-6 border-t border-border">
-                      <p className="text-sm font-medium text-foreground mb-3">Available Days</p>
+                      <p className="text-sm font-medium text-foreground mb-3">{t('detail.availableDays')}</p>
                       <div className="flex flex-wrap gap-2">
                         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => {
                           const dayAvail = availability.find(a => a.day_of_week === index && a.is_active);

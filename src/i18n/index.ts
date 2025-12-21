@@ -51,6 +51,7 @@ import enCoach from './locales/en/coach.json';
 import enAdmin from './locales/en/admin.json';
 import enPages from './locales/en/pages.json';
 import enGamification from './locales/en/gamification.json';
+import enMarketplace from './locales/en/marketplace.json';
 import plCommon from './locales/pl/common.json';
 import plLanding from './locales/pl/landing.json';
 import plDashboard from './locales/pl/dashboard.json';
@@ -63,6 +64,7 @@ import plCoach from './locales/pl/coach.json';
 import plAdmin from './locales/pl/admin.json';
 import plPages from './locales/pl/pages.json';
 import plGamification from './locales/pl/gamification.json';
+import plMarketplace from './locales/pl/marketplace.json';
 
 // Production-visible languages (what users see in production)
 export const SUPPORTED_LANGUAGES = [
@@ -118,6 +120,7 @@ const resources = {
     admin: enAdmin,
     pages: enPages,
     gamification: enGamification,
+    marketplace: enMarketplace,
   },
   pl: {
     common: plCommon,
@@ -132,6 +135,7 @@ const resources = {
     admin: plAdmin,
     pages: plPages,
     gamification: plGamification,
+    marketplace: plMarketplace,
   },
 };
 
@@ -175,7 +179,7 @@ i18nInstance.init({
   fallbackLng: DEFAULT_LANGUAGE,
   supportedLngs: getWhitelistedLanguages(),
   defaultNS: 'common',
-  ns: ['common', 'landing', 'dashboard', 'settings', 'booking', 'messaging', 'coaches', 'client', 'coach', 'admin', 'pages', 'gamification'],
+  ns: ['common', 'landing', 'dashboard', 'settings', 'booking', 'messaging', 'coaches', 'client', 'coach', 'admin', 'pages', 'gamification', 'marketplace'],
   
   // Detection config (only used if detector is added)
   detection: detectionOptions,

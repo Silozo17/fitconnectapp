@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import CheckoutButton from "@/components/payments/CheckoutButton";
 import { formatCurrency, type CurrencyCode } from "@/lib/currency";
 import { useExchangeRates } from "@/hooks/useExchangeRates";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface CoachPricingSectionProps {
   coachId: string;
@@ -15,6 +16,7 @@ interface CoachPricingSectionProps {
 }
 
 const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPricingSectionProps) => {
+  const { t } = useTranslation('coaches');
   const { convertForViewer } = useExchangeRates();
   const { data: packages = [], isLoading: packagesLoading } = useCoachPackages(coachId);
   const { data: plans = [], isLoading: plansLoading } = useCoachSubscriptionPlans(coachId);
@@ -46,7 +48,7 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Package className="h-5 w-5" />
-          Pricing & Packages
+          {t('profile.pricingPackages')}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -54,12 +56,12 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
           <TabsList className="mb-4">
             {hasPackages && (
               <TabsTrigger value="packages">
-                Session Packages
+                {t('profile.sessionPackages')}
               </TabsTrigger>
             )}
             {hasPlans && (
               <TabsTrigger value="subscriptions">
-                Subscriptions
+                {t('profile.subscriptions')}
               </TabsTrigger>
             )}
           </TabsList>
@@ -83,7 +85,7 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
                           <p className="text-sm text-muted-foreground">{pkg.description}</p>
                         )}
                       </div>
-                      <Badge variant="secondary">{pkg.session_count} sessions</Badge>
+                      <Badge variant="secondary">{t('profile.sessions', { count: pkg.session_count })}</Badge>
                     </div>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4">
                       <div className="min-w-0">
@@ -91,11 +93,11 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
                           {formatCurrency(convertedPrice.amount, convertedPrice.currency)}
                         </span>
                         <span className="text-sm text-muted-foreground ml-2 block sm:inline">
-                          ({formatCurrency(convertedPerSession.amount, convertedPerSession.currency)}/session)
+                          ({formatCurrency(convertedPerSession.amount, convertedPerSession.currency)}{t('profile.perSession')})
                         </span>
                         {convertedPrice.wasConverted && (
                           <span className="text-xs text-muted-foreground block">
-                            Original: {formatCurrency(convertedPrice.originalAmount, convertedPrice.originalCurrency)}
+                            {t('profile.original')}: {formatCurrency(convertedPrice.originalAmount, convertedPrice.originalCurrency)}
                           </span>
                         )}
                       </div>
@@ -103,13 +105,13 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
                         type="package"
                         itemId={pkg.id}
                         coachId={coachId}
-                        label="Purchase"
+                        label={t('profile.purchase')}
                         size="sm"
                         className="w-full sm:w-auto"
                       />
                     </div>
                     <p className="text-xs text-muted-foreground mt-2">
-                      Valid for {pkg.validity_days} days after purchase
+                      {t('profile.validForDays', { days: pkg.validity_days })}
                     </p>
                   </div>
                 );
@@ -150,7 +152,7 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
                         ))}
                         {plan.features.length > 4 && (
                           <li className="text-xs text-muted-foreground">
-                            +{plan.features.length - 4} more features
+                            {t('profile.moreFeatures', { count: plan.features.length - 4 })}
                           </li>
                         )}
                       </ul>
@@ -164,7 +166,7 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
                         <span className="text-sm text-muted-foreground">/{plan.billing_period}</span>
                         {convertedPrice.wasConverted && (
                           <span className="text-xs text-muted-foreground block">
-                            Original: {formatCurrency(convertedPrice.originalAmount, convertedPrice.originalCurrency)}
+                            {t('profile.original')}: {formatCurrency(convertedPrice.originalAmount, convertedPrice.originalCurrency)}
                           </span>
                         )}
                       </div>
@@ -172,7 +174,7 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
                         type="subscription"
                         itemId={plan.id}
                         coachId={coachId}
-                        label="Subscribe"
+                        label={t('profile.subscribe')}
                         size="sm"
                         className="w-full sm:w-auto"
                       />

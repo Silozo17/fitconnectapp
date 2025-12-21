@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import type { MarketplaceCoach } from "@/hooks/useCoachMarketplace";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface RequestConnectionModalProps {
   open: boolean;
@@ -33,6 +34,7 @@ const RequestConnectionModal = ({
   coach,
 }: RequestConnectionModalProps) => {
   const { user } = useAuth();
+  const { t } = useTranslation('coaches');
   const queryClient = useQueryClient();
   const [message, setMessage] = useState("");
 
@@ -138,7 +140,7 @@ const RequestConnectionModal = ({
       }
     },
     onSuccess: () => {
-      toast.success("Connection request sent!");
+      toast.success(t('connection.sent'));
       queryClient.invalidateQueries({
         queryKey: ["connection-status", clientProfile?.id, coach.id],
       });
@@ -159,25 +161,25 @@ const RequestConnectionModal = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Connect with {coach.display_name}</DialogTitle>
+          <DialogTitle>{t('connection.connectWith', { name: coach.display_name })}</DialogTitle>
           <DialogDescription>
-            Send a connection request to start working with this coach.
+            {t('connection.sendRequest')}
           </DialogDescription>
         </DialogHeader>
 
         {existingStatus?.type === "connected" ? (
           <div className="flex flex-col items-center py-6 text-center">
             <CheckCircle className="h-12 w-12 text-green-500 mb-3" />
-            <p className="font-medium text-foreground">Already Connected</p>
+            <p className="font-medium text-foreground">{t('connection.alreadyConnected')}</p>
             <p className="text-sm text-muted-foreground mt-1">
-              You are already connected with this coach.
+              {t('connection.alreadyConnectedDesc')}
             </p>
             <Button
               variant="outline"
               className="mt-4"
               onClick={() => onOpenChange(false)}
             >
-              Close
+              {t('connection.close')}
             </Button>
           </div>
         ) : existingStatus?.type === "request" ? (
@@ -185,29 +187,29 @@ const RequestConnectionModal = ({
             <div className="h-12 w-12 rounded-full bg-amber-500/10 flex items-center justify-center mb-3">
               <Loader2 className="h-6 w-6 text-amber-500" />
             </div>
-            <p className="font-medium text-foreground">Request Pending</p>
+            <p className="font-medium text-foreground">{t('connection.requestPending')}</p>
             <p className="text-sm text-muted-foreground mt-1">
               {existingStatus.data.status === "pending"
-                ? "Your request is awaiting the coach's response."
-                : `Your request was ${existingStatus.data.status}.`}
+                ? t('connection.awaitingResponse')
+                : t('connection.requestWas', { status: existingStatus.data.status })}
             </p>
             <Button
               variant="outline"
               className="mt-4"
               onClick={() => onOpenChange(false)}
             >
-              Close
+              {t('connection.close')}
             </Button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="message">
-                Message (Optional)
+                {t('connection.messageOptional')}
               </Label>
               <Textarea
                 id="message"
-                placeholder="Tell the coach about your fitness goals and what you're looking for..."
+                placeholder={t('connection.tellCoachAbout')}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 rows={4}
@@ -224,7 +226,7 @@ const RequestConnectionModal = ({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
               >
-                Cancel
+                {t('connection.cancel')}
               </Button>
               <Button
                 type="submit"
@@ -235,7 +237,7 @@ const RequestConnectionModal = ({
                 ) : (
                   <Send className="h-4 w-4 mr-2" />
                 )}
-                Send Request
+                {t('connection.send')}
               </Button>
             </div>
           </form>

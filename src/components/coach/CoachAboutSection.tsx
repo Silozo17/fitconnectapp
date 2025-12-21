@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface CoachAboutSectionProps {
   bio: string | null;
@@ -14,6 +15,7 @@ const MAX_CHARS = 300;
 
 export function CoachAboutSection({ bio, whoIWorkWith }: CoachAboutSectionProps) {
   const [expanded, setExpanded] = useState(false);
+  const { t } = useTranslation('coaches');
   
   const hasBio = bio && bio.trim().length > 0;
   const hasWhoIWorkWith = whoIWorkWith && whoIWorkWith.trim().length > 0;
@@ -37,7 +39,7 @@ export function CoachAboutSection({ bio, whoIWorkWith }: CoachAboutSectionProps)
             <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
               <User className="h-5 w-5 text-primary" />
             </div>
-            <h2 className="text-xl font-semibold text-foreground">About Me</h2>
+            <h2 className="text-xl font-semibold text-foreground">{t('profile.aboutMe')}</h2>
           </div>
           <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
             {displayBio}
@@ -52,12 +54,12 @@ export function CoachAboutSection({ bio, whoIWorkWith }: CoachAboutSectionProps)
               {expanded ? (
                 <>
                   <ChevronUp className="h-4 w-4 mr-1" />
-                  Show less
+                  {t('profile.showLess')}
                 </>
               ) : (
                 <>
                   <ChevronDown className="h-4 w-4 mr-1" />
-                  Read more
+                  {t('profile.readMore')}
                 </>
               )}
             </Button>
@@ -75,7 +77,7 @@ export function CoachAboutSection({ bio, whoIWorkWith }: CoachAboutSectionProps)
             <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-accent/10">
               <Target className="h-5 w-5 text-accent-foreground" />
             </div>
-            <h2 className="text-xl font-semibold text-foreground">Who I Work With</h2>
+            <h2 className="text-xl font-semibold text-foreground">{t('profile.whoIWorkWith')}</h2>
           </div>
           <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
             {whoIWorkWith}
@@ -93,11 +95,11 @@ export function CoachAboutSection({ bio, whoIWorkWith }: CoachAboutSectionProps)
           <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger value="about" className="flex items-center gap-2">
               <User className="h-4 w-4" />
-              About Me
+              {t('profile.aboutMe')}
             </TabsTrigger>
             <TabsTrigger value="clients" className="flex items-center gap-2">
               <Target className="h-4 w-4" />
-              Who I Work With
+              {t('profile.whoIWorkWith')}
             </TabsTrigger>
           </TabsList>
           
@@ -115,12 +117,12 @@ export function CoachAboutSection({ bio, whoIWorkWith }: CoachAboutSectionProps)
                 {expanded ? (
                   <>
                     <ChevronUp className="h-4 w-4 mr-1" />
-                    Show less
+                    {t('profile.showLess')}
                   </>
                 ) : (
                   <>
                     <ChevronDown className="h-4 w-4 mr-1" />
-                    Read more
+                    {t('profile.readMore')}
                   </>
                 )}
               </Button>

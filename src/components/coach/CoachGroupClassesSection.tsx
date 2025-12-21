@@ -8,12 +8,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { formatCurrency, type CurrencyCode } from "@/lib/currency";
 import { toast } from "sonner";
 import { useExchangeRates } from "@/hooks/useExchangeRates";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface CoachGroupClassesSectionProps {
   coachId: string;
 }
 
 export function CoachGroupClassesSection({ coachId }: CoachGroupClassesSectionProps) {
+  const { t } = useTranslation('coaches');
   const { data: groupClasses, isLoading } = useCoachGroupClasses(coachId);
   const { data: myWaitlistEntries = [] } = useMyWaitlistEntries();
   const joinWaitlist = useJoinWaitlist();
@@ -47,7 +49,7 @@ export function CoachGroupClassesSection({ coachId }: CoachGroupClassesSectionPr
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            Group Classes
+            {t('profile.groupClasses')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -66,7 +68,7 @@ export function CoachGroupClassesSection({ coachId }: CoachGroupClassesSectionPr
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Users className="h-5 w-5" />
-          Group Classes
+          {t('profile.groupClasses')}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -87,7 +89,7 @@ export function CoachGroupClassesSection({ coachId }: CoachGroupClassesSectionPr
                     <div className="flex items-center gap-2">
                       <h4 className="font-semibold text-foreground">{groupClass.title}</h4>
                       {groupClass.is_waitlist_open && (
-                        <Badge variant="secondary" className="text-xs">Waitlist Open</Badge>
+                        <Badge variant="secondary" className="text-xs">{t('profile.waitlistOpen')}</Badge>
                       )}
                     </div>
                     
@@ -119,7 +121,7 @@ export function CoachGroupClassesSection({ coachId }: CoachGroupClassesSectionPr
                       {groupClass.max_participants && (
                         <span className="flex items-center gap-1">
                           <Users className="h-3.5 w-3.5" />
-                          Max {groupClass.max_participants}
+                          {t('profile.maxParticipants', { count: groupClass.max_participants })}
                         </span>
                       )}
                     </div>
@@ -138,7 +140,7 @@ export function CoachGroupClassesSection({ coachId }: CoachGroupClassesSectionPr
                         )}
                       </div>
                     ) : (
-                      <p className="text-sm text-muted-foreground">Contact for pricing</p>
+                      <p className="text-sm text-muted-foreground">{t('profile.contactForPricing')}</p>
                     )}
                     
                     {groupClass.is_waitlist_open && user && role === "client" && (
@@ -151,9 +153,9 @@ export function CoachGroupClassesSection({ coachId }: CoachGroupClassesSectionPr
                         {joinWaitlist.isPending ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : isOnWaitlist(groupClass.id) ? (
-                          "On Waitlist"
+                          t('profile.onWaitlist')
                         ) : (
-                          "Join Waitlist"
+                          t('profile.joinWaitlist')
                         )}
                       </Button>
                     )}

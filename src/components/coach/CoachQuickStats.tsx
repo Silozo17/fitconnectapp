@@ -1,6 +1,7 @@
 import { Award, Video, Users, Clock, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { RARITY_CONFIG, Rarity } from "@/lib/avatar-utils";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface CoachQuickStatsProps {
   experienceYears: number | null;
@@ -68,41 +69,42 @@ export function CoachQuickStats({
   reviewCount,
   averageRating,
 }: CoachQuickStatsProps) {
+  const { t } = useTranslation('coaches');
   const experienceRarity = getExperienceRarity(experienceYears);
   
   const stats: (StatItemProps & { show: boolean })[] = [
     {
       icon: <Award className="h-5 w-5" />,
-      label: "Experience",
-      value: experienceYears ? `${experienceYears} years` : "New Coach",
+      label: t('profile.experience'),
+      value: experienceYears ? t('profile.years', { count: experienceYears }) : t('profile.newCoach'),
       rarity: experienceRarity,
       show: true,
     },
     {
       icon: <Video className="h-5 w-5" />,
-      label: "Online Sessions",
-      value: onlineAvailable ? "Available" : "Not Available",
+      label: t('profile.onlineSessions'),
+      value: onlineAvailable ? t('profile.available') : t('profile.notAvailable'),
       highlight: !!onlineAvailable,
       show: true,
     },
     {
       icon: <Users className="h-5 w-5" />,
-      label: "In-Person",
-      value: inPersonAvailable ? "Available" : "Not Available",
+      label: t('profile.inPersonSessions'),
+      value: inPersonAvailable ? t('profile.available') : t('profile.notAvailable'),
       highlight: !!inPersonAvailable,
       show: true,
     },
     {
       icon: <Star className="h-5 w-5" />,
-      label: "Reviews",
-      value: reviewCount > 0 ? `${averageRating.toFixed(1)} (${reviewCount})` : "No reviews yet",
+      label: t('profile.reviews'),
+      value: reviewCount > 0 ? `${averageRating.toFixed(1)} (${reviewCount})` : t('profile.noReviewsYet'),
       highlight: reviewCount > 0 && averageRating >= 4.5,
       show: true,
     },
     {
       icon: <Clock className="h-5 w-5" />,
-      label: "Response Time",
-      value: "Within 24h",
+      label: t('profile.responseTime'),
+      value: t('profile.within24h'),
       show: true,
     },
   ];

@@ -1,0 +1,44 @@
+{
+  "product": {
+    "notFound": "Nie znaleziono produktu",
+    "notFoundDesc": "Produkt, którego szukasz, nie istnieje",
+    "backToMarketplace": "Wróć do Marketplace",
+    "minutes": "{{count}} minut",
+    "pages": "{{count}} stron",
+    "downloadable": "Do pobrania",
+    "streamable": "Do streamingu",
+    "tabs": {
+      "description": "Opis",
+      "reviews": "Opinie"
+    },
+    "preview": "Podgląd",
+    "viewPreview": "Zobacz podgląd",
+    "watchFreePreview": "Obejrzyj darmowy podgląd",
+    "verifiedPurchase": "Zweryfikowany zakup",
+    "noReviews": "Brak opinii",
+    "free": "ZA DARMO",
+    "savePercent": "Oszczędź {{percent}}%",
+    "goToLibrary": "Przejdź do Biblioteki",
+    "alreadyOwned": "Posiadasz już tę treść",
+    "purchaseNow": "Kup teraz",
+    "getForFree": "Pobierz za darmo",
+    "createdBy": "Utworzone przez",
+    "viewProfile": "Zobacz profil",
+    "tags": "Tagi",
+    "user": "Użytkownik"
+  },
+  "bundle": {
+    "notFound": "Nie znaleziono pakietu",
+    "notFoundDesc": "Pakiet, którego szukasz, nie istnieje",
+    "badge": "Pakiet",
+    "whatsIncluded": "Zawartość ({{count}} elementów)",
+    "included": "W zestawie",
+    "youSave": "Oszczędzasz {{amount}}",
+    "alreadyOwned": "Posiadasz już ten pakiet",
+    "purchaseBundle": "Kup pakiet",
+    "stats": {
+      "items": "Elementy",
+      "savings": "Oszczędności"
+    }
+  }
+}
