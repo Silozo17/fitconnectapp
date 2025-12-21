@@ -8,51 +8,25 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Share2, Twitter, Facebook, Linkedin, Link, Check, MessageCircle, Mail } from 'lucide-react';
-import { share, canUseNativeShare, type ShareOptions } from '@/lib/share';
+import { share, canUseNativeShare } from '@/lib/share';
+import { getAppShareOptions } from '@/lib/shareHelpers';
 import { isDespia } from '@/lib/despia';
 
-export interface ShareableAchievement {
-  type: 'badge' | 'level' | 'challenge' | 'rank';
-  title: string;
-  description: string;
-  value?: string | number;
-  icon?: string;
-}
-
-interface ShareAchievementButtonProps {
-  achievement: ShareableAchievement;
+interface ShareAppButtonProps {
   variant?: 'default' | 'outline' | 'ghost';
   size?: 'default' | 'sm' | 'lg' | 'icon';
+  className?: string;
 }
 
-export function ShareAchievementButton({ 
-  achievement, 
+export function ShareAppButton({ 
   variant = 'outline',
-  size = 'sm' 
-}: ShareAchievementButtonProps) {
+  size = 'default',
+  className
+}: ShareAppButtonProps) {
   const { t } = useTranslation('gamification');
   const [copied, setCopied] = useState(false);
 
-  const getShareText = () => {
-    switch (achievement.type) {
-      case 'badge':
-        return t('share.achievement.badge', { title: achievement.title, description: achievement.description });
-      case 'level':
-        return t('share.achievement.level', { value: achievement.value, description: achievement.description });
-      case 'challenge':
-        return t('share.achievement.challenge', { title: achievement.title, description: achievement.description });
-      case 'rank':
-        return t('share.achievement.rank', { value: achievement.value, title: achievement.title, description: achievement.description });
-      default:
-        return t('share.achievement.default', { title: achievement.title, description: achievement.description });
-    }
-  };
-
-  const shareOptions: ShareOptions = {
-    title: `FitConnect Achievement: ${achievement.title}`,
-    text: getShareText(),
-    url: window.location.origin,
-  };
+  const shareOptions = getAppShareOptions();
 
   const handleNativeShare = async () => {
     await share('native', shareOptions);
@@ -67,11 +41,16 @@ export function ShareAchievementButton({
   };
 
   // For Despia or mobile with native share, show simple button
-  if (isDespia() || (size === 'icon' && canUseNativeShare())) {
+  if ((isDespia() || (size === 'icon' && canUseNativeShare()))) {
     return (
-      <Button variant={variant} size={size} onClick={handleNativeShare}>
+      <Button 
+        variant={variant} 
+        size={size} 
+        onClick={handleNativeShare}
+        className={className}
+      >
         <Share2 className="h-4 w-4" />
-        {size !== 'icon' && <span className="ml-2">{t('share.button')}</span>}
+        {size !== 'icon' && <span className="ml-2">{t('share.shareApp', 'Share App')}</span>}
       </Button>
     );
   }
@@ -79,9 +58,9 @@ export function ShareAchievementButton({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant={variant} size={size}>
-          <Share2 className="h-4 w-4 mr-2" />
-          {t('share.button')}
+        <Button variant={variant} size={size} className={className}>
+          <Share2 className="h-4 w-4" />
+          {size !== 'icon' && <span className="ml-2">{t('share.shareApp', 'Share App')}</span>}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">

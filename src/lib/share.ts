@@ -1,4 +1,5 @@
 import { toast } from "sonner";
+import { isDespia, nativeShare as despiaNativeShare } from "./despia";
 
 export interface ShareOptions {
   title: string;
@@ -9,32 +10,44 @@ export interface ShareOptions {
 export type SharePlatform = 'native' | 'twitter' | 'facebook' | 'linkedin' | 'whatsapp' | 'email' | 'copy';
 
 /**
- * Check if the Web Share API is available
+ * Check if native sharing is available (Despia or Web Share API)
  */
 export function canUseNativeShare(): boolean {
+  if (isDespia()) return true;
   return typeof navigator !== 'undefined' && !!navigator.share;
 }
 
 /**
- * Share content using the native Web Share API
+ * Share content using native sharing (Despia first, then Web Share API)
  */
 async function shareNative(options: ShareOptions): Promise<boolean> {
-  if (!canUseNativeShare()) return false;
-  
-  try {
-    await navigator.share({
-      title: options.title,
-      text: options.text,
+  // Use Despia native share when available
+  if (isDespia()) {
+    return despiaNativeShare({
+      message: `${options.title}\n\n${options.text}`,
       url: options.url,
     });
-    return true;
-  } catch (error) {
-    // User cancelled or share failed
-    if ((error as Error).name !== 'AbortError') {
-      console.error('Native share failed:', error);
-    }
-    return false;
   }
+  
+  // Fall back to Web Share API
+  if (typeof navigator !== 'undefined' && navigator.share) {
+    try {
+      await navigator.share({
+        title: options.title,
+        text: options.text,
+        url: options.url,
+      });
+      return true;
+    } catch (error) {
+      // User cancelled or share failed
+      if ((error as Error).name !== 'AbortError') {
+        console.error('Native share failed:', error);
+      }
+      return false;
+    }
+  }
+  
+  return false;
 }
 
 /**

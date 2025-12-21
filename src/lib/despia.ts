@@ -68,4 +68,32 @@ export const triggerHaptic = (pattern: HapticPattern): void => {
   }
 };
 
+/**
+ * Native share options for Despia
+ */
+export interface DespiaShareOptions {
+  message: string;
+  url: string;
+}
+
+/**
+ * Trigger native share sheet on Despia devices
+ * Uses the shareapp:// protocol with properly encoded message and URL
+ * @param options Share options with message and URL
+ * @returns true if share was triggered, false otherwise
+ */
+export const nativeShare = (options: DespiaShareOptions): boolean => {
+  if (!isDespia()) return false;
+  
+  try {
+    const encodedMessage = encodeURIComponent(options.message);
+    const encodedUrl = encodeURIComponent(options.url);
+    despia(`shareapp://message?=${encodedMessage}&url=${encodedUrl}`);
+    return true;
+  } catch (e) {
+    console.warn('Native share failed:', e);
+    return false;
+  }
+};
+
 export default despia;
