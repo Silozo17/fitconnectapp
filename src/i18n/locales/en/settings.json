@@ -182,6 +182,12 @@
     "disableTwoFactor": "Disable 2FA"
   },
 
+  "nativeSettings": {
+    "title": "App Settings",
+    "description": "Manage notifications, permissions & privacy",
+    "button": "Open Native Settings"
+  },
+
   "account": {
     "title": "Account",
     "signOut": "Sign Out",

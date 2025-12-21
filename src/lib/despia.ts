@@ -92,6 +92,23 @@ export const nativeShare = (options: DespiaShareOptions): boolean => {
     return true;
   } catch (e) {
     console.warn('Native share failed:', e);
+  return false;
+  }
+};
+
+/**
+ * Open the device's native settings page for this app
+ * Works on both iOS and Android when running in Despia environment
+ * @returns true if settings was opened, false if not in Despia environment
+ */
+export const openNativeSettings = (): boolean => {
+  if (!isDespia()) return false;
+  
+  try {
+    despia('settingsapp://');
+    return true;
+  } catch (e) {
+    console.warn('Failed to open native settings:', e);
     return false;
   }
 };

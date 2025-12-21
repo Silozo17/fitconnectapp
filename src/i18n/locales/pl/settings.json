@@ -182,6 +182,12 @@
     "disableTwoFactor": "Wyłącz 2FA"
   },
 
+  "nativeSettings": {
+    "title": "Ustawienia aplikacji",
+    "description": "Zarządzaj powiadomieniami, uprawnieniami i prywatnością",
+    "button": "Otwórz ustawienia"
+  },
+
   "account": {
     "title": "Konto",
     "signOut": "Wyloguj się",
