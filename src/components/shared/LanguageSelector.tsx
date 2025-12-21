@@ -7,8 +7,6 @@ import { useUserLocalePreference } from "@/hooks/useUserLocalePreference";
 import { useAuth } from "@/contexts/AuthContext";
 import { 
   SUPPORTED_LANGUAGES,
-  DEV_LANGUAGES,
-  ALL_LANGUAGES,
   LANGUAGE_STORAGE_KEY, 
   DEFAULT_LANGUAGE, 
   type LanguageCode 
@@ -21,8 +19,6 @@ const comingSoonLanguages = [
   { code: 'de', name: 'German' },
 ];
 
-const isDev = import.meta.env.DEV;
-
 const LanguageSelector = () => {
   const { currentLanguage, changeLanguage, t } = useTranslation('settings');
   const { t: tCommon } = useTranslation('common');
@@ -30,9 +26,8 @@ const LanguageSelector = () => {
   const userLocale = useUserLocalePreference();
 
   const handleLanguageChange = (languageCode: string) => {
-    // Validate against available languages (include dev languages in dev mode)
-    const availableLanguages = isDev ? ALL_LANGUAGES : SUPPORTED_LANGUAGES;
-    const validCodes = availableLanguages.map(l => l.code) as string[];
+    // Validate against supported languages
+    const validCodes = SUPPORTED_LANGUAGES.map(l => l.code) as string[];
     if (!validCodes.includes(languageCode)) {
       console.warn(`Unsupported language: ${languageCode}, falling back to English`);
       languageCode = DEFAULT_LANGUAGE;
@@ -73,17 +68,6 @@ const LanguageSelector = () => {
           {SUPPORTED_LANGUAGES.map((lang) => (
             <SelectItem key={lang.code} value={lang.code}>
               <span>{lang.nativeName}</span>
-            </SelectItem>
-          ))}
-          {/* Dev languages (only in development mode) */}
-          {isDev && DEV_LANGUAGES.map((lang) => (
-            <SelectItem key={lang.code} value={lang.code}>
-              <div className="flex items-center justify-between gap-3">
-                <span>{lang.nativeName}</span>
-                <Badge variant="outline" className="text-xs">
-                  Dev
-                </Badge>
-              </div>
             </SelectItem>
           ))}
           {/* Coming soon languages (disabled) */}

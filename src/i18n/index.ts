@@ -67,12 +67,11 @@ import plGamification from './locales/pl/gamification.json';
 // Production-visible languages (what users see in production)
 export const SUPPORTED_LANGUAGES = [
   { code: 'en', name: 'English', nativeName: 'English' },
+  { code: 'pl', name: 'Polish', nativeName: 'Polski' },
 ] as const;
 
 // Dev-only languages (for testing new languages before production)
-export const DEV_LANGUAGES = [
-  { code: 'pl', name: 'Polish', nativeName: 'Polski' },
-] as const;
+export const DEV_LANGUAGES = [] as const;
 
 // Combined type for all language codes
 export type LanguageCode = 'en' | 'pl';
@@ -93,9 +92,7 @@ export const LANGUAGE_STORAGE_KEY = 'fitconnect-language';
 const getStoredLanguage = (): LanguageCode => {
   try {
     const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
-    // Include dev languages in dev mode for proper persistence
-    const availableLanguages = import.meta.env.DEV ? ALL_LANGUAGES : SUPPORTED_LANGUAGES;
-    const validCodes = availableLanguages.map(l => l.code) as string[];
+    const validCodes = SUPPORTED_LANGUAGES.map(l => l.code) as string[];
     
     if (stored && validCodes.includes(stored)) {
       return stored as LanguageCode;
@@ -138,11 +135,8 @@ const resources = {
   },
 };
 
-// Get whitelisted languages for detector (respects dev mode)
+// Get whitelisted languages for detector
 const getWhitelistedLanguages = (): string[] => {
-  if (import.meta.env.DEV) {
-    return ALL_LANGUAGES.map(l => l.code);
-  }
   return SUPPORTED_LANGUAGES.map(l => l.code);
 };
 
