@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { getLastRoute, clearLastRoute, useRouteRestoration } from "@/hooks/useRouteRestoration";
+import { getLastRoute, useRouteRestoration, isColdStart, markColdStartComplete } from "@/hooks/useRouteRestoration";
 
 const RouteRestorer = () => {
   const { user, role, loading } = useAuth();
@@ -17,18 +17,18 @@ const RouteRestorer = () => {
     // Only run once, when auth finishes loading
     if (loading || hasRestored.current) return;
 
-    // Only restore for authenticated users on initial load
+    // Only restore for authenticated users on TRUE cold start
     if (user && role) {
       const lastRoute = getLastRoute();
       const currentPath = location.pathname;
 
       // Only restore if:
-      // 1. We have a saved route
-      // 2. Current path is a generic entry point (like root or get-started)
-      // 3. The saved route is different from current
-      const isEntryPoint = currentPath === "/" || currentPath === "/get-started" || currentPath === "/auth";
+      // 1. This is a cold start (fresh page load, not in-app navigation)
+      // 2. User landed on auth or get-started page (NOT homepage - users should be able to browse)
+      // 3. We have a saved dashboard route
+      const shouldRestore = isColdStart() && (currentPath === "/get-started" || currentPath === "/auth");
       
-      if (lastRoute && isEntryPoint && lastRoute !== currentPath) {
+      if (lastRoute && shouldRestore && lastRoute !== currentPath) {
         // Verify the saved route matches the user's role
         const isValidRoute = 
           (lastRoute.startsWith("/dashboard/admin") && (role === "admin" || role === "manager" || role === "staff")) ||
@@ -41,6 +41,7 @@ const RouteRestorer = () => {
       }
       
       hasRestored.current = true;
+      markColdStartComplete();
     }
   }, [user, role, loading, navigate, location.pathname]);
 
