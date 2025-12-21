@@ -5,6 +5,7 @@ import { useClientProfileId } from '@/hooks/useClientProfileId';
 import { useCoachProfileId } from '@/hooks/useCoachProfileId';
 import { toast } from 'sonner';
 import { triggerHaptic } from '@/lib/despia';
+import { triggerConfetti, confettiPresets } from '@/lib/confetti';
 
 export interface ChallengeReward {
   id: string;
@@ -194,6 +195,7 @@ export function useJoinChallenge() {
       queryClient.invalidateQueries({ queryKey: ['available-challenges'] });
       queryClient.invalidateQueries({ queryKey: ['my-challenges'] });
       triggerHaptic('success');
+      triggerConfetti(confettiPresets.challengeJoin);
       toast.success('Challenge joined!', { description: 'Good luck on your challenge!' });
     },
     onError: (error: Error) => {

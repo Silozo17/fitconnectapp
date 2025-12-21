@@ -22,6 +22,7 @@ export const confettiPresets = {
   levelUp: { type: 'fireworks' as ConfettiType, particleCount: 150, duration: 2000 },
   challengeComplete: { type: 'shower' as ConfettiType, particleCount: 80, duration: 1500 },
   badgeEarned: { type: 'burst' as ConfettiType, particleCount: 80, duration: 1200 },
+  challengeJoin: { type: 'burst' as ConfettiType, particleCount: 50, duration: 1000 },
 };
 
 // Check if user prefers reduced motion
