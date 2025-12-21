@@ -1,7 +1,21 @@
 /**
  * Location utilities for coach profiles
- * Single source of truth: Google Places API-derived structured fields
- * with fallback to legacy freetext location field
+ * 
+ * LEGACY COMPATIBILITY LAYER
+ * ==========================
+ * This module provides a non-destructive compatibility layer for coaches
+ * with legacy location data. The system:
+ * 
+ * 1. PRIORITIZES structured Google Places API data when available
+ * 2. INFERS location components from legacy freetext when structured data is missing
+ * 3. MARKS inferred values so they can be distinguished from explicit data
+ * 4. NEVER requires coaches to re-save their profiles
+ * 
+ * Behavior guarantees:
+ * - Legacy coaches appear in all searches and filters
+ * - Country filtering includes coaches with parseable legacy locations
+ * - Coaches without determinable country remain visible (not excluded)
+ * - Display is consistent whether using structured or legacy data
  */
 
 export interface CoachLocationFields {
@@ -17,6 +31,19 @@ export interface ParsedLegacyLocation {
   region: string | null;
   country: string | null;
   countryCode: string | null;
+}
+
+export interface StructuredLocation {
+  city: string | null;
+  region: string | null;
+  country: string | null;
+  countryCode: string | null;
+  /** True if data comes from Google Places API, false if inferred from legacy */
+  hasStructuredData: boolean;
+  /** True if any location data was inferred from legacy field */
+  isInferred: boolean;
+  /** The original legacy location string, if used for inference */
+  legacySource: string | null;
 }
 
 /**
@@ -58,6 +85,15 @@ const COUNTRY_MAP: Record<string, string> = {
   'hungary': 'HU',
   'romania': 'RO',
   'bulgaria': 'BG',
+  'croatia': 'HR',
+  'slovakia': 'SK',
+  'slovenia': 'SI',
+  'estonia': 'EE',
+  'latvia': 'LV',
+  'lithuania': 'LT',
+  'luxembourg': 'LU',
+  'malta': 'MT',
+  'cyprus': 'CY',
   // Other common countries
   'canada': 'CA',
   'australia': 'AU',
@@ -71,6 +107,30 @@ const COUNTRY_MAP: Record<string, string> = {
   'uae': 'AE',
   'united arab emirates': 'AE',
   'singapore': 'SG',
+  'hong kong': 'HK',
+  'thailand': 'TH',
+  'malaysia': 'MY',
+  'indonesia': 'ID',
+  'philippines': 'PH',
+  'vietnam': 'VN',
+  'south korea': 'KR',
+  'korea': 'KR',
+  'taiwan': 'TW',
+  'russia': 'RU',
+  'ukraine': 'UA',
+  'turkey': 'TR',
+  'israel': 'IL',
+  'saudi arabia': 'SA',
+  'qatar': 'QA',
+  'kuwait': 'KW',
+  'egypt': 'EG',
+  'morocco': 'MA',
+  'nigeria': 'NG',
+  'kenya': 'KE',
+  'argentina': 'AR',
+  'chile': 'CL',
+  'colombia': 'CO',
+  'peru': 'PE',
 };
 
 /**
@@ -99,6 +159,15 @@ const CODE_TO_COUNTRY: Record<string, string> = {
   'HU': 'Hungary',
   'RO': 'Romania',
   'BG': 'Bulgaria',
+  'HR': 'Croatia',
+  'SK': 'Slovakia',
+  'SI': 'Slovenia',
+  'EE': 'Estonia',
+  'LV': 'Latvia',
+  'LT': 'Lithuania',
+  'LU': 'Luxembourg',
+  'MT': 'Malta',
+  'CY': 'Cyprus',
   'CA': 'Canada',
   'AU': 'Australia',
   'NZ': 'New Zealand',
@@ -110,6 +179,29 @@ const CODE_TO_COUNTRY: Record<string, string> = {
   'ZA': 'South Africa',
   'AE': 'United Arab Emirates',
   'SG': 'Singapore',
+  'HK': 'Hong Kong',
+  'TH': 'Thailand',
+  'MY': 'Malaysia',
+  'ID': 'Indonesia',
+  'PH': 'Philippines',
+  'VN': 'Vietnam',
+  'KR': 'South Korea',
+  'TW': 'Taiwan',
+  'RU': 'Russia',
+  'UA': 'Ukraine',
+  'TR': 'Turkey',
+  'IL': 'Israel',
+  'SA': 'Saudi Arabia',
+  'QA': 'Qatar',
+  'KW': 'Kuwait',
+  'EG': 'Egypt',
+  'MA': 'Morocco',
+  'NG': 'Nigeria',
+  'KE': 'Kenya',
+  'AR': 'Argentina',
+  'CL': 'Chile',
+  'CO': 'Colombia',
+  'PE': 'Peru',
 };
 
 /**
@@ -179,7 +271,7 @@ export function getDisplayLocation(coach: CoachLocationFields): string {
     return coach.location_city;
   }
   
-  // Fall back to legacy freetext
+  // Fall back to legacy freetext (preserve original formatting)
   return coach.location || "Location not set";
 }
 
@@ -257,15 +349,9 @@ export function getLocationCountry(coach: CoachLocationFields): string | null {
 
 /**
  * Returns a complete structured location object with fallbacks from legacy data
- * Useful for ranking algorithm and display
+ * Marks whether data was inferred from legacy vs explicit structured data
  */
-export function getStructuredLocationWithFallbacks(coach: CoachLocationFields): {
-  city: string | null;
-  region: string | null;
-  country: string | null;
-  countryCode: string | null;
-  hasStructuredData: boolean;
-} {
+export function getStructuredLocationWithFallbacks(coach: CoachLocationFields): StructuredLocation {
   // If we have structured data, use it
   if (coach.location_city || coach.location_country_code) {
     return {
@@ -274,17 +360,23 @@ export function getStructuredLocationWithFallbacks(coach: CoachLocationFields): 
       country: coach.location_country || (coach.location_country_code ? CODE_TO_COUNTRY[coach.location_country_code.toUpperCase()] : null) || null,
       countryCode: coach.location_country_code?.toUpperCase() || null,
       hasStructuredData: true,
+      isInferred: false,
+      legacySource: null,
     };
   }
   
-  // Parse from legacy location
+  // Parse from legacy location - mark as inferred
   const parsed = parseLegacyLocation(coach.location);
+  const hasAnyData = !!(parsed.city || parsed.region || parsed.country || parsed.countryCode);
+  
   return {
     city: parsed.city,
     region: parsed.region,
     country: parsed.country,
     countryCode: parsed.countryCode,
     hasStructuredData: false,
+    isInferred: hasAnyData,
+    legacySource: coach.location || null,
   };
 }
 
@@ -296,10 +388,23 @@ export function hasStructuredLocation(coach: CoachLocationFields): boolean {
 }
 
 /**
+ * Checks if a coach's location data is inferred from legacy fields
+ */
+export function hasInferredLocation(coach: CoachLocationFields): boolean {
+  if (hasStructuredLocation(coach)) {
+    return false;
+  }
+  const parsed = parseLegacyLocation(coach.location);
+  return !!(parsed.city || parsed.country || parsed.countryCode);
+}
+
+/**
  * Checks if a coach matches a country filter
  * Returns true if:
  * - Coach has matching country_code (structured or parsed from legacy)
  * - Coach has no determinable country (legacy - include for visibility)
+ * 
+ * This ensures legacy coaches are NEVER excluded due to missing data
  */
 export function matchesCountryFilter(
   coach: CoachLocationFields,
@@ -321,6 +426,22 @@ export function matchesCountryFilter(
   
   // Legacy coaches without determinable country - include them
   // (they may be in the right country, we just don't know)
-  // This ensures legacy coaches remain visible
+  // This ensures legacy coaches remain visible and are not broken
   return true;
+}
+
+/**
+ * Gets a country name from a country code
+ */
+export function getCountryNameFromCode(code: string | null | undefined): string | null {
+  if (!code) return null;
+  return CODE_TO_COUNTRY[code.toUpperCase()] || null;
+}
+
+/**
+ * Gets a country code from a country name
+ */
+export function getCountryCodeFromName(name: string | null | undefined): string | null {
+  if (!name) return null;
+  return COUNTRY_MAP[name.toLowerCase()] || null;
 }
