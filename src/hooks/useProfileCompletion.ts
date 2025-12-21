@@ -20,7 +20,7 @@ export function useProfileCompletion() {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: ["marketplace-profile-completion", user?.id],
+    queryKey: ["profile-completion", user?.id],
     queryFn: async (): Promise<ProfileCompletionData> => {
       if (!user?.id) throw new Error("Not authenticated");
 

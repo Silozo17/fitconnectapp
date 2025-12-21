@@ -1,6 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { 
+  PROFILE_COMPLETION_RULES, 
+  calculateProfileCompletion,
+  CompletionContext 
+} from "@/lib/profileCompletionRules";
 
 export interface ProfileStep {
   id: string;
@@ -20,15 +25,64 @@ export interface ProfileCompletionData {
   completedCount: number;
 }
 
+// Step metadata for UI navigation - maps rule IDs to links
+const STEP_METADATA: Record<string, { link: string; linkText: string; description: string }> = {
+  profile_photo: {
+    link: "/dashboard/coach/settings?tab=marketplace",
+    linkText: "Upload Photo",
+    description: "Upload a professional profile photo",
+  },
+  bio: {
+    link: "/dashboard/coach/settings?tab=marketplace",
+    linkText: "Write Bio",
+    description: "Write a compelling bio (50+ characters)",
+  },
+  specialisations: {
+    link: "/dashboard/coach/settings?tab=marketplace",
+    linkText: "Add Specialties",
+    description: "Select your coaching specialties",
+  },
+  experience: {
+    link: "/dashboard/coach/settings?tab=marketplace",
+    linkText: "Add Experience",
+    description: "Add your years of experience",
+  },
+  location: {
+    link: "/dashboard/coach/settings?tab=marketplace",
+    linkText: "Add Location",
+    description: "Add your location",
+  },
+  availability: {
+    link: "/dashboard/coach/settings?tab=marketplace",
+    linkText: "Set Availability",
+    description: "Set online or in-person availability",
+  },
+  who_i_work_with: {
+    link: "/dashboard/coach/settings?tab=marketplace",
+    linkText: "Add Description",
+    description: "Describe your ideal clients (20+ characters)",
+  },
+  gallery: {
+    link: "/dashboard/coach/settings?tab=marketplace",
+    linkText: "Add Images",
+    description: "Add at least one gallery image",
+  },
+  social_links: {
+    link: "/dashboard/coach/settings?tab=marketplace",
+    linkText: "Add Links",
+    description: "Add at least one social media link",
+  },
+};
+
 /**
  * Hook for dashboard-style profile completion with step navigation
- * Uses centralized completion logic but provides step-based UI data
+ * Uses centralized completion rules from profileCompletionRules.ts
  */
 export const useCoachProfileCompletion = () => {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: ["coach-profile-completion", user?.id],
+    queryKey: ["profile-completion", user?.id],
     queryFn: async (): Promise<ProfileCompletionData> => {
       if (!user?.id) throw new Error("Not authenticated");
 
@@ -41,186 +95,75 @@ export const useCoachProfileCompletion = () => {
 
       if (profileError) throw profileError;
 
-      // Fetch session types count
-      const { count: sessionTypesCount } = await supabase
-        .from("session_types")
-        .select("*", { count: "exact", head: true })
-        .eq("coach_id", profile.id);
-
-      // Fetch availability count
-      const { count: availabilityCount } = await supabase
-        .from("coach_availability")
-        .select("*", { count: "exact", head: true })
-        .eq("coach_id", profile.id)
-        .eq("is_active", true);
-
-      // Fetch verification documents count
-      const { count: documentsCount } = await supabase
-        .from("coach_verification_documents")
-        .select("*", { count: "exact", head: true })
-        .eq("coach_id", profile.id);
-
       // Fetch gallery images count
       const { count: galleryCount } = await supabase
         .from("coach_gallery_images")
         .select("*", { count: "exact", head: true })
         .eq("coach_id", profile.id);
 
-      // Fetch group classes count
+      // Fetch group classes count (kept for interface compatibility, not used in completion)
       const { count: groupClassCount } = await supabase
         .from("coach_group_classes")
         .select("*", { count: "exact", head: true })
         .eq("coach_id", profile.id);
 
-      // Check for social links
-      const hasSocialLinks = !!(
-        profile.instagram_url ||
-        profile.facebook_url ||
-        profile.youtube_url ||
-        profile.tiktok_url ||
-        profile.x_url ||
-        profile.linkedin_url ||
-        profile.threads_url
-      );
+      // Build completion context using centralized rules
+      const ctx: CompletionContext = {
+        profile: {
+          bio: profile.bio,
+          card_image_url: profile.card_image_url,
+          coach_types: profile.coach_types,
+          experience_years: profile.experience_years,
+          location: profile.location,
+          online_available: profile.online_available,
+          in_person_available: profile.in_person_available,
+          who_i_work_with: profile.who_i_work_with,
+          instagram_url: profile.instagram_url,
+          facebook_url: profile.facebook_url,
+          youtube_url: profile.youtube_url,
+          tiktok_url: profile.tiktok_url,
+          x_url: profile.x_url,
+          linkedin_url: profile.linkedin_url,
+          threads_url: profile.threads_url,
+        },
+        galleryCount: galleryCount ?? 0,
+        groupClassCount: groupClassCount ?? 0,
+      };
 
-      // Define all steps - using card_image_url consistently
-      const steps: ProfileStep[] = [
-        {
-          id: "profile_photo",
-          name: "Profile Photo",
-          description: "Upload a professional profile photo",
-          completed: !!profile.card_image_url,
-          link: "/dashboard/coach/settings?tab=marketplace",
-          linkText: "Upload Photo",
-        },
-        {
-          id: "display_name",
-          name: "Display Name",
-          description: "Add your display name",
-          completed: !!profile.display_name && profile.display_name.length > 0,
-          link: "/dashboard/coach/settings",
-          linkText: "Add Name",
-        },
-        {
-          id: "bio",
-          name: "Bio",
-          description: "Write a compelling bio (50+ characters)",
-          completed: !!profile.bio && profile.bio.length >= 50,
-          link: "/dashboard/coach/settings?tab=marketplace",
-          linkText: "Write Bio",
-        },
-        {
-          id: "specialties",
-          name: "Specialties",
-          description: "Select your coaching specialties",
-          completed: !!profile.coach_types && profile.coach_types.length > 0,
-          link: "/dashboard/coach/settings?tab=marketplace",
-          linkText: "Add Specialties",
-        },
-        {
-          id: "location",
-          name: "Location",
-          description: "Add your location",
-          completed: !!profile.location && profile.location.length > 0,
-          link: "/dashboard/coach/settings?tab=marketplace",
-          linkText: "Add Location",
-        },
-        {
-          id: "availability_mode",
-          name: "Session Availability",
-          description: "Set online or in-person availability",
-          completed: !!(profile.online_available || profile.in_person_available),
-          link: "/dashboard/coach/settings?tab=marketplace",
-          linkText: "Set Availability",
-        },
-        {
-          id: "who_i_work_with",
-          name: "Who You Work With",
-          description: "Describe your ideal clients (20+ characters)",
-          completed: !!profile.who_i_work_with && profile.who_i_work_with.length > 20,
-          link: "/dashboard/coach/settings?tab=marketplace",
-          linkText: "Add Description",
-        },
-        {
-          id: "gallery",
-          name: "Gallery Images",
-          description: "Add at least one gallery image",
-          completed: (galleryCount ?? 0) >= 1,
-          link: "/dashboard/coach/settings?tab=marketplace",
-          linkText: "Add Images",
-        },
-        {
-          id: "social_links",
-          name: "Social Media Links",
-          description: "Add at least one social media link",
-          completed: hasSocialLinks,
-          link: "/dashboard/coach/settings?tab=marketplace",
-          linkText: "Add Links",
-        },
-        {
-          id: "group_classes",
-          name: "Group Classes",
-          description: "Create at least one group class",
-          completed: (groupClassCount ?? 0) >= 1,
-          link: "/dashboard/coach/settings?tab=marketplace",
-          linkText: "Add Classes",
-        },
-        {
-          id: "hourly_rate",
-          name: "Hourly Rate",
-          description: "Set your hourly rate",
-          completed: !!profile.hourly_rate && profile.hourly_rate > 0,
-          link: "/dashboard/coach/settings",
-          linkText: "Set Rate",
-        },
-        {
-          id: "session_types",
-          name: "Session Types",
-          description: "Create at least one session type",
-          completed: (sessionTypesCount || 0) > 0,
-          link: "/dashboard/coach/packages",
-          linkText: "Create Session",
-        },
-        {
-          id: "availability",
-          name: "Availability",
-          description: "Set your available hours",
-          completed: (availabilityCount || 0) > 0,
-          link: "/dashboard/coach/schedule",
-          linkText: "Set Hours",
-        },
-        {
-          id: "stripe_connect",
-          name: "Payment Setup",
-          description: "Connect Stripe to receive payments",
-          completed: !!profile.stripe_connect_onboarded,
-          link: "/dashboard/coach/settings",
-          linkText: "Connect Stripe",
-        },
-        {
-          id: "verification",
-          name: "Verification",
-          description: "Upload verification documents",
-          completed: (documentsCount || 0) > 0,
-          link: "/dashboard/coach/settings?tab=verification",
-          linkText: "Upload Docs",
-        },
-      ];
+      // Calculate completion using centralized rules
+      const completion = calculateProfileCompletion(ctx);
 
-      const completedSteps = steps.filter((s) => s.completed);
-      const incompleteSteps = steps.filter((s) => !s.completed);
-      const percentage = Math.round((completedSteps.length / steps.length) * 100);
+      // Convert to step format for UI
+      const allSteps: ProfileStep[] = completion.results.map((result) => {
+        const metadata = STEP_METADATA[result.id] || {
+          link: "/dashboard/coach/settings?tab=marketplace",
+          linkText: "Complete",
+          description: result.label,
+        };
+        
+        return {
+          id: result.id,
+          name: result.label,
+          description: metadata.description,
+          completed: result.completed,
+          link: metadata.link,
+          linkText: metadata.linkText,
+        };
+      });
+
+      const completedSteps = allSteps.filter((s) => s.completed);
+      const incompleteSteps = allSteps.filter((s) => !s.completed);
 
       return {
-        percentage,
+        percentage: completion.percentage,
         completedSteps,
         incompleteSteps,
-        isFullyComplete: completedSteps.length === steps.length,
-        totalSteps: steps.length,
-        completedCount: completedSteps.length,
+        isFullyComplete: completion.percentage === 100,
+        totalSteps: completion.totalCount,
+        completedCount: completion.completedCount,
       };
     },
     enabled: !!user?.id,
-    staleTime: 1000 * 30, // 30 seconds for better reactivity
+    staleTime: 1000 * 30,
   });
 };
