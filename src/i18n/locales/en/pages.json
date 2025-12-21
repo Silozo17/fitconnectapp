@@ -1,64 +1,186 @@
 {
   "about": {
     "title": "About Us",
+    "metaDescription": "Learn about FitConnect's mission to make personalized fitness coaching accessible to everyone. Meet our team and discover our story.",
     "subtitle": "Connecting clients with world-class fitness professionals",
-    "mission": {
-      "title": "Our Mission",
-      "description": "To make professional fitness coaching accessible to everyone, everywhere."
-    },
-    "vision": {
-      "title": "Our Vision",
-      "description": "A world where everyone has access to personalised fitness guidance."
+    "badge": "Our Story",
+    "hero": {
+      "title": "Transforming Lives Through",
+      "titleHighlight": "Expert Coaching",
+      "description": "We believe everyone deserves access to world-class fitness coaching. FitConnect bridges the gap between ambitious individuals and the coaches who can help them achieve their dreams."
     },
     "story": {
-      "title": "Our Story",
-      "description": "Founded with a passion for fitness and technology, we set out to revolutionise how people connect with fitness professionals."
+      "title": "How It All",
+      "titleHighlight": "Started",
+      "paragraph1": "Founded in 2024, FitConnect was born from a simple observation: while incredible fitness coaches exist everywhere, finding the right match remains frustratingly difficult for most people.",
+      "paragraph2": "Our founders, Sarah and Marcus, experienced this firsthand. Sarah, a former Olympic athlete turned coach, struggled to reach clients beyond her local gym. Marcus, a busy tech entrepreneur, couldn't find a coach who understood his schedule constraints and specific goals.",
+      "paragraph3": "Together, they built FitConnect—a platform that uses smart matching technology to connect clients with coaches who truly fit their needs, whether that's a nutritionist for meal planning, a personal trainer for strength goals, or a boxing coach for stress relief.",
+      "established": "Est. 2024",
+      "location": "San Francisco, CA"
+    },
+    "mission": {
+      "title": "Our Mission",
+      "description": "\"To make personalized fitness coaching",
+      "descriptionHighlight": "accessible, affordable, and effective",
+      "descriptionEnd": "for everyone, regardless of location, budget, or experience level.\""
     },
     "values": {
-      "title": "Our Values",
+      "title": "Our",
+      "titleHighlight": "Core Values",
+      "subtitle": "These principles guide everything we do at FitConnect",
       "excellence": "Excellence",
-      "excellenceDesc": "We strive for excellence in everything we do.",
-      "integrity": "Integrity",
-      "integrityDesc": "We operate with honesty and transparency.",
-      "innovation": "Innovation",
-      "innovationDesc": "We continuously innovate to improve our platform.",
+      "excellenceDesc": "We partner only with verified, top-tier coaches who have proven track records of transforming lives.",
+      "accessibility": "Accessibility",
+      "accessibilityDesc": "Fitness coaching for every budget and schedule. Everyone deserves access to expert guidance.",
       "community": "Community",
-      "communityDesc": "We foster a supportive fitness community."
+      "communityDesc": "Building meaningful connections that motivate, inspire, and support your fitness journey.",
+      "results": "Results",
+      "resultsDesc": "Data-driven approach focused on measurable outcomes and sustainable transformation."
+    },
+    "stats": {
+      "activeUsers": "Active Users",
+      "expertCoaches": "Expert Coaches",
+      "sessionsCompleted": "Sessions Completed",
+      "satisfactionRate": "Satisfaction Rate"
     },
     "team": {
-      "title": "Our Team",
-      "subtitle": "Meet the people behind the platform"
+      "title": "Meet Our",
+      "titleHighlight": "Leadership",
+      "subtitle": "Passionate experts dedicated to revolutionizing fitness coaching"
+    },
+    "trust": {
+      "title": "Your Trust, Our Priority",
+      "description": "Every coach on FitConnect undergoes rigorous verification including credential checks, background screening, and ongoing performance monitoring. We maintain the highest standards so you can focus on what matters—your fitness journey.",
+      "verifiedCerts": "Verified certifications and credentials",
+      "backgroundChecks": "Comprehensive background checks",
+      "qualityMonitoring": "Ongoing quality monitoring and reviews",
+      "securePayments": "Secure payment and data protection"
+    },
+    "cta": {
+      "title": "Join the FitConnect",
+      "titleHighlight": "Community",
+      "description": "Whether you're looking to transform your body, improve your health, or grow your coaching business, FitConnect is here to help you succeed.",
+      "findCoach": "Find Your Coach",
+      "becomeCoach": "Become a Coach"
     }
   },
   "contact": {
     "title": "Contact Us",
+    "metaTitle": "Contact Us | FitConnect - Get in Touch",
+    "metaDescription": "Have questions about FitConnect? Contact our support team. We're here to help you find the perfect fitness coach.",
     "subtitle": "We'd love to hear from you",
-    "form": {
-      "name": "Your Name",
-      "email": "Email Address",
-      "subject": "Subject",
-      "message": "Message",
-      "send": "Send Message",
-      "sending": "Sending...",
-      "success": "Message sent successfully!",
-      "error": "Failed to send message. Please try again."
+    "badge": "Get in Touch",
+    "hero": {
+      "title": "Contact",
+      "titleHighlight": "Us",
+      "description": "Have a question or need help? We're here for you. Send us a message and we'll get back to you as soon as possible."
     },
     "info": {
-      "title": "Get in Touch",
-      "email": "Email",
-      "phone": "Phone",
-      "address": "Address",
-      "hours": "Business Hours"
+      "emailUs": "Email Us",
+      "emailSubtext": "We'll respond within 24 hours",
+      "liveChat": "Live Chat",
+      "liveChatDesc": "Chat with our team",
+      "liveChatSubtext": "Available Mon-Fri, 9am-6pm GMT",
+      "responseTime": "Response Time",
+      "responseTimeDesc": "Under 24 hours",
+      "responseTimeSubtext": "For all enquiries"
     },
-    "support": {
-      "title": "Need Support?",
-      "description": "Our support team is here to help you with any questions.",
-      "helpCenter": "Visit Help Center"
-    }
+    "form": {
+      "title": "Send us a Message",
+      "name": "Your Name",
+      "namePlaceholder": "John Doe",
+      "email": "Email Address",
+      "emailPlaceholder": "john@example.com",
+      "subject": "Subject",
+      "subjectPlaceholder": "How can we help?",
+      "message": "Message",
+      "messagePlaceholder": "Tell us more about your enquiry...",
+      "send": "Send Message",
+      "sending": "Sending...",
+      "success": "Message sent successfully! We'll get back to you soon.",
+      "error": "Failed to send message. Please try again.",
+      "fillAllFields": "Please fill in all fields"
+    },
+    "quickAnswers": {
+      "title": "Quick Answers",
+      "findCoach": "How do I find a coach?",
+      "pricing": "What are the pricing options?",
+      "becomeCoach": "How do I become a coach?",
+      "viewFaq": "View all FAQs"
+    },
+    "followUs": "Follow Us"
   },
   "faq": {
     "title": "Frequently Asked Questions",
+    "metaDescription": "Find answers to common questions about FitConnect. Learn about finding coaches, pricing, payments, and how our fitness coaching platform works.",
     "subtitle": "Find answers to common questions",
+    "badge": "Help Center",
+    "hero": {
+      "title": "Frequently Asked",
+      "titleHighlight": "Questions",
+      "description": "Everything you need to know about FitConnect. Can't find what you're looking for? Reach out to our friendly support team."
+    },
+    "tabs": {
+      "forClients": "For Clients",
+      "forCoaches": "For Coaches",
+      "general": "General"
+    },
+    "stillHaveQuestions": {
+      "title": "Still Have Questions?",
+      "description": "Can't find the answer you're looking for? Our friendly support team is here to help you with anything you need.",
+      "contactSupport": "Contact Support",
+      "learnHowItWorks": "Learn How It Works"
+    },
+    "clientQuestions": {
+      "q1": "How do I find the right coach for me?",
+      "a1": "Our smart matching system helps you find coaches based on your goals, budget, location, and preferred training style. Browse coach profiles, read reviews, and book a free discovery call to ensure it's a great fit before committing.",
+      "q2": "What types of coaches are available on FitConnect?",
+      "a2": "We offer a diverse range of certified professionals including Personal Trainers, Nutritionists & Dietitians, Boxing Coaches, MMA Trainers, Yoga Instructors, and Strength & Conditioning Specialists. Each coach is verified and brings unique expertise to help you reach your goals.",
+      "q3": "How much does coaching cost?",
+      "a3": "Coaching rates vary based on the coach's experience, specialty, and session type. Rates typically range from $30-$200+ per session. You can filter coaches by price range and many offer package discounts for multiple sessions.",
+      "q4": "Can I cancel or reschedule sessions?",
+      "a4": "Yes! You can reschedule or cancel sessions up to 24 hours before the scheduled time at no charge. Cancellations within 24 hours may be subject to the coach's cancellation policy, which is displayed on their profile.",
+      "q5": "Is there a free trial or introductory session?",
+      "a5": "Many coaches offer a free 15-minute discovery call to discuss your goals and see if you're a good match. Look for the 'Free Consultation' badge on coach profiles, or message coaches directly to inquire.",
+      "q6": "How do online sessions work?",
+      "a6": "Online sessions are conducted through our integrated video platform. Simply log in at your scheduled time, and you'll be connected with your coach. You can train from home, your gym, or anywhere with a stable internet connection.",
+      "q7": "What if I'm not satisfied with my coach?",
+      "a7": "Your satisfaction is our priority. If you're not happy after your first session, contact our support team within 48 hours for a full refund. We'll also help match you with a different coach who better fits your needs.",
+      "q8": "Do coaches create personalized workout/meal plans?",
+      "a8": "Yes! Most coaches create customized plans based on your goals, preferences, and any limitations. The level of customization depends on the package you choose—discuss specifics with your coach during the discovery call."
+    },
+    "coachQuestions": {
+      "q1": "How do I become a coach on FitConnect?",
+      "a1": "Click 'Become a Coach' and complete our application. You'll need to submit your certifications, experience details, and complete a brief interview. Once approved, you can set up your profile and start accepting clients.",
+      "q2": "What are the requirements to join as a coach?",
+      "a2": "We require: (1) Valid certification from an accredited organization in your specialty, (2) Minimum 2 years of professional coaching experience, (3) Passing a background check, (4) Professional liability insurance. Additional certifications strengthen your profile.",
+      "q3": "How and when do I get paid?",
+      "a3": "Payments are processed automatically after each completed session. Funds are transferred to your connected bank account within 3-5 business days. You can track all earnings and pending payments in your coach dashboard.",
+      "q4": "Can I set my own rates and schedule?",
+      "a4": "Absolutely! You have full control over your hourly rates, package pricing, and availability. Set your schedule, block off vacation time, and adjust rates anytime through your dashboard.",
+      "q5": "What tools does FitConnect provide for coaches?",
+      "a5": "Our platform includes: client management dashboard, scheduling & calendar integration, secure messaging, video session hosting, progress tracking tools, workout/meal plan builders, payment processing, and marketing visibility.",
+      "q6": "How much does FitConnect charge coaches?",
+      "a6": "We charge a 15% platform fee on each session. This covers payment processing, platform maintenance, marketing, and support. There are no upfront costs or monthly fees—you only pay when you earn.",
+      "q7": "How do I get more clients on the platform?",
+      "a7": "Complete your profile with photos and detailed descriptions, respond quickly to inquiries, collect reviews from clients, and maintain a high rating. Featured placement is available for top-performing coaches.",
+      "q8": "Can I coach both online and in-person?",
+      "a8": "Yes! You can offer online sessions, in-person sessions, or both. Simply indicate your preferences in your profile settings and specify your in-person service area."
+    },
+    "generalQuestions": {
+      "q1": "Is my personal information secure?",
+      "a1": "Yes, security is our top priority. We use bank-level encryption (256-bit SSL) to protect all data. Payment information is handled by Stripe, a PCI-compliant payment processor. We never share your personal information with third parties.",
+      "q2": "What payment methods do you accept?",
+      "a2": "We accept all major credit/debit cards (Visa, Mastercard, American Express, Discover), Apple Pay, Google Pay, and bank transfers in select regions. All payments are processed securely through Stripe.",
+      "q3": "How do I contact customer support?",
+      "a3": "You can reach our support team via email at {{email}}, through the in-app chat, or by phone during business hours (9 AM - 6 PM GMT). We typically respond to inquiries within 24 hours.",
+      "q4": "Do you offer refunds?",
+      "a4": "Yes, we offer a satisfaction guarantee. If you're unsatisfied with your first session with a new coach, contact us within 48 hours for a full refund. Package refunds are prorated based on unused sessions.",
+      "q5": "Is FitConnect available in my area?",
+      "a5": "FitConnect is available worldwide for online coaching! For in-person sessions, availability depends on coaches in your area. Enter your location in the search to see local coaches, or choose online coaching for maximum flexibility.",
+      "q6": "Can I use FitConnect for corporate wellness programs?",
+      "a6": "Yes! We offer corporate packages for businesses looking to provide fitness coaching as an employee benefit. Contact our enterprise team at {{email}} for custom solutions and volume pricing."
+    },
     "search": "Search FAQs...",
     "categories": {
       "general": "General",
@@ -73,7 +195,118 @@
   },
   "howItWorks": {
     "title": "How It Works",
+    "metaDescription": "Learn how FitConnect connects you with expert fitness coaches. Simple steps for clients to find coaches and coaches to grow their business.",
     "subtitle": "Getting started is easy",
+    "badge": "Getting Started",
+    "hero": {
+      "title": "Your Fitness Journey,",
+      "titleHighlight": "Simplified",
+      "description": "Whether you're looking for a coach or ready to grow your coaching business, FitConnect makes it easy to get started."
+    },
+    "tabs": {
+      "lookingForCoach": "I'm Looking for a Coach",
+      "imACoach": "I'm a Coach"
+    },
+    "clientSteps": {
+      "step1": {
+        "title": "Browse & Discover",
+        "description": "Search our curated network of certified coaches. Filter by specialty, location, price, and availability to find your perfect match.",
+        "detail1": "Personal trainers, nutritionists, boxing coaches & more",
+        "detail2": "Read detailed profiles and verified reviews",
+        "detail3": "Compare rates and specialties",
+        "detail4": "View real results from other clients"
+      },
+      "step2": {
+        "title": "Connect & Consult",
+        "description": "Message coaches directly and book a free discovery call to discuss your goals and ensure it's a great fit.",
+        "detail1": "Free 15-minute consultation with most coaches",
+        "detail2": "Discuss your goals and limitations",
+        "detail3": "Get a feel for their coaching style",
+        "detail4": "No commitment until you're ready"
+      },
+      "step3": {
+        "title": "Book & Train",
+        "description": "Schedule sessions that fit your life. Train online from anywhere or meet in person with local coaches.",
+        "detail1": "Flexible scheduling to match your calendar",
+        "detail2": "Online or in-person sessions available",
+        "detail3": "HD video for remote training",
+        "detail4": "Easy rescheduling when needed"
+      },
+      "step4": {
+        "title": "Track & Transform",
+        "description": "Monitor your progress with built-in tracking tools. Celebrate milestones and adjust your plan as you grow.",
+        "detail1": "Visual progress charts and metrics",
+        "detail2": "Custom workout and meal plans",
+        "detail3": "Regular check-ins with your coach",
+        "detail4": "Achieve sustainable results"
+      }
+    },
+    "coachSteps": {
+      "step1": {
+        "title": "Apply & Verify",
+        "description": "Submit your application with credentials. We verify certifications and conduct background checks to maintain quality standards.",
+        "detail1": "Quick online application process",
+        "detail2": "Submit certifications and experience",
+        "detail3": "Background check for client safety",
+        "detail4": "Review typically takes 3-5 days"
+      },
+      "step2": {
+        "title": "Build Your Profile",
+        "description": "Create a compelling profile that showcases your expertise. Set your rates, availability, and service offerings.",
+        "detail1": "Upload photos and videos",
+        "detail2": "Highlight specialties and achievements",
+        "detail3": "Set your own rates and packages",
+        "detail4": "Define your service area"
+      },
+      "step3": {
+        "title": "Get Discovered",
+        "description": "Your profile goes live in our marketplace. Clients searching for your expertise will find you organically.",
+        "detail1": "Appear in relevant search results",
+        "detail2": "Featured placement for top coaches",
+        "detail3": "Receive client inquiries directly",
+        "detail4": "Build your reputation with reviews"
+      },
+      "step4": {
+        "title": "Coach & Earn",
+        "description": "Accept bookings, deliver amazing sessions, and get paid securely. Focus on coaching while we handle the business side.",
+        "detail1": "Manage clients from your dashboard",
+        "detail2": "Automatic payment processing",
+        "detail3": "Build recurring client relationships",
+        "detail4": "Grow your business sustainably"
+      }
+    },
+    "findYourCoachNow": "Find Your Coach Now",
+    "startYourApplication": "Start Your Application",
+    "features": {
+      "title": "Everything You Need,",
+      "titleHighlight": "Built In",
+      "subtitle": "Our platform includes all the tools you need for a seamless coaching experience",
+      "hdVideo": "HD Video Sessions",
+      "hdVideoDesc": "Crystal-clear video calls with screen sharing for form checks and demonstrations",
+      "secureMessaging": "Secure Messaging",
+      "secureMessagingDesc": "Stay connected between sessions with in-app chat and file sharing",
+      "smartScheduling": "Smart Scheduling",
+      "smartSchedulingDesc": "Book sessions easily with calendar sync and automatic reminders",
+      "progressTracking": "Progress Tracking",
+      "progressTrackingDesc": "Visualize your journey with charts, photos, and milestone celebrations",
+      "customPlans": "Custom Plans",
+      "customPlansDesc": "Receive personalized workout and nutrition plans tailored to your goals",
+      "safeSecurity": "Safe & Secure",
+      "safeSecurityDesc": "Bank-level encryption protects your data and payments"
+    },
+    "testimonial": {
+      "quote": "FitConnect made finding the right coach so easy. Within a week, I was training with someone who truly understood my goals.",
+      "quoteHighlight": " Best decision I ever made for my health.",
+      "author": "Amanda K.",
+      "result": "Lost 30 lbs in 4 months"
+    },
+    "cta": {
+      "title": "Ready to Get",
+      "titleHighlight": "Started?",
+      "description": "Whether you're looking to transform your body or grow your coaching business, your journey starts here.",
+      "findACoach": "Find a Coach",
+      "becomeACoach": "Become a Coach"
+    },
     "forClients": {
       "title": "For Clients",
       "step1": {
@@ -115,29 +348,89 @@
   },
   "forCoaches": {
     "title": "For Coaches",
+    "metaDescription": "Grow your coaching business with FitConnect. Reach thousands of clients, manage your schedule, and focus on what you love—coaching.",
     "subtitle": "Grow your fitness business with us",
+    "badge": "For Fitness Professionals",
     "hero": {
-      "title": "Take Your Coaching Business to the Next Level",
-      "description": "Join our platform and connect with clients who are ready to transform their lives."
+      "title": "Grow Your Coaching Business With",
+      "titleHighlight": "FitConnect",
+      "description": "Join {{count}} coaches reaching clients worldwide. Set your own rates, build your brand, and focus on what you do best—transforming lives.",
+      "applyNow": "Apply Now",
+      "learnMore": "Learn More"
+    },
+    "calculator": {
+      "title": "Value Calculator",
+      "subtitle": "See what FitConnect saves you",
+      "numberOfClients": "Number of clients: {{count}}",
+      "adminHoursPerClient": "Admin hours per client/week: {{hours}}",
+      "weekly": "Weekly",
+      "yearly": "Yearly",
+      "hoursSaved": "hours",
+      "saved": "saved",
+      "activeClients": "{{count}} active clients",
+      "lookingForCoaches": "looking for coaches like you"
     },
     "benefits": {
-      "title": "Why Join Us?",
-      "reach": {
-        "title": "Expand Your Reach",
-        "description": "Access a growing marketplace of motivated clients."
-      },
-      "tools": {
-        "title": "Powerful Tools",
-        "description": "Workout builders, nutrition planners, and client management."
-      },
-      "payments": {
-        "title": "Secure Payments",
-        "description": "Get paid on time with our integrated payment system."
-      },
-      "flexibility": {
-        "title": "Work Your Way",
-        "description": "Set your own schedule, prices, and availability."
-      }
+      "title": "Why Coaches Choose",
+      "titleHighlight": "FitConnect",
+      "subtitle": "Everything you need to run a successful coaching business, all in one platform",
+      "reachClients": "Reach Thousands of Clients",
+      "reachClientsDesc": "Get discovered by motivated individuals actively seeking your expertise. Our platform drives qualified leads directly to you.",
+      "scheduling": "Built-in Scheduling",
+      "schedulingDesc": "Manage your availability with our powerful scheduling system. Sync with your calendar and let clients book automatically.",
+      "securePayments": "Secure Payments",
+      "securePaymentsDesc": "Get paid reliably after every session. We handle all payment processing so you can focus on coaching.",
+      "clientManagement": "Client Management Tools",
+      "clientManagementDesc": "Track client progress, create custom plans, and manage your entire business from one dashboard.",
+      "trainAnywhere": "Train Clients Anywhere",
+      "trainAnywhereDesc": "Offer online sessions to clients worldwide. Our HD video platform makes remote coaching seamless.",
+      "businessProtection": "Business Protection",
+      "businessProtectionDesc": "Clear terms, cancellation policies, and our support team backing you up if issues arise."
+    },
+    "tools": {
+      "title": "Powerful Tools at Your",
+      "titleHighlight": "Fingertips",
+      "smartScheduling": "Smart Scheduling",
+      "inAppMessaging": "In-App Messaging",
+      "videoSessions": "Video Sessions",
+      "planBuilder": "Plan Builder",
+      "progressTracking": "Progress Tracking",
+      "paymentProcessing": "Payment Processing"
+    },
+    "steps": {
+      "title": "Get Started in",
+      "titleHighlight": "3 Simple Steps",
+      "step1Title": "Apply & Get Verified",
+      "step1Desc": "Submit your credentials and complete our verification process. We review certifications and conduct background checks.",
+      "step2Title": "Build Your Profile",
+      "step2Desc": "Create a compelling profile showcasing your expertise, experience, and training philosophy. Set your rates and availability.",
+      "step3Title": "Start Coaching & Earning",
+      "step3Desc": "Accept client bookings, deliver amazing sessions, and grow your business. We handle the rest."
+    },
+    "testimonials": {
+      "title": "What Coaches",
+      "titleHighlight": "Are Saying"
+    },
+    "requirements": {
+      "title": "Coach Requirements",
+      "subtitle": "We maintain high standards to ensure the best experience for our clients",
+      "req1": "Valid certification from an accredited organization (NASM, ACE, ISSA, NSCA, etc.)",
+      "req2": "Minimum 2 years of professional coaching experience",
+      "req3": "Pass a comprehensive background check",
+      "req4": "Maintain professional liability insurance",
+      "req5": "Commitment to FitConnect's code of conduct and quality standards"
+    },
+    "cta": {
+      "title": "Ready to Grow Your",
+      "titleHighlight": "Coaching Business?",
+      "description": "Join FitConnect today and start reaching clients who are ready to transform their lives with your help.",
+      "applyToBecome": "Apply to Become a Coach",
+      "coachFaq": "Coach FAQ",
+      "reviewTime": "Application review typically takes 3-5 business days"
+    },
+    "pricing": {
+      "title": "Coach Plans",
+      "subtitle": "Choose the plan that fits your business"
     },
     "features": {
       "title": "Platform Features",
@@ -149,15 +442,6 @@
       "messaging": "In-App Messaging",
       "payments": "Payment Processing",
       "marketing": "Marketing Tools"
-    },
-    "pricing": {
-      "title": "Coach Plans",
-      "subtitle": "Choose the plan that fits your business"
-    },
-    "cta": {
-      "title": "Ready to Get Started?",
-      "button": "Apply Now",
-      "subtext": "Join thousands of coaches already on our platform"
     }
   },
   "pricing": {
@@ -268,10 +552,9 @@
     "noStories": "No success stories yet"
   },
   "notFound": {
-    "title": "Page Not Found",
-    "subtitle": "The page you're looking for doesn't exist or has been moved.",
-    "goHome": "Go to Homepage",
-    "goBack": "Go Back"
+    "title": "404",
+    "subtitle": "Oops! Page not found",
+    "goHome": "Return to Home"
   },
   "community": {
     "title": "Community",
