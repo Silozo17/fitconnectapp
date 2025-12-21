@@ -1,88 +1,42 @@
-import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
-import { supabase } from "@/integrations/supabase/client";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Users, Dumbbell, Calendar, MessageSquare, TrendingUp, Activity, Download, ChevronDown } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, Legend } from "recharts";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Download, ChevronDown, LayoutDashboard, PoundSterling, Heart, Settings2 } from "lucide-react";
 import { arrayToCSV, downloadCSV } from "@/lib/csv-export";
 import { toast } from "sonner";
 import { DateRangeFilter } from "@/components/shared/DateRangeFilter";
-import { ComparisonStatCard } from "@/components/shared/ComparisonStatCard";
-import { useDateRangeAnalytics } from "@/hooks/useDateRangeAnalytics";
-import { format, eachDayOfInterval } from "date-fns";
+import { useAdminAnalytics } from "@/hooks/useAdminAnalytics";
+import { AnalyticsOverviewTab } from "@/components/admin/analytics/AnalyticsOverviewTab";
+import { AnalyticsMonetisationTab } from "@/components/admin/analytics/AnalyticsMonetisationTab";
+import { AnalyticsEngagementTab } from "@/components/admin/analytics/AnalyticsEngagementTab";
+import { AnalyticsOperationalTab } from "@/components/admin/analytics/AnalyticsOperationalTab";
+import { format } from "date-fns";
 
 const AdminAnalytics = () => {
   const { t } = useTranslation("admin");
-  const [loading, setLoading] = useState(true);
-  const [analytics, setAnalytics] = useState({ totalUsers: 0, totalCoaches: 0, totalSessions: 0, totalMessages: 0, sessionCompletionRate: 0 });
-  const [comparison, setComparison] = useState<typeof analytics | null>(null);
-  const [userGrowthData, setUserGrowthData] = useState<any[]>([]);
-  const [sessionData, setSessionData] = useState<any[]>([]);
-
-  const dateRange = useDateRangeAnalytics('30d', 'none');
-
-  useEffect(() => {
-    fetchAnalytics();
-  }, [dateRange.startDate, dateRange.endDate, dateRange.compareMode]);
-
-  const fetchAnalytics = async () => {
-    setLoading(true);
-    try {
-      const { start, end } = dateRange.getDateFilter();
-      const compFilter = dateRange.getComparisonFilter();
-
-      const [clients, coaches, sessions, messages] = await Promise.all([
-        supabase.from("client_profiles").select("id, created_at", { count: "exact" }).gte("created_at", start).lte("created_at", end),
-        supabase.from("coach_profiles").select("id, created_at", { count: "exact" }).gte("created_at", start).lte("created_at", end),
-        supabase.from("coaching_sessions").select("id, status, created_at", { count: "exact" }).gte("created_at", start).lte("created_at", end),
-        supabase.from("messages").select("id, created_at", { count: "exact" }).gte("created_at", start).lte("created_at", end),
-      ]);
-
-      const completed = sessions.data?.filter(s => s.status === "completed").length || 0;
-      const total = sessions.count || 0;
-
-      setAnalytics({
-        totalUsers: clients.count || 0,
-        totalCoaches: coaches.count || 0,
-        totalSessions: total,
-        totalMessages: messages.count || 0,
-        sessionCompletionRate: total > 0 ? (completed / total) * 100 : 0,
-      });
-
-      if (compFilter) {
-        const [pClients, pCoaches, pSessions, pMessages] = await Promise.all([
-          supabase.from("client_profiles").select("id", { count: "exact" }).gte("created_at", compFilter.start).lte("created_at", compFilter.end),
-          supabase.from("coach_profiles").select("id", { count: "exact" }).gte("created_at", compFilter.start).lte("created_at", compFilter.end),
-          supabase.from("coaching_sessions").select("id", { count: "exact" }).gte("created_at", compFilter.start).lte("created_at", compFilter.end),
-          supabase.from("messages").select("id", { count: "exact" }).gte("created_at", compFilter.start).lte("created_at", compFilter.end),
-        ]);
-        setComparison({ totalUsers: pClients.count || 0, totalCoaches: pCoaches.count || 0, totalSessions: pSessions.count || 0, totalMessages: pMessages.count || 0, sessionCompletionRate: 0 });
-      } else {
-        setComparison(null);
-      }
-
-      // Chart data
-      const days = eachDayOfInterval({ start: dateRange.startDate, end: dateRange.endDate }).slice(-14);
-      setUserGrowthData(days.map(d => ({ date: format(d, "MMM d"), clients: clients.data?.filter(c => format(new Date(c.created_at), "yyyy-MM-dd") === format(d, "yyyy-MM-dd")).length || 0, coaches: coaches.data?.filter(c => format(new Date(c.created_at), "yyyy-MM-dd") === format(d, "yyyy-MM-dd")).length || 0 })));
-      setSessionData(days.map(d => ({ date: format(d, "MMM d"), scheduled: sessions.data?.filter(s => format(new Date(s.created_at), "yyyy-MM-dd") === format(d, "yyyy-MM-dd")).length || 0, completed: sessions.data?.filter(s => format(new Date(s.created_at), "yyyy-MM-dd") === format(d, "yyyy-MM-dd") && s.status === "completed").length || 0 })));
-    } catch (error) {
-      console.error("Error fetching analytics:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { analytics, comparison, userGrowthData, sessionData, loading, dateRange } = useAdminAnalytics();
 
   const handleExport = () => {
     const csv = arrayToCSV(
       [
-        { metric: t("analytics.totalClients"), value: analytics.totalUsers },
+        { metric: t("analytics.totalClients"), value: analytics.totalClients },
         { metric: t("analytics.totalCoaches"), value: analytics.totalCoaches },
         { metric: t("analytics.totalSessions"), value: analytics.totalSessions },
-        { metric: t("analytics.messagesSent"), value: analytics.totalMessages }
+        { metric: t("analytics.messagesSent"), value: analytics.totalMessages },
+        { metric: t("analytics.totalGMV"), value: `£${analytics.totalGMV.toFixed(2)}` },
+        { metric: t("analytics.platformCommission"), value: `£${analytics.platformCommission.toFixed(2)}` },
+        { metric: t("analytics.coachMRR"), value: `£${analytics.coachSubscriptionMRR.toFixed(2)}` },
+        { metric: t("analytics.averageRating"), value: analytics.averageRating.toFixed(1) },
+        { metric: t("analytics.totalReviews"), value: analytics.totalReviews },
+        { metric: t("analytics.repeatBookingRate"), value: `${analytics.repeatBookingRate.toFixed(1)}%` },
+        { metric: t("analytics.sessionCompletionRate"), value: `${analytics.sessionCompletionRate.toFixed(1)}%` },
+        { metric: t("analytics.sessionNoShowRate"), value: `${analytics.sessionNoShowRate.toFixed(1)}%` },
+        { metric: t("analytics.bookingConversion"), value: `${analytics.bookingConversionRate.toFixed(1)}%` },
+        { metric: t("analytics.connectionAcceptance"), value: `${analytics.connectionAcceptanceRate.toFixed(1)}%` },
+        { metric: t("analytics.verifiedCoaches"), value: `${analytics.verifiedCoachRate.toFixed(1)}%` },
       ],
       [
         { key: "metric", header: "Metric" },
@@ -136,65 +90,60 @@ const AdminAnalytics = () => {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
             </div>
           ) : (
-            <>
-              <div className="grid gap-4 grid-cols-2 xl:grid-cols-4">
-                <ComparisonStatCard title={t("analytics.totalClients")} value={analytics.totalUsers} previousValue={comparison?.totalUsers} icon={Users} showComparison={showComp} />
-                <ComparisonStatCard title={t("analytics.totalCoaches")} value={analytics.totalCoaches} previousValue={comparison?.totalCoaches} icon={Dumbbell} showComparison={showComp} />
-                <ComparisonStatCard title={t("analytics.totalSessions")} value={analytics.totalSessions} previousValue={comparison?.totalSessions} icon={Calendar} showComparison={showComp} />
-                <ComparisonStatCard title={t("analytics.messagesSent")} value={analytics.totalMessages} previousValue={comparison?.totalMessages} icon={MessageSquare} showComparison={showComp} />
-              </div>
+            <Tabs defaultValue="overview" className="space-y-6">
+              <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
+                <TabsTrigger value="overview" className="gap-2">
+                  <LayoutDashboard className="h-4 w-4 hidden sm:block" />
+                  {t("analytics.tabOverview")}
+                </TabsTrigger>
+                <TabsTrigger value="monetisation" className="gap-2">
+                  <PoundSterling className="h-4 w-4 hidden sm:block" />
+                  {t("analytics.tabMonetisation")}
+                </TabsTrigger>
+                <TabsTrigger value="engagement" className="gap-2">
+                  <Heart className="h-4 w-4 hidden sm:block" />
+                  {t("analytics.tabEngagement")}
+                </TabsTrigger>
+                <TabsTrigger value="operational" className="gap-2">
+                  <Settings2 className="h-4 w-4 hidden sm:block" />
+                  {t("analytics.tabOperational")}
+                </TabsTrigger>
+              </TabsList>
 
-              <div className="grid gap-6 grid-cols-1 xl:grid-cols-2">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5 text-primary" />
-                      {t("analytics.userGrowth")}
-                    </CardTitle>
-                    <CardDescription>{t("analytics.newUsersOverTime")}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-[300px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={userGrowthData}>
-                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                          <XAxis dataKey="date" className="text-xs" />
-                          <YAxis className="text-xs" />
-                          <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} />
-                          <Legend />
-                          <Area type="monotone" dataKey="clients" stackId="1" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.6} name={t("analytics.clients")} />
-                          <Area type="monotone" dataKey="coaches" stackId="1" stroke="hsl(var(--accent))" fill="hsl(var(--accent))" fillOpacity={0.6} name={t("analytics.coaches")} />
-                        </AreaChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Activity className="w-5 h-5 text-primary" />
-                      {t("analytics.sessionActivity")}
-                    </CardTitle>
-                    <CardDescription>{t("analytics.scheduledVsCompleted")}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-[300px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={sessionData}>
-                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                          <XAxis dataKey="date" className="text-xs" />
-                          <YAxis className="text-xs" />
-                          <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} />
-                          <Legend />
-                          <Bar dataKey="scheduled" fill="hsl(var(--muted-foreground))" name={t("analytics.scheduled")} radius={[4, 4, 0, 0]} />
-                          <Bar dataKey="completed" fill="hsl(var(--primary))" name={t("analytics.completed")} radius={[4, 4, 0, 0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </>
+              <TabsContent value="overview">
+                <AnalyticsOverviewTab 
+                  analytics={analytics} 
+                  comparison={comparison} 
+                  userGrowthData={userGrowthData} 
+                  sessionData={sessionData} 
+                  showComparison={showComp} 
+                />
+              </TabsContent>
+
+              <TabsContent value="monetisation">
+                <AnalyticsMonetisationTab 
+                  analytics={analytics} 
+                  comparison={comparison} 
+                  showComparison={showComp} 
+                />
+              </TabsContent>
+
+              <TabsContent value="engagement">
+                <AnalyticsEngagementTab 
+                  analytics={analytics} 
+                  comparison={comparison} 
+                  showComparison={showComp} 
+                />
+              </TabsContent>
+
+              <TabsContent value="operational">
+                <AnalyticsOperationalTab 
+                  analytics={analytics} 
+                  comparison={comparison} 
+                  showComparison={showComp} 
+                />
+              </TabsContent>
+            </Tabs>
           )}
         </div>
       </AdminLayout>
