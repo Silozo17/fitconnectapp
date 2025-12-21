@@ -17,10 +17,27 @@ export const CURRENCIES: Record<CurrencyCode, CurrencyConfig> = {
   PLN: { code: 'PLN', symbol: 'zł', name: 'Polish Zloty', locale: 'pl-PL' },
 };
 
-// Fixed conversion rate for platform boost fees (GBP to PLN)
+// Fixed conversion rate for platform prices (GBP to PLN)
 const GBP_TO_PLN_RATE = 5;
 
 /**
+ * Convert platform price from GBP to display currency based on country
+ * Fixed rate: £1 = 5 PLN (for Poland only)
+ * All other countries display in GBP
+ * This applies to: platform subscriptions, boost fees
+ */
+export function convertPlatformPriceForDisplay(
+  amountGBP: number,
+  countryCode: string
+): { amount: number; currency: CurrencyCode } {
+  if (countryCode === 'pl') {
+    return { amount: amountGBP * GBP_TO_PLN_RATE, currency: 'PLN' };
+  }
+  return { amount: amountGBP, currency: 'GBP' };
+}
+
+/**
+ * @deprecated Use convertPlatformPriceForDisplay with country context instead
  * Convert boost fee from GBP to display currency (only PLN conversion supported)
  * Base values remain in GBP - this is display-only conversion
  */
@@ -35,6 +52,7 @@ export function convertBoostFeeForDisplay(
 }
 
 /**
+ * @deprecated Use convertPlatformPriceForDisplay with country context instead
  * Get the display currency code for boost fees
  * Returns PLN if coach uses PLN, otherwise GBP
  */

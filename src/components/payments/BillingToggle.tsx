@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { SUBSCRIPTION_TIERS, TierKey, BillingInterval } from "@/lib/stripe-config";
-import { formatCurrency } from "@/lib/currency";
+import { formatCurrency, convertPlatformPriceForDisplay } from "@/lib/currency";
+import { useCountryContext } from "@/contexts/CountryContext";
 
 interface BillingToggleProps {
   selectedTier: TierKey;
@@ -9,10 +10,13 @@ interface BillingToggleProps {
 }
 
 export function BillingToggle({ selectedTier, billingInterval, onIntervalChange }: BillingToggleProps) {
+  const { countryCode } = useCountryContext();
   const tierData = SUBSCRIPTION_TIERS[selectedTier];
-  const monthlyPrice = tierData.prices.monthly.amount;
+  const monthlyConverted = convertPlatformPriceForDisplay(tierData.prices.monthly.amount, countryCode);
   const yearlyData = tierData.prices.yearly;
-
+  const yearlyConverted = convertPlatformPriceForDisplay(yearlyData.amount, countryCode);
+  const yearlyEquivalentConverted = convertPlatformPriceForDisplay(yearlyData.monthlyEquivalent, countryCode);
+  const savingsConverted = convertPlatformPriceForDisplay(yearlyData.savings, countryCode);
   return (
     <div className="grid grid-cols-2 gap-4">
       {/* Monthly Option */}
@@ -29,12 +33,12 @@ export function BillingToggle({ selectedTier, billingInterval, onIntervalChange 
           <p className="font-semibold text-foreground">Monthly</p>
           <div className="flex items-baseline gap-1">
             <span className="text-2xl font-bold text-foreground">
-              {formatCurrency(monthlyPrice)}
+              {formatCurrency(monthlyConverted.amount, monthlyConverted.currency)}
             </span>
             <span className="text-muted-foreground text-sm">/month</span>
           </div>
           <p className="text-xs text-muted-foreground">
-            {formatCurrency(monthlyPrice)} billed monthly
+            {formatCurrency(monthlyConverted.amount, monthlyConverted.currency)} billed monthly
           </p>
         </div>
         {billingInterval === "monthly" && (
@@ -58,18 +62,18 @@ export function BillingToggle({ selectedTier, billingInterval, onIntervalChange 
         )}
       >
         <div className="absolute -top-2.5 left-4 px-2 py-0.5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full">
-          SAVE {formatCurrency(yearlyData.savings)}
+          SAVE {formatCurrency(savingsConverted.amount, savingsConverted.currency)}
         </div>
         <div className="space-y-2">
           <p className="font-semibold text-foreground">Yearly</p>
           <div className="flex items-baseline gap-1">
             <span className="text-2xl font-bold text-foreground">
-              {formatCurrency(yearlyData.monthlyEquivalent)}
+              {formatCurrency(yearlyEquivalentConverted.amount, yearlyEquivalentConverted.currency)}
             </span>
             <span className="text-muted-foreground text-sm">/month</span>
           </div>
           <p className="text-xs text-muted-foreground">
-            {formatCurrency(yearlyData.amount)} billed annually
+            {formatCurrency(yearlyConverted.amount, yearlyConverted.currency)} billed annually
           </p>
         </div>
         {billingInterval === "yearly" && (

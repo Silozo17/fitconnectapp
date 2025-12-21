@@ -3,18 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Rocket, Zap, TrendingUp, Shield, Clock, CreditCard, Loader2 } from "lucide-react";
 import { useCoachBoostStatus, usePurchaseBoost, useBoostSettings, isBoostActive, getBoostRemainingDays } from "@/hooks/useCoachBoost";
-import { formatCurrency, convertBoostFeeForDisplay, getBoostDisplayCurrency } from "@/lib/currency";
+import { formatCurrency, convertPlatformPriceForDisplay } from "@/lib/currency";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCoachProfile } from "@/hooks/useCoachEarnings";
+import { useCountryContext } from "@/contexts/CountryContext";
 
 export const BoostToggleCard = () => {
   const { data: boostStatus, isLoading: statusLoading } = useCoachBoostStatus();
   const { data: settings, isLoading: settingsLoading } = useBoostSettings();
-  const { data: coachProfile } = useCoachProfile();
+  const { countryCode } = useCountryContext();
   const purchaseBoost = usePurchaseBoost();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -25,9 +25,8 @@ export const BoostToggleCard = () => {
   const isPending = boostStatus?.payment_status === "pending";
   const isMigratedFree = boostStatus?.payment_status === "migrated_free";
   
-  // Currency conversion for PLN display
-  const displayCurrency = getBoostDisplayCurrency(coachProfile?.currency);
-  const convertForDisplay = (amountGBP: number) => convertBoostFeeForDisplay(amountGBP, displayCurrency);
+  // Currency conversion based on country
+  const convertForDisplay = (amountGBP: number) => convertPlatformPriceForDisplay(amountGBP, countryCode);
 
   // Handle payment success/cancel from URL params
   useEffect(() => {
@@ -61,7 +60,7 @@ export const BoostToggleCard = () => {
   }
 
   const boostPriceGBP = settings?.boost_price ? settings.boost_price / 100 : 5;
-  const boostPrice = convertForDisplay(boostPriceGBP);
+  const boostPriceConverted = convertForDisplay(boostPriceGBP);
   const boostDuration = settings?.boost_duration_days || 30;
 
   return (
@@ -103,8 +102,8 @@ export const BoostToggleCard = () => {
                 <p className="text-sm text-amber-600 dark:text-amber-400 font-medium">
                   🎁 Free Boost Extension
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  As an early adopter, you've been granted a free 30-day extension. After this expires, Boost requires a {formatCurrency(boostPrice, displayCurrency)} payment for {boostDuration} days.
+              <p className="text-xs text-muted-foreground mt-1">
+                  As an early adopter, you've been granted a free 30-day extension. After this expires, Boost requires a {formatCurrency(boostPriceConverted.amount, boostPriceConverted.currency)} payment for {boostDuration} days.
                 </p>
               </div>
             )}
@@ -130,7 +129,7 @@ export const BoostToggleCard = () => {
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <div>
                   <p className="text-sm font-medium">
-                    Activate Boost for {formatCurrency(boostPrice, displayCurrency)}
+                    Activate Boost for {formatCurrency(boostPriceConverted.amount, boostPriceConverted.currency)}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {boostDuration}-day visibility boost. Appear first in search results.
@@ -157,7 +156,7 @@ export const BoostToggleCard = () => {
             </div>
             <div className="rounded-lg bg-blue-500/5 border border-blue-500/20 p-3">
               <p className="text-xs text-muted-foreground">
-                <span className="font-medium text-foreground">What you pay:</span> {formatCurrency(boostPrice, displayCurrency)} activation + {settings ? `${Math.round(settings.commission_rate * 100)}%` : "30%"} of first booking from new clients.
+                <span className="font-medium text-foreground">What you pay:</span> {formatCurrency(boostPriceConverted.amount, boostPriceConverted.currency)} activation + {settings ? `${Math.round(settings.commission_rate * 100)}%` : "30%"} of first booking from new clients.
                 After {boostDuration} days, Boost expires automatically — no auto-renewal.
               </p>
             </div>
@@ -170,7 +169,7 @@ export const BoostToggleCard = () => {
               <CreditCard className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <p className="text-sm font-medium">{formatCurrency(boostPrice, displayCurrency)} for {boostDuration} days</p>
+              <p className="text-sm font-medium">{formatCurrency(boostPriceConverted.amount, boostPriceConverted.currency)} for {boostDuration} days</p>
               <p className="text-xs text-muted-foreground">
                 One-time payment, no auto-renewal
               </p>
