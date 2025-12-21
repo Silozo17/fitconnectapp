@@ -1,0 +1,13 @@
+<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- Monochrome dumbbell icon for Safari pinned tabs -->
+  <g stroke="#000000" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Left weight plates -->
+    <rect x="3" y="8" width="4" height="16" rx="1"/>
+    <rect x="7" y="10" width="3" height="12" rx="0.5"/>
+    <!-- Bar -->
+    <line x1="10" y1="16" x2="22" y2="16"/>
+    <!-- Right weight plates -->
+    <rect x="22" y="10" width="3" height="12" rx="0.5"/>
+    <rect x="25" y="8" width="4" height="16" rx="1"/>
+  </g>
+</svg>
