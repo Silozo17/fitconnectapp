@@ -1,5 +1,6 @@
 import { Award, Video, Users, Clock, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { RARITY_CONFIG, Rarity } from "@/lib/avatar-utils";
 
 interface CoachQuickStatsProps {
   experienceYears: number | null;
@@ -14,26 +15,46 @@ interface StatItemProps {
   label: string;
   value: string;
   highlight?: boolean;
+  rarity?: Rarity;
   className?: string;
 }
 
-function StatItem({ icon, label, value, highlight, className }: StatItemProps) {
+function getExperienceRarity(years: number | null): Rarity {
+  if (!years || years < 2) return 'common';
+  if (years <= 4) return 'uncommon';
+  if (years <= 9) return 'rare';
+  if (years <= 19) return 'epic';
+  return 'legendary';
+}
+
+function StatItem({ icon, label, value, highlight, rarity, className }: StatItemProps) {
+  const rarityConfig = rarity ? RARITY_CONFIG[rarity] : null;
+  
   return (
     <div 
       className={cn(
         "flex items-center gap-3 px-4 py-3 rounded-xl bg-muted/50 border border-border/50",
-        highlight && "bg-primary/5 border-primary/20",
+        highlight && !rarity && "bg-primary/5 border-primary/20",
+        rarity && rarityConfig?.bg,
+        rarity && rarityConfig?.border,
+        rarity === 'legendary' && "shadow-[0_0_12px_hsl(var(--primary)/0.3)]",
+        rarity === 'epic' && "shadow-[0_0_8px_hsl(280_100%_70%/0.2)]",
         className
       )}
     >
       <div className={cn(
         "flex items-center justify-center w-10 h-10 rounded-lg",
-        highlight ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+        highlight && !rarity ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground",
+        rarity && rarityConfig?.bg,
+        rarity && rarityConfig?.color
       )}>
         {icon}
       </div>
       <div className="flex flex-col">
-        <span className="text-sm font-semibold text-foreground">{value}</span>
+        <span className={cn(
+          "text-sm font-semibold text-foreground",
+          rarity && rarityConfig?.color
+        )}>{value}</span>
         <span className="text-xs text-muted-foreground">{label}</span>
       </div>
     </div>
@@ -47,11 +68,14 @@ export function CoachQuickStats({
   reviewCount,
   averageRating,
 }: CoachQuickStatsProps) {
+  const experienceRarity = getExperienceRarity(experienceYears);
+  
   const stats: (StatItemProps & { show: boolean })[] = [
     {
       icon: <Award className="h-5 w-5" />,
       label: "Experience",
       value: experienceYears ? `${experienceYears} years` : "New Coach",
+      rarity: experienceRarity,
       show: true,
     },
     {
