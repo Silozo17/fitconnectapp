@@ -24,7 +24,6 @@ export const usePushNotifications = () => {
     }
 
     if (!isDespia()) {
-      console.log("Push registration skipped: not in Despia environment");
       return { success: false, error: "Not in Despia environment" };
     }
 
@@ -65,7 +64,6 @@ export const usePushNotifications = () => {
         throw error;
       }
 
-      console.log("Push notification registered successfully:", playerId);
       setIsRegistered(true);
       return { success: true, playerId };
     } catch (error: any) {

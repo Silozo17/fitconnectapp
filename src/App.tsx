@@ -23,8 +23,6 @@ import { CookieConsentBanner } from "./components/shared/CookieConsentBanner";
 import { ErrorBoundary } from "./components/shared/ErrorBoundary";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
-// Dev-only debug panel (lazy loaded)
-const LocaleDebugPanel = lazy(() => import('./components/dev/LocaleDebugPanel').then(m => ({ default: m.LocaleDebugPanel })));
 import PageLoadingSpinner from "@/components/shared/PageLoadingSpinner";
 
 // Layout wrapper for app routes (provides AppLocaleProvider)
@@ -203,7 +201,6 @@ const App = () => (
                       <AdminProvider>
                         <LocaleProvider>
                           <LanguagePersistence />
-                          {import.meta.env.DEV && <Suspense fallback={null}><LocaleDebugPanel /></Suspense>}
                           <Routes>
                             {/* App routes - wrapped with AppLocaleWrapper (layout route pattern) */}
                             <Route element={<AppLocaleWrapper />}>
