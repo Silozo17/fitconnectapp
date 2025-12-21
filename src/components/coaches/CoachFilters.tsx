@@ -12,6 +12,7 @@ import {
 import { COACH_TYPE_CATEGORIES, getCoachTypesByCategory } from "@/constants/coachTypes";
 import { LocationFilter } from "./LocationFilter";
 import { LocationData } from "@/types/ranking";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface CoachFiltersProps {
   selectedTypes: string[];
@@ -45,6 +46,7 @@ const CoachFilters = ({
   onLocationSelect,
   onClearLocation,
 }: CoachFiltersProps) => {
+  const { t } = useTranslation('coaches');
   const handleTypeToggle = (typeId: string) => {
     if (selectedTypes.includes(typeId)) {
       onTypesChange(selectedTypes.filter((t) => t !== typeId));
@@ -72,10 +74,10 @@ const CoachFilters = ({
     <Card className="sticky top-24">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Filters</CardTitle>
+          <CardTitle className="text-lg">{t('filters.title')}</CardTitle>
           {hasActiveFilters && (
             <Button variant="ghost" size="sm" onClick={clearFilters}>
-              Clear all
+              {t('filters.clearFilters')}
             </Button>
           )}
         </div>
@@ -94,7 +96,7 @@ const CoachFilters = ({
 
         {/* Coach Type by Category */}
         <div>
-          <h4 className="font-medium mb-3 text-sm">Specialty</h4>
+          <h4 className="font-medium mb-3 text-sm">{t('filters.specialty')}</h4>
           <Accordion type="multiple" className="w-full" defaultValue={["combat", "fitness"]}>
             {COACH_TYPE_CATEGORIES.map((category) => {
               const CategoryIcon = category.icon;
@@ -140,7 +142,7 @@ const CoachFilters = ({
 
         {/* Price Range */}
         <div>
-          <h4 className="font-medium mb-3 text-sm">Price Range</h4>
+          <h4 className="font-medium mb-3 text-sm">{t('filters.priceRange')}</h4>
           <Slider
             value={[priceRange?.min ?? 0, priceRange?.max ?? 500]}
             onValueChange={handlePriceChange}
@@ -156,7 +158,7 @@ const CoachFilters = ({
 
         {/* Availability */}
         <div>
-          <h4 className="font-medium mb-3 text-sm">Availability</h4>
+          <h4 className="font-medium mb-3 text-sm">{t('filters.availability')}</h4>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Checkbox
@@ -165,7 +167,7 @@ const CoachFilters = ({
                 onCheckedChange={(checked) => onOnlineOnlyChange(checked as boolean)}
               />
               <Label htmlFor="online" className="text-sm cursor-pointer">
-                Online Sessions
+                {t('filters.onlineSessions')}
               </Label>
             </div>
             <div className="flex items-center gap-2">
@@ -175,7 +177,7 @@ const CoachFilters = ({
                 onCheckedChange={(checked) => onInPersonOnlyChange(checked as boolean)}
               />
               <Label htmlFor="inPerson" className="text-sm cursor-pointer">
-                In-Person Sessions
+                {t('filters.inPersonSessions')}
               </Label>
             </div>
           </div>

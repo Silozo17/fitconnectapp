@@ -33,7 +33,11 @@
     "inPersonOnly": "Tylko osobiście",
     "location": "Lokalizacja",
     "clearFilters": "Wyczyść filtry",
-    "applyFilters": "Zastosuj filtry"
+    "applyFilters": "Zastosuj filtry",
+    "specialty": "Specjalizacja",
+    "availability": "Dostępność",
+    "onlineSessions": "Sesje online",
+    "inPersonSessions": "Sesje osobiście"
   },
 
   "card": {

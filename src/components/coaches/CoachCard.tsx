@@ -15,6 +15,7 @@ import type { MarketplaceCoach } from "@/hooks/useCoachMarketplace";
 import { useCoachLinkPrefix } from "@/hooks/useCoachLinkPrefix";
 import { useExchangeRates } from "@/hooks/useExchangeRates";
 import { getDisplayLocation } from "@/lib/location-utils";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface CoachCardProps {
   coach: MarketplaceCoach;
@@ -24,6 +25,7 @@ interface CoachCardProps {
 }
 
 const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCardProps) => {
+  const { t } = useTranslation('coaches');
   const { data: reviews = [] } = useCoachReviews(coach.id);
   const averageRating = calculateAverageRating(reviews);
   const { user, role } = useAuth();
@@ -84,7 +86,7 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
         {coach.is_sponsored && (
           <Badge className="bg-primary/90 text-primary-foreground border-0 backdrop-blur-sm">
             <Rocket className="w-3 h-3 mr-1" />
-            Sponsored
+            {t('card.boosted')}
           </Badge>
         )}
         <FavouriteButton coachId={coach.id} />
@@ -117,10 +119,10 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
         )}
         <div className="absolute bottom-3 left-3 flex gap-2">
           {coach.in_person_available && (
-            <Badge className="bg-accent/90 text-accent-foreground border-0 backdrop-blur-sm"><User className="w-3 h-3 mr-1" />In-Person</Badge>
+            <Badge className="bg-accent/90 text-accent-foreground border-0 backdrop-blur-sm"><User className="w-3 h-3 mr-1" />{t('card.inPerson')}</Badge>
           )}
           {coach.online_available && (
-            <Badge className="bg-primary/90 text-primary-foreground border-0 backdrop-blur-sm"><Video className="w-3 h-3 mr-1" />Online</Badge>
+            <Badge className="bg-primary/90 text-primary-foreground border-0 backdrop-blur-sm"><Video className="w-3 h-3 mr-1" />{t('card.online')}</Badge>
           )}
         </div>
       </div>
@@ -174,7 +176,7 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
                 <span className="font-display font-bold text-xl text-foreground">
                   {formatCurrency(convertedRate.amount, convertedRate.currency)}
                 </span>
-                <span className="text-muted-foreground text-sm">/session</span>
+                <span className="text-muted-foreground text-sm">/{t('card.perSession')}</span>
                 {convertedRate.wasConverted && (
                   <span className="text-muted-foreground text-xs block">
                     ({formatCurrency(convertedRate.originalAmount, convertedRate.originalCurrency)})
@@ -182,7 +184,7 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
                 )}
               </>
             ) : (
-              <span className="text-muted-foreground text-sm">Contact for pricing</span>
+              <span className="text-muted-foreground text-sm">{t('detail.contactForPricing')}</span>
             )}
           </div>
           
@@ -201,7 +203,7 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
                       <MessageSquare className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Message</TooltipContent>
+                  <TooltipContent>{t('card.message')}</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
@@ -215,7 +217,7 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
                       <Calendar className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Book Session</TooltipContent>
+                  <TooltipContent>{t('card.bookSession')}</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
@@ -229,26 +231,26 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
                       <UserPlus className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Request Connection</TooltipContent>
+                  <TooltipContent>{t('connection.title')}</TooltipContent>
                 </Tooltip>
 
                 <Button asChild variant="lime-outline" size="sm">
-                  <Link to={`${effectiveLinkPrefix}/${coach.username || coach.id}`}>View</Link>
+                  <Link to={`${effectiveLinkPrefix}/${coach.username || coach.id}`}>{t('card.viewProfile')}</Link>
                 </Button>
               </div>
             </TooltipProvider>
           ) : !isAuthenticated ? (
             <div className="flex items-center gap-2 flex-shrink-0">
               <Button asChild variant="lime-outline" size="sm">
-                <Link to={`${effectiveLinkPrefix}/${coach.username || coach.id}`}>View</Link>
+                <Link to={`${effectiveLinkPrefix}/${coach.username || coach.id}`}>{t('card.viewProfile')}</Link>
               </Button>
               <Button variant="lime" size="sm" onClick={handleSignUp}>
-                Connect
+                {t('card.connect')}
               </Button>
             </div>
           ) : (
             <Button asChild variant="lime-outline" size="sm">
-              <Link to={`${effectiveLinkPrefix}/${coach.username || coach.id}`}>View Profile</Link>
+              <Link to={`${effectiveLinkPrefix}/${coach.username || coach.id}`}>{t('card.viewProfile')}</Link>
             </Button>
           )}
         </div>

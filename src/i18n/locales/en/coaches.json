@@ -33,7 +33,11 @@
     "inPersonOnly": "In-Person Only",
     "location": "Location",
     "clearFilters": "Clear Filters",
-    "applyFilters": "Apply Filters"
+    "applyFilters": "Apply Filters",
+    "specialty": "Specialty",
+    "availability": "Availability",
+    "onlineSessions": "Online Sessions",
+    "inPersonSessions": "In-Person Sessions"
   },
 
   "card": {

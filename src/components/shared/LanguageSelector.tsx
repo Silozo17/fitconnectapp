@@ -76,7 +76,7 @@ const LanguageSelector = () => {
               <div className="flex items-center justify-between gap-3">
                 <span>{lang.name}</span>
                 <Badge variant="secondary" className="text-xs">
-                  {tCommon('labels.comingSoon')}
+                  {tCommon('common.comingSoon')}
                 </Badge>
               </div>
             </SelectItem>
