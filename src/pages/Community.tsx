@@ -91,11 +91,11 @@ function LeaderboardRow({ entry, t }: { entry: PublicLeaderboardEntry; t: any })
       <TableCell className="text-muted-foreground">
         <div className="flex items-center gap-1.5">
           <MapPin className="h-3.5 w-3.5" />
-          {location || t('pages.community.leaderboard.unknown')}
+          {location || t('community.leaderboard.unknown')}
         </div>
       </TableCell>
       <TableCell className="text-center">
-        <span className="px-2 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">{t('pages.community.leaderboard.level')} {entry.level}</span>
+        <span className="px-2 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">{t('community.leaderboard.level')} {entry.level}</span>
       </TableCell>
       <TableCell className="text-right font-bold text-primary">{entry.totalXp.toLocaleString()} XP</TableCell>
     </TableRow>
@@ -120,11 +120,11 @@ function LeaderboardCard({ entry, t }: { entry: PublicLeaderboardEntry; t: any }
           <p className="font-semibold text-foreground truncate">{entry.displayName}</p>
           <p className="text-xs text-muted-foreground flex items-center gap-1">
             <MapPin className="h-3 w-3" />
-            {location || t('pages.community.leaderboard.unknown')}
+            {location || t('community.leaderboard.unknown')}
           </p>
         </div>
         <div className="text-right">
-          <p className="text-sm font-bold text-primary">{t('pages.community.leaderboard.level')} {entry.level}</p>
+          <p className="text-sm font-bold text-primary">{t('community.leaderboard.level')} {entry.level}</p>
           <p className="text-xs text-muted-foreground">{entry.totalXp.toLocaleString()} XP</p>
         </div>
       </div>
@@ -175,7 +175,7 @@ function AvatarCard({ avatar, locked = false }: { avatar: any; locked?: boolean 
 }
 
 export default function Community() {
-  const { t } = useTranslation();
+  const { t } = useTranslation('pages');
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'leaderboards';
   
@@ -233,10 +233,10 @@ export default function Community() {
 
   const getScopeLabel = () => {
     switch (scope) {
-      case 'country': return selectedCountry ? t('pages.community.leaderboard.inLocation', { location: selectedCountry }) : t('pages.community.leaderboard.byCountry');
-      case 'county': return selectedCounty ? t('pages.community.leaderboard.inLocation', { location: selectedCounty }) : t('pages.community.leaderboard.byCounty');
-      case 'city': return selectedCity ? t('pages.community.leaderboard.inLocation', { location: selectedCity }) : t('pages.community.leaderboard.byCity');
-      default: return t('pages.community.leaderboard.global');
+      case 'country': return selectedCountry ? t('community.leaderboard.inLocation', { location: selectedCountry }) : t('community.leaderboard.byCountry');
+      case 'county': return selectedCounty ? t('community.leaderboard.inLocation', { location: selectedCounty }) : t('community.leaderboard.byCounty');
+      case 'city': return selectedCity ? t('community.leaderboard.inLocation', { location: selectedCity }) : t('community.leaderboard.byCity');
+      default: return t('community.leaderboard.global');
     }
   };
 
@@ -253,8 +253,8 @@ export default function Community() {
   return (
     <>
       <Helmet>
-        <title>{t('pages.community.meta.title')}</title>
-        <meta name="description" content={t('pages.community.meta.description')} />
+        <title>{t('community.meta.title')}</title>
+        <meta name="description" content={t('community.meta.description')} />
       </Helmet>
 
       <div className="min-h-screen bg-background relative">
@@ -274,16 +274,16 @@ export default function Community() {
             <div className="text-center mb-10">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-4">
                 <Users className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-primary">{t('pages.community.hero.badge')}</span>
+                <span className="text-sm font-medium text-primary">{t('community.hero.badge')}</span>
               </div>
               <h1 className="text-3xl md:text-5xl font-bold mb-4">
-                {t('pages.community.hero.titleStart')}{" "}
+                {t('community.hero.titleStart')}{" "}
                 <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  {t('pages.community.hero.titleHighlight')}
+                  {t('community.hero.titleHighlight')}
                 </span>
               </h1>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                {t('pages.community.hero.description')}
+                {t('community.hero.description')}
               </p>
             </div>
 
@@ -292,11 +292,11 @@ export default function Community() {
               <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto">
                 <TabsTrigger value="leaderboards" className="gap-2">
                   <Trophy className="h-4 w-4" />
-                  {t('pages.community.tabs.leaderboards')}
+                  {t('community.tabs.leaderboards')}
                 </TabsTrigger>
                 <TabsTrigger value="avatars" className="gap-2">
                   <Sparkles className="h-4 w-4" />
-                  {t('pages.community.tabs.avatars')}
+                  {t('community.tabs.avatars')}
                 </TabsTrigger>
               </TabsList>
 
@@ -306,26 +306,26 @@ export default function Community() {
                 <Card className="p-4 md:p-6 bg-card/80 border-border/50">
                   <div className="flex items-center gap-2 mb-4">
                     <Filter className="h-4 w-4 text-primary" />
-                    <span className="font-semibold text-sm">{t('pages.community.leaderboard.filters')}</span>
+                    <span className="font-semibold text-sm">{t('community.leaderboard.filters')}</span>
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                     <Select value={scope} onValueChange={(v) => setScope(v as ScopeType)}>
                       <SelectTrigger>
                         <Globe className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <SelectValue placeholder={t('pages.community.leaderboard.scope')} />
+                        <SelectValue placeholder={t('community.leaderboard.scope')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="global"><Globe className="h-4 w-4 inline mr-2" />{t('pages.community.leaderboard.global')}</SelectItem>
-                        <SelectItem value="country"><Flag className="h-4 w-4 inline mr-2" />{t('pages.community.leaderboard.byCountry')}</SelectItem>
-                        <SelectItem value="county"><MapPin className="h-4 w-4 inline mr-2" />{t('pages.community.leaderboard.byCounty')}</SelectItem>
-                        <SelectItem value="city"><Building2 className="h-4 w-4 inline mr-2" />{t('pages.community.leaderboard.byCity')}</SelectItem>
+                        <SelectItem value="global"><Globe className="h-4 w-4 inline mr-2" />{t('community.leaderboard.global')}</SelectItem>
+                        <SelectItem value="country"><Flag className="h-4 w-4 inline mr-2" />{t('community.leaderboard.byCountry')}</SelectItem>
+                        <SelectItem value="county"><MapPin className="h-4 w-4 inline mr-2" />{t('community.leaderboard.byCounty')}</SelectItem>
+                        <SelectItem value="city"><Building2 className="h-4 w-4 inline mr-2" />{t('community.leaderboard.byCity')}</SelectItem>
                       </SelectContent>
                     </Select>
 
                     {scope === 'country' && (
                       <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                        <SelectTrigger><SelectValue placeholder={t('pages.community.leaderboard.selectCountry')} /></SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder={t('community.leaderboard.selectCountry')} /></SelectTrigger>
                         <SelectContent>
                           {filterOptions(countries)?.map(c => (
                             <SelectItem key={c.value} value={c.value}>{c.label} ({c.count})</SelectItem>
@@ -336,7 +336,7 @@ export default function Community() {
 
                     {scope === 'county' && (
                       <Select value={selectedCounty} onValueChange={setSelectedCounty}>
-                        <SelectTrigger><SelectValue placeholder={t('pages.community.leaderboard.selectCounty')} /></SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder={t('community.leaderboard.selectCounty')} /></SelectTrigger>
                         <SelectContent>
                           {filterOptions(counties)?.map(c => (
                             <SelectItem key={c.value} value={c.value}>{c.label} ({c.count})</SelectItem>
@@ -347,7 +347,7 @@ export default function Community() {
 
                     {scope === 'city' && (
                       <Select value={selectedCity} onValueChange={setSelectedCity}>
-                        <SelectTrigger><SelectValue placeholder={t('pages.community.leaderboard.selectCity')} /></SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder={t('community.leaderboard.selectCity')} /></SelectTrigger>
                         <SelectContent>
                           {filterOptions(cities)?.map(c => (
                             <SelectItem key={c.value} value={c.value}>{c.label} ({c.count})</SelectItem>
@@ -358,16 +358,16 @@ export default function Community() {
 
                     <div className="relative col-span-1 sm:col-span-2 lg:col-span-1">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input placeholder={t('pages.community.leaderboard.searchLocation')} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9" />
+                      <Input placeholder={t('community.leaderboard.searchLocation')} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9" />
                     </div>
 
                     <Select value={perPage.toString()} onValueChange={(v) => setPerPage(Number(v))}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="10">{t('pages.community.leaderboard.perPage', { count: 10 })}</SelectItem>
-                        <SelectItem value="25">{t('pages.community.leaderboard.perPage', { count: 25 })}</SelectItem>
-                        <SelectItem value="50">{t('pages.community.leaderboard.perPage', { count: 50 })}</SelectItem>
-                        <SelectItem value="100">{t('pages.community.leaderboard.perPage', { count: 100 })}</SelectItem>
+                        <SelectItem value="10">{t('community.leaderboard.perPage', { count: 10 })}</SelectItem>
+                        <SelectItem value="25">{t('community.leaderboard.perPage', { count: 25 })}</SelectItem>
+                        <SelectItem value="50">{t('community.leaderboard.perPage', { count: 50 })}</SelectItem>
+                        <SelectItem value="100">{t('community.leaderboard.perPage', { count: 100 })}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -379,7 +379,7 @@ export default function Community() {
                     <Users className="h-4 w-4 text-primary" />
                     <span>
                       <strong className="text-foreground">{leaderboardData?.totalParticipants.toLocaleString() || 0}</strong>{" "}
-                      {t('pages.community.leaderboard.participants')} {getScopeLabel()}
+                      {t('community.leaderboard.participants')} {getScopeLabel()}
                     </span>
                   </div>
                 </div>

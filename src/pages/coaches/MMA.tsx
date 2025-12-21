@@ -10,72 +10,72 @@ import { Flame, Target, Zap, Shield, Users, ArrowRight, Star } from "lucide-reac
 import { useTranslation } from "@/hooks/useTranslation";
 
 const MMA = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('pages');
 
   const benefits = [
     {
       icon: Zap,
-      title: t('pages.coachTypes.mma.benefits.combat.title'),
-      description: t('pages.coachTypes.mma.benefits.combat.description'),
+      title: t('coachTypes.mma.benefits.combat.title'),
+      description: t('coachTypes.mma.benefits.combat.description'),
     },
     {
       icon: Target,
-      title: t('pages.coachTypes.mma.benefits.conditioning.title'),
-      description: t('pages.coachTypes.mma.benefits.conditioning.description'),
+      title: t('coachTypes.mma.benefits.conditioning.title'),
+      description: t('coachTypes.mma.benefits.conditioning.description'),
     },
     {
       icon: Shield,
-      title: t('pages.coachTypes.mma.benefits.selfDefense.title'),
-      description: t('pages.coachTypes.mma.benefits.selfDefense.description'),
+      title: t('coachTypes.mma.benefits.selfDefense.title'),
+      description: t('coachTypes.mma.benefits.selfDefense.description'),
     },
     {
       icon: Users,
-      title: t('pages.coachTypes.mma.benefits.coaches.title'),
-      description: t('pages.coachTypes.mma.benefits.coaches.description'),
+      title: t('coachTypes.mma.benefits.coaches.title'),
+      description: t('coachTypes.mma.benefits.coaches.description'),
     },
   ];
 
   const disciplines = [
-    { name: t('pages.coachTypes.mma.disciplines.bjj.name'), description: t('pages.coachTypes.mma.disciplines.bjj.description') },
-    { name: t('pages.coachTypes.mma.disciplines.muayThai.name'), description: t('pages.coachTypes.mma.disciplines.muayThai.description') },
-    { name: t('pages.coachTypes.mma.disciplines.wrestling.name'), description: t('pages.coachTypes.mma.disciplines.wrestling.description') },
-    { name: t('pages.coachTypes.mma.disciplines.boxing.name'), description: t('pages.coachTypes.mma.disciplines.boxing.description') },
+    { name: t('coachTypes.mma.disciplines.bjj.name'), description: t('coachTypes.mma.disciplines.bjj.description') },
+    { name: t('coachTypes.mma.disciplines.muayThai.name'), description: t('coachTypes.mma.disciplines.muayThai.description') },
+    { name: t('coachTypes.mma.disciplines.wrestling.name'), description: t('coachTypes.mma.disciplines.wrestling.description') },
+    { name: t('coachTypes.mma.disciplines.boxing.name'), description: t('coachTypes.mma.disciplines.boxing.description') },
   ];
 
   const faqs = [
     {
-      question: t('pages.coachTypes.mma.faq.experience.question'),
-      answer: t('pages.coachTypes.mma.faq.experience.answer'),
+      question: t('coachTypes.mma.faq.experience.question'),
+      answer: t('coachTypes.mma.faq.experience.answer'),
     },
     {
-      question: t('pages.coachTypes.mma.faq.training.question'),
-      answer: t('pages.coachTypes.mma.faq.training.answer'),
+      question: t('coachTypes.mma.faq.training.question'),
+      answer: t('coachTypes.mma.faq.training.answer'),
     },
     {
-      question: t('pages.coachTypes.mma.faq.safety.question'),
-      answer: t('pages.coachTypes.mma.faq.safety.answer'),
+      question: t('coachTypes.mma.faq.safety.question'),
+      answer: t('coachTypes.mma.faq.safety.answer'),
     },
     {
-      question: t('pages.coachTypes.mma.faq.fitness.question'),
-      answer: t('pages.coachTypes.mma.faq.fitness.answer'),
+      question: t('coachTypes.mma.faq.fitness.question'),
+      answer: t('coachTypes.mma.faq.fitness.answer'),
     },
     {
-      question: t('pages.coachTypes.mma.faq.compete.question'),
-      answer: t('pages.coachTypes.mma.faq.compete.answer'),
+      question: t('coachTypes.mma.faq.compete.question'),
+      answer: t('coachTypes.mma.faq.compete.answer'),
     },
   ];
 
   const featuredCoaches = [
-    { name: "Carlos Silva", specialty: t('pages.coachTypes.mma.featured.specialties.bjj'), rating: 4.9, fights: 25 },
-    { name: "Amanda Torres", specialty: t('pages.coachTypes.mma.featured.specialties.striking'), rating: 4.8, experience: t('pages.coachTypes.mma.featured.proFighter') },
-    { name: "Jake Morrison", specialty: t('pages.coachTypes.mma.featured.specialties.wrestling'), rating: 4.9, clients: 200 },
+    { name: "Carlos Silva", specialty: t('coachTypes.mma.featured.specialties.bjj'), rating: 4.9, fights: 25 },
+    { name: "Amanda Torres", specialty: t('coachTypes.mma.featured.specialties.striking'), rating: 4.8, experience: t('coachTypes.mma.featured.proFighter') },
+    { name: "Jake Morrison", specialty: t('coachTypes.mma.featured.specialties.wrestling'), rating: 4.9, clients: 200 },
   ];
 
   return (
     <>
       <Helmet>
-        <title>{t('pages.coachTypes.mma.meta.title')}</title>
-        <meta name="description" content={t('pages.coachTypes.mma.meta.description')} />
+        <title>{t('coachTypes.mma.meta.title')}</title>
+        <meta name="description" content={t('coachTypes.mma.meta.description')} />
       </Helmet>
       
       <div className="min-h-screen bg-background">
@@ -87,23 +87,23 @@ const MMA = () => {
           <div className="container mx-auto relative z-10">
             <div className="max-w-3xl">
               <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
-                <Flame className="w-3 h-3 mr-1" /> {t('pages.coachTypes.mma.hero.badge')}
+                <Flame className="w-3 h-3 mr-1" /> {t('coachTypes.mma.hero.badge')}
               </Badge>
               <h1 className="font-display text-4xl md:text-6xl font-bold mb-6">
-                {t('pages.coachTypes.mma.hero.titleStart')} <span className="text-gradient-primary">{t('pages.coachTypes.mma.hero.titleHighlight')}</span> {t('pages.coachTypes.mma.hero.titleEnd')}
+                {t('coachTypes.mma.hero.titleStart')} <span className="text-gradient-primary">{t('coachTypes.mma.hero.titleHighlight')}</span> {t('coachTypes.mma.hero.titleEnd')}
               </h1>
               <p className="text-muted-foreground text-lg md:text-xl mb-8">
-                {t('pages.coachTypes.mma.hero.description')}
+                {t('coachTypes.mma.hero.description')}
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link to="/coaches?type=mma">
                   <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                    {t('pages.coachTypes.mma.hero.browseButton')} <ArrowRight className="ml-2 w-5 h-5" />
+                    {t('coachTypes.mma.hero.browseButton')} <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>
                 </Link>
                 <Link to="/how-it-works">
                   <Button size="lg" variant="outline">
-                    {t('pages.coachTypes.mma.hero.howItWorks')}
+                    {t('coachTypes.mma.hero.howItWorks')}
                   </Button>
                 </Link>
               </div>
@@ -115,7 +115,7 @@ const MMA = () => {
         <section className="py-12 px-4 bg-card/50">
           <div className="container mx-auto">
             <div className="text-center mb-8">
-              <h2 className="font-display text-2xl font-bold mb-2">{t('pages.coachTypes.mma.disciplines.title')}</h2>
+              <h2 className="font-display text-2xl font-bold mb-2">{t('coachTypes.mma.disciplines.title')}</h2>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {disciplines.map((discipline, index) => (
@@ -135,10 +135,10 @@ const MMA = () => {
           <div className="container mx-auto">
             <div className="text-center mb-12">
               <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-                {t('pages.coachTypes.mma.benefits.title')}
+                {t('coachTypes.mma.benefits.title')}
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                {t('pages.coachTypes.mma.benefits.description')}
+                {t('coachTypes.mma.benefits.description')}
               </p>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -162,10 +162,10 @@ const MMA = () => {
           <div className="container mx-auto">
             <div className="text-center mb-12">
               <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-                {t('pages.coachTypes.mma.featured.title')}
+                {t('coachTypes.mma.featured.title')}
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                {t('pages.coachTypes.mma.featured.description')}
+                {t('coachTypes.mma.featured.description')}
               </p>
             </div>
             <div className="grid md:grid-cols-3 gap-6 mb-8">
@@ -187,8 +187,8 @@ const MMA = () => {
                         <span className="text-foreground font-medium">{coach.rating}</span>
                       </div>
                       <span className="text-muted-foreground">
-                        {coach.fights ? t('pages.coachTypes.mma.featured.stats.fights', { count: coach.fights }) : 
-                         coach.clients ? t('pages.coachTypes.mma.featured.stats.clients', { count: coach.clients }) : 
+                        {coach.fights ? t('coachTypes.mma.featured.stats.fights', { count: coach.fights }) : 
+                         coach.clients ? t('coachTypes.mma.featured.stats.clients', { count: coach.clients }) : 
                          coach.experience}
                       </span>
                     </div>
@@ -199,7 +199,7 @@ const MMA = () => {
             <div className="text-center">
               <Link to="/coaches?type=mma">
                 <Button variant="outline" size="lg">
-                  {t('pages.coachTypes.mma.featured.viewAll')} <ArrowRight className="ml-2 w-5 h-5" />
+                  {t('coachTypes.mma.featured.viewAll')} <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
             </div>
@@ -211,10 +211,10 @@ const MMA = () => {
           <div className="container mx-auto max-w-3xl">
             <div className="text-center mb-12">
               <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-                {t('pages.coachTypes.mma.faq.title')}
+                {t('coachTypes.mma.faq.title')}
               </h2>
               <p className="text-muted-foreground">
-                {t('pages.coachTypes.mma.faq.description')}
+                {t('coachTypes.mma.faq.description')}
               </p>
             </div>
             <Accordion type="single" collapsible className="space-y-4">
@@ -236,14 +236,14 @@ const MMA = () => {
         <section className="py-20 px-4 bg-card/50">
           <div className="container mx-auto text-center">
             <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-              {t('pages.coachTypes.mma.cta.title')}
+              {t('coachTypes.mma.cta.title')}
             </h2>
             <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-              {t('pages.coachTypes.mma.cta.description')}
+              {t('coachTypes.mma.cta.description')}
             </p>
             <Link to="/coaches?type=mma">
               <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                {t('pages.coachTypes.mma.cta.button')} <ArrowRight className="ml-2 w-5 h-5" />
+                {t('coachTypes.mma.cta.button')} <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
           </div>

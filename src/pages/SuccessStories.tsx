@@ -11,16 +11,16 @@ import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
 import { useTranslation } from "@/hooks/useTranslation";
 
 const SuccessStories = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('pages');
   const [activeFilter, setActiveFilter] = useState("all");
 
   const filters = [
-    { id: "all", label: t('pages.successStories.filters.all') },
-    { id: "weight-loss", label: t('pages.successStories.filters.weightLoss') },
-    { id: "muscle-gain", label: t('pages.successStories.filters.muscleGain') },
-    { id: "boxing", label: t('pages.successStories.filters.boxing') },
-    { id: "mma", label: t('pages.successStories.filters.mma') },
-    { id: "nutrition", label: t('pages.successStories.filters.nutrition') },
+    { id: "all", label: t('successStories.filters.all') },
+    { id: "weight-loss", label: t('successStories.filters.weightLoss') },
+    { id: "muscle-gain", label: t('successStories.filters.muscleGain') },
+    { id: "boxing", label: t('successStories.filters.boxing') },
+    { id: "mma", label: t('successStories.filters.mma') },
+    { id: "nutrition", label: t('successStories.filters.nutrition') },
   ];
 
   const stories = [
@@ -29,11 +29,11 @@ const SuccessStories = () => {
       name: "Sarah M.",
       category: "weight-loss",
       coach: "James Wilson",
-      coachType: t('pages.successStories.coachTypes.personalTrainer'),
+      coachType: t('successStories.coachTypes.personalTrainer'),
       beforeWeight: "95kg",
       afterWeight: "68kg",
-      duration: t('pages.successStories.duration.months', { count: 8 }),
-      quote: t('pages.successStories.stories.sarah.quote'),
+      duration: t('successStories.duration.months', { count: 8 }),
+      quote: t('successStories.stories.sarah.quote'),
       rating: 5,
       image: "https://images.unsplash.com/photo-1594381898411-846e7d193883?w=400",
     },
@@ -42,11 +42,11 @@ const SuccessStories = () => {
       name: "Marcus T.",
       category: "muscle-gain",
       coach: "Alex Chen",
-      coachType: t('pages.successStories.coachTypes.personalTrainer'),
+      coachType: t('successStories.coachTypes.personalTrainer'),
       beforeWeight: "65kg",
       afterWeight: "82kg",
-      duration: t('pages.successStories.duration.months', { count: 12 }),
-      quote: t('pages.successStories.stories.marcus.quote'),
+      duration: t('successStories.duration.months', { count: 12 }),
+      quote: t('successStories.stories.marcus.quote'),
       rating: 5,
       image: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=400",
     },
@@ -55,10 +55,10 @@ const SuccessStories = () => {
       name: "Emma K.",
       category: "boxing",
       coach: "Mike Rodriguez",
-      coachType: t('pages.successStories.coachTypes.boxingCoach'),
-      achievement: t('pages.successStories.stories.emma.achievement'),
-      duration: t('pages.successStories.duration.months', { count: 18 }),
-      quote: t('pages.successStories.stories.emma.quote'),
+      coachType: t('successStories.coachTypes.boxingCoach'),
+      achievement: t('successStories.stories.emma.achievement'),
+      duration: t('successStories.duration.months', { count: 18 }),
+      quote: t('successStories.stories.emma.quote'),
       rating: 5,
       image: "https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?w=400",
     },
@@ -67,10 +67,10 @@ const SuccessStories = () => {
       name: "David L.",
       category: "nutrition",
       coach: "Sophie Anderson",
-      coachType: t('pages.successStories.coachTypes.nutritionist'),
-      achievement: t('pages.successStories.stories.david.achievement'),
-      duration: t('pages.successStories.duration.months', { count: 6 }),
-      quote: t('pages.successStories.stories.david.quote'),
+      coachType: t('successStories.coachTypes.nutritionist'),
+      achievement: t('successStories.stories.david.achievement'),
+      duration: t('successStories.duration.months', { count: 6 }),
+      quote: t('successStories.stories.david.quote'),
       rating: 5,
       image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400",
     },
@@ -79,10 +79,10 @@ const SuccessStories = () => {
       name: "Ryan P.",
       category: "mma",
       coach: "Carlos Silva",
-      coachType: t('pages.successStories.coachTypes.mmaCoach'),
-      achievement: t('pages.successStories.stories.ryan.achievement'),
-      duration: t('pages.successStories.duration.months', { count: 14 }),
-      quote: t('pages.successStories.stories.ryan.quote'),
+      coachType: t('successStories.coachTypes.mmaCoach'),
+      achievement: t('successStories.stories.ryan.achievement'),
+      duration: t('successStories.duration.months', { count: 14 }),
+      quote: t('successStories.stories.ryan.quote'),
       rating: 5,
       image: "https://images.unsplash.com/photo-1564415315949-7a0c4c73aab4?w=400",
     },
@@ -91,11 +91,11 @@ const SuccessStories = () => {
       name: "Jennifer H.",
       category: "weight-loss",
       coach: "Lisa Brown",
-      coachType: t('pages.successStories.coachTypes.personalTrainer'),
+      coachType: t('successStories.coachTypes.personalTrainer'),
       beforeWeight: "82kg",
       afterWeight: "62kg",
-      duration: t('pages.successStories.duration.months', { count: 10 }),
-      quote: t('pages.successStories.stories.jennifer.quote'),
+      duration: t('successStories.duration.months', { count: 10 }),
+      quote: t('successStories.stories.jennifer.quote'),
       rating: 5,
       image: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=400",
     },
@@ -108,8 +108,8 @@ const SuccessStories = () => {
   return (
     <>
       <Helmet>
-        <title>{t('pages.successStories.meta.title')}</title>
-        <meta name="description" content={t('pages.successStories.meta.description')} />
+        <title>{t('successStories.meta.title')}</title>
+        <meta name="description" content={t('successStories.meta.description')} />
       </Helmet>
       
       <div className="min-h-screen bg-background relative">
@@ -129,13 +129,13 @@ const SuccessStories = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
           <div className="container mx-auto text-center relative z-10">
             <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
-              {t('pages.successStories.hero.badge')}
+              {t('successStories.hero.badge')}
             </Badge>
             <h1 className="font-display text-4xl md:text-6xl font-bold mb-6">
-              {t('pages.successStories.hero.titleStart')} <span className="text-gradient-primary">{t('pages.successStories.hero.titleHighlight')}</span>
+              {t('successStories.hero.titleStart')} <span className="text-gradient-primary">{t('successStories.hero.titleHighlight')}</span>
             </h1>
             <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto">
-              {t('pages.successStories.hero.description')}
+              {t('successStories.hero.description')}
             </p>
           </div>
         </section>
@@ -198,7 +198,7 @@ const SuccessStories = () => {
                         </div>
                       )}
                       <p className="text-sm text-muted-foreground">
-                        {t('pages.successStories.card.coach')}: <span className="text-foreground">{story.coach}</span> • {story.duration}
+                        {t('successStories.card.coach')}: <span className="text-foreground">{story.coach}</span> • {story.duration}
                       </p>
                     </div>
                   </CardContent>
@@ -212,14 +212,14 @@ const SuccessStories = () => {
         <section className="py-20 px-4 bg-card/50">
           <div className="container mx-auto text-center">
             <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-              {t('pages.successStories.cta.title')}
+              {t('successStories.cta.title')}
             </h2>
             <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-              {t('pages.successStories.cta.description')}
+              {t('successStories.cta.description')}
             </p>
             <Link to="/coaches">
               <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                {t('pages.successStories.cta.button')} <ArrowRight className="ml-2 w-5 h-5" />
+                {t('successStories.cta.button')} <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
           </div>

@@ -10,65 +10,65 @@ import { Swords, Target, Zap, Shield, Heart, ArrowRight, Star } from "lucide-rea
 import { useTranslation } from "@/hooks/useTranslation";
 
 const Boxing = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('pages');
 
   const benefits = [
     {
       icon: Zap,
-      title: t('pages.coachTypes.boxing.benefits.fullBody.title'),
-      description: t('pages.coachTypes.boxing.benefits.fullBody.description'),
+      title: t('coachTypes.boxing.benefits.fullBody.title'),
+      description: t('coachTypes.boxing.benefits.fullBody.description'),
     },
     {
       icon: Target,
-      title: t('pages.coachTypes.boxing.benefits.skills.title'),
-      description: t('pages.coachTypes.boxing.benefits.skills.description'),
+      title: t('coachTypes.boxing.benefits.skills.title'),
+      description: t('coachTypes.boxing.benefits.skills.description'),
     },
     {
       icon: Shield,
-      title: t('pages.coachTypes.boxing.benefits.selfDefense.title'),
-      description: t('pages.coachTypes.boxing.benefits.selfDefense.description'),
+      title: t('coachTypes.boxing.benefits.selfDefense.title'),
+      description: t('coachTypes.boxing.benefits.selfDefense.description'),
     },
     {
       icon: Heart,
-      title: t('pages.coachTypes.boxing.benefits.stress.title'),
-      description: t('pages.coachTypes.boxing.benefits.stress.description'),
+      title: t('coachTypes.boxing.benefits.stress.title'),
+      description: t('coachTypes.boxing.benefits.stress.description'),
     },
   ];
 
   const faqs = [
     {
-      question: t('pages.coachTypes.boxing.faq.experience.question'),
-      answer: t('pages.coachTypes.boxing.faq.experience.answer'),
+      question: t('coachTypes.boxing.faq.experience.question'),
+      answer: t('coachTypes.boxing.faq.experience.answer'),
     },
     {
-      question: t('pages.coachTypes.boxing.faq.equipment.question'),
-      answer: t('pages.coachTypes.boxing.faq.equipment.answer'),
+      question: t('coachTypes.boxing.faq.equipment.question'),
+      answer: t('coachTypes.boxing.faq.equipment.answer'),
     },
     {
-      question: t('pages.coachTypes.boxing.faq.safety.question'),
-      answer: t('pages.coachTypes.boxing.faq.safety.answer'),
+      question: t('coachTypes.boxing.faq.safety.question'),
+      answer: t('coachTypes.boxing.faq.safety.answer'),
     },
     {
-      question: t('pages.coachTypes.boxing.faq.weightLoss.question'),
-      answer: t('pages.coachTypes.boxing.faq.weightLoss.answer'),
+      question: t('coachTypes.boxing.faq.weightLoss.question'),
+      answer: t('coachTypes.boxing.faq.weightLoss.answer'),
     },
     {
-      question: t('pages.coachTypes.boxing.faq.results.question'),
-      answer: t('pages.coachTypes.boxing.faq.results.answer'),
+      question: t('coachTypes.boxing.faq.results.question'),
+      answer: t('coachTypes.boxing.faq.results.answer'),
     },
   ];
 
   const featuredCoaches = [
-    { name: "Mike Rodriguez", specialty: t('pages.coachTypes.boxing.featured.specialties.amateur'), rating: 4.9, fights: 50 },
-    { name: "Tommy Williams", specialty: t('pages.coachTypes.boxing.featured.specialties.fitness'), rating: 4.8, clients: 300 },
-    { name: "Sarah Jones", specialty: t('pages.coachTypes.boxing.featured.specialties.womens'), rating: 4.9, experience: t('pages.coachTypes.boxing.featured.experience', { years: 15 }) },
+    { name: "Mike Rodriguez", specialty: t('coachTypes.boxing.featured.specialties.amateur'), rating: 4.9, fights: 50 },
+    { name: "Tommy Williams", specialty: t('coachTypes.boxing.featured.specialties.fitness'), rating: 4.8, clients: 300 },
+    { name: "Sarah Jones", specialty: t('coachTypes.boxing.featured.specialties.womens'), rating: 4.9, experience: t('coachTypes.boxing.featured.experience', { years: 15 }) },
   ];
 
   return (
     <>
       <Helmet>
-        <title>{t('pages.coachTypes.boxing.meta.title')}</title>
-        <meta name="description" content={t('pages.coachTypes.boxing.meta.description')} />
+        <title>{t('coachTypes.boxing.meta.title')}</title>
+        <meta name="description" content={t('coachTypes.boxing.meta.description')} />
       </Helmet>
       
       <div className="min-h-screen bg-background">
@@ -80,23 +80,23 @@ const Boxing = () => {
           <div className="container mx-auto relative z-10">
             <div className="max-w-3xl">
               <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
-                <Swords className="w-3 h-3 mr-1" /> {t('pages.coachTypes.boxing.hero.badge')}
+                <Swords className="w-3 h-3 mr-1" /> {t('coachTypes.boxing.hero.badge')}
               </Badge>
               <h1 className="font-display text-4xl md:text-6xl font-bold mb-6">
-                {t('pages.coachTypes.boxing.hero.titleStart')} <span className="text-gradient-primary">{t('pages.coachTypes.boxing.hero.titleHighlight')}</span>
+                {t('coachTypes.boxing.hero.titleStart')} <span className="text-gradient-primary">{t('coachTypes.boxing.hero.titleHighlight')}</span>
               </h1>
               <p className="text-muted-foreground text-lg md:text-xl mb-8">
-                {t('pages.coachTypes.boxing.hero.description')}
+                {t('coachTypes.boxing.hero.description')}
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link to="/coaches?type=boxing">
                   <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                    {t('pages.coachTypes.boxing.hero.browseButton')} <ArrowRight className="ml-2 w-5 h-5" />
+                    {t('coachTypes.boxing.hero.browseButton')} <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>
                 </Link>
                 <Link to="/how-it-works">
                   <Button size="lg" variant="outline">
-                    {t('pages.coachTypes.boxing.hero.howItWorks')}
+                    {t('coachTypes.boxing.hero.howItWorks')}
                   </Button>
                 </Link>
               </div>
@@ -109,10 +109,10 @@ const Boxing = () => {
           <div className="container mx-auto">
             <div className="text-center mb-12">
               <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-                {t('pages.coachTypes.boxing.benefits.title')}
+                {t('coachTypes.boxing.benefits.title')}
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                {t('pages.coachTypes.boxing.benefits.description')}
+                {t('coachTypes.boxing.benefits.description')}
               </p>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -136,10 +136,10 @@ const Boxing = () => {
           <div className="container mx-auto">
             <div className="text-center mb-12">
               <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-                {t('pages.coachTypes.boxing.featured.title')}
+                {t('coachTypes.boxing.featured.title')}
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                {t('pages.coachTypes.boxing.featured.description')}
+                {t('coachTypes.boxing.featured.description')}
               </p>
             </div>
             <div className="grid md:grid-cols-3 gap-6 mb-8">
@@ -161,8 +161,8 @@ const Boxing = () => {
                         <span className="text-foreground font-medium">{coach.rating}</span>
                       </div>
                       <span className="text-muted-foreground">
-                        {coach.fights ? t('pages.coachTypes.boxing.featured.stats.fights', { count: coach.fights }) : 
-                         coach.clients ? t('pages.coachTypes.boxing.featured.stats.clients', { count: coach.clients }) : 
+                        {coach.fights ? t('coachTypes.boxing.featured.stats.fights', { count: coach.fights }) : 
+                         coach.clients ? t('coachTypes.boxing.featured.stats.clients', { count: coach.clients }) : 
                          coach.experience}
                       </span>
                     </div>
@@ -173,7 +173,7 @@ const Boxing = () => {
             <div className="text-center">
               <Link to="/coaches?type=boxing">
                 <Button variant="outline" size="lg">
-                  {t('pages.coachTypes.boxing.featured.viewAll')} <ArrowRight className="ml-2 w-5 h-5" />
+                  {t('coachTypes.boxing.featured.viewAll')} <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
             </div>
@@ -185,10 +185,10 @@ const Boxing = () => {
           <div className="container mx-auto max-w-3xl">
             <div className="text-center mb-12">
               <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-                {t('pages.coachTypes.boxing.faq.title')}
+                {t('coachTypes.boxing.faq.title')}
               </h2>
               <p className="text-muted-foreground">
-                {t('pages.coachTypes.boxing.faq.description')}
+                {t('coachTypes.boxing.faq.description')}
               </p>
             </div>
             <Accordion type="single" collapsible className="space-y-4">
@@ -210,14 +210,14 @@ const Boxing = () => {
         <section className="py-20 px-4">
           <div className="container mx-auto text-center">
             <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-              {t('pages.coachTypes.boxing.cta.title')}
+              {t('coachTypes.boxing.cta.title')}
             </h2>
             <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-              {t('pages.coachTypes.boxing.cta.description')}
+              {t('coachTypes.boxing.cta.description')}
             </p>
             <Link to="/coaches?type=boxing">
               <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                {t('pages.coachTypes.boxing.cta.button')} <ArrowRight className="ml-2 w-5 h-5" />
+                {t('coachTypes.boxing.cta.button')} <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
           </div>

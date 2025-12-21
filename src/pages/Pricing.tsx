@@ -21,47 +21,47 @@ const tierIcons: Record<TierKey, typeof Zap> = {
 };
 
 const Pricing = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('pages');
   const [billingInterval, setBillingInterval] = useState<BillingInterval>("monthly");
   const { countryCode } = useCountryContext();
 
   const platformFeatures = [
     {
       icon: MessageSquare,
-      title: t('pages.pricing.features.messaging.title'),
-      description: t('pages.pricing.features.messaging.description')
+      title: t('pricing.features.messaging.title'),
+      description: t('pricing.features.messaging.description')
     },
     {
       icon: Calendar,
-      title: t('pages.pricing.features.scheduling.title'),
-      description: t('pages.pricing.features.scheduling.description')
+      title: t('pricing.features.scheduling.title'),
+      description: t('pricing.features.scheduling.description')
     },
     {
       icon: TrendingUp,
-      title: t('pages.pricing.features.progress.title'),
-      description: t('pages.pricing.features.progress.description')
+      title: t('pricing.features.progress.title'),
+      description: t('pricing.features.progress.description')
     },
     {
       icon: Video,
-      title: t('pages.pricing.features.video.title'),
-      description: t('pages.pricing.features.video.description')
+      title: t('pricing.features.video.title'),
+      description: t('pricing.features.video.description')
     },
     {
       icon: FileText,
-      title: t('pages.pricing.features.plans.title'),
-      description: t('pages.pricing.features.plans.description')
+      title: t('pricing.features.plans.title'),
+      description: t('pricing.features.plans.description')
     },
     {
       icon: Shield,
-      title: t('pages.pricing.features.payments.title'),
-      description: t('pages.pricing.features.payments.description')
+      title: t('pricing.features.payments.title'),
+      description: t('pricing.features.payments.description')
     }
   ];
 
   return (
     <PageLayout
-      title={t('pages.pricing.meta.title')}
-      description={t('pages.pricing.meta.description')}
+      title={t('pricing.meta.title')}
+      description={t('pricing.meta.description')}
     >
       {/* Decorative Avatars - placed at PageLayout level */}
       <DecorativeAvatar 
@@ -88,16 +88,16 @@ const Pricing = () => {
         
         <div className="container mx-auto px-4 text-center">
           <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary font-medium text-sm mb-6">
-            {t('pages.pricing.hero.badge')}
+            {t('pricing.hero.badge')}
           </span>
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            {t('pages.pricing.hero.titleStart')}{" "}
+            {t('pricing.hero.titleStart')}{" "}
             <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-              {t('pages.pricing.hero.titleHighlight')}
+              {t('pricing.hero.titleHighlight')}
             </span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-10">
-            {t('pages.pricing.hero.description')}
+            {t('pricing.hero.description')}
           </p>
 
           {/* Billing Toggle */}
@@ -111,7 +111,7 @@ const Pricing = () => {
                   : "bg-muted text-muted-foreground hover:bg-muted/80"
               )}
             >
-              {t('pages.pricing.billing.monthly')}
+              {t('pricing.billing.monthly')}
             </button>
             <button
               onClick={() => setBillingInterval("yearly")}
@@ -122,9 +122,9 @@ const Pricing = () => {
                   : "bg-muted text-muted-foreground hover:bg-muted/80"
               )}
             >
-              {t('pages.pricing.billing.yearly')}
+              {t('pricing.billing.yearly')}
               <span className="text-xs px-2 py-0.5 rounded-full bg-accent text-accent-foreground">
-                {t('pages.pricing.billing.save')}
+                {t('pricing.billing.save')}
               </span>
             </button>
           </div>
@@ -157,7 +157,7 @@ const Pricing = () => {
                   {isPopular && (
                     <div className="absolute top-4 right-4">
                       <span className="px-3 py-1 rounded-full bg-gradient-to-r from-primary to-secondary text-white text-xs font-semibold">
-                        {t('pages.pricing.tiers.popular')}
+                        {t('pricing.tiers.popular')}
                       </span>
                     </div>
                   )}
@@ -177,17 +177,17 @@ const Pricing = () => {
                     <div className="mb-6">
                       <div className="flex items-baseline gap-1">
                         <span className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                          {isFree ? t('pages.pricing.tiers.free') : formatCurrency(converted.amount, converted.currency)}
+                          {isFree ? t('pricing.tiers.free') : formatCurrency(converted.amount, converted.currency)}
                         </span>
                         {!isFree && (
                           <span className="text-muted-foreground">
-                            /{billingInterval === "monthly" ? t('pages.pricing.billing.perMonth') : t('pages.pricing.billing.perYear')}
+                            /{billingInterval === "monthly" ? t('pricing.billing.perMonth') : t('pricing.billing.perYear')}
                           </span>
                         )}
                       </div>
                       {billingInterval === "yearly" && !isFree && "savings" in priceData && priceData.savings > 0 && (
                         <p className="text-sm text-primary font-medium mt-1">
-                          {t('pages.pricing.tiers.saveAmount', { amount: formatCurrency(convertPlatformPriceForDisplay(priceData.savings, countryCode).amount, converted.currency) })}
+                          {t('pricing.tiers.saveAmount', { amount: formatCurrency(convertPlatformPriceForDisplay(priceData.savings, countryCode).amount, converted.currency) })}
                         </p>
                       )}
                     </div>
@@ -196,7 +196,7 @@ const Pricing = () => {
                     <div className="flex items-center gap-2 mb-3 p-3 rounded-lg bg-primary/10 border border-primary/20">
                       <Percent className="w-5 h-5 text-primary" />
                       <span className="font-semibold text-primary">
-                        {t('pages.pricing.tiers.platformFee', { percent: tier.commissionPercent })}
+                        {t('pricing.tiers.platformFee', { percent: tier.commissionPercent })}
                       </span>
                     </div>
 
@@ -205,8 +205,8 @@ const Pricing = () => {
                       <Users className="w-5 h-5 text-primary" />
                       <span className="font-semibold">
                         {tier.clientLimit === null 
-                          ? t('pages.pricing.tiers.unlimitedClients')
-                          : t('pages.pricing.tiers.upToClients', { count: tier.clientLimit })}
+                          ? t('pricing.tiers.unlimitedClients')
+                          : t('pricing.tiers.upToClients', { count: tier.clientLimit })}
                       </span>
                     </div>
 
@@ -224,7 +224,7 @@ const Pricing = () => {
                         className="w-full" 
                         variant={isPopular ? "primary" : isFree ? "outline" : "primary"}
                       >
-                        {isFree ? t('pages.pricing.tiers.getStartedFree') : t('pages.pricing.tiers.subscribeNow')}
+                        {isFree ? t('pricing.tiers.getStartedFree') : t('pricing.tiers.subscribeNow')}
                       </GradientButton>
                     </Link>
                   </CardContent>
@@ -240,13 +240,13 @@ const Pricing = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              {t('pages.pricing.platformFeatures.titleStart')}{" "}
+              {t('pricing.platformFeatures.titleStart')}{" "}
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                {t('pages.pricing.platformFeatures.titleHighlight')}
+                {t('pricing.platformFeatures.titleHighlight')}
               </span>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              {t('pages.pricing.platformFeatures.description')}
+              {t('pricing.platformFeatures.description')}
             </p>
           </div>
           
@@ -274,16 +274,16 @@ const Pricing = () => {
       <section className="py-20">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl font-bold mb-4">{t('pages.pricing.cta.title')}</h2>
+            <h2 className="text-2xl font-bold mb-4">{t('pricing.cta.title')}</h2>
             <p className="text-muted-foreground mb-8">
-              {t('pages.pricing.cta.description')}
+              {t('pricing.cta.description')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/subscribe">
-                <GradientButton size="lg">{t('pages.pricing.cta.getStarted')}</GradientButton>
+                <GradientButton size="lg">{t('pricing.cta.getStarted')}</GradientButton>
               </Link>
               <Link to="/faq">
-                <GradientButton size="lg" variant="outline">{t('pages.pricing.cta.viewFaq')}</GradientButton>
+                <GradientButton size="lg" variant="outline">{t('pricing.cta.viewFaq')}</GradientButton>
               </Link>
             </div>
           </div>
