@@ -19,6 +19,8 @@ export interface ProfileData {
   x_url?: string | null;
   linkedin_url?: string | null;
   threads_url?: string | null;
+  stripe_connect_id?: string | null;
+  stripe_connect_onboarded?: boolean | null;
 }
 
 export interface CompletionContext {
@@ -100,6 +102,12 @@ export const PROFILE_COMPLETION_RULES: CompletionRule[] = [
       ctx.profile.linkedin_url ||
       ctx.profile.threads_url
     ),
+  },
+  {
+    id: "stripe_connected",
+    label: "Connect Stripe",
+    weight: 5,
+    check: (ctx) => !!ctx.profile.stripe_connect_id && !!ctx.profile.stripe_connect_onboarded,
   },
 ];
 
