@@ -34,20 +34,30 @@ const ClientFindCoaches = () => {
   // Manual location filter (persisted for session)
   const {
     manualLocation,
+    manualCountryCode,
     isManualSelection,
     setManualLocation,
     clearManualLocation,
   } = useMarketplaceLocationFilter();
 
-  // Determine effective location (manual overrides auto)
+  // Get country from context (geo-detected or stored preference)
+  const { countryCode: contextCountryCode, isLoading: countryLoading } = useCountry();
+
+  /**
+   * Effective country code priority:
+   * 1. Manual selection from marketplace filter (user explicitly chose)
+   * 2. Context country (from URL locale, stored preference, or geo-detection)
+   * 
+   * This ensures manual location selection ALWAYS overrides geo-detection.
+   */
+  const effectiveCountryCode = manualCountryCode ?? contextCountryCode;
+
+  // Determine effective location for city-level ranking (manual overrides auto)
   const effectiveLocation = isManualSelection
     ? manualLocation
     : autoLocationLoading
       ? null
       : autoLocation;
-
-  // Get country from context for filtering
-  const { countryCode } = useCountry();
 
   const { data: coaches, isLoading, error } = useCoachMarketplace({
     search: searchQuery || undefined,
@@ -57,7 +67,7 @@ const ClientFindCoaches = () => {
     inPersonOnly,
     userLocation: effectiveLocation,
     enableLocationRanking: true,
-    countryCode,
+    countryCode: effectiveCountryCode,
   });
 
   const handleBook = useCallback((coach: MarketplaceCoach) => {
