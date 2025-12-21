@@ -2,22 +2,26 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 const STORAGE_KEY = "fitconnect_last_route";
-
-// Routes that should not be saved for restoration
-const EXCLUDED_ROUTES = ["/auth", "/get-started", "/"];
+const COLD_START_KEY = "fitconnect_cold_start";
 
 export const useRouteRestoration = () => {
   const location = useLocation();
 
-  // Save current route on navigation (excluding auth routes)
+  // Mark navigation has occurred (no longer cold start)
+  useEffect(() => {
+    // After first navigation, mark as not a cold start
+    const timer = setTimeout(() => {
+      sessionStorage.setItem(COLD_START_KEY, "false");
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Save current route on navigation (only dashboard routes)
   useEffect(() => {
     const pathname = location.pathname;
     
-    // Only save dashboard and meaningful routes
-    if (
-      pathname.startsWith("/dashboard") &&
-      !EXCLUDED_ROUTES.some(route => pathname === route)
-    ) {
+    // Only save dashboard routes for restoration
+    if (pathname.startsWith("/dashboard")) {
       try {
         sessionStorage.setItem(STORAGE_KEY, pathname);
       } catch {
@@ -38,6 +42,24 @@ export const getLastRoute = (): string | null => {
 export const clearLastRoute = () => {
   try {
     sessionStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // Ignore storage errors
+  }
+};
+
+// Check if this is a cold start (fresh page load, not in-app navigation)
+export const isColdStart = (): boolean => {
+  try {
+    return sessionStorage.getItem(COLD_START_KEY) !== "false";
+  } catch {
+    return true;
+  }
+};
+
+// Mark cold start as complete
+export const markColdStartComplete = () => {
+  try {
+    sessionStorage.setItem(COLD_START_KEY, "false");
   } catch {
     // Ignore storage errors
   }
