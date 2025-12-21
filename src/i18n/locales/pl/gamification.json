@@ -1,4 +1,15 @@
 {
+  "celebration": {
+    "congratulations": "Gratulacje!",
+    "challengeComplete": "Wyzwanie ukończone!",
+    "youCompleted": "Ukończyłeś \"{{title}}\"",
+    "xpEarned": "+{{xp}} XP",
+    "badgeUnlocked": "Odznaka odblokowana!",
+    "avatarUnlocked": "Awatar odblokowany!",
+    "levelUp": "Awans!",
+    "reachedLevel": "Osiągnąłeś Poziom {{level}}",
+    "tapToDismiss": "Dotknij aby zamknąć"
+  },
   "xp": {
     "level": "Poziom",
     "totalXp": "Łączne XP",
