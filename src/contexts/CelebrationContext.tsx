@@ -1,17 +1,22 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { CelebrationOverlay, CelebrationData, CelebrationType } from '@/components/gamification/CelebrationOverlay';
+import { triggerConfetti, confettiPresets } from '@/lib/confetti';
+import { triggerHaptic } from '@/lib/despia';
 
-interface BadgeReward {
+export interface BadgeReward {
   name: string;
   imageUrl?: string;
   rarity: string;
 }
 
-interface AvatarReward {
+export interface AvatarReward {
   name: string;
   imageUrl?: string;
   rarity: string;
 }
+
+export type StreakMilestone = 7 | 30 | 100;
+export type FirstTimeAchievementType = 'first_workout' | 'first_habit' | 'first_photo' | 'first_connection';
 
 interface CelebrationContextValue {
   showChallengeComplete: (data: {
@@ -23,6 +28,8 @@ interface CelebrationContextValue {
   showLevelUp: (newLevel: number, xpEarned?: number) => void;
   showBadgeEarned: (badge: BadgeReward, xpEarned?: number) => void;
   showAvatarUnlocked: (avatar: AvatarReward) => void;
+  showStreakMilestone: (days: StreakMilestone, habitName: string) => void;
+  showFirstTimeAchievement: (type: FirstTimeAchievementType) => void;
   closeCelebration: () => void;
 }
 
@@ -93,6 +100,8 @@ export function CelebrationProvider({ children }: CelebrationProviderProps) {
   }, []);
 
   const showAvatarUnlocked = useCallback((avatar: AvatarReward) => {
+    triggerConfetti(confettiPresets.medium);
+    triggerHaptic('success');
     setCelebrationData({
       type: 'avatar_unlocked',
       title: 'Avatar Unlocked!',
@@ -102,11 +111,58 @@ export function CelebrationProvider({ children }: CelebrationProviderProps) {
     setIsOpen(true);
   }, []);
 
+  const showStreakMilestone = useCallback((days: StreakMilestone, habitName: string) => {
+    // Select confetti intensity based on streak length
+    const preset = days >= 100 
+      ? confettiPresets.streakLegendary 
+      : days >= 30 
+        ? confettiPresets.streakMonth 
+        : confettiPresets.streakWeek;
+    
+    triggerConfetti(preset);
+    triggerHaptic(days >= 30 ? 'success' : 'light');
+    
+    const milestoneLabels: Record<StreakMilestone, string> = {
+      7: '7-Day Streak!',
+      30: '30-Day Streak!',
+      100: '100-Day Streak!',
+    };
+    
+    setCelebrationData({
+      type: 'streak_milestone' as CelebrationType,
+      title: milestoneLabels[days],
+      subtitle: habitName,
+    });
+    setIsOpen(true);
+  }, []);
+
+  const showFirstTimeAchievement = useCallback((type: FirstTimeAchievementType) => {
+    triggerConfetti(confettiPresets.firstTime);
+    triggerHaptic('light');
+    
+    const achievementDetails: Record<FirstTimeAchievementType, { title: string; subtitle: string }> = {
+      first_workout: { title: 'First Workout Logged!', subtitle: 'Your fitness journey begins' },
+      first_habit: { title: 'First Habit Completed!', subtitle: 'Building healthy routines' },
+      first_photo: { title: 'First Progress Photo!', subtitle: 'Tracking your transformation' },
+      first_connection: { title: 'Coach Connected!', subtitle: 'Ready to reach your goals' },
+    };
+    
+    const details = achievementDetails[type];
+    setCelebrationData({
+      type: 'first_time' as CelebrationType,
+      title: details.title,
+      subtitle: details.subtitle,
+    });
+    setIsOpen(true);
+  }, []);
+
   const value: CelebrationContextValue = {
     showChallengeComplete,
     showLevelUp,
     showBadgeEarned,
     showAvatarUnlocked,
+    showStreakMilestone,
+    showFirstTimeAchievement,
     closeCelebration,
   };
 
