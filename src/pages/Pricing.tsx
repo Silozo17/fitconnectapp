@@ -6,11 +6,17 @@ import { GradientButton } from "@/components/ui/gradient-button";
 import { Link } from "react-router-dom";
 import { Check, Zap, Star, Crown, Sparkles, Users, MessageSquare, Calendar, TrendingUp, Video, FileText, Shield, Percent } from "lucide-react";
 import { SUBSCRIPTION_TIERS, TierKey, BillingInterval } from "@/lib/stripe-config";
-import { formatCurrency, convertPlatformPriceForDisplay } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
 import { useCountryContext } from "@/contexts/CountryContext";
 import { useTranslation } from "@/hooks/useTranslation";
+import { 
+  getPricingConfig, 
+  getSubscriptionPrice, 
+  getSubscriptionSavings,
+  formatPrice,
+  type SubscriptionTier 
+} from "@/lib/pricing-config";
 
 const tierIcons: Record<TierKey, typeof Zap> = {
   free: Sparkles,
@@ -139,10 +145,18 @@ const Pricing = () => {
               .filter(([_, tier]) => !tier.adminOnly)
               .map(([key, tier]) => {
               const Icon = tierIcons[key];
-              const priceData = tier.prices[billingInterval];
-              const converted = convertPlatformPriceForDisplay(priceData.amount, countryCode);
               const isPopular = tier.highlighted;
               const isFree = key === "free";
+              
+              // Use unified pricing config - no conversion needed
+              const tierKeyForPricing = key as SubscriptionTier;
+              const isSupportedTier = ['starter', 'pro', 'enterprise'].includes(key);
+              const priceAmount = isSupportedTier 
+                ? getSubscriptionPrice(countryCode, tierKeyForPricing, billingInterval)
+                : 0;
+              const savingsAmount = isSupportedTier && billingInterval === "yearly"
+                ? getSubscriptionSavings(countryCode, tierKeyForPricing)
+                : 0;
 
               return (
                 <Card 
@@ -177,7 +191,7 @@ const Pricing = () => {
                     <div className="mb-6">
                       <div className="flex items-baseline gap-1">
                         <span className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                          {isFree ? t('pricing.billing.free') : formatCurrency(converted.amount, converted.currency)}
+                          {isFree ? t('pricing.billing.free') : formatPrice(priceAmount, countryCode)}
                         </span>
                         {!isFree && (
                           <span className="text-muted-foreground">
@@ -185,9 +199,9 @@ const Pricing = () => {
                           </span>
                         )}
                       </div>
-                      {billingInterval === "yearly" && !isFree && "savings" in priceData && priceData.savings > 0 && (
+                      {billingInterval === "yearly" && !isFree && savingsAmount > 0 && (
                         <p className="text-sm text-primary font-medium mt-1">
-                          {t('pricing.billing.saveAmount', { amount: formatCurrency(convertPlatformPriceForDisplay(priceData.savings, countryCode).amount, converted.currency) })}
+                          {t('pricing.billing.saveAmount', { amount: formatPrice(savingsAmount, countryCode) })}
                         </p>
                       )}
                     </div>
