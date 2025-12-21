@@ -1,64 +1,186 @@
 {
   "about": {
     "title": "O nas",
+    "metaDescription": "Dowiedz się o misji FitConnect, aby uczynić spersonalizowany coaching fitness dostępnym dla każdego. Poznaj nasz zespół i odkryj naszą historię.",
     "subtitle": "Łączymy klientów ze światowej klasy profesjonalistami fitness",
-    "mission": {
-      "title": "Nasza misja",
-      "description": "Uczynienie profesjonalnego coachingu fitness dostępnym dla wszystkich, wszędzie."
-    },
-    "vision": {
-      "title": "Nasza wizja",
-      "description": "Świat, w którym każdy ma dostęp do spersonalizowanego wsparcia fitness."
+    "badge": "Nasza historia",
+    "hero": {
+      "title": "Zmieniamy życie poprzez",
+      "titleHighlight": "Profesjonalny coaching",
+      "description": "Wierzymy, że każdy zasługuje na dostęp do światowej klasy coachingu fitness. FitConnect łączy ambitnych ludzi z trenerami, którzy mogą pomóc im osiągnąć ich marzenia."
     },
     "story": {
-      "title": "Nasza historia",
-      "description": "Założona z pasją do fitness i technologii, postanowiliśmy zrewolucjonizować sposób, w jaki ludzie łączą się z profesjonalistami fitness."
+      "title": "Jak to wszystko",
+      "titleHighlight": "się zaczęło",
+      "paragraph1": "Założona w 2024 roku, FitConnect narodziła się z prostej obserwacji: podczas gdy niesamowici trenerzy fitness istnieją wszędzie, znalezienie odpowiedniego dopasowania pozostaje frustrująco trudne dla większości ludzi.",
+      "paragraph2": "Nasi założyciele, Sarah i Marcus, doświadczyli tego osobiście. Sarah, była olimpijka, która została trenerem, miała trudności z dotarciem do klientów poza swoją lokalną siłownią. Marcus, zapracowany przedsiębiorca technologiczny, nie mógł znaleźć trenera, który rozumiałby jego ograniczenia czasowe i konkretne cele.",
+      "paragraph3": "Razem zbudowali FitConnect — platformę, która wykorzystuje inteligentną technologię dopasowania, aby łączyć klientów z trenerami, którzy naprawdę odpowiadają ich potrzebom, czy to dietetyk do planowania posiłków, trener personalny do celów siłowych, czy trener boksu do redukcji stresu.",
+      "established": "Zał. 2024",
+      "location": "San Francisco, Kalifornia"
+    },
+    "mission": {
+      "title": "Nasza misja",
+      "description": "\"Uczynić spersonalizowany coaching fitness",
+      "descriptionHighlight": "dostępnym, przystępnym cenowo i skutecznym",
+      "descriptionEnd": "dla każdego, niezależnie od lokalizacji, budżetu czy poziomu doświadczenia.\""
     },
     "values": {
-      "title": "Nasze wartości",
+      "title": "Nasze",
+      "titleHighlight": "wartości",
+      "subtitle": "Te zasady kierują wszystkim, co robimy w FitConnect",
       "excellence": "Doskonałość",
-      "excellenceDesc": "Dążymy do doskonałości we wszystkim, co robimy.",
-      "integrity": "Uczciwość",
-      "integrityDesc": "Działamy uczciwie i przejrzyście.",
-      "innovation": "Innowacja",
-      "innovationDesc": "Nieustannie wprowadzamy innowacje, aby ulepszać naszą platformę.",
+      "excellenceDesc": "Współpracujemy tylko ze zweryfikowanymi, najlepszymi trenerami, którzy mają udokumentowane osiągnięcia w zmienianiu życia.",
+      "accessibility": "Dostępność",
+      "accessibilityDesc": "Coaching fitness dla każdego budżetu i harmonogramu. Każdy zasługuje na dostęp do profesjonalnego wsparcia.",
       "community": "Społeczność",
-      "communityDesc": "Tworzymy wspierającą społeczność fitness."
+      "communityDesc": "Budowanie znaczących połączeń, które motywują, inspirują i wspierają Twoją podróż fitness.",
+      "results": "Wyniki",
+      "resultsDesc": "Podejście oparte na danych, skupione na mierzalnych rezultatach i trwałej transformacji."
+    },
+    "stats": {
+      "activeUsers": "Aktywni użytkownicy",
+      "expertCoaches": "Eksperci-trenerzy",
+      "sessionsCompleted": "Ukończone sesje",
+      "satisfactionRate": "Wskaźnik satysfakcji"
     },
     "team": {
-      "title": "Nasz zespół",
-      "subtitle": "Poznaj ludzi stojących za platformą"
+      "title": "Poznaj nasze",
+      "titleHighlight": "kierownictwo",
+      "subtitle": "Pasjonaci eksperci oddani rewolucjonizowaniu coachingu fitness"
+    },
+    "trust": {
+      "title": "Twoje zaufanie, nasz priorytet",
+      "description": "Każdy trener na FitConnect przechodzi rygorystyczną weryfikację, w tym sprawdzenie poświadczeń, weryfikację przeszłości i ciągłe monitorowanie wyników. Utrzymujemy najwyższe standardy, abyś mógł skupić się na tym, co ważne — Twojej podróży fitness.",
+      "verifiedCerts": "Zweryfikowane certyfikaty i poświadczenia",
+      "backgroundChecks": "Kompleksowe sprawdzenie przeszłości",
+      "qualityMonitoring": "Ciągłe monitorowanie jakości i recenzje",
+      "securePayments": "Bezpieczne płatności i ochrona danych"
+    },
+    "cta": {
+      "title": "Dołącz do społeczności",
+      "titleHighlight": "FitConnect",
+      "description": "Niezależnie od tego, czy chcesz zmienić swoje ciało, poprawić zdrowie, czy rozwinąć biznes trenerski, FitConnect jest tutaj, aby pomóc Ci odnieść sukces.",
+      "findCoach": "Znajdź swojego trenera",
+      "becomeCoach": "Zostań trenerem"
     }
   },
   "contact": {
     "title": "Kontakt",
+    "metaTitle": "Kontakt | FitConnect - Skontaktuj się z nami",
+    "metaDescription": "Masz pytania dotyczące FitConnect? Skontaktuj się z naszym zespołem wsparcia. Jesteśmy tutaj, aby pomóc Ci znaleźć idealnego trenera fitness.",
     "subtitle": "Chętnie Cię wysłuchamy",
-    "form": {
-      "name": "Twoje imię",
-      "email": "Adres e-mail",
-      "subject": "Temat",
-      "message": "Wiadomość",
-      "send": "Wyślij wiadomość",
-      "sending": "Wysyłanie...",
-      "success": "Wiadomość wysłana pomyślnie!",
-      "error": "Nie udało się wysłać wiadomości. Spróbuj ponownie."
+    "badge": "Skontaktuj się",
+    "hero": {
+      "title": "Kontakt z",
+      "titleHighlight": "nami",
+      "description": "Masz pytanie lub potrzebujesz pomocy? Jesteśmy tutaj dla Ciebie. Wyślij nam wiadomość, a odpowiemy tak szybko, jak to możliwe."
     },
     "info": {
-      "title": "Skontaktuj się",
-      "email": "E-mail",
-      "phone": "Telefon",
-      "address": "Adres",
-      "hours": "Godziny pracy"
+      "emailUs": "Napisz do nas",
+      "emailSubtext": "Odpowiemy w ciągu 24 godzin",
+      "liveChat": "Czat na żywo",
+      "liveChatDesc": "Porozmawiaj z naszym zespołem",
+      "liveChatSubtext": "Dostępny pon-pt, 9:00-18:00",
+      "responseTime": "Czas odpowiedzi",
+      "responseTimeDesc": "Poniżej 24 godzin",
+      "responseTimeSubtext": "Dla wszystkich zapytań"
     },
-    "support": {
-      "title": "Potrzebujesz pomocy?",
-      "description": "Nasz zespół wsparcia jest tutaj, aby odpowiedzieć na Twoje pytania.",
-      "helpCenter": "Odwiedź Centrum pomocy"
-    }
+    "form": {
+      "title": "Wyślij nam wiadomość",
+      "name": "Twoje imię",
+      "namePlaceholder": "Jan Kowalski",
+      "email": "Adres e-mail",
+      "emailPlaceholder": "jan@example.com",
+      "subject": "Temat",
+      "subjectPlaceholder": "Jak możemy pomóc?",
+      "message": "Wiadomość",
+      "messagePlaceholder": "Opowiedz nam więcej o swoim zapytaniu...",
+      "send": "Wyślij wiadomość",
+      "sending": "Wysyłanie...",
+      "success": "Wiadomość wysłana pomyślnie! Skontaktujemy się wkrótce.",
+      "error": "Nie udało się wysłać wiadomości. Spróbuj ponownie.",
+      "fillAllFields": "Wypełnij wszystkie pola"
+    },
+    "quickAnswers": {
+      "title": "Szybkie odpowiedzi",
+      "findCoach": "Jak znaleźć trenera?",
+      "pricing": "Jakie są opcje cenowe?",
+      "becomeCoach": "Jak zostać trenerem?",
+      "viewFaq": "Zobacz wszystkie FAQ"
+    },
+    "followUs": "Obserwuj nas"
   },
   "faq": {
     "title": "Najczęściej zadawane pytania",
+    "metaDescription": "Znajdź odpowiedzi na częste pytania dotyczące FitConnect. Dowiedz się o znajdowaniu trenerów, cenach, płatnościach i działaniu naszej platformy coachingu fitness.",
     "subtitle": "Znajdź odpowiedzi na częste pytania",
+    "badge": "Centrum pomocy",
+    "hero": {
+      "title": "Najczęściej zadawane",
+      "titleHighlight": "pytania",
+      "description": "Wszystko, co musisz wiedzieć o FitConnect. Nie możesz znaleźć tego, czego szukasz? Skontaktuj się z naszym przyjaznym zespołem wsparcia."
+    },
+    "tabs": {
+      "forClients": "Dla klientów",
+      "forCoaches": "Dla trenerów",
+      "general": "Ogólne"
+    },
+    "stillHaveQuestions": {
+      "title": "Nadal masz pytania?",
+      "description": "Nie możesz znaleźć odpowiedzi, której szukasz? Nasz przyjazny zespół wsparcia jest tutaj, aby pomóc Ci we wszystkim, czego potrzebujesz.",
+      "contactSupport": "Skontaktuj się ze wsparciem",
+      "learnHowItWorks": "Dowiedz się, jak to działa"
+    },
+    "clientQuestions": {
+      "q1": "Jak znaleźć odpowiedniego trenera dla siebie?",
+      "a1": "Nasz inteligentny system dopasowania pomaga znaleźć trenerów na podstawie Twoich celów, budżetu, lokalizacji i preferowanego stylu treningu. Przeglądaj profile trenerów, czytaj recenzje i umów się na bezpłatną rozmowę zapoznawczą, aby upewnić się, że to dobre dopasowanie.",
+      "q2": "Jakie rodzaje trenerów są dostępni na FitConnect?",
+      "a2": "Oferujemy różnorodną gamę certyfikowanych profesjonalistów, w tym trenerów personalnych, dietetyków, trenerów boksu, trenerów MMA, instruktorów jogi i specjalistów ds. przygotowania motorycznego. Każdy trener jest zweryfikowany i wnosi unikalną wiedzę.",
+      "q3": "Ile kosztuje coaching?",
+      "a3": "Stawki za coaching różnią się w zależności od doświadczenia trenera, specjalizacji i rodzaju sesji. Stawki zazwyczaj wahają się od 30 do 200+ USD za sesję. Możesz filtrować trenerów według przedziału cenowego, a wielu oferuje zniżki pakietowe.",
+      "q4": "Czy mogę anulować lub przełożyć sesje?",
+      "a4": "Tak! Możesz przełożyć lub anulować sesje do 24 godzin przed planowanym terminem bez opłat. Anulacje w ciągu 24 godzin mogą podlegać polityce anulowania trenera, która jest wyświetlana na jego profilu.",
+      "q5": "Czy jest bezpłatny okres próbny lub sesja wprowadzająca?",
+      "a5": "Wielu trenerów oferuje bezpłatną 15-minutową rozmowę zapoznawczą, aby omówić Twoje cele i sprawdzić, czy jesteście dobrze dopasowani. Szukaj odznaki 'Bezpłatna konsultacja' na profilach trenerów.",
+      "q6": "Jak działają sesje online?",
+      "a6": "Sesje online są prowadzone przez naszą zintegrowaną platformę wideo. Po prostu zaloguj się o zaplanowanej godzinie, a zostaniesz połączony ze swoim trenerem. Możesz ćwiczyć z domu, siłowni lub z dowolnego miejsca ze stabilnym połączeniem internetowym.",
+      "q7": "Co jeśli nie jestem zadowolony z mojego trenera?",
+      "a7": "Twoja satysfakcja jest naszym priorytetem. Jeśli nie jesteś zadowolony po pierwszej sesji, skontaktuj się z naszym zespołem wsparcia w ciągu 48 godzin, aby otrzymać pełny zwrot pieniędzy. Pomożemy Ci również dopasować się do innego trenera.",
+      "q8": "Czy trenerzy tworzą spersonalizowane plany treningowe/żywieniowe?",
+      "a8": "Tak! Większość trenerów tworzy dostosowane plany na podstawie Twoich celów, preferencji i ewentualnych ograniczeń. Poziom personalizacji zależy od wybranego pakietu — omów szczegóły ze swoim trenerem podczas rozmowy zapoznawczej."
+    },
+    "coachQuestions": {
+      "q1": "Jak zostać trenerem na FitConnect?",
+      "a1": "Kliknij 'Zostań trenerem' i wypełnij naszą aplikację. Będziesz musiał przesłać swoje certyfikaty, szczegóły doświadczenia i odbyć krótką rozmowę kwalifikacyjną. Po zatwierdzeniu możesz skonfigurować swój profil i zacząć przyjmować klientów.",
+      "q2": "Jakie są wymagania, aby dołączyć jako trener?",
+      "a2": "Wymagamy: (1) Ważnego certyfikatu od akredytowanej organizacji w Twojej specjalizacji, (2) Minimum 2 lat doświadczenia zawodowego jako trener, (3) Przejścia weryfikacji przeszłości, (4) Ubezpieczenia odpowiedzialności cywilnej. Dodatkowe certyfikaty wzmacniają Twój profil.",
+      "q3": "Jak i kiedy otrzymuję płatność?",
+      "a3": "Płatności są przetwarzane automatycznie po każdej zakończonej sesji. Środki są przelewane na Twoje połączone konto bankowe w ciągu 3-5 dni roboczych. Możesz śledzić wszystkie zarobki i oczekujące płatności w panelu trenera.",
+      "q4": "Czy mogę ustalać własne stawki i harmonogram?",
+      "a4": "Absolutnie! Masz pełną kontrolę nad swoimi stawkami godzinowymi, cenami pakietów i dostępnością. Ustal swój harmonogram, blokuj czas na urlop i dostosowuj stawki w dowolnym momencie przez swój panel.",
+      "q5": "Jakie narzędzia zapewnia FitConnect dla trenerów?",
+      "a5": "Nasza platforma obejmuje: panel zarządzania klientami, harmonogramowanie i integrację z kalendarzem, bezpieczne wiadomości, hosting sesji wideo, narzędzia do śledzenia postępów, kreatory planów treningowych/żywieniowych, przetwarzanie płatności i widoczność marketingową.",
+      "q6": "Ile FitConnect pobiera od trenerów?",
+      "a6": "Pobieramy 15% opłaty platformowej od każdej sesji. Obejmuje to przetwarzanie płatności, utrzymanie platformy, marketing i wsparcie. Nie ma żadnych kosztów początkowych ani miesięcznych opłat — płacisz tylko wtedy, gdy zarabiasz.",
+      "q7": "Jak zdobyć więcej klientów na platformie?",
+      "a7": "Uzupełnij swój profil zdjęciami i szczegółowymi opisami, szybko odpowiadaj na zapytania, zbieraj recenzje od klientów i utrzymuj wysoką ocenę. Wyróżnione miejsce jest dostępne dla najlepszych trenerów.",
+      "q8": "Czy mogę prowadzić coaching zarówno online, jak i stacjonarnie?",
+      "a8": "Tak! Możesz oferować sesje online, sesje stacjonarne lub jedno i drugie. Po prostu wskaż swoje preferencje w ustawieniach profilu i określ swój obszar usług stacjonarnych."
+    },
+    "generalQuestions": {
+      "q1": "Czy moje dane osobowe są bezpieczne?",
+      "a1": "Tak, bezpieczeństwo jest naszym najwyższym priorytetem. Używamy szyfrowania na poziomie bankowym (256-bit SSL) do ochrony wszystkich danych. Informacje o płatnościach są obsługiwane przez Stripe, procesor płatności zgodny z PCI. Nigdy nie udostępniamy Twoich danych osobowych stronom trzecim.",
+      "q2": "Jakie metody płatności akceptujecie?",
+      "a2": "Akceptujemy wszystkie główne karty kredytowe/debetowe (Visa, Mastercard, American Express, Discover), Apple Pay, Google Pay oraz przelewy bankowe w wybranych regionach. Wszystkie płatności są przetwarzane bezpiecznie przez Stripe.",
+      "q3": "Jak skontaktować się z obsługą klienta?",
+      "a3": "Możesz skontaktować się z naszym zespołem wsparcia przez e-mail pod adresem {{email}}, przez czat w aplikacji lub telefonicznie w godzinach pracy (9:00 - 18:00 GMT). Zazwyczaj odpowiadamy na zapytania w ciągu 24 godzin.",
+      "q4": "Czy oferujecie zwroty?",
+      "a4": "Tak, oferujemy gwarancję satysfakcji. Jeśli nie jesteś zadowolony z pierwszej sesji z nowym trenerem, skontaktuj się z nami w ciągu 48 godzin, aby otrzymać pełny zwrot pieniędzy. Zwroty za pakiety są proporcjonalne do niewykorzystanych sesji.",
+      "q5": "Czy FitConnect jest dostępny w mojej okolicy?",
+      "a5": "FitConnect jest dostępny na całym świecie dla coachingu online! W przypadku sesji stacjonarnych dostępność zależy od trenerów w Twojej okolicy. Wprowadź swoją lokalizację w wyszukiwarce, aby zobaczyć lokalnych trenerów, lub wybierz coaching online dla maksymalnej elastyczności.",
+      "q6": "Czy mogę korzystać z FitConnect do programów wellness dla firm?",
+      "a6": "Tak! Oferujemy pakiety korporacyjne dla firm chcących zapewnić coaching fitness jako benefit dla pracowników. Skontaktuj się z naszym zespołem ds. przedsiębiorstw pod adresem {{email}}, aby uzyskać niestandardowe rozwiązania i ceny hurtowe."
+    },
     "search": "Szukaj w FAQ...",
     "categories": {
       "general": "Ogólne",
@@ -73,7 +195,118 @@
   },
   "howItWorks": {
     "title": "Jak to działa",
+    "metaDescription": "Dowiedz się, jak FitConnect łączy Cię z ekspertami fitness. Proste kroki dla klientów szukających trenerów i trenerów chcących rozwijać biznes.",
     "subtitle": "Rozpoczęcie jest łatwe",
+    "badge": "Pierwsze kroki",
+    "hero": {
+      "title": "Twoja podróż fitness,",
+      "titleHighlight": "uproszczona",
+      "description": "Niezależnie od tego, czy szukasz trenera, czy jesteś gotowy rozwijać swój biznes trenerski, FitConnect ułatwia rozpoczęcie."
+    },
+    "tabs": {
+      "lookingForCoach": "Szukam trenera",
+      "imACoach": "Jestem trenerem"
+    },
+    "clientSteps": {
+      "step1": {
+        "title": "Przeglądaj i odkrywaj",
+        "description": "Przeszukaj naszą wyselekcjonowaną sieć certyfikowanych trenerów. Filtruj według specjalizacji, lokalizacji, ceny i dostępności, aby znaleźć idealne dopasowanie.",
+        "detail1": "Trenerzy personalni, dietetycy, trenerzy boksu i więcej",
+        "detail2": "Czytaj szczegółowe profile i zweryfikowane recenzje",
+        "detail3": "Porównuj stawki i specjalizacje",
+        "detail4": "Zobacz prawdziwe wyniki innych klientów"
+      },
+      "step2": {
+        "title": "Połącz się i konsultuj",
+        "description": "Pisz bezpośrednio do trenerów i umów się na bezpłatną rozmowę zapoznawczą, aby omówić swoje cele i upewnić się, że to dobre dopasowanie.",
+        "detail1": "Bezpłatna 15-minutowa konsultacja z większością trenerów",
+        "detail2": "Omów swoje cele i ograniczenia",
+        "detail3": "Poznaj styl trenera",
+        "detail4": "Bez zobowiązań, dopóki nie będziesz gotowy"
+      },
+      "step3": {
+        "title": "Rezerwuj i ćwicz",
+        "description": "Zaplanuj sesje dopasowane do Twojego życia. Ćwicz online z dowolnego miejsca lub spotkaj się osobiście z lokalnymi trenerami.",
+        "detail1": "Elastyczne planowanie dopasowane do Twojego kalendarza",
+        "detail2": "Dostępne sesje online lub stacjonarne",
+        "detail3": "Wideo HD do zdalnego treningu",
+        "detail4": "Łatwe przełożenie w razie potrzeby"
+      },
+      "step4": {
+        "title": "Śledź i transformuj się",
+        "description": "Monitoruj swoje postępy za pomocą wbudowanych narzędzi śledzenia. Świętuj kamienie milowe i dostosowuj plan w miarę rozwoju.",
+        "detail1": "Wizualne wykresy postępów i metryki",
+        "detail2": "Niestandardowe plany treningowe i żywieniowe",
+        "detail3": "Regularne spotkania kontrolne z trenerem",
+        "detail4": "Osiągaj trwałe wyniki"
+      }
+    },
+    "coachSteps": {
+      "step1": {
+        "title": "Aplikuj i zweryfikuj się",
+        "description": "Złóż aplikację z poświadczeniami. Weryfikujemy certyfikaty i przeprowadzamy sprawdzenie przeszłości, aby utrzymać standardy jakości.",
+        "detail1": "Szybki proces aplikacji online",
+        "detail2": "Prześlij certyfikaty i doświadczenie",
+        "detail3": "Sprawdzenie przeszłości dla bezpieczeństwa klientów",
+        "detail4": "Weryfikacja trwa zazwyczaj 3-5 dni"
+      },
+      "step2": {
+        "title": "Zbuduj swój profil",
+        "description": "Stwórz atrakcyjny profil prezentujący Twoją ekspertyzę. Ustaw swoje stawki, dostępność i ofertę usług.",
+        "detail1": "Prześlij zdjęcia i filmy",
+        "detail2": "Wyróżnij specjalizacje i osiągnięcia",
+        "detail3": "Ustal własne stawki i pakiety",
+        "detail4": "Określ swój obszar usług"
+      },
+      "step3": {
+        "title": "Daj się odkryć",
+        "description": "Twój profil trafia na nasz marketplace. Klienci szukający Twojej ekspertyzy znajdą Cię organicznie.",
+        "detail1": "Pojawiaj się w odpowiednich wynikach wyszukiwania",
+        "detail2": "Wyróżnione miejsce dla najlepszych trenerów",
+        "detail3": "Otrzymuj zapytania klientów bezpośrednio",
+        "detail4": "Buduj swoją reputację dzięki recenzjom"
+      },
+      "step4": {
+        "title": "Trenuj i zarabiaj",
+        "description": "Akceptuj rezerwacje, prowadź niesamowite sesje i otrzymuj bezpieczne płatności. Skup się na coachingu, a my zajmiemy się resztą.",
+        "detail1": "Zarządzaj klientami z panelu",
+        "detail2": "Automatyczne przetwarzanie płatności",
+        "detail3": "Buduj relacje z powracającymi klientami",
+        "detail4": "Rozwijaj swój biznes zrównoważenie"
+      }
+    },
+    "findYourCoachNow": "Znajdź swojego trenera teraz",
+    "startYourApplication": "Rozpocznij aplikację",
+    "features": {
+      "title": "Wszystko, czego potrzebujesz,",
+      "titleHighlight": "wbudowane",
+      "subtitle": "Nasza platforma zawiera wszystkie narzędzia potrzebne do płynnego doświadczenia coachingowego",
+      "hdVideo": "Sesje wideo HD",
+      "hdVideoDesc": "Krystalicznie czyste rozmowy wideo z udostępnianiem ekranu do sprawdzania techniki i demonstracji",
+      "secureMessaging": "Bezpieczne wiadomości",
+      "secureMessagingDesc": "Pozostań w kontakcie między sesjami dzięki czatowi w aplikacji i udostępnianiu plików",
+      "smartScheduling": "Inteligentne planowanie",
+      "smartSchedulingDesc": "Łatwo rezerwuj sesje z synchronizacją kalendarza i automatycznymi przypomnieniami",
+      "progressTracking": "Śledzenie postępów",
+      "progressTrackingDesc": "Wizualizuj swoją podróż za pomocą wykresów, zdjęć i świętowania kamieni milowych",
+      "customPlans": "Niestandardowe plany",
+      "customPlansDesc": "Otrzymuj spersonalizowane plany treningowe i żywieniowe dostosowane do Twoich celów",
+      "safeSecurity": "Bezpieczeństwo",
+      "safeSecurityDesc": "Szyfrowanie na poziomie bankowym chroni Twoje dane i płatności"
+    },
+    "testimonial": {
+      "quote": "FitConnect sprawił, że znalezienie odpowiedniego trenera było tak łatwe. W ciągu tygodnia ćwiczyłam z kimś, kto naprawdę rozumiał moje cele.",
+      "quoteHighlight": " Najlepsza decyzja, jaką kiedykolwiek podjęłam dla swojego zdrowia.",
+      "author": "Amanda K.",
+      "result": "Schudła 14 kg w 4 miesiące"
+    },
+    "cta": {
+      "title": "Gotowy, aby",
+      "titleHighlight": "zacząć?",
+      "description": "Niezależnie od tego, czy chcesz zmienić swoje ciało, czy rozwinąć biznes trenerski, Twoja podróż zaczyna się tutaj.",
+      "findACoach": "Znajdź trenera",
+      "becomeACoach": "Zostań trenerem"
+    },
     "forClients": {
       "title": "Dla klientów",
       "step1": {
@@ -115,29 +348,89 @@
   },
   "forCoaches": {
     "title": "Dla trenerów",
+    "metaDescription": "Rozwijaj swój biznes trenerski z FitConnect. Docieraj do tysięcy klientów, zarządzaj harmonogramem i skup się na tym, co kochasz — coachingu.",
     "subtitle": "Rozwijaj swój biznes fitness z nami",
+    "badge": "Dla profesjonalistów fitness",
     "hero": {
-      "title": "Przenieś swój biznes coachingowy na wyższy poziom",
-      "description": "Dołącz do naszej platformy i połącz się z klientami gotowymi na transformację."
+      "title": "Rozwijaj swój biznes coachingowy z",
+      "titleHighlight": "FitConnect",
+      "description": "Dołącz do {{count}} trenerów docierających do klientów na całym świecie. Ustal własne stawki, buduj swoją markę i skup się na tym, co robisz najlepiej — zmienianiu życia.",
+      "applyNow": "Aplikuj teraz",
+      "learnMore": "Dowiedz się więcej"
+    },
+    "calculator": {
+      "title": "Kalkulator wartości",
+      "subtitle": "Zobacz, ile oszczędzasz z FitConnect",
+      "numberOfClients": "Liczba klientów: {{count}}",
+      "adminHoursPerClient": "Godziny admin. na klienta/tydzień: {{hours}}",
+      "weekly": "Tygodniowo",
+      "yearly": "Rocznie",
+      "hoursSaved": "godzin",
+      "saved": "zaoszczędzonych",
+      "activeClients": "{{count}} aktywnych klientów",
+      "lookingForCoaches": "szuka trenerów takich jak Ty"
     },
     "benefits": {
-      "title": "Dlaczego warto dołączyć?",
-      "reach": {
-        "title": "Poszerzaj zasięg",
-        "description": "Uzyskaj dostęp do rosnącego rynku zmotywowanych klientów."
-      },
-      "tools": {
-        "title": "Potężne narzędzia",
-        "description": "Kreatory treningów, planery żywieniowe i zarządzanie klientami."
-      },
-      "payments": {
-        "title": "Bezpieczne płatności",
-        "description": "Otrzymuj płatności na czas dzięki zintegrowanemu systemowi płatności."
-      },
-      "flexibility": {
-        "title": "Pracuj po swojemu",
-        "description": "Ustal własny harmonogram, ceny i dostępność."
-      }
+      "title": "Dlaczego trenerzy wybierają",
+      "titleHighlight": "FitConnect",
+      "subtitle": "Wszystko, czego potrzebujesz do prowadzenia udanego biznesu trenerskiego, w jednym miejscu",
+      "reachClients": "Docieraj do tysięcy klientów",
+      "reachClientsDesc": "Daj się odkryć zmotywowanym osobom aktywnie poszukującym Twojej ekspertyzy. Nasza platforma kieruje kwalifikowanych leadów bezpośrednio do Ciebie.",
+      "scheduling": "Wbudowane planowanie",
+      "schedulingDesc": "Zarządzaj swoją dostępnością dzięki naszemu potężnemu systemowi planowania. Synchronizuj z kalendarzem i pozwól klientom rezerwować automatycznie.",
+      "securePayments": "Bezpieczne płatności",
+      "securePaymentsDesc": "Otrzymuj płatności niezawodnie po każdej sesji. Zajmujemy się całym przetwarzaniem płatności, abyś mógł skupić się na coachingu.",
+      "clientManagement": "Narzędzia zarządzania klientami",
+      "clientManagementDesc": "Śledź postępy klientów, twórz niestandardowe plany i zarządzaj całym biznesem z jednego panelu.",
+      "trainAnywhere": "Trenuj klientów wszędzie",
+      "trainAnywhereDesc": "Oferuj sesje online klientom na całym świecie. Nasza platforma wideo HD sprawia, że zdalny coaching jest płynny.",
+      "businessProtection": "Ochrona biznesu",
+      "businessProtectionDesc": "Jasne warunki, polityka anulowania i nasz zespół wsparcia wspierający Cię, jeśli pojawią się problemy."
+    },
+    "tools": {
+      "title": "Potężne narzędzia na",
+      "titleHighlight": "wyciągnięcie ręki",
+      "smartScheduling": "Inteligentne planowanie",
+      "inAppMessaging": "Wiadomości w aplikacji",
+      "videoSessions": "Sesje wideo",
+      "planBuilder": "Kreator planów",
+      "progressTracking": "Śledzenie postępów",
+      "paymentProcessing": "Przetwarzanie płatności"
+    },
+    "steps": {
+      "title": "Zacznij w",
+      "titleHighlight": "3 prostych krokach",
+      "step1Title": "Aplikuj i zweryfikuj się",
+      "step1Desc": "Prześlij swoje poświadczenia i przejdź nasz proces weryfikacji. Sprawdzamy certyfikaty i przeprowadzamy weryfikację przeszłości.",
+      "step2Title": "Zbuduj swój profil",
+      "step2Desc": "Stwórz atrakcyjny profil prezentujący Twoją ekspertyzę, doświadczenie i filozofię treningową. Ustal swoje stawki i dostępność.",
+      "step3Title": "Zacznij coaching i zarabianie",
+      "step3Desc": "Akceptuj rezerwacje klientów, prowadź niesamowite sesje i rozwijaj swój biznes. My zajmujemy się resztą."
+    },
+    "testimonials": {
+      "title": "Co mówią",
+      "titleHighlight": "trenerzy"
+    },
+    "requirements": {
+      "title": "Wymagania dla trenerów",
+      "subtitle": "Utrzymujemy wysokie standardy, aby zapewnić najlepsze doświadczenie naszym klientom",
+      "req1": "Ważny certyfikat od akredytowanej organizacji (NASM, ACE, ISSA, NSCA itp.)",
+      "req2": "Minimum 2 lata doświadczenia zawodowego jako trener",
+      "req3": "Przejście kompleksowej weryfikacji przeszłości",
+      "req4": "Posiadanie ubezpieczenia odpowiedzialności cywilnej",
+      "req5": "Zobowiązanie do kodeksu postępowania i standardów jakości FitConnect"
+    },
+    "cta": {
+      "title": "Gotowy rozwijać swój",
+      "titleHighlight": "biznes coachingowy?",
+      "description": "Dołącz do FitConnect już dziś i zacznij docierać do klientów gotowych na transformację swojego życia z Twoją pomocą.",
+      "applyToBecome": "Aplikuj, aby zostać trenerem",
+      "coachFaq": "FAQ dla trenerów",
+      "reviewTime": "Weryfikacja aplikacji trwa zazwyczaj 3-5 dni roboczych"
+    },
+    "pricing": {
+      "title": "Plany dla trenerów",
+      "subtitle": "Wybierz plan odpowiedni dla Twojego biznesu"
     },
     "features": {
       "title": "Funkcje platformy",
@@ -149,15 +442,6 @@
       "messaging": "Wiadomości w aplikacji",
       "payments": "Przetwarzanie płatności",
       "marketing": "Narzędzia marketingowe"
-    },
-    "pricing": {
-      "title": "Plany dla trenerów",
-      "subtitle": "Wybierz plan odpowiedni dla Twojego biznesu"
-    },
-    "cta": {
-      "title": "Gotowy, aby zacząć?",
-      "button": "Aplikuj teraz",
-      "subtext": "Dołącz do tysięcy trenerów już na naszej platformie"
     }
   },
   "pricing": {
@@ -268,10 +552,9 @@
     "noStories": "Brak historii sukcesu"
   },
   "notFound": {
-    "title": "Strona nie znaleziona",
-    "subtitle": "Strona, której szukasz, nie istnieje lub została przeniesiona.",
-    "goHome": "Przejdź do strony głównej",
-    "goBack": "Wróć"
+    "title": "404",
+    "subtitle": "Ups! Strona nie znaleziona",
+    "goHome": "Wróć na stronę główną"
   },
   "community": {
     "title": "Społeczność",
