@@ -113,4 +113,23 @@ export const openNativeSettings = (): boolean => {
   }
 };
 
+/**
+ * Configure the native status bar appearance (Android only)
+ * Sets dark background with white text for visibility
+ * iOS uses apple-mobile-web-app-status-bar-style meta tag instead
+ */
+export const configureStatusBar = (): void => {
+  if (!isDespia()) return;
+  
+  try {
+    // Set status bar background to dark (#0D0D14 = RGB 13, 13, 20)
+    despia('statusbarcolor://{13, 13, 20}');
+    
+    // Set status bar icons/text to white for visibility on dark background
+    despia('statusbartextcolor://{white}');
+  } catch (e) {
+    console.warn('Failed to configure status bar:', e);
+  }
+};
+
 export default despia;
