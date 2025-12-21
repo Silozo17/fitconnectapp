@@ -8,6 +8,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AdminProvider } from "@/contexts/AdminContext";
 import { LocaleProvider } from "@/contexts/LocaleContext";
+import { LocaleRoutingProvider } from "@/contexts/LocaleRoutingContext";
 import { CookieConsentProvider } from "@/contexts/CookieConsentContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import GuestOnlyRoute from "@/components/auth/GuestOnlyRoute";
@@ -201,13 +202,15 @@ const App = () => (
             <AuthProvider>
               <AdminProvider>
                 <LocaleProvider>
-                  <RouteRestorer />
-                  <Suspense fallback={<PageLoadingSpinner />}>
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/get-started" element={<GuestOnlyRoute><GetStarted /></GuestOnlyRoute>} />
-                    <Route path="/coaches" element={<Coaches />} />
-                    <Route path="/coaches/:id" element={<CoachDetail />} />
+                  <LocaleRoutingProvider>
+                    <RouteRestorer />
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                    <Routes>
+                      {/* Non-locale routes (work as-is) */}
+                      <Route path="/" element={<Index />} />
+                      <Route path="/get-started" element={<GuestOnlyRoute><GetStarted /></GuestOnlyRoute>} />
+                      <Route path="/coaches" element={<Coaches />} />
+                      <Route path="/coaches/:id" element={<CoachDetail />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/about" element={<About />} />
                     <Route path="/faq" element={<FAQ />} />
@@ -650,11 +653,12 @@ const App = () => (
                     <Route path="/subscribe" element={<Subscribe />} />
                     <Route path="/subscribe/success" element={<SubscribeSuccess />} />
                   
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </Suspense>
-                <ScrollToTop />
-              </LocaleProvider>
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </Suspense>
+                  <ScrollToTop />
+                  </LocaleRoutingProvider>
+                </LocaleProvider>
             </AdminProvider>
           </AuthProvider>
           </CookieConsentProvider>
