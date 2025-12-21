@@ -27,11 +27,13 @@ import { CoachAboutSection } from "@/components/coach/CoachAboutSection";
 import { CoachSocialLinksDisplay } from "@/components/coach/CoachSocialLinksDisplay";
 import { CoachSocialLinksSection } from "@/components/coach/CoachSocialLinksSection";
 import { CoachDigitalProductsSection } from "@/components/coach/CoachDigitalProductsSection";
+import { useExchangeRates } from "@/hooks/useExchangeRates";
 
 const CoachDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: coach, isLoading, error } = useCoachById(id || "");
+  const { convertForViewer } = useExchangeRates();
   
   // Use coach.id (UUID) for all queries - only run after coach is loaded
   const coachId = coach?.id;
@@ -90,6 +92,12 @@ const CoachDetail = () => {
       </PageLayout>
     );
   }
+
+  // Convert coach's hourly rate for viewer
+  const coachCurrency = (coach.currency as CurrencyCode) || 'GBP';
+  const convertedRate = coach.hourly_rate 
+    ? convertForViewer(coach.hourly_rate, coachCurrency)
+    : null;
 
   // Generate SEO schema
   const coachSchema = createLocalBusinessSchema({
@@ -216,12 +224,17 @@ const CoachDetail = () => {
                 <CardContent className="p-6">
                   {/* Price Display */}
                   <div className="text-center mb-6 pb-6 border-b border-border">
-                    {coach.hourly_rate ? (
+                    {convertedRate ? (
                       <>
                         <p className="text-4xl font-bold text-foreground">
-                          {formatCurrency(coach.hourly_rate, (coach.currency as CurrencyCode) || 'GBP')}
+                          {formatCurrency(convertedRate.amount, convertedRate.currency)}
                         </p>
                         <p className="text-muted-foreground mt-1">per session</p>
+                        {convertedRate.wasConverted && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            ({formatCurrency(convertedRate.originalAmount, convertedRate.originalCurrency)})
+                          </p>
+                        )}
                       </>
                     ) : (
                       <p className="text-lg text-muted-foreground">Contact for pricing</p>

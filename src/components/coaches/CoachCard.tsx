@@ -13,6 +13,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { getAvatarImageUrl } from "@/hooks/useAvatars";
 import type { MarketplaceCoach } from "@/hooks/useCoachMarketplace";
 import { useCoachLinkPrefix } from "@/hooks/useCoachLinkPrefix";
+import { useExchangeRates } from "@/hooks/useExchangeRates";
 
 interface CoachCardProps {
   coach: MarketplaceCoach;
@@ -28,6 +29,7 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
   const navigate = useNavigate();
   const autoLinkPrefix = useCoachLinkPrefix();
   const effectiveLinkPrefix = linkPrefix ?? autoLinkPrefix;
+  const { convertForViewer } = useExchangeRates();
 
   const isClient = user && (role === "client" || role === "admin");
   const isAuthenticated = !!user;
@@ -68,6 +70,12 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
     e.stopPropagation();
     navigate("/auth?tab=register&role=client");
   };
+
+  // Convert coach's hourly rate for viewer
+  const coachCurrency = (coach.currency as CurrencyCode) || 'GBP';
+  const convertedRate = coach.hourly_rate 
+    ? convertForViewer(coach.hourly_rate, coachCurrency)
+    : null;
 
   return (
     <div className={`group card-glow rounded-2xl overflow-hidden hover-lift relative ${coach.is_sponsored ? "ring-2 ring-primary/50" : ""}`}>
@@ -159,10 +167,17 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
 
         <div className="flex items-center justify-between gap-3 pt-4 border-t border-border">
           <div className="min-w-0 flex-shrink">
-            {coach.hourly_rate ? (
+            {convertedRate ? (
               <>
-                <span className="font-display font-bold text-xl text-foreground">{formatCurrency(coach.hourly_rate, (coach.currency as CurrencyCode) || 'GBP')}</span>
+                <span className="font-display font-bold text-xl text-foreground">
+                  {formatCurrency(convertedRate.amount, convertedRate.currency)}
+                </span>
                 <span className="text-muted-foreground text-sm">/session</span>
+                {convertedRate.wasConverted && (
+                  <span className="text-muted-foreground text-xs block">
+                    ({formatCurrency(convertedRate.originalAmount, convertedRate.originalCurrency)})
+                  </span>
+                )}
               </>
             ) : (
               <span className="text-muted-foreground text-sm">Contact for pricing</span>

@@ -2,18 +2,21 @@ import { CheckoutItem } from "@/hooks/useCheckoutItem";
 import { formatCurrency, CurrencyCode } from "@/lib/currency";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useExchangeRates } from "@/hooks/useExchangeRates";
 
 interface ProductPriceSummaryProps {
   item: CheckoutItem;
 }
 
 export function ProductPriceSummary({ item }: ProductPriceSummaryProps) {
+  const { convertForViewer } = useExchangeRates();
   const isRecurring = item.type === "subscription";
   const billingText = isRecurring 
     ? `Billed ${item.billingPeriod === "monthly" ? "monthly" : item.billingPeriod === "weekly" ? "weekly" : "annually"}`
     : "One-time payment";
   
-  const currency = (item.currency || "GBP") as CurrencyCode;
+  const itemCurrency = (item.currency || "GBP") as CurrencyCode;
+  const convertedPrice = convertForViewer(item.price, itemCurrency);
 
   return (
     <div className="space-y-4">
@@ -22,13 +25,18 @@ export function ProductPriceSummary({ item }: ProductPriceSummaryProps) {
           {item.name}
         </h3>
         <p className="text-2xl font-bold text-gray-900 mt-1">
-          {formatCurrency(item.price, currency)}{" "}
+          {formatCurrency(convertedPrice.amount, convertedPrice.currency)}{" "}
           {isRecurring && (
             <span className="text-base font-normal text-gray-500">
               per {item.billingPeriod === "monthly" ? "month" : item.billingPeriod === "weekly" ? "week" : "year"}
             </span>
           )}
         </p>
+        {convertedPrice.wasConverted && (
+          <p className="text-sm text-gray-500 mt-1">
+            Original: {formatCurrency(convertedPrice.originalAmount, convertedPrice.originalCurrency)}
+          </p>
+        )}
       </div>
 
       {item.coach && (
@@ -52,14 +60,18 @@ export function ProductPriceSummary({ item }: ProductPriceSummaryProps) {
             <p className="font-medium text-gray-900">{item.name}</p>
             <p className="text-sm text-gray-500">{billingText}</p>
           </div>
-          <p className="font-semibold text-gray-900">{formatCurrency(item.price, currency)}</p>
+          <p className="font-semibold text-gray-900">
+            {formatCurrency(convertedPrice.amount, convertedPrice.currency)}
+          </p>
         </div>
         
         <Separator className="bg-gray-200" />
         
         <div className="flex justify-between items-center">
           <p className="text-gray-600">Subtotal</p>
-          <p className="font-medium text-gray-900">{formatCurrency(item.price, currency)}</p>
+          <p className="font-medium text-gray-900">
+            {formatCurrency(convertedPrice.amount, convertedPrice.currency)}
+          </p>
         </div>
         
         <div className="flex justify-between items-center">
@@ -71,7 +83,16 @@ export function ProductPriceSummary({ item }: ProductPriceSummaryProps) {
         
         <div className="flex justify-between items-center">
           <p className="font-semibold text-gray-900">Total due today</p>
-          <p className="font-bold text-gray-900 text-lg">{formatCurrency(item.price, currency)}</p>
+          <div className="text-right">
+            <p className="font-bold text-gray-900 text-lg">
+              {formatCurrency(convertedPrice.amount, convertedPrice.currency)}
+            </p>
+            {convertedPrice.wasConverted && (
+              <p className="text-xs text-gray-500">
+                Charged in {formatCurrency(convertedPrice.originalAmount, convertedPrice.originalCurrency)}
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>
