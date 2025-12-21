@@ -1,0 +1,1189 @@
+{
+  "privacy": {
+    "meta": {
+      "title": "Privacy Policy",
+      "description": "Learn how FitConnect collects, uses, and protects your personal information. Our commitment to your privacy and data security."
+    },
+    "hero": {
+      "titleStart": "Privacy",
+      "titleHighlight": "Policy",
+      "lastUpdated": "Last updated: December 19, 2024"
+    },
+    "sections": {
+      "introduction": {
+        "title": "1. Introduction",
+        "p1": "Welcome to FitConnect, a trading name of AMW Media Ltd (\"we,\" \"our,\" or \"us\"). We are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website and mobile application (collectively, the \"Platform\").",
+        "p2": "Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the Platform."
+      },
+      "informationCollected": {
+        "title": "2. Information We Collect",
+        "personalInfo": {
+          "title": "Personal Information You Provide",
+          "intro": "We collect personal information that you voluntarily provide when you:",
+          "items": {
+            "register": "Register for an account (name, email address, phone number)",
+            "profile": "Complete your profile (profile photo, bio, fitness goals, health information)",
+            "booking": "Book coaching sessions (scheduling preferences, location)",
+            "payments": "Make payments (payment card details processed by our payment provider)",
+            "communicate": "Communicate with coaches or our support team (message content)",
+            "coach": "Apply to become a coach (certifications, experience, background information)"
+          }
+        },
+        "automaticInfo": {
+          "title": "Information Automatically Collected",
+          "intro": "When you access the Platform, we automatically collect certain information, including:",
+          "items": {
+            "device": "Device information (device type, operating system, unique device identifiers)",
+            "log": "Log data (IP address, browser type, pages visited, time spent)",
+            "location": "Location data (general location based on IP address, precise location if permitted)",
+            "usage": "Usage data (features used, actions taken, session duration)"
+          }
+        },
+        "healthInfo": {
+          "title": "Health and Fitness Information",
+          "intro": "To provide personalized coaching services, we may collect health-related information such as:",
+          "items": {
+            "measurements": "Physical measurements (height, weight, body measurements)",
+            "goals": "Fitness goals and exercise history",
+            "diet": "Dietary preferences and restrictions",
+            "progress": "Progress photos and workout logs",
+            "medical": "Medical conditions or injuries (only if you choose to share)"
+          }
+        }
+      },
+      "howWeUse": {
+        "title": "3. How We Use Your Information",
+        "intro": "We use the information we collect to:",
+        "items": {
+          "account": "Create and manage your account",
+          "connect": "Connect you with appropriate coaches based on your goals",
+          "payments": "Process payments and transactions",
+          "communication": "Facilitate communication between clients and coaches",
+          "progress": "Track your fitness progress and provide insights",
+          "admin": "Send administrative information (confirmations, updates, security alerts)",
+          "support": "Respond to your inquiries and provide customer support",
+          "improve": "Improve and optimize the Platform",
+          "security": "Detect and prevent fraud, abuse, or security incidents",
+          "legal": "Comply with legal obligations",
+          "ai": "Generate AI-assisted workout and meal plan suggestions (see Section 12A)"
+        }
+      },
+      "informationSharing": {
+        "title": "4. Information Sharing",
+        "intro": "We may share your information in the following circumstances:",
+        "coachesClients": {
+          "title": "With Coaches and Clients",
+          "content": "When you book a session, your profile information, fitness goals, and relevant health data will be shared with your coach to facilitate your training. Coaches' profiles are visible to potential clients."
+        },
+        "serviceProviders": {
+          "title": "With Service Providers",
+          "intro": "We share information with third-party service providers who perform services on our behalf. These providers are categorized below:",
+          "infrastructure": {
+            "title": "Infrastructure & Platform Services",
+            "supabase": "Supabase: Database hosting, authentication, and file storage"
+          },
+          "payment": {
+            "title": "Payment Services",
+            "stripe": "Stripe: Payment processing, subscription billing, and financial transactions"
+          },
+          "communication": {
+            "title": "Communication Services",
+            "resend": "Resend: Transactional email delivery (booking confirmations, notifications)",
+            "zoom": "Zoom Video Communications: Video conferencing for online coaching sessions",
+            "googleMeet": "Google (Meet): Video conferencing integration for online sessions"
+          },
+          "ai": {
+            "title": "AI and Machine Learning Services",
+            "gemini": "Google Cloud AI (Gemini): AI-powered features including workout plan generation, meal plan suggestions, exercise alternatives, food substitutions, macro calculations, and progress analysis. Personal data processed by AI services is used solely to generate personalized suggestions and is not retained by the AI provider beyond the processing request."
+          },
+          "wearables": {
+            "title": "Health and Fitness Data Integrations",
+            "apple": "Apple (HealthKit): Health and fitness data synchronization from Apple devices",
+            "google": "Google (Fit): Fitness and activity data from Android devices",
+            "fitbit": "Fitbit: Activity and health data from Fitbit devices",
+            "garmin": "Garmin: Training and activity data from Garmin devices"
+          },
+          "calendar": {
+            "title": "Calendar Integrations",
+            "googleCalendar": "Google Calendar: Session scheduling and calendar synchronization",
+            "appleCalendar": "Apple Calendar (CalDAV): Session scheduling via CalDAV protocol (see Section 12B)"
+          },
+          "obligations": "All service providers are contractually obligated to protect your data and use it only for the specific purposes we direct."
+        },
+        "legal": {
+          "title": "For Legal Purposes",
+          "content": "We may disclose information if required by law, regulation, legal process, or governmental request, or to protect our rights, privacy, safety, or property."
+        },
+        "businessTransfers": {
+          "title": "Business Transfers",
+          "content": "In the event of a merger, acquisition, or sale of assets, your information may be transferred as part of that transaction."
+        }
+      },
+      "dataSecurity": {
+        "title": "5. Data Security",
+        "intro": "We implement appropriate technical and organizational security measures to protect your personal information, including:",
+        "items": {
+          "ssl": "256-bit SSL/TLS encryption for data in transit",
+          "encryption": "Encryption of sensitive data at rest",
+          "assessments": "Regular security assessments and penetration testing",
+          "access": "Access controls and authentication requirements",
+          "training": "Employee training on data protection practices"
+        },
+        "disclaimer": "However, no method of transmission over the Internet or electronic storage is 100% secure. While we strive to protect your personal information, we cannot guarantee absolute security."
+      },
+      "yourRights": {
+        "title": "6. Your Rights and Choices",
+        "intro": "Depending on your location, you may have the following rights:",
+        "items": {
+          "access": "Access: Request a copy of the personal information we hold about you",
+          "correction": "Correction: Request correction of inaccurate or incomplete information",
+          "deletion": "Deletion: Request deletion of your personal information",
+          "portability": "Portability: Request a copy of your data in a machine-readable format",
+          "optOut": "Opt-out: Unsubscribe from marketing communications",
+          "restriction": "Restriction: Request limitation of processing in certain circumstances"
+        },
+        "dataExport": {
+          "title": "Data Export and Portability",
+          "intro": "You have the right to receive a copy of your personal data in a structured, commonly used, machine-readable format (JSON or CSV). To request a data export:",
+          "inApp": "In-App: Go to Settings → Privacy → Download My Data",
+          "email": "Email: Contact {{privacyEmail}} with subject \"Data Export Request\"",
+          "fulfillment": "We will fulfill data export requests within 30 days. Your export will include profile data, workout logs, meal plans, progress photos, message history, and connected device data.",
+          "contact": "To exercise any of these rights, please contact us at {{privacyEmail}}. We will respond to your request within 30 days."
+        }
+      },
+      "cookies": {
+        "title": "7. Cookies and Local Storage",
+        "whatAre": {
+          "title": "7.1 What Are Cookies and Local Storage",
+          "content": "Cookies and local storage are small pieces of data stored on your device that help websites remember information about you. We use browser local storage (similar to cookies) to store preferences and improve your experience on FitConnect."
+        },
+        "categories": {
+          "title": "7.2 Cookie Categories We Use",
+          "intro": "We organize our cookies and local storage into four categories:",
+          "essential": {
+            "title": "Essential (Required)",
+            "intro": "These are necessary for the Platform to function and cannot be disabled. They include:",
+            "items": {
+              "auth": "Authentication tokens to keep you logged in",
+              "security": "Security-related data to protect your account",
+              "ui": "Core UI state (such as sidebar position)"
+            }
+          },
+          "location": {
+            "title": "Location Services (Optional)",
+            "intro": "If you consent, we detect your approximate location to personalize your experience:",
+            "purpose": "Purpose: Show coaches near you and display relevant local leaderboards",
+            "storageKey": "Storage key: fitconnect_user_location",
+            "dataCached": "Data cached: City, region, and country (e.g., \"Harrow\", \"Greater London\", \"United Kingdom\")",
+            "cacheDuration": "Cache duration: 7 days, then refreshed automatically"
+          },
+          "preferences": {
+            "title": "Preferences (Optional)",
+            "intro": "If you consent, we remember your choices to improve usability:",
+            "items": {
+              "consent": "Your cookie consent decision",
+              "banners": "Dismissed banners and prompts",
+              "theme": "Theme and display preferences"
+            }
+          },
+          "analytics": {
+            "title": "Analytics (Optional)",
+            "content": "If you consent, we may collect anonymized usage data to improve the Platform. Currently, we do not use third-party analytics tracking. This category is reserved for future improvements."
+          }
+        },
+        "locationDetection": {
+          "title": "7.3 How We Detect Your Location",
+          "intro": "When you grant location consent, we use your IP address to determine your approximate location:",
+          "method": "Method: IP-based geolocation (we do not use GPS or precise device location)",
+          "precision": "Precision: City or town level only (e.g., \"High Wycombe\", not your street address)",
+          "thirdParty": "Third-party service: We use ipapi.co to perform the lookup",
+          "dataStored": "Data stored: Only your city, region, and country are cached locally",
+          "noTracking": "No tracking: Your IP address is not stored or logged by FitConnect",
+          "usage": "This location data enables the marketplace to show coaches near you and allows you to view local leaderboards for your town, county, and country."
+        },
+        "manage": {
+          "title": "7.4 How to Manage Your Preferences",
+          "intro": "When you first visit FitConnect, a consent banner will appear at the bottom of the screen. You can:",
+          "acceptAll": "Accept All: Enable all optional cookies (location, preferences, analytics)",
+          "rejectAll": "Reject All: Disable all optional cookies (essential cookies remain active)",
+          "managePreferences": "Manage Preferences: Choose which categories to enable individually",
+          "storedIn": "Your consent decision is stored in fitconnect_cookie_consent and applies immediately. You can change your preferences at any time by clicking \"Cookie Preferences\" in the footer or visiting your Privacy settings."
+        },
+        "reject": {
+          "title": "7.5 What Happens If You Reject Optional Cookies",
+          "intro": "If you reject optional cookies, the Platform remains fully functional with the following differences:",
+          "location": "Location: Automatic location detection is disabled. You can still manually select your location when searching for coaches or viewing leaderboards.",
+          "preferences": "Preferences: Some UI preferences may not persist between sessions.",
+          "analytics": "Analytics: No usage data is collected (currently not implemented).",
+          "essential": "Essential functionality including account access, bookings, payments, messaging, and all coaching features work normally regardless of your cookie preferences."
+        }
+      },
+      "thirdPartyServices": {
+        "title": "8. Third-Party Services",
+        "intro": "The Platform may contain links to third-party websites or integrate with third-party services. This Privacy Policy does not apply to those third parties. We encourage you to review their privacy policies before providing any information.",
+        "shoppingLinks": {
+          "title": "External Shopping Links",
+          "intro": "FitConnect provides links to external grocery retailers (Tesco, Asda, Sainsbury's, and others) to help you purchase ingredients for your meal plans. When you use these shopping links:",
+          "items": {
+            "generate": "FitConnect only generates shopping list links based on your meal plan ingredients",
+            "noData": "No personal data is shared with grocery retailers by FitConnect",
+            "theirPolicy": "Any information you provide to retailers is subject to their privacy policies",
+            "retailer": "Purchases, payments, and deliveries are handled entirely by the retailer",
+            "noInfo": "FitConnect does not receive any information about your purchases from retailers"
+          }
+        }
+      },
+      "childrenPrivacy": {
+        "title": "9. Children's Privacy",
+        "p1": "FitConnect is intended for users aged 18 and older. We do not knowingly collect or solicit personal information from anyone under 18 years of age. If you are under 18, please do not attempt to register for the Platform or send any personal information to us.",
+        "p2": "If we learn that we have collected personal information from a person under 18, we will delete that information as quickly as possible. If you believe that a child under 18 has provided us with personal information, please contact us immediately at {{privacyEmail}}."
+      },
+      "internationalTransfers": {
+        "title": "10. International Data Transfers",
+        "p1": "Your information may be transferred to and processed in countries other than your country of residence. These countries may have different data protection laws. We ensure appropriate safeguards are in place for such transfers in accordance with the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018.",
+        "p2": "For transfers outside the UK and EEA, we rely on adequacy decisions, Standard Contractual Clauses (SCCs), or other lawful transfer mechanisms approved by the UK Information Commissioner's Office (ICO)."
+      },
+      "dataRetention": {
+        "title": "11. Data Retention",
+        "content": "We retain your personal information for as long as necessary to fulfill the purposes outlined in this Privacy Policy, unless a longer retention period is required by law. When you delete your account, we will delete or anonymize your personal information within 30 days, except where we need to retain it for legal compliance."
+      },
+      "googleServices": {
+        "title": "12. Google Services Integration",
+        "intro": "FitConnect integrates with various Google services to enhance your experience. This section explains how we use Google APIs and your rights regarding this data.",
+        "signIn": {
+          "title": "Google Sign-In (OAuth 2.0)",
+          "intro": "When you choose to sign in with Google, we access:",
+          "items": {
+            "profile": "Your basic profile information (name, email address, profile picture)",
+            "email": "Your email address for account identification and communication"
+          },
+          "usage": "We use this information solely to create and authenticate your FitConnect account. We do not post to your Google account or access any other Google services without your explicit consent."
+        },
+        "calendar": {
+          "title": "Google Calendar Integration",
+          "intro": "Coaches and clients can optionally connect their Google Calendar to sync coaching sessions. When you connect Google Calendar, we request access to:",
+          "scope": "calendar.events scope: To create, read, and update calendar events for your coaching sessions",
+          "useIntro": "We use this access to:",
+          "items": {
+            "add": "Automatically add confirmed coaching sessions to your calendar",
+            "update": "Update calendar events when sessions are rescheduled",
+            "remove": "Remove calendar events when sessions are cancelled"
+          },
+          "limitation": "We only access calendar events created by FitConnect. We do not read, modify, or delete your other calendar events."
+        },
+        "fit": {
+          "title": "Google Fit Integration",
+          "intro": "Clients can optionally connect Google Fit to sync fitness and health data. When you connect Google Fit, we may request access to:",
+          "scopes": {
+            "activity": "fitness.activity.read: To read your activity data (steps, active minutes, calories burned)",
+            "body": "fitness.body.read: To read body measurements (weight, body fat percentage)",
+            "sleep": "fitness.sleep.read: To read sleep data for wellness tracking"
+          },
+          "useIntro": "We use this data to:",
+          "items": {
+            "display": "Display your fitness metrics on your dashboard",
+            "share": "Share relevant data with your connected coaches (with your consent)",
+            "track": "Track progress towards fitness goals and habits",
+            "verify": "Verify challenge completion for gamification features"
+          }
+        },
+        "revoke": {
+          "title": "Revoking Google Access",
+          "intro": "You can disconnect Google services from FitConnect at any time through your account settings. Additionally, you can revoke FitConnect's access to your Google account directly through Google:",
+          "steps": {
+            "visit": "Visit myaccount.google.com/permissions",
+            "find": "Find \"FitConnect\" in the list of apps with access",
+            "remove": "Click \"Remove Access\" to revoke all permissions"
+          },
+          "aftermath": "When you disconnect or revoke access, we stop receiving new data from Google services. Previously synced data remains in your FitConnect account unless you request its deletion."
+        }
+      },
+      "aiServices": {
+        "title": "12A. AI Services and Third-Party AI",
+        "intro": "FitConnect uses artificial intelligence (AI) to enhance user experience and provide personalized fitness and nutrition recommendations. This section explains how AI is used and how your data is processed.",
+        "features": {
+          "title": "AI Features and Capabilities",
+          "intro": "AI is used within FitConnect for:",
+          "items": {
+            "workout": "Workout Plan Generation: Creating personalized exercise routines based on your goals, experience, equipment, and preferences",
+            "meal": "Meal Plan Suggestions: Generating meal ideas that meet nutritional targets and accommodate dietary restrictions",
+            "macro": "Macro and Calorie Calculations: Computing personalized nutritional targets",
+            "exercise": "Exercise Alternatives: Suggesting substitute exercises for injuries, equipment limitations, or preferences",
+            "food": "Food Substitutions: Recommending alternative ingredients for allergies, dietary needs, or availability",
+            "progress": "Progress Analysis: Analyzing your fitness data to provide insights",
+            "content": "Content Assistance: Helping coaches create product descriptions"
+          }
+        },
+        "provider": {
+          "title": "Third-Party AI Provider",
+          "intro": "FitConnect uses Google Cloud AI services (including Gemini models) to power AI features. When you use AI-powered features:",
+          "items": {
+            "sent": "Your relevant data (goals, measurements, preferences) is sent to Google Cloud AI to generate personalized suggestions",
+            "processed": "Data is processed solely for the purpose of generating your requested content",
+            "noRetain": "Google Cloud AI does not retain your personal data after processing the request",
+            "returned": "AI responses are returned to FitConnect for display to you or your coach"
+          }
+        },
+        "protection": {
+          "title": "AI Data Protection",
+          "intro": "Important: In accordance with Apple App Store requirements and our commitment to transparency:",
+          "items": {
+            "identified": "AI-generated content is clearly identified as AI-assisted within the Platform",
+            "minimized": "Personal data sent to AI services is minimized to only what's necessary for the request",
+            "bound": "AI providers are bound by data processing agreements that protect your information",
+            "optional": "AI features are optional; you can use FitConnect without AI-generated content",
+            "review": "Coaches review and approve all AI-generated content before it's shared with clients"
+          }
+        },
+        "optOut": {
+          "title": "Opting Out of AI Features",
+          "content": "You can choose not to use AI-powered features. AI suggestions are always optional, and coaches can create all content manually. If you have concerns about AI processing your data, please discuss with your coach or contact us at {{privacyEmail}}."
+        }
+      },
+      "appleCalendar": {
+        "title": "12B. Apple Calendar (CalDAV) Integration",
+        "intro": "FitConnect supports calendar synchronization with Apple Calendar and other CalDAV-compatible calendar services (such as iCloud Calendar, Fastmail, and other providers).",
+        "howItWorks": {
+          "title": "How CalDAV Integration Works",
+          "intro": "When you connect your Apple Calendar or CalDAV calendar:",
+          "items": {
+            "credentials": "You provide your CalDAV server credentials (username and app-specific password)",
+            "protocol": "FitConnect uses the CalDAV protocol to create, update, and delete calendar events",
+            "sessionsOnly": "We only create events for your FitConnect coaching sessions"
+          }
+        },
+        "dataStored": {
+          "title": "Data We Store",
+          "intro": "To maintain your calendar connection, we securely store:",
+          "items": {
+            "credentials": "Encrypted Credentials: Your CalDAV access credentials, encrypted at rest",
+            "serverUrl": "Server URL: The CalDAV server endpoint for your calendar provider",
+            "calendarId": "Calendar Identifier: Reference to the calendar where events are created",
+            "eventRefs": "Event References: IDs of calendar events created by FitConnect"
+          }
+        },
+        "protection": {
+          "title": "CalDAV Data Protection",
+          "items": {
+            "encrypted": "Credentials are encrypted using industry-standard encryption",
+            "accessOnly": "We only access your calendar to manage FitConnect session events",
+            "noRead": "We do not read or access your other calendar events",
+            "appPassword": "We recommend using app-specific passwords rather than your main account password"
+          }
+        },
+        "disconnect": {
+          "title": "Disconnecting CalDAV",
+          "intro": "You can disconnect your CalDAV calendar at any time through Settings → Integrations → Apple Calendar. Upon disconnection:",
+          "items": {
+            "deleted": "Your credentials are immediately deleted from our systems",
+            "future": "Future sessions will not be added to your calendar",
+            "existing": "Existing events remain on your calendar until manually deleted"
+          }
+        }
+      },
+      "appleHealthKit": {
+        "title": "13. Apple HealthKit Integration",
+        "intro": "FitConnect integrates with Apple HealthKit to provide comprehensive health and fitness tracking for iOS users. This integration is optional and requires your explicit consent.",
+        "dataAccessed": {
+          "title": "Data We Access from HealthKit",
+          "intro": "With your permission, we may read the following data types from Apple HealthKit:",
+          "items": {
+            "activity": "Activity Data: Steps, active energy burned, exercise minutes, stand hours",
+            "workout": "Workout Data: Workout type, duration, distance, calories burned",
+            "body": "Body Measurements: Weight, height, body fat percentage, body mass index",
+            "heart": "Heart Data: Resting heart rate, heart rate variability (for recovery tracking)",
+            "sleep": "Sleep Data: Sleep duration, sleep stages (if available)"
+          }
+        },
+        "usage": {
+          "title": "How We Use HealthKit Data",
+          "intro": "HealthKit data is used exclusively to:",
+          "items": {
+            "display": "Display your health metrics on your FitConnect dashboard",
+            "track": "Track progress toward fitness goals set with your coach",
+            "autoComplete": "Auto-complete habits linked to activity metrics (e.g., step goals)",
+            "verify": "Verify challenge completion for gamification features",
+            "share": "Share relevant metrics with your connected coaches (with your explicit consent)"
+          }
+        },
+        "protection": {
+          "title": "HealthKit Data Protection",
+          "intro": "Important: In accordance with Apple's requirements and our commitment to your privacy:",
+          "items": {
+            "noAds": "HealthKit data is never used for advertising or marketing purposes",
+            "noSale": "HealthKit data is never sold to third parties",
+            "noShare": "HealthKit data is never shared with third parties for their marketing purposes",
+            "secure": "HealthKit data is stored securely using encryption and transmitted only over secure connections",
+            "revoke": "Access to your HealthKit data can be revoked at any time through iOS Settings"
+          }
+        },
+        "revoking": {
+          "title": "Revoking HealthKit Access",
+          "intro": "You can revoke FitConnect's access to HealthKit at any time:",
+          "items": {
+            "goTo": "Go to iOS Settings → Privacy & Security → Health → FitConnect",
+            "toggle": "Toggle off any data types you no longer wish to share",
+            "disable": "Or disable all access by turning off FitConnect entirely"
+          }
+        }
+      },
+      "fitbit": {
+        "title": "14. Fitbit Integration",
+        "intro": "FitConnect can connect to your Fitbit account to sync fitness and health data from your Fitbit devices. This integration uses the official Fitbit Web API.",
+        "dataAccessed": {
+          "title": "Data We Access from Fitbit",
+          "intro": "With your authorization, we may access:",
+          "items": {
+            "activity": "Activity & Exercise: Steps, distance, floors climbed, active minutes, logged exercises",
+            "body": "Body & Weight: Weight logs, body fat percentage, BMI",
+            "sleep": "Sleep: Sleep duration, sleep stages, sleep score",
+            "heart": "Heart Rate: Resting heart rate, heart rate zones during exercise"
+          }
+        },
+        "usage": {
+          "title": "How We Use Fitbit Data",
+          "items": {
+            "sync": "Sync your activity data to display on your FitConnect dashboard",
+            "track": "Track progress towards fitness goals and habits",
+            "share": "Share relevant metrics with your connected coaches",
+            "verify": "Verify challenge completion for gamification features"
+          }
+        },
+        "revoking": {
+          "title": "Revoking Fitbit Access",
+          "intro": "You can disconnect Fitbit from FitConnect at any time:",
+          "items": {
+            "inApp": "Through FitConnect: Settings → Integrations → Fitbit → Disconnect",
+            "fitbit": "Through Fitbit: Visit fitbit.com/settings/applications and revoke FitConnect's access"
+          }
+        }
+      },
+      "garmin": {
+        "title": "15. Garmin Integration",
+        "intro": "FitConnect integrates with Garmin Connect to sync training data from your Garmin devices. This integration uses the official Garmin Connect API.",
+        "dataAccessed": {
+          "title": "Data We Access from Garmin",
+          "intro": "With your authorization, we may access:",
+          "items": {
+            "activity": "Activity Summaries: Daily steps, calories, distance, active minutes",
+            "workout": "Workout Data: Running, cycling, swimming, strength training activities with detailed metrics",
+            "body": "Body Composition: Weight and body composition data from Garmin Index scales",
+            "sleep": "Sleep Data: Sleep duration, sleep stages, sleep score",
+            "stress": "Stress & Recovery: Stress levels, Body Battery, HRV status"
+          }
+        },
+        "usage": {
+          "title": "How We Use Garmin Data",
+          "items": {
+            "display": "Display your training metrics and activity data on your dashboard",
+            "track": "Track progress towards fitness goals set with your coach",
+            "autoComplete": "Auto-complete habits linked to activity metrics",
+            "share": "Share relevant training data with your connected coaches"
+          }
+        },
+        "revoking": {
+          "title": "Revoking Garmin Access",
+          "intro": "You can disconnect Garmin from FitConnect at any time:",
+          "items": {
+            "inApp": "Through FitConnect: Settings → Integrations → Garmin → Disconnect",
+            "garmin": "Through Garmin: Visit Garmin Connect Settings → Connected Apps → Revoke FitConnect access"
+          }
+        }
+      },
+      "videoConferencing": {
+        "title": "16. Video Conferencing (Zoom & Google Meet)",
+        "intro": "FitConnect enables online coaching sessions through video conferencing integrations. Coaches can connect their accounts to create video meeting links for their sessions.",
+        "zoom": {
+          "title": "Zoom Integration",
+          "intro": "When coaches connect their Zoom account, we request access to:",
+          "items": {
+            "create": "Create meeting links for scheduled coaching sessions",
+            "update": "Update or cancel meetings when sessions are rescheduled or cancelled",
+            "access": "Access basic user information (display name, email) to identify the connected account"
+          },
+          "dataStored": {
+            "title": "Data We Store from Zoom",
+            "intro": "When a coach connects their Zoom account, we store:",
+            "items": {
+              "tokens": "OAuth Tokens: Encrypted access and refresh tokens to maintain the connection",
+              "identifiers": "Account Identifiers: Zoom user ID and account email to identify the connected account",
+              "meetingIds": "Meeting IDs: References to meetings created for coaching sessions"
+            }
+          },
+          "important": "Important: FitConnect does not record, store, or have access to the content of your video calls. All video sessions are conducted directly through Zoom's infrastructure and are subject to Zoom's Privacy Policy.",
+          "rights": {
+            "title": "Your Rights Regarding Zoom Data",
+            "intro": "You have the following rights concerning Zoom data processed through FitConnect:",
+            "items": {
+              "access": "Access: View your Zoom connection status and stored data in Settings → Integrations → Zoom",
+              "disconnect": "Disconnection: Remove the Zoom integration at any time through your integration settings",
+              "deletion": "Deletion: Request deletion of all Zoom-related data by contacting {{privacyEmail}}",
+              "portability": "Portability: Request a copy of your Zoom integration data in a machine-readable format"
+            }
+          },
+          "exercise": {
+            "title": "How to Exercise Your Zoom Data Rights",
+            "intro": "You can exercise your rights regarding Zoom data through the following methods:",
+            "items": {
+              "inApp": "In-App: Navigate to Settings → Integrations → Zoom → Disconnect to remove the integration and delete stored tokens",
+              "email": "Email: Contact {{privacyEmail}} with \"Zoom Data Request\" in the subject line for access, deletion, or portability requests",
+              "viaZoom": "Via Zoom: Visit marketplace.zoom.us → Installed Apps → Find FitConnect → Remove to revoke access directly through Zoom"
+            }
+          },
+          "disconnect": {
+            "title": "What Happens When You Disconnect Zoom",
+            "intro": "When you disconnect Zoom from FitConnect or revoke access through the Zoom Marketplace:",
+            "items": {
+              "deleted": "Your OAuth tokens are immediately deleted from our systems",
+              "noLonger": "We can no longer create or manage Zoom meetings on your behalf",
+              "existing": "Existing meeting links for future sessions will remain valid until the meetings occur or are manually deleted in Zoom",
+              "historical": "Historical records of which sessions used Zoom may be retained for audit purposes"
+            }
+          }
+        },
+        "googleMeet": {
+          "title": "Google Meet Integration",
+          "content": "When Google Calendar is connected, coaches can generate Google Meet links for online sessions. We only create meeting links; we do not record or access meeting content."
+        }
+      },
+      "mobilePermissions": {
+        "title": "17. Mobile Application Permissions",
+        "intro": "The FitConnect mobile application may request the following device permissions to provide our services:",
+        "camera": {
+          "title": "Camera Access",
+          "intro": "Used to:",
+          "items": {
+            "progress": "Take and upload progress photos",
+            "profile": "Take profile pictures",
+            "qr": "Scan QR codes for quick actions"
+          },
+          "note": "Camera access is only activated when you explicitly use these features."
+        },
+        "photos": {
+          "title": "Photo Library Access",
+          "intro": "Used to:",
+          "items": {
+            "select": "Select existing photos for progress tracking",
+            "upload": "Upload profile pictures from your gallery",
+            "save": "Save images generated by the app"
+          }
+        },
+        "microphone": {
+          "title": "Microphone Access",
+          "intro": "Used for:",
+          "items": {
+            "video": "Audio during video coaching sessions (Zoom/Google Meet)",
+            "voice": "Voice notes and audio messages (if enabled)"
+          },
+          "note": "Microphone access is only active during video calls or when you explicitly record audio. FitConnect does not listen to or record audio in the background."
+        },
+        "notifications": {
+          "title": "Push Notifications",
+          "intro": "Used to send you:",
+          "items": {
+            "sessions": "Session reminders and booking confirmations",
+            "messages": "New message notifications",
+            "payments": "Payment confirmations and receipts",
+            "challenges": "Challenge updates and achievement notifications",
+            "security": "Important account and security alerts"
+          },
+          "note": "You can manage notification preferences in your device settings or within the app."
+        },
+        "location": {
+          "title": "Location Services (Optional)",
+          "intro": "If enabled, used to:",
+          "items": {
+            "find": "Find coaches near your location",
+            "leaderboards": "Display location-based leaderboards",
+            "improve": "Improve coach discovery recommendations"
+          },
+          "note": "Location access is optional and can be disabled at any time in your device settings."
+        },
+        "biometric": {
+          "title": "Biometric Authentication (Optional)",
+          "content": "If your device supports Face ID or Touch ID, you can enable biometric authentication for quick and secure login. Biometric data is processed entirely on your device and is never transmitted to or stored by FitConnect."
+        }
+      },
+      "localStorage": {
+        "title": "17A. Local Data Storage and Caching",
+        "intro": "FitConnect stores certain data locally on your device to improve performance and enable offline access to key features.",
+        "dataStored": {
+          "title": "Data Stored Locally",
+          "items": {
+            "workout": "Workout Plans: Your current workout programs for offline viewing",
+            "meal": "Meal Plans: Your current nutrition plans and recipes",
+            "logs": "Workout Logs: Recent workout entries pending sync",
+            "profile": "Profile Data: Your profile information for quick access",
+            "preferences": "Preferences: App settings and display preferences"
+          }
+        },
+        "protection": {
+          "title": "Local Data Protection",
+          "items": {
+            "encrypted": "Local data is encrypted using your device's native encryption capabilities",
+            "secure": "Sensitive data (health metrics, progress photos) is stored in secure app storage",
+            "synced": "Local data is synced to our servers when connectivity is available",
+            "clearing": "Clearing app data or uninstalling the app removes all locally stored information"
+          }
+        },
+        "offline": {
+          "title": "Offline Mode",
+          "content": "When offline, you can view previously synced workout and meal plans, log workouts locally, and access your profile. Changes made offline will sync automatically when you reconnect."
+        }
+      },
+      "accountDeletion": {
+        "title": "18. Account Deletion",
+        "intro": "You have the right to delete your FitConnect account at any time. This section explains how to delete your account and what happens to your data.",
+        "howTo": {
+          "title": "How to Delete Your Account",
+          "intro": "You can delete your account through the following methods:",
+          "items": {
+            "inApp": "In-App: Go to Settings → Account → Delete Account",
+            "email": "Email: Send a request to {{privacyEmail}} with subject \"Account Deletion Request\""
+          }
+        },
+        "whatHappens": {
+          "title": "What Happens When You Delete Your Account",
+          "immediate": {
+            "title": "Immediately deleted:",
+            "items": {
+              "profile": "Your profile information (name, bio, profile photo)",
+              "goals": "Your fitness goals and preferences",
+              "photos": "Your progress photos",
+              "plans": "Your meal plans and workout plans",
+              "device": "Your connected device data (HealthKit, Fitbit, Garmin)",
+              "notifications": "Your notification preferences"
+            }
+          },
+          "retained30": {
+            "title": "Retained for 30 days (then deleted):",
+            "items": {
+              "recovery": "Account recovery data (in case you change your mind)",
+              "backup": "Backup copies in our disaster recovery systems"
+            }
+          },
+          "retainedLegal": {
+            "title": "Retained as required by law:",
+            "items": {
+              "payment": "Payment transaction records (required for tax and accounting purposes, typically 7 years)",
+              "legal": "Legal compliance records",
+              "fraud": "Fraud prevention data"
+            }
+          },
+          "coachNote": "Note for Coaches: If you have active clients or pending bookings, you will need to complete or transfer these commitments before account deletion can be processed."
+        },
+        "export": {
+          "title": "Data Export Before Deletion",
+          "content": "Before deleting your account, you can request a copy of your data by going to Settings → Privacy → Download My Data. We will provide your data in a machine-readable format (JSON/CSV) within 30 days of your request."
+        }
+      },
+      "changes": {
+        "title": "19. Changes to This Policy",
+        "content": "We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the \"Last updated\" date. For material changes, we will provide additional notice through in-app notifications or email. We encourage you to review this Privacy Policy periodically."
+      },
+      "contact": {
+        "title": "20. Contact Us",
+        "intro": "If you have questions or concerns about this Privacy Policy or our data practices, please contact us:",
+        "email": "Email: {{privacyEmail}}",
+        "address": "Address: {{address}}",
+        "phone": "Phone: {{phone}}",
+        "ukGdpr": "For UK-specific privacy inquiries or to contact our Data Protection representative, please email {{privacyEmail}} with \"UK GDPR Request\" in the subject line.",
+        "acknowledgment": "By using FitConnect, you acknowledge that you have read and understood this Privacy Policy and agree to its terms."
+      }
+    }
+  },
+  "terms": {
+    "meta": {
+      "title": "Terms of Service",
+      "description": "Read FitConnect's Terms of Service. Understand your rights and responsibilities when using our fitness coaching platform."
+    },
+    "hero": {
+      "titleStart": "Terms of",
+      "titleHighlight": "Service",
+      "lastUpdated": "Last updated: December 19, 2024"
+    },
+    "sections": {
+      "acceptance": {
+        "title": "1. Acceptance of Terms",
+        "p1": "Welcome to FitConnect. By accessing or using our website, mobile application, and services (collectively, the \"Platform\"), you agree to be bound by these Terms of Service (\"Terms\"). If you do not agree to these Terms, please do not use the Platform.",
+        "p2": "These Terms constitute a legally binding agreement between you and AMW Media Ltd, trading as FitConnect, a company registered in England and Wales (\"FitConnect,\" \"we,\" \"us,\" or \"our\"). We may update these Terms from time to time, and your continued use of the Platform constitutes acceptance of any changes."
+      },
+      "description": {
+        "title": "2. Description of Service",
+        "p1": "FitConnect is a platform that connects fitness professionals (\"Coaches\") with individuals seeking fitness coaching services (\"Clients\"). We provide the technology and platform for Coaches and Clients to discover, communicate, schedule sessions, and process payments.",
+        "important": "Important: FitConnect is not a fitness coaching provider. We do not employ Coaches, and Coaches are independent contractors responsible for their own services, advice, and conduct. We do not guarantee any specific results from coaching services."
+      },
+      "mobileEULA": {
+        "title": "3. Mobile Application License (EULA)",
+        "intro": "Subject to your compliance with these Terms, FitConnect grants you a limited, non-exclusive, non-transferable, revocable license to download, install, and use the FitConnect mobile application (\"App\") on devices that you own or control, solely for your personal, non-commercial use.",
+        "restrictions": {
+          "title": "License Restrictions",
+          "intro": "You may not:",
+          "items": {
+            "copy": "Copy, modify, or create derivative works based on the App",
+            "reverse": "Reverse engineer, disassemble, decompile, or attempt to derive the source code of the App",
+            "sell": "Sell, resell, rent, lease, loan, sublicense, distribute, or transfer the App to any third party",
+            "network": "Make the App available over a network where it could be used by multiple devices at the same time",
+            "remove": "Remove, alter, or obscure any proprietary notices on the App",
+            "illegal": "Use the App for any illegal, unauthorized, or harmful purpose",
+            "automated": "Use automated systems, bots, or scrapers to access or interact with the App"
+          }
+        },
+        "termination": {
+          "title": "License Termination",
+          "content": "This license is effective until terminated. Your rights under this license will terminate automatically without notice if you fail to comply with any of these Terms. Upon termination, you must cease all use of the App and delete all copies from your devices."
+        },
+        "updates": {
+          "title": "Updates and Modifications",
+          "content": "FitConnect may from time to time develop and provide App updates, which may include upgrades, bug fixes, patches, and other error corrections and/or new features. Updates may also modify or delete features and functionality in their entirety. You agree that FitConnect has no obligation to provide any updates or to continue to provide or enable any particular features or functionality."
+        }
+      },
+      "userAccounts": {
+        "title": "4. User Accounts",
+        "registration": {
+          "title": "Account Registration",
+          "intro": "To use certain features of the Platform, you must create an account. You agree to:",
+          "items": {
+            "accurate": "Provide accurate, current, and complete information during registration",
+            "maintain": "Maintain and promptly update your account information",
+            "security": "Maintain the security of your password and account",
+            "responsibility": "Accept responsibility for all activities under your account",
+            "notify": "Notify us immediately of any unauthorized use"
+          }
+        },
+        "eligibility": {
+          "title": "Account Eligibility and Age Requirements",
+          "intro": "You must be at least 18 years old to create an account and use FitConnect. By creating an account, you represent and warrant that:",
+          "items": {
+            "age": "You are at least 18 years of age",
+            "capacity": "You have the legal capacity to enter into these Terms",
+            "notOnBehalf": "You are not using the Platform on behalf of any person under 18 years of age",
+            "truthful": "All registration information you submit is truthful and accurate"
+          },
+          "parentalConsent": "Parental Consent: FitConnect does not knowingly collect or solicit personal information from anyone under 18 years of age. If you are under 18, please do not attempt to register for the Platform or send any personal information about yourself to us. If we learn that we have collected personal information from a person under 18, we will delete that information as quickly as possible and terminate the associated account. If you believe a person under 18 has provided us with personal information, please contact us at {{email}}."
+        }
+      },
+      "coachRequirements": {
+        "title": "5. Coach Requirements and Responsibilities",
+        "intro": "If you register as a Coach on FitConnect, you agree to:",
+        "items": {
+          "certifications": "Hold valid certifications from accredited organizations in your area of expertise",
+          "experience": "Maintain a minimum of 2 years of professional coaching experience",
+          "background": "Complete and pass our background check process",
+          "insurance": "Maintain professional liability insurance throughout your time on the platform",
+          "accurate": "Provide accurate information about your qualifications and experience",
+          "professional": "Deliver services professionally and in accordance with industry standards",
+          "respond": "Respond to client inquiries and bookings in a timely manner",
+          "honor": "Honor scheduled sessions or provide adequate notice for cancellations",
+          "noMedical": "Not provide medical advice or services outside your scope of practice",
+          "comply": "Comply with all applicable laws and regulations"
+        },
+        "reserve": "FitConnect reserves the right to verify credentials, conduct ongoing quality monitoring, and remove Coaches who do not meet our standards or violate these Terms."
+      },
+      "clientResponsibilities": {
+        "title": "6. Client Responsibilities",
+        "intro": "If you use FitConnect as a Client, you agree to:",
+        "items": {
+          "accurate": "Provide accurate information about your health, fitness level, and any limitations",
+          "consult": "Consult with a healthcare provider before beginning any fitness program",
+          "inform": "Inform your Coach of any medical conditions, injuries, or changes in health status",
+          "attend": "Attend scheduled sessions or provide adequate notice for cancellations",
+          "follow": "Follow safety guidelines and instructions provided by your Coach",
+          "pay": "Make payments for services as agreed",
+          "respect": "Treat Coaches and other users with respect"
+        }
+      },
+      "payments": {
+        "title": "7. Payments and Fees",
+        "clientPayments": {
+          "title": "Client Payments",
+          "content": "Clients agree to pay for coaching sessions at the rates displayed on Coach profiles. Payment is processed through our secure payment system (powered by Stripe) at the time of booking. All fees are in GBP unless otherwise specified."
+        },
+        "inAppPurchases": {
+          "title": "In-App Purchases (iOS and Android)",
+          "intro": "When purchasing subscriptions or digital products through the FitConnect mobile app:",
+          "ios": "iOS Purchases: Payments made through the iOS app are processed by Apple and subject to the Apple Media Services Terms and Conditions. Refunds for iOS purchases must be requested through Apple.",
+          "android": "Android Purchases: Payments made through the Android app are processed by Google Play and subject to Google Play Terms of Service. Refunds for Android purchases must be requested through Google Play."
+        },
+        "coachEarnings": {
+          "title": "Coach Earnings",
+          "intro": "Coaches receive payment for completed sessions minus a platform commission fee that varies based on their subscription tier:",
+          "tiers": {
+            "free": "Free Plan: 4% platform commission",
+            "starter": "Starter Plan: 3% platform commission",
+            "pro": "Pro Plan: 2% platform commission",
+            "enterprise": "Enterprise Plan: 1% platform commission"
+          },
+          "processing": "Payments are processed within 3-5 business days after session completion and transferred to the Coach's connected Stripe account. Coaches can reduce their commission rate by upgrading their subscription plan at any time."
+        },
+        "refunds": {
+          "title": "Refunds",
+          "content": "Clients may request a refund for their first session with a new Coach within 48 hours if unsatisfied. Package refunds are prorated based on unused sessions. Refund requests are reviewed on a case-by-case basis and may take up to 10 business days to process."
+        }
+      },
+      "subscriptions": {
+        "title": "8. Subscription Services and Auto-Renewal",
+        "coachSubs": {
+          "title": "Coach Platform Subscriptions",
+          "content": "Coaches may subscribe to paid platform tiers (Starter, Pro, Enterprise) that provide additional features and reduced commission rates. Subscription pricing is displayed on our pricing page and in the app before purchase."
+        },
+        "autoRenewal": {
+          "title": "Auto-Renewal Terms",
+          "important": "IMPORTANT - PLEASE READ CAREFULLY: When you subscribe to a paid plan, your subscription will automatically renew at the end of each billing period (monthly or annually, depending on your selection) unless you cancel it before the renewal date.",
+          "items": {
+            "billing": "Billing: You will be charged through your iTunes Account (iOS) or Google Play Account (Android) at confirmation of purchase and at the start of each renewal period",
+            "renewal": "Renewal: Your subscription automatically renews unless auto-renew is turned off at least 24 hours before the end of the current billing period",
+            "priceChanges": "Price Changes: We will notify you at least 30 days in advance of any price increases. Price changes will take effect at the start of your next billing period following the notice"
+          }
+        },
+        "howToCancel": {
+          "title": "How to Cancel Auto-Renewal",
+          "intro": "You can cancel your subscription at any time. To prevent being charged for the next billing period, you must cancel at least 24 hours before your renewal date.",
+          "items": {
+            "ios": "iOS: Go to Settings → [Your Name] → Subscriptions → FitConnect → Cancel Subscription",
+            "android": "Android: Go to Google Play Store → Menu → Subscriptions → FitConnect → Cancel",
+            "web": "Web: Go to FitConnect Settings → Subscription → Cancel Subscription"
+          },
+          "afterCancel": "After cancellation, you will continue to have access to your subscription features until the end of your current billing period. No refunds are provided for partial billing periods."
+        },
+        "clientSubs": {
+          "title": "Client Subscriptions to Coaches",
+          "content": "Some Coaches offer subscription plans for ongoing coaching services. These subscriptions are agreements between you and the Coach, processed through our platform. The same auto-renewal terms apply. Coach subscription pricing, terms, and cancellation policies are displayed on each Coach's profile before purchase."
+        }
+      },
+      "digitalProducts": {
+        "title": "8A. Digital Products and Content",
+        "intro": "Coaches may create and sell digital products (\"Digital Content\") through the Platform, including but not limited to e-books, workout templates, video tutorials, training programs, meal plan templates, and other downloadable or streamable content.",
+        "license": {
+          "title": "License to Digital Content",
+          "content": "When you purchase Digital Content, you are granted a limited, non-exclusive, non-transferable, revocable license to access and use the Digital Content for your personal, non-commercial use only."
+        },
+        "restrictions": {
+          "title": "Restrictions on Digital Content",
+          "intro": "You may not:",
+          "items": {
+            "resell": "Resell, redistribute, or share purchased Digital Content with others",
+            "copy": "Copy, reproduce, or create derivative works from Digital Content",
+            "commercial": "Use Digital Content for commercial purposes or in a commercial setting",
+            "upload": "Upload, publish, or share Digital Content on file-sharing sites or social media",
+            "remove": "Remove or alter any copyright notices or branding on Digital Content"
+          }
+        },
+        "accessPeriod": {
+          "title": "Access Period",
+          "content": "Unless otherwise specified at the time of purchase, Digital Content remains accessible through your FitConnect account for as long as your account is active and in good standing. Some Digital Content may have expiration dates, which will be clearly stated at the time of purchase."
+        },
+        "refunds": {
+          "title": "Digital Content Refunds",
+          "content": "Due to the nature of digital products, no refunds are provided once Digital Content has been accessed, downloaded, or streamed. If you experience technical issues preventing access to purchased content, please contact support at {{email}} within 7 days of purchase."
+        },
+        "bundles": {
+          "title": "Content Bundles",
+          "content": "Coaches may offer bundled Digital Content at a discounted price. When purchasing bundles, all included items are subject to these Digital Content terms. Individual items within a bundle cannot be refunded separately."
+        }
+      },
+      "cancellation": {
+        "title": "9. Cancellation Policy",
+        "content": "Sessions may be cancelled or rescheduled free of charge up to 24 hours before the scheduled time. Cancellations within 24 hours may be subject to the Coach's individual cancellation policy, which is displayed on their profile. No-shows may result in full session charges."
+      },
+      "userContent": {
+        "title": "10. User Content and License",
+        "yourContent": {
+          "title": "Your Content",
+          "content": "You retain ownership of all content you submit, post, or display on or through the Platform (\"User Content\"), including but not limited to profile information, progress photos, reviews, messages, workout logs, and any other materials."
+        },
+        "licenseGrant": {
+          "title": "License Grant to FitConnect",
+          "content": "By submitting User Content to the Platform, you grant FitConnect a worldwide, non-exclusive, royalty-free, sublicensable, and transferable license to use, reproduce, distribute, prepare derivative works of, display, and perform your User Content in connection with the Platform and FitConnect's business, including for promoting and redistributing part or all of the Platform."
+        },
+        "reviews": {
+          "title": "Reviews and Testimonials",
+          "content": "If you leave a review or testimonial, you grant FitConnect permission to use your first name, location, and review content for marketing purposes on our website, social media, and promotional materials. You may request removal of your testimonial at any time by contacting {{email}}."
+        },
+        "moderation": {
+          "title": "Content Moderation",
+          "content": "FitConnect reserves the right to review, moderate, and remove any User Content that violates these Terms, is illegal, harmful, abusive, offensive, or otherwise objectionable, at our sole discretion."
+        },
+        "survival": {
+          "title": "Content Survival",
+          "content": "The license granted above survives termination of your account only with respect to User Content that has been shared publicly (such as reviews) or that is reasonably necessary for FitConnect to maintain archived copies for legal compliance, dispute resolution, or enforcement of these Terms."
+        }
+      },
+      "intellectualProperty": {
+        "title": "11. Intellectual Property",
+        "p1": "The Platform, including its design, features, content, and technology, is owned by FitConnect and protected by intellectual property laws. You may not copy, modify, distribute, sell, or lease any part of the Platform without our written permission.",
+        "p2": "Coaches retain ownership of their original content (workout plans, nutritional guides, etc.) but grant FitConnect a license to display such content on the Platform for service delivery purposes."
+      },
+      "videoConferencing": {
+        "title": "11A. Video Conferencing Services",
+        "intro": "FitConnect integrates with third-party video conferencing services, including Zoom Video Communications, Inc. (\"Zoom\") and Google Meet, to facilitate online coaching sessions. This section governs your use of these integrated services.",
+        "thirdPartyTerms": {
+          "title": "Third-Party Service Terms",
+          "intro": "When you use video conferencing features through FitConnect, you agree to also be bound by the terms and privacy policies of the respective service providers:",
+          "zoom": "Zoom: Zoom Terms of Service and Zoom Privacy Policy",
+          "googleMeet": "Google Meet: Google Terms of Service and Google Privacy Policy"
+        },
+        "coachResponsibilities": {
+          "title": "Coach Responsibilities",
+          "intro": "Coaches who connect video conferencing accounts agree to:",
+          "items": {
+            "legitimate": "Use the integration solely for conducting legitimate coaching sessions with clients",
+            "comply": "Comply with the terms of service of the connected video conferencing provider",
+            "notUse": "Not use the integration for any purpose unrelated to FitConnect coaching services",
+            "consent": "Obtain appropriate consent before recording any video sessions",
+            "protect": "Protect any recordings in accordance with applicable data protection laws"
+          }
+        },
+        "clientResponsibilities": {
+          "title": "Client Responsibilities",
+          "intro": "Clients participating in video coaching sessions agree to:",
+          "items": {
+            "professional": "Conduct themselves professionally during video sessions",
+            "comply": "Ensure their participation complies with the video provider's terms of service",
+            "noRecord": "Not record sessions without the express consent of the Coach",
+            "noShare": "Not share meeting links with unauthorized third parties"
+          }
+        },
+        "disclaimer": {
+          "title": "Disclaimer of Liability for Video Services",
+          "important": "IMPORTANT: FitConnect is not responsible for the availability, performance, security, or functionality of third-party video conferencing services. You acknowledge and agree that:",
+          "items": {
+            "noControl": "FitConnect does not control and is not liable for any disruptions, outages, or technical issues with Zoom, Google Meet, or any other video conferencing service",
+            "noAccess": "FitConnect does not have access to, and is not responsible for, the content of your video calls",
+            "recordings": "Any recordings made during video sessions are the responsibility of the parties involved, subject to applicable laws and the Coach's policies",
+            "noLiable": "FitConnect is not liable for any data breaches or security incidents that occur within the third-party video conferencing platforms"
+          }
+        },
+        "disconnection": {
+          "title": "Disconnection of Video Services",
+          "content": "Coaches may disconnect their video conferencing accounts at any time through Settings → Integrations. Upon disconnection, FitConnect will no longer be able to create or manage video meetings on the Coach's behalf. Existing meeting links for scheduled sessions may remain active until the meetings occur or are manually cancelled."
+        }
+      },
+      "aiContent": {
+        "title": "11B. AI-Generated Content and Features",
+        "intro": "FitConnect incorporates artificial intelligence (\"AI\") features to assist Coaches and enhance the user experience. This section governs the use of AI-powered functionality within the Platform.",
+        "features": {
+          "title": "AI-Assisted Features",
+          "intro": "AI is used within FitConnect for the following purposes:",
+          "items": {
+            "workout": "Workout Plan Generation: AI may suggest workout routines based on client goals, fitness level, available equipment, and preferences",
+            "meal": "Meal Plan Suggestions: AI may generate meal plan ideas based on nutritional targets, dietary restrictions, and preferences",
+            "macro": "Macro and Calorie Calculations: AI assists in calculating nutritional targets based on user data",
+            "exercise": "Exercise Alternatives: AI may suggest alternative exercises when needed",
+            "food": "Food Substitutions: AI may recommend food alternatives for dietary needs",
+            "progress": "Progress Analysis: AI may analyze user data to provide insights",
+            "products": "Product Descriptions: AI may assist Coaches in creating product descriptions"
+          }
+        },
+        "disclaimer": {
+          "title": "AI Content Disclaimer",
+          "important": "IMPORTANT - PLEASE READ CAREFULLY:",
+          "items": {
+            "suggestions": "AI-generated content is provided as suggestions only and should not be considered professional medical, nutritional, or fitness advice",
+            "review": "All AI-generated workout and meal plans are subject to Coach review and approval before being delivered to Clients",
+            "general": "AI suggestions are based on general principles and may not account for your specific individual circumstances, health conditions, or needs",
+            "noGuarantee": "FitConnect does not guarantee the accuracy, completeness, or appropriateness of AI-generated content",
+            "consult": "You should always consult with qualified healthcare professionals before making significant changes to your diet or exercise routine"
+          }
+        },
+        "coachResponsibility": {
+          "title": "Coach Responsibility for AI Content",
+          "intro": "Coaches who use AI features to assist in creating client programs are responsible for:",
+          "items": {
+            "reviewing": "Reviewing all AI-generated content before sharing with clients",
+            "modifying": "Modifying AI suggestions to suit individual client needs",
+            "ensuring": "Ensuring AI-generated content is appropriate for each client's circumstances",
+            "fullResponsibility": "Taking full professional responsibility for any content delivered to clients, regardless of whether it was AI-assisted"
+          }
+        },
+        "limitation": {
+          "title": "Limitation of Liability for AI",
+          "content": "FitConnect is not liable for any injuries, health issues, adverse effects, or damages resulting from following AI-generated suggestions. AI features are tools to assist human professionals, not replacements for professional judgment."
+        }
+      },
+      "challenges": {
+        "title": "11C. Challenges and Gamification",
+        "intro": "FitConnect offers challenges, badges, experience points (XP), levels, leaderboards, and other gamification features to encourage engagement and fitness progress.",
+        "virtualRewards": {
+          "title": "Virtual Rewards",
+          "intro": "Badges, XP, levels, avatars, and other virtual rewards earned through FitConnect:",
+          "items": {
+            "noValue": "Have no monetary value and cannot be exchanged for cash or other consideration",
+            "entertainment": "Are for entertainment and motivational purposes only",
+            "property": "Remain the property of FitConnect and are licensed to you for use within the Platform",
+            "modified": "May be modified, removed, or reset at FitConnect's discretion",
+            "nonTransferable": "Are non-transferable between accounts"
+          }
+        },
+        "participation": {
+          "title": "Challenge Participation",
+          "intro": "When participating in challenges, you agree that:",
+          "items": {
+            "voluntary": "Participation is entirely voluntary",
+            "rules": "Challenge rules and requirements may vary and will be displayed before joining",
+            "verify": "FitConnect reserves the right to verify challenge completion through wearable data or other means",
+            "cheating": "Cheating, manipulating data, or fraudulent completion of challenges may result in disqualification, badge removal, or account suspension",
+            "modify": "FitConnect may modify or cancel challenges at any time with reasonable notice"
+          }
+        },
+        "leaderboards": {
+          "title": "Leaderboards",
+          "content": "Leaderboard participation may display your display name, location, and ranking publicly within the Platform. You can control your leaderboard visibility through your privacy settings. By appearing on leaderboards, you consent to this display of information."
+        },
+        "prizes": {
+          "title": "Challenge Rewards",
+          "content": "Some challenges may offer prizes or rewards. Prize fulfillment is subject to challenge-specific rules, eligibility requirements, and any applicable laws. FitConnect reserves the right to substitute prizes of equal or greater value."
+        }
+      },
+      "externalLinks": {
+        "title": "11D. External Links and Third-Party Services",
+        "intro": "FitConnect may include links to external websites and third-party services for your convenience.",
+        "shopping": {
+          "title": "Shopping Links",
+          "intro": "FitConnect provides links to external grocery retailers (including Tesco, Asda, Sainsbury's, and others) to help you purchase ingredients for your meal plans. When using these links:",
+          "items": {
+            "generate": "FitConnect only generates shopping list links; we do not process any grocery purchases",
+            "directWith": "All purchases are conducted directly with the retailer and subject to their terms and conditions",
+            "prices": "Prices, availability, and delivery options are determined by the retailer",
+            "noResponsible": "FitConnect is not responsible for product quality, delivery issues, or any disputes with retailers",
+            "noShared": "No personal or payment information is shared by FitConnect with grocery retailers"
+          }
+        },
+        "disclaimer": {
+          "title": "External Links Disclaimer",
+          "content": "FitConnect is not responsible for the content, accuracy, privacy practices, or availability of third-party websites. Links to external sites do not imply endorsement. We encourage you to review the terms and privacy policies of any external sites you visit."
+        }
+      },
+      "beta": {
+        "title": "11E. Beta and Pre-Release Features",
+        "intro": "FitConnect may offer access to beta, preview, or pre-release features (\"Beta Features\") to gather feedback and improve the Platform.",
+        "terms": {
+          "title": "Beta Feature Terms",
+          "intro": "By using Beta Features, you acknowledge and agree that:",
+          "items": {
+            "asIs": "Beta Features are provided \"AS-IS\" and \"AS-AVAILABLE\" without any warranties",
+            "bugs": "Beta Features may contain bugs, errors, or instabilities",
+            "changed": "Beta Features may be changed, limited, or discontinued at any time without notice",
+            "dataLoss": "Data created using Beta Features may be lost or reset during development",
+            "feedback": "Your feedback about Beta Features may be used by FitConnect to improve the Platform without compensation or attribution"
+          }
+        },
+        "confidentiality": {
+          "title": "Confidentiality",
+          "content": "Unless otherwise stated, Beta Features are confidential. You agree not to publicly discuss, screenshot, or share information about Beta Features without FitConnect's prior written consent."
+        }
+      },
+      "cookies": {
+        "title": "11F. Cookies and Local Storage",
+        "intro": "FitConnect uses cookies and browser local storage to provide and improve the Platform. This section summarizes our cookie practices; for full details, see Section 7 of our Privacy Policy.",
+        "banner": {
+          "title": "Consent Banner",
+          "content": "When you first visit FitConnect, a cookie consent banner appears allowing you to accept, reject, or customize your preferences. Your choice is stored and respected across all Platform features."
+        },
+        "categories": {
+          "title": "Cookie Categories",
+          "essential": "Essential: Required for core functionality (login, security, navigation). These cannot be disabled.",
+          "location": "Location: Optional. Enables automatic location detection for marketplace personalization and local leaderboards.",
+          "preferences": "Preferences: Optional. Remembers your UI settings and dismissed banners.",
+          "analytics": "Analytics: Optional. Reserved for future usage improvements."
+        },
+        "choices": {
+          "title": "Your Choices",
+          "content": "You can change your cookie preferences at any time via the cookie preferences modal accessible from the footer. Rejecting optional cookies does not affect core Platform functionality—you can still use all features, though some personalization (like automatic location) will be disabled."
+        },
+        "continuedUse": {
+          "title": "Continued Use",
+          "content": "By continuing to use FitConnect after making your consent choice, you agree to the storage and use of cookies as described. Essential cookies are necessary for the Platform to function and your use of the Platform constitutes acceptance of these essential cookies."
+        }
+      },
+      "healthDisclaimer": {
+        "title": "12. Health and Fitness Disclaimer",
+        "important": "IMPORTANT - READ CAREFULLY:",
+        "items": {
+          "technology": "FitConnect is a technology platform that connects users with fitness professionals. We do not provide medical advice, diagnoses, or treatment recommendations.",
+          "educational": "The information and services provided through the Platform, including workout plans, nutrition guidance, and coaching advice, are for general informational and educational purposes only.",
+          "consultPhysician": "Consult Your Physician: Before beginning any exercise program, dietary change, or using any information or services obtained through FitConnect, you should consult with a qualified healthcare provider. This is especially important if you have any pre-existing health conditions, injuries, or are pregnant.",
+          "assumptionRisk": "Assumption of Risk: You understand and agree that physical exercise involves inherent risks, including but not limited to risk of injury, illness, or death. You voluntarily assume all such risks and agree to release FitConnect from any liability related to your participation in fitness activities.",
+          "notMedical": "Coaches Are Not Medical Professionals: Unless specifically stated on their profile, Coaches on FitConnect are fitness professionals, not medical doctors, physiotherapists, or licensed healthcare providers. They are not qualified to diagnose medical conditions or prescribe medical treatments.",
+          "noGuarantee": "No Guarantee of Results: Individual results from fitness coaching vary based on numerous factors including genetics, adherence to programs, diet, rest, and other lifestyle factors. FitConnect and Coaches do not guarantee any specific results."
+        }
+      },
+      "limitationLiability": {
+        "title": "13. Limitation of Liability",
+        "important": "TO THE MAXIMUM EXTENT PERMITTED BY LAW:",
+        "items": {
+          "noLiable": "FitConnect is not liable for any injuries, health issues, or other damages resulting from coaching services obtained through the Platform.",
+          "noResponsible": "FitConnect is not responsible for the conduct, advice, or services provided by Coaches, as they are independent contractors.",
+          "noIndirect": "FitConnect is not liable for any indirect, incidental, special, consequential, or punitive damages.",
+          "totalLiability": "Our total liability shall not exceed the amount you paid to FitConnect in the 12 months preceding the claim."
+        }
+      },
+      "disclaimerWarranties": {
+        "title": "14. Disclaimer of Warranties",
+        "content": "THE PLATFORM IS PROVIDED \"AS IS\" AND \"AS AVAILABLE\" WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED. WE DO NOT WARRANT THAT THE PLATFORM WILL BE UNINTERRUPTED, ERROR-FREE, OR SECURE. WE DO NOT GUARANTEE ANY SPECIFIC RESULTS FROM COACHING SERVICES."
+      },
+      "indemnification": {
+        "title": "15. Indemnification",
+        "content": "You agree to indemnify and hold harmless FitConnect, its officers, directors, employees, and agents from any claims, damages, losses, or expenses (including attorney's fees) arising from your use of the Platform, violation of these Terms, or infringement of any third-party rights."
+      },
+      "thirdPartyBeneficiaries": {
+        "title": "16. Third-Party Beneficiaries",
+        "apple": {
+          "title": "Apple App Store",
+          "content": "You acknowledge and agree that Apple Inc. and its subsidiaries are third-party beneficiaries of these Terms as they relate to your use of the App on iOS devices. Upon your acceptance of these Terms, Apple will have the right (and will be deemed to have accepted the right) to enforce these Terms against you as a third-party beneficiary thereof."
+        },
+        "google": {
+          "title": "Google Play Store",
+          "content": "Similarly, Google LLC and its subsidiaries are third-party beneficiaries of these Terms as they relate to your use of the App on Android devices. You acknowledge that Google Play and its terms apply to your use of the App."
+        },
+        "storeTerms": {
+          "title": "App Store and Play Store Terms",
+          "content": "You acknowledge that your use of the App is also subject to the terms and conditions of the Apple App Store Terms of Service and/or the Google Play Terms of Service, as applicable. In the event of any conflict between these Terms and the App Store or Play Store terms, the App Store or Play Store terms shall prevail with respect to your use of the App."
+        },
+        "dataSafety": {
+          "title": "Google Play Data Safety Compliance",
+          "content": "FitConnect complies with the Google Play Developer Program Policies, including the User Data policy. Our data collection, usage, and sharing practices are disclosed in our Privacy Policy and the Google Play Data Safety section of our app listing."
+        }
+      },
+      "disputeResolution": {
+        "title": "17. Dispute Resolution",
+        "p1": "We hope to resolve any disputes amicably. If you have a complaint, please contact us first at {{legalEmail}} and we will try to resolve the matter.",
+        "p2": "For disputes between Clients and Coaches regarding services, both parties agree to first attempt resolution through FitConnect's support team before pursuing formal proceedings.",
+        "p3": "If we cannot resolve a dispute informally, any legal proceedings shall be brought exclusively in the courts of England and Wales. Both parties agree to submit to the exclusive jurisdiction of these courts."
+      },
+      "termination": {
+        "title": "18. Termination",
+        "content": "We may suspend or terminate your account at any time for violation of these Terms, fraudulent activity, or any other reason at our discretion. You may terminate your account at any time by going to Settings → Account → Delete Account or by contacting support. Upon termination, your right to use the Platform ceases immediately."
+      },
+      "exportCompliance": {
+        "title": "19. Export Compliance",
+        "intro": "The App may be subject to export control laws and regulations. You agree not to export, re-export, or transfer the App to any country or person prohibited by applicable laws, including:",
+        "items": {
+          "countries": "Countries subject to UK, US, EU, or UN sanctions or embargoes",
+          "persons": "Any person or entity on the UK HM Treasury sanctions list, US Treasury Department's Specially Designated Nationals list, or similar restricted party lists"
+        },
+        "represent": "By using the App, you represent and warrant that you are not located in any such country or on any such list. You also agree to comply with all applicable export control laws and regulations, including the UK Export Control Act 2002 and US Export Administration Regulations (EAR)."
+      },
+      "governingLaw": {
+        "title": "20. Governing Law",
+        "content": "These Terms shall be governed by and construed in accordance with the laws of England and Wales. Nothing in these Terms shall affect your statutory rights as a consumer under applicable UK law, including the Consumer Rights Act 2015."
+      },
+      "severability": {
+        "title": "21. Severability",
+        "content": "If any provision of these Terms is found to be unenforceable, the remaining provisions shall continue in full force and effect."
+      },
+      "entireAgreement": {
+        "title": "22. Entire Agreement",
+        "content": "These Terms, together with our Privacy Policy, constitute the entire agreement between you and FitConnect regarding the Platform and supersede any prior agreements."
+      },
+      "contact": {
+        "title": "23. Contact Information",
+        "intro": "For questions about these Terms, please contact us:",
+        "email": "Email: {{legalEmail}}",
+        "address": "Address: {{address}}",
+        "phone": "Phone: {{phone}}",
+        "acknowledgment": "By using FitConnect, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service."
+      }
+    }
+  }
+}
