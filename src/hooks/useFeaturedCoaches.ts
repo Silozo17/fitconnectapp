@@ -18,7 +18,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useCoachEngagement, createEmptyEngagementMap } from '@/hooks/useCoachEngagement';
 import { sortCoachesByUnifiedRanking, extractRankingFactors } from '@/lib/unified-coach-ranking';
 import { calculateLocationScore, filterByLocationWithExpansion } from '@/lib/coach-ranking';
-import { isRealCoach } from '@/lib/coach-validation';
+import { hasBlockedName } from '@/lib/coach-validation';
 import type { LocationData } from '@/types/ranking';
 import type { MarketplaceCoach } from '@/hooks/useCoachMarketplace';
 
@@ -60,9 +60,9 @@ export function useFeaturedCoaches({ userLocation }: UseFeaturedCoachesOptions):
 
       if (error) throw error;
 
-      // Filter to real coaches only
+      // Filter out only fake/demo/placeholder coaches (allow incomplete profiles)
       const coaches = ((data || []) as unknown as MarketplaceCoach[])
-        .filter(coach => isRealCoach(coach));
+        .filter(coach => !hasBlockedName(coach.display_name));
 
       return { coaches, boostedCoachIds };
     },
