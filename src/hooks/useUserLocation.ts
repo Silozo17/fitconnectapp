@@ -10,6 +10,7 @@ interface StoredLocation {
   city: string | null;
   region: string | null;
   country: string | null;
+  countryCode: string | null;
   county: string | null;
   timestamp: number;
 }
@@ -60,6 +61,7 @@ export const useUserLocation = (): UseUserLocationReturn => {
               city: parsed.city,
               region: parsed.region,
               country: parsed.country,
+              countryCode: parsed.countryCode,
               county: parsed.county,
             });
             setIsLoading(false);
@@ -81,6 +83,7 @@ export const useUserLocation = (): UseUserLocationReturn => {
           city: data?.city || null,
           region: data?.region || null,
           country: data?.country || null,
+          countryCode: data?.countryCode || null,
           county: data?.county || null,
         };
 
@@ -89,6 +92,7 @@ export const useUserLocation = (): UseUserLocationReturn => {
           city: locationData.city,
           region: locationData.region,
           country: locationData.country,
+          countryCode: locationData.countryCode ?? null,
           county: locationData.county ?? null,
           timestamp: Date.now(),
         };
@@ -104,6 +108,7 @@ export const useUserLocation = (): UseUserLocationReturn => {
           city: null,
           region: null,
           country: "United Kingdom",
+          countryCode: "GB",
           county: null,
         });
         setIsLoading(false);
