@@ -87,31 +87,31 @@ const ClientPlans = () => {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <CardTitle className="text-lg">
-                        {assignment.plan.name}
+                        {assignment.plan?.name || 'Unnamed Plan'}
                       </CardTitle>
                       <p className="text-sm text-muted-foreground mt-1">
-                        by {assignment.coach.display_name || "Coach"}
+                        by {assignment.coach?.display_name || "Coach"}
                       </p>
                     </div>
                     <div className="flex gap-2">
-                      {getPlanTypeBadge(assignment.plan.plan_type)}
+                      {getPlanTypeBadge(assignment.plan?.plan_type || 'workout')}
                       <Badge
                         variant={assignment.status === "active" ? "default" : "secondary"}
                       >
-                        {assignment.status}
+                        {assignment.status || 'unknown'}
                       </Badge>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  {assignment.plan.description && (
+                  {assignment.plan?.description && (
                     <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                       {assignment.plan.description}
                     </p>
                   )}
 
                   <div className="space-y-3">
-                    {assignment.plan.duration_weeks && (
+                    {assignment.plan?.duration_weeks && (
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <ClipboardList className="w-4 h-4" />
                         <span>{assignment.plan.duration_weeks} weeks</span>
