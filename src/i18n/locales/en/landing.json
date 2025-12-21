@@ -96,7 +96,11 @@
     "verified": "Verified",
     "reviews": "reviews",
     "perSession": "/session",
-    "viewProfile": "View Profile →"
+    "viewProfile": "View Profile →",
+    "noCoachesTitle": "We're Growing Our Network",
+    "noCoachesMessage": "We're building our network of verified fitness professionals. Check back soon or explore all available coaches.",
+    "becomeCoach": "Become a Coach",
+    "exploreAll": "Explore All Coaches"
   },
   "leaderboard": {
     "badge": "Community Leaderboard",
