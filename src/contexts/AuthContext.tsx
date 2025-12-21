@@ -36,9 +36,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    // Set up auth state listener FIRST
+    // Handle visibility change for PWA/browser background/foreground
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // App is now visible - start auto refresh and revalidate session
+        supabase.auth.startAutoRefresh();
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          setSession(session);
+          setUser(session?.user ?? null);
+          if (session?.user) {
+            setTimeout(() => fetchUserRole(session.user.id), 0);
+          }
+        });
+      } else {
+        // App is in background - stop auto refresh to save resources
+        supabase.auth.stopAutoRefresh();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Start auto refresh on mount
+    supabase.auth.startAutoRefresh();
+
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        if (event === 'TOKEN_REFRESHED') {
+          console.log('Auth: Token refreshed successfully');
+        }
+        
+        if (event === 'SIGNED_OUT') {
+          console.log('Auth: User signed out');
+        }
+
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -55,7 +86,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     );
 
-    // THEN check for existing session
+    // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -67,7 +98,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      supabase.auth.stopAutoRefresh();
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = useCallback(async (email: string, password: string, selectedRole: AppRole) => {
