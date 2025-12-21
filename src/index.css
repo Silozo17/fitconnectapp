@@ -409,6 +409,18 @@
 
 /* UX Polish - Focus states */
 @layer utilities {
+  /* Mobile bottom nav safe spacing - single source of truth */
+  .pb-mobile-nav {
+    padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Only apply full spacing on mobile (< 768px), desktop gets standard spacing */
+  @media (min-width: 768px) {
+    .pb-mobile-nav {
+      padding-bottom: 1.5rem;
+    }
+  }
+
   .focus-ring {
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background;
   }

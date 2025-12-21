@@ -74,7 +74,7 @@ const DashboardLayout = memo(({ children, title = "Coach Dashboard", description
           />
           <main 
             id="main-content" 
-            className={`flex-1 p-4 lg:p-6 overflow-y-auto ${isMobile ? "pb-24" : "pb-6"}`}
+            className="flex-1 p-4 lg:p-6 overflow-y-auto pb-mobile-nav"
             role="main"
             aria-label={title}
             tabIndex={-1}
