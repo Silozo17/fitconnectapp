@@ -1,4 +1,4 @@
-import { Globe, ChevronDown } from "lucide-react";
+import { MapPin, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,15 +27,15 @@ const LOCATION_NAMES: Record<RouteLocationCode, { name: string; flag: string }> 
   ca: { name: "Canada", flag: "🇨🇦" },
 };
 
-// Language display names
-const LANGUAGE_NAMES: Record<RouteLanguageCode, { name: string; nativeName: string }> = {
-  en: { name: "English", nativeName: "English" },
-  pl: { name: "Polish", nativeName: "Polski" },
+// Language display names with flags
+const LANGUAGE_NAMES: Record<RouteLanguageCode, { name: string; nativeName: string; flag: string }> = {
+  en: { name: "English", nativeName: "English", flag: "🇬🇧" },
+  pl: { name: "Polish", nativeName: "Polski", flag: "🇵🇱" },
 };
 
 /**
  * Compact locale selector for the header.
- * Shows language and location dropdowns.
+ * Shows location (left) and language (right) dropdowns.
  * Hidden on PWA/native/Despia apps.
  */
 export const HeaderLocaleSelector = () => {
@@ -60,39 +60,14 @@ export const HeaderLocaleSelector = () => {
 
   return (
     <div className="flex items-center gap-1">
-      {/* Language Dropdown */}
+      {/* Location Dropdown - LEFT */}
       <DropdownMenu>
         <DropdownMenuTrigger className="flex items-center gap-1 px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground rounded-md hover:bg-secondary/50 transition-colors">
-          <Globe className="w-4 h-4" />
-          <span className="uppercase">{language}</span>
+          <MapPin className="w-4 h-4" />
+          <span className="uppercase">{location}</span>
           <ChevronDown className="w-3 h-3" />
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="min-w-[140px]">
-          <DropdownMenuLabel className="text-xs">Language</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {SUPPORTED_LANGUAGES.map((lang) => {
-            const langInfo = LANGUAGE_NAMES[lang];
-            const isActive = lang === language;
-            return (
-              <DropdownMenuItem
-                key={lang}
-                onClick={() => changeLanguage(lang)}
-                className={isActive ? "bg-primary/10 text-primary" : ""}
-              >
-                {langInfo?.nativeName || lang.toUpperCase()}
-              </DropdownMenuItem>
-            );
-          })}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {/* Location Dropdown */}
-      <DropdownMenu>
-        <DropdownMenuTrigger className="flex items-center gap-1 px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground rounded-md hover:bg-secondary/50 transition-colors">
-          <span>{currentLocation?.flag}</span>
-          <ChevronDown className="w-3 h-3" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="min-w-[180px]">
+        <DropdownMenuContent align="start" className="min-w-[180px]">
           <DropdownMenuLabel className="text-xs">Location</DropdownMenuLabel>
           <DropdownMenuSeparator />
           {SUPPORTED_LOCATIONS.map((loc) => {
@@ -108,6 +83,33 @@ export const HeaderLocaleSelector = () => {
                 <span className="mr-2">{locInfo?.flag}</span>
                 <span className="flex-1">{locInfo?.name}</span>
                 <span className="text-xs text-muted-foreground">{currency}</span>
+              </DropdownMenuItem>
+            );
+          })}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* Language Dropdown - RIGHT */}
+      <DropdownMenu>
+        <DropdownMenuTrigger className="flex items-center gap-1 px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground rounded-md hover:bg-secondary/50 transition-colors">
+          <span>{currentLanguage?.flag}</span>
+          <span className="uppercase">{language}</span>
+          <ChevronDown className="w-3 h-3" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-[140px]">
+          <DropdownMenuLabel className="text-xs">Language</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {SUPPORTED_LANGUAGES.map((lang) => {
+            const langInfo = LANGUAGE_NAMES[lang];
+            const isActive = lang === language;
+            return (
+              <DropdownMenuItem
+                key={lang}
+                onClick={() => changeLanguage(lang)}
+                className={isActive ? "bg-primary/10 text-primary" : ""}
+              >
+                <span className="mr-2">{langInfo?.flag}</span>
+                {langInfo?.nativeName || lang.toUpperCase()}
               </DropdownMenuItem>
             );
           })}
