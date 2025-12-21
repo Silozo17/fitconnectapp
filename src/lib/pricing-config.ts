@@ -61,7 +61,7 @@ export const PRICING_CONFIGS: Record<PricingCountry, CountryPricingConfig> = {
           yearly: 'price_1Sf814EztIBHKDEevMuXmU4J',
         },
       },
-      boost: 'price_1Sh2QCEztIBHKDEeBoostGBP', // TODO: Add real boost price ID for GBP
+      boost: 'price_1SgwRVEztIBHKDEelYmh9Y4K',
     },
     pricing: {
       subscriptions: {
