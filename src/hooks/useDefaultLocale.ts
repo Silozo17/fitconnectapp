@@ -6,6 +6,7 @@ import {
   DEFAULT_ROUTE_LOCALE,
   COUNTRY_TO_LOCATION,
   getDefaultLanguageForLocation,
+  isValidLanguage,
 } from '@/lib/locale-routing';
 
 interface DefaultLocaleResult {
@@ -15,43 +16,86 @@ interface DefaultLocaleResult {
   };
   isLoading: boolean;
   detectedCountry: string | null;
+  /** Whether device language was detected */
+  deviceLanguageUsed: boolean;
 }
 
 /**
- * Hook to determine the default locale based on user's geo-location.
- * Uses the existing useUserLocation hook for geo-detection.
+ * Gets the device/browser language if valid
+ */
+function getDeviceLanguage(): RouteLanguageCode | null {
+  if (typeof navigator === 'undefined') return null;
+  
+  // Try navigator.language first (e.g., 'pl-PL' or 'en')
+  const browserLang = navigator.language?.split('-')[0]?.toLowerCase();
+  if (browserLang && isValidLanguage(browserLang)) {
+    return browserLang;
+  }
+  
+  // Try navigator.languages array
+  const languages = navigator.languages || [];
+  for (const lang of languages) {
+    const code = lang.split('-')[0]?.toLowerCase();
+    if (code && isValidLanguage(code)) {
+      return code;
+    }
+  }
+  
+  return null;
+}
+
+/**
+ * Hook to determine the default locale based on:
+ * 1. Device/browser language (priority 2, after stored preference which is checked elsewhere)
+ * 2. Geo-location (priority 3)
+ * 3. Default en-gb (priority 4)
+ * 
+ * Stored preference is checked in LocaleRedirect component.
  */
 export function useDefaultLocale(): DefaultLocaleResult {
   const { location, isLoading } = useUserLocation();
 
   const result = useMemo(() => {
-    if (!location?.country) {
-      return {
-        defaultLocale: DEFAULT_ROUTE_LOCALE,
-        detectedCountry: null,
-      };
-    }
-
-    // Map country name to location code
-    const locationCode = COUNTRY_TO_LOCATION[location.country];
+    // Priority 2: Device/browser language
+    const deviceLanguage = getDeviceLanguage();
     
-    if (!locationCode) {
-      // Unknown country - default to UK
-      return {
-        defaultLocale: DEFAULT_ROUTE_LOCALE,
-        detectedCountry: location.country,
-      };
+    // Priority 3: Geo-detected location
+    let locationCode: RouteLocationCode | null = null;
+    let detectedCountry: string | null = null;
+    
+    if (location?.country) {
+      detectedCountry = location.country;
+      locationCode = COUNTRY_TO_LOCATION[location.country] || null;
     }
-
-    // Get default language for this location
-    const languageCode = getDefaultLanguageForLocation(locationCode);
+    
+    // Determine final language
+    // - Use device language if detected
+    // - Otherwise use location's default language
+    // - Otherwise use 'en'
+    let languageCode: RouteLanguageCode;
+    let deviceLanguageUsed = false;
+    
+    if (deviceLanguage) {
+      languageCode = deviceLanguage;
+      deviceLanguageUsed = true;
+    } else if (locationCode) {
+      languageCode = getDefaultLanguageForLocation(locationCode);
+    } else {
+      languageCode = DEFAULT_ROUTE_LOCALE.language;
+    }
+    
+    // Determine final location
+    // - Use geo-detected location if available
+    // - Otherwise use default
+    const finalLocation = locationCode ?? DEFAULT_ROUTE_LOCALE.location;
 
     return {
       defaultLocale: {
         language: languageCode,
-        location: locationCode,
+        location: finalLocation,
       },
-      detectedCountry: location.country,
+      detectedCountry,
+      deviceLanguageUsed,
     };
   }, [location?.country]);
 

@@ -13,7 +13,7 @@ import RequestConnectionModal from "@/components/coaches/RequestConnectionModal"
 import { useCoachMarketplace, type MarketplaceCoach } from "@/hooks/useCoachMarketplace";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { useMarketplaceLocationFilter } from "@/hooks/useMarketplaceLocationFilter";
-import { useCountry } from "@/hooks/useCountry";
+import { useLocationFromRoute } from "@/hooks/useLocationFromRoute";
 import { useTranslation } from "@/hooks/useTranslation";
 
 const Coaches = () => {
@@ -29,7 +29,7 @@ const Coaches = () => {
   const [bookingCoach, setBookingCoach] = useState<MarketplaceCoach | null>(null);
   const [connectionCoach, setConnectionCoach] = useState<MarketplaceCoach | null>(null);
 
-  // Get auto-detected user location
+  // Get auto-detected user location for proximity ranking
   const { location: autoLocation, isLoading: autoLocationLoading } = useUserLocation();
 
   // Manual location filter (persisted for session)
@@ -40,15 +40,18 @@ const Coaches = () => {
     clearManualLocation,
   } = useMarketplaceLocationFilter();
 
-  // Determine effective location (manual overrides auto)
+  // Determine effective location for proximity ranking (manual overrides auto)
   const effectiveLocation = isManualSelection
     ? manualLocation
     : autoLocationLoading
       ? null
       : autoLocation;
 
-  // Get country from context for filtering
-  const { countryCode } = useCountry();
+  // Get country from URL locale route - this is the single source of truth
+  // URL: /en-gb/coaches → locationCode: 'gb' → shows UK coaches
+  // URL: /pl-gb/coaches → locationCode: 'gb' → shows UK coaches (Polish UI)
+  // URL: /pl-pl/coaches → locationCode: 'pl' → shows Polish coaches
+  const { locationCode } = useLocationFromRoute();
 
   const { data: coaches, isLoading, error } = useCoachMarketplace({
     search: searchQuery || undefined,
@@ -58,7 +61,7 @@ const Coaches = () => {
     inPersonOnly,
     userLocation: effectiveLocation,
     enableLocationRanking: true,
-    countryCode,
+    countryCode: locationCode, // Filter by URL location
   });
 
   const handleBook = useCallback((coach: MarketplaceCoach) => {
