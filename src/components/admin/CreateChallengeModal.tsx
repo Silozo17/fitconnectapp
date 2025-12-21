@@ -549,58 +549,6 @@ export function CreateChallengeModal({ open, onOpenChange, challenge }: CreateCh
               </div>
             </div>
           </div>
-            
-            <div>
-              <Label htmlFor="max_participants">Max Participants (optional)</Label>
-              <Input
-                id="max_participants"
-                type="number"
-                {...form.register('max_participants', { 
-                  valueAsNumber: true,
-                  setValueAs: v => v === '' ? null : Number(v)
-                })}
-                placeholder="Unlimited"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="start_date">Start Date</Label>
-              <Input
-                id="start_date"
-                type="date"
-                {...form.register('start_date')}
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="end_date">End Date</Label>
-              <Input
-                id="end_date"
-                type="date"
-                {...form.register('end_date')}
-              />
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Switch
-                  id="is_active"
-                  checked={form.watch('is_active')}
-                  onCheckedChange={(v) => form.setValue('is_active', v)}
-                />
-                <Label htmlFor="is_active">Active</Label>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <Switch
-                  id="visibility"
-                  checked={form.watch('visibility') === 'public'}
-                  onCheckedChange={(v) => form.setValue('visibility', v ? 'public' : 'private')}
-                />
-                <Label htmlFor="visibility">Public</Label>
-              </div>
-            </div>
-          </div>
           
           {/* Exclusive Reward Section */}
           <ChallengeRewardUpload
