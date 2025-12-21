@@ -98,9 +98,27 @@
     "perSession": "/session",
     "viewProfile": "View Profile →",
     "noCoachesTitle": "We're Growing Our Network",
-    "noCoachesMessage": "We're building our network of verified fitness professionals. Check back soon or explore all available coaches.",
+    "noCoachesMessage": "We're carefully vetting fitness professionals to bring you the best coaching experience. Join early to be the first to connect.",
     "becomeCoach": "Become a Coach",
-    "exploreAll": "Explore All Coaches"
+    "exploreAll": "Explore Available Coaches",
+    "benefits": {
+      "verified": {
+        "title": "Verified Professionals",
+        "description": "Every coach is vetted for credentials and experience"
+      },
+      "personalized": {
+        "title": "Personalized Plans",
+        "description": "Custom workouts & nutrition tailored to your goals"
+      },
+      "flexible": {
+        "title": "Local & Online",
+        "description": "Train in-person nearby or from anywhere online"
+      },
+      "quality": {
+        "title": "Quality Guaranteed",
+        "description": "Only complete, approved coach profiles shown"
+      }
+    }
   },
   "leaderboard": {
     "badge": "Community Leaderboard",
