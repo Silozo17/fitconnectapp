@@ -251,12 +251,25 @@ export function getStoredLocalePreference(): StoredLocalePreference | null {
 
 /**
  * Store locale preference in localStorage
+ * 
+ * IMPORTANT: 'manual' source takes priority over 'url' and 'geo'.
+ * If a 'manual' preference exists, 'url' and 'geo' sources will NOT overwrite it.
+ * This ensures user selections persist and aren't overridden by navigation or geo-detection.
  */
 export function setStoredLocalePreference(
   language: RouteLanguageCode,
   location: RouteLocationCode,
   source: 'geo' | 'manual' | 'url'
 ): void {
+  // Check existing preference - don't overwrite manual selections with url/geo
+  if (source !== 'manual') {
+    const existing = getStoredLocalePreference();
+    if (existing?.source === 'manual') {
+      // Don't overwrite manual selection with url or geo
+      return;
+    }
+  }
+  
   const preference: StoredLocalePreference = {
     language,
     location,
