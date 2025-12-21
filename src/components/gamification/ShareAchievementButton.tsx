@@ -8,8 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Share2, Twitter, Facebook, Linkedin, Link, Check, MessageCircle, Mail } from 'lucide-react';
-import { share, canUseNativeShare, type ShareOptions } from '@/lib/share';
-import { isDespia } from '@/lib/despia';
+import { useShareManager, type ShareOptions } from '@/hooks/useShareManager';
 
 export interface ShareableAchievement {
   type: 'badge' | 'level' | 'challenge' | 'rank';
@@ -32,6 +31,7 @@ export function ShareAchievementButton({
 }: ShareAchievementButtonProps) {
   const { t } = useTranslation('gamification');
   const [copied, setCopied] = useState(false);
+  const { share, shouldShowNativeButton, isDespia } = useShareManager();
 
   const getShareText = () => {
     switch (achievement.type) {
@@ -67,7 +67,7 @@ export function ShareAchievementButton({
   };
 
   // For Despia or mobile with native share, show simple button
-  if (isDespia() || (size === 'icon' && canUseNativeShare())) {
+  if (isDespia || (size === 'icon' && shouldShowNativeButton())) {
     return (
       <Button variant={variant} size={size} onClick={handleNativeShare}>
         <Share2 className="h-4 w-4" />

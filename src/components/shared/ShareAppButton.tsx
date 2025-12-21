@@ -8,9 +8,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Share2, Twitter, Facebook, Linkedin, Link, Check, MessageCircle, Mail } from 'lucide-react';
-import { share, canUseNativeShare } from '@/lib/share';
+import { useShareManager } from '@/hooks/useShareManager';
 import { getAppShareOptions } from '@/lib/shareHelpers';
-import { isDespia } from '@/lib/despia';
 
 interface ShareAppButtonProps {
   variant?: 'default' | 'outline' | 'ghost';
@@ -25,6 +24,7 @@ export function ShareAppButton({
 }: ShareAppButtonProps) {
   const { t } = useTranslation('gamification');
   const [copied, setCopied] = useState(false);
+  const { share, shouldShowNativeButton, isDespia } = useShareManager();
 
   const shareOptions = getAppShareOptions();
 
@@ -41,7 +41,7 @@ export function ShareAppButton({
   };
 
   // For Despia or mobile with native share, show simple button
-  if ((isDespia() || (size === 'icon' && canUseNativeShare()))) {
+  if (isDespia || (size === 'icon' && shouldShowNativeButton())) {
     return (
       <Button 
         variant={variant} 
