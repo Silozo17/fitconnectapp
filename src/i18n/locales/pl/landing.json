@@ -96,7 +96,11 @@
     "verified": "Zweryfikowany",
     "reviews": "opinii",
     "perSession": "/sesja",
-    "viewProfile": "Zobacz Profil →"
+    "viewProfile": "Zobacz Profil →",
+    "noCoachesTitle": "Rozwijamy Naszą Sieć",
+    "noCoachesMessage": "Budujemy sieć zweryfikowanych profesjonalistów fitness. Sprawdź ponownie wkrótce lub przeglądaj wszystkich dostępnych trenerów.",
+    "becomeCoach": "Zostań Trenerem",
+    "exploreAll": "Przeglądaj Wszystkich"
   },
   "leaderboard": {
     "badge": "Ranking Społeczności",

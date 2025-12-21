@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, ArrowRight, CheckCircle, Loader2 } from "lucide-react";
+import { Star, MapPin, ArrowRight, CheckCircle, Loader2, Users } from "lucide-react";
 import { useCoachMarketplace } from "@/hooks/useCoachMarketplace";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { getDisplayLocation } from "@/lib/location-utils";
@@ -18,71 +18,21 @@ const FeaturedCoaches = () => {
     location: locationSearch,
     limit: 4,
     featured: true,
+    realCoachesOnly: true,
   });
 
   // Fallback to all coaches if no local coaches found
   const { data: fallbackCoaches } = useCoachMarketplace({
     limit: 4,
     featured: true,
+    realCoachesOnly: true,
   });
 
   const displayCoaches = coaches?.length ? coaches : fallbackCoaches;
   const isLoading = locationLoading || coachesLoading;
   const locationLabel = location?.city || location?.region || location?.country || "Your Area";
 
-  // Mock data fallback when no database coaches exist
-  const mockCoaches = [
-    {
-      id: "1",
-      display_name: "Marcus Johnson",
-      coach_types: ["Personal Trainer"],
-      location: "London, UK",
-      hourly_rate: 60,
-      is_verified: true,
-      profile_image_url: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=400&fit=crop",
-      rating: 4.9,
-      reviews_count: 127,
-      tags: ["Weight Loss", "Strength"],
-    },
-    {
-      id: "2",
-      display_name: "Sarah Chen",
-      coach_types: ["Nutritionist"],
-      location: "Manchester, UK",
-      hourly_rate: 45,
-      is_verified: true,
-      profile_image_url: "https://images.unsplash.com/photo-1594381898411-846e7d193883?w=400&h=400&fit=crop",
-      rating: 5.0,
-      reviews_count: 89,
-      tags: ["Meal Planning", "Vegan"],
-    },
-    {
-      id: "3",
-      display_name: "David Okonkwo",
-      coach_types: ["Boxing Coach"],
-      location: "Birmingham, UK",
-      hourly_rate: 55,
-      is_verified: true,
-      profile_image_url: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=400&fit=crop",
-      rating: 4.8,
-      reviews_count: 156,
-      tags: ["Boxing", "Conditioning"],
-    },
-    {
-      id: "4",
-      display_name: "Emma Williams",
-      coach_types: ["MMA Coach"],
-      location: "Leeds, UK",
-      hourly_rate: 65,
-      is_verified: true,
-      profile_image_url: "https://images.unsplash.com/photo-1549476464-37392f717541?w=400&h=400&fit=crop",
-      rating: 4.9,
-      reviews_count: 72,
-      tags: ["MMA", "Self Defense"],
-    },
-  ];
-
-  const coachesToShow = displayCoaches?.length ? displayCoaches : mockCoaches;
+  const coachesToShow = displayCoaches || [];
 
   return (
     <section className="py-24 md:py-32 bg-background">
@@ -96,7 +46,7 @@ const FeaturedCoaches = () => {
             <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
               {t('featuredCoaches.title')} <span className="gradient-text-teal">{t('featuredCoaches.titleHighlight')}</span>
             </h2>
-            {!isLoading && (
+            {!isLoading && coachesToShow.length > 0 && (
               <p className="text-muted-foreground mt-2 flex items-center gap-2">
                 <MapPin className="w-4 h-4" />
                 {t('featuredCoaches.showingNear', { location: locationLabel })}
@@ -122,8 +72,33 @@ const FeaturedCoaches = () => {
           </div>
         )}
 
+        {/* Empty State */}
+        {!isLoading && coachesToShow.length === 0 && (
+          <div className="text-center py-16 bg-secondary/30 rounded-2xl border border-border/50">
+            <div className="max-w-md mx-auto px-4">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                <Users className="w-8 h-8 text-primary" />
+              </div>
+              <h3 className="font-display text-xl font-semibold text-foreground mb-3">
+                {t('featuredCoaches.noCoachesTitle')}
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                {t('featuredCoaches.noCoachesMessage')}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button asChild variant="outline" className="rounded-xl">
+                  <Link to="/for-coaches">{t('featuredCoaches.becomeCoach')}</Link>
+                </Button>
+                <Button asChild className="rounded-xl">
+                  <Link to="/coaches">{t('featuredCoaches.exploreAll')}</Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Coaches Grid */}
-        {!isLoading && (
+        {!isLoading && coachesToShow.length > 0 && (
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {coachesToShow.map((coach) => (
               <Link
@@ -134,7 +109,7 @@ const FeaturedCoaches = () => {
                 {/* Image */}
                 <div className="relative aspect-square overflow-hidden">
                   <img
-                    src={coach.profile_image_url || "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=400&fit=crop"}
+                    src={coach.profile_image_url || coach.card_image_url || ""}
                     alt={coach.display_name || "Coach"}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
