@@ -211,10 +211,10 @@ const Pricing = () => {
                     </div>
 
                     <ul className="space-y-3 mb-8 flex-1">
-                      {tier.features.map((feature, fIndex) => (
+                      {tier.featureKeys.map((featureKey, fIndex) => (
                         <li key={fIndex} className="flex items-start gap-3">
                           <Check className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                          <span className="text-sm text-muted-foreground">{feature}</span>
+                          <span className="text-sm text-muted-foreground">{t(featureKey)}</span>
                         </li>
                       ))}
                     </ul>
