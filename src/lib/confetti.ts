@@ -17,12 +17,28 @@ export interface ConfettiOptions {
 }
 
 // Preset configurations for common celebration events
+// Intensity levels: subtle (first-time), medium (milestones), high (achievements), maximum (legendary)
 export const confettiPresets = {
+  // Intensity-based presets
+  subtle: { type: 'burst' as ConfettiType, particleCount: 30, duration: 800 },
+  medium: { type: 'burst' as ConfettiType, particleCount: 60, duration: 1200 },
+  high: { type: 'burst' as ConfettiType, particleCount: 100, duration: 1500 },
+  maximum: { type: 'fireworks' as ConfettiType, particleCount: 200, duration: 3000 },
+  
+  // Event-specific presets
   achievement: { type: 'burst' as ConfettiType, particleCount: 100, duration: 1500 },
   levelUp: { type: 'fireworks' as ConfettiType, particleCount: 150, duration: 2000 },
   challengeComplete: { type: 'shower' as ConfettiType, particleCount: 80, duration: 1500 },
   badgeEarned: { type: 'burst' as ConfettiType, particleCount: 80, duration: 1200 },
   challengeJoin: { type: 'burst' as ConfettiType, particleCount: 50, duration: 1000 },
+  
+  // Streak milestone presets
+  streakWeek: { type: 'burst' as ConfettiType, particleCount: 50, duration: 1000 },
+  streakMonth: { type: 'shower' as ConfettiType, particleCount: 80, duration: 1500 },
+  streakLegendary: { type: 'fireworks' as ConfettiType, particleCount: 150, duration: 2500 },
+  
+  // First-time achievements
+  firstTime: { type: 'burst' as ConfettiType, particleCount: 40, duration: 1000 },
 };
 
 // Check if user prefers reduced motion

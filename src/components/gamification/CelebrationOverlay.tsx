@@ -1,11 +1,17 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Trophy, Sparkles, Star } from 'lucide-react';
+import { X, Trophy, Sparkles, Star, Flame, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { triggerConfetti, confettiPresets } from '@/lib/confetti';
 import { triggerHaptic } from '@/lib/despia';
 
-export type CelebrationType = 'challenge_complete' | 'level_up' | 'badge_earned' | 'avatar_unlocked';
+export type CelebrationType = 
+  | 'challenge_complete' 
+  | 'level_up' 
+  | 'badge_earned' 
+  | 'avatar_unlocked'
+  | 'streak_milestone'
+  | 'first_time';
 
 export interface CelebrationData {
   type: CelebrationType;
@@ -148,8 +154,24 @@ export function CelebrationOverlay({
       case 'badge_earned':
       case 'avatar_unlocked':
         return <Sparkles className="h-12 w-12 text-purple-400" />;
+      case 'streak_milestone':
+        return <Flame className="h-12 w-12 text-orange-500" />;
+      case 'first_time':
+        return <Zap className="h-12 w-12 text-emerald-400" />;
       default:
         return <Trophy className="h-12 w-12 text-amber-400" />;
+    }
+  };
+
+  // Get gradient colors based on celebration type
+  const getGradientColors = () => {
+    switch (data.type) {
+      case 'streak_milestone':
+        return 'from-orange-500/20 to-red-500/20';
+      case 'first_time':
+        return 'from-emerald-500/20 to-teal-500/20';
+      default:
+        return 'from-amber-500/20 to-orange-500/20';
     }
   };
 
@@ -184,7 +206,10 @@ export function CelebrationOverlay({
 
         {/* Icon */}
         <div className="flex justify-center mb-4">
-          <div className="p-4 rounded-full bg-gradient-to-br from-amber-500/20 to-orange-500/20 animate-pulse">
+          <div className={cn(
+            "p-4 rounded-full bg-gradient-to-br animate-pulse",
+            getGradientColors()
+          )}>
             {getIcon()}
           </div>
         </div>

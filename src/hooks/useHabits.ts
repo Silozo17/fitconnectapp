@@ -2,6 +2,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { triggerConfetti, confettiPresets } from "@/lib/confetti";
+import { triggerHaptic } from "@/lib/despia";
+
+// Streak milestones that trigger celebrations
+const STREAK_MILESTONES = [7, 30, 100] as const;
+type StreakMilestone = typeof STREAK_MILESTONES[number];
 
 export interface Habit {
   id: string;
@@ -286,13 +292,37 @@ export const useDeleteHabit = () => {
   });
 };
 
+// Helper to check if streak hits a milestone
+const checkStreakMilestone = (newStreak: number): StreakMilestone | null => {
+  if (STREAK_MILESTONES.includes(newStreak as StreakMilestone)) {
+    return newStreak as StreakMilestone;
+  }
+  return null;
+};
+
+// Helper to trigger appropriate celebration for streak milestone
+const triggerStreakCelebration = (milestone: StreakMilestone) => {
+  const preset = milestone >= 100 
+    ? confettiPresets.streakLegendary 
+    : milestone >= 30 
+      ? confettiPresets.streakMonth 
+      : confettiPresets.streakWeek;
+  
+  triggerConfetti(preset);
+  triggerHaptic(milestone >= 30 ? 'success' : 'light');
+};
+
 // Mutation to log a habit (client)
 export const useLogHabit = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   
   return useMutation({
-    mutationFn: async ({ habitId, notes }: { habitId: string; notes?: string }) => {
+    mutationFn: async ({ habitId, notes, previousStreak = 0 }: { 
+      habitId: string; 
+      notes?: string;
+      previousStreak?: number;
+    }) => {
       // Get client profile
       const { data: clientProfile } = await supabase
         .from('client_profiles')
@@ -319,11 +349,25 @@ export const useLogHabit = () => {
         .single();
       
       if (error) throw error;
-      return data;
+      
+      // Return data with streak info for celebration check
+      return { ...data, previousStreak };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['my-habits'] });
-      toast.success('Habit completed! 🎉');
+      
+      // Check for streak milestone celebration
+      const newStreak = (data.previousStreak || 0) + 1;
+      const milestone = checkStreakMilestone(newStreak);
+      
+      if (milestone) {
+        triggerStreakCelebration(milestone);
+        toast.success(`${milestone}-day streak! 🔥`, {
+          description: 'Keep up the amazing work!',
+        });
+      } else {
+        toast.success('Habit completed! 🎉');
+      }
     },
     onError: (error) => {
       toast.error('Failed to log habit: ' + error.message);
