@@ -22,13 +22,47 @@ export function canUseWebShare(): boolean {
 }
 
 /**
+ * Copy share content to clipboard with toast notification
+ * Used as fallback when Web Share API is unavailable or fails
+ */
+async function fallbackToClipboard(options: ShareOptions): Promise<boolean> {
+  const shareText = `${options.title}\n\n${options.text}\n\n${options.url}`;
+  
+  try {
+    await navigator.clipboard.writeText(shareText);
+    toast.success('Link copied to clipboard!', {
+      description: 'Share not supported on this browser'
+    });
+    return true;
+  } catch {
+    // Fallback for older browsers using execCommand
+    try {
+      const textarea = document.createElement('textarea');
+      textarea.value = shareText;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      toast.success('Link copied to clipboard!');
+      return true;
+    } catch {
+      toast.error('Unable to share. Please copy the link manually.');
+      return false;
+    }
+  }
+}
+
+/**
  * SYNCHRONOUS Web Share - must be called directly from click handler
  * This preserves the user gesture context required by Safari iOS
- * Returns void because it must not be awaited in the call chain
+ * Falls back to clipboard copy with toast on unsupported browsers
  */
 export function triggerWebShare(options: ShareOptions): void {
+  // Check feature availability - if not, use fallback immediately
   if (!('share' in navigator)) {
-    console.warn('Web Share API not supported');
+    fallbackToClipboard(options);
     return;
   }
   
@@ -39,9 +73,12 @@ export function triggerWebShare(options: ShareOptions): void {
     text: options.text,
     url: options.url,
   }).catch((error) => {
-    if (error.name !== 'AbortError') {
-      console.error('Web share failed:', error);
-    }
+    // User cancelled - no fallback needed
+    if (error.name === 'AbortError') return;
+    
+    // Share failed - use clipboard fallback
+    console.error('Web share failed, using clipboard fallback:', error);
+    fallbackToClipboard(options);
   });
 }
 
