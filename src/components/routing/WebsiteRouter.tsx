@@ -4,6 +4,7 @@ import { LocaleRoutingProvider } from '@/contexts/LocaleRoutingContext';
 import GuestOnlyRoute from '@/components/auth/GuestOnlyRoute';
 import PageLoadingSpinner from '@/components/shared/PageLoadingSpinner';
 import RouteRestorer from '@/components/shared/RouteRestorer';
+import ScrollToTop from '@/components/shared/ScrollToTop';
 import { DashboardLocaleRedirect } from './DashboardLocaleRedirect';
 import { LocaleRouteWrapper } from './LocaleRouteWrapper';
 
@@ -145,6 +146,7 @@ export function WebsiteRouter() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
+      <ScrollToTop />
     </LocaleRoutingProvider>
   );
 }
