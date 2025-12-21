@@ -19,10 +19,24 @@ interface UseLocaleLinkReturn {
  * Hook to help with locale-prefixed links.
  * Safe to use outside of LocaleRoutingProvider (will return original paths).
  */
+// Protected paths that should never have locale prefixes
+const PROTECTED_PATHS = ['/dashboard', '/onboarding', '/docs', '/auth', '/subscribe'];
+
+function isProtectedPath(path: string): boolean {
+  return PROTECTED_PATHS.some(protectedPath => 
+    path === protectedPath || path.startsWith(`${protectedPath}/`)
+  );
+}
+
 export function useLocaleLink(): UseLocaleLinkReturn {
   const localeRouting = useOptionalLocaleRouting();
   
   const localePath = useCallback((path: string): string => {
+    // Never prefix protected paths (dashboard, onboarding, etc.)
+    if (isProtectedPath(path)) {
+      return path;
+    }
+    
     // If locale routing is active and we're on a locale route, prefix the path
     if (localeRouting?.isLocaleRoute) {
       return localeRouting.buildLocalePath(path);
