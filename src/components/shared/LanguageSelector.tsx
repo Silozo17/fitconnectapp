@@ -21,7 +21,8 @@ const comingSoonLanguages = [
 const isDev = import.meta.env.DEV;
 
 const LanguageSelector = () => {
-  const { currentLanguage, changeLanguage, t } = useTranslation();
+  const { currentLanguage, changeLanguage, t } = useTranslation('settings');
+  const { t: tCommon } = useTranslation('common');
 
   const handleLanguageChange = (languageCode: string) => {
     // Validate against available languages (include dev languages in dev mode)
@@ -47,7 +48,7 @@ const LanguageSelector = () => {
     <div className="space-y-2">
       <Label className="flex items-center gap-2">
         <Globe className="w-4 h-4" />
-        {t('settings.preferences.language')}
+        {t('preferences.language')}
       </Label>
       <Select value={currentLanguage} onValueChange={handleLanguageChange}>
         <SelectTrigger className="w-full max-w-xs">
@@ -77,7 +78,7 @@ const LanguageSelector = () => {
               <div className="flex items-center justify-between gap-3">
                 <span>{lang.name}</span>
                 <Badge variant="secondary" className="text-xs">
-                  {t('common.comingSoon')}
+                  {tCommon('labels.comingSoon')}
                 </Badge>
               </div>
             </SelectItem>
@@ -85,7 +86,7 @@ const LanguageSelector = () => {
         </SelectContent>
       </Select>
       <p className="text-xs text-muted-foreground">
-        {t('settings.preferences.languageHint')}
+        {t('preferences.languageHint')}
       </p>
     </div>
   );
