@@ -6,6 +6,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, Dumbbell, ChevronDown, Swords, Apple, Flame, Users, BookOpen, Trophy, HelpCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import { HeaderLocaleSelector } from "@/components/shared/HeaderLocaleSelector";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -190,6 +191,7 @@ const Navbar = () => {
 
           {/* Desktop Auth Buttons - shows at xl (1280px) */}
           <div className="hidden xl:flex items-center gap-3">
+            <HeaderLocaleSelector />
             {user ? (
               <>
                 <Button asChild variant="ghost"><Link to={dashboardLink}>Dashboard</Link></Button>
