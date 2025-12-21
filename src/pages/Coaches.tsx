@@ -17,7 +17,7 @@ import { useLocationFromRoute } from "@/hooks/useLocationFromRoute";
 import { useTranslation } from "@/hooks/useTranslation";
 
 const Coaches = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('coaches');
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
@@ -85,10 +85,10 @@ const Coaches = () => {
   return (
     <>
       <Helmet>
-        <title>Find Fitness Coaches | Personal Trainers, Nutritionists & Combat Sports | FitConnect</title>
+        <title>{t('title')} | FitConnect</title>
         <meta 
           name="description" 
-          content="Browse and connect with verified fitness coaches near you. Filter by specialty, location, price, and session type to find your perfect match." 
+          content={t('seoDescription')} 
         />
       </Helmet>
 
@@ -100,10 +100,10 @@ const Coaches = () => {
             {/* Header */}
             <div className="mb-8">
               <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-2">
-                Find Your <span className="gradient-text">Perfect Coach</span>
+                {t('header.title')} <span className="gradient-text">{t('header.titleHighlight')}</span>
               </h1>
               <p className="text-muted-foreground mb-6">
-                Browse our verified fitness professionals and start your transformation today.
+                {t('header.subtitle')}
               </p>
 
               {/* Search Bar */}
@@ -111,7 +111,7 @@ const Coaches = () => {
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                   <Input
-                    placeholder="Search by name, specialty, or location..."
+                    placeholder={t('search.placeholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10 h-12 bg-background/80 backdrop-blur-sm"
@@ -125,7 +125,7 @@ const Coaches = () => {
                   className="hidden md:flex h-12"
                 >
                   <SlidersHorizontal className="h-5 w-5 mr-2" />
-                  Filters
+                  {t('search.filters')}
                 </Button>
 
                 {/* Mobile Filter Sheet */}
@@ -137,7 +137,7 @@ const Coaches = () => {
                   </SheetTrigger>
                   <SheetContent side="left" className="w-[300px] sm:w-[350px] p-0">
                     <SheetHeader className="p-4 border-b border-border">
-                      <SheetTitle>Filters</SheetTitle>
+                      <SheetTitle>{t('filters.title')}</SheetTitle>
                     </SheetHeader>
                     <div className="p-4 overflow-y-auto max-h-[calc(100vh-80px)]">
                       <CoachFilters
@@ -192,14 +192,14 @@ const Coaches = () => {
                   </div>
                 ) : error ? (
                   <div className="text-center py-20 text-muted-foreground">
-                    <p>Failed to load coaches. Please try again.</p>
+                    <p>{t('results.loadFailed')}</p>
                   </div>
                 ) : coaches && coaches.length > 0 ? (
                   <>
                     <div className="flex items-center gap-2 mb-6 text-muted-foreground">
                       <Users className="w-5 h-5" />
                       <span>
-                        Showing <strong className="text-foreground">{coaches.length}</strong> coach{coaches.length !== 1 ? "es" : ""}
+                        {t('results.showing')} <strong className="text-foreground">{coaches.length}</strong> {coaches.length !== 1 ? t('results.coaches') : t('results.coach')}
                       </span>
                     </div>
                     <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
@@ -219,10 +219,10 @@ const Coaches = () => {
                       <Users className="w-8 h-8 text-muted-foreground" />
                     </div>
                     <h3 className="font-display font-semibold text-xl text-foreground mb-2">
-                      {t('empty.noCoaches')}
+                      {t('results.noCoaches')}
                     </h3>
                     <p className="text-muted-foreground">
-                      {t('empty.tryAdjusting')}
+                      {t('results.noCoachesDesc')}
                     </p>
                   </div>
                 )}
