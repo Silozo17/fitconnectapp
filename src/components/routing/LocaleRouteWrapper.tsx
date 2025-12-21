@@ -40,6 +40,9 @@ export function LocaleRouteWrapper() {
   
   // Apply locale settings when valid - wait for i18n to be ready
   useEffect(() => {
+    // Reset ready state at the start of the effect
+    setIsI18nReady(false);
+    
     if (!parsedLocale) {
       setIsI18nReady(true);
       return;
@@ -64,14 +67,8 @@ export function LocaleRouteWrapper() {
     setLocale(LOCATION_TO_DATE_LOCALE[location]);
     
     // Store preference with 'url' source
-    // Note: setStoredLocalePreference will NOT overwrite a 'manual' source
     setStoredLocalePreference(language, location, 'url');
   }, [parsedLocale, setCurrency, setLocale]);
-  
-  // Reset ready state when locale changes
-  useEffect(() => {
-    setIsI18nReady(false);
-  }, [locale]);
   
   // Don't render children until i18n is ready
   if (!isI18nReady) {
