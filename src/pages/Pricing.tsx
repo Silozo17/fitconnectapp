@@ -6,9 +6,10 @@ import { GradientButton } from "@/components/ui/gradient-button";
 import { Link } from "react-router-dom";
 import { Check, Zap, Star, Crown, Sparkles, Users, MessageSquare, Calendar, TrendingUp, Video, FileText, Shield, Percent } from "lucide-react";
 import { SUBSCRIPTION_TIERS, TierKey, BillingInterval } from "@/lib/stripe-config";
-import { formatCurrency } from "@/lib/currency";
+import { formatCurrency, convertPlatformPriceForDisplay } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
+import { useCountryContext } from "@/contexts/CountryContext";
 
 const tierIcons: Record<TierKey, typeof Zap> = {
   free: Sparkles,
@@ -20,6 +21,7 @@ const tierIcons: Record<TierKey, typeof Zap> = {
 
 const Pricing = () => {
   const [billingInterval, setBillingInterval] = useState<BillingInterval>("monthly");
+  const { countryCode } = useCountryContext();
 
   const platformFeatures = [
     {
@@ -135,7 +137,8 @@ const Pricing = () => {
               .filter(([_, tier]) => !tier.adminOnly)
               .map(([key, tier]) => {
               const Icon = tierIcons[key];
-              const price = tier.prices[billingInterval];
+              const priceData = tier.prices[billingInterval];
+              const converted = convertPlatformPriceForDisplay(priceData.amount, countryCode);
               const isPopular = tier.highlighted;
               const isFree = key === "free";
 
@@ -172,7 +175,7 @@ const Pricing = () => {
                     <div className="mb-6">
                       <div className="flex items-baseline gap-1">
                         <span className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                          {isFree ? "Free" : formatCurrency(price.amount)}
+                          {isFree ? "Free" : formatCurrency(converted.amount, converted.currency)}
                         </span>
                         {!isFree && (
                           <span className="text-muted-foreground">
@@ -180,9 +183,9 @@ const Pricing = () => {
                           </span>
                         )}
                       </div>
-                      {billingInterval === "yearly" && !isFree && "savings" in price && price.savings > 0 && (
+                      {billingInterval === "yearly" && !isFree && "savings" in priceData && priceData.savings > 0 && (
                         <p className="text-sm text-primary font-medium mt-1">
-                          Save {formatCurrency(price.savings)}/year
+                          Save {formatCurrency(convertPlatformPriceForDisplay(priceData.savings, countryCode).amount, converted.currency)}/year
                         </p>
                       )}
                     </div>

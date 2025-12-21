@@ -11,22 +11,23 @@ import {
 } from "@/components/ui/accordion";
 import { FeatureGate } from "@/components/FeatureGate";
 import { useBoostSettings } from "@/hooks/useCoachBoost";
-import { formatCurrency, convertBoostFeeForDisplay, getBoostDisplayCurrency } from "@/lib/currency";
-import { useCoachProfile } from "@/hooks/useCoachEarnings";
+import { formatCurrency, convertPlatformPriceForDisplay } from "@/lib/currency";
+import { useCountryContext } from "@/contexts/CountryContext";
 
 const CoachBoost = () => {
   const { data: settings } = useBoostSettings();
-  const { data: coachProfile } = useCoachProfile();
+  const { countryCode } = useCountryContext();
   
-  // Currency conversion for PLN display
-  const displayCurrency = getBoostDisplayCurrency(coachProfile?.currency);
-  const convertForDisplay = (amountGBP: number) => convertBoostFeeForDisplay(amountGBP, displayCurrency);
+  // Currency conversion based on country
+  const convertForDisplay = (amountGBP: number) => convertPlatformPriceForDisplay(amountGBP, countryCode);
   
   const commissionPercent = settings ? Math.round(settings.commission_rate * 100) : 30;
   const minFeeValue = settings ? settings.min_fee : 30;
   const maxFeeValue = settings ? settings.max_fee : 100;
-  const minFee = formatCurrency(convertForDisplay(minFeeValue), displayCurrency);
-  const maxFee = formatCurrency(convertForDisplay(maxFeeValue), displayCurrency);
+  const minFeeConverted = convertForDisplay(minFeeValue);
+  const maxFeeConverted = convertForDisplay(maxFeeValue);
+  const minFee = formatCurrency(minFeeConverted.amount, minFeeConverted.currency);
+  const maxFee = formatCurrency(maxFeeConverted.amount, maxFeeConverted.currency);
   
   return (
     <DashboardLayout>
@@ -65,7 +66,7 @@ const CoachBoost = () => {
                   </div>
                   <h3 className="font-semibold mb-1">Purchase Boost</h3>
                   <p className="text-sm text-muted-foreground">
-                    Pay {settings ? formatCurrency(convertForDisplay(settings.boost_price / 100), displayCurrency) : formatCurrency(convertForDisplay(5), displayCurrency)} for {settings?.boost_duration_days || 30} days of priority visibility in search results.
+                    Pay {settings ? formatCurrency(convertForDisplay(settings.boost_price / 100).amount, convertForDisplay(settings.boost_price / 100).currency) : formatCurrency(convertForDisplay(5).amount, convertForDisplay(5).currency)} for {settings?.boost_duration_days || 30} days of priority visibility in search results.
                   </p>
                 </div>
 
@@ -105,7 +106,7 @@ const CoachBoost = () => {
                 <AccordionItem value="item-1">
                   <AccordionTrigger>How much does Boost cost?</AccordionTrigger>
                   <AccordionContent>
-                    Boost costs {settings ? formatCurrency(convertForDisplay(settings.boost_price / 100), displayCurrency) : formatCurrency(convertForDisplay(5), displayCurrency)} for {settings?.boost_duration_days || 30} days. This is a one-time payment with no auto-renewal. Additionally, when Boost brings you a NEW client, you pay {commissionPercent}% of their first session booking. Bookings under {minFee} are calculated at {minFee} (minimum fee: {settings ? formatCurrency(convertForDisplay(settings.min_fee * settings.commission_rate), displayCurrency) : formatCurrency(convertForDisplay(9), displayCurrency)}). Bookings over {maxFee} are capped at {maxFee} (maximum fee: {settings ? formatCurrency(convertForDisplay(settings.max_fee * settings.commission_rate), displayCurrency) : formatCurrency(convertForDisplay(30), displayCurrency)}).
+                    Boost costs {settings ? formatCurrency(convertForDisplay(settings.boost_price / 100).amount, convertForDisplay(settings.boost_price / 100).currency) : formatCurrency(convertForDisplay(5).amount, convertForDisplay(5).currency)} for {settings?.boost_duration_days || 30} days. This is a one-time payment with no auto-renewal. Additionally, when Boost brings you a NEW client, you pay {commissionPercent}% of their first session booking. Bookings under {minFee} are calculated at {minFee} (minimum fee: {settings ? formatCurrency(convertForDisplay(settings.min_fee * settings.commission_rate).amount, convertForDisplay(settings.min_fee * settings.commission_rate).currency) : formatCurrency(convertForDisplay(9).amount, convertForDisplay(9).currency)}). Bookings over {maxFee} are capped at {maxFee} (maximum fee: {settings ? formatCurrency(convertForDisplay(settings.max_fee * settings.commission_rate).amount, convertForDisplay(settings.max_fee * settings.commission_rate).currency) : formatCurrency(convertForDisplay(30).amount, convertForDisplay(30).currency)}).
                   </AccordionContent>
                 </AccordionItem>
 
