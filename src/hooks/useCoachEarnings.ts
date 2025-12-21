@@ -312,7 +312,7 @@ export const useCoachProfile = () => {
       if (!user) return null;
       const { data } = await supabase
         .from("coach_profiles")
-        .select("id, stripe_connect_id, stripe_connect_onboarded, subscription_tier")
+        .select("id, stripe_connect_id, stripe_connect_onboarded, subscription_tier, currency")
         .eq("user_id", user.id)
         .maybeSingle();
       return data;

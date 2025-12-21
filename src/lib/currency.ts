@@ -1,5 +1,5 @@
 // Supported currencies
-export type CurrencyCode = 'GBP' | 'USD' | 'EUR' | 'AUD' | 'CAD';
+export type CurrencyCode = 'GBP' | 'USD' | 'EUR' | 'AUD' | 'CAD' | 'PLN';
 
 export interface CurrencyConfig {
   code: CurrencyCode;
@@ -14,7 +14,36 @@ export const CURRENCIES: Record<CurrencyCode, CurrencyConfig> = {
   EUR: { code: 'EUR', symbol: '€', name: 'Euro', locale: 'de-DE' },
   AUD: { code: 'AUD', symbol: 'A$', name: 'Australian Dollar', locale: 'en-AU' },
   CAD: { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar', locale: 'en-CA' },
+  PLN: { code: 'PLN', symbol: 'zł', name: 'Polish Zloty', locale: 'pl-PL' },
 };
+
+// Fixed conversion rate for platform boost fees (GBP to PLN)
+const GBP_TO_PLN_RATE = 5;
+
+/**
+ * Convert boost fee from GBP to display currency (only PLN conversion supported)
+ * Base values remain in GBP - this is display-only conversion
+ */
+export function convertBoostFeeForDisplay(
+  amountGBP: number,
+  displayCurrency: string
+): number {
+  if (displayCurrency === 'PLN') {
+    return amountGBP * GBP_TO_PLN_RATE;
+  }
+  return amountGBP;
+}
+
+/**
+ * Get the display currency code for boost fees
+ * Returns PLN if coach uses PLN, otherwise GBP
+ */
+export function getBoostDisplayCurrency(coachCurrency: string | null | undefined): CurrencyCode {
+  if (coachCurrency === 'PLN') {
+    return 'PLN';
+  }
+  return 'GBP';
+}
 
 // Default currency for UK launch
 export const DEFAULT_CURRENCY: CurrencyCode = 'GBP';

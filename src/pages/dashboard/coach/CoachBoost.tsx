@@ -11,14 +11,23 @@ import {
 } from "@/components/ui/accordion";
 import { FeatureGate } from "@/components/FeatureGate";
 import { useBoostSettings } from "@/hooks/useCoachBoost";
-import { formatCurrency } from "@/lib/currency";
+import { formatCurrency, convertBoostFeeForDisplay, getBoostDisplayCurrency } from "@/lib/currency";
+import { useCoachProfile } from "@/hooks/useCoachEarnings";
 
 const CoachBoost = () => {
   const { data: settings } = useBoostSettings();
+  const { data: coachProfile } = useCoachProfile();
+  
+  // Currency conversion for PLN display
+  const displayCurrency = getBoostDisplayCurrency(coachProfile?.currency);
+  const convertForDisplay = (amountGBP: number) => convertBoostFeeForDisplay(amountGBP, displayCurrency);
   
   const commissionPercent = settings ? Math.round(settings.commission_rate * 100) : 30;
-  const minFee = settings ? formatCurrency(settings.min_fee, "GBP") : "£30";
-  const maxFee = settings ? formatCurrency(settings.max_fee, "GBP") : "£100";
+  const minFeeValue = settings ? settings.min_fee : 30;
+  const maxFeeValue = settings ? settings.max_fee : 100;
+  const minFee = formatCurrency(convertForDisplay(minFeeValue), displayCurrency);
+  const maxFee = formatCurrency(convertForDisplay(maxFeeValue), displayCurrency);
+  
   return (
     <DashboardLayout>
       <FeatureGate feature="boost_marketing">
@@ -56,7 +65,7 @@ const CoachBoost = () => {
                   </div>
                   <h3 className="font-semibold mb-1">Purchase Boost</h3>
                   <p className="text-sm text-muted-foreground">
-                    Pay {settings ? formatCurrency(settings.boost_price / 100, "GBP") : "£5"} for {settings?.boost_duration_days || 30} days of priority visibility in search results.
+                    Pay {settings ? formatCurrency(convertForDisplay(settings.boost_price / 100), displayCurrency) : formatCurrency(convertForDisplay(5), displayCurrency)} for {settings?.boost_duration_days || 30} days of priority visibility in search results.
                   </p>
                 </div>
 
@@ -96,7 +105,7 @@ const CoachBoost = () => {
                 <AccordionItem value="item-1">
                   <AccordionTrigger>How much does Boost cost?</AccordionTrigger>
                   <AccordionContent>
-                    Boost costs {settings ? formatCurrency(settings.boost_price / 100, "GBP") : "£5"} for {settings?.boost_duration_days || 30} days. This is a one-time payment with no auto-renewal. Additionally, when Boost brings you a NEW client, you pay {commissionPercent}% of their first session booking. Bookings under {minFee} are calculated at {minFee} (minimum fee: {settings ? formatCurrency(settings.min_fee * settings.commission_rate, "GBP") : "£9"}). Bookings over {maxFee} are capped at {maxFee} (maximum fee: {settings ? formatCurrency(settings.max_fee * settings.commission_rate, "GBP") : "£30"}).
+                    Boost costs {settings ? formatCurrency(convertForDisplay(settings.boost_price / 100), displayCurrency) : formatCurrency(convertForDisplay(5), displayCurrency)} for {settings?.boost_duration_days || 30} days. This is a one-time payment with no auto-renewal. Additionally, when Boost brings you a NEW client, you pay {commissionPercent}% of their first session booking. Bookings under {minFee} are calculated at {minFee} (minimum fee: {settings ? formatCurrency(convertForDisplay(settings.min_fee * settings.commission_rate), displayCurrency) : formatCurrency(convertForDisplay(9), displayCurrency)}). Bookings over {maxFee} are capped at {maxFee} (maximum fee: {settings ? formatCurrency(convertForDisplay(settings.max_fee * settings.commission_rate), displayCurrency) : formatCurrency(convertForDisplay(30), displayCurrency)}).
                   </AccordionContent>
                 </AccordionItem>
 
