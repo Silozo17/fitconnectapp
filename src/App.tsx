@@ -15,6 +15,7 @@ import { AnimationSettingsProvider } from "@/contexts/AnimationSettingsContext";
 import { CelebrationListeners } from "@/components/gamification/CelebrationListeners";
 import { CountryProvider } from "@/contexts/CountryContext";
 import { useLanguagePersistence } from "@/hooks/useLanguagePersistence";
+import { useAppInitialization } from "@/hooks/useAppInitialization";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import GuestOnlyRoute from "@/components/auth/GuestOnlyRoute";
 import ScrollToTop from "./components/shared/ScrollToTop";
@@ -29,6 +30,12 @@ import { ErrorBoundary } from "./components/shared/ErrorBoundary";
 // Language persistence component (must be inside i18n context)
 function LanguagePersistence() {
   useLanguagePersistence();
+  return null;
+}
+
+// Despia native initialization (Android status bar config)
+function DespiaInitializer() {
+  useAppInitialization();
   return null;
 }
 
@@ -205,6 +212,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <ReloadPrompt />
+        <DespiaInitializer />
         <BrowserRouter>
           <InstallBanner />
           <ScrollRestoration />

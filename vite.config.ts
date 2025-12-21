@@ -22,7 +22,7 @@ export default defineConfig(({ mode }) => ({
         name: 'FitConnect',
         short_name: 'FitConnect',
         description: 'Connect with world-class fitness coaches. Personal trainers, nutritionists, boxing, MMA and bodybuilding coaches.',
-        theme_color: '#BEFF00',
+        theme_color: '#0D0D14',
         background_color: '#0D0D14',
         display: 'standalone',
         orientation: 'portrait-primary',
