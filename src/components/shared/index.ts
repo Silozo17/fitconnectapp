@@ -34,6 +34,7 @@ export { default as ScrollRestoration } from "./ScrollRestoration";
 // Forms & inputs
 export { CurrencySelector } from "./CurrencySelector";
 export { LanguageSelector } from "./LanguageSelector";
+export { LocationSelector } from "./LocationSelector";
 export { LocationAutocomplete } from "./LocationAutocomplete";
 export { DateRangeFilter } from "./DateRangeFilter";
 
