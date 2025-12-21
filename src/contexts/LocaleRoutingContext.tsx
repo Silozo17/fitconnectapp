@@ -51,13 +51,24 @@ export function LocaleRoutingProvider({ children }: LocaleRoutingProviderProps) 
   const navigate = useNavigate();
   const { setCurrency, setLocale } = useLocale();
   
+  // Initialize from stored preference synchronously to prevent flicker
+  const initialLocale = useMemo(() => {
+    const stored = getStoredLocalePreference();
+    if (stored) {
+      return { language: stored.language, location: stored.location };
+    }
+    // Fall back to URL parsing
+    const parsed = parseLocaleFromPath(routerLocation.pathname);
+    return { language: parsed.language, location: parsed.location };
+  }, []);
+  
   // Parse locale from current URL
   const parsed = useMemo(() => {
     return parseLocaleFromPath(routerLocation.pathname);
   }, [routerLocation.pathname]);
   
-  const [language, setLanguage] = useState<RouteLanguageCode>(parsed.language);
-  const [location, setLocation] = useState<RouteLocationCode>(parsed.location);
+  const [language, setLanguage] = useState<RouteLanguageCode>(initialLocale.language);
+  const [location, setLocation] = useState<RouteLocationCode>(initialLocale.location);
   const [isLocaleRoute, setIsLocaleRoute] = useState(parsed.isLocaleRoute);
   
   // Update state when URL changes
