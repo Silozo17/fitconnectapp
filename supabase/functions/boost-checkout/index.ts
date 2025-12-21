@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { getBoostPriceId, getCurrency } from "../_shared/pricing-config.ts";
+import { getBoostPriceId, getCurrency, getActivePricing, validateBoostPriceId } from "../_shared/pricing-config.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -102,7 +102,29 @@ serve(async (req) => {
     // Get the correct price ID and currency based on country
     const priceId = getBoostPriceId(countryCode);
     const currency = getCurrency(countryCode);
-    logStep("Boost pricing resolved", { priceId, currency, countryCode, duration: durationDays });
+    
+    // SECURITY: Validate that the derived priceId matches expected country's price IDs
+    const activePricing = getActivePricing(countryCode);
+    const validation = validateBoostPriceId(priceId, countryCode);
+    
+    if (!validation.valid) {
+      logStep("Boost price validation failed", { priceId, countryCode, expectedCountry: validation.expectedCountry, expectedPriceId: validation.expectedPriceId });
+      throw new Error("Boost price configuration mismatch - please refresh and try again");
+    }
+    
+    // Also verify currency matches country
+    if (currency !== activePricing.currency) {
+      logStep("Currency validation failed", { currency, expectedCurrency: activePricing.currency });
+      throw new Error("Currency configuration mismatch");
+    }
+    
+    logStep("Validated boost price and currency match country", { 
+      priceId, 
+      currency, 
+      countryCode, 
+      duration: durationDays,
+      country: activePricing.country 
+    });
 
     // Find or create Stripe customer
     const customers = await stripe.customers.list({ email: user.email!, limit: 1 });

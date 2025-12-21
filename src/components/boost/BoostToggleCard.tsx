@@ -14,7 +14,7 @@ export const BoostToggleCard = () => {
   const { data: boostStatus, isLoading: statusLoading } = useCoachBoostStatus();
   const { data: settings, isLoading: settingsLoading } = useBoostSettings();
   const pricing = useActivePricing();
-  const purchaseBoost = usePurchaseBoost();
+  const purchaseBoost = usePurchaseBoost(pricing.country);
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
 

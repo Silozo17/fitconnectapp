@@ -139,12 +139,14 @@ export const useBoostSettings = () => {
 };
 
 // New: Purchase boost mutation
-export const usePurchaseBoost = () => {
+export const usePurchaseBoost = (countryCode?: string) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke("boost-checkout");
+      const { data, error } = await supabase.functions.invoke("boost-checkout", {
+        body: { countryCode: countryCode || "GB" },
+      });
       
       if (error) throw error;
       if (data?.error) throw new Error(data.error);

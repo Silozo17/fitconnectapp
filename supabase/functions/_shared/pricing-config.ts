@@ -180,3 +180,39 @@ export function getActivePricing(countryCode: string | null | undefined): Active
     prices: config.pricing,
   };
 }
+
+/**
+ * SECURITY: Validate that a subscription price ID is valid for the given country.
+ * Returns validation result with expected country.
+ */
+export function validateSubscriptionPriceId(
+  priceId: string,
+  countryCode: string | null | undefined
+): { valid: boolean; expectedCountry: PricingCountry; expectedPriceId?: string } {
+  const config = getPricingConfig(countryCode);
+  
+  // Check all subscription price IDs for this country
+  for (const tier of Object.keys(config.stripePriceIds.subscriptions) as SubscriptionTier[]) {
+    const tierPrices = config.stripePriceIds.subscriptions[tier];
+    if (tierPrices.monthly === priceId || tierPrices.yearly === priceId) {
+      return { valid: true, expectedCountry: config.country };
+    }
+  }
+  
+  return { valid: false, expectedCountry: config.country };
+}
+
+/**
+ * SECURITY: Validate that a boost price ID matches the country.
+ */
+export function validateBoostPriceId(
+  priceId: string,
+  countryCode: string | null | undefined
+): { valid: boolean; expectedCountry: PricingCountry; expectedPriceId: string } {
+  const config = getPricingConfig(countryCode);
+  return {
+    valid: config.stripePriceIds.boost === priceId,
+    expectedCountry: config.country,
+    expectedPriceId: config.stripePriceIds.boost,
+  };
+}

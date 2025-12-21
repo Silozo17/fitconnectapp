@@ -4,6 +4,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { 
   getSubscriptionPriceId, 
   getCurrency,
+  getActivePricing,
+  validateSubscriptionPriceId,
   type SubscriptionTier,
   type BillingInterval 
 } from "../_shared/pricing-config.ts";
@@ -79,7 +81,29 @@ serve(async (req) => {
     );
     const currency = getCurrency(countryCode);
     
-    logStep("Using price ID from country config", { priceId, tier, billingInterval, countryCode, currency });
+    // SECURITY: Validate that the derived priceId matches expected country's price IDs
+    const activePricing = getActivePricing(countryCode);
+    const validation = validateSubscriptionPriceId(priceId, countryCode);
+    
+    if (!validation.valid) {
+      logStep("Price validation failed", { priceId, countryCode, expectedCountry: validation.expectedCountry });
+      throw new Error("Price configuration mismatch - please refresh and try again");
+    }
+    
+    // Also verify currency matches country
+    if (currency !== activePricing.currency) {
+      logStep("Currency validation failed", { currency, expectedCurrency: activePricing.currency });
+      throw new Error("Currency configuration mismatch");
+    }
+    
+    logStep("Validated price and currency match country", { 
+      priceId, 
+      tier, 
+      billingInterval, 
+      countryCode, 
+      currency,
+      country: activePricing.country 
+    });
 
     // Check if customer exists in Stripe
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
