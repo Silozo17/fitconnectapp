@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCoachEngagement, createEmptyEngagementMap } from "./useCoachEngagement";
-import { rankCoaches, filterByLocationWithExpansion } from "@/lib/coach-ranking";
+import { calculateLocationScore, filterByLocationWithExpansion } from "@/lib/coach-ranking";
+import { sortCoachesByUnifiedRanking, extractRankingFactors } from "@/lib/unified-coach-ranking";
 import { matchesCountryFilterStrict } from "@/lib/location-utils";
 import { isRealCoach } from "@/lib/coach-validation";
 import type { LocationData, CoachLocationData, CoachProfileData, RankingScore } from "@/types/ranking";
-
 // Type for public coach profile data (GDPR-safe columns only)
 export type MarketplaceCoach = {
   id: string;
@@ -239,7 +239,7 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
     enabled: coachIds.length > 0 && enableLocationRanking,
   });
 
-  // Apply ranking algorithm
+  // Apply unified ranking algorithm
   const rankedData = (() => {
     if (!coachesQuery.data?.coaches) {
       return undefined;
@@ -262,27 +262,72 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
     // Get engagement map (use empty map if still loading)
     const engagementMap = engagementQuery.data ?? createEmptyEngagementMap(coachIds);
 
-    // Apply ranking algorithm
-    const ranked = rankCoaches(
-      coaches,
-      options.userLocation ?? null,
-      engagementMap,
-      (coach) => extractCoachRankingData(coach, boostedCoachIds)
-    );
+    // Calculate location scores for each coach
+    const coachesWithLocation = coaches.map(coach => {
+      const { score: locationScore, matchLevel } = calculateLocationScore(
+        options.userLocation ?? null,
+        {
+          location_city: coach.location_city,
+          location_region: coach.location_region,
+          location_country: coach.location_country,
+          online_available: coach.online_available,
+          in_person_available: coach.in_person_available,
+          location: coach.location,
+        }
+      );
+      return { coach, locationScore, matchLevel };
+    });
+
+    // Build ranked array for location filtering (uses legacy format)
+    const rankedForFilter = coachesWithLocation.map(({ coach, locationScore, matchLevel }) => ({
+      coach,
+      ranking: {
+        locationScore,
+        engagementScore: 0,
+        profileScore: 0,
+        totalScore: locationScore,
+        matchLevel,
+        isSponsored: boostedCoachIds.includes(coach.id),
+      },
+    }));
 
     // Apply location expansion if needed
-    // When countryCode is explicitly set (from URL/manual selection), disable strict country filtering
-    // since we've already filtered by country at the DB level - ranking should only sort by proximity
     const hasExplicitCountryFilter = !!options.countryCode;
-    const { coaches: filteredRanked, effectiveMatchLevel, expanded } = 
-      filterByLocationWithExpansion(ranked, minResultsBeforeExpansion, !hasExplicitCountryFilter);
+    const { coaches: filteredByLocation, effectiveMatchLevel, expanded } = 
+      filterByLocationWithExpansion(rankedForFilter, minResultsBeforeExpansion, !hasExplicitCountryFilter);
+
+    // Apply unified ranking to location-filtered coaches
+    const sorted = sortCoachesByUnifiedRanking(
+      filteredByLocation.map(r => r.coach),
+      (coach) => {
+        const locationData = coachesWithLocation.find(c => c.coach.id === coach.id);
+        return extractRankingFactors(
+          coach.id,
+          locationData?.locationScore ?? 0,
+          locationData?.matchLevel ?? 'no_match',
+          coach.is_verified === true,
+          boostedCoachIds.includes(coach.id),
+          engagementMap
+        );
+      }
+    );
 
     // Map back to MarketplaceCoach with ranking data
-    let result = filteredRanked.map(({ coach, ranking }) => ({
-      ...coach,
-      is_sponsored: ranking.isSponsored,
-      ranking,
-    }));
+    let result = sorted.map(({ coach, factors }) => {
+      const locationData = coachesWithLocation.find(c => c.coach.id === coach.id);
+      return {
+        ...coach,
+        is_sponsored: factors.isBoosted,
+        ranking: {
+          locationScore: factors.locationScore,
+          engagementScore: 0,
+          profileScore: 0,
+          totalScore: factors.locationScore,
+          matchLevel: locationData?.matchLevel ?? 'no_match',
+          isSponsored: factors.isBoosted,
+        },
+      };
+    });
 
     // Apply limit if specified
     if (options.limit && result.length > options.limit) {
