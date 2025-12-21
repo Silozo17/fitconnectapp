@@ -5367,6 +5367,7 @@ export type Database = {
           online_available: boolean | null
           primary_coach_type: string | null
           profile_image_url: string | null
+          selected_avatar_id: string | null
           threads_url: string | null
           tiktok_url: string | null
           username: string | null
@@ -5404,6 +5405,7 @@ export type Database = {
           online_available?: boolean | null
           primary_coach_type?: string | null
           profile_image_url?: string | null
+          selected_avatar_id?: string | null
           threads_url?: string | null
           tiktok_url?: string | null
           username?: string | null
@@ -5441,6 +5443,7 @@ export type Database = {
           online_available?: boolean | null
           primary_coach_type?: string | null
           profile_image_url?: string | null
+          selected_avatar_id?: string | null
           threads_url?: string | null
           tiktok_url?: string | null
           username?: string | null
@@ -5449,7 +5452,15 @@ export type Database = {
           x_url?: string | null
           youtube_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "coach_profiles_selected_avatar_id_fkey"
+            columns: ["selected_avatar_id"]
+            isOneToOne: false
+            referencedRelation: "avatars"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       public_leaderboard_profiles: {
         Row: {
