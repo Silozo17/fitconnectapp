@@ -14,6 +14,7 @@ import { CelebrationProvider } from "@/contexts/CelebrationContext";
 import { AnimationSettingsProvider } from "@/contexts/AnimationSettingsContext";
 import { CelebrationListeners } from "@/components/gamification/CelebrationListeners";
 import { CountryProvider } from "@/contexts/CountryContext";
+import { useLanguagePersistence } from "@/hooks/useLanguagePersistence";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import GuestOnlyRoute from "@/components/auth/GuestOnlyRoute";
 import ScrollToTop from "./components/shared/ScrollToTop";
@@ -24,6 +25,12 @@ import { ReloadPrompt } from "./components/pwa/ReloadPrompt";
 import { InstallBanner } from "./components/pwa/InstallBanner";
 import { CookieConsentBanner } from "./components/shared/CookieConsentBanner";
 import { ErrorBoundary } from "./components/shared/ErrorBoundary";
+
+// Language persistence component (must be inside i18n context)
+function LanguagePersistence() {
+  useLanguagePersistence();
+  return null;
+}
 
 // Eagerly loaded pages (critical path)
 import Index from "./pages/Index";
@@ -210,6 +217,7 @@ const App = () => (
                     <CelebrationListeners />
                 <AdminProvider>
                   <LocaleProvider>
+                    <LanguagePersistence />
                     <LocaleRoutingProvider>
                       <RouteRestorer />
                     <Suspense fallback={<PageLoadingSpinner />}>
