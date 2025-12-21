@@ -1,19 +1,27 @@
 /**
  * Hook for fetching featured coaches for the homepage
  * 
- * Wraps useCoachMarketplace and applies quality-based sorting:
- * 1. Highest rated AND verified
- * 2. Highest rated (not verified)
- * 3. Verified (not highest rated)
- * 4. All others
+ * Uses the unified ranking algorithm (single source of truth shared with /coaches page):
+ * 1. Boosted + Verified + Highest Rated + Closest
+ * 2. Boosted + Verified + Highest Rated
+ * 3. Boosted + Verified
+ * 4. Verified + Closest + Highest Rated
+ * 5. Verified + Highest Rated
+ * 6. Verified + Closest
+ * 7. Highest Rated + Closest
+ * 8. Closest only
  */
 
 import { useMemo } from 'react';
-import { useCoachMarketplace, MarketplaceCoach } from '@/hooks/useCoachMarketplace';
-import { useCoachEngagement } from '@/hooks/useCoachEngagement';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useCoachEngagement, createEmptyEngagementMap } from '@/hooks/useCoachEngagement';
+import { sortCoachesByUnifiedRanking, extractRankingFactors } from '@/lib/unified-coach-ranking';
+import { calculateLocationScore, filterByLocationWithExpansion } from '@/lib/coach-ranking';
+import { isRealCoach } from '@/lib/coach-validation';
 import type { LocationData } from '@/types/ranking';
+import type { MarketplaceCoach } from '@/hooks/useCoachMarketplace';
 
-const HIGH_RATING_THRESHOLD = 4.5;
 const FEATURED_COACH_LIMIT = 4;
 
 interface UseFeaturedCoachesOptions {
@@ -26,92 +34,113 @@ interface UseFeaturedCoachesResult {
   locationLabel: string;
 }
 
-/**
- * Sorts coaches by quality priority:
- * 1. High rated (4.5+) AND verified
- * 2. High rated (4.5+) only
- * 3. Verified only
- * 4. All others
- * Within each bucket, sort by rating descending
- */
-function sortByQualityPriority(
-  coaches: MarketplaceCoach[],
-  engagementMap: Map<string, { avg_rating: number | null }>
-): MarketplaceCoach[] {
-  return [...coaches].sort((a, b) => {
-    const aRating = engagementMap.get(a.id)?.avg_rating ?? 0;
-    const bRating = engagementMap.get(b.id)?.avg_rating ?? 0;
-    const aVerified = a.is_verified === true;
-    const bVerified = b.is_verified === true;
-    const aHighRated = aRating >= HIGH_RATING_THRESHOLD;
-    const bHighRated = bRating >= HIGH_RATING_THRESHOLD;
-
-    // Calculate priority bucket (lower = higher priority)
-    // 1 = high rated + verified
-    // 2 = high rated only
-    // 3 = verified only
-    // 4 = other
-    const aPriority = aHighRated && aVerified ? 1 : aHighRated ? 2 : aVerified ? 3 : 4;
-    const bPriority = bHighRated && bVerified ? 1 : bHighRated ? 2 : bVerified ? 3 : 4;
-
-    // Sort by priority first
-    if (aPriority !== bPriority) {
-      return aPriority - bPriority;
-    }
-
-    // Within same priority bucket, sort by rating descending
-    return bRating - aRating;
-  });
-}
-
 export function useFeaturedCoaches({ userLocation }: UseFeaturedCoachesOptions): UseFeaturedCoachesResult {
-  // Build location search string from user location
-  const locationSearch = userLocation?.city || userLocation?.region || userLocation?.country || '';
+  // Fetch coaches and boosted IDs
+  const coachesQuery = useQuery({
+    queryKey: ['featured-coaches'],
+    queryFn: async () => {
+      // Get boosted coach IDs
+      const now = new Date().toISOString();
+      const { data: boosts } = await supabase
+        .from('coach_boosts')
+        .select('coach_id, boost_end_date, payment_status')
+        .eq('is_active', true)
+        .in('payment_status', ['succeeded', 'migrated_free'])
+        .gt('boost_end_date', now);
+      
+      const boostedCoachIds = (boosts || [])
+        .filter(b => b.boost_end_date !== null)
+        .map(b => b.coach_id);
 
-  // Fetch coaches with location filter
-  const { data: localCoaches, isLoading: localLoading } = useCoachMarketplace({
-    location: locationSearch,
-    limit: FEATURED_COACH_LIMIT,
-    featured: true,
-    realCoachesOnly: true,
+      // Fetch coaches
+      const { data, error } = await supabase
+        .from('public_coach_profiles')
+        .select('*, avatars(slug, rarity, image_url)')
+        .order('hourly_rate', { ascending: false, nullsFirst: false });
+
+      if (error) throw error;
+
+      // Filter to real coaches only
+      const coaches = ((data || []) as unknown as MarketplaceCoach[])
+        .filter(coach => isRealCoach(coach));
+
+      return { coaches, boostedCoachIds };
+    },
+    staleTime: 1000 * 60 * 2,
   });
 
-  // Fallback to all coaches if no local coaches found
-  const { data: fallbackCoaches, isLoading: fallbackLoading } = useCoachMarketplace({
-    limit: FEATURED_COACH_LIMIT,
-    featured: true,
-    realCoachesOnly: true,
-  });
+  const coaches = coachesQuery.data?.coaches ?? [];
+  const boostedCoachIds = coachesQuery.data?.boostedCoachIds ?? [];
+  const coachIds = useMemo(() => coaches.map(c => c.id), [coaches]);
 
-  // Determine which coaches to use
-  const baseCoaches = localCoaches?.length ? localCoaches : fallbackCoaches;
-  const coachIds = useMemo(() => (baseCoaches || []).map(c => c.id), [baseCoaches]);
-
-  // Fetch engagement data for quality sorting
+  // Fetch engagement data
   const { data: engagementMap, isLoading: engagementLoading } = useCoachEngagement({
     coachIds,
     enabled: coachIds.length > 0,
   });
 
-  // Apply quality-based sorting after location filtering
-  const sortedCoaches = useMemo(() => {
-    if (!baseCoaches || baseCoaches.length === 0) {
-      return [];
-    }
+  // Apply unified ranking
+  const rankedCoaches = useMemo(() => {
+    if (coaches.length === 0) return [];
 
-    // If engagement data not ready, return unsorted
-    if (!engagementMap) {
-      return baseCoaches;
-    }
+    const engagement = engagementMap ?? createEmptyEngagementMap(coachIds);
 
-    return sortByQualityPriority(baseCoaches, engagementMap);
-  }, [baseCoaches, engagementMap]);
+    // First, calculate location scores and filter by location
+    const coachesWithLocation = coaches.map(coach => {
+      const { score: locationScore, matchLevel } = calculateLocationScore(userLocation, {
+        location_city: coach.location_city,
+        location_region: coach.location_region,
+        location_country: coach.location_country,
+        online_available: coach.online_available,
+        in_person_available: coach.in_person_available,
+        location: coach.location,
+      });
+      return { coach, locationScore, matchLevel };
+    });
 
-  const isLoading = localLoading || (localCoaches?.length === 0 && fallbackLoading) || engagementLoading;
+    // Apply location filtering (town → region → country expansion)
+    const rankedForFilter = coachesWithLocation.map(({ coach, locationScore, matchLevel }) => ({
+      coach,
+      ranking: {
+        locationScore,
+        engagementScore: 0,
+        profileScore: 0,
+        totalScore: locationScore,
+        matchLevel,
+        isSponsored: boostedCoachIds.includes(coach.id),
+      },
+    }));
+
+    const { coaches: filteredByLocation } = filterByLocationWithExpansion(
+      rankedForFilter,
+      FEATURED_COACH_LIMIT,
+      true
+    );
+
+    // Apply unified ranking to location-filtered coaches
+    const sorted = sortCoachesByUnifiedRanking(
+      filteredByLocation.map(r => r.coach),
+      (coach) => {
+        const locationData = coachesWithLocation.find(c => c.coach.id === coach.id);
+        return extractRankingFactors(
+          coach.id,
+          locationData?.locationScore ?? 0,
+          locationData?.matchLevel ?? 'no_match',
+          coach.is_verified === true,
+          boostedCoachIds.includes(coach.id),
+          engagement
+        );
+      }
+    );
+
+    return sorted.slice(0, FEATURED_COACH_LIMIT).map(r => r.coach);
+  }, [coaches, boostedCoachIds, coachIds, engagementMap, userLocation]);
+
+  const isLoading = coachesQuery.isLoading || engagementLoading;
   const locationLabel = userLocation?.city || userLocation?.region || userLocation?.country || 'Your Area';
 
   return {
-    coaches: sortedCoaches,
+    coaches: rankedCoaches,
     isLoading,
     locationLabel,
   };
