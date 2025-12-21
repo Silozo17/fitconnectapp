@@ -35,6 +35,7 @@ const Coaches = () => {
   // Manual location filter (persisted for session)
   const {
     manualLocation,
+    manualCountryCode,
     isManualSelection,
     setManualLocation,
     clearManualLocation,
@@ -47,11 +48,20 @@ const Coaches = () => {
       ? null
       : autoLocation;
 
-  // Get country from URL locale route - this is the single source of truth
+  // Get country from URL locale route - this is the default source of truth
   // URL: /en-gb/coaches → locationCode: 'gb' → shows UK coaches
   // URL: /pl-gb/coaches → locationCode: 'gb' → shows UK coaches (Polish UI)
   // URL: /pl-pl/coaches → locationCode: 'pl' → shows Polish coaches
   const { locationCode } = useLocationFromRoute();
+
+  /**
+   * Effective country code priority:
+   * 1. Manual selection from marketplace filter (user explicitly chose via city/location picker)
+   * 2. URL locale (e.g., /en-pl/coaches means show Polish coaches)
+   * 
+   * This ensures manual location selection ALWAYS overrides URL locale for filtering.
+   */
+  const effectiveCountryCode = manualCountryCode ?? locationCode;
 
   const { data: coaches, isLoading, error } = useCoachMarketplace({
     search: searchQuery || undefined,
@@ -61,7 +71,7 @@ const Coaches = () => {
     inPersonOnly,
     userLocation: effectiveLocation,
     enableLocationRanking: true,
-    countryCode: locationCode, // Filter by URL location
+    countryCode: effectiveCountryCode,
   });
 
   const handleBook = useCallback((coach: MarketplaceCoach) => {

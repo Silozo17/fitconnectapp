@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { LocationData } from "@/types/ranking";
+import { RouteLocationCode, SUPPORTED_LOCATIONS } from "@/lib/locale-routing";
+import { getCountryCodeFromName } from "@/lib/location-utils";
 
 const STORAGE_KEY = "fitconnect_marketplace_location_filter";
 
@@ -8,17 +10,34 @@ interface StoredLocationFilter {
   region: string | null;
   county: string | null;
   country: string | null;
+  countryCode: RouteLocationCode | null;
 }
 
 interface MarketplaceLocationFilter {
   /** The manually selected location (null if using auto-detection) */
   manualLocation: LocationData | null;
+  /** The country code from manual selection */
+  manualCountryCode: RouteLocationCode | null;
   /** Whether a manual location is currently set */
   isManualSelection: boolean;
   /** Set a manual location override */
   setManualLocation: (location: LocationData) => void;
+  /** Set just the country code (for country-only filter) */
+  setManualCountryCode: (code: RouteLocationCode) => void;
   /** Clear manual selection and revert to auto-detection */
   clearManualLocation: () => void;
+}
+
+/**
+ * Derives country code from a country name or returns null
+ */
+function deriveCountryCode(country: string | null): RouteLocationCode | null {
+  if (!country) return null;
+  const code = getCountryCodeFromName(country);
+  if (code && SUPPORTED_LOCATIONS.includes(code as RouteLocationCode)) {
+    return code as RouteLocationCode;
+  }
+  return null;
 }
 
 /**
@@ -46,33 +65,61 @@ export function useMarketplaceLocationFilter(): MarketplaceLocationFilter {
     return null;
   });
 
+  const [manualCountryCode, setManualCountryCodeState] = useState<RouteLocationCode | null>(() => {
+    // Initialize from sessionStorage
+    try {
+      const stored = sessionStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed: StoredLocationFilter = JSON.parse(stored);
+        return parsed.countryCode ?? deriveCountryCode(parsed.country);
+      }
+    } catch {
+      // Ignore parse errors
+    }
+    return null;
+  });
+
   // Persist to sessionStorage when manual location changes
   useEffect(() => {
-    if (manualLocation) {
+    if (manualLocation || manualCountryCode) {
       const toStore: StoredLocationFilter = {
-        city: manualLocation.city,
-        region: manualLocation.region,
-        county: manualLocation.county ?? null,
-        country: manualLocation.country,
+        city: manualLocation?.city ?? null,
+        region: manualLocation?.region ?? null,
+        county: manualLocation?.county ?? null,
+        country: manualLocation?.country ?? null,
+        countryCode: manualCountryCode ?? deriveCountryCode(manualLocation?.country ?? null),
       };
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
     } else {
       sessionStorage.removeItem(STORAGE_KEY);
     }
-  }, [manualLocation]);
+  }, [manualLocation, manualCountryCode]);
 
   const setManualLocation = useCallback((location: LocationData) => {
     setManualLocationState(location);
+    // Also set country code from the location if available
+    const derivedCode = deriveCountryCode(location.country);
+    if (derivedCode) {
+      setManualCountryCodeState(derivedCode);
+    }
+  }, []);
+
+  const setManualCountryCode = useCallback((code: RouteLocationCode) => {
+    setManualCountryCodeState(code);
+    // Don't clear location - allows for city within country filtering
   }, []);
 
   const clearManualLocation = useCallback(() => {
     setManualLocationState(null);
+    setManualCountryCodeState(null);
   }, []);
 
   return {
     manualLocation,
-    isManualSelection: manualLocation !== null,
+    manualCountryCode,
+    isManualSelection: manualLocation !== null || manualCountryCode !== null,
     setManualLocation,
+    setManualCountryCode,
     clearManualLocation,
   };
 }

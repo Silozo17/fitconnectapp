@@ -337,13 +337,17 @@ export function rankCoaches<T extends { id: string; display_name: string | null 
 /**
  * Filters coaches by location match level, expanding radius as needed
  * 
- * In strict mode (default), expansion stops at 'same_country' level.
- * This ensures users NEVER see coaches from other countries.
+ * IMPORTANT: This function now ALWAYS includes all coaches within the same country.
+ * The minResults threshold is used to determine the "effective match level" for display
+ * purposes only, but coaches are never hidden from the country results.
  * 
- * @param rankedCoaches - Pre-ranked coaches
- * @param minResults - Minimum results before stopping expansion
- * @param strictCountryFilter - If true (default), never expand beyond same_country
- * @returns Filtered coaches with the match level used
+ * This ensures that when filtering by country (e.g., Poland), users see ALL Polish coaches,
+ * with local/city coaches sorted first and broader country results following.
+ * 
+ * @param rankedCoaches - Pre-ranked coaches (already sorted by location tier, then score)
+ * @param minResults - Minimum results before stopping expansion (for display messaging only)
+ * @param strictCountryFilter - If true (default), only include coaches within same_country or closer
+ * @returns All coaches within allowed levels, with effective match level for UI messaging
  */
 export function filterByLocationWithExpansion<T>(
   rankedCoaches: RankedCoach<T>[],
@@ -354,40 +358,38 @@ export function filterByLocationWithExpansion<T>(
   effectiveMatchLevel: LocationMatchLevel;
   expanded: boolean;
 } {
-  // In strict mode, max level is same_country (never show foreign coaches)
-  const levels: LocationMatchLevel[] = strictCountryFilter 
+  // Define which levels are allowed (in strict mode, never show foreign/unmatched coaches)
+  const allowedLevels: LocationMatchLevel[] = strictCountryFilter 
     ? ['exact_city', 'same_region', 'same_country']
     : ['exact_city', 'same_region', 'same_country', 'online_only', 'no_match'];
   
-  const maxLevel = levels[levels.length - 1];
+  // Filter to only include coaches within allowed levels
+  // This ensures we NEVER hide country-level coaches when user has a city
+  const filteredCoaches = rankedCoaches.filter(rc => 
+    allowedLevels.includes(rc.ranking.matchLevel)
+  );
 
-  for (const level of levels) {
-    const filtered = rankedCoaches.filter(rc => {
-      const levelIndex = levels.indexOf(rc.ranking.matchLevel);
-      const targetIndex = levels.indexOf(level);
-      // Only include if match level exists in our levels array and is <= target
+  // Determine effective match level for UI messaging (based on where most results come from)
+  // This is for display only - we still show ALL coaches within the country
+  let effectiveMatchLevel: LocationMatchLevel = 'same_country';
+  
+  for (const level of ['exact_city', 'same_region', 'same_country'] as LocationMatchLevel[]) {
+    const countAtLevel = filteredCoaches.filter(rc => {
+      const levelIndex = allowedLevels.indexOf(rc.ranking.matchLevel);
+      const targetIndex = allowedLevels.indexOf(level);
       return levelIndex !== -1 && levelIndex <= targetIndex;
-    });
+    }).length;
 
-    if (filtered.length >= minResults || level === maxLevel) {
-      return {
-        coaches: filtered,
-        effectiveMatchLevel: level,
-        expanded: level !== 'exact_city',
-      };
+    if (countAtLevel >= minResults) {
+      effectiveMatchLevel = level;
+      break;
     }
   }
 
-  // Fallback: return coaches within the max allowed level
-  const fallbackFiltered = rankedCoaches.filter(rc => {
-    const levelIndex = levels.indexOf(rc.ranking.matchLevel);
-    return levelIndex !== -1;
-  });
-  
   return {
-    coaches: fallbackFiltered,
-    effectiveMatchLevel: maxLevel,
-    expanded: true,
+    coaches: filteredCoaches,
+    effectiveMatchLevel,
+    expanded: effectiveMatchLevel !== 'exact_city',
   };
 }
 
