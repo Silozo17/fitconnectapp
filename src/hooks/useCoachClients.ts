@@ -234,8 +234,8 @@ export function useAddClient() {
       queryClient.invalidateQueries({ queryKey: ["coach-clients"] });
       toast.success("Invitation sent successfully! The client will receive an email to join.");
     },
-    onError: (error) => {
-      toast.error("Failed to send invitation: " + error.message);
+    onError: () => {
+      toast.error("Failed to send invitation. Please try again.");
     },
   });
 }
@@ -276,8 +276,8 @@ export function useScheduleSession() {
       queryClient.invalidateQueries({ queryKey: ["client-sessions"] });
       toast.success("Session scheduled successfully");
     },
-    onError: (error) => {
-      toast.error("Failed to schedule session: " + error.message);
+    onError: () => {
+      toast.error("Failed to schedule session. Please try again.");
     },
   });
 }
@@ -311,8 +311,8 @@ export function useAddNote() {
       queryClient.invalidateQueries({ queryKey: ["client-notes"] });
       toast.success("Note added successfully");
     },
-    onError: (error) => {
-      toast.error("Failed to add note: " + error.message);
+    onError: () => {
+      toast.error("Failed to add note. Please try again.");
     },
   });
 }
@@ -348,8 +348,8 @@ export function useAddProgress() {
       queryClient.invalidateQueries({ queryKey: ["client-progress"] });
       toast.success("Progress logged successfully");
     },
-    onError: (error) => {
-      toast.error("Failed to log progress: " + error.message);
+    onError: () => {
+      toast.error("Failed to log progress. Please try again.");
     },
   });
 }
@@ -373,8 +373,8 @@ export function useUpdateSession() {
       queryClient.invalidateQueries({ queryKey: ["client-sessions"] });
       toast.success("Session updated");
     },
-    onError: (error) => {
-      toast.error("Failed to update session: " + error.message);
+    onError: () => {
+      toast.error("Failed to update session. Please try again.");
     },
   });
 }

@@ -97,8 +97,8 @@ export const useCreateExercise = () => {
       queryClient.invalidateQueries({ queryKey: ["exercises"] });
       toast.success("Exercise created successfully");
     },
-    onError: (error: Error) => {
-      toast.error("Failed to create exercise: " + error.message);
+    onError: () => {
+      toast.error("Failed to create exercise. Please try again.");
     },
   });
 };
@@ -122,8 +122,8 @@ export const useUpdateExercise = () => {
       queryClient.invalidateQueries({ queryKey: ["exercises"] });
       toast.success("Exercise updated successfully");
     },
-    onError: (error: Error) => {
-      toast.error("Failed to update exercise: " + error.message);
+    onError: () => {
+      toast.error("Failed to update exercise. Please try again.");
     },
   });
 };
@@ -144,8 +144,8 @@ export const useDeleteExercise = () => {
       queryClient.invalidateQueries({ queryKey: ["exercises"] });
       toast.success("Exercise deleted successfully");
     },
-    onError: (error: Error) => {
-      toast.error("Failed to delete exercise: " + error.message);
+    onError: () => {
+      toast.error("Failed to delete exercise. Please try again.");
     },
   });
 };

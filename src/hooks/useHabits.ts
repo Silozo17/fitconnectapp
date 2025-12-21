@@ -236,8 +236,8 @@ export const useCreateHabit = () => {
       queryClient.invalidateQueries({ queryKey: ['client-habits', variables.client_id] });
       toast.success('Habit created successfully');
     },
-    onError: (error) => {
-      toast.error('Failed to create habit: ' + error.message);
+    onError: () => {
+      toast.error('Failed to create habit. Please try again.');
     },
   });
 };
@@ -262,8 +262,8 @@ export const useUpdateHabit = () => {
       queryClient.invalidateQueries({ queryKey: ['client-habits', data.client_id] });
       toast.success('Habit updated');
     },
-    onError: (error) => {
-      toast.error('Failed to update habit: ' + error.message);
+    onError: () => {
+      toast.error('Failed to update habit. Please try again.');
     },
   });
 };
@@ -286,8 +286,8 @@ export const useDeleteHabit = () => {
       queryClient.invalidateQueries({ queryKey: ['client-habits', variables.clientId] });
       toast.success('Habit deleted');
     },
-    onError: (error) => {
-      toast.error('Failed to delete habit: ' + error.message);
+    onError: () => {
+      toast.error('Failed to delete habit. Please try again.');
     },
   });
 };
@@ -369,8 +369,8 @@ export const useLogHabit = () => {
         toast.success('Habit completed! 🎉');
       }
     },
-    onError: (error) => {
-      toast.error('Failed to log habit: ' + error.message);
+    onError: () => {
+      toast.error('Failed to log habit. Please try again.');
     },
   });
 };
@@ -392,8 +392,8 @@ export const useUnlogHabit = () => {
       queryClient.invalidateQueries({ queryKey: ['my-habits'] });
       toast.success('Habit unmarked');
     },
-    onError: (error) => {
-      toast.error('Failed to undo: ' + error.message);
+    onError: () => {
+      toast.error('Failed to undo. Please try again.');
     },
   });
 };

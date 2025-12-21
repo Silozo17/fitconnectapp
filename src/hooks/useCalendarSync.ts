@@ -46,8 +46,8 @@ export const useCalendarSync = () => {
       
       return data;
     },
-    onError: (error) => {
-      toast.error("Failed to connect calendar: " + error.message);
+    onError: () => {
+      toast.error("Failed to connect calendar. Please try again.");
     },
   });
 
@@ -64,8 +64,8 @@ export const useCalendarSync = () => {
       queryClient.invalidateQueries({ queryKey: ["calendar-connections"] });
       toast.success("Calendar disconnected");
     },
-    onError: (error) => {
-      toast.error("Failed to disconnect: " + error.message);
+    onError: () => {
+      toast.error("Failed to disconnect. Please try again.");
     },
   });
 
@@ -102,8 +102,8 @@ export const useCalendarSync = () => {
     onSuccess: () => {
       toast.success("Session synced to calendar");
     },
-    onError: (error) => {
-      toast.error("Failed to sync: " + error.message);
+    onError: () => {
+      toast.error("Failed to sync. Please try again.");
     },
   });
 

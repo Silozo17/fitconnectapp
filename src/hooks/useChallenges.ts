@@ -198,8 +198,8 @@ export function useJoinChallenge() {
       triggerConfetti(confettiPresets.challengeJoin);
       toast.success('Challenge joined!', { description: 'Good luck on your challenge!' });
     },
-    onError: (error: Error) => {
-      toast.error('Failed to join challenge', { description: error.message });
+    onError: () => {
+      toast.error('Failed to join challenge. Please try again.');
     },
   });
 }
