@@ -109,6 +109,7 @@ export function WebsiteRouter() {
           
           {/* Locale-prefixed website routes */}
           <Route path=":locale" element={<LocaleRouteWrapper />}>
+            <Route index element={<PageRoutesOutlet />} />
             <Route path="*" element={<PageRoutesOutlet />} />
           </Route>
           
