@@ -210,20 +210,111 @@ export function useAdminAnalytics(): UseAdminAnalyticsReturn {
       supabase.from('coaching_sessions').select('created_at, status').gte('created_at', start).lte('created_at', end),
     ]);
 
-    // Generate date buckets for last 14 days
+    // Calculate the actual number of days in the range
+    const startDate = new Date(start);
     const endDate = new Date(end);
+    const daysDiff = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
+    // Determine aggregation level based on range length
+    const aggregateByWeek = daysDiff > 31 && daysDiff <= 90;
+    const aggregateByMonth = daysDiff > 90;
+
+    const formatDateStr = (d: Date) => d.toISOString().split('T')[0];
+    
+    const formatLabel = (d: Date, isWeek = false, isMonth = false) => {
+      if (isMonth) {
+        return d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+      }
+      if (isWeek) {
+        const weekEnd = new Date(d);
+        weekEnd.setDate(weekEnd.getDate() + 6);
+        return `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { day: 'numeric' })}`;
+      }
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    };
+
+    const isDateInRange = (dateStr: string, rangeStart: Date, rangeEnd: Date) => {
+      const d = new Date(dateStr);
+      return d >= rangeStart && d <= rangeEnd;
+    };
+
+    if (aggregateByMonth) {
+      // Monthly aggregation for ranges > 90 days
+      const months: { start: Date; end: Date; label: string }[] = [];
+      let current = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+      while (current <= endDate) {
+        const monthEnd = new Date(current.getFullYear(), current.getMonth() + 1, 0, 23, 59, 59);
+        months.push({
+          start: new Date(current),
+          end: monthEnd > endDate ? endDate : monthEnd,
+          label: formatLabel(current, false, true),
+        });
+        current = new Date(current.getFullYear(), current.getMonth() + 1, 1);
+      }
+
+      const userGrowth: UserGrowthData[] = months.map(m => ({
+        date: m.label,
+        clients: (clients.data || []).filter(c => isDateInRange(c.created_at, m.start, m.end)).length,
+        coaches: (coaches.data || []).filter(c => isDateInRange(c.created_at, m.start, m.end)).length,
+      }));
+
+      const sessionActivity: SessionActivityData[] = months.map(m => {
+        const monthSessions = (sessions.data || []).filter(s => isDateInRange(s.created_at, m.start, m.end));
+        return {
+          date: m.label,
+          scheduled: monthSessions.length,
+          completed: monthSessions.filter(s => s.status === 'completed').length,
+        };
+      });
+
+      return { userGrowth, sessionActivity };
+    }
+
+    if (aggregateByWeek) {
+      // Weekly aggregation for ranges 32-90 days
+      const weeks: { start: Date; end: Date; label: string }[] = [];
+      let current = new Date(startDate);
+      while (current <= endDate) {
+        const weekEnd = new Date(current);
+        weekEnd.setDate(weekEnd.getDate() + 6);
+        weekEnd.setHours(23, 59, 59);
+        weeks.push({
+          start: new Date(current),
+          end: weekEnd > endDate ? endDate : weekEnd,
+          label: formatLabel(current, true, false),
+        });
+        current = new Date(current);
+        current.setDate(current.getDate() + 7);
+      }
+
+      const userGrowth: UserGrowthData[] = weeks.map(w => ({
+        date: w.label,
+        clients: (clients.data || []).filter(c => isDateInRange(c.created_at, w.start, w.end)).length,
+        coaches: (coaches.data || []).filter(c => isDateInRange(c.created_at, w.start, w.end)).length,
+      }));
+
+      const sessionActivity: SessionActivityData[] = weeks.map(w => {
+        const weekSessions = (sessions.data || []).filter(s => isDateInRange(s.created_at, w.start, w.end));
+        return {
+          date: w.label,
+          scheduled: weekSessions.length,
+          completed: weekSessions.filter(s => s.status === 'completed').length,
+        };
+      });
+
+      return { userGrowth, sessionActivity };
+    }
+
+    // Daily data points for ranges ≤ 31 days
     const days: Date[] = [];
-    for (let i = 13; i >= 0; i--) {
-      const d = new Date(endDate);
-      d.setDate(d.getDate() - i);
+    for (let i = 0; i < daysDiff; i++) {
+      const d = new Date(startDate);
+      d.setDate(d.getDate() + i);
       days.push(d);
     }
 
-    const formatDate = (d: Date) => d.toISOString().split('T')[0];
-    const formatLabel = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
     const userGrowth: UserGrowthData[] = days.map(d => {
-      const dateStr = formatDate(d);
+      const dateStr = formatDateStr(d);
       return {
         date: formatLabel(d),
         clients: (clients.data || []).filter(c => c.created_at.startsWith(dateStr)).length,
@@ -232,7 +323,7 @@ export function useAdminAnalytics(): UseAdminAnalyticsReturn {
     });
 
     const sessionActivity: SessionActivityData[] = days.map(d => {
-      const dateStr = formatDate(d);
+      const dateStr = formatDateStr(d);
       const daySessions = (sessions.data || []).filter(s => s.created_at.startsWith(dateStr));
       return {
         date: formatLabel(d),
