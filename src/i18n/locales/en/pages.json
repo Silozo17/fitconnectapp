@@ -531,9 +531,11 @@
     "billing": {
       "monthly": "Monthly",
       "yearly": "Yearly",
+      "save": "Save 17%",
       "savePercent": "Save 17%",
-      "perMonth": "/mo",
-      "perYear": "/yr",
+      "perMonth": "mo",
+      "perYear": "yr",
+      "free": "Free",
       "saveAmount": "Save {{amount}}/year"
     },
     "tiers": {
@@ -543,6 +545,51 @@
       "upToClients": "Up to {{count}} clients",
       "getStartedFree": "Get Started Free",
       "subscribeNow": "Subscribe Now"
+    },
+    "tierFeatures": {
+      "free": {
+        "clients": "Up to 3 clients",
+        "workoutPlans": "Basic workout plans",
+        "messaging": "Client messaging",
+        "scheduling": "Session scheduling",
+        "platformFee": "4% platform fee"
+      },
+      "starter": {
+        "clients": "Up to 10 clients",
+        "analytics": "Basic analytics dashboard",
+        "support": "Email support",
+        "workoutBuilder": "Workout plan builder",
+        "messaging": "Client messaging",
+        "scheduling": "Session scheduling",
+        "platformFee": "3% platform fee"
+      },
+      "pro": {
+        "includesStarter": "Everything in Starter, plus:",
+        "clients": "Up to 50 clients",
+        "analytics": "Advanced analytics",
+        "support": "Priority support",
+        "branding": "Custom branding",
+        "aiTools": "AI workout & meal planners",
+        "nutrition": "Nutrition plan builder",
+        "progress": "Client progress tracking",
+        "platformFee": "2% platform fee"
+      },
+      "enterprise": {
+        "includesPro": "Everything in Pro, plus:",
+        "clients": "Unlimited clients",
+        "accountManager": "Dedicated account manager",
+        "integrations": "Custom integrations",
+        "reporting": "Advanced reporting",
+        "support": "Phone support",
+        "platformFee": "1% platform fee"
+      },
+      "founder": {
+        "clients": "Unlimited clients",
+        "allFeatures": "All Pro & Enterprise features",
+        "support": "Priority support",
+        "platformFee": "1% platform fee",
+        "earlyAccess": "Early access to new features"
+      }
     },
     "platformFeatures": {
       "title": "Included With",
@@ -572,6 +619,12 @@
         "title": "Secure Payments",
         "description": "Safe, encrypted transactions with automatic payouts"
       }
+    },
+    "cta": {
+      "title": "Have Questions?",
+      "description": "Check out our FAQ or contact us for more information about our plans and features.",
+      "getStarted": "Get Started",
+      "viewFaq": "View FAQ"
     },
     "faqCta": {
       "title": "Have Questions?",

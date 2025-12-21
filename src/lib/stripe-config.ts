@@ -1,4 +1,59 @@
 // Stripe price configuration for FitConnect platform subscriptions
+
+// Multi-currency price IDs
+export const PRICE_IDS = {
+  starter: {
+    GBP: {
+      monthly: "price_1Sf80vEztIBHKDEerFCQIjUR",
+      yearly: "price_1Sf812EztIBHKDEevWTflleJ",
+    },
+    PLN: {
+      monthly: "price_1SgvfEEztIBHKDEe5R8Ouqls",
+      yearly: "price_1SgvfGEztIBHKDEedOcGnELa",
+    },
+  },
+  pro: {
+    GBP: {
+      monthly: "price_1Sf80wEztIBHKDEeO6RxdYCU",
+      yearly: "price_1Sf813EztIBHKDEeqPNPZoRy",
+    },
+    PLN: {
+      monthly: "price_1SgvfIEztIBHKDEejNc6oP2q",
+      yearly: "price_1SgvfJEztIBHKDEejTwn9u45",
+    },
+  },
+  enterprise: {
+    GBP: {
+      monthly: "price_1Sf80xEztIBHKDEegrV6T1T7",
+      yearly: "price_1Sf814EztIBHKDEevMuXmU4J",
+    },
+    PLN: {
+      monthly: "price_1SgvfLEztIBHKDEeheUytGet",
+      yearly: "price_1SgvfNEztIBHKDEeIaxNaEUD",
+    },
+  },
+  boost: {
+    GBP: "price_boost_gbp", // TODO: Add GBP boost price when created
+    PLN: "price_1SgvfPEztIBHKDEe63hxwTyy",
+  },
+} as const;
+
+// Pricing amounts by currency (in minor units for PLN, major for GBP display)
+export const PRICING_BY_CURRENCY = {
+  GBP: {
+    starter: { monthly: 19, yearly: 190, savings: 38 },
+    pro: { monthly: 49, yearly: 490, savings: 98 },
+    enterprise: { monthly: 99, yearly: 990, savings: 198 },
+    boost: 5,
+  },
+  PLN: {
+    starter: { monthly: 79, yearly: 790, savings: 158 },
+    pro: { monthly: 199, yearly: 1990, savings: 398 },
+    enterprise: { monthly: 399, yearly: 3990, savings: 798 },
+    boost: 25,
+  },
+} as const;
+
 export const SUBSCRIPTION_TIERS = {
   free: {
     name: "Free",
@@ -17,6 +72,13 @@ export const SUBSCRIPTION_TIERS = {
         priceId: null,
       },
     },
+    featureKeys: [
+      "pricing.tierFeatures.free.clients",
+      "pricing.tierFeatures.free.workoutPlans",
+      "pricing.tierFeatures.free.messaging",
+      "pricing.tierFeatures.free.scheduling",
+      "pricing.tierFeatures.free.platformFee",
+    ],
     features: [
       "Up to 3 clients",
       "Basic workout plans",
@@ -44,6 +106,15 @@ export const SUBSCRIPTION_TIERS = {
         priceId: "price_1Sf812EztIBHKDEevWTflleJ",
       },
     },
+    featureKeys: [
+      "pricing.tierFeatures.starter.clients",
+      "pricing.tierFeatures.starter.analytics",
+      "pricing.tierFeatures.starter.support",
+      "pricing.tierFeatures.starter.workoutBuilder",
+      "pricing.tierFeatures.starter.messaging",
+      "pricing.tierFeatures.starter.scheduling",
+      "pricing.tierFeatures.starter.platformFee",
+    ],
     features: [
       "Up to 10 clients",
       "Basic analytics dashboard",
@@ -73,6 +144,17 @@ export const SUBSCRIPTION_TIERS = {
         priceId: "price_1Sf813EztIBHKDEeqPNPZoRy",
       },
     },
+    featureKeys: [
+      "pricing.tierFeatures.pro.includesStarter",
+      "pricing.tierFeatures.pro.clients",
+      "pricing.tierFeatures.pro.analytics",
+      "pricing.tierFeatures.pro.support",
+      "pricing.tierFeatures.pro.branding",
+      "pricing.tierFeatures.pro.aiTools",
+      "pricing.tierFeatures.pro.nutrition",
+      "pricing.tierFeatures.pro.progress",
+      "pricing.tierFeatures.pro.platformFee",
+    ],
     features: [
       "Everything in Starter, plus:",
       "Up to 50 clients",
@@ -104,6 +186,15 @@ export const SUBSCRIPTION_TIERS = {
         priceId: "price_1Sf814EztIBHKDEevMuXmU4J",
       },
     },
+    featureKeys: [
+      "pricing.tierFeatures.enterprise.includesPro",
+      "pricing.tierFeatures.enterprise.clients",
+      "pricing.tierFeatures.enterprise.accountManager",
+      "pricing.tierFeatures.enterprise.integrations",
+      "pricing.tierFeatures.enterprise.reporting",
+      "pricing.tierFeatures.enterprise.support",
+      "pricing.tierFeatures.enterprise.platformFee",
+    ],
     features: [
       "Everything in Pro, plus:",
       "Unlimited clients",
@@ -133,6 +224,13 @@ export const SUBSCRIPTION_TIERS = {
         priceId: null,
       },
     },
+    featureKeys: [
+      "pricing.tierFeatures.founder.clients",
+      "pricing.tierFeatures.founder.allFeatures",
+      "pricing.tierFeatures.founder.support",
+      "pricing.tierFeatures.founder.platformFee",
+      "pricing.tierFeatures.founder.earlyAccess",
+    ],
     features: [
       "Unlimited clients",
       "All Pro & Enterprise features",
