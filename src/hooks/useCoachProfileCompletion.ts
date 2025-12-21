@@ -72,6 +72,11 @@ const STEP_METADATA: Record<string, { link: string; linkText: string; descriptio
     linkText: "Add Links",
     description: "Add at least one social media link",
   },
+  stripe_connected: {
+    link: "/dashboard/coach/settings?tab=payments",
+    linkText: "Connect Stripe",
+    description: "Connect your Stripe account to receive payments",
+  },
 };
 
 /**
@@ -125,6 +130,8 @@ export const useCoachProfileCompletion = () => {
           x_url: profile.x_url,
           linkedin_url: profile.linkedin_url,
           threads_url: profile.threads_url,
+          stripe_connect_id: profile.stripe_connect_id,
+          stripe_connect_onboarded: profile.stripe_connect_onboarded,
         },
         galleryCount: galleryCount ?? 0,
         groupClassCount: groupClassCount ?? 0,
