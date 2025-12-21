@@ -11,7 +11,8 @@ export interface CropArea {
 export async function getCroppedImg(
   imageSrc: string,
   pixelCrop: CropArea,
-  outputSize: number = 400
+  outputWidth: number = 400,
+  aspectRatio: number = 1 // 1 = square, 4/3 = landscape card
 ): Promise<Blob> {
   const image = await createImage(imageSrc);
   const canvas = document.createElement("canvas");
@@ -21,11 +22,14 @@ export async function getCroppedImg(
     throw new Error("No 2d context");
   }
 
-  // Set canvas size to desired output size (square)
-  canvas.width = outputSize;
-  canvas.height = outputSize;
+  // Calculate output dimensions based on aspect ratio
+  const outputHeight = Math.round(outputWidth / aspectRatio);
 
-  // Draw the cropped image
+  // Set canvas size to desired output dimensions
+  canvas.width = outputWidth;
+  canvas.height = outputHeight;
+
+  // Draw the cropped image preserving aspect ratio
   ctx.drawImage(
     image,
     pixelCrop.x,
@@ -34,8 +38,8 @@ export async function getCroppedImg(
     pixelCrop.height,
     0,
     0,
-    outputSize,
-    outputSize
+    outputWidth,
+    outputHeight
   );
 
   // Convert to blob

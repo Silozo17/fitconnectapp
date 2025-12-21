@@ -47,7 +47,8 @@ export function CardImageCropperModal({
 
     setIsProcessing(true);
     try {
-      const croppedBlob = await getCroppedImg(imageSrc, croppedAreaPixels);
+      // Pass 4/3 aspect ratio to preserve landscape format for marketplace cards
+      const croppedBlob = await getCroppedImg(imageSrc, croppedAreaPixels, 800, 4 / 3);
       onCropComplete(croppedBlob);
       onClose();
     } catch (error) {
