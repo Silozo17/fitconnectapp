@@ -121,9 +121,31 @@ export interface ParsedLocaleRoute {
   isLocaleRoute: boolean;
 }
 
+// ============================================
+// Protected paths that should NOT use locale routing
+// ============================================
+const PROTECTED_PATHS = [
+  '/dashboard',
+  '/onboarding',
+  '/docs',
+  '/auth',
+  '/subscribe',
+];
+
+/**
+ * Check if a path is protected from locale routing
+ */
+function isProtectedPath(path: string): boolean {
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return PROTECTED_PATHS.some(protectedPath => 
+    normalizedPath === protectedPath || normalizedPath.startsWith(`${protectedPath}/`)
+  );
+}
+
 /**
  * Parse locale from URL path
  * Matches pattern: /en-gb/... or /pl-pl/...
+ * Protected paths (dashboard, onboarding, docs, auth, subscribe) are never locale routes
  */
 export function parseLocaleFromPath(pathname: string): ParsedLocaleRoute {
   // Match pattern: /xx-yy or /xx-yy/...
@@ -132,10 +154,21 @@ export function parseLocaleFromPath(pathname: string): ParsedLocaleRoute {
   if (match) {
     const [, lang, loc, rest] = match;
     if (isValidLanguage(lang) && isValidLocation(loc)) {
+      const restOfPath = rest || '/';
+      
+      // Don't treat as locale route if the rest is a protected path
+      if (isProtectedPath(restOfPath)) {
+        return {
+          ...DEFAULT_ROUTE_LOCALE,
+          restOfPath: pathname, // Keep full path for redirect handling
+          isLocaleRoute: false,
+        };
+      }
+      
       return {
         language: lang,
         location: loc,
-        restOfPath: rest || '/',
+        restOfPath,
         isLocaleRoute: true,
       };
     }

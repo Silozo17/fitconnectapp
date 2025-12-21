@@ -67,7 +67,7 @@ const Subscribe = lazy(() => import("./pages/Subscribe"));
 const SubscribeSuccess = lazy(() => import("./pages/SubscribeSuccess"));
 const Checkout = lazy(() => import("./pages/Checkout"));
 const Install = lazy(() => import("./pages/Install"));
-
+const DashboardLocaleRedirect = lazy(() => import("./components/routing/DashboardLocaleRedirect").then(m => ({ default: m.DashboardLocaleRedirect })));
 // Coach category pages
 const PersonalTrainers = lazy(() => import("./pages/coaches/PersonalTrainers"));
 const Nutritionists = lazy(() => import("./pages/coaches/Nutritionists"));
@@ -676,6 +676,13 @@ const App = () => (
                     {/* Subscription Pages */}
                     <Route path="/subscribe" element={<Subscribe />} />
                     <Route path="/subscribe/success" element={<SubscribeSuccess />} />
+
+                    {/* Redirect locale-prefixed protected routes to plain routes */}
+                    <Route path="/:locale/dashboard/*" element={<DashboardLocaleRedirect />} />
+                    <Route path="/:locale/onboarding/*" element={<DashboardLocaleRedirect />} />
+                    <Route path="/:locale/docs/*" element={<DashboardLocaleRedirect />} />
+                    <Route path="/:locale/auth" element={<DashboardLocaleRedirect />} />
+                    <Route path="/:locale/subscribe/*" element={<DashboardLocaleRedirect />} />
                   
                       <Route path="*" element={<NotFound />} />
                     </Routes>
