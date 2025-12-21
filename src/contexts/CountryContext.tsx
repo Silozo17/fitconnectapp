@@ -1,8 +1,9 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { RouteLocationCode, SUPPORTED_LOCATIONS, isValidLocation, COUNTRY_TO_LOCATION } from "@/lib/locale-routing";
 
-// Storage key for country preference
+// Storage key for country preference (localStorage fallback for unauthenticated users)
 const COUNTRY_STORAGE_KEY = "fitconnect_country";
 const LOCATION_CACHE_KEY = "fitconnect_user_location";
 const COUNTRY_EXPIRY_DAYS = 30;
@@ -14,15 +15,15 @@ interface StoredCountryPreference {
 }
 
 interface CountryContextType {
-  /** Current active country code */
+  /** Current active country code (resolved using priority order) */
   countryCode: RouteLocationCode;
   /** Country detected from geo-location (null if not yet detected) */
   detectedCountry: RouteLocationCode | null;
-  /** Whether user manually selected the country */
+  /** Whether user manually selected the country in this session */
   isManualOverride: boolean;
   /** Loading state for initial detection */
   isLoading: boolean;
-  /** Set country manually (creates override) */
+  /** Set country manually (highest priority - creates override) */
   setCountry: (code: RouteLocationCode) => void;
   /** Reset to geo-detected country */
   resetToDetected: () => void;
@@ -37,6 +38,7 @@ const DEFAULT_COUNTRY: RouteLocationCode = 'gb';
 
 /**
  * Map full country name or code to RouteLocationCode
+ * IMPORTANT: Do NOT infer currency from language - only use country data
  */
 function mapToLocationCode(countryNameOrCode: string | null): RouteLocationCode {
   if (!countryNameOrCode) return DEFAULT_COUNTRY;
@@ -121,87 +123,165 @@ function setStoredCountryPreference(countryCode: RouteLocationCode, source: 'geo
   }
 }
 
+/**
+ * Fetch user's country preference from database
+ */
+async function fetchUserCountryPreference(userId: string): Promise<RouteLocationCode | null> {
+  try {
+    const { data, error } = await supabase
+      .from("user_profiles")
+      .select("country_preference")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error fetching user country preference:", error);
+      return null;
+    }
+
+    const pref = data?.country_preference;
+    if (pref && isValidLocation(pref)) {
+      return pref as RouteLocationCode;
+    }
+    return null;
+  } catch (err) {
+    console.error("Failed to fetch user country preference:", err);
+    return null;
+  }
+}
+
+/**
+ * Save user's country preference to database
+ */
+async function saveUserCountryPreference(userId: string, countryCode: RouteLocationCode): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from("user_profiles")
+      .update({ 
+        country_preference: countryCode,
+        locale_initialized_at: new Date().toISOString(),
+      })
+      .eq("user_id", userId);
+
+    if (error) {
+      console.error("Error saving user country preference:", error);
+    }
+  } catch (err) {
+    console.error("Failed to save user country preference:", err);
+  }
+}
+
+/**
+ * Detect country from IP/device geolocation
+ */
+async function detectCountryFromGeo(): Promise<RouteLocationCode> {
+  try {
+    // Check if we have cached location data first
+    const cachedLocation = localStorage.getItem(LOCATION_CACHE_KEY);
+    if (cachedLocation) {
+      try {
+        const parsed = JSON.parse(cachedLocation);
+        if (parsed.country) {
+          return mapToLocationCode(parsed.country);
+        }
+      } catch {
+        // Continue to API detection
+      }
+    }
+    
+    // Call edge function for detection
+    const { data, error } = await supabase.functions.invoke('get-user-location');
+    
+    if (error) {
+      console.error('Country detection error:', error);
+      return DEFAULT_COUNTRY;
+    }
+    
+    return mapToLocationCode(data?.country || data?.countryCode);
+  } catch (err) {
+    console.error('Country detection failed:', err);
+    return DEFAULT_COUNTRY;
+  }
+}
+
 interface CountryProviderProps {
   children: ReactNode;
 }
 
+/**
+ * CountryProvider resolves active country using this priority order:
+ * 
+ * 1. User-selected location (manual override in current session)
+ * 2. Saved user country preference (from DB if logged in, localStorage otherwise)
+ * 3. Device/IP geolocation fallback
+ * 
+ * IMPORTANT: Currency is NEVER inferred from language - only from country.
+ */
 export function CountryProvider({ children }: CountryProviderProps) {
+  const { user } = useAuth();
   const [countryCode, setCountryCode] = useState<RouteLocationCode>(DEFAULT_COUNTRY);
   const [detectedCountry, setDetectedCountry] = useState<RouteLocationCode | null>(null);
   const [isManualOverride, setIsManualOverride] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initial load: check storage and/or detect
+  // Resolve country using priority order
   useEffect(() => {
-    const initializeCountry = async () => {
-      // First check stored preference
+    const resolveCountry = async () => {
+      setIsLoading(true);
+
+      // Priority 1: Check for manual override in localStorage
       const storedPref = getStoredCountryPreference();
-      
-      if (storedPref) {
+      if (storedPref?.source === 'manual') {
+        // Manual override takes highest priority
         setCountryCode(storedPref.countryCode);
-        setIsManualOverride(storedPref.source === 'manual');
-        
-        // If manual override, we're done
-        if (storedPref.source === 'manual') {
-          setDetectedCountry(storedPref.countryCode); // Assume detected was same
-          setIsLoading(false);
-          return;
-        }
-        
-        // If geo source, use stored value but still set detected
+        setIsManualOverride(true);
         setDetectedCountry(storedPref.countryCode);
         setIsLoading(false);
         return;
       }
-      
-      // No stored preference - detect country
-      try {
-        // Check if we have cached location data first
-        const cachedLocation = localStorage.getItem(LOCATION_CACHE_KEY);
-        if (cachedLocation) {
-          try {
-            const parsed = JSON.parse(cachedLocation);
-            if (parsed.country) {
-              const locationCode = mapToLocationCode(parsed.country);
-              setDetectedCountry(locationCode);
-              setCountryCode(locationCode);
-              setStoredCountryPreference(locationCode, 'geo');
-              setIsLoading(false);
-              return;
-            }
-          } catch {
-            // Continue to API detection
-          }
+
+      // Priority 2: Check saved user preference (DB for logged-in users)
+      if (user?.id) {
+        const dbCountry = await fetchUserCountryPreference(user.id);
+        if (dbCountry) {
+          setCountryCode(dbCountry);
+          setIsManualOverride(false);
+          setDetectedCountry(dbCountry);
+          // Also update localStorage for consistency
+          setStoredCountryPreference(dbCountry, 'geo');
+          setIsLoading(false);
+          return;
         }
-        
-        // Call edge function for detection
-        const { data, error } = await supabase.functions.invoke('get-user-location');
-        
-        if (error) {
-          console.error('Country detection error:', error);
-          setDetectedCountry(DEFAULT_COUNTRY);
-          setCountryCode(DEFAULT_COUNTRY);
-          setStoredCountryPreference(DEFAULT_COUNTRY, 'geo');
-        } else {
-          const locationCode = mapToLocationCode(data?.country || data?.countryCode);
-          setDetectedCountry(locationCode);
-          setCountryCode(locationCode);
-          setStoredCountryPreference(locationCode, 'geo');
-        }
-      } catch (err) {
-        console.error('Country detection failed:', err);
-        setDetectedCountry(DEFAULT_COUNTRY);
-        setCountryCode(DEFAULT_COUNTRY);
-        setStoredCountryPreference(DEFAULT_COUNTRY, 'geo');
       }
+
+      // Priority 2b: For unauthenticated users, check localStorage geo preference
+      if (!user?.id && storedPref?.source === 'geo') {
+        setCountryCode(storedPref.countryCode);
+        setIsManualOverride(false);
+        setDetectedCountry(storedPref.countryCode);
+        setIsLoading(false);
+        return;
+      }
+
+      // Priority 3: Geo-detection fallback
+      const geoCountry = await detectCountryFromGeo();
+      setDetectedCountry(geoCountry);
+      setCountryCode(geoCountry);
+      setIsManualOverride(false);
+      setStoredCountryPreference(geoCountry, 'geo');
       
+      // For logged-in users, also save to DB
+      if (user?.id) {
+        await saveUserCountryPreference(user.id, geoCountry);
+      }
+
       setIsLoading(false);
     };
 
-    initializeCountry();
-  }, []);
+    resolveCountry();
+  }, [user?.id]);
 
-  // Set country manually
+  // Set country manually (highest priority)
   const setCountry = useCallback((code: RouteLocationCode) => {
     if (!isValidLocation(code)) {
       console.warn('Invalid country code:', code);
@@ -211,15 +291,26 @@ export function CountryProvider({ children }: CountryProviderProps) {
     setCountryCode(code);
     setIsManualOverride(true);
     setStoredCountryPreference(code, 'manual');
-  }, []);
+    
+    // For logged-in users, also save to DB
+    if (user?.id) {
+      saveUserCountryPreference(user.id, code);
+    }
+  }, [user?.id]);
 
   // Reset to geo-detected country
-  const resetToDetected = useCallback(() => {
-    const country = detectedCountry || DEFAULT_COUNTRY;
+  const resetToDetected = useCallback(async () => {
+    const country = detectedCountry || await detectCountryFromGeo();
     setCountryCode(country);
+    setDetectedCountry(country);
     setIsManualOverride(false);
     setStoredCountryPreference(country, 'geo');
-  }, [detectedCountry]);
+    
+    // For logged-in users, also update DB
+    if (user?.id) {
+      saveUserCountryPreference(user.id, country);
+    }
+  }, [detectedCountry, user?.id]);
 
   // Clear all stored preferences
   const clearCountry = useCallback(() => {
