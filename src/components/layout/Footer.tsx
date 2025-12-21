@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { SocialLinks } from "@/components/shared/SocialLinks";
+import { FooterLocaleSelector } from "@/components/shared/FooterLocaleSelector";
 
 const Footer = () => {
   const [email, setEmail] = useState("");
@@ -148,8 +149,13 @@ const Footer = () => {
           ))}
         </div>
 
+        {/* Locale Selector */}
+        <div className="mt-12 pt-8 border-t border-border">
+          <FooterLocaleSelector />
+        </div>
+
         {/* Bottom */}
-        <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="mt-8 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-muted-foreground text-sm">
             © {new Date().getFullYear()} FitConnect. All rights reserved.
           </p>
