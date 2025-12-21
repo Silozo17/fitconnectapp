@@ -751,12 +751,43 @@
       "description": "Dołącz do tysięcy osób, które odmieniły swoje życie z FitConnect.",
       "button": "Znajdź swojego trenera"
     },
+    "coachTypes": {
+      "personalTrainer": "Trener personalny",
+      "boxingCoach": "Trener boksu",
+      "nutritionist": "Dietetyk",
+      "mmaCoach": "Trener MMA"
+    },
+    "duration": {
+      "months": "{{count}} miesięcy"
+    },
+    "stories": {
+      "sarah": {
+        "quote": "FitConnect zmienił moje życie. Schudłam 27kg i zyskałam pewność siebie, o której nie wiedziałam. Mój trener James był niesamowity!"
+      },
+      "marcus": {
+        "quote": "Z chudego stałem się silny. Spersonalizowany plan treningowy był dokładnie tym, czego potrzebowałem do budowy mięśni."
+      },
+      "emma": {
+        "quote": "Boks zawsze był moim marzeniem. Teraz rywalizuję na poziomie regionalnym dzięki eksperckiemu prowadzeniu trenera Mike'a.",
+        "achievement": "Mistrzyni regionalna"
+      },
+      "david": {
+        "quote": "W końcu zrozumiałem, jak jeść odpowiednio dla mojego ciała. Plany posiłków Sophie były łatwe do naśladowania i pyszne.",
+        "achievement": "Odwróciłem stan przedcukrzycowy"
+      },
+      "ryan": {
+        "quote": "Od totalnego początkującego do rywalizacji w amatorskim MMA. Carlos nauczył mnie wszystkiego od walki w parterze po uderzenia.",
+        "achievement": "Debiut w amatorskim MMA"
+      },
+      "jennifer": {
+        "quote": "Po dwójce dzieci myślałam, że nigdy nie poczuję się znowu sprawna. Lisa udowodniła, że się mylę swoim wspierającym podejściem."
+      }
+    },
     "readStory": "Przeczytaj historię",
     "viewAll": "Zobacz wszystkie historie",
     "featured": "Wyróżniona historia",
     "before": "Przed",
     "after": "Po",
-    "duration": "Czas trwania",
     "goal": "Cel",
     "achieved": "Osiągnięte",
     "coach": "Trener",
@@ -793,6 +824,12 @@
         "byCounty": "Wg regionu",
         "byCity": "Wg miasta"
       },
+      "global": "Globalnie",
+      "byCountry": "Wg kraju",
+      "byCounty": "Wg regionu",
+      "byCity": "Wg miasta",
+      "inLocation": "w {{location}}",
+      "level": "Poziom",
       "selectCountry": "Wybierz kraj",
       "selectCounty": "Wybierz region",
       "selectCity": "Wybierz miasto",
@@ -801,6 +838,13 @@
       "participants": "uczestników",
       "participantsIn": "w {{location}}",
       "participantsGlobal": "Globalnie",
+      "table": {
+        "rank": "Pozycja",
+        "name": "Nazwa",
+        "location": "Lokalizacja",
+        "level": "Poziom",
+        "xp": "XP"
+      },
       "tableHeaders": {
         "rank": "Pozycja",
         "name": "Nazwa",
@@ -819,7 +863,38 @@
       "challengeDescription": "Odblokuj, ukończając wyzwania",
       "coachTitle": "Ekskluzywne dla trenerów",
       "coachDescription": "Dostępne dla zweryfikowanych trenerów",
-      "viewAll": "Zobacz wszystkie {{count}} awatarów"
+      "viewAll": "Zobacz wszystkie {{count}} awatarów",
+      "tabs": {
+        "all": "Wszystkie",
+        "free": "Darmowe",
+        "challenge": "Wyzwania",
+        "coach": "Trener"
+      },
+      "categories": {
+        "free": "Darmowe awatary",
+        "challenge": "Awatary z wyzwań",
+        "coach": "Ekskluzywne dla trenerów"
+      },
+      "unlock": {
+        "challenges": {
+          "title": "Ukończ wyzwania",
+          "description": "Zakończ wyzwania społeczności, aby odblokować ekskluzywne awatary"
+        },
+        "milestones": {
+          "title": "Osiągnij kamienie milowe",
+          "description": "Zdobądź cele treningowe i żywieniowe"
+        },
+        "streaks": {
+          "title": "Buduj serie",
+          "description": "Utrzymuj codzienne nawyki, aby zdobyć rzadkie awatary"
+        }
+      }
+    },
+    "cta": {
+      "title": "Gotowy dołączyć do społeczności?",
+      "description": "Rozpocznij swoją przygodę z fitness już dziś i rywalizuj z tysiącami innych.",
+      "getStarted": "Rozpocznij",
+      "findCoach": "Znajdź trenera"
     },
     "pagination": {
       "previous": "Poprzednia",
@@ -832,6 +907,51 @@
     "leaderboards": "Rankingi",
     "join": "Dołącz do społeczności",
     "comingSoon": "Wkrótce"
+  },
+  "pages": {
+    "community": {
+      "leaderboard": {
+        "table": {
+          "rank": "Pozycja",
+          "name": "Nazwa",
+          "location": "Lokalizacja",
+          "level": "Poziom"
+        }
+      },
+      "avatars": {
+        "tabs": {
+          "all": "Wszystkie",
+          "free": "Darmowe",
+          "challenge": "Wyzwania",
+          "coach": "Trener"
+        },
+        "categories": {
+          "free": "Darmowe awatary",
+          "challenge": "Awatary z wyzwań",
+          "coach": "Ekskluzywne dla trenerów"
+        },
+        "unlock": {
+          "challenges": {
+            "title": "Ukończ wyzwania",
+            "description": "Zakończ wyzwania społeczności, aby odblokować ekskluzywne awatary"
+          },
+          "milestones": {
+            "title": "Osiągnij kamienie milowe",
+            "description": "Zdobądź cele treningowe i żywieniowe"
+          },
+          "streaks": {
+            "title": "Buduj serie",
+            "description": "Utrzymuj codzienne nawyki, aby zdobyć rzadkie awatary"
+          }
+        }
+      },
+      "cta": {
+        "title": "Gotowy dołączyć do społeczności?",
+        "description": "Rozpocznij swoją przygodę z fitness już dziś i rywalizuj z tysiącami innych.",
+        "getStarted": "Rozpocznij",
+        "findCoach": "Znajdź trenera"
+      }
+    }
   },
   "careers": {
     "title": "Kariera",

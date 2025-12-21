@@ -751,12 +751,43 @@
       "description": "Join thousands of others who have transformed their lives with FitConnect.",
       "button": "Find Your Coach"
     },
+    "coachTypes": {
+      "personalTrainer": "Personal Trainer",
+      "boxingCoach": "Boxing Coach",
+      "nutritionist": "Nutritionist",
+      "mmaCoach": "MMA Coach"
+    },
+    "duration": {
+      "months": "{{count}} months"
+    },
+    "stories": {
+      "sarah": {
+        "quote": "FitConnect changed my life. I lost 27kg and gained confidence I never knew I had. My coach James was incredible!"
+      },
+      "marcus": {
+        "quote": "I went from skinny to strong. The personalised training plan was exactly what I needed to build muscle effectively."
+      },
+      "emma": {
+        "quote": "Boxing was always a dream. Now I compete at regional level thanks to Coach Mike's expert guidance.",
+        "achievement": "Regional champion"
+      },
+      "david": {
+        "quote": "Finally understood how to eat right for my body. Sophie's meal plans were easy to follow and delicious.",
+        "achievement": "Reversed pre-diabetes"
+      },
+      "ryan": {
+        "quote": "From total beginner to competing in amateur MMA. Carlos taught me everything from ground game to striking.",
+        "achievement": "Amateur MMA debut"
+      },
+      "jennifer": {
+        "quote": "After two kids, I thought I'd never feel fit again. Lisa proved me wrong with her supportive approach."
+      }
+    },
     "readStory": "Read Story",
     "viewAll": "View All Stories",
     "featured": "Featured Story",
     "before": "Before",
     "after": "After",
-    "duration": "Duration",
     "goal": "Goal",
     "achieved": "Achieved",
     "coach": "Coach",
@@ -793,6 +824,12 @@
         "byCounty": "By County",
         "byCity": "By City"
       },
+      "global": "Global",
+      "byCountry": "By Country",
+      "byCounty": "By County",
+      "byCity": "By City",
+      "inLocation": "in {{location}}",
+      "level": "Level",
       "selectCountry": "Select country",
       "selectCounty": "Select county",
       "selectCity": "Select city",
@@ -801,6 +838,13 @@
       "participants": "participants",
       "participantsIn": "in {{location}}",
       "participantsGlobal": "Global",
+      "table": {
+        "rank": "Rank",
+        "name": "Name",
+        "location": "Location",
+        "level": "Level",
+        "xp": "XP"
+      },
       "tableHeaders": {
         "rank": "Rank",
         "name": "Name",
@@ -819,7 +863,38 @@
       "challengeDescription": "Unlock by completing challenges",
       "coachTitle": "Coach Exclusive",
       "coachDescription": "Available to verified coaches",
-      "viewAll": "View all {{count}} avatars"
+      "viewAll": "View all {{count}} avatars",
+      "tabs": {
+        "all": "All",
+        "free": "Free",
+        "challenge": "Challenge",
+        "coach": "Coach"
+      },
+      "categories": {
+        "free": "Free Avatars",
+        "challenge": "Challenge Avatars",
+        "coach": "Coach Exclusive"
+      },
+      "unlock": {
+        "challenges": {
+          "title": "Complete Challenges",
+          "description": "Finish community challenges to unlock exclusive avatars"
+        },
+        "milestones": {
+          "title": "Hit Milestones",
+          "description": "Reach workout and nutrition milestones"
+        },
+        "streaks": {
+          "title": "Build Streaks",
+          "description": "Maintain daily habits to earn rare avatars"
+        }
+      }
+    },
+    "cta": {
+      "title": "Ready to Join the Community?",
+      "description": "Start your fitness journey today and compete with thousands of others.",
+      "getStarted": "Get Started",
+      "findCoach": "Find a Coach"
     },
     "pagination": {
       "previous": "Previous",
@@ -832,6 +907,51 @@
     "leaderboards": "Leaderboards",
     "join": "Join Community",
     "comingSoon": "Coming Soon"
+  },
+  "pages": {
+    "community": {
+      "leaderboard": {
+        "table": {
+          "rank": "Rank",
+          "name": "Name",
+          "location": "Location",
+          "level": "Level"
+        }
+      },
+      "avatars": {
+        "tabs": {
+          "all": "All",
+          "free": "Free",
+          "challenge": "Challenge",
+          "coach": "Coach"
+        },
+        "categories": {
+          "free": "Free Avatars",
+          "challenge": "Challenge Avatars",
+          "coach": "Coach Exclusive"
+        },
+        "unlock": {
+          "challenges": {
+            "title": "Complete Challenges",
+            "description": "Finish community challenges to unlock exclusive avatars"
+          },
+          "milestones": {
+            "title": "Hit Milestones",
+            "description": "Reach workout and nutrition milestones"
+          },
+          "streaks": {
+            "title": "Build Streaks",
+            "description": "Maintain daily habits to earn rare avatars"
+          }
+        }
+      },
+      "cta": {
+        "title": "Ready to Join the Community?",
+        "description": "Start your fitness journey today and compete with thousands of others.",
+        "getStarted": "Get Started",
+        "findCoach": "Find a Coach"
+      }
+    }
   },
   "careers": {
     "title": "Careers",
