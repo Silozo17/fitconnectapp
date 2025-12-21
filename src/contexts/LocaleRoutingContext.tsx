@@ -133,20 +133,36 @@ export function LocaleRoutingProvider({ children }: LocaleRoutingProviderProps) 
   const changeLanguage = useCallback((newLang: RouteLanguageCode) => {
     if (newLang === language) return;
     
+    // Get current path without locale prefix
     const currentPath = getPathWithoutLocale();
+    
+    // Always navigate to locale-prefixed URL when language is changed
     const newPath = buildLocalePathUtil(newLang, location, currentPath);
     
+    // Store as manual selection (takes priority over geo-detection)
     setStoredLocalePreference(newLang, location, 'manual');
+    
+    // Update local state immediately
+    setLanguage(newLang);
+    
     navigate(newPath, { replace: true });
   }, [language, location, getPathWithoutLocale, navigate]);
   
   const changeLocation = useCallback((newLoc: RouteLocationCode) => {
     if (newLoc === location) return;
     
+    // Get current path without locale prefix
     const currentPath = getPathWithoutLocale();
+    
+    // Always navigate to locale-prefixed URL when location is changed
     const newPath = buildLocalePathUtil(language, newLoc, currentPath);
     
+    // Store as manual selection (takes priority over geo-detection)
     setStoredLocalePreference(language, newLoc, 'manual');
+    
+    // Update local state immediately
+    setLocation(newLoc);
+    
     navigate(newPath, { replace: true });
   }, [language, location, getPathWithoutLocale, navigate]);
   

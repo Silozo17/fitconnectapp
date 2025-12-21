@@ -48,6 +48,7 @@ export const HeaderLocaleSelector = () => {
   }
 
   // Graceful fallback if not in locale routing context
+  // This shouldn't happen on website routes, but provides safety
   if (!localeRouting) {
     return null;
   }

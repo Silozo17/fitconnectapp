@@ -53,7 +53,8 @@ export function LocaleRouteWrapper() {
     setCurrency(LOCATION_TO_CURRENCY[location]);
     setLocale(LOCATION_TO_DATE_LOCALE[location]);
     
-    // Store preference
+    // Store preference with 'url' source
+    // Note: setStoredLocalePreference will NOT overwrite a 'manual' source
     setStoredLocalePreference(language, location, 'url');
   }, [parsedLocale, setCurrency, setLocale]);
   
