@@ -2,7 +2,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Home, Search, Calendar, MessageSquare, User, Users } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useEnvironment } from "@/hooks/useEnvironment";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -36,12 +35,9 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const { isPWA, isNativeApp } = useEnvironment();
 
-  // Only show on mobile AND in PWA/native app context
-  const showBottomNav = isMobile && (isPWA || isNativeApp);
-
-  if (!showBottomNav) {
+  // Show on all mobile screens (browser, PWA, native)
+  if (!isMobile) {
     return null;
   }
 
