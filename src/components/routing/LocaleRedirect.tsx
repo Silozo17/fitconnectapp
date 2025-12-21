@@ -1,9 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useDefaultLocale } from '@/hooks/useDefaultLocale';
+import { useLocaleDetection } from '@/hooks/useLocaleDetection';
 import { 
   buildLocalePath, 
-  getStoredLocalePreference,
+  parseLocaleFromPath,
   setStoredLocalePreference,
 } from '@/lib/locale-routing';
 import PageLoadingSpinner from '@/components/shared/PageLoadingSpinner';
@@ -21,34 +21,33 @@ interface LocaleRedirectProps {
  * 
  * Priority order:
  * 1. Stored preference (from previous visits or manual selection)
- * 2. Device/browser language (from navigator.language)
- * 3. Geo-location (IP-based detection)
- * 4. Default: en-gb
+ * 2. URL (if already on locale route)
+ * 3. Device/browser language (from navigator.language)
+ * 4. Geo-location (IP-based detection)
+ * 5. Default: en-gb
  */
 export function LocaleRedirect({ preservePath = false }: LocaleRedirectProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { defaultLocale, isLoading, deviceLanguageUsed } = useDefaultLocale();
+  const [hasRedirected, setHasRedirected] = useState(false);
+  
+  const detection = useLocaleDetection(location.pathname);
   
   useEffect(() => {
-    // Wait for geo-detection to complete (but don't block forever)
-    if (isLoading) return;
+    // Prevent infinite redirects
+    if (hasRedirected) return;
     
-    // Priority 1: Check for stored preference first
-    const stored = getStoredLocalePreference();
+    // Wait for detection to be ready (geo-detection complete or timeout)
+    if (!detection.isReady) return;
     
-    let locale: { language: typeof defaultLocale.language; location: typeof defaultLocale.location };
-    
-    if (stored) {
-      // Use stored preference
-      locale = { language: stored.language, location: stored.location };
-    } else {
-      // Use detected locale (device language or geo)
-      locale = defaultLocale;
-      
-      // Store the detected locale for future visits
-      setStoredLocalePreference(locale.language, locale.location, deviceLanguageUsed ? 'manual' : 'geo');
+    // If already on a locale route, don't redirect
+    const currentParsed = parseLocaleFromPath(location.pathname);
+    if (currentParsed.isLocaleRoute) {
+      setHasRedirected(true);
+      return;
     }
+    
+    const { locale, source } = detection;
     
     // Build the redirect path
     const targetPath = preservePath 
@@ -57,9 +56,20 @@ export function LocaleRedirect({ preservePath = false }: LocaleRedirectProps) {
     
     const localePath = buildLocalePath(locale.language, locale.location, targetPath);
     
+    // Store the preference if newly detected (not from stored)
+    if (source !== 'stored') {
+      setStoredLocalePreference(
+        locale.language, 
+        locale.location, 
+        source === 'device' || source === 'url' ? 'manual' : 'geo'
+      );
+    }
+    
+    setHasRedirected(true);
+    
     // Use replace to avoid adding to history
     navigate(localePath, { replace: true });
-  }, [isLoading, defaultLocale, deviceLanguageUsed, navigate, location, preservePath]);
+  }, [detection.isReady, detection.locale, detection.source, hasRedirected, navigate, location, preservePath]);
   
   // Show loading spinner while detecting
   return <PageLoadingSpinner />;

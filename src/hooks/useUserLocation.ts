@@ -5,6 +5,7 @@ import { LocationData } from "@/types/ranking";
 
 const LOCATION_STORAGE_KEY = "fitconnect_user_location";
 const LOCATION_EXPIRY_DAYS = 7;
+const GEO_TIMEOUT_MS = 2000; // Max 2 seconds wait for geo-detection
 
 interface StoredLocation {
   city: string | null;
@@ -40,13 +41,24 @@ export const useUserLocation = (): UseUserLocationReturn => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout | null = null;
+    let isMounted = true;
+
     const detectLocation = async () => {
       // Check if user has given consent for location cookies
       if (!hasLocationConsent()) {
-        // No consent - return without location data
-        setLocation(null);
-        setIsLoading(false);
-        setError(null);
+        // No consent - return default UK location for routing purposes
+        if (isMounted) {
+          setLocation({
+            city: null,
+            region: null,
+            country: "United Kingdom",
+            countryCode: "GB",
+            county: null,
+          });
+          setIsLoading(false);
+          setError(null);
+        }
         return;
       }
 
@@ -57,15 +69,17 @@ export const useUserLocation = (): UseUserLocationReturn => {
           const parsed: StoredLocation = JSON.parse(stored);
           const expiryTime = LOCATION_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
           if (Date.now() - parsed.timestamp < expiryTime) {
-            setLocation({
-              city: parsed.city,
-              region: parsed.region,
-              country: parsed.country,
-              countryCode: parsed.countryCode,
-              county: parsed.county,
-            });
-            setIsLoading(false);
-            setError(null);
+            if (isMounted) {
+              setLocation({
+                city: parsed.city,
+                region: parsed.region,
+                country: parsed.country,
+                countryCode: parsed.countryCode,
+                county: parsed.county,
+              });
+              setIsLoading(false);
+              setError(null);
+            }
             return;
           }
         } catch {
@@ -98,12 +112,32 @@ export const useUserLocation = (): UseUserLocationReturn => {
         };
         localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify(toStore));
 
-        setLocation(locationData);
-        setIsLoading(false);
-        setError(null);
+        if (isMounted) {
+          setLocation(locationData);
+          setIsLoading(false);
+          setError(null);
+        }
       } catch (err) {
         console.error('Location detection failed:', err);
         // Default to UK if detection fails
+        if (isMounted) {
+          setLocation({
+            city: null,
+            region: null,
+            country: "United Kingdom",
+            countryCode: "GB",
+            county: null,
+          });
+          setIsLoading(false);
+          setError(null);
+        }
+      }
+    };
+
+    // Start timeout to prevent waiting too long for geo-detection
+    timeoutId = setTimeout(() => {
+      if (isMounted && isLoading) {
+        // Timeout reached - use default UK location
         setLocation({
           city: null,
           region: null,
@@ -114,9 +148,16 @@ export const useUserLocation = (): UseUserLocationReturn => {
         setIsLoading(false);
         setError(null);
       }
-    };
+    }, GEO_TIMEOUT_MS);
 
     detectLocation();
+
+    return () => {
+      isMounted = false;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, []);
 
   const clearLocation = () => {
