@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { getBoostPriceId, getCurrency } from "../_shared/pricing-config.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -30,6 +31,10 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
+
+    // Get country code from request body
+    const { countryCode } = await req.json() as { countryCode?: string };
+    logStep("Request parsed", { countryCode });
 
     // Get authenticated user
     const authHeader = req.headers.get("Authorization");
@@ -81,10 +86,10 @@ serve(async (req) => {
 
     logStep("No active boost found, proceeding with checkout");
 
-    // Get boost settings for pricing
+    // Get boost settings for duration (price comes from Stripe price ID)
     const { data: boostSettings, error: settingsError } = await supabase
       .from("boost_settings")
-      .select("boost_price, boost_duration_days")
+      .select("boost_duration_days")
       .eq("is_active", true)
       .single();
 
@@ -92,9 +97,12 @@ serve(async (req) => {
       throw new Error("Boost settings not found");
     }
 
-    const priceInPence = boostSettings.boost_price || 500; // Default £5
     const durationDays = boostSettings.boost_duration_days || 30;
-    logStep("Boost settings", { price: priceInPence, duration: durationDays });
+
+    // Get the correct price ID and currency based on country
+    const priceId = getBoostPriceId(countryCode);
+    const currency = getCurrency(countryCode);
+    logStep("Boost pricing resolved", { priceId, currency, countryCode, duration: durationDays });
 
     // Find or create Stripe customer
     const customers = await stripe.customers.list({ email: user.email!, limit: 1 });
@@ -115,21 +123,14 @@ serve(async (req) => {
       logStep("New Stripe customer created", { customerId });
     }
 
-    // Create checkout session
+    // Create checkout session using Stripe price ID
     const origin = req.headers.get("origin") || "https://fitconnect.app";
     
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       line_items: [
         {
-          price_data: {
-            currency: "gbp",
-            product_data: {
-              name: "Boost Activation",
-              description: `${durationDays}-day Boost - Appear first in search results`,
-            },
-            unit_amount: priceInPence,
-          },
+          price: priceId,
           quantity: 1,
         },
       ],
@@ -140,7 +141,8 @@ serve(async (req) => {
         type: "boost_activation",
         coach_id: coachProfile.id,
         duration_days: durationDays.toString(),
-        price_paid: priceInPence.toString(),
+        country_code: countryCode || "GB",
+        currency,
       },
     });
 

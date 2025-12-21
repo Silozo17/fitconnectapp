@@ -1,27 +1,17 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { 
+  getSubscriptionPriceId, 
+  getCurrency,
+  type SubscriptionTier,
+  type BillingInterval 
+} from "../_shared/pricing-config.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
-
-// SECURITY: Price IDs are hardcoded server-side - amounts come from Stripe, not client
-const PRICE_IDS = {
-  starter: {
-    monthly: "price_1Sf80vEztIBHKDEerFCQIjUR",
-    yearly: "price_1Sf812EztIBHKDEevWTflleJ",
-  },
-  pro: {
-    monthly: "price_1Sf80wEztIBHKDEeO6RxdYCU",
-    yearly: "price_1Sf813EztIBHKDEeqPNPZoRy",
-  },
-  enterprise: {
-    monthly: "price_1Sf80xEztIBHKDEegrV6T1T7",
-    yearly: "price_1Sf814EztIBHKDEevMuXmU4J",
-  },
-} as const;
 
 const logStep = (step: string, details?: Record<string, unknown>) => {
   if (Deno.env.get("DENO_ENV") !== "production") {
@@ -29,6 +19,10 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
     console.log(`[CREATE-SUBSCRIPTION-CHECKOUT] ${step}${detailsStr}`);
   }
 };
+
+// Valid tiers and intervals for validation
+const VALID_TIERS = ["starter", "pro", "enterprise"] as const;
+const VALID_INTERVALS = ["monthly", "yearly"] as const;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -61,22 +55,31 @@ serve(async (req) => {
     }
 
     const user = userData.user;
-    const { tier, billingInterval } = await req.json();
+    const { tier, billingInterval, countryCode } = await req.json() as {
+      tier: string;
+      billingInterval: string;
+      countryCode?: string;
+    };
 
-    logStep("Creating checkout", { tier, billingInterval, userId: user.id });
+    logStep("Creating checkout", { tier, billingInterval, countryCode, userId: user.id });
 
     // SECURITY: Validate tier and interval against known values
-    if (!PRICE_IDS[tier as keyof typeof PRICE_IDS]) {
+    if (!VALID_TIERS.includes(tier as SubscriptionTier)) {
       throw new Error("Invalid subscription tier");
     }
-    if (!["monthly", "yearly"].includes(billingInterval)) {
+    if (!VALID_INTERVALS.includes(billingInterval as BillingInterval)) {
       throw new Error("Invalid billing interval");
     }
 
-    // SECURITY: Price ID is fetched from server-side constant, not from client
-    const priceId = PRICE_IDS[tier as keyof typeof PRICE_IDS][billingInterval as "monthly" | "yearly"];
+    // Get the correct price ID based on country (defaults to GB if not provided)
+    const priceId = getSubscriptionPriceId(
+      countryCode, 
+      tier as SubscriptionTier, 
+      billingInterval as BillingInterval
+    );
+    const currency = getCurrency(countryCode);
     
-    logStep("Using price ID", { priceId, tier, billingInterval });
+    logStep("Using price ID from country config", { priceId, tier, billingInterval, countryCode, currency });
 
     // Check if customer exists in Stripe
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
@@ -124,6 +127,8 @@ serve(async (req) => {
         user_id: user.id,
         tier,
         billing_interval: billingInterval,
+        country_code: countryCode || "GB",
+        currency,
       },
     });
 
