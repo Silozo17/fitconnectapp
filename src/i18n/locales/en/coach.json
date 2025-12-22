@@ -126,7 +126,8 @@
       "bodyFatTrend": "Body Fat Trend",
       "noProgressData": "No progress data logged yet",
       "logFirstProgress": "Log First Progress Entry",
-      "goalProgress": "Goal Progress"
+      "goalProgress": "Goal Progress",
+      "inProgress": "In progress"
     },
     "plans": {
       "assignPlan": "Assign Plan",
@@ -141,6 +142,29 @@
       "addNote": "Add Note",
       "noNotesYet": "No notes yet",
       "addFirstNote": "Add First Note"
+    },
+    "goals": {
+      "target": "Target",
+      "current": "Current",
+      "goalAchieved": "Goal achieved!"
+    },
+    "healthProfile": {
+      "title": "Health Profile",
+      "noData": "No health information provided yet.",
+      "dietaryRestrictions": "Dietary Restrictions",
+      "allergies": "Allergies",
+      "medicalConditions": "Medical Conditions",
+      "none": "none"
+    },
+    "habits": {
+      "activeHabits": "Active Habits",
+      "totalStreakDays": "Total Streak Days",
+      "bestStreak": "Best Streak",
+      "assignedHabits": "Assigned Habits",
+      "addHabit": "Add Habit",
+      "noHabitsYet": "No habits assigned yet",
+      "createHabitsDescription": "Create habits to help your client build healthy routines",
+      "createFirstHabit": "Create First Habit"
     }
   },
   "scheduleSessionModal": {
