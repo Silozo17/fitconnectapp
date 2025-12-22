@@ -140,7 +140,56 @@
 
   "notifications": {
     "title": "Notifications",
-    "description": "Configure how you receive notifications"
+    "description": "Configure how you receive notifications",
+    "email": {
+      "title": "Email Notifications",
+      "description": "Choose which notifications you'd like to receive via email",
+      "bookings": "Booking notifications",
+      "bookingsDesc": "Receive emails for new bookings and confirmations",
+      "messages": "Message notifications",
+      "messagesDesc": "Receive emails when you get new messages",
+      "reminders": "Session reminders",
+      "remindersDesc": "Receive email reminders before your sessions",
+      "marketing": "Marketing emails",
+      "marketingDesc": "Receive tips, updates, and promotional content"
+    },
+    "push": {
+      "title": "Push Notifications",
+      "nativePushActive": "Native Push Active",
+      "descriptionNative": "Choose which push notifications to receive on your device",
+      "descriptionWeb": "Choose which notifications appear in the notification center",
+      "bookings": "Booking notifications",
+      "bookingsDesc": "Notifications for booking requests and updates",
+      "messages": "Message notifications",
+      "messagesDesc": "Notifications for new messages",
+      "reminders": "Session reminders",
+      "remindersDesc": "Reminder notifications before sessions"
+    },
+    "additional": {
+      "title": "Additional Notifications",
+      "description": "Configure notifications for challenges, achievements, and more",
+      "challenges": "Challenge notifications",
+      "challengesDesc": "New challenges, expiring challenges, and completions",
+      "achievements": "Achievement notifications",
+      "achievementsDesc": "Badge unlocks and milestone achievements",
+      "connections": "Connection notifications",
+      "connectionsDesc": "Friend requests and connection updates",
+      "motivation": "Daily motivation",
+      "motivationDesc": "Receive daily motivational messages"
+    },
+    "timing": {
+      "title": "Reminder Timing",
+      "description": "Choose when to receive session reminders",
+      "remindMe": "Remind me before sessions",
+      "howEarly": "How early would you like to be reminded?",
+      "1hour": "1 hour",
+      "2hours": "2 hours",
+      "4hours": "4 hours",
+      "12hours": "12 hours",
+      "24hours": "24 hours",
+      "2days": "2 days"
+    },
+    "failedUpdate": "Failed to update preferences"
   },
 
   "integrations": {

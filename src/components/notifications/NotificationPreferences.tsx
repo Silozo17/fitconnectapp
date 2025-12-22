@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Bell, Mail, Smartphone, Clock, Trophy, Users, Sparkles } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -11,6 +12,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const NotificationPreferences = () => {
+  const { t } = useTranslation('settings');
   const { preferences, updatePreferences } = useNotifications();
   const { isDespia, isRegistered } = usePushNotifications();
   const [localPrefs, setLocalPrefs] = useState<NotificationPreferencesType | null>(preferences);
@@ -32,7 +34,7 @@ export const NotificationPreferences = () => {
 
     setSaving(false);
     if (error) {
-      toast.error("Failed to update preferences");
+      toast.error(t('notifications.failedUpdate'));
       setLocalPrefs(preferences);
     }
   };
@@ -48,7 +50,7 @@ export const NotificationPreferences = () => {
 
     setSaving(false);
     if (error) {
-      toast.error("Failed to update preferences");
+      toast.error(t('notifications.failedUpdate'));
       setLocalPrefs(preferences);
     }
   };
@@ -70,18 +72,18 @@ export const NotificationPreferences = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Mail className="w-5 h-5" />
-            Email Notifications
+            {t('notifications.email.title')}
           </CardTitle>
           <CardDescription>
-            Choose which notifications you'd like to receive via email
+            {t('notifications.email.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <Label>Booking notifications</Label>
+              <Label>{t('notifications.email.bookings')}</Label>
               <p className="text-sm text-muted-foreground">
-                Receive emails for new bookings and confirmations
+                {t('notifications.email.bookingsDesc')}
               </p>
             </div>
             <Switch
@@ -92,9 +94,9 @@ export const NotificationPreferences = () => {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <Label>Message notifications</Label>
+              <Label>{t('notifications.email.messages')}</Label>
               <p className="text-sm text-muted-foreground">
-                Receive emails when you get new messages
+                {t('notifications.email.messagesDesc')}
               </p>
             </div>
             <Switch
@@ -105,9 +107,9 @@ export const NotificationPreferences = () => {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <Label>Session reminders</Label>
+              <Label>{t('notifications.email.reminders')}</Label>
               <p className="text-sm text-muted-foreground">
-                Receive email reminders before your sessions
+                {t('notifications.email.remindersDesc')}
               </p>
             </div>
             <Switch
@@ -118,9 +120,9 @@ export const NotificationPreferences = () => {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <Label>Marketing emails</Label>
+              <Label>{t('notifications.email.marketing')}</Label>
               <p className="text-sm text-muted-foreground">
-                Receive tips, updates, and promotional content
+                {t('notifications.email.marketingDesc')}
               </p>
             </div>
             <Switch
@@ -137,26 +139,26 @@ export const NotificationPreferences = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Smartphone className="w-5 h-5" />
-            Push Notifications
+            {t('notifications.push.title')}
             {isDespia && isRegistered && (
               <Badge variant="secondary" className="ml-2 text-xs">
-                Native Push Active
+                {t('notifications.push.nativePushActive')}
               </Badge>
             )}
           </CardTitle>
           <CardDescription>
             {isDespia 
-              ? "Choose which push notifications to receive on your device"
-              : "Choose which notifications appear in the notification center"
+              ? t('notifications.push.descriptionNative')
+              : t('notifications.push.descriptionWeb')
             }
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <Label>Booking notifications</Label>
+              <Label>{t('notifications.push.bookings')}</Label>
               <p className="text-sm text-muted-foreground">
-                Notifications for booking requests and updates
+                {t('notifications.push.bookingsDesc')}
               </p>
             </div>
             <Switch
@@ -167,9 +169,9 @@ export const NotificationPreferences = () => {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <Label>Message notifications</Label>
+              <Label>{t('notifications.push.messages')}</Label>
               <p className="text-sm text-muted-foreground">
-                Notifications for new messages
+                {t('notifications.push.messagesDesc')}
               </p>
             </div>
             <Switch
@@ -180,9 +182,9 @@ export const NotificationPreferences = () => {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <Label>Session reminders</Label>
+              <Label>{t('notifications.push.reminders')}</Label>
               <p className="text-sm text-muted-foreground">
-                Reminder notifications before sessions
+                {t('notifications.push.remindersDesc')}
               </p>
             </div>
             <Switch
@@ -199,10 +201,10 @@ export const NotificationPreferences = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Bell className="w-5 h-5" />
-            Additional Notifications
+            {t('notifications.additional.title')}
           </CardTitle>
           <CardDescription>
-            Configure notifications for challenges, achievements, and more
+            {t('notifications.additional.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -210,9 +212,9 @@ export const NotificationPreferences = () => {
             <div className="flex items-center gap-2">
               <Trophy className="w-4 h-4 text-amber-500" />
               <div>
-                <Label>Challenge notifications</Label>
+                <Label>{t('notifications.additional.challenges')}</Label>
                 <p className="text-sm text-muted-foreground">
-                  New challenges, expiring challenges, and completions
+                  {t('notifications.additional.challengesDesc')}
                 </p>
               </div>
             </div>
@@ -226,9 +228,9 @@ export const NotificationPreferences = () => {
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-purple-500" />
               <div>
-                <Label>Achievement notifications</Label>
+                <Label>{t('notifications.additional.achievements')}</Label>
                 <p className="text-sm text-muted-foreground">
-                  Badge unlocks and milestone achievements
+                  {t('notifications.additional.achievementsDesc')}
                 </p>
               </div>
             </div>
@@ -242,9 +244,9 @@ export const NotificationPreferences = () => {
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-blue-500" />
               <div>
-                <Label>Connection notifications</Label>
+                <Label>{t('notifications.additional.connections')}</Label>
                 <p className="text-sm text-muted-foreground">
-                  Friend requests and connection updates
+                  {t('notifications.additional.connectionsDesc')}
                 </p>
               </div>
             </div>
@@ -258,9 +260,9 @@ export const NotificationPreferences = () => {
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-green-500" />
               <div>
-                <Label>Daily motivation</Label>
+                <Label>{t('notifications.additional.motivation')}</Label>
                 <p className="text-sm text-muted-foreground">
-                  Receive daily motivational messages
+                  {t('notifications.additional.motivationDesc')}
                 </p>
               </div>
             </div>
@@ -278,18 +280,18 @@ export const NotificationPreferences = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="w-5 h-5" />
-            Reminder Timing
+            {t('notifications.timing.title')}
           </CardTitle>
           <CardDescription>
-            Choose when to receive session reminders
+            {t('notifications.timing.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
             <div>
-              <Label>Remind me before sessions</Label>
+              <Label>{t('notifications.timing.remindMe')}</Label>
               <p className="text-sm text-muted-foreground">
-                How early would you like to be reminded?
+                {t('notifications.timing.howEarly')}
               </p>
             </div>
             <Select
@@ -301,12 +303,12 @@ export const NotificationPreferences = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="1">1 hour</SelectItem>
-                <SelectItem value="2">2 hours</SelectItem>
-                <SelectItem value="4">4 hours</SelectItem>
-                <SelectItem value="12">12 hours</SelectItem>
-                <SelectItem value="24">24 hours</SelectItem>
-                <SelectItem value="48">2 days</SelectItem>
+                <SelectItem value="1">{t('notifications.timing.1hour')}</SelectItem>
+                <SelectItem value="2">{t('notifications.timing.2hours')}</SelectItem>
+                <SelectItem value="4">{t('notifications.timing.4hours')}</SelectItem>
+                <SelectItem value="12">{t('notifications.timing.12hours')}</SelectItem>
+                <SelectItem value="24">{t('notifications.timing.24hours')}</SelectItem>
+                <SelectItem value="48">{t('notifications.timing.2days')}</SelectItem>
               </SelectContent>
             </Select>
           </div>

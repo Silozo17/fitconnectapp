@@ -140,7 +140,56 @@
 
   "notifications": {
     "title": "Powiadomienia",
-    "description": "Skonfiguruj sposób otrzymywania powiadomień"
+    "description": "Skonfiguruj sposób otrzymywania powiadomień",
+    "email": {
+      "title": "Powiadomienia email",
+      "description": "Wybierz, które powiadomienia chcesz otrzymywać e-mailem",
+      "bookings": "Powiadomienia o rezerwacjach",
+      "bookingsDesc": "Otrzymuj e-maile o nowych rezerwacjach i potwierdzeniach",
+      "messages": "Powiadomienia o wiadomościach",
+      "messagesDesc": "Otrzymuj e-maile, gdy dostaniesz nowe wiadomości",
+      "reminders": "Przypomnienia o sesjach",
+      "remindersDesc": "Otrzymuj e-mailowe przypomnienia przed sesjami",
+      "marketing": "E-maile marketingowe",
+      "marketingDesc": "Otrzymuj porady, aktualizacje i treści promocyjne"
+    },
+    "push": {
+      "title": "Powiadomienia push",
+      "nativePushActive": "Natywne push aktywne",
+      "descriptionNative": "Wybierz, które powiadomienia push otrzymywać na urządzeniu",
+      "descriptionWeb": "Wybierz, które powiadomienia pojawiają się w centrum powiadomień",
+      "bookings": "Powiadomienia o rezerwacjach",
+      "bookingsDesc": "Powiadomienia o prośbach o rezerwację i aktualizacjach",
+      "messages": "Powiadomienia o wiadomościach",
+      "messagesDesc": "Powiadomienia o nowych wiadomościach",
+      "reminders": "Przypomnienia o sesjach",
+      "remindersDesc": "Powiadomienia przypominające przed sesjami"
+    },
+    "additional": {
+      "title": "Dodatkowe powiadomienia",
+      "description": "Skonfiguruj powiadomienia o wyzwaniach, osiągnięciach i więcej",
+      "challenges": "Powiadomienia o wyzwaniach",
+      "challengesDesc": "Nowe wyzwania, wygasające wyzwania i ukończenia",
+      "achievements": "Powiadomienia o osiągnięciach",
+      "achievementsDesc": "Odblokowania odznak i osiągnięcia kamieni milowych",
+      "connections": "Powiadomienia o połączeniach",
+      "connectionsDesc": "Zaproszenia do znajomych i aktualizacje połączeń",
+      "motivation": "Codzienna motywacja",
+      "motivationDesc": "Otrzymuj codzienne wiadomości motywacyjne"
+    },
+    "timing": {
+      "title": "Czas przypomnień",
+      "description": "Wybierz, kiedy otrzymywać przypomnienia o sesjach",
+      "remindMe": "Przypomnij mi przed sesjami",
+      "howEarly": "Jak wcześnie chcesz być przypomniany?",
+      "1hour": "1 godzina",
+      "2hours": "2 godziny",
+      "4hours": "4 godziny",
+      "12hours": "12 godzin",
+      "24hours": "24 godziny",
+      "2days": "2 dni"
+    },
+    "failedUpdate": "Nie udało się zaktualizować preferencji"
   },
 
   "integrations": {

@@ -904,11 +904,11 @@ const CoachSettings = () => {
                           )}
                         </div>
                         <div>
-                          <CardTitle>Verification Status</CardTitle>
+                          <CardTitle>{t('verification.verificationStatus')}</CardTitle>
                           <CardDescription>
                             {isVerified 
-                              ? "Your profile is verified" 
-                              : "Upload documents to get verified"}
+                              ? t('verification.profileVerified')
+                              : t('verification.uploadToVerify')}
                           </CardDescription>
                         </div>
                       </div>
@@ -921,7 +921,7 @@ const CoachSettings = () => {
                   {verificationStatus?.verification_notes && (
                     <CardContent>
                       <div className="p-3 rounded-lg bg-muted">
-                        <p className="text-sm font-medium mb-1">Admin Notes:</p>
+                        <p className="text-sm font-medium mb-1">{t('verification.adminNotes')}:</p>
                         <p className="text-sm text-muted-foreground">{verificationStatus.verification_notes}</p>
                       </div>
                     </CardContent>
@@ -929,7 +929,7 @@ const CoachSettings = () => {
                   {isVerified && verificationStatus?.verified_at && (
                     <CardContent>
                       <p className="text-sm text-muted-foreground">
-                        Verified on {format(new Date(verificationStatus.verified_at), "MMMM d, yyyy")}
+                        {t('verification.verifiedOn')} {format(new Date(verificationStatus.verified_at), "MMMM d, yyyy")}
                       </p>
                     </CardContent>
                   )}
@@ -1005,14 +1005,14 @@ const CoachSettings = () => {
                           {currentStatus !== "approved" && (
                             <div>
                               <Label htmlFor={`upload-${type}`} className="cursor-pointer">
-                                <div className="flex items-center justify-center gap-2 p-3 border-2 border-dashed border-border rounded-lg hover:border-primary/50 hover:bg-muted/50 transition-colors">
+                            <div className="flex items-center justify-center gap-2 p-3 border-2 border-dashed border-border rounded-lg hover:border-primary/50 hover:bg-muted/50 transition-colors">
                                   {isUploading ? (
                                     <Loader2 className="w-4 h-4 animate-spin" />
                                   ) : (
                                     <Upload className="w-4 h-4" />
                                   )}
                                   <span className="text-sm">
-                                    {isUploading ? "Uploading..." : "Upload document"}
+                                    {isUploading ? t('verification.uploading') : t('verification.uploadDocument')}
                                   </span>
                                 </div>
                               </Label>
@@ -1046,7 +1046,7 @@ const CoachSettings = () => {
                         ) : (
                           <Shield className="w-4 h-4 mr-2" />
                         )}
-                        Submit for Verification
+                        {t('verification.submitForReview')}
                       </Button>
                     </CardContent>
                   </Card>
@@ -1060,9 +1060,9 @@ const CoachSettings = () => {
                 {/* Video Conferencing */}
                 <div className="space-y-4">
                   <div>
-                    <h2 className="text-xl font-semibold mb-1">Video Conferencing</h2>
+                    <h2 className="text-xl font-semibold mb-1">{t('integrations.video.title')}</h2>
                     <p className="text-sm text-muted-foreground">
-                      Automatically create video meeting links for your online sessions
+                      {t('integrations.video.description')}
                     </p>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1098,9 +1098,9 @@ const CoachSettings = () => {
                 {/* Calendar Integration */}
                 <div className="space-y-4">
                   <div>
-                    <h2 className="text-xl font-semibold mb-1">Calendar Sync</h2>
+                    <h2 className="text-xl font-semibold mb-1">{t('integrations.calendar.title')}</h2>
                     <p className="text-sm text-muted-foreground">
-                      Automatically add coaching sessions to your calendar
+                      {t('integrations.calendar.description')}
                     </p>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1141,18 +1141,17 @@ const CoachSettings = () => {
                     <div className="flex items-start gap-3">
                       <Shield className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
                       <div className="space-y-2">
-                        <h3 className="font-medium">Data & Privacy</h3>
+                        <h3 className="font-medium">{t('integrations.dataPrivacy.title')}</h3>
                         <p className="text-sm text-muted-foreground">
-                          When you connect integrations, your data is handled according to our privacy practices. 
-                          Learn more about how we protect your data.
+                          {t('integrations.dataPrivacy.description')}
                         </p>
                         <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
                           <Link to="/privacy#integrations" className="text-primary hover:underline">
-                            Privacy Policy
+                            {t('integrations.dataPrivacy.privacyPolicy')}
                           </Link>
                           <span className="text-muted-foreground">•</span>
                           <Link to="/terms" className="text-primary hover:underline">
-                            Terms of Service
+                            {t('integrations.dataPrivacy.termsOfService')}
                           </Link>
                         </div>
                       </div>
@@ -1166,7 +1165,7 @@ const CoachSettings = () => {
             {selectedTab === "preferences" && (
               <div className="space-y-6">
                 <div className="card-elevated p-6">
-                  <h2 className="font-display font-bold text-foreground mb-6">Display Preferences</h2>
+                  <h2 className="font-display font-bold text-foreground mb-6">{t('preferences.displayPreferences')}</h2>
                   <div className="space-y-6">
                     <LanguageSelector />
                     <Separator />
@@ -1175,14 +1174,14 @@ const CoachSettings = () => {
                     <div className="max-w-xs">
                       <CurrencySelector />
                       <p className="text-sm text-muted-foreground mt-2">
-                        This affects how prices are displayed for you and your clients throughout the platform.
+                        {t('preferences.currencyHint')}
                       </p>
                     </div>
                     <Separator />
                     <div className="max-w-xs">
-                      <Label htmlFor="cancellation-hours" className="text-base font-medium">Cancellation Policy</Label>
+                      <Label htmlFor="cancellation-hours" className="text-base font-medium">{t('preferences.cancellationPolicy')}</Label>
                       <p className="text-sm text-muted-foreground mb-2">
-                        Minimum hours notice required for clients to cancel without forfeiting package tokens.
+                        {t('preferences.cancellationPolicyDesc')}
                       </p>
                       <Input
                         id="cancellation-hours"
@@ -1203,7 +1202,7 @@ const CoachSettings = () => {
                           }
                         }}
                       />
-                      <p className="text-xs text-muted-foreground mt-1">hours</p>
+                      <p className="text-xs text-muted-foreground mt-1">{t('preferences.hours')}</p>
                     </div>
                   </div>
                 </div>
@@ -1239,13 +1238,13 @@ const CoachSettings = () => {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Session</CardTitle>
-                    <CardDescription>Manage your current session</CardDescription>
+                    <CardTitle>{t('account.session')}</CardTitle>
+                    <CardDescription>{t('account.sessionDesc')}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <Button variant="outline" onClick={signOut}>
                       <LogOut className="w-4 h-4 mr-2" />
-                      Sign Out
+                      {t('account.signOut')}
                     </Button>
                   </CardContent>
                 </Card>
