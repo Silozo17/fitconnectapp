@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { FeatureGate } from "@/components/FeatureGate";
 import {
   User,
   Bell,
@@ -207,6 +208,8 @@ const CoachSettings = () => {
     updateSettings,
     getSettings,
     isLoading: videoLoading,
+    activeProvider,
+    getActiveProviderName,
   } = useVideoConference();
 
   const {
@@ -1089,6 +1092,7 @@ const CoachSettings = () => {
 
             {/* Integrations Tab */}
             {selectedTab === "integrations" && (
+              <FeatureGate feature="custom_integrations">
               <div className="space-y-6">
                 {/* Video Conferencing */}
                 <div className="space-y-4">
@@ -1101,6 +1105,9 @@ const CoachSettings = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {videoProviders.map((provider) => {
                       const settings = getSettings(provider.id);
+                      const isConnected = !!settings;
+                      const isBlocked = !isConnected && !!activeProvider && activeProvider.provider !== provider.id;
+                      
                       return (
                         <VideoProviderCard
                           key={provider.id}
@@ -1108,7 +1115,7 @@ const CoachSettings = () => {
                           providerName={provider.name}
                           providerIcon={provider.icon}
                           providerColor={provider.color}
-                          isConnected={!!settings}
+                          isConnected={isConnected}
                           autoCreateMeetings={settings?.auto_create_meetings}
                           onConnect={() => connectVideoProvider.mutate(provider.id)}
                           onDisconnect={() => settings && disconnectVideoProvider.mutate(settings.id)}
@@ -1120,6 +1127,8 @@ const CoachSettings = () => {
                             })
                           }
                           isConnecting={connectVideoProvider.isPending}
+                          isBlocked={isBlocked}
+                          blockedByProvider={isBlocked ? getActiveProviderName() : null}
                         />
                       );
                     })}
@@ -1192,6 +1201,7 @@ const CoachSettings = () => {
                   </CardContent>
                 </Card>
               </div>
+              </FeatureGate>
             )}
 
             {/* Preferences Tab */}

@@ -41,8 +41,38 @@ export const useVideoConference = () => {
     enabled: !!user,
   });
 
+  // Get the currently active provider (there should only be one)
+  const activeProvider = settings?.find((s) => s.is_active);
+  
+  // Check if a specific provider is connected and active
+  const isConnected = (provider: VideoProvider): boolean => {
+    return settings?.some((s) => s.provider === provider && s.is_active) ?? false;
+  };
+  
+  // Check if ANY provider is connected (for single-provider enforcement)
+  const hasActiveProvider = (): boolean => {
+    return !!activeProvider;
+  };
+  
+  // Get settings for a specific provider (only if active)
+  const getSettings = (provider: VideoProvider): VideoConferenceSettings | undefined => {
+    return settings?.find((s) => s.provider === provider && s.is_active);
+  };
+  
+  // Get the name of the currently active provider for display
+  const getActiveProviderName = (): string | null => {
+    if (!activeProvider) return null;
+    return activeProvider.provider === "zoom" ? "Zoom" : "Google Meet";
+  };
+
   const connectVideoProvider = useMutation({
     mutationFn: async (provider: VideoProvider) => {
+      // ENFORCEMENT: Check if another provider is already connected
+      if (activeProvider && activeProvider.provider !== provider) {
+        const activeName = activeProvider.provider === "zoom" ? "Zoom" : "Google Meet";
+        throw new Error(`You already have ${activeName} connected. Please disconnect it first before connecting a different provider.`);
+      }
+      
       const { data, error } = await supabase.functions.invoke("video-oauth-start", {
         body: { provider },
       });
@@ -56,7 +86,7 @@ export const useVideoConference = () => {
       return data;
     },
     onError: (error) => {
-      toast.error("Failed to connect video provider: " + error.message);
+      toast.error(error.message || "Failed to connect video provider");
     },
   });
 
@@ -122,14 +152,6 @@ export const useVideoConference = () => {
     },
   });
 
-  const isConnected = (provider: VideoProvider) => {
-    return settings?.some((s) => s.provider === provider && s.is_active);
-  };
-
-  const getSettings = (provider: VideoProvider) => {
-    return settings?.find((s) => s.provider === provider && s.is_active);
-  };
-
   return {
     settings,
     isLoading,
@@ -139,5 +161,9 @@ export const useVideoConference = () => {
     createMeeting,
     isConnected,
     getSettings,
+    // New helpers for single-provider enforcement
+    activeProvider,
+    hasActiveProvider,
+    getActiveProviderName,
   };
 };

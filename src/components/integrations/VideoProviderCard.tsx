@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Loader2, Check, Video, Unlink } from "lucide-react";
+import { Loader2, Check, Video, Unlink, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface VideoProviderCardProps {
@@ -18,6 +18,10 @@ interface VideoProviderCardProps {
   onDisconnect: () => void;
   onToggleAutoCreate?: (enabled: boolean) => void;
   isConnecting?: boolean;
+  /** If another provider is already connected, this will be true */
+  isBlocked?: boolean;
+  /** Name of the provider that is blocking this one */
+  blockedByProvider?: string | null;
 }
 
 const VideoProviderCard = ({
@@ -31,11 +35,16 @@ const VideoProviderCard = ({
   onDisconnect,
   onToggleAutoCreate,
   isConnecting,
+  isBlocked = false,
+  blockedByProvider = null,
 }: VideoProviderCardProps) => {
   const { t } = useTranslation('common');
 
   return (
-    <Card className="bg-card/50 border-border/50 hover:border-primary/30 transition-all">
+    <Card className={cn(
+      "bg-card/50 border-border/50 transition-all",
+      isBlocked && !isConnected ? "opacity-60" : "hover:border-primary/30"
+    )}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -82,6 +91,25 @@ const VideoProviderCard = ({
             >
               <Unlink className="w-4 h-4 mr-2" />
               {t('integrations.disconnect')}
+            </Button>
+          </div>
+        ) : isBlocked ? (
+          <div className="space-y-3">
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/50 border border-border">
+              <AlertCircle className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+              <p className="text-sm text-muted-foreground">
+                {blockedByProvider 
+                  ? t('integrations.video.blockedByOther', { provider: blockedByProvider })
+                  : t('integrations.video.onlyOneProvider')}
+              </p>
+            </div>
+            <Button
+              disabled
+              className="w-full"
+              variant="outline"
+            >
+              <Video className="w-4 h-4 mr-2" />
+              {t('integrations.connect')} {providerName}
             </Button>
           </div>
         ) : (

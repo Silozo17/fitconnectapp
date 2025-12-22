@@ -62,6 +62,8 @@ const CoachIntegrations = () => {
     updateSettings,
     getSettings,
     isLoading: videoLoading,
+    activeProvider,
+    getActiveProviderName,
   } = useVideoConference();
 
   const {
@@ -105,6 +107,10 @@ const CoachIntegrations = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {videoProviders.map((provider) => {
               const settings = getSettings(provider.id);
+              const isConnected = !!settings;
+              // Block if another provider is active
+              const isBlocked = !isConnected && !!activeProvider && activeProvider.provider !== provider.id;
+              
               return (
                 <VideoProviderCard
                   key={provider.id}
@@ -112,7 +118,7 @@ const CoachIntegrations = () => {
                   providerName={provider.name}
                   providerIcon={provider.icon}
                   providerColor={provider.color}
-                  isConnected={!!settings}
+                  isConnected={isConnected}
                   autoCreateMeetings={settings?.auto_create_meetings}
                   onConnect={() => connectVideoProvider.mutate(provider.id)}
                   onDisconnect={() => settings && disconnectVideoProvider.mutate(settings.id)}
@@ -124,6 +130,8 @@ const CoachIntegrations = () => {
                     })
                   }
                   isConnecting={connectVideoProvider.isPending}
+                  isBlocked={isBlocked}
+                  blockedByProvider={isBlocked ? getActiveProviderName() : null}
                 />
               );
             })}

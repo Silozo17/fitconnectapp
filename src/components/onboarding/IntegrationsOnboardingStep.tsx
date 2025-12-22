@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { Video, Calendar, CheckCircle, ExternalLink, Loader2 } from "lucide-react";
+import { Video, Calendar, CheckCircle, ExternalLink, Loader2, Lock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import type { Database } from "@/integrations/supabase/types";
 
 type VideoProvider = Database["public"]["Enums"]["video_provider"];
@@ -99,11 +100,18 @@ const IntegrationsOnboardingStep = ({ coachId, onStateChange }: IntegrationsOnbo
   const { t } = useTranslation('common');
   const { user } = useAuth();
   const [connectingProvider, setConnectingProvider] = useState<string | null>(null);
+  const { hasFeature } = useFeatureAccess();
 
   const { videoConnections, calendarConnections, hasAnyConnection } = useIntegrationsState(coachId);
 
   // Track previous state to avoid unnecessary calls
   const prevStateRef = useRef({ hasAnyConnection: false });
+
+  // Check if user has access to integrations (enterprise+ only)
+  const hasIntegrationsAccess = hasFeature("custom_integrations");
+
+  // Get the currently connected video provider (for single-provider enforcement)
+  const connectedVideoProvider = videoConnections?.[0] || null;
 
   // Notify parent of state changes - MUST be in useEffect to avoid render-loop freezes
   useEffect(() => {
@@ -114,6 +122,13 @@ const IntegrationsOnboardingStep = ({ coachId, onStateChange }: IntegrationsOnbo
   }, [hasAnyConnection, onStateChange]);
 
   const handleConnectVideo = async (providerId: VideoProvider) => {
+    // Single-provider enforcement
+    if (connectedVideoProvider && connectedVideoProvider !== providerId) {
+      const activeName = connectedVideoProvider === "zoom" ? "Zoom" : "Google Meet";
+      toast.error(`You already have ${activeName} connected. Please disconnect it first.`);
+      return;
+    }
+    
     setConnectingProvider(providerId);
     try {
       const { data, error } = await supabase.functions.invoke("video-oauth-start", {
@@ -132,6 +147,49 @@ const IntegrationsOnboardingStep = ({ coachId, onStateChange }: IntegrationsOnbo
       setConnectingProvider(null);
     }
   };
+
+  const handleConnectCalendar = async (providerId: CalendarProvider) => {
+    setConnectingProvider(providerId);
+    try {
+      const { data, error } = await supabase.functions.invoke("calendar-oauth-start", {
+        body: { provider: providerId },
+      });
+
+      if (error) throw error;
+      
+      if (data?.authUrl) {
+        sessionStorage.setItem("onboarding_return", "coach");
+        window.location.href = data.authUrl;
+      }
+    } catch (error) {
+      toast.error(t('integrations.connectionError'));
+    } finally {
+      setConnectingProvider(null);
+    }
+  };
+
+  // Show locked state for users without enterprise+ plan
+  if (!hasIntegrationsAccess) {
+    return (
+      <div className="space-y-5">
+        <div className="mb-4">
+          <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">
+            {t('onboardingIntegrations.videoCalendar.title')}
+          </h2>
+          <p className="text-muted-foreground text-sm mt-1.5">
+            {t('onboardingIntegrations.videoCalendar.subtitle')}
+          </p>
+        </div>
+        <div className="p-6 rounded-xl border-2 border-dashed border-border bg-muted/30 text-center">
+          <Lock className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+          <h3 className="font-medium text-foreground mb-2">{t('integrations.enterpriseOnly', 'Enterprise Feature')}</h3>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+            {t('integrations.upgradeToEnterprise', 'Video conferencing and calendar integrations are available on the Enterprise plan. You can skip this step and upgrade later.')}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const handleConnectCalendar = async (providerId: CalendarProvider) => {
     setConnectingProvider(providerId);
