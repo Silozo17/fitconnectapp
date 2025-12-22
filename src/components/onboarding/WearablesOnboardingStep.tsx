@@ -5,8 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { useWearables, WearableProvider } from "@/hooks/useWearables";
 
 interface WearablesOnboardingStepProps {
-  onComplete: () => void;
-  onSkip: () => void;
+  /** Called to indicate state changes - parent controls footer */
+  onStateChange?: (state: { hasAnyConnection: boolean; isLoading: boolean }) => void;
 }
 
 const WEARABLE_PROVIDERS: {
@@ -50,25 +50,31 @@ const WEARABLE_PROVIDERS: {
   },
 ];
 
-const WearablesOnboardingStep = ({ onComplete, onSkip }: WearablesOnboardingStepProps) => {
+export function useWearablesState() {
+  const { connections, isLoading, connectWearable, getConnection } = useWearables();
+  const hasAnyConnection = (connections?.length || 0) > 0;
+  return { connections, isLoading, hasAnyConnection, connectWearable, getConnection };
+}
+
+const WearablesOnboardingStep = ({ onStateChange }: WearablesOnboardingStepProps) => {
   const { t } = useTranslation('common');
-  const {
-    connections,
-    isLoading,
-    connectWearable,
-    getConnection,
-  } = useWearables();
+  const { connections, isLoading, connectWearable, getConnection } = useWearables();
 
   const hasAnyConnection = (connections?.length || 0) > 0;
+
+  // Notify parent of state changes
+  if (onStateChange) {
+    onStateChange({ hasAnyConnection, isLoading });
+  }
 
   if (isLoading) {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="font-display text-2xl font-bold text-foreground mb-2">
+          <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-2">
             {t('onboardingIntegrations.wearables.title')}
           </h2>
-          <p className="text-muted-foreground">{t('loading.default')}</p>
+          <p className="text-muted-foreground text-sm">{t('loading.default')}</p>
         </div>
         <div className="flex justify-center py-8">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -80,10 +86,10 @@ const WearablesOnboardingStep = ({ onComplete, onSkip }: WearablesOnboardingStep
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-display text-2xl font-bold text-foreground mb-2">
+        <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-2">
           {t('onboardingIntegrations.wearables.title')}
         </h2>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {t('onboardingIntegrations.wearables.subtitle')}
         </p>
       </div>
@@ -112,7 +118,7 @@ const WearablesOnboardingStep = ({ onComplete, onSkip }: WearablesOnboardingStep
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <p className="font-medium text-foreground">{t(provider.nameKey)}</p>
+                      <p className="font-medium text-foreground text-sm">{t(provider.nameKey)}</p>
                       {provider.comingSoon && (
                         <Badge variant="secondary" className="text-xs">
                           <Clock className="w-3 h-3 mr-1" />
@@ -120,7 +126,7 @@ const WearablesOnboardingStep = ({ onComplete, onSkip }: WearablesOnboardingStep
                         </Badge>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground">{t(provider.descriptionKey)}</p>
+                    <p className="text-xs text-muted-foreground">{t(provider.descriptionKey)}</p>
                   </div>
                 </div>
                 {provider.comingSoon ? (
@@ -137,7 +143,6 @@ const WearablesOnboardingStep = ({ onComplete, onSkip }: WearablesOnboardingStep
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      // Store return info in sessionStorage
                       sessionStorage.setItem("onboarding_return", "client");
                       connectWearable.mutate(provider.id);
                     }}
@@ -164,13 +169,6 @@ const WearablesOnboardingStep = ({ onComplete, onSkip }: WearablesOnboardingStep
           <strong className="text-foreground">{t('integrations.wearables.syncHealthData')}</strong>
         </p>
       </div>
-
-      <Button 
-        onClick={hasAnyConnection ? onComplete : onSkip} 
-        className="w-full bg-primary text-primary-foreground"
-      >
-        {hasAnyConnection ? t('onboardingIntegrations.wearables.continueButton') : t('onboardingIntegrations.wearables.skipButton')}
-      </Button>
     </div>
   );
 };

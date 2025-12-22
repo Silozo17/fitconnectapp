@@ -28,14 +28,27 @@ import { OnboardingStatusBanner } from "./OnboardingStatusBanner";
 
 interface VerificationOnboardingStepProps {
   coachId: string;
-  onComplete: () => void;
-  onSkip: () => void;
+  /** Called to indicate state changes - parent controls footer */
+  onStateChange?: (state: { hasRequiredDocs: boolean; hasAnyDocs: boolean; isSubmitting: boolean }) => void;
+  /** Called when submit is triggered by parent */
+  onSubmitRef?: React.MutableRefObject<(() => Promise<void>) | null>;
+}
+
+export function useVerificationState() {
+  const { data: documents = [], isLoading } = useVerificationDocuments();
+  
+  const hasIdentity = documents.some(d => d.document_type === 'identity');
+  const hasCertification = documents.some(d => d.document_type === 'certification');
+  const hasRequiredDocs = hasIdentity && hasCertification;
+  const hasAnyDocs = documents.length > 0;
+
+  return { documents, isLoading, hasRequiredDocs, hasAnyDocs };
 }
 
 export default function VerificationOnboardingStep({
   coachId,
-  onComplete,
-  onSkip,
+  onStateChange,
+  onSubmitRef,
 }: VerificationOnboardingStepProps) {
   const { t } = useTranslation('common');
   const [uploadingType, setUploadingType] = useState<DocumentType | null>(null);
@@ -92,6 +105,22 @@ export default function VerificationOnboardingStep({
   const hasRequiredDocs = hasIdentity && hasCertification;
   const hasAnyDocs = documents.length > 0;
 
+  // Notify parent of state changes
+  if (onStateChange) {
+    onStateChange({ hasRequiredDocs, hasAnyDocs, isSubmitting: submitMutation.isPending });
+  }
+
+  // Expose submit function to parent
+  const handleSubmit = async () => {
+    if (hasAnyDocs) {
+      await submitMutation.mutateAsync();
+    }
+  };
+
+  if (onSubmitRef) {
+    onSubmitRef.current = handleSubmit;
+  }
+
   const handleFileSelect = async (type: DocumentType, file: File) => {
     setUploadingType(type);
     try {
@@ -115,13 +144,6 @@ export default function VerificationOnboardingStep({
 
   const handleDelete = (documentId: string) => {
     deleteMutation.mutate(documentId);
-  };
-
-  const handleSubmitAndContinue = async () => {
-    if (hasAnyDocs) {
-      await submitMutation.mutateAsync();
-    }
-    onComplete();
   };
 
   const getDocsForType = (type: DocumentType): VerificationDocument[] => {
@@ -229,86 +251,62 @@ export default function VerificationOnboardingStep({
   }
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Scrollable content */}
-      <div className="flex-1 min-h-0 overflow-y-auto space-y-4">
-        {/* Header */}
-        <div>
-          <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-1">
-            {t('onboarding.getVerified')}
-          </h2>
-          <p className="text-muted-foreground text-sm">
-            {t('onboarding.standOutWithBadge')}
-          </p>
-        </div>
+    <div className="space-y-4">
+      {/* Header */}
+      <div>
+        <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-1">
+          {t('onboarding.getVerified')}
+        </h2>
+        <p className="text-muted-foreground text-sm">
+          {t('onboarding.standOutWithBadge')}
+        </p>
+      </div>
 
-        {/* Benefits - horizontal scroll on mobile */}
-        <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
-          {BENEFITS.map((benefit) => {
-            const Icon = benefit.icon;
-            return (
-              <div
-                key={benefit.title}
-                className="flex-shrink-0 p-3 rounded-lg bg-secondary/50 border border-border min-w-[140px] sm:min-w-0 sm:flex-1"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Icon className="w-4 h-4 text-primary" />
-                  </div>
-                  <p className="font-medium text-foreground text-xs">{benefit.title}</p>
+      {/* Benefits - horizontal scroll on mobile */}
+      <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
+        {BENEFITS.map((benefit) => {
+          const Icon = benefit.icon;
+          return (
+            <div
+              key={benefit.title}
+              className="flex-shrink-0 p-3 rounded-lg bg-secondary/50 border border-border min-w-[140px] sm:min-w-0 sm:flex-1"
+            >
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Icon className="w-4 h-4 text-primary" />
                 </div>
+                <p className="font-medium text-foreground text-xs">{benefit.title}</p>
               </div>
-            );
-          })}
-        </div>
-
-        {/* Required Documents */}
-        <div className="space-y-2">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Required</p>
-          {requiredDocs.map(renderDocumentCard)}
-        </div>
-
-        {/* Optional Documents - Collapsible */}
-        <Collapsible open={showOptional} onOpenChange={setShowOptional}>
-          <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground w-full py-2 hover:text-foreground transition-colors">
-            <ChevronDown className={cn("w-4 h-4 transition-transform", showOptional && "rotate-180")} />
-            Optional documents ({optionalDocs.length})
-          </CollapsibleTrigger>
-          <CollapsibleContent className="space-y-2 mt-1">
-            {optionalDocs.map(renderDocumentCard)}
-          </CollapsibleContent>
-        </Collapsible>
-
-        {/* Status indicator - fixed height to prevent layout shift */}
-        <OnboardingStatusBanner
-          show={hasRequiredDocs}
-          variant="success"
-          icon={<CheckCircle2 className="w-4 h-4 text-primary" />}
-          message={t('onboarding.requiredDocsUploaded')}
-          height={48}
-        />
+            </div>
+          );
+        })}
       </div>
 
-      {/* Sticky Actions */}
-      <div className="shrink-0 pt-3 border-t border-border flex gap-3 bg-background mt-auto">
-        <Button 
-          variant="outline" 
-          onClick={onSkip}
-          className="flex-1"
-        >
-          {t('onboarding.skipForNow')}
-        </Button>
-        <Button 
-          onClick={handleSubmitAndContinue}
-          disabled={submitMutation.isPending}
-          className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
-        >
-          {submitMutation.isPending ? (
-            <Loader2 className="w-4 h-4 animate-spin mr-2" />
-          ) : null}
-          {hasAnyDocs ? t('onboarding.submitAndContinue') : t('actions.continue')}
-        </Button>
+      {/* Required Documents */}
+      <div className="space-y-2">
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Required</p>
+        {requiredDocs.map(renderDocumentCard)}
       </div>
+
+      {/* Optional Documents - Collapsible */}
+      <Collapsible open={showOptional} onOpenChange={setShowOptional}>
+        <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground w-full py-2 hover:text-foreground transition-colors">
+          <ChevronDown className={cn("w-4 h-4 transition-transform", showOptional && "rotate-180")} />
+          Optional documents ({optionalDocs.length})
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 mt-1">
+          {optionalDocs.map(renderDocumentCard)}
+        </CollapsibleContent>
+      </Collapsible>
+
+      {/* Status indicator - fixed height to prevent layout shift */}
+      <OnboardingStatusBanner
+        show={hasRequiredDocs}
+        variant="success"
+        icon={<CheckCircle2 className="w-4 h-4 text-primary" />}
+        message={t('onboarding.requiredDocsUploaded')}
+        height={48}
+      />
     </div>
   );
 }

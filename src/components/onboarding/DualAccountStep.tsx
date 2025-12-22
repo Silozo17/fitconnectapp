@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { User, Briefcase, CheckCircle, Loader2, ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { User, Briefcase, CheckCircle, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -8,18 +7,31 @@ import { useTranslation } from "react-i18next";
 
 interface DualAccountStepProps {
   coachId: string;
-  onComplete: (createClientAccount: boolean) => void;
-  onBack?: () => void;
+  /** Called to indicate state changes - parent controls footer */
+  onStateChange?: (state: { selectedOption: 'both' | 'coach_only' | null; isCreating: boolean }) => void;
+  /** Exposed function for parent to trigger account creation */
+  onActionRef?: React.MutableRefObject<(() => Promise<boolean>) | null>;
 }
 
-const DualAccountStep = ({ coachId, onComplete, onBack }: DualAccountStepProps) => {
+export function useDualAccountState() {
+  const [selectedOption, setSelectedOption] = useState<'both' | 'coach_only' | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  return { selectedOption, setSelectedOption, isCreating, setIsCreating };
+}
+
+const DualAccountStep = ({ coachId, onStateChange, onActionRef }: DualAccountStepProps) => {
   const { t } = useTranslation('common');
   const { user } = useAuth();
+  const [selectedOption, setSelectedOption] = useState<'both' | 'coach_only' | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [selectedOption, setSelectedOption] = useState<"coach_only" | "both" | null>(null);
 
-  const handleCreateDualAccount = async () => {
-    if (!user) return;
+  // Notify parent of state changes
+  if (onStateChange) {
+    onStateChange({ selectedOption, isCreating });
+  }
+
+  const handleCreateDualAccount = async (): Promise<boolean> => {
+    if (!user) return false;
     
     setIsCreating(true);
     try {
@@ -38,8 +50,7 @@ const DualAccountStep = ({ coachId, onComplete, onBack }: DualAccountStepProps) 
           .eq("id", coachId);
         
         toast.success(t('onboarding.clientAccountSetup'));
-        onComplete(true);
-        return;
+        return true;
       }
 
       // Generate unique username with timestamp to avoid conflicts
@@ -70,8 +81,7 @@ const DualAccountStep = ({ coachId, onComplete, onBack }: DualAccountStepProps) 
               .update({ also_client: true })
               .eq("id", coachId);
             toast.success(t('onboarding.clientAccountSetup'));
-            onComplete(true);
-            return;
+            return true;
           }
         }
         throw profileError;
@@ -92,26 +102,33 @@ const DualAccountStep = ({ coachId, onComplete, onBack }: DualAccountStepProps) 
         .eq("id", coachId);
 
       toast.success(t('onboarding.clientAccountCreated'));
-      onComplete(true);
+      return true;
     } catch (error) {
       console.error("Error creating client account:", error);
       toast.error(t('onboarding.failedCreateClient'));
+      return false;
     } finally {
       setIsCreating(false);
     }
   };
 
-  const handleCoachOnly = () => {
-    onComplete(false);
-  };
+  // Expose action function to parent
+  if (onActionRef) {
+    onActionRef.current = async () => {
+      if (selectedOption === 'both') {
+        return await handleCreateDualAccount();
+      }
+      return true; // coach_only doesn't need creation
+    };
+  }
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-display text-2xl font-bold text-foreground mb-2">
+        <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-2">
           {t('onboarding.oneMoreThing')}
         </h2>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {t('onboarding.alsoFindCoaches')}
         </p>
       </div>
@@ -120,14 +137,15 @@ const DualAccountStep = ({ coachId, onComplete, onBack }: DualAccountStepProps) 
         <button
           type="button"
           onClick={() => setSelectedOption("both")}
-          className={`w-full p-6 rounded-xl border-2 transition-all text-left ${
+          className={`w-full p-4 sm:p-6 rounded-xl border-2 transition-all text-left ${
             selectedOption === "both"
               ? "border-primary bg-primary/10"
               : "border-border hover:border-muted-foreground"
           }`}
+          disabled={isCreating}
         >
           <div className="flex items-start gap-4">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
               selectedOption === "both" ? "bg-primary" : "bg-secondary"
             }`}>
               <div className="relative">
@@ -135,25 +153,25 @@ const DualAccountStep = ({ coachId, onComplete, onBack }: DualAccountStepProps) 
                 <User className={`w-3 h-3 absolute -bottom-1 -right-1 ${selectedOption === "both" ? "text-primary-foreground" : "text-muted-foreground"}`} />
               </div>
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <h3 className="font-display text-lg font-bold text-foreground">{t('onboarding.yesBothAccounts')}</h3>
-                {selectedOption === "both" && <CheckCircle className="w-5 h-5 text-primary" />}
+                <h3 className="font-display text-base sm:text-lg font-bold text-foreground">{t('onboarding.yesBothAccounts')}</h3>
+                {selectedOption === "both" && <CheckCircle className="w-5 h-5 text-primary shrink-0" />}
               </div>
-              <p className="text-muted-foreground text-sm mt-1">
+              <p className="text-muted-foreground text-xs sm:text-sm mt-1">
                 {t('onboarding.coachAndFindCoaches')}
               </p>
-              <ul className="mt-3 space-y-1 text-sm text-muted-foreground">
+              <ul className="mt-3 space-y-1 text-xs sm:text-sm text-muted-foreground">
                 <li className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-primary" />
+                  <CheckCircle className="w-4 h-4 text-primary shrink-0" />
                   {t('onboarding.browseBookCoaches')}
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-primary" />
+                  <CheckCircle className="w-4 h-4 text-primary shrink-0" />
                   {t('onboarding.trackOwnProgress')}
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-primary" />
+                  <CheckCircle className="w-4 h-4 text-primary shrink-0" />
                   {t('onboarding.participateChallenges')}
                 </li>
               </ul>
@@ -164,24 +182,25 @@ const DualAccountStep = ({ coachId, onComplete, onBack }: DualAccountStepProps) 
         <button
           type="button"
           onClick={() => setSelectedOption("coach_only")}
-          className={`w-full p-6 rounded-xl border-2 transition-all text-left ${
+          className={`w-full p-4 sm:p-6 rounded-xl border-2 transition-all text-left ${
             selectedOption === "coach_only"
               ? "border-primary bg-primary/10"
               : "border-border hover:border-muted-foreground"
           }`}
+          disabled={isCreating}
         >
           <div className="flex items-start gap-4">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
               selectedOption === "coach_only" ? "bg-primary" : "bg-secondary"
             }`}>
               <Briefcase className={`w-6 h-6 ${selectedOption === "coach_only" ? "text-primary-foreground" : "text-muted-foreground"}`} />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <h3 className="font-display text-lg font-bold text-foreground">{t('onboarding.noCoachOnly')}</h3>
-                {selectedOption === "coach_only" && <CheckCircle className="w-5 h-5 text-primary" />}
+                <h3 className="font-display text-base sm:text-lg font-bold text-foreground">{t('onboarding.noCoachOnly')}</h3>
+                {selectedOption === "coach_only" && <CheckCircle className="w-5 h-5 text-primary shrink-0" />}
               </div>
-              <p className="text-muted-foreground text-sm mt-1">
+              <p className="text-muted-foreground text-xs sm:text-sm mt-1">
                 {t('onboarding.focusOnBusiness')}
               </p>
             </div>
@@ -189,28 +208,10 @@ const DualAccountStep = ({ coachId, onComplete, onBack }: DualAccountStepProps) 
         </button>
       </div>
 
-      <div className="flex gap-3">
-        {onBack && (
-          <Button variant="outline" onClick={onBack}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            {t('common.back')}
-          </Button>
-        )}
-        <Button
-          onClick={selectedOption === "both" ? handleCreateDualAccount : handleCoachOnly}
-          disabled={!selectedOption || isCreating}
-          className="flex-1 bg-primary text-primary-foreground"
-        >
-          {isCreating ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              {t('onboarding.creatingAccount')}
-            </>
-          ) : (
-            t('actions.continue')
-          )}
-        </Button>
-      </div>
+      {/* Info text */}
+      <p className="text-xs text-muted-foreground text-center">
+        {t('onboarding.canChangeThisLater')}
+      </p>
     </div>
   );
 };
