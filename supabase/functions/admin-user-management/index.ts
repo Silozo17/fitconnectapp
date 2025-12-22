@@ -250,8 +250,19 @@ Deno.serve(async (req) => {
           });
         }
 
-        // Also delete auth users if userIds provided
+        // Delete user_roles and auth users if userIds provided
         if (userIds && userIds.length > 0) {
+          // Delete user_roles BEFORE auth users to allow re-registration
+          const { error: rolesError } = await supabaseAdmin
+            .from("user_roles")
+            .delete()
+            .in("user_id", userIds);
+          
+          if (rolesError) {
+            console.warn("Failed to delete user_roles:", rolesError);
+          }
+
+          // Now delete auth users
           const deleteErrors: string[] = [];
           for (const userId of userIds) {
             const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(userId);
@@ -262,7 +273,7 @@ Deno.serve(async (req) => {
           }
           
           if (deleteErrors.length > 0) {
-            console.warn(`Failed to delete ${deleteErrors.length} auth users`);
+            console.warn(`Failed to delete ${deleteErrors.length} auth users. Users may still be able to re-register.`);
           }
         }
 

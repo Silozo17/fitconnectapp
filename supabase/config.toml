@@ -206,3 +206,6 @@ verify_jwt = true
 
 [functions.check-health-achievements]
 verify_jwt = true
+
+[functions.cleanup-orphaned-users]
+verify_jwt = true
