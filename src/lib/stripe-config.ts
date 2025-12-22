@@ -201,7 +201,7 @@ export const SUBSCRIPTION_TIERS = {
       "Dedicated account manager",
       "Custom integrations",
       "Advanced reporting",
-      "Phone support",
+      "Priority support",
       "1% platform fee",
     ],
     highlighted: false,
