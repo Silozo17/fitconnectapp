@@ -45,6 +45,7 @@ export const BADGE_ICON_MAP: Record<string, LucideIcon> = {
   Sparkles,
   Gem,
   Award,
+  crown: Crown,
   Crown,
   Trophy,
   // Health badge icons (lowercase DB values)

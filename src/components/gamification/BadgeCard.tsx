@@ -58,14 +58,22 @@ export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
               !earned && 'grayscale'
             )}
           >
-            {badge.image_url ? (
-              <img src={badge.image_url} alt={badge.name} className="w-14 h-14 object-contain" />
-            ) : (
-              (() => {
+            {(() => {
+              // Check if the icon is an emoji
+              const isEmoji = (str: string): boolean => {
+                const emojiRegex = /[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/u;
+                return emojiRegex.test(str);
+              };
+
+              if (badge.image_url) {
+                return <img src={badge.image_url} alt={badge.name} className="w-14 h-14 object-contain" />;
+              } else if (isEmoji(badge.icon)) {
+                return <span className="text-4xl">{badge.icon}</span>;
+              } else {
                 const IconComponent = getBadgeIcon(badge.icon);
                 return <IconComponent className="w-12 h-12 text-primary" />;
-              })()
-            )}
+              }
+            })()}
           </div>
           
           <h4 className={cn(
