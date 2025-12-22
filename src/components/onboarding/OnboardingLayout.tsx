@@ -51,6 +51,10 @@ interface OnboardingLayoutProps {
   onSkip?: () => void;
   /** Custom skip label */
   skipLabel?: string;
+  /** Disable back button */
+  backDisabled?: boolean;
+  /** Disable skip button */
+  skipDisabled?: boolean;
 }
 
 const MAX_WIDTH_CLASSES = {
@@ -78,6 +82,8 @@ export function OnboardingLayout({
   maxWidth = 'lg',
   onSkip,
   skipLabel = 'Skip',
+  backDisabled = false,
+  skipDisabled = false,
 }: OnboardingLayoutProps) {
   const progressPercent = totalSteps > 0 ? ((currentStep + 1) / totalSteps) * 100 : 0;
   const headerRef = useRef<HTMLElement>(null);
@@ -109,7 +115,7 @@ export function OnboardingLayout({
 
   // Determine header right content
   const resolvedHeaderRight = headerRight ?? (onSkip ? (
-    <Button variant="ghost" size="sm" onClick={onSkip} className="text-muted-foreground text-sm">
+    <Button variant="ghost" size="sm" onClick={onSkip} disabled={skipDisabled} className="text-muted-foreground text-sm">
       {skipLabel}
     </Button>
   ) : null);
@@ -164,6 +170,7 @@ export function OnboardingLayout({
                   variant="ghost"
                   size="icon"
                   onClick={onBack}
+                  disabled={backDisabled}
                   className="flex-shrink-0 -ml-2"
                   aria-label="Go back"
                 >

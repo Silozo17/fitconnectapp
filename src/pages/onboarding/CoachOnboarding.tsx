@@ -270,15 +270,38 @@ const CoachOnboarding = () => {
     }
   }, [isNavigating, currentStep, formData.coachTypes.length, formData.inPersonAvailable, formData.locationData, formData.onlineAvailable, dualAccountState.selectedOption, verificationState.hasAnyDocs]);
 
-  const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep((prev) => prev - 1);
+  const handleBack = useCallback(() => {
+    // Guard: prevent navigation during existing navigation
+    if (isNavigating) {
+      console.log("[CoachOnboarding] handleBack blocked - already navigating");
+      return;
     }
-  };
+    
+    if (currentStep > 0) {
+      setIsNavigating(true);
+      console.log("[CoachOnboarding] handleBack - step", currentStep, "->", currentStep - 1);
+      
+      setCurrentStep((prev) => prev - 1);
+      
+      // Re-enable navigation after delay
+      setTimeout(() => {
+        setIsNavigating(false);
+        console.log("[CoachOnboarding] Navigation unlocked after back");
+      }, 150);
+    }
+  }, [isNavigating, currentStep]);
 
-  const handleSkip = () => {
+  const handleSkip = useCallback(() => {
+    // Guard: prevent skip during existing navigation
+    if (isNavigating) {
+      console.log("[CoachOnboarding] handleSkip blocked - already navigating");
+      return;
+    }
+    
+    setIsNavigating(true);
+    console.log("[CoachOnboarding] handleSkip - navigating to dashboard");
     navigate("/dashboard/coach");
-  };
+  }, [isNavigating, navigate]);
 
   const handleComplete = async () => {
     if (!user) return;
@@ -669,6 +692,7 @@ const CoachOnboarding = () => {
             coachId={coachProfileId}
             onComplete={handleNext}
             onSkip={handleNext}
+            onBack={handleBack}
           />
         ) : null;
 
@@ -792,13 +816,15 @@ const CoachOnboarding = () => {
         totalSteps={STEPS.length}
         title={STEPS[currentStep]}
         headerLogo
-        showBackButton={currentStep > 0 && !isNavigating}
+        showBackButton={currentStep > 0 && currentStep !== 4 && !isNavigating}
         onBack={handleBack}
         onSkip={handleSkip}
         skipLabel="Skip for now"
         footerActions={getFooterActions()}
         hideFooter={currentStep === 4}
         maxWidth="lg"
+        backDisabled={isNavigating}
+        skipDisabled={isNavigating}
       >
         {renderStepContent()}
       </OnboardingLayout>
