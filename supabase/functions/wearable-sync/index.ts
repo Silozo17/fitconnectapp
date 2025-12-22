@@ -49,8 +49,9 @@ serve(async (req) => {
     let healthData: any[] = [];
 
     switch (provider) {
-      case "google_fit":
-        healthData = await syncGoogleFit(access_token, weekAgo, today);
+      case "health_connect":
+        // Health Connect data is pushed from native app, not pulled via API
+        console.log("Health Connect sync is handled by native app");
         break;
       case "fitbit":
         healthData = await syncFitbit(access_token, weekAgo, today);
@@ -129,108 +130,6 @@ serve(async (req) => {
     );
   }
 });
-
-async function syncGoogleFit(accessToken: string, startDate: Date, endDate: Date) {
-  const healthData: any[] = [];
-  const startTimeMillis = startDate.getTime();
-  const endTimeMillis = endDate.getTime();
-
-  try {
-    // Fetch steps
-    const stepsResponse = await fetch(
-      "https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          aggregateBy: [{ dataTypeName: "com.google.step_count.delta" }],
-          bucketByTime: { durationMillis: 86400000 },
-          startTimeMillis,
-          endTimeMillis,
-        }),
-      }
-    );
-
-    const stepsData = await stepsResponse.json();
-    if (stepsData.bucket) {
-      for (const bucket of stepsData.bucket) {
-        const date = format(new Date(parseInt(bucket.startTimeMillis)), "yyyy-MM-dd");
-        const value = bucket.dataset?.[0]?.point?.[0]?.value?.[0]?.intVal || 0;
-        if (value > 0) {
-          healthData.push({ type: "steps", date, value, unit: "steps", raw: bucket });
-        }
-      }
-    }
-
-    // Fetch heart rate
-    const hrResponse = await fetch(
-      "https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          aggregateBy: [{ dataTypeName: "com.google.heart_rate.bpm" }],
-          bucketByTime: { durationMillis: 86400000 },
-          startTimeMillis,
-          endTimeMillis,
-        }),
-      }
-    );
-
-    const hrData = await hrResponse.json();
-    if (hrData.bucket) {
-      for (const bucket of hrData.bucket) {
-        const date = format(new Date(parseInt(bucket.startTimeMillis)), "yyyy-MM-dd");
-        const point = bucket.dataset?.[0]?.point?.[0];
-        if (point) {
-          const avgHr = point.value?.[0]?.fpVal || 0;
-          if (avgHr > 0) {
-            healthData.push({ type: "heart_rate", date, value: avgHr, unit: "bpm", raw: bucket });
-          }
-        }
-      }
-    }
-
-    // Fetch calories
-    const caloriesResponse = await fetch(
-      "https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          aggregateBy: [{ dataTypeName: "com.google.calories.expended" }],
-          bucketByTime: { durationMillis: 86400000 },
-          startTimeMillis,
-          endTimeMillis,
-        }),
-      }
-    );
-
-    const caloriesData = await caloriesResponse.json();
-    if (caloriesData.bucket) {
-      for (const bucket of caloriesData.bucket) {
-        const date = format(new Date(parseInt(bucket.startTimeMillis)), "yyyy-MM-dd");
-        const value = bucket.dataset?.[0]?.point?.[0]?.value?.[0]?.fpVal || 0;
-        if (value > 0) {
-          healthData.push({ type: "calories", date, value: Math.round(value), unit: "kcal", raw: bucket });
-        }
-      }
-    }
-  } catch (error) {
-    console.error("Error fetching Google Fit data:", error);
-  }
-
-  return healthData;
-}
 
 async function syncFitbit(accessToken: string, startDate: Date, endDate: Date) {
   const healthData: any[] = [];

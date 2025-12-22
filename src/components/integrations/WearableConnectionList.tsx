@@ -36,10 +36,12 @@ const WearableConnectionList = () => {
       description: t('integrations.requiresFitConnectApp'),
     },
     {
-      id: "google_fit",
-      name: "Google Fit",
+      id: "health_connect",
+      name: "Health Connect",
       icon: <Activity className="w-6 h-6 text-white" />,
-      color: "bg-gradient-to-br from-blue-500 to-green-500",
+      color: "bg-gradient-to-br from-green-500 to-teal-500",
+      comingSoon: true,
+      description: t('integrations.requiresAndroidApp'),
     },
     {
       id: "fitbit",

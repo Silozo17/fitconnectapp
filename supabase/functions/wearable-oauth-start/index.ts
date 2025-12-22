@@ -13,7 +13,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID");
 const FITBIT_CLIENT_ID = Deno.env.get("FITBIT_CLIENT_ID");
 const GARMIN_CONSUMER_KEY = Deno.env.get("GARMIN_CONSUMER_KEY");
 const GARMIN_CONSUMER_SECRET = Deno.env.get("GARMIN_CONSUMER_SECRET");
@@ -53,18 +52,12 @@ serve(async (req) => {
     const state = btoa(JSON.stringify({ userId: user.id, provider }));
 
     switch (provider) {
-      case "google_fit":
-        if (!GOOGLE_CLIENT_ID) {
-          throw new Error("Google OAuth not configured. Please add GOOGLE_CLIENT_ID secret.");
-        }
-        const googleScopes = [
-          "https://www.googleapis.com/auth/fitness.activity.read",
-          "https://www.googleapis.com/auth/fitness.heart_rate.read",
-          "https://www.googleapis.com/auth/fitness.sleep.read",
-          "https://www.googleapis.com/auth/fitness.body.read",
-        ].join(" ");
-        authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(googleScopes)}&state=${state}&access_type=offline&prompt=consent`;
-        break;
+      case "health_connect":
+        throw new Error(
+          "Health Connect requires a native Android app to access health data. " +
+          "This feature is coming soon with the FitConnect Android app. " +
+          "In the meantime, you can manually log your health data using the 'Log Data' button."
+        );
 
       case "fitbit":
         if (!FITBIT_CLIENT_ID) {

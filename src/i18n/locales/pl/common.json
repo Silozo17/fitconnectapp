@@ -789,9 +789,9 @@
         "name": "Apple Health",
         "description": "Synchronizuj dane zdrowotne z iPhone'a i Apple Watch"
       },
-      "googleFit": {
-        "name": "Google Fit",
-        "description": "Połącz swoje konto Google Fit"
+      "healthConnect": {
+        "name": "Health Connect",
+        "description": "Synchronizuj dane zdrowotne z urządzeń Android (wymaga aplikacji mobilnej)"
       },
       "fitbit": {
         "name": "Fitbit",

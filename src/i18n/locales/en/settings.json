@@ -226,7 +226,7 @@
     "manualHealthData": "Manual Health Data",
     "manualHealthDesc": "Log steps, heart rate, sleep manually",
     "logData": "Log Data",
-    "requiresFitConnectApp": "Requires FitConnect iOS app",
+    "requiresAndroidApp": "Requires FitConnect Android app",
     "appleCalendar": "Apple Calendar",
     "googleCalendar": "Google Calendar"
   },

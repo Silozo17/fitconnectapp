@@ -13,8 +13,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID");
-const GOOGLE_CLIENT_SECRET = Deno.env.get("GOOGLE_CLIENT_SECRET");
 const FITBIT_CLIENT_ID = Deno.env.get("FITBIT_CLIENT_ID");
 const FITBIT_CLIENT_SECRET = Deno.env.get("FITBIT_CLIENT_SECRET");
 const GARMIN_CONSUMER_KEY = Deno.env.get("GARMIN_CONSUMER_KEY");
@@ -162,7 +160,7 @@ serve(async (req) => {
 
     } else if (code && state) {
       // =====================================================
-      // OAuth 2.0 Flow (Google Fit, Fitbit)
+      // OAuth 2.0 Flow (Fitbit only - Google Fit removed)
       // =====================================================
       const { userId, provider } = JSON.parse(atob(state));
       console.log("Processing OAuth 2.0 callback for:", provider, userId);
@@ -173,25 +171,6 @@ serve(async (req) => {
       let providerUserId: string | undefined;
 
       switch (provider) {
-        case "google_fit":
-          const googleResponse = await fetch("https://oauth2.googleapis.com/token", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: new URLSearchParams({
-              code,
-              client_id: GOOGLE_CLIENT_ID!,
-              client_secret: GOOGLE_CLIENT_SECRET!,
-              redirect_uri: redirectUri,
-              grant_type: "authorization_code",
-            }),
-          });
-          const googleData = await googleResponse.json();
-          if (googleData.error) throw new Error(googleData.error_description);
-          accessToken = googleData.access_token;
-          refreshToken = googleData.refresh_token;
-          expiresIn = googleData.expires_in;
-          break;
-
         case "fitbit":
           const fitbitAuth = btoa(`${FITBIT_CLIENT_ID}:${FITBIT_CLIENT_SECRET}`);
           const fitbitResponse = await fetch("https://api.fitbit.com/oauth2/token", {
