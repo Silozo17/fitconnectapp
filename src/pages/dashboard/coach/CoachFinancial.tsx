@@ -479,7 +479,9 @@ function InvoiceRow({
   onUpdateStatus: (status: Invoice["status"]) => void;
   onDelete: () => void;
 }) {
-  const config = INVOICE_STATUS_CONFIG[invoice.status];
+  const { t } = useTranslation("coach");
+  const statusConfig = getInvoiceStatusConfig(t);
+  const config = statusConfig[invoice.status];
   const StatusIcon = config.icon;
 
   return (
