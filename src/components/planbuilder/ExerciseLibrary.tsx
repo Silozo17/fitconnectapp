@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { useExercises, useExerciseCategories, Exercise } from "@/hooks/useExercises";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface ExerciseLibraryProps {
   onAddExercise: (exercise: Exercise) => void;
@@ -20,6 +21,7 @@ interface ExerciseLibraryProps {
 }
 
 const ExerciseLibrary = ({ onAddExercise, onCreateCustom }: ExerciseLibraryProps) => {
+  const { t } = useTranslation('coach');
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   
@@ -46,13 +48,15 @@ const ExerciseLibrary = ({ onAddExercise, onCreateCustom }: ExerciseLibraryProps
   return (
     <div className="card-glow rounded-2xl overflow-hidden">
       <div className="p-4 border-b border-border">
-        <h3 className="font-display font-bold text-foreground mb-4">Exercise Library</h3>
+        <h3 className="font-display font-bold text-foreground mb-4">
+          {t('workoutBuilder.exerciseLibrary.title')}
+        </h3>
         
         <div className="space-y-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Search exercises..."
+              placeholder={t('workoutBuilder.exerciseLibrary.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -61,10 +65,10 @@ const ExerciseLibrary = ({ onAddExercise, onCreateCustom }: ExerciseLibraryProps
           
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
             <SelectTrigger>
-              <SelectValue placeholder="All Categories" />
+              <SelectValue placeholder={t('workoutBuilder.exerciseLibrary.allCategories')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="all">{t('workoutBuilder.exerciseLibrary.allCategories')}</SelectItem>
               {categories?.map((category) => (
                 <SelectItem key={category.id} value={category.id}>
                   {category.name}
@@ -84,7 +88,7 @@ const ExerciseLibrary = ({ onAddExercise, onCreateCustom }: ExerciseLibraryProps
           ) : exercises?.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Dumbbell className="w-8 h-8 mx-auto mb-2 opacity-50" />
-              <p>No exercises found</p>
+              <p>{t('workoutBuilder.exerciseLibrary.noExercises')}</p>
             </div>
           ) : (
             exercises?.map((exercise) => (
@@ -101,7 +105,7 @@ const ExerciseLibrary = ({ onAddExercise, onCreateCustom }: ExerciseLibraryProps
                     <p className="font-medium text-foreground text-sm">{exercise.name}</p>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-muted-foreground">
-                        {exercise.category?.name || "Uncategorized"}
+                        {exercise.category?.name || t('workoutBuilder.exerciseLibrary.uncategorized')}
                       </span>
                       {exercise.video_url && (
                         <Video className="w-3 h-3 text-primary" />
@@ -129,7 +133,7 @@ const ExerciseLibrary = ({ onAddExercise, onCreateCustom }: ExerciseLibraryProps
           onClick={onCreateCustom}
         >
           <Plus className="w-4 h-4 mr-2" />
-          Create Custom Exercise
+          {t('workoutBuilder.exerciseLibrary.createCustom')}
         </Button>
       </div>
     </div>

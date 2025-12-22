@@ -1,5 +1,6 @@
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface MacroTrackerProps {
   calories: number;
@@ -24,6 +25,7 @@ export const MacroTracker = ({
   targetFat = 65,
   compact = false,
 }: MacroTrackerProps) => {
+  const { t } = useTranslation('coach');
   const caloriePercent = Math.min((calories / targetCalories) * 100, 100);
   const proteinPercent = Math.min((protein / targetProtein) * 100, 100);
   const carbsPercent = Math.min((carbs / targetCarbs) * 100, 100);
@@ -54,12 +56,14 @@ export const MacroTracker = ({
 
   return (
     <div className="bg-card border border-border rounded-xl p-4">
-      <h3 className="text-lg font-semibold text-foreground mb-4">Daily Macros</h3>
+      <h3 className="text-lg font-semibold text-foreground mb-4">
+        {t('nutritionBuilder.dailyMacros')}
+      </h3>
       
       {/* Calories */}
       <div className="mb-4">
         <div className="flex justify-between items-center mb-1">
-          <span className="text-sm text-muted-foreground">Calories</span>
+          <span className="text-sm text-muted-foreground">{t('nutritionBuilder.calories')}</span>
           <span className="text-sm font-medium text-primary">
             {Math.round(calories)} / {targetCalories}
           </span>
@@ -85,7 +89,7 @@ export const MacroTracker = ({
             value={proteinPercent} 
             className="h-1.5 bg-background [&>div]:bg-red-400" 
           />
-          <div className="text-xs text-muted-foreground mt-1">Protein</div>
+          <div className="text-xs text-muted-foreground mt-1">{t('nutritionBuilder.protein')}</div>
         </div>
         
         {/* Carbs */}
@@ -96,7 +100,7 @@ export const MacroTracker = ({
             value={carbsPercent} 
             className="h-1.5 bg-background [&>div]:bg-yellow-400" 
           />
-          <div className="text-xs text-muted-foreground mt-1">Carbs</div>
+          <div className="text-xs text-muted-foreground mt-1">{t('nutritionBuilder.carbs')}</div>
         </div>
         
         {/* Fat */}
@@ -107,7 +111,7 @@ export const MacroTracker = ({
             value={fatPercent} 
             className="h-1.5 bg-background [&>div]:bg-blue-400" 
           />
-          <div className="text-xs text-muted-foreground mt-1">Fat</div>
+          <div className="text-xs text-muted-foreground mt-1">{t('nutritionBuilder.fat')}</div>
         </div>
       </div>
     </div>

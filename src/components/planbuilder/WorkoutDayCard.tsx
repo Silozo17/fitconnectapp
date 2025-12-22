@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PlanDay, PlanExercise } from "@/hooks/useTrainingPlans";
 import SortableExerciseItem from "./SortableExerciseItem";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface WorkoutDayCardProps {
   day: PlanDay;
@@ -38,6 +39,7 @@ const WorkoutDayCard = ({
   onDeleteDay,
   onAddExercise,
 }: WorkoutDayCardProps) => {
+  const { t } = useTranslation('coach');
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -79,7 +81,7 @@ const WorkoutDayCard = ({
           <GripVertical className="w-5 h-5 text-muted-foreground" />
           <span className="font-medium text-foreground">{day.name}</span>
           <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-            {day.exercises.length} exercises
+            {day.exercises.length} {t('workoutBuilder.exerciseLibrary.exercises')}
           </Badge>
         </div>
         <div className="flex items-center gap-2">
@@ -141,7 +143,7 @@ const WorkoutDayCard = ({
             onClick={onAddExercise}
           >
             <Plus className="w-4 h-4 mr-2" />
-            Add Exercise
+            {t('workoutBuilder.exerciseLibrary.addExercise')}
           </Button>
         </div>
       )}
