@@ -1072,6 +1072,56 @@
       "rare": "Rzadka",
       "epic": "Epicka",
       "legendary": "Legendarna"
+    },
+    "badges": {
+      "profile_starter": {
+        "name": "Początkujący profil",
+        "description": "Uzupełnij 50% profilu trenera"
+      },
+      "profile_pro": {
+        "name": "Profesjonalny profil",
+        "description": "Uzupełnij 100% profilu trenera"
+      },
+      "first_client": {
+        "name": "Pierwszy klient",
+        "description": "Zaakceptuj pierwsze połączenie z klientem"
+      },
+      "first_review": {
+        "name": "Pierwsza recenzja",
+        "description": "Otrzymaj pierwszą recenzję od klienta"
+      },
+      "first_session": {
+        "name": "Pierwsza sesja",
+        "description": "Ukończ pierwszą sesję treningową"
+      },
+      "first_earning": {
+        "name": "Pierwszy zarobek",
+        "description": "Otrzymaj pierwszą płatność"
+      },
+      "session_pro": {
+        "name": "Profesjonalista sesji",
+        "description": "Ukończ 50 sesji treningowych"
+      },
+      "rising_star": {
+        "name": "Wschodząca gwiazda",
+        "description": "Zarób 1000 £ przez platformę"
+      },
+      "growing_business": {
+        "name": "Rozwijający się biznes",
+        "description": "Osiągnij 10 aktywnych klientów"
+      },
+      "coaching_star": {
+        "name": "Gwiazda coachingu",
+        "description": "Osiągnij 50 aktywnych klientów"
+      },
+      "verified_coach": {
+        "name": "Zweryfikowany trener",
+        "description": "Ukończ proces weryfikacji"
+      },
+      "highly_rated": {
+        "name": "Wysoko oceniany",
+        "description": "Utrzymaj ocenę 4.5+ przy 10+ recenzjach"
+      }
     }
   },
   "reviewsPage": {

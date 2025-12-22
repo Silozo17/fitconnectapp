@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { enGB, pl } from "date-fns/locale";
+import i18n from "@/i18n";
 
 const rarityColors: Record<string, string> = {
   common: "border-muted-foreground/30",
@@ -192,6 +194,21 @@ const CoachAchievements = () => {
     );
   }
 
+  // Helper to get badge name/description with translation fallback
+  const getBadgeTranslation = (badge: typeof availableBadges[0], field: 'name' | 'description') => {
+    // Convert badge name to key format (e.g., "Profile Starter" -> "profile_starter")
+    const badgeKey = badge.name.toLowerCase().replace(/\s+/g, '_');
+    const translationKey = `achievementsPage.badges.${badgeKey}.${field}`;
+    const translated = t(translationKey);
+    // If translation key returns itself, fall back to database value
+    return translated === translationKey ? badge[field] : translated;
+  };
+
+  // Get locale for date formatting
+  const getDateLocale = () => {
+    return i18n.language === 'pl' ? pl : enGB;
+  };
+
   const renderBadgeCard = (badge: typeof availableBadges[0]) => {
     const isEarned = earnedBadgeIds.has(badge.id);
     const earnedData = earnedBadges?.find((b) => b.badge_id === badge.id);
@@ -202,6 +219,9 @@ const CoachAchievements = () => {
     const gradientStyle = isEarned 
       ? rarityGradientEarned[badge.rarity] 
       : rarityGradientUnearned[badge.rarity];
+
+    const badgeName = getBadgeTranslation(badge, 'name');
+    const badgeDescription = getBadgeTranslation(badge, 'description');
 
     return (
       <div
@@ -216,9 +236,9 @@ const CoachAchievements = () => {
           {/* Left side - Text content */}
           <div className="flex-1 min-w-0 order-2 sm:order-1">
             <h3 className={cn("font-semibold text-lg", isEarned ? "text-foreground" : "text-muted-foreground")}>
-              {badge.name}
+              {badgeName}
             </h3>
-            <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{badge.description}</p>
+            <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{badgeDescription}</p>
             
             <div className="space-y-2">
               <div className="flex items-center gap-2">
@@ -230,7 +250,7 @@ const CoachAchievements = () => {
                 </span>
                 {isEarned && earnedData && (
                   <span className="text-xs text-muted-foreground">
-                    {t("achievementsPage.earnedOn", { date: format(new Date(earnedData.earned_at), "MMM d, yyyy") })}
+                    {t("achievementsPage.earnedOn", { date: format(new Date(earnedData.earned_at), "d MMM yyyy", { locale: getDateLocale() }) })}
                   </span>
                 )}
               </div>
