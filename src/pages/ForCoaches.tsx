@@ -214,7 +214,7 @@ const ForCoaches = () => {
                       <div className="pt-4 border-t border-border text-center">
                         <div className="flex items-center justify-center gap-2 mb-1">
                           <Globe className="w-5 h-5 text-primary" />
-                          <p className="text-lg font-bold">{isLoading ? "..." : formatStatNumber(platformStats?.totalUsers || 0)} {t("forCoaches.calculator.activeClients")}</p>
+                          <p className="text-lg font-bold">{isLoading ? "..." : (t as any)("forCoaches.calculator.activeClients", { count: formatStatNumber(platformStats?.totalUsers || 0) })}</p>
                         </div>
                         <p className="text-xs text-muted-foreground">
                           {t("forCoaches.calculator.lookingForCoaches")}
