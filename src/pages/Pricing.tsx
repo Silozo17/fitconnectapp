@@ -8,7 +8,7 @@ import { Check, Zap, Star, Crown, Sparkles, Users, MessageSquare, Calendar, Tren
 import { SUBSCRIPTION_TIERS, TierKey, BillingInterval } from "@/lib/stripe-config";
 import { cn } from "@/lib/utils";
 import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
-import { useCountryContext } from "@/contexts/CountryContext";
+import { useCountry } from "@/hooks/useCountry";
 import { useTranslation } from "@/hooks/useTranslation";
 import { 
   getPricingConfig, 
@@ -29,7 +29,7 @@ const tierIcons: Record<TierKey, typeof Zap> = {
 const Pricing = () => {
   const { t } = useTranslation('pages');
   const [billingInterval, setBillingInterval] = useState<BillingInterval>("monthly");
-  const { countryCode } = useCountryContext();
+  const { countryCode } = useCountry();
 
   const platformFeatures = [
     {
