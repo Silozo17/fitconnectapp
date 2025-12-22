@@ -553,7 +553,11 @@
       "saveSettings": "Save Settings",
       "settingsSaved": "Booking settings saved",
       "settingsFailed": "Failed to save booking settings",
-      "depositsInfo": "Deposits and payment requirements are configured per session type below. Edit a session type to set up deposits or require full payment upfront."
+      "depositsInfo": "Deposits and payment requirements are configured per session type below. Edit a session type to set up deposits or require full payment upfront.",
+      "requireApproval": "Require approval for bookings",
+      "requireApprovalDesc": "When enabled, you must approve each booking before it's confirmed",
+      "minBookingNotice": "Minimum notice before booking",
+      "bookAtLeast": "Clients must book at least this far in advance"
     },
     "bufferOptions": {
       "noBuffer": "No buffer",
@@ -605,6 +609,7 @@
       "fixedAmount": "Fixed amount",
       "depositPercent": "Deposit %",
       "depositAmount": "Deposit Amount",
+      "depositPreview": "Deposit amount:",
       "cancel": "Cancel",
       "save": "Save",
       "boostPaymentError": "Cannot remove payment requirement - Boost requires at least one session type with payment enabled. Disable Boost first if you want to remove all payment requirements."
@@ -617,6 +622,11 @@
       "endTime": "End Time",
       "cancel": "Cancel",
       "save": "Save"
+    },
+    "stripeConnect": {
+      "title": "Connect Stripe to Enable Payments",
+      "description": "To collect deposits or require payment during bookings, you need to connect your Stripe account first.",
+      "connectButton": "Connect Stripe"
     }
   },
   "invoices": {
