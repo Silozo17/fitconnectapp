@@ -98,6 +98,7 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
       <CardContent>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {(Object.entries(SUBSCRIPTION_TIERS) as [TierKey, typeof SUBSCRIPTION_TIERS[TierKey]][])
+            .filter(([tierKey, tier]) => !tier.adminOnly || activeTier === tierKey)
             .map(([tierKey, tier]) => {
               const isCurrentTier = activeTier === tierKey;
               const isLoading = loadingTier === tierKey;
