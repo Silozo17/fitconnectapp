@@ -865,15 +865,15 @@ const CoachSchedule = () => {
               <div className="flex items-start gap-3">
                 <CreditCard className="w-5 h-5 text-warning mt-0.5 shrink-0" />
                 <div>
-                  <p className="font-medium text-foreground">Connect Stripe to Enable Payments</p>
+                  <p className="font-medium text-foreground">{t("schedule.stripeConnect.title")}</p>
                   <p className="text-sm text-muted-foreground">
-                    To collect deposits or require payment during bookings, you need to connect your Stripe account first.
+                    {t("schedule.stripeConnect.description")}
                   </p>
                 </div>
               </div>
               <Button asChild variant="outline" className="shrink-0 border-warning/50 hover:bg-warning/10">
                 <Link to="/dashboard/coach/settings?tab=subscription">
-                  Connect Stripe
+                  {t("schedule.stripeConnect.connectButton")}
                 </Link>
               </Button>
             </div>
@@ -889,9 +889,9 @@ const CoachSchedule = () => {
               {/* Booking Approval */}
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label className="font-medium">Require approval for bookings</Label>
+                  <Label className="font-medium">{t("schedule.bookingSettings.requireApproval")}</Label>
                   <p className="text-sm text-muted-foreground">
-                    When enabled, you must approve each booking before it's confirmed
+                    {t("schedule.bookingSettings.requireApprovalDesc")}
                   </p>
                 </div>
                 <Switch
@@ -903,56 +903,56 @@ const CoachSchedule = () => {
               {/* Pre-booking Buffer */}
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Minimum notice before booking</Label>
+                  <Label>{t("schedule.bookingSettings.minBookingNotice")}</Label>
                   <Select value={preBookingBuffer} onValueChange={setPreBookingBuffer}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="60">1 hour</SelectItem>
-                      <SelectItem value="120">2 hours</SelectItem>
-                      <SelectItem value="240">4 hours</SelectItem>
-                      <SelectItem value="720">12 hours</SelectItem>
-                      <SelectItem value="1440">24 hours</SelectItem>
-                      <SelectItem value="2880">48 hours</SelectItem>
+                      <SelectItem value="60">{t("schedule.bufferOptions.1hr")}</SelectItem>
+                      <SelectItem value="120">{t("schedule.bufferOptions.2hr")}</SelectItem>
+                      <SelectItem value="240">{t("schedule.bufferOptions.4hr")}</SelectItem>
+                      <SelectItem value="720">{t("schedule.bufferOptions.12hr")}</SelectItem>
+                      <SelectItem value="1440">{t("schedule.bufferOptions.24hr")}</SelectItem>
+                      <SelectItem value="2880">{t("schedule.bufferOptions.48hr")}</SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
-                    Clients must book at least this far in advance
+                    {t("schedule.bookingSettings.bookAtLeast")}
                   </p>
                 </div>
 
                 {/* Post-booking Buffer */}
                 <div className="space-y-2">
-                  <Label>Buffer between sessions</Label>
+                  <Label>{t("schedule.bookingSettings.bufferBetweenSessions")}</Label>
                   <Select value={postBookingBuffer} onValueChange={setPostBookingBuffer}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="0">No buffer</SelectItem>
-                      <SelectItem value="15">15 minutes</SelectItem>
-                      <SelectItem value="30">30 minutes</SelectItem>
-                      <SelectItem value="45">45 minutes</SelectItem>
-                      <SelectItem value="60">1 hour</SelectItem>
+                      <SelectItem value="0">{t("schedule.bufferOptions.noBuffer")}</SelectItem>
+                      <SelectItem value="15">{t("schedule.bufferOptions.15min")}</SelectItem>
+                      <SelectItem value="30">{t("schedule.bufferOptions.30min")}</SelectItem>
+                      <SelectItem value="45">{t("schedule.bufferOptions.45min")}</SelectItem>
+                      <SelectItem value="60">{t("schedule.bufferOptions.1hr")}</SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
-                    Time blocked after each session ends
+                    {t("schedule.bookingSettings.bufferDescription")}
                   </p>
                 </div>
               </div>
 
               {/* Default Location */}
               <div className="space-y-2">
-                <Label>Default session location</Label>
+                <Label>{t("schedule.bookingSettings.defaultLocation")}</Label>
                 <Input
-                  placeholder="e.g., PureGym Manchester, 123 Main St"
+                  placeholder={t("schedule.bookingSettings.locationPlaceholder")}
                   value={defaultLocation}
                   onChange={(e) => setDefaultLocation(e.target.value)}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Default location for in-person sessions (can be overridden per session type)
+                  {t("schedule.bookingSettings.locationDescription")}
                 </p>
               </div>
 
@@ -967,8 +967,7 @@ const CoachSchedule = () => {
               <div className="flex items-start gap-3 p-3 bg-secondary/50 rounded-lg text-sm">
                 <AlertCircle className="w-4 h-4 mt-0.5 text-muted-foreground flex-shrink-0" />
                 <p className="text-muted-foreground">
-                  Deposits and payment requirements are configured per session type below. 
-                  Edit a session type to set up deposits or require full payment upfront.
+                  {t("schedule.bookingSettings.depositsInfo")}
                 </p>
               </div>
             </div>
@@ -977,8 +976,8 @@ const CoachSchedule = () => {
           {/* Weekly Availability Card */}
           <div className="card-elevated">
             <div className="p-4 border-b border-border">
-              <h3 className="font-display font-bold text-foreground">Weekly Availability</h3>
-              <p className="text-sm text-muted-foreground">Set your default working hours</p>
+              <h3 className="font-display font-bold text-foreground">{t("schedule.weeklyAvailability.title")}</h3>
+              <p className="text-sm text-muted-foreground">{t("schedule.weeklyAvailability.subtitle")}</p>
             </div>
             {loadingAvailability ? (
               <div className="p-12 flex justify-center">
@@ -1021,7 +1020,7 @@ const CoachSchedule = () => {
                             size="sm"
                             onClick={() => handleEditAvailability(dayIndex)}
                           >
-                            Edit
+                            {t("schedule.weeklyAvailability.edit")}
                           </Button>
                         </div>
                       )}
@@ -1031,7 +1030,7 @@ const CoachSchedule = () => {
                           size="sm"
                           onClick={() => handleEditAvailability(dayIndex)}
                         >
-                          Set Hours
+                          {t("schedule.weeklyAvailability.setHours")}
                         </Button>
                       )}
                     </div>
@@ -1045,15 +1044,15 @@ const CoachSchedule = () => {
           <div className="card-elevated mt-6">
             <div className="p-4 border-b border-border flex items-center justify-between">
               <div>
-                <h3 className="font-display font-bold text-foreground">Session Types</h3>
-                <p className="text-sm text-muted-foreground">Define your service offerings</p>
+                <h3 className="font-display font-bold text-foreground">{t("schedule.sessionTypes.title")}</h3>
+                <p className="text-sm text-muted-foreground">{t("schedule.sessionTypes.subtitle")}</p>
               </div>
               <Button size="sm" variant="outline" onClick={() => {
                 resetSessionTypeForm();
                 setShowSessionTypeModal(true);
               }}>
                 <Plus className="w-4 h-4 mr-2" />
-                Add Type
+                {t("schedule.sessionTypes.addType")}
               </Button>
             </div>
             {loadingSessionTypes ? (
@@ -1062,13 +1061,13 @@ const CoachSchedule = () => {
               </div>
             ) : sessionTypes.length === 0 ? (
               <div className="p-8 text-center">
-                <p className="text-muted-foreground mb-4">No session types yet</p>
+                <p className="text-muted-foreground mb-4">{t("schedule.sessionTypes.noSessionTypes")}</p>
                 <Button onClick={() => {
                   resetSessionTypeForm();
                   setShowSessionTypeModal(true);
                 }}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Create Your First Session Type
+                  {t("schedule.sessionTypes.createFirst")}
                 </Button>
               </div>
             ) : (
@@ -1080,17 +1079,17 @@ const CoachSchedule = () => {
                         <p className="font-medium text-foreground">{type.name}</p>
                         {type.payment_required === "full" && (
                           <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/30">
-                            Pay Upfront
+                            {t("schedule.sessionTypes.payUpfront")}
                           </Badge>
                         )}
                         {type.payment_required === "deposit" && (
                           <Badge variant="outline" className="text-xs bg-accent/10 text-accent border-accent/30">
-                            Deposit Required
+                            {t("schedule.sessionTypes.depositRequired")}
                           </Badge>
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {type.duration_minutes} min - {getCurrencySymbol((type.currency as CurrencyCode) || coachCurrency)}{type.price}
+                        {type.duration_minutes} {t("schedule.sessionTypes.min")} - {getCurrencySymbol((type.currency as CurrencyCode) || coachCurrency)}{type.price}
                         {type.is_online && " • Online"}
                         {type.is_in_person && " • In-Person"}
                       </p>
@@ -1110,31 +1109,31 @@ const CoachSchedule = () => {
       <Dialog open={showSessionTypeModal} onOpenChange={setShowSessionTypeModal}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingSessionType ? "Edit" : "Add"} Session Type</DialogTitle>
+            <DialogTitle>{editingSessionType ? t("schedule.sessionTypeModal.editTitle") : t("schedule.sessionTypeModal.addTitle")}</DialogTitle>
             <DialogDescription>
-              Define a service offering for your clients to book.
+              {t("schedule.sessionTypeModal.description")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
             <div className="space-y-2">
-              <Label>Name</Label>
+              <Label>{t("schedule.sessionTypeModal.name")}</Label>
               <Input 
-                placeholder="e.g., Personal Training Session"
+                placeholder={t("schedule.sessionTypeModal.namePlaceholder")}
                 value={sessionTypeName}
                 onChange={(e) => setSessionTypeName(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label>Description (Optional)</Label>
+              <Label>{t("schedule.sessionTypeModal.descriptionLabel")}</Label>
               <Input 
-                placeholder="Brief description of the session"
+                placeholder={t("schedule.sessionTypeModal.descriptionPlaceholder")}
                 value={sessionTypeDescription}
                 onChange={(e) => setSessionTypeDescription(e.target.value)}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Duration (minutes)</Label>
+                <Label>{t("schedule.sessionTypeModal.duration")}</Label>
                 <Input 
                   type="number"
                   placeholder="60"
@@ -1143,7 +1142,7 @@ const CoachSchedule = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Price ({getCurrencySymbol(coachCurrency)})</Label>
+                <Label>{t("schedule.sessionTypeModal.price")} ({getCurrencySymbol(coachCurrency)})</Label>
                 <Input 
                   type="number"
                   placeholder="0.00"
@@ -1158,14 +1157,14 @@ const CoachSchedule = () => {
                   checked={sessionTypeOnline}
                   onCheckedChange={setSessionTypeOnline}
                 />
-                <Label className="font-normal">Online</Label>
+                <Label className="font-normal">{t("schedule.online")}</Label>
               </div>
               <div className="flex items-center gap-2">
                 <Switch 
                   checked={sessionTypeInPerson}
                   onCheckedChange={setSessionTypeInPerson}
                 />
-                <Label className="font-normal">In-Person</Label>
+                <Label className="font-normal">{t("schedule.inPerson")}</Label>
               </div>
             </div>
 
@@ -1174,42 +1173,42 @@ const CoachSchedule = () => {
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <CreditCard className="w-4 h-4" />
-                  Payment Requirements
+                  {t("schedule.sessionTypeModal.paymentRequirements")}
                 </Label>
                 <Select value={paymentRequired} onValueChange={(v) => setPaymentRequired(v as PaymentRequired)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select payment requirement" />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">No upfront payment</SelectItem>
-                    <SelectItem value="deposit">Require deposit</SelectItem>
-                    <SelectItem value="full">Require full payment</SelectItem>
+                    <SelectItem value="none">{t("schedule.sessionTypeModal.noUpfront")}</SelectItem>
+                    <SelectItem value="deposit">{t("schedule.sessionTypeModal.requireDeposit")}</SelectItem>
+                    <SelectItem value="full">{t("schedule.sessionTypeModal.requireFull")}</SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
-                  {paymentRequired === "none" && "Clients can book without paying in advance"}
-                  {paymentRequired === "deposit" && "Clients pay a deposit to secure the booking"}
-                  {paymentRequired === "full" && "Clients must pay the full session price to book"}
+                  {paymentRequired === "none" && t("schedule.sessionTypeModal.noUpfrontDesc")}
+                  {paymentRequired === "deposit" && t("schedule.sessionTypeModal.depositDesc")}
+                  {paymentRequired === "full" && t("schedule.sessionTypeModal.fullPaymentDesc")}
                 </p>
               </div>
 
               {paymentRequired === "deposit" && (
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Deposit Type</Label>
+                    <Label>{t("schedule.sessionTypeModal.depositType")}</Label>
                     <Select value={depositType} onValueChange={(v) => setDepositType(v as DepositType)}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="percentage">Percentage of price</SelectItem>
-                        <SelectItem value="fixed">Fixed amount</SelectItem>
+                        <SelectItem value="percentage">{t("schedule.sessionTypeModal.percentageOfPrice")}</SelectItem>
+                        <SelectItem value="fixed">{t("schedule.sessionTypeModal.fixedAmount")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
                     <Label>
-                      {depositType === "percentage" ? "Deposit %" : `Deposit (${getCurrencySymbol(coachCurrency)})`}
+                      {depositType === "percentage" ? t("schedule.sessionTypeModal.depositPercent") : `${t("schedule.sessionTypeModal.depositAmount")} (${getCurrencySymbol(coachCurrency)})`}
                     </Label>
                     <Input 
                       type="number"
@@ -1226,7 +1225,7 @@ const CoachSchedule = () => {
               {paymentRequired === "deposit" && depositValue && sessionTypePrice && (
                 <div className="bg-secondary/50 rounded-lg p-3 text-sm">
                   <p className="text-muted-foreground">
-                    Deposit amount:{" "}
+                    {t("schedule.sessionTypeModal.depositPreview")}{" "}
                     <span className="font-medium text-foreground">
                       {formatCurrency(
                         depositType === "percentage"
@@ -1244,14 +1243,14 @@ const CoachSchedule = () => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowSessionTypeModal(false)}>
-              Cancel
+              {t("schedule.sessionTypeModal.cancel")}
             </Button>
             <Button 
               onClick={handleSaveSessionType}
               disabled={!sessionTypeName || !sessionTypePrice || upsertSessionType.isPending}
             >
               {upsertSessionType.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Save
+              {t("schedule.sessionTypeModal.save")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1261,20 +1260,20 @@ const CoachSchedule = () => {
       <Dialog open={showAvailabilityModal} onOpenChange={setShowAvailabilityModal}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Availability - {editingDay !== null ? dayNames[editingDay] : ""}</DialogTitle>
+            <DialogTitle>{t("schedule.availabilityModal.editTitle")} - {editingDay !== null ? dayNames[editingDay] : ""}</DialogTitle>
             <DialogDescription>
-              Set your working hours for this day.
+              {t("schedule.availabilityModal.description")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="flex items-center gap-2">
               <Switch checked={availEnabled} onCheckedChange={setAvailEnabled} />
-              <Label>Available on this day</Label>
+              <Label>{t("schedule.availabilityModal.availableOnDay")}</Label>
             </div>
             {availEnabled && (
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Start Time</Label>
+                  <Label>{t("schedule.availabilityModal.startTime")}</Label>
                   <Input 
                     type="time"
                     value={availStartTime}
@@ -1282,7 +1281,7 @@ const CoachSchedule = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>End Time</Label>
+                  <Label>{t("schedule.availabilityModal.endTime")}</Label>
                   <Input 
                     type="time"
                     value={availEndTime}
@@ -1294,14 +1293,14 @@ const CoachSchedule = () => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAvailabilityModal(false)}>
-              Cancel
+              {t("schedule.availabilityModal.cancel")}
             </Button>
             <Button 
               onClick={handleSaveAvailability}
               disabled={updateAvailability.isPending}
             >
               {updateAvailability.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Save
+              {t("schedule.availabilityModal.save")}
             </Button>
           </DialogFooter>
         </DialogContent>

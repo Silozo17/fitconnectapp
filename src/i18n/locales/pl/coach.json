@@ -553,7 +553,11 @@
       "saveSettings": "Zapisz ustawienia",
       "settingsSaved": "Ustawienia rezerwacji zapisane",
       "settingsFailed": "Nie udało się zapisać ustawień rezerwacji",
-      "depositsInfo": "Zaliczki i wymagania płatności są konfigurowane dla każdego typu sesji poniżej. Edytuj typ sesji, aby ustawić zaliczki lub wymagać pełnej płatności z góry."
+      "depositsInfo": "Zaliczki i wymagania płatności są konfigurowane dla każdego typu sesji poniżej. Edytuj typ sesji, aby ustawić zaliczki lub wymagać pełnej płatności z góry.",
+      "requireApproval": "Wymagaj zatwierdzenia rezerwacji",
+      "requireApprovalDesc": "Po włączeniu musisz zatwierdzić każdą rezerwację przed potwierdzeniem",
+      "minBookingNotice": "Minimalny czas przed rezerwacją",
+      "bookAtLeast": "Klienci muszą rezerwować z takim wyprzedzeniem"
     },
     "bufferOptions": {
       "noBuffer": "Brak przerwy",
@@ -605,6 +609,7 @@
       "fixedAmount": "Stała kwota",
       "depositPercent": "Zaliczka %",
       "depositAmount": "Kwota zaliczki",
+      "depositPreview": "Kwota zaliczki:",
       "cancel": "Anuluj",
       "save": "Zapisz",
       "boostPaymentError": "Nie można usunąć wymagania płatności - Boost wymaga co najmniej jednego typu sesji z włączoną płatnością. Najpierw wyłącz Boost, jeśli chcesz usunąć wszystkie wymagania płatności."
@@ -617,6 +622,11 @@
       "endTime": "Godzina zakończenia",
       "cancel": "Anuluj",
       "save": "Zapisz"
+    },
+    "stripeConnect": {
+      "title": "Połącz Stripe, aby włączyć płatności",
+      "description": "Aby pobierać zaliczki lub wymagać płatności podczas rezerwacji, musisz najpierw połączyć swoje konto Stripe.",
+      "connectButton": "Połącz Stripe"
     }
   },
   "invoices": {
