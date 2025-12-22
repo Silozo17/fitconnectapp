@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Lock } from 'lucide-react';
 import { ShareAchievementButton } from './ShareAchievementButton';
+import { getBadgeIcon } from '@/lib/badge-icons';
 
 interface BadgeCardProps {
   badge: BadgeType;
@@ -60,7 +61,10 @@ export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
             {badge.image_url ? (
               <img src={badge.image_url} alt={badge.name} className="w-14 h-14 object-contain" />
             ) : (
-              <span className="text-4xl">{badge.icon}</span>
+              (() => {
+                const IconComponent = getBadgeIcon(badge.icon);
+                return <IconComponent className="w-12 h-12 text-primary" />;
+              })()
             )}
           </div>
           
