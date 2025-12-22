@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CreditCard, ExternalLink, Loader2, CheckCircle, AlertTriangle, Percent } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,9 @@ import { useQuery } from "@tanstack/react-query";
 import { SUBSCRIPTION_TIERS, TierKey } from "@/lib/stripe-config";
 import { useTranslation } from "react-i18next";
 import { OnboardingConfirmSheet } from "./OnboardingConfirmSheet";
+
+type StripeStatus = "pending" | "connected" | "skipped";
+
 interface StripeConnectOnboardingStepProps {
   coachId: string;
   onComplete: () => void;
@@ -20,8 +23,17 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showSkipWarning, setShowSkipWarning] = useState(false);
+  const [stripeStatus, setStripeStatus] = useState<StripeStatus>("pending");
+  const [isReturningFromStripe, setIsReturningFromStripe] = useState(false);
 
-  // Check if already connected
+  // Parse URL params once on mount - not on every render
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isReturning = urlParams.get("stripe") === "returning";
+    setIsReturningFromStripe(isReturning);
+  }, []);
+
+  // Only query Stripe status when not skipped
   const { data: coachProfile, refetch } = useQuery({
     queryKey: ["coach-stripe-onboarding", coachId],
     queryFn: async () => {
@@ -34,8 +46,15 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
       if (error) throw error;
       return data;
     },
-    enabled: !!coachId,
+    enabled: !!coachId && stripeStatus !== "skipped",
   });
+
+  // Update stripeStatus when profile shows connected
+  useEffect(() => {
+    if (coachProfile?.stripe_connect_onboarded && stripeStatus === "pending") {
+      setStripeStatus("connected");
+    }
+  }, [coachProfile?.stripe_connect_onboarded, stripeStatus]);
 
   // Get current commission rate based on tier
   const rawTier = coachProfile?.subscription_tier || "free";
@@ -44,7 +63,7 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
   const commissionPercent = tierData?.commissionPercent || 4;
 
   const handleConnect = async () => {
-    if (!user) return;
+    if (!user || stripeStatus === "skipped") return;
 
     setIsLoading(true);
     try {
@@ -79,7 +98,7 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
   };
 
   const handleCompleteOnboarding = async () => {
-    if (!coachProfile?.stripe_connect_id) return;
+    if (!coachProfile?.stripe_connect_id || stripeStatus === "skipped") return;
 
     setIsLoading(true);
     try {
@@ -92,6 +111,7 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
         .eq("id", coachId);
 
       toast.success(t('onboarding.stripeSuccess'));
+      setStripeStatus("connected");
       refetch();
       onComplete();
     } catch (error) {
@@ -106,19 +126,19 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
   };
 
   const handleConfirmSkip = () => {
+    // Set status to skipped FIRST - this disables all Stripe logic immediately
+    setStripeStatus("skipped");
     setShowSkipWarning(false);
-    // Small delay to let sheet start closing, then navigate
-    setTimeout(() => {
-      onSkip();
-    }, 100);
+    // Navigate immediately - no setTimeout needed
+    onSkip();
   };
 
-  // Check URL params for returning from Stripe
-  const urlParams = new URLSearchParams(window.location.search);
-  const isReturningFromStripe = urlParams.get("stripe") === "returning";
-  const wasSuccessful = urlParams.get("success") === "true";
+  // Early return when skipped - prevents any Stripe UI from rendering
+  if (stripeStatus === "skipped") {
+    return null;
+  }
 
-  if (coachProfile?.stripe_connect_onboarded) {
+  if (stripeStatus === "connected" || coachProfile?.stripe_connect_onboarded) {
     return (
       <div className="space-y-6">
         <div>
@@ -258,7 +278,7 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
         </Button>
       </div>
 
-      {/* Skip confirmation bottom sheet - no layout shift */}
+      {/* Skip confirmation bottom sheet */}
       <OnboardingConfirmSheet
         open={showSkipWarning}
         onOpenChange={setShowSkipWarning}
