@@ -226,6 +226,7 @@ export function OnboardingLayout({
               <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                 {footerActions.secondary && (
                   <Button
+                    type="button"
                     variant="outline"
                     onClick={footerActions.secondary.onClick}
                     disabled={footerActions.secondary.disabled}
@@ -236,6 +237,7 @@ export function OnboardingLayout({
                 )}
                 {footerActions.primary && (
                   <Button
+                    type="button"
                     onClick={footerActions.primary.onClick}
                     disabled={footerActions.primary.disabled || footerActions.primary.loading}
                     className="w-full sm:w-auto"
