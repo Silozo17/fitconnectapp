@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Footprints, Heart, Moon, Flame, Activity, Clock, Watch, RefreshCw } from "lucide-react";
@@ -10,49 +11,49 @@ import { formatDistanceToNow } from "date-fns";
 
 const metrics: {
   type: HealthDataType;
-  label: string;
+  labelKey: string;
   icon: React.ReactNode;
   color: string;
   format: (value: number) => string;
 }[] = [
   {
     type: "steps",
-    label: "Steps",
+    labelKey: "Steps",
     icon: <Footprints className="w-5 h-5" />,
     color: "text-blue-400",
     format: (v) => v.toLocaleString(),
   },
   {
     type: "heart_rate",
-    label: "Avg Heart Rate",
+    labelKey: "Avg Heart Rate",
     icon: <Heart className="w-5 h-5" />,
     color: "text-red-400",
     format: (v) => `${Math.round(v)} bpm`,
   },
   {
     type: "sleep",
-    label: "Sleep",
+    labelKey: "Sleep",
     icon: <Moon className="w-5 h-5" />,
     color: "text-purple-400",
     format: (v) => `${(v / 60).toFixed(1)} hrs`,
   },
   {
     type: "calories",
-    label: "Calories Burned",
+    labelKey: "Calories Burned",
     icon: <Flame className="w-5 h-5" />,
     color: "text-orange-400",
     format: (v) => v.toLocaleString(),
   },
   {
     type: "active_minutes",
-    label: "Active Minutes",
+    labelKey: "Active Minutes",
     icon: <Clock className="w-5 h-5" />,
     color: "text-green-400",
     format: (v) => `${Math.round(v)} min`,
   },
   {
     type: "distance",
-    label: "Distance",
+    labelKey: "Distance",
     icon: <Activity className="w-5 h-5" />,
     color: "text-cyan-400",
     format: (v) => `${(v / 1000).toFixed(1)} km`,
@@ -65,6 +66,7 @@ interface HealthDataWidgetProps {
 }
 
 const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps) => {
+  const { t } = useTranslation('settings');
   const { getTodayValue, isLoading, data } = useHealthData();
   const { connections, isLoading: wearablesLoading, error: wearablesError } = useWearables();
   const { syncAll, isSyncing, lastSyncedAt } = useSyncAllWearables();
@@ -86,7 +88,7 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">
             <Activity className="w-5 h-5 text-primary" />
-            Today's Health
+            {t('integrations.todaysHealth')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -106,7 +108,7 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">
             <Activity className="w-5 h-5 text-primary" />
-            Today's Health
+            {t('integrations.todaysHealth')}
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center py-6 gap-4">
@@ -115,15 +117,15 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
           </div>
           <div className="text-center">
             <p className="text-sm text-muted-foreground mb-1">
-              No device connected
+              {t('integrations.noDeviceConnected')}
             </p>
             <p className="text-xs text-muted-foreground">
-              Connect a wearable to track your health metrics
+              {t('integrations.connectWearableHint')}
             </p>
           </div>
           <Button asChild variant="outline" size="sm">
             <Link to="/dashboard/client/integrations">
-              Connect a Device
+              {t('integrations.connectDevice')}
             </Link>
           </Button>
         </CardContent>
@@ -139,7 +141,7 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
             <Activity className="w-5 h-5 text-primary" />
-            Today's Health
+            {t('integrations.todaysHealth')}
           </CardTitle>
           <div className="flex items-center gap-2">
             {lastSyncedAt && (
@@ -176,7 +178,7 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
                   {metric.icon}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{metric.label}</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{metric.labelKey}</p>
                   <p className="font-semibold text-sm sm:text-base truncate">{metric.format(value)}</p>
                 </div>
               </div>

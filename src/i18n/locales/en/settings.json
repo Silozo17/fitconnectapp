@@ -218,7 +218,58 @@
       "description": "When you connect integrations, your data is handled according to our privacy practices. Learn more about how we protect your data.",
       "privacyPolicy": "Privacy Policy",
       "termsOfService": "Terms of Service"
+    },
+    "todaysHealth": "Today's Health",
+    "noDeviceConnected": "No device connected",
+    "connectWearableHint": "Connect a wearable to track your health metrics",
+    "connectDevice": "Connect a Device",
+    "manualHealthData": "Manual Health Data",
+    "manualHealthDesc": "Log steps, heart rate, sleep manually",
+    "logData": "Log Data",
+    "requiresFitConnectApp": "Requires FitConnect iOS app",
+    "appleCalendar": "Apple Calendar",
+    "googleCalendar": "Google Calendar"
+  },
+
+  "privacy": {
+    "title": "Health Data Privacy",
+    "description": "Control which coaches can see your health data from connected wearables",
+    "changesImmediate": "Changes take effect immediately.",
+    "noCoaches": "You don't have any active coach connections yet.",
+    "noCoachesHint": "Once you connect with a coach, you'll be able to manage their access to your health data here.",
+    "fullAccess": "Full Access",
+    "noAccess": "No Access",
+    "limitedAccess": "Limited Access",
+    "shareAll": "Share All",
+    "revokeAll": "Revoke All",
+    "showSettings": "Show individual settings",
+    "hideSettings": "Hide individual settings",
+    "dataTypes": {
+      "all": { "label": "All Data", "description": "Share all health data types" },
+      "steps": { "label": "Steps", "description": "Daily step count" },
+      "heart_rate": { "label": "Heart Rate", "description": "Heart rate measurements" },
+      "sleep": { "label": "Sleep", "description": "Sleep duration and quality" },
+      "calories": { "label": "Calories", "description": "Calories burned" },
+      "distance": { "label": "Distance", "description": "Distance traveled" },
+      "active_minutes": { "label": "Active Minutes", "description": "Active exercise time" },
+      "weight": { "label": "Weight", "description": "Body weight measurements" }
     }
+  },
+
+  "manualHealthModal": {
+    "title": "Log Health Data",
+    "description": "Manually enter your health metrics. This data will sync with your coach's dashboard.",
+    "steps": { "title": "Steps", "desc": "Today's step count", "label": "Number of steps" },
+    "heartRate": { "title": "Heart Rate", "desc": "Current resting heart rate", "label": "Heart rate (BPM)" },
+    "calories": { "title": "Calories Burned", "desc": "Active calories today", "label": "Calories (kcal)" },
+    "sleep": { "title": "Sleep", "desc": "Last night's sleep duration", "hours": "Hours", "minutes": "Minutes" },
+    "activeMinutes": { "title": "Active Minutes", "desc": "Exercise duration today", "label": "Minutes of activity" },
+    "cancel": "Cancel",
+    "save": "Save Data",
+    "saving": "Saving...",
+    "enterAtLeastOne": "Please enter at least one value",
+    "successSingle": "1 health data point logged!",
+    "successMultiple": "{{count}} health data points logged!"
   },
 
   "verification": {
@@ -489,7 +540,12 @@
     "specialtiesCustomHint": "Can't find your specialty? Add a custom one that best describes your expertise.",
     "specialtiesCustomPlaceholder": "Enter custom specialty...",
     "specialtiesAdd": "Add",
-    "specialtiesCancel": "Cancel"
+    "specialtiesCancel": "Cancel",
+    "visibility": {
+      "title": "Marketplace Visibility",
+      "visibleDesc": "Your profile appears in marketplace search results",
+      "hiddenDesc": "Your profile is hidden from marketplace search"
+    }
   },
   
   "profileCompletion": {
