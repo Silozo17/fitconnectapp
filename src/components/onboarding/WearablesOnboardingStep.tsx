@@ -26,11 +26,12 @@ const WEARABLE_PROVIDERS: {
     comingSoon: true,
   },
   {
-    id: "google_fit",
-    nameKey: "integrations.wearables.googleFit.name",
-    descriptionKey: "integrations.wearables.googleFit.description",
+    id: "health_connect",
+    nameKey: "integrations.wearables.healthConnect.name",
+    descriptionKey: "integrations.wearables.healthConnect.description",
     icon: <Activity className="w-5 h-5 text-white" />,
-    color: "bg-gradient-to-br from-blue-500 to-green-500",
+    color: "bg-gradient-to-br from-green-500 to-teal-500",
+    comingSoon: true,
   },
   {
     id: "fitbit",

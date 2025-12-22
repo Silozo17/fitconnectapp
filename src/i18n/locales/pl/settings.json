@@ -226,7 +226,7 @@
     "manualHealthData": "Ręczne dane zdrowotne",
     "manualHealthDesc": "Zapisz kroki, tętno, sen ręcznie",
     "logData": "Zapisz dane",
-    "requiresFitConnectApp": "Wymaga aplikacji FitConnect iOS",
+    "requiresAndroidApp": "Wymaga aplikacji FitConnect na Androida",
     "appleCalendar": "Kalendarz Apple",
     "googleCalendar": "Kalendarz Google"
   },

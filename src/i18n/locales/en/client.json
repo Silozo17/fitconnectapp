@@ -403,7 +403,7 @@
     "lastSync": "Last Synced",
     "devices": {
       "appleHealth": "Apple Health",
-      "googleFit": "Google Fit",
+      "healthConnect": "Health Connect",
       "fitbit": "Fitbit",
       "garmin": "Garmin",
       "strava": "Strava"

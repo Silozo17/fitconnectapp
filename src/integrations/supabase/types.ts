@@ -5658,7 +5658,7 @@ export type Database = {
         | "other"
       video_provider: "zoom" | "google_meet"
       wearable_provider:
-        | "google_fit"
+        | "health_connect"
         | "fitbit"
         | "garmin"
         | "apple_health"
@@ -5802,7 +5802,7 @@ export const Constants = {
       ],
       video_provider: ["zoom", "google_meet"],
       wearable_provider: [
-        "google_fit",
+        "health_connect",
         "fitbit",
         "garmin",
         "apple_health",

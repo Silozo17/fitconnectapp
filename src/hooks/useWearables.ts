@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
-export type WearableProvider = "google_fit" | "fitbit" | "garmin" | "apple_health";
+export type WearableProvider = "health_connect" | "fitbit" | "garmin" | "apple_health";
 
 interface WearableConnection {
   id: string;

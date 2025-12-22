@@ -789,9 +789,9 @@
         "name": "Apple Health",
         "description": "Sync health data from your iPhone and Apple Watch"
       },
-      "googleFit": {
-        "name": "Google Fit",
-        "description": "Connect your Google Fit account"
+      "healthConnect": {
+        "name": "Health Connect",
+        "description": "Sync health data from Android devices (requires mobile app)"
       },
       "fitbit": {
         "name": "Fitbit",

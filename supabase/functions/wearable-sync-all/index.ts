@@ -47,6 +47,14 @@ serve(async (req) => {
       try {
         console.log(`Syncing connection ${connection.id} (${connection.provider})...`);
 
+        // Skip health_connect - data is pushed from native app
+        if (connection.provider === "health_connect") {
+          console.log("Skipping health_connect - data is pushed from native app");
+          results.push({ connectionId: connection.id, provider: connection.provider, success: true });
+          successCount++;
+          continue;
+        }
+
         // Check if token needs refresh
         let accessToken = connection.access_token;
         const tokenExpires = connection.token_expires_at ? new Date(connection.token_expires_at) : null;
@@ -63,9 +71,7 @@ serve(async (req) => {
 
         let healthData: any[] = [];
         
-        if (connection.provider === "google_fit") {
-          healthData = await syncGoogleFit(accessToken, startDate, endDate);
-        } else if (connection.provider === "fitbit") {
+        if (connection.provider === "fitbit") {
           healthData = await syncFitbit(accessToken, startDate, endDate);
         }
 
@@ -76,12 +82,11 @@ serve(async (req) => {
             wearable_connection_id: connection.id,
             data_type: item.data_type,
             value: item.value,
-            recorded_at: item.recorded_date, // Map recorded_date to recorded_at
+            recorded_at: item.recorded_date,
             source: item.source,
             unit: getUnitForDataType(item.data_type),
           }));
 
-          // Use insert with upsert behavior based on unique constraint
           for (const dataPoint of dataToUpsert) {
             const { error: upsertError } = await supabase
               .from("health_data_sync")
@@ -146,17 +151,7 @@ async function refreshToken(connection: any, supabase: any): Promise<string> {
     "Content-Type": "application/x-www-form-urlencoded",
   };
 
-  if (connection.provider === "google_fit") {
-    const clientId = Deno.env.get("GOOGLE_FIT_CLIENT_ID")!;
-    const clientSecret = Deno.env.get("GOOGLE_FIT_CLIENT_SECRET")!;
-    tokenUrl = "https://oauth2.googleapis.com/token";
-    body = new URLSearchParams({
-      client_id: clientId,
-      client_secret: clientSecret,
-      refresh_token: connection.refresh_token,
-      grant_type: "refresh_token",
-    }).toString();
-  } else if (connection.provider === "fitbit") {
+  if (connection.provider === "fitbit") {
     const clientId = Deno.env.get("FITBIT_CLIENT_ID")!;
     const clientSecret = Deno.env.get("FITBIT_CLIENT_SECRET")!;
     tokenUrl = "https://api.fitbit.com/oauth2/token";
@@ -194,58 +189,6 @@ async function refreshToken(connection: any, supabase: any): Promise<string> {
     .eq("id", connection.id);
 
   return tokens.access_token;
-}
-
-async function syncGoogleFit(accessToken: string, startDate: Date, endDate: Date): Promise<any[]> {
-  const dataTypes = [
-    { name: "steps", dataSourceId: "derived:com.google.step_count.delta:com.google.android.gms:estimated_steps" },
-    { name: "heart_rate", dataSourceId: "derived:com.google.heart_rate.bpm:com.google.android.gms:merge_heart_rate_bpm" },
-    { name: "calories", dataSourceId: "derived:com.google.calories.expended:com.google.android.gms:merge_calories_expended" },
-  ];
-
-  const results: any[] = [];
-
-  for (const dataType of dataTypes) {
-    try {
-      const response = await fetch("https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          aggregateBy: [{ dataSourceId: dataType.dataSourceId }],
-          bucketByTime: { durationMillis: 86400000 },
-          startTimeMillis: startDate.getTime(),
-          endTimeMillis: endDate.getTime(),
-        }),
-      });
-
-      if (!response.ok) continue;
-
-      const data = await response.json();
-      
-      for (const bucket of data.bucket || []) {
-        const date = new Date(parseInt(bucket.startTimeMillis)).toISOString().split("T")[0];
-        const dataset = bucket.dataset?.[0];
-        const point = dataset?.point?.[0];
-        
-        if (point?.value?.[0]) {
-          let value = point.value[0].intVal || point.value[0].fpVal || 0;
-          results.push({
-            data_type: dataType.name,
-            value: Math.round(value),
-            recorded_date: date,
-            source: "google_fit",
-          });
-        }
-      }
-    } catch (error) {
-      console.error(`Error fetching ${dataType.name} from Google Fit:`, error);
-    }
-  }
-
-  return results;
 }
 
 function getUnitForDataType(dataType: string): string {
