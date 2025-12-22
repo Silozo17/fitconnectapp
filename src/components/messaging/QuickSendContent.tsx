@@ -996,12 +996,12 @@ const QuickSendContent = ({ participantId, clientId, onSendMessage, onSendMessag
         </DialogContent>
       </Dialog>
 
-      {clientId && coachId && (
+      {participantId && coachId && (
         <SessionOfferDialog
           open={showSessionOfferDialog}
           onOpenChange={setShowSessionOfferDialog}
           coachId={coachId}
-          clientId={clientId}
+          participantUserId={participantId}
           onOfferCreated={async (offerId, offerDetails) => {
             await onSendMessage(offerDetails);
           }}
