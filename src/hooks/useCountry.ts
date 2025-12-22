@@ -1,5 +1,6 @@
 import { useCountryContext, useOptionalCountryContext } from "@/contexts/CountryContext";
 import { useOptionalLocaleRouting } from "@/contexts/LocaleRoutingContext";
+import { useOptionalAppLocale } from "@/contexts/AppLocaleContext";
 import { RouteLocationCode, LOCATION_TO_CURRENCY, LOCATION_TO_DATE_LOCALE } from "@/lib/locale-routing";
 import { CurrencyCode } from "@/lib/currency";
 
@@ -35,19 +36,30 @@ interface UseCountryReturn {
  */
 export function useCountry(): UseCountryReturn {
   const localeRouting = useOptionalLocaleRouting();
+  const appLocale = useOptionalAppLocale();
   const context = useCountryContext();
   
-  // If on a locale-prefixed route, use URL location
+  // Priority:
+  // 1. URL locale route (website pages like /pl-en/pricing)
+  // 2. AppLocaleContext (dashboard - reacts to user preference changes)
+  // 3. CountryContext (fallback)
   const isFromRoute = localeRouting?.isLocaleRoute ?? false;
-  const countryCode = isFromRoute 
-    ? (localeRouting?.location ?? context.countryCode)
-    : context.countryCode;
+  
+  let countryCode: RouteLocationCode;
+  if (isFromRoute) {
+    countryCode = localeRouting?.location ?? context.countryCode;
+  } else if (appLocale) {
+    // Dashboard mode - use AppLocaleContext which reacts to changes
+    countryCode = appLocale.location;
+  } else {
+    countryCode = context.countryCode;
+  }
   
   return {
     countryCode,
     isFromRoute,
     isManualOverride: isFromRoute ? false : context.isManualOverride,
-    isLoading: context.isLoading,
+    isLoading: appLocale?.isLoading ?? context.isLoading,
     currency: LOCATION_TO_CURRENCY[countryCode] || 'GBP',
     dateLocale: LOCATION_TO_DATE_LOCALE[countryCode] || 'en-GB',
     setCountry: isFromRoute 
@@ -62,20 +74,27 @@ export function useCountry(): UseCountryReturn {
  */
 export function useOptionalCountry(): UseCountryReturn | null {
   const localeRouting = useOptionalLocaleRouting();
+  const appLocale = useOptionalAppLocale();
   const context = useOptionalCountryContext();
   
   if (!context) return null;
   
   const isFromRoute = localeRouting?.isLocaleRoute ?? false;
-  const countryCode = isFromRoute 
-    ? (localeRouting?.location ?? context.countryCode)
-    : context.countryCode;
+  
+  let countryCode: RouteLocationCode;
+  if (isFromRoute) {
+    countryCode = localeRouting?.location ?? context.countryCode;
+  } else if (appLocale) {
+    countryCode = appLocale.location;
+  } else {
+    countryCode = context.countryCode;
+  }
   
   return {
     countryCode,
     isFromRoute,
     isManualOverride: isFromRoute ? false : context.isManualOverride,
-    isLoading: context.isLoading,
+    isLoading: appLocale?.isLoading ?? context.isLoading,
     currency: LOCATION_TO_CURRENCY[countryCode] || 'GBP',
     dateLocale: LOCATION_TO_DATE_LOCALE[countryCode] || 'en-GB',
     setCountry: isFromRoute 
