@@ -40,13 +40,13 @@ export function DecorativeAvatar({
   return (
     <div
       className={cn(
-        'absolute pointer-events-none select-none hidden md:block',
+        'absolute pointer-events-none select-none hidden md:block z-10',
         positionClasses[position],
         sizeClasses[size],
         animate && 'animate-float',
         className
       )}
-      style={{ opacity: opacity / 100 }}
+      style={{ opacity: opacity / 100, willChange: 'transform' }}
     >
       <img
         src={imageUrl}

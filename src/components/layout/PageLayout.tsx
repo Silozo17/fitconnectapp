@@ -55,7 +55,7 @@ const PageLayout = ({
       />
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main>{children}</main>
+        <main className="relative">{children}</main>
         <Footer />
       </div>
     </>
