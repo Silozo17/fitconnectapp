@@ -6,6 +6,8 @@
   "profileUpdated": "Profile updated successfully",
   "settingsSaved": "Settings saved successfully",
   "failedToSave": "Failed to save changes",
+  "allChangesSaved": "All changes saved",
+  "unsavedChanges": "You have unsaved changes",
 
   "tabs": {
     "profile": "Profile",
@@ -113,11 +115,16 @@
 
   "preferences": {
     "title": "Preferences",
+    "displayPreferences": "Display Preferences",
     "language": "Language",
     "languageDescription": "Choose your preferred language",
     "languageHint": "More languages coming soon",
     "currency": "Currency",
     "currencyDescription": "Choose your preferred currency for display",
+    "currencyHint": "This affects how prices are displayed for you and your clients throughout the platform.",
+    "cancellationPolicy": "Cancellation Policy",
+    "cancellationPolicyDesc": "Minimum hours notice required for clients to cancel without forfeiting package tokens.",
+    "hours": "hours",
     "animations": {
       "title": "Celebration Animations",
       "description": "Configure celebration effects for achievements and milestones",
@@ -141,11 +148,11 @@
     "description": "Connect third-party services",
     "video": {
       "title": "Video Conferencing",
-      "description": "Connect your video platform for online sessions"
+      "description": "Automatically create video meeting links for your online sessions"
     },
     "calendar": {
       "title": "Calendar Sync",
-      "description": "Sync your availability with external calendars"
+      "description": "Automatically add coaching sessions to your calendar"
     },
     "wearables": {
       "title": "Wearable Devices",
@@ -154,6 +161,12 @@
     "healthData": {
       "title": "Health Data",
       "description": "View synced health metrics"
+    },
+    "dataPrivacy": {
+      "title": "Data & Privacy",
+      "description": "When you connect integrations, your data is handled according to our privacy practices. Learn more about how we protect your data.",
+      "privacyPolicy": "Privacy Policy",
+      "termsOfService": "Terms of Service"
     }
   },
 
@@ -166,6 +179,11 @@
       "approved": "Verified",
       "rejected": "Rejected"
     },
+    "verificationStatus": "Verification Status",
+    "profileVerified": "Your profile is verified",
+    "uploadToVerify": "Upload documents to get verified",
+    "verifiedOn": "Verified on",
+    "adminNotes": "Admin Notes",
     "documents": {
       "identity": {
         "label": "Government ID",
@@ -184,21 +202,37 @@
         "description": "Relevant degrees, diplomas, or qualifications"
       }
     },
-    "uploadDocument": "Upload Document",
+    "uploadDocument": "Upload document",
+    "uploading": "Uploading...",
     "viewDocument": "View Document",
     "deleteDocument": "Delete Document",
-    "submitForReview": "Submit for Review",
+    "submitForReview": "Submit for Verification",
     "resubmit": "Resubmit for Review"
   },
 
   "security": {
     "title": "Security",
     "description": "Manage your account security settings",
+    "accountSecurity": "Account Security",
+    "manageEmailPassword": "Manage your email and password",
+    "emailAddress": "Email Address",
+    "password": "Password",
+    "changePasswordDesc": "Change your account password",
     "changePassword": "Change Password",
     "currentPassword": "Current Password",
     "newPassword": "New Password",
     "confirmPassword": "Confirm New Password",
     "updatePassword": "Update Password",
+    "updateEmail": "Update Email",
+    "newEmailAddress": "New Email Address",
+    "emailPlaceholder": "your-new-email@example.com",
+    "passwordPlaceholder": "Enter new password",
+    "confirmPasswordPlaceholder": "Confirm new password",
+    "confirmationEmailSent": "Confirmation email sent",
+    "checkBothEmails": "Please check both your old and new email addresses to confirm the change.",
+    "passwordUpdated": "Password updated successfully",
+    "passwordMinLength": "Password must be at least 8 characters",
+    "passwordsDontMatch": "Passwords don't match",
     "twoFactor": "Two-Factor Authentication",
     "twoFactorDescription": "Add an extra layer of security to your account",
     "enableTwoFactor": "Enable 2FA",
@@ -213,9 +247,12 @@
 
   "account": {
     "title": "Account",
+    "session": "Session",
+    "sessionDesc": "Manage your current session",
     "signOut": "Sign Out",
     "signOutDescription": "Sign out of your account on this device",
     "dangerZone": "Danger Zone",
+    "dangerZoneDesc": "Irreversible actions that affect your account",
     "deleteAccount": "Delete Account",
     "deleteAccountDescription": "Permanently delete your account and all associated data",
     "deleteAccountWarning": "This action cannot be undone. All your data will be permanently deleted."
@@ -232,15 +269,94 @@
   "invoice": {
     "title": "Invoice Settings",
     "description": "Configure your invoice details and branding",
+    "businessDetails": "Business Details",
+    "businessDetailsDesc": "Your business information for invoices",
     "businessName": "Business Name",
+    "businessNamePlaceholder": "Your business name",
     "businessAddress": "Business Address",
+    "businessAddressPlaceholder": "Your business address",
     "businessEmail": "Business Email",
+    "businessEmailPlaceholder": "invoices@yourbusiness.com",
     "businessPhone": "Business Phone",
+    "businessPhonePlaceholder": "+44 7XXX XXXXXX",
+    "vatSettings": "VAT Settings",
+    "vatRegistered": "VAT Registered",
+    "vatRegisteredDesc": "I am registered for VAT",
     "vatNumber": "VAT Number",
+    "vatNumberPlaceholder": "GB123456789",
+    "vatRate": "VAT Rate (%)",
+    "vatInclusive": "Prices include VAT",
+    "vatExclusive": "Prices exclude VAT",
     "companyRegistration": "Company Registration",
+    "companyRegistrationPlaceholder": "Company number",
     "bankDetails": "Bank Details",
+    "bankDetailsPlaceholder": "Account name, sort code, account number...",
     "defaultNotes": "Default Invoice Notes",
-    "paymentTerms": "Payment Terms"
+    "defaultNotesPlaceholder": "Thank you for your business!",
+    "paymentTerms": "Payment Terms",
+    "paymentTermsPlaceholder": "Payment due within 14 days",
+    "invoiceDesign": "Invoice Design",
+    "invoiceDesignDesc": "Customise how your invoices look",
+    "template": "Template",
+    "accentColor": "Accent Colour",
+    "logo": "Logo",
+    "uploadLogo": "Upload Logo",
+    "removeLogo": "Remove",
+    "preview": "Preview",
+    "previewDesc": "See how your invoices will look",
+    "sampleInvoice": "Sample Invoice",
+    "itemDescription": "Item Description",
+    "qty": "Qty",
+    "rate": "Rate",
+    "amount": "Amount",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "thankYou": "Thank you for your business!"
+  },
+
+  "marketplace": {
+    "visualIdentity": "Visual Identity",
+    "visualIdentityDesc": "Photos that represent you and your work",
+    "cardPhoto": "Marketplace Card Photo",
+    "cardPhotoDesc": "This landscape image appears on your card in search results and listings",
+    "cardPreview": "Card Preview",
+    "galleryImages": "Gallery Images",
+    "galleryImagesDesc": "Showcase your work, gym, or training sessions (up to 5 images)",
+    "aboutYou": "About You",
+    "aboutYouDesc": "Tell clients about your expertise and background",
+    "bioLabel": "Bio",
+    "bioDesc": "Your professional story and coaching philosophy",
+    "bioPlaceholder": "Tell clients about your background, what motivates you, and your coaching approach...",
+    "characters": "characters",
+    "yearsExperience": "Years of Experience",
+    "specialisations": "Specialisations",
+    "whoIWorkWith": "Who I Work With",
+    "whoIWorkWithDesc": "Describe your ideal clients and who you specialise in helping",
+    "whoIWorkWithPlaceholder": "e.g., Beginners looking to build confidence, busy professionals wanting flexible training, athletes preparing for competitions...",
+    "locationAvailability": "Location & Availability",
+    "locationAvailabilityDesc": "Where and how clients can train with you",
+    "locationLabel": "Location",
+    "locationPlaceholder": "Search for your city...",
+    "gymAffiliation": "Gym Affiliation",
+    "gymPlaceholder": "e.g., PureGym Manchester, Independent",
+    "gymHint": "Leave blank if you're an online-only coach",
+    "sessionTypes": "Session Types",
+    "onlineSessions": "Online Sessions",
+    "onlineDesc": "Video calls & remote coaching",
+    "inPersonSessions": "In-Person Sessions",
+    "inPersonDesc": "Face-to-face training",
+    "groupClasses": "Group Classes",
+    "groupClassesDesc": "Manage your group training sessions and waitlists",
+    "socialLinks": "Social Media & Links",
+    "socialLinksDesc": "Connect your social profiles so clients can learn more about you"
+  },
+
+  "services": {
+    "title": "Services & Pricing",
+    "pricingCurrency": "Pricing Currency",
+    "pricingCurrencyDesc": "Select the currency for your rates. This will be displayed to clients.",
+    "hourlyRate": "Hourly Rate",
+    "hourlyRateDesc": "Your base session rate"
   },
 
   "admin": {
