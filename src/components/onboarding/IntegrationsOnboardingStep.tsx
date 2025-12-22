@@ -13,26 +13,19 @@ type CalendarProvider = Database["public"]["Enums"]["calendar_provider"];
 
 interface IntegrationsOnboardingStepProps {
   coachId: string;
-  /** Called to indicate state changes - parent controls footer */
   onStateChange?: (state: { hasAnyConnection: boolean }) => void;
 }
 
-const VIDEO_PROVIDERS: {
-  id: VideoProvider;
-  nameKey: string;
-  descriptionKey: string;
-  icon: typeof Video;
-  color: string;
-}[] = [
+const VIDEO_PROVIDERS = [
   {
-    id: "zoom",
+    id: "zoom" as VideoProvider,
     nameKey: "integrations.video.zoom.name",
     descriptionKey: "integrations.video.zoom.description",
     icon: Video,
     color: "bg-blue-500",
   },
   {
-    id: "google_meet",
+    id: "google_meet" as VideoProvider,
     nameKey: "integrations.video.googleMeet.name",
     descriptionKey: "integrations.video.googleMeet.description",
     icon: Video,
@@ -40,15 +33,9 @@ const VIDEO_PROVIDERS: {
   },
 ];
 
-const CALENDAR_PROVIDERS: {
-  id: CalendarProvider;
-  nameKey: string;
-  descriptionKey: string;
-  icon: typeof Calendar;
-  color: string;
-}[] = [
+const CALENDAR_PROVIDERS = [
   {
-    id: "google_calendar",
+    id: "google_calendar" as CalendarProvider,
     nameKey: "integrations.calendar.googleCalendar.name",
     descriptionKey: "integrations.calendar.googleCalendar.description",
     icon: Calendar,
@@ -59,8 +46,7 @@ const CALENDAR_PROVIDERS: {
 export function useIntegrationsState(coachId: string) {
   const { user } = useAuth();
 
-  // Check connected video providers
-  const { data: videoConnections } = useQuery({
+  const { data: videoConnections = [] } = useQuery({
     queryKey: ["video-connections-onboarding", coachId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -75,11 +61,11 @@ export function useIntegrationsState(coachId: string) {
     enabled: !!coachId,
   });
 
-  // Check connected calendar providers
-  const { data: calendarConnections } = useQuery({
+  const { data: calendarConnections = [] } = useQuery({
     queryKey: ["calendar-connections-onboarding", user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("calendar_connections").select("provider").eq("user_id", user!.id);
+      if (!user) return [];
+      const { data, error } = await supabase.from("calendar_connections").select("provider").eq("user_id", user.id);
 
       if (error) return [];
       return data.map((c) => c.provider);
@@ -87,25 +73,22 @@ export function useIntegrationsState(coachId: string) {
     enabled: !!user,
   });
 
-  const hasAnyConnection = (videoConnections?.length || 0) > 0 || (calendarConnections?.length || 0) > 0;
+  const hasAnyConnection = videoConnections.length > 0 || calendarConnections.length > 0;
 
   return { videoConnections, calendarConnections, hasAnyConnection };
 }
 
 const IntegrationsOnboardingStep = ({ coachId, onStateChange }: IntegrationsOnboardingStepProps) => {
   const { t } = useTranslation("common");
-  const { user } = useAuth();
   const [connectingProvider, setConnectingProvider] = useState<string | null>(null);
 
   const { videoConnections, calendarConnections, hasAnyConnection } = useIntegrationsState(coachId);
 
-  // Track previous state to avoid unnecessary calls
-  const prevStateRef = useRef({ hasAnyConnection: false });
+  const prevStateRef = useRef<boolean>(false);
 
-  // Notify parent of state changes - MUST be in useEffect to avoid render-loop freezes
   useEffect(() => {
-    if (prevStateRef.current.hasAnyConnection !== hasAnyConnection) {
-      prevStateRef.current = { hasAnyConnection };
+    if (prevStateRef.current !== hasAnyConnection) {
+      prevStateRef.current = hasAnyConnection;
       onStateChange?.({ hasAnyConnection });
     }
   }, [hasAnyConnection, onStateChange]);
@@ -123,7 +106,27 @@ const IntegrationsOnboardingStep = ({ coachId, onStateChange }: IntegrationsOnbo
         sessionStorage.setItem("onboarding_return", "coach");
         window.location.href = data.authUrl;
       }
-    } catch (error) {
+    } catch {
+      toast.error(t("integrations.connectionError"));
+    } finally {
+      setConnectingProvider(null);
+    }
+  };
+
+  const handleConnectCalendar = async (providerId: CalendarProvider) => {
+    setConnectingProvider(providerId);
+    try {
+      const { data, error } = await supabase.functions.invoke("calendar-oauth-start", {
+        body: { provider: providerId },
+      });
+
+      if (error) throw error;
+
+      if (data?.authUrl) {
+        sessionStorage.setItem("onboarding_return", "coach");
+        window.location.href = data.authUrl;
+      }
+    } catch {
       toast.error(t("integrations.connectionError"));
     } finally {
       setConnectingProvider(null);
@@ -132,125 +135,107 @@ const IntegrationsOnboardingStep = ({ coachId, onStateChange }: IntegrationsOnbo
 
   return (
     <div className="space-y-5">
-      <div className="mb-4">
-        <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">
+      <div>
+        <h2 className="font-display text-xl sm:text-2xl font-bold">
           {t("onboardingIntegrations.videoCalendar.title")}
         </h2>
-        <p className="text-muted-foreground text-sm mt-1.5">{t("onboardingIntegrations.videoCalendar.subtitle")}</p>
+        <p className="text-muted-foreground text-sm mt-1">{t("onboardingIntegrations.videoCalendar.subtitle")}</p>
       </div>
 
-      {/* Video Conferencing */}
-      <div className="space-y-3">
-        <h3 className="font-medium text-foreground text-sm">
-          {t("onboardingIntegrations.videoCalendar.videoSection")}
-        </h3>
-        <div className="space-y-2">
-          {VIDEO_PROVIDERS.map((provider) => {
-            const isConnected = videoConnections?.includes(provider.id);
-            const isConnecting = connectingProvider === provider.id;
-            const Icon = provider.icon;
+      {/* Video */}
+      <div className="space-y-2">
+        {VIDEO_PROVIDERS.map((provider) => {
+          const isConnected = videoConnections.includes(provider.id);
+          const isConnecting = connectingProvider === provider.id;
+          const Icon = provider.icon;
 
-            return (
-              <div
-                key={provider.id}
-                className={`p-4 rounded-xl border-2 transition-all ${
-                  isConnected ? "border-green-500/30 bg-green-500/5" : "border-border hover:border-muted-foreground"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-lg ${provider.color} flex items-center justify-center`}>
-                      <Icon className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground text-sm">{t(provider.nameKey)}</p>
-                      <p className="text-xs text-muted-foreground">{t(provider.descriptionKey)}</p>
-                    </div>
+          return (
+            <div key={provider.id} className="p-4 rounded-xl border">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-lg ${provider.color} flex items-center justify-center`}>
+                    <Icon className="w-5 h-5 text-white" />
                   </div>
-                  {isConnected ? (
-                    <div className="flex items-center gap-2 text-green-600">
-                      <CheckCircle className="w-5 h-5" />
-                      <span className="text-sm font-medium">{t("integrations.connected")}</span>
-                    </div>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleConnectVideo(provider.id)}
-                      disabled={isConnecting}
-                    >
-                      {isConnecting ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <>
-                          <ExternalLink className="w-4 h-4 mr-1" />
-                          {t("integrations.connect")}
-                        </>
-                      )}
-                    </Button>
-                  )}
+                  <div>
+                    <p className="font-medium">{t(provider.nameKey)}</p>
+                    <p className="text-xs text-muted-foreground">{t(provider.descriptionKey)}</p>
+                  </div>
                 </div>
+
+                {isConnected ? (
+                  <div className="flex items-center gap-2 text-green-600">
+                    <CheckCircle className="w-5 h-5" />
+                    <span className="text-sm">{t("integrations.connected")}</span>
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleConnectVideo(provider.id)}
+                    disabled={isConnecting}
+                  >
+                    {isConnecting ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        <ExternalLink className="w-4 h-4 mr-1" />
+                        {t("integrations.connect")}
+                      </>
+                    )}
+                  </Button>
+                )}
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Calendar Sync */}
-      <div className="space-y-3">
-        <h3 className="font-medium text-foreground text-sm">
-          {t("onboardingIntegrations.videoCalendar.calendarSection")}
-        </h3>
-        <div className="space-y-2">
-          {CALENDAR_PROVIDERS.map((provider) => {
-            const isConnected = calendarConnections?.includes(provider.id);
-            const isConnecting = connectingProvider === provider.id;
-            const Icon = provider.icon;
+      {/* Calendar */}
+      <div className="space-y-2">
+        {CALENDAR_PROVIDERS.map((provider) => {
+          const isConnected = calendarConnections.includes(provider.id);
+          const isConnecting = connectingProvider === provider.id;
+          const Icon = provider.icon;
 
-            return (
-              <div
-                key={provider.id}
-                className={`p-4 rounded-xl border-2 transition-all ${
-                  isConnected ? "border-green-500/30 bg-green-500/5" : "border-border hover:border-muted-foreground"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-lg ${provider.color} flex items-center justify-center`}>
-                      <Icon className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground text-sm">{t(provider.nameKey)}</p>
-                      <p className="text-xs text-muted-foreground">{t(provider.descriptionKey)}</p>
-                    </div>
+          return (
+            <div key={provider.id} className="p-4 rounded-xl border">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-lg ${provider.color} flex items-center justify-center`}>
+                    <Icon className="w-5 h-5 text-white" />
                   </div>
-                  {isConnected ? (
-                    <div className="flex items-center gap-2 text-green-600">
-                      <CheckCircle className="w-5 h-5" />
-                      <span className="text-sm font-medium">{t("integrations.connected")}</span>
-                    </div>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleConnectCalendar(provider.id)}
-                      disabled={isConnecting}
-                    >
-                      {isConnecting ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <>
-                          <ExternalLink className="w-4 h-4 mr-1" />
-                          {t("integrations.connect")}
-                        </>
-                      )}
-                    </Button>
-                  )}
+                  <div>
+                    <p className="font-medium">{t(provider.nameKey)}</p>
+                    <p className="text-xs text-muted-foreground">{t(provider.descriptionKey)}</p>
+                  </div>
                 </div>
+
+                {isConnected ? (
+                  <div className="flex items-center gap-2 text-green-600">
+                    <CheckCircle className="w-5 h-5" />
+                    <span className="text-sm">{t("integrations.connected")}</span>
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleConnectCalendar(provider.id)}
+                    disabled={isConnecting}
+                  >
+                    {isConnecting ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        <ExternalLink className="w-4 h-4 mr-1" />
+                        {t("integrations.connect")}
+                      </>
+                    )}
+                  </Button>
+                )}
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
