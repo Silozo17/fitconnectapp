@@ -584,14 +584,14 @@ const CoachSettings = () => {
                 {/* Section 1: Visual Identity */}
                 <MarketplaceSection
                   icon={Image}
-                  title="Visual Identity"
-                  description="Photos that represent you and your work"
+                  title={t('marketplace.visualIdentity')}
+                  description={t('marketplace.visualIdentityDesc')}
                 >
                   <div className="space-y-6">
                     {/* Marketplace Card Photo */}
                     <div>
-                      <Label className="text-base font-medium mb-3 block">Marketplace Card Photo</Label>
-                      <p className="text-sm text-muted-foreground mb-4">This landscape image appears on your card in search results and listings</p>
+                      <Label className="text-base font-medium mb-3 block">{t('marketplace.cardPhoto')}</Label>
+                      <p className="text-sm text-muted-foreground mb-4">{t('marketplace.cardPhotoDesc')}</p>
                       <div className="flex flex-col lg:flex-row gap-6">
                         <div className="flex-1">
                           <CardImageUpload
@@ -615,7 +615,7 @@ const CoachSettings = () => {
                           />
                         </div>
                         <div className="lg:w-80">
-                          <p className="text-sm font-medium mb-2 text-muted-foreground">Card Preview</p>
+                          <p className="text-sm font-medium mb-2 text-muted-foreground">{t('marketplace.cardPreview')}</p>
                           <CoachCardPreview
                             displayName={profile.display_name}
                             cardImageUrl={profile.card_image_url}
@@ -635,8 +635,8 @@ const CoachSettings = () => {
 
                     {/* Gallery Images */}
                     <div>
-                      <Label className="text-base font-medium mb-3 block">Gallery Images</Label>
-                      <p className="text-sm text-muted-foreground mb-4">Showcase your work, gym, or training sessions (up to 5 images)</p>
+                      <Label className="text-base font-medium mb-3 block">{t('marketplace.galleryImages')}</Label>
+                      <p className="text-sm text-muted-foreground mb-4">{t('marketplace.galleryImagesDesc')}</p>
                       <CoachGalleryUpload userId={user?.id || ''} />
                     </div>
                   </div>
@@ -645,29 +645,29 @@ const CoachSettings = () => {
                 {/* Section 2: About You */}
                 <MarketplaceSection
                   icon={UserCircle}
-                  title="About You"
-                  description="Tell clients about your expertise and background"
+                  title={t('marketplace.aboutYou')}
+                  description={t('marketplace.aboutYouDesc')}
                 >
                   <div className="space-y-6">
                     {/* Bio */}
                     <div>
-                      <Label className="text-base font-medium">Bio</Label>
-                      <p className="text-sm text-muted-foreground mb-2">Your professional story and coaching philosophy</p>
+                      <Label className="text-base font-medium">{t('marketplace.bioLabel')}</Label>
+                      <p className="text-sm text-muted-foreground mb-2">{t('marketplace.bioDesc')}</p>
                       <Textarea
                         value={profile.bio || ""}
                         onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
                         rows={4}
-                        placeholder="Tell clients about your background, what motivates you, and your coaching approach..."
+                        placeholder={t('marketplace.bioPlaceholder')}
                       />
                       <p className="text-xs text-muted-foreground mt-1 text-right">
-                        {(profile.bio?.length || 0)} characters
+                        {(profile.bio?.length || 0)} {t('marketplace.characters')}
                       </p>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {/* Years of Experience */}
                       <div>
-                        <Label>Years of Experience</Label>
+                        <Label>{t('marketplace.yearsExperience')}</Label>
                         <Input
                           type="number"
                           value={profile.experience_years || ""}
@@ -680,7 +680,7 @@ const CoachSettings = () => {
 
                     {/* Coach Types */}
                     <div>
-                      <Label className="text-base font-medium mb-2 block">Specialisations</Label>
+                      <Label className="text-base font-medium mb-2 block">{t('marketplace.specialisations')}</Label>
                       <CoachTypeSelector
                         selectedTypes={profile.coach_types || []}
                         onChange={(types) => setProfile({ ...profile, coach_types: types })}
@@ -691,13 +691,13 @@ const CoachSettings = () => {
 
                     {/* Who I Work With */}
                     <div>
-                      <Label className="text-base font-medium">Who I Work With</Label>
-                      <p className="text-sm text-muted-foreground mb-2">Describe your ideal clients and who you specialise in helping</p>
+                      <Label className="text-base font-medium">{t('marketplace.whoIWorkWith')}</Label>
+                      <p className="text-sm text-muted-foreground mb-2">{t('marketplace.whoIWorkWithDesc')}</p>
                       <Textarea
                         value={profile.who_i_work_with || ""}
                         onChange={(e) => setProfile({ ...profile, who_i_work_with: e.target.value })}
                         rows={3}
-                        placeholder="e.g., Beginners looking to build confidence, busy professionals wanting flexible training, athletes preparing for competitions..."
+                        placeholder={t('marketplace.whoIWorkWithPlaceholder')}
                       />
                     </div>
                   </div>
@@ -706,13 +706,13 @@ const CoachSettings = () => {
                 {/* Section 3: Location & Availability */}
                 <MarketplaceSection
                   icon={MapPin}
-                  title="Location & Availability"
-                  description="Where and how clients can train with you"
+                  title={t('marketplace.locationAvailability')}
+                  description={t('marketplace.locationAvailabilityDesc')}
                 >
                   <div className="space-y-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <Label>Location</Label>
+                        <Label>{t('marketplace.locationLabel')}</Label>
                         <LocationAutocomplete
                           value={profile.location || ""}
                           onLocationChange={(location, data) => {
@@ -728,20 +728,20 @@ const CoachSettings = () => {
                               location_place_id: data?.place_id || null,
                             }));
                           }}
-                          placeholder="Search for your city..."
+                          placeholder={t('marketplace.locationPlaceholder')}
                           className="mt-1"
                         />
                       </div>
                       <div>
-                        <Label>Gym Affiliation</Label>
+                        <Label>{t('marketplace.gymAffiliation')}</Label>
                         <Input
                           value={profile.gym_affiliation || ""}
                           onChange={(e) => setProfile({ ...profile, gym_affiliation: e.target.value })}
                           className="mt-1"
-                          placeholder="e.g., PureGym Manchester, Independent"
+                          placeholder={t('marketplace.gymPlaceholder')}
                         />
                         <p className="text-xs text-muted-foreground mt-1">
-                          Leave blank if you're an online-only coach
+                          {t('marketplace.gymHint')}
                         </p>
                       </div>
                     </div>
@@ -749,7 +749,7 @@ const CoachSettings = () => {
                     <Separator />
 
                     <div>
-                      <Label className="text-base font-medium mb-3 block">Session Types</Label>
+                      <Label className="text-base font-medium mb-3 block">{t('marketplace.sessionTypes')}</Label>
                       <div className="flex flex-col sm:flex-row gap-6">
                         <div className="flex items-center gap-3 p-3 rounded-lg border bg-muted/30">
                           <Switch
@@ -757,8 +757,8 @@ const CoachSettings = () => {
                             onCheckedChange={(checked) => setProfile({ ...profile, online_available: checked })}
                           />
                           <div>
-                            <Label className="cursor-pointer">Online Sessions</Label>
-                            <p className="text-xs text-muted-foreground">Video calls & remote coaching</p>
+                            <Label className="cursor-pointer">{t('marketplace.onlineSessions')}</Label>
+                            <p className="text-xs text-muted-foreground">{t('marketplace.onlineDesc')}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3 p-3 rounded-lg border bg-muted/30">
@@ -767,8 +767,8 @@ const CoachSettings = () => {
                             onCheckedChange={(checked) => setProfile({ ...profile, in_person_available: checked })}
                           />
                           <div>
-                            <Label className="cursor-pointer">In-Person Sessions</Label>
-                            <p className="text-xs text-muted-foreground">Face-to-face training</p>
+                            <Label className="cursor-pointer">{t('marketplace.inPersonSessions')}</Label>
+                            <p className="text-xs text-muted-foreground">{t('marketplace.inPersonDesc')}</p>
                           </div>
                         </div>
                       </div>
@@ -779,8 +779,8 @@ const CoachSettings = () => {
                 {/* Section 4: Group Classes */}
                 <MarketplaceSection
                   icon={UsersIcon}
-                  title="Group Classes"
-                  description="Manage your group training sessions and waitlists"
+                  title={t('marketplace.groupClasses')}
+                  description={t('marketplace.groupClassesDesc')}
                   defaultOpen={false}
                 >
                   <CoachGroupClassesManager />
@@ -789,8 +789,8 @@ const CoachSettings = () => {
                 {/* Section 5: Social Media Links */}
                 <MarketplaceSection
                   icon={LinkIcon}
-                  title="Social Media & Links"
-                  description="Connect your social profiles so clients can learn more about you"
+                  title={t('marketplace.socialLinks')}
+                  description={t('marketplace.socialLinksDesc')}
                   defaultOpen={false}
                 >
                   <CoachSocialLinksSection
@@ -812,7 +812,7 @@ const CoachSettings = () => {
                 <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-background/95 backdrop-blur border-t p-4 z-40">
                   <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
                     <p className="text-sm text-muted-foreground hidden sm:block">
-                      {checkIsDirty() ? "You have unsaved changes" : "All changes saved"}
+                      {checkIsDirty() ? t('unsavedChanges') : t('allChangesSaved')}
                     </p>
                     <Button 
                       onClick={handleSaveProfile} 
@@ -825,7 +825,7 @@ const CoachSettings = () => {
                       ) : (
                         <Save className="w-4 h-4 mr-2" />
                       )}
-                      Save Changes
+                      {t('saveChanges')}
                     </Button>
                   </div>
                 </div>
@@ -835,15 +835,15 @@ const CoachSettings = () => {
             {/* Services & Pricing Tab */}
             {selectedTab === "services" && (
               <div className="card-elevated p-6">
-                <h2 className="font-display font-bold text-foreground mb-6">Services & Pricing</h2>
+                <h2 className="font-display font-bold text-foreground mb-6">{t('services.title')}</h2>
 
                 <div className="space-y-6">
                   {/* Currency Selection */}
                   <div className="p-4 bg-secondary/50 rounded-lg">
                     <div className="mb-4">
-                      <Label className="text-foreground font-medium">Pricing Currency</Label>
+                      <Label className="text-foreground font-medium">{t('services.pricingCurrency')}</Label>
                       <p className="text-sm text-muted-foreground">
-                        Select the currency for your rates. This will be displayed to clients.
+                        {t('services.pricingCurrencyDesc')}
                       </p>
                     </div>
                     <CurrencySelector 
@@ -855,8 +855,8 @@ const CoachSettings = () => {
                   {/* Hourly Rate */}
                   <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg">
                     <div>
-                      <p className="font-medium text-foreground">Hourly Rate</p>
-                      <p className="text-sm text-muted-foreground">Your base session rate</p>
+                      <p className="font-medium text-foreground">{t('services.hourlyRate')}</p>
+                      <p className="text-sm text-muted-foreground">{t('services.hourlyRateDesc')}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-muted-foreground">{getCurrencySymbol((profile.currency || "GBP") as any)}</span>
@@ -876,7 +876,7 @@ const CoachSettings = () => {
                       ) : (
                         <Save className="w-4 h-4 mr-2" />
                       )}
-                      Save Changes
+                      {t('saveChanges')}
                     </Button>
                   </div>
                 </div>

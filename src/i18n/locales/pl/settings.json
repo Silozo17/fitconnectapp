@@ -6,6 +6,8 @@
   "profileUpdated": "Profil zaktualizowany pomyślnie",
   "settingsSaved": "Ustawienia zapisane pomyślnie",
   "failedToSave": "Nie udało się zapisać zmian",
+  "allChangesSaved": "Wszystkie zmiany zapisane",
+  "unsavedChanges": "Masz niezapisane zmiany",
 
   "tabs": {
     "profile": "Profil",
@@ -113,11 +115,16 @@
 
   "preferences": {
     "title": "Preferencje",
+    "displayPreferences": "Preferencje wyświetlania",
     "language": "Język",
     "languageDescription": "Wybierz preferowany język",
     "languageHint": "Więcej języków wkrótce",
     "currency": "Waluta",
     "currencyDescription": "Wybierz preferowaną walutę do wyświetlania",
+    "currencyHint": "Wpływa to na sposób wyświetlania cen dla Ciebie i Twoich klientów na całej platformie.",
+    "cancellationPolicy": "Polityka anulowania",
+    "cancellationPolicyDesc": "Minimalna liczba godzin przed sesją, kiedy klient może anulować bez utraty tokenów pakietu.",
+    "hours": "godzin",
     "animations": {
       "title": "Animacje celebracji",
       "description": "Skonfiguruj efekty celebracji dla osiągnięć i kamieni milowych",
@@ -141,11 +148,11 @@
     "description": "Połącz usługi zewnętrzne",
     "video": {
       "title": "Wideokonferencje",
-      "description": "Połącz swoją platformę wideo dla sesji online"
+      "description": "Automatycznie twórz linki do spotkań wideo dla sesji online"
     },
     "calendar": {
       "title": "Synchronizacja kalendarza",
-      "description": "Synchronizuj swoją dostępność z zewnętrznymi kalendarzami"
+      "description": "Automatycznie dodawaj sesje coachingowe do swojego kalendarza"
     },
     "wearables": {
       "title": "Urządzenia noszone",
@@ -154,6 +161,12 @@
     "healthData": {
       "title": "Dane zdrowotne",
       "description": "Zobacz zsynchronizowane wskaźniki zdrowia"
+    },
+    "dataPrivacy": {
+      "title": "Dane i prywatność",
+      "description": "Gdy łączysz integracje, Twoje dane są obsługiwane zgodnie z naszymi praktykami prywatności. Dowiedz się więcej o tym, jak chronimy Twoje dane.",
+      "privacyPolicy": "Polityka prywatności",
+      "termsOfService": "Regulamin"
     }
   },
 
@@ -166,6 +179,11 @@
       "approved": "Zweryfikowany",
       "rejected": "Odrzucony"
     },
+    "verificationStatus": "Status weryfikacji",
+    "profileVerified": "Twój profil jest zweryfikowany",
+    "uploadToVerify": "Prześlij dokumenty, aby uzyskać weryfikację",
+    "verifiedOn": "Zweryfikowano",
+    "adminNotes": "Notatki administratora",
     "documents": {
       "identity": {
         "label": "Dowód tożsamości",
@@ -185,20 +203,36 @@
       }
     },
     "uploadDocument": "Prześlij dokument",
+    "uploading": "Przesyłanie...",
     "viewDocument": "Zobacz dokument",
     "deleteDocument": "Usuń dokument",
-    "submitForReview": "Prześlij do przeglądu",
+    "submitForReview": "Prześlij do weryfikacji",
     "resubmit": "Prześlij ponownie do przeglądu"
   },
 
   "security": {
     "title": "Bezpieczeństwo",
     "description": "Zarządzaj ustawieniami bezpieczeństwa konta",
+    "accountSecurity": "Bezpieczeństwo konta",
+    "manageEmailPassword": "Zarządzaj swoim emailem i hasłem",
+    "emailAddress": "Adres email",
+    "password": "Hasło",
+    "changePasswordDesc": "Zmień hasło do konta",
     "changePassword": "Zmień hasło",
     "currentPassword": "Aktualne hasło",
     "newPassword": "Nowe hasło",
     "confirmPassword": "Potwierdź nowe hasło",
     "updatePassword": "Zaktualizuj hasło",
+    "updateEmail": "Zaktualizuj email",
+    "newEmailAddress": "Nowy adres email",
+    "emailPlaceholder": "twoj-nowy-email@example.com",
+    "passwordPlaceholder": "Wprowadź nowe hasło",
+    "confirmPasswordPlaceholder": "Potwierdź nowe hasło",
+    "confirmationEmailSent": "Email potwierdzający wysłany",
+    "checkBothEmails": "Sprawdź zarówno stary, jak i nowy adres email, aby potwierdzić zmianę.",
+    "passwordUpdated": "Hasło zaktualizowane pomyślnie",
+    "passwordMinLength": "Hasło musi mieć co najmniej 8 znaków",
+    "passwordsDontMatch": "Hasła nie są zgodne",
     "twoFactor": "Uwierzytelnianie dwuskładnikowe",
     "twoFactorDescription": "Dodaj dodatkową warstwę bezpieczeństwa do swojego konta",
     "enableTwoFactor": "Włącz 2FA",
@@ -213,9 +247,12 @@
 
   "account": {
     "title": "Konto",
+    "session": "Sesja",
+    "sessionDesc": "Zarządzaj bieżącą sesją",
     "signOut": "Wyloguj się",
     "signOutDescription": "Wyloguj się z konta na tym urządzeniu",
     "dangerZone": "Strefa niebezpieczna",
+    "dangerZoneDesc": "Nieodwracalne działania wpływające na Twoje konto",
     "deleteAccount": "Usuń konto",
     "deleteAccountDescription": "Trwale usuń swoje konto i wszystkie powiązane dane",
     "deleteAccountWarning": "Ta akcja jest nieodwracalna. Wszystkie Twoje dane zostaną trwale usunięte."
@@ -232,15 +269,94 @@
   "invoice": {
     "title": "Ustawienia faktur",
     "description": "Skonfiguruj szczegóły i branding faktur",
+    "businessDetails": "Dane firmy",
+    "businessDetailsDesc": "Informacje o firmie na fakturach",
     "businessName": "Nazwa firmy",
+    "businessNamePlaceholder": "Nazwa Twojej firmy",
     "businessAddress": "Adres firmy",
+    "businessAddressPlaceholder": "Adres Twojej firmy",
     "businessEmail": "Email firmowy",
+    "businessEmailPlaceholder": "faktury@twojafirma.pl",
     "businessPhone": "Telefon firmowy",
+    "businessPhonePlaceholder": "+48 XXX XXX XXX",
+    "vatSettings": "Ustawienia VAT",
+    "vatRegistered": "Zarejestrowany jako podatnik VAT",
+    "vatRegisteredDesc": "Jestem zarejestrowany jako podatnik VAT",
     "vatNumber": "Numer VAT",
+    "vatNumberPlaceholder": "PL1234567890",
+    "vatRate": "Stawka VAT (%)",
+    "vatInclusive": "Ceny zawierają VAT",
+    "vatExclusive": "Ceny nie zawierają VAT",
     "companyRegistration": "Numer KRS",
+    "companyRegistrationPlaceholder": "Numer rejestracji firmy",
     "bankDetails": "Dane bankowe",
+    "bankDetailsPlaceholder": "Nazwa konta, numer konta...",
     "defaultNotes": "Domyślne notatki na fakturze",
-    "paymentTerms": "Warunki płatności"
+    "defaultNotesPlaceholder": "Dziękujemy za współpracę!",
+    "paymentTerms": "Warunki płatności",
+    "paymentTermsPlaceholder": "Płatność w ciągu 14 dni",
+    "invoiceDesign": "Wygląd faktury",
+    "invoiceDesignDesc": "Dostosuj wygląd swoich faktur",
+    "template": "Szablon",
+    "accentColor": "Kolor akcentu",
+    "logo": "Logo",
+    "uploadLogo": "Prześlij logo",
+    "removeLogo": "Usuń",
+    "preview": "Podgląd",
+    "previewDesc": "Zobacz, jak będą wyglądać Twoje faktury",
+    "sampleInvoice": "Przykładowa faktura",
+    "itemDescription": "Opis pozycji",
+    "qty": "Ilość",
+    "rate": "Stawka",
+    "amount": "Kwota",
+    "subtotal": "Suma częściowa",
+    "total": "Razem",
+    "thankYou": "Dziękujemy za współpracę!"
+  },
+
+  "marketplace": {
+    "visualIdentity": "Identyfikacja wizualna",
+    "visualIdentityDesc": "Zdjęcia, które Cię reprezentują i Twoją pracę",
+    "cardPhoto": "Zdjęcie karty marketplace",
+    "cardPhotoDesc": "Ten poziomy obrazek pojawia się na Twojej karcie w wynikach wyszukiwania i listach",
+    "cardPreview": "Podgląd karty",
+    "galleryImages": "Galeria zdjęć",
+    "galleryImagesDesc": "Pokaż swoją pracę, siłownię lub sesje treningowe (do 5 zdjęć)",
+    "aboutYou": "O Tobie",
+    "aboutYouDesc": "Opowiedz klientom o swojej wiedzy i doświadczeniu",
+    "bioLabel": "O mnie",
+    "bioDesc": "Twoja historia zawodowa i filozofia coachingu",
+    "bioPlaceholder": "Opowiedz klientom o swoim doświadczeniu, co Cię motywuje i o Twoim podejściu do coachingu...",
+    "characters": "znaków",
+    "yearsExperience": "Lata doświadczenia",
+    "specialisations": "Specjalizacje",
+    "whoIWorkWith": "Z kim pracuję",
+    "whoIWorkWithDesc": "Opisz swoich idealnych klientów i w czym się specjalizujesz",
+    "whoIWorkWithPlaceholder": "np. Początkujący chcący zbudować pewność siebie, zapracowani profesjonaliści szukający elastycznych treningów, sportowcy przygotowujący się do zawodów...",
+    "locationAvailability": "Lokalizacja i dostępność",
+    "locationAvailabilityDesc": "Gdzie i jak klienci mogą trenować z Tobą",
+    "locationLabel": "Lokalizacja",
+    "locationPlaceholder": "Wyszukaj swoje miasto...",
+    "gymAffiliation": "Afiliacja siłowni",
+    "gymPlaceholder": "np. Zdrofit Warszawa, Niezależny",
+    "gymHint": "Zostaw puste, jeśli jesteś trenerem tylko online",
+    "sessionTypes": "Typy sesji",
+    "onlineSessions": "Sesje online",
+    "onlineDesc": "Połączenia wideo i zdalny coaching",
+    "inPersonSessions": "Sesje osobiste",
+    "inPersonDesc": "Trening twarzą w twarz",
+    "groupClasses": "Zajęcia grupowe",
+    "groupClassesDesc": "Zarządzaj sesjami grupowymi i listami oczekujących",
+    "socialLinks": "Media społecznościowe i linki",
+    "socialLinksDesc": "Połącz swoje profile społecznościowe, aby klienci mogli dowiedzieć się więcej o Tobie"
+  },
+
+  "services": {
+    "title": "Usługi i cennik",
+    "pricingCurrency": "Waluta cennika",
+    "pricingCurrencyDesc": "Wybierz walutę dla swoich stawek. Będzie wyświetlana klientom.",
+    "hourlyRate": "Stawka godzinowa",
+    "hourlyRateDesc": "Twoja podstawowa stawka za sesję"
   },
 
   "admin": {
