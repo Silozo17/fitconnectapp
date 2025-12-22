@@ -402,7 +402,8 @@
     "uploadBothRequired": "Prześlij dokument tożsamości i certyfikat zawodowy, aby złożyć wniosek o weryfikację.",
     "requiredDocsUploaded": "Przesłałeś wymagane dokumenty. Kliknij \"Wyślij i kontynuuj\", aby przesłać do weryfikacji.",
     "skipForNow": "Pomiń na razie",
-    "submitAndContinue": "Wyślij i kontynuuj"
+    "submitAndContinue": "Wyślij i kontynuuj",
+    "goBack": "Wróć"
   },
   "navigation": {
     "home": "Strona główna",
