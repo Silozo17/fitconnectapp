@@ -487,6 +487,11 @@
   },
 
   "marketplace": {
+    "visibility": {
+      "title": "Widoczność w marketplace",
+      "visibleDesc": "Twój profil pojawia się w wynikach wyszukiwania",
+      "hiddenDesc": "Twój profil jest ukryty przed wyszukiwaniem"
+    },
     "visualIdentity": "Identyfikacja wizualna",
     "visualIdentityDesc": "Zdjęcia, które Cię reprezentują i Twoją pracę",
     "cardPhoto": "Zdjęcie karty marketplace",

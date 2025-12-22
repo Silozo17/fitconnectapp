@@ -71,7 +71,7 @@ import { VerifiedBadge } from "@/components/verification/VerifiedBadge";
 import { AccountSecuritySection } from "@/components/shared/AccountSecuritySection";
 import { InvoiceSettingsSection } from "@/components/coach/InvoiceSettingsSection";
 import { format } from "date-fns";
-import { Upload, FileText, Trash2, CheckCircle, XCircle, Clock, AlertCircle, Eye, Users } from "lucide-react";
+import { Upload, FileText, Trash2, CheckCircle, XCircle, Clock, AlertCircle, Eye, EyeOff, Users } from "lucide-react";
 import { CoachGalleryUpload } from "@/components/coach/CoachGalleryUpload";
 import { CoachGroupClassesManager } from "@/components/coach/CoachGroupClassesManager";
 import { CoachWhoIWorkWithSection } from "@/components/coach/CoachWhoIWorkWithSection";
@@ -107,6 +107,7 @@ interface CoachProfile {
   subscription_tier: string | null;
   is_verified: boolean | null;
   who_i_work_with: string | null;
+  marketplace_visible: boolean | null;
   // Social media links
   facebook_url: string | null;
   instagram_url: string | null;
@@ -262,6 +263,7 @@ const CoachSettings = () => {
     subscription_tier: "free",
     is_verified: false,
     who_i_work_with: null,
+    marketplace_visible: true,
     facebook_url: null,
     instagram_url: null,
     tiktok_url: null,
@@ -289,7 +291,7 @@ const CoachSettings = () => {
 
       const { data, error } = await supabase
         .from("coach_profiles")
-        .select("id, display_name, username, bio, location, location_city, location_region, location_country, location_country_code, location_lat, location_lng, location_place_id, gym_affiliation, experience_years, hourly_rate, currency, coach_types, online_available, in_person_available, profile_image_url, card_image_url, subscription_tier, is_verified, who_i_work_with, facebook_url, instagram_url, tiktok_url, x_url, threads_url, linkedin_url, youtube_url")
+        .select("id, display_name, username, bio, location, location_city, location_region, location_country, location_country_code, location_lat, location_lng, location_place_id, gym_affiliation, experience_years, hourly_rate, currency, coach_types, online_available, in_person_available, profile_image_url, card_image_url, subscription_tier, is_verified, who_i_work_with, marketplace_visible, facebook_url, instagram_url, tiktok_url, x_url, threads_url, linkedin_url, youtube_url")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -325,6 +327,7 @@ const CoachSettings = () => {
         subscription_tier: coachData.subscription_tier || "free",
         is_verified: coachData.is_verified ?? false,
         who_i_work_with: coachData.who_i_work_with || null,
+        marketplace_visible: coachData.marketplace_visible ?? true,
         facebook_url: coachData.facebook_url || null,
         instagram_url: coachData.instagram_url || null,
         tiktok_url: coachData.tiktok_url || null,
@@ -365,6 +368,7 @@ const CoachSettings = () => {
         profile_image_url: profile.profile_image_url,
         card_image_url: profile.card_image_url,
         who_i_work_with: profile.who_i_work_with,
+        marketplace_visible: profile.marketplace_visible,
         facebook_url: profile.facebook_url,
         instagram_url: profile.instagram_url,
         tiktok_url: profile.tiktok_url,
@@ -580,6 +584,35 @@ const CoachSettings = () => {
               <div className="space-y-6 pb-24">
                 {/* Profile Completion Progress */}
                 <ProfileCompletionProgress />
+
+                {/* Marketplace Visibility Toggle */}
+                <Card>
+                  <CardContent className="flex items-center justify-between py-4">
+                    <div className="flex items-center gap-3">
+                      {profile.marketplace_visible !== false ? (
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Eye className="h-5 w-5 text-primary" />
+                        </div>
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                          <EyeOff className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-medium">{t('marketplace.visibility.title')}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {profile.marketplace_visible !== false 
+                            ? t('marketplace.visibility.visibleDesc')
+                            : t('marketplace.visibility.hiddenDesc')}
+                        </p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={profile.marketplace_visible !== false}
+                      onCheckedChange={(checked) => setProfile({ ...profile, marketplace_visible: checked })}
+                    />
+                  </CardContent>
+                </Card>
 
                 {/* Section 1: Visual Identity */}
                 <MarketplaceSection
