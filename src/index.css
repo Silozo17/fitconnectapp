@@ -411,7 +411,7 @@
 @layer utilities {
   /* Mobile bottom nav safe spacing - single source of truth */
   .pb-mobile-nav {
-    padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(8rem + env(safe-area-inset-bottom, 0px));
   }
 
   /* Only apply full spacing on mobile (< 768px), desktop gets standard spacing */
