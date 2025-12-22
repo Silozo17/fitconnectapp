@@ -40,14 +40,16 @@ export function useCountry(): UseCountryReturn {
   const context = useCountryContext();
   
   // Priority:
-  // 1. URL locale route (website pages like /pl-en/pricing)
+  // 1. LocaleRoutingContext (website routes - handles both locale-prefixed and stored preferences)
   // 2. AppLocaleContext (dashboard - reacts to user preference changes)
   // 3. CountryContext (fallback)
   const isFromRoute = localeRouting?.isLocaleRoute ?? false;
   
   let countryCode: RouteLocationCode;
-  if (isFromRoute) {
-    countryCode = localeRouting?.location ?? context.countryCode;
+  if (localeRouting) {
+    // LocaleRoutingContext is available (website routes)
+    // It handles stored preferences for non-locale routes too
+    countryCode = localeRouting.location;
   } else if (appLocale) {
     // Dashboard mode - use AppLocaleContext which reacts to changes
     countryCode = appLocale.location;
@@ -82,8 +84,10 @@ export function useOptionalCountry(): UseCountryReturn | null {
   const isFromRoute = localeRouting?.isLocaleRoute ?? false;
   
   let countryCode: RouteLocationCode;
-  if (isFromRoute) {
-    countryCode = localeRouting?.location ?? context.countryCode;
+  if (localeRouting) {
+    // LocaleRoutingContext is available (website routes)
+    // It handles stored preferences for non-locale routes too
+    countryCode = localeRouting.location;
   } else if (appLocale) {
     countryCode = appLocale.location;
   } else {
