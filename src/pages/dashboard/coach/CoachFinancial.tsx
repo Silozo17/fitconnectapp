@@ -68,6 +68,8 @@ import {
   Cell,
   Legend,
 } from "recharts";
+import { FeatureGate } from "@/components/FeatureGate";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 
 const getInvoiceStatusConfig = (t: (key: string) => string) => ({
   draft: { label: t("financial.status.draft"), color: "bg-muted text-muted-foreground", icon: FileText },
@@ -85,6 +87,7 @@ export default function CoachFinancial() {
   const { data: coachProfile, isLoading: profileLoading } = useCoachProfile();
   const INVOICE_STATUS_CONFIG = getInvoiceStatusConfig(t);
   const coachId = coachProfile?.id;
+  const { hasFeature } = useFeatureAccess();
 
   const { data: invoices, isLoading: invoicesLoading } = useCoachInvoices(coachId);
   const { data: expenses, isLoading: expensesLoading } = useCoachExpenses(coachId);
@@ -97,6 +100,8 @@ export default function CoachFinancial() {
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [showExpenseModal, setShowExpenseModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ type: "invoice" | "expense"; id: string } | null>(null);
+  
+  const hasAdvancedReporting = hasFeature("advanced_reporting");
 
   const isLoading = profileLoading || invoicesLoading || expensesLoading;
 
@@ -343,69 +348,71 @@ export default function CoachFinancial() {
 
           {/* Reports Tab */}
           <TabsContent value="reports" className="space-y-4">
-            <div className="grid gap-4 lg:grid-cols-2">
-              {/* Income vs Expenses Chart */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t("financial.reports.incomeVsExpenses")}</CardTitle>
-                  <CardDescription>{t("financial.reports.last6Months")}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={monthlyData}>
-                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                        <XAxis dataKey="month" className="text-xs" />
-                        <YAxis className="text-xs" tickFormatter={(v) => `£${v}`} />
-                        <Tooltip
-                          formatter={(value: number) => formatCurrency(value)}
-                          contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
-                        />
-                        <Bar dataKey="income" fill="hsl(142 76% 36%)" name="Income" radius={[4, 4, 0, 0]} />
-                        <Bar dataKey="expenses" fill="hsl(var(--destructive))" name="Expenses" radius={[4, 4, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Expense Breakdown */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t("financial.reports.expenseBreakdown")}</CardTitle>
-                  <CardDescription>{t("financial.reports.byCategory")}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {expensesByCategory.length === 0 ? (
-                    <div className="h-64 flex items-center justify-center text-muted-foreground">
-                      {t("financial.reports.noExpenseData")}
-                    </div>
-                  ) : (
+            <FeatureGate feature="advanced_reporting">
+              <div className="grid gap-4 lg:grid-cols-2">
+                {/* Income vs Expenses Chart */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>{t("financial.reports.incomeVsExpenses")}</CardTitle>
+                    <CardDescription>{t("financial.reports.last6Months")}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
                     <div className="h-64">
                       <ResponsiveContainer width="100%" height="100%">
-                        <RechartsPieChart>
-                          <Pie
-                            data={expensesByCategory}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={50}
-                            outerRadius={80}
-                            paddingAngle={2}
-                            dataKey="value"
-                          >
-                            {expensesByCategory.map((_, index) => (
-                              <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                          <Legend />
-                        </RechartsPieChart>
+                        <BarChart data={monthlyData}>
+                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                          <XAxis dataKey="month" className="text-xs" />
+                          <YAxis className="text-xs" tickFormatter={(v) => `£${v}`} />
+                          <Tooltip
+                            formatter={(value: number) => formatCurrency(value)}
+                            contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
+                          />
+                          <Bar dataKey="income" fill="hsl(142 76% 36%)" name="Income" radius={[4, 4, 0, 0]} />
+                          <Bar dataKey="expenses" fill="hsl(var(--destructive))" name="Expenses" radius={[4, 4, 0, 0]} />
+                        </BarChart>
                       </ResponsiveContainer>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+                  </CardContent>
+                </Card>
+
+                {/* Expense Breakdown */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>{t("financial.reports.expenseBreakdown")}</CardTitle>
+                    <CardDescription>{t("financial.reports.byCategory")}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {expensesByCategory.length === 0 ? (
+                      <div className="h-64 flex items-center justify-center text-muted-foreground">
+                        {t("financial.reports.noExpenseData")}
+                      </div>
+                    ) : (
+                      <div className="h-64">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <RechartsPieChart>
+                            <Pie
+                              data={expensesByCategory}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={50}
+                              outerRadius={80}
+                              paddingAngle={2}
+                              dataKey="value"
+                            >
+                              {expensesByCategory.map((_, index) => (
+                                <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                              ))}
+                            </Pie>
+                            <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                            <Legend />
+                          </RechartsPieChart>
+                        </ResponsiveContainer>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </FeatureGate>
           </TabsContent>
 
           {/* Tax Tab */}
