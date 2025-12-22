@@ -217,7 +217,10 @@
     "coachNotFound": "Nie znaleziono profilu trenera",
     "mealBuilder": "Kreator posiłków",
     "aiSuggestions": "Sugestie AI",
-    "loading": "Ładowanie planu..."
+    "loading": "Ładowanie planu...",
+    "day": "Dzień",
+    "meal": "Posiłek",
+    "addedFood": "Dodano {{food}} do {{meal}}"
   },
   "workoutBuilder": {
     "title": "Utwórz plan",
@@ -256,7 +259,13 @@
     "weeks4": "4 tygodnie",
     "weeks6": "6 tygodni",
     "weeks8": "8 tygodni",
-    "weeks12": "12 tygodni"
+    "weeks12": "12 tygodni",
+    "day": "Dzień",
+    "defaultDays": {
+      "day1Push": "Dzień 1 - Wypychanie",
+      "day2Pull": "Dzień 2 - Przyciąganie",
+      "day3Legs": "Dzień 3 - Nogi"
+    }
   },
   "packages": {
     "title": "Pakiety",

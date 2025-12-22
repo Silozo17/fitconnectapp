@@ -47,9 +47,9 @@ const CoachPlanBuilder = () => {
   const [showCreateExercise, setShowCreateExercise] = useState(false);
 
   const [workoutDays, setWorkoutDays] = useState<PlanDay[]>([
-    { id: generateId(), name: "Day 1 - Push", exercises: [] },
-    { id: generateId(), name: "Day 2 - Pull", exercises: [] },
-    { id: generateId(), name: "Day 3 - Legs", exercises: [] },
+    { id: generateId(), name: t("workoutBuilder.defaultDays.day1Push"), exercises: [] },
+    { id: generateId(), name: t("workoutBuilder.defaultDays.day2Pull"), exercises: [] },
+    { id: generateId(), name: t("workoutBuilder.defaultDays.day3Legs"), exercises: [] },
   ]);
 
   const { data: existingPlan, isLoading: planLoading } = useTrainingPlan(planId);
@@ -107,7 +107,7 @@ const CoachPlanBuilder = () => {
   const handleAddDay = () => {
     const newDay: PlanDay = {
       id: generateId(),
-      name: `Day ${workoutDays.length + 1}`,
+      name: `${t("workoutBuilder.day")} ${workoutDays.length + 1}`,
       exercises: [],
     };
     setWorkoutDays([...workoutDays, newDay]);

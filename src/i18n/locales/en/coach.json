@@ -217,7 +217,10 @@
     "coachNotFound": "Coach profile not found",
     "mealBuilder": "Meal Builder",
     "aiSuggestions": "AI Suggestions",
-    "loading": "Loading plan..."
+    "loading": "Loading plan...",
+    "day": "Day",
+    "meal": "Meal",
+    "addedFood": "Added {{food}} to {{meal}}"
   },
   "workoutBuilder": {
     "title": "Create Plan",
@@ -256,7 +259,13 @@
     "weeks4": "4 weeks",
     "weeks6": "6 weeks",
     "weeks8": "8 weeks",
-    "weeks12": "12 weeks"
+    "weeks12": "12 weeks",
+    "day": "Day",
+    "defaultDays": {
+      "day1Push": "Day 1 - Push",
+      "day2Pull": "Day 2 - Pull",
+      "day3Legs": "Day 3 - Legs"
+    }
   },
   "packages": {
     "title": "Packages",
