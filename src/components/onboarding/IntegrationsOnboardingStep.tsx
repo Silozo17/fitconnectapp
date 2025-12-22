@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Video, Calendar, CheckCircle, ExternalLink, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -102,10 +102,16 @@ const IntegrationsOnboardingStep = ({ coachId, onStateChange }: IntegrationsOnbo
 
   const { videoConnections, calendarConnections, hasAnyConnection } = useIntegrationsState(coachId);
 
-  // Notify parent of state changes
-  if (onStateChange) {
-    onStateChange({ hasAnyConnection });
-  }
+  // Track previous state to avoid unnecessary calls
+  const prevStateRef = useRef({ hasAnyConnection: false });
+
+  // Notify parent of state changes - MUST be in useEffect to avoid render-loop freezes
+  useEffect(() => {
+    if (prevStateRef.current.hasAnyConnection !== hasAnyConnection) {
+      prevStateRef.current = { hasAnyConnection };
+      onStateChange?.({ hasAnyConnection });
+    }
+  }, [hasAnyConnection, onStateChange]);
 
   const handleConnectVideo = async (providerId: VideoProvider) => {
     setConnectingProvider(providerId);

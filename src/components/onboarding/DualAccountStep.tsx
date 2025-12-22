@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { User, Briefcase, CheckCircle, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,10 +25,16 @@ const DualAccountStep = ({ coachId, onStateChange, onActionRef }: DualAccountSte
   const [selectedOption, setSelectedOption] = useState<'both' | 'coach_only' | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
-  // Notify parent of state changes
-  if (onStateChange) {
-    onStateChange({ selectedOption, isCreating });
-  }
+  // Track previous state to avoid unnecessary calls
+  const prevStateRef = useRef<{ selectedOption: typeof selectedOption; isCreating: boolean }>({ selectedOption: null, isCreating: false });
+
+  // Notify parent of state changes - MUST be in useEffect to avoid render-loop freezes
+  useEffect(() => {
+    if (prevStateRef.current.selectedOption !== selectedOption || prevStateRef.current.isCreating !== isCreating) {
+      prevStateRef.current = { selectedOption, isCreating };
+      onStateChange?.({ selectedOption, isCreating });
+    }
+  }, [selectedOption, isCreating, onStateChange]);
 
   const handleCreateDualAccount = async (): Promise<boolean> => {
     if (!user) return false;
