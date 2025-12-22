@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
@@ -212,7 +212,7 @@ const CoachOnboarding = () => {
     setFormData((prev) => ({ ...prev, primaryCoachType: typeId }));
   };
 
-  const handleNext = async () => {
+  const handleNext = useCallback(async () => {
     // Idempotency guard: prevent double-clicks and rapid navigation
     if (isNavigating) {
       console.log("[CoachOnboarding] handleNext blocked - already navigating");
@@ -268,7 +268,7 @@ const CoachOnboarding = () => {
         console.log("[CoachOnboarding] Navigation unlocked");
       }, 150);
     }
-  };
+  }, [isNavigating, currentStep, formData.coachTypes.length, formData.inPersonAvailable, formData.locationData, formData.onlineAvailable, dualAccountState.selectedOption, verificationState.hasAnyDocs]);
 
   const handleBack = () => {
     if (currentStep > 0) {
