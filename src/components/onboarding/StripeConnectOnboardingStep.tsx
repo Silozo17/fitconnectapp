@@ -20,7 +20,6 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showSkipWarning, setShowSkipWarning] = useState(false);
-  const [isPendingSkip, setIsPendingSkip] = useState(false);
 
   // Check if already connected
   const { data: coachProfile, refetch } = useQuery({
@@ -107,20 +106,11 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
   };
 
   const handleConfirmSkip = () => {
-    setIsPendingSkip(true);
     setShowSkipWarning(false);
-  };
-
-  // Handle skip when sheet closes
-  const handleSheetOpenChange = (open: boolean) => {
-    setShowSkipWarning(open);
-    if (!open && isPendingSkip) {
-      setIsPendingSkip(false);
-      // Wait for sheet close animation (300ms) plus buffer
-      setTimeout(() => {
-        onSkip();
-      }, 350);
-    }
+    // Small delay to let sheet start closing, then navigate
+    setTimeout(() => {
+      onSkip();
+    }, 100);
   };
 
   // Check URL params for returning from Stripe
@@ -246,6 +236,7 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
 
       <div className="flex gap-3">
         <Button
+          type="button"
           variant="outline"
           onClick={handleSkipClick}
           className="flex-1"
@@ -253,6 +244,7 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
           {t('onboarding.setUpLater')}
         </Button>
         <Button 
+          type="button"
           onClick={handleConnect} 
           disabled={isLoading}
           className="flex-1 bg-primary text-primary-foreground"
@@ -269,7 +261,7 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
       {/* Skip confirmation bottom sheet - no layout shift */}
       <OnboardingConfirmSheet
         open={showSkipWarning}
-        onOpenChange={handleSheetOpenChange}
+        onOpenChange={setShowSkipWarning}
         title={t('onboarding.skipWarningTitle')}
         description={t('onboarding.skipWarningMessage')}
         icon={<AlertTriangle className="w-6 h-6" />}
