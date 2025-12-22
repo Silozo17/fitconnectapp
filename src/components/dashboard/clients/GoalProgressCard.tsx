@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Target, CheckCircle, TrendingUp } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface Goal {
   id: string;
@@ -17,6 +18,8 @@ interface GoalProgressCardProps {
 }
 
 export function GoalProgressCard({ goal }: GoalProgressCardProps) {
+  const { t } = useTranslation("coach");
+
   return (
     <Card className={`bg-card border-border ${goal.isCompleted ? 'border-green-500/50' : ''}`}>
       <CardContent className="p-4">
@@ -34,7 +37,7 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
             <div>
               <h4 className="font-medium text-foreground">{goal.name}</h4>
               <p className="text-xs text-muted-foreground">
-                Target: {goal.target} {goal.unit}
+                {t('clientDetail.goals.target')}: {goal.target} {goal.unit}
               </p>
             </div>
           </div>
@@ -52,15 +55,15 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
             className="h-2"
           />
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>Current: {goal.current} {goal.unit}</span>
-            <span>Target: {goal.target} {goal.unit}</span>
+            <span>{t('clientDetail.goals.current')}: {goal.current} {goal.unit}</span>
+            <span>{t('clientDetail.goals.target')}: {goal.target} {goal.unit}</span>
           </div>
         </div>
 
         {goal.isCompleted && (
           <div className="mt-3 text-xs text-green-400 flex items-center gap-1">
             <CheckCircle className="h-3 w-3" />
-            Goal achieved!
+            {t('clientDetail.goals.goalAchieved')}
           </div>
         )}
       </CardContent>

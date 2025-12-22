@@ -1,5 +1,6 @@
 import { AlertTriangle, Heart, Utensils } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface HealthProfileCardProps {
   dietaryRestrictions?: string[] | null;
@@ -12,33 +13,25 @@ export const HealthProfileCard = ({
   allergies,
   medicalConditions,
 }: HealthProfileCardProps) => {
+  const { t } = useTranslation("coach");
+  
   const hasDietary = dietaryRestrictions && dietaryRestrictions.length > 0;
   const hasAllergies = allergies && allergies.length > 0;
   const hasMedical = medicalConditions && medicalConditions.length > 0;
-  const hasAnyData = hasDietary || hasAllergies || hasMedical;
-
-  if (!hasAnyData) {
-    return (
-      <div className="card-elevated p-6">
-        <h3 className="font-display font-bold text-foreground mb-4">Health Profile</h3>
-        <p className="text-muted-foreground text-sm">No health information provided yet.</p>
-      </div>
-    );
-  }
 
   return (
     <div className="card-elevated p-6 space-y-5">
-      <h3 className="font-display font-bold text-foreground">Health Profile</h3>
+      <h3 className="font-display font-bold text-foreground">{t('clientDetail.healthProfile.title')}</h3>
 
       {/* Dietary Restrictions */}
-      {hasDietary && (
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Utensils className="w-4 h-4 text-success" />
-            <span className="text-sm font-medium text-foreground">Dietary Restrictions</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {dietaryRestrictions.map((item) => (
+      <div>
+        <div className="flex items-center gap-2 mb-2">
+          <Utensils className="w-4 h-4 text-success" />
+          <span className="text-sm font-medium text-foreground">{t('clientDetail.healthProfile.dietaryRestrictions')}</span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {hasDietary ? (
+            dietaryRestrictions.map((item) => (
               <Badge
                 key={item}
                 variant="outline"
@@ -46,20 +39,24 @@ export const HealthProfileCard = ({
               >
                 {item}
               </Badge>
-            ))}
-          </div>
+            ))
+          ) : (
+            <Badge variant="outline" className="bg-muted/50 text-muted-foreground border-muted">
+              {t('clientDetail.healthProfile.none')}
+            </Badge>
+          )}
         </div>
-      )}
+      </div>
 
       {/* Allergies */}
-      {hasAllergies && (
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <AlertTriangle className="w-4 h-4 text-warning" />
-            <span className="text-sm font-medium text-foreground">Allergies</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {allergies.map((item) => (
+      <div>
+        <div className="flex items-center gap-2 mb-2">
+          <AlertTriangle className="w-4 h-4 text-warning" />
+          <span className="text-sm font-medium text-foreground">{t('clientDetail.healthProfile.allergies')}</span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {hasAllergies ? (
+            allergies.map((item) => (
               <Badge
                 key={item}
                 variant="outline"
@@ -67,17 +64,21 @@ export const HealthProfileCard = ({
               >
                 {item}
               </Badge>
-            ))}
-          </div>
+            ))
+          ) : (
+            <Badge variant="outline" className="bg-muted/50 text-muted-foreground border-muted">
+              {t('clientDetail.healthProfile.none')}
+            </Badge>
+          )}
         </div>
-      )}
+      </div>
 
       {/* Medical Conditions */}
       {hasMedical && (
         <div>
           <div className="flex items-center gap-2 mb-2">
             <Heart className="w-4 h-4 text-destructive" />
-            <span className="text-sm font-medium text-foreground">Medical Conditions</span>
+            <span className="text-sm font-medium text-foreground">{t('clientDetail.healthProfile.medicalConditions')}</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {medicalConditions.map((item) => (

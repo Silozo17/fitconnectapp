@@ -126,7 +126,8 @@
       "bodyFatTrend": "Trend tkanki tłuszczowej",
       "noProgressData": "Brak zapisanych danych o postępach",
       "logFirstProgress": "Zapisz pierwszy wpis postępu",
-      "goalProgress": "Postęp celów"
+      "goalProgress": "Postęp celów",
+      "inProgress": "W trakcie"
     },
     "plans": {
       "assignPlan": "Przypisz plan",
@@ -141,6 +142,29 @@
       "addNote": "Dodaj notatkę",
       "noNotesYet": "Brak notatek",
       "addFirstNote": "Dodaj pierwszą notatkę"
+    },
+    "goals": {
+      "target": "Cel",
+      "current": "Aktualnie",
+      "goalAchieved": "Cel osiągnięty!"
+    },
+    "healthProfile": {
+      "title": "Profil zdrowotny",
+      "noData": "Brak podanych informacji zdrowotnych.",
+      "dietaryRestrictions": "Ograniczenia dietetyczne",
+      "allergies": "Alergie",
+      "medicalConditions": "Schorzenia",
+      "none": "brak"
+    },
+    "habits": {
+      "activeHabits": "Aktywne nawyki",
+      "totalStreakDays": "Łączne dni serii",
+      "bestStreak": "Najlepsza seria",
+      "assignedHabits": "Przypisane nawyki",
+      "addHabit": "Dodaj nawyk",
+      "noHabitsYet": "Brak przypisanych nawyków",
+      "createHabitsDescription": "Utwórz nawyki, aby pomóc klientowi budować zdrowe rutyny",
+      "createFirstHabit": "Utwórz pierwszy nawyk"
     }
   },
   "scheduleSessionModal": {

@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Plus, Flame, Target, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useClientHabits, Habit } from "@/hooks/useHabits";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import HabitCard from "./HabitCard";
 import CreateHabitModal from "./CreateHabitModal";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface HabitManagerProps {
   coachId: string;
@@ -15,6 +16,7 @@ interface HabitManagerProps {
 }
 
 const HabitManager = ({ coachId, clientId }: HabitManagerProps) => {
+  const { t } = useTranslation("coach");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | undefined>();
   
@@ -73,31 +75,31 @@ const HabitManager = ({ coachId, clientId }: HabitManagerProps) => {
           <CardContent className="p-4 text-center">
             <Target className="h-6 w-6 mx-auto text-primary mb-1" />
             <p className="text-2xl font-bold">{activeHabits.length}</p>
-            <p className="text-xs text-muted-foreground">Active Habits</p>
+            <p className="text-xs text-muted-foreground">{t('clientDetail.habits.activeHabits')}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
             <Flame className="h-6 w-6 mx-auto text-orange-500 mb-1" />
             <p className="text-2xl font-bold">{totalStreaks}</p>
-            <p className="text-xs text-muted-foreground">Total Streak Days</p>
+            <p className="text-xs text-muted-foreground">{t('clientDetail.habits.totalStreakDays')}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
             <TrendingUp className="h-6 w-6 mx-auto text-green-500 mb-1" />
             <p className="text-2xl font-bold">{bestStreak}</p>
-            <p className="text-xs text-muted-foreground">Best Streak</p>
+            <p className="text-xs text-muted-foreground">{t('clientDetail.habits.bestStreak')}</p>
           </CardContent>
         </Card>
       </div>
       
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold">Assigned Habits</h3>
+        <h3 className="font-semibold">{t('clientDetail.habits.assignedHabits')}</h3>
         <Button onClick={() => setIsCreateModalOpen(true)} size="sm">
           <Plus className="h-4 w-4 mr-2" />
-          Add Habit
+          {t('clientDetail.habits.addHabit')}
         </Button>
       </div>
       
@@ -117,13 +119,13 @@ const HabitManager = ({ coachId, clientId }: HabitManagerProps) => {
         <Card>
           <CardContent className="p-8 text-center">
             <Target className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h4 className="font-medium mb-2">No habits assigned yet</h4>
+            <h4 className="font-medium mb-2">{t('clientDetail.habits.noHabitsYet')}</h4>
             <p className="text-sm text-muted-foreground mb-4">
-              Create habits to help your client build healthy routines
+              {t('clientDetail.habits.createHabitsDescription')}
             </p>
             <Button onClick={() => setIsCreateModalOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Create First Habit
+              {t('clientDetail.habits.createFirstHabit')}
             </Button>
           </CardContent>
         </Card>
