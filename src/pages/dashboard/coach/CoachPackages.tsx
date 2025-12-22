@@ -11,8 +11,10 @@ import CreatePackageModal from "@/components/packages/CreatePackageModal";
 import CreateSubscriptionPlanModal from "@/components/packages/CreateSubscriptionPlanModal";
 import { toast } from "sonner";
 import { useLocale } from "@/contexts/LocaleContext";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const CoachPackages = () => {
+  const { t } = useTranslation('coach');
   const { formatCurrency } = useLocale();
   const { data: packages = [], isLoading: packagesLoading } = useCoachPackages();
   const { data: plans = [], isLoading: plansLoading } = useCoachSubscriptionPlans();
@@ -27,18 +29,18 @@ const CoachPackages = () => {
   const handleTogglePackage = async (pkg: CoachPackage) => {
     try {
       await updatePackage.mutateAsync({ id: pkg.id, is_active: !pkg.is_active });
-      toast.success(pkg.is_active ? "Package deactivated" : "Package activated");
+      toast.success(pkg.is_active ? t('packages.inactive') : t('packages.active'));
     } catch {
-      toast.error("Failed to update package");
+      toast.error(t('packages.failedToSave'));
     }
   };
 
   const handleTogglePlan = async (plan: CoachSubscriptionPlan) => {
     try {
       await updatePlan.mutateAsync({ id: plan.id, is_active: !plan.is_active });
-      toast.success(plan.is_active ? "Plan deactivated" : "Plan activated");
+      toast.success(plan.is_active ? t('subscriptionPlans.planUpdated') : t('subscriptionPlans.planUpdated'));
     } catch {
-      toast.error("Failed to update plan");
+      toast.error(t('subscriptionPlans.failedToSave'));
     }
   };
 
@@ -50,7 +52,7 @@ const CoachPackages = () => {
             <div className="flex items-center gap-2 mb-1">
               <h3 className="font-semibold text-foreground">{pkg.name}</h3>
               <Badge variant={pkg.is_active ? "default" : "secondary"}>
-                {pkg.is_active ? "Active" : "Inactive"}
+                {pkg.is_active ? t('packages.active') : t('packages.inactive')}
               </Badge>
             </div>
             {pkg.description && (
@@ -61,7 +63,7 @@ const CoachPackages = () => {
             <Button
               variant="ghost"
               size="icon"
-              aria-label="Edit package"
+              aria-label={t('packages.editPackage')}
               onClick={() => {
                 setEditPackage(pkg);
                 setShowPackageModal(true);
@@ -72,7 +74,7 @@ const CoachPackages = () => {
             <Button
               variant="ghost"
               size="icon"
-              aria-label={pkg.is_active ? "Deactivate package" : "Activate package"}
+              aria-label={pkg.is_active ? t('packages.inactive') : t('packages.active')}
               onClick={() => handleTogglePackage(pkg)}
             >
               {pkg.is_active ? (
@@ -87,20 +89,20 @@ const CoachPackages = () => {
         <div className="grid grid-cols-3 gap-4 text-center pt-4 border-t border-border">
           <div>
             <p className="text-2xl font-bold text-foreground">{pkg.session_count}</p>
-            <p className="text-xs text-muted-foreground">Sessions</p>
+            <p className="text-xs text-muted-foreground">{t('packagesPage.sessions')}</p>
           </div>
           <div>
             <p className="text-2xl font-bold text-primary">{formatCurrency(pkg.price)}</p>
-            <p className="text-xs text-muted-foreground">Total Price</p>
+            <p className="text-xs text-muted-foreground">{t('packagesPage.totalPrice')}</p>
           </div>
           <div>
             <p className="text-2xl font-bold text-foreground">{pkg.validity_days}</p>
-            <p className="text-xs text-muted-foreground">Days Valid</p>
+            <p className="text-xs text-muted-foreground">{t('packagesPage.daysValid')}</p>
           </div>
         </div>
 
         <p className="text-xs text-muted-foreground text-center mt-3">
-          {formatCurrency(pkg.price / pkg.session_count)} per session
+          {formatCurrency(pkg.price / pkg.session_count)} {t('packagesPage.perSession')}
         </p>
       </CardContent>
     </Card>
@@ -114,7 +116,7 @@ const CoachPackages = () => {
             <div className="flex items-center gap-2 mb-1">
               <h3 className="font-semibold text-foreground">{plan.name}</h3>
               <Badge variant={plan.is_active ? "default" : "secondary"}>
-                {plan.is_active ? "Active" : "Inactive"}
+                {plan.is_active ? t('subscriptionPlans.active') : t('packages.inactive')}
               </Badge>
             </div>
             {plan.description && (
@@ -153,7 +155,7 @@ const CoachPackages = () => {
 
         {plan.sessions_per_period && (
           <p className="text-sm text-muted-foreground mb-3">
-            {plan.sessions_per_period} sessions per {plan.billing_period.replace("ly", "")}
+            {plan.sessions_per_period} {t('packagesPage.sessionsPer')} {plan.billing_period.replace("ly", "")}
           </p>
         )}
 
@@ -173,11 +175,11 @@ const CoachPackages = () => {
   const isLoading = packagesLoading || plansLoading;
 
   return (
-    <DashboardLayout title="Packages & Subscriptions" description="Manage your pricing packages">
+    <DashboardLayout title={t('packagesPage.title')} description={t('packagesPage.subtitle')}>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Packages & Subscriptions</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t('packagesPage.title')}</h1>
         <p className="text-muted-foreground">
-          Create session packages and subscription plans for your clients
+          {t('packagesPage.subtitle')}
         </p>
       </div>
 
@@ -191,11 +193,11 @@ const CoachPackages = () => {
             <TabsList>
               <TabsTrigger value="packages" className="gap-2">
                 <Package className="h-4 w-4" />
-                Packages ({packages.length})
+                {t('packagesPage.packages')} ({packages.length})
               </TabsTrigger>
               <TabsTrigger value="subscriptions" className="gap-2">
                 <RefreshCcw className="h-4 w-4" />
-                Subscriptions ({plans.length})
+                {t('packagesPage.subscriptions')} ({plans.length})
               </TabsTrigger>
             </TabsList>
           </div>
@@ -204,7 +206,7 @@ const CoachPackages = () => {
             <div className="flex justify-end">
               <Button onClick={() => { setEditPackage(null); setShowPackageModal(true); }}>
                 <Plus className="h-4 w-4 mr-2" />
-                Create Package
+                {t('packagesPage.createPackage')}
               </Button>
             </div>
 
@@ -212,13 +214,13 @@ const CoachPackages = () => {
               <Card>
                 <CardContent className="py-12 text-center">
                   <Package className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-                  <h3 className="font-semibold text-foreground mb-2">No packages yet</h3>
+                  <h3 className="font-semibold text-foreground mb-2">{t('packagesPage.noPackages')}</h3>
                   <p className="text-muted-foreground mb-4">
-                    Create session packages to offer bulk discounts to clients
+                    {t('packagesPage.noPackagesDesc')}
                   </p>
                   <Button onClick={() => setShowPackageModal(true)}>
                     <Plus className="h-4 w-4 mr-2" />
-                    Create Your First Package
+                    {t('packagesPage.createFirstPackage')}
                   </Button>
                 </CardContent>
               </Card>
@@ -235,7 +237,7 @@ const CoachPackages = () => {
             <div className="flex justify-end">
               <Button onClick={() => { setEditPlan(null); setShowPlanModal(true); }}>
                 <Plus className="h-4 w-4 mr-2" />
-                Create Subscription Plan
+                {t('packagesPage.createSubscriptionPlan')}
               </Button>
             </div>
 
@@ -243,13 +245,13 @@ const CoachPackages = () => {
               <Card>
                 <CardContent className="py-12 text-center">
                   <RefreshCcw className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-                  <h3 className="font-semibold text-foreground mb-2">No subscription plans yet</h3>
+                  <h3 className="font-semibold text-foreground mb-2">{t('packagesPage.noSubscriptions')}</h3>
                   <p className="text-muted-foreground mb-4">
-                    Create recurring subscription plans for ongoing coaching
+                    {t('packagesPage.noSubscriptionsDesc')}
                   </p>
                   <Button onClick={() => setShowPlanModal(true)}>
                     <Plus className="h-4 w-4 mr-2" />
-                    Create Your First Plan
+                    {t('packagesPage.createFirstPlan')}
                   </Button>
                 </CardContent>
               </Card>

@@ -10,8 +10,10 @@ import { PendingRequestCard } from "@/components/connections/PendingRequestCard"
 import { AddConnectionModal } from "@/components/connections/AddConnectionModal";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const CoachConnections = () => {
+  const { t } = useTranslation('coach');
   const { user } = useAuth();
   const {
     connections,
@@ -31,14 +33,14 @@ const CoachConnections = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Connections</h1>
+            <h1 className="text-2xl font-bold text-foreground">{t('connections.title')}</h1>
             <p className="text-muted-foreground">
-              Connect with other coaches and fitness professionals
+              {t('connections.subtitle')}
             </p>
           </div>
           <Button onClick={() => setAddModalOpen(true)} className="gap-2">
             <UserPlus className="w-4 h-4" />
-            Add Connection
+            {t('connections.addConnection')}
           </Button>
         </div>
 
@@ -47,7 +49,7 @@ const CoachConnections = () => {
           <TabsList className="grid w-full grid-cols-3 max-w-md">
             <TabsTrigger value="friends" className="gap-2">
               <Users className="w-4 h-4" />
-              Friends
+              {t('connections.friends')}
               {connections.length > 0 && (
                 <Badge variant="secondary" className="ml-1 text-xs">
                   {connections.length}
@@ -56,7 +58,7 @@ const CoachConnections = () => {
             </TabsTrigger>
             <TabsTrigger value="pending" className="gap-2">
               <Clock className="w-4 h-4" />
-              Pending
+              {t('connections.pending')}
               {pendingRequests.length > 0 && (
                 <Badge variant="default" className="ml-1 text-xs">
                   {pendingRequests.length}
@@ -65,7 +67,7 @@ const CoachConnections = () => {
             </TabsTrigger>
             <TabsTrigger value="sent" className="gap-2">
               <Send className="w-4 h-4" />
-              Sent
+              {t('connections.sent')}
               {sentRequests.length > 0 && (
                 <Badge variant="outline" className="ml-1 text-xs">
                   {sentRequests.length}
@@ -80,7 +82,7 @@ const CoachConnections = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="w-5 h-5 text-primary" />
-                  Your Connections
+                  {t('connections.yourConnections')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -92,7 +94,7 @@ const CoachConnections = () => {
                   <div className="text-center py-8">
                     <Users className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
                     <p className="text-muted-foreground">
-                      You haven't connected with anyone yet
+                      {t('connections.noConnections')}
                     </p>
                     <Button
                       variant="outline"
@@ -100,7 +102,7 @@ const CoachConnections = () => {
                       onClick={() => setAddModalOpen(true)}
                     >
                       <UserPlus className="w-4 h-4 mr-2" />
-                      Find Connections
+                      {t('connections.findConnections')}
                     </Button>
                   </div>
                 ) : (
@@ -125,7 +127,7 @@ const CoachConnections = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Clock className="w-5 h-5 text-primary" />
-                  Pending Requests
+                  {t('connections.pendingRequests')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -137,7 +139,7 @@ const CoachConnections = () => {
                   <div className="text-center py-8">
                     <Clock className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
                     <p className="text-muted-foreground">
-                      No pending connection requests
+                      {t('connections.noPendingRequests')}
                     </p>
                   </div>
                 ) : (
@@ -163,7 +165,7 @@ const CoachConnections = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Send className="w-5 h-5 text-primary" />
-                  Sent Requests
+                  {t('connections.sentRequests')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -175,7 +177,7 @@ const CoachConnections = () => {
                   <div className="text-center py-8">
                     <Send className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
                     <p className="text-muted-foreground">
-                      You haven't sent any requests
+                      {t('connections.noSentRequests')}
                     </p>
                   </div>
                 ) : (
