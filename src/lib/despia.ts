@@ -199,4 +199,37 @@ export const isBioAuthAvailable = (): boolean => {
   return isDespia();
 };
 
+/**
+ * Get the user's tracking/privacy status (ATT on iOS, etc.)
+ * Returns true if the user has disabled tracking
+ */
+export const isTrackingDisabled = (): boolean => {
+  if (!isDespia()) return false;
+  
+  try {
+    // Access the trackingDisabled property from despia runtime
+    return (despia as any).trackingDisabled === true;
+  } catch (e) {
+    console.warn('Failed to get tracking status:', e);
+    return false;
+  }
+};
+
+/**
+ * Get the current privacy/tracking status for compliance
+ */
+export interface PrivacyStatus {
+  trackingDisabled: boolean;
+  isDespia: boolean;
+  timestamp: string;
+}
+
+export const getPrivacyStatus = (): PrivacyStatus => {
+  return {
+    trackingDisabled: isTrackingDisabled(),
+    isDespia: isDespia(),
+    timestamp: new Date().toISOString(),
+  };
+};
+
 export default despia;
