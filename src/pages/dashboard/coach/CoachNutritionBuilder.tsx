@@ -45,18 +45,18 @@ const CoachNutritionBuilder = () => {
   const [targetCarbs, setTargetCarbs] = useState(200);
   const [targetFat, setTargetFat] = useState(65);
   
-  // Days and meals
-  const [days, setDays] = useState<NutritionDay[]>([
-    {
-      id: crypto.randomUUID(),
-      name: "Day 1",
-      meals: [
-        { id: crypto.randomUUID(), name: "Breakfast", time: "07:00", foods: [] },
-        { id: crypto.randomUUID(), name: "Lunch", time: "12:00", foods: [] },
-        { id: crypto.randomUUID(), name: "Dinner", time: "18:00", foods: [] },
-      ],
-    },
-  ]);
+  // Days and meals - initialize with translated names
+  const getInitialDays = (): NutritionDay[] => [{
+    id: crypto.randomUUID(),
+    name: `${t("nutritionBuilder.day")} 1`,
+    meals: [
+      { id: crypto.randomUUID(), name: t("nutritionBuilder.breakfast"), time: "07:00", foods: [] },
+      { id: crypto.randomUUID(), name: t("nutritionBuilder.lunch"), time: "12:00", foods: [] },
+      { id: crypto.randomUUID(), name: t("nutritionBuilder.dinner"), time: "18:00", foods: [] },
+    ],
+  }];
+  
+  const [days, setDays] = useState<NutritionDay[]>(getInitialDays());
   
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
 
@@ -113,11 +113,11 @@ const CoachNutritionBuilder = () => {
   const addDay = () => {
     const newDay: NutritionDay = {
       id: crypto.randomUUID(),
-      name: `Day ${days.length + 1}`,
+      name: `${t("nutritionBuilder.day")} ${days.length + 1}`,
       meals: [
-        { id: crypto.randomUUID(), name: "Breakfast", time: "07:00", foods: [] },
-        { id: crypto.randomUUID(), name: "Lunch", time: "12:00", foods: [] },
-        { id: crypto.randomUUID(), name: "Dinner", time: "18:00", foods: [] },
+        { id: crypto.randomUUID(), name: t("nutritionBuilder.breakfast"), time: "07:00", foods: [] },
+        { id: crypto.randomUUID(), name: t("nutritionBuilder.lunch"), time: "12:00", foods: [] },
+        { id: crypto.randomUUID(), name: t("nutritionBuilder.dinner"), time: "18:00", foods: [] },
       ],
     };
     setDays([...days, newDay]);
@@ -128,7 +128,7 @@ const CoachNutritionBuilder = () => {
     if (!currentDay) return;
     const newMeal: Meal = {
       id: crypto.randomUUID(),
-      name: `Meal ${currentDay.meals.length + 1}`,
+      name: `${t("nutritionBuilder.meal")} ${currentDay.meals.length + 1}`,
       foods: [],
     };
     const updatedDays = [...days];
@@ -158,7 +158,7 @@ const CoachNutritionBuilder = () => {
     if (updatedDays[selectedDayIndex].meals[mealIndex]) {
       updatedDays[selectedDayIndex].meals[mealIndex].foods.push(mealFood);
       setDays(updatedDays);
-      toast.success(t("workoutBuilder.addedExercise", { exercise: food.name, day: updatedDays[selectedDayIndex].meals[mealIndex].name }));
+      toast.success(t("nutritionBuilder.addedFood", { food: food.name, meal: updatedDays[selectedDayIndex].meals[mealIndex].name }));
     }
   };
 
