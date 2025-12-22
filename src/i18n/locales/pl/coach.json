@@ -127,6 +127,38 @@
     "generateWithAI": "Generuj z AI",
     "customise": "Dostosuj"
   },
+  "plansPage": {
+    "title": "Plany treningowe",
+    "description": "Twórz i zarządzaj planami treningowymi i żywieniowymi.",
+    "subtitle": "Twórz, zarządzaj i przypisuj plany treningowe i żywieniowe",
+    "createPlan": "Utwórz plan",
+    "workoutPlans": "Plany treningowe",
+    "nutritionPlans": "Plany żywieniowe",
+    "activeAssignments": "Aktywne przypisania",
+    "searchPlans": "Szukaj planów...",
+    "filter": "Filtruj",
+    "weeks": "tygodni",
+    "exercises": "ćwiczeń",
+    "days": "dni",
+    "createNewPlan": "Utwórz nowy plan",
+    "buildCustomWorkout": "Zbuduj własny plan treningowy",
+    "createNutritionPlan": "Utwórz plan żywieniowy",
+    "buildCustomMeal": "Zbuduj własny plan posiłków",
+    "noWorkoutPlans": "Nie znaleziono planów treningowych",
+    "noNutritionPlans": "Nie znaleziono planów żywieniowych",
+    "actions": {
+      "edit": "Edytuj",
+      "duplicate": "Duplikuj",
+      "assign": "Przypisz",
+      "delete": "Usuń"
+    },
+    "deleteDialog": {
+      "title": "Usuń plan",
+      "description": "To trwale usunie \"{planName}\". Tej czynności nie można cofnąć.",
+      "cancel": "Anuluj",
+      "confirm": "Usuń"
+    }
+  },
   "nutritionBuilder": {
     "title": "Kreator żywienia",
     "subtitle": "Twórz plany posiłków",

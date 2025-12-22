@@ -41,7 +41,7 @@ import { format } from "date-fns";
 import { useTranslation } from "@/hooks/useTranslation";
 
 const CoachPlans = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('coach');
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [planToDelete, setPlanToDelete] = useState<TrainingPlan | null>(null);
@@ -91,7 +91,7 @@ const CoachPlans = () => {
 
   if (isLoading) {
     return (
-      <DashboardLayout title="Training Plans" description="Create and manage your training and nutrition plans.">
+      <DashboardLayout title={t("plansPage.title")} description={t("plansPage.description")}>
         <div className="flex items-center justify-center h-64">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
@@ -100,19 +100,19 @@ const CoachPlans = () => {
   }
 
   return (
-    <DashboardLayout title="Training Plans" description="Create and manage your training and nutrition plans.">
+    <DashboardLayout title={t("plansPage.title")} description={t("plansPage.description")}>
       <FeatureGate feature="workout_plan_builder">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="font-display text-2xl font-bold text-foreground">Training Plans</h1>
-          <p className="text-muted-foreground">Create, manage, and assign workout and nutrition plans</p>
+          <h1 className="font-display text-2xl font-bold text-foreground">{t("plansPage.title")}</h1>
+          <p className="text-muted-foreground">{t("plansPage.subtitle")}</p>
         </div>
         <div className="flex gap-3">
           <Link to="/dashboard/coach/plans/new">
             <Button className="bg-primary text-primary-foreground">
               <Plus className="w-4 h-4 mr-2" />
-              Create Plan
+              {t("plansPage.createPlan")}
             </Button>
           </Link>
         </div>
@@ -127,7 +127,7 @@ const CoachPlans = () => {
             </div>
             <div>
               <p className="text-2xl font-display font-bold text-foreground">{workoutPlans.length}</p>
-              <p className="text-sm text-muted-foreground">Workout Plans</p>
+              <p className="text-sm text-muted-foreground">{t("plansPage.workoutPlans")}</p>
             </div>
           </div>
         </div>
@@ -138,7 +138,7 @@ const CoachPlans = () => {
             </div>
             <div>
               <p className="text-2xl font-display font-bold text-foreground">{nutritionPlans.length}</p>
-              <p className="text-sm text-muted-foreground">Nutrition Plans</p>
+              <p className="text-sm text-muted-foreground">{t("plansPage.nutritionPlans")}</p>
             </div>
           </div>
         </div>
@@ -149,7 +149,7 @@ const CoachPlans = () => {
             </div>
             <div>
               <p className="text-2xl font-display font-bold text-foreground">0</p>
-              <p className="text-sm text-muted-foreground">Active Assignments</p>
+              <p className="text-sm text-muted-foreground">{t("plansPage.activeAssignments")}</p>
             </div>
           </div>
         </div>
@@ -159,15 +159,15 @@ const CoachPlans = () => {
       <Tabs defaultValue="workout" className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <TabsList className="bg-secondary">
-            <TabsTrigger value="workout">Workout Plans</TabsTrigger>
-            <TabsTrigger value="nutrition">Nutrition Plans</TabsTrigger>
+            <TabsTrigger value="workout">{t("plansPage.workoutPlans")}</TabsTrigger>
+            <TabsTrigger value="nutrition">{t("plansPage.nutritionPlans")}</TabsTrigger>
           </TabsList>
 
           <div className="flex gap-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search plans..."
+                placeholder={t("plansPage.searchPlans")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 w-64"
@@ -175,7 +175,7 @@ const CoachPlans = () => {
             </div>
             <Button variant="outline">
               <Filter className="w-4 h-4 mr-2" />
-              Filter
+              {t("plansPage.filter")}
             </Button>
           </div>
         </div>
@@ -197,17 +197,17 @@ const CoachPlans = () => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => handleEditPlan(plan)}>
-                        <Edit className="w-4 h-4 mr-2" /> Edit
+                        <Edit className="w-4 h-4 mr-2" /> {t("plansPage.actions.edit")}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleDuplicatePlan(plan)}>
-                        <Copy className="w-4 h-4 mr-2" /> Duplicate
+                        <Copy className="w-4 h-4 mr-2" /> {t("plansPage.actions.duplicate")}
                       </DropdownMenuItem>
-                      <DropdownMenuItem><Users className="w-4 h-4 mr-2" /> Assign</DropdownMenuItem>
+                      <DropdownMenuItem><Users className="w-4 h-4 mr-2" /> {t("plansPage.actions.assign")}</DropdownMenuItem>
                       <DropdownMenuItem 
                         className="text-destructive"
                         onClick={() => setPlanToDelete(plan)}
                       >
-                        <Trash2 className="w-4 h-4 mr-2" /> Delete
+                        <Trash2 className="w-4 h-4 mr-2" /> {t("plansPage.actions.delete")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -215,13 +215,13 @@ const CoachPlans = () => {
                 <h3 className="font-display font-bold text-foreground mb-2">{plan.name}</h3>
                 <div className="flex items-center gap-2 mb-4">
                   {plan.duration_weeks && (
-                    <Badge variant="outline">{plan.duration_weeks} weeks</Badge>
+                    <Badge variant="outline">{plan.duration_weeks} {t("plansPage.weeks")}</Badge>
                   )}
                 </div>
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <div className="flex items-center gap-4">
                     <span className="flex items-center gap-1">
-                      <Dumbbell className="w-3 h-3" /> {Array.isArray(plan.content) ? plan.content.reduce((acc, day) => acc + (day.exercises?.length || 0), 0) : 0} exercises
+                      <Dumbbell className="w-3 h-3" /> {Array.isArray(plan.content) ? plan.content.reduce((acc, day) => acc + (day.exercises?.length || 0), 0) : 0} {t("plansPage.exercises")}
                     </span>
                   </div>
                   <span>{format(new Date(plan.created_at), "MMM d, yyyy")}</span>
@@ -235,15 +235,15 @@ const CoachPlans = () => {
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
                   <Plus className="w-6 h-6 text-primary" />
                 </div>
-                <p className="font-medium text-foreground">Create New Plan</p>
-                <p className="text-sm text-muted-foreground">Build a custom workout plan</p>
+                <p className="font-medium text-foreground">{t("plansPage.createNewPlan")}</p>
+                <p className="text-sm text-muted-foreground">{t("plansPage.buildCustomWorkout")}</p>
               </div>
             </Link>
           </div>
 
           {filterPlans(workoutPlans).length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
-              {t('empty.noWorkoutPlans')}
+              {t('plansPage.noWorkoutPlans')}
             </div>
           )}
         </TabsContent>
@@ -266,21 +266,21 @@ const CoachPlans = () => {
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleEditPlan(plan)}>
-                          <Edit className="w-4 h-4 mr-2" /> Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDuplicatePlan(plan)}>
-                          <Copy className="w-4 h-4 mr-2" /> Duplicate
-                        </DropdownMenuItem>
-                        <DropdownMenuItem><Users className="w-4 h-4 mr-2" /> Assign</DropdownMenuItem>
-                        <DropdownMenuItem 
-                          className="text-destructive"
-                          onClick={() => setPlanToDelete(plan)}
-                        >
-                          <Trash2 className="w-4 h-4 mr-2" /> Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleEditPlan(plan)}>
+                        <Edit className="w-4 h-4 mr-2" /> {t("plansPage.actions.edit")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleDuplicatePlan(plan)}>
+                        <Copy className="w-4 h-4 mr-2" /> {t("plansPage.actions.duplicate")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem><Users className="w-4 h-4 mr-2" /> {t("plansPage.actions.assign")}</DropdownMenuItem>
+                      <DropdownMenuItem 
+                        className="text-destructive"
+                        onClick={() => setPlanToDelete(plan)}
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" /> {t("plansPage.actions.delete")}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
                   <h3 className="font-display font-bold text-foreground mb-2">{plan.name}</h3>
@@ -289,12 +289,12 @@ const CoachPlans = () => {
                       <Badge variant="outline">{targetCalories} kcal</Badge>
                     )}
                     {plan.duration_weeks && (
-                      <Badge variant="outline">{plan.duration_weeks} weeks</Badge>
+                      <Badge variant="outline">{plan.duration_weeks} {t("plansPage.weeks")}</Badge>
                     )}
                   </div>
                   <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
-                      <Apple className="w-3 h-3" /> {Array.isArray(content?.days) ? content.days.length : 0} days
+                      <Apple className="w-3 h-3" /> {Array.isArray(content?.days) ? content.days.length : 0} {t("plansPage.days")}
                     </span>
                     <span>{format(new Date(plan.created_at), "MMM d, yyyy")}</span>
                   </div>
@@ -308,15 +308,15 @@ const CoachPlans = () => {
                 <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center mb-3">
                   <Plus className="w-6 h-6 text-success" />
                 </div>
-                <p className="font-medium text-foreground">Create Nutrition Plan</p>
-                <p className="text-sm text-muted-foreground">Build a custom meal plan</p>
+                <p className="font-medium text-foreground">{t("plansPage.createNutritionPlan")}</p>
+                <p className="text-sm text-muted-foreground">{t("plansPage.buildCustomMeal")}</p>
               </div>
             </Link>
           </div>
 
           {filterPlans(nutritionPlans).length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
-              {t('empty.noNutritionPlans')}
+              {t('plansPage.noNutritionPlans')}
             </div>
           )}
         </TabsContent>
@@ -326,18 +326,18 @@ const CoachPlans = () => {
       <AlertDialog open={!!planToDelete} onOpenChange={(open) => !open && setPlanToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Plan</AlertDialogTitle>
+            <AlertDialogTitle>{t("plansPage.deleteDialog.title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete "{planToDelete?.name}". This action cannot be undone.
+              {t("plansPage.deleteDialog.description").replace("{planName}", planToDelete?.name || "")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("plansPage.deleteDialog.cancel")}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDeletePlan}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {t("plansPage.deleteDialog.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

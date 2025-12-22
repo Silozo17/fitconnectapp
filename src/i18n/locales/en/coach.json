@@ -127,6 +127,38 @@
     "generateWithAI": "Generate with AI",
     "customise": "Customise"
   },
+  "plansPage": {
+    "title": "Training Plans",
+    "description": "Create and manage your training and nutrition plans.",
+    "subtitle": "Create, manage, and assign workout and nutrition plans",
+    "createPlan": "Create Plan",
+    "workoutPlans": "Workout Plans",
+    "nutritionPlans": "Nutrition Plans",
+    "activeAssignments": "Active Assignments",
+    "searchPlans": "Search plans...",
+    "filter": "Filter",
+    "weeks": "weeks",
+    "exercises": "exercises",
+    "days": "days",
+    "createNewPlan": "Create New Plan",
+    "buildCustomWorkout": "Build a custom workout plan",
+    "createNutritionPlan": "Create Nutrition Plan",
+    "buildCustomMeal": "Build a custom meal plan",
+    "noWorkoutPlans": "No workout plans found",
+    "noNutritionPlans": "No nutrition plans found",
+    "actions": {
+      "edit": "Edit",
+      "duplicate": "Duplicate",
+      "assign": "Assign",
+      "delete": "Delete"
+    },
+    "deleteDialog": {
+      "title": "Delete Plan",
+      "description": "This will permanently delete \"{planName}\". This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    }
+  },
   "nutritionBuilder": {
     "title": "Nutrition Builder",
     "subtitle": "Create meal plans",
