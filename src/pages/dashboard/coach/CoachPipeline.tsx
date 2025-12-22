@@ -436,7 +436,7 @@ const CoachPipeline = () => {
                       ) : (
                         <>
                           <Plus className="w-4 h-4 mr-1" />
-                          Add
+                          {t("pipeline.add")}
                         </>
                       )}
                     </Button>
@@ -448,7 +448,7 @@ const CoachPipeline = () => {
           
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddLeadModal(false)}>
-              Close
+              {t("pipeline.close")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -458,18 +458,18 @@ const CoachPipeline = () => {
       <Dialog open={!!notesModal} onOpenChange={() => setNotesModal(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Notes</DialogTitle>
+            <DialogTitle>{t("pipeline.editNotesTitle")}</DialogTitle>
           </DialogHeader>
           <Textarea
             value={notesModal?.notes || ''}
             onChange={(e) => notesModal && setNotesModal({ ...notesModal, notes: e.target.value })}
-            placeholder="Add notes about this lead..."
+            placeholder={t("pipeline.notesPlaceholder")}
             rows={4}
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setNotesModal(null)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setNotesModal(null)}>{t("pipeline.cancel")}</Button>
             <Button onClick={handleSaveNotes} disabled={updateNotes.isPending}>
-              {updateNotes.isPending ? "Saving..." : "Save Notes"}
+              {updateNotes.isPending ? t("pipeline.saving") : t("pipeline.saveNotes")}
             </Button>
           </DialogFooter>
         </DialogContent>
