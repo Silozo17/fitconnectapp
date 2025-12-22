@@ -76,7 +76,7 @@ const CoachIntegrations = () => {
     if (isCalDAV) {
       setAppleCalendarModalOpen(true);
     } else {
-      connectCalendar.mutate(providerId);
+      connectCalendar.mutate({ provider: providerId });
     }
   };
 

@@ -27,11 +27,11 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) throw new Error("Unauthorized");
 
-    const { provider } = await req.json();
-    console.log("Starting calendar OAuth for provider:", provider);
+    const { provider, returnPath } = await req.json();
+    console.log("Starting calendar OAuth for provider:", provider, "returnPath:", returnPath);
 
     const redirectUri = `${SUPABASE_URL}/functions/v1/calendar-oauth-callback`;
-    const state = btoa(JSON.stringify({ userId: user.id, provider }));
+    const state = btoa(JSON.stringify({ userId: user.id, provider, returnPath }));
 
     let authUrl: string;
 

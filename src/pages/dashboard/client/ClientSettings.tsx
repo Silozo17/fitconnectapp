@@ -539,7 +539,7 @@ const ClientSettings = () => {
                       const connection = getConnection(provider.id);
                       const handleConnect = provider.isCalDav 
                         ? () => setShowAppleCalendarModal(true)
-                        : () => connectCalendar.mutate(provider.id);
+                        : () => connectCalendar.mutate({ provider: provider.id });
                       return (
                         <CalendarConnectionCard
                           key={provider.id}

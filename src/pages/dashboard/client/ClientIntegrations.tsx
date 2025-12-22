@@ -41,7 +41,7 @@ const ClientIntegrations = () => {
     if (isCalDAV) {
       setShowAppleCalendarModal(true);
     } else {
-      connectCalendar.mutate(provider);
+      connectCalendar.mutate({ provider });
     }
   };
 

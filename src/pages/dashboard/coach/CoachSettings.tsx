@@ -232,7 +232,7 @@ const CoachSettings = () => {
     if (provider.isCalDAV) {
       setShowAppleCalendarModal(true);
     } else {
-      connectCalendar.mutate(provider.id);
+      connectCalendar.mutate({ provider: provider.id });
     }
   };
 
