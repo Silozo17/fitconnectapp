@@ -132,4 +132,71 @@ export const configureStatusBar = (): void => {
   }
 };
 
+/**
+ * Biometric authentication result handlers
+ * These are called by the Despia runtime when biometric auth completes
+ */
+export interface BioAuthCallbacks {
+  onSuccess: () => void;
+  onFailure: (errorCode: string, errorMessage: string) => void;
+  onUnavailable: () => void;
+}
+
+// Store callbacks globally so Despia can access them
+let bioAuthCallbacks: BioAuthCallbacks | null = null;
+
+/**
+ * Register global callbacks for biometric authentication
+ * Must be called before triggering bioauth
+ */
+export const registerBioAuthCallbacks = (callbacks: BioAuthCallbacks): void => {
+  bioAuthCallbacks = callbacks;
+  
+  // Expose callbacks globally for Despia runtime
+  if (typeof window !== 'undefined') {
+    (window as any).onBioAuthSuccess = () => {
+      if (isDespia() && bioAuthCallbacks) {
+        bioAuthCallbacks.onSuccess();
+      }
+    };
+    
+    (window as any).onBioAuthFailure = (errorCode: string, errorMessage: string) => {
+      if (isDespia() && bioAuthCallbacks) {
+        bioAuthCallbacks.onFailure(errorCode, errorMessage);
+      }
+    };
+    
+    (window as any).onBioAuthUnavailable = () => {
+      if (isDespia() && bioAuthCallbacks) {
+        bioAuthCallbacks.onUnavailable();
+      }
+    };
+  }
+};
+
+/**
+ * Trigger biometric authentication (Face ID / Touch ID / Fingerprint)
+ * Make sure to register callbacks first with registerBioAuthCallbacks
+ * @returns true if bioauth was triggered, false if not in Despia environment
+ */
+export const triggerBioAuth = (): boolean => {
+  if (!isDespia()) return false;
+  
+  try {
+    despia('bioauth://');
+    return true;
+  } catch (e) {
+    console.warn('Biometric authentication failed to trigger:', e);
+    return false;
+  }
+};
+
+/**
+ * Check if biometric authentication is available on this device
+ * Note: This triggers the auth flow - use with onUnavailable callback
+ */
+export const isBioAuthAvailable = (): boolean => {
+  return isDespia();
+};
+
 export default despia;
