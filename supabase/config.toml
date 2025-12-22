@@ -61,10 +61,10 @@ verify_jwt = false
 verify_jwt = true
 
 [functions.calendar-caldav-fetch-events]
-verify_jwt = true
+verify_jwt = false
 
 [functions.calendar-google-fetch-events]
-verify_jwt = true
+verify_jwt = false
 
 [functions.calendar-sync-all]
 verify_jwt = false
