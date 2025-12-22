@@ -1,4 +1,5 @@
 import { Trophy, Star, Check, Dumbbell, Lock } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { useCoachBadges, useAvailableCoachBadges, useCoachStats } from "@/hooks/useCoachGamification";
 import { useCoachProfileCompletion } from "@/hooks/useCoachProfileCompletion";
@@ -138,6 +139,7 @@ const calculateBadgeProgress = (
 };
 
 const CoachAchievements = () => {
+  const { t } = useTranslation("coach");
   const { data: earnedBadges, isLoading: badgesLoading } = useCoachBadges();
   const { data: availableBadges, isLoading: availableLoading } = useAvailableCoachBadges();
   const { data: stats, isLoading: statsLoading } = useCoachStats();
@@ -168,7 +170,7 @@ const CoachAchievements = () => {
 
   if (isLoading) {
     return (
-      <DashboardLayout title="Achievements" description="Track your coaching milestones and badges">
+      <DashboardLayout title={t("achievementsPage.title")} description={t("achievementsPage.subtitle")}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <Skeleton key={i} className="h-32 w-full" />
@@ -239,7 +241,7 @@ const CoachAchievements = () => {
                   disabled={isUpdating || (!earnedData.is_featured && featuredCount >= MAX_FEATURED_BADGES)}
                 >
                   <Star className={cn("h-3 w-3 mr-1", earnedData.is_featured && "fill-current")} />
-                  {earnedData.is_featured ? "Featured" : "Feature on Profile"}
+                  {earnedData.is_featured ? t("achievementsPage.featured") : t("achievementsPage.featureOnProfile")}
                 </Button>
               )}
             </div>
@@ -274,39 +276,39 @@ const CoachAchievements = () => {
   const totalAvailable = availableBadges?.length || 0;
 
   return (
-    <DashboardLayout title="Achievements" description="Track your coaching milestones and badges">
+    <DashboardLayout title={t("achievementsPage.title")} description={t("achievementsPage.subtitle")}>
       {/* Summary Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div className="card-elevated p-4 text-center">
           <Trophy className="w-8 h-8 text-primary mx-auto mb-2" />
           <p className="text-2xl font-bold text-foreground">{totalEarned}/{totalAvailable}</p>
-          <p className="text-sm text-muted-foreground">Badges Earned</p>
+          <p className="text-sm text-muted-foreground">{t("achievementsPage.badgesEarned")}</p>
         </div>
         <div className="card-elevated p-4 text-center">
           <Star className="w-8 h-8 text-warning mx-auto mb-2" />
           <p className="text-2xl font-bold text-foreground">{featuredCount}/{MAX_FEATURED_BADGES}</p>
-          <p className="text-sm text-muted-foreground">Featured on Profile</p>
+          <p className="text-sm text-muted-foreground">{t("achievementsPage.featuredOnProfile")}</p>
         </div>
         <div className="card-elevated p-4 text-center">
           <div className="w-8 h-8 rounded-full bg-success/20 flex items-center justify-center mx-auto mb-2">
             <Check className="w-5 h-5 text-success" />
           </div>
           <p className="text-2xl font-bold text-foreground">{stats?.clientCount || 0}</p>
-          <p className="text-sm text-muted-foreground">Active Clients</p>
+          <p className="text-sm text-muted-foreground">{t("achievementsPage.activeClients")}</p>
         </div>
         <div className="card-elevated p-4 text-center">
           <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-2">
             <Dumbbell className="w-5 h-5 text-accent" />
           </div>
           <p className="text-2xl font-bold text-foreground">{stats?.sessionCount || 0}</p>
-          <p className="text-sm text-muted-foreground">Sessions Completed</p>
+          <p className="text-sm text-muted-foreground">{t("achievementsPage.sessionsCompleted")}</p>
         </div>
       </div>
 
       {/* Profile Badges */}
       {profileBadges.length > 0 && (
         <div className="mb-8">
-          <h2 className="text-xl font-display font-bold text-foreground mb-4">Profile Badges</h2>
+          <h2 className="text-xl font-display font-bold text-foreground mb-4">{t("achievementsPage.profileBadges")}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {profileBadges.map((badge) => renderBadgeCard(badge))}
           </div>
@@ -316,7 +318,7 @@ const CoachAchievements = () => {
       {/* Milestone Badges */}
       {milestoneBadges.length > 0 && (
         <div className="mb-8">
-          <h2 className="text-xl font-display font-bold text-foreground mb-4">Milestone Badges</h2>
+          <h2 className="text-xl font-display font-bold text-foreground mb-4">{t("achievementsPage.milestoneBadges")}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {milestoneBadges.map((badge) => renderBadgeCard(badge))}
           </div>
@@ -327,8 +329,8 @@ const CoachAchievements = () => {
       {totalAvailable === 0 && (
         <div className="text-center py-12">
           <Trophy className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-foreground mb-2">No badges available</h3>
-          <p className="text-muted-foreground">Check back later for achievements to unlock!</p>
+          <h3 className="text-lg font-semibold text-foreground mb-2">{t("achievementsPage.noBadges")}</h3>
+          <p className="text-muted-foreground">{t("achievementsPage.checkBackLater")}</p>
         </div>
       )}
     </DashboardLayout>

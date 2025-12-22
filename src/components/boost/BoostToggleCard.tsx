@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Rocket, Zap, TrendingUp, Shield, Clock, CreditCard, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useCoachBoostStatus, usePurchaseBoost, useBoostSettings, isBoostActive, getBoostRemainingDays } from "@/hooks/useCoachBoost";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSearchParams } from "react-router-dom";
@@ -11,6 +12,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useActivePricing } from "@/hooks/useActivePricing";
 
 export const BoostToggleCard = () => {
+  const { t } = useTranslation("coach");
   const { data: boostStatus, isLoading: statusLoading } = useCoachBoostStatus();
   const { data: settings, isLoading: settingsLoading } = useBoostSettings();
   const pricing = useActivePricing();
@@ -33,14 +35,14 @@ export const BoostToggleCard = () => {
   useEffect(() => {
     const paymentStatus = searchParams.get("payment");
     if (paymentStatus === "success") {
-      toast.success("Boost activated successfully! You'll now appear first in search results.");
+      toast.success(t("boostCard.activatedSuccess"));
       queryClient.invalidateQueries({ queryKey: ["coach-boost-status"] });
       setSearchParams({});
     } else if (paymentStatus === "cancelled") {
-      toast.info("Boost purchase was cancelled");
+      toast.info(t("boostCard.purchaseCancelled"));
       setSearchParams({});
     }
-  }, [searchParams, setSearchParams, queryClient]);
+  }, [searchParams, setSearchParams, queryClient, t]);
 
   const handlePurchase = () => {
     purchaseBoost.mutate();
@@ -69,9 +71,9 @@ export const BoostToggleCard = () => {
               <Rocket className="h-5 w-5" />
             </div>
             <div>
-              <CardTitle className="text-xl">Boost Your Profile</CardTitle>
+              <CardTitle className="text-xl">{t("boostCard.title")}</CardTitle>
               <CardDescription>
-                Appear first in search results and get more clients
+                {t("boostCard.subtitle")}
               </CardDescription>
             </div>
           </div>
@@ -79,13 +81,13 @@ export const BoostToggleCard = () => {
             {isActive && (
               <Badge className="bg-primary text-primary-foreground animate-pulse">
                 <Zap className="h-3 w-3 mr-1" />
-                Active
+                {t("boostCard.active")}
               </Badge>
             )}
             {isPending && (
               <Badge variant="secondary">
                 <Clock className="h-3 w-3 mr-1" />
-                Payment Pending
+                {t("boostCard.paymentPending")}
               </Badge>
             )}
           </div>
@@ -97,24 +99,24 @@ export const BoostToggleCard = () => {
             {isMigratedFree && (
               <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3">
                 <p className="text-sm text-amber-600 dark:text-amber-400 font-medium">
-                  🎁 Free Boost Extension
+                  🎁 {t("boostCard.freeExtension")}
                 </p>
               <p className="text-xs text-muted-foreground mt-1">
-                  As an early adopter, you've been granted a free 30-day extension. After this expires, Boost requires a {formattedBoostPrice} payment for {boostDuration} days.
+                  {t("boostCard.earlyAdopterMessage", { price: formattedBoostPrice, days: boostDuration })}
                 </p>
               </div>
             )}
             <div className="rounded-lg bg-primary/10 border border-primary/20 p-4">
               <p className="text-sm text-primary font-medium flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
-                You're appearing at the top of search results!
+                {t("boostCard.appearingAtTop")}
               </p>
               <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                 <Clock className="h-3 w-3" />
-                {remainingDays} day{remainingDays !== 1 ? "s" : ""} remaining
+                {remainingDays} {t("boostCard.daysRemaining")}
                 {boostStatus?.boost_end_date && (
                   <span className="ml-1">
-                    (expires {new Date(boostStatus.boost_end_date).toLocaleDateString()})
+                    ({t("boostCard.expires")} {new Date(boostStatus.boost_end_date).toLocaleDateString()})
                   </span>
                 )}
               </p>
@@ -126,10 +128,10 @@ export const BoostToggleCard = () => {
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <div>
                   <p className="text-sm font-medium">
-                    Activate Boost for {formattedBoostPrice}
+                    {t("boostCard.activateFor", { price: formattedBoostPrice })}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {boostDuration}-day visibility boost. Appear first in search results.
+                    {t("boostCard.visibilityBoost", { days: boostDuration })}
                   </p>
                 </div>
                 <Button 
@@ -140,12 +142,12 @@ export const BoostToggleCard = () => {
                   {purchaseBoost.isPending ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Processing...
+                      {t("boostCard.processing")}
                     </>
                   ) : (
                     <>
                       <CreditCard className="h-4 w-4" />
-                      Purchase Boost
+                      {t("boostCard.purchaseBoost")}
                     </>
                   )}
                 </Button>
@@ -153,8 +155,8 @@ export const BoostToggleCard = () => {
             </div>
             <div className="rounded-lg bg-blue-500/5 border border-blue-500/20 p-3">
               <p className="text-xs text-muted-foreground">
-                <span className="font-medium text-foreground">What you pay:</span> {formattedBoostPrice} activation + {settings ? `${Math.round(settings.commission_rate * 100)}%` : "30%"} of first booking from new clients.
-                After {boostDuration} days, Boost expires automatically — no auto-renewal.
+                <span className="font-medium text-foreground">{t("boostCard.whatYouPay")}:</span> {formattedBoostPrice} {t("boostCard.activation")} + {settings ? `${Math.round(settings.commission_rate * 100)}%` : "30%"} {t("boostCard.ofFirstBooking")}.
+                {t("boostCard.afterDays", { days: boostDuration })}
               </p>
             </div>
           </div>
@@ -166,9 +168,9 @@ export const BoostToggleCard = () => {
               <CreditCard className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <p className="text-sm font-medium">{formattedBoostPrice} for {boostDuration} days</p>
+              <p className="text-sm font-medium">{t("boostCard.priceForDays", { price: formattedBoostPrice, days: boostDuration })}</p>
               <p className="text-xs text-muted-foreground">
-                One-time payment, no auto-renewal
+                {t("boostCard.oneTimePayment")}
               </p>
             </div>
           </div>
@@ -178,9 +180,9 @@ export const BoostToggleCard = () => {
               <Zap className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <p className="text-sm font-medium">Plus {settings ? `${Math.round(settings.commission_rate * 100)}%` : "30%"} on new clients</p>
+              <p className="text-sm font-medium">{t("boostCard.plusCommission", { rate: settings ? Math.round(settings.commission_rate * 100) : 30 })}</p>
               <p className="text-xs text-muted-foreground">
-                Only on their first booking
+                {t("boostCard.onlyFirstBooking")}
               </p>
             </div>
           </div>
@@ -190,9 +192,9 @@ export const BoostToggleCard = () => {
               <Shield className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <p className="text-sm font-medium">No-show protection</p>
+              <p className="text-sm font-medium">{t("boostCard.noShowProtection")}</p>
               <p className="text-xs text-muted-foreground">
-                No fee if client doesn't show up
+                {t("boostCard.noFeeIfNoShow")}
               </p>
             </div>
           </div>
@@ -202,9 +204,9 @@ export const BoostToggleCard = () => {
               <TrendingUp className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <p className="text-sm font-medium">Repeat clients = 100% yours</p>
+              <p className="text-sm font-medium">{t("boostCard.repeatClients")}</p>
               <p className="text-xs text-muted-foreground">
-                Commission only on first booking
+                {t("boostCard.commissionOnlyFirst")}
               </p>
             </div>
           </div>
@@ -213,7 +215,7 @@ export const BoostToggleCard = () => {
         {isActive && remainingDays <= 5 && remainingDays > 0 && (
           <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-4">
             <p className="text-sm text-amber-600 font-medium">
-              Your Boost expires soon! Renew to maintain your visibility.
+              {t("boostCard.expiresSoon")}
             </p>
             <Button 
               onClick={handlePurchase}
@@ -227,7 +229,7 @@ export const BoostToggleCard = () => {
               ) : (
                 <CreditCard className="h-4 w-4" />
               )}
-              Renew Boost
+              {t("boostCard.renewBoost")}
             </Button>
           </div>
         )}

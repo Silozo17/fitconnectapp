@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { useCoachPipeline, Lead, LeadStage } from "@/hooks/useCoachPipeline";
@@ -48,14 +49,16 @@ import ProspectProfileSheet from "@/components/messaging/ProspectProfileSheet";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { Rarity } from "@/lib/avatar-utils";
 
-const STAGES: { key: LeadStage; label: string; icon: React.ReactNode; color: string; borderColor: string }[] = [
-  { key: 'new_lead', label: 'New Leads', icon: <UserPlus className="w-4 h-4" />, color: 'bg-blue-500', borderColor: 'border-l-blue-500' },
-  { key: 'conversation_started', label: 'In Conversation', icon: <MessageSquare className="w-4 h-4" />, color: 'bg-amber-500', borderColor: 'border-l-amber-500' },
-  { key: 'offer_sent', label: 'Offer Sent', icon: <Send className="w-4 h-4" />, color: 'bg-purple-500', borderColor: 'border-l-purple-500' },
-  { key: 'deal_closed', label: 'Deal Closed', icon: <CheckCircle className="w-4 h-4" />, color: 'bg-green-500', borderColor: 'border-l-green-500' },
+const getStages = (t: (key: string) => string): { key: LeadStage; label: string; icon: React.ReactNode; color: string; borderColor: string }[] => [
+  { key: 'new_lead', label: t("pipeline.stages.newLeads"), icon: <UserPlus className="w-4 h-4" />, color: 'bg-blue-500', borderColor: 'border-l-blue-500' },
+  { key: 'conversation_started', label: t("pipeline.stages.inConversation"), icon: <MessageSquare className="w-4 h-4" />, color: 'bg-amber-500', borderColor: 'border-l-amber-500' },
+  { key: 'offer_sent', label: t("pipeline.stages.offerSent"), icon: <Send className="w-4 h-4" />, color: 'bg-purple-500', borderColor: 'border-l-purple-500' },
+  { key: 'deal_closed', label: t("pipeline.stages.dealClosed"), icon: <CheckCircle className="w-4 h-4" />, color: 'bg-green-500', borderColor: 'border-l-green-500' },
 ];
 
 const CoachPipeline = () => {
+  const { t } = useTranslation("coach");
+  const STAGES = getStages(t);
   const { leads, leadsByStage, isLoading, error, coachProfileId, addLead, updateStage, updateNotes, deleteLead } = useCoachPipeline();
   const { markLeadsViewed } = useCoachBadges();
   const [notesModal, setNotesModal] = useState<{ lead: Lead; notes: string } | null>(null);
@@ -125,9 +128,9 @@ const CoachPipeline = () => {
   const handleMoveToStage = async (lead: Lead, newStage: LeadStage) => {
     try {
       await updateStage.mutateAsync({ leadId: lead.id, stage: newStage });
-      toast({ title: "Lead updated", description: `Moved to ${STAGES.find(s => s.key === newStage)?.label}` });
+      toast({ title: t("pipeline.leadUpdated"), description: `${t("pipeline.movedTo")} ${STAGES.find(s => s.key === newStage)?.label}` });
     } catch (error) {
-      toast({ title: "Error", description: "Failed to update lead", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("pipeline.failedToUpdateLead"), variant: "destructive" });
     }
   };
 
@@ -135,29 +138,29 @@ const CoachPipeline = () => {
     if (!notesModal) return;
     try {
       await updateNotes.mutateAsync({ leadId: notesModal.lead.id, notes: notesModal.notes });
-      toast({ title: "Notes saved" });
+      toast({ title: t("pipeline.notesSaved") });
       setNotesModal(null);
     } catch (error) {
-      toast({ title: "Error", description: "Failed to save notes", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("pipeline.failedToSaveNotes"), variant: "destructive" });
     }
   };
 
   const handleDelete = async (lead: Lead) => {
     try {
       await deleteLead.mutateAsync(lead.id);
-      toast({ title: "Lead removed" });
+      toast({ title: t("pipeline.leadRemoved") });
     } catch (error) {
-      toast({ title: "Error", description: "Failed to remove lead", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("pipeline.failedToRemoveLead"), variant: "destructive" });
     }
   };
 
   const handleAddToPipeline = async (clientId: string) => {
     try {
       await addLead.mutateAsync({ clientId, source: 'manual' });
-      toast({ title: "Lead added", description: "Client added to pipeline" });
+      toast({ title: t("pipeline.leadAdded"), description: t("pipeline.clientAddedToPipeline") });
       refetchAvailableClients();
     } catch (error) {
-      toast({ title: "Error", description: "Failed to add lead", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("pipeline.failedToAddLead"), variant: "destructive" });
     }
   };
 
@@ -223,23 +226,23 @@ const CoachPipeline = () => {
                         avatar: avatarUrl,
                       })}>
                         <Eye className="w-4 h-4 mr-2" />
-                        View Profile
+                        {t("pipeline.viewProfile")}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => setNotesModal({ lead, notes: lead.notes || '' })}>
                         <StickyNote className="w-4 h-4 mr-2" />
-                        Edit Notes
+                        {t("pipeline.editNotes")}
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       {stageIndex < STAGES.length - 1 && (
                         <DropdownMenuItem onClick={() => handleMoveToStage(lead, STAGES[stageIndex + 1].key)}>
                           <ChevronRight className="w-4 h-4 mr-2" />
-                          Move to {STAGES[stageIndex + 1].label}
+                          {t("pipeline.moveTo")} {STAGES[stageIndex + 1].label}
                         </DropdownMenuItem>
                       )}
                       {stageIndex > 0 && (
                         <DropdownMenuItem onClick={() => handleMoveToStage(lead, STAGES[stageIndex - 1].key)}>
                           <ChevronRight className="w-4 h-4 mr-2 rotate-180" />
-                          Move to {STAGES[stageIndex - 1].label}
+                          {t("pipeline.moveTo")} {STAGES[stageIndex - 1].label}
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuSeparator />
@@ -248,7 +251,7 @@ const CoachPipeline = () => {
                         className="text-destructive focus:text-destructive"
                       >
                         <Trash2 className="w-4 h-4 mr-2" />
-                        Remove
+                        {t("pipeline.remove")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -309,14 +312,14 @@ const CoachPipeline = () => {
 
   return (
     <DashboardLayout
-      title="Sales Pipeline"
-      description="Track and manage your leads from first contact to client conversion"
+      title={t("pipeline.title")}
+      description={t("pipeline.subtitle")}
     >
       {/* Header with Add Button */}
       <div className="flex justify-end mb-4">
         <Button onClick={() => setShowAddLeadModal(true)} size="sm">
           <Plus className="w-4 h-4 mr-2" />
-          Add to Pipeline
+          {t("pipeline.addToPipeline")}
         </Button>
       </div>
       
@@ -327,9 +330,9 @@ const CoachPipeline = () => {
       ) : error ? (
         <div className="text-center py-12">
           <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
-          <p className="text-muted-foreground mb-4">Failed to load pipeline data</p>
+          <p className="text-muted-foreground mb-4">{t("pipeline.failedToLoad")}</p>
           <Button variant="outline" onClick={() => window.location.reload()}>
-            Retry
+            {t("common.retry")}
           </Button>
         </div>
       ) : (
@@ -343,7 +346,7 @@ const CoachPipeline = () => {
                 <div>
                   <h3 className="font-medium text-sm">{stage.label}</h3>
                   <span className="text-xs text-muted-foreground">
-                    {leadsByStage[stage.key].length} leads
+                    {leadsByStage[stage.key].length} {t("pipeline.leads")}
                   </span>
                 </div>
               </div>
@@ -351,7 +354,7 @@ const CoachPipeline = () => {
               <div className="flex-1 min-h-[200px] p-2 rounded-lg bg-muted/30 border border-dashed border-border">
                 {leadsByStage[stage.key].length === 0 ? (
                   <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
-                    No leads
+                    {t("pipeline.noLeads")}
                   </div>
                 ) : (
                   leadsByStage[stage.key].map(renderLeadCard)
@@ -368,10 +371,10 @@ const CoachPipeline = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Users className="w-5 h-5" />
-              Add to Pipeline
+              {t("pipeline.addToPipeline")}
             </DialogTitle>
             <DialogDescription>
-              Add clients who have messaged you back to your pipeline
+              {t("pipeline.addToPipelineDescription")}
             </DialogDescription>
           </DialogHeader>
           
@@ -382,9 +385,9 @@ const CoachPipeline = () => {
           ) : availableClients.length === 0 ? (
             <div className="py-8 text-center">
               <Users className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
-              <p className="text-muted-foreground">No available clients to add</p>
+              <p className="text-muted-foreground">{t("pipeline.noAvailableClients")}</p>
               <p className="text-sm text-muted-foreground/70 mt-1">
-                All clients who messaged you are already in the pipeline
+                {t("pipeline.allClientsInPipeline")}
               </p>
             </div>
           ) : (
