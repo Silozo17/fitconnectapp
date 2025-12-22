@@ -172,12 +172,12 @@ export function OnboardingLayout({
               )}
               <div className="min-w-0 flex-1">
                 {title && (
-                  <h1 className="text-lg font-semibold text-foreground truncate">
+                  <h1 className="text-base sm:text-lg font-semibold text-foreground leading-snug">
                     {title}
                   </h1>
                 )}
                 {subtitle && (
-                  <p className="text-sm text-muted-foreground truncate">
+                  <p className="text-sm text-muted-foreground line-clamp-2">
                     {subtitle}
                   </p>
                 )}
@@ -243,7 +243,7 @@ export function OnboardingLayout({
                     {footerActions.primary.loading ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Loading...
+                        Please wait...
                       </>
                     ) : (
                       footerActions.primary.label

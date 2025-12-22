@@ -188,12 +188,12 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="font-display text-2xl font-bold text-foreground mb-2">
+    <div className="space-y-5">
+      <div className="mb-4">
+        <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">
           {t('onboarding.connectPayment')}
         </h2>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground text-sm mt-1.5">
           {t('onboarding.connectStripeDesc')}
         </p>
       </div>

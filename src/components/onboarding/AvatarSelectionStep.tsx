@@ -150,11 +150,11 @@ export function AvatarSelectionStep({ selectedAvatarId, onSelect }: AvatarSelect
 
                     {/* Avatar Name */}
                     <div className={cn(
-                      "absolute bottom-0 left-0 right-0 p-1 sm:p-2 text-center",
+                      "absolute bottom-0 left-0 right-0 p-1.5 sm:p-2 text-center",
                       "bg-gradient-to-t from-background/90 to-transparent"
                     )}>
                       <p className={cn(
-                        "text-[10px] sm:text-xs font-medium line-clamp-1 text-center",
+                        "text-xs sm:text-sm font-medium line-clamp-1 text-center",
                         isSelected ? "text-primary" : "text-foreground"
                       )}>
                         {avatar.name}
