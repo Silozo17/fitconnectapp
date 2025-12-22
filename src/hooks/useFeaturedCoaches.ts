@@ -125,15 +125,27 @@ export function useFeaturedCoaches({ userLocation, countryCode }: UseFeaturedCoa
       },
     }));
 
-    const { coaches: filteredByLocation } = filterByLocationWithExpansion(
-      rankedForFilter,
-      FEATURED_COACH_LIMIT,
-      true
-    );
+    // When countryCode is explicitly provided, we've already filtered by country
+    // Skip location expansion filtering - just use all filtered coaches for ranking
+    const hasExplicitCountryFilter = !!countryCode;
+    
+    let coachesToRank: typeof rankedForFilter;
+    if (hasExplicitCountryFilter) {
+      // Country already filtered via matchesCountryFilterStrict - include all for ranking
+      coachesToRank = rankedForFilter;
+    } else {
+      // No explicit country filter - apply location expansion based on user's geo-location
+      const { coaches: filteredByLocation } = filterByLocationWithExpansion(
+        rankedForFilter,
+        FEATURED_COACH_LIMIT,
+        true
+      );
+      coachesToRank = filteredByLocation;
+    }
 
-    // Apply unified ranking to location-filtered coaches
+    // Apply unified ranking to filtered coaches
     const sorted = sortCoachesByUnifiedRanking(
-      filteredByLocation.map(r => r.coach),
+      coachesToRank.map(r => r.coach),
       (coach) => {
         const locationData = coachesWithLocation.find(c => c.coach.id === coach.id);
         return extractRankingFactors(
@@ -148,7 +160,7 @@ export function useFeaturedCoaches({ userLocation, countryCode }: UseFeaturedCoa
     );
 
     return sorted.slice(0, FEATURED_COACH_LIMIT).map(r => r.coach);
-  }, [coaches, boostedCoachIds, coachIds, engagementMap, userLocation]);
+  }, [coaches, boostedCoachIds, coachIds, engagementMap, userLocation, countryCode]);
 
   const isLoading = coachesQuery.isLoading || engagementLoading;
   
