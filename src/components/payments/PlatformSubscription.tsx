@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 import { Crown, Check, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,8 +19,20 @@ interface PlatformSubscriptionProps {
   currentTier?: string;
 }
 
+// Helper to translate feature keys
+const translateFeature = (featureKey: string, t: TFunction, tPages: TFunction): string => {
+  // featureKeys are like "pricing.tierFeatures.free.clients"
+  // We need to extract the path and use tPages
+  const match = featureKey.match(/^pricing\.tierFeatures\.(.+)$/);
+  if (match) {
+    return tPages(`pricing.tierFeatures.${match[1]}`);
+  }
+  return featureKey;
+};
+
 const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscriptionProps) => {
   const { t } = useTranslation("settings");
+  const { t: tPages } = useTranslation("pages");
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
@@ -140,10 +153,10 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
                   </div>
 
                   <ul className="space-y-2 mb-4">
-                    {tier.features.map((feature, i) => (
+                    {tier.featureKeys.map((featureKey, i) => (
                       <li key={i} className="flex items-center gap-2 text-sm">
                         <Check className="h-4 w-4 text-primary" />
-                        <span className="text-muted-foreground">{feature}</span>
+                        <span className="text-muted-foreground">{translateFeature(featureKey, t, tPages)}</span>
                       </li>
                     ))}
                   </ul>
