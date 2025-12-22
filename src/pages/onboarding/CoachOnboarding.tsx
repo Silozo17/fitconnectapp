@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
-import { Dumbbell, ArrowRight, ArrowLeft, Check, Loader2, Crown, Zap, Sparkles, Star } from "lucide-react";
+import { Dumbbell, ArrowRight, ArrowLeft, Check, Loader2, Crown, Zap, Sparkles, Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { toast } from "sonner";
 import { ProfileImageUpload } from "@/components/shared/ProfileImageUpload";
 import { LocationAutocomplete } from "@/components/shared/LocationAutocomplete";
@@ -280,43 +281,44 @@ const CoachOnboarding = () => {
         <meta name="description" content="Create your coaching profile to start connecting with clients." />
       </Helmet>
 
-      <div className="min-h-screen bg-background">
+      <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="border-b border-border">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="border-b border-border shrink-0">
+          <div className="container mx-auto px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-                <Dumbbell className="w-6 h-6 text-primary-foreground" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary flex items-center justify-center">
+                <Dumbbell className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
               </div>
-              <span className="font-display font-bold text-xl text-foreground">FitConnect</span>
+              <span className="font-display font-bold text-lg sm:text-xl text-foreground">FitConnect</span>
             </div>
-            <Button variant="ghost" onClick={handleSkip} className="text-muted-foreground">
+            <Button variant="ghost" size="sm" onClick={handleSkip} className="text-muted-foreground text-sm">
               Skip for now
             </Button>
           </div>
         </div>
 
         {/* Progress */}
-        <div className="container mx-auto px-4 py-6 max-w-2xl">
-          <div className="mb-2 flex items-center justify-between text-sm">
+        <div className="container mx-auto px-4 py-3 max-w-2xl shrink-0">
+          <div className="mb-1.5 flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Step {currentStep + 1} of {STEPS.length}</span>
-            <span className="text-foreground font-medium">{STEPS[currentStep]}</span>
+            <span className="text-foreground font-medium text-sm">{STEPS[currentStep]}</span>
           </div>
-          <Progress value={progress} className="h-2" />
+          <Progress value={progress} className="h-1.5" />
         </div>
 
         {/* Form Content */}
-        <div className="container mx-auto px-4 py-8 max-w-2xl">
-          <div className="card-elevated p-8">
+        <div className="container mx-auto px-4 py-3 max-w-2xl flex-1 min-h-0 overflow-hidden flex flex-col">
+          <div className="card-elevated p-4 sm:p-6 flex-1 min-h-0 flex flex-col overflow-hidden">
             {/* Step 1: Basic Info */}
             {currentStep === 0 && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-                    Tell us about yourself
-                  </h2>
-                  <p className="text-muted-foreground">This will appear on your public profile.</p>
-                </div>
+              <div className="flex flex-col h-full">
+                <div className="flex-1 min-h-0 overflow-y-auto space-y-4">
+                  <div>
+                    <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-1">
+                      Tell us about yourself
+                    </h2>
+                    <p className="text-muted-foreground text-sm">This will appear on your public profile.</p>
+                  </div>
 
                 {/* Profile Image Upload */}
                 <div>
@@ -362,6 +364,7 @@ const CoachOnboarding = () => {
                     className="mt-1.5 bg-secondary border-border text-foreground w-full sm:w-32"
                     placeholder="5"
                   />
+                </div>
                 </div>
               </div>
             )}
@@ -573,65 +576,81 @@ const CoachOnboarding = () => {
               />
             )}
 
-            {/* Step 9: Subscription Tier */}
+            {/* Step 9: Subscription Tier - Carousel */}
             {currentStep === 8 && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="font-display text-2xl font-bold text-foreground mb-2">
+              <div className="flex flex-col h-full">
+                <div className="text-center mb-4 shrink-0">
+                  <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-1">
                     Choose your plan
                   </h2>
-                  <p className="text-muted-foreground">You can upgrade anytime. No payment required now.</p>
+                  <p className="text-muted-foreground text-sm">Swipe to browse. Upgrade anytime.</p>
                 </div>
 
-                <div className="space-y-4">
-                  {getDisplayableTiers().map((tier) => {
-                    const Icon = tier.icon;
-                    return (
-                      <button
-                        key={tier.id}
-                        type="button"
-                        onClick={() => handleInputChange("subscriptionTier", tier.id)}
-                        className={`w-full p-6 rounded-xl border-2 transition-all text-left relative ${
-                          formData.subscriptionTier === tier.id
-                            ? "border-primary bg-primary/10"
-                            : "border-border hover:border-muted-foreground"
-                        }`}
-                      >
-                        {tier.popular && (
-                          <span className="absolute -top-3 right-4 px-3 py-1 bg-accent text-accent-foreground text-xs font-bold rounded-full">
-                            Popular
-                          </span>
-                        )}
-                        <div className="flex items-start gap-4">
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                            formData.subscriptionTier === tier.id ? "bg-primary" : "bg-secondary"
-                          }`}>
-                            <Icon className={`w-6 h-6 ${
-                              formData.subscriptionTier === tier.id ? "text-primary-foreground" : "text-muted-foreground"
-                            }`} />
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-baseline gap-2">
-                              <h3 className="font-display text-lg font-bold text-foreground">{tier.name}</h3>
-                              <span className="text-xl font-bold text-primary">{tier.price}<span className="text-sm text-muted-foreground">/mo</span></span>
-                            </div>
-                            <p className="text-muted-foreground text-sm mt-1">{tier.description}</p>
-                            <ul className="mt-3 space-y-1">
-                              {tier.features.map((feature, i) => (
-                                <li key={i} className="text-sm text-muted-foreground flex items-center gap-2">
-                                  <Check className="w-4 h-4 text-primary" />
-                                  {feature}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          {formData.subscriptionTier === tier.id && (
-                            <Check className="w-6 h-6 text-primary" />
-                          )}
-                        </div>
-                      </button>
-                    );
-                  })}
+                <div className="flex-1 min-h-0 flex items-center overflow-hidden">
+                  <Carousel
+                    opts={{ align: "center", loop: true }}
+                    className="w-full"
+                  >
+                    <CarouselContent className="-ml-2">
+                      {getDisplayableTiers().map((tier) => {
+                        const Icon = tier.icon;
+                        const isSelected = formData.subscriptionTier === tier.id;
+                        return (
+                          <CarouselItem key={tier.id} className="pl-2 basis-[85%] sm:basis-1/2">
+                            <button
+                              type="button"
+                              onClick={() => handleInputChange("subscriptionTier", tier.id)}
+                              className={`w-full h-full p-4 rounded-xl border-2 transition-all text-left relative ${
+                                isSelected ? "border-primary bg-primary/10" : "border-border hover:border-muted-foreground"
+                              }`}
+                            >
+                              {tier.popular && (
+                                <span className="absolute -top-2 right-3 px-2 py-0.5 bg-accent text-accent-foreground text-xs font-bold rounded-full">
+                                  Popular
+                                </span>
+                              )}
+                              <div className="flex items-center gap-3 mb-2">
+                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                                  isSelected ? "bg-primary" : "bg-secondary"
+                                }`}>
+                                  <Icon className={`w-5 h-5 ${isSelected ? "text-primary-foreground" : "text-muted-foreground"}`} />
+                                </div>
+                                <div>
+                                  <h3 className="font-display font-bold text-foreground">{tier.name}</h3>
+                                  <span className="text-lg font-bold text-primary">{tier.price}<span className="text-xs text-muted-foreground">/mo</span></span>
+                                </div>
+                                {isSelected && <Check className="w-5 h-5 text-primary ml-auto" />}
+                              </div>
+                              <p className="text-muted-foreground text-xs mb-2">{tier.description}</p>
+                              <ul className="space-y-0.5">
+                                {tier.features.slice(0, 3).map((feature, i) => (
+                                  <li key={i} className="text-xs text-muted-foreground flex items-center gap-1.5">
+                                    <Check className="w-3 h-3 text-primary shrink-0" />
+                                    <span className="truncate">{feature}</span>
+                                  </li>
+                                ))}
+                                {tier.features.length > 3 && (
+                                  <li className="text-xs text-primary">+{tier.features.length - 3} more</li>
+                                )}
+                              </ul>
+                            </button>
+                          </CarouselItem>
+                        );
+                      })}
+                    </CarouselContent>
+                  </Carousel>
+                </div>
+
+                {/* Dot indicators */}
+                <div className="flex justify-center gap-1.5 pt-3 shrink-0">
+                  {getDisplayableTiers().map((tier) => (
+                    <div
+                      key={tier.id}
+                      className={`w-2 h-2 rounded-full transition-colors ${
+                        formData.subscriptionTier === tier.id ? "bg-primary" : "bg-border"
+                      }`}
+                    />
+                  ))}
                 </div>
               </div>
             )}

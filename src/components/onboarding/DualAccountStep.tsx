@@ -23,7 +23,7 @@ const DualAccountStep = ({ coachId, onComplete, onBack }: DualAccountStepProps) 
     
     setIsCreating(true);
     try {
-      // Check if client profile already exists
+      // Check if client profile already exists FIRST
       const { data: existingProfile } = await supabase
         .from("client_profiles")
         .select("id")
@@ -31,7 +31,7 @@ const DualAccountStep = ({ coachId, onComplete, onBack }: DualAccountStepProps) 
         .maybeSingle();
 
       if (existingProfile) {
-        // Already has client profile
+        // Already has client profile - just update coach and continue
         await supabase
           .from("coach_profiles")
           .update({ also_client: true })
@@ -42,28 +42,48 @@ const DualAccountStep = ({ coachId, onComplete, onBack }: DualAccountStepProps) 
         return;
       }
 
+      // Generate unique username with timestamp to avoid conflicts
+      const uniqueUsername = `client_${user.id.slice(0, 8)}_${Date.now().toString(36)}`;
+
       // Create client profile
       const { error: profileError } = await supabase
         .from("client_profiles")
         .insert({
           user_id: user.id,
-          username: `client_${user.id.slice(0, 8)}`,
+          username: uniqueUsername,
           onboarding_completed: false,
         });
 
-      if (profileError) throw profileError;
-
-      // Add client role
-      const { error: roleError } = await supabase
-        .from("user_roles")
-        .insert({
-          user_id: user.id,
-          role: "client",
-        });
-
-      if (roleError && !roleError.message.includes("duplicate")) {
-        throw roleError;
+      if (profileError) {
+        // If duplicate key error, profile might already exist - check again
+        if (profileError.message.includes("duplicate") || profileError.code === "23505") {
+          const { data: checkAgain } = await supabase
+            .from("client_profiles")
+            .select("id")
+            .eq("user_id", user.id)
+            .maybeSingle();
+          
+          if (checkAgain) {
+            // Profile exists, just proceed
+            await supabase
+              .from("coach_profiles")
+              .update({ also_client: true })
+              .eq("id", coachId);
+            toast.success(t('onboarding.clientAccountSetup'));
+            onComplete(true);
+            return;
+          }
+        }
+        throw profileError;
       }
+
+      // Add client role using upsert to handle duplicates
+      await supabase
+        .from("user_roles")
+        .upsert(
+          { user_id: user.id, role: "client" as const },
+          { onConflict: 'user_id,role', ignoreDuplicates: true }
+        );
 
       // Update coach profile
       await supabase
@@ -76,6 +96,7 @@ const DualAccountStep = ({ coachId, onComplete, onBack }: DualAccountStepProps) 
     } catch (error) {
       console.error("Error creating client account:", error);
       toast.error(t('onboarding.failedCreateClient'));
+    } finally {
       setIsCreating(false);
     }
   };
