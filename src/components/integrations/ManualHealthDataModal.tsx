@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +24,7 @@ interface ManualHealthDataModalProps {
 }
 
 const ManualHealthDataModal = ({ open, onOpenChange }: ManualHealthDataModalProps) => {
+  const { t } = useTranslation('settings');
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -115,7 +117,7 @@ const ManualHealthDataModal = ({ open, onOpenChange }: ManualHealthDataModalProp
       }
 
       if (entries.length === 0) {
-        toast.error("Please enter at least one value");
+        toast.error(t('manualHealthModal.enterAtLeastOne'));
         return;
       }
 
@@ -123,7 +125,13 @@ const ManualHealthDataModal = ({ open, onOpenChange }: ManualHealthDataModalProp
 
       if (error) throw error;
 
-      toast.success(`${entries.length} health data point${entries.length > 1 ? "s" : ""} logged!`);
+      // NOTE: Manual health data entries (source='manual') should NOT count towards achievements
+      // Only wearable-synced data should contribute to health-related achievements
+      
+      const successMessage = entries.length === 1 
+        ? t('manualHealthModal.successSingle')
+        : t('manualHealthModal.successMultiple', { count: entries.length });
+      toast.success(successMessage);
       queryClient.invalidateQueries({ queryKey: ["health-data"] });
       onOpenChange(false);
       setFormData({
@@ -148,10 +156,10 @@ const ManualHealthDataModal = ({ open, onOpenChange }: ManualHealthDataModalProp
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5 text-primary" />
-            Log Health Data
+            {t('manualHealthModal.title')}
           </DialogTitle>
           <DialogDescription>
-            Manually enter your health metrics. This data will sync with your coach's dashboard.
+            {t('manualHealthModal.description')}
           </DialogDescription>
         </DialogHeader>
 
@@ -179,12 +187,12 @@ const ManualHealthDataModal = ({ open, onOpenChange }: ManualHealthDataModalProp
               <div className="flex items-center gap-3 p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
                 <Footprints className="h-8 w-8 text-blue-500" />
                 <div>
-                  <h4 className="font-medium">Steps</h4>
-                  <p className="text-sm text-muted-foreground">Today's step count</p>
+                  <h4 className="font-medium">{t('manualHealthModal.steps.title')}</h4>
+                  <p className="text-sm text-muted-foreground">{t('manualHealthModal.steps.desc')}</p>
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="steps">Number of steps</Label>
+                <Label htmlFor="steps">{t('manualHealthModal.steps.label')}</Label>
                 <Input
                   id="steps"
                   type="number"
@@ -199,12 +207,12 @@ const ManualHealthDataModal = ({ open, onOpenChange }: ManualHealthDataModalProp
               <div className="flex items-center gap-3 p-4 rounded-lg bg-red-500/10 border border-red-500/20">
                 <Heart className="h-8 w-8 text-red-500" />
                 <div>
-                  <h4 className="font-medium">Heart Rate</h4>
-                  <p className="text-sm text-muted-foreground">Current resting heart rate</p>
+                  <h4 className="font-medium">{t('manualHealthModal.heartRate.title')}</h4>
+                  <p className="text-sm text-muted-foreground">{t('manualHealthModal.heartRate.desc')}</p>
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="heartRate">Heart rate (BPM)</Label>
+                <Label htmlFor="heartRate">{t('manualHealthModal.heartRate.label')}</Label>
                 <Input
                   id="heartRate"
                   type="number"
@@ -219,12 +227,12 @@ const ManualHealthDataModal = ({ open, onOpenChange }: ManualHealthDataModalProp
               <div className="flex items-center gap-3 p-4 rounded-lg bg-orange-500/10 border border-orange-500/20">
                 <Flame className="h-8 w-8 text-orange-500" />
                 <div>
-                  <h4 className="font-medium">Calories Burned</h4>
-                  <p className="text-sm text-muted-foreground">Active calories today</p>
+                  <h4 className="font-medium">{t('manualHealthModal.calories.title')}</h4>
+                  <p className="text-sm text-muted-foreground">{t('manualHealthModal.calories.desc')}</p>
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="calories">Calories (kcal)</Label>
+                <Label htmlFor="calories">{t('manualHealthModal.calories.label')}</Label>
                 <Input
                   id="calories"
                   type="number"
@@ -239,13 +247,13 @@ const ManualHealthDataModal = ({ open, onOpenChange }: ManualHealthDataModalProp
               <div className="flex items-center gap-3 p-4 rounded-lg bg-purple-500/10 border border-purple-500/20">
                 <Moon className="h-8 w-8 text-purple-500" />
                 <div>
-                  <h4 className="font-medium">Sleep</h4>
-                  <p className="text-sm text-muted-foreground">Last night's sleep duration</p>
+                  <h4 className="font-medium">{t('manualHealthModal.sleep.title')}</h4>
+                  <p className="text-sm text-muted-foreground">{t('manualHealthModal.sleep.desc')}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="sleepHours">Hours</Label>
+                  <Label htmlFor="sleepHours">{t('manualHealthModal.sleep.hours')}</Label>
                   <Input
                     id="sleepHours"
                     type="number"
@@ -257,7 +265,7 @@ const ManualHealthDataModal = ({ open, onOpenChange }: ManualHealthDataModalProp
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="sleepMinutes">Minutes</Label>
+                  <Label htmlFor="sleepMinutes">{t('manualHealthModal.sleep.minutes')}</Label>
                   <Input
                     id="sleepMinutes"
                     type="number"
@@ -275,12 +283,12 @@ const ManualHealthDataModal = ({ open, onOpenChange }: ManualHealthDataModalProp
               <div className="flex items-center gap-3 p-4 rounded-lg bg-green-500/10 border border-green-500/20">
                 <Activity className="h-8 w-8 text-green-500" />
                 <div>
-                  <h4 className="font-medium">Active Minutes</h4>
-                  <p className="text-sm text-muted-foreground">Exercise duration today</p>
+                  <h4 className="font-medium">{t('manualHealthModal.activeMinutes.title')}</h4>
+                  <p className="text-sm text-muted-foreground">{t('manualHealthModal.activeMinutes.desc')}</p>
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="activeMinutes">Minutes of activity</Label>
+                <Label htmlFor="activeMinutes">{t('manualHealthModal.activeMinutes.label')}</Label>
                 <Input
                   id="activeMinutes"
                   type="number"
@@ -295,16 +303,16 @@ const ManualHealthDataModal = ({ open, onOpenChange }: ManualHealthDataModalProp
 
         <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
-            Cancel
+            {t('manualHealthModal.cancel')}
           </Button>
           <Button onClick={handleSubmit} disabled={isSubmitting}>
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
+                {t('manualHealthModal.saving')}
               </>
             ) : (
-              "Save Data"
+              t('manualHealthModal.save')
             )}
           </Button>
         </DialogFooter>

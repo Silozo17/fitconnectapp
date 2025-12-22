@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Activity, Heart, Watch, Apple, PenLine } from "lucide-react";
 import WearableConnectionCard from "./WearableConnectionCard";
 import { useWearables, WearableProvider } from "@/hooks/useWearables";
@@ -6,43 +7,8 @@ import ManualHealthDataModal from "./ManualHealthDataModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-const providers: {
-  id: WearableProvider;
-  name: string;
-  icon: React.ReactNode;
-  color: string;
-  comingSoon?: boolean;
-  description?: string;
-}[] = [
-  {
-    id: "apple_health",
-    name: "Apple Health",
-    icon: <Apple className="w-6 h-6 text-white" />,
-    color: "bg-gradient-to-br from-pink-500 to-red-500",
-    comingSoon: true,
-    description: "Requires FitConnect iOS app",
-  },
-  {
-    id: "google_fit",
-    name: "Google Fit",
-    icon: <Activity className="w-6 h-6 text-white" />,
-    color: "bg-gradient-to-br from-blue-500 to-green-500",
-  },
-  {
-    id: "fitbit",
-    name: "Fitbit",
-    icon: <Heart className="w-6 h-6 text-white" />,
-    color: "bg-gradient-to-br from-teal-500 to-cyan-500",
-  },
-  {
-    id: "garmin",
-    name: "Garmin",
-    icon: <Watch className="w-6 h-6 text-white" />,
-    color: "bg-gradient-to-br from-blue-600 to-blue-800",
-  },
-];
-
 const WearableConnectionList = () => {
+  const { t } = useTranslation('settings');
   const [showManualEntry, setShowManualEntry] = useState(false);
   const {
     connections,
@@ -52,6 +18,42 @@ const WearableConnectionList = () => {
     syncWearable,
     getConnection,
   } = useWearables();
+
+  const providers: {
+    id: WearableProvider;
+    name: string;
+    icon: React.ReactNode;
+    color: string;
+    comingSoon?: boolean;
+    description?: string;
+  }[] = [
+    {
+      id: "apple_health",
+      name: "Apple Health",
+      icon: <Apple className="w-6 h-6 text-white" />,
+      color: "bg-gradient-to-br from-pink-500 to-red-500",
+      comingSoon: true,
+      description: t('integrations.requiresFitConnectApp'),
+    },
+    {
+      id: "google_fit",
+      name: "Google Fit",
+      icon: <Activity className="w-6 h-6 text-white" />,
+      color: "bg-gradient-to-br from-blue-500 to-green-500",
+    },
+    {
+      id: "fitbit",
+      name: "Fitbit",
+      icon: <Heart className="w-6 h-6 text-white" />,
+      color: "bg-gradient-to-br from-teal-500 to-cyan-500",
+    },
+    {
+      id: "garmin",
+      name: "Garmin",
+      icon: <Watch className="w-6 h-6 text-white" />,
+      color: "bg-gradient-to-br from-blue-600 to-blue-800",
+    },
+  ];
 
   if (isLoading) {
     return (
@@ -99,14 +101,14 @@ const WearableConnectionList = () => {
                 <PenLine className="h-5 w-5 text-primary" />
               </div>
               <div className="min-w-0">
-                <h4 className="font-medium text-sm">Manual Health Data</h4>
+                <h4 className="font-medium text-sm">{t('integrations.manualHealthData')}</h4>
                 <p className="text-xs text-muted-foreground">
-                  Log steps, heart rate, sleep manually
+                  {t('integrations.manualHealthDesc')}
                 </p>
               </div>
             </div>
             <Button variant="outline" size="sm" onClick={() => setShowManualEntry(true)} className="shrink-0">
-              Log Data
+              {t('integrations.logData')}
             </Button>
           </div>
         </CardContent>

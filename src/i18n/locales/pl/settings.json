@@ -218,7 +218,58 @@
       "description": "Gdy łączysz integracje, Twoje dane są obsługiwane zgodnie z naszymi praktykami prywatności. Dowiedz się więcej o tym, jak chronimy Twoje dane.",
       "privacyPolicy": "Polityka prywatności",
       "termsOfService": "Regulamin"
+    },
+    "todaysHealth": "Dzisiejsze zdrowie",
+    "noDeviceConnected": "Brak połączonego urządzenia",
+    "connectWearableHint": "Połącz urządzenie noszone, aby śledzić swoje wskaźniki zdrowia",
+    "connectDevice": "Połącz urządzenie",
+    "manualHealthData": "Ręczne dane zdrowotne",
+    "manualHealthDesc": "Zapisz kroki, tętno, sen ręcznie",
+    "logData": "Zapisz dane",
+    "requiresFitConnectApp": "Wymaga aplikacji FitConnect iOS",
+    "appleCalendar": "Kalendarz Apple",
+    "googleCalendar": "Kalendarz Google"
+  },
+
+  "privacy": {
+    "title": "Prywatność danych zdrowotnych",
+    "description": "Kontroluj, którzy trenerzy mogą widzieć Twoje dane zdrowotne z połączonych urządzeń",
+    "changesImmediate": "Zmiany wchodzą w życie natychmiast.",
+    "noCoaches": "Nie masz jeszcze żadnych aktywnych połączeń z trenerami.",
+    "noCoachesHint": "Gdy połączysz się z trenerem, będziesz mógł zarządzać jego dostępem do Twoich danych zdrowotnych tutaj.",
+    "fullAccess": "Pełny dostęp",
+    "noAccess": "Brak dostępu",
+    "limitedAccess": "Ograniczony dostęp",
+    "shareAll": "Udostępnij wszystko",
+    "revokeAll": "Odbierz wszystko",
+    "showSettings": "Pokaż indywidualne ustawienia",
+    "hideSettings": "Ukryj indywidualne ustawienia",
+    "dataTypes": {
+      "all": { "label": "Wszystkie dane", "description": "Udostępnij wszystkie typy danych zdrowotnych" },
+      "steps": { "label": "Kroki", "description": "Dzienna liczba kroków" },
+      "heart_rate": { "label": "Tętno", "description": "Pomiary tętna" },
+      "sleep": { "label": "Sen", "description": "Czas trwania i jakość snu" },
+      "calories": { "label": "Kalorie", "description": "Spalone kalorie" },
+      "distance": { "label": "Dystans", "description": "Przebyty dystans" },
+      "active_minutes": { "label": "Aktywne minuty", "description": "Czas aktywnego ćwiczenia" },
+      "weight": { "label": "Waga", "description": "Pomiary masy ciała" }
     }
+  },
+
+  "manualHealthModal": {
+    "title": "Zapisz dane zdrowotne",
+    "description": "Ręcznie wprowadź swoje wskaźniki zdrowia. Te dane zostaną zsynchronizowane z panelem trenera.",
+    "steps": { "title": "Kroki", "desc": "Dzisiejsza liczba kroków", "label": "Liczba kroków" },
+    "heartRate": { "title": "Tętno", "desc": "Aktualne tętno spoczynkowe", "label": "Tętno (BPM)" },
+    "calories": { "title": "Spalone kalorie", "desc": "Aktywne kalorie dzisiaj", "label": "Kalorie (kcal)" },
+    "sleep": { "title": "Sen", "desc": "Czas snu ostatniej nocy", "hours": "Godziny", "minutes": "Minuty" },
+    "activeMinutes": { "title": "Aktywne minuty", "desc": "Czas ćwiczeń dzisiaj", "label": "Minuty aktywności" },
+    "cancel": "Anuluj",
+    "save": "Zapisz dane",
+    "saving": "Zapisywanie...",
+    "enterAtLeastOne": "Wprowadź co najmniej jedną wartość",
+    "successSingle": "Zapisano 1 punkt danych zdrowotnych!",
+    "successMultiple": "Zapisano {{count}} punktów danych zdrowotnych!"
   },
 
   "verification": {
@@ -489,7 +540,12 @@
     "specialtiesCustomHint": "Nie możesz znaleźć swojej specjalizacji? Dodaj własną, która najlepiej opisuje Twoją ekspertyzę.",
     "specialtiesCustomPlaceholder": "Wprowadź własną specjalizację...",
     "specialtiesAdd": "Dodaj",
-    "specialtiesCancel": "Anuluj"
+    "specialtiesCancel": "Anuluj",
+    "visibility": {
+      "title": "Widoczność w marketplace",
+      "visibleDesc": "Twój profil pojawia się w wynikach wyszukiwania marketplace",
+      "hiddenDesc": "Twój profil jest ukryty w wyszukiwaniu marketplace"
+    }
   },
   
   "profileCompletion": {
