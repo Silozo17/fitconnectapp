@@ -221,8 +221,8 @@ const CoachReviews = () => {
               {reviews.map((review) => {
                 const dispute = getDisputeForReview(review.id);
                 const clientName = review.client
-                  ? [review.client.first_name, review.client.last_name].filter(Boolean).join(" ") || "Anonymous"
-                  : "Anonymous";
+                  ? [review.client.first_name, review.client.last_name].filter(Boolean).join(" ") || t("reviewsPage.anonymous")
+                  : t("reviewsPage.anonymous");
 
                 return (
                   <Card key={review.id}>
@@ -238,7 +238,7 @@ const CoachReviews = () => {
                             <div className="flex items-center gap-2">
                               <p className="font-medium text-foreground">{clientName}</p>
                               {!review.is_public && (
-                                <Badge variant="outline" className="text-xs">Private</Badge>
+                                <Badge variant="outline" className="text-xs">{t("reviewsPage.private")}</Badge>
                               )}
                             </div>
                             <span className="text-xs text-muted-foreground">
@@ -281,7 +281,7 @@ const CoachReviews = () => {
                                 {dispute.status === "pending" && <Clock className="w-3 h-3" />}
                                 {dispute.status === "approved" && <CheckCircle className="w-3 h-3" />}
                                 {dispute.status === "rejected" && <AlertTriangle className="w-3 h-3" />}
-                                Dispute {dispute.status}
+                                {t(`reviewsPage.disputeStatus.${dispute.status}`)}
                               </Badge>
                             ) : (
                               <Button

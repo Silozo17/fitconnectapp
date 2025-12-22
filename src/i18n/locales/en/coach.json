@@ -761,6 +761,19 @@
     "submitDispute": "Submit Dispute",
     "disputeReason": "Dispute Reason",
     "disputeReasonPlaceholder": "Explain why you believe this review should be reviewed by our team...",
-    "submitting": "Submitting..."
+    "submitting": "Submitting...",
+    "allReviews": "All Reviews",
+    "loading": "Loading reviews...",
+    "adminResponse": "Admin Response",
+    "disputeDescription": "If you believe this review is unfair or violates our guidelines, you can submit it for review by our team.",
+    "reasonForDispute": "Reason for Dispute",
+    "disputePlaceholder": "Explain why you believe this review should be reviewed by our team...",
+    "anonymous": "Anonymous",
+    "private": "Private",
+    "disputeStatus": {
+      "pending": "Dispute pending",
+      "approved": "Dispute approved",
+      "rejected": "Dispute rejected"
+    }
   }
 }
