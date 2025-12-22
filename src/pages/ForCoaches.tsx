@@ -28,51 +28,51 @@ const ForCoaches = () => {
   const benefits = [
     {
       icon: Users,
-      title: t("forCoaches.benefits.reach.title"),
-      description: t("forCoaches.benefits.reach.description")
+      title: t("forCoaches.benefits.reachClients"),
+      description: t("forCoaches.benefits.reachClientsDesc")
     },
     {
       icon: Calendar,
-      title: t("forCoaches.benefits.scheduling.title"),
-      description: t("forCoaches.benefits.scheduling.description")
+      title: t("forCoaches.benefits.scheduling"),
+      description: t("forCoaches.benefits.schedulingDesc")
     },
     {
       icon: DollarSign,
-      title: t("forCoaches.benefits.payments.title"),
-      description: t("forCoaches.benefits.payments.description")
+      title: t("forCoaches.benefits.securePayments"),
+      description: t("forCoaches.benefits.securePaymentsDesc")
     },
     {
       icon: BarChart3,
-      title: t("forCoaches.benefits.management.title"),
-      description: t("forCoaches.benefits.management.description")
+      title: t("forCoaches.benefits.clientManagement"),
+      description: t("forCoaches.benefits.clientManagementDesc")
     },
     {
       icon: Globe,
-      title: t("forCoaches.benefits.global.title"),
-      description: t("forCoaches.benefits.global.description")
+      title: t("forCoaches.benefits.trainAnywhere"),
+      description: t("forCoaches.benefits.trainAnywhereDesc")
     },
     {
       icon: Shield,
-      title: t("forCoaches.benefits.protection.title"),
-      description: t("forCoaches.benefits.protection.description")
+      title: t("forCoaches.benefits.businessProtection"),
+      description: t("forCoaches.benefits.businessProtectionDesc")
     }
   ];
 
   const platformTools = [
-    { icon: Calendar, label: t("forCoaches.tools.scheduling") },
-    { icon: MessageSquare, label: t("forCoaches.tools.messaging") },
-    { icon: Video, label: t("forCoaches.tools.video") },
+    { icon: Calendar, label: t("forCoaches.tools.smartScheduling") },
+    { icon: MessageSquare, label: t("forCoaches.tools.inAppMessaging") },
+    { icon: Video, label: t("forCoaches.tools.videoSessions") },
     { icon: FileText, label: t("forCoaches.tools.planBuilder") },
-    { icon: TrendingUp, label: t("forCoaches.tools.progress") },
-    { icon: DollarSign, label: t("forCoaches.tools.payments") }
+    { icon: TrendingUp, label: t("forCoaches.tools.progressTracking") },
+    { icon: DollarSign, label: t("forCoaches.tools.paymentProcessing") }
   ];
 
   const requirements = [
-    t("forCoaches.requirements.certification"),
-    t("forCoaches.requirements.experience"),
-    t("forCoaches.requirements.background"),
-    t("forCoaches.requirements.insurance"),
-    t("forCoaches.requirements.conduct")
+    t("forCoaches.requirements.req1"),
+    t("forCoaches.requirements.req2"),
+    t("forCoaches.requirements.req3"),
+    t("forCoaches.requirements.req4"),
+    t("forCoaches.requirements.req5")
   ];
 
   const testimonials = [
@@ -99,25 +99,25 @@ const ForCoaches = () => {
   const steps = [
     {
       step: "01",
-      title: t("forCoaches.steps.apply.title"),
-      description: t("forCoaches.steps.apply.description")
+      title: t("forCoaches.steps.step1Title"),
+      description: t("forCoaches.steps.step1Desc")
     },
     {
       step: "02",
-      title: t("forCoaches.steps.build.title"),
-      description: t("forCoaches.steps.build.description")
+      title: t("forCoaches.steps.step2Title"),
+      description: t("forCoaches.steps.step2Desc")
     },
     {
       step: "03",
-      title: t("forCoaches.steps.start.title"),
-      description: t("forCoaches.steps.start.description")
+      title: t("forCoaches.steps.step3Title"),
+      description: t("forCoaches.steps.step3Desc")
     }
   ];
 
   return (
     <PageLayout
-      title={t("forCoaches.meta.title")}
-      description={t("forCoaches.meta.description")}
+      title={t("forCoaches.title")}
+      description={t("forCoaches.metaDescription")}
     >
       {/* Decorative Avatar */}
       <DecorativeAvatar 
@@ -139,16 +139,16 @@ const ForCoaches = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary font-medium text-sm mb-6">
-                {t("forCoaches.hero.badge")}
+                {t("forCoaches.badge")}
               </span>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-                {t("forCoaches.hero.titleStart")}{" "}
+                {t("forCoaches.hero.title")}{" "}
                 <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-                  FitConnect
+                  {t("forCoaches.hero.titleHighlight")}
                 </span>
               </h1>
               <p className="text-xl text-muted-foreground mb-8">
-                {t("forCoaches.hero.description", { coachCount: isLoading ? "..." : formatStatNumber(platformStats?.totalCoaches || 0) })}
+                {t("forCoaches.hero.description", { count: isLoading ? "..." : formatStatNumber(platformStats?.totalCoaches || 0) } as Record<string, string>)}
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/auth?mode=signup&role=coach">
@@ -170,7 +170,7 @@ const ForCoaches = () => {
                   <div className="space-y-6">
                     <div>
                       <label className="block text-sm font-medium mb-2">
-                        {t("forCoaches.calculator.clientsLabel", { count: numberOfClients })}
+                        {t("forCoaches.calculator.numberOfClients", { count: numberOfClients })}
                       </label>
                       <Input
                         type="range"
@@ -183,7 +183,7 @@ const ForCoaches = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-2">
-                        {t("forCoaches.calculator.hoursLabel", { count: adminHoursPerClient })}
+                        {t("forCoaches.calculator.adminHoursPerClient", { hours: adminHoursPerClient })}
                       </label>
                       <Input
                         type="range"
@@ -199,14 +199,14 @@ const ForCoaches = () => {
                         <div>
                           <p className="text-sm text-muted-foreground">{t("forCoaches.calculator.weekly")}</p>
                           <p className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                            {weeklyTimeSaved} {t("forCoaches.calculator.hours")}
+                            {weeklyTimeSaved} {t("forCoaches.calculator.hoursSaved")}
                           </p>
                           <p className="text-xs text-muted-foreground">{t("forCoaches.calculator.saved")}</p>
                         </div>
                         <div>
                           <p className="text-sm text-muted-foreground">{t("forCoaches.calculator.yearly")}</p>
                           <p className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                            {yearlyTimeSaved.toLocaleString()} {t("forCoaches.calculator.hours")}
+                            {yearlyTimeSaved.toLocaleString()} {t("forCoaches.calculator.hoursSaved")}
                           </p>
                           <p className="text-xs text-muted-foreground">{t("forCoaches.calculator.saved")}</p>
                         </div>
@@ -235,13 +235,13 @@ const ForCoaches = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              {t("forCoaches.benefitsSection.titleStart")}{" "}
+              {t("forCoaches.benefits.title")}{" "}
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                FitConnect
+                {t("forCoaches.benefits.titleHighlight")}
               </span>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              {t("forCoaches.benefitsSection.description")}
+              {t("forCoaches.benefits.subtitle")}
             </p>
           </div>
           
@@ -266,9 +266,9 @@ const ForCoaches = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              {t("forCoaches.toolsSection.titleStart")}{" "}
+              {t("forCoaches.tools.title")}{" "}
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                {t("forCoaches.toolsSection.titleHighlight")}
+                {t("forCoaches.tools.titleHighlight")}
               </span>
             </h2>
           </div>
@@ -292,9 +292,9 @@ const ForCoaches = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              {t("forCoaches.stepsSection.titleStart")}{" "}
+              {t("forCoaches.steps.title")}{" "}
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                {t("forCoaches.stepsSection.titleHighlight")}
+                {t("forCoaches.steps.titleHighlight")}
               </span>
             </h2>
           </div>
@@ -323,9 +323,9 @@ const ForCoaches = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              {t("forCoaches.testimonialsSection.titleStart")}{" "}
+              {t("forCoaches.testimonials.title")}{" "}
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                {t("forCoaches.testimonialsSection.titleHighlight")}
+                {t("forCoaches.testimonials.titleHighlight")}
               </span>
             </h2>
           </div>
@@ -358,10 +358,10 @@ const ForCoaches = () => {
             <div className="text-center mb-12">
               <Award className="w-12 h-12 text-primary mx-auto mb-4" />
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                {t("forCoaches.requirementsSection.title")}
+                {t("forCoaches.requirements.title")}
               </h2>
               <p className="text-muted-foreground">
-                {t("forCoaches.requirementsSection.description")}
+                {t("forCoaches.requirements.subtitle")}
               </p>
             </div>
             
@@ -386,7 +386,7 @@ const ForCoaches = () => {
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              {t("forCoaches.cta.titleStart")}{" "}
+              {t("forCoaches.cta.title")}{" "}
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 {t("forCoaches.cta.titleHighlight")}
               </span>
@@ -396,10 +396,10 @@ const ForCoaches = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/auth?mode=signup&role=coach">
-                <GradientButton size="lg">{t("forCoaches.cta.apply")}</GradientButton>
+                <GradientButton size="lg">{t("forCoaches.cta.applyToBecome")}</GradientButton>
               </Link>
               <Link to="/faq">
-                <GradientButton size="lg" variant="outline">{t("forCoaches.cta.faq")}</GradientButton>
+                <GradientButton size="lg" variant="outline">{t("forCoaches.cta.coachFaq")}</GradientButton>
               </Link>
             </div>
             <p className="text-sm text-muted-foreground mt-6">
