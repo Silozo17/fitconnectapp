@@ -26,6 +26,7 @@ import { useSelectedAvatar } from "@/hooks/useAvatars";
 import { useTranslation } from "react-i18next";
 
 import WearableConnectionList from "@/components/integrations/WearableConnectionList";
+import { HealthDataPrivacySettings } from "@/components/dashboard/clients/HealthDataPrivacySettings";
 import CalendarConnectionCard from "@/components/integrations/CalendarConnectionCard";
 import HealthDataWidget from "@/components/integrations/HealthDataWidget";
 import AppleCalendarConnectModal from "@/components/integrations/AppleCalendarConnectModal";
@@ -107,6 +108,7 @@ const ClientSettings = () => {
   const settingsTabs = [
     { id: "profile", icon: User, label: t('tabs.profile') },
     { id: "health", icon: Heart, label: t('tabs.health') },
+    { id: "privacy", icon: Shield, label: t('tabs.privacy', 'Privacy') },
     { id: "preferences", icon: Globe, label: t('tabs.preferences') },
     { id: "integrations", icon: Plug, label: t('tabs.integrations') },
     { id: "notifications", icon: Bell, label: t('tabs.notifications') },
@@ -444,6 +446,11 @@ const ClientSettings = () => {
                   </Button>
                 </div>
               </>
+            )}
+
+            {/* Privacy Tab */}
+            {selectedTab === "privacy" && (
+              <HealthDataPrivacySettings />
             )}
 
             {/* Preferences Tab */}

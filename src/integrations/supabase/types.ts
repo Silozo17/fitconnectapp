@@ -3727,6 +3727,72 @@ export type Database = {
           },
         ]
       }
+      health_data_sharing_preferences: {
+        Row: {
+          client_id: string
+          coach_id: string
+          created_at: string | null
+          data_type: string
+          id: string
+          is_allowed: boolean
+          updated_at: string | null
+        }
+        Insert: {
+          client_id: string
+          coach_id: string
+          created_at?: string | null
+          data_type: string
+          id?: string
+          is_allowed?: boolean
+          updated_at?: string | null
+        }
+        Update: {
+          client_id?: string
+          coach_id?: string
+          created_at?: string | null
+          data_type?: string
+          id?: string
+          is_allowed?: boolean
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "health_data_sharing_preferences_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "health_data_sharing_preferences_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "health_data_sharing_preferences_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "health_data_sharing_preferences_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "health_data_sharing_preferences_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       health_data_sync: {
         Row: {
           client_id: string
@@ -5488,6 +5554,14 @@ export type Database = {
       }
       coach_can_view_client_profile: {
         Args: { client_profile_id: string }
+        Returns: boolean
+      }
+      coach_can_view_health_data: {
+        Args: {
+          p_client_id: string
+          p_coach_user_id: string
+          p_data_type: string
+        }
         Returns: boolean
       }
       coach_has_messaged_client: {
