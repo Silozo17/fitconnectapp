@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useCoachProfile, useCoachClients } from "@/hooks/useCoachClients";
 import {
   useCoachInvoices,
@@ -68,19 +69,21 @@ import {
   Legend,
 } from "recharts";
 
-const INVOICE_STATUS_CONFIG = {
-  draft: { label: "Draft", color: "bg-muted text-muted-foreground", icon: FileText },
-  sent: { label: "Sent", color: "bg-blue-500/10 text-blue-500", icon: Send },
-  paid: { label: "Paid", color: "bg-green-500/10 text-green-500", icon: CheckCircle2 },
-  overdue: { label: "Overdue", color: "bg-destructive/10 text-destructive", icon: AlertTriangle },
-  cancelled: { label: "Cancelled", color: "bg-muted text-muted-foreground line-through", icon: Trash2 },
-  refunded: { label: "Refunded", color: "bg-orange-500/10 text-orange-500", icon: RotateCcw },
-};
+const getInvoiceStatusConfig = (t: (key: string) => string) => ({
+  draft: { label: t("financial.status.draft"), color: "bg-muted text-muted-foreground", icon: FileText },
+  sent: { label: t("financial.status.sent"), color: "bg-blue-500/10 text-blue-500", icon: Send },
+  paid: { label: t("financial.status.paid"), color: "bg-green-500/10 text-green-500", icon: CheckCircle2 },
+  overdue: { label: t("financial.status.overdue"), color: "bg-destructive/10 text-destructive", icon: AlertTriangle },
+  cancelled: { label: t("financial.status.cancelled"), color: "bg-muted text-muted-foreground line-through", icon: Trash2 },
+  refunded: { label: t("financial.status.refunded"), color: "bg-orange-500/10 text-orange-500", icon: RotateCcw },
+});
 
 const CHART_COLORS = ["hsl(var(--primary))", "hsl(var(--destructive))", "hsl(var(--warning))", "hsl(142 76% 36%)", "hsl(221 83% 53%)", "hsl(262 83% 58%)", "hsl(24 95% 53%)", "hsl(173 80% 40%)"];
 
 export default function CoachFinancial() {
+  const { t } = useTranslation("coach");
   const { data: coachProfile, isLoading: profileLoading } = useCoachProfile();
+  const INVOICE_STATUS_CONFIG = getInvoiceStatusConfig(t);
   const coachId = coachProfile?.id;
 
   const { data: invoices, isLoading: invoicesLoading } = useCoachInvoices(coachId);
@@ -162,19 +165,19 @@ export default function CoachFinancial() {
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Financial Management</h1>
+            <h1 className="text-2xl font-bold">{t("financial.title")}</h1>
             <p className="text-muted-foreground">
-              Manage invoices, track expenses, and view financial reports
+              {t("financial.subtitle")}
             </p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setShowExpenseModal(true)}>
               <Receipt className="h-4 w-4 mr-2" />
-              Add Expense
+              {t("financial.addExpense")}
             </Button>
             <Button onClick={() => setShowInvoiceModal(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Create Invoice
+              {t("financial.createInvoice")}
             </Button>
           </div>
         </div>
@@ -188,7 +191,7 @@ export default function CoachFinancial() {
                   <CheckCircle2 className="h-5 w-5 text-green-500" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground truncate">Total Paid</p>
+                  <p className="text-xs text-muted-foreground truncate">{t("financial.totalPaid")}</p>
                   <p className="text-xl font-bold truncate">{formatCurrency(summary.totalPaid / 100)}</p>
                 </div>
               </div>
@@ -202,7 +205,7 @@ export default function CoachFinancial() {
                   <Clock className="h-5 w-5 text-blue-500" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground truncate">Outstanding</p>
+                  <p className="text-xs text-muted-foreground truncate">{t("financial.outstanding")}</p>
                   <p className="text-xl font-bold truncate">{formatCurrency(summary.totalOutstanding / 100)}</p>
                 </div>
               </div>
@@ -216,7 +219,7 @@ export default function CoachFinancial() {
                   <TrendingDown className="h-5 w-5 text-destructive" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground truncate">Expenses</p>
+                  <p className="text-xs text-muted-foreground truncate">{t("financial.expenses")}</p>
                   <p className="text-xl font-bold truncate">{formatCurrency(summary.totalExpenses / 100)}</p>
                 </div>
               </div>
@@ -234,7 +237,7 @@ export default function CoachFinancial() {
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground truncate">Net Profit</p>
+                  <p className="text-xs text-muted-foreground truncate">{t("financial.netProfit")}</p>
                   <p className={`text-xl font-bold truncate ${summary.netProfit >= 0 ? "text-green-500" : "text-destructive"}`}>
                     {formatCurrency(summary.netProfit / 100)}
                   </p>
@@ -249,19 +252,19 @@ export default function CoachFinancial() {
           <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-flex">
             <TabsTrigger value="invoices" className="gap-2">
               <FileText className="h-4 w-4 hidden sm:block" />
-              Invoices
+              {t("financial.tabs.invoices")}
             </TabsTrigger>
             <TabsTrigger value="expenses" className="gap-2">
               <Receipt className="h-4 w-4 hidden sm:block" />
-              Expenses
+              {t("financial.tabs.expenses")}
             </TabsTrigger>
             <TabsTrigger value="reports" className="gap-2">
               <PieChart className="h-4 w-4 hidden sm:block" />
-              Reports
+              {t("financial.tabs.reports")}
             </TabsTrigger>
             <TabsTrigger value="tax" className="gap-2">
               <FileCheck className="h-4 w-4 hidden sm:block" />
-              Tax
+              {t("financial.tabs.tax")}
             </TabsTrigger>
           </TabsList>
 
@@ -269,20 +272,20 @@ export default function CoachFinancial() {
           <TabsContent value="invoices" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Invoices</CardTitle>
-                <CardDescription>Manage your client invoices</CardDescription>
+                <CardTitle>{t("financial.tabs.invoices")}</CardTitle>
+                <CardDescription>{t("financial.manageInvoices")}</CardDescription>
               </CardHeader>
               <CardContent>
                 {!invoices?.length ? (
                   <div className="text-center py-8">
                     <FileText className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
-                    <p className="text-muted-foreground">No invoices yet</p>
+                    <p className="text-muted-foreground">{t("financial.noInvoices")}</p>
                     <Button
                       variant="outline"
                       className="mt-3"
                       onClick={() => setShowInvoiceModal(true)}
                     >
-                      Create your first invoice
+                      {t("financial.createFirstInvoice")}
                     </Button>
                   </div>
                 ) : (
@@ -307,20 +310,20 @@ export default function CoachFinancial() {
           <TabsContent value="expenses" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Expenses</CardTitle>
-                <CardDescription>Track your business expenses</CardDescription>
+                <CardTitle>{t("financial.tabs.expenses")}</CardTitle>
+                <CardDescription>{t("financial.trackExpenses")}</CardDescription>
               </CardHeader>
               <CardContent>
                 {!expenses?.length ? (
                   <div className="text-center py-8">
                     <Receipt className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
-                    <p className="text-muted-foreground">No expenses recorded</p>
+                    <p className="text-muted-foreground">{t("financial.noExpenses")}</p>
                     <Button
                       variant="outline"
                       className="mt-3"
                       onClick={() => setShowExpenseModal(true)}
                     >
-                      Add your first expense
+                      {t("financial.addFirstExpense")}
                     </Button>
                   </div>
                 ) : (
@@ -344,8 +347,8 @@ export default function CoachFinancial() {
               {/* Income vs Expenses Chart */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Income vs Expenses</CardTitle>
-                  <CardDescription>Last 6 months overview</CardDescription>
+                  <CardTitle>{t("financial.reports.incomeVsExpenses")}</CardTitle>
+                  <CardDescription>{t("financial.reports.last6Months")}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="h-64">
@@ -369,13 +372,13 @@ export default function CoachFinancial() {
               {/* Expense Breakdown */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Expense Breakdown</CardTitle>
-                  <CardDescription>By category</CardDescription>
+                  <CardTitle>{t("financial.reports.expenseBreakdown")}</CardTitle>
+                  <CardDescription>{t("financial.reports.byCategory")}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {expensesByCategory.length === 0 ? (
                     <div className="h-64 flex items-center justify-center text-muted-foreground">
-                      No expense data yet
+                      {t("financial.reports.noExpenseData")}
                     </div>
                   ) : (
                     <div className="h-64">
@@ -409,19 +412,19 @@ export default function CoachFinancial() {
           <TabsContent value="tax" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Tax Documents</CardTitle>
-                <CardDescription>Generate tax reports and summaries</CardDescription>
+                <CardTitle>{t("financial.tax.title")}</CardTitle>
+                <CardDescription>{t("financial.tax.description")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="text-center py-8">
                   <FileCheck className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
-                  <p className="text-muted-foreground mb-2">Tax reporting coming soon</p>
+                  <p className="text-muted-foreground mb-2">{t("financial.tax.comingSoon")}</p>
                   <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                    We're working on generating tax summaries, VAT reports, and annual statements to make your accounting easier.
+                    {t("financial.tax.comingSoonDesc")}
                   </p>
                   <Button variant="outline" className="mt-4" disabled>
                     <Download className="h-4 w-4 mr-2" />
-                    Export Tax Summary
+                    {t("financial.tax.exportTaxSummary")}
                   </Button>
                 </div>
               </CardContent>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -45,6 +46,7 @@ interface ReviewDispute {
 }
 
 const CoachReviews = () => {
+  const { t } = useTranslation("coach");
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [disputeModalOpen, setDisputeModalOpen] = useState(false);
@@ -157,7 +159,7 @@ const CoachReviews = () => {
     : 0;
 
   return (
-    <DashboardLayout title="My Reviews" description="View and manage reviews from your clients">
+    <DashboardLayout title={t("reviewsPage.title")} description={t("reviewsPage.subtitle")}>
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <Card>
@@ -168,7 +170,7 @@ const CoachReviews = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold">{averageRating}</p>
-                <p className="text-sm text-muted-foreground">Average Rating</p>
+                <p className="text-sm text-muted-foreground">{t("reviewsPage.averageRating")}</p>
               </div>
             </div>
           </CardContent>
@@ -181,7 +183,7 @@ const CoachReviews = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold">{reviews.length}</p>
-                <p className="text-sm text-muted-foreground">Total Reviews</p>
+                <p className="text-sm text-muted-foreground">{t("reviewsPage.totalReviews")}</p>
               </div>
             </div>
           </CardContent>
@@ -194,7 +196,7 @@ const CoachReviews = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold">{disputes.filter((d) => d.status === "pending").length}</p>
-                <p className="text-sm text-muted-foreground">Pending Disputes</p>
+                <p className="text-sm text-muted-foreground">{t("reviewsPage.pendingDisputes")}</p>
               </div>
             </div>
           </CardContent>
@@ -204,15 +206,15 @@ const CoachReviews = () => {
       {/* Reviews List */}
       <Card>
         <CardHeader>
-          <CardTitle>All Reviews</CardTitle>
+          <CardTitle>{t("reviewsPage.allReviews")}</CardTitle>
         </CardHeader>
         <CardContent>
           {reviewsLoading ? (
-            <div className="text-center py-8 text-muted-foreground">Loading reviews...</div>
+            <div className="text-center py-8 text-muted-foreground">{t("reviewsPage.loading")}</div>
           ) : reviews.length === 0 ? (
             <div className="text-center py-8">
               <MessageSquareText className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-              <p className="text-muted-foreground">No reviews yet</p>
+              <p className="text-muted-foreground">{t("reviewsPage.noReviews")}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -289,7 +291,7 @@ const CoachReviews = () => {
                                 className="text-muted-foreground hover:text-foreground"
                               >
                                 <Flag className="w-4 h-4 mr-1" />
-                                Dispute Review
+                                {t("reviewsPage.disputeReview")}
                               </Button>
                             )}
                           </div>
@@ -297,7 +299,7 @@ const CoachReviews = () => {
                           {/* Show admin notes if dispute was resolved */}
                           {dispute?.admin_notes && (
                             <div className="mt-2 p-2 bg-muted rounded text-sm">
-                              <p className="font-medium text-xs text-muted-foreground mb-1">Admin Response:</p>
+                              <p className="font-medium text-xs text-muted-foreground mb-1">{t("reviewsPage.adminResponse")}:</p>
                               <p>{dispute.admin_notes}</p>
                             </div>
                           )}
@@ -316,9 +318,9 @@ const CoachReviews = () => {
       <Dialog open={disputeModalOpen} onOpenChange={setDisputeModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Dispute Review</DialogTitle>
+            <DialogTitle>{t("reviewsPage.disputeReview")}</DialogTitle>
             <DialogDescription>
-              Explain why you believe this review should be removed or modified. Our team will review your request.
+              {t("reviewsPage.disputeDescription")}
             </DialogDescription>
           </DialogHeader>
 
@@ -344,9 +346,9 @@ const CoachReviews = () => {
           )}
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Reason for dispute</label>
+            <label className="text-sm font-medium">{t("reviewsPage.reasonForDispute")}</label>
             <Textarea
-              placeholder="Explain why this review is inappropriate, inaccurate, or violates guidelines..."
+              placeholder={t("reviewsPage.disputePlaceholder")}
               value={disputeReason}
               onChange={(e) => setDisputeReason(e.target.value)}
               rows={4}
@@ -355,13 +357,13 @@ const CoachReviews = () => {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setDisputeModalOpen(false)}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button
               onClick={handleSubmitDispute}
               disabled={!disputeReason.trim() || createDisputeMutation.isPending}
             >
-              {createDisputeMutation.isPending ? "Submitting..." : "Submit Dispute"}
+              {createDisputeMutation.isPending ? t("reviewsPage.submitting") : t("reviewsPage.submitDispute")}
             </Button>
           </DialogFooter>
         </DialogContent>

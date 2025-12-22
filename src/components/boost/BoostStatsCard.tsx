@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, DollarSign, TrendingUp, Calendar, Clock } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useCoachBoostStatus, useBoostAttributions, useBoostSettings, calculateBoostFee, isBoostActive, getBoostRemainingDays } from "@/hooks/useCoachBoost";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
@@ -8,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useActivePricing } from "@/hooks/useActivePricing";
 
 export const BoostStatsCard = () => {
+  const { t } = useTranslation("coach");
   const { data: boostStatus, isLoading: statusLoading } = useCoachBoostStatus();
   const { data: attributions, isLoading: attributionsLoading } = useBoostAttributions(5);
   const { data: settings } = useBoostSettings();
@@ -52,19 +54,19 @@ export const BoostStatsCard = () => {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <Clock className="h-4 w-4" />
-              Boost Status
+              {t("boostStats.boostStatus")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {boostActive ? (
               <>
-                <p className="text-2xl font-bold text-primary">{remainingDays} days</p>
-                <p className="text-xs text-muted-foreground">remaining</p>
+                <p className="text-2xl font-bold text-primary">{remainingDays} {t("boostStats.days")}</p>
+                <p className="text-xs text-muted-foreground">{t("boostStats.remaining")}</p>
               </>
             ) : (
               <>
-                <p className="text-2xl font-bold text-muted-foreground">Inactive</p>
-                <p className="text-xs text-muted-foreground">Purchase to activate</p>
+                <p className="text-2xl font-bold text-muted-foreground">{t("boostStats.inactive")}</p>
+                <p className="text-xs text-muted-foreground">{t("boostStats.purchaseToActivate")}</p>
               </>
             )}
           </CardContent>
@@ -74,12 +76,12 @@ export const BoostStatsCard = () => {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <Users className="h-4 w-4" />
-              Clients Acquired
+              {t("boostStats.clientsAcquired")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{totalClients}</p>
-            <p className="text-xs text-muted-foreground">via Boost</p>
+            <p className="text-xs text-muted-foreground">{t("boostStats.viaBoost")}</p>
           </CardContent>
         </Card>
 
@@ -87,12 +89,12 @@ export const BoostStatsCard = () => {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <DollarSign className="h-4 w-4" />
-              Commission Paid
+              {t("boostStats.commissionPaid")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{pricing.formatPrice(totalFees)}</p>
-            <p className="text-xs text-muted-foreground">on new clients</p>
+            <p className="text-xs text-muted-foreground">{t("boostStats.onNewClients")}</p>
           </CardContent>
         </Card>
 
@@ -100,12 +102,12 @@ export const BoostStatsCard = () => {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
-              Est. Client Value
+              {t("boostStats.estClientValue")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{pricing.formatPrice(estimatedLifetimeValue)}</p>
-            <p className="text-xs text-muted-foreground">from repeat visits</p>
+            <p className="text-xs text-muted-foreground">{t("boostStats.fromRepeatVisits")}</p>
           </CardContent>
         </Card>
 
@@ -113,14 +115,14 @@ export const BoostStatsCard = () => {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
-              ROI
+              {t("boostStats.roi")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className={`text-3xl font-bold ${roi > 0 ? "text-green-500" : "text-muted-foreground"}`}>
               {roi > 0 ? `+${Math.round(roi)}%` : "N/A"}
             </p>
-            <p className="text-xs text-muted-foreground">return on investment</p>
+            <p className="text-xs text-muted-foreground">{t("boostStats.returnOnInvestment")}</p>
           </CardContent>
         </Card>
       </div>
@@ -128,7 +130,7 @@ export const BoostStatsCard = () => {
       {/* Recent Acquisitions */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Recent Acquisitions</CardTitle>
+          <CardTitle className="text-lg">{t("boostStats.recentAcquisitions")}</CardTitle>
         </CardHeader>
         <CardContent>
           {attributions && attributions.length > 0 ? (
@@ -161,7 +163,7 @@ export const BoostStatsCard = () => {
                       <p className="text-sm font-medium">
                         {attribution.booking_amount 
                           ? pricing.formatPrice(attribution.booking_amount) 
-                          : "Pending booking"}
+                          : t("boostStats.pendingBooking")}
                       </p>
                       {attribution.fee_amount && (
                         <Badge 
@@ -179,7 +181,7 @@ export const BoostStatsCard = () => {
             </div>
           ) : (
             <p className="text-muted-foreground text-center py-8">
-              No clients acquired via Boost yet. Purchase Boost for {pricing.formatPrice(pricing.prices.boost)} to start appearing first in search results for 30 days!
+              {t("boostStats.noClientsYet", { price: pricing.formatPrice(pricing.prices.boost) })}
             </p>
           )}
         </CardContent>
@@ -189,21 +191,25 @@ export const BoostStatsCard = () => {
       {settings && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Fee Calculator</CardTitle>
+            <CardTitle className="text-lg">{t("boostStats.feeCalculator")}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
-              Fee is {Math.round(settings.commission_rate * 100)}% of booking value. 
-              Minimum fee: {pricing.formatPrice(settings.min_fee * settings.commission_rate)} (on bookings under {pricing.formatPrice(settings.min_fee)}). 
-              Maximum fee: {pricing.formatPrice(settings.max_fee * settings.commission_rate)} (on bookings over {pricing.formatPrice(settings.max_fee)}).
+              {t("boostStats.feeDescription", { 
+                rate: Math.round(settings.commission_rate * 100),
+                minFee: pricing.formatPrice(settings.min_fee * settings.commission_rate),
+                minBooking: pricing.formatPrice(settings.min_fee),
+                maxFee: pricing.formatPrice(settings.max_fee * settings.commission_rate),
+                maxBooking: pricing.formatPrice(settings.max_fee)
+              })}
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[20, 50, 100, 150].map((amount) => {
                 const fee = calculateBoostFee(amount, settings);
                 return (
                   <div key={amount} className="p-3 rounded-lg bg-muted/50 text-center">
-                    <p className="text-sm text-muted-foreground">{pricing.formatPrice(amount)} booking</p>
-                    <p className="text-lg font-bold text-primary">{pricing.formatPrice(fee)} fee</p>
+                    <p className="text-sm text-muted-foreground">{pricing.formatPrice(amount)} {t("boostStats.booking")}</p>
+                    <p className="text-lg font-bold text-primary">{pricing.formatPrice(fee)} {t("boostStats.fee")}</p>
                   </div>
                 );
               })}
