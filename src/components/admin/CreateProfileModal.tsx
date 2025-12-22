@@ -43,32 +43,36 @@ const CreateProfileModal = ({
     setIsLoading(true);
 
     try {
-      // Fetch existing user_profile to link and reuse username
-      const { data: existingUserProfile } = await supabase
-        .from("user_profiles")
-        .select("id, username")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      // Use existing username or generate a new one
-      let username: string;
-      let userProfileId: string | null = null;
-
-      if (existingUserProfile) {
-        username = existingUserProfile.username;
-        userProfileId = existingUserProfile.id;
-      } else {
-        // Generate a unique username if no user_profile exists (shouldn't happen normally)
-        const baseUsername = (firstName || displayName || 'user').toLowerCase().replace(/[^a-z0-9]/g, '');
-        const randomSuffix = Math.floor(Math.random() * 9999);
-        username = `${baseUsername}${randomSuffix}`;
-      }
-
       if (profileType === "client") {
+        // Check if client profile already exists
+        const { data: existingClientProfile } = await supabase
+          .from("client_profiles")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (existingClientProfile) {
+          toast.success("Client profile already exists");
+          await refreshProfiles();
+          onSuccess();
+          onOpenChange(false);
+          return;
+        }
+
+        // Fetch existing user_profile to link and reuse username
+        const { data: existingUserProfile } = await supabase
+          .from("user_profiles")
+          .select("id, username")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        const username = existingUserProfile?.username || 
+          `${(firstName || 'user').toLowerCase().replace(/[^a-z0-9]/g, '')}${Math.floor(Math.random() * 9999)}`;
+
         const { error } = await supabase.from("client_profiles").insert({
           user_id: user.id,
           username,
-          user_profile_id: userProfileId,
+          user_profile_id: existingUserProfile?.id || null,
           first_name: firstName || null,
           last_name: lastName || null,
           onboarding_completed: true,
@@ -78,10 +82,35 @@ const CreateProfileModal = ({
 
         toast.success("Client profile created successfully");
       } else {
+        // Check if coach profile already exists
+        const { data: existingCoachProfile } = await supabase
+          .from("coach_profiles")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (existingCoachProfile) {
+          toast.success("Coach profile already exists");
+          await refreshProfiles();
+          onSuccess();
+          onOpenChange(false);
+          return;
+        }
+
+        // Fetch existing user_profile to link and reuse username
+        const { data: existingUserProfile } = await supabase
+          .from("user_profiles")
+          .select("id, username")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        const username = existingUserProfile?.username || 
+          `${(displayName || 'coach').toLowerCase().replace(/[^a-z0-9]/g, '')}${Math.floor(Math.random() * 9999)}`;
+
         const { error } = await supabase.from("coach_profiles").insert({
           user_id: user.id,
           username,
-          user_profile_id: userProfileId,
+          user_profile_id: existingUserProfile?.id || null,
           display_name: displayName || `${firstName} ${lastName}`.trim() || null,
           subscription_tier: "free",
           onboarding_completed: true,
