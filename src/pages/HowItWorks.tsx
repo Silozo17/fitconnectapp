@@ -19,49 +19,49 @@ const HowItWorks = () => {
     {
       step: "01",
       icon: Search,
-      title: t("howItWorks.clientSteps.browse.title"),
-      description: t("howItWorks.clientSteps.browse.description"),
+      title: t("howItWorks.clientSteps.step1.title"),
+      description: t("howItWorks.clientSteps.step1.description"),
       details: [
-        t("howItWorks.clientSteps.browse.details.0"),
-        t("howItWorks.clientSteps.browse.details.1"),
-        t("howItWorks.clientSteps.browse.details.2"),
-        t("howItWorks.clientSteps.browse.details.3")
+        t("howItWorks.clientSteps.step1.detail1"),
+        t("howItWorks.clientSteps.step1.detail2"),
+        t("howItWorks.clientSteps.step1.detail3"),
+        t("howItWorks.clientSteps.step1.detail4")
       ]
     },
     {
       step: "02",
       icon: MessageSquare,
-      title: t("howItWorks.clientSteps.connect.title"),
-      description: t("howItWorks.clientSteps.connect.description"),
+      title: t("howItWorks.clientSteps.step2.title"),
+      description: t("howItWorks.clientSteps.step2.description"),
       details: [
-        t("howItWorks.clientSteps.connect.details.0"),
-        t("howItWorks.clientSteps.connect.details.1"),
-        t("howItWorks.clientSteps.connect.details.2"),
-        t("howItWorks.clientSteps.connect.details.3")
+        t("howItWorks.clientSteps.step2.detail1"),
+        t("howItWorks.clientSteps.step2.detail2"),
+        t("howItWorks.clientSteps.step2.detail3"),
+        t("howItWorks.clientSteps.step2.detail4")
       ]
     },
     {
       step: "03",
       icon: Calendar,
-      title: t("howItWorks.clientSteps.book.title"),
-      description: t("howItWorks.clientSteps.book.description"),
+      title: t("howItWorks.clientSteps.step3.title"),
+      description: t("howItWorks.clientSteps.step3.description"),
       details: [
-        t("howItWorks.clientSteps.book.details.0"),
-        t("howItWorks.clientSteps.book.details.1"),
-        t("howItWorks.clientSteps.book.details.2"),
-        t("howItWorks.clientSteps.book.details.3")
+        t("howItWorks.clientSteps.step3.detail1"),
+        t("howItWorks.clientSteps.step3.detail2"),
+        t("howItWorks.clientSteps.step3.detail3"),
+        t("howItWorks.clientSteps.step3.detail4")
       ]
     },
     {
       step: "04",
       icon: TrendingUp,
-      title: t("howItWorks.clientSteps.track.title"),
-      description: t("howItWorks.clientSteps.track.description"),
+      title: t("howItWorks.clientSteps.step4.title"),
+      description: t("howItWorks.clientSteps.step4.description"),
       details: [
-        t("howItWorks.clientSteps.track.details.0"),
-        t("howItWorks.clientSteps.track.details.1"),
-        t("howItWorks.clientSteps.track.details.2"),
-        t("howItWorks.clientSteps.track.details.3")
+        t("howItWorks.clientSteps.step4.detail1"),
+        t("howItWorks.clientSteps.step4.detail2"),
+        t("howItWorks.clientSteps.step4.detail3"),
+        t("howItWorks.clientSteps.step4.detail4")
       ]
     }
   ];
@@ -70,49 +70,49 @@ const HowItWorks = () => {
     {
       step: "01",
       icon: FileText,
-      title: t("howItWorks.coachSteps.apply.title"),
-      description: t("howItWorks.coachSteps.apply.description"),
+      title: t("howItWorks.coachSteps.step1.title"),
+      description: t("howItWorks.coachSteps.step1.description"),
       details: [
-        t("howItWorks.coachSteps.apply.details.0"),
-        t("howItWorks.coachSteps.apply.details.1"),
-        t("howItWorks.coachSteps.apply.details.2"),
-        t("howItWorks.coachSteps.apply.details.3")
+        t("howItWorks.coachSteps.step1.detail1"),
+        t("howItWorks.coachSteps.step1.detail2"),
+        t("howItWorks.coachSteps.step1.detail3"),
+        t("howItWorks.coachSteps.step1.detail4")
       ]
     },
     {
       step: "02",
       icon: Users,
-      title: t("howItWorks.coachSteps.build.title"),
-      description: t("howItWorks.coachSteps.build.description"),
+      title: t("howItWorks.coachSteps.step2.title"),
+      description: t("howItWorks.coachSteps.step2.description"),
       details: [
-        t("howItWorks.coachSteps.build.details.0"),
-        t("howItWorks.coachSteps.build.details.1"),
-        t("howItWorks.coachSteps.build.details.2"),
-        t("howItWorks.coachSteps.build.details.3")
+        t("howItWorks.coachSteps.step2.detail1"),
+        t("howItWorks.coachSteps.step2.detail2"),
+        t("howItWorks.coachSteps.step2.detail3"),
+        t("howItWorks.coachSteps.step2.detail4")
       ]
     },
     {
       step: "03",
       icon: Zap,
-      title: t("howItWorks.coachSteps.discover.title"),
-      description: t("howItWorks.coachSteps.discover.description"),
+      title: t("howItWorks.coachSteps.step3.title"),
+      description: t("howItWorks.coachSteps.step3.description"),
       details: [
-        t("howItWorks.coachSteps.discover.details.0"),
-        t("howItWorks.coachSteps.discover.details.1"),
-        t("howItWorks.coachSteps.discover.details.2"),
-        t("howItWorks.coachSteps.discover.details.3")
+        t("howItWorks.coachSteps.step3.detail1"),
+        t("howItWorks.coachSteps.step3.detail2"),
+        t("howItWorks.coachSteps.step3.detail3"),
+        t("howItWorks.coachSteps.step3.detail4")
       ]
     },
     {
       step: "04",
       icon: Award,
-      title: t("howItWorks.coachSteps.coach.title"),
-      description: t("howItWorks.coachSteps.coach.description"),
+      title: t("howItWorks.coachSteps.step4.title"),
+      description: t("howItWorks.coachSteps.step4.description"),
       details: [
-        t("howItWorks.coachSteps.coach.details.0"),
-        t("howItWorks.coachSteps.coach.details.1"),
-        t("howItWorks.coachSteps.coach.details.2"),
-        t("howItWorks.coachSteps.coach.details.3")
+        t("howItWorks.coachSteps.step4.detail1"),
+        t("howItWorks.coachSteps.step4.detail2"),
+        t("howItWorks.coachSteps.step4.detail3"),
+        t("howItWorks.coachSteps.step4.detail4")
       ]
     }
   ];
@@ -120,40 +120,40 @@ const HowItWorks = () => {
   const features = [
     {
       icon: Video,
-      title: t("howItWorks.features.video.title"),
-      description: t("howItWorks.features.video.description")
+      title: t("howItWorks.features.hdVideo"),
+      description: t("howItWorks.features.hdVideoDesc")
     },
     {
       icon: MessageSquare,
-      title: t("howItWorks.features.messaging.title"),
-      description: t("howItWorks.features.messaging.description")
+      title: t("howItWorks.features.secureMessaging"),
+      description: t("howItWorks.features.secureMessagingDesc")
     },
     {
       icon: Calendar,
-      title: t("howItWorks.features.scheduling.title"),
-      description: t("howItWorks.features.scheduling.description")
+      title: t("howItWorks.features.smartScheduling"),
+      description: t("howItWorks.features.smartSchedulingDesc")
     },
     {
       icon: TrendingUp,
-      title: t("howItWorks.features.progress.title"),
-      description: t("howItWorks.features.progress.description")
+      title: t("howItWorks.features.progressTracking"),
+      description: t("howItWorks.features.progressTrackingDesc")
     },
     {
       icon: FileText,
-      title: t("howItWorks.features.plans.title"),
-      description: t("howItWorks.features.plans.description")
+      title: t("howItWorks.features.customPlans"),
+      description: t("howItWorks.features.customPlansDesc")
     },
     {
       icon: Shield,
-      title: t("howItWorks.features.security.title"),
-      description: t("howItWorks.features.security.description")
+      title: t("howItWorks.features.safeSecurity"),
+      description: t("howItWorks.features.safeSecurityDesc")
     }
   ];
 
   return (
     <PageLayout
-      title={t("howItWorks.meta.title")}
-      description={t("howItWorks.meta.description")}
+      title={t("howItWorks.title")}
+      description={t("howItWorks.metaDescription")}
     >
       {/* Decorative Avatars */}
       <DecorativeAvatar 
@@ -180,10 +180,10 @@ const HowItWorks = () => {
         
         <div className="container mx-auto px-4 text-center">
           <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary font-medium text-sm mb-6">
-            {t("howItWorks.hero.badge")}
+            {t("howItWorks.badge")}
           </span>
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            {t("howItWorks.hero.titleStart")}{" "}
+            {t("howItWorks.hero.title")}{" "}
             <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
               {t("howItWorks.hero.titleHighlight")}
             </span>
@@ -244,7 +244,7 @@ const HowItWorks = () => {
               
               <div className="text-center mt-16">
                 <Link to="/coaches">
-                  <GradientButton size="lg">{t("howItWorks.cta.findCoachNow")}</GradientButton>
+                  <GradientButton size="lg">{t("howItWorks.findYourCoachNow")}</GradientButton>
                 </Link>
               </div>
             </TabsContent>
@@ -284,7 +284,7 @@ const HowItWorks = () => {
               
               <div className="text-center mt-16">
                 <Link to="/for-coaches">
-                  <GradientButton size="lg">{t("howItWorks.cta.startApplication")}</GradientButton>
+                  <GradientButton size="lg">{t("howItWorks.startYourApplication")}</GradientButton>
                 </Link>
               </div>
             </TabsContent>
@@ -297,13 +297,13 @@ const HowItWorks = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              {t("howItWorks.featuresSection.titleStart")}{" "}
+              {t("howItWorks.features.title")}{" "}
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                {t("howItWorks.featuresSection.titleHighlight")}
+                {t("howItWorks.features.titleHighlight")}
               </span>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              {t("howItWorks.featuresSection.description")}
+              {t("howItWorks.features.subtitle")}
             </p>
           </div>
           
@@ -333,7 +333,7 @@ const HowItWorks = () => {
               ))}
             </div>
             <blockquote className="text-2xl md:text-3xl font-medium mb-6 italic">
-              "{t("howItWorks.testimonial.quoteStart")}
+              "{t("howItWorks.testimonial.quote")}
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 {" "}{t("howItWorks.testimonial.quoteHighlight")}
               </span>"
@@ -350,20 +350,20 @@ const HowItWorks = () => {
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            {t("howItWorks.finalCta.titleStart")}{" "}
+            {t("howItWorks.cta.title")}{" "}
             <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              {t("howItWorks.finalCta.titleHighlight")}
+              {t("howItWorks.cta.titleHighlight")}
             </span>
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
-            {t("howItWorks.finalCta.description")}
+            {t("howItWorks.cta.description")}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/coaches">
-              <GradientButton size="lg">{t("howItWorks.finalCta.findCoach")}</GradientButton>
+              <GradientButton size="lg">{t("howItWorks.cta.findACoach")}</GradientButton>
             </Link>
             <Link to="/for-coaches">
-              <GradientButton size="lg" variant="outline">{t("howItWorks.finalCta.becomeCoach")}</GradientButton>
+              <GradientButton size="lg" variant="outline">{t("howItWorks.cta.becomeACoach")}</GradientButton>
             </Link>
           </div>
         </div>
