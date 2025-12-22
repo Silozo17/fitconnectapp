@@ -46,6 +46,7 @@ const WEARABLE_PROVIDERS: {
     descriptionKey: "integrations.wearables.garmin.description",
     icon: <Watch className="w-5 h-5 text-white" />,
     color: "bg-gradient-to-br from-blue-600 to-blue-800",
+    comingSoon: true,
   },
 ];
 
