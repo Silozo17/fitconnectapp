@@ -1,20 +1,18 @@
 import { useState, useRef } from "react";
 import DOMPurify from "dompurify";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { 
   BadgeCheck, 
   TrendingUp, 
-  Users, 
-  Shield, 
   Upload, 
   FileText, 
   X, 
   Loader2, 
-  AlertCircle,
   CheckCircle2,
-  Clock
+  Clock,
+  ChevronDown
 } from "lucide-react";
 import { 
   useVerificationDocuments, 
@@ -40,6 +38,7 @@ export default function VerificationOnboardingStep({
 }: VerificationOnboardingStepProps) {
   const { t } = useTranslation('common');
   const [uploadingType, setUploadingType] = useState<DocumentType | null>(null);
+  const [showOptional, setShowOptional] = useState(false);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   
   const { data: documents = [], isLoading } = useVerificationDocuments();
@@ -82,9 +81,10 @@ export default function VerificationOnboardingStep({
   const BENEFITS = [
     { icon: BadgeCheck, title: t('onboarding.verifiedBadge'), description: t('onboarding.standOutTrust') },
     { icon: TrendingUp, title: t('onboarding.higherRanking'), description: t('onboarding.appearHigher') },
-    { icon: Users, title: t('onboarding.moreClients'), description: t('onboarding.buildTrustFaster') },
-    { icon: Shield, title: t('onboarding.premiumTrust'), description: t('onboarding.showProfessionalism') },
   ];
+
+  const requiredDocs = DOCUMENT_TYPES.filter(d => d.required);
+  const optionalDocs = DOCUMENT_TYPES.filter(d => !d.required);
 
   const hasIdentity = documents.some(d => d.document_type === 'identity');
   const hasCertification = documents.some(d => d.document_type === 'certification');
@@ -108,7 +108,7 @@ export default function VerificationOnboardingStep({
     const file = e.target.files?.[0];
     if (file) {
       handleFileSelect(type, file);
-      e.target.value = ''; // Reset input
+      e.target.value = '';
     }
   };
 
@@ -127,6 +127,98 @@ export default function VerificationOnboardingStep({
     return documents.filter(d => d.document_type === type);
   };
 
+  const renderDocumentCard = (docType: typeof DOCUMENT_TYPES[0]) => {
+    const uploadedDocs = getDocsForType(docType.type);
+    const isUploading = uploadingType === docType.type;
+    const hasUpload = uploadedDocs.length > 0;
+    
+    return (
+      <div
+        key={docType.type}
+        className={cn(
+          "p-3 rounded-lg border transition-all",
+          hasUpload 
+            ? "border-primary/50 bg-primary/5" 
+            : "border-border bg-secondary/30"
+        )}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5">
+              <p className="font-medium text-foreground text-sm truncate">{docType.label}</p>
+              {docType.required && (
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0">{t('onboarding.required')}</Badge>
+              )}
+              {hasUpload && (
+                <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
+              )}
+            </div>
+            
+            {/* Show uploaded files compactly */}
+            {uploadedDocs.map((doc) => (
+              <div 
+                key={doc.id}
+                className="flex items-center gap-1.5 mt-1.5 text-xs"
+              >
+                <FileText className="w-3 h-3 text-muted-foreground shrink-0" />
+                <span className="text-foreground truncate flex-1">{doc.file_name}</span>
+                {doc.ai_analyzed_at ? (
+                  <Badge 
+                    variant={doc.ai_flagged ? "destructive" : "secondary"} 
+                    className="text-[10px] px-1 py-0 shrink-0"
+                  >
+                    {doc.ai_flagged ? t('onboarding.flagged') : `${doc.ai_confidence_score}%`}
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-[10px] px-1 py-0 shrink-0">
+                    <Clock className="w-2.5 h-2.5 mr-0.5" />
+                    {t('onboarding.analyzing')}
+                  </Badge>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-5 w-5 shrink-0"
+                  onClick={() => handleDelete(doc.id)}
+                  disabled={deleteMutation.isPending}
+                >
+                  <X className="w-3 h-3" />
+                </Button>
+              </div>
+            ))}
+          </div>
+          
+          {/* Upload button */}
+          <div className="shrink-0">
+            <input
+              type="file"
+              ref={(el) => (fileInputRefs.current[docType.type] = el)}
+              onChange={(e) => handleFileChange(docType.type, e)}
+              accept=".pdf,.jpg,.jpeg,.png,.webp"
+              className="hidden"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleUploadClick(docType.type)}
+              disabled={isUploading}
+              className="h-8 px-2.5 text-xs"
+            >
+              {isUploading ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <>
+                  <Upload className="w-3.5 h-3.5 mr-1" />
+                  {hasUpload ? '+' : t('onboarding.upload')}
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -136,172 +228,67 @@ export default function VerificationOnboardingStep({
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-          {t('onboarding.getVerified')}
-        </h2>
-        <p className="text-muted-foreground">
-          {t('onboarding.standOutWithBadge')}
-        </p>
-      </div>
+    <div className="flex flex-col h-full">
+      {/* Scrollable content */}
+      <div className="flex-1 min-h-0 overflow-y-auto space-y-4">
+        {/* Header */}
+        <div>
+          <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-1">
+            {t('onboarding.getVerified')}
+          </h2>
+          <p className="text-muted-foreground text-sm">
+            {t('onboarding.standOutWithBadge')}
+          </p>
+        </div>
 
-      {/* Benefits Grid */}
-      <div className="grid grid-cols-2 gap-3">
-        {BENEFITS.map((benefit) => {
-          const Icon = benefit.icon;
-          return (
-            <div
-              key={benefit.title}
-              className="p-4 rounded-xl bg-secondary/50 border border-border"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Icon className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium text-foreground text-sm">{benefit.title}</p>
-                  <p className="text-xs text-muted-foreground">{benefit.description}</p>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Optional Notice */}
-      <Alert className="bg-muted/50 border-border">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription 
-          className="text-sm"
-          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(t('onboarding.verificationOptional')) }}
-        />
-      </Alert>
-
-      {/* Document Upload Cards */}
-      <div className="space-y-3">
-        <p className="text-sm font-medium text-foreground">{t('onboarding.uploadDocuments')}</p>
-        
-        {DOCUMENT_TYPES.map((docType) => {
-          const uploadedDocs = getDocsForType(docType.type);
-          const isUploading = uploadingType === docType.type;
-          const hasUpload = uploadedDocs.length > 0;
-          
-          return (
-            <div
-              key={docType.type}
-              className={cn(
-                "p-4 rounded-xl border-2 transition-all",
-                hasUpload 
-                  ? "border-primary/50 bg-primary/5" 
-                  : "border-border bg-secondary/30"
-              )}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium text-foreground">{docType.label}</p>
-                    {docType.required && (
-                      <Badge variant="outline" className="text-xs">{t('onboarding.required')}</Badge>
-                    )}
-                    {hasUpload && (
-                      <CheckCircle2 className="w-4 h-4 text-primary" />
-                    )}
+        {/* Benefits - horizontal scroll on mobile */}
+        <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
+          {BENEFITS.map((benefit) => {
+            const Icon = benefit.icon;
+            return (
+              <div
+                key={benefit.title}
+                className="flex-shrink-0 p-3 rounded-lg bg-secondary/50 border border-border min-w-[140px] sm:min-w-0 sm:flex-1"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Icon className="w-4 h-4 text-primary" />
                   </div>
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    {docType.description}
-                  </p>
-                  
-                  {/* Show uploaded files */}
-                  {uploadedDocs.map((doc) => (
-                    <div 
-                      key={doc.id}
-                      className="flex items-center gap-2 mt-2 p-2 rounded-lg bg-background"
-                    >
-                      <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
-                      <span className="text-sm text-foreground truncate flex-1">
-                        {doc.file_name}
-                      </span>
-                      {doc.ai_analyzed_at ? (
-                        <Badge 
-                          variant={doc.ai_flagged ? "destructive" : "secondary"} 
-                          className="text-xs shrink-0"
-                        >
-                          {doc.ai_flagged ? t('onboarding.flagged') : `${doc.ai_confidence_score}%`}
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="text-xs shrink-0">
-                          <Clock className="w-3 h-3 mr-1" />
-                          {t('onboarding.analyzing')}
-                        </Badge>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 shrink-0"
-                        onClick={() => handleDelete(doc.id)}
-                        disabled={deleteMutation.isPending}
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-                
-                {/* Upload button */}
-                <div>
-                  <input
-                    type="file"
-                    ref={(el) => (fileInputRefs.current[docType.type] = el)}
-                    onChange={(e) => handleFileChange(docType.type, e)}
-                    accept=".pdf,.jpg,.jpeg,.png,.webp"
-                    className="hidden"
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleUploadClick(docType.type)}
-                    disabled={isUploading}
-                    className="shrink-0"
-                  >
-                    {isUploading ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <>
-                        <Upload className="w-4 h-4 mr-1.5" />
-                        {hasUpload ? t('onboarding.addMore') : t('onboarding.upload')}
-                      </>
-                    )}
-                  </Button>
+                  <p className="font-medium text-foreground text-xs">{benefit.title}</p>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+
+        {/* Required Documents */}
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Required</p>
+          {requiredDocs.map(renderDocumentCard)}
+        </div>
+
+        {/* Optional Documents - Collapsible */}
+        <Collapsible open={showOptional} onOpenChange={setShowOptional}>
+          <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground w-full py-2 hover:text-foreground transition-colors">
+            <ChevronDown className={cn("w-4 h-4 transition-transform", showOptional && "rotate-180")} />
+            Optional documents ({optionalDocs.length})
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-2 mt-1">
+            {optionalDocs.map(renderDocumentCard)}
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Status indicator */}
+        {hasRequiredDocs && (
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-primary/10 border border-primary/30">
+            <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+            <p className="text-sm text-foreground">{t('onboarding.requiredDocsUploaded')}</p>
+          </div>
+        )}
       </div>
 
-      {/* Progress indicator */}
-      {hasAnyDocs && !hasRequiredDocs && (
-        <Alert className="bg-amber-500/10 border-amber-500/30">
-          <AlertCircle className="h-4 w-4 text-amber-500" />
-          <AlertDescription className="text-sm">
-            {t('onboarding.uploadBothRequired')}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {hasRequiredDocs && (
-        <Alert className="bg-primary/10 border-primary/30">
-          <CheckCircle2 className="h-4 w-4 text-primary" />
-          <AlertDescription className="text-sm">
-            {t('onboarding.requiredDocsUploaded')}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Actions */}
-      <div className="flex gap-3 pt-4 border-t border-border">
+      {/* Sticky Actions */}
+      <div className="shrink-0 pt-3 border-t border-border flex gap-3 bg-background mt-auto">
         <Button 
           variant="outline" 
           onClick={onSkip}

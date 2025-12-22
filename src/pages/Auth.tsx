@@ -201,6 +201,12 @@ const Auth = () => {
             role: selectedRole,
           },
         }).catch((err) => console.error("Failed to send welcome email:", err));
+
+        // Explicit navigation based on selected role
+        const targetRoute = selectedRole === "coach" 
+          ? "/onboarding/coach" 
+          : "/onboarding/client";
+        navigate(targetRoute, { replace: true });
       }
     } catch (error) {
       toast.error(t("auth.unexpectedError"));
