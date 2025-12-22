@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { SUBSCRIPTION_TIERS, TierKey } from "@/lib/stripe-config";
 import { useTranslation } from "react-i18next";
-
+import { OnboardingConfirmSheet } from "./OnboardingConfirmSheet";
 interface StripeConnectOnboardingStepProps {
   coachId: string;
   onComplete: () => void;
@@ -102,10 +102,11 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
   };
 
   const handleSkipClick = () => {
-    if (!showSkipWarning) {
-      setShowSkipWarning(true);
-      return;
-    }
+    setShowSkipWarning(true);
+  };
+
+  const handleConfirmSkip = () => {
+    setShowSkipWarning(false);
     onSkip();
   };
 
@@ -230,27 +231,13 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
         </span>
       </div>
 
-      {showSkipWarning && (
-        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="font-medium text-amber-600">{t('onboarding.skipWarningTitle')}</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                {t('onboarding.skipWarningMessage')}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="flex gap-3">
         <Button
           variant="outline"
           onClick={handleSkipClick}
           className="flex-1"
         >
-          {showSkipWarning ? t('onboarding.skipAnyway') : t('onboarding.setUpLater')}
+          {t('onboarding.setUpLater')}
         </Button>
         <Button 
           onClick={handleConnect} 
@@ -265,6 +252,20 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
           {t('onboarding.connectStripe')}
         </Button>
       </div>
+
+      {/* Skip confirmation bottom sheet - no layout shift */}
+      <OnboardingConfirmSheet
+        open={showSkipWarning}
+        onOpenChange={setShowSkipWarning}
+        title={t('onboarding.skipWarningTitle')}
+        description={t('onboarding.skipWarningMessage')}
+        icon={<AlertTriangle className="w-6 h-6" />}
+        variant="warning"
+        confirmLabel={t('onboarding.skipAnyway')}
+        cancelLabel={t('onboarding.goBack')}
+        onConfirm={handleConfirmSkip}
+        onCancel={() => setShowSkipWarning(false)}
+      />
     </div>
   );
 };
