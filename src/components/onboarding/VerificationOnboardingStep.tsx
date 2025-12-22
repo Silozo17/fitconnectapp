@@ -24,6 +24,7 @@ import {
 } from "@/hooks/useVerification";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+import { OnboardingStatusBanner } from "./OnboardingStatusBanner";
 
 interface VerificationOnboardingStepProps {
   coachId: string;
@@ -278,13 +279,14 @@ export default function VerificationOnboardingStep({
           </CollapsibleContent>
         </Collapsible>
 
-        {/* Status indicator */}
-        {hasRequiredDocs && (
-          <div className="flex items-center gap-2 p-2 rounded-lg bg-primary/10 border border-primary/30">
-            <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
-            <p className="text-sm text-foreground">{t('onboarding.requiredDocsUploaded')}</p>
-          </div>
-        )}
+        {/* Status indicator - fixed height to prevent layout shift */}
+        <OnboardingStatusBanner
+          show={hasRequiredDocs}
+          variant="success"
+          icon={<CheckCircle2 className="w-4 h-4 text-primary" />}
+          message={t('onboarding.requiredDocsUploaded')}
+          height={48}
+        />
       </div>
 
       {/* Sticky Actions */}

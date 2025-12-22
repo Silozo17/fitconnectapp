@@ -416,12 +416,16 @@ const CoachOnboarding = () => {
                   <p className="text-muted-foreground">Select all that apply. Click the star to set your primary specialty.</p>
                 </div>
 
-                {/* Selected specialties with primary indicator */}
-                {formData.coachTypes.length > 0 && (
-                  <div className="p-4 rounded-xl bg-secondary/50 border border-border">
-                    <p className="text-sm text-muted-foreground mb-3">Your selected specialties:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {formData.coachTypes.map((typeId) => {
+                {/* Selected specialties with primary indicator - fixed height container */}
+                <div 
+                  className="h-[88px] transition-opacity duration-200 overflow-hidden"
+                  style={{ opacity: formData.coachTypes.length > 0 ? 1 : 0 }}
+                  aria-hidden={formData.coachTypes.length === 0}
+                >
+                  <div className="p-4 rounded-xl bg-secondary/50 border border-border h-full">
+                    <p className="text-sm text-muted-foreground mb-2">Your selected specialties:</p>
+                    <div className="flex flex-wrap gap-2 overflow-hidden">
+                      {formData.coachTypes.slice(0, 5).map((typeId) => {
                         const type = COACH_TYPES.find(t => t.id === typeId);
                         const isPrimary = formData.primaryCoachType === typeId;
                         if (!type) return null;
@@ -442,9 +446,14 @@ const CoachOnboarding = () => {
                           </button>
                         );
                       })}
+                      {formData.coachTypes.length > 5 && (
+                        <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm bg-muted text-muted-foreground">
+                          +{formData.coachTypes.length - 5} more
+                        </span>
+                      )}
                     </div>
                   </div>
-                )}
+                </div>
 
                 <div className="space-y-6 max-h-[40vh] overflow-y-auto pr-2">
                   {COACH_TYPE_CATEGORIES.map((category) => {
