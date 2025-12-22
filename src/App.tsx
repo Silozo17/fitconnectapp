@@ -34,6 +34,9 @@ import { WebsiteRouter } from "./components/routing/WebsiteRouter";
 // Auth page (not lazy - critical path)
 import Auth from '@/pages/Auth';
 
+// Zoom OAuth redirect (not lazy - must be immediate)
+import ZoomOAuth from '@/pages/api/zoom/OAuth';
+
 // Onboarding
 const ClientOnboarding = lazy(() => import('@/pages/onboarding/ClientOnboarding'));
 const CoachOnboarding = lazy(() => import('@/pages/onboarding/CoachOnboarding'));
@@ -202,6 +205,9 @@ const App = () => (
                         <LocaleProvider>
                           <LanguagePersistence />
                           <Routes>
+                            {/* Zoom OAuth redirect - must be outside AppLocaleWrapper for isolation */}
+                            <Route path="/api/zoom/oauth" element={<ZoomOAuth />} />
+                            
                             {/* App routes - wrapped with AppLocaleWrapper (layout route pattern) */}
                             <Route element={<AppLocaleWrapper />}>
                               {/* Auth */}
