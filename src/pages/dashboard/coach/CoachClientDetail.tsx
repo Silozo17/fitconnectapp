@@ -41,13 +41,20 @@ import {
   useCoachProfile
 } from "@/hooks/useCoachClients";
 import { format } from "date-fns";
+import { enGB, pl } from "date-fns/locale";
 import { useTranslation } from "@/hooks/useTranslation";
+import i18n from "@/i18n";
 
 const CoachClientDetail = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation("coach");
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+
+  // Get locale for date formatting
+  const getDateLocale = () => {
+    return i18n.language === 'pl' ? pl : enGB;
+  };
 
   // Fetch real data
   const { data: coachProfile } = useCoachProfile();
@@ -80,9 +87,9 @@ const CoachClientDetail = () => {
   const clientRelation = clientData;
 
   const fullName = useMemo(() => {
-    if (!client) return "Client";
-    return `${client.first_name || ''} ${client.last_name || ''}`.trim() || "Client";
-  }, [client]);
+    if (!client) return t('common.client');
+    return `${client.first_name || ''} ${client.last_name || ''}`.trim() || t('common.client');
+  }, [client, t]);
 
   const initials = useMemo(() => {
     if (!client) return "?";
@@ -115,7 +122,7 @@ const CoachClientDetail = () => {
   // Transform progress data for chart
   const chartData = useMemo(() => {
     return progressData.map(p => ({
-      date: format(new Date(p.recorded_at), 'MMM d'),
+      date: format(new Date(p.recorded_at), 'd MMM', { locale: getDateLocale() }),
       weight: p.weight_kg || undefined,
       bodyFat: p.body_fat_percentage || undefined,
     }));
@@ -134,13 +141,13 @@ const CoachClientDetail = () => {
     return client.fitness_goals.map((goal, i) => ({
       id: String(i),
       name: goal,
-      current: "In progress",
+      current: t('clientDetail.progress.inProgress') || "In progress",
       target: "100",
       progress: 50,
       unit: "%",
       isCompleted: false,
     }));
-  }, [client]);
+  }, [client, t]);
 
   const handleViewSession = (session: typeof sessions[0]) => {
     setSelectedSession({
@@ -167,9 +174,29 @@ const CoachClientDetail = () => {
 
   const isLoading = isLoadingClient || isLoadingSessions || isLoadingNotes || isLoadingProgress || isLoadingPlans;
 
+  // Status translations
+  const getStatusLabel = (status: string) => {
+    const statusMap: Record<string, string> = {
+      'active': t('clients.active'),
+      'pending': t('clients.pending'),
+      'inactive': t('clients.inactive'),
+    };
+    return statusMap[status] || status;
+  };
+
+  const getSessionStatusLabel = (status: string) => {
+    const statusMap: Record<string, string> = {
+      'scheduled': t('sessionDetailModal.status.scheduled'),
+      'completed': t('sessionDetailModal.status.completed'),
+      'cancelled': t('sessionDetailModal.status.cancelled'),
+      'no_show': t('sessionDetailModal.status.noShow'),
+    };
+    return statusMap[status] || status;
+  };
+
   if (isLoading) {
     return (
-      <DashboardLayout title="Client Details" description={t('loading.default')}>
+      <DashboardLayout title={t('clientDetail.pageTitle')} description={t('loading.default')}>
         <div className="flex items-center justify-center p-12">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
@@ -179,27 +206,27 @@ const CoachClientDetail = () => {
 
   if (!clientData) {
     return (
-      <DashboardLayout title="Client Not Found" description="">
+      <DashboardLayout title={t('clientDetail.clientNotFound')} description="">
         <Link to="/dashboard/coach/clients">
           <Button variant="ghost" className="mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Clients
+            {t('clientDetail.backToClients')}
           </Button>
         </Link>
         <div className="card-elevated p-12 text-center">
-          <p className="text-muted-foreground">Client not found or you don't have access.</p>
+          <p className="text-muted-foreground">{t('clientDetail.noAccessMessage')}</p>
         </div>
       </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout title={fullName} description="View and manage client details.">
+    <DashboardLayout title={fullName} description={t('clientDetail.pageDescription')}>
       {/* Back Button */}
       <Link to="/dashboard/coach/clients">
         <Button variant="ghost" className="mb-4">
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Clients
+          {t('clientDetail.backToClients')}
         </Button>
       </Link>
 
@@ -217,28 +244,28 @@ const CoachClientDetail = () => {
                 clientRelation?.status === 'pending' ? 'bg-warning/20 text-warning border-warning/30' :
                 'bg-muted text-muted-foreground'
               }>
-                {clientRelation?.status || 'unknown'}
+                {getStatusLabel(clientRelation?.status || t('clientDetail.unknown'))}
               </Badge>
             </div>
             <p className="text-muted-foreground">
               {client?.height_cm && `${client.height_cm}cm`}
               {client?.height_cm && client?.weight_kg && ' • '}
               {client?.weight_kg && `${client.weight_kg}kg`}
-              {client?.age && ` • ${client.age} years old`}
+              {client?.age && ` • ${client.age} ${t('clientDetail.yearsOld')}`}
             </p>
             <p className="text-sm text-muted-foreground mt-1">
-              Client since {clientRelation?.start_date ? format(new Date(clientRelation.start_date), 'MMM d, yyyy') : 'N/A'}
+              {t('clientDetail.clientSince')} {clientRelation?.start_date ? format(new Date(clientRelation.start_date), 'd MMM yyyy', { locale: getDateLocale() }) : 'N/A'}
               {clientRelation?.plan_type && ` • ${clientRelation.plan_type}`}
             </p>
           </div>
           <div className="flex gap-3">
             <Button variant="outline" onClick={() => navigate(`/dashboard/coach/messages/${id}`)}>
               <MessageSquare className="w-4 h-4 mr-2" />
-              Message
+              {t('clients.message')}
             </Button>
             <Button onClick={() => setIsScheduleSessionOpen(true)} className="bg-primary text-primary-foreground">
               <Calendar className="w-4 h-4 mr-2" />
-              Schedule Session
+              {t('clients.scheduleSession')}
             </Button>
           </div>
         </div>
@@ -249,21 +276,21 @@ const CoachClientDetail = () => {
         <div className="card-elevated p-4">
           <div className="flex items-center gap-2 mb-2">
             <Calendar className="w-4 h-4 text-primary" />
-            <span className="text-sm text-muted-foreground">Sessions Done</span>
+            <span className="text-sm text-muted-foreground">{t('clientDetail.stats.sessionsDone')}</span>
           </div>
           <p className="text-2xl font-display font-bold text-foreground">{sessionStats.completed}</p>
         </div>
         <div className="card-elevated p-4">
           <div className="flex items-center gap-2 mb-2">
             <Clock className="w-4 h-4 text-warning" />
-            <span className="text-sm text-muted-foreground">Upcoming</span>
+            <span className="text-sm text-muted-foreground">{t('clientDetail.stats.upcoming')}</span>
           </div>
           <p className="text-2xl font-display font-bold text-foreground">{sessionStats.upcoming}</p>
         </div>
         <div className="card-elevated p-4">
           <div className="flex items-center gap-2 mb-2">
             <Scale className="w-4 h-4 text-success" />
-            <span className="text-sm text-muted-foreground">Current Weight</span>
+            <span className="text-sm text-muted-foreground">{t('clientDetail.stats.currentWeight')}</span>
           </div>
           <p className="text-2xl font-display font-bold text-foreground">
             {progressData.length > 0 ? `${progressData[progressData.length - 1].weight_kg || '-'} kg` : `${client?.weight_kg || '-'} kg`}
@@ -272,7 +299,7 @@ const CoachClientDetail = () => {
         <div className="card-elevated p-4">
           <div className="flex items-center gap-2 mb-2">
             <Target className="w-4 h-4 text-accent" />
-            <span className="text-sm text-muted-foreground">Notes</span>
+            <span className="text-sm text-muted-foreground">{t('clientDetail.stats.notes')}</span>
           </div>
           <p className="text-2xl font-display font-bold text-foreground">{notes.length}</p>
         </div>
@@ -281,12 +308,12 @@ const CoachClientDetail = () => {
       {/* Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList className="bg-secondary">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="sessions">Sessions</TabsTrigger>
-          <TabsTrigger value="progress">Progress</TabsTrigger>
-          <TabsTrigger value="plans">Plans</TabsTrigger>
-          <TabsTrigger value="habits">Habits</TabsTrigger>
-          <TabsTrigger value="notes">Notes</TabsTrigger>
+          <TabsTrigger value="overview">{t('clientDetail.tabs.overview')}</TabsTrigger>
+          <TabsTrigger value="sessions">{t('clientDetail.tabs.sessions')}</TabsTrigger>
+          <TabsTrigger value="progress">{t('clientDetail.tabs.progress')}</TabsTrigger>
+          <TabsTrigger value="plans">{t('clientDetail.tabs.plans')}</TabsTrigger>
+          <TabsTrigger value="habits">{t('clientDetail.tabs.habits')}</TabsTrigger>
+          <TabsTrigger value="notes">{t('clientDetail.tabs.notes')}</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
@@ -295,7 +322,7 @@ const CoachClientDetail = () => {
             {/* Goals */}
             <div className="card-elevated p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-display font-bold text-foreground">Fitness Goals</h3>
+                <h3 className="font-display font-bold text-foreground">{t('clientDetail.overview.fitnessGoals')}</h3>
                 <Button variant="ghost" size="sm">
                   <Edit className="w-4 h-4" />
                 </Button>
@@ -307,14 +334,14 @@ const CoachClientDetail = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground">No goals set yet.</p>
+                <p className="text-muted-foreground">{t('clientDetail.overview.noGoalsSet')}</p>
               )}
             </div>
 
             {/* Upcoming Sessions */}
             <div className="card-elevated p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-display font-bold text-foreground">Upcoming Sessions</h3>
+                <h3 className="font-display font-bold text-foreground">{t('clientDetail.overview.upcomingSessions')}</h3>
                 <Button variant="ghost" size="sm" onClick={() => setIsScheduleSessionOpen(true)}>
                   <Plus className="w-4 h-4" />
                 </Button>
@@ -333,7 +360,7 @@ const CoachClientDetail = () => {
                       <div>
                         <p className="font-medium text-foreground">{session.session_type}</p>
                         <p className="text-sm text-muted-foreground">
-                          {format(new Date(session.scheduled_at), 'MMM d, yyyy')} at {format(new Date(session.scheduled_at), 'h:mm a')}
+                          {format(new Date(session.scheduled_at), 'd MMM yyyy', { locale: getDateLocale() })} {t('common.at')} {format(new Date(session.scheduled_at), 'HH:mm', { locale: getDateLocale() })}
                         </p>
                       </div>
                     </div>
@@ -343,7 +370,7 @@ const CoachClientDetail = () => {
                   </div>
                 ))}
                 {sessions.filter(s => s.status === 'scheduled').length === 0 && (
-                  <p className="text-muted-foreground text-center py-4">No upcoming sessions</p>
+                  <p className="text-muted-foreground text-center py-4">{t('clientDetail.overview.noUpcomingSessions')}</p>
                 )}
               </div>
             </div>
@@ -358,7 +385,7 @@ const CoachClientDetail = () => {
 
           {/* Recent Progress */}
           {chartData.length > 0 && (
-            <ProgressChart title="Recent Progress" data={chartData} />
+            <ProgressChart title={t('clients.progressOverview')} data={chartData} />
           )}
         </TabsContent>
 
@@ -377,10 +404,10 @@ const CoachClientDetail = () => {
             {/* Session List */}
             <div className="lg:col-span-2 card-elevated">
               <div className="p-4 border-b border-border flex items-center justify-between">
-                <h3 className="font-display font-bold text-foreground">Session History</h3>
+                <h3 className="font-display font-bold text-foreground">{t('clientDetail.sessions.sessionHistory')}</h3>
                 <Button size="sm" onClick={() => setIsScheduleSessionOpen(true)} className="bg-primary text-primary-foreground">
                   <Plus className="w-4 h-4 mr-2" />
-                  Schedule Session
+                  {t('clients.scheduleSession')}
                 </Button>
               </div>
               <div className="divide-y divide-border">
@@ -403,7 +430,7 @@ const CoachClientDetail = () => {
                       <div>
                         <p className="font-medium text-foreground">{session.session_type}</p>
                         <p className="text-sm text-muted-foreground">
-                          {format(new Date(session.scheduled_at), 'MMM d, yyyy')}
+                          {format(new Date(session.scheduled_at), 'd MMM yyyy', { locale: getDateLocale() })}
                         </p>
                       </div>
                     </div>
@@ -414,14 +441,14 @@ const CoachClientDetail = () => {
                         session.status === 'cancelled' ? 'bg-destructive/20 text-destructive border-destructive/30' :
                         'bg-primary/20 text-primary border-primary/30'
                       }>
-                        {session.status}
+                        {getSessionStatusLabel(session.status)}
                       </Badge>
                     </div>
                   </div>
                 ))}
                 {sessions.length === 0 && (
                   <div className="p-8 text-center text-muted-foreground">
-                    No sessions yet
+                    {t('clientDetail.sessions.noSessionsYet')}
                   </div>
                 )}
               </div>
@@ -435,22 +462,22 @@ const CoachClientDetail = () => {
             <div className="flex justify-end">
               <Button onClick={() => setIsAddProgressOpen(true)} className="bg-primary text-primary-foreground">
                 <Plus className="w-4 h-4 mr-2" />
-                Log Progress
+                {t('clientDetail.progress.logProgress')}
               </Button>
             </div>
 
             {chartData.length > 0 ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ProgressChart title="Weight & Body Composition" data={chartData} />
-                <ProgressChart title="Body Fat Trend" data={chartData} />
+                <ProgressChart title={t('clientDetail.progress.weightAndBodyComposition')} data={chartData} />
+                <ProgressChart title={t('clientDetail.progress.bodyFatTrend')} data={chartData} />
               </div>
             ) : (
               <div className="card-elevated p-12 text-center">
                 <Scale className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground mb-4">No progress data logged yet</p>
+                <p className="text-muted-foreground mb-4">{t('clientDetail.progress.noProgressData')}</p>
                 <Button onClick={() => setIsAddProgressOpen(true)} variant="outline">
                   <Plus className="w-4 h-4 mr-2" />
-                  Log First Progress Entry
+                  {t('clientDetail.progress.logFirstProgress')}
                 </Button>
               </div>
             )}
@@ -458,7 +485,7 @@ const CoachClientDetail = () => {
             {/* Goals Progress */}
             {goals.length > 0 && (
               <div className="card-elevated p-6">
-                <h3 className="font-display font-bold text-foreground mb-4">Goal Progress</h3>
+                <h3 className="font-display font-bold text-foreground mb-4">{t('clientDetail.progress.goalProgress')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {goals.map((goal) => (
                     <GoalProgressCard key={goal.id} goal={goal} />
@@ -474,7 +501,7 @@ const CoachClientDetail = () => {
           <div className="flex justify-end">
             <Button onClick={() => setIsAssignPlanOpen(true)} variant="outline">
               <Plus className="w-4 h-4 mr-2" />
-              Assign Plan
+              {t('clientDetail.plans.assignPlan')}
             </Button>
           </div>
 
@@ -496,7 +523,9 @@ const CoachClientDetail = () => {
                       <div>
                         <h4 className="font-medium text-foreground">{assignment.training_plan?.name}</h4>
                         <p className="text-sm text-muted-foreground capitalize">
-                          {assignment.training_plan?.plan_type} Plan
+                          {assignment.training_plan?.plan_type === 'workout' 
+                            ? t('clientDetail.plans.workoutPlan') 
+                            : t('clientDetail.plans.nutritionPlan')}
                         </p>
                       </div>
                     </div>
@@ -504,15 +533,15 @@ const CoachClientDetail = () => {
                       assignment.status === 'active' ? 'bg-success/20 text-success border-success/30' :
                       'bg-muted text-muted-foreground'
                     }>
-                      {assignment.status}
+                      {getStatusLabel(assignment.status)}
                     </Badge>
                   </div>
                   {assignment.training_plan?.description && (
                     <p className="text-sm text-muted-foreground mb-3">{assignment.training_plan.description}</p>
                   )}
                   <p className="text-sm text-muted-foreground">
-                    Assigned: {format(new Date(assignment.assigned_at), 'MMM d, yyyy')}
-                    {assignment.training_plan?.duration_weeks && ` • ${assignment.training_plan.duration_weeks} weeks`}
+                    {t('clientDetail.plans.assigned')}: {format(new Date(assignment.assigned_at), 'd MMM yyyy', { locale: getDateLocale() })}
+                    {assignment.training_plan?.duration_weeks && ` • ${assignment.training_plan.duration_weeks} ${t('clientDetail.plans.weeks')}`}
                   </p>
                 </div>
               ))}
@@ -520,10 +549,10 @@ const CoachClientDetail = () => {
           ) : (
             <div className="card-elevated p-12 text-center">
               <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground mb-4">No plans assigned yet</p>
+              <p className="text-muted-foreground mb-4">{t('clientDetail.plans.noPlansAssigned')}</p>
               <Button onClick={() => setIsAssignPlanOpen(true)} variant="outline">
                 <Plus className="w-4 h-4 mr-2" />
-                Assign First Plan
+                {t('clientDetail.plans.assignFirstPlan')}
               </Button>
             </div>
           )}
@@ -541,7 +570,7 @@ const CoachClientDetail = () => {
           <div className="flex justify-end">
             <Button onClick={() => setIsAddNoteOpen(true)} variant="outline">
               <Plus className="w-4 h-4 mr-2" />
-              Add Note
+              {t('clientDetail.notes.addNote')}
             </Button>
           </div>
 
@@ -561,10 +590,10 @@ const CoachClientDetail = () => {
           ) : (
             <div className="card-elevated p-12 text-center">
               <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground mb-4">No notes yet</p>
+              <p className="text-muted-foreground mb-4">{t('clientDetail.notes.noNotesYet')}</p>
               <Button onClick={() => setIsAddNoteOpen(true)} variant="outline">
                 <Plus className="w-4 h-4 mr-2" />
-                Add First Note
+                {t('clientDetail.notes.addFirstNote')}
               </Button>
             </div>
           )}

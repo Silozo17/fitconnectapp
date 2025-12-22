@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { useSessionManagement } from "@/hooks/useSessionManagement";
 import { RescheduleSessionModal } from "./RescheduleSessionModal";
 import { CancelSessionModal } from "./CancelSessionModal";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface Session {
   id: string;
@@ -30,14 +31,8 @@ interface SessionDetailModalProps {
   onRefresh?: () => void;
 }
 
-const statusConfig = {
-  scheduled: { label: "Scheduled", icon: Calendar, color: "bg-blue-500/20 text-blue-400" },
-  completed: { label: "Completed", icon: CheckCircle, color: "bg-green-500/20 text-green-400" },
-  cancelled: { label: "Cancelled", icon: XCircle, color: "bg-red-500/20 text-red-400" },
-  no_show: { label: "No Show", icon: AlertCircle, color: "bg-orange-500/20 text-orange-400" },
-};
-
 export function SessionDetailModal({ open, onOpenChange, session, onRefresh }: SessionDetailModalProps) {
+  const { t } = useTranslation("coach");
   const [notes, setNotes] = useState(session?.notes || "");
   const [showReschedule, setShowReschedule] = useState(false);
   const [showCancel, setShowCancel] = useState(false);
@@ -59,6 +54,13 @@ export function SessionDetailModal({ open, onOpenChange, session, onRefresh }: S
   }, [session?.notes]);
 
   if (!session) return null;
+
+  const statusConfig = {
+    scheduled: { label: t('sessionDetailModal.status.scheduled'), icon: Calendar, color: "bg-blue-500/20 text-blue-400" },
+    completed: { label: t('sessionDetailModal.status.completed'), icon: CheckCircle, color: "bg-green-500/20 text-green-400" },
+    cancelled: { label: t('sessionDetailModal.status.cancelled'), icon: XCircle, color: "bg-red-500/20 text-red-400" },
+    no_show: { label: t('sessionDetailModal.status.noShow'), icon: AlertCircle, color: "bg-orange-500/20 text-orange-400" },
+  };
 
   const status = statusConfig[session.status];
   const StatusIcon = status.icon;
@@ -110,7 +112,7 @@ export function SessionDetailModal({ open, onOpenChange, session, onRefresh }: S
         <DialogContent className="sm:max-w-lg bg-card border-border">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between text-foreground">
-              <span>Session Details</span>
+              <span>{t('sessionDetailModal.title')}</span>
               <Badge className={status.color}>
                 <StatusIcon className="h-3 w-3 mr-1" />
                 {status.label}
@@ -147,7 +149,7 @@ export function SessionDetailModal({ open, onOpenChange, session, onRefresh }: S
 
             {session.rescheduledFrom && (
               <div className="text-xs text-muted-foreground bg-amber-500/10 px-3 py-2 rounded-md">
-                Rescheduled from: {new Date(session.rescheduledFrom).toLocaleString()}
+                {t('sessionDetailModal.rescheduledFrom')}: {new Date(session.rescheduledFrom).toLocaleString()}
               </div>
             )}
 
@@ -156,56 +158,33 @@ export function SessionDetailModal({ open, onOpenChange, session, onRefresh }: S
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-2">
                     <Video className="h-4 w-4 text-primary" />
-                    <span className="text-foreground">Online Session</span>
+                    <span className="text-foreground">{t('sessionDetailModal.onlineSession')}</span>
                   </div>
                   {session.videoMeetingUrl ? (
-                    <a
-                      href={session.videoMeetingUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-primary hover:underline"
-                    >
+                    <a href={session.videoMeetingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-primary hover:underline">
                       <ExternalLink className="h-3 w-3" />
-                      Join Meeting
+                      {t('sessionDetailModal.joinMeeting')}
                     </a>
                   ) : session.status === "scheduled" && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={handleCreateMeeting}
-                      disabled={createVideoMeeting.isPending}
-                      className="h-7 text-xs"
-                    >
+                    <Button size="sm" variant="outline" onClick={handleCreateMeeting} disabled={createVideoMeeting.isPending} className="h-7 text-xs">
                       <Link2 className="h-3 w-3 mr-1" />
-                      Create Link
+                      {t('sessionDetailModal.createLink')}
                     </Button>
                   )}
                 </div>
               ) : (
                 <>
                   <MapPin className="h-4 w-4 text-primary" />
-                  <span className="text-foreground">{session.location || "Location TBD"}</span>
+                  <span className="text-foreground">{session.location || t('sessionDetailModal.locationTbd')}</span>
                 </>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="sessionNotes">Session Notes</Label>
-              <Textarea
-                id="sessionNotes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add notes about this session..."
-                className="bg-background border-border resize-none"
-                rows={4}
-              />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSaveNotes}
-                disabled={isLoading}
-              >
-                Save Notes
+              <Label htmlFor="sessionNotes">{t('sessionDetailModal.sessionNotes')}</Label>
+              <Textarea id="sessionNotes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t('sessionDetailModal.sessionNotesPlaceholder')} className="bg-background border-border resize-none" rows={4} />
+              <Button variant="outline" size="sm" onClick={handleSaveNotes} disabled={isLoading}>
+                {t('sessionDetailModal.saveNotes')}
               </Button>
             </div>
           </div>
@@ -213,46 +192,24 @@ export function SessionDetailModal({ open, onOpenChange, session, onRefresh }: S
           <DialogFooter className="flex-col sm:flex-row gap-2">
             {session.status === "scheduled" && (
               <>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowReschedule(true)}
-                  disabled={isLoading}
-                  className="w-full sm:w-auto"
-                >
+                <Button variant="outline" onClick={() => setShowReschedule(true)} disabled={isLoading} className="w-full sm:w-auto">
                   <CalendarDays className="h-4 w-4 mr-1" />
-                  Reschedule
+                  {t('sessionDetailModal.reschedule')}
                 </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => setShowCancel(true)}
-                  disabled={isLoading}
-                  className="w-full sm:w-auto"
-                >
-                  Cancel Session
+                <Button variant="destructive" onClick={() => setShowCancel(true)} disabled={isLoading} className="w-full sm:w-auto">
+                  {t('sessionDetailModal.cancelSession')}
                 </Button>
-                <Button
-                  variant="secondary"
-                  onClick={handleMarkNoShow}
-                  disabled={isLoading}
-                  className="w-full sm:w-auto"
-                >
-                  No Show
+                <Button variant="secondary" onClick={handleMarkNoShow} disabled={isLoading} className="w-full sm:w-auto">
+                  {t('sessionDetailModal.noShow')}
                 </Button>
-                <Button
-                  onClick={handleMarkComplete}
-                  disabled={isLoading}
-                  className="w-full sm:w-auto"
-                >
-                  Mark Complete
+                <Button onClick={handleMarkComplete} disabled={isLoading} className="w-full sm:w-auto">
+                  {t('sessionDetailModal.markComplete')}
                 </Button>
               </>
             )}
             {session.status !== "scheduled" && (
-              <Button
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                Close
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                {t('sessionDetailModal.close')}
               </Button>
             )}
           </DialogFooter>

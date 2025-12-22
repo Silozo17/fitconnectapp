@@ -87,6 +87,169 @@
     "message": "Message",
     "errorLoading": "Error loading clients"
   },
+  "clientDetail": {
+    "pageTitle": "Client Details",
+    "pageDescription": "View and manage client details.",
+    "backToClients": "Back to Clients",
+    "clientNotFound": "Client Not Found",
+    "noAccessMessage": "Client not found or you don't have access.",
+    "yearsOld": "years old",
+    "clientSince": "Client since",
+    "unknown": "unknown",
+    "tabs": {
+      "overview": "Overview",
+      "sessions": "Sessions",
+      "progress": "Progress",
+      "plans": "Plans",
+      "habits": "Habits",
+      "notes": "Notes"
+    },
+    "stats": {
+      "sessionsDone": "Sessions Done",
+      "upcoming": "Upcoming",
+      "currentWeight": "Current Weight",
+      "notes": "Notes"
+    },
+    "overview": {
+      "fitnessGoals": "Fitness Goals",
+      "noGoalsSet": "No goals set yet.",
+      "upcomingSessions": "Upcoming Sessions",
+      "noUpcomingSessions": "No upcoming sessions"
+    },
+    "sessions": {
+      "sessionHistory": "Session History",
+      "noSessionsYet": "No sessions yet"
+    },
+    "progress": {
+      "logProgress": "Log Progress",
+      "weightAndBodyComposition": "Weight & Body Composition",
+      "bodyFatTrend": "Body Fat Trend",
+      "noProgressData": "No progress data logged yet",
+      "logFirstProgress": "Log First Progress Entry",
+      "goalProgress": "Goal Progress"
+    },
+    "plans": {
+      "assignPlan": "Assign Plan",
+      "noPlansAssigned": "No plans assigned yet",
+      "assignFirstPlan": "Assign First Plan",
+      "assigned": "Assigned",
+      "weeks": "weeks",
+      "workoutPlan": "Workout Plan",
+      "nutritionPlan": "Nutrition Plan"
+    },
+    "notes": {
+      "addNote": "Add Note",
+      "noNotesYet": "No notes yet",
+      "addFirstNote": "Add First Note"
+    }
+  },
+  "scheduleSessionModal": {
+    "title": "Schedule Session",
+    "titleWithClient": "Schedule Session with {{clientName}}",
+    "date": "Date",
+    "time": "Time",
+    "sessionType": "Session Type",
+    "selectType": "Select type",
+    "duration": "Duration",
+    "onlineSession": "Online Session",
+    "location": "Location",
+    "locationPlaceholder": "Gym address or meeting point",
+    "sessionNotes": "Session Notes (Optional)",
+    "sessionNotesPlaceholder": "Any specific focus areas or notes for this session...",
+    "cancel": "Cancel",
+    "scheduling": "Scheduling...",
+    "schedule": "Schedule Session",
+    "sessionTypes": {
+      "oneOnOne": "1-on-1 Training",
+      "group": "Group Session",
+      "assessment": "Assessment",
+      "consultation": "Consultation",
+      "nutritionReview": "Nutrition Review"
+    },
+    "durations": {
+      "30min": "30 minutes",
+      "45min": "45 minutes",
+      "60min": "60 minutes",
+      "90min": "90 minutes",
+      "120min": "2 hours"
+    }
+  },
+  "addNoteModal": {
+    "title": "Add Note",
+    "titleWithClient": "Add Note for {{clientName}}",
+    "category": "Category",
+    "noteContent": "Note Content",
+    "notePlaceholder": "Write your note here...",
+    "pinNote": "Pin this note",
+    "cancel": "Cancel",
+    "saving": "Saving...",
+    "addNote": "Add Note",
+    "categories": {
+      "general": "General",
+      "progress": "Progress",
+      "injury": "Injury",
+      "feedback": "Feedback",
+      "goal": "Goal"
+    }
+  },
+  "addProgressModal": {
+    "title": "Log Progress",
+    "titleWithClient": "Log Progress for {{clientName}}",
+    "bodyComposition": "Body Composition",
+    "weight": "Weight (kg)",
+    "bodyFat": "Body Fat (%)",
+    "measurements": "Measurements (cm)",
+    "chest": "Chest",
+    "waist": "Waist",
+    "hips": "Hips",
+    "arms": "Arms",
+    "legs": "Legs",
+    "notes": "Notes (Optional)",
+    "notesPlaceholder": "Any observations about this measurement...",
+    "cancel": "Cancel",
+    "saving": "Saving...",
+    "saveProgress": "Save Progress"
+  },
+  "assignPlanModal": {
+    "title": "Assign Plan",
+    "titleWithClient": "Assign Plan to {{clientName}}",
+    "comingSoon": "Coming Soon",
+    "comingSoonDesc": "Plan assignment will connect to your saved workout and nutrition plans. This preview shows example plans.",
+    "searchPlans": "Search plans...",
+    "noPlansFound": "No plans found matching your search",
+    "startDate": "Start Date",
+    "cancel": "Cancel",
+    "assigning": "Assigning...",
+    "assignPlan": "Assign Plan",
+    "weeks": "weeks",
+    "planTypes": {
+      "workout": "workout",
+      "nutrition": "nutrition",
+      "hybrid": "hybrid"
+    }
+  },
+  "sessionDetailModal": {
+    "title": "Session Details",
+    "sessionNotes": "Session Notes",
+    "sessionNotesPlaceholder": "Add notes about this session...",
+    "saveNotes": "Save Notes",
+    "reschedule": "Reschedule",
+    "cancelSession": "Cancel Session",
+    "noShow": "No Show",
+    "markComplete": "Mark Complete",
+    "close": "Close",
+    "onlineSession": "Online Session",
+    "joinMeeting": "Join Meeting",
+    "createLink": "Create Link",
+    "locationTbd": "Location TBD",
+    "rescheduledFrom": "Rescheduled from",
+    "status": {
+      "scheduled": "Scheduled",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "noShow": "No Show"
+    }
+  },
   "planBuilder": {
     "title": "Plan Builder",
     "subtitle": "Create training programmes",
