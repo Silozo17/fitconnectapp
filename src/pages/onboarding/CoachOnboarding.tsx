@@ -76,6 +76,7 @@ const CoachOnboarding = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingProfile, setIsCheckingProfile] = useState(true);
+  const [isNavigating, setIsNavigating] = useState(false);
   const [coachProfileId, setCoachProfileId] = useState<string | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -148,7 +149,8 @@ const CoachOnboarding = () => {
   // Save current step and form data whenever they change
   useEffect(() => {
     const saveProgress = async () => {
-      if (!coachProfileId || isCheckingProfile) return;
+      // Guard: Don't save during navigation to prevent tight loops
+      if (!coachProfileId || isCheckingProfile || isNavigating) return;
       
       // Serialize formData to JSON-compatible format
       const progressData = JSON.parse(JSON.stringify({
@@ -168,7 +170,7 @@ const CoachOnboarding = () => {
     // Debounce the save to avoid too many updates
     const timer = setTimeout(saveProgress, 500);
     return () => clearTimeout(timer);
-  }, [currentStep, formData, coachProfileId, isCheckingProfile]);
+  }, [currentStep, formData, coachProfileId, isCheckingProfile, isNavigating]);
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -211,6 +213,12 @@ const CoachOnboarding = () => {
   };
 
   const handleNext = async () => {
+    // Idempotency guard: prevent double-clicks and rapid navigation
+    if (isNavigating) {
+      console.log("[CoachOnboarding] handleNext blocked - already navigating");
+      return;
+    }
+    
     // Validate specialties step - require at least one specialty
     if (currentStep === 1 && formData.coachTypes.length === 0) {
       toast.error("Please select at least one specialty");
@@ -229,20 +237,36 @@ const CoachOnboarding = () => {
       }
     }
 
-    // Handle dual account step
-    if (currentStep === 6 && dualAccountActionRef.current) {
-      const success = await dualAccountActionRef.current();
-      if (!success) return;
-      setFormData(prev => ({ ...prev, alsoClient: dualAccountState.selectedOption === 'both' }));
-    }
+    // Set navigating flag BEFORE any async work
+    setIsNavigating(true);
+    console.log("[CoachOnboarding] handleNext - step", currentStep, "-> navigating");
 
-    // Handle verification step
-    if (currentStep === 7 && verificationSubmitRef.current && verificationState.hasAnyDocs) {
-      await verificationSubmitRef.current();
-    }
-    
-    if (currentStep < STEPS.length - 1) {
-      setCurrentStep((prev) => prev + 1);
+    try {
+      // Handle dual account step
+      if (currentStep === 6 && dualAccountActionRef.current) {
+        const success = await dualAccountActionRef.current();
+        if (!success) {
+          setIsNavigating(false);
+          return;
+        }
+        setFormData(prev => ({ ...prev, alsoClient: dualAccountState.selectedOption === 'both' }));
+      }
+
+      // Handle verification step
+      if (currentStep === 7 && verificationSubmitRef.current && verificationState.hasAnyDocs) {
+        await verificationSubmitRef.current();
+      }
+      
+      if (currentStep < STEPS.length - 1) {
+        setCurrentStep((prev) => prev + 1);
+        console.log("[CoachOnboarding] Step advanced to", currentStep + 1);
+      }
+    } finally {
+      // Re-enable navigation after a short delay to allow render to complete
+      setTimeout(() => {
+        setIsNavigating(false);
+        console.log("[CoachOnboarding] Navigation unlocked");
+      }, 150);
     }
   };
 
@@ -338,25 +362,24 @@ const CoachOnboarding = () => {
       case 2:
       case 3:
         return {
-          primary: { label: "Next", onClick: handleNext },
-          secondary: baseSecondary,
+          primary: { label: "Next", onClick: handleNext, disabled: isNavigating },
+          secondary: baseSecondary ? { ...baseSecondary, disabled: isNavigating } : undefined,
         };
 
-      // Step 4: Stripe - handled by component, skip navigation for now
+      // Step 4: Stripe - component handles its own navigation buttons
+      // Hide footer to prevent duplicate navigation and freeze issues
       case 4:
-        return {
-          primary: { label: "Next", onClick: handleNext },
-          secondary: { label: "Skip", onClick: handleNext },
-        };
+        return undefined;
 
       // Step 5: Integrations
       case 5:
         return {
           primary: { 
             label: integrationsState.hasAnyConnection ? "Continue" : "Skip", 
-            onClick: handleNext 
+            onClick: handleNext,
+            disabled: isNavigating,
           },
-          secondary: baseSecondary,
+          secondary: baseSecondary ? { ...baseSecondary, disabled: isNavigating } : undefined,
         };
 
       // Step 6: Dual Account
@@ -365,10 +388,10 @@ const CoachOnboarding = () => {
           primary: { 
             label: "Continue", 
             onClick: handleNext,
-            disabled: !dualAccountState.selectedOption,
+            disabled: !dualAccountState.selectedOption || isNavigating,
             loading: dualAccountState.isCreating,
           },
-          secondary: baseSecondary,
+          secondary: baseSecondary ? { ...baseSecondary, disabled: isNavigating } : undefined,
         };
 
       // Step 7: Verification
@@ -377,9 +400,10 @@ const CoachOnboarding = () => {
           primary: { 
             label: verificationState.hasAnyDocs ? "Submit & Continue" : "Skip", 
             onClick: handleNext,
+            disabled: isNavigating,
             loading: verificationState.isSubmitting,
           },
-          secondary: baseSecondary,
+          secondary: baseSecondary ? { ...baseSecondary, disabled: isNavigating } : undefined,
         };
 
       // Step 8: Choose Plan
@@ -388,9 +412,10 @@ const CoachOnboarding = () => {
           primary: { 
             label: "Complete Setup", 
             onClick: handleComplete,
+            disabled: isNavigating,
             loading: isSubmitting,
           },
-          secondary: baseSecondary,
+          secondary: baseSecondary ? { ...baseSecondary, disabled: isNavigating } : undefined,
         };
 
       default:
@@ -767,11 +792,12 @@ const CoachOnboarding = () => {
         totalSteps={STEPS.length}
         title={STEPS[currentStep]}
         headerLogo
-        showBackButton={currentStep > 0}
+        showBackButton={currentStep > 0 && !isNavigating}
         onBack={handleBack}
         onSkip={handleSkip}
         skipLabel="Skip for now"
         footerActions={getFooterActions()}
+        hideFooter={currentStep === 4}
         maxWidth="lg"
       >
         {renderStepContent()}
