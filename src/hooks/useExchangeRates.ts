@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { CurrencyCode, CURRENCIES } from "@/lib/currency";
-import { useCountryContext } from "@/contexts/CountryContext";
+import { useCountry } from "@/hooks/useCountry";
 
 interface ExchangeRatesResponse {
   rates: Record<string, number>;
@@ -60,7 +60,7 @@ async function fetchExchangeRates(base: string = 'GBP'): Promise<ExchangeRatesRe
 }
 
 export function useExchangeRates() {
-  const { countryCode } = useCountryContext();
+  const { countryCode } = useCountry();
   const viewerCurrency = getViewerCurrency(countryCode);
   
   const { data, isLoading, error } = useQuery({

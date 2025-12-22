@@ -7,7 +7,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { TierKey, BillingInterval } from "@/lib/stripe-config";
 import { Loader2 } from "lucide-react";
-import { useCountryContext } from "@/contexts/CountryContext";
+import { useCountry } from "@/hooks/useCountry";
 
 interface SubscriptionCheckoutProps {
   tier: TierKey;
@@ -18,7 +18,7 @@ export function SubscriptionCheckout({ tier, billingInterval }: SubscriptionChec
   const [error, setError] = useState<string | null>(null);
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [isLoadingStripe, setIsLoadingStripe] = useState(true);
-  const { countryCode } = useCountryContext();
+  const { countryCode } = useCountry();
 
   // Fetch Stripe publishable key on mount
   useEffect(() => {
