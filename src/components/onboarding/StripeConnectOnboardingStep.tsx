@@ -16,9 +16,10 @@ interface StripeConnectOnboardingStepProps {
   coachId: string;
   onComplete: () => void;
   onSkip: () => void;
+  onBack: () => void;
 }
 
-const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConnectOnboardingStepProps) => {
+const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip, onBack }: StripeConnectOnboardingStepProps) => {
   const { t } = useTranslation('common');
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -30,11 +31,13 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
   const [pendingSkip, setPendingSkip] = useState(false);
   const skipCalledRef = useRef(false);
   
-  // Store onSkip in a ref to prevent stale closures and avoid useEffect re-triggers
+  // Store callbacks in refs to prevent stale closures and avoid useEffect re-triggers
   const onSkipRef = useRef(onSkip);
+  const onBackRef = useRef(onBack);
   useEffect(() => {
     onSkipRef.current = onSkip;
-  }, [onSkip]);
+    onBackRef.current = onBack;
+  }, [onSkip, onBack]);
 
   // Parse URL params once on mount - not on every render
   useEffect(() => {
@@ -288,6 +291,14 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
       </div>
 
       <div className="flex gap-3">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => onBackRef.current()}
+          className="flex-1"
+        >
+          {t('onboarding.goBack')}
+        </Button>
         <Button
           type="button"
           variant="outline"

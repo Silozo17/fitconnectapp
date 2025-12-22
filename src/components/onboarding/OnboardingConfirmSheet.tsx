@@ -67,6 +67,7 @@ export function OnboardingConfirmSheet({
         side="bottom"
         className="rounded-t-2xl pb-[env(safe-area-inset-bottom)]"
         onCloseAutoFocus={(e) => e.preventDefault()}
+        onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <SheetHeader className="text-left">
           {icon && (
