@@ -11,6 +11,8 @@ export const FEATURE_ACCESS = {
   // Starter tier features
   workout_plan_builder: ["starter", "pro", "enterprise", "founder"],
   basic_analytics: ["starter", "pro", "enterprise", "founder"],
+  digital_products: ["starter", "pro", "enterprise", "founder"],
+  group_classes: ["starter", "pro", "enterprise", "founder"],
   
   // Pro tier features
   nutrition_plan_builder: ["pro", "enterprise", "founder"],
@@ -36,6 +38,8 @@ export const FEATURE_NAMES: Record<FeatureKey, string> = {
   packages_subscriptions: "Packages & Subscriptions",
   workout_plan_builder: "Workout Plan Builder",
   basic_analytics: "Basic Analytics",
+  digital_products: "Digital Products",
+  group_classes: "Group Classes",
   nutrition_plan_builder: "Nutrition Plan Builder",
   ai_workout_generator: "AI Workout Generator",
   ai_meal_suggestions: "AI Meal Suggestions",
@@ -55,6 +59,8 @@ export const FEATURE_DESCRIPTIONS: Record<FeatureKey, string> = {
   packages_subscriptions: "Sell packages and subscriptions to clients",
   workout_plan_builder: "Build custom workout plans with exercise library",
   basic_analytics: "View basic stats and performance metrics",
+  digital_products: "Sell digital products like e-books and training programs",
+  group_classes: "Create and manage group fitness classes",
   nutrition_plan_builder: "Create detailed nutrition and meal plans",
   ai_workout_generator: "Generate workout plans using AI",
   ai_meal_suggestions: "Get AI-powered meal suggestions",

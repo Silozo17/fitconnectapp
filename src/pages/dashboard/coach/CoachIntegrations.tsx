@@ -9,6 +9,7 @@ import { Video, Calendar, Shield, Apple } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+import { FeatureGate } from "@/components/FeatureGate";
 
 const videoProviders: {
   id: VideoProvider;
@@ -84,6 +85,7 @@ const CoachIntegrations = () => {
       title="Integrations"
       description="Connect video conferencing and calendar services"
     >
+      <FeatureGate feature="custom_integrations">
       <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">Integrations</h1>
@@ -194,6 +196,7 @@ const CoachIntegrations = () => {
           </div>
         </Card>
       </div>
+      </FeatureGate>
     </DashboardLayout>
   );
 };

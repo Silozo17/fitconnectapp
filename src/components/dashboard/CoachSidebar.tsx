@@ -113,9 +113,10 @@ const menuGroups: MenuGroup[] = [
     collapsible: true,
     items: [
       { titleKey: "navigation.coach.boost", icon: Rocket, path: "/dashboard/coach/boost", requiredFeature: "boost_marketing" },
-      { titleKey: "navigation.coach.earnings", icon: DollarSign, path: "/dashboard/coach/earnings" },
+      { titleKey: "navigation.coach.earnings", icon: DollarSign, path: "/dashboard/coach/earnings", requiredFeature: "basic_analytics" },
       { titleKey: "navigation.coach.financial", icon: Receipt, path: "/dashboard/coach/financial" },
       { titleKey: "navigation.coach.reviews", icon: Star, path: "/dashboard/coach/reviews" },
+      { titleKey: "navigation.coach.integrations", icon: Settings, path: "/dashboard/coach/integrations", requiredFeature: "custom_integrations" },
     ],
   },
   {
