@@ -20,8 +20,10 @@ import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useTrainingPlan, useUpdateTrainingPlan } from "@/hooks/useTrainingPlans";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const CoachNutritionBuilder = () => {
+  const { t } = useTranslation("coach");
   const navigate = useNavigate();
   const { planId } = useParams();
   const { user } = useAuth();
@@ -156,17 +158,17 @@ const CoachNutritionBuilder = () => {
     if (updatedDays[selectedDayIndex].meals[mealIndex]) {
       updatedDays[selectedDayIndex].meals[mealIndex].foods.push(mealFood);
       setDays(updatedDays);
-      toast.success(`Added ${food.name} to ${updatedDays[selectedDayIndex].meals[mealIndex].name}`);
+      toast.success(t("workoutBuilder.addedExercise", { exercise: food.name, day: updatedDays[selectedDayIndex].meals[mealIndex].name }));
     }
   };
 
   const handleSave = async () => {
     if (!planName.trim()) {
-      toast.error("Please enter a plan name");
+      toast.error(t("nutritionBuilder.planNameRequired"));
       return;
     }
     if (!coachProfileId) {
-      toast.error("Coach profile not found");
+      toast.error(t("nutritionBuilder.coachNotFound"));
       return;
     }
 
@@ -191,7 +193,7 @@ const CoachNutritionBuilder = () => {
           duration_weeks: durationWeeks,
           content: JSON.parse(JSON.stringify(planContent)) as any,
         });
-        toast.success("Nutrition plan updated!");
+        toast.success(t("nutritionBuilder.planUpdated"));
       } else {
         // Create new plan
         const { error } = await supabase.from("training_plans").insert([{
@@ -205,11 +207,11 @@ const CoachNutritionBuilder = () => {
         }]);
 
         if (error) throw error;
-        toast.success("Nutrition plan saved!");
+        toast.success(t("nutritionBuilder.planSaved"));
       }
       navigate("/dashboard/coach/plans");
     } catch (error) {
-      toast.error("Failed to save plan");
+      toast.error(t("nutritionBuilder.saveFailed"));
     } finally {
       setIsSaving(false);
     }
@@ -217,7 +219,7 @@ const CoachNutritionBuilder = () => {
 
   if (isLoadingPlan) {
     return (
-      <DashboardLayout title="Nutrition Plan Builder" description="Loading plan...">
+      <DashboardLayout title={t("nutritionBuilder.pageTitle")} description={t("nutritionBuilder.loading")}>
         <div className="flex items-center justify-center h-64">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
@@ -227,8 +229,8 @@ const CoachNutritionBuilder = () => {
 
   return (
     <DashboardLayout 
-      title={isEditing ? "Edit Nutrition Plan" : "Nutrition Plan Builder"} 
-      description={isEditing ? "Update your nutrition plan" : "Create a customized nutrition plan"}
+      title={isEditing ? t("nutritionBuilder.editTitle") : t("nutritionBuilder.pageTitle")} 
+      description={isEditing ? t("nutritionBuilder.editDescription") : t("nutritionBuilder.pageDescription")}
     >
       <FeatureGate feature="nutrition_plan_builder">
         {/* Header */}
@@ -239,21 +241,21 @@ const CoachNutritionBuilder = () => {
             </Button>
             <div>
               <h1 className="font-display text-2xl font-bold text-foreground">
-                {isEditing ? "Edit Nutrition Plan" : "Nutrition Plan Builder"}
+                {isEditing ? t("nutritionBuilder.editTitle") : t("nutritionBuilder.pageTitle")}
               </h1>
               <p className="text-muted-foreground">
-                {isEditing ? "Update your meal plan" : "Create customized meal plans with macro tracking"}
+                {isEditing ? t("nutritionBuilder.editDescription") : t("nutritionBuilder.pageDescription")}
               </p>
             </div>
           </div>
           <div className="flex gap-3">
             <Button variant="outline" onClick={() => setCreateFoodOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Add Custom Food
+              {t("nutritionBuilder.addCustomFood")}
             </Button>
             <Button onClick={handleSave} disabled={isSaving}>
               <Save className="h-4 w-4 mr-2" />
-              {isSaving ? "Saving..." : isEditing ? "Update Plan" : "Save Plan"}
+              {isSaving ? t("nutritionBuilder.saving") : isEditing ? t("nutritionBuilder.updatePlan") : t("nutritionBuilder.savePlan")}
             </Button>
           </div>
         </div>
@@ -262,17 +264,17 @@ const CoachNutritionBuilder = () => {
         <div className="card-elevated p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="md:col-span-2 space-y-2">
-              <Label htmlFor="planName">Plan Name *</Label>
+              <Label htmlFor="planName">{t("nutritionBuilder.planName")} *</Label>
               <Input
                 id="planName"
                 value={planName}
                 onChange={(e) => setPlanName(e.target.value)}
-                placeholder="e.g., Weight Loss Meal Plan"
+                placeholder={t("nutritionBuilder.planNamePlaceholder")}
                 className="bg-background border-border"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="duration">Duration (weeks)</Label>
+              <Label htmlFor="duration">{t("nutritionBuilder.durationWeeks")}</Label>
               <Input
                 id="duration"
                 type="number"
@@ -283,11 +285,11 @@ const CoachNutritionBuilder = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label>Description</Label>
+              <Label>{t("nutritionBuilder.description")}</Label>
               <Input
                 value={planDescription}
                 onChange={(e) => setPlanDescription(e.target.value)}
-                placeholder="Brief description..."
+                placeholder={t("nutritionBuilder.descriptionPlaceholder")}
                 className="bg-background border-border"
               />
             </div>
@@ -299,13 +301,13 @@ const CoachNutritionBuilder = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Target className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold text-foreground">Daily Macro Targets</h3>
+              <h3 className="font-semibold text-foreground">{t("nutritionBuilder.dailyMacroTargets")}</h3>
             </div>
             {canUseAI && <AIMacroCalculator onMacrosCalculated={handleMacrosCalculated} />}
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="space-y-2">
-              <Label className="text-primary">Calories</Label>
+              <Label className="text-primary">{t("nutritionBuilder.calories")}</Label>
               <Input
                 type="number"
                 value={targetCalories}
@@ -314,7 +316,7 @@ const CoachNutritionBuilder = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-red-400">Protein (g)</Label>
+              <Label className="text-red-400">{t("nutritionBuilder.proteinG")}</Label>
               <Input
                 type="number"
                 value={targetProtein}
@@ -323,7 +325,7 @@ const CoachNutritionBuilder = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-yellow-400">Carbs (g)</Label>
+              <Label className="text-yellow-400">{t("nutritionBuilder.carbsG")}</Label>
               <Input
                 type="number"
                 value={targetCarbs}
@@ -332,7 +334,7 @@ const CoachNutritionBuilder = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-blue-400">Fat (g)</Label>
+              <Label className="text-blue-400">{t("nutritionBuilder.fatG")}</Label>
               <Input
                 type="number"
                 value={targetFat}
@@ -346,11 +348,11 @@ const CoachNutritionBuilder = () => {
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
           <TabsList className="bg-secondary">
-            <TabsTrigger value="builder">Meal Builder</TabsTrigger>
+            <TabsTrigger value="builder">{t("nutritionBuilder.mealBuilder")}</TabsTrigger>
             {canUseAI && (
               <TabsTrigger value="ai">
                 <Sparkles className="h-4 w-4 mr-2" />
-                AI Suggestions
+                {t("nutritionBuilder.aiSuggestions")}
               </TabsTrigger>
             )}
           </TabsList>
@@ -370,7 +372,7 @@ const CoachNutritionBuilder = () => {
               ))}
               <Button variant="outline" onClick={addDay} className="shrink-0">
                 <Plus className="h-4 w-4 mr-2" />
-                Add Day
+                {t("nutritionBuilder.addDay")}
               </Button>
             </div>
 
@@ -410,7 +412,7 @@ const CoachNutritionBuilder = () => {
                 {/* Add Meal Button */}
                 <Button variant="outline" className="w-full" onClick={addMeal}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Meal
+                  {t("nutritionBuilder.addMeal")}
                 </Button>
               </div>
             </div>

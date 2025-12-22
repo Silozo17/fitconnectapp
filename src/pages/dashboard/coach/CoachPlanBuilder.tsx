@@ -25,8 +25,10 @@ import { Exercise } from "@/hooks/useExercises";
 import { WorkoutPlan } from "@/hooks/useAI";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const CoachPlanBuilder = () => {
+  const { t } = useTranslation("coach");
   const [searchParams] = useSearchParams();
   const { planId } = useParams();
   const navigate = useNavigate();
@@ -99,7 +101,7 @@ const CoachPlanBuilder = () => {
       })),
     }));
     setWorkoutDays(newDays);
-    toast.success("AI plan loaded! Review and customize as needed.");
+    toast.success(t("workoutBuilder.aiPlanLoaded"));
   };
 
   const handleAddDay = () => {
@@ -126,7 +128,7 @@ const CoachPlanBuilder = () => {
 
   const handleAddExerciseToDay = (exercise: Exercise) => {
     if (addingToDay === null) {
-      toast.error("Please select a day first");
+      toast.error(t("workoutBuilder.selectDayFirst"));
       return;
     }
 
@@ -143,17 +145,17 @@ const CoachPlanBuilder = () => {
     const newDays = [...workoutDays];
     newDays[addingToDay].exercises.push(newExercise);
     setWorkoutDays(newDays);
-    toast.success(`Added ${exercise.name} to ${newDays[addingToDay].name}`);
+    toast.success(t("workoutBuilder.addedExercise", { exercise: exercise.name, day: newDays[addingToDay].name }));
   };
 
   const handleSave = async () => {
     if (!coachProfileId) {
-      toast.error("Coach profile not found");
+      toast.error(t("workoutBuilder.coachNotFound"));
       return;
     }
 
     if (!planName.trim()) {
-      toast.error("Please enter a plan name");
+      toast.error(t("workoutBuilder.planNameRequired"));
       return;
     }
 
@@ -183,7 +185,7 @@ const CoachPlanBuilder = () => {
   const canUseAI = hasFeature("ai_workout_generator");
 
   return (
-    <DashboardLayout title="Create Plan" description="Build a new training plan.">
+    <DashboardLayout title={t("workoutBuilder.title")} description={t("workoutBuilder.pageDescription")}>
       <FeatureGate feature="workout_plan_builder">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -195,16 +197,16 @@ const CoachPlanBuilder = () => {
             </Link>
             <div>
               <h1 className="font-display text-2xl font-bold text-foreground">
-                {isEditing ? "Edit Plan" : isNutrition ? "Create Nutrition Plan" : "Create Workout Plan"}
+                {isEditing ? t("workoutBuilder.editPlan") : isNutrition ? t("workoutBuilder.createNutrition") : t("workoutBuilder.createWorkout")}
               </h1>
-              <p className="text-muted-foreground">Design a personalized plan for your clients</p>
+              <p className="text-muted-foreground">{t("workoutBuilder.designPlan")}</p>
             </div>
           </div>
           <div className="flex gap-3">
             {canUseAI && <AIWorkoutGenerator onPlanGenerated={handleAIPlanGenerated} />}
             <Button variant="outline" disabled>
               <Eye className="w-4 h-4 mr-2" />
-              Preview
+              {t("workoutBuilder.preview")}
             </Button>
             <Button onClick={handleSave} disabled={isSaving}>
               {isSaving ? (
@@ -212,7 +214,7 @@ const CoachPlanBuilder = () => {
               ) : (
                 <Save className="w-4 h-4 mr-2" />
               )}
-              {isEditing ? "Update Plan" : "Save Plan"}
+              {isEditing ? t("workoutBuilder.updatePlan") : t("workoutBuilder.savePlan")}
             </Button>
           </div>
         </div>
@@ -222,54 +224,54 @@ const CoachPlanBuilder = () => {
           <div className="lg:col-span-2 space-y-6">
             {/* Basic Info */}
             <div className="card-glow rounded-2xl p-6">
-              <h2 className="font-display font-bold text-foreground mb-4">Plan Details</h2>
+              <h2 className="font-display font-bold text-foreground mb-4">{t("workoutBuilder.planDetails")}</h2>
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="name">Plan Name</Label>
+                  <Label htmlFor="name">{t("workoutBuilder.planName")}</Label>
                   <Input
                     id="name"
                     value={planName}
                     onChange={(e) => setPlanName(e.target.value)}
-                    placeholder="e.g., Beginner Full Body Program"
+                    placeholder={t("workoutBuilder.planNamePlaceholder")}
                     className="mt-1"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description">{t("workoutBuilder.descriptionLabel")}</Label>
                   <Textarea
                     id="description"
                     value={planDescription}
                     onChange={(e) => setPlanDescription(e.target.value)}
-                    placeholder="Describe the goals and structure of this plan..."
+                    placeholder={t("workoutBuilder.descriptionPlaceholder")}
                     className="mt-1"
                     rows={3}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>Duration (weeks)</Label>
+                    <Label>{t("workoutBuilder.durationWeeks")}</Label>
                     <Select value={duration} onValueChange={setDuration}>
                       <SelectTrigger className="mt-1">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="4">4 weeks</SelectItem>
-                        <SelectItem value="6">6 weeks</SelectItem>
-                        <SelectItem value="8">8 weeks</SelectItem>
-                        <SelectItem value="12">12 weeks</SelectItem>
+                        <SelectItem value="4">{t("workoutBuilder.weeks4")}</SelectItem>
+                        <SelectItem value="6">{t("workoutBuilder.weeks6")}</SelectItem>
+                        <SelectItem value="8">{t("workoutBuilder.weeks8")}</SelectItem>
+                        <SelectItem value="12">{t("workoutBuilder.weeks12")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <Label>Difficulty Level</Label>
+                    <Label>{t("workoutBuilder.difficultyLevel")}</Label>
                     <Select value={level} onValueChange={setLevel}>
                       <SelectTrigger className="mt-1">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="beginner">Beginner</SelectItem>
-                        <SelectItem value="intermediate">Intermediate</SelectItem>
-                        <SelectItem value="advanced">Advanced</SelectItem>
+                        <SelectItem value="beginner">{t("workoutBuilder.beginner")}</SelectItem>
+                        <SelectItem value="intermediate">{t("workoutBuilder.intermediate")}</SelectItem>
+                        <SelectItem value="advanced">{t("workoutBuilder.advanced")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -280,10 +282,10 @@ const CoachPlanBuilder = () => {
             {/* Workout Days */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="font-display font-bold text-foreground">Weekly Schedule</h2>
+                <h2 className="font-display font-bold text-foreground">{t("workoutBuilder.weeklySchedule")}</h2>
                 <Button variant="outline" size="sm" onClick={handleAddDay}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Add Day
+                  {t("workoutBuilder.addDay")}
                 </Button>
               </div>
 
@@ -310,7 +312,7 @@ const CoachPlanBuilder = () => {
             {addingToDay !== null && (
               <div className="card-glow rounded-2xl p-4 bg-primary/5 border-primary/20">
                 <p className="text-sm text-primary font-medium">
-                  Adding exercises to: <span className="font-bold">{workoutDays[addingToDay]?.name}</span>
+                  {t("workoutBuilder.addingTo")} <span className="font-bold">{workoutDays[addingToDay]?.name}</span>
                 </p>
               </div>
             )}
@@ -327,14 +329,14 @@ const CoachPlanBuilder = () => {
             <div className="card-glow rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Lightbulb className="w-5 h-5 text-primary" />
-                <h3 className="font-display font-bold text-foreground">Tips</h3>
+                <h3 className="font-display font-bold text-foreground">{t("workoutBuilder.tips")}</h3>
               </div>
               <ul className="text-sm text-muted-foreground space-y-2">
-                <li>• Click a day to start adding exercises</li>
-                <li>• Drag exercises to reorder them</li>
-                <li>• Include rest days for recovery</li>
-                <li>• Consider progressive overload</li>
-                <li>• Balance muscle groups across days</li>
+                <li>• {t("workoutBuilder.tip1")}</li>
+                <li>• {t("workoutBuilder.tip2")}</li>
+                <li>• {t("workoutBuilder.tip3")}</li>
+                <li>• {t("workoutBuilder.tip4")}</li>
+                <li>• {t("workoutBuilder.tip5")}</li>
               </ul>
             </div>
           </div>
