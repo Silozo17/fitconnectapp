@@ -29,7 +29,7 @@ export interface UserConnection {
   };
 }
 
-interface SearchResult {
+export interface SearchResult {
   user_id: string;
   username: string | null;
   display_name: string | null;
@@ -37,7 +37,9 @@ interface SearchResult {
   last_name: string | null;
   avatar_url: string | null;
   profile_image_url: string | null;
-  profile_type: "client" | "coach" | "admin";
+  profile_type: "client" | "coach" | "admin"; // Keep for backward compat
+  profile_types: ("client" | "coach" | "admin")[]; // All roles this user has
+  primary_profile_type: "client" | "coach" | "admin"; // Primary role (coach > client)
   location: string | null;
 }
 
@@ -202,9 +204,21 @@ export const useConnections = () => {
   const searchUsers = async (query: string): Promise<SearchResult[]> => {
     if (!query || query.length < 2) return [];
 
-    const results: SearchResult[] = [];
     const searchTerm = query.toLowerCase();
     const isEmailSearch = query.includes("@");
+
+    // Map to group results by user_id
+    const userMap = new Map<string, {
+      user_id: string;
+      username: string | null;
+      display_name: string | null;
+      first_name: string | null;
+      last_name: string | null;
+      avatar_url: string | null;
+      profile_image_url: string | null;
+      profile_types: ("client" | "coach" | "admin")[];
+      location: string | null;
+    }>();
 
     // If query looks like an email, search by exact email match
     if (isEmailSearch) {
@@ -215,21 +229,35 @@ export const useConnections = () => {
       if (emailResults) {
         emailResults.forEach((r: any) => {
           if (r.user_id !== user?.id) {
-            results.push({
-              user_id: r.user_id,
-              username: r.username,
-              display_name: r.display_name,
-              first_name: r.first_name,
-              last_name: r.last_name,
-              avatar_url: r.avatar_url,
-              profile_image_url: r.profile_image_url,
-              profile_type: r.profile_type as "client" | "coach" | "admin",
-              location: r.location,
-            });
+            const existing = userMap.get(r.user_id);
+            if (existing) {
+              // Add this profile type if not already present
+              if (!existing.profile_types.includes(r.profile_type)) {
+                existing.profile_types.push(r.profile_type);
+              }
+              // Prefer coach data over client data
+              if (r.profile_type === "coach") {
+                existing.display_name = r.display_name || existing.display_name;
+                existing.profile_image_url = r.profile_image_url || existing.profile_image_url;
+                existing.location = r.location || existing.location;
+              }
+            } else {
+              userMap.set(r.user_id, {
+                user_id: r.user_id,
+                username: r.username,
+                display_name: r.display_name,
+                first_name: r.first_name,
+                last_name: r.last_name,
+                avatar_url: r.avatar_url,
+                profile_image_url: r.profile_image_url,
+                profile_types: [r.profile_type as "client" | "coach" | "admin"],
+                location: r.location,
+              });
+            }
           }
         });
       }
-      return results;
+      return consolidateResults(userMap);
     }
 
     // Search clients by username or name
@@ -238,20 +266,27 @@ export const useConnections = () => {
       .select("user_id, username, first_name, last_name, avatar_url, location")
       .or(`username.ilike.%${searchTerm}%,first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%`)
       .neq("user_id", user?.id)
-      .limit(10);
+      .limit(15);
 
     clients?.forEach((c) => {
-      results.push({
-        user_id: c.user_id,
-        username: c.username,
-        display_name: null,
-        first_name: c.first_name,
-        last_name: c.last_name,
-        avatar_url: c.avatar_url,
-        profile_image_url: null,
-        profile_type: "client",
-        location: c.location,
-      });
+      const existing = userMap.get(c.user_id);
+      if (existing) {
+        if (!existing.profile_types.includes("client")) {
+          existing.profile_types.push("client");
+        }
+      } else {
+        userMap.set(c.user_id, {
+          user_id: c.user_id,
+          username: c.username,
+          display_name: null,
+          first_name: c.first_name,
+          last_name: c.last_name,
+          avatar_url: c.avatar_url,
+          profile_image_url: null,
+          profile_types: ["client"],
+          location: c.location,
+        });
+      }
     });
 
     // Search coaches by username or display name
@@ -260,23 +295,69 @@ export const useConnections = () => {
       .select("user_id, username, display_name, profile_image_url, location")
       .or(`username.ilike.%${searchTerm}%,display_name.ilike.%${searchTerm}%`)
       .neq("user_id", user?.id)
-      .limit(10);
+      .limit(15);
 
     coaches?.forEach((c) => {
-      results.push({
-        user_id: c.user_id,
-        username: c.username,
-        display_name: c.display_name,
-        first_name: null,
-        last_name: null,
-        avatar_url: null,
-        profile_image_url: c.profile_image_url,
-        profile_type: "coach",
-        location: c.location,
-      });
+      const existing = userMap.get(c.user_id);
+      if (existing) {
+        if (!existing.profile_types.includes("coach")) {
+          existing.profile_types.push("coach");
+        }
+        // Prefer coach data
+        existing.display_name = c.display_name || existing.display_name;
+        existing.profile_image_url = c.profile_image_url || existing.profile_image_url;
+        existing.location = c.location || existing.location;
+        existing.username = c.username || existing.username;
+      } else {
+        userMap.set(c.user_id, {
+          user_id: c.user_id,
+          username: c.username,
+          display_name: c.display_name,
+          first_name: null,
+          last_name: null,
+          avatar_url: null,
+          profile_image_url: c.profile_image_url,
+          profile_types: ["coach"],
+          location: c.location,
+        });
+      }
     });
 
-    return results;
+    return consolidateResults(userMap);
+  };
+
+  // Helper to consolidate grouped results into final SearchResult array
+  const consolidateResults = (userMap: Map<string, {
+    user_id: string;
+    username: string | null;
+    display_name: string | null;
+    first_name: string | null;
+    last_name: string | null;
+    avatar_url: string | null;
+    profile_image_url: string | null;
+    profile_types: ("client" | "coach" | "admin")[];
+    location: string | null;
+  }>): SearchResult[] => {
+    return Array.from(userMap.values()).map((u) => {
+      // Determine primary profile type: coach > client > admin
+      const primary: "client" | "coach" | "admin" = 
+        u.profile_types.includes("coach") ? "coach" :
+        u.profile_types.includes("client") ? "client" : "admin";
+      
+      return {
+        user_id: u.user_id,
+        username: u.username,
+        display_name: u.display_name,
+        first_name: u.first_name,
+        last_name: u.last_name,
+        avatar_url: u.avatar_url,
+        profile_image_url: u.profile_image_url,
+        profile_type: primary, // backward compat
+        profile_types: u.profile_types,
+        primary_profile_type: primary,
+        location: u.location,
+      };
+    });
   };
 
   // Send connection request

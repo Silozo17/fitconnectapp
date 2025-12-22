@@ -22,6 +22,7 @@ import { QuickSendMetadata } from "@/types/messaging";
 import { Message, getQuickSendMetadata } from "@/hooks/useMessages";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAdminView } from "@/contexts/AdminContext";
 
 interface QuickSendMessageCardProps {
   message: Message;
@@ -84,6 +85,7 @@ const QuickSendMessageCard = ({
 }: QuickSendMessageCardProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { activeProfileType } = useAdminView();
   const [updating, setUpdating] = useState(false);
   
   const metadata = getQuickSendMetadata(message.metadata);
@@ -92,8 +94,8 @@ const QuickSendMessageCard = ({
   const config = itemTypeConfig[metadata.itemType] || itemTypeConfig['package'];
   const Icon = config.icon;
   
-  // Client can respond if: they received the message, it's pending, and they're not the coach
-  const canRespond = !isMine && metadata.status === 'pending';
+  // Client can respond if: they received the message, it's pending, and they're in client view
+  const canRespond = !isMine && metadata.status === 'pending' && activeProfileType === 'client';
   
   const handleAccept = async () => {
     setUpdating(true);
