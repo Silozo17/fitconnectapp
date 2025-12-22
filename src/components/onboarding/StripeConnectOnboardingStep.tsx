@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { CreditCard, ExternalLink, Loader2, CheckCircle, AlertTriangle, Percent } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +25,10 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
   const [showSkipWarning, setShowSkipWarning] = useState(false);
   const [stripeStatus, setStripeStatus] = useState<StripeStatus>("pending");
   const [isReturningFromStripe, setIsReturningFromStripe] = useState(false);
+  
+  // 2-phase skip pattern: pendingSkip triggers navigation after sheet closes
+  const [pendingSkip, setPendingSkip] = useState(false);
+  const skipCalledRef = useRef(false);
 
   // Parse URL params once on mount - not on every render
   useEffect(() => {
@@ -55,6 +59,18 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
       setStripeStatus("connected");
     }
   }, [coachProfile?.stripe_connect_onboarded, stripeStatus]);
+
+  // Phase 2: Execute skip AFTER sheet is fully closed
+  useEffect(() => {
+    if (pendingSkip && !showSkipWarning && !skipCalledRef.current) {
+      skipCalledRef.current = true;
+      // Use queueMicrotask to ensure DOM updates (sheet unmount) are committed
+      queueMicrotask(() => {
+        setStripeStatus("skipped");
+        onSkip();
+      });
+    }
+  }, [pendingSkip, showSkipWarning, onSkip]);
 
   // Get current commission rate based on tier
   const rawTier = coachProfile?.subscription_tier || "free";
@@ -125,17 +141,23 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
     setShowSkipWarning(true);
   };
 
-  const handleConfirmSkip = () => {
-    // Set status to skipped FIRST - this disables all Stripe logic immediately
-    setStripeStatus("skipped");
+  // Phase 1: Only close the sheet and set pending flag - DO NOT navigate here
+  const handleConfirmSkip = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Close sheet first, set pending flag - navigation happens in useEffect
+    setPendingSkip(true);
     setShowSkipWarning(false);
-    // Navigate immediately - no setTimeout needed
-    onSkip();
   };
 
-  // Early return when skipped - prevents any Stripe UI from rendering
+  // Show minimal loading UI when skipped - prevents unmount-before-navigation issues
   if (stripeStatus === "skipped") {
-    return null;
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
   }
 
   if (stripeStatus === "connected" || coachProfile?.stripe_connect_onboarded) {

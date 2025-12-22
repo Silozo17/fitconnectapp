@@ -19,7 +19,7 @@ interface OnboardingConfirmSheetProps {
   variant?: "warning" | "info" | "destructive";
   confirmLabel: string;
   cancelLabel: string;
-  onConfirm: () => void;
+  onConfirm: (e: React.MouseEvent) => void;
   onCancel: () => void;
   confirmLoading?: boolean;
 }
@@ -87,7 +87,11 @@ export function OnboardingConfirmSheet({
         <SheetFooter className="flex-col gap-2 mt-6 sm:flex-col">
           <Button
             type="button"
-            onClick={onConfirm}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onConfirm(e);
+            }}
             variant={styles.confirmVariant}
             className="w-full"
             disabled={confirmLoading}
