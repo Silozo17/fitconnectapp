@@ -303,6 +303,17 @@ const CoachOnboarding = () => {
     navigate("/dashboard/coach");
   }, [isNavigating, navigate]);
 
+  // Fail-safe: if isNavigating gets stuck, force unlock after 2 seconds
+  useEffect(() => {
+    if (isNavigating) {
+      const failSafe = setTimeout(() => {
+        console.warn("[CoachOnboarding] Navigation fail-safe triggered - forcing unlock");
+        setIsNavigating(false);
+      }, 2000);
+      return () => clearTimeout(failSafe);
+    }
+  }, [isNavigating]);
+
   const handleComplete = async () => {
     if (!user) return;
 

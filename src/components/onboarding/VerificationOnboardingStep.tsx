@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import DOMPurify from "dompurify";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -105,10 +105,25 @@ export default function VerificationOnboardingStep({
   const hasRequiredDocs = hasIdentity && hasCertification;
   const hasAnyDocs = documents.length > 0;
 
-  // Notify parent of state changes
-  if (onStateChange) {
-    onStateChange({ hasRequiredDocs, hasAnyDocs, isSubmitting: submitMutation.isPending });
-  }
+  // Track previous state to avoid unnecessary calls
+  const prevStateRef = useRef<{ hasRequiredDocs: boolean; hasAnyDocs: boolean; isSubmitting: boolean }>({
+    hasRequiredDocs: false,
+    hasAnyDocs: false,
+    isSubmitting: false,
+  });
+
+  // Notify parent of state changes - MUST be in useEffect to avoid render-loop freezes
+  useEffect(() => {
+    const isSubmitting = submitMutation.isPending;
+    if (
+      prevStateRef.current.hasRequiredDocs !== hasRequiredDocs ||
+      prevStateRef.current.hasAnyDocs !== hasAnyDocs ||
+      prevStateRef.current.isSubmitting !== isSubmitting
+    ) {
+      prevStateRef.current = { hasRequiredDocs, hasAnyDocs, isSubmitting };
+      onStateChange?.({ hasRequiredDocs, hasAnyDocs, isSubmitting });
+    }
+  }, [hasRequiredDocs, hasAnyDocs, submitMutation.isPending, onStateChange]);
 
   // Expose submit function to parent
   const handleSubmit = async () => {
