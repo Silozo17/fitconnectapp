@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -58,19 +58,66 @@ export function OnboardingLayout({
   hideProgress = false,
 }: OnboardingLayoutProps) {
   const progressPercent = totalSteps > 0 ? ((currentStep + 1) / totalSteps) * 100 : 0;
+  const headerRef = useRef<HTMLElement>(null);
+  const footerRef = useRef<HTMLElement>(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const [footerHeight, setFooterHeight] = useState(0);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  // Measure header and footer heights
+  useEffect(() => {
+    const updateHeights = () => {
+      if (headerRef.current) {
+        setHeaderHeight(headerRef.current.offsetHeight);
+      }
+      if (footerRef.current) {
+        setFooterHeight(footerRef.current.offsetHeight);
+      }
+    };
+
+    updateHeights();
+    window.addEventListener('resize', updateHeights);
+    return () => window.removeEventListener('resize', updateHeights);
+  }, [hideProgress, title, subtitle]);
+
+  // Handle keyboard appearance using visualViewport API
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+
+    const handleResize = () => {
+      // Keyboard is likely visible if viewport height is significantly less than window height
+      const heightDiff = window.innerHeight - viewport.height;
+      const isKeyboardVisible = heightDiff > 150; // Threshold for keyboard detection
+      setKeyboardVisible(isKeyboardVisible);
+    };
+
+    viewport.addEventListener('resize', handleResize);
+    viewport.addEventListener('scroll', handleResize);
+
+    return () => {
+      viewport.removeEventListener('resize', handleResize);
+      viewport.removeEventListener('scroll', handleResize);
+    };
+  }, []);
 
   return (
     <div 
-      className="flex flex-col min-h-[100dvh] bg-background"
+      className="fixed inset-0 bg-background flex flex-col"
       style={{
-        // iOS safe area padding
-        paddingTop: 'env(safe-area-inset-top)',
+        // iOS safe area padding on sides
         paddingLeft: 'env(safe-area-inset-left)',
         paddingRight: 'env(safe-area-inset-right)',
       }}
     >
       {/* Fixed Header */}
-      <header className="flex-shrink-0 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header 
+        ref={headerRef}
+        className="flex-shrink-0 border-b border-border bg-background z-10"
+        style={{
+          paddingTop: 'env(safe-area-inset-top)',
+        }}
+      >
         {/* Progress Bar */}
         {!hideProgress && (
           <div className="px-4 pt-3">
@@ -117,46 +164,52 @@ export function OnboardingLayout({
         </div>
       </header>
 
-      {/* Scrollable Content Area */}
+      {/* Scrollable Content Area - takes remaining space */}
       <main 
         className={cn(
-          "flex-1 overflow-y-auto",
+          "flex-1 overflow-y-auto overscroll-contain",
           "px-4 py-6",
           contentClassName
         )}
       >
-        {children}
+        <div className="max-w-lg mx-auto">
+          {children}
+        </div>
       </main>
 
-      {/* Sticky Footer */}
+      {/* Fixed Footer - adjusts for keyboard */}
       <footer 
-        className="flex-shrink-0 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+        ref={footerRef}
+        className={cn(
+          "flex-shrink-0 border-t border-border bg-background z-10",
+          "transition-transform duration-200 ease-out"
+        )}
         style={{
-          paddingBottom: 'max(env(safe-area-inset-bottom), 1rem)',
+          paddingBottom: keyboardVisible ? '0.5rem' : 'max(env(safe-area-inset-bottom), 1rem)',
+          // When keyboard is visible, footer stays at visual viewport bottom
+          transform: keyboardVisible ? `translateY(0)` : undefined,
         }}
       >
-        <div className="px-4 pt-4">
+        <div className="px-4 pt-4 max-w-lg mx-auto w-full">
           {footer ? (
             footer
           ) : footerActions ? (
-            <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
-              {footerActions.secondary ? (
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              {footerActions.secondary && (
                 <Button
                   variant="outline"
                   onClick={footerActions.secondary.onClick}
                   disabled={footerActions.secondary.disabled}
-                  className="sm:order-1"
+                  className="w-full sm:w-auto"
                 >
                   {footerActions.secondary.label}
                 </Button>
-              ) : (
-                <div className="hidden sm:block" /> // Spacer for alignment
               )}
               {footerActions.primary && (
                 <Button
                   onClick={footerActions.primary.onClick}
                   disabled={footerActions.primary.disabled || footerActions.primary.loading}
-                  className="sm:order-2"
+                  className="w-full sm:w-auto"
                 >
                   {footerActions.primary.loading ? 'Loading...' : footerActions.primary.label}
                 </Button>
