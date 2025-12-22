@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
@@ -7,19 +7,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
-import { Dumbbell, ArrowRight, ArrowLeft, Check, Loader2, Crown, Zap, Sparkles, Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { Check, Loader2, Crown, Zap, Sparkles, Star } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { toast } from "sonner";
 import { ProfileImageUpload } from "@/components/shared/ProfileImageUpload";
 import { LocationAutocomplete } from "@/components/shared/LocationAutocomplete";
 import StripeConnectOnboardingStep from "@/components/onboarding/StripeConnectOnboardingStep";
-import IntegrationsOnboardingStep from "@/components/onboarding/IntegrationsOnboardingStep";
+import IntegrationsOnboardingStep, { useIntegrationsState } from "@/components/onboarding/IntegrationsOnboardingStep";
 import DualAccountStep from "@/components/onboarding/DualAccountStep";
 import VerificationOnboardingStep from "@/components/onboarding/VerificationOnboardingStep";
+import { OnboardingLayout } from "@/components/onboarding/OnboardingLayout";
 import { COACH_TYPES, COACH_TYPE_CATEGORIES, getCoachTypesByCategory } from "@/constants/coachTypes";
 import { SUBSCRIPTION_TIERS, TierKey } from "@/lib/stripe-config";
+import { useTranslation } from "react-i18next";
 
 const STEPS = [
   "Basic Info",
@@ -70,6 +71,7 @@ interface LocationData {
 }
 
 const CoachOnboarding = () => {
+  const { t } = useTranslation('common');
   const [searchParams] = useSearchParams();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -77,6 +79,15 @@ const CoachOnboarding = () => {
   const [coachProfileId, setCoachProfileId] = useState<string | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  // Step component state
+  const [integrationsState, setIntegrationsState] = useState({ hasAnyConnection: false });
+  const [dualAccountState, setDualAccountState] = useState({ selectedOption: null as 'both' | 'coach_only' | null, isCreating: false });
+  const [verificationState, setVerificationState] = useState({ hasRequiredDocs: false, hasAnyDocs: false, isSubmitting: false });
+  
+  // Refs for step actions
+  const dualAccountActionRef = useRef<(() => Promise<boolean>) | null>(null);
+  const verificationSubmitRef = useRef<(() => Promise<void>) | null>(null);
 
   const [formData, setFormData] = useState({
     displayName: "",
@@ -199,7 +210,7 @@ const CoachOnboarding = () => {
     setFormData((prev) => ({ ...prev, primaryCoachType: typeId }));
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     // Validate specialties step - require at least one specialty
     if (currentStep === 1 && formData.coachTypes.length === 0) {
       toast.error("Please select at least one specialty");
@@ -216,6 +227,18 @@ const CoachOnboarding = () => {
         toast.error("Please enable at least one session type (online or in-person)");
         return;
       }
+    }
+
+    // Handle dual account step
+    if (currentStep === 6 && dualAccountActionRef.current) {
+      const success = await dualAccountActionRef.current();
+      if (!success) return;
+      setFormData(prev => ({ ...prev, alsoClient: dualAccountState.selectedOption === 'both' }));
+    }
+
+    // Handle verification step
+    if (currentStep === 7 && verificationSubmitRef.current && verificationState.hasAnyDocs) {
+      await verificationSubmitRef.current();
     }
     
     if (currentStep < STEPS.length - 1) {
@@ -296,11 +319,6 @@ const CoachOnboarding = () => {
     }
   };
 
-  const handleDualAccountComplete = (createClientAccount: boolean) => {
-    setFormData(prev => ({ ...prev, alsoClient: createClientAccount }));
-    handleNext();
-  };
-
   if (isCheckingProfile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -309,7 +327,433 @@ const CoachOnboarding = () => {
     );
   }
 
-  const progress = ((currentStep + 1) / STEPS.length) * 100;
+  // Determine footer actions based on current step
+  const getFooterActions = () => {
+    const baseSecondary = currentStep > 0 ? { label: "Back", onClick: handleBack } : undefined;
+
+    switch (currentStep) {
+      // Steps 0-3: Basic navigation
+      case 0:
+      case 1:
+      case 2:
+      case 3:
+        return {
+          primary: { label: "Next", onClick: handleNext },
+          secondary: baseSecondary,
+        };
+
+      // Step 4: Stripe - handled by component, skip navigation for now
+      case 4:
+        return {
+          primary: { label: "Next", onClick: handleNext },
+          secondary: { label: "Skip", onClick: handleNext },
+        };
+
+      // Step 5: Integrations
+      case 5:
+        return {
+          primary: { 
+            label: integrationsState.hasAnyConnection ? "Continue" : "Skip", 
+            onClick: handleNext 
+          },
+          secondary: baseSecondary,
+        };
+
+      // Step 6: Dual Account
+      case 6:
+        return {
+          primary: { 
+            label: "Continue", 
+            onClick: handleNext,
+            disabled: !dualAccountState.selectedOption,
+            loading: dualAccountState.isCreating,
+          },
+          secondary: baseSecondary,
+        };
+
+      // Step 7: Verification
+      case 7:
+        return {
+          primary: { 
+            label: verificationState.hasAnyDocs ? "Submit & Continue" : "Skip", 
+            onClick: handleNext,
+            loading: verificationState.isSubmitting,
+          },
+          secondary: baseSecondary,
+        };
+
+      // Step 8: Choose Plan
+      case 8:
+        return {
+          primary: { 
+            label: "Complete Setup", 
+            onClick: handleComplete,
+            loading: isSubmitting,
+          },
+          secondary: baseSecondary,
+        };
+
+      default:
+        return undefined;
+    }
+  };
+
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 0:
+        return (
+          <div className="space-y-4">
+            <div>
+              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-1">
+                Tell us about yourself
+              </h2>
+              <p className="text-muted-foreground text-sm">This will appear on your public profile.</p>
+            </div>
+
+            {/* Profile Image Upload */}
+            <div>
+              <Label className="text-foreground mb-3 block">Profile Photo</Label>
+              <ProfileImageUpload
+                currentImageUrl={formData.profileImageUrl}
+                userId={user?.id || ""}
+                displayName={formData.displayName}
+                onImageChange={(url) => handleInputChange("profileImageUrl", url || "")}
+                size="lg"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="displayName" className="text-foreground text-sm">Display Name</Label>
+              <Input
+                id="displayName"
+                value={formData.displayName}
+                onChange={(e) => handleInputChange("displayName", e.target.value)}
+                className="mt-1.5 bg-secondary border-border text-foreground h-9 sm:h-10"
+                placeholder="Coach Mike"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="bio" className="text-foreground text-sm">Bio</Label>
+              <Textarea
+                id="bio"
+                value={formData.bio}
+                onChange={(e) => handleInputChange("bio", e.target.value)}
+                className="mt-1.5 bg-secondary border-border text-foreground min-h-24 sm:min-h-32"
+                placeholder="Tell potential clients about your background, experience, and coaching philosophy..."
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="experience" className="text-foreground text-sm">Years of Experience</Label>
+              <Input
+                id="experience"
+                type="number"
+                value={formData.experienceYears}
+                onChange={(e) => handleInputChange("experienceYears", e.target.value)}
+                className="mt-1.5 bg-secondary border-border text-foreground w-full sm:w-32 h-9 sm:h-10"
+                placeholder="5"
+              />
+            </div>
+          </div>
+        );
+
+      case 1:
+        return (
+          <div className="space-y-4">
+            <div>
+              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-1">
+                What do you specialize in?
+              </h2>
+              <p className="text-muted-foreground text-sm">Select all that apply. Click the star to set your primary specialty.</p>
+            </div>
+
+            {/* Selected specialties with primary indicator - fixed height container */}
+            <div 
+              className="h-[88px] transition-opacity duration-200 overflow-hidden"
+              style={{ opacity: formData.coachTypes.length > 0 ? 1 : 0 }}
+              aria-hidden={formData.coachTypes.length === 0}
+            >
+              <div className="p-3 sm:p-4 rounded-xl bg-secondary/50 border border-border h-full">
+                <p className="text-xs sm:text-sm text-muted-foreground mb-2">Your selected specialties:</p>
+                <div className="flex flex-wrap gap-1.5 sm:gap-2 overflow-hidden">
+                  {formData.coachTypes.slice(0, 5).map((typeId) => {
+                    const type = COACH_TYPES.find(t => t.id === typeId);
+                    const isPrimary = formData.primaryCoachType === typeId;
+                    if (!type) return null;
+                    return (
+                      <button
+                        key={typeId}
+                        type="button"
+                        onClick={() => handleSetPrimary(typeId)}
+                        className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm transition-all ${
+                          isPrimary 
+                            ? "bg-primary text-primary-foreground" 
+                            : "bg-secondary text-foreground hover:bg-secondary/80"
+                        }`}
+                      >
+                        {isPrimary && <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current" />}
+                        {type.label}
+                        {isPrimary && <span className="text-[10px] sm:text-xs opacity-80">(Primary)</span>}
+                      </button>
+                    );
+                  })}
+                  {formData.coachTypes.length > 5 && (
+                    <span className="inline-flex items-center px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm bg-muted text-muted-foreground">
+                      +{formData.coachTypes.length - 5} more
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-2">
+              {COACH_TYPE_CATEGORIES.map((category) => {
+                const CategoryIcon = category.icon;
+                const typesInCategory = getCoachTypesByCategory(category.id);
+                
+                return (
+                  <div key={category.id}>
+                    <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                      <CategoryIcon className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                      <h3 className="font-medium text-foreground text-sm">{category.label}</h3>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {typesInCategory.map((type) => {
+                        const IconComponent = type.icon;
+                        const isSelected = formData.coachTypes.includes(type.id);
+                        const isPrimary = formData.primaryCoachType === type.id;
+                        return (
+                          <button
+                            key={type.id}
+                            type="button"
+                            onClick={() => handleMultiSelect("coachTypes", type.id)}
+                            className={`p-2.5 sm:p-3 rounded-lg border-2 transition-all text-left flex items-center gap-2 ${
+                              isSelected
+                                ? isPrimary 
+                                  ? "border-primary bg-primary/20" 
+                                  : "border-primary bg-primary/10"
+                                : "border-border hover:border-muted-foreground"
+                            }`}
+                          >
+                            <IconComponent className={`w-4 h-4 sm:w-5 sm:h-5 shrink-0 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
+                            <span className={`text-xs sm:text-sm flex-1 ${isSelected ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+                              {type.label}
+                            </span>
+                            {isPrimary && (
+                              <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary fill-primary shrink-0" />
+                            )}
+                            {isSelected && !isPrimary && (
+                              <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary ml-auto shrink-0" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+
+      case 2:
+        return (
+          <div className="space-y-4">
+            <div>
+              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-1">
+                Set your pricing
+              </h2>
+              <p className="text-muted-foreground text-sm">How much do you charge per session?</p>
+            </div>
+
+            <div>
+              <Label htmlFor="hourlyRate" className="text-foreground text-sm">Hourly Rate (£)</Label>
+              <Input
+                id="hourlyRate"
+                type="number"
+                value={formData.hourlyRate}
+                onChange={(e) => handleInputChange("hourlyRate", e.target.value)}
+                className="mt-1.5 bg-secondary border-border text-foreground w-full sm:w-40 h-9 sm:h-10"
+                placeholder="50"
+              />
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2">
+                You can offer packages and discounts later in your dashboard.
+              </p>
+            </div>
+          </div>
+        );
+
+      case 3:
+        return (
+          <div className="space-y-4">
+            <div>
+              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-1">
+                Where do you coach?
+              </h2>
+              <p className="text-muted-foreground text-sm">Let clients know how they can work with you.</p>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 sm:p-4 rounded-xl bg-secondary">
+                <div>
+                  <p className="font-medium text-foreground text-sm">Online Coaching</p>
+                  <p className="text-xs text-muted-foreground">Video calls, remote training</p>
+                </div>
+                <Switch
+                  checked={formData.onlineAvailable}
+                  onCheckedChange={(checked) => handleInputChange("onlineAvailable", checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-3 sm:p-4 rounded-xl bg-secondary">
+                <div>
+                  <p className="font-medium text-foreground text-sm">In-Person Sessions</p>
+                  <p className="text-xs text-muted-foreground">Face-to-face training</p>
+                </div>
+                <Switch
+                  checked={formData.inPersonAvailable}
+                  onCheckedChange={(checked) => handleInputChange("inPersonAvailable", checked)}
+                />
+              </div>
+            </div>
+
+            {/* Location - Required for in-person */}
+            {formData.inPersonAvailable && (
+              <div>
+                <Label className="text-foreground text-sm">
+                  Location <span className="text-destructive">*</span>
+                </Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Select your city so clients can find you
+                </p>
+                <LocationAutocomplete
+                  value={formData.location}
+                  onLocationChange={handleLocationChange}
+                  placeholder="Search for your city..."
+                  required={formData.inPersonAvailable}
+                />
+              </div>
+            )}
+          </div>
+        );
+
+      case 4:
+        return coachProfileId ? (
+          <StripeConnectOnboardingStep
+            coachId={coachProfileId}
+            onComplete={handleNext}
+            onSkip={handleNext}
+          />
+        ) : null;
+
+      case 5:
+        return coachProfileId ? (
+          <IntegrationsOnboardingStep
+            coachId={coachProfileId}
+            onStateChange={setIntegrationsState}
+          />
+        ) : null;
+
+      case 6:
+        return coachProfileId ? (
+          <DualAccountStep
+            coachId={coachProfileId}
+            onStateChange={setDualAccountState}
+            onActionRef={dualAccountActionRef}
+          />
+        ) : null;
+
+      case 7:
+        return coachProfileId ? (
+          <VerificationOnboardingStep
+            coachId={coachProfileId}
+            onStateChange={setVerificationState}
+            onSubmitRef={verificationSubmitRef}
+          />
+        ) : null;
+
+      case 8:
+        return (
+          <div className="space-y-4">
+            <div className="text-center">
+              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-1">
+                Choose your plan
+              </h2>
+              <p className="text-muted-foreground text-sm">Swipe to browse. Upgrade anytime.</p>
+            </div>
+
+            <Carousel
+              opts={{ align: "center", loop: true }}
+              className="w-full"
+            >
+              <CarouselContent className="-ml-2">
+                {getDisplayableTiers().map((tier) => {
+                  const Icon = tier.icon;
+                  const isSelected = formData.subscriptionTier === tier.id;
+                  return (
+                    <CarouselItem key={tier.id} className="pl-2 basis-[85%] sm:basis-1/2">
+                      <button
+                        type="button"
+                        onClick={() => handleInputChange("subscriptionTier", tier.id)}
+                        className={`w-full h-full p-4 rounded-xl border-2 transition-all text-left relative ${
+                          isSelected ? "border-primary bg-primary/10" : "border-border hover:border-muted-foreground"
+                        }`}
+                      >
+                        {tier.popular && (
+                          <span className="absolute -top-2 right-3 px-2 py-0.5 bg-accent text-accent-foreground text-xs font-bold rounded-full">
+                            Popular
+                          </span>
+                        )}
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                            isSelected ? "bg-primary" : "bg-secondary"
+                          }`}>
+                            <Icon className={`w-5 h-5 ${isSelected ? "text-primary-foreground" : "text-muted-foreground"}`} />
+                          </div>
+                          <div>
+                            <h3 className="font-display font-bold text-foreground">{tier.name}</h3>
+                            <span className="text-lg font-bold text-primary">{tier.price}<span className="text-xs text-muted-foreground">/mo</span></span>
+                          </div>
+                          {isSelected && <Check className="w-5 h-5 text-primary ml-auto" />}
+                        </div>
+                        <p className="text-muted-foreground text-xs mb-2">{tier.description}</p>
+                        <ul className="space-y-0.5">
+                          {tier.features.slice(0, 3).map((feature, i) => (
+                            <li key={i} className="text-xs text-muted-foreground flex items-center gap-1.5">
+                              <Check className="w-3 h-3 text-primary shrink-0" />
+                              <span className="truncate">{feature}</span>
+                            </li>
+                          ))}
+                          {tier.features.length > 3 && (
+                            <li className="text-xs text-primary">+{tier.features.length - 3} more</li>
+                          )}
+                        </ul>
+                      </button>
+                    </CarouselItem>
+                  );
+                })}
+              </CarouselContent>
+            </Carousel>
+
+            {/* Dot indicators */}
+            <div className="flex justify-center gap-1.5 pt-2">
+              {getDisplayableTiers().map((tier) => (
+                <div
+                  key={tier.id}
+                  className={`w-2 h-2 rounded-full transition-colors ${
+                    formData.subscriptionTier === tier.id ? "bg-primary" : "bg-border"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
 
   return (
     <>
@@ -318,428 +762,20 @@ const CoachOnboarding = () => {
         <meta name="description" content="Create your coaching profile to start connecting with clients." />
       </Helmet>
 
-      <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="border-b border-border shrink-0">
-          <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary flex items-center justify-center">
-                <Dumbbell className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
-              </div>
-              <span className="font-display font-bold text-lg sm:text-xl text-foreground">FitConnect</span>
-            </div>
-            <Button variant="ghost" size="sm" onClick={handleSkip} className="text-muted-foreground text-sm">
-              Skip for now
-            </Button>
-          </div>
-        </div>
-
-        {/* Progress */}
-        <div className="container mx-auto px-4 py-3 max-w-2xl shrink-0">
-          <div className="mb-1.5 flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Step {currentStep + 1} of {STEPS.length}</span>
-            <span className="text-foreground font-medium text-sm">{STEPS[currentStep]}</span>
-          </div>
-          <Progress value={progress} className="h-1.5" />
-        </div>
-
-        {/* Form Content */}
-        <div className="container mx-auto px-4 py-3 max-w-2xl flex-1 min-h-0 overflow-hidden flex flex-col">
-          <div className="card-elevated p-4 sm:p-6 flex-1 min-h-0 flex flex-col overflow-hidden">
-            {/* Step 1: Basic Info */}
-            {currentStep === 0 && (
-              <div className="flex flex-col h-full">
-                <div className="flex-1 min-h-0 overflow-y-auto space-y-4">
-                  <div>
-                    <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-1">
-                      Tell us about yourself
-                    </h2>
-                    <p className="text-muted-foreground text-sm">This will appear on your public profile.</p>
-                  </div>
-
-                {/* Profile Image Upload */}
-                <div>
-                  <Label className="text-foreground mb-3 block">Profile Photo</Label>
-                  <ProfileImageUpload
-                    currentImageUrl={formData.profileImageUrl}
-                    userId={user?.id || ""}
-                    displayName={formData.displayName}
-                    onImageChange={(url) => handleInputChange("profileImageUrl", url || "")}
-                    size="lg"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="displayName" className="text-foreground">Display Name</Label>
-                  <Input
-                    id="displayName"
-                    value={formData.displayName}
-                    onChange={(e) => handleInputChange("displayName", e.target.value)}
-                    className="mt-1.5 bg-secondary border-border text-foreground"
-                    placeholder="Coach Mike"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="bio" className="text-foreground">Bio</Label>
-                  <Textarea
-                    id="bio"
-                    value={formData.bio}
-                    onChange={(e) => handleInputChange("bio", e.target.value)}
-                    className="mt-1.5 bg-secondary border-border text-foreground min-h-32"
-                    placeholder="Tell potential clients about your background, experience, and coaching philosophy..."
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="experience" className="text-foreground">Years of Experience</Label>
-                  <Input
-                    id="experience"
-                    type="number"
-                    value={formData.experienceYears}
-                    onChange={(e) => handleInputChange("experienceYears", e.target.value)}
-                    className="mt-1.5 bg-secondary border-border text-foreground w-full sm:w-32"
-                    placeholder="5"
-                  />
-                </div>
-                </div>
-              </div>
-            )}
-
-            {/* Step 2: Specialties */}
-            {currentStep === 1 && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-                    What do you specialize in?
-                  </h2>
-                  <p className="text-muted-foreground">Select all that apply. Click the star to set your primary specialty.</p>
-                </div>
-
-                {/* Selected specialties with primary indicator - fixed height container */}
-                <div 
-                  className="h-[88px] transition-opacity duration-200 overflow-hidden"
-                  style={{ opacity: formData.coachTypes.length > 0 ? 1 : 0 }}
-                  aria-hidden={formData.coachTypes.length === 0}
-                >
-                  <div className="p-4 rounded-xl bg-secondary/50 border border-border h-full">
-                    <p className="text-sm text-muted-foreground mb-2">Your selected specialties:</p>
-                    <div className="flex flex-wrap gap-2 overflow-hidden">
-                      {formData.coachTypes.slice(0, 5).map((typeId) => {
-                        const type = COACH_TYPES.find(t => t.id === typeId);
-                        const isPrimary = formData.primaryCoachType === typeId;
-                        if (!type) return null;
-                        return (
-                          <button
-                            key={typeId}
-                            type="button"
-                            onClick={() => handleSetPrimary(typeId)}
-                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-all ${
-                              isPrimary 
-                                ? "bg-primary text-primary-foreground" 
-                                : "bg-secondary text-foreground hover:bg-secondary/80"
-                            }`}
-                          >
-                            {isPrimary && <Star className="w-3.5 h-3.5 fill-current" />}
-                            {type.label}
-                            {isPrimary && <span className="text-xs opacity-80">(Primary)</span>}
-                          </button>
-                        );
-                      })}
-                      {formData.coachTypes.length > 5 && (
-                        <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm bg-muted text-muted-foreground">
-                          +{formData.coachTypes.length - 5} more
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-6 max-h-[40vh] overflow-y-auto pr-2">
-                  {COACH_TYPE_CATEGORIES.map((category) => {
-                    const CategoryIcon = category.icon;
-                    const typesInCategory = getCoachTypesByCategory(category.id);
-                    
-                    return (
-                      <div key={category.id}>
-                        <div className="flex items-center gap-2 mb-3">
-                          <CategoryIcon className="w-5 h-5 text-primary" />
-                          <h3 className="font-medium text-foreground">{category.label}</h3>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          {typesInCategory.map((type) => {
-                            const IconComponent = type.icon;
-                            const isSelected = formData.coachTypes.includes(type.id);
-                            const isPrimary = formData.primaryCoachType === type.id;
-                            return (
-                              <button
-                                key={type.id}
-                                type="button"
-                                onClick={() => handleMultiSelect("coachTypes", type.id)}
-                                className={`p-3 rounded-lg border-2 transition-all text-left flex items-center gap-2 ${
-                                  isSelected
-                                    ? isPrimary 
-                                      ? "border-primary bg-primary/20" 
-                                      : "border-primary bg-primary/10"
-                                    : "border-border hover:border-muted-foreground"
-                                }`}
-                              >
-                                <IconComponent className={`w-5 h-5 shrink-0 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
-                                <span className={`text-sm flex-1 ${isSelected ? "text-foreground font-medium" : "text-muted-foreground"}`}>
-                                  {type.label}
-                                </span>
-                                {isPrimary && (
-                                  <Star className="w-4 h-4 text-primary fill-primary shrink-0" />
-                                )}
-                                {isSelected && !isPrimary && (
-                                  <Check className="w-4 h-4 text-primary ml-auto shrink-0" />
-                                )}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Step 3: Services & Pricing */}
-            {currentStep === 2 && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-                    Set your pricing
-                  </h2>
-                  <p className="text-muted-foreground">How much do you charge per session?</p>
-                </div>
-
-                <div>
-                  <Label htmlFor="hourlyRate" className="text-foreground">Hourly Rate (£)</Label>
-                  <Input
-                    id="hourlyRate"
-                    type="number"
-                    value={formData.hourlyRate}
-                    onChange={(e) => handleInputChange("hourlyRate", e.target.value)}
-                    className="mt-1.5 bg-secondary border-border text-foreground w-full sm:w-40"
-                    placeholder="50"
-                  />
-                  <p className="text-sm text-muted-foreground mt-2">
-                    You can offer packages and discounts later in your dashboard.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Step 4: Availability */}
-            {currentStep === 3 && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-                    Where do you coach?
-                  </h2>
-                  <p className="text-muted-foreground">Let clients know how they can work with you.</p>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-secondary">
-                    <div>
-                      <p className="font-medium text-foreground">Online Coaching</p>
-                      <p className="text-sm text-muted-foreground">Video calls, remote training</p>
-                    </div>
-                    <Switch
-                      checked={formData.onlineAvailable}
-                      onCheckedChange={(checked) => handleInputChange("onlineAvailable", checked)}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-secondary">
-                    <div>
-                      <p className="font-medium text-foreground">In-Person Sessions</p>
-                      <p className="text-sm text-muted-foreground">Face-to-face training</p>
-                    </div>
-                    <Switch
-                      checked={formData.inPersonAvailable}
-                      onCheckedChange={(checked) => handleInputChange("inPersonAvailable", checked)}
-                    />
-                  </div>
-                </div>
-
-                {/* Location - Required for in-person */}
-                {formData.inPersonAvailable && (
-                  <div>
-                    <Label className="text-foreground">
-                      Location <span className="text-destructive">*</span>
-                    </Label>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Select your city so clients can find you
-                    </p>
-                    <LocationAutocomplete
-                      value={formData.location}
-                      onLocationChange={handleLocationChange}
-                      placeholder="Search for your city..."
-                      required={formData.inPersonAvailable}
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Step 5: Connect Stripe */}
-            {currentStep === 4 && coachProfileId && (
-              <StripeConnectOnboardingStep
-                coachId={coachProfileId}
-                onComplete={handleNext}
-                onSkip={handleNext}
-              />
-            )}
-
-            {/* Step 6: Integrations */}
-            {currentStep === 5 && coachProfileId && (
-              <IntegrationsOnboardingStep
-                coachId={coachProfileId}
-                onComplete={handleNext}
-                onSkip={handleNext}
-              />
-            )}
-
-            {/* Step 7: Dual Account */}
-            {currentStep === 6 && coachProfileId && (
-              <DualAccountStep
-                coachId={coachProfileId}
-                onComplete={handleDualAccountComplete}
-                onBack={handleBack}
-              />
-            )}
-
-            {/* Step 8: Verification */}
-            {currentStep === 7 && coachProfileId && (
-              <VerificationOnboardingStep
-                coachId={coachProfileId}
-                onComplete={handleNext}
-                onSkip={handleNext}
-              />
-            )}
-
-            {/* Step 9: Subscription Tier - Carousel */}
-            {currentStep === 8 && (
-              <div className="flex flex-col h-full">
-                <div className="text-center mb-4 shrink-0">
-                  <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-1">
-                    Choose your plan
-                  </h2>
-                  <p className="text-muted-foreground text-sm">Swipe to browse. Upgrade anytime.</p>
-                </div>
-
-                <div className="flex-1 min-h-0 flex items-center overflow-hidden">
-                  <Carousel
-                    opts={{ align: "center", loop: true }}
-                    className="w-full"
-                  >
-                    <CarouselContent className="-ml-2">
-                      {getDisplayableTiers().map((tier) => {
-                        const Icon = tier.icon;
-                        const isSelected = formData.subscriptionTier === tier.id;
-                        return (
-                          <CarouselItem key={tier.id} className="pl-2 basis-[85%] sm:basis-1/2">
-                            <button
-                              type="button"
-                              onClick={() => handleInputChange("subscriptionTier", tier.id)}
-                              className={`w-full h-full p-4 rounded-xl border-2 transition-all text-left relative ${
-                                isSelected ? "border-primary bg-primary/10" : "border-border hover:border-muted-foreground"
-                              }`}
-                            >
-                              {tier.popular && (
-                                <span className="absolute -top-2 right-3 px-2 py-0.5 bg-accent text-accent-foreground text-xs font-bold rounded-full">
-                                  Popular
-                                </span>
-                              )}
-                              <div className="flex items-center gap-3 mb-2">
-                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                                  isSelected ? "bg-primary" : "bg-secondary"
-                                }`}>
-                                  <Icon className={`w-5 h-5 ${isSelected ? "text-primary-foreground" : "text-muted-foreground"}`} />
-                                </div>
-                                <div>
-                                  <h3 className="font-display font-bold text-foreground">{tier.name}</h3>
-                                  <span className="text-lg font-bold text-primary">{tier.price}<span className="text-xs text-muted-foreground">/mo</span></span>
-                                </div>
-                                {isSelected && <Check className="w-5 h-5 text-primary ml-auto" />}
-                              </div>
-                              <p className="text-muted-foreground text-xs mb-2">{tier.description}</p>
-                              <ul className="space-y-0.5">
-                                {tier.features.slice(0, 3).map((feature, i) => (
-                                  <li key={i} className="text-xs text-muted-foreground flex items-center gap-1.5">
-                                    <Check className="w-3 h-3 text-primary shrink-0" />
-                                    <span className="truncate">{feature}</span>
-                                  </li>
-                                ))}
-                                {tier.features.length > 3 && (
-                                  <li className="text-xs text-primary">+{tier.features.length - 3} more</li>
-                                )}
-                              </ul>
-                            </button>
-                          </CarouselItem>
-                        );
-                      })}
-                    </CarouselContent>
-                  </Carousel>
-                </div>
-
-                {/* Dot indicators */}
-                <div className="flex justify-center gap-1.5 pt-3 shrink-0">
-                  {getDisplayableTiers().map((tier) => (
-                    <div
-                      key={tier.id}
-                      className={`w-2 h-2 rounded-full transition-colors ${
-                        formData.subscriptionTier === tier.id ? "bg-primary" : "bg-border"
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Navigation - only show for steps that don't have their own navigation */}
-            {(currentStep <= 3 || currentStep === 8) && (
-              <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
-                <Button
-                  variant="ghost"
-                  onClick={handleBack}
-                  disabled={currentStep === 0}
-                  className="text-muted-foreground"
-                >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back
-                </Button>
-
-                {currentStep < STEPS.length - 1 ? (
-                  <Button onClick={handleNext} className="bg-primary text-primary-foreground hover:bg-primary/90">
-                    Next
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={handleComplete}
-                    disabled={isSubmitting}
-                    className="bg-primary text-primary-foreground hover:bg-primary/90"
-                  >
-                    {isSubmitting ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <>
-                        Complete Setup
-                        <Check className="w-4 h-4 ml-2" />
-                      </>
-                    )}
-                  </Button>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+      <OnboardingLayout
+        currentStep={currentStep}
+        totalSteps={STEPS.length}
+        title={STEPS[currentStep]}
+        headerLogo
+        showBackButton={currentStep > 0}
+        onBack={handleBack}
+        onSkip={handleSkip}
+        skipLabel="Skip for now"
+        footerActions={getFooterActions()}
+        maxWidth="lg"
+      >
+        {renderStepContent()}
+      </OnboardingLayout>
     </>
   );
 };

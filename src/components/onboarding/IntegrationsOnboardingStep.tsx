@@ -13,8 +13,8 @@ type CalendarProvider = Database["public"]["Enums"]["calendar_provider"];
 
 interface IntegrationsOnboardingStepProps {
   coachId: string;
-  onComplete: () => void;
-  onSkip: () => void;
+  /** Called to indicate state changes - parent controls footer */
+  onStateChange?: (state: { hasAnyConnection: boolean }) => void;
 }
 
 const VIDEO_PROVIDERS: {
@@ -56,12 +56,10 @@ const CALENDAR_PROVIDERS: {
   },
 ];
 
-const IntegrationsOnboardingStep = ({ coachId, onComplete, onSkip }: IntegrationsOnboardingStepProps) => {
-  const { t } = useTranslation('common');
+export function useIntegrationsState(coachId: string) {
   const { user } = useAuth();
-  const [connectingProvider, setConnectingProvider] = useState<string | null>(null);
 
-  // Check connected video providers - uses video_conference_settings table
+  // Check connected video providers
   const { data: videoConnections } = useQuery({
     queryKey: ["video-connections-onboarding", coachId],
     queryFn: async () => {
@@ -92,6 +90,23 @@ const IntegrationsOnboardingStep = ({ coachId, onComplete, onSkip }: Integration
     enabled: !!user,
   });
 
+  const hasAnyConnection = (videoConnections?.length || 0) > 0 || (calendarConnections?.length || 0) > 0;
+
+  return { videoConnections, calendarConnections, hasAnyConnection };
+}
+
+const IntegrationsOnboardingStep = ({ coachId, onStateChange }: IntegrationsOnboardingStepProps) => {
+  const { t } = useTranslation('common');
+  const { user } = useAuth();
+  const [connectingProvider, setConnectingProvider] = useState<string | null>(null);
+
+  const { videoConnections, calendarConnections, hasAnyConnection } = useIntegrationsState(coachId);
+
+  // Notify parent of state changes
+  if (onStateChange) {
+    onStateChange({ hasAnyConnection });
+  }
+
   const handleConnectVideo = async (providerId: VideoProvider) => {
     setConnectingProvider(providerId);
     try {
@@ -102,7 +117,6 @@ const IntegrationsOnboardingStep = ({ coachId, onComplete, onSkip }: Integration
       if (error) throw error;
       
       if (data?.authUrl) {
-        // Store return info in sessionStorage
         sessionStorage.setItem("onboarding_return", "coach");
         window.location.href = data.authUrl;
       }
@@ -133,22 +147,20 @@ const IntegrationsOnboardingStep = ({ coachId, onComplete, onSkip }: Integration
     }
   };
 
-  const hasAnyConnection = (videoConnections?.length || 0) > 0 || (calendarConnections?.length || 0) > 0;
-
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-display text-2xl font-bold text-foreground mb-2">
+        <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-2">
           {t('onboardingIntegrations.videoCalendar.title')}
         </h2>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {t('onboardingIntegrations.videoCalendar.subtitle')}
         </p>
       </div>
 
       {/* Video Conferencing */}
       <div className="space-y-3">
-        <h3 className="font-medium text-foreground">{t('onboardingIntegrations.videoCalendar.videoSection')}</h3>
+        <h3 className="font-medium text-foreground text-sm">{t('onboardingIntegrations.videoCalendar.videoSection')}</h3>
         <div className="space-y-2">
           {VIDEO_PROVIDERS.map((provider) => {
             const isConnected = videoConnections?.includes(provider.id);
@@ -170,8 +182,8 @@ const IntegrationsOnboardingStep = ({ coachId, onComplete, onSkip }: Integration
                       <Icon className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <p className="font-medium text-foreground">{t(provider.nameKey)}</p>
-                      <p className="text-sm text-muted-foreground">{t(provider.descriptionKey)}</p>
+                      <p className="font-medium text-foreground text-sm">{t(provider.nameKey)}</p>
+                      <p className="text-xs text-muted-foreground">{t(provider.descriptionKey)}</p>
                     </div>
                   </div>
                   {isConnected ? (
@@ -205,7 +217,7 @@ const IntegrationsOnboardingStep = ({ coachId, onComplete, onSkip }: Integration
 
       {/* Calendar Sync */}
       <div className="space-y-3">
-        <h3 className="font-medium text-foreground">{t('onboardingIntegrations.videoCalendar.calendarSection')}</h3>
+        <h3 className="font-medium text-foreground text-sm">{t('onboardingIntegrations.videoCalendar.calendarSection')}</h3>
         <div className="space-y-2">
           {CALENDAR_PROVIDERS.map((provider) => {
             const isConnected = calendarConnections?.includes(provider.id);
@@ -227,8 +239,8 @@ const IntegrationsOnboardingStep = ({ coachId, onComplete, onSkip }: Integration
                       <Icon className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <p className="font-medium text-foreground">{t(provider.nameKey)}</p>
-                      <p className="text-sm text-muted-foreground">{t(provider.descriptionKey)}</p>
+                      <p className="font-medium text-foreground text-sm">{t(provider.nameKey)}</p>
+                      <p className="text-xs text-muted-foreground">{t(provider.descriptionKey)}</p>
                     </div>
                   </div>
                   {isConnected ? (
@@ -259,13 +271,6 @@ const IntegrationsOnboardingStep = ({ coachId, onComplete, onSkip }: Integration
           })}
         </div>
       </div>
-
-      <Button 
-        onClick={hasAnyConnection ? onComplete : onSkip} 
-        className="w-full bg-primary text-primary-foreground"
-      >
-        {hasAnyConnection ? t('onboardingIntegrations.videoCalendar.continueButton') : t('onboardingIntegrations.videoCalendar.skipButton')}
-      </Button>
     </div>
   );
 };
