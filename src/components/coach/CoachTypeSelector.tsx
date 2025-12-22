@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +24,7 @@ interface CoachTypeSelectorProps {
 }
 
 export function CoachTypeSelector({ selectedTypes, onChange }: CoachTypeSelectorProps) {
+  const { t } = useTranslation("settings");
   const [customTypeInput, setCustomTypeInput] = useState("");
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
@@ -88,12 +90,12 @@ export function CoachTypeSelector({ selectedTypes, onChange }: CoachTypeSelector
 
   return (
     <div className="space-y-4">
-      <Label className="mb-2 block">Specialties & Coach Types</Label>
+      <Label className="mb-2 block">{t("marketplace.specialtiesTitle")}</Label>
       
       {/* Selected Types Display */}
       {selectedTypes.length > 0 && (
         <div className="space-y-2">
-          <p className="text-sm text-muted-foreground">Selected specialties:</p>
+          <p className="text-sm text-muted-foreground">{t("marketplace.specialtiesSelected")}</p>
           <div className="flex flex-wrap gap-2">
             {selectedTypes.map((type) => {
               const isCustom = isCustomType(type);
@@ -199,7 +201,7 @@ export function CoachTypeSelector({ selectedTypes, onChange }: CoachTypeSelector
             <Input
               value={customTypeInput}
               onChange={(e) => setCustomTypeInput(e.target.value)}
-              placeholder="Enter custom specialty..."
+              placeholder={t("marketplace.specialtiesCustomPlaceholder")}
               className="flex-1"
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -210,7 +212,7 @@ export function CoachTypeSelector({ selectedTypes, onChange }: CoachTypeSelector
               autoFocus
             />
             <Button onClick={handleAddCustomType} size="sm">
-              Add
+              {t("marketplace.specialtiesAdd")}
             </Button>
             <Button
               variant="outline"
@@ -220,7 +222,7 @@ export function CoachTypeSelector({ selectedTypes, onChange }: CoachTypeSelector
                 setCustomTypeInput("");
               }}
             >
-              Cancel
+              {t("marketplace.specialtiesCancel")}
             </Button>
           </div>
         ) : (
@@ -231,11 +233,11 @@ export function CoachTypeSelector({ selectedTypes, onChange }: CoachTypeSelector
             className="gap-2"
           >
             <Plus className="h-4 w-4" />
-            Add Custom Specialty
+            {t("marketplace.specialtiesAddCustom")}
           </Button>
         )}
         <p className="text-xs text-muted-foreground mt-2">
-          Can't find your specialty? Add a custom one that best describes your expertise.
+          {t("marketplace.specialtiesCustomHint")}
         </p>
       </div>
     </div>

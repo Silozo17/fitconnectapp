@@ -469,7 +469,48 @@
     "groupClasses": "Zajęcia grupowe",
     "groupClassesDesc": "Zarządzaj sesjami grupowymi i listami oczekujących",
     "socialLinks": "Media społecznościowe i linki",
-    "socialLinksDesc": "Połącz swoje profile społecznościowe, aby klienci mogli dowiedzieć się więcej o Tobie"
+    "socialLinksDesc": "Połącz swoje profile społecznościowe, aby klienci mogli dowiedzieć się więcej o Tobie",
+    "cardImageChange": "Zmień",
+    "cardImageUpload": "Prześlij",
+    "cardImageRemove": "Usuń",
+    "cardImageHint": "Prześlij poziome zdjęcie zoptymalizowane pod kątem Twojego wpisu w marketplace. To jest oddzielne od Twojego zdjęcia profilowego.",
+    "galleryTitle": "Galeria zdjęć",
+    "galleryShowcase": "Zaprezentuj swoją pracę za pomocą maksymalnie 5 zdjęć",
+    "galleryAddPhoto": "Dodaj zdjęcie",
+    "galleryEmptyTitle": "Kliknij, aby przesłać swoje pierwsze zdjęcie galerii",
+    "galleryEmptyDesc": "Pokaż klientom z kim pracujesz i jaki jest Twój styl treningowy",
+    "galleryMaxReached": "Osiągnięto maksymalnie 5 zdjęć galerii. Usuń jedno, aby dodać więcej.",
+    "galleryCaptionPlaceholder": "Dodaj podpis...",
+    "galleryRemove": "Usuń",
+    "galleryRecommended": "Zalecane: minimum 1200×800px, proporcje 4:3. Maksymalnie 5MB na zdjęcie. Format JPG lub PNG.",
+    "specialtiesTitle": "Specjalizacje i typy trenera",
+    "specialtiesSelected": "Wybrane specjalizacje:",
+    "specialtiesAddCustom": "Dodaj własną specjalizację",
+    "specialtiesCustomHint": "Nie możesz znaleźć swojej specjalizacji? Dodaj własną, która najlepiej opisuje Twoją ekspertyzę.",
+    "specialtiesCustomPlaceholder": "Wprowadź własną specjalizację...",
+    "specialtiesAdd": "Dodaj",
+    "specialtiesCancel": "Anuluj"
+  },
+  
+  "profileCompletion": {
+    "title": "Postęp profilu",
+    "complete": "Profil ukończony!",
+    "percentage": "Ukończenie profilu:",
+    "items": "elementów",
+    "next": "Następne:",
+    "more": "więcej",
+    "tasks": {
+      "profile_photo": "Zdjęcie profilowe",
+      "bio": "O mnie",
+      "specialisations": "Specjalizacje trenera",
+      "experience": "Lata doświadczenia",
+      "location": "Lokalizacja",
+      "availability": "Dostępność sesji",
+      "who_i_work_with": "Z kim pracujesz",
+      "gallery": "Zdjęcia galerii",
+      "social_links": "Linki do mediów społecznościowych",
+      "stripe_connected": "Połącz Stripe"
+    }
   },
 
   "services": {
