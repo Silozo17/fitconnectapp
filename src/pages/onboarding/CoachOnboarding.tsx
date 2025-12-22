@@ -315,8 +315,13 @@ const CoachOnboarding = () => {
   }, [isNavigating]);
 
   const handleComplete = async () => {
-    if (!user) return;
+    // Guard: prevent during existing navigation or submission
+    if (!user || isNavigating || isSubmitting) {
+      console.log("[CoachOnboarding] handleComplete blocked - user:", !!user, "navigating:", isNavigating, "submitting:", isSubmitting);
+      return;
+    }
 
+    setIsNavigating(true); // Block other navigation
     setIsSubmitting(true);
 
     try {
@@ -370,8 +375,11 @@ const CoachOnboarding = () => {
         toast.success("Profile completed! Welcome to FitConnect.");
         navigate("/dashboard/coach");
       }
+      // Don't reset isNavigating on success - we're navigating away
     } catch (error) {
+      console.error("[CoachOnboarding] handleComplete error:", error);
       toast.error("Failed to save profile. Please try again.");
+      setIsNavigating(false); // Only reset on error
     } finally {
       setIsSubmitting(false);
     }

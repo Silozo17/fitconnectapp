@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { Activity, Heart, Watch, CheckCircle, ExternalLink, Loader2, Apple, Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -62,10 +63,19 @@ const WearablesOnboardingStep = ({ onStateChange }: WearablesOnboardingStepProps
 
   const hasAnyConnection = (connections?.length || 0) > 0;
 
-  // Notify parent of state changes
-  if (onStateChange) {
-    onStateChange({ hasAnyConnection, isLoading });
-  }
+  // Track previous state to avoid unnecessary calls
+  const prevStateRef = useRef<{ hasAnyConnection: boolean; isLoading: boolean }>({ hasAnyConnection: false, isLoading: true });
+
+  // Notify parent of state changes - MUST be in useEffect to avoid render-loop freezes
+  useEffect(() => {
+    if (
+      prevStateRef.current.hasAnyConnection !== hasAnyConnection ||
+      prevStateRef.current.isLoading !== isLoading
+    ) {
+      prevStateRef.current = { hasAnyConnection, isLoading };
+      onStateChange?.({ hasAnyConnection, isLoading });
+    }
+  }, [hasAnyConnection, isLoading, onStateChange]);
 
   if (isLoading) {
     return (

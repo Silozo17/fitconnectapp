@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
@@ -58,6 +58,7 @@ const ClientOnboarding = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingProfile, setIsCheckingProfile] = useState(true);
+  const [isNavigating, setIsNavigating] = useState(false);
   const [clientProfileId, setClientProfileId] = useState<string | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -116,7 +117,8 @@ const ClientOnboarding = () => {
   // Save current step and form data whenever they change
   useEffect(() => {
     const saveProgress = async () => {
-      if (!clientProfileId || isCheckingProfile) return;
+      // Guard: Don't save during navigation or submission
+      if (!clientProfileId || isCheckingProfile || isNavigating || isSubmitting) return;
       
       // Serialize formData to JSON-compatible format
       const progressData = JSON.parse(JSON.stringify({
@@ -136,7 +138,18 @@ const ClientOnboarding = () => {
     // Debounce the save to avoid too many updates
     const timer = setTimeout(saveProgress, 500);
     return () => clearTimeout(timer);
-  }, [currentStep, formData, clientProfileId, isCheckingProfile]);
+  }, [currentStep, formData, clientProfileId, isCheckingProfile, isNavigating, isSubmitting]);
+
+  // Fail-safe: if isNavigating gets stuck, force unlock after 2 seconds
+  useEffect(() => {
+    if (isNavigating) {
+      const failSafe = setTimeout(() => {
+        console.warn("[ClientOnboarding] Navigation fail-safe triggered - forcing unlock");
+        setIsNavigating(false);
+      }, 2000);
+      return () => clearTimeout(failSafe);
+    }
+  }, [isNavigating]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -160,7 +173,13 @@ const ClientOnboarding = () => {
     }));
   };
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
+    // Guard: prevent during existing navigation
+    if (isNavigating) {
+      console.log("[ClientOnboarding] handleNext blocked - already navigating");
+      return;
+    }
+    
     // Validate avatar selection on step 0
     if (currentStep === 0 && !formData.selectedAvatarId) {
       toast.error("Please choose an avatar to continue");
@@ -174,23 +193,58 @@ const ClientOnboarding = () => {
     }
     
     if (currentStep < STEPS.length - 1) {
+      setIsNavigating(true);
+      console.log("[ClientOnboarding] handleNext - step", currentStep, "->", currentStep + 1);
       setCurrentStep((prev) => prev + 1);
+      
+      // Re-enable navigation after delay
+      setTimeout(() => {
+        setIsNavigating(false);
+        console.log("[ClientOnboarding] Navigation unlocked");
+      }, 150);
     }
-  };
+  }, [isNavigating, currentStep, formData.selectedAvatarId, formData.firstName]);
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
+    // Guard: prevent during existing navigation
+    if (isNavigating) {
+      console.log("[ClientOnboarding] handleBack blocked - already navigating");
+      return;
+    }
+    
     if (currentStep > 0) {
+      setIsNavigating(true);
+      console.log("[ClientOnboarding] handleBack - step", currentStep, "->", currentStep - 1);
       setCurrentStep((prev) => prev - 1);
+      
+      // Re-enable navigation after delay
+      setTimeout(() => {
+        setIsNavigating(false);
+        console.log("[ClientOnboarding] Navigation unlocked after back");
+      }, 150);
     }
-  };
+  }, [isNavigating, currentStep]);
 
-  const handleSkip = () => {
+  const handleSkip = useCallback(() => {
+    // Guard: prevent during existing navigation
+    if (isNavigating) {
+      console.log("[ClientOnboarding] handleSkip blocked - already navigating");
+      return;
+    }
+    
+    setIsNavigating(true);
+    console.log("[ClientOnboarding] handleSkip - navigating to dashboard");
     navigate("/dashboard/client");
-  };
+  }, [isNavigating, navigate]);
 
-  const handleComplete = async () => {
-    if (!user) return;
+  const handleComplete = useCallback(async () => {
+    // Guard: prevent during existing navigation or submission
+    if (!user || isNavigating || isSubmitting) {
+      console.log("[ClientOnboarding] handleComplete blocked - user:", !!user, "navigating:", isNavigating, "submitting:", isSubmitting);
+      return;
+    }
 
+    setIsNavigating(true); // Block other navigation
     setIsSubmitting(true);
 
     try {
@@ -229,13 +283,15 @@ const ClientOnboarding = () => {
 
       toast.success("Profile completed! Let's find you a coach.");
       navigate("/dashboard/client");
+      // Don't reset isNavigating on success - we're navigating away
     } catch (error) {
-      console.error("Error saving profile:", error);
+      console.error("[ClientOnboarding] handleComplete error:", error);
       toast.error("Failed to save profile. Please try again.");
+      setIsNavigating(false); // Only reset on error
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [user, isNavigating, isSubmitting, formData, navigate]);
 
   if (isCheckingProfile) {
     return (
@@ -254,10 +310,12 @@ const ClientOnboarding = () => {
           label: wearablesState.hasAnyConnection ? "Complete Setup" : "Skip & Complete",
           onClick: handleComplete,
           loading: isSubmitting,
+          disabled: isNavigating || isSubmitting,
         },
         secondary: currentStep > 0 ? {
           label: "Back",
           onClick: handleBack,
+          disabled: isNavigating || isSubmitting,
         } : undefined,
       };
     }
@@ -267,10 +325,12 @@ const ClientOnboarding = () => {
       primary: {
         label: "Next",
         onClick: handleNext,
+        disabled: isNavigating,
       },
       secondary: currentStep > 0 ? {
         label: "Back",
         onClick: handleBack,
+        disabled: isNavigating,
       } : undefined,
     };
   };
