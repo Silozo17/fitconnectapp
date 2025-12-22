@@ -248,12 +248,12 @@ const ClientOnboarding = () => {
 
       case 1:
         return (
-          <div className="space-y-4 sm:space-y-5">
-            <div>
-              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-1">
+          <div className="space-y-5">
+            <div className="mb-4">
+              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">
                 Let's get to know you
               </h2>
-              <p className="text-sm text-muted-foreground">Tell us a bit about yourself.</p>
+              <p className="text-sm text-muted-foreground mt-1.5">Tell us a bit about yourself.</p>
             </div>
 
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
@@ -318,12 +318,12 @@ const ClientOnboarding = () => {
 
       case 2:
         return (
-          <div className="space-y-4 sm:space-y-5">
-            <div>
-              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-1">
+          <div className="space-y-5">
+            <div className="mb-4">
+              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">
                 Your body metrics
               </h2>
-              <p className="text-sm text-muted-foreground">This helps coaches create personalized plans.</p>
+              <p className="text-sm text-muted-foreground mt-1.5">This helps coaches create personalized plans.</p>
             </div>
 
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
@@ -359,12 +359,12 @@ const ClientOnboarding = () => {
 
       case 3:
         return (
-          <div className="space-y-4">
-            <div>
-              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-1">
+          <div className="space-y-5">
+            <div className="mb-4">
+              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">
                 What are your fitness goals?
               </h2>
-              <p className="text-sm text-muted-foreground">Select all that apply.</p>
+              <p className="text-sm text-muted-foreground mt-1.5">Select all that apply.</p>
             </div>
 
             <div className="grid grid-cols-2 gap-2 sm:gap-3">
@@ -397,12 +397,12 @@ const ClientOnboarding = () => {
 
       case 4:
         return (
-          <div className="space-y-4">
-            <div>
-              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-1">
+          <div className="space-y-5">
+            <div className="mb-4">
+              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">
                 Dietary preferences
               </h2>
-              <p className="text-sm text-muted-foreground">Help your nutritionist create the perfect plan.</p>
+              <p className="text-sm text-muted-foreground mt-1.5">Help your nutritionist create the perfect plan.</p>
             </div>
 
             <div>

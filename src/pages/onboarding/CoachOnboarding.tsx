@@ -402,12 +402,12 @@ const CoachOnboarding = () => {
     switch (currentStep) {
       case 0:
         return (
-          <div className="space-y-4">
-            <div>
-              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-1">
+          <div className="space-y-5">
+            <div className="mb-4">
+              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">
                 Tell us about yourself
               </h2>
-              <p className="text-muted-foreground text-sm">This will appear on your public profile.</p>
+              <p className="text-muted-foreground text-sm mt-1.5">This will appear on your public profile.</p>
             </div>
 
             {/* Profile Image Upload */}
@@ -460,12 +460,12 @@ const CoachOnboarding = () => {
 
       case 1:
         return (
-          <div className="space-y-4">
-            <div>
-              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-1">
+          <div className="space-y-5">
+            <div className="mb-4">
+              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">
                 What do you specialize in?
               </h2>
-              <p className="text-muted-foreground text-sm">Select all that apply. Click the star to set your primary specialty.</p>
+              <p className="text-muted-foreground text-sm mt-1.5">Select all that apply. Click the star to set your primary specialty.</p>
             </div>
 
             {/* Selected specialties with primary indicator - fixed height container */}
@@ -494,7 +494,7 @@ const CoachOnboarding = () => {
                       >
                         {isPrimary && <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current" />}
                         {type.label}
-                        {isPrimary && <span className="text-[10px] sm:text-xs opacity-80">(Primary)</span>}
+                        {isPrimary && <span className="text-xs opacity-80">(Primary)</span>}
                       </button>
                     );
                   })}
@@ -559,12 +559,12 @@ const CoachOnboarding = () => {
 
       case 2:
         return (
-          <div className="space-y-4">
-            <div>
-              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-1">
+          <div className="space-y-5">
+            <div className="mb-4">
+              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">
                 Set your pricing
               </h2>
-              <p className="text-muted-foreground text-sm">How much do you charge per session?</p>
+              <p className="text-muted-foreground text-sm mt-1.5">How much do you charge per session?</p>
             </div>
 
             <div>
@@ -586,12 +586,12 @@ const CoachOnboarding = () => {
 
       case 3:
         return (
-          <div className="space-y-4">
-            <div>
-              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-1">
+          <div className="space-y-5">
+            <div className="mb-4">
+              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">
                 Where do you coach?
               </h2>
-              <p className="text-muted-foreground text-sm">Let clients know how they can work with you.</p>
+              <p className="text-muted-foreground text-sm mt-1.5">Let clients know how they can work with you.</p>
             </div>
 
             <div className="space-y-3">
@@ -675,12 +675,12 @@ const CoachOnboarding = () => {
 
       case 8:
         return (
-          <div className="space-y-4">
-            <div className="text-center">
-              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-1">
+          <div className="space-y-5">
+            <div className="text-center mb-4">
+              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">
                 Choose your plan
               </h2>
-              <p className="text-muted-foreground text-sm">Swipe to browse. Upgrade anytime.</p>
+              <p className="text-muted-foreground text-sm mt-1.5">Swipe to browse. Upgrade anytime.</p>
             </div>
 
             <Carousel
@@ -720,9 +720,9 @@ const CoachOnboarding = () => {
                         <p className="text-muted-foreground text-xs mb-2">{tier.description}</p>
                         <ul className="space-y-0.5">
                           {tier.features.slice(0, 3).map((feature, i) => (
-                            <li key={i} className="text-xs text-muted-foreground flex items-center gap-1.5">
-                              <Check className="w-3 h-3 text-primary shrink-0" />
-                              <span className="truncate">{feature}</span>
+                            <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                              <Check className="w-3 h-3 text-primary shrink-0 mt-0.5" />
+                              <span className="break-words">{feature}</span>
                             </li>
                           ))}
                           {tier.features.length > 3 && (

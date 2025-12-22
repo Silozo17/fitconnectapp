@@ -84,12 +84,12 @@ const WearablesOnboardingStep = ({ onStateChange }: WearablesOnboardingStepProps
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-2">
+    <div className="space-y-5">
+      <div className="mb-4">
+        <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">
           {t('onboardingIntegrations.wearables.title')}
         </h2>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-muted-foreground text-sm mt-1.5">
           {t('onboardingIntegrations.wearables.subtitle')}
         </p>
       </div>
@@ -164,9 +164,9 @@ const WearablesOnboardingStep = ({ onStateChange }: WearablesOnboardingStepProps
         })}
       </div>
 
-      <div className="p-4 rounded-xl bg-secondary">
-        <p className="text-sm text-muted-foreground">
-          <strong className="text-foreground">{t('integrations.wearables.syncHealthData')}</strong>
+      <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
+        <p className="text-xs sm:text-sm text-muted-foreground">
+          <span className="text-foreground font-medium">Tip:</span> {t('integrations.wearables.syncHealthData')}
         </p>
       </div>
     </div>

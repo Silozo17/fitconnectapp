@@ -123,12 +123,12 @@ const DualAccountStep = ({ coachId, onStateChange, onActionRef }: DualAccountSte
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-2">
+    <div className="space-y-5">
+      <div className="mb-4">
+        <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">
           {t('onboarding.oneMoreThing')}
         </h2>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-muted-foreground text-sm mt-1.5">
           {t('onboarding.alsoFindCoaches')}
         </p>
       </div>

@@ -148,12 +148,12 @@ const IntegrationsOnboardingStep = ({ coachId, onStateChange }: IntegrationsOnbo
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-2">
+    <div className="space-y-5">
+      <div className="mb-4">
+        <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">
           {t('onboardingIntegrations.videoCalendar.title')}
         </h2>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-muted-foreground text-sm mt-1.5">
           {t('onboardingIntegrations.videoCalendar.subtitle')}
         </p>
       </div>
