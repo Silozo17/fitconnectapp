@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Star, MapPin, ArrowRight, CheckCircle, Loader2, Users, Target, Globe, ShieldCheck } from "lucide-react";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { useFeaturedCoaches } from "@/hooks/useFeaturedCoaches";
+import { useCountry } from "@/hooks/useCountry";
 import { getDisplayLocation } from "@/lib/location-utils";
 import { BenefitCard } from "./BenefitCard";
 import { getAvatarImageUrl } from "@/hooks/useAvatars";
@@ -13,13 +14,16 @@ import { UserAvatar } from "@/components/shared/UserAvatar";
 const FeaturedCoaches = () => {
   const { t } = useTranslation('landing');
   const { location, isLoading: locationLoading } = useUserLocation();
+  const { countryCode, isLoading: countryLoading } = useCountry();
   
   // Use dedicated hook for featured coaches with quality-based sorting
+  // Pass countryCode to enforce strict country filtering based on user's selected location
   const { coaches: coachesToShow, isLoading: coachesLoading, locationLabel } = useFeaturedCoaches({
     userLocation: location,
+    countryCode, // Strict filtering by selected country
   });
 
-  const isLoading = locationLoading || coachesLoading;
+  const isLoading = locationLoading || coachesLoading || countryLoading;
 
   return (
     <section className="py-24 md:py-32 bg-background">

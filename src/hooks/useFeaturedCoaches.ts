@@ -25,6 +25,7 @@ import { useCoachEngagement, createEmptyEngagementMap } from '@/hooks/useCoachEn
 import { sortCoachesByUnifiedRanking, extractRankingFactors } from '@/lib/unified-coach-ranking';
 import { calculateLocationScore, filterByLocationWithExpansion } from '@/lib/coach-ranking';
 import { hasBlockedName } from '@/lib/coach-validation';
+import { matchesCountryFilterStrict, getCountryNameFromCode } from '@/lib/location-utils';
 import type { LocationData } from '@/types/ranking';
 import type { MarketplaceCoach } from '@/hooks/useCoachMarketplace';
 
@@ -32,6 +33,8 @@ const FEATURED_COACH_LIMIT = 4;
 
 interface UseFeaturedCoachesOptions {
   userLocation: LocationData | null;
+  /** When provided, strictly filter coaches to this country only */
+  countryCode?: string | null;
 }
 
 interface UseFeaturedCoachesResult {
@@ -40,10 +43,10 @@ interface UseFeaturedCoachesResult {
   locationLabel: string;
 }
 
-export function useFeaturedCoaches({ userLocation }: UseFeaturedCoachesOptions): UseFeaturedCoachesResult {
+export function useFeaturedCoaches({ userLocation, countryCode }: UseFeaturedCoachesOptions): UseFeaturedCoachesResult {
   // Fetch coaches and boosted IDs
   const coachesQuery = useQuery({
-    queryKey: ['featured-coaches'],
+    queryKey: ['featured-coaches', countryCode],
     queryFn: async () => {
       // Get boosted coach IDs
       const now = new Date().toISOString();
@@ -67,8 +70,13 @@ export function useFeaturedCoaches({ userLocation }: UseFeaturedCoachesOptions):
       if (error) throw error;
 
       // Filter out only fake/demo/placeholder coaches (allow incomplete profiles)
-      const coaches = ((data || []) as unknown as MarketplaceCoach[])
+      let coaches = ((data || []) as unknown as MarketplaceCoach[])
         .filter(coach => !hasBlockedName(coach.display_name));
+
+      // Apply strict country filtering when countryCode is provided
+      if (countryCode) {
+        coaches = coaches.filter(coach => matchesCountryFilterStrict(coach, countryCode));
+      }
 
       return { coaches, boostedCoachIds };
     },
@@ -143,7 +151,11 @@ export function useFeaturedCoaches({ userLocation }: UseFeaturedCoachesOptions):
   }, [coaches, boostedCoachIds, coachIds, engagementMap, userLocation]);
 
   const isLoading = coachesQuery.isLoading || engagementLoading;
-  const locationLabel = userLocation?.city || userLocation?.region || userLocation?.country || 'Your Area';
+  
+  // Location label: prefer country name from countryCode when filtering by country
+  const locationLabel = countryCode 
+    ? (getCountryNameFromCode(countryCode) || userLocation?.country || 'Your Area')
+    : (userLocation?.city || userLocation?.region || userLocation?.country || 'Your Area');
 
   return {
     coaches: rankedCoaches,
