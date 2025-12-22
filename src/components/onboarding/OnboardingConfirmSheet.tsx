@@ -66,6 +66,8 @@ export function OnboardingConfirmSheet({
       <SheetContent
         side="bottom"
         className="rounded-t-2xl pb-[env(safe-area-inset-bottom)]"
+        onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <SheetHeader className="text-left">
           {icon && (

@@ -20,6 +20,7 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showSkipWarning, setShowSkipWarning] = useState(false);
+  const [isPendingSkip, setIsPendingSkip] = useState(false);
 
   // Check if already connected
   const { data: coachProfile, refetch } = useQuery({
@@ -106,11 +107,20 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
   };
 
   const handleConfirmSkip = () => {
+    setIsPendingSkip(true);
     setShowSkipWarning(false);
-    // Small delay to ensure sheet closes before navigation
-    setTimeout(() => {
-      onSkip();
-    }, 100);
+  };
+
+  // Handle skip when sheet closes
+  const handleSheetOpenChange = (open: boolean) => {
+    setShowSkipWarning(open);
+    if (!open && isPendingSkip) {
+      setIsPendingSkip(false);
+      // Wait for sheet close animation (300ms) plus buffer
+      setTimeout(() => {
+        onSkip();
+      }, 350);
+    }
   };
 
   // Check URL params for returning from Stripe
@@ -259,7 +269,7 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
       {/* Skip confirmation bottom sheet - no layout shift */}
       <OnboardingConfirmSheet
         open={showSkipWarning}
-        onOpenChange={setShowSkipWarning}
+        onOpenChange={handleSheetOpenChange}
         title={t('onboarding.skipWarningTitle')}
         description={t('onboarding.skipWarningMessage')}
         icon={<AlertTriangle className="w-6 h-6" />}
