@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +22,7 @@ interface InvoiceSettingsSectionProps {
 }
 
 export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps) {
+  const { t } = useTranslation('settings');
   const { data: settings, isLoading } = useCoachInvoiceSettings(coachId);
   const updateSettings = useUpdateInvoiceSettings();
   const uploadLogo = useUploadInvoiceLogo();
@@ -164,15 +166,15 @@ export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps)
       {/* Business Details */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Business Details</CardTitle>
-          <CardDescription>Your business information shown on invoices</CardDescription>
+          <CardTitle className="text-lg">{t('invoice.businessDetails')}</CardTitle>
+          <CardDescription>{t('invoice.businessDetailsDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Logo Upload */}
           <div>
-            <Label>Business Logo</Label>
+            <Label>{t('invoice.logo')}</Label>
             <p className="text-xs text-muted-foreground mb-2">
-              Upload your logo or leave blank to use FitConnect logo
+              {t('invoice.uploadLogo')}
             </p>
             <div className="flex items-center gap-4">
               {formData.logoUrl ? (
@@ -193,7 +195,7 @@ export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps)
                 </div>
               ) : (
                 <div className="h-16 w-32 border-2 border-dashed border-border rounded-lg flex items-center justify-center text-muted-foreground">
-                  <span className="text-xs">No logo</span>
+                  <span className="text-xs">{t('invoice.logo')}</span>
                 </div>
               )}
               <label>
@@ -211,7 +213,7 @@ export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps)
                     ) : (
                       <Upload className="h-4 w-4 mr-2" />
                     )}
-                    Upload Logo
+                    {t('invoice.uploadLogo')}
                   </span>
                 </Button>
               </label>
@@ -220,28 +222,28 @@ export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps)
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <Label>Business Name</Label>
+              <Label>{t('invoice.businessName')}</Label>
               <Input
                 value={formData.businessName}
                 onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-                placeholder="Your Business Name"
+                placeholder={t('invoice.businessNamePlaceholder')}
               />
             </div>
             <div>
-              <Label>Email</Label>
+              <Label>{t('invoice.businessEmail')}</Label>
               <Input
                 type="email"
                 value={formData.businessEmail}
                 onChange={(e) => setFormData({ ...formData, businessEmail: e.target.value })}
-                placeholder="billing@yourbusiness.com"
+                placeholder={t('invoice.businessEmailPlaceholder')}
               />
             </div>
             <div>
-              <Label>Phone</Label>
+              <Label>{t('invoice.businessPhone')}</Label>
               <Input
                 value={formData.businessPhone}
                 onChange={(e) => setFormData({ ...formData, businessPhone: e.target.value })}
-                placeholder="+44 123 456 7890"
+                placeholder={t('invoice.businessPhonePlaceholder')}
               />
             </div>
           </div>
@@ -250,9 +252,9 @@ export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps)
           <div className="border rounded-lg p-4 space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label htmlFor="vat-toggle">VAT Registered</Label>
+                <Label htmlFor="vat-toggle">{t('invoice.vatRegistered')}</Label>
                 <p className="text-xs text-muted-foreground">
-                  Enable if your business is registered for VAT
+                  {t('invoice.vatRegisteredDesc')}
                 </p>
               </div>
               <Switch
@@ -266,15 +268,15 @@ export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps)
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <Label>VAT Number</Label>
+                    <Label>{t('invoice.vatNumber')}</Label>
                     <Input
                       value={formData.vatNumber}
                       onChange={(e) => setFormData({ ...formData, vatNumber: e.target.value })}
-                      placeholder="GB123456789"
+                      placeholder={t('invoice.vatNumberPlaceholder')}
                     />
                   </div>
                   <div>
-                    <Label>VAT Rate (%)</Label>
+                    <Label>{t('invoice.vatRate')}</Label>
                     <Input
                       type="number"
                       min="0"
@@ -288,7 +290,7 @@ export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps)
                 </div>
                 
                 <div className="space-y-2">
-                  <Label>VAT Calculation Method</Label>
+                  <Label>{t('invoice.vatSettings')}</Label>
                   <RadioGroup
                     value={formData.vatInclusive ? "inclusive" : "exclusive"}
                     onValueChange={(value) => setFormData({ ...formData, vatInclusive: value === "inclusive" })}
@@ -297,13 +299,13 @@ export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps)
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="exclusive" id="vat-exclusive" />
                       <Label htmlFor="vat-exclusive" className="font-normal cursor-pointer">
-                        Add VAT to prices (exclusive)
+                        {t('invoice.vatExclusive')}
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="inclusive" id="vat-inclusive" />
                       <Label htmlFor="vat-inclusive" className="font-normal cursor-pointer">
-                        Prices already include VAT (inclusive)
+                        {t('invoice.vatInclusive')}
                       </Label>
                     </div>
                   </RadioGroup>
@@ -318,11 +320,11 @@ export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps)
           </div>
 
           <div>
-            <Label>Business Address</Label>
+            <Label>{t('invoice.businessAddress')}</Label>
             <Textarea
               value={formData.businessAddress}
               onChange={(e) => setFormData({ ...formData, businessAddress: e.target.value })}
-              placeholder="123 Business Street&#10;City, Postcode&#10;Country"
+              placeholder={t('invoice.businessAddressPlaceholder')}
               rows={3}
             />
           </div>
@@ -332,8 +334,8 @@ export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps)
       {/* Invoice Design */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Invoice Design</CardTitle>
-          <CardDescription>Choose a template style for your invoices</CardDescription>
+          <CardTitle className="text-lg">{t('invoice.invoiceDesign')}</CardTitle>
+          <CardDescription>{t('invoice.invoiceDesignDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <InvoiceTemplateSelector
@@ -344,7 +346,7 @@ export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps)
 
           {formData.templateId === "modern" && (
             <div>
-              <Label>Accent Color</Label>
+              <Label>{t('invoice.accentColor')}</Label>
               <div className="flex items-center gap-3 mt-2">
                 <input
                   type="color"
@@ -367,33 +369,33 @@ export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps)
       {/* Default Terms */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Default Terms</CardTitle>
-          <CardDescription>Pre-fill these on every new invoice</CardDescription>
+          <CardTitle className="text-lg">{t('invoice.paymentTerms')}</CardTitle>
+          <CardDescription>{t('invoice.previewDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label>Payment Terms</Label>
+            <Label>{t('invoice.paymentTerms')}</Label>
             <Input
               value={formData.defaultPaymentTerms}
               onChange={(e) => setFormData({ ...formData, defaultPaymentTerms: e.target.value })}
-              placeholder="Payment due within 14 days"
+              placeholder={t('invoice.paymentTermsPlaceholder')}
             />
           </div>
           <div>
-            <Label>Bank Details</Label>
+            <Label>{t('invoice.bankDetails')}</Label>
             <Textarea
               value={formData.bankDetails}
               onChange={(e) => setFormData({ ...formData, bankDetails: e.target.value })}
-              placeholder="Bank: Your Bank&#10;Sort Code: 12-34-56&#10;Account: 12345678"
+              placeholder={t('invoice.bankDetailsPlaceholder')}
               rows={3}
             />
           </div>
           <div>
-            <Label>Default Notes</Label>
+            <Label>{t('invoice.defaultNotes')}</Label>
             <Textarea
               value={formData.defaultNotes}
               onChange={(e) => setFormData({ ...formData, defaultNotes: e.target.value })}
-              placeholder="Thank you for your business!"
+              placeholder={t('invoice.defaultNotesPlaceholder')}
               rows={2}
             />
           </div>
@@ -403,8 +405,8 @@ export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps)
       {/* Preview */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Preview</CardTitle>
-          <CardDescription>How your invoices will look</CardDescription>
+          <CardTitle className="text-lg">{t('invoice.preview')}</CardTitle>
+          <CardDescription>{t('invoice.previewDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="border rounded-lg overflow-hidden max-w-2xl mx-auto">
@@ -426,7 +428,7 @@ export function InvoiceSettingsSection({ coachId }: InvoiceSettingsSectionProps)
           ) : (
             <Save className="h-4 w-4 mr-2" />
           )}
-          Save Invoice Settings
+          {t('saveChanges')}
         </Button>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -43,6 +44,7 @@ interface AccountSecuritySectionProps {
 
 export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySectionProps) => {
   const { user } = useAuth();
+  const { t } = useTranslation('settings');
   const [showEmailDialog, setShowEmailDialog] = useState(false);
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -65,8 +67,8 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
       const { error } = await supabase.auth.updateUser({ email: data.email });
       if (error) throw error;
       
-      toast.success("Confirmation email sent", {
-        description: "Please check both your old and new email addresses to confirm the change.",
+      toast.success(t('security.confirmationEmailSent'), {
+        description: t('security.checkBothEmails'),
       });
       setShowEmailDialog(false);
       emailForm.reset();
@@ -85,7 +87,7 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
       const { error } = await supabase.auth.updateUser({ password: data.newPassword });
       if (error) throw error;
       
-      toast.success("Password updated successfully");
+      toast.success(t('security.passwordUpdated'));
       setShowPasswordDialog(false);
       passwordForm.reset();
     } catch (error: unknown) {
@@ -103,9 +105,9 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <Shield className="w-4 h-4 sm:w-5 sm:h-5" />
-            Account Security
+            {t('security.accountSecurity')}
           </CardTitle>
-          <CardDescription className="text-xs sm:text-sm">Manage your email and password</CardDescription>
+          <CardDescription className="text-xs sm:text-sm">{t('security.manageEmailPassword')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 sm:space-y-4">
           {/* Email Row - Responsive */}
@@ -115,12 +117,12 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
                 <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="font-medium text-foreground text-sm sm:text-base">Email Address</p>
+                <p className="font-medium text-foreground text-sm sm:text-base">{t('security.emailAddress')}</p>
                 <p className="text-xs sm:text-sm text-muted-foreground truncate">{user?.email}</p>
               </div>
             </div>
             <Button variant="outline" size="sm" className="w-full sm:w-auto shrink-0" onClick={() => setShowEmailDialog(true)}>
-              Update Email
+              {t('security.updateEmail')}
             </Button>
           </div>
 
@@ -131,12 +133,12 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
                 <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="font-medium text-foreground text-sm sm:text-base">Password</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">Change your account password</p>
+                <p className="font-medium text-foreground text-sm sm:text-base">{t('security.password')}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">{t('security.changePasswordDesc')}</p>
               </div>
             </div>
             <Button variant="outline" size="sm" className="w-full sm:w-auto shrink-0" onClick={() => setShowPasswordDialog(true)}>
-              Change Password
+              {t('security.changePassword')}
             </Button>
           </div>
 
@@ -148,14 +150,14 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
                   <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium text-foreground text-sm sm:text-base">App Settings</p>
+                  <p className="font-medium text-foreground text-sm sm:text-base">{t('nativeSettings.title')}</p>
                   <p className="text-xs sm:text-sm text-muted-foreground">
-                    Manage notifications, permissions & privacy
+                    {t('nativeSettings.description')}
                   </p>
                 </div>
               </div>
               <Button variant="outline" size="sm" className="w-full sm:w-auto shrink-0" onClick={() => openNativeSettings()}>
-                Open Native Settings
+                {t('nativeSettings.button')}
               </Button>
             </div>
           )}
@@ -167,9 +169,9 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-destructive text-base sm:text-lg">
             <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5" />
-            Danger Zone
+            {t('account.dangerZone')}
           </CardTitle>
-          <CardDescription className="text-xs sm:text-sm">Irreversible actions that affect your account</CardDescription>
+          <CardDescription className="text-xs sm:text-sm">{t('account.dangerZoneDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-4 bg-destructive/10 rounded-lg border border-destructive/20">
@@ -178,14 +180,14 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
                 <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-destructive" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="font-medium text-foreground text-sm sm:text-base">Delete Account</p>
+                <p className="font-medium text-foreground text-sm sm:text-base">{t('account.deleteAccount')}</p>
                 <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
-                  Permanently delete your account and all associated data
+                  {t('account.deleteAccountDescription')}
                 </p>
               </div>
             </div>
             <Button variant="destructive" size="sm" className="w-full sm:w-auto shrink-0" onClick={() => setShowDeleteDialog(true)}>
-              Delete Account
+              {t('account.deleteAccount')}
             </Button>
           </div>
         </CardContent>
@@ -195,9 +197,9 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
       <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
         <DialogContent className="max-w-[95vw] sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Update Email Address</DialogTitle>
+            <DialogTitle>{t('security.updateEmail')}</DialogTitle>
             <DialogDescription className="text-xs sm:text-sm">
-              Enter your new email address. You'll receive confirmation emails at both your old and new addresses.
+              {t('security.checkBothEmails')}
             </DialogDescription>
           </DialogHeader>
           <Form {...emailForm}>
@@ -207,11 +209,11 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>New Email Address</FormLabel>
+                    <FormLabel>{t('security.newEmailAddress')}</FormLabel>
                     <FormControl>
                       <Input
                         type="email"
-                        placeholder="your-new-email@example.com"
+                        placeholder={t('security.emailPlaceholder')}
                         {...field}
                       />
                     </FormControl>
@@ -226,11 +228,11 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
                   className="w-full sm:w-auto"
                   onClick={() => setShowEmailDialog(false)}
                 >
-                  Cancel
+                  {t('forms.cancel')}
                 </Button>
                 <Button type="submit" className="w-full sm:w-auto" disabled={isUpdatingEmail}>
                   {isUpdatingEmail && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  Update Email
+                  {t('security.updateEmail')}
                 </Button>
               </DialogFooter>
             </form>
@@ -242,9 +244,9 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
       <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
         <DialogContent className="max-w-[95vw] sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Change Password</DialogTitle>
+            <DialogTitle>{t('security.changePassword')}</DialogTitle>
             <DialogDescription className="text-xs sm:text-sm">
-              Enter your new password. Make sure it's at least 8 characters long.
+              {t('security.passwordMinLength')}
             </DialogDescription>
           </DialogHeader>
           <Form {...passwordForm}>
@@ -254,11 +256,11 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
                 name="newPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>New Password</FormLabel>
+                    <FormLabel>{t('security.newPassword')}</FormLabel>
                     <FormControl>
                       <Input
                         type="password"
-                        placeholder="Enter new password"
+                        placeholder={t('security.passwordPlaceholder')}
                         {...field}
                       />
                     </FormControl>
@@ -271,11 +273,11 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
+                    <FormLabel>{t('security.confirmPassword')}</FormLabel>
                     <FormControl>
                       <Input
                         type="password"
-                        placeholder="Confirm new password"
+                        placeholder={t('security.confirmPasswordPlaceholder')}
                         {...field}
                       />
                     </FormControl>
@@ -290,11 +292,11 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
                   className="w-full sm:w-auto"
                   onClick={() => setShowPasswordDialog(false)}
                 >
-                  Cancel
+                  {t('forms.cancel')}
                 </Button>
                 <Button type="submit" className="w-full sm:w-auto" disabled={isUpdatingPassword}>
                   {isUpdatingPassword && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  Change Password
+                  {t('security.changePassword')}
                 </Button>
               </DialogFooter>
             </form>
