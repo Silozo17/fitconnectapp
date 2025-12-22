@@ -33,9 +33,9 @@ export const useCalendarSync = () => {
   });
 
   const connectCalendar = useMutation({
-    mutationFn: async (provider: CalendarProvider) => {
+    mutationFn: async ({ provider, returnPath }: { provider: CalendarProvider; returnPath?: string }) => {
       const { data, error } = await supabase.functions.invoke("calendar-oauth-start", {
-        body: { provider },
+        body: { provider, returnPath: returnPath || window.location.pathname },
       });
 
       if (error) throw error;

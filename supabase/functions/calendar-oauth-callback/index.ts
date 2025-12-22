@@ -23,8 +23,8 @@ serve(async (req) => {
   }
 
   try {
-    const { userId, provider } = JSON.parse(atob(state));
-    console.log("Processing calendar OAuth callback for:", provider, userId);
+    const { userId, provider, returnPath } = JSON.parse(atob(state));
+    console.log("Processing calendar OAuth callback for:", provider, userId, "returnPath:", returnPath);
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const redirectUri = `${SUPABASE_URL}/functions/v1/calendar-oauth-callback`;
@@ -78,16 +78,20 @@ serve(async (req) => {
     // Get the app URL
     const appUrl = Deno.env.get("APP_URL") || "https://getfitconnect.co.uk";
 
-    // Determine redirect based on user role
-    const { data: coachProfile } = await supabase
-      .from("coach_profiles")
-      .select("id")
-      .eq("user_id", userId)
-      .single();
+    // Use returnPath from state if provided, otherwise determine based on user role
+    let redirectPath = returnPath;
+    
+    if (!redirectPath) {
+      const { data: coachProfile } = await supabase
+        .from("coach_profiles")
+        .select("id")
+        .eq("user_id", userId)
+        .single();
 
-    const redirectPath = coachProfile
-      ? "/dashboard/coach/integrations"
-      : "/dashboard/client/integrations";
+      redirectPath = coachProfile
+        ? "/dashboard/coach/integrations"
+        : "/dashboard/client/integrations";
+    }
 
     return new Response(null, {
       status: 302,
