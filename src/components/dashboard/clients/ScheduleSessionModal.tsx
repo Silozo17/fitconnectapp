@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Calendar, Clock, MapPin, Video } from "lucide-react";
 import { useScheduleSession } from "@/hooks/useCoachClients";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface ScheduleSessionModalProps {
   open: boolean;
@@ -17,6 +18,7 @@ interface ScheduleSessionModalProps {
 }
 
 export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId }: ScheduleSessionModalProps) {
+  const { t } = useTranslation("coach");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [duration, setDuration] = useState("60");
@@ -66,14 +68,14 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
             <Calendar className="h-5 w-5 text-primary" />
-            Schedule Session {clientName && `with ${clientName}`}
+            {clientName ? t('scheduleSessionModal.titleWithClient', { clientName }) : t('scheduleSessionModal.title')}
           </DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="date">Date</Label>
+              <Label htmlFor="date">{t('scheduleSessionModal.date')}</Label>
               <Input
                 id="date"
                 type="date"
@@ -84,7 +86,7 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="time">Time</Label>
+              <Label htmlFor="time">{t('scheduleSessionModal.time')}</Label>
               <div className="relative">
                 <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -101,32 +103,32 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="sessionType">Session Type</Label>
+              <Label htmlFor="sessionType">{t('scheduleSessionModal.sessionType')}</Label>
               <Select value={sessionType} onValueChange={setSessionType} required>
                 <SelectTrigger className="bg-background border-border">
-                  <SelectValue placeholder="Select type" />
+                  <SelectValue placeholder={t('scheduleSessionModal.selectType')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1-on-1">1-on-1 Training</SelectItem>
-                  <SelectItem value="group">Group Session</SelectItem>
-                  <SelectItem value="assessment">Assessment</SelectItem>
-                  <SelectItem value="consultation">Consultation</SelectItem>
-                  <SelectItem value="nutrition-review">Nutrition Review</SelectItem>
+                  <SelectItem value="1-on-1">{t('scheduleSessionModal.sessionTypes.oneOnOne')}</SelectItem>
+                  <SelectItem value="group">{t('scheduleSessionModal.sessionTypes.group')}</SelectItem>
+                  <SelectItem value="assessment">{t('scheduleSessionModal.sessionTypes.assessment')}</SelectItem>
+                  <SelectItem value="consultation">{t('scheduleSessionModal.sessionTypes.consultation')}</SelectItem>
+                  <SelectItem value="nutrition-review">{t('scheduleSessionModal.sessionTypes.nutritionReview')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="duration">Duration</Label>
+              <Label htmlFor="duration">{t('scheduleSessionModal.duration')}</Label>
               <Select value={duration} onValueChange={setDuration}>
                 <SelectTrigger className="bg-background border-border">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="30">30 minutes</SelectItem>
-                  <SelectItem value="45">45 minutes</SelectItem>
-                  <SelectItem value="60">60 minutes</SelectItem>
-                  <SelectItem value="90">90 minutes</SelectItem>
-                  <SelectItem value="120">2 hours</SelectItem>
+                  <SelectItem value="30">{t('scheduleSessionModal.durations.30min')}</SelectItem>
+                  <SelectItem value="45">{t('scheduleSessionModal.durations.45min')}</SelectItem>
+                  <SelectItem value="60">{t('scheduleSessionModal.durations.60min')}</SelectItem>
+                  <SelectItem value="90">{t('scheduleSessionModal.durations.90min')}</SelectItem>
+                  <SelectItem value="120">{t('scheduleSessionModal.durations.120min')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -135,7 +137,7 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
           <div className="flex items-center justify-between p-3 rounded-lg bg-background border border-border">
             <div className="flex items-center gap-2">
               <Video className="h-4 w-4 text-muted-foreground" />
-              <Label htmlFor="isOnline" className="cursor-pointer">Online Session</Label>
+              <Label htmlFor="isOnline" className="cursor-pointer">{t('scheduleSessionModal.onlineSession')}</Label>
             </div>
             <Switch
               id="isOnline"
@@ -146,14 +148,14 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
 
           {!isOnline && (
             <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
+              <Label htmlFor="location">{t('scheduleSessionModal.location')}</Label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="location"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  placeholder="Gym address or meeting point"
+                  placeholder={t('scheduleSessionModal.locationPlaceholder')}
                   className="pl-10 bg-background border-border"
                 />
               </div>
@@ -161,27 +163,23 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
           )}
           
           <div className="space-y-2">
-            <Label htmlFor="notes">Session Notes (Optional)</Label>
+            <Label htmlFor="notes">{t('scheduleSessionModal.sessionNotes')}</Label>
             <Textarea
               id="notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Any specific focus areas or notes for this session..."
+              placeholder={t('scheduleSessionModal.sessionNotesPlaceholder')}
               className="bg-background border-border resize-none"
               rows={3}
             />
           </div>
           
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              {t('scheduleSessionModal.cancel')}
             </Button>
             <Button type="submit" disabled={scheduleSessionMutation.isPending || !clientId || !sessionType}>
-              {scheduleSessionMutation.isPending ? "Scheduling..." : "Schedule Session"}
+              {scheduleSessionMutation.isPending ? t('scheduleSessionModal.scheduling') : t('scheduleSessionModal.schedule')}
             </Button>
           </DialogFooter>
         </form>

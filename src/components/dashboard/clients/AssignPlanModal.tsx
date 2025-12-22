@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/hooks/useTranslation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,41 +25,11 @@ interface AssignPlanModalProps {
 }
 
 const mockPlans: Plan[] = [
-  {
-    id: "1",
-    name: "Beginner Strength Program",
-    type: "workout",
-    description: "Perfect for those new to weight training. Focus on compound movements and building a strong foundation.",
-    durationWeeks: 8,
-  },
-  {
-    id: "2",
-    name: "Fat Loss Meal Plan",
-    type: "nutrition",
-    description: "Calorie-controlled meal plan with high protein and balanced macros for sustainable fat loss.",
-    durationWeeks: 12,
-  },
-  {
-    id: "3",
-    name: "Advanced Hypertrophy",
-    type: "workout",
-    description: "High volume training program designed for muscle growth and aesthetic development.",
-    durationWeeks: 6,
-  },
-  {
-    id: "4",
-    name: "Complete Transformation",
-    type: "hybrid",
-    description: "Full workout and nutrition program for complete body recomposition.",
-    durationWeeks: 16,
-  },
-  {
-    id: "5",
-    name: "Muscle Gain Diet",
-    type: "nutrition",
-    description: "High-calorie, high-protein meal plan optimized for lean muscle gain.",
-    durationWeeks: 8,
-  },
+  { id: "1", name: "Beginner Strength Program", type: "workout", description: "Perfect for those new to weight training.", durationWeeks: 8 },
+  { id: "2", name: "Fat Loss Meal Plan", type: "nutrition", description: "Calorie-controlled meal plan with high protein.", durationWeeks: 12 },
+  { id: "3", name: "Advanced Hypertrophy", type: "workout", description: "High volume training program for muscle growth.", durationWeeks: 6 },
+  { id: "4", name: "Complete Transformation", type: "hybrid", description: "Full workout and nutrition program.", durationWeeks: 16 },
+  { id: "5", name: "Muscle Gain Diet", type: "nutrition", description: "High-calorie meal plan for lean muscle gain.", durationWeeks: 8 },
 ];
 
 const typeConfig = {
@@ -101,33 +71,25 @@ export function AssignPlanModal({ open, onOpenChange, clientName }: AssignPlanMo
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
             <ClipboardList className="h-5 w-5 text-primary" />
-            {t('plans.assignPlan')} {clientName && `${t('plans.to')} ${clientName}`}
+            {clientName ? t('assignPlanModal.titleWithClient', { clientName }) : t('assignPlanModal.title')}
           </DialogTitle>
           <DialogDescription className="sr-only">
             Select a training or nutrition plan to assign to this client
           </DialogDescription>
         </DialogHeader>
         
-        {/* Coming Soon Notice */}
         <div className="flex items-center gap-3 p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
           <Construction className="h-5 w-5 text-amber-500 flex-shrink-0" />
           <div>
-            <p className="text-sm font-medium text-amber-500">Coming Soon</p>
-            <p className="text-xs text-muted-foreground">
-              Plan assignment will connect to your saved workout and nutrition plans. This preview shows example plans.
-            </p>
+            <p className="text-sm font-medium text-amber-500">{t('assignPlanModal.comingSoon')}</p>
+            <p className="text-xs text-muted-foreground">{t('assignPlanModal.comingSoonDesc')}</p>
           </div>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t('plans.searchPlans')}
-              className="pl-10 bg-background border-border"
-            />
+            <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder={t('assignPlanModal.searchPlans')} className="pl-10 bg-background border-border" />
           </div>
 
           <ScrollArea className="h-[300px] pr-4">
@@ -138,34 +100,20 @@ export function AssignPlanModal({ open, onOpenChange, clientName }: AssignPlanMo
                 const isSelected = selectedPlan === plan.id;
                 
                 return (
-                  <div
-                    key={plan.id}
-                    onClick={() => setSelectedPlan(plan.id)}
-                    className={`p-4 rounded-lg border cursor-pointer transition-all ${
-                      isSelected
-                        ? "border-primary bg-primary/10"
-                        : "border-border bg-background hover:border-primary/50"
-                    }`}
-                  >
+                  <div key={plan.id} onClick={() => setSelectedPlan(plan.id)} className={`p-4 rounded-lg border cursor-pointer transition-all ${isSelected ? "border-primary bg-primary/10" : "border-border bg-background hover:border-primary/50"}`}>
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <h4 className="font-medium text-foreground">{plan.name}</h4>
-                          {isSelected && (
-                            <CheckCircle className="h-4 w-4 text-primary" />
-                          )}
+                          {isSelected && <CheckCircle className="h-4 w-4 text-primary" />}
                         </div>
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {plan.description}
-                        </p>
+                        <p className="text-sm text-muted-foreground line-clamp-2">{plan.description}</p>
                         <div className="flex items-center gap-2 mt-2">
                           <Badge variant="secondary" className={config.color}>
                             <Icon className="h-3 w-3 mr-1" />
-                            {plan.type}
+                            {t(`assignPlanModal.planTypes.${plan.type}`)}
                           </Badge>
-                          <span className="text-xs text-muted-foreground">
-                            {plan.durationWeeks} weeks
-                          </span>
+                          <span className="text-xs text-muted-foreground">{plan.durationWeeks} {t('assignPlanModal.weeks')}</span>
                         </div>
                       </div>
                     </div>
@@ -174,36 +122,24 @@ export function AssignPlanModal({ open, onOpenChange, clientName }: AssignPlanMo
               })}
               
               {filteredPlans.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  No plans found matching your search
-                </div>
+                <div className="text-center py-8 text-muted-foreground">{t('assignPlanModal.noPlansFound')}</div>
               )}
             </div>
           </ScrollArea>
 
           {selectedPlan && (
             <div className="space-y-2">
-              <Label htmlFor="startDate">Start Date</Label>
-              <Input
-                id="startDate"
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="bg-background border-border"
-              />
+              <Label htmlFor="startDate">{t('assignPlanModal.startDate')}</Label>
+              <Input id="startDate" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="bg-background border-border" />
             </div>
           )}
           
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              {t('assignPlanModal.cancel')}
             </Button>
             <Button type="submit" disabled={isLoading || !selectedPlan}>
-              {isLoading ? "Assigning..." : "Assign Plan"}
+              {isLoading ? t('assignPlanModal.assigning') : t('assignPlanModal.assignPlan')}
             </Button>
           </DialogFooter>
         </form>

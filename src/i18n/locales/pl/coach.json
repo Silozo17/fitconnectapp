@@ -87,6 +87,169 @@
     "message": "Wiadomość",
     "errorLoading": "Błąd ładowania klientów"
   },
+  "clientDetail": {
+    "pageTitle": "Szczegóły klienta",
+    "pageDescription": "Przeglądaj i zarządzaj szczegółami klienta.",
+    "backToClients": "Powrót do klientów",
+    "clientNotFound": "Nie znaleziono klienta",
+    "noAccessMessage": "Klient nie został znaleziony lub nie masz dostępu.",
+    "yearsOld": "lat",
+    "clientSince": "Klient od",
+    "unknown": "nieznany",
+    "tabs": {
+      "overview": "Przegląd",
+      "sessions": "Sesje",
+      "progress": "Postępy",
+      "plans": "Plany",
+      "habits": "Nawyki",
+      "notes": "Notatki"
+    },
+    "stats": {
+      "sessionsDone": "Ukończone sesje",
+      "upcoming": "Nadchodzące",
+      "currentWeight": "Aktualna waga",
+      "notes": "Notatki"
+    },
+    "overview": {
+      "fitnessGoals": "Cele fitness",
+      "noGoalsSet": "Brak ustawionych celów.",
+      "upcomingSessions": "Nadchodzące sesje",
+      "noUpcomingSessions": "Brak nadchodzących sesji"
+    },
+    "sessions": {
+      "sessionHistory": "Historia sesji",
+      "noSessionsYet": "Brak sesji"
+    },
+    "progress": {
+      "logProgress": "Zapisz postęp",
+      "weightAndBodyComposition": "Waga i skład ciała",
+      "bodyFatTrend": "Trend tkanki tłuszczowej",
+      "noProgressData": "Brak zapisanych danych o postępach",
+      "logFirstProgress": "Zapisz pierwszy wpis postępu",
+      "goalProgress": "Postęp celów"
+    },
+    "plans": {
+      "assignPlan": "Przypisz plan",
+      "noPlansAssigned": "Brak przypisanych planów",
+      "assignFirstPlan": "Przypisz pierwszy plan",
+      "assigned": "Przypisano",
+      "weeks": "tygodni",
+      "workoutPlan": "Plan treningowy",
+      "nutritionPlan": "Plan żywieniowy"
+    },
+    "notes": {
+      "addNote": "Dodaj notatkę",
+      "noNotesYet": "Brak notatek",
+      "addFirstNote": "Dodaj pierwszą notatkę"
+    }
+  },
+  "scheduleSessionModal": {
+    "title": "Zaplanuj sesję",
+    "titleWithClient": "Zaplanuj sesję z {{clientName}}",
+    "date": "Data",
+    "time": "Godzina",
+    "sessionType": "Typ sesji",
+    "selectType": "Wybierz typ",
+    "duration": "Czas trwania",
+    "onlineSession": "Sesja online",
+    "location": "Lokalizacja",
+    "locationPlaceholder": "Adres siłowni lub miejsce spotkania",
+    "sessionNotes": "Notatki do sesji (opcjonalnie)",
+    "sessionNotesPlaceholder": "Konkretne obszary do pracy lub notatki do tej sesji...",
+    "cancel": "Anuluj",
+    "scheduling": "Planowanie...",
+    "schedule": "Zaplanuj sesję",
+    "sessionTypes": {
+      "oneOnOne": "Trening 1-na-1",
+      "group": "Sesja grupowa",
+      "assessment": "Ocena",
+      "consultation": "Konsultacja",
+      "nutritionReview": "Przegląd żywienia"
+    },
+    "durations": {
+      "30min": "30 minut",
+      "45min": "45 minut",
+      "60min": "60 minut",
+      "90min": "90 minut",
+      "120min": "2 godziny"
+    }
+  },
+  "addNoteModal": {
+    "title": "Dodaj notatkę",
+    "titleWithClient": "Dodaj notatkę dla {{clientName}}",
+    "category": "Kategoria",
+    "noteContent": "Treść notatki",
+    "notePlaceholder": "Napisz swoją notatkę tutaj...",
+    "pinNote": "Przypnij tę notatkę",
+    "cancel": "Anuluj",
+    "saving": "Zapisywanie...",
+    "addNote": "Dodaj notatkę",
+    "categories": {
+      "general": "Ogólne",
+      "progress": "Postępy",
+      "injury": "Uraz",
+      "feedback": "Opinia",
+      "goal": "Cel"
+    }
+  },
+  "addProgressModal": {
+    "title": "Zapisz postęp",
+    "titleWithClient": "Zapisz postęp dla {{clientName}}",
+    "bodyComposition": "Skład ciała",
+    "weight": "Waga (kg)",
+    "bodyFat": "Tkanka tłuszczowa (%)",
+    "measurements": "Wymiary (cm)",
+    "chest": "Klatka piersiowa",
+    "waist": "Talia",
+    "hips": "Biodra",
+    "arms": "Ramiona",
+    "legs": "Nogi",
+    "notes": "Notatki (opcjonalnie)",
+    "notesPlaceholder": "Uwagi dotyczące tego pomiaru...",
+    "cancel": "Anuluj",
+    "saving": "Zapisywanie...",
+    "saveProgress": "Zapisz postęp"
+  },
+  "assignPlanModal": {
+    "title": "Przypisz plan",
+    "titleWithClient": "Przypisz plan do {{clientName}}",
+    "comingSoon": "Wkrótce",
+    "comingSoonDesc": "Przypisywanie planów zostanie połączone z zapisanymi planami treningowymi i żywieniowymi. Ten podgląd pokazuje przykładowe plany.",
+    "searchPlans": "Szukaj planów...",
+    "noPlansFound": "Nie znaleziono planów pasujących do wyszukiwania",
+    "startDate": "Data rozpoczęcia",
+    "cancel": "Anuluj",
+    "assigning": "Przypisywanie...",
+    "assignPlan": "Przypisz plan",
+    "weeks": "tygodni",
+    "planTypes": {
+      "workout": "treningowy",
+      "nutrition": "żywieniowy",
+      "hybrid": "hybrydowy"
+    }
+  },
+  "sessionDetailModal": {
+    "title": "Szczegóły sesji",
+    "sessionNotes": "Notatki z sesji",
+    "sessionNotesPlaceholder": "Dodaj notatki o tej sesji...",
+    "saveNotes": "Zapisz notatki",
+    "reschedule": "Przełóż",
+    "cancelSession": "Anuluj sesję",
+    "noShow": "Nieobecność",
+    "markComplete": "Oznacz jako ukończone",
+    "close": "Zamknij",
+    "onlineSession": "Sesja online",
+    "joinMeeting": "Dołącz do spotkania",
+    "createLink": "Utwórz link",
+    "locationTbd": "Lokalizacja do ustalenia",
+    "rescheduledFrom": "Przełożono z",
+    "status": {
+      "scheduled": "Zaplanowana",
+      "completed": "Ukończona",
+      "cancelled": "Anulowana",
+      "noShow": "Nieobecność"
+    }
+  },
   "planBuilder": {
     "title": "Kreator planów",
     "subtitle": "Twórz programy treningowe",
