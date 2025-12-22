@@ -94,14 +94,14 @@ const CoachOnboarding = () => {
     alsoClient: false,
   });
 
-  // Check if onboarding is already completed and get coach profile ID
+  // Check if onboarding is already completed and restore saved step
   useEffect(() => {
     const checkProfile = async () => {
       if (!user) return;
 
       const { data } = await supabase
         .from("coach_profiles")
-        .select("id, onboarding_completed")
+        .select("id, onboarding_completed, onboarding_progress")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -109,9 +109,21 @@ const CoachOnboarding = () => {
         navigate("/dashboard/coach");
       } else {
         setCoachProfileId(data?.id || null);
+        
+        // Restore saved step from onboarding_progress
+        const progress = data?.onboarding_progress as { current_step?: number; form_data?: typeof formData } | null;
+        if (progress?.current_step !== undefined && progress.current_step >= 0 && progress.current_step < STEPS.length) {
+          setCurrentStep(progress.current_step);
+        }
+        
+        // Restore saved form data if available
+        if (progress?.form_data) {
+          setFormData(prev => ({ ...prev, ...progress.form_data }));
+        }
+        
         setIsCheckingProfile(false);
         
-        // Check if returning from Stripe
+        // Check if returning from Stripe (overrides saved step)
         const stripeReturning = searchParams.get("stripe");
         if (stripeReturning === "returning") {
           setCurrentStep(4); // Go to Stripe step
@@ -121,6 +133,31 @@ const CoachOnboarding = () => {
 
     checkProfile();
   }, [user, navigate, searchParams]);
+
+  // Save current step and form data whenever they change
+  useEffect(() => {
+    const saveProgress = async () => {
+      if (!coachProfileId || isCheckingProfile) return;
+      
+      // Serialize formData to JSON-compatible format
+      const progressData = JSON.parse(JSON.stringify({
+        current_step: currentStep,
+        form_data: formData,
+        last_updated: new Date().toISOString(),
+      }));
+      
+      await supabase
+        .from("coach_profiles")
+        .update({
+          onboarding_progress: progressData
+        })
+        .eq("id", coachProfileId);
+    };
+    
+    // Debounce the save to avoid too many updates
+    const timer = setTimeout(saveProgress, 500);
+    return () => clearTimeout(timer);
+  }, [currentStep, formData, coachProfileId, isCheckingProfile]);
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

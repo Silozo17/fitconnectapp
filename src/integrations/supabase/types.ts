@@ -5577,6 +5577,7 @@ export type Database = {
         Returns: boolean
       }
       coach_is_visible: { Args: { check_coach_id: string }; Returns: boolean }
+      find_orphaned_auth_users: { Args: never; Returns: string[] }
       generate_product_slug: {
         Args: { product_id: string; title: string }
         Returns: string
