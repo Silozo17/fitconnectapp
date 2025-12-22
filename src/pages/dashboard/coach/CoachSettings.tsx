@@ -970,7 +970,7 @@ const CoachSettings = () => {
                                         : ""
                                     }`}
                                   >
-                                    {doc.status}
+                                    {statusConfig[doc.status as keyof typeof statusConfig]?.label || doc.status}
                                   </Badge>
                                   <Button
                                     variant="ghost"
