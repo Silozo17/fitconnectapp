@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,9 +32,10 @@ interface SortableImageCardProps {
   onDelete: (id: string) => void;
   onUpdateCaption: (id: string, caption: string) => void;
   isDeleting: boolean;
+  t: (key: string) => string;
 }
 
-function SortableImageCard({ image, onDelete, onUpdateCaption, isDeleting }: SortableImageCardProps) {
+function SortableImageCard({ image, onDelete, onUpdateCaption, isDeleting, t }: SortableImageCardProps) {
   const [caption, setCaption] = useState(image.caption || "");
   const {
     attributes,
@@ -74,7 +76,7 @@ function SortableImageCard({ image, onDelete, onUpdateCaption, isDeleting }: Sor
       
       <div className="p-2 space-y-2">
         <Input
-          placeholder="Add caption..."
+          placeholder={t("marketplace.galleryCaptionPlaceholder")}
           value={caption}
           onChange={(e) => setCaption(e.target.value)}
           onBlur={() => {
@@ -96,7 +98,7 @@ function SortableImageCard({ image, onDelete, onUpdateCaption, isDeleting }: Sor
           ) : (
             <>
               <Trash2 className="h-3 w-3 mr-1" />
-              Remove
+              {t("marketplace.galleryRemove")}
             </>
           )}
         </Button>
@@ -110,6 +112,7 @@ interface CoachGalleryUploadProps {
 }
 
 export function CoachGalleryUpload({ userId }: CoachGalleryUploadProps) {
+  const { t } = useTranslation("settings");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewSrc, setPreviewSrc] = useState<string | null>(null);
   const [showCropper, setShowCropper] = useState(false);
@@ -206,7 +209,7 @@ export function CoachGalleryUpload({ userId }: CoachGalleryUploadProps) {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-lg flex items-center gap-2">
-              Gallery Images
+              {t("marketplace.galleryTitle")}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
@@ -214,15 +217,14 @@ export function CoachGalleryUpload({ userId }: CoachGalleryUploadProps) {
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs">
                     <p className="text-sm">
-                      <strong>Recommended:</strong> 1200×800px minimum, 4:3 aspect ratio.
-                      Max 5MB per image. JPG or PNG format.
+                      {t("marketplace.galleryRecommended")}
                     </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </CardTitle>
             <CardDescription>
-              Showcase your work with up to 5 photos ({images.length}/5)
+              {t("marketplace.galleryShowcase")} ({images.length}/5)
             </CardDescription>
           </div>
           <input
@@ -243,7 +245,7 @@ export function CoachGalleryUpload({ userId }: CoachGalleryUploadProps) {
             ) : (
               <Camera className="h-4 w-4 mr-2" />
             )}
-            Add Photo
+            {t("marketplace.galleryAddPhoto")}
           </Button>
         </div>
       </CardHeader>
@@ -255,10 +257,10 @@ export function CoachGalleryUpload({ userId }: CoachGalleryUploadProps) {
           >
             <ImageIcon className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
             <p className="text-sm text-muted-foreground">
-              Click to upload your first gallery image
+              {t("marketplace.galleryEmptyTitle")}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Show clients who you work with and your training style
+              {t("marketplace.galleryEmptyDesc")}
             </p>
           </div>
         ) : (
@@ -276,6 +278,7 @@ export function CoachGalleryUpload({ userId }: CoachGalleryUploadProps) {
                     onDelete={(id) => deleteImage.mutate(id)}
                     onUpdateCaption={(id, caption) => updateCaption.mutate({ id, caption })}
                     isDeleting={deleteImage.isPending}
+                    t={t}
                   />
                 ))}
               </div>
@@ -285,7 +288,7 @@ export function CoachGalleryUpload({ userId }: CoachGalleryUploadProps) {
 
         {!canAddMore && (
           <p className="text-xs text-muted-foreground mt-4 text-center">
-            Maximum 5 gallery images reached. Remove one to add more.
+            {t("marketplace.galleryMaxReached")}
           </p>
         )}
       </CardContent>

@@ -469,7 +469,48 @@
     "groupClasses": "Group Classes",
     "groupClassesDesc": "Manage your group training sessions and waitlists",
     "socialLinks": "Social Media & Links",
-    "socialLinksDesc": "Connect your social profiles so clients can learn more about you"
+    "socialLinksDesc": "Connect your social profiles so clients can learn more about you",
+    "cardImageChange": "Change",
+    "cardImageUpload": "Upload",
+    "cardImageRemove": "Remove",
+    "cardImageHint": "Upload a landscape photo optimized for your marketplace listing. This is separate from your profile picture.",
+    "galleryTitle": "Gallery Images",
+    "galleryShowcase": "Showcase your work with up to 5 photos",
+    "galleryAddPhoto": "Add Photo",
+    "galleryEmptyTitle": "Click to upload your first gallery image",
+    "galleryEmptyDesc": "Show clients who you work with and your training style",
+    "galleryMaxReached": "Maximum 5 gallery images reached. Remove one to add more.",
+    "galleryCaptionPlaceholder": "Add caption...",
+    "galleryRemove": "Remove",
+    "galleryRecommended": "Recommended: 1200×800px minimum, 4:3 aspect ratio. Max 5MB per image. JPG or PNG format.",
+    "specialtiesTitle": "Specialties & Coach Types",
+    "specialtiesSelected": "Selected specialties:",
+    "specialtiesAddCustom": "Add Custom Specialty",
+    "specialtiesCustomHint": "Can't find your specialty? Add a custom one that best describes your expertise.",
+    "specialtiesCustomPlaceholder": "Enter custom specialty...",
+    "specialtiesAdd": "Add",
+    "specialtiesCancel": "Cancel"
+  },
+  
+  "profileCompletion": {
+    "title": "Profile Completion",
+    "complete": "Profile complete!",
+    "percentage": "Profile completion:",
+    "items": "items",
+    "next": "Next:",
+    "more": "more",
+    "tasks": {
+      "profile_photo": "Profile photo",
+      "bio": "Bio",
+      "specialisations": "Coach specialisations",
+      "experience": "Years of experience",
+      "location": "Location",
+      "availability": "Session availability",
+      "who_i_work_with": "Who you work with",
+      "gallery": "Gallery images",
+      "social_links": "Social media links",
+      "stripe_connected": "Connect Stripe"
+    }
   },
 
   "services": {

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, AlertCircle, Sparkles, Loader2 } from "lucide-react";
@@ -5,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useProfileCompletion } from "@/hooks/useProfileCompletion";
 
 export function ProfileCompletionProgress() {
+  const { t } = useTranslation("settings");
   const { data, isLoading } = useProfileCompletion();
 
   if (isLoading) {
@@ -30,6 +32,14 @@ export function ProfileCompletionProgress() {
   const { percentage, completedCount, totalCount, incompleteItems } = data;
   const isComplete = percentage === 100;
 
+  // Translate task labels using task IDs
+  const translateTaskLabel = (taskId: string): string => {
+    const key = `profileCompletion.tasks.${taskId}`;
+    const translated = t(key);
+    // If translation key not found, return original
+    return translated === key ? taskId : translated;
+  };
+
   return (
     <Card className={cn(
       "border-border/50 overflow-hidden",
@@ -54,13 +64,13 @@ export function ProfileCompletionProgress() {
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">
                 {isComplete ? (
-                  "Profile complete!"
+                  t("profileCompletion.complete")
                 ) : (
-                  <>Profile completion: <span className="text-primary">{percentage}%</span></>
+                  <>{t("profileCompletion.percentage")} <span className="text-primary">{percentage}%</span></>
                 )}
               </span>
               <span className="text-xs text-muted-foreground">
-                {completedCount} / {totalCount} items
+                {completedCount} / {totalCount} {t("profileCompletion.items")}
               </span>
             </div>
             
@@ -71,9 +81,9 @@ export function ProfileCompletionProgress() {
             
             {!isComplete && incompleteItems.length > 0 && (
               <p className="text-xs text-muted-foreground mt-2 truncate">
-                <span className="text-foreground/70">Next:</span>{" "}
-                {incompleteItems.slice(0, 2).map(i => i.label).join(", ")}
-                {incompleteItems.length > 2 && ` +${incompleteItems.length - 2} more`}
+                <span className="text-foreground/70">{t("profileCompletion.next")}</span>{" "}
+                {incompleteItems.slice(0, 2).map(i => translateTaskLabel(i.id)).join(", ")}
+                {incompleteItems.length > 2 && ` +${incompleteItems.length - 2} ${t("profileCompletion.more")}`}
               </p>
             )}
           </div>

@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Camera, Loader2, Trash2, ImageIcon } from "lucide-react";
 import { CardImageCropperModal } from "./CardImageCropperModal";
@@ -16,6 +17,7 @@ export function CardImageUpload({
   userId,
   onImageChange,
 }: CardImageUploadProps) {
+  const { t } = useTranslation("settings");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewSrc, setPreviewSrc] = useState<string | null>(null);
   const [showCropper, setShowCropper] = useState(false);
@@ -120,7 +122,7 @@ export function CardImageUpload({
             disabled={uploading}
           >
             <Camera className="w-4 h-4 mr-2" />
-            {currentImageUrl ? "Change" : "Upload"}
+            {currentImageUrl ? t("marketplace.cardImageChange") : t("marketplace.cardImageUpload")}
           </Button>
           {currentImageUrl && (
             <Button
@@ -132,15 +134,14 @@ export function CardImageUpload({
               className="text-destructive hover:text-destructive"
             >
               <Trash2 className="w-4 h-4 mr-2" />
-              Remove
+              {t("marketplace.cardImageRemove")}
             </Button>
           )}
         </div>
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Upload a landscape photo optimized for your marketplace listing. 
-        This is separate from your profile picture.
+        {t("marketplace.cardImageHint")}
       </p>
 
       {/* Cropper Modal */}
