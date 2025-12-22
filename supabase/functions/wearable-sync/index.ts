@@ -92,6 +92,31 @@ serve(async (req) => {
 
     console.log(`Synced ${healthData.length} data points for ${provider}`);
 
+    // Trigger challenge progress sync and health achievement check
+    if (healthData.length > 0) {
+      console.log("Triggering challenge progress sync and achievement check...");
+      
+      // Call sync-challenge-progress
+      await fetch(`${SUPABASE_URL}/functions/v1/sync-challenge-progress`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        },
+        body: JSON.stringify({ clientId: client_id }),
+      }).catch(err => console.error("Error calling sync-challenge-progress:", err));
+
+      // Call check-health-achievements
+      await fetch(`${SUPABASE_URL}/functions/v1/check-health-achievements`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        },
+        body: JSON.stringify({ clientId: client_id }),
+      }).catch(err => console.error("Error calling check-health-achievements:", err));
+    }
+
     return new Response(
       JSON.stringify({ success: true, dataPoints: healthData.length }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }

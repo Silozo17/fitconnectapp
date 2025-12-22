@@ -200,3 +200,9 @@ verify_jwt = false
 
 [functions.admin-normalize-locations]
 verify_jwt = true
+
+[functions.sync-challenge-progress]
+verify_jwt = true
+
+[functions.check-health-achievements]
+verify_jwt = true
