@@ -480,7 +480,22 @@
     },
     "testimonials": {
       "title": "What Coaches",
-      "titleHighlight": "Are Saying"
+      "titleHighlight": "Are Saying",
+      "mike": {
+        "quote": "FitConnect transformed my coaching business. I've tripled my client base in just 6 months.",
+        "author": "Mike Thompson",
+        "role": "Personal Trainer"
+      },
+      "sarah": {
+        "quote": "The platform handles all the admin work so I can focus on what I love—training clients.",
+        "author": "Sarah Chen",
+        "role": "Fitness Coach"
+      },
+      "marcus": {
+        "quote": "Best decision I made for my career. The exposure and tools are incredible.",
+        "author": "Marcus Williams",
+        "role": "Strength Coach"
+      }
     },
     "requirements": {
       "title": "Coach Requirements",

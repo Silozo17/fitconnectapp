@@ -480,7 +480,22 @@
     },
     "testimonials": {
       "title": "Co mówią",
-      "titleHighlight": "trenerzy"
+      "titleHighlight": "trenerzy",
+      "mike": {
+        "quote": "FitConnect odmienił mój biznes trenerski. Potroiłem bazę klientów w zaledwie 6 miesięcy.",
+        "author": "Mike Thompson",
+        "role": "Trener personalny"
+      },
+      "sarah": {
+        "quote": "Platforma zajmuje się całą administracją, więc mogę skupić się na tym, co kocham — trenowaniu klientów.",
+        "author": "Sarah Chen",
+        "role": "Trener fitness"
+      },
+      "marcus": {
+        "quote": "Najlepsza decyzja, jaką podjąłem dla mojej kariery. Ekspozycja i narzędzia są niesamowite.",
+        "author": "Marcus Williams",
+        "role": "Trener siłowy"
+      }
     },
     "requirements": {
       "title": "Wymagania dla trenerów",
