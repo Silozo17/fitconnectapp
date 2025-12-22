@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { format } from "date-fns";
-import { CalendarIcon, Clock, MapPin, Video, Loader2, PoundSterling } from "lucide-react";
+import { CalendarIcon, Clock, MapPin, Video, Loader2, PoundSterling, AlertCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -28,15 +28,18 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useSessionTypes } from "@/hooks/useCoachSchedule";
 import { useCreateSessionOffer } from "@/hooks/useSessionOffers";
+import { useParticipantClientProfileId } from "@/hooks/useParticipantClientProfileId";
 import { cn } from "@/lib/utils";
 
 interface SessionOfferDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   coachId: string;
-  clientId: string;
+  /** The auth user_id of the participant (will be converted to client_profile.id) */
+  participantUserId: string;
   onOfferCreated?: (offerId: string, offerDetails: string) => void;
 }
 
@@ -58,11 +61,15 @@ const SessionOfferDialog = ({
   open,
   onOpenChange,
   coachId,
-  clientId,
+  participantUserId,
   onOfferCreated,
 }: SessionOfferDialogProps) => {
   const { data: sessionTypes = [] } = useSessionTypes(coachId);
   const createOffer = useCreateSessionOffer();
+  
+  // Convert user_id to client_profile.id
+  const { clientProfileId, hasClientProfile, isLoading: isLoadingProfile } = 
+    useParticipantClientProfileId(participantUserId);
 
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTime, setSelectedTime] = useState("10:00");
@@ -75,7 +82,7 @@ const SessionOfferDialog = ({
   const [notes, setNotes] = useState("");
 
   const handleSubmit = async () => {
-    if (!selectedDate) return;
+    if (!selectedDate || !clientProfileId) return;
 
     const [hours, minutes] = selectedTime.split(":").map(Number);
     const proposedDate = new Date(selectedDate);
@@ -83,7 +90,7 @@ const SessionOfferDialog = ({
 
     const offer = await createOffer.mutateAsync({
       coach_id: coachId,
-      client_id: clientId,
+      client_id: clientProfileId, // Use the resolved client_profile.id
       session_type: sessionType,
       proposed_date: proposedDate,
       duration_minutes: parseInt(duration),
@@ -121,6 +128,8 @@ const SessionOfferDialog = ({
     setNotes("");
   };
 
+  const canSubmit = selectedDate && hasClientProfile && !isLoadingProfile;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
@@ -130,6 +139,24 @@ const SessionOfferDialog = ({
             Send a session proposal for the client to accept or decline
           </DialogDescription>
         </DialogHeader>
+
+        {/* Show error if user doesn't have a client profile */}
+        {!isLoadingProfile && !hasClientProfile && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              This user doesn't have a client profile. They need to create one to receive session offers.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Show loading state while checking profile */}
+        {isLoadingProfile && (
+          <div className="flex items-center justify-center py-4">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            <span className="ml-2 text-sm text-muted-foreground">Checking client profile...</span>
+          </div>
+        )}
 
         <div className="space-y-4 py-4">
           {/* Date & Time */}
@@ -145,6 +172,7 @@ const SessionOfferDialog = ({
                       "w-full justify-start text-left font-normal",
                       !selectedDate && "text-muted-foreground"
                     )}
+                    disabled={!hasClientProfile}
                   >
                     <CalendarIcon className="mr-2 h-3 w-3" />
                     {selectedDate ? format(selectedDate, "PPP") : "Pick date"}
@@ -163,7 +191,7 @@ const SessionOfferDialog = ({
             </div>
             <div className="space-y-2">
               <Label className="text-xs">Time</Label>
-              <Select value={selectedTime} onValueChange={setSelectedTime}>
+              <Select value={selectedTime} onValueChange={setSelectedTime} disabled={!hasClientProfile}>
                 <SelectTrigger className="h-9">
                   <SelectValue />
                 </SelectTrigger>
@@ -182,7 +210,7 @@ const SessionOfferDialog = ({
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label className="text-xs">Duration</Label>
-              <Select value={duration} onValueChange={setDuration}>
+              <Select value={duration} onValueChange={setDuration} disabled={!hasClientProfile}>
                 <SelectTrigger className="h-9">
                   <SelectValue />
                 </SelectTrigger>
@@ -197,7 +225,7 @@ const SessionOfferDialog = ({
             </div>
             <div className="space-y-2">
               <Label className="text-xs">Session Type</Label>
-              <Select value={sessionType} onValueChange={setSessionType}>
+              <Select value={sessionType} onValueChange={setSessionType} disabled={!hasClientProfile}>
                 <SelectTrigger className="h-9">
                   <SelectValue />
                 </SelectTrigger>
@@ -220,7 +248,7 @@ const SessionOfferDialog = ({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label className="text-xs">Free Session</Label>
-              <Switch checked={isFree} onCheckedChange={setIsFree} />
+              <Switch checked={isFree} onCheckedChange={setIsFree} disabled={!hasClientProfile} />
             </div>
             {!isFree && (
               <div className="relative">
@@ -231,6 +259,7 @@ const SessionOfferDialog = ({
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   className="pl-9 h-9"
+                  disabled={!hasClientProfile}
                 />
               </div>
             )}
@@ -243,15 +272,16 @@ const SessionOfferDialog = ({
               value={isOnline ? "online" : "in-person"}
               onValueChange={(v) => setIsOnline(v === "online")}
               className="flex gap-4"
+              disabled={!hasClientProfile}
             >
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="online" id="offer-online" />
+                <RadioGroupItem value="online" id="offer-online" disabled={!hasClientProfile} />
                 <Label htmlFor="offer-online" className="cursor-pointer flex items-center gap-1 text-sm">
                   <Video className="w-3 h-3" /> Online
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="in-person" id="offer-inperson" />
+                <RadioGroupItem value="in-person" id="offer-inperson" disabled={!hasClientProfile} />
                 <Label htmlFor="offer-inperson" className="cursor-pointer flex items-center gap-1 text-sm">
                   <MapPin className="w-3 h-3" /> In-Person
                 </Label>
@@ -267,6 +297,7 @@ const SessionOfferDialog = ({
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="Enter location"
                 className="h-9"
+                disabled={!hasClientProfile}
               />
             </div>
           )}
@@ -280,6 +311,7 @@ const SessionOfferDialog = ({
               placeholder="Add a personal message..."
               rows={2}
               className="resize-none"
+              disabled={!hasClientProfile}
             />
           </div>
         </div>
@@ -290,7 +322,7 @@ const SessionOfferDialog = ({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={!selectedDate || createOffer.isPending}
+            disabled={!canSubmit || createOffer.isPending}
             size="sm"
           >
             {createOffer.isPending ? (

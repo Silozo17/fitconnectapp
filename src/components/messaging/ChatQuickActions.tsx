@@ -40,11 +40,12 @@ import SessionOfferDialog from "./SessionOfferDialog";
 
 interface ChatQuickActionsProps {
   coachId: string;
-  clientId?: string;
+  /** The auth user_id of the participant (not client_profile.id) */
+  participantUserId?: string;
   onSendMessage: (message: string) => Promise<boolean>;
 }
 
-const ChatQuickActions = ({ coachId, clientId, onSendMessage }: ChatQuickActionsProps) => {
+const ChatQuickActions = ({ coachId, participantUserId, onSendMessage }: ChatQuickActionsProps) => {
   const [showPricingDialog, setShowPricingDialog] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [showTemplatesPopover, setShowTemplatesPopover] = useState(false);
@@ -211,7 +212,7 @@ const ChatQuickActions = ({ coachId, clientId, onSendMessage }: ChatQuickActions
       </Button>
 
       {/* Session Offer Button */}
-      {clientId && (
+      {participantUserId && (
         <Button
           variant="outline"
           size="sm"
@@ -297,7 +298,7 @@ const ChatQuickActions = ({ coachId, clientId, onSendMessage }: ChatQuickActions
                 <span className="text-xs">Book</span>
               </Button>
 
-              {clientId && (
+              {participantUserId && (
                 <Button
                   variant="outline"
                   className="h-14 flex-col gap-1 border-primary/30 text-primary"
@@ -412,12 +413,12 @@ const ChatQuickActions = ({ coachId, clientId, onSendMessage }: ChatQuickActions
       </Dialog>
 
       {/* Session Offer Dialog */}
-      {clientId && (
+      {participantUserId && (
         <SessionOfferDialog
           open={showSessionOfferDialog}
           onOpenChange={setShowSessionOfferDialog}
           coachId={coachId}
-          clientId={clientId}
+          participantUserId={participantUserId}
           onOfferCreated={async (offerId, offerDetails) => {
             await onSendMessage(offerDetails);
           }}
