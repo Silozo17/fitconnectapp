@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useFoods, useFoodCategories, Food, FoodCategory } from '@/hooks/useFoods';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const iconMap: Record<string, React.ElementType> = {
   Drumstick,
@@ -22,6 +23,7 @@ interface FoodLibraryProps {
 }
 
 export const FoodLibrary = ({ onAddFood }: FoodLibraryProps) => {
+  const { t } = useTranslation('coach');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>();
   
@@ -35,13 +37,15 @@ export const FoodLibrary = ({ onAddFood }: FoodLibraryProps) => {
 
   return (
     <div className="bg-card border border-border rounded-xl p-4 h-full flex flex-col">
-      <h3 className="text-lg font-semibold text-foreground mb-4">Food Library</h3>
+      <h3 className="text-lg font-semibold text-foreground mb-4">
+        {t('nutritionBuilder.foodLibrary.title')}
+      </h3>
       
       {/* Search */}
       <div className="relative mb-4">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search foods..."
+          placeholder={t('nutritionBuilder.foodLibrary.searchPlaceholder')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-10 bg-background border-border"
@@ -55,7 +59,7 @@ export const FoodLibrary = ({ onAddFood }: FoodLibraryProps) => {
           className={`cursor-pointer ${!selectedCategory ? 'bg-primary text-primary-foreground' : 'hover:bg-primary/10'}`}
           onClick={() => setSelectedCategory(undefined)}
         >
-          All
+          {t('nutritionBuilder.foodLibrary.all')}
         </Badge>
         {categories?.map((category) => {
           const Icon = getIcon(category.icon);
@@ -77,9 +81,13 @@ export const FoodLibrary = ({ onAddFood }: FoodLibraryProps) => {
       <ScrollArea className="flex-1">
         <div className="space-y-2 pr-4">
           {isLoading ? (
-            <div className="text-center text-muted-foreground py-8">Loading foods...</div>
+            <div className="text-center text-muted-foreground py-8">
+              {t('nutritionBuilder.foodLibrary.loading')}
+            </div>
           ) : foods?.length === 0 ? (
-            <div className="text-center text-muted-foreground py-8">No foods found</div>
+            <div className="text-center text-muted-foreground py-8">
+              {t('nutritionBuilder.foodLibrary.noFoods')}
+            </div>
           ) : (
             foods?.map((food) => {
               const Icon = getIcon(food.food_categories?.icon || null);
@@ -94,11 +102,13 @@ export const FoodLibrary = ({ onAddFood }: FoodLibraryProps) => {
                         <Icon className="h-4 w-4 text-primary shrink-0" />
                         <span className="font-medium text-foreground truncate">{food.name}</span>
                         {food.is_custom && (
-                          <Badge variant="outline" className="text-xs shrink-0">Custom</Badge>
+                          <Badge variant="outline" className="text-xs shrink-0">
+                            {t('nutritionBuilder.foodLibrary.custom')}
+                          </Badge>
                         )}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {food.serving_description} · {food.calories_per_100g} cal/100g
+                        {food.serving_description} · {food.calories_per_100g} {t('nutritionBuilder.foodLibrary.calPer100g')}
                       </div>
                       <div className="flex gap-3 mt-1 text-xs">
                         <span className="text-red-400">P: {food.protein_g}g</span>

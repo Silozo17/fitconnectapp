@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Meal, MealFood, calculateMealMacros } from '@/hooks/useFoods';
 import { MacroTracker } from './MacroTracker';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface MealCardProps {
   meal: Meal;
@@ -13,6 +14,7 @@ interface MealCardProps {
 }
 
 export const MealCard = ({ meal, onUpdateMeal, onDeleteMeal }: MealCardProps) => {
+  const { t } = useTranslation('coach');
   const [isOpen, setIsOpen] = useState(true);
   const macros = calculateMealMacros(meal.foods);
 
@@ -103,7 +105,7 @@ export const MealCard = ({ meal, onUpdateMeal, onDeleteMeal }: MealCardProps) =>
             {/* Foods List */}
             {meal.foods.length === 0 ? (
               <div className="text-center text-muted-foreground py-6 border border-dashed border-border rounded-lg">
-                Add foods from the library
+                {t('nutritionBuilder.foodLibrary.addFoodsFromLibrary')}
               </div>
             ) : (
               <div className="space-y-2">

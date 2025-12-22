@@ -220,7 +220,28 @@
     "loading": "Ładowanie planu...",
     "day": "Dzień",
     "meal": "Posiłek",
-    "addedFood": "Dodano {{food}} do {{meal}}"
+    "addedFood": "Dodano {{food}} do {{meal}}",
+    "foodLibrary": {
+      "title": "Biblioteka produktów",
+      "searchPlaceholder": "Szukaj produktów...",
+      "all": "Wszystko",
+      "loading": "Ładowanie produktów...",
+      "noFoods": "Nie znaleziono produktów",
+      "custom": "Własne",
+      "calPer100g": "kcal/100g",
+      "addFoodsFromLibrary": "Dodaj produkty z biblioteki"
+    },
+    "categories": {
+      "proteins": "Białka",
+      "carbohydrates": "Węglowodany",
+      "vegetables": "Warzywa",
+      "fruits": "Owoce",
+      "dairy": "Nabiał",
+      "fatsAndOils": "Tłuszcze i oleje",
+      "snacks": "Przekąski",
+      "beverages": "Napoje"
+    },
+    "dailyMacros": "Dzienne makro"
   },
   "workoutBuilder": {
     "title": "Utwórz plan",
@@ -265,6 +286,26 @@
       "day1Push": "Dzień 1 - Wypychanie",
       "day2Pull": "Dzień 2 - Przyciąganie",
       "day3Legs": "Dzień 3 - Nogi"
+    },
+    "exerciseLibrary": {
+      "title": "Biblioteka ćwiczeń",
+      "searchPlaceholder": "Szukaj ćwiczeń...",
+      "allCategories": "Wszystkie kategorie",
+      "noExercises": "Nie znaleziono ćwiczeń",
+      "createCustom": "Utwórz własne ćwiczenie",
+      "uncategorized": "Bez kategorii",
+      "exercises": "ćwiczenia",
+      "addExercise": "Dodaj ćwiczenie"
+    },
+    "categories": {
+      "chest": "Klatka piersiowa",
+      "back": "Plecy",
+      "shoulders": "Barki",
+      "arms": "Ramiona",
+      "legs": "Nogi",
+      "core": "Mięśnie brzucha",
+      "cardio": "Kardio",
+      "fullBody": "Całe ciało"
     }
   },
   "packages": {

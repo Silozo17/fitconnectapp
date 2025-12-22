@@ -220,7 +220,28 @@
     "loading": "Loading plan...",
     "day": "Day",
     "meal": "Meal",
-    "addedFood": "Added {{food}} to {{meal}}"
+    "addedFood": "Added {{food}} to {{meal}}",
+    "foodLibrary": {
+      "title": "Food Library",
+      "searchPlaceholder": "Search foods...",
+      "all": "All",
+      "loading": "Loading foods...",
+      "noFoods": "No foods found",
+      "custom": "Custom",
+      "calPer100g": "cal/100g",
+      "addFoodsFromLibrary": "Add foods from the library"
+    },
+    "categories": {
+      "proteins": "Proteins",
+      "carbohydrates": "Carbohydrates",
+      "vegetables": "Vegetables",
+      "fruits": "Fruits",
+      "dairy": "Dairy",
+      "fatsAndOils": "Fats & Oils",
+      "snacks": "Snacks",
+      "beverages": "Beverages"
+    },
+    "dailyMacros": "Daily Macros"
   },
   "workoutBuilder": {
     "title": "Create Plan",
@@ -265,6 +286,26 @@
       "day1Push": "Day 1 - Push",
       "day2Pull": "Day 2 - Pull",
       "day3Legs": "Day 3 - Legs"
+    },
+    "exerciseLibrary": {
+      "title": "Exercise Library",
+      "searchPlaceholder": "Search exercises...",
+      "allCategories": "All Categories",
+      "noExercises": "No exercises found",
+      "createCustom": "Create Custom Exercise",
+      "uncategorized": "Uncategorized",
+      "exercises": "exercises",
+      "addExercise": "Add Exercise"
+    },
+    "categories": {
+      "chest": "Chest",
+      "back": "Back",
+      "shoulders": "Shoulders",
+      "arms": "Arms",
+      "legs": "Legs",
+      "core": "Core",
+      "cardio": "Cardio",
+      "fullBody": "Full Body"
     }
   },
   "packages": {
