@@ -17,6 +17,15 @@ import {
   Trophy,
   LucideIcon,
   HelpCircle,
+  Footprints,
+  Flame,
+  Timer,
+  MapPin,
+  Map,
+  Globe,
+  Moon,
+  Watch,
+  Bluetooth,
 } from "lucide-react";
 
 // Map badge icon names stored in DB to actual Lucide components
@@ -26,7 +35,7 @@ export const BADGE_ICON_MAP: Record<string, LucideIcon> = {
   UserPlus,
   Dumbbell,
   Star,
-  MessageSquareStar: Star, // Alias since MessageSquareStar doesn't exist
+  MessageSquareStar: Star,
   CircleDollarSign,
   TrendingUp,
   Rocket,
@@ -38,6 +47,25 @@ export const BADGE_ICON_MAP: Record<string, LucideIcon> = {
   Award,
   Crown,
   Trophy,
+  // Health badge icons (lowercase DB values)
+  footprints: Footprints,
+  Footprints,
+  flame: Flame,
+  Flame,
+  timer: Timer,
+  Timer,
+  "map-pin": MapPin,
+  MapPin,
+  map: Map,
+  Map,
+  globe: Globe,
+  Globe,
+  moon: Moon,
+  Moon,
+  watch: Watch,
+  Watch,
+  bluetooth: Bluetooth,
+  Bluetooth,
 };
 
 export function getBadgeIcon(iconName: string): LucideIcon {
