@@ -1072,6 +1072,56 @@
       "rare": "Rare",
       "epic": "Epic",
       "legendary": "Legendary"
+    },
+    "badges": {
+      "profile_starter": {
+        "name": "Profile Starter",
+        "description": "Complete 50% of your coach profile"
+      },
+      "profile_pro": {
+        "name": "Profile Pro",
+        "description": "Complete 100% of your coach profile"
+      },
+      "first_client": {
+        "name": "First Client",
+        "description": "Accept your first client connection"
+      },
+      "first_review": {
+        "name": "First Review",
+        "description": "Receive your first client review"
+      },
+      "first_session": {
+        "name": "First Session",
+        "description": "Complete your first coaching session"
+      },
+      "first_earning": {
+        "name": "First Earning",
+        "description": "Receive your first payment"
+      },
+      "session_pro": {
+        "name": "Session Pro",
+        "description": "Complete 50 coaching sessions"
+      },
+      "rising_star": {
+        "name": "Rising Star",
+        "description": "Earn £1,000 through the platform"
+      },
+      "growing_business": {
+        "name": "Growing Business",
+        "description": "Reach 10 active clients"
+      },
+      "coaching_star": {
+        "name": "Coaching Star",
+        "description": "Reach 50 active clients"
+      },
+      "verified_coach": {
+        "name": "Verified Coach",
+        "description": "Complete the verification process"
+      },
+      "highly_rated": {
+        "name": "Highly Rated",
+        "description": "Maintain 4.5+ rating with 10+ reviews"
+      }
     }
   },
   "reviewsPage": {
