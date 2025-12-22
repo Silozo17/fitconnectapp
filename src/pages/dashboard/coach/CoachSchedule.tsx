@@ -64,8 +64,8 @@ import { getCurrencySymbol, type CurrencyCode } from "@/lib/currency";
 import { useCoachBoostStatus } from "@/hooks/useCoachBoost";
 import { useExternalCalendarEvents, useSyncExternalCalendar } from "@/hooks/useExternalCalendarEvents";
 
-const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+// Day names used for availability - will be translated
+const dayIndexMap = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"] as const;
 // Full 24-hour time slots
 const timeSlots = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")}:00`);
 
@@ -74,8 +74,18 @@ type DepositType = "percentage" | "fixed";
 
 const CoachSchedule = () => {
   const { user } = useAuth();
-  const { t } = useTranslation('booking');
+  const { t } = useTranslation('coach');
   const queryClient = useQueryClient();
+  
+  // Translated day arrays
+  const weekDays = [
+    t("schedule.days.mon"), t("schedule.days.tue"), t("schedule.days.wed"),
+    t("schedule.days.thu"), t("schedule.days.fri"), t("schedule.days.sat"), t("schedule.days.sun")
+  ];
+  const dayNames = [
+    t("schedule.days.sunday"), t("schedule.days.monday"), t("schedule.days.tuesday"),
+    t("schedule.days.wednesday"), t("schedule.days.thursday"), t("schedule.days.friday"), t("schedule.days.saturday")
+  ];
   const [coachId, setCoachId] = useState<string | null>(null);
   const [coachCurrency, setCoachCurrency] = useState<CurrencyCode>("GBP");
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
@@ -227,7 +237,7 @@ const CoachSchedule = () => {
         },
         () => {
           queryClient.invalidateQueries({ queryKey: ["booking-requests"] });
-          toast.info("New booking request received!");
+          toast.info(t("schedule.newBookingRequest"));
         }
       )
       .subscribe();
@@ -245,10 +255,10 @@ const CoachSchedule = () => {
     try {
       await syncCalendar();
       await refetchExternalEvents();
-      toast.success("Calendars synced successfully");
+      toast.success(t("schedule.calendarsSuccess"));
     } catch (error) {
       console.error("Failed to sync calendars:", error);
-      toast.error("Failed to sync calendars");
+      toast.error(t("schedule.calendarsFailed"));
     } finally {
       setIsSyncing(false);
     }
@@ -336,7 +346,7 @@ const CoachSchedule = () => {
       
       if (otherPaymentSessions.length === 0) {
         toast.error(
-          "Cannot remove payment requirement - Boost requires at least one session type with payment enabled. Disable Boost first if you want to remove all payment requirements.",
+          t("schedule.sessionTypeModal.boostPaymentError"),
           { duration: 6000 }
         );
         return;
@@ -411,7 +421,7 @@ const CoachSchedule = () => {
       return (
         <Badge className="bg-success/20 text-success border-success/30">
           <CreditCard className="w-3 h-3 mr-1" />
-          Paid {formatCurrency(amountPaid, currency)}
+          {t("schedule.payment.paid")} {formatCurrency(amountPaid, currency)}
         </Badge>
       );
     }
@@ -420,7 +430,7 @@ const CoachSchedule = () => {
       return (
         <Badge className="bg-primary/20 text-primary border-primary/30">
           <Banknote className="w-3 h-3 mr-1" />
-          Deposit Paid {formatCurrency(amountPaid, currency)}
+          {t("schedule.payment.depositPaid")} {formatCurrency(amountPaid, currency)}
         </Badge>
       );
     }
@@ -429,7 +439,7 @@ const CoachSchedule = () => {
       return (
         <Badge variant="outline" className="text-warning border-warning/30">
           <AlertCircle className="w-3 h-3 mr-1" />
-          Awaiting {formatCurrency(amountDue, currency)}
+          {t("schedule.payment.awaiting")} {formatCurrency(amountDue, currency)}
         </Badge>
       );
     }
@@ -475,9 +485,9 @@ const CoachSchedule = () => {
       .eq("id", coachId);
     
     if (error) {
-      toast.error("Failed to save booking settings");
+      toast.error(t("schedule.bookingSettings.settingsFailed"));
     } else {
-      toast.success("Booking settings saved");
+      toast.success(t("schedule.bookingSettings.settingsSaved"));
     }
   };
 
@@ -546,12 +556,12 @@ const CoachSchedule = () => {
   const currentWeekLabel = `${format(weekStart, "MMM d")} - ${format(addDays(weekStart, 6), "d, yyyy")}`;
 
   return (
-    <DashboardLayout title="Schedule" description="Manage your availability and bookings.">
+    <DashboardLayout title={t("schedule.title")} description={t("schedule.description")}>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="font-display text-2xl font-bold text-foreground">Schedule</h1>
-          <p className="text-muted-foreground">Manage your calendar, availability, and booking requests</p>
+          <h1 className="font-display text-2xl font-bold text-foreground">{t("schedule.title")}</h1>
+          <p className="text-muted-foreground">{t("schedule.pageDescription")}</p>
         </div>
         <Button className="bg-primary text-primary-foreground" onClick={() => {
           setPreselectedDate(undefined);
@@ -559,21 +569,21 @@ const CoachSchedule = () => {
           setShowAddSessionModal(true);
         }}>
           <Plus className="w-4 h-4 mr-2" />
-          Add Session
+          {t("schedule.addSession")}
         </Button>
       </div>
 
       {/* Tabs */}
       <Tabs defaultValue="calendar" className="space-y-6">
         <TabsList className="bg-secondary">
-          <TabsTrigger value="calendar">Calendar</TabsTrigger>
+          <TabsTrigger value="calendar">{t("schedule.calendar")}</TabsTrigger>
           <TabsTrigger value="requests">
-            Booking Requests
+            {t("schedule.bookingRequests")}
             {bookingRequests.length > 0 && (
               <Badge className="ml-2 bg-accent text-accent-foreground">{bookingRequests.length}</Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="availability">Availability</TabsTrigger>
+          <TabsTrigger value="availability">{t("schedule.availability")}</TabsTrigger>
         </TabsList>
 
         {/* Calendar Tab */}
@@ -607,7 +617,7 @@ const CoachSchedule = () => {
                       disabled={isSyncing}
                     >
                       <RefreshCw className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
-                      Sync Calendars
+                      {t("schedule.syncCalendars")}
                     </Button>
                   </div>
                   <Button variant="ghost" size="icon" onClick={() => setWeekStart(prev => addDays(prev, 7))}>
@@ -635,7 +645,7 @@ const CoachSchedule = () => {
                     <div className="grid grid-cols-8 border-b border-border bg-muted/30">
                       <div className="p-2 text-xs text-muted-foreground flex items-center">
                         <CalendarIcon className="w-3 h-3 mr-1" />
-                        All-Day
+                        {t("schedule.allDay")}
                       </div>
                       {weekDates.map((_, dayIndex) => {
                         const allDayEvents = getAllDayEventsForDate(dayIndex);
@@ -644,7 +654,7 @@ const CoachSchedule = () => {
                             {allDayEvents.map((event, idx) => (
                               <div key={idx} className="p-1.5 rounded text-xs bg-warning/20 border border-warning/30 mb-1">
                                 <p className="font-medium text-warning-foreground truncate">
-                                  {event.title || "Busy"}
+                                  {event.title || t("schedule.busy")}
                                 </p>
                               </div>
                             ))}
@@ -700,7 +710,7 @@ const CoachSchedule = () => {
                                   >
                                     <div className="p-2">
                                       <p className="font-medium text-foreground truncate">
-                                        {session.client?.first_name} {session.client?.last_name || "External Client"}
+                                        {session.client?.first_name} {session.client?.last_name || t("schedule.externalClient")}
                                       </p>
                                       <p className="text-muted-foreground truncate">{session.session_type}</p>
                                       <div className="flex items-center gap-1 mt-1">
@@ -723,7 +733,7 @@ const CoachSchedule = () => {
                                   >
                                     <div className="p-2">
                                       <p className="font-medium text-muted-foreground truncate">
-                                        {externalEvent.title || "Busy"}
+                                        {externalEvent.title || t("schedule.busy")}
                                       </p>
                                       <div className="flex items-center gap-1 mt-1">
                                         <CalendarDays className="w-3 h-3 text-muted-foreground" />
@@ -748,23 +758,23 @@ const CoachSchedule = () => {
               <div className="flex flex-wrap items-center gap-6 mt-4">
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 rounded bg-success/10 border border-success/30" />
-                  <span className="text-sm text-muted-foreground">Available</span>
+                  <span className="text-sm text-muted-foreground">{t("schedule.legend.available")}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 rounded bg-accent/20 border border-accent/30" />
-                  <span className="text-sm text-muted-foreground">In-Person</span>
+                  <span className="text-sm text-muted-foreground">{t("schedule.legend.inPerson")}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 rounded bg-primary/20 border border-primary/30" />
-                  <span className="text-sm text-muted-foreground">Online</span>
+                  <span className="text-sm text-muted-foreground">{t("schedule.legend.online")}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 rounded bg-muted/50 border border-muted-foreground/20" />
-                  <span className="text-sm text-muted-foreground">External Calendar</span>
+                  <span className="text-sm text-muted-foreground">{t("schedule.legend.externalCalendar")}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 rounded bg-warning/20 border border-warning/30" />
-                  <span className="text-sm text-muted-foreground">All-Day / Holiday</span>
+                  <span className="text-sm text-muted-foreground">{t("schedule.legend.allDayHoliday")}</span>
                 </div>
               </div>
             </>
@@ -775,7 +785,7 @@ const CoachSchedule = () => {
         <TabsContent value="requests">
           <div className="card-elevated">
             <div className="p-4 border-b border-border">
-              <h3 className="font-display font-bold text-foreground">Pending Requests</h3>
+              <h3 className="font-display font-bold text-foreground">{t("schedule.pendingRequests")}</h3>
             </div>
             {loadingRequests ? (
               <div className="p-12 flex justify-center">
@@ -783,7 +793,7 @@ const CoachSchedule = () => {
               </div>
             ) : bookingRequests.length === 0 ? (
               <div className="p-12 text-center">
-                <p className="text-muted-foreground">No pending booking requests</p>
+                <p className="text-muted-foreground">{t("schedule.noPendingRequests")}</p>
               </div>
             ) : (
               <div className="divide-y divide-border">
@@ -797,7 +807,7 @@ const CoachSchedule = () => {
                         <p className="font-medium text-foreground">
                           {request.client?.first_name} {request.client?.last_name}
                         </p>
-                        <p className="text-sm text-muted-foreground">{request.session_type?.name || "General Session"}</p>
+                        <p className="text-sm text-muted-foreground">{request.session_type?.name || t("schedule.generalSession")}</p>
                         <div className="flex flex-wrap items-center gap-2 mt-1 text-sm text-muted-foreground">
                           <Clock className="w-3 h-3" />
                           <span>
@@ -805,11 +815,11 @@ const CoachSchedule = () => {
                           </span>
                           {request.is_online ? (
                             <Badge variant="outline" className="text-xs">
-                              <Video className="w-3 h-3 mr-1" /> Online
+                              <Video className="w-3 h-3 mr-1" /> {t("schedule.online")}
                             </Badge>
                           ) : (
                             <Badge variant="outline" className="text-xs">
-                              <MapPin className="w-3 h-3 mr-1" /> In-Person
+                              <MapPin className="w-3 h-3 mr-1" /> {t("schedule.inPerson")}
                             </Badge>
                           )}
                           {getPaymentStatusBadge(request)}
@@ -828,7 +838,7 @@ const CoachSchedule = () => {
                         disabled={respondToBooking.isPending}
                       >
                         <X className="w-4 h-4 mr-1" />
-                        Decline
+                        {t("schedule.decline")}
                       </Button>
                       <Button 
                         size="sm" 
@@ -837,7 +847,7 @@ const CoachSchedule = () => {
                         disabled={respondToBooking.isPending}
                       >
                         <Check className="w-4 h-4 mr-1" />
-                        Accept
+                        {t("schedule.accept")}
                       </Button>
                     </div>
                   </div>
@@ -872,8 +882,8 @@ const CoachSchedule = () => {
           {/* Booking Settings Card */}
           <div className="card-elevated">
             <div className="p-4 border-b border-border">
-              <h3 className="font-display font-bold text-foreground">Booking Settings</h3>
-              <p className="text-sm text-muted-foreground">Control how clients can book with you</p>
+              <h3 className="font-display font-bold text-foreground">{t("schedule.bookingSettings.title")}</h3>
+              <p className="text-sm text-muted-foreground">{t("schedule.bookingSettings.subtitle")}</p>
             </div>
             <div className="p-4 space-y-6">
               {/* Booking Approval */}
@@ -949,7 +959,7 @@ const CoachSchedule = () => {
               {/* Save Button */}
               <div className="flex justify-end pt-2">
                 <Button onClick={handleSaveBookingSettings}>
-                  Save Settings
+                  {t("schedule.bookingSettings.saveSettings")}
                 </Button>
               </div>
 
