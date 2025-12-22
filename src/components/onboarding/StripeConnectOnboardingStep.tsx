@@ -29,6 +29,12 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
   // 2-phase skip pattern: pendingSkip triggers navigation after sheet closes
   const [pendingSkip, setPendingSkip] = useState(false);
   const skipCalledRef = useRef(false);
+  
+  // Store onSkip in a ref to prevent stale closures and avoid useEffect re-triggers
+  const onSkipRef = useRef(onSkip);
+  useEffect(() => {
+    onSkipRef.current = onSkip;
+  }, [onSkip]);
 
   // Parse URL params once on mount - not on every render
   useEffect(() => {
@@ -61,16 +67,21 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
   }, [coachProfile?.stripe_connect_onboarded, stripeStatus]);
 
   // Phase 2: Execute skip AFTER sheet is fully closed
+  // Uses double-RAF to ensure sheet animation completes before navigation
   useEffect(() => {
     if (pendingSkip && !showSkipWarning && !skipCalledRef.current) {
       skipCalledRef.current = true;
-      // Use queueMicrotask to ensure DOM updates (sheet unmount) are committed
-      queueMicrotask(() => {
-        setStripeStatus("skipped");
-        onSkip();
+      // Double requestAnimationFrame ensures sheet animation is fully complete
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setStripeStatus("skipped");
+          onSkipRef.current(); // Use ref to avoid stale closure
+        });
       });
     }
-  }, [pendingSkip, showSkipWarning, onSkip]);
+    // Intentionally omit onSkip from deps - we use onSkipRef instead
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingSkip, showSkipWarning]);
 
   // Get current commission rate based on tier
   const rawTier = coachProfile?.subscription_tier || "free";
