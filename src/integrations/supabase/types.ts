@@ -5544,6 +5544,14 @@ export type Database = {
     }
     Functions: {
       calculate_boost_fee: { Args: { booking_amount: number }; Returns: number }
+      check_and_award_health_badges: {
+        Args: { p_client_id: string }
+        Returns: {
+          badge_id: string
+          badge_name: string
+          was_awarded: boolean
+        }[]
+      }
       client_can_view_client_profile: {
         Args: { target_client_profile_id: string }
         Returns: boolean
