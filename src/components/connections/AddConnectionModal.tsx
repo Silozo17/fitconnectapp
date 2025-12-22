@@ -11,24 +11,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Search, UserPlus, AtSign, MapPin, Loader2 } from "lucide-react";
-import { useConnections } from "@/hooks/useConnections";
+import { useConnections, SearchResult } from "@/hooks/useConnections";
 import { getDisplayLocation } from "@/lib/location-utils";
 
 interface AddConnectionModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-}
-
-interface SearchResult {
-  user_id: string;
-  username: string | null;
-  display_name: string | null;
-  first_name: string | null;
-  last_name: string | null;
-  avatar_url: string | null;
-  profile_image_url: string | null;
-  profile_type: "client" | "coach" | "admin";
-  location: string | null;
 }
 
 export const AddConnectionModal = ({
@@ -62,7 +50,7 @@ export const AddConnectionModal = ({
     setSending(true);
     const success = await sendConnectionRequest(
       selectedUser.user_id,
-      selectedUser.profile_type,
+      selectedUser.primary_profile_type, // Use primary profile type for connection
       message || undefined
     );
     setSending(false);
@@ -144,13 +132,15 @@ export const AddConnectionModal = ({
                     <AvatarFallback>{getInitials(result)}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium truncate">
                         {getDisplayName(result)}
                       </span>
-                      <Badge variant="outline" className="text-xs capitalize">
-                        {result.profile_type}
-                      </Badge>
+                      {result.profile_types.map((type) => (
+                        <Badge key={type} variant="outline" className="text-xs capitalize">
+                          {type}
+                        </Badge>
+                      ))}
                     </div>
                     {result.username && (
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
@@ -193,13 +183,15 @@ export const AddConnectionModal = ({
                   <AvatarFallback>{getInitials(selectedUser)}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-semibold">
                       {getDisplayName(selectedUser)}
                     </span>
-                    <Badge variant="outline" className="text-xs capitalize">
-                      {selectedUser.profile_type}
-                    </Badge>
+                    {selectedUser.profile_types.map((type) => (
+                      <Badge key={type} variant="outline" className="text-xs capitalize">
+                        {type}
+                      </Badge>
+                    ))}
                   </div>
                   {selectedUser.username && (
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
