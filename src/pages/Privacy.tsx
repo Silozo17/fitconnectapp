@@ -23,7 +23,7 @@ const Privacy = () => {
               Policy
             </span>
           </h1>
-          <p className="text-muted-foreground">Last updated: December 19, 2024</p>
+          <p className="text-muted-foreground">Last updated: December 2025</p>
         </div>
       </section>
 
@@ -166,6 +166,20 @@ const Privacy = () => {
                   In the event of a merger, acquisition, or sale of assets, your information may be transferred 
                   as part of that transaction.
                 </p>
+
+                <h2>4A. Health and Calendar Data: What We Never Do</h2>
+                <p>
+                  FitConnect takes a strict approach to your sensitive health and calendar data.
+                  Regardless of the source (Apple HealthKit, Health Connect, Fitbit, Garmin, Google
+                  Calendar, or Apple Calendar), we commit to the following:
+                </p>
+                <ul>
+                  <li><strong>No Advertising:</strong> Health and calendar data is never used for advertising or marketing purposes</li>
+                  <li><strong>No Selling:</strong> Health and calendar data is never sold to third parties</li>
+                  <li><strong>No Third-Party Marketing:</strong> Health and calendar data is never shared with third parties for their marketing or advertising purposes</li>
+                  <li><strong>Minimal Sharing:</strong> Health data is only shared with your connected coaches when you explicitly consent</li>
+                  <li><strong>Easy Revocation:</strong> You can revoke access to any connected service at any time via your account settings or your device settings</li>
+                </ul>
 
                 <h2>5. Data Security</h2>
                 <p>
@@ -397,6 +411,18 @@ const Privacy = () => {
                   other calendar events.
                 </p>
 
+                <h4>Google Calendar Data Protection</h4>
+                <p>
+                  <strong>Important:</strong> In accordance with Google's API Services User Data Policy:
+                </p>
+                <ul>
+                  <li>Google Calendar data is <strong>never</strong> used for advertising or marketing purposes</li>
+                  <li>Google Calendar data is <strong>never</strong> sold to third parties</li>
+                  <li>Google Calendar data is <strong>never</strong> shared with third parties except as required to provide our scheduling service</li>
+                  <li>We only read your existing calendar events to check availability; we do not store copies of your personal calendar events</li>
+                  <li>You can revoke calendar access at any time via your FitConnect account settings or through Google's permissions page</li>
+                </ul>
+
                 <h3>Google Fit Integration</h3>
                 <p>
                   Clients can optionally connect Google Fit to sync fitness and health data. When you connect 
@@ -573,6 +599,63 @@ const Privacy = () => {
                   <li>Toggle off any data types you no longer wish to share</li>
                   <li>Or disable all access by turning off FitConnect entirely</li>
                 </ul>
+                <p>
+                  When you revoke HealthKit access, we stop receiving new data from Apple Health. Previously 
+                  synced data remains in your FitConnect account unless you request its deletion through our 
+                  data deletion process.
+                </p>
+
+                <h2>13A. Health Connect Integration (Android)</h2>
+                <p>
+                  FitConnect integrates with Health Connect on Android devices to provide comprehensive
+                  health and fitness tracking. Health Connect is Android's centralised platform for
+                  storing and sharing health data between apps. This integration is optional and
+                  requires your explicit consent.
+                </p>
+
+                <h3>Data We Access from Health Connect</h3>
+                <p>With your permission, we may read the following data types from Health Connect:</p>
+                <ul>
+                  <li><strong>Activity Data:</strong> Steps, distance, calories burned, active minutes</li>
+                  <li><strong>Exercise Data:</strong> Workout type, duration, intensity</li>
+                  <li><strong>Body Measurements:</strong> Weight, height, body fat percentage</li>
+                  <li><strong>Heart Rate:</strong> Resting heart rate and heart rate during exercise</li>
+                  <li><strong>Sleep Data:</strong> Sleep duration and sleep stages</li>
+                </ul>
+
+                <h3>How We Use Health Connect Data</h3>
+                <p>Health Connect data is used exclusively to:</p>
+                <ul>
+                  <li>Display your health metrics on your FitConnect dashboard</li>
+                  <li>Track progress towards fitness goals set with your coach</li>
+                  <li>Auto-complete habits linked to activity metrics</li>
+                  <li>Verify challenge completion for gamification features</li>
+                  <li>Share relevant metrics with your connected coaches (with your explicit consent)</li>
+                </ul>
+
+                <h3>Health Connect Data Protection</h3>
+                <p>
+                  <strong>Important:</strong> In accordance with Google Play requirements and our
+                  commitment to your privacy:
+                </p>
+                <ul>
+                  <li>Health Connect data is <strong>never</strong> used for advertising or marketing purposes</li>
+                  <li>Health Connect data is <strong>never</strong> sold to third parties</li>
+                  <li>Health Connect data is <strong>never</strong> shared with third parties for their marketing purposes</li>
+                  <li>Health Connect data is stored securely using encryption and transmitted only over secure connections</li>
+                  <li>Access to your Health Connect data can be revoked at any time through your Android device settings or your FitConnect account settings</li>
+                </ul>
+
+                <h3>Revoking Health Connect Access</h3>
+                <p>You can revoke FitConnect's access to Health Connect at any time:</p>
+                <ul>
+                  <li><strong>Via Android Settings:</strong> Go to Settings → Privacy → Health Connect → FitConnect → Remove all permissions</li>
+                  <li><strong>Via FitConnect:</strong> Go to Settings → Integrations → Health Connect → Disconnect</li>
+                </ul>
+                <p>
+                  When you revoke access, we stop receiving new data from Health Connect. Previously
+                  synced data remains in your FitConnect account unless you request its deletion.
+                </p>
 
                 <h2>14. Fitbit Integration</h2>
                 <p>
@@ -688,9 +771,17 @@ const Privacy = () => {
                   <li>Historical records of which sessions used Zoom may be retained for audit purposes</li>
                 </ul>
 
+                <h4>Zoom Marketplace Compliance</h4>
+                <p>
+                  FitConnect complies with Zoom App Marketplace requirements including handling
+                  deauthorization events. When you remove FitConnect from your Zoom account via
+                  the Zoom Marketplace, we receive a webhook notification and automatically delete
+                  your OAuth tokens and Zoom-related data.
+                </p>
+
                 <h3>Google Meet Integration</h3>
                 <p>
-                  When Google Calendar is connected, coaches can generate Google Meet links for online sessions. 
+                  When Google Calendar is connected, coaches can generate Google Meet links for online sessions.
                   We only create meeting links; we do not record or access meeting content.
                 </p>
 
