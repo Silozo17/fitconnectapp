@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { Video, Calendar, CheckCircle, ExternalLink, Loader2, Lock } from "lucide-react";
+import { Video, Calendar, CheckCircle, ExternalLink, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
-import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import type { Database } from "@/integrations/supabase/types";
 
 type VideoProvider = Database["public"]["Enums"]["video_provider"];
@@ -69,9 +68,9 @@ export function useIntegrationsState(coachId: string) {
         .select("provider")
         .eq("coach_id", coachId)
         .eq("is_active", true);
-      
+
       if (error) return [];
-      return data.map(c => c.provider);
+      return data.map((c) => c.provider);
     },
     enabled: !!coachId,
   });
@@ -80,13 +79,10 @@ export function useIntegrationsState(coachId: string) {
   const { data: calendarConnections } = useQuery({
     queryKey: ["calendar-connections-onboarding", user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("calendar_connections")
-        .select("provider")
-        .eq("user_id", user!.id);
-      
+      const { data, error } = await supabase.from("calendar_connections").select("provider").eq("user_id", user!.id);
+
       if (error) return [];
-      return data.map(c => c.provider);
+      return data.map((c) => c.provider);
     },
     enabled: !!user,
   });
@@ -97,21 +93,14 @@ export function useIntegrationsState(coachId: string) {
 }
 
 const IntegrationsOnboardingStep = ({ coachId, onStateChange }: IntegrationsOnboardingStepProps) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation("common");
   const { user } = useAuth();
   const [connectingProvider, setConnectingProvider] = useState<string | null>(null);
-  const { hasFeature } = useFeatureAccess();
 
   const { videoConnections, calendarConnections, hasAnyConnection } = useIntegrationsState(coachId);
 
   // Track previous state to avoid unnecessary calls
   const prevStateRef = useRef({ hasAnyConnection: false });
-
-  // Check if user has access to integrations (enterprise+ only)
-  const hasIntegrationsAccess = hasFeature("custom_integrations");
-
-  // Get the currently connected video provider (for single-provider enforcement)
-  const connectedVideoProvider = videoConnections?.[0] || null;
 
   // Notify parent of state changes - MUST be in useEffect to avoid render-loop freezes
   useEffect(() => {
@@ -122,13 +111,6 @@ const IntegrationsOnboardingStep = ({ coachId, onStateChange }: IntegrationsOnbo
   }, [hasAnyConnection, onStateChange]);
 
   const handleConnectVideo = async (providerId: VideoProvider) => {
-    // Single-provider enforcement
-    if (connectedVideoProvider && connectedVideoProvider !== providerId) {
-      const activeName = connectedVideoProvider === "zoom" ? "Zoom" : "Google Meet";
-      toast.error(`You already have ${activeName} connected. Please disconnect it first.`);
-      return;
-    }
-    
     setConnectingProvider(providerId);
     try {
       const { data, error } = await supabase.functions.invoke("video-oauth-start", {
@@ -136,76 +118,13 @@ const IntegrationsOnboardingStep = ({ coachId, onStateChange }: IntegrationsOnbo
       });
 
       if (error) throw error;
-      
+
       if (data?.authUrl) {
         sessionStorage.setItem("onboarding_return", "coach");
         window.location.href = data.authUrl;
       }
     } catch (error) {
-      toast.error(t('integrations.connectionError'));
-    } finally {
-      setConnectingProvider(null);
-    }
-  };
-
-  const handleConnectCalendar = async (providerId: CalendarProvider) => {
-    setConnectingProvider(providerId);
-    try {
-      const { data, error } = await supabase.functions.invoke("calendar-oauth-start", {
-        body: { provider: providerId },
-      });
-
-      if (error) throw error;
-      
-      if (data?.authUrl) {
-        sessionStorage.setItem("onboarding_return", "coach");
-        window.location.href = data.authUrl;
-      }
-    } catch (error) {
-      toast.error(t('integrations.connectionError'));
-    } finally {
-      setConnectingProvider(null);
-    }
-  };
-
-  // Show locked state for users without enterprise+ plan
-  if (!hasIntegrationsAccess) {
-    return (
-      <div className="space-y-5">
-        <div className="mb-4">
-          <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">
-            {t('onboardingIntegrations.videoCalendar.title')}
-          </h2>
-          <p className="text-muted-foreground text-sm mt-1.5">
-            {t('onboardingIntegrations.videoCalendar.subtitle')}
-          </p>
-        </div>
-        <div className="p-6 rounded-xl border-2 border-dashed border-border bg-muted/30 text-center">
-          <Lock className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
-          <h3 className="font-medium text-foreground mb-2">{t('integrations.enterpriseOnly', 'Enterprise Feature')}</h3>
-          <p className="text-sm text-muted-foreground max-w-md mx-auto">
-            {t('integrations.upgradeToEnterprise', 'Video conferencing and calendar integrations are available on the Enterprise plan. You can skip this step and upgrade later.')}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  const handleConnectCalendar = async (providerId: CalendarProvider) => {
-    setConnectingProvider(providerId);
-    try {
-      const { data, error } = await supabase.functions.invoke("calendar-oauth-start", {
-        body: { provider: providerId },
-      });
-
-      if (error) throw error;
-      
-      if (data?.authUrl) {
-        sessionStorage.setItem("onboarding_return", "coach");
-        window.location.href = data.authUrl;
-      }
-    } catch (error) {
-      toast.error(t('integrations.connectionError'));
+      toast.error(t("integrations.connectionError"));
     } finally {
       setConnectingProvider(null);
     }
@@ -215,16 +134,16 @@ const IntegrationsOnboardingStep = ({ coachId, onStateChange }: IntegrationsOnbo
     <div className="space-y-5">
       <div className="mb-4">
         <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">
-          {t('onboardingIntegrations.videoCalendar.title')}
+          {t("onboardingIntegrations.videoCalendar.title")}
         </h2>
-        <p className="text-muted-foreground text-sm mt-1.5">
-          {t('onboardingIntegrations.videoCalendar.subtitle')}
-        </p>
+        <p className="text-muted-foreground text-sm mt-1.5">{t("onboardingIntegrations.videoCalendar.subtitle")}</p>
       </div>
 
       {/* Video Conferencing */}
       <div className="space-y-3">
-        <h3 className="font-medium text-foreground text-sm">{t('onboardingIntegrations.videoCalendar.videoSection')}</h3>
+        <h3 className="font-medium text-foreground text-sm">
+          {t("onboardingIntegrations.videoCalendar.videoSection")}
+        </h3>
         <div className="space-y-2">
           {VIDEO_PROVIDERS.map((provider) => {
             const isConnected = videoConnections?.includes(provider.id);
@@ -235,9 +154,7 @@ const IntegrationsOnboardingStep = ({ coachId, onStateChange }: IntegrationsOnbo
               <div
                 key={provider.id}
                 className={`p-4 rounded-xl border-2 transition-all ${
-                  isConnected
-                    ? "border-green-500/30 bg-green-500/5"
-                    : "border-border hover:border-muted-foreground"
+                  isConnected ? "border-green-500/30 bg-green-500/5" : "border-border hover:border-muted-foreground"
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -253,7 +170,7 @@ const IntegrationsOnboardingStep = ({ coachId, onStateChange }: IntegrationsOnbo
                   {isConnected ? (
                     <div className="flex items-center gap-2 text-green-600">
                       <CheckCircle className="w-5 h-5" />
-                      <span className="text-sm font-medium">{t('integrations.connected')}</span>
+                      <span className="text-sm font-medium">{t("integrations.connected")}</span>
                     </div>
                   ) : (
                     <Button
@@ -267,7 +184,7 @@ const IntegrationsOnboardingStep = ({ coachId, onStateChange }: IntegrationsOnbo
                       ) : (
                         <>
                           <ExternalLink className="w-4 h-4 mr-1" />
-                          {t('integrations.connect')}
+                          {t("integrations.connect")}
                         </>
                       )}
                     </Button>
@@ -281,7 +198,9 @@ const IntegrationsOnboardingStep = ({ coachId, onStateChange }: IntegrationsOnbo
 
       {/* Calendar Sync */}
       <div className="space-y-3">
-        <h3 className="font-medium text-foreground text-sm">{t('onboardingIntegrations.videoCalendar.calendarSection')}</h3>
+        <h3 className="font-medium text-foreground text-sm">
+          {t("onboardingIntegrations.videoCalendar.calendarSection")}
+        </h3>
         <div className="space-y-2">
           {CALENDAR_PROVIDERS.map((provider) => {
             const isConnected = calendarConnections?.includes(provider.id);
@@ -292,9 +211,7 @@ const IntegrationsOnboardingStep = ({ coachId, onStateChange }: IntegrationsOnbo
               <div
                 key={provider.id}
                 className={`p-4 rounded-xl border-2 transition-all ${
-                  isConnected
-                    ? "border-green-500/30 bg-green-500/5"
-                    : "border-border hover:border-muted-foreground"
+                  isConnected ? "border-green-500/30 bg-green-500/5" : "border-border hover:border-muted-foreground"
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -310,7 +227,7 @@ const IntegrationsOnboardingStep = ({ coachId, onStateChange }: IntegrationsOnbo
                   {isConnected ? (
                     <div className="flex items-center gap-2 text-green-600">
                       <CheckCircle className="w-5 h-5" />
-                      <span className="text-sm font-medium">{t('integrations.connected')}</span>
+                      <span className="text-sm font-medium">{t("integrations.connected")}</span>
                     </div>
                   ) : (
                     <Button
@@ -324,7 +241,7 @@ const IntegrationsOnboardingStep = ({ coachId, onStateChange }: IntegrationsOnbo
                       ) : (
                         <>
                           <ExternalLink className="w-4 h-4 mr-1" />
-                          {t('integrations.connect')}
+                          {t("integrations.connect")}
                         </>
                       )}
                     </Button>
