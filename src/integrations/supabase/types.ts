@@ -5649,7 +5649,12 @@ export type Database = {
         | "audio"
         | "other"
       video_provider: "zoom" | "google_meet"
-      wearable_provider: "google_fit" | "fitbit" | "garmin" | "apple_health"
+      wearable_provider:
+        | "google_fit"
+        | "fitbit"
+        | "garmin"
+        | "apple_health"
+        | "manual"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -5788,7 +5793,13 @@ export const Constants = {
         "other",
       ],
       video_provider: ["zoom", "google_meet"],
-      wearable_provider: ["google_fit", "fitbit", "garmin", "apple_health"],
+      wearable_provider: [
+        "google_fit",
+        "fitbit",
+        "garmin",
+        "apple_health",
+        "manual",
+      ],
     },
   },
 } as const
