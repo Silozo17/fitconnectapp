@@ -19,6 +19,8 @@ import {
   PublicLeaderboardEntry 
 } from "@/hooks/usePublicLeaderboard";
 import { useUserLocation } from "@/hooks/useUserLocation";
+import { useCountry } from "@/hooks/useCountry";
+import { getCountryNameFromCode } from "@/lib/location-utils";
 import { useAvatars, getAvatarImageUrl } from "@/hooks/useAvatars";
 import { getUnlockDescription } from "@/lib/avatar-utils";
 import { cn } from "@/lib/utils";
@@ -189,15 +191,16 @@ export default function Community() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const { location: userLocation } = useUserLocation();
-  const city = userLocation?.city;
-  const region = userLocation?.region;
-  const country = userLocation?.country;
+  const { countryCode } = useCountry();
+  
+  // Derive country name from the selected countryCode (source of truth)
+  const effectiveCountry = getCountryNameFromCode(countryCode) || userLocation?.country;
 
   useEffect(() => {
-    if (country && !selectedCountry) {
-      setSelectedCountry(country);
+    if (effectiveCountry && !selectedCountry) {
+      setSelectedCountry(effectiveCountry);
     }
-  }, [country]);
+  }, [effectiveCountry]);
 
   const { data: countries } = useLocationOptions('country');
   const { data: counties } = useLocationOptions('county');
