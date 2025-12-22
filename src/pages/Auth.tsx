@@ -100,7 +100,9 @@ const Auth = () => {
   }, [isLogin, resetBreachCheck]);
 
   useEffect(() => {
-    if (user && role) {
+    const handleRedirect = async () => {
+      if (!user || !role) return;
+      
       // If there's a return URL, redirect there instead of default dashboard
       if (returnUrl) {
         navigate(decodeURIComponent(returnUrl), { replace: true });
@@ -110,12 +112,38 @@ const Auth = () => {
       // Default role-based redirects
       if (role === "admin") {
         navigate("/dashboard/admin", { replace: true });
-      } else if (role === "client") {
-        navigate("/onboarding/client", { replace: true });
-      } else if (role === "coach") {
-        navigate("/onboarding/coach", { replace: true });
+        return;
       }
-    }
+      
+      // Check onboarding status for clients and coaches
+      if (role === "client") {
+        const { data } = await supabase
+          .from("client_profiles")
+          .select("onboarding_completed")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        
+        if (data?.onboarding_completed) {
+          navigate("/dashboard/client", { replace: true });
+        } else {
+          navigate("/onboarding/client", { replace: true });
+        }
+      } else if (role === "coach") {
+        const { data } = await supabase
+          .from("coach_profiles")
+          .select("onboarding_completed")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        
+        if (data?.onboarding_completed) {
+          navigate("/dashboard/coach", { replace: true });
+        } else {
+          navigate("/onboarding/coach", { replace: true });
+        }
+      }
+    };
+    
+    handleRedirect();
   }, [user, role, navigate, returnUrl]);
 
   // Send OTP email
