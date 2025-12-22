@@ -12,8 +12,10 @@ import CreateBundleModal from "@/components/marketplace/CreateBundleModal";
 import BulkEditPricesModal from "@/components/marketplace/BulkEditPricesModal";
 import { useCoachProducts, useCoachBundles, useDeleteProduct, useDeleteBundle, useUpdateProduct, CONTENT_TYPES } from "@/hooks/useDigitalProducts";
 import { formatCurrency } from "@/lib/currency";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function CoachProducts() {
+  const { t } = useTranslation('coach');
   const [showCreateProduct, setShowCreateProduct] = useState(false);
   const [showCreateBundle, setShowCreateBundle] = useState(false);
   const [showBulkEdit, setShowBulkEdit] = useState(false);
@@ -47,26 +49,26 @@ export default function CoachProducts() {
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
               <Package className="h-8 w-8 text-primary" />
-              Digital Products
+              {t('productsPage.title')}
             </h1>
             <p className="text-muted-foreground mt-1">
-              Create and manage your digital content
+              {t('productsPage.subtitle')}
             </p>
           </div>
           <div className="flex gap-2 flex-wrap">
             {products && products.length > 0 && (
               <Button variant="outline" onClick={() => setShowBulkEdit(true)}>
                 <DollarSign className="h-4 w-4 mr-2" />
-                Bulk Edit Prices
+                {t('productsPage.bulkEditPrices')}
               </Button>
             )}
             <Button variant="outline" onClick={() => setShowCreateBundle(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Create Bundle
+              {t('productsPage.createBundle')}
             </Button>
             <Button onClick={() => setShowCreateProduct(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Create Product
+              {t('productsPage.createProduct')}
             </Button>
           </div>
         </div>
@@ -76,33 +78,33 @@ export default function CoachProducts() {
           <Card>
             <CardContent className="p-4 text-center">
               <p className="text-3xl font-bold text-primary">{products?.length || 0}</p>
-              <p className="text-sm text-muted-foreground">Total Products</p>
+              <p className="text-sm text-muted-foreground">{t('productsPage.totalProducts')}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
               <p className="text-3xl font-bold text-green-500">{publishedProducts.length}</p>
-              <p className="text-sm text-muted-foreground">Published</p>
+              <p className="text-sm text-muted-foreground">{t('productsPage.published')}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
               <p className="text-3xl font-bold text-yellow-500">{draftProducts.length}</p>
-              <p className="text-sm text-muted-foreground">Drafts</p>
+              <p className="text-sm text-muted-foreground">{t('productsPage.drafts')}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
               <p className="text-3xl font-bold text-accent">{bundles?.length || 0}</p>
-              <p className="text-sm text-muted-foreground">Bundles</p>
+              <p className="text-sm text-muted-foreground">{t('productsPage.bundles')}</p>
             </CardContent>
           </Card>
         </div>
 
         <Tabs defaultValue="products" className="space-y-6">
           <TabsList>
-            <TabsTrigger value="products">Products ({products?.length || 0})</TabsTrigger>
-            <TabsTrigger value="bundles">Bundles ({bundles?.length || 0})</TabsTrigger>
+            <TabsTrigger value="products">{t('productsPage.products')} ({products?.length || 0})</TabsTrigger>
+            <TabsTrigger value="bundles">{t('productsPage.bundles')} ({bundles?.length || 0})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="products" className="space-y-4">
@@ -143,25 +145,25 @@ export default function CoachProducts() {
                                 {product.is_published ? (
                                   <>
                                     <EyeOff className="h-4 w-4 mr-2" />
-                                    Unpublish
+                                    {t('productsPage.unpublish')}
                                   </>
                                 ) : (
                                   <>
                                     <Eye className="h-4 w-4 mr-2" />
-                                    Publish
+                                    {t('productsPage.publish')}
                                   </>
                                 )}
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleToggleFeatured(product.id, product.is_featured)}>
                                 <Star className={`h-4 w-4 mr-2 ${product.is_featured ? "fill-yellow-500 text-yellow-500" : ""}`} />
-                                {product.is_featured ? "Remove Featured" : "Mark Featured"}
+                                {product.is_featured ? t('productsPage.removeFeatured') : t('productsPage.markFeatured')}
                               </DropdownMenuItem>
                               <DropdownMenuItem 
                                 className="text-destructive"
                                 onClick={() => setDeleteProductId(product.id)}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
-                                Delete
+                                {t('productsPage.delete')}
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -169,10 +171,10 @@ export default function CoachProducts() {
 
                         <div className="absolute top-2 left-2 flex gap-1">
                           {!product.is_published && (
-                            <Badge variant="secondary">Draft</Badge>
+                            <Badge variant="secondary">{t('productsPage.draft')}</Badge>
                           )}
                           {product.is_featured && (
-                            <Badge className="bg-yellow-500 text-black">⭐ Featured</Badge>
+                            <Badge className="bg-yellow-500 text-black">⭐ {t('productsPage.featured')}</Badge>
                           )}
                         </div>
                       </div>
@@ -184,7 +186,7 @@ export default function CoachProducts() {
                             {contentType?.label}
                           </Badge>
                           <span className="font-bold text-primary">
-                            {product.price === 0 ? "Free" : formatCurrency(product.price, (product.currency || "GBP") as "GBP" | "USD" | "EUR")}
+                            {product.price === 0 ? t('productsPage.free') : formatCurrency(product.price, (product.currency || "GBP") as "GBP" | "USD" | "EUR")}
                           </span>
                         </div>
                         <h3 className="font-semibold line-clamp-1">{product.title}</h3>
@@ -192,7 +194,7 @@ export default function CoachProducts() {
                           {product.short_description || product.description}
                         </p>
                         <p className="text-xs text-muted-foreground mt-2">
-                          {product.download_count} downloads
+                          {product.download_count} {t('productsPage.downloads')}
                         </p>
                       </CardContent>
                     </Card>
@@ -203,13 +205,13 @@ export default function CoachProducts() {
               <Card className="p-12">
                 <div className="text-center">
                   <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                  <h2 className="text-2xl font-semibold mb-2">No products yet</h2>
+                  <h2 className="text-2xl font-semibold mb-2">{t('productsPage.noProducts')}</h2>
                   <p className="text-muted-foreground mb-6">
-                    Create your first digital product to start selling to clients.
+                    {t('productsPage.noProductsDesc')}
                   </p>
                   <Button onClick={() => setShowCreateProduct(true)}>
                     <Plus className="h-4 w-4 mr-2" />
-                    Create Product
+                    {t('productsPage.createProduct')}
                   </Button>
                 </div>
               </Card>
@@ -253,7 +255,7 @@ export default function CoachProducts() {
                               onClick={() => setDeleteBundleId(bundle.id)}
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
+                              {t('productsPage.delete')}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -261,7 +263,7 @@ export default function CoachProducts() {
 
                       {!bundle.is_published && (
                         <Badge className="absolute top-2 left-2" variant="secondary">
-                          Draft
+                          {t('productsPage.draft')}
                         </Badge>
                       )}
                     </div>
@@ -270,7 +272,7 @@ export default function CoachProducts() {
                       <div className="flex items-start justify-between mb-2">
                         <Badge className="bg-accent text-accent-foreground text-xs">
                           <Package className="h-3 w-3 mr-1" />
-                          Bundle
+                          {t('productsPage.bundle')}
                         </Badge>
                         <span className="font-bold text-primary">
                           {formatCurrency(bundle.price, (bundle.currency || "GBP") as "GBP" | "USD" | "EUR")}
@@ -288,13 +290,13 @@ export default function CoachProducts() {
               <Card className="p-12">
                 <div className="text-center">
                   <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                  <h2 className="text-2xl font-semibold mb-2">No bundles yet</h2>
+                  <h2 className="text-2xl font-semibold mb-2">{t('productsPage.noBundles')}</h2>
                   <p className="text-muted-foreground mb-6">
-                    Create bundles to offer discounted collections of your products.
+                    {t('productsPage.noBundlesDesc')}
                   </p>
                   <Button onClick={() => setShowCreateBundle(true)}>
                     <Plus className="h-4 w-4 mr-2" />
-                    Create Bundle
+                    {t('productsPage.createBundle')}
                   </Button>
                 </div>
               </Card>
@@ -325,13 +327,13 @@ export default function CoachProducts() {
       <AlertDialog open={!!deleteProductId} onOpenChange={() => setDeleteProductId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Product</AlertDialogTitle>
+            <AlertDialogTitle>{t('productsPage.deleteProduct')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this product? This action cannot be undone.
+              {t('productsPage.deleteProductConfirm')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('productsPage.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => {
@@ -341,7 +343,7 @@ export default function CoachProducts() {
                 }
               }}
             >
-              Delete
+              {t('productsPage.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -351,13 +353,13 @@ export default function CoachProducts() {
       <AlertDialog open={!!deleteBundleId} onOpenChange={() => setDeleteBundleId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Bundle</AlertDialogTitle>
+            <AlertDialogTitle>{t('productsPage.deleteBundle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this bundle? This action cannot be undone.
+              {t('productsPage.deleteBundleConfirm')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('productsPage.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => {
@@ -367,7 +369,7 @@ export default function CoachProducts() {
                 }
               }}
             >
-              Delete
+              {t('productsPage.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
