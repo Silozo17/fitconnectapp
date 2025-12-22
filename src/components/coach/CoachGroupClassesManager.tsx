@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -66,11 +67,13 @@ function GroupClassForm({
   onSubmit,
   onCancel,
   isSubmitting,
+  t,
 }: {
   initialData?: GroupClass;
   onSubmit: (data: GroupClassFormData) => void;
   onCancel: () => void;
   isSubmitting: boolean;
+  t: (key: string) => string;
 }) {
   const [formData, setFormData] = useState<GroupClassFormData>(
     initialData
@@ -92,61 +95,61 @@ function GroupClassForm({
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="title">Class Title *</Label>
+        <Label htmlFor="title">{t("groupClasses.form.classTitle")} *</Label>
         <Input
           id="title"
           value={formData.title}
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          placeholder="e.g., Morning HIIT Class"
+          placeholder={t("groupClasses.form.classTitlePlaceholder")}
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description">{t("groupClasses.form.description")}</Label>
         <Textarea
           id="description"
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          placeholder="Describe what the class involves..."
+          placeholder={t("groupClasses.form.descriptionPlaceholder")}
           rows={3}
         />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="schedule">Schedule</Label>
+          <Label htmlFor="schedule">{t("groupClasses.form.schedule")}</Label>
           <Input
             id="schedule"
             value={formData.schedule_info}
             onChange={(e) => setFormData({ ...formData, schedule_info: e.target.value })}
-            placeholder="e.g., Mon/Wed/Fri 7:00 AM"
+            placeholder={t("groupClasses.form.schedulePlaceholder")}
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="location">Location</Label>
+          <Label htmlFor="location">{t("groupClasses.form.location")}</Label>
           <Input
             id="location"
             value={formData.location}
             onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-            placeholder="e.g., Central Park, NYC"
+            placeholder={t("groupClasses.form.locationPlaceholder")}
           />
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="target">Who is this for?</Label>
+        <Label htmlFor="target">{t("groupClasses.form.whoIsThisFor")}</Label>
         <Input
           id="target"
           value={formData.target_audience}
           onChange={(e) => setFormData({ ...formData, target_audience: e.target.value })}
-          placeholder="e.g., All fitness levels welcome"
+          placeholder={t("groupClasses.form.whoIsThisForPlaceholder")}
         />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="price">Price</Label>
+          <Label htmlFor="price">{t("groupClasses.form.price")}</Label>
           <div className="flex gap-2">
             <Input
               id="price"
@@ -170,13 +173,13 @@ function GroupClassForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="max">Max Participants</Label>
+          <Label htmlFor="max">{t("groupClasses.form.maxParticipants")}</Label>
           <Input
             id="max"
             type="number"
             value={formData.max_participants}
             onChange={(e) => setFormData({ ...formData, max_participants: e.target.value })}
-            placeholder="Leave empty for unlimited"
+            placeholder={t("groupClasses.form.maxParticipantsPlaceholder")}
             min="1"
           />
         </div>
@@ -184,8 +187,8 @@ function GroupClassForm({
 
       <div className="flex items-center justify-between">
         <div className="space-y-0.5">
-          <Label>Waitlist Open</Label>
-          <p className="text-xs text-muted-foreground">Allow clients to join the waitlist</p>
+          <Label>{t("groupClasses.form.waitlistOpen")}</Label>
+          <p className="text-xs text-muted-foreground">{t("groupClasses.form.waitlistOpenDesc")}</p>
         </div>
         <Switch
           checked={formData.is_waitlist_open}
@@ -195,8 +198,8 @@ function GroupClassForm({
 
       <div className="flex items-center justify-between">
         <div className="space-y-0.5">
-          <Label>Active</Label>
-          <p className="text-xs text-muted-foreground">Show this class on your profile</p>
+          <Label>{t("groupClasses.form.active")}</Label>
+          <p className="text-xs text-muted-foreground">{t("groupClasses.form.activeDesc")}</p>
         </div>
         <Switch
           checked={formData.is_active}
@@ -206,18 +209,18 @@ function GroupClassForm({
 
       <div className="flex justify-end gap-2 pt-4">
         <Button variant="outline" onClick={onCancel} disabled={isSubmitting}>
-          Cancel
+          {t("forms.cancel")}
         </Button>
         <Button onClick={() => onSubmit(formData)} disabled={isSubmitting || !formData.title}>
           {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-          {initialData ? "Save Changes" : "Create Class"}
+          {initialData ? t("groupClasses.form.saveChanges") : t("groupClasses.form.createClassButton")}
         </Button>
       </div>
     </div>
   );
 }
 
-function WaitlistViewer({ classId, className }: { classId: string; className: string }) {
+function WaitlistViewer({ classId, className, t }: { classId: string; className: string; t: ReturnType<typeof useTranslation>['t'] }) {
   const { data: waitlist = [], isLoading } = useGroupClassWaitlist(classId);
 
   return (
@@ -225,14 +228,14 @@ function WaitlistViewer({ classId, className }: { classId: string; className: st
       <DialogTrigger asChild>
         <Button variant="ghost" size="sm">
           <Eye className="h-4 w-4 mr-1" />
-          Waitlist ({waitlist.length})
+          {t("groupClasses.waitlist")} ({waitlist.length})
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Waitlist for {className}</DialogTitle>
+          <DialogTitle>{t("groupClasses.waitlistFor", { name: className })}</DialogTitle>
           <DialogDescription>
-            {waitlist.length} {waitlist.length === 1 ? "person" : "people"} on the waitlist
+            {t("groupClasses.peopleOnWaitlist", { count: waitlist.length })}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-2 max-h-64 overflow-y-auto">
@@ -242,7 +245,7 @@ function WaitlistViewer({ classId, className }: { classId: string; className: st
             </div>
           ) : waitlist.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-4">
-              No one on the waitlist yet
+              {t("groupClasses.noOneOnWaitlist")}
             </p>
           ) : (
             waitlist.map((entry, index) => (
@@ -269,6 +272,7 @@ function WaitlistViewer({ classId, className }: { classId: string; className: st
 }
 
 export function CoachGroupClassesManager() {
+  const { t } = useTranslation("settings");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingClass, setEditingClass] = useState<GroupClass | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -343,29 +347,30 @@ export function CoachGroupClassesManager() {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-lg">Group Classes</CardTitle>
+            <CardTitle className="text-lg">{t("groupClasses.title")}</CardTitle>
             <CardDescription>
-              Offer group sessions and manage waitlists
+              {t("groupClasses.description")}
             </CardDescription>
           </div>
           <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
             <DialogTrigger asChild>
               <Button size="sm">
                 <Plus className="h-4 w-4 mr-2" />
-                Add Class
+                {t("groupClasses.addClass")}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-lg">
               <DialogHeader>
-                <DialogTitle>Create Group Class</DialogTitle>
+                <DialogTitle>{t("groupClasses.createClass")}</DialogTitle>
                 <DialogDescription>
-                  Set up a new group class for clients to join
+                  {t("groupClasses.createClassDesc")}
                 </DialogDescription>
               </DialogHeader>
               <GroupClassForm
                 onSubmit={handleCreate}
                 onCancel={() => setIsCreateOpen(false)}
                 isSubmitting={createClass.isPending}
+                t={t}
               />
             </DialogContent>
           </Dialog>
@@ -375,8 +380,8 @@ export function CoachGroupClassesManager() {
         {classes.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <Users className="h-10 w-10 mx-auto mb-3 opacity-50" />
-            <p className="text-sm">No group classes yet</p>
-            <p className="text-xs mt-1">Create your first class to start accepting waitlist signups</p>
+            <p className="text-sm">{t("groupClasses.noClassesYet")}</p>
+            <p className="text-xs mt-1">{t("groupClasses.createFirstClass")}</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -390,7 +395,7 @@ export function CoachGroupClassesManager() {
                     <div className="flex items-center gap-2">
                       <h4 className="font-medium">{groupClass.title}</h4>
                       {!groupClass.is_active && (
-                        <Badge variant="secondary">Inactive</Badge>
+                        <Badge variant="secondary">{t("groupClasses.inactive")}</Badge>
                       )}
                     </div>
                     {groupClass.description && (
@@ -400,7 +405,7 @@ export function CoachGroupClassesManager() {
                     )}
                   </div>
                   <div className="flex items-center gap-1">
-                    <WaitlistViewer classId={groupClass.id} className={groupClass.title} />
+                    <WaitlistViewer classId={groupClass.id} className={groupClass.title} t={t} />
                     <Button
                       variant="ghost"
                       size="sm"
@@ -441,7 +446,7 @@ export function CoachGroupClassesManager() {
 
                 {groupClass.target_audience && (
                   <p className="text-xs text-muted-foreground">
-                    <strong>For:</strong> {groupClass.target_audience}
+                    <strong>{t("groupClasses.for")}</strong> {groupClass.target_audience}
                   </p>
                 )}
               </div>
@@ -454,9 +459,9 @@ export function CoachGroupClassesManager() {
       <Dialog open={!!editingClass} onOpenChange={() => setEditingClass(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Edit Group Class</DialogTitle>
+            <DialogTitle>{t("groupClasses.editClass")}</DialogTitle>
             <DialogDescription>
-              Update your group class details
+              {t("groupClasses.editClassDesc")}
             </DialogDescription>
           </DialogHeader>
           {editingClass && (
@@ -465,6 +470,7 @@ export function CoachGroupClassesManager() {
               onSubmit={handleUpdate}
               onCancel={() => setEditingClass(null)}
               isSubmitting={updateClass.isPending}
+              t={t}
             />
           )}
         </DialogContent>
@@ -474,20 +480,19 @@ export function CoachGroupClassesManager() {
       <AlertDialog open={!!deletingId} onOpenChange={() => setDeletingId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Group Class?</AlertDialogTitle>
+            <AlertDialogTitle>{t("groupClasses.deleteClass")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete this group class and remove all waitlist entries.
-              This action cannot be undone.
+              {t("groupClasses.deleteClassDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("forms.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {deleteClass.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              Delete
+              {t("forms.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

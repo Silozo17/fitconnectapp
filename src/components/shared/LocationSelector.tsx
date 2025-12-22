@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Select,
   SelectContent,
@@ -28,6 +29,7 @@ const LOCATION_NAMES: Record<RouteLocationCode, { name: string; flag: string }> 
 };
 
 export const LocationSelector = () => {
+  const { t } = useTranslation("settings");
   const localeRouting = useOptionalLocaleRouting();
   const { isPWA, isNativeApp } = useEnvironment();
   const { user } = useAuth();
@@ -68,7 +70,7 @@ export const LocationSelector = () => {
     <div className="space-y-2">
       <Label className="flex items-center gap-2">
         <MapPin className="w-4 h-4" />
-        Location
+        {t("preferences.location")}
       </Label>
       <Select value={currentLocation} onValueChange={handleLocationChange}>
         <SelectTrigger className="w-full max-w-xs">
@@ -98,7 +100,7 @@ export const LocationSelector = () => {
         </SelectContent>
       </Select>
       <p className="text-xs text-muted-foreground">
-        Affects pricing currency and regional availability
+        {t("preferences.locationDescription")}
       </p>
     </div>
   );

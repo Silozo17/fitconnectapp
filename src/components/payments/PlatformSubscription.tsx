@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Crown, Check, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ interface PlatformSubscriptionProps {
 }
 
 const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscriptionProps) => {
+  const { t } = useTranslation("settings");
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
@@ -76,12 +78,12 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   const getButtonConfig = (tierKey: TierKey) => {
     const targetPosition = getTierPosition(tierKey);
     if (targetPosition > currentPosition) {
-      return { text: "Upgrade", variant: "default" as const };
+      return { text: t("subscription.upgrade"), variant: "default" as const };
     }
     if (targetPosition < currentPosition) {
-      return { text: "Downgrade", variant: "outline" as const };
+      return { text: t("subscription.downgrade"), variant: "outline" as const };
     }
-    return { text: "Current", variant: "outline" as const };
+    return { text: t("subscription.current"), variant: "outline" as const };
   };
 
   return (
@@ -89,10 +91,10 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Crown className="h-5 w-5 text-primary" />
-          Platform Subscription
+          {t("subscription.platformSubscription")}
         </CardTitle>
         <CardDescription>
-          Choose a plan to unlock more features and grow your coaching business
+          {t("subscription.platformDescription")}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -117,23 +119,23 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
                   )}
                 >
                   {isCurrentTier && (
-                    <Badge className="absolute -top-2 right-2">Current Plan</Badge>
+                    <Badge className="absolute -top-2 right-2">{t("subscription.currentPlan")}</Badge>
                   )}
                   {tier.highlighted && !isCurrentTier && (
-                    <Badge variant="secondary" className="absolute -top-2 right-2">Popular</Badge>
+                    <Badge variant="secondary" className="absolute -top-2 right-2">{t("subscription.popular")}</Badge>
                   )}
                   
                   <h3 className="font-semibold text-lg mb-1">{tier.name}</h3>
                   <div className="flex items-baseline gap-1 mb-4">
                     <span className="text-3xl font-bold">
                       {tier.prices.monthly.amount === 0 
-                        ? "Free" 
+                        ? t("subscription.free")
                         : (['starter', 'pro', 'enterprise'].includes(tierKey)
                             ? pricing.formatPrice(pricing.getSubscriptionPrice(tierKey as 'starter' | 'pro' | 'enterprise', 'monthly'))
                             : `${pricing.currencySymbol}${tier.prices.monthly.amount}`)}
                     </span>
                     {tier.prices.monthly.amount > 0 && (
-                      <span className="text-muted-foreground">/month</span>
+                      <span className="text-muted-foreground">{t("subscription.perMonth")}</span>
                     )}
                   </div>
 
@@ -155,11 +157,11 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
                         disabled={loadingTier === "manage"}
                       >
                         {loadingTier === "manage" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                        Manage Subscription
+                        {t("subscription.manageSubscription")}
                       </Button>
                     ) : (
                       <Button variant="outline" className="w-full" disabled>
-                        Current Plan
+                        {t("subscription.currentPlan")}
                       </Button>
                     )
                   ) : tierKey === "free" ? (
@@ -170,7 +172,7 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
                       disabled={loadingTier === "manage"}
                     >
                       {loadingTier === "manage" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                      Downgrade
+                      {t("subscription.downgrade")}
                     </Button>
                   ) : (
                     <Button

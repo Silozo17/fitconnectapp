@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { CreditCard, ExternalLink, Loader2, CheckCircle, Percent } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +17,7 @@ interface StripeConnectButtonProps {
 }
 
 const StripeConnectButton = ({ coachId, onSuccess }: StripeConnectButtonProps) => {
+  const { t } = useTranslation("settings");
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -87,27 +89,27 @@ const StripeConnectButton = ({ coachId, onSuccess }: StripeConnectButtonProps) =
               <CheckCircle className="h-5 w-5 text-green-500" />
             </div>
             <div className="flex-1">
-              <p className="font-medium text-foreground">Stripe Connected</p>
+              <p className="font-medium text-foreground">{t("stripeConnect.connected")}</p>
               <p className="text-sm text-muted-foreground">
-                You can receive payments from clients
+                {t("stripeConnect.canReceivePayments")}
               </p>
             </div>
             <Badge variant="outline" className="text-green-600 border-green-500/30">
-              Active
+              {t("stripeConnect.active")}
             </Badge>
           </div>
           <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
             <Percent className="w-4 h-4 text-primary" />
             <span className="text-sm">
-              <span className="font-medium">{commissionPercent}%</span> platform fee on transactions
+              <span className="font-medium">{t("stripeConnect.platformFee", { percent: commissionPercent })}</span>
               <span className="text-muted-foreground ml-1">
-                ({tierData.name} plan)
+                {t("stripeConnect.planLabel", { plan: tierData.name })}
               </span>
             </span>
           </div>
           {currentTier !== "enterprise" && (
             <p className="text-xs text-muted-foreground">
-              <Link to="/pricing" className="text-primary hover:underline">Upgrade your plan</Link> to reduce fees
+              <Link to="/pricing" className="text-primary hover:underline">{t("stripeConnect.upgradePlan")}</Link>
             </p>
           )}
         </CardContent>
@@ -123,14 +125,14 @@ const StripeConnectButton = ({ coachId, onSuccess }: StripeConnectButtonProps) =
           <div className="text-center space-y-4">
             <Loader2 className="h-12 w-12 text-primary mx-auto animate-spin" />
             <div>
-              <h3 className="font-semibold">Verifying your account...</h3>
+              <h3 className="font-semibold">{t("stripeConnect.verifying")}</h3>
               <p className="text-sm text-muted-foreground">
-                Stripe is verifying your account. This may take a few moments.
+                {t("stripeConnect.verifyingDesc")}
               </p>
             </div>
             <Button variant="outline" onClick={() => refetch()} disabled={isLoading}>
               {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Check Status
+              {t("stripeConnect.checkStatus")}
             </Button>
           </div>
         </CardContent>
@@ -143,30 +145,30 @@ const StripeConnectButton = ({ coachId, onSuccess }: StripeConnectButtonProps) =
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <CreditCard className="h-5 w-5" />
-          Connect Stripe
+          {t("stripeConnect.title")}
         </CardTitle>
         <CardDescription>
-          Connect your Stripe account to receive payments from clients
+          {t("stripeConnect.description")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2 text-sm text-muted-foreground">
-          <p>• Accept credit/debit card payments</p>
-          <p>• Automatic transfers to your bank account</p>
-          <p>• Secure and PCI compliant</p>
+          <p>• {t("stripeConnect.acceptPayments")}</p>
+          <p>• {t("stripeConnect.automaticTransfers")}</p>
+          <p>• {t("stripeConnect.secureCompliant")}</p>
         </div>
         <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10">
           <Percent className="w-4 h-4 text-primary" />
             <span className="text-sm">
-              <span className="font-medium">{commissionPercent}%</span> platform fee
+              <span className="font-medium">{t("stripeConnect.platformFee", { percent: commissionPercent })}</span>
               <span className="text-muted-foreground ml-1">
-                ({tierData.name} plan)
+                {t("stripeConnect.planLabel", { plan: tierData.name })}
             </span>
           </span>
         </div>
         {currentTier !== "enterprise" && (
           <p className="text-xs text-muted-foreground">
-            <Link to="/pricing" className="text-primary hover:underline">Upgrade your plan</Link> to reduce fees
+            <Link to="/pricing" className="text-primary hover:underline">{t("stripeConnect.upgradePlan")}</Link>
           </p>
         )}
         
@@ -176,7 +178,7 @@ const StripeConnectButton = ({ coachId, onSuccess }: StripeConnectButtonProps) =
           ) : (
             <ExternalLink className="h-4 w-4 mr-2" />
           )}
-          Connect with Stripe
+          {t("stripeConnect.connectButton")}
         </Button>
       </CardContent>
     </Card>
