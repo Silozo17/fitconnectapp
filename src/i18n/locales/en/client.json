@@ -515,5 +515,19 @@
     "noUpcoming": "No upcoming bookings",
     "noPast": "No past bookings",
     "bookNew": "Book a Session"
+  },
+  "achievements": {
+    "title": "Achievements",
+    "subtitle": "Track your progress and unlock badges",
+    "changeAvatar": "Change Avatar",
+    "tabs": {
+      "badges": "Badges",
+      "history": "XP History"
+    },
+    "xpHistory": {
+      "title": "Recent XP Activity",
+      "noXpYet": "No XP earned yet",
+      "earnXp": "Complete habits and workouts to earn XP!"
+    }
   }
 }

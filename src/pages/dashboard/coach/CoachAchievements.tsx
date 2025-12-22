@@ -1,5 +1,5 @@
 import { Trophy, Star, Check, Dumbbell, Lock } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/hooks/useTranslation";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { useCoachBadges, useAvailableCoachBadges, useCoachStats } from "@/hooks/useCoachGamification";
 import { useCoachProfileCompletion } from "@/hooks/useCoachProfileCompletion";
@@ -57,7 +57,8 @@ interface BadgeProgress {
   current: number;
   target: number;
   percentage: number;
-  label: string;
+  labelKey: string;
+  labelParams: Record<string, string | number>;
 }
 
 const calculateBadgeProgress = (
@@ -75,7 +76,8 @@ const calculateBadgeProgress = (
         current,
         target: criteriaValue,
         percentage: Math.min((current / criteriaValue) * 100, 100),
-        label: `${current}% / ${criteriaValue}%`,
+        labelKey: "achievementsPage.progress.percent",
+        labelParams: { current, target: criteriaValue },
       };
     }
     case "client_count": {
@@ -84,7 +86,8 @@ const calculateBadgeProgress = (
         current,
         target: criteriaValue,
         percentage: Math.min((current / criteriaValue) * 100, 100),
-        label: `${current} / ${criteriaValue} clients`,
+        labelKey: "achievementsPage.progress.clients",
+        labelParams: { current, target: criteriaValue },
       };
     }
     case "session_count": {
@@ -93,7 +96,8 @@ const calculateBadgeProgress = (
         current,
         target: criteriaValue,
         percentage: Math.min((current / criteriaValue) * 100, 100),
-        label: `${current} / ${criteriaValue} sessions`,
+        labelKey: "achievementsPage.progress.sessions",
+        labelParams: { current, target: criteriaValue },
       };
     }
     case "review_count": {
@@ -102,7 +106,8 @@ const calculateBadgeProgress = (
         current,
         target: criteriaValue,
         percentage: Math.min((current / criteriaValue) * 100, 100),
-        label: `${current} / ${criteriaValue} reviews`,
+        labelKey: "achievementsPage.progress.reviews",
+        labelParams: { current, target: criteriaValue },
       };
     }
     case "rating_threshold": {
@@ -114,9 +119,12 @@ const calculateBadgeProgress = (
         current: currentRating,
         target: targetRating,
         percentage: hasEnoughReviews ? Math.min((currentRating / targetRating) * 100, 100) : 0,
-        label: hasEnoughReviews 
-          ? `${currentRating.toFixed(1)} / ${targetRating} rating`
-          : `Need ${minReviews} reviews first`,
+        labelKey: hasEnoughReviews 
+          ? "achievementsPage.progress.rating"
+          : "achievementsPage.progress.needReviews",
+        labelParams: hasEnoughReviews 
+          ? { current: currentRating.toFixed(1), target: targetRating }
+          : { count: minReviews },
       };
     }
     case "verification": {
@@ -125,7 +133,10 @@ const calculateBadgeProgress = (
         current: isVerified ? 1 : 0,
         target: 1,
         percentage: isVerified ? 100 : 0,
-        label: isVerified ? "Verified" : "Get verified",
+        labelKey: isVerified 
+          ? "achievementsPage.progress.verified" 
+          : "achievementsPage.progress.getVerified",
+        labelParams: {},
       };
     }
     default:
@@ -133,7 +144,8 @@ const calculateBadgeProgress = (
         current: 0,
         target: 1,
         percentage: 0,
-        label: "In progress",
+        labelKey: "achievementsPage.progress.inProgress",
+        labelParams: {},
       };
   }
 };
@@ -214,11 +226,11 @@ const CoachAchievements = () => {
                   "text-xs font-medium capitalize px-2 py-0.5 rounded-full bg-background/50",
                   isEarned ? rarityTextColors[badge.rarity] : "text-muted-foreground"
                 )}>
-                  {badge.rarity}
+                  {t(`achievementsPage.rarity.${badge.rarity}`)}
                 </span>
                 {isEarned && earnedData && (
                   <span className="text-xs text-muted-foreground">
-                    Earned {format(new Date(earnedData.earned_at), "MMM d, yyyy")}
+                    {t("achievementsPage.earnedOn", { date: format(new Date(earnedData.earned_at), "MMM d, yyyy") })}
                   </span>
                 )}
               </div>
@@ -227,7 +239,9 @@ const CoachAchievements = () => {
               {!isEarned && progress && (
                 <div className="space-y-1">
                   <Progress value={progress.percentage} className="h-2" />
-                  <p className="text-xs text-muted-foreground">{progress.label}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t(progress.labelKey, progress.labelParams)}
+                  </p>
                 </div>
               )}
 

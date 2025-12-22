@@ -515,5 +515,19 @@
     "noUpcoming": "Brak nadchodzących rezerwacji",
     "noPast": "Brak przeszłych rezerwacji",
     "bookNew": "Zarezerwuj sesję"
+  },
+  "achievements": {
+    "title": "Osiągnięcia",
+    "subtitle": "Śledź swój postęp i odblokowuj odznaki",
+    "changeAvatar": "Zmień awatara",
+    "tabs": {
+      "badges": "Odznaki",
+      "history": "Historia XP"
+    },
+    "xpHistory": {
+      "title": "Ostatnia aktywność XP",
+      "noXpYet": "Brak zdobytych XP",
+      "earnXp": "Ukończ nawyki i treningi, aby zdobyć XP!"
+    }
   }
 }
