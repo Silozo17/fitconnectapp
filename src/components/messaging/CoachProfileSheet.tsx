@@ -11,6 +11,19 @@ import { UserAvatar } from "@/components/shared/UserAvatar";
 import { Rarity } from "@/lib/avatar-utils";
 import { useCoachLinkPrefix } from "@/hooks/useCoachLinkPrefix";
 import { RARITY_ORDER } from "@/hooks/useGamification";
+import { getCoachTypeById, COACH_TYPES } from "@/constants/coachTypes";
+
+// Helper to get display label for coach type (handles custom types)
+const getCoachTypeDisplayLabel = (type: string): string => {
+  const byId = getCoachTypeById(type);
+  if (byId) return byId.label;
+  const byLabel = COACH_TYPES.find(t => t.label === type);
+  if (byLabel) return byLabel.label;
+  if (type.startsWith("custom_")) {
+    return type.replace("custom_", "").replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+  }
+  return type.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+};
 
 interface CoachProfileSheetProps {
   open: boolean;
@@ -143,7 +156,7 @@ export const CoachProfileSheet = ({
                 <div className="flex flex-wrap gap-2">
                   {profile.coach_types.map((type: string) => (
                     <Badge key={type} variant="outline" className="text-xs">
-                      {type}
+                      {getCoachTypeDisplayLabel(type)}
                     </Badge>
                   ))}
                 </div>

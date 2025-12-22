@@ -16,6 +16,26 @@ import { useCoachLinkPrefix } from "@/hooks/useCoachLinkPrefix";
 import { useExchangeRates } from "@/hooks/useExchangeRates";
 import { getDisplayLocation } from "@/lib/location-utils";
 import { useTranslation } from "@/hooks/useTranslation";
+import { getCoachTypeById, COACH_TYPES } from "@/constants/coachTypes";
+
+// Helper to get display label for coach type (handles custom types)
+const getCoachTypeDisplayLabel = (type: string): string => {
+  // First check if it's an ID in the predefined list
+  const byId = getCoachTypeById(type);
+  if (byId) return byId.label;
+  
+  // Check if it matches a label directly
+  const byLabel = COACH_TYPES.find(t => t.label === type);
+  if (byLabel) return byLabel.label;
+  
+  // It's a custom type - clean up the display
+  if (type.startsWith("custom_")) {
+    return type.replace("custom_", "").replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+  }
+  
+  // Return as-is but with title case
+  return type.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+};
 
 interface CoachCardProps {
   coach: MarketplaceCoach;
@@ -141,7 +161,7 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
           )}
         </div>
         {coach.coach_types && coach.coach_types.length > 0 && (
-          <p className="text-primary text-sm font-medium mb-2">{coach.coach_types[0]}</p>
+          <p className="text-primary text-sm font-medium mb-2">{getCoachTypeDisplayLabel(coach.coach_types[0])}</p>
         )}
 
         {(coach.location || coach.location_city || coach.gym_affiliation) && (
@@ -164,7 +184,7 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
         {coach.coach_types && coach.coach_types.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">
             {coach.coach_types.slice(0, 3).map((type) => (
-              <Badge key={type} variant="secondary" className="bg-secondary/80 text-xs">{type}</Badge>
+              <Badge key={type} variant="secondary" className="bg-secondary/80 text-xs">{getCoachTypeDisplayLabel(type)}</Badge>
             ))}
           </div>
         )}
