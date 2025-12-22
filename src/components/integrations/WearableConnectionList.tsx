@@ -54,6 +54,8 @@ const WearableConnectionList = () => {
       name: "Garmin",
       icon: <Watch className="w-6 h-6 text-white" />,
       color: "bg-gradient-to-br from-blue-600 to-blue-800",
+      comingSoon: true,
+      description: t('integrations.awaitingDeveloperAccess'),
     },
   ];
 

@@ -227,6 +227,7 @@
     "manualHealthDesc": "Zapisz kroki, tętno, sen ręcznie",
     "logData": "Zapisz dane",
     "requiresAndroidApp": "Wymaga aplikacji FitConnect na Androida",
+    "awaitingDeveloperAccess": "Integracja wkrótce dostępna",
     "appleCalendar": "Kalendarz Apple",
     "googleCalendar": "Kalendarz Google"
   },
