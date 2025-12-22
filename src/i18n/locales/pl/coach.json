@@ -761,6 +761,19 @@
     "submitDispute": "Zgłoś spór",
     "disputeReason": "Powód sporu",
     "disputeReasonPlaceholder": "Wyjaśnij, dlaczego uważasz, że ta recenzja powinna zostać sprawdzona przez nasz zespół...",
-    "submitting": "Wysyłanie..."
+    "submitting": "Wysyłanie...",
+    "allReviews": "Wszystkie recenzje",
+    "loading": "Ładowanie recenzji...",
+    "adminResponse": "Odpowiedź administratora",
+    "disputeDescription": "Jeśli uważasz, że ta recenzja jest niesprawiedliwa lub narusza nasze wytyczne, możesz ją zgłosić do przeglądu przez nasz zespół.",
+    "reasonForDispute": "Powód sporu",
+    "disputePlaceholder": "Wyjaśnij, dlaczego uważasz, że ta recenzja powinna zostać sprawdzona przez nasz zespół...",
+    "anonymous": "Anonimowy",
+    "private": "Prywatna",
+    "disputeStatus": {
+      "pending": "Spór oczekujący",
+      "approved": "Spór zatwierdzony",
+      "rejected": "Spór odrzucony"
+    }
   }
 }
