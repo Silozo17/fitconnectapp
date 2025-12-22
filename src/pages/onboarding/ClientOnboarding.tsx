@@ -58,6 +58,7 @@ const ClientOnboarding = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingProfile, setIsCheckingProfile] = useState(true);
+  const [clientProfileId, setClientProfileId] = useState<string | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -78,26 +79,64 @@ const ClientOnboarding = () => {
     allergies: [] as string[],
   });
 
-  // Check if onboarding is already completed
+  // Check if onboarding is already completed and restore saved step
   useEffect(() => {
     const checkProfile = async () => {
       if (!user) return;
 
       const { data } = await supabase
         .from("client_profiles")
-        .select("onboarding_completed")
+        .select("id, onboarding_completed, onboarding_progress")
         .eq("user_id", user.id)
         .maybeSingle();
 
       if (data?.onboarding_completed) {
         navigate("/dashboard/client");
       } else {
+        setClientProfileId(data?.id || null);
+        
+        // Restore saved step from onboarding_progress
+        const progress = data?.onboarding_progress as { current_step?: number; form_data?: typeof formData } | null;
+        if (progress?.current_step !== undefined && progress.current_step >= 0 && progress.current_step < STEPS.length) {
+          setCurrentStep(progress.current_step);
+        }
+        
+        // Restore saved form data if available
+        if (progress?.form_data) {
+          setFormData(prev => ({ ...prev, ...progress.form_data }));
+        }
+        
         setIsCheckingProfile(false);
       }
     };
 
     checkProfile();
   }, [user, navigate]);
+
+  // Save current step and form data whenever they change
+  useEffect(() => {
+    const saveProgress = async () => {
+      if (!clientProfileId || isCheckingProfile) return;
+      
+      // Serialize formData to JSON-compatible format
+      const progressData = JSON.parse(JSON.stringify({
+        current_step: currentStep,
+        form_data: formData,
+        last_updated: new Date().toISOString(),
+      }));
+      
+      await supabase
+        .from("client_profiles")
+        .update({
+          onboarding_progress: progressData
+        })
+        .eq("id", clientProfileId);
+    };
+    
+    // Debounce the save to avoid too many updates
+    const timer = setTimeout(saveProgress, 500);
+    return () => clearTimeout(timer);
+  }, [currentStep, formData, clientProfileId, isCheckingProfile]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

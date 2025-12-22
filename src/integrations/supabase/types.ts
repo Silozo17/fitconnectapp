@@ -1114,6 +1114,7 @@ export type Database = {
           location: string | null
           medical_conditions: string[] | null
           onboarding_completed: boolean
+          onboarding_progress: Json | null
           selected_avatar_id: string | null
           status: string | null
           status_reason: string | null
@@ -1146,6 +1147,7 @@ export type Database = {
           location?: string | null
           medical_conditions?: string[] | null
           onboarding_completed?: boolean
+          onboarding_progress?: Json | null
           selected_avatar_id?: string | null
           status?: string | null
           status_reason?: string | null
@@ -1178,6 +1180,7 @@ export type Database = {
           location?: string | null
           medical_conditions?: string[] | null
           onboarding_completed?: boolean
+          onboarding_progress?: Json | null
           selected_avatar_id?: string | null
           status?: string | null
           status_reason?: string | null
