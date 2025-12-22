@@ -1050,18 +1050,29 @@
     "profileBadges": "Profile Badges",
     "milestoneBadges": "Milestone Badges",
     "earned": "Earned",
+    "earnedOn": "Earned {{date}}",
     "featureOnProfile": "Feature on Profile",
     "featured": "Featured",
     "noBadges": "No badges available",
-    "noBadgesDesc": "Check back later for achievements to unlock!",
-    "clients": "clients",
-    "sessions": "sessions",
-    "reviews": "reviews",
-    "rating": "rating",
-    "needReviews": "Need {{count}} reviews first",
-    "verified": "Verified",
-    "getVerified": "Get verified",
-    "inProgress": "In progress"
+    "checkBackLater": "Check back later for achievements to unlock!",
+    "progress": {
+      "clients": "{{current}} / {{target}} clients",
+      "sessions": "{{current}} / {{target}} sessions",
+      "reviews": "{{current}} / {{target}} reviews",
+      "rating": "{{current}} / {{target}} rating",
+      "needReviews": "Need {{count}} reviews first",
+      "verified": "Verified",
+      "getVerified": "Get verified",
+      "inProgress": "In progress",
+      "percent": "{{current}}% / {{target}}%"
+    },
+    "rarity": {
+      "common": "Common",
+      "uncommon": "Uncommon",
+      "rare": "Rare",
+      "epic": "Epic",
+      "legendary": "Legendary"
+    }
   },
   "reviewsPage": {
     "title": "Reviews",

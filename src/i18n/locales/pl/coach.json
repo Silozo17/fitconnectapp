@@ -1050,18 +1050,29 @@
     "profileBadges": "Odznaki profilu",
     "milestoneBadges": "Odznaki kamieni milowych",
     "earned": "Zdobyte",
+    "earnedOn": "Zdobyto {{date}}",
     "featureOnProfile": "Wyróżnij na profilu",
     "featured": "Wyróżnione",
     "noBadges": "Brak dostępnych odznak",
-    "noBadgesDesc": "Wróć później, aby odblokować osiągnięcia!",
-    "clients": "klientów",
-    "sessions": "sesji",
-    "reviews": "recenzji",
-    "rating": "ocena",
-    "needReviews": "Potrzeba najpierw {{count}} recenzji",
-    "verified": "Zweryfikowany",
-    "getVerified": "Uzyskaj weryfikację",
-    "inProgress": "W trakcie"
+    "checkBackLater": "Wróć później, aby odblokować osiągnięcia!",
+    "progress": {
+      "clients": "{{current}} / {{target}} klientów",
+      "sessions": "{{current}} / {{target}} sesji",
+      "reviews": "{{current}} / {{target}} recenzji",
+      "rating": "{{current}} / {{target}} oceny",
+      "needReviews": "Potrzeba najpierw {{count}} recenzji",
+      "verified": "Zweryfikowany",
+      "getVerified": "Uzyskaj weryfikację",
+      "inProgress": "W trakcie",
+      "percent": "{{current}}% / {{target}}%"
+    },
+    "rarity": {
+      "common": "Zwykła",
+      "uncommon": "Niezwykła",
+      "rare": "Rzadka",
+      "epic": "Epicka",
+      "legendary": "Legendarna"
+    }
   },
   "reviewsPage": {
     "title": "Recenzje",
