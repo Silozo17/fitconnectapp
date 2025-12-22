@@ -86,6 +86,7 @@ export function OnboardingConfirmSheet({
 
         <SheetFooter className="flex-col gap-2 mt-6 sm:flex-col">
           <Button
+            type="button"
             onClick={onConfirm}
             variant={styles.confirmVariant}
             className="w-full"
@@ -94,6 +95,7 @@ export function OnboardingConfirmSheet({
             {confirmLoading ? "Please wait..." : confirmLabel}
           </Button>
           <Button
+            type="button"
             onClick={onCancel}
             variant="ghost"
             className="w-full"

@@ -402,7 +402,8 @@
     "uploadBothRequired": "Upload both a Government ID and Professional Certification to submit for verification.",
     "requiredDocsUploaded": "You have uploaded the required documents. Click \"Submit & Continue\" to send for review.",
     "skipForNow": "Skip for now",
-    "submitAndContinue": "Submit & Continue"
+    "submitAndContinue": "Submit & Continue",
+    "goBack": "Go back"
   },
   "navigation": {
     "home": "Home",

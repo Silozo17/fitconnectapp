@@ -107,7 +107,10 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip }: StripeConn
 
   const handleConfirmSkip = () => {
     setShowSkipWarning(false);
-    onSkip();
+    // Small delay to ensure sheet closes before navigation
+    setTimeout(() => {
+      onSkip();
+    }, 100);
   };
 
   // Check URL params for returning from Stripe
