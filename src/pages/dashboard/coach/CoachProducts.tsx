@@ -328,8 +328,11 @@ export default function CoachProducts() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t('productsPage.deleteProduct')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('productsPage.deleteProductConfirm')}
+            <AlertDialogDescription className="space-y-2">
+              <p>{t('productsPage.deleteProductConfirm')}</p>
+              <p className="text-destructive font-medium">
+                ⚠️ {t('productsPage.deleteProductWarning', 'Warning: This will also permanently delete all purchase records associated with this product.')}
+              </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -354,8 +357,11 @@ export default function CoachProducts() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t('productsPage.deleteBundle')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('productsPage.deleteBundleConfirm')}
+            <AlertDialogDescription className="space-y-2">
+              <p>{t('productsPage.deleteBundleConfirm')}</p>
+              <p className="text-destructive font-medium">
+                ⚠️ {t('productsPage.deleteBundleWarning', 'Warning: This will also permanently delete all purchase records associated with this bundle.')}
+              </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
