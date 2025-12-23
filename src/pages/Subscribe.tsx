@@ -6,10 +6,12 @@ import { TierSelector, TierFeatures } from "@/components/payments/TierSelector";
 import { BillingToggle } from "@/components/payments/BillingToggle";
 import { PriceSummary } from "@/components/payments/PriceSummary";
 import { SubscriptionCheckout, CheckoutLoading } from "@/components/payments/SubscriptionCheckout";
+import { NativeSubscriptionButtons } from "@/components/payments/NativeSubscriptionButtons";
 import { SUBSCRIPTION_TIERS, TierKey, BillingInterval } from "@/lib/stripe-config";
 import { Button } from "@/components/ui/button";
 import { getAvatarImageUrl } from "@/hooks/useAvatars";
 import { toast } from "sonner";
+import { isDespia } from "@/lib/despia";
 
 // Tier-to-avatar mapping - each tier gets a progressively better avatar
 const TIER_AVATARS: Record<TierKey, string> = {
@@ -187,55 +189,64 @@ export default function Subscribe() {
 
       {/* Right Side - Light - Side by side layout */}
       <div className="hidden md:flex w-1/2 bg-white p-4 md:p-6 lg:p-8 flex-col lg:flex-row gap-4 lg:gap-6 items-start overflow-y-auto">
-        {/* LEFT: Price Summary - Compact box */}
-        <div className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-          <PriceSummary tier={selectedTier} billingInterval={billingInterval} />
-        </div>
+        {/* Show native IAP for Despia environment */}
+        {isDespia() ? (
+          <div className="w-full">
+            <NativeSubscriptionButtons currentTier="free" />
+          </div>
+        ) : (
+          <>
+            {/* LEFT: Price Summary - Compact box */}
+            <div className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+              <PriceSummary tier={selectedTier} billingInterval={billingInterval} />
+            </div>
 
-        {/* RIGHT: Checkout Form - Takes remaining space */}
-        <div className="flex-1 min-w-0 w-full">
-          {!user ? (
-            <div className="bg-gray-50 rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Sign in to continue
-              </h3>
-              <p className="text-gray-600 text-sm mb-4">
-                You need to be signed in to subscribe to a plan.
-              </p>
-              <Link to={`/auth?returnUrl=${encodedReturnUrl}`}>
-                <Button className="w-full bg-[#0D0D14] hover:bg-[#1a1a24] text-white">
-                  Sign in
-                </Button>
-              </Link>
-              <p className="text-xs text-gray-500 mt-4">
-                Don't have an account?{" "}
-                <Link to={`/auth?mode=signup&returnUrl=${encodedReturnUrl}`} className="text-[#0D0D14] hover:underline font-medium">
-                  Sign up
-                </Link>
-              </p>
+            {/* RIGHT: Checkout Form - Takes remaining space */}
+            <div className="flex-1 min-w-0 w-full">
+              {!user ? (
+                <div className="bg-gray-50 rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Sign in to continue
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-4">
+                    You need to be signed in to subscribe to a plan.
+                  </p>
+                  <Link to={`/auth?returnUrl=${encodedReturnUrl}`}>
+                    <Button className="w-full bg-[#0D0D14] hover:bg-[#1a1a24] text-white">
+                      Sign in
+                    </Button>
+                  </Link>
+                  <p className="text-xs text-gray-500 mt-4">
+                    Don't have an account?{" "}
+                    <Link to={`/auth?mode=signup&returnUrl=${encodedReturnUrl}`} className="text-[#0D0D14] hover:underline font-medium">
+                      Sign up
+                    </Link>
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <Suspense fallback={<CheckoutLoading />}>
+                    <SubscriptionCheckout 
+                      key={checkoutKey}
+                      tier={selectedTier} 
+                      billingInterval={billingInterval}
+                    />
+                  </Suspense>
+                  <p className="text-xs text-gray-500 text-center mt-4">
+                    By subscribing, you agree to our{" "}
+                    <Link to="/terms" className="underline hover:text-gray-700">
+                      Terms of Service
+                    </Link>{" "}
+                    and{" "}
+                    <Link to="/privacy" className="underline hover:text-gray-700">
+                      Privacy Policy
+                    </Link>
+                  </p>
+                </div>
+              )}
             </div>
-          ) : (
-            <div>
-              <Suspense fallback={<CheckoutLoading />}>
-                <SubscriptionCheckout 
-                  key={checkoutKey}
-                  tier={selectedTier} 
-                  billingInterval={billingInterval}
-                />
-              </Suspense>
-              <p className="text-xs text-gray-500 text-center mt-4">
-                By subscribing, you agree to our{" "}
-                <Link to="/terms" className="underline hover:text-gray-700">
-                  Terms of Service
-                </Link>{" "}
-                and{" "}
-                <Link to="/privacy" className="underline hover:text-gray-700">
-                  Privacy Policy
-                </Link>
-              </p>
-            </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
 
       {/* Mobile Checkout Sheet */}

@@ -199,4 +199,103 @@ export const isBioAuthAvailable = (): boolean => {
   return isDespia();
 };
 
+// ============================================================================
+// REVENUECAT IN-APP PURCHASES
+// ============================================================================
+
+/**
+ * Native IAP product IDs for subscription tiers
+ * These must match the products configured in RevenueCat
+ */
+export const IAP_PRODUCT_IDS = {
+  // Monthly subscriptions
+  starter_monthly: 'fitconnect_starter_monthly',
+  pro_monthly: 'fitconnect_pro_monthly',
+  enterprise_monthly: 'fitconnect_enterprise_monthly',
+  // Yearly subscriptions
+  starter_yearly: 'fitconnect_starter_yearly',
+  pro_yearly: 'fitconnect_pro_yearly',
+  enterprise_yearly: 'fitconnect_enterprise_yearly',
+} as const;
+
+export type IAPProductId = typeof IAP_PRODUCT_IDS[keyof typeof IAP_PRODUCT_IDS];
+
+/**
+ * IAP success callback data provided by Despia native runtime
+ */
+export interface IAPSuccessData {
+  planID: string;
+  transactionID: string;
+  subreceipts: string;
+}
+
+/**
+ * IAP callback handlers
+ */
+export interface IAPCallbacks {
+  onSuccess: (data: IAPSuccessData) => void;
+  onError?: (error: string) => void;
+}
+
+// Store callbacks globally so Despia can access them
+let iapCallbacks: IAPCallbacks | null = null;
+
+/**
+ * Register global callback for IAP success
+ * Must be called before triggering purchases
+ */
+export const registerIAPCallbacks = (callbacks: IAPCallbacks): void => {
+  iapCallbacks = callbacks;
+  
+  // Expose iapSuccess globally for Despia runtime
+  if (typeof window !== 'undefined') {
+    (window as any).iapSuccess = (data: IAPSuccessData) => {
+      if (isDespia() && iapCallbacks) {
+        console.log('[Despia IAP] Purchase success callback received:', data);
+        iapCallbacks.onSuccess(data);
+      }
+    };
+  }
+};
+
+/**
+ * Cleanup IAP callbacks when component unmounts
+ */
+export const unregisterIAPCallbacks = (): void => {
+  iapCallbacks = null;
+  if (typeof window !== 'undefined') {
+    delete (window as any).iapSuccess;
+  }
+};
+
+/**
+ * Trigger a RevenueCat purchase through Despia native runtime
+ * @param userId The user's ID (typically the auth user ID or coach profile ID)
+ * @param productId The RevenueCat product ID to purchase
+ * @returns true if the purchase was triggered, false if not in Despia environment
+ */
+export const triggerRevenueCatPurchase = (userId: string, productId: string): boolean => {
+  if (!isDespia()) {
+    console.warn('[Despia IAP] Attempted purchase outside of Despia environment');
+    return false;
+  }
+  
+  try {
+    const command = `revenuecat://purchase?external_id=${encodeURIComponent(userId)}&product=${encodeURIComponent(productId)}`;
+    console.log('[Despia IAP] Triggering purchase:', command);
+    despia(command);
+    return true;
+  } catch (e) {
+    console.error('[Despia IAP] Failed to trigger purchase:', e);
+    return false;
+  }
+};
+
+/**
+ * Check if native IAP is available
+ */
+export const isNativeIAPAvailable = (): boolean => {
+  return isDespia();
+};
+
 export default despia;
