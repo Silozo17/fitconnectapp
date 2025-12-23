@@ -58,13 +58,6 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
     // Starts with for other routes
     return location.pathname.startsWith(route);
   };
-    // Exact match for home routes
-    if (route === "/dashboard/client" || route === "/dashboard/coach") {
-      return location.pathname === route;
-    }
-    // Starts with for other routes
-    return location.pathname.startsWith(route);
-  };
 
   // Use CSS md:hidden for immediate visibility on mobile, with JS fallback
   // This ensures nav is visible before JS hydrates in PWA/Despia
