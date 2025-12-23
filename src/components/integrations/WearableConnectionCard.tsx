@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Check, RefreshCw, Unlink, Clock } from "lucide-react";
+import { Loader2, Check, RefreshCw, Unlink } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -18,8 +18,8 @@ interface WearableConnectionCardProps {
   onSync: () => void;
   isConnecting?: boolean;
   isSyncing?: boolean;
-  comingSoon?: boolean;
-  comingSoonDescription?: string;
+  disabled?: boolean;
+  disabledMessage?: string;
 }
 
 const WearableConnectionCard = ({
@@ -34,15 +34,15 @@ const WearableConnectionCard = ({
   onSync,
   isConnecting,
   isSyncing,
-  comingSoon,
-  comingSoonDescription,
+  disabled,
+  disabledMessage,
 }: WearableConnectionCardProps) => {
   const { t } = useTranslation('common');
 
   return (
     <Card className={cn(
       "bg-card/50 border-border/50 hover:border-primary/30 transition-all min-h-[160px]",
-      comingSoon && "opacity-75"
+      disabled && "opacity-75"
     )}>
       <CardHeader className="pb-2 pt-4 px-4">
         <div className="flex items-start gap-3">
@@ -56,28 +56,23 @@ const WearableConnectionCard = ({
           </div>
           <div className="min-w-0 flex-1">
             <CardTitle className="text-base truncate">{providerName}</CardTitle>
-            {comingSoon ? (
-              <Badge variant="secondary" className="mt-1 text-[10px] px-1.5 py-0">
-                <Clock className="w-2.5 h-2.5 mr-0.5" />
-                {t('common.comingSoon')}
-              </Badge>
-            ) : isConnected ? (
+            {isConnected && (
               <Badge variant="outline" className="mt-1 text-[10px] px-1.5 py-0 text-primary border-primary/30">
                 <Check className="w-2.5 h-2.5 mr-0.5" />
                 {t('integrations.connected')}
               </Badge>
-            ) : null}
+            )}
           </div>
         </div>
       </CardHeader>
       <CardContent className="px-4 pb-4">
-        {comingSoon ? (
+        {disabled ? (
           <div className="space-y-2">
             <p className="text-xs text-muted-foreground line-clamp-2">
-              {comingSoonDescription || t('common.comingSoon')}
+              {disabledMessage}
             </p>
             <Button disabled className="w-full" variant="secondary" size="sm">
-              {t('common.comingSoon')}
+              {t('integrations.installApp', 'Install App')}
             </Button>
           </div>
         ) : isConnected ? (
