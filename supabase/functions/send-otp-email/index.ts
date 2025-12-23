@@ -12,21 +12,52 @@ function generateOTP(): string {
 }
 
 serve(async (req) => {
+  // Extract device info from headers for debugging
+  const userAgent = req.headers.get("user-agent") || "unknown";
+  const clientInfo = req.headers.get("x-client-info") || "unknown";
+  const isIPad = userAgent.toLowerCase().includes("ipad");
+  const isIOS = userAgent.toLowerCase().includes("iphone") || isIPad;
+  
+  console.log(`[send-otp-email] Request received - Device: ${isIPad ? 'iPad' : isIOS ? 'iPhone' : 'Other'}, User-Agent: ${userAgent}, Client-Info: ${clientInfo}`);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { email } = await req.json();
+    let requestBody;
+    try {
+      requestBody = await req.json();
+      console.log(`[send-otp-email] Request body parsed successfully:`, JSON.stringify(requestBody));
+    } catch (parseError) {
+      console.error(`[send-otp-email] Failed to parse request body:`, parseError);
+      return new Response(
+        JSON.stringify({ error: "Invalid request body", details: "Could not parse JSON" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { email } = requestBody;
 
     if (!email) {
+      console.error(`[send-otp-email] Email missing from request body`);
       return new Response(
         JSON.stringify({ error: "Email is required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log(`Generating OTP for email: ${email}`);
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      console.error(`[send-otp-email] Invalid email format: ${email}`);
+      return new Response(
+        JSON.stringify({ error: "Invalid email format" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log(`[send-otp-email] Generating OTP for email: ${email} (Device: ${isIPad ? 'iPad' : isIOS ? 'iPhone' : 'Other'})`);
 
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -38,12 +69,19 @@ serve(async (req) => {
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes from now
 
     // Delete any existing codes for this email
-    await supabaseAdmin
+    console.log(`[send-otp-email] Deleting existing codes for: ${email.toLowerCase()}`);
+    const { error: deleteError } = await supabaseAdmin
       .from("email_verifications")
       .delete()
       .eq("email", email.toLowerCase());
+    
+    if (deleteError) {
+      console.error(`[send-otp-email] Failed to delete existing codes:`, deleteError);
+      // Continue anyway, this is not critical
+    }
 
     // Insert new code
+    console.log(`[send-otp-email] Inserting new OTP code for: ${email.toLowerCase()}`);
     const { error: insertError } = await supabaseAdmin
       .from("email_verifications")
       .insert({
@@ -53,9 +91,18 @@ serve(async (req) => {
       });
 
     if (insertError) {
-      console.error("Failed to insert OTP:", insertError);
-      throw new Error("Failed to generate verification code");
+      console.error(`[send-otp-email] Failed to insert OTP:`, insertError);
+      return new Response(
+        JSON.stringify({ 
+          error: "Failed to generate verification code", 
+          details: insertError.message,
+          code: insertError.code 
+        }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
+    
+    console.log(`[send-otp-email] OTP stored successfully, sending email...`);
 
     // Send email via Resend
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
@@ -100,21 +147,34 @@ serve(async (req) => {
 
     if (!emailResponse.ok) {
       const errorData = await emailResponse.text();
-      console.error("Resend error:", errorData);
-      throw new Error("Failed to send verification email");
+      console.error(`[send-otp-email] Resend API error:`, errorData);
+      return new Response(
+        JSON.stringify({ 
+          error: "Failed to send verification email", 
+          details: errorData 
+        }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
-    console.log(`OTP sent successfully to ${email}`);
+    const emailResult = await emailResponse.json();
+    console.log(`[send-otp-email] Email sent successfully to ${email}, Resend ID: ${emailResult.id}`);
 
     return new Response(
       JSON.stringify({ success: true, message: "Verification code sent" }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
-    console.error("Error in send-otp-email:", error);
+    console.error(`[send-otp-email] Unhandled error:`, error);
     const errorMessage = error instanceof Error ? error.message : "Failed to send verification code";
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    console.error(`[send-otp-email] Error stack:`, errorStack);
+    
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ 
+        error: errorMessage,
+        details: "An unexpected error occurred during signup" 
+      }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
