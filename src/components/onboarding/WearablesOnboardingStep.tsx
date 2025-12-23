@@ -1,55 +1,24 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import { Activity, Heart, Watch, CheckCircle, ExternalLink, Loader2, Apple, Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useWearables, WearableProvider } from "@/hooks/useWearables";
+import { useEnvironment } from "@/hooks/useEnvironment";
 
 interface WearablesOnboardingStepProps {
   /** Called to indicate state changes - parent controls footer */
   onStateChange?: (state: { hasAnyConnection: boolean; isLoading: boolean }) => void;
 }
 
-const WEARABLE_PROVIDERS: {
+interface WearableProviderConfig {
   id: WearableProvider;
   nameKey: string;
   descriptionKey: string;
   icon: React.ReactNode;
   color: string;
-  comingSoon?: boolean;
-}[] = [
-  {
-    id: "apple_health",
-    nameKey: "integrations.wearables.appleHealth.name",
-    descriptionKey: "integrations.wearables.appleHealth.description",
-    icon: <Apple className="w-5 h-5 text-white" />,
-    color: "bg-gradient-to-br from-pink-500 to-red-500",
-    comingSoon: true,
-  },
-  {
-    id: "health_connect",
-    nameKey: "integrations.wearables.healthConnect.name",
-    descriptionKey: "integrations.wearables.healthConnect.description",
-    icon: <Activity className="w-5 h-5 text-white" />,
-    color: "bg-gradient-to-br from-green-500 to-teal-500",
-    comingSoon: true,
-  },
-  {
-    id: "fitbit",
-    nameKey: "integrations.wearables.fitbit.name",
-    descriptionKey: "integrations.wearables.fitbit.description",
-    icon: <Heart className="w-5 h-5 text-white" />,
-    color: "bg-gradient-to-br from-teal-500 to-cyan-500",
-  },
-  {
-    id: "garmin",
-    nameKey: "integrations.wearables.garmin.name",
-    descriptionKey: "integrations.wearables.garmin.description",
-    icon: <Watch className="w-5 h-5 text-white" />,
-    color: "bg-gradient-to-br from-blue-600 to-blue-800",
-    comingSoon: true,
-  },
-];
+  comingSoon: boolean;
+}
 
 export function useWearablesState() {
   const { connections, isLoading, connectWearable, getConnection } = useWearables();
@@ -59,9 +28,53 @@ export function useWearablesState() {
 
 const WearablesOnboardingStep = ({ onStateChange }: WearablesOnboardingStepProps) => {
   const { t } = useTranslation('common');
+  const { isDespia, isIOS, isAndroid } = useEnvironment();
   const { connections, isLoading, connectWearable, getConnection } = useWearables();
 
   const hasAnyConnection = (connections?.length || 0) > 0;
+
+  // Platform-aware provider configuration
+  const providers: WearableProviderConfig[] = useMemo(() => {
+    const isIOSNative = isDespia && isIOS;
+    const isAndroidNative = isDespia && isAndroid;
+
+    return [
+      {
+        id: "apple_health",
+        nameKey: "integrations.wearables.appleHealth.name",
+        descriptionKey: "integrations.wearables.appleHealth.description",
+        icon: <Apple className="w-5 h-5 text-white" />,
+        color: "bg-gradient-to-br from-pink-500 to-red-500",
+        // Available on iOS native only
+        comingSoon: !isIOSNative,
+      },
+      {
+        id: "health_connect",
+        nameKey: "integrations.wearables.healthConnect.name",
+        descriptionKey: "integrations.wearables.healthConnect.description",
+        icon: <Activity className="w-5 h-5 text-white" />,
+        color: "bg-gradient-to-br from-green-500 to-teal-500",
+        // Available on Android native only
+        comingSoon: !isAndroidNative,
+      },
+      {
+        id: "fitbit",
+        nameKey: "integrations.wearables.fitbit.name",
+        descriptionKey: "integrations.wearables.fitbit.description",
+        icon: <Heart className="w-5 h-5 text-white" />,
+        color: "bg-gradient-to-br from-teal-500 to-cyan-500",
+        comingSoon: false,
+      },
+      {
+        id: "garmin",
+        nameKey: "integrations.wearables.garmin.name",
+        descriptionKey: "integrations.wearables.garmin.description",
+        icon: <Watch className="w-5 h-5 text-white" />,
+        color: "bg-gradient-to-br from-blue-600 to-blue-800",
+        comingSoon: true,
+      },
+    ];
+  }, [isDespia, isIOS, isAndroid]);
 
   // Track previous state to avoid unnecessary calls
   const prevStateRef = useRef<{ hasAnyConnection: boolean; isLoading: boolean }>({ hasAnyConnection: false, isLoading: true });
@@ -105,7 +118,7 @@ const WearablesOnboardingStep = ({ onStateChange }: WearablesOnboardingStepProps
       </div>
 
       <div className="space-y-3">
-        {WEARABLE_PROVIDERS.map((provider) => {
+        {providers.map((provider) => {
           const connection = getConnection(provider.id);
           const isConnected = !!connection;
           const isConnecting = connectWearable.isPending;

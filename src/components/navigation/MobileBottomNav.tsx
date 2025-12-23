@@ -1,18 +1,21 @@
+import { useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Home, Search, Calendar, MessageSquare, User, Users } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useIOSRestrictions } from "@/hooks/useIOSRestrictions";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
   icon: React.ElementType;
   labelKey: string;
   route: string;
+  hideOnIOS?: boolean;
 }
 
-const clientNavItems: NavItem[] = [
+const clientNavItemsConfig: NavItem[] = [
   { icon: Home, labelKey: "bottomNav.home", route: "/dashboard/client" },
-  { icon: Search, labelKey: "bottomNav.discover", route: "/dashboard/client/find-coaches" },
+  { icon: Search, labelKey: "bottomNav.discover", route: "/dashboard/client/find-coaches", hideOnIOS: true },
   { icon: Calendar, labelKey: "bottomNav.plans", route: "/dashboard/client/plans" },
   { icon: MessageSquare, labelKey: "bottomNav.messages", route: "/dashboard/client/messages" },
   { icon: User, labelKey: "bottomNav.profile", route: "/dashboard/client/settings" },
@@ -35,10 +38,26 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { isIOSNative } = useIOSRestrictions();
 
-  const navItems = variant === "client" ? clientNavItems : coachNavItems;
+  // Filter out iOS-restricted items for client nav
+  const navItems = useMemo(() => {
+    if (variant === "coach") return coachNavItems;
+    
+    if (isIOSNative) {
+      return clientNavItemsConfig.filter(item => !item.hideOnIOS);
+    }
+    return clientNavItemsConfig;
+  }, [variant, isIOSNative]);
 
   const isActive = (route: string) => {
+    // Exact match for home routes
+    if (route === "/dashboard/client" || route === "/dashboard/coach") {
+      return location.pathname === route;
+    }
+    // Starts with for other routes
+    return location.pathname.startsWith(route);
+  };
     // Exact match for home routes
     if (route === "/dashboard/client" || route === "/dashboard/coach") {
       return location.pathname === route;

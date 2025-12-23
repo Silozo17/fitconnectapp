@@ -7,6 +7,7 @@ import RouteRestorer from '@/components/shared/RouteRestorer';
 import ScrollToTop from '@/components/shared/ScrollToTop';
 import { DashboardLocaleRedirect } from './DashboardLocaleRedirect';
 import { LocaleRouteWrapper } from './LocaleRouteWrapper';
+import IOSRestrictedRoute from './IOSRestrictedRoute';
 
 // Eagerly loaded pages (critical path)
 import Index from '@/pages/Index';
@@ -117,15 +118,17 @@ export function WebsiteRouter() {
           {/* Non-prefixed routes (root level) */}
           <Route path="/" element={<Index />} />
           <Route path="get-started" element={<GuestOnlyRoute><GetStarted /></GuestOnlyRoute>} />
-          <Route path="coaches" element={<Coaches />} />
-          <Route path="coaches/:id" element={<CoachDetail />} />
-          <Route path="coaches/personal-trainers" element={<PersonalTrainers />} />
-          <Route path="coaches/nutritionists" element={<Nutritionists />} />
-          <Route path="coaches/boxing" element={<Boxing />} />
-          <Route path="coaches/mma" element={<MMA />} />
+          {/* iOS-restricted: Coach marketplace routes */}
+          <Route path="coaches" element={<IOSRestrictedRoute restrictionType="coaches"><Coaches /></IOSRestrictedRoute>} />
+          <Route path="coaches/:id" element={<IOSRestrictedRoute restrictionType="coaches"><CoachDetail /></IOSRestrictedRoute>} />
+          <Route path="coaches/personal-trainers" element={<IOSRestrictedRoute restrictionType="coaches"><PersonalTrainers /></IOSRestrictedRoute>} />
+          <Route path="coaches/nutritionists" element={<IOSRestrictedRoute restrictionType="coaches"><Nutritionists /></IOSRestrictedRoute>} />
+          <Route path="coaches/boxing" element={<IOSRestrictedRoute restrictionType="coaches"><Boxing /></IOSRestrictedRoute>} />
+          <Route path="coaches/mma" element={<IOSRestrictedRoute restrictionType="coaches"><MMA /></IOSRestrictedRoute>} />
           <Route path="about" element={<About />} />
           <Route path="faq" element={<FAQ />} />
-          <Route path="pricing" element={<Pricing />} />
+          {/* iOS-restricted: Pricing with web subscription links */}
+          <Route path="pricing" element={<IOSRestrictedRoute restrictionType="pricing"><Pricing /></IOSRestrictedRoute>} />
           <Route path="for-coaches" element={<ForCoaches />} />
           <Route path="how-it-works" element={<HowItWorks />} />
           <Route path="privacy" element={<Privacy />} />
@@ -135,8 +138,15 @@ export function WebsiteRouter() {
           <Route path="community" element={<Community />} />
           <Route path="leaderboards" element={<Navigate to="/community" replace />} />
           <Route path="avatars" element={<Navigate to="/community?tab=avatars" replace />} />
-          <Route path="marketplace" element={<Marketplace />} />
-          <Route path="marketplace/:productId" element={<MarketplaceProduct />} />
+          {/* iOS-restricted: Marketplace routes */}
+          <Route path="marketplace" element={<IOSRestrictedRoute restrictionType="marketplace"><Marketplace /></IOSRestrictedRoute>} />
+          <Route path="marketplace/:productId" element={<IOSRestrictedRoute restrictionType="marketplace"><MarketplaceProduct /></IOSRestrictedRoute>} />
+          <Route path="marketplace/bundles/:bundleId" element={<IOSRestrictedRoute restrictionType="marketplace"><MarketplaceBundle /></IOSRestrictedRoute>} />
+          {/* iOS-restricted: Checkout */}
+          <Route path="checkout" element={<IOSRestrictedRoute restrictionType="checkout"><Checkout /></IOSRestrictedRoute>} />
+          <Route path="blog" element={<Blog />} />
+          <Route path="blog/:slug" element={<BlogPost />} />
+          <Route path="install" element={<Install />} />
           <Route path="marketplace/bundles/:bundleId" element={<MarketplaceBundle />} />
           <Route path="checkout" element={<Checkout />} />
           <Route path="blog" element={<Blog />} />
