@@ -1,6 +1,4 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { DAVClient } from "https://esm.sh/tsdav@2.1.1";
-import ICAL from "https://esm.sh/ical.js@2.0.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -32,63 +30,29 @@ function decodeCredentials(accessToken: string): { email: string; password: stri
   }
 }
 
-function parseICSToEvents(icsData: string): CalendarEvent[] {
-  const events: CalendarEvent[] = [];
-  
-  try {
-    const jcalData = ICAL.parse(icsData);
-    const comp = new ICAL.Component(jcalData);
-    const vevents = comp.getAllSubcomponents("vevent");
-
-    for (const vevent of vevents) {
-      try {
-        const event = new ICAL.Event(vevent);
-        const uid = event.uid || `generated-${Date.now()}-${Math.random()}`;
-        const summary = event.summary || null;
-        
-        let dtstart: string;
-        let dtend: string;
-        let isAllDay = false;
-
-        if (event.startDate) {
-          isAllDay = event.startDate.isDate;
-          dtstart = event.startDate.toJSDate().toISOString();
-        } else {
-          continue;
-        }
-
-        if (event.endDate) {
-          dtend = event.endDate.toJSDate().toISOString();
-        } else {
-          const endDate = new Date(dtstart);
-          if (isAllDay) {
-            endDate.setDate(endDate.getDate() + 1);
-          } else {
-            endDate.setHours(endDate.getHours() + 1);
-          }
-          dtend = endDate.toISOString();
-        }
-
-        events.push({ uid, summary, dtstart, dtend, isAllDay });
-      } catch (e) {
-        console.log("Error parsing individual event:", e);
-      }
-    }
-  } catch (e) {
-    console.log("ICAL.js parse failed, trying regex fallback:", e);
-    // Fallback to regex parsing
-    const veventRegex = /BEGIN:VEVENT([\s\S]*?)END:VEVENT/g;
-    let match;
-    while ((match = veventRegex.exec(icsData)) !== null) {
-      const event = parseVEventFallback(match[1]);
-      if (event) events.push(event);
-    }
+function parseICalDateTime(icalDate: string): string {
+  const clean = icalDate.replace(/[^0-9TZ]/g, "");
+  if (clean.length >= 15) {
+    const year = clean.substring(0, 4);
+    const month = clean.substring(4, 6);
+    const day = clean.substring(6, 8);
+    const hour = clean.substring(9, 11);
+    const minute = clean.substring(11, 13);
+    const second = clean.substring(13, 15);
+    const tz = clean.endsWith("Z") ? "Z" : "";
+    return `${year}-${month}-${day}T${hour}:${minute}:${second}${tz || "Z"}`;
   }
-
-  return events;
+  // Handle date-only format (8 digits)
+  if (clean.length >= 8) {
+    const year = clean.substring(0, 4);
+    const month = clean.substring(4, 6);
+    const day = clean.substring(6, 8);
+    return `${year}-${month}-${day}T00:00:00Z`;
+  }
+  return new Date().toISOString();
 }
 
-function parseVEventFallback(veventBlock: string): CalendarEvent | null {
+function parseVEvent(veventBlock: string): CalendarEvent | null {
   const lines = veventBlock.split(/\r?\n/);
   let uid = "";
   let summary: string | null = null;
@@ -98,6 +62,7 @@ function parseVEventFallback(veventBlock: string): CalendarEvent | null {
 
   for (let i = 0; i < lines.length; i++) {
     let line = lines[i];
+    // Handle line continuations
     while (i + 1 < lines.length && /^[ \t]/.test(lines[i + 1])) {
       line += lines[i + 1].substring(1);
       i++;
@@ -132,6 +97,7 @@ function parseVEventFallback(veventBlock: string): CalendarEvent | null {
   }
 
   if (!uid || !dtstart) return null;
+  
   if (!dtend) {
     if (isAllDay) {
       dtend = dtstart.replace("T00:00:00Z", "T23:59:59Z");
@@ -145,82 +111,216 @@ function parseVEventFallback(veventBlock: string): CalendarEvent | null {
   return { uid, summary, dtstart, dtend, isAllDay };
 }
 
-function parseICalDateTime(icalDate: string): string {
-  const clean = icalDate.replace(/[^0-9TZ]/g, "");
-  if (clean.length >= 15) {
-    const year = clean.substring(0, 4);
-    const month = clean.substring(4, 6);
-    const day = clean.substring(6, 8);
-    const hour = clean.substring(9, 11);
-    const minute = clean.substring(11, 13);
-    const second = clean.substring(13, 15);
-    const tz = clean.endsWith("Z") ? "Z" : "";
-    return `${year}-${month}-${day}T${hour}:${minute}:${second}${tz || "Z"}`;
+function parseICSToEvents(icsData: string): CalendarEvent[] {
+  const events: CalendarEvent[] = [];
+  const veventRegex = /BEGIN:VEVENT([\s\S]*?)END:VEVENT/g;
+  let match;
+  
+  while ((match = veventRegex.exec(icsData)) !== null) {
+    const event = parseVEvent(match[1]);
+    if (event) {
+      events.push(event);
+    }
   }
-  return new Date().toISOString();
+  
+  return events;
 }
 
-async function syncWithTsdav(
+async function fetchCalendarEvents(
+  email: string,
+  password: string,
+  calendarUrls: string[],
+  startDate: Date,
+  endDate: Date
+): Promise<CalendarEvent[]> {
+  const authString = btoa(`${email}:${password}`);
+  const allEvents: CalendarEvent[] = [];
+  
+  // Format dates for CalDAV REPORT
+  const formatCalDAVDate = (date: Date) => {
+    return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  };
+  
+  const startStr = formatCalDAVDate(startDate);
+  const endStr = formatCalDAVDate(endDate);
+
+  for (const calendarUrl of calendarUrls) {
+    console.log(`Fetching events from calendar: ${calendarUrl}`);
+    
+    try {
+      // Use REPORT with calendar-query to get events in time range
+      const reportBody = `<?xml version="1.0" encoding="utf-8"?>
+        <c:calendar-query xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav">
+          <d:prop>
+            <d:getetag/>
+            <c:calendar-data/>
+          </d:prop>
+          <c:filter>
+            <c:comp-filter name="VCALENDAR">
+              <c:comp-filter name="VEVENT">
+                <c:time-range start="${startStr}" end="${endStr}"/>
+              </c:comp-filter>
+            </c:comp-filter>
+          </c:filter>
+        </c:calendar-query>`;
+
+      const fullUrl = calendarUrl.startsWith("http") 
+        ? calendarUrl 
+        : `https://caldav.icloud.com${calendarUrl}`;
+
+      const response = await fetch(fullUrl, {
+        method: "REPORT",
+        headers: {
+          "Authorization": `Basic ${authString}`,
+          "Content-Type": "application/xml; charset=utf-8",
+          "Depth": "1",
+        },
+        body: reportBody,
+      });
+
+      console.log(`Calendar ${calendarUrl} response status:`, response.status);
+
+      if (response.ok || response.status === 207) {
+        const xmlData = await response.text();
+        
+        // Extract calendar-data (ICS content) from each response
+        const calDataRegex = /<c:calendar-data[^>]*>([\s\S]*?)<\/c:calendar-data>/gi;
+        let dataMatch;
+        
+        while ((dataMatch = calDataRegex.exec(xmlData)) !== null) {
+          let icsData = dataMatch[1];
+          // Decode HTML entities if present
+          icsData = icsData
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&amp;/g, '&')
+            .replace(/&quot;/g, '"');
+          
+          const events = parseICSToEvents(icsData);
+          allEvents.push(...events);
+        }
+        
+        console.log(`Found ${allEvents.length} events so far`);
+      } else {
+        const errorText = await response.text();
+        console.error(`Failed to fetch calendar ${calendarUrl}:`, errorText.substring(0, 500));
+      }
+    } catch (calError) {
+      console.error(`Error fetching calendar ${calendarUrl}:`, calError);
+    }
+  }
+
+  return allEvents;
+}
+
+async function discoverAndFetchEvents(
   email: string,
   password: string,
   startDate: Date,
   endDate: Date
 ): Promise<CalendarEvent[]> {
-  console.log("Step 1: Creating DAVClient for iCloud...");
+  const authString = btoa(`${email}:${password}`);
+  const calendarUrls: string[] = [];
   
-  const client = new DAVClient({
-    serverUrl: "https://caldav.icloud.com",
-    credentials: {
-      username: email,
-      password: password,
+  console.log("Step 1: Discovering user principal...");
+  
+  // Discover user principal
+  const principalResponse = await fetch("https://caldav.icloud.com/", {
+    method: "PROPFIND",
+    headers: {
+      "Authorization": `Basic ${authString}`,
+      "Content-Type": "application/xml; charset=utf-8",
+      "Depth": "0",
     },
-    authMethod: "Basic",
-    defaultAccountType: "caldav",
+    body: `<?xml version="1.0" encoding="utf-8"?>
+      <d:propfind xmlns:d="DAV:">
+        <d:prop>
+          <d:current-user-principal/>
+        </d:prop>
+      </d:propfind>`,
   });
 
-  console.log("Step 2: Logging in to iCloud CalDAV...");
-  await client.login();
-  console.log("Login successful!");
-  console.log("Account info:", {
-    serverUrl: client.serverUrl,
-    accountType: client.accountType,
+  if (principalResponse.status === 401) {
+    throw new Error("Invalid credentials");
+  }
+
+  const principalXml = await principalResponse.text();
+  const principalMatch = principalXml.match(/<d:current-user-principal[^>]*>[\s\S]*?<d:href[^>]*>([^<]+)<\/d:href>/i) ||
+                         principalXml.match(/<D:current-user-principal[^>]*>[\s\S]*?<D:href[^>]*>([^<]+)<\/D:href>/i);
+  
+  let principalUrl = principalMatch ? principalMatch[1] : `/${email.split('@')[0]}/principal/`;
+  
+  console.log("Principal URL:", principalUrl);
+
+  // Get calendar home
+  const homeSetResponse = await fetch(`https://caldav.icloud.com${principalUrl}`, {
+    method: "PROPFIND",
+    headers: {
+      "Authorization": `Basic ${authString}`,
+      "Content-Type": "application/xml; charset=utf-8",
+      "Depth": "0",
+    },
+    body: `<?xml version="1.0" encoding="utf-8"?>
+      <d:propfind xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav">
+        <d:prop>
+          <c:calendar-home-set/>
+        </d:prop>
+      </d:propfind>`,
   });
 
-  console.log("Step 3: Fetching calendars...");
-  const calendars = await client.fetchCalendars();
-  console.log(`Found ${calendars.length} calendars:`, calendars.map(c => ({
-    displayName: c.displayName,
-    url: c.url,
-  })));
+  let calendarHomeUrl = `/${email.split('@')[0]}/calendars/`;
+  
+  if (homeSetResponse.ok || homeSetResponse.status === 207) {
+    const homeSetXml = await homeSetResponse.text();
+    const homeMatch = homeSetXml.match(/<c:calendar-home-set[^>]*>[\s\S]*?<d:href[^>]*>([^<]+)<\/d:href>/i) ||
+                      homeSetXml.match(/<calendar-home-set[^>]*>[\s\S]*?<href[^>]*>([^<]+)<\/href>/i);
+    if (homeMatch) {
+      calendarHomeUrl = homeMatch[1];
+    }
+  }
+  
+  console.log("Calendar home URL:", calendarHomeUrl);
 
-  const allEvents: CalendarEvent[] = [];
+  // List calendars
+  const calendarsResponse = await fetch(`https://caldav.icloud.com${calendarHomeUrl}`, {
+    method: "PROPFIND",
+    headers: {
+      "Authorization": `Basic ${authString}`,
+      "Content-Type": "application/xml; charset=utf-8",
+      "Depth": "1",
+    },
+    body: `<?xml version="1.0" encoding="utf-8"?>
+      <d:propfind xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav">
+        <d:prop>
+          <d:displayname/>
+          <d:resourcetype/>
+        </d:prop>
+      </d:propfind>`,
+  });
 
-  for (const calendar of calendars) {
-    console.log(`Step 4: Fetching events from "${calendar.displayName || 'Unnamed'}"...`);
+  if (calendarsResponse.ok || calendarsResponse.status === 207) {
+    const calendarsXml = await calendarsResponse.text();
+    const responseBlocks = calendarsXml.split(/<d:response[^>]*>/i).slice(1);
     
-    try {
-      const calendarObjects = await client.fetchCalendarObjects({
-        calendar,
-        timeRange: {
-          start: startDate.toISOString(),
-          end: endDate.toISOString(),
-        },
-      });
-
-      console.log(`Found ${calendarObjects.length} events in "${calendar.displayName || 'Unnamed'}"`);
-
-      for (const obj of calendarObjects) {
-        if (obj.data) {
-          const events = parseICSToEvents(obj.data);
-          allEvents.push(...events);
+    for (const block of responseBlocks) {
+      if (block.includes("<c:calendar") || block.includes("<cal:calendar") || block.includes(":calendar/>")) {
+        const hrefMatch = block.match(/<d:href[^>]*>([^<]+)<\/d:href>/i) ||
+                         block.match(/<D:href[^>]*>([^<]+)<\/D:href>/i);
+        if (hrefMatch) {
+          calendarUrls.push(hrefMatch[1]);
         }
       }
-    } catch (calError) {
-      console.error(`Error fetching events from ${calendar.displayName}:`, calError);
     }
   }
 
-  return allEvents;
+  if (calendarUrls.length === 0) {
+    console.log("No calendars discovered, using default");
+    calendarUrls.push(`${calendarHomeUrl}home/`);
+  }
+
+  console.log(`Found ${calendarUrls.length} calendars to fetch`);
+  
+  return await fetchCalendarEvents(email, password, calendarUrls, startDate, endDate);
 }
 
 Deno.serve(async (req) => {
@@ -249,7 +349,7 @@ Deno.serve(async (req) => {
       // No body
     }
 
-    console.log("=== Starting iCloud CalDAV sync ===");
+    console.log("=== Starting iCloud CalDAV fetch ===");
     console.log("User:", userId, "Connection:", specificConnectionId);
 
     let query = supabase
@@ -294,12 +394,32 @@ Deno.serve(async (req) => {
 
         console.log("Syncing date range:", startDate.toISOString(), "to", endDate.toISOString());
 
-        const allEvents = await syncWithTsdav(
-          credentials.email,
-          credentials.password,
-          startDate,
-          endDate
-        );
+        // Use stored calendar URLs if available, otherwise discover
+        let calendarUrls: string[] = [];
+        if (connection.calendar_id) {
+          calendarUrls = connection.calendar_id.split(",").filter((u: string) => u.trim());
+        }
+
+        let allEvents: CalendarEvent[];
+        
+        if (calendarUrls.length > 0) {
+          console.log("Using stored calendar URLs:", calendarUrls);
+          allEvents = await fetchCalendarEvents(
+            credentials.email,
+            credentials.password,
+            calendarUrls,
+            startDate,
+            endDate
+          );
+        } else {
+          console.log("No stored URLs, discovering calendars...");
+          allEvents = await discoverAndFetchEvents(
+            credentials.email,
+            credentials.password,
+            startDate,
+            endDate
+          );
+        }
 
         console.log(`Total events fetched: ${allEvents.length}`);
 
@@ -350,7 +470,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log("\n=== CalDAV sync complete ===");
+    console.log("\n=== CalDAV fetch complete ===");
     console.log("Results:", results);
 
     return new Response(
@@ -360,7 +480,7 @@ Deno.serve(async (req) => {
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error("CalDAV sync error:", errorMessage);
+    console.error("CalDAV fetch error:", errorMessage);
     return new Response(
       JSON.stringify({ error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
