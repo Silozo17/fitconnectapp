@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Activity, Heart, Watch, Apple, PenLine } from "lucide-react";
 import WearableConnectionCard from "./WearableConnectionCard";
@@ -6,10 +6,12 @@ import { useWearables, WearableProvider } from "@/hooks/useWearables";
 import ManualHealthDataModal from "./ManualHealthDataModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useEnvironment } from "@/hooks/useEnvironment";
 
 const WearableConnectionList = () => {
   const { t } = useTranslation('settings');
   const [showManualEntry, setShowManualEntry] = useState(false);
+  const { isDespia, isIOS, isAndroid } = useEnvironment();
   const {
     connections,
     isLoading,
@@ -19,45 +21,54 @@ const WearableConnectionList = () => {
     getConnection,
   } = useWearables();
 
-  const providers: {
-    id: WearableProvider;
-    name: string;
-    icon: React.ReactNode;
-    color: string;
-    comingSoon?: boolean;
-    description?: string;
-  }[] = [
-    {
-      id: "apple_health",
-      name: "Apple Health",
-      icon: <Apple className="w-6 h-6 text-white" />,
-      color: "bg-gradient-to-br from-pink-500 to-red-500",
-      comingSoon: true,
-      description: t('integrations.requiresFitConnectApp'),
-    },
-    {
-      id: "health_connect",
-      name: "Health Connect",
-      icon: <Activity className="w-6 h-6 text-white" />,
-      color: "bg-gradient-to-br from-green-500 to-teal-500",
-      comingSoon: true,
-      description: t('integrations.requiresAndroidApp'),
-    },
-    {
-      id: "fitbit",
-      name: "Fitbit",
-      icon: <Heart className="w-6 h-6 text-white" />,
-      color: "bg-gradient-to-br from-teal-500 to-cyan-500",
-    },
-    {
-      id: "garmin",
-      name: "Garmin",
-      icon: <Watch className="w-6 h-6 text-white" />,
-      color: "bg-gradient-to-br from-blue-600 to-blue-800",
-      comingSoon: true,
-      description: t('integrations.awaitingDeveloperAccess'),
-    },
-  ];
+  // Platform-aware provider configuration
+  // Apple Health: available on iOS native, coming soon elsewhere
+  // Health Connect: available on Android native, coming soon elsewhere
+  const providers = useMemo(() => {
+    const isIOSNative = isDespia && isIOS;
+    const isAndroidNative = isDespia && isAndroid;
+
+    return [
+      {
+        id: "apple_health" as WearableProvider,
+        name: "Apple Health",
+        icon: <Apple className="w-6 h-6 text-white" />,
+        color: "bg-gradient-to-br from-pink-500 to-red-500",
+        // Available on iOS native, coming soon on web/Android
+        comingSoon: !isIOSNative,
+        description: isIOSNative 
+          ? t('integrations.syncWithAppleHealth', 'Sync your health data from Apple Health')
+          : t('integrations.requiresIOSApp', 'Requires the FitConnect iOS app'),
+      },
+      {
+        id: "health_connect" as WearableProvider,
+        name: "Health Connect",
+        icon: <Activity className="w-6 h-6 text-white" />,
+        color: "bg-gradient-to-br from-green-500 to-teal-500",
+        // Available on Android native, coming soon on web/iOS
+        comingSoon: !isAndroidNative,
+        description: isAndroidNative
+          ? t('integrations.syncWithHealthConnect', 'Sync your health data from Health Connect')
+          : t('integrations.requiresAndroidApp', 'Requires the FitConnect Android app'),
+      },
+      {
+        id: "fitbit" as WearableProvider,
+        name: "Fitbit",
+        icon: <Heart className="w-6 h-6 text-white" />,
+        color: "bg-gradient-to-br from-teal-500 to-cyan-500",
+        comingSoon: false,
+        description: undefined,
+      },
+      {
+        id: "garmin" as WearableProvider,
+        name: "Garmin",
+        icon: <Watch className="w-6 h-6 text-white" />,
+        color: "bg-gradient-to-br from-blue-600 to-blue-800",
+        comingSoon: true,
+        description: t('integrations.awaitingDeveloperAccess'),
+      },
+    ];
+  }, [isDespia, isIOS, isAndroid, t]);
 
   if (isLoading) {
     return (

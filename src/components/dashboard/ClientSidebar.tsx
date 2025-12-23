@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
@@ -40,6 +40,7 @@ import { UserAvatar } from "@/components/shared/UserAvatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useSelectedAvatar } from "@/hooks/useAvatars";
+import { useIOSRestrictions } from "@/hooks/useIOSRestrictions";
 import { Rarity } from "@/lib/avatar-utils";
 import {
   Collapsible,
@@ -64,6 +65,7 @@ interface MenuItem {
   icon: typeof Home;
   path: string;
   badgeKey?: BadgeKey;
+  hideOnIOS?: boolean;
 }
 
 interface MenuGroup {
@@ -72,16 +74,17 @@ interface MenuGroup {
   icon?: typeof Home;
   items: MenuItem[];
   collapsible: boolean;
+  hideOnIOS?: boolean;
 }
 
-const menuGroups: MenuGroup[] = [
+const menuGroupsConfig: MenuGroup[] = [
   {
     id: "main",
     collapsible: false,
     items: [
       { titleKey: "navigation.client.home", icon: Home, path: "/dashboard/client" },
-      { titleKey: "navigation.client.findCoaches", icon: Search, path: "/dashboard/client/find-coaches" },
-      { titleKey: "navigation.client.marketplace", icon: ShoppingBag, path: "/dashboard/client/marketplace" },
+      { titleKey: "navigation.client.findCoaches", icon: Search, path: "/dashboard/client/find-coaches", hideOnIOS: true },
+      { titleKey: "navigation.client.marketplace", icon: ShoppingBag, path: "/dashboard/client/marketplace", hideOnIOS: true },
       { titleKey: "navigation.client.messages", icon: MessageSquare, path: "/dashboard/client/messages", badgeKey: "messages" },
       { titleKey: "navigation.client.connections", icon: UserPlus, path: "/dashboard/client/connections", badgeKey: "connections" },
     ],
@@ -152,6 +155,19 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
   const { data: selectedAvatar } = useSelectedAvatar('client');
   const { unreadCount } = useUnreadMessages();
   const { newPlans, pendingConnections } = useClientBadges();
+  const { isIOSNative } = useIOSRestrictions();
+
+  // Filter menu groups and items based on iOS restrictions
+  const menuGroups = useMemo(() => {
+    if (!isIOSNative) return menuGroupsConfig;
+
+    return menuGroupsConfig
+      .filter(group => !group.hideOnIOS)
+      .map(group => ({
+        ...group,
+        items: group.items.filter(item => !item.hideOnIOS),
+      }));
+  }, [isIOSNative]);
 
   // Initialize open groups based on current path
   const getInitialOpenGroups = () => {

@@ -8,6 +8,7 @@ import { Menu, Dumbbell, ChevronDown, Swords, Apple, Flame, Users, BookOpen, Tro
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { HeaderLocaleSelector } from "@/components/shared/HeaderLocaleSelector";
+import { useIOSRestrictions } from "@/hooks/useIOSRestrictions";
 
 const Navbar = () => {
   const { t } = useTranslation("common");
@@ -16,6 +17,7 @@ const Navbar = () => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const { user, role, signOut } = useAuth();
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { isIOSNative, shouldHideCoachMarketplace, shouldHidePricingPage } = useIOSRestrictions();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -46,14 +48,21 @@ const Navbar = () => {
     { name: t("website.resourceLinks.faq"), href: "/faq", icon: HelpCircle, description: t("website.resourceLinks.faqDesc") },
   ];
 
-  const forCoaches = [
-    { name: t("website.forCoachesLinks.whyFitConnect"), href: "/for-coaches", icon: Users, description: t("website.forCoachesLinks.whyFitConnectDesc") },
-    { name: t("website.forCoachesLinks.pricingPlans"), href: "/pricing", icon: BookOpen, description: t("website.forCoachesLinks.pricingPlansDesc") },
-  ];
+  // Filter out iOS-restricted items
+  const forCoaches = shouldHidePricingPage
+    ? [
+        { name: t("website.forCoachesLinks.whyFitConnect"), href: "/for-coaches", icon: Users, description: t("website.forCoachesLinks.whyFitConnectDesc") },
+      ]
+    : [
+        { name: t("website.forCoachesLinks.whyFitConnect"), href: "/for-coaches", icon: Users, description: t("website.forCoachesLinks.whyFitConnectDesc") },
+        { name: t("website.forCoachesLinks.pricingPlans"), href: "/pricing", icon: BookOpen, description: t("website.forCoachesLinks.pricingPlansDesc") },
+      ];
 
+  // Filter navLinks based on iOS restrictions
   const navLinks = [
     { name: t("website.nav.community"), href: "/community" },
-    { name: t("website.nav.marketplace"), href: "/marketplace" },
+    // Hide marketplace on iOS native
+    ...(!isIOSNative ? [{ name: t("website.nav.marketplace"), href: "/marketplace" }] : []),
   ];
 
   const dashboardLink = role === "coach" ? "/dashboard/coach" : role === "admin" ? "/dashboard/admin" : "/dashboard/client";
@@ -85,38 +94,40 @@ const Navbar = () => {
 
           {/* Desktop Navigation - shows at xl (1280px) for tablets to use hamburger */}
           <div className="hidden xl:flex items-center gap-1">
-            {/* Find Coaches Dropdown */}
-            <div 
-              className="relative"
-              onMouseEnter={() => handleDropdownEnter("coaches")}
-              onMouseLeave={handleDropdownLeave}
-            >
-              <button className="px-4 py-2 text-muted-foreground hover:text-foreground font-medium transition-colors rounded-lg hover:bg-secondary/50 flex items-center gap-1">
-                {t("website.nav.findCoaches")}
-                <ChevronDown className={cn("w-4 h-4 transition-transform", activeDropdown === "coaches" && "rotate-180")} />
-              </button>
-              
-              {activeDropdown === "coaches" && (
-                <div className="absolute top-full left-0 mt-2 w-72 bg-card border border-border rounded-xl shadow-lg p-2 animate-in fade-in slide-in-from-top-2">
-                  {coachTypes.map((item) => (
-                    <Link
-                      key={item.href}
-                      to={item.href}
-                      className="flex items-start gap-3 p-3 rounded-lg hover:bg-secondary/50 transition-colors group"
-                      onClick={() => setActiveDropdown(null)}
-                    >
-                      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
-                        <item.icon className="w-4 h-4 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-foreground text-sm">{item.name}</p>
-                        <p className="text-xs text-muted-foreground">{item.description}</p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
+            {/* Find Coaches Dropdown - Hidden on iOS native */}
+            {!shouldHideCoachMarketplace && (
+              <div 
+                className="relative"
+                onMouseEnter={() => handleDropdownEnter("coaches")}
+                onMouseLeave={handleDropdownLeave}
+              >
+                <button className="px-4 py-2 text-muted-foreground hover:text-foreground font-medium transition-colors rounded-lg hover:bg-secondary/50 flex items-center gap-1">
+                  {t("website.nav.findCoaches")}
+                  <ChevronDown className={cn("w-4 h-4 transition-transform", activeDropdown === "coaches" && "rotate-180")} />
+                </button>
+                
+                {activeDropdown === "coaches" && (
+                  <div className="absolute top-full left-0 mt-2 w-72 bg-card border border-border rounded-xl shadow-lg p-2 animate-in fade-in slide-in-from-top-2">
+                    {coachTypes.map((item) => (
+                      <Link
+                        key={item.href}
+                        to={item.href}
+                        className="flex items-start gap-3 p-3 rounded-lg hover:bg-secondary/50 transition-colors group"
+                        onClick={() => setActiveDropdown(null)}
+                      >
+                        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
+                          <item.icon className="w-4 h-4 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground text-sm">{item.name}</p>
+                          <p className="text-xs text-muted-foreground">{item.description}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Resources Dropdown */}
             <div 
@@ -226,21 +237,23 @@ const Navbar = () => {
 
               {/* Scrollable Navigation */}
               <div className="flex-1 overflow-y-auto">
-                {/* Mobile Find Coaches Section */}
-                <div className="px-6 py-4">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t("website.nav.findCoaches")}</p>
-                  {coachTypes.map((item) => (
-                    <Link
-                      key={item.href}
-                      to={item.href}
-                      className="flex items-center gap-3 py-2.5 text-foreground hover:text-primary transition-colors"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <item.icon className="w-4 h-4 text-primary" />
-                      {item.name}
-                    </Link>
-                  ))}
-                </div>
+                {/* Mobile Find Coaches Section - Hidden on iOS native */}
+                {!shouldHideCoachMarketplace && (
+                  <div className="px-6 py-4">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t("website.nav.findCoaches")}</p>
+                    {coachTypes.map((item) => (
+                      <Link
+                        key={item.href}
+                        to={item.href}
+                        className="flex items-center gap-3 py-2.5 text-foreground hover:text-primary transition-colors"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <item.icon className="w-4 h-4 text-primary" />
+                        {item.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
 
                 <div className="border-t border-border/50 mx-6" />
 
