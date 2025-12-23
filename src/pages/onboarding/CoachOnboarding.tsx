@@ -21,6 +21,8 @@ import { OnboardingLayout } from "@/components/onboarding/OnboardingLayout";
 import { COACH_TYPES, COACH_TYPE_CATEGORIES, getCoachTypesByCategory } from "@/constants/coachTypes";
 import { SUBSCRIPTION_TIERS, TierKey } from "@/lib/stripe-config";
 import { useTranslation } from "react-i18next";
+import { useIOSRestrictions } from "@/hooks/useIOSRestrictions";
+import { useNativeIAP, SubscriptionTier, BillingInterval } from "@/hooks/useNativeIAP";
 
 const STEPS = [
   "Basic Info",
@@ -78,8 +80,11 @@ const CoachOnboarding = () => {
   const [isCheckingProfile, setIsCheckingProfile] = useState(true);
   const [isNavigating, setIsNavigating] = useState(false);
   const [coachProfileId, setCoachProfileId] = useState<string | null>(null);
+  const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { isIOSNative } = useIOSRestrictions();
+  const { purchase: nativePurchase, state: iapState } = useNativeIAP();
 
   // Step component state
   const [integrationsState, setIntegrationsState] = useState({ hasAnyConnection: false });
@@ -364,10 +369,21 @@ const CoachOnboarding = () => {
 
       if (error) throw error;
 
-      // If paid tier selected, redirect to payment
+      // If paid tier selected, handle payment
       if (isPaidTier) {
+        const tier = formData.subscriptionTier as SubscriptionTier;
+        
+        // On iOS native, trigger native IAP directly
+        if (isIOSNative && (tier === 'starter' || tier === 'pro' || tier === 'enterprise')) {
+          toast.success("Profile saved! Completing subscription...");
+          await nativePurchase(tier, billingInterval);
+          // IAP hook handles success/error and navigation
+          return;
+        }
+        
+        // On web/Android, redirect to web checkout
         toast.success("Profile saved! Complete your subscription to unlock all features.");
-        navigate(`/subscribe?tier=${formData.subscriptionTier}&billing=monthly`);
+        navigate(`/subscribe?tier=${formData.subscriptionTier}&billing=${billingInterval}`);
       } else if (formData.alsoClient) {
         toast.success("Profile completed! Welcome to FitConnect.");
         navigate("/onboarding/client");

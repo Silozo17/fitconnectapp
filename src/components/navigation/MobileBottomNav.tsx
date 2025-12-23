@@ -11,11 +11,13 @@ interface NavItem {
   labelKey: string;
   route: string;
   hideOnIOS?: boolean;
+  /** If true, show as disabled with tooltip instead of hiding */
+  disabledOnIOS?: boolean;
 }
 
 const clientNavItemsConfig: NavItem[] = [
   { icon: Home, labelKey: "bottomNav.home", route: "/dashboard/client" },
-  { icon: Search, labelKey: "bottomNav.discover", route: "/dashboard/client/find-coaches", hideOnIOS: true },
+  { icon: Search, labelKey: "bottomNav.discover", route: "/dashboard/client/find-coaches", disabledOnIOS: true },
   { icon: Calendar, labelKey: "bottomNav.plans", route: "/dashboard/client/plans" },
   { icon: MessageSquare, labelKey: "bottomNav.messages", route: "/dashboard/client/messages" },
   { icon: User, labelKey: "bottomNav.profile", route: "/dashboard/client/settings" },
@@ -40,11 +42,12 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
   const isMobile = useIsMobile();
   const { isIOSNative } = useIOSRestrictions();
 
-  // Filter out iOS-restricted items for client nav
+  // Keep all items but mark iOS-disabled ones for rendering
   const navItems = useMemo(() => {
     if (variant === "coach") return coachNavItems;
     
     if (isIOSNative) {
+      // Filter hideOnIOS but keep disabledOnIOS items
       return clientNavItemsConfig.filter(item => !item.hideOnIOS);
     }
     return clientNavItemsConfig;
@@ -79,6 +82,20 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
         {navItems.map((item) => {
           const active = isActive(item.route);
           const Icon = item.icon;
+          const isDisabledOnIOS = isIOSNative && item.disabledOnIOS;
+
+          if (isDisabledOnIOS) {
+            return (
+              <div
+                key={item.route}
+                className="flex flex-col items-center justify-center w-14 h-14 opacity-40 cursor-not-allowed"
+                aria-label={`${t(item.labelKey)} (Web Only)`}
+              >
+                <Icon className="h-5 w-5 text-muted-foreground" strokeWidth={2} />
+                <span className="text-[9px] text-muted-foreground mt-0.5">Web</span>
+              </div>
+            );
+          }
 
           return (
             <button

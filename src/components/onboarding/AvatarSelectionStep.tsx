@@ -111,24 +111,25 @@ export function AvatarSelectionStep({ selectedAvatarId, onSelect }: AvatarSelect
           }}
           className="w-full"
         >
-          <CarouselContent className="-ml-2">
+          <CarouselContent className="-ml-2 py-1">
             {avatars.map((avatar) => {
               const isSelected = selectedAvatarId === avatar.id;
 
               return (
                 <CarouselItem key={avatar.id} className="pl-2 basis-1/3 sm:basis-1/4 md:basis-1/5">
-                  <button
-                    type="button"
-                    onClick={() => onSelect(avatar.id, avatar.slug)}
-                    className={cn(
-                      "relative w-full group rounded-xl overflow-hidden transition-all duration-200",
-                      "border-2 bg-gradient-to-br from-card to-background",
-                      "hover:scale-105 hover:shadow-lg active:scale-95",
-                      isSelected
-                        ? "border-primary ring-2 ring-primary/30 shadow-[0_0_20px_hsl(var(--primary)/0.3)]"
-                        : "border-border/50 hover:border-primary/50"
-                    )}
-                  >
+                  <div className="p-0.5">
+                    <button
+                      type="button"
+                      onClick={() => onSelect(avatar.id, avatar.slug)}
+                      className={cn(
+                        "relative w-full group rounded-xl transition-all duration-200",
+                        "border-2 bg-gradient-to-br from-card to-background",
+                        "hover:scale-105 hover:shadow-lg active:scale-95",
+                        isSelected
+                          ? "border-primary ring-2 ring-primary/30 shadow-[0_0_20px_hsl(var(--primary)/0.3)]"
+                          : "border-border/50 hover:border-primary/50"
+                      )}
+                    >
                     {/* Avatar Image - reduced aspect ratio for mobile */}
                     <div className="aspect-square p-1.5 sm:p-2">
                       <img
@@ -148,19 +149,20 @@ export function AvatarSelectionStep({ selectedAvatarId, onSelect }: AvatarSelect
                       </div>
                     )}
 
-                    {/* Avatar Name */}
-                    <div className={cn(
-                      "absolute bottom-0 left-0 right-0 p-1.5 sm:p-2 text-center",
-                      "bg-gradient-to-t from-background/90 to-transparent"
-                    )}>
-                      <p className={cn(
-                        "text-xs sm:text-sm font-medium line-clamp-1 text-center",
-                        isSelected ? "text-primary" : "text-foreground"
+                      {/* Avatar Name */}
+                      <div className={cn(
+                        "absolute bottom-0 left-0 right-0 p-1.5 sm:p-2 text-center",
+                        "bg-gradient-to-t from-background/90 to-transparent"
                       )}>
-                        {avatar.name}
-                      </p>
-                    </div>
-                  </button>
+                        <p className={cn(
+                          "text-xs sm:text-sm font-medium line-clamp-1 text-center",
+                          isSelected ? "text-primary" : "text-foreground"
+                        )}>
+                          {avatar.name}
+                        </p>
+                      </div>
+                    </button>
+                  </div>
                 </CarouselItem>
               );
             })}

@@ -65,7 +65,10 @@ interface MenuItem {
   icon: typeof Home;
   path: string;
   badgeKey?: BadgeKey;
+  /** If true, the item is hidden on iOS native */
   hideOnIOS?: boolean;
+  /** If true, the item shows as disabled with "Web Only" on iOS instead of being hidden */
+  disabledOnIOS?: boolean;
 }
 
 interface MenuGroup {
@@ -83,8 +86,8 @@ const menuGroupsConfig: MenuGroup[] = [
     collapsible: false,
     items: [
       { titleKey: "navigation.client.home", icon: Home, path: "/dashboard/client" },
-      { titleKey: "navigation.client.findCoaches", icon: Search, path: "/dashboard/client/find-coaches", hideOnIOS: true },
-      { titleKey: "navigation.client.marketplace", icon: ShoppingBag, path: "/dashboard/client/marketplace", hideOnIOS: true },
+      { titleKey: "navigation.client.findCoaches", icon: Search, path: "/dashboard/client/find-coaches", disabledOnIOS: true },
+      { titleKey: "navigation.client.marketplace", icon: ShoppingBag, path: "/dashboard/client/marketplace", disabledOnIOS: true },
       { titleKey: "navigation.client.messages", icon: MessageSquare, path: "/dashboard/client/messages", badgeKey: "messages" },
       { titleKey: "navigation.client.connections", icon: UserPlus, path: "/dashboard/client/connections", badgeKey: "connections" },
     ],
@@ -158,6 +161,7 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
   const { isIOSNative } = useIOSRestrictions();
 
   // Filter menu groups and items based on iOS restrictions
+  // Items with disabledOnIOS are kept but rendered as disabled
   const menuGroups = useMemo(() => {
     if (!isIOSNative) return menuGroupsConfig;
 
@@ -229,30 +233,55 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
     const isActive = location.pathname === item.path;
     const badgeCount = getBadgeCount(item.badgeKey);
     const title = t(item.titleKey);
+    const isDisabledOnIOS = isIOSNative && item.disabledOnIOS;
 
     if (isCollapsed) {
       return (
         <Tooltip key={item.path} delayDuration={0}>
           <TooltipTrigger asChild>
-            <Link
-              to={item.path}
-              className={cn(
-                "flex items-center justify-center p-2.5 rounded-lg transition-colors relative",
-                isActive
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              )}
-            >
-              <div className="relative">
-                <item.icon className="w-5 h-5" />
-                {badgeCount > 0 && <SidebarBadge count={badgeCount} collapsed />}
+            {isDisabledOnIOS ? (
+              <div
+                className="flex items-center justify-center p-2.5 rounded-lg opacity-50 cursor-not-allowed"
+              >
+                <item.icon className="w-5 h-5 text-muted-foreground" />
               </div>
-            </Link>
+            ) : (
+              <Link
+                to={item.path}
+                className={cn(
+                  "flex items-center justify-center p-2.5 rounded-lg transition-colors relative",
+                  isActive
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                )}
+              >
+                <div className="relative">
+                  <item.icon className="w-5 h-5" />
+                  {badgeCount > 0 && <SidebarBadge count={badgeCount} collapsed />}
+                </div>
+              </Link>
+            )}
           </TooltipTrigger>
           <TooltipContent side="right" className="font-medium">
-            {title}
+            {isDisabledOnIOS ? `${title} (Web Only)` : title}
           </TooltipContent>
         </Tooltip>
+      );
+    }
+
+    if (isDisabledOnIOS) {
+      return (
+        <div
+          key={item.path}
+          className={cn(
+            "flex items-center gap-3 px-3 py-2 rounded-lg opacity-50 cursor-not-allowed",
+            indented && "ml-4"
+          )}
+        >
+          <item.icon className="w-4 h-4 flex-shrink-0 text-muted-foreground" />
+          <span className="font-medium text-sm flex-1 text-muted-foreground">{title}</span>
+          <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">Web Only</span>
+        </div>
       );
     }
 

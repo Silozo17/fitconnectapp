@@ -333,6 +333,7 @@
   },
   "onboarding": {
     "oneMoreThing": "One more thing...",
+    "canChangeThisLater": "You can change this later in your settings.",
     "alsoFindCoaches": "Would you also like to find coaches for your own fitness journey?",
     "yesBothAccounts": "Yes, create both accounts",
     "coachAndFindCoaches": "Coach clients AND find coaches for yourself. Switch between roles anytime.",
