@@ -13,7 +13,7 @@ import { getAvatarImageUrl } from "@/hooks/useAvatars";
 import { toast } from "sonner";
 import { isDespia } from "@/lib/despia";
 import { useIOSRestrictions } from "@/hooks/useIOSRestrictions";
-
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 // Tier-to-avatar mapping - each tier gets a progressively better avatar
 const TIER_AVATARS: Record<TierKey, string> = {
   free: "strongman_bear",
@@ -29,6 +29,7 @@ export default function Subscribe() {
   const location = useLocation();
   const navigate = useNavigate();
   const { isIOSNative } = useIOSRestrictions();
+  const { currentTier } = useFeatureAccess();
   
   // Build return URL for auth redirect
   const currentUrl = `${location.pathname}${location.search}`;
@@ -197,7 +198,7 @@ export default function Subscribe() {
         {/* Show native IAP ONLY for native app environments */}
         {isNativeApp ? (
           <div className="w-full">
-            <NativeSubscriptionButtons currentTier="free" />
+            <NativeSubscriptionButtons currentTier={currentTier} />
           </div>
         ) : (
           <>
@@ -269,7 +270,7 @@ export default function Subscribe() {
           <div className="p-6">
             {isNativeApp ? (
               /* Native app: show only IAP buttons */
-              <NativeSubscriptionButtons currentTier="free" />
+              <NativeSubscriptionButtons currentTier={currentTier} />
             ) : (
               /* Web: show Stripe checkout */
               <>
