@@ -17,6 +17,7 @@ import { useExchangeRates } from "@/hooks/useExchangeRates";
 import { getDisplayLocation } from "@/lib/location-utils";
 import { useTranslation } from "@/hooks/useTranslation";
 import { getCoachTypeById, COACH_TYPES } from "@/constants/coachTypes";
+import { useIOSRestrictions } from "@/hooks/useIOSRestrictions";
 
 // Helper to get display label for coach type (handles custom types)
 const getCoachTypeDisplayLabel = (type: string): string => {
@@ -53,6 +54,7 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
   const autoLinkPrefix = useCoachLinkPrefix();
   const effectiveLinkPrefix = linkPrefix ?? autoLinkPrefix;
   const { convertForViewer } = useExchangeRates();
+  const { isIOSNative } = useIOSRestrictions();
 
   const isClient = user && (role === "client" || role === "admin");
   const isAuthenticated = !!user;
@@ -208,10 +210,11 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
             )}
           </div>
           
-          {/* Action Buttons */}
+          {/* Action Buttons - Hide booking/connection on iOS native */}
           {isClient ? (
             <TooltipProvider>
               <div className="flex items-center gap-1 flex-shrink-0">
+                {/* Message button - always show */}
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button 
@@ -226,33 +229,38 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
                   <TooltipContent>{t('card.message')}</TooltipContent>
                 </Tooltip>
 
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-9 w-9"
-                      onClick={handleBook}
-                    >
-                      <Calendar className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>{t('card.bookSession')}</TooltipContent>
-                </Tooltip>
+                {/* Book and Connect buttons - hide on iOS native */}
+                {!isIOSNative && (
+                  <>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-9 w-9"
+                          onClick={handleBook}
+                        >
+                          <Calendar className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>{t('card.bookSession')}</TooltipContent>
+                    </Tooltip>
 
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-9 w-9"
-                      onClick={handleRequestConnection}
-                    >
-                      <UserPlus className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>{t('connection.title')}</TooltipContent>
-                </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-9 w-9"
+                          onClick={handleRequestConnection}
+                        >
+                          <UserPlus className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>{t('connection.title')}</TooltipContent>
+                    </Tooltip>
+                  </>
+                )}
 
                 <Button asChild variant="lime-outline" size="sm">
                   <Link to={`${effectiveLinkPrefix}/${coach.username || coach.id}`}>{t('card.viewProfile')}</Link>

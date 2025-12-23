@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { getAvatarImageUrl } from "@/hooks/useAvatars";
 import { toast } from "sonner";
 import { isDespia } from "@/lib/despia";
+import { useIOSRestrictions } from "@/hooks/useIOSRestrictions";
 
 // Tier-to-avatar mapping - each tier gets a progressively better avatar
 const TIER_AVATARS: Record<TierKey, string> = {
@@ -27,10 +28,14 @@ export default function Subscribe() {
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const { isIOSNative } = useIOSRestrictions();
   
   // Build return URL for auth redirect
   const currentUrl = `${location.pathname}${location.search}`;
   const encodedReturnUrl = encodeURIComponent(currentUrl);
+  
+  // Check if running in Despia native environment (iOS or Android)
+  const isNativeApp = isDespia();
   
   // Read initial values from URL params
   const initialTier = (searchParams.get("tier") as TierKey) || "pro";
@@ -189,8 +194,8 @@ export default function Subscribe() {
 
       {/* Right Side - Light - Side by side layout */}
       <div className="hidden md:flex w-1/2 bg-white p-4 md:p-6 lg:p-8 flex-col lg:flex-row gap-4 lg:gap-6 items-start overflow-y-auto">
-        {/* Show native IAP for Despia environment */}
-        {isDespia() ? (
+        {/* Show native IAP ONLY for native app environments */}
+        {isNativeApp ? (
           <div className="w-full">
             <NativeSubscriptionButtons currentTier="free" />
           </div>
@@ -249,7 +254,7 @@ export default function Subscribe() {
         )}
       </div>
 
-      {/* Mobile Checkout Sheet */}
+      {/* Mobile Checkout Sheet - Only show on non-native or show native IAP */}
       {showMobileCheckout && user && (
         <div className="md:hidden fixed inset-0 z-50 bg-white overflow-auto">
           <div className="p-4 border-b sticky top-0 bg-white">
@@ -262,24 +267,32 @@ export default function Subscribe() {
             </button>
           </div>
           <div className="p-6">
-            <PriceSummary tier={selectedTier} billingInterval={billingInterval} />
-            <div className="mt-6">
-              {user ? (
-                <Suspense fallback={<CheckoutLoading />}>
-                  <SubscriptionCheckout 
-                    key={`mobile-${checkoutKey}`}
-                    tier={selectedTier} 
-                    billingInterval={billingInterval}
-                  />
-                </Suspense>
-              ) : (
-                <div className="text-center">
-                  <Link to={`/auth?returnUrl=${encodedReturnUrl}`}>
-                    <Button className="w-full">Sign in to subscribe</Button>
-                  </Link>
+            {isNativeApp ? (
+              /* Native app: show only IAP buttons */
+              <NativeSubscriptionButtons currentTier="free" />
+            ) : (
+              /* Web: show Stripe checkout */
+              <>
+                <PriceSummary tier={selectedTier} billingInterval={billingInterval} />
+                <div className="mt-6">
+                  {user ? (
+                    <Suspense fallback={<CheckoutLoading />}>
+                      <SubscriptionCheckout 
+                        key={`mobile-${checkoutKey}`}
+                        tier={selectedTier} 
+                        billingInterval={billingInterval}
+                      />
+                    </Suspense>
+                  ) : (
+                    <div className="text-center">
+                      <Link to={`/auth?returnUrl=${encodedReturnUrl}`}>
+                        <Button className="w-full">Sign in to subscribe</Button>
+                      </Link>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </>
+            )}
           </div>
         </div>
       )}
