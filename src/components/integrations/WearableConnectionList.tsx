@@ -22,52 +22,55 @@ const WearableConnectionList = () => {
   } = useWearables();
 
   // Platform-aware provider configuration
-  // Apple Health: available on iOS native, coming soon elsewhere
-  // Health Connect: available on Android native, coming soon elsewhere
+  // Apple Health: only visible on iOS native and web (hidden on Android native)
+  // Health Connect: only visible on Android native and web (hidden on iOS native)
   const providers = useMemo(() => {
     const isIOSNative = isDespia && isIOS;
     const isAndroidNative = isDespia && isAndroid;
+    const isWeb = !isDespia;
 
-    return [
-      {
+    const allProviders = [
+      // Apple Health: Hide on Android native, show on iOS native and web
+      ...(!isAndroidNative ? [{
         id: "apple_health" as WearableProvider,
         name: "Apple Health",
         icon: <Apple className="w-6 h-6 text-white" />,
         color: "bg-gradient-to-br from-pink-500 to-red-500",
-        // Available on iOS native, coming soon on web/Android
-        comingSoon: !isIOSNative,
-        description: isIOSNative 
-          ? t('integrations.syncWithAppleHealth', 'Sync your health data from Apple Health')
-          : t('integrations.requiresIOSApp', 'Requires the FitConnect iOS app'),
-      },
-      {
+        disabled: isWeb, // Disabled on web (needs app install)
+        disabledMessage: isWeb 
+          ? t('integrations.installIOSApp', 'Install the iOS app to connect')
+          : undefined,
+      }] : []),
+      // Health Connect: Hide on iOS native, show on Android native and web
+      ...(!isIOSNative ? [{
         id: "health_connect" as WearableProvider,
         name: "Health Connect",
         icon: <Activity className="w-6 h-6 text-white" />,
         color: "bg-gradient-to-br from-green-500 to-teal-500",
-        // Available on Android native, coming soon on web/iOS
-        comingSoon: !isAndroidNative,
-        description: isAndroidNative
-          ? t('integrations.syncWithHealthConnect', 'Sync your health data from Health Connect')
-          : t('integrations.requiresAndroidApp', 'Requires the FitConnect Android app'),
-      },
+        disabled: isWeb, // Disabled on web (needs app install)
+        disabledMessage: isWeb 
+          ? t('integrations.installAndroidApp', 'Install the Android app to connect')
+          : undefined,
+      }] : []),
       {
         id: "fitbit" as WearableProvider,
         name: "Fitbit",
         icon: <Heart className="w-6 h-6 text-white" />,
         color: "bg-gradient-to-br from-teal-500 to-cyan-500",
-        comingSoon: false,
-        description: undefined,
+        disabled: false,
+        disabledMessage: undefined,
       },
       {
         id: "garmin" as WearableProvider,
         name: "Garmin",
         icon: <Watch className="w-6 h-6 text-white" />,
         color: "bg-gradient-to-br from-blue-600 to-blue-800",
-        comingSoon: true,
-        description: t('integrations.awaitingDeveloperAccess'),
+        disabled: false,
+        disabledMessage: undefined,
       },
     ];
+
+    return allProviders;
   }, [isDespia, isIOS, isAndroid, t]);
 
   if (isLoading) {
@@ -100,8 +103,8 @@ const WearableConnectionList = () => {
               onSync={() => connection && syncWearable.mutate(connection.id)}
               isConnecting={connectWearable.isPending}
               isSyncing={syncWearable.isPending}
-              comingSoon={provider.comingSoon}
-              comingSoonDescription={provider.description}
+              disabled={provider.disabled}
+              disabledMessage={provider.disabledMessage}
             />
           );
         })}

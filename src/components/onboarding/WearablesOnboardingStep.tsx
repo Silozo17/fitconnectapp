@@ -1,8 +1,7 @@
 import { useEffect, useRef, useMemo } from "react";
-import { Activity, Heart, Watch, CheckCircle, ExternalLink, Loader2, Apple, Clock } from "lucide-react";
+import { Activity, Heart, Watch, CheckCircle, ExternalLink, Loader2, Apple, Smartphone } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useWearables, WearableProvider } from "@/hooks/useWearables";
 import { useEnvironment } from "@/hooks/useEnvironment";
 
@@ -17,7 +16,8 @@ interface WearableProviderConfig {
   descriptionKey: string;
   icon: React.ReactNode;
   color: string;
-  comingSoon: boolean;
+  disabled: boolean;
+  disabledMessage?: string;
 }
 
 export function useWearablesState() {
@@ -34,47 +34,63 @@ const WearablesOnboardingStep = ({ onStateChange }: WearablesOnboardingStepProps
   const hasAnyConnection = (connections?.length || 0) > 0;
 
   // Platform-aware provider configuration
+  // Apple Health: only visible on iOS native and web (hidden on Android native)
+  // Health Connect: only visible on Android native and web (hidden on iOS native)
   const providers: WearableProviderConfig[] = useMemo(() => {
     const isIOSNative = isDespia && isIOS;
     const isAndroidNative = isDespia && isAndroid;
+    const isWeb = !isDespia;
 
-    return [
-      {
+    const allProviders: WearableProviderConfig[] = [];
+
+    // Apple Health: Hide on Android native, show on iOS native and web
+    if (!isAndroidNative) {
+      allProviders.push({
         id: "apple_health",
         nameKey: "integrations.wearables.appleHealth.name",
         descriptionKey: "integrations.wearables.appleHealth.description",
         icon: <Apple className="w-5 h-5 text-white" />,
         color: "bg-gradient-to-br from-pink-500 to-red-500",
-        // Available on iOS native only
-        comingSoon: !isIOSNative,
-      },
-      {
+        disabled: isWeb,
+        disabledMessage: isWeb ? t('integrations.installIOSApp', 'Install the iOS app to connect') : undefined,
+      });
+    }
+
+    // Health Connect: Hide on iOS native, show on Android native and web
+    if (!isIOSNative) {
+      allProviders.push({
         id: "health_connect",
         nameKey: "integrations.wearables.healthConnect.name",
         descriptionKey: "integrations.wearables.healthConnect.description",
         icon: <Activity className="w-5 h-5 text-white" />,
         color: "bg-gradient-to-br from-green-500 to-teal-500",
-        // Available on Android native only
-        comingSoon: !isAndroidNative,
-      },
-      {
-        id: "fitbit",
-        nameKey: "integrations.wearables.fitbit.name",
-        descriptionKey: "integrations.wearables.fitbit.description",
-        icon: <Heart className="w-5 h-5 text-white" />,
-        color: "bg-gradient-to-br from-teal-500 to-cyan-500",
-        comingSoon: false,
-      },
-      {
-        id: "garmin",
-        nameKey: "integrations.wearables.garmin.name",
-        descriptionKey: "integrations.wearables.garmin.description",
-        icon: <Watch className="w-5 h-5 text-white" />,
-        color: "bg-gradient-to-br from-blue-600 to-blue-800",
-        comingSoon: true,
-      },
-    ];
-  }, [isDespia, isIOS, isAndroid]);
+        disabled: isWeb,
+        disabledMessage: isWeb ? t('integrations.installAndroidApp', 'Install the Android app to connect') : undefined,
+      });
+    }
+
+    // Fitbit: Available everywhere
+    allProviders.push({
+      id: "fitbit",
+      nameKey: "integrations.wearables.fitbit.name",
+      descriptionKey: "integrations.wearables.fitbit.description",
+      icon: <Heart className="w-5 h-5 text-white" />,
+      color: "bg-gradient-to-br from-teal-500 to-cyan-500",
+      disabled: false,
+    });
+
+    // Garmin: Available everywhere (Connect button)
+    allProviders.push({
+      id: "garmin",
+      nameKey: "integrations.wearables.garmin.name",
+      descriptionKey: "integrations.wearables.garmin.description",
+      icon: <Watch className="w-5 h-5 text-white" />,
+      color: "bg-gradient-to-br from-blue-600 to-blue-800",
+      disabled: false,
+    });
+
+    return allProviders;
+  }, [isDespia, isIOS, isAndroid, t]);
 
   // Track previous state to avoid unnecessary calls
   const prevStateRef = useRef<{ hasAnyConnection: boolean; isLoading: boolean }>({ hasAnyConnection: false, isLoading: true });
@@ -127,7 +143,7 @@ const WearablesOnboardingStep = ({ onStateChange }: WearablesOnboardingStepProps
             <div
               key={provider.id}
               className={`p-4 rounded-xl border-2 transition-all ${
-                provider.comingSoon
+                provider.disabled
                   ? "border-border/50 bg-muted/30 opacity-75"
                   : isConnected
                   ? "border-green-500/30 bg-green-500/5"
@@ -140,21 +156,16 @@ const WearablesOnboardingStep = ({ onStateChange }: WearablesOnboardingStepProps
                     {provider.icon}
                   </div>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium text-foreground text-sm">{t(provider.nameKey)}</p>
-                      {provider.comingSoon && (
-                        <Badge variant="secondary" className="text-xs">
-                          <Clock className="w-3 h-3 mr-1" />
-                          {t('common.comingSoon')}
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground">{t(provider.descriptionKey)}</p>
+                    <p className="font-medium text-foreground text-sm">{t(provider.nameKey)}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {provider.disabledMessage || t(provider.descriptionKey)}
+                    </p>
                   </div>
                 </div>
-                {provider.comingSoon ? (
+                {provider.disabled ? (
                   <Button variant="outline" size="sm" disabled>
-                    {t('common.comingSoon')}
+                    <Smartphone className="w-4 h-4 mr-1" />
+                    {t('integrations.installApp', 'Install App')}
                   </Button>
                 ) : isConnected ? (
                   <div className="flex items-center gap-2 text-green-600">
