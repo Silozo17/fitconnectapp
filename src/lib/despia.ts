@@ -200,6 +200,75 @@ export const isBioAuthAvailable = (): boolean => {
 };
 
 // ============================================================================
+// HEALTHKIT INTEGRATION (iOS)
+// ============================================================================
+
+/**
+ * HealthKit permission result handlers
+ */
+export interface HealthKitCallbacks {
+  onSuccess: () => void;
+  onError: (errorMessage: string) => void;
+}
+
+let healthKitCallbacks: HealthKitCallbacks | null = null;
+
+/**
+ * Register global callbacks for HealthKit permission request
+ */
+export const registerHealthKitCallbacks = (callbacks: HealthKitCallbacks): void => {
+  healthKitCallbacks = callbacks;
+  
+  // Expose callbacks globally for Despia runtime
+  if (typeof window !== 'undefined') {
+    (window as any).onHealthKitSuccess = () => {
+      if (isDespia() && healthKitCallbacks) {
+        console.log('[Despia HealthKit] Permission granted');
+        healthKitCallbacks.onSuccess();
+      }
+    };
+    
+    (window as any).onHealthKitError = (error: string) => {
+      if (isDespia() && healthKitCallbacks) {
+        console.error('[Despia HealthKit] Permission error:', error);
+        healthKitCallbacks.onError(error);
+      }
+    };
+  }
+};
+
+/**
+ * Cleanup HealthKit callbacks
+ */
+export const unregisterHealthKitCallbacks = (): void => {
+  healthKitCallbacks = null;
+  if (typeof window !== 'undefined') {
+    delete (window as any).onHealthKitSuccess;
+    delete (window as any).onHealthKitError;
+  }
+};
+
+/**
+ * Request HealthKit permissions on iOS via Despia native runtime
+ * @returns true if the request was triggered, false if not in Despia environment
+ */
+export const requestHealthKitPermissions = (): boolean => {
+  if (!isDespia()) {
+    console.warn('[Despia HealthKit] Attempted outside of Despia environment');
+    return false;
+  }
+  
+  try {
+    console.log('[Despia HealthKit] Requesting permissions...');
+    despia('healthkit://permissions');
+    return true;
+  } catch (e) {
+    console.error('[Despia HealthKit] Failed to request permissions:', e);
+    return false;
+  }
+};
+
+// ============================================================================
 // REVENUECAT IN-APP PURCHASES
 // ============================================================================
 
