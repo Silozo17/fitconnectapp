@@ -58,20 +58,20 @@ interface RevenueCatWebhookPayload {
 
 // Map RevenueCat product IDs to our tier names
 const productToTier: Record<string, string> = {
-  // iOS product IDs (you'll configure these in RevenueCat)
+  // App Store Connect product IDs (matching your configuration)
+  "fitconnect.starter.monthly": "starter",
+  "fitconnect.starter.annual": "starter",
+  "fitconnect.pro.monthly": "pro",
+  "fitconnect.pro.annual": "pro",
+  "fitconnect.enterprise.monthly": "enterprise",
+  "fitconnect.enterprise.annual": "enterprise",
+  // Legacy underscore format for backwards compatibility
   "fitconnect_starter_monthly": "starter",
   "fitconnect_starter_yearly": "starter",
   "fitconnect_pro_monthly": "pro",
   "fitconnect_pro_yearly": "pro",
   "fitconnect_enterprise_monthly": "enterprise",
   "fitconnect_enterprise_yearly": "enterprise",
-  // Android product IDs
-  "fitconnect.starter.monthly": "starter",
-  "fitconnect.starter.yearly": "starter",
-  "fitconnect.pro.monthly": "pro",
-  "fitconnect.pro.yearly": "pro",
-  "fitconnect.enterprise.monthly": "enterprise",
-  "fitconnect.enterprise.yearly": "enterprise",
 };
 
 // Extract coach ID from RevenueCat app_user_id

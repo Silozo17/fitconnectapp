@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCoachProfileId } from '@/hooks/useCoachProfileId';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   isNativeIAPAvailable,
   registerIAPCallbacks,
@@ -39,6 +40,7 @@ const MAX_POLL_ATTEMPTS = 30; // 60 seconds max polling
 export const useNativeIAP = (): UseNativeIAPReturn => {
   const { user } = useAuth();
   const { data: coachProfileId } = useCoachProfileId();
+  const queryClient = useQueryClient();
   const [state, setState] = useState<NativeIAPState>({
     isAvailable: false,
     isPurchasing: false,
@@ -127,8 +129,10 @@ export const useNativeIAP = (): UseNativeIAPReturn => {
           description: `Your ${expectedTier} plan is now active.`,
         });
 
-        // Refresh the page to update UI
-        window.location.reload();
+        // Invalidate queries to refresh subscription data throughout the app
+        queryClient.invalidateQueries({ queryKey: ['coach-profile'] });
+        queryClient.invalidateQueries({ queryKey: ['platform-subscription'] });
+        queryClient.invalidateQueries({ queryKey: ['feature-access'] });
         return;
       }
 

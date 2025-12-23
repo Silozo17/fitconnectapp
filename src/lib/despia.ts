@@ -208,14 +208,14 @@ export const isBioAuthAvailable = (): boolean => {
  * These must match the products configured in RevenueCat
  */
 export const IAP_PRODUCT_IDS = {
-  // Monthly subscriptions
-  starter_monthly: 'fitconnect_starter_monthly',
-  pro_monthly: 'fitconnect_pro_monthly',
-  enterprise_monthly: 'fitconnect_enterprise_monthly',
-  // Yearly subscriptions
-  starter_yearly: 'fitconnect_starter_yearly',
-  pro_yearly: 'fitconnect_pro_yearly',
-  enterprise_yearly: 'fitconnect_enterprise_yearly',
+  // Monthly subscriptions (matching App Store Connect product IDs)
+  starter_monthly: 'fitconnect.starter.monthly',
+  pro_monthly: 'fitconnect.pro.monthly',
+  enterprise_monthly: 'fitconnect.enterprise.monthly',
+  // Annual subscriptions (matching App Store Connect product IDs)
+  starter_yearly: 'fitconnect.starter.annual',
+  pro_yearly: 'fitconnect.pro.annual',
+  enterprise_yearly: 'fitconnect.enterprise.annual',
 } as const;
 
 export type IAPProductId = typeof IAP_PRODUCT_IDS[keyof typeof IAP_PRODUCT_IDS];
