@@ -76,16 +76,33 @@ export const useWearables = () => {
     enabled: !!user,
   });
 
-  // Map HealthKit type identifiers to health_data_sync data types
+  /**
+   * UNSUPPORTED CATEGORY TYPES - These cause native crashes with HKStatisticsCollectionQuery
+   * Despia SDK uses HKStatisticsCollectionQuery which only works with QUANTITY types.
+   * Category types require HKSampleQuery which is not currently supported.
+   */
+  const UNSUPPORTED_CATEGORY_TYPES = [
+    'HKCategoryTypeIdentifierSleepAnalysis',
+    'HKCategoryTypeIdentifierMindfulSession',
+    'HKCategoryTypeIdentifierAppleStandHour',
+  ];
+
+  // Map HealthKit QUANTITY type identifiers to health_data_sync data types
   const mapHealthKitToDataType = (hkType: string): string | null => {
+    // Skip unsupported category types entirely - they cause native crashes
+    if (UNSUPPORTED_CATEGORY_TYPES.some(cat => hkType.includes(cat))) {
+      console.log(`[useWearables] Skipping unsupported category type: ${hkType}`);
+      return null;
+    }
+    
     const mappings: Record<string, string> = {
       'HKQuantityTypeIdentifierStepCount': 'steps',
       'HKQuantityTypeIdentifierActiveEnergyBurned': 'calories',
       'HKQuantityTypeIdentifierDistanceWalkingRunning': 'distance',
       'HKQuantityTypeIdentifierHeartRate': 'heart_rate',
-      'HKCategoryTypeIdentifierSleepAnalysis': 'sleep',
       'HKQuantityTypeIdentifierAppleExerciseTime': 'active_minutes',
       'HKQuantityTypeIdentifierBodyMass': 'weight',
+      // NOTE: Sleep (HKCategoryTypeIdentifierSleepAnalysis) removed - causes native crash
     };
     return mappings[hkType] || null;
   };
@@ -156,9 +173,6 @@ export const useWearables = () => {
         }
       }
 
-      // SLEEP_VALUES: Actual sleep stages to include (exclude 0=inBed, 2=awake)
-      const SLEEP_VALUES = [1, 3, 4, 5]; // 1=asleepUnspecified, 3=asleepCore, 4=asleepDeep, 5=asleepREM
-
       // Group data by date and type for aggregation
       const aggregatedData: Record<string, Record<string, { sum: number; count: number; maxValue?: number }>> = {};
 
@@ -171,77 +185,9 @@ export const useWearables = () => {
           continue;
         }
 
-        // Special handling for sleep data
-        if (dataType === 'sleep') {
-          console.log(`[useWearables] Processing ${readings.length} sleep samples...`);
-          let processedCount = 0;
-          let skippedMissingDates = 0;
-          let skippedNonSleep = 0;
-          
-          for (const reading of readings) {
-            // Handle null/undefined
-            if (reading === null || reading === undefined) continue;
-            
-            const readingObj = reading as { startDate?: string; endDate?: string; value?: number; date?: string };
-            
-            // Check for {startDate, endDate} format
-            if (readingObj.startDate && readingObj.endDate) {
-              const startDate = new Date(readingObj.startDate);
-              const endDate = new Date(readingObj.endDate);
-              
-              // Skip if dates are invalid
-              if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-                skippedMissingDates++;
-                continue;
-              }
-              
-              // Explicitly include only actual sleep values
-              const sleepValue = readingObj.value;
-              if (typeof sleepValue === 'number' && !SLEEP_VALUES.includes(sleepValue)) {
-                skippedNonSleep++;
-                continue;
-              }
-              
-              const durationMinutes = (endDate.getTime() - startDate.getTime()) / 60000;
-              if (durationMinutes <= 0) continue;
-              
-              // Use end date as recorded date (when you wake up)
-              const dateStr = endDate.toISOString().split('T')[0];
-              
-              if (!aggregatedData[dateStr]) aggregatedData[dateStr] = {};
-              if (!aggregatedData[dateStr]['sleep']) {
-                aggregatedData[dateStr]['sleep'] = { sum: 0, count: 0 };
-              }
-              
-              aggregatedData[dateStr]['sleep'].sum += durationMinutes;
-              aggregatedData[dateStr]['sleep'].count += 1;
-              processedCount++;
-            } else if (readingObj.date && typeof readingObj.value === 'number') {
-              // Despia's {date, value, unit} format
-              const dateStr = readingObj.date.split('T')[0];
-              const value = readingObj.value;
-              
-              // If value > 5, it's likely already calculated duration in minutes
-              if (value > 5) {
-                if (!aggregatedData[dateStr]) aggregatedData[dateStr] = {};
-                if (!aggregatedData[dateStr]['sleep']) {
-                  aggregatedData[dateStr]['sleep'] = { sum: 0, count: 0 };
-                }
-                
-                aggregatedData[dateStr]['sleep'].sum += value;
-                aggregatedData[dateStr]['sleep'].count += 1;
-                processedCount++;
-              } else {
-                skippedNonSleep++;
-              }
-            } else {
-              skippedMissingDates++;
-            }
-          }
-          
-          console.log(`[useWearables] Sleep summary: ${processedCount} processed, ${skippedMissingDates} missing dates, ${skippedNonSleep} non-sleep`);
-          continue; // Skip normal processing for sleep
-        }
+        // Sleep data is no longer synced from Apple Health due to Despia SDK limitation
+        // (HKCategoryTypeIdentifierSleepAnalysis requires HKSampleQuery, not HKStatisticsCollectionQuery)
+        // Sleep can still be synced from Fitbit/Garmin or entered manually
 
         // For cumulative metrics, track max value per day
         const cumulativeTypes = ['steps', 'calories', 'distance', 'active_minutes'];
