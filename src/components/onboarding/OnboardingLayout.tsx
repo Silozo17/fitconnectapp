@@ -46,7 +46,7 @@ interface OnboardingLayoutProps {
   /** Hide footer completely (for steps that don't need footer) */
   hideFooter?: boolean;
   /** Max width for content area */
-  maxWidth?: 'sm' | 'md' | 'lg' | 'full';
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
   /** Skip button handler - shows "Skip" in header right */
   onSkip?: () => void;
   /** Custom skip label */
@@ -61,6 +61,8 @@ const MAX_WIDTH_CLASSES = {
   sm: 'max-w-md',
   md: 'max-w-lg',
   lg: 'max-w-2xl',
+  xl: 'max-w-4xl',
+  '2xl': 'max-w-6xl',
   full: 'max-w-full',
 };
 

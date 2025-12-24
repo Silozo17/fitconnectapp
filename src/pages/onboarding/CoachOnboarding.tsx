@@ -1018,7 +1018,7 @@ const CoachOnboarding = () => {
           );
         }
         
-        // Non-iOS: existing carousel behavior
+        // Non-iOS: Web version with Monthly + Annual options
         return (
           <div className="space-y-5">
             <div className="text-center mb-4">
@@ -1032,52 +1032,149 @@ const CoachOnboarding = () => {
               opts={{ align: "center", loop: true }}
               className="w-full"
             >
-              <CarouselContent className="-ml-2">
-                {tiers.map((tier) => {
+              <CarouselContent className="-ml-2 md:-ml-4">
+                {/* Free tier - single card */}
+                {freeTier && (
+                  <CarouselItem className="pl-2 md:pl-4 basis-[85%] sm:basis-[70%] md:basis-1/2 lg:basis-1/3">
+                    {(() => {
+                      const Icon = freeTier.icon;
+                      const isSelected = formData.subscriptionTier === freeTier.id;
+                      return (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleInputChange("subscriptionTier", freeTier.id);
+                            setBillingInterval('monthly');
+                            setHasSelectedPlan(true);
+                          }}
+                          className={`w-full h-full p-4 rounded-xl border-2 transition-all text-left relative ${
+                            isSelected ? "border-primary bg-primary/10" : "border-border hover:border-muted-foreground"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                              isSelected ? "bg-primary" : "bg-secondary"
+                            }`}>
+                              <Icon className={`w-5 h-5 ${isSelected ? "text-primary-foreground" : "text-muted-foreground"}`} />
+                            </div>
+                            <div>
+                              <h3 className="font-display font-bold text-foreground">{freeTier.name}</h3>
+                              <span className="text-lg font-bold text-primary">Free</span>
+                            </div>
+                            {isSelected && <Check className="w-5 h-5 text-primary ml-auto" />}
+                          </div>
+                          <p className="text-muted-foreground text-xs mb-2">{freeTier.description}</p>
+                          <ul className="space-y-0.5">
+                            {freeTier.features.slice(0, 3).map((feature, i) => (
+                              <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                                <Check className="w-3 h-3 text-primary shrink-0 mt-0.5" />
+                                <span className="break-words">{feature}</span>
+                              </li>
+                            ))}
+                            {freeTier.features.length > 3 && (
+                              <li className="text-xs text-primary">+{freeTier.features.length - 3} more</li>
+                            )}
+                          </ul>
+                        </button>
+                      );
+                    })()}
+                  </CarouselItem>
+                )}
+                
+                {/* Paid tiers - each with Monthly + Annual stacked cards */}
+                {paidTiers.map((tier) => {
                   const Icon = tier.icon;
-                  const isSelected = formData.subscriptionTier === tier.id;
+                  const tierConfig = SUBSCRIPTION_TIERS[tier.id as TierKey];
+                  const monthlyPrice = tierConfig.prices.monthly.amount;
+                  const yearlyPrice = tierConfig.prices.yearly.amount;
+                  const yearlyMonthlyEquivalent = Math.round(yearlyPrice / 12);
+                  const savings = tierConfig.prices.yearly.savings;
+                  
+                  const isSelectedMonthly = formData.subscriptionTier === tier.id && billingInterval === 'monthly';
+                  const isSelectedYearly = formData.subscriptionTier === tier.id && billingInterval === 'yearly';
+                  
                   return (
-                    <CarouselItem key={tier.id} className="pl-2 basis-[85%] sm:basis-1/2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          handleInputChange("subscriptionTier", tier.id);
-                          setHasSelectedPlan(true);
-                        }}
-                        className={`w-full h-full p-4 rounded-xl border-2 transition-all text-left relative ${
-                          isSelected ? "border-primary bg-primary/10" : "border-border hover:border-muted-foreground"
-                        }`}
-                      >
-                        {tier.popular && (
-                          <span className="absolute -top-2 right-3 px-2 py-0.5 bg-accent text-accent-foreground text-xs font-bold rounded-full">
-                            Popular
-                          </span>
-                        )}
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                            isSelected ? "bg-primary" : "bg-secondary"
-                          }`}>
-                            <Icon className={`w-5 h-5 ${isSelected ? "text-primary-foreground" : "text-muted-foreground"}`} />
-                          </div>
-                          <div>
-                            <h3 className="font-display font-bold text-foreground">{tier.name}</h3>
-                            <span className="text-lg font-bold text-primary">{tier.price}<span className="text-xs text-muted-foreground">/mo</span></span>
-                          </div>
-                          {isSelected && <Check className="w-5 h-5 text-primary ml-auto" />}
-                        </div>
-                        <p className="text-muted-foreground text-xs mb-2">{tier.description}</p>
-                        <ul className="space-y-0.5">
-                          {tier.features.slice(0, 3).map((feature, i) => (
-                            <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
-                              <Check className="w-3 h-3 text-primary shrink-0 mt-0.5" />
-                              <span className="break-words">{feature}</span>
-                            </li>
-                          ))}
-                          {tier.features.length > 3 && (
-                            <li className="text-xs text-primary">+{tier.features.length - 3} more</li>
+                    <CarouselItem key={tier.id} className="pl-2 md:pl-4 basis-[85%] sm:basis-[70%] md:basis-1/2 lg:basis-1/3">
+                      <div className="flex flex-col gap-3">
+                        {/* Monthly card */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleInputChange("subscriptionTier", tier.id);
+                            setBillingInterval('monthly');
+                            setHasSelectedPlan(true);
+                          }}
+                          className={`w-full p-4 rounded-xl border-2 transition-all text-left relative ${
+                            isSelectedMonthly ? "border-primary bg-primary/10" : "border-border hover:border-muted-foreground"
+                          }`}
+                        >
+                          {tier.popular && (
+                            <span className="absolute -top-2 right-3 px-2 py-0.5 bg-accent text-accent-foreground text-xs font-bold rounded-full">
+                              Popular
+                            </span>
                           )}
-                        </ul>
-                      </button>
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                              isSelectedMonthly ? "bg-primary" : "bg-secondary"
+                            }`}>
+                              <Icon className={`w-5 h-5 ${isSelectedMonthly ? "text-primary-foreground" : "text-muted-foreground"}`} />
+                            </div>
+                            <div>
+                              <h3 className="font-display font-bold text-foreground">{tier.name}</h3>
+                              <span className="text-lg font-bold text-primary">£{monthlyPrice}<span className="text-xs text-muted-foreground">/mo</span></span>
+                            </div>
+                            {isSelectedMonthly && <Check className="w-5 h-5 text-primary ml-auto" />}
+                          </div>
+                          <p className="text-muted-foreground text-xs mb-2">{tier.description}</p>
+                          <ul className="space-y-0.5">
+                            {tier.features.slice(0, 2).map((feature, i) => (
+                              <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                                <Check className="w-3 h-3 text-primary shrink-0 mt-0.5" />
+                                <span className="break-words line-clamp-1">{feature}</span>
+                              </li>
+                            ))}
+                            {tier.features.length > 2 && (
+                              <li className="text-xs text-primary">+{tier.features.length - 2} more</li>
+                            )}
+                          </ul>
+                        </button>
+                        
+                        {/* Annual card with savings */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleInputChange("subscriptionTier", tier.id);
+                            setBillingInterval('yearly');
+                            setHasSelectedPlan(true);
+                          }}
+                          className={`w-full p-4 rounded-xl border-2 transition-all text-left relative ${
+                            isSelectedYearly ? "border-primary bg-primary/10" : "border-border hover:border-muted-foreground"
+                          }`}
+                        >
+                          {/* Savings badge */}
+                          {savings > 0 && (
+                            <span className="absolute -top-2 right-3 px-2 py-0.5 bg-green-500 text-white text-xs font-bold rounded-full">
+                              Save £{savings}
+                            </span>
+                          )}
+                          <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                              isSelectedYearly ? "bg-primary" : "bg-secondary"
+                            }`}>
+                              <Icon className={`w-5 h-5 ${isSelectedYearly ? "text-primary-foreground" : "text-muted-foreground"}`} />
+                            </div>
+                            <div>
+                              <h3 className="font-display font-bold text-foreground">{tier.name} <span className="text-xs font-normal text-muted-foreground">(Annual)</span></h3>
+                              <div className="flex items-baseline gap-1.5">
+                                <span className="text-lg font-bold text-primary">£{yearlyMonthlyEquivalent}<span className="text-xs text-muted-foreground">/mo</span></span>
+                                <span className="text-xs text-muted-foreground line-through">£{monthlyPrice}</span>
+                              </div>
+                            </div>
+                            {isSelectedYearly && <Check className="w-5 h-5 text-primary ml-auto" />}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-2">Billed annually at £{yearlyPrice}/year</p>
+                        </button>
+                      </div>
                     </CarouselItem>
                   );
                 })}
@@ -1086,20 +1183,25 @@ const CoachOnboarding = () => {
 
             {/* Dot indicators - clickable */}
             <div className="flex justify-center gap-1.5 pt-2">
-              {tiers.map((tier) => (
-                <button
-                  key={tier.id}
-                  type="button"
-                  onClick={() => {
-                    handleInputChange("subscriptionTier", tier.id);
-                    setHasSelectedPlan(true);
-                  }}
-                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                    formData.subscriptionTier === tier.id ? "bg-primary" : "bg-border hover:bg-muted-foreground"
-                  }`}
-                  aria-label={`Select ${tier.name}`}
-                />
-              ))}
+              {[freeTier, ...paidTiers].filter(Boolean).map((tier) => {
+                if (!tier) return null;
+                const isActive = formData.subscriptionTier === tier.id;
+                return (
+                  <button
+                    key={tier.id}
+                    type="button"
+                    onClick={() => {
+                      handleInputChange("subscriptionTier", tier.id);
+                      if (tier.id !== 'free') setBillingInterval('monthly');
+                      setHasSelectedPlan(true);
+                    }}
+                    className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                      isActive ? "bg-primary" : "bg-border hover:bg-muted-foreground"
+                    }`}
+                    aria-label={`Select ${tier.name}`}
+                  />
+                );
+              })}
             </div>
             
             {/* Visual hint when no plan selected */}
@@ -1135,7 +1237,7 @@ const CoachOnboarding = () => {
         onBack={handleBack}
         footerActions={getFooterActions()}
         hideFooter={currentStep === 4}
-        maxWidth="lg"
+        maxWidth={currentStep === 8 ? "xl" : "lg"}
         backDisabled={isNavigating}
         skipDisabled={isNavigating}
       >
