@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProgressPhotoUpload } from './ProgressPhotoUpload';
 import { useCreateProgress } from '@/hooks/useClientProgress';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCelebration } from '@/contexts/CelebrationContext';
 import { toast } from 'sonner';
 import { Scale, Ruler, Camera } from 'lucide-react';
 
@@ -37,7 +38,11 @@ export const LogProgressModal = ({ open, onOpenChange, clientId }: LogProgressMo
   const { t } = useTranslation("client");
   const { t: tCommon } = useTranslation("common");
   const { user } = useAuth();
-  const createProgress = useCreateProgress();
+  const { showFirstTimeAchievement } = useCelebration();
+  
+  const createProgress = useCreateProgress({
+    onFirstPhoto: () => showFirstTimeAchievement('first_photo'),
+  });
   const [photos, setPhotos] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState('weight');
 

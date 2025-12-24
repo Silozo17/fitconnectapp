@@ -260,7 +260,10 @@ export function useClientBadges() {
   });
 }
 
-export function useAwardXP() {
+// Pass celebration callbacks from component that has access to useCelebration
+export function useAwardXP(callbacks?: {
+  onLevelUp?: (newLevel: number, xpEarned: number) => void;
+}) {
   const queryClient = useQueryClient();
   const { data: profile } = useClientProfile();
   
@@ -344,20 +347,34 @@ export function useAwardXP() {
         });
       }
       
-      return { newTotalXP, level, leveledUp: level > previousLevel, previousLevel };
+      return { newTotalXP, level, leveledUp: level > previousLevel, previousLevel, amount };
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['client-xp'] });
       queryClient.invalidateQueries({ queryKey: ['xp-transactions'] });
-      toast.success(`+${variables.amount} XP`, { description: variables.description });
+      
+      // Haptic feedback for XP earned
+      triggerHaptic('light');
+      
       if (data.leveledUp) {
-        toast.success(`Level Up! 🎉`, { description: `You've reached Level ${data.level} - ${getLevelTitle(data.level)}!`, duration: 5000 });
+        // Use celebration overlay if callback provided
+        if (callbacks?.onLevelUp) {
+          callbacks.onLevelUp(data.level, variables.amount);
+        } else {
+          // Fallback to toast
+          toast.success(`Level Up! 🎉`, { description: `You've reached Level ${data.level} - ${getLevelTitle(data.level)}!`, duration: 5000 });
+        }
+      } else {
+        toast.success(`+${variables.amount} XP`, { description: variables.description });
       }
     },
   });
 }
 
-export function useAwardBadge() {
+// Pass celebration callbacks from component that has access to useCelebration
+export function useAwardBadge(callbacks?: {
+  onBadgeEarned?: (badge: { name: string; imageUrl?: string; rarity: string }, xpReward: number) => void;
+}) {
   const queryClient = useQueryClient();
   const { data: profile } = useClientProfile();
   const awardXP = useAwardXP();
@@ -376,9 +393,26 @@ export function useAwardBadge() {
     },
     onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ['client-badges'] });
+      queryClient.invalidateQueries({ queryKey: ['user-stats'] });
+      
       if (!data.alreadyEarned && data.badge) {
         triggerHaptic('success');
-        toast.success(`Badge Earned! ${data.badge.icon}`, { description: `${data.badge.name} - ${data.badge.description}`, duration: 5000 });
+        
+        // Use celebration overlay if callback provided
+        if (callbacks?.onBadgeEarned) {
+          callbacks.onBadgeEarned(
+            { 
+              name: data.badge.name, 
+              imageUrl: data.badge.image_url || undefined, 
+              rarity: data.badge.rarity 
+            },
+            data.badge.xp_reward
+          );
+        } else {
+          // Fallback to toast
+          toast.success(`Badge Earned! ${data.badge.icon}`, { description: `${data.badge.name} - ${data.badge.description}`, duration: 5000 });
+        }
+        
         if (data.badge.xp_reward > 0) {
           awardXP.mutate({ amount: data.badge.xp_reward, source: 'badge_earned', description: `Earned "${data.badge.name}" badge`, sourceId: data.badge.id });
         }
