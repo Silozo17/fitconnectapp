@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import { Avatar, getAvatarImageUrl } from '@/hooks/useAvatars';
 import { useUserStats } from '@/hooks/useUserStats';
-import { RARITY_CONFIG } from '@/lib/avatar-utils';
+import { RARITY_CONFIG, DEFAULT_AVATAR } from '@/lib/avatar-utils';
 import { Zap, Trophy, Target, Medal } from 'lucide-react';
 
 interface AvatarShowcaseProps {
@@ -22,7 +22,9 @@ export function AvatarShowcase({ avatar, className, showStats = false, size = 'm
   };
   
   const rarityConfig = avatar ? RARITY_CONFIG[avatar.rarity] : RARITY_CONFIG.common;
-  const imageUrl = avatar ? getAvatarImageUrl(avatar.slug) : '/placeholder.svg';
+  const imageUrl = avatar 
+    ? getAvatarImageUrl(avatar.slug) 
+    : getAvatarImageUrl(DEFAULT_AVATAR.slug);
   
   return (
     <div className={cn('flex flex-col items-center', className)}>
@@ -93,14 +95,23 @@ export function AvatarShowcase({ avatar, className, showStats = false, size = 'm
       </div>
       
       {/* Avatar name and rarity - OUTSIDE the relative wrapper */}
-      {avatar && (
-        <div className="mt-3 text-center">
-          <h3 className="font-bold text-lg">{avatar.name}</h3>
-          <span className={cn('text-sm', rarityConfig.color)}>
-            {rarityConfig.label}
-          </span>
-        </div>
-      )}
+      <div className="mt-3 text-center">
+        {avatar ? (
+          <>
+            <h3 className="font-bold text-lg">{avatar.name}</h3>
+            <span className={cn('text-sm', rarityConfig.color)}>
+              {rarityConfig.label}
+            </span>
+          </>
+        ) : (
+          <>
+            <h3 className="font-medium text-base text-muted-foreground">No Avatar Selected</h3>
+            <span className="text-sm text-muted-foreground/70">
+              Choose an avatar below
+            </span>
+          </>
+        )}
+      </div>
     </div>
   );
 }
