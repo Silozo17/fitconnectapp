@@ -121,16 +121,21 @@ export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
               {/* Progress bar for unearned badges */}
               {!earned && progress && progress.target > 0 && (
                 <div className="mt-3 space-y-1.5">
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <span className="text-muted-foreground truncate max-w-[60%]">
+                      {progress.label || t('badges.progress', { 
+                        current: progress.current, 
+                        target: progress.target 
+                      })}
+                    </span>
+                    <span className="font-semibold text-primary">
+                      {Math.round(progress.percentage)}%
+                    </span>
+                  </div>
                   <Progress 
                     value={progress.percentage} 
-                    className="h-1.5" 
+                    className="h-2" 
                   />
-                  <div className="text-xs text-muted-foreground">
-                    {progress.label || t('badges.progress', { 
-                      current: progress.current, 
-                      target: progress.target 
-                    })}
-                  </div>
                 </div>
               )}
             </>
