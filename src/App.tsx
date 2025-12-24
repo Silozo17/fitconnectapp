@@ -33,6 +33,7 @@ import { WebsiteRouter } from "./components/routing/WebsiteRouter";
 
 // Auth page (not lazy - critical path)
 import Auth from '@/pages/Auth';
+const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
 
 // Zoom OAuth redirect (not lazy - must be immediate)
 import ZoomOAuth from '@/pages/api/zoom/OAuth';
@@ -212,6 +213,7 @@ const App = () => (
                             <Route element={<AppLocaleWrapper />}>
                               {/* Auth */}
                               <Route path="/auth" element={<Auth />} />
+                              <Route path="/auth/reset-password" element={<Suspense fallback={<PageLoadingSpinner />}><ResetPassword /></Suspense>} />
                               
                               {/* Subscription Pages */}
                               <Route path="/subscribe" element={<Subscribe />} />

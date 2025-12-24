@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dumbbell, Loader2, User, Briefcase } from "lucide-react";
+import { Dumbbell, Loader2, User, Briefcase, ArrowLeft, CheckCircle, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import BlobShape from "@/components/ui/blob-shape";
@@ -45,6 +45,9 @@ const Auth = () => {
   const [showOTPVerification, setShowOTPVerification] = useState(false);
   const [pendingSignupData, setPendingSignupData] = useState<{ email: string; password: string } | null>(null);
   const [hasNavigated, setHasNavigated] = useState(false); // Prevent duplicate navigation after signup
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+  const [resetLinkSent, setResetLinkSent] = useState(false);
   const { signIn, signUp, user, role } = useAuth();
   
   // Get return URL from query params or location state
@@ -98,6 +101,9 @@ const Auth = () => {
     setPasswordValue("");
     setShowOTPVerification(false);
     setPendingSignupData(null);
+    setShowForgotPassword(false);
+    setResetLinkSent(false);
+    setForgotPasswordEmail("");
   }, [isLogin, resetBreachCheck]);
 
   useEffect(() => {
@@ -155,6 +161,43 @@ const Auth = () => {
       body: { email },
     });
     if (error) throw error;
+  };
+
+  // Handle forgot password
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotPasswordEmail) {
+      toast.error(t("validation.required"));
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const resetUrl = `${window.location.origin}/auth/reset-password`;
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail, {
+        redirectTo: resetUrl,
+      });
+
+      if (error) {
+        toast.error(error.message);
+      } else {
+        // Also send branded email via our edge function
+        await supabase.functions.invoke("send-password-reset-email", {
+          body: { 
+            email: forgotPasswordEmail,
+            resetLink: resetUrl 
+          },
+        }).catch(err => console.error("Failed to send branded email:", err));
+
+        setResetLinkSent(true);
+        toast.success(t("auth.resetLinkSent"));
+      }
+    } catch (error) {
+      toast.error(t("auth.unexpectedError"));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const onSubmit = async (data: AuthFormData) => {
@@ -335,147 +378,229 @@ const Auth = () => {
             {/* Header */}
             <div className="mb-4 sm:mb-8">
               <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-1 sm:mb-2">
-                {isLogin ? t("auth.welcomeBack") : t("auth.createAccount")}
+                {showForgotPassword 
+                  ? (resetLinkSent ? t("auth.checkYourEmail") : t("auth.forgotPasswordTitle"))
+                  : (isLogin ? t("auth.welcomeBack") : t("auth.createAccount"))}
               </h1>
               <p className="text-muted-foreground text-sm sm:text-base">
-                {isLogin
-                  ? t("auth.logInAccess")
-                  : t("auth.startJourney")}
+                {showForgotPassword
+                  ? (resetLinkSent ? t("auth.resetLinkSentTo") : t("auth.forgotPasswordSubtitle"))
+                  : (isLogin ? t("auth.logInAccess") : t("auth.startJourney"))}
               </p>
             </div>
 
-            {/* Role Selection (Sign Up only) */}
-            {!isLogin && (
-              <div className="mb-4 sm:mb-6">
-                <Label className="text-foreground mb-2 sm:mb-3 block text-sm sm:text-base">{t("auth.iWantTo")}</Label>
-                <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedRole("client")}
-                    className={`p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-1 sm:gap-2 ${
-                      selectedRole === "client"
-                        ? "border-primary bg-primary/10"
-                        : "border-border hover:border-muted-foreground"
-                    }`}
+            {/* Forgot Password Form */}
+            {showForgotPassword ? (
+              resetLinkSent ? (
+                // Reset link sent success
+                <div className="text-center">
+                  <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-6">
+                    <Mail className="w-8 h-8 text-green-500" />
+                  </div>
+                  <p className="text-foreground font-medium mb-2">{forgotPasswordEmail}</p>
+                  <p className="text-muted-foreground text-sm mb-6">
+                    {t("auth.checkSpamFolder")}
+                  </p>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowForgotPassword(false);
+                      setResetLinkSent(false);
+                      setForgotPasswordEmail("");
+                    }}
+                    className="w-full"
                   >
-                    <User
-                      className={`w-5 h-5 sm:w-6 sm:h-6 ${
-                        selectedRole === "client"
-                          ? "text-primary"
-                          : "text-muted-foreground"
-                      }`}
-                    />
-                    <span
-                      className={`font-medium text-sm sm:text-base ${
-                        selectedRole === "client"
-                          ? "text-foreground"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      {t("auth.findCoach")}
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedRole("coach")}
-                    className={`p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-1 sm:gap-2 ${
-                      selectedRole === "coach"
-                        ? "border-primary bg-primary/10"
-                        : "border-border hover:border-muted-foreground"
-                    }`}
-                  >
-                    <Briefcase
-                      className={`w-5 h-5 sm:w-6 sm:h-6 ${
-                        selectedRole === "coach"
-                          ? "text-primary"
-                          : "text-muted-foreground"
-                      }`}
-                    />
-                    <span
-                      className={`font-medium text-sm sm:text-base ${
-                        selectedRole === "coach"
-                          ? "text-foreground"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      {t("auth.becomeCoach")}
-                    </span>
-                  </button>
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    {t("auth.backToLogin")}
+                  </Button>
                 </div>
-              </div>
-            )}
+              ) : (
+                // Forgot password form
+                <form onSubmit={handleForgotPassword} className="space-y-3 sm:space-y-4">
+                  <div>
+                    <Label htmlFor="forgot-email" className="text-foreground text-sm sm:text-base">
+                      {t("auth.email")}
+                    </Label>
+                    <Input
+                      id="forgot-email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={forgotPasswordEmail}
+                      onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                      className="mt-1 sm:mt-1.5 bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl h-10 sm:h-12"
+                    />
+                  </div>
 
-            {/* Form */}
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
-              <div>
-                <Label htmlFor="email" className="text-foreground text-sm sm:text-base">
-                  {t("auth.email")}
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  className="mt-1 sm:mt-1.5 bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl h-10 sm:h-12"
-                  {...register("email")}
-                />
-                {errors.email && (
-                  <p className="text-destructive text-sm mt-1">
-                    {errors.email.message}
-                  </p>
-                )}
-              </div>
+                  <GradientButton
+                    type="submit"
+                    disabled={isSubmitting || !forgotPasswordEmail}
+                    className="w-full h-10 sm:h-12 text-sm sm:text-base"
+                  >
+                    {isSubmitting ? (
+                      <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                    ) : (
+                      t("auth.sendResetLink")
+                    )}
+                  </GradientButton>
 
-              <div>
-                <Label htmlFor="password" className="text-foreground text-sm sm:text-base">
-                  {t("auth.password")}
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  className="mt-1 sm:mt-1.5 bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl h-10 sm:h-12"
-                  {...register("password")}
-                />
-                {errors.password && (
-                  <p className="text-destructive text-sm mt-1">
-                    {errors.password.message}
-                  </p>
-                )}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setShowForgotPassword(false)}
+                    className="w-full"
+                  >
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    {t("auth.backToLogin")}
+                  </Button>
+                </form>
+              )
+            ) : (
+              <>
+                {/* Role Selection (Sign Up only) */}
                 {!isLogin && (
-                  <PasswordStrengthIndicator 
-                    password={passwordValue}
-                    isBreached={isBreached ?? false}
-                    isCheckingBreach={isCheckingBreach}
-                  />
+                  <div className="mb-4 sm:mb-6">
+                    <Label className="text-foreground mb-2 sm:mb-3 block text-sm sm:text-base">{t("auth.iWantTo")}</Label>
+                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedRole("client")}
+                        className={`p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-1 sm:gap-2 ${
+                          selectedRole === "client"
+                            ? "border-primary bg-primary/10"
+                            : "border-border hover:border-muted-foreground"
+                        }`}
+                      >
+                        <User
+                          className={`w-5 h-5 sm:w-6 sm:h-6 ${
+                            selectedRole === "client"
+                              ? "text-primary"
+                              : "text-muted-foreground"
+                          }`}
+                        />
+                        <span
+                          className={`font-medium text-sm sm:text-base ${
+                            selectedRole === "client"
+                              ? "text-foreground"
+                              : "text-muted-foreground"
+                          }`}
+                        >
+                          {t("auth.findCoach")}
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedRole("coach")}
+                        className={`p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-1 sm:gap-2 ${
+                          selectedRole === "coach"
+                            ? "border-primary bg-primary/10"
+                            : "border-border hover:border-muted-foreground"
+                        }`}
+                      >
+                        <Briefcase
+                          className={`w-5 h-5 sm:w-6 sm:h-6 ${
+                            selectedRole === "coach"
+                              ? "text-primary"
+                              : "text-muted-foreground"
+                          }`}
+                        />
+                        <span
+                          className={`font-medium text-sm sm:text-base ${
+                            selectedRole === "coach"
+                              ? "text-foreground"
+                              : "text-muted-foreground"
+                          }`}
+                        >
+                          {t("auth.becomeCoach")}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
                 )}
-              </div>
 
-              <GradientButton
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full h-10 sm:h-12 text-sm sm:text-base"
-              >
-                {isSubmitting ? (
-                  <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
-                ) : isLogin ? (
-                  t("actions.logIn")
-                ) : (
-                  t("auth.createAccount")
-                )}
-              </GradientButton>
-            </form>
+                {/* Form */}
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
+                  <div>
+                    <Label htmlFor="email" className="text-foreground text-sm sm:text-base">
+                      {t("auth.email")}
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      className="mt-1 sm:mt-1.5 bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl h-10 sm:h-12"
+                      {...register("email")}
+                    />
+                    {errors.email && (
+                      <p className="text-destructive text-sm mt-1">
+                        {errors.email.message}
+                      </p>
+                    )}
+                  </div>
 
-            {/* Toggle */}
-            <p className="mt-4 sm:mt-6 text-center text-muted-foreground text-sm sm:text-base">
-              {isLogin ? t("auth.noAccount") : t("auth.hasAccount")}{" "}
-              <button
-                type="button"
-                onClick={() => setIsLogin(!isLogin)}
-                className="text-primary hover:underline font-medium"
-              >
-                {isLogin ? t("actions.signUp") : t("actions.logIn")}
-              </button>
-            </p>
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="password" className="text-foreground text-sm sm:text-base">
+                        {t("auth.password")}
+                      </Label>
+                      {isLogin && (
+                        <button
+                          type="button"
+                          onClick={() => setShowForgotPassword(true)}
+                          className="text-primary hover:underline text-sm font-medium"
+                        >
+                          {t("auth.forgotPassword")}
+                        </button>
+                      )}
+                    </div>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="••••••••"
+                      className="mt-1 sm:mt-1.5 bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl h-10 sm:h-12"
+                      {...register("password")}
+                    />
+                    {errors.password && (
+                      <p className="text-destructive text-sm mt-1">
+                        {errors.password.message}
+                      </p>
+                    )}
+                    {!isLogin && (
+                      <PasswordStrengthIndicator 
+                        password={passwordValue}
+                        isBreached={isBreached ?? false}
+                        isCheckingBreach={isCheckingBreach}
+                      />
+                    )}
+                  </div>
+
+                  <GradientButton
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full h-10 sm:h-12 text-sm sm:text-base"
+                  >
+                    {isSubmitting ? (
+                      <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                    ) : isLogin ? (
+                      t("actions.logIn")
+                    ) : (
+                      t("auth.createAccount")
+                    )}
+                  </GradientButton>
+                </form>
+
+                {/* Toggle */}
+                <p className="mt-4 sm:mt-6 text-center text-muted-foreground text-sm sm:text-base">
+                  {isLogin ? t("auth.noAccount") : t("auth.hasAccount")}{" "}
+                  <button
+                    type="button"
+                    onClick={() => setIsLogin(!isLogin)}
+                    className="text-primary hover:underline font-medium"
+                  >
+                    {isLogin ? t("actions.signUp") : t("actions.logIn")}
+                  </button>
+                </p>
+              </>
+            )}
           </div>
         </div>
 
