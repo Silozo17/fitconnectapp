@@ -347,8 +347,13 @@ export const syncHealthKitData = async (days: number = 7): Promise<HealthKitConn
      */
     const types = 'HKQuantityTypeIdentifierStepCount';
     
+    // Add cache-busting timestamp to attempt to bypass any caching in Despia SDK
+    const timestamp = Date.now();
+    
+    console.log(`[Despia HealthKit] Request: types=${types}, days=${days}, t=${timestamp}`);
+    
     const response = await despia(
-      `healthkit://read?types=${types}&days=${days}`,
+      `healthkit://read?types=${types}&days=${days}&t=${timestamp}`,
       ['healthkitResponse']
     );
     

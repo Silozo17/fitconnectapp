@@ -277,18 +277,43 @@ export const useSyncAllWearables = () => {
 
       if (healthDataSyncEntries.length > 0) {
         console.log(`[useSyncAllWearables] Upserting ${healthDataSyncEntries.length} Apple Health entries...`);
+        
+        // Log what we're about to upsert for debugging
+        for (const entry of healthDataSyncEntries) {
+          console.log(`[useSyncAllWearables] Upserting: ${entry.recorded_at} ${entry.data_type} = ${entry.value} ${entry.unit}`);
+        }
 
-        const { error: upsertError } = await supabase
+        // First, check current values in DB for comparison
+        const today = new Date().toISOString().split('T')[0];
+        const { data: currentData } = await supabase
+          .from('health_data_sync')
+          .select('data_type, recorded_at, value, updated_at')
+          .eq('client_id', clientId)
+          .eq('source', 'apple_health')
+          .eq('recorded_at', today);
+        
+        if (currentData && currentData.length > 0) {
+          console.log('[useSyncAllWearables] Current DB values before upsert:');
+          for (const row of currentData) {
+            console.log(`  ${row.recorded_at} ${row.data_type} = ${row.value} (updated: ${row.updated_at})`);
+          }
+        }
+
+        const { error: upsertError, data: upsertResult } = await supabase
           .from('health_data_sync')
           .upsert(healthDataSyncEntries, {
             onConflict: 'client_id,data_type,recorded_at,source',
             ignoreDuplicates: false,
-          });
+          })
+          .select();
 
         if (upsertError) {
           console.error('[useSyncAllWearables] Error upserting health data:', upsertError);
           return { success: false, error: upsertError.message };
         }
+
+        // Log upsert result to verify data was actually updated
+        console.log(`[useSyncAllWearables] Upsert result:`, upsertResult);
 
         // Update the Apple Health connection's last_synced_at
         const appleHealthConnection = connections?.find(c => c.provider === 'apple_health');
@@ -381,18 +406,28 @@ export const useSyncAllWearables = () => {
       ]);
       console.log('[useSyncAllWearables] Query refetch complete');
 
-      const totalDataPoints = totalSynced + clientSideDataPoints;
+      // Calculate actual server-side synced devices (excluding client-side providers)
+      const serverSideProviders = ['fitbit', 'garmin'];
+      const serverConnections = connections.filter(c => serverSideProviders.includes(c.provider));
+      const actualServerSynced = Math.min(data?.synced || 0, serverConnections.length);
 
       // Show appropriate toast based on what happened
       if (clientSideDataPoints > 0) {
+        // Primary: Show Apple Health data points synced
         toast.success(`Synced ${clientSideDataPoints} data points from Apple Health`);
+      } else if (hasAppleHealth && isIOSNative) {
+        // On iOS but no data points synced - likely Despia SDK issue
+        toast.info("Sync attempted - waiting for Apple Health data. Try again if steps don't update.", {
+          duration: 5000,
+        });
       } else if (hasAppleHealth && !isIOSNative) {
-        // User has Apple Health connected but isn't on iOS native - let them know
+        // User has Apple Health connected but isn't on iOS native
         toast.info("Apple Health syncs from your iOS device. Open the app on your iPhone to sync latest data.", {
           duration: 5000,
         });
-      } else if (totalSynced > 0) {
-        toast.success(`Synced ${totalSynced} device${totalSynced > 1 ? "s" : ""}`);
+      } else if (actualServerSynced > 0) {
+        // Only server-side devices synced (Fitbit, Garmin)
+        toast.success(`Synced ${actualServerSynced} device${actualServerSynced > 1 ? "s" : ""}`);
       } else {
         toast.info("Sync complete - no new data available");
       }
