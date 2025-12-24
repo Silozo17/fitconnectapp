@@ -2,8 +2,17 @@ import { DocsLayout } from "@/components/docs/DocsLayout";
 import { DocStep } from "@/components/docs/DocStep";
 import { DocTip } from "@/components/docs/DocTip";
 import { DocScreenshot } from "@/components/docs/DocScreenshot";
+import { useNativePricing } from "@/hooks/useNativePricing";
+import { useActivePricing } from "@/hooks/useActivePricing";
+import { isDespia } from "@/lib/despia";
 
 export default function CoachOnboarding() {
+  // Use native pricing on native apps, web pricing otherwise
+  const isNativeApp = isDespia();
+  const webPricing = useActivePricing();
+  const nativePricing = useNativePricing();
+  const pricing = isNativeApp ? nativePricing : webPricing;
+
   return (
     <DocsLayout
       title="Getting Started as a Coach"
@@ -227,7 +236,7 @@ export default function CoachOnboarding() {
         <div className="grid md:grid-cols-2 gap-4 mb-6">
           <div className="p-4 rounded-lg border border-border">
             <h3 className="font-semibold text-lg mb-2">Free</h3>
-            <p className="text-2xl font-bold mb-2">£0<span className="text-sm font-normal">/month</span></p>
+            <p className="text-2xl font-bold mb-2">{pricing.formatPrice(0)}<span className="text-sm font-normal">/month</span></p>
             <ul className="text-sm text-muted-foreground space-y-1">
               <li>• Up to 3 clients</li>
               <li>• Basic features</li>
@@ -236,7 +245,7 @@ export default function CoachOnboarding() {
           </div>
           <div className="p-4 rounded-lg border border-primary/50 bg-primary/5">
             <h3 className="font-semibold text-lg mb-2">Starter</h3>
-            <p className="text-2xl font-bold mb-2">£19<span className="text-sm font-normal">/month</span></p>
+            <p className="text-2xl font-bold mb-2">{pricing.formatPrice(pricing.getSubscriptionPrice('starter', 'monthly'))}<span className="text-sm font-normal">/month</span></p>
             <ul className="text-sm text-muted-foreground space-y-1">
               <li>• Up to 10 clients</li>
               <li>• All features</li>
@@ -245,7 +254,7 @@ export default function CoachOnboarding() {
           </div>
           <div className="p-4 rounded-lg border border-border">
             <h3 className="font-semibold text-lg mb-2">Pro</h3>
-            <p className="text-2xl font-bold mb-2">£49<span className="text-sm font-normal">/month</span></p>
+            <p className="text-2xl font-bold mb-2">{pricing.formatPrice(pricing.getSubscriptionPrice('pro', 'monthly'))}<span className="text-sm font-normal">/month</span></p>
             <ul className="text-sm text-muted-foreground space-y-1">
               <li>• Up to 50 clients</li>
               <li>• Priority support</li>
@@ -254,7 +263,7 @@ export default function CoachOnboarding() {
           </div>
           <div className="p-4 rounded-lg border border-border">
             <h3 className="font-semibold text-lg mb-2">Enterprise</h3>
-            <p className="text-2xl font-bold mb-2">£99<span className="text-sm font-normal">/month</span></p>
+            <p className="text-2xl font-bold mb-2">{pricing.formatPrice(pricing.getSubscriptionPrice('enterprise', 'monthly'))}<span className="text-sm font-normal">/month</span></p>
             <ul className="text-sm text-muted-foreground space-y-1">
               <li>• Unlimited clients</li>
               <li>• White-label options</li>

@@ -13,6 +13,10 @@ import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { SUBSCRIPTION_TIERS, TierKey, normalizeTier, getTierPosition } from "@/lib/stripe-config";
 import { useActivePricing } from "@/hooks/useActivePricing";
+import { useNativePricing } from "@/hooks/useNativePricing";
+import { useNativeIAP, SubscriptionTier } from "@/hooks/useNativeIAP";
+import { isDespia } from "@/lib/despia";
+import { IAPUnsuccessfulDialog } from "@/components/iap/IAPUnsuccessfulDialog";
 
 interface PlatformSubscriptionProps {
   coachId: string;
@@ -36,7 +40,15 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
-  const pricing = useActivePricing();
+  
+  // Platform detection and pricing
+  const isNativeApp = isDespia();
+  const webPricing = useActivePricing();
+  const nativePricing = useNativePricing();
+  const pricing = isNativeApp ? nativePricing : webPricing;
+  
+  // Native IAP hook
+  const { purchase: nativePurchase, state: iapState, dismissUnsuccessfulModal } = useNativeIAP();
 
   const { data: subscription } = useQuery({
     queryKey: ["platform-subscription", coachId],
@@ -53,7 +65,13 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   });
 
   const handleSubscribe = (tierKey: TierKey) => {
-    navigate(`/subscribe?tier=${tierKey}&billing=monthly&from=settings`);
+    if (isNativeApp && ['starter', 'pro', 'enterprise'].includes(tierKey)) {
+      // Trigger native IAP directly
+      nativePurchase(tierKey as SubscriptionTier, 'monthly');
+    } else {
+      // Navigate to web checkout
+      navigate(`/subscribe?tier=${tierKey}&billing=monthly&from=settings`);
+    }
   };
 
   const handleManageSubscription = async () => {
@@ -99,70 +117,89 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
     return { text: t("subscription.current"), variant: "outline" as const };
   };
 
+  // Check if any purchase is in progress
+  const isPurchasing = iapState.isPurchasing || iapState.isPolling;
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Crown className="h-5 w-5 text-primary" />
-          {t("subscription.platformSubscription")}
-        </CardTitle>
-        <CardDescription>
-          {t("subscription.platformDescription")}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {(Object.entries(SUBSCRIPTION_TIERS) as [TierKey, typeof SUBSCRIPTION_TIERS[TierKey]][])
-            .filter(([tierKey, tier]) => !tier.adminOnly || activeTier === tierKey)
-            .map(([tierKey, tier]) => {
-              const isCurrentTier = activeTier === tierKey;
-              const isLoading = loadingTier === tierKey;
-              const buttonConfig = getButtonConfig(tierKey);
-              const isFreeToFree = tierKey === "free" && activeTier === "free";
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Crown className="h-5 w-5 text-primary" />
+            {t("subscription.platformSubscription")}
+          </CardTitle>
+          <CardDescription>
+            {t("subscription.platformDescription")}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {(Object.entries(SUBSCRIPTION_TIERS) as [TierKey, typeof SUBSCRIPTION_TIERS[TierKey]][])
+              .filter(([tierKey, tier]) => !tier.adminOnly || activeTier === tierKey)
+              .map(([tierKey, tier]) => {
+                const isCurrentTier = activeTier === tierKey;
+                const isLoading = loadingTier === tierKey || (isPurchasing && loadingTier === null);
+                const buttonConfig = getButtonConfig(tierKey);
+                const isPricedTier = ['starter', 'pro', 'enterprise'].includes(tierKey);
 
-              return (
-                <div
-                  key={tierKey}
-                  className={cn(
-                    "border rounded-lg p-4 relative transition-all",
-                    isCurrentTier 
-                      ? "border-primary bg-primary/5" 
-                      : "border-border hover:border-primary/50",
-                    tier.highlighted && "ring-2 ring-primary"
-                  )}
-                >
-                  {isCurrentTier && (
-                    <Badge className="absolute -top-2 right-2">{t("subscription.currentPlan")}</Badge>
-                  )}
-                  {tier.highlighted && !isCurrentTier && (
-                    <Badge variant="secondary" className="absolute -top-2 right-2">{t("subscription.popular")}</Badge>
-                  )}
-                  
-                  <h3 className="font-semibold text-lg mb-1">{tier.name}</h3>
-                  <div className="flex items-baseline gap-1 mb-4">
-                    <span className="text-3xl font-bold">
-                      {tier.prices.monthly.amount === 0 
-                        ? t("subscription.free")
-                        : (['starter', 'pro', 'enterprise'].includes(tierKey)
-                            ? pricing.formatPrice(pricing.getSubscriptionPrice(tierKey as 'starter' | 'pro' | 'enterprise', 'monthly'))
-                            : `${pricing.currencySymbol}${tier.prices.monthly.amount}`)}
-                    </span>
-                    {tier.prices.monthly.amount > 0 && (
-                      <span className="text-muted-foreground">{t("subscription.perMonth")}</span>
+                return (
+                  <div
+                    key={tierKey}
+                    className={cn(
+                      "border rounded-lg p-4 relative transition-all",
+                      isCurrentTier 
+                        ? "border-primary bg-primary/5" 
+                        : "border-border hover:border-primary/50",
+                      tier.highlighted && "ring-2 ring-primary"
                     )}
-                  </div>
+                  >
+                    {isCurrentTier && (
+                      <Badge className="absolute -top-2 right-2">{t("subscription.currentPlan")}</Badge>
+                    )}
+                    {tier.highlighted && !isCurrentTier && (
+                      <Badge variant="secondary" className="absolute -top-2 right-2">{t("subscription.popular")}</Badge>
+                    )}
+                    
+                    <h3 className="font-semibold text-lg mb-1">{tier.name}</h3>
+                    <div className="flex items-baseline gap-1 mb-4">
+                      <span className="text-3xl font-bold">
+                        {tier.prices.monthly.amount === 0 
+                          ? t("subscription.free")
+                          : (isPricedTier
+                              ? pricing.formatPrice(pricing.getSubscriptionPrice(tierKey as SubscriptionTier, 'monthly'))
+                              : `${pricing.currencySymbol}${tier.prices.monthly.amount}`)}
+                      </span>
+                      {tier.prices.monthly.amount > 0 && (
+                        <span className="text-muted-foreground">{t("subscription.perMonth")}</span>
+                      )}
+                    </div>
 
-                  <ul className="space-y-2 mb-4">
-                    {tier.featureKeys.map((featureKey, i) => (
-                      <li key={i} className="flex items-center gap-2 text-sm">
-                        <Check className="h-4 w-4 text-primary" />
-                        <span className="text-muted-foreground">{translateFeature(featureKey, t, tPages)}</span>
-                      </li>
-                    ))}
-                  </ul>
+                    <ul className="space-y-2 mb-4">
+                      {tier.featureKeys.map((featureKey, i) => (
+                        <li key={i} className="flex items-center gap-2 text-sm">
+                          <Check className="h-4 w-4 text-primary" />
+                          <span className="text-muted-foreground">{translateFeature(featureKey, t, tPages)}</span>
+                        </li>
+                      ))}
+                    </ul>
 
-                  {isCurrentTier ? (
-                    activeTier !== "free" ? (
+                    {isCurrentTier ? (
+                      activeTier !== "free" ? (
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={handleManageSubscription}
+                          disabled={loadingTier === "manage"}
+                        >
+                          {loadingTier === "manage" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                          {t("subscription.manageSubscription")}
+                        </Button>
+                      ) : (
+                        <Button variant="outline" className="w-full" disabled>
+                          {t("subscription.currentPlan")}
+                        </Button>
+                      )
+                    ) : tierKey === "free" ? (
                       <Button
                         variant="outline"
                         className="w-full"
@@ -170,40 +207,32 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
                         disabled={loadingTier === "manage"}
                       >
                         {loadingTier === "manage" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                        {t("subscription.manageSubscription")}
+                        {t("subscription.downgrade")}
                       </Button>
                     ) : (
-                      <Button variant="outline" className="w-full" disabled>
-                        {t("subscription.currentPlan")}
+                      <Button
+                        variant={buttonConfig.variant}
+                        className="w-full"
+                        onClick={() => handleSubscribe(tierKey)}
+                        disabled={!!loadingTier || isPurchasing}
+                      >
+                        {(isLoading || isPurchasing) && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                        {buttonConfig.text}
                       </Button>
-                    )
-                  ) : tierKey === "free" ? (
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={handleManageSubscription}
-                      disabled={loadingTier === "manage"}
-                    >
-                      {loadingTier === "manage" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                      {t("subscription.downgrade")}
-                    </Button>
-                  ) : (
-                    <Button
-                      variant={buttonConfig.variant}
-                      className="w-full"
-                      onClick={() => handleSubscribe(tierKey)}
-                      disabled={!!loadingTier}
-                    >
-                      {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                      {buttonConfig.text}
-                    </Button>
-                  )}
-                </div>
-              );
-            })}
-        </div>
-      </CardContent>
-    </Card>
+                    )}
+                  </div>
+                );
+              })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Native IAP unsuccessful dialog */}
+      <IAPUnsuccessfulDialog 
+        open={iapState.showUnsuccessfulModal} 
+        onOpenChange={dismissUnsuccessfulModal}
+      />
+    </>
   );
 };
 
