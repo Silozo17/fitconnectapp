@@ -2446,6 +2446,8 @@ export type Database = {
         Row: {
           admin_notes: string | null
           ai_analysis: Json | null
+          ai_analysis_error: string | null
+          ai_analysis_status: string | null
           ai_analyzed_at: string | null
           ai_confidence_score: number | null
           ai_flagged: boolean | null
@@ -2465,6 +2467,8 @@ export type Database = {
         Insert: {
           admin_notes?: string | null
           ai_analysis?: Json | null
+          ai_analysis_error?: string | null
+          ai_analysis_status?: string | null
           ai_analyzed_at?: string | null
           ai_confidence_score?: number | null
           ai_flagged?: boolean | null
@@ -2484,6 +2488,8 @@ export type Database = {
         Update: {
           admin_notes?: string | null
           ai_analysis?: Json | null
+          ai_analysis_error?: string | null
+          ai_analysis_status?: string | null
           ai_analyzed_at?: string | null
           ai_confidence_score?: number | null
           ai_flagged?: boolean | null
