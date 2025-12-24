@@ -183,6 +183,9 @@ export const useSyncAllWearables = () => {
 
       console.log('[useSyncAllWearables] Edge function response:', data);
 
+      // Immediately refetch connections to get updated last_synced_at
+      await queryClient.refetchQueries({ queryKey: ["wearable-connections"], exact: false });
+
       let totalSynced = data?.synced || 0;
       let clientSideDataPoints = 0;
 
@@ -224,10 +227,18 @@ export const useSyncAllWearables = () => {
 
       const totalDataPoints = totalSynced + clientSideDataPoints;
 
-      if (totalDataPoints > 0 || clientSideDataPoints > 0) {
-        toast.success(`Synced ${totalDataPoints} device${totalDataPoints > 1 ? "s" : ""}${clientSideDataPoints > 0 ? ` (${clientSideDataPoints} data points from Apple Health)` : ""}`);
+      // Show appropriate toast based on what happened
+      if (clientSideDataPoints > 0) {
+        toast.success(`Synced ${clientSideDataPoints} data points from Apple Health`);
+      } else if (hasAppleHealth && !isIOSNative) {
+        // User has Apple Health connected but isn't on iOS native - let them know
+        toast.info("Apple Health syncs from your iOS device. Open the app on your iPhone to sync latest data.", {
+          duration: 5000,
+        });
+      } else if (totalSynced > 0) {
+        toast.success(`Synced ${totalSynced} device${totalSynced > 1 ? "s" : ""}`);
       } else {
-        toast.info("No new data to sync");
+        toast.info("Sync complete - no new data available");
       }
 
       return { ...data, clientSideDataPoints };

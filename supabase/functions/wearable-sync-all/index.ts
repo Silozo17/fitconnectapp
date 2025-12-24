@@ -49,8 +49,16 @@ serve(async (req) => {
         console.log(`Processing connection ${connection.id} (${connection.provider})...`);
 
         // Skip health_connect and apple_health - data is pushed from native app
+        // But still update last_synced_at to indicate the edge function processed this connection
         if (connection.provider === "health_connect" || connection.provider === "apple_health") {
           console.log(`Flagging ${connection.provider} for client-side sync - data is pushed from native app`);
+          
+          // Update last_synced_at to show the edge function ran for this connection
+          await supabase
+            .from("wearable_connections")
+            .update({ last_synced_at: new Date().toISOString() })
+            .eq("id", connection.id);
+          
           if (!requiresClientSync.includes(connection.provider)) {
             requiresClientSync.push(connection.provider);
           }
