@@ -67,7 +67,7 @@ interface HealthDataWidgetProps {
 
 const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps) => {
   const { t } = useTranslation('settings');
-  const { getTodayValue, isLoading, data } = useHealthData();
+  const { getTodayValue, getTodaySource, isLoading, data } = useHealthData();
   const { connections, isLoading: wearablesLoading, error: wearablesError } = useWearables();
   const { syncAll, isSyncing, lastSyncedAt } = useSyncAllWearables();
 
@@ -81,6 +81,28 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
       // Error handled in hook
     }
   };
+
+  // Get a formatted source name for display
+  const getSourceDisplayName = (source: string | null): string => {
+    if (!source) return '';
+    const names: Record<string, string> = {
+      'apple_health': 'Apple Health',
+      'health_connect': 'Health Connect',
+      'fitbit': 'Fitbit',
+      'garmin': 'Garmin',
+      'manual': 'Manual',
+    };
+    return names[source] || source;
+  };
+
+  // Determine the primary data source for display
+  const primarySource = (() => {
+    for (const metric of metrics) {
+      const source = getTodaySource(metric.type);
+      if (source) return source;
+    }
+    return null;
+  })();
 
   if (isLoading && !wearablesError && wearablesLoading) {
     return (
@@ -133,16 +155,24 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
     );
   }
 
-  const displayMetrics = compact ? metrics.slice(0, 4) : metrics;
+  // Always show all 6 metrics for consistency
+  const displayMetrics = metrics;
 
   return (
     <Card className={cn("bg-card/50 border-border/50", className)}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Activity className="w-5 h-5 text-primary" />
-            {t('integrations.todaysHealth')}
-          </CardTitle>
+          <div className="flex flex-col">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Activity className="w-5 h-5 text-primary" />
+              {t('integrations.todaysHealth')}
+            </CardTitle>
+            {primarySource && (
+              <span className="text-xs text-muted-foreground mt-0.5">
+                via {getSourceDisplayName(primarySource)}
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-2">
             {lastSyncedAt && (
               <span className="text-xs text-muted-foreground">
@@ -165,7 +195,7 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
       <CardContent>
         <div className={cn(
           "grid gap-2 sm:gap-3",
-          compact ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-3"
+          compact ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-2 sm:grid-cols-3"
         )}>
           {displayMetrics.map((metric) => {
             const value = getTodayValue(metric.type);

@@ -32,7 +32,7 @@ serve(async (req) => {
     if (!connections || connections.length === 0) {
       console.log("No active wearable connections to sync");
       return new Response(
-        JSON.stringify({ success: true, message: "No active connections", synced: 0 }),
+        JSON.stringify({ success: true, message: "No active connections", synced: 0, requiresClientSync: [] }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -42,14 +42,18 @@ serve(async (req) => {
     let successCount = 0;
     let errorCount = 0;
     const results: { connectionId: string; provider: string; success: boolean; error?: string }[] = [];
+    const requiresClientSync: string[] = []; // Providers that need client-side sync
 
     for (const connection of connections) {
       try {
-        console.log(`Syncing connection ${connection.id} (${connection.provider})...`);
+        console.log(`Processing connection ${connection.id} (${connection.provider})...`);
 
-        // Skip health_connect - data is pushed from native app
-        if (connection.provider === "health_connect") {
-          console.log("Skipping health_connect - data is pushed from native app");
+        // Skip health_connect and apple_health - data is pushed from native app
+        if (connection.provider === "health_connect" || connection.provider === "apple_health") {
+          console.log(`Flagging ${connection.provider} for client-side sync - data is pushed from native app`);
+          if (!requiresClientSync.includes(connection.provider)) {
+            requiresClientSync.push(connection.provider);
+          }
           results.push({ connectionId: connection.id, provider: connection.provider, success: true });
           successCount++;
           continue;
@@ -72,11 +76,16 @@ serve(async (req) => {
         let healthData: any[] = [];
         
         if (connection.provider === "fitbit") {
+          console.log(`Syncing Fitbit data for connection ${connection.id}...`);
           healthData = await syncFitbit(accessToken, startDate, endDate);
+        } else if (connection.provider === "garmin") {
+          console.log(`Syncing Garmin data for connection ${connection.id}...`);
+          healthData = await syncGarmin(accessToken, startDate, endDate);
         }
 
         // Upsert health data
         if (healthData.length > 0) {
+          console.log(`Upserting ${healthData.length} data points for ${connection.provider}...`);
           const dataToUpsert = healthData.map((item) => ({
             client_id: connection.client_id,
             wearable_connection_id: connection.id,
@@ -123,14 +132,15 @@ serve(async (req) => {
       }
     }
 
-    console.log(`Sync complete: ${successCount} success, ${errorCount} errors`);
+    console.log(`Sync complete: ${successCount} success, ${errorCount} errors, ${requiresClientSync.length} require client sync`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         synced: successCount, 
         errors: errorCount,
-        results 
+        results,
+        requiresClientSync,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
@@ -160,6 +170,11 @@ async function refreshToken(connection: any, supabase: any): Promise<string> {
       refresh_token: connection.refresh_token,
       grant_type: "refresh_token",
     }).toString();
+  } else if (connection.provider === "garmin") {
+    // Garmin uses OAuth 1.0a, token refresh is different
+    // For now, skip token refresh for Garmin as tokens typically don't expire
+    console.log("Garmin token refresh not required (OAuth 1.0a)");
+    return connection.access_token;
   } else {
     throw new Error(`Unknown provider: ${connection.provider}`);
   }
@@ -228,6 +243,10 @@ async function syncFitbit(accessToken: string, startDate: Date, endDate: Date): 
       if (summary?.veryActiveMinutes !== undefined) {
         results.push({ data_type: "active_minutes", value: summary.veryActiveMinutes + (summary.fairlyActiveMinutes || 0), recorded_date: date, source: "fitbit" });
       }
+      if (summary?.distances?.[0]?.distance) {
+        // Fitbit returns distance in km, convert to meters
+        results.push({ data_type: "distance", value: summary.distances[0].distance * 1000, recorded_date: date, source: "fitbit" });
+      }
     }
   } catch (error) {
     console.error("Error fetching Fitbit activities:", error);
@@ -258,12 +277,27 @@ async function syncFitbit(accessToken: string, startDate: Date, endDate: Date): 
       const data = await response.json();
       const totalMinutes = data.summary?.totalMinutesAsleep;
       if (totalMinutes) {
-        results.push({ data_type: "sleep_minutes", value: totalMinutes, recorded_date: formatDate(endDate), source: "fitbit" });
+        results.push({ data_type: "sleep", value: totalMinutes, recorded_date: formatDate(endDate), source: "fitbit" });
       }
     }
   } catch (error) {
     console.error("Error fetching Fitbit sleep:", error);
   }
 
+  return results;
+}
+
+async function syncGarmin(accessToken: string, startDate: Date, endDate: Date): Promise<any[]> {
+  const results: any[] = [];
+  const formatDate = (d: Date) => d.toISOString().split("T")[0];
+  
+  // Garmin uses OAuth 1.0a and has a different API structure
+  // For now, return empty results - full Garmin integration requires OAuth 1.0a implementation
+  console.log("Garmin sync placeholder - OAuth 1.0a implementation required");
+  
+  // When fully implemented, would fetch from endpoints like:
+  // - https://apis.garmin.com/wellness-api/rest/dailies
+  // - https://apis.garmin.com/wellness-api/rest/activities
+  
   return results;
 }

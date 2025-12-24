@@ -48,29 +48,49 @@ export const useHealthData = (options: UseHealthDataOptions = {}) => {
     clientId,
   } = options;
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["health-data", user?.id, clientId, dataType, startDate, endDate],
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ["health-data", user?.id, clientId, dataType, startDate.toISOString(), endDate.toISOString()],
     queryFn: async () => {
       let targetClientId = clientId;
 
       // If no clientId provided, get current user's client profile
       if (!targetClientId) {
-        const { data: clientProfile } = await supabase
+        console.log('[useHealthData] No clientId provided, fetching client profile for user:', user?.id);
+        const { data: clientProfile, error: profileError } = await supabase
           .from("client_profiles")
           .select("id")
           .eq("user_id", user!.id)
           .single();
 
-        if (!clientProfile) return [];
+        if (profileError) {
+          console.error('[useHealthData] Error fetching client profile:', profileError);
+          return [];
+        }
+
+        if (!clientProfile) {
+          console.log('[useHealthData] No client profile found');
+          return [];
+        }
         targetClientId = clientProfile.id;
+        console.log('[useHealthData] Found client profile:', targetClientId);
       }
+
+      const startDateStr = format(startDate, "yyyy-MM-dd");
+      const endDateStr = format(endDate, "yyyy-MM-dd");
+      
+      console.log('[useHealthData] Fetching health data:', {
+        clientId: targetClientId,
+        dataType,
+        startDate: startDateStr,
+        endDate: endDateStr,
+      });
 
       let query = supabase
         .from("health_data_sync")
         .select("*")
         .eq("client_id", targetClientId)
-        .gte("recorded_at", format(startDate, "yyyy-MM-dd"))
-        .lte("recorded_at", format(endDate, "yyyy-MM-dd"))
+        .gte("recorded_at", startDateStr)
+        .lte("recorded_at", endDateStr)
         .order("recorded_at", { ascending: true });
 
       if (dataType) {
@@ -79,7 +99,16 @@ export const useHealthData = (options: UseHealthDataOptions = {}) => {
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('[useHealthData] Error fetching health data:', error);
+        throw error;
+      }
+
+      console.log('[useHealthData] Fetched data:', data?.length || 0, 'records');
+      if (data && data.length > 0) {
+        console.log('[useHealthData] Sample data:', data.slice(0, 3));
+      }
+
       return data as HealthDataPoint[];
     },
     enabled: !!user,
@@ -136,6 +165,7 @@ export const useHealthData = (options: UseHealthDataOptions = {}) => {
     data,
     isLoading,
     error,
+    refetch,
     todayData,
     getTodayValue,
     getTodaySource,
