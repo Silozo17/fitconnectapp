@@ -12,23 +12,36 @@ import despia from 'despia-native';
  * Uses multiple fallback detection methods for reliability
  */
 export const isDespia = (): boolean => {
-  if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
+  if (typeof window === 'undefined') return false;
+  if (typeof navigator === 'undefined') return false;
   
-  // Method 1: User agent check (primary)
+  // Method 1: User agent check (primary - case insensitive for reliability)
   const hasUserAgent = navigator.userAgent.toLowerCase().includes('despia');
   
-  // Method 2: Check for Despia runtime functions on window
+  // Method 2: Check for Despia runtime callback functions on window
+  // These are set by Despia native when the webview loads
   const hasRuntimeFunctions = typeof (window as any).onBioAuthSuccess === 'function' ||
                               typeof (window as any).iapSuccess === 'function' ||
                               typeof (window as any).onHealthKitSuccess === 'function';
   
-  // Method 3: Check for despia-native SDK marker
+  // Method 3: Check for despia-native SDK marker set by the native app
   const hasSDKMarker = !!(window as any).__DESPIA__;
   
-  // Method 4: Check if the despia function is callable (from imported module)
-  const hasDespiaFunction = typeof despia === 'function';
+  // Method 4: Check if Despia sets window.despiaReady (native bridge check)
+  const hasNativeBridge = typeof (window as any).despiaReady !== 'undefined';
   
-  return hasUserAgent || hasRuntimeFunctions || hasSDKMarker || hasDespiaFunction;
+  // Debug logging for TestFlight debugging
+  const result = hasUserAgent || hasRuntimeFunctions || hasSDKMarker || hasNativeBridge;
+  console.log('[Despia Detection]', {
+    userAgent: navigator.userAgent,
+    hasUserAgent,
+    hasRuntimeFunctions,
+    hasSDKMarker,
+    hasNativeBridge,
+    result
+  });
+  
+  return result;
 };
 
 /**

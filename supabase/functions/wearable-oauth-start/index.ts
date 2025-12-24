@@ -140,10 +140,17 @@ serve(async (req) => {
         break;
 
       case "apple_health":
+        // This should never be reached if platform detection works correctly
+        // Log for debugging if it does get hit
+        console.error("Apple Health OAuth requested from non-native context!", {
+          userAgent: req.headers.get("User-Agent"),
+          userId: user.id,
+        });
         throw new Error(
-          "Apple Health requires a native iOS app to access HealthKit data. " +
-          "This feature is coming soon with the FitConnect iOS app. " +
-          "In the meantime, you can manually log your health data using the 'Log Data' button."
+          "Apple Health connection failed - platform detection issue. " +
+          "This request should use the native HealthKit flow on iOS. " +
+          "Please restart the app and try again. " +
+          "If the issue persists, ensure you're using the latest version of the app."
         );
 
       default:
