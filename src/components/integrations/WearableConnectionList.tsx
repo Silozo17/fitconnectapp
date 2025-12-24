@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Activity, Heart, Watch, Apple, PenLine } from "lucide-react";
 import WearableConnectionCard from "./WearableConnectionCard";
@@ -11,6 +11,7 @@ import { useEnvironment } from "@/hooks/useEnvironment";
 const WearableConnectionList = () => {
   const { t } = useTranslation('settings');
   const [showManualEntry, setShowManualEntry] = useState(false);
+  const [connectingProvider, setConnectingProvider] = useState<WearableProvider | null>(null);
   const { isDespia, isIOS, isAndroid } = useEnvironment();
   const {
     connections,
@@ -82,6 +83,19 @@ const WearableConnectionList = () => {
     return allProviders;
   }, [isDespia, isIOS, isAndroid]);
 
+  // Handle connect with individual loading state tracking
+  const handleConnect = useCallback(async (providerId: WearableProvider) => {
+    setConnectingProvider(providerId);
+    try {
+      await connectWearable.mutateAsync(providerId);
+    } catch (error) {
+      // Error already handled by toast in mutation
+      console.log('[WearableConnectionList] Connection failed:', error);
+    } finally {
+      setConnectingProvider(null);
+    }
+  }, [connectWearable]);
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -107,10 +121,10 @@ const WearableConnectionList = () => {
               providerColor={provider.color}
               isConnected={!!connection}
               lastSynced={connection?.last_synced_at}
-              onConnect={() => connectWearable.mutate(provider.id)}
+              onConnect={() => handleConnect(provider.id)}
               onDisconnect={() => connection && disconnectWearable.mutate(connection.id)}
               onSync={() => connection && syncWearable.mutate(connection.id)}
-              isConnecting={connectWearable.isPending}
+              isConnecting={connectingProvider === provider.id}
               isSyncing={syncWearable.isPending}
               disabled={provider.disabled}
               disabledMessage={provider.disabledMessage}
