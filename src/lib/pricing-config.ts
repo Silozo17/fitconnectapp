@@ -138,7 +138,32 @@ export function getBoostPriceId(countryCode: string | null | undefined): string 
 }
 
 /**
+ * Native App Pricing (iOS/Android)
+ * Higher prices to account for ~30% App Store/Play Store fees
+ */
+export const NATIVE_PRICING_CONFIGS: Record<PricingCountry, CountryPricingConfig['pricing']> = {
+  GB: {
+    subscriptions: {
+      starter: { monthly: 24.99, yearly: 249.99, savings: 49.89 },
+      pro: { monthly: 59.99, yearly: 599.99, savings: 119.89 },
+      enterprise: { monthly: 109.99, yearly: 1099.99, savings: 219.89 },
+    },
+    boost: 5,
+  },
+  PL: {
+    subscriptions: {
+      // Polish native pricing (~30% markup from web prices)
+      starter: { monthly: 104, yearly: 1039, savings: 209 },
+      pro: { monthly: 259, yearly: 2599, savings: 509 },
+      enterprise: { monthly: 519, yearly: 5199, savings: 1029 },
+    },
+    boost: 25,
+  },
+};
+
+/**
  * Format a price amount for display using the country's currency settings.
+ * Handles decimal places automatically (e.g., £24.99 vs £19)
  */
 export function formatPrice(
   amount: number,
@@ -146,10 +171,13 @@ export function formatPrice(
 ): string {
   const config = getPricingConfig(countryCode);
   
+  // Check if amount has decimals
+  const hasDecimals = amount % 1 !== 0;
+  
   // Format number with locale-appropriate separators
   const formattedNumber = new Intl.NumberFormat(config.locale, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: hasDecimals ? 2 : 0,
+    maximumFractionDigits: hasDecimals ? 2 : 0,
   }).format(amount);
   
   // Position currency symbol (£ before, zł after)

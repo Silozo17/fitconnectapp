@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { useNativeIAP, SubscriptionTier, BillingInterval } from '@/hooks/useNativeIAP';
 import { isDespia } from '@/lib/despia';
 import { SUBSCRIPTION_TIERS, TierKey, normalizeTier, getTierPosition } from '@/lib/stripe-config';
-import { useActivePricing } from '@/hooks/useActivePricing';
+import { useNativePricing } from '@/hooks/useNativePricing';
 
 interface NativeSubscriptionButtonsProps {
   currentTier?: string;
@@ -27,7 +27,7 @@ export const NativeSubscriptionButtons = ({
 }: NativeSubscriptionButtonsProps) => {
   const { t } = useTranslation('settings');
   const { t: tPages } = useTranslation('pages');
-  const pricing = useActivePricing();
+  const pricing = useNativePricing();
   const { state, purchase, isAvailable } = useNativeIAP();
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
 
