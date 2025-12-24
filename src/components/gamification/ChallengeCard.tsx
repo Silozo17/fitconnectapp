@@ -234,7 +234,7 @@ export function ChallengeCard({ challenge, showJoinButton = true, showProgress =
           />
         )}
         
-        {showProgress && isJoined && (
+        {isJoined && (
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">{t('challenges.yourProgress')}</span>

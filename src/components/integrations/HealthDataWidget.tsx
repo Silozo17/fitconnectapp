@@ -5,6 +5,7 @@ import { Footprints, Heart, Moon, Flame, Activity, Clock, Watch, RefreshCw } fro
 import { useHealthData, HealthDataType } from "@/hooks/useHealthData";
 import { useWearables } from "@/hooks/useWearables";
 import { useSyncAllWearables } from "@/hooks/useSyncAllWearables";
+import { useWearableAutoSync } from "@/hooks/useWearableAutoSync";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
@@ -70,6 +71,9 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
   const { getTodayValue, getTodaySource, isLoading, data, refetch } = useHealthData();
   const { connections, isLoading: wearablesLoading, error: wearablesError } = useWearables();
   const { syncAll, isSyncing, lastSyncedAt } = useSyncAllWearables();
+  
+  // Enable auto-sync every 15 minutes
+  useWearableAutoSync();
 
   const hasConnectedDevice = connections && connections.length > 0;
   const hasData = data && data.length > 0;
