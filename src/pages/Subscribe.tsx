@@ -1,6 +1,6 @@
 import { useState, Suspense, useEffect } from "react";
 import { Link, Navigate, useSearchParams, useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, Zap } from "lucide-react";
+import { ArrowLeft, Zap, CheckCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { TierSelector, TierFeatures } from "@/components/payments/TierSelector";
 import { BillingToggle } from "@/components/payments/BillingToggle";
@@ -23,6 +23,18 @@ const TIER_AVATARS: Record<TierKey, string> = {
   founder: "elite_personal_trainer_human",
 };
 
+// Helper to get the back navigation path based on where user came from
+const getBackPath = (from: string | null): string => {
+  switch (from) {
+    case "onboarding":
+      return "/onboarding/coach";
+    case "settings":
+      return "/dashboard/coach/settings";
+    default:
+      return "/pricing";
+  }
+};
+
 export default function Subscribe() {
   const { user, role } = useAuth();
   const [searchParams] = useSearchParams();
@@ -41,20 +53,34 @@ export default function Subscribe() {
   // Read initial values from URL params
   const initialTier = (searchParams.get("tier") as TierKey) || "pro";
   const initialBilling = (searchParams.get("billing") as BillingInterval) || "monthly";
+  const fromParam = searchParams.get("from");
   
   const [selectedTier, setSelectedTier] = useState<TierKey>(
     initialTier in SUBSCRIPTION_TIERS ? initialTier : "pro"
   );
   
-  // Handle free tier selection - redirect to dashboard
+  // Handle tier selection - just update the selection, no auto-redirect for free
   const handleTierChange = (tier: TierKey) => {
-    if (tier === "free") {
-      toast.success("Continuing with the free plan");
-      navigate("/dashboard/coach");
-      return;
-    }
     setSelectedTier(tier);
   };
+  
+  // Handle confirming free tier selection
+  const handleConfirmFreeTier = () => {
+    toast.success("Continuing with the free plan");
+    navigateBack();
+  };
+  
+  // Navigate back to where user came from
+  const navigateBack = () => {
+    const backPath = getBackPath(fromParam);
+    // If coming from onboarding, go to dashboard instead (onboarding complete)
+    if (fromParam === "onboarding") {
+      navigate("/dashboard/coach");
+    } else {
+      navigate(backPath);
+    }
+  };
+  
   const [billingInterval, setBillingInterval] = useState<BillingInterval>(
     initialBilling === "yearly" ? "yearly" : "monthly"
   );
@@ -72,15 +98,16 @@ export default function Subscribe() {
   }
 
   const tierData = SUBSCRIPTION_TIERS[selectedTier];
+  const backPath = getBackPath(fromParam);
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row relative overflow-hidden">
       {/* Left Side - Dark */}
       <div className="w-full md:w-1/2 bg-[#0D0D14] p-6 sm:p-8 md:p-10 lg:p-12 flex flex-col relative overflow-hidden">
         
-        {/* Back Link */}
+        {/* Back Link - Dynamic based on 'from' param */}
         <Link 
-          to="/pricing" 
+          to={backPath} 
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -199,6 +226,30 @@ export default function Subscribe() {
         {isNativeApp ? (
           <div className="w-full">
             <NativeSubscriptionButtons currentTier={currentTier} />
+          </div>
+        ) : selectedTier === "free" ? (
+          /* Free tier confirmation panel */
+          <div className="w-full max-w-md mx-auto">
+            <div className="bg-gray-50 rounded-xl p-8 text-center">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-8 h-8 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Free Plan Selected
+              </h3>
+              <p className="text-gray-600 text-sm mb-6">
+                Start with the free plan to explore FitConnect's core features. You can upgrade anytime.
+              </p>
+              <Button 
+                onClick={handleConfirmFreeTier}
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6"
+              >
+                Continue with Free Plan
+              </Button>
+              <p className="text-xs text-gray-500 mt-4">
+                No credit card required
+              </p>
+            </div>
           </div>
         ) : (
           <>
