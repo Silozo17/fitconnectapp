@@ -9,7 +9,6 @@ import {
   triggerHaptic
 } from "@/lib/despia";
 import { useCallback } from "react";
-import type { Json } from "@/integrations/supabase/types";
 
 export type WearableProvider = "health_connect" | "fitbit" | "garmin" | "apple_health";
 
@@ -22,6 +21,33 @@ interface WearableConnection {
   is_active: boolean;
   created_at: string;
 }
+
+// Type guard to check if data is a valid object with health data
+const isValidHealthDataObject = (data: unknown): data is Record<string, unknown[]> => {
+  if (!data || typeof data !== 'object') return false;
+  if (Array.isArray(data)) return false;
+  return true;
+};
+
+// Safe Object.keys wrapper
+const safeObjectKeys = (obj: unknown): string[] => {
+  try {
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return [];
+    return Object.keys(obj);
+  } catch {
+    return [];
+  }
+};
+
+// Safe Object.entries wrapper
+const safeObjectEntries = <T>(obj: unknown): [string, T][] => {
+  try {
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return [];
+    return Object.entries(obj) as [string, T][];
+  } catch {
+    return [];
+  }
+};
 
 export const useWearables = () => {
   const { user } = useAuth();
@@ -89,7 +115,7 @@ export const useWearables = () => {
 
     try {
       // TYPE GUARD: Validate healthData is a proper object before processing
-      if (typeof healthData !== 'object' || Array.isArray(healthData)) {
+      if (!isValidHealthDataObject(healthData)) {
         console.log('[useWearables] Invalid health data format:', typeof healthData, Array.isArray(healthData) ? '(array)' : '');
         return;
       }
@@ -114,17 +140,19 @@ export const useWearables = () => {
       console.log('[useWearables] Data type:', typeof data);
       
       // Safe Object.keys call with fallback
-      const dataKeys = Object.keys(data || {});
+      const dataKeys = safeObjectKeys(data);
       console.log('[useWearables] Data keys:', dataKeys);
       console.log('[useWearables] Full data JSON:', JSON.stringify(data, null, 2));
       
-      for (const [metricType, readings] of Object.entries(data || {})) {
+      const dataEntries = safeObjectEntries<unknown[]>(data);
+      
+      for (const [metricType, readings] of dataEntries) {
         console.log(`[useWearables] Type "${metricType}":`);
         console.log(`  - Is Array: ${Array.isArray(readings)}`);
         console.log(`  - Length: ${Array.isArray(readings) ? readings.length : 'N/A'}`);
-        if (Array.isArray(readings) && readings.length > 0) {
+        if (Array.isArray(readings) && readings.length > 0 && readings[0]) {
           console.log(`  - First sample FULL:`, JSON.stringify(readings[0], null, 2));
-          console.log(`  - All keys in first sample:`, Object.keys(readings[0] || {}));
+          console.log(`  - All keys in first sample:`, safeObjectKeys(readings[0]));
         }
       }
 
@@ -134,7 +162,7 @@ export const useWearables = () => {
       // Group data by date and type for aggregation
       const aggregatedData: Record<string, Record<string, { sum: number; count: number; maxValue?: number }>> = {};
 
-      for (const [metricType, readings] of Object.entries(data || {})) {
+      for (const [metricType, readings] of dataEntries) {
         if (!Array.isArray(readings)) continue;
 
         const dataType = mapHealthKitToDataType(metricType);
@@ -143,7 +171,7 @@ export const useWearables = () => {
           continue;
         }
 
-        // Special handling for sleep data - calculate duration from startDate/endDate
+        // Special handling for sleep data
         if (dataType === 'sleep') {
           console.log(`[useWearables] Processing ${readings.length} sleep samples...`);
           let processedCount = 0;
@@ -154,39 +182,61 @@ export const useWearables = () => {
             // Handle null/undefined
             if (reading === null || reading === undefined) continue;
             
-            const startDate = reading.startDate ? new Date(reading.startDate) : null;
-            const endDate = reading.endDate ? new Date(reading.endDate) : null;
+            const readingObj = reading as { startDate?: string; endDate?: string; value?: number; date?: string };
             
-            // Skip if missing dates
-            if (!startDate || !endDate) {
+            // Check for {startDate, endDate} format
+            if (readingObj.startDate && readingObj.endDate) {
+              const startDate = new Date(readingObj.startDate);
+              const endDate = new Date(readingObj.endDate);
+              
+              // Skip if dates are invalid
+              if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+                skippedMissingDates++;
+                continue;
+              }
+              
+              // Explicitly include only actual sleep values
+              const sleepValue = readingObj.value;
+              if (typeof sleepValue === 'number' && !SLEEP_VALUES.includes(sleepValue)) {
+                skippedNonSleep++;
+                continue;
+              }
+              
+              const durationMinutes = (endDate.getTime() - startDate.getTime()) / 60000;
+              if (durationMinutes <= 0) continue;
+              
+              // Use end date as recorded date (when you wake up)
+              const dateStr = endDate.toISOString().split('T')[0];
+              
+              if (!aggregatedData[dateStr]) aggregatedData[dateStr] = {};
+              if (!aggregatedData[dateStr]['sleep']) {
+                aggregatedData[dateStr]['sleep'] = { sum: 0, count: 0 };
+              }
+              
+              aggregatedData[dateStr]['sleep'].sum += durationMinutes;
+              aggregatedData[dateStr]['sleep'].count += 1;
+              processedCount++;
+            } else if (readingObj.date && typeof readingObj.value === 'number') {
+              // Despia's {date, value, unit} format
+              const dateStr = readingObj.date.split('T')[0];
+              const value = readingObj.value;
+              
+              // If value > 5, it's likely already calculated duration in minutes
+              if (value > 5) {
+                if (!aggregatedData[dateStr]) aggregatedData[dateStr] = {};
+                if (!aggregatedData[dateStr]['sleep']) {
+                  aggregatedData[dateStr]['sleep'] = { sum: 0, count: 0 };
+                }
+                
+                aggregatedData[dateStr]['sleep'].sum += value;
+                aggregatedData[dateStr]['sleep'].count += 1;
+                processedCount++;
+              } else {
+                skippedNonSleep++;
+              }
+            } else {
               skippedMissingDates++;
-              console.log('[useWearables] Skipping sleep sample - missing dates:', JSON.stringify(reading));
-              continue;
             }
-            
-            // Explicitly include only actual sleep values
-            const sleepValue = reading.value;
-            if (!SLEEP_VALUES.includes(sleepValue as number)) {
-              skippedNonSleep++;
-              console.log(`[useWearables] Skipping non-sleep sample (value=${sleepValue})`);
-              continue;
-            }
-            
-            const durationMinutes = (endDate.getTime() - startDate.getTime()) / 60000;
-            if (durationMinutes <= 0) continue;
-            
-            // Use end date as recorded date (when you wake up)
-            const dateStr = endDate.toISOString().split('T')[0];
-            
-            if (!aggregatedData[dateStr]) aggregatedData[dateStr] = {};
-            if (!aggregatedData[dateStr]['sleep']) {
-              aggregatedData[dateStr]['sleep'] = { sum: 0, count: 0 };
-            }
-            
-            aggregatedData[dateStr]['sleep'].sum += durationMinutes;
-            aggregatedData[dateStr]['sleep'].count += 1;
-            processedCount++;
-            console.log(`[useWearables] Sleep: ${durationMinutes.toFixed(1)} min on ${dateStr}`);
           }
           
           console.log(`[useWearables] Sleep summary: ${processedCount} processed, ${skippedMissingDates} missing dates, ${skippedNonSleep} non-sleep`);
@@ -204,12 +254,14 @@ export const useWearables = () => {
             continue;
           }
           
-          if (reading.value === undefined || reading.value === null) {
+          const readingObj = reading as { date?: string; startDate?: string; value?: number };
+          
+          if (readingObj.value === undefined || readingObj.value === null) {
             console.log(`[useWearables] ${dataType}: Sample missing value field:`, JSON.stringify(reading));
             continue;
           }
 
-          const dateStr = (reading.date || reading.startDate || new Date().toISOString()).split('T')[0];
+          const dateStr = (readingObj.date || readingObj.startDate || new Date().toISOString()).split('T')[0];
 
           if (!aggregatedData[dateStr]) {
             aggregatedData[dateStr] = {};
@@ -218,11 +270,11 @@ export const useWearables = () => {
             aggregatedData[dateStr][dataType] = { sum: 0, count: 0, maxValue: 0 };
           }
 
-          aggregatedData[dateStr][dataType].sum += reading.value;
+          aggregatedData[dateStr][dataType].sum += readingObj.value;
           aggregatedData[dateStr][dataType].count += 1;
           
-          if (isCumulative && reading.value > (aggregatedData[dateStr][dataType].maxValue || 0)) {
-            aggregatedData[dateStr][dataType].maxValue = reading.value;
+          if (isCumulative && readingObj.value > (aggregatedData[dateStr][dataType].maxValue || 0)) {
+            aggregatedData[dateStr][dataType].maxValue = readingObj.value;
           }
         }
       }
@@ -461,17 +513,57 @@ export const useWearables = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["wearable-connections"] });
-      toast.success("Wearable disconnected successfully");
+      toast.success("Wearable disconnected");
     },
-    onError: (error) => {
-      toast.error("Failed to disconnect: " + error.message);
+    onError: () => {
+      toast.error("Failed to disconnect wearable");
     },
   });
 
   const syncWearable = useMutation({
-    mutationFn: async (connectionId: string) => {
+    mutationFn: async (provider: WearableProvider) => {
+      // For Apple Health on iOS, sync must be done client-side
+      const isDespiaEnv = isDespia();
+      const isIOSNativeNow = isDespiaEnv && /iPad|iPhone|iPod/i.test(navigator.userAgent);
+
+      if (provider === "apple_health" && isIOSNativeNow) {
+        console.log('[useWearables] Syncing Apple Health client-side...');
+        
+        // Get client profile
+        const { data: clientProfile } = await supabase
+          .from("client_profiles")
+          .select("id")
+          .eq("user_id", user!.id)
+          .single();
+
+        if (!clientProfile) {
+          throw new Error("Client profile not found");
+        }
+
+        const result = await syncHealthKitData(7);
+        if (!result.success) {
+          throw new Error(result.error || "Failed to sync Apple Health");
+        }
+
+        if (result.data) {
+          await syncHealthDataToDatabase(clientProfile.id, result.data);
+        }
+
+        // Update last_synced_at
+        const connection = connections?.find(c => c.provider === 'apple_health');
+        if (connection) {
+          await supabase
+            .from("wearable_connections")
+            .update({ last_synced_at: new Date().toISOString() })
+            .eq("id", connection.id);
+        }
+
+        return { synced: true, dataPoints: result.data ? 1 : 0 };
+      }
+
+      // For other providers, use server-side sync
       const { data, error } = await supabase.functions.invoke("wearable-sync", {
-        body: { connectionId },
+        body: { provider },
       });
 
       if (error) throw error;
@@ -480,20 +572,17 @@ export const useWearables = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["wearable-connections"] });
       queryClient.invalidateQueries({ queryKey: ["health-data"] });
-      toast.success("Health data synced successfully");
+      toast.success("Wearable synced successfully");
     },
     onError: (error) => {
-      toast.error("Failed to sync: " + error.message);
+      toast.error("Failed to sync wearable: " + error.message);
     },
   });
 
-  const isConnected = (provider: WearableProvider) => {
-    return connections?.some((c) => c.provider === provider && c.is_active);
-  };
-
-  const getConnection = (provider: WearableProvider) => {
-    return connections?.find((c) => c.provider === provider && c.is_active);
-  };
+  // Helper to get a specific connection by provider
+  const getConnection = useCallback((provider: WearableProvider) => {
+    return connections?.find(c => c.provider === provider) || null;
+  }, [connections]);
 
   return {
     connections,
@@ -502,7 +591,6 @@ export const useWearables = () => {
     connectWearable,
     disconnectWearable,
     syncWearable,
-    isConnected,
     getConnection,
   };
 };

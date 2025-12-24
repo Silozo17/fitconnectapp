@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { format, subDays, startOfDay } from "date-fns";
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useRef, useCallback } from "react";
 
 export type HealthDataType = "steps" | "heart_rate" | "sleep" | "calories" | "distance" | "active_minutes";
 
@@ -42,6 +42,7 @@ const getHighestPriorityEntry = (entries: HealthDataPoint[]): HealthDataPoint | 
 
 export const useHealthData = (options: UseHealthDataOptions = {}) => {
   const { user } = useAuth();
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   
   // Memoize default dates to prevent query key instability
   const defaultStartDate = useMemo(() => startOfDay(subDays(new Date(), 7)), []);
@@ -125,6 +126,76 @@ export const useHealthData = (options: UseHealthDataOptions = {}) => {
     staleTime: 1000 * 60 * 5, // 5 minutes - prevents unnecessary refetches
   });
 
+  // Get target client ID for realtime subscription
+  const targetClientIdRef = useRef<string | null>(null);
+  
+  // Update targetClientIdRef when we have data
+  useEffect(() => {
+    if (clientId) {
+      targetClientIdRef.current = clientId;
+    } else if (user) {
+      supabase
+        .from("client_profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .single()
+        .then(({ data }) => {
+          if (data) {
+            targetClientIdRef.current = data.id;
+          }
+        });
+    }
+  }, [clientId, user]);
+
+  // Realtime subscription for live updates
+  useEffect(() => {
+    if (!user) return;
+
+    // Small delay to ensure targetClientIdRef is set
+    const setupChannel = setTimeout(() => {
+      const currentClientId = targetClientIdRef.current;
+      if (!currentClientId) return;
+
+      console.log('[useHealthData] Setting up realtime subscription for client:', currentClientId);
+
+      // Clean up existing channel
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+      }
+
+      const channel = supabase
+        .channel(`health-data-${currentClientId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*', // INSERT, UPDATE, DELETE
+            schema: 'public',
+            table: 'health_data_sync',
+            filter: `client_id=eq.${currentClientId}`
+          },
+          (payload) => {
+            console.log('[useHealthData] Realtime update received:', payload.eventType, payload);
+            // Refetch data on any change
+            refetch();
+          }
+        )
+        .subscribe((status) => {
+          console.log('[useHealthData] Realtime subscription status:', status);
+        });
+
+      channelRef.current = channel;
+    }, 500);
+
+    return () => {
+      clearTimeout(setupChannel);
+      if (channelRef.current) {
+        console.log('[useHealthData] Cleaning up realtime subscription');
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+    };
+  }, [user, refetch]);
+
   // Memoize today's date string
   const todayStr = useMemo(() => format(new Date(), "yyyy-MM-dd"), []);
   
@@ -155,21 +226,21 @@ export const useHealthData = (options: UseHealthDataOptions = {}) => {
   }, [data, todayData, isLoading, user?.id, clientId, dataType, startDateKey, endDateKey, todayStr]);
 
   // Get today's value using priority-based selection for multi-device deduplication
-  const getTodayValue = (type: HealthDataType) => {
+  const getTodayValue = useCallback((type: HealthDataType) => {
     const entriesForType = todayData?.filter((d) => d.data_type === type) ?? [];
     const highestPriorityEntry = getHighestPriorityEntry(entriesForType);
     return highestPriorityEntry?.value ?? 0;
-  };
+  }, [todayData]);
 
   // Get the source of today's data for a type
-  const getTodaySource = (type: HealthDataType) => {
+  const getTodaySource = useCallback((type: HealthDataType) => {
     const entriesForType = todayData?.filter((d) => d.data_type === type) ?? [];
     const highestPriorityEntry = getHighestPriorityEntry(entriesForType);
     return highestPriorityEntry?.source ?? null;
-  };
+  }, [todayData]);
 
   // Get data grouped by type with deduplication per date
-  const getDataByType = (type: HealthDataType) => {
+  const getDataByType = useCallback((type: HealthDataType) => {
     const typeData = data?.filter((d) => d.data_type === type) ?? [];
     
     // Group by date and take highest priority for each date
@@ -188,14 +259,14 @@ export const useHealthData = (options: UseHealthDataOptions = {}) => {
     }
 
     return deduplicated.sort((a, b) => a.recorded_at.localeCompare(b.recorded_at));
-  };
+  }, [data]);
 
   // Calculate averages using deduplicated data
-  const getAverage = (type: HealthDataType) => {
+  const getAverage = useCallback((type: HealthDataType) => {
     const typeData = getDataByType(type);
     if (typeData.length === 0) return 0;
     return typeData.reduce((sum, d) => sum + d.value, 0) / typeData.length;
-  };
+  }, [getDataByType]);
 
   return {
     data,

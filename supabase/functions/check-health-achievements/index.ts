@@ -76,6 +76,72 @@ const deduplicateHealthData = (healthData: HealthDataRow[]): Record<string, numb
   return totals;
 };
 
+// Calculate streak for a data type (consecutive days meeting a minimum value)
+const calculateStreak = (healthData: HealthDataRow[], dataType: string, minValue: number): number => {
+  if (!healthData || healthData.length === 0) return 0;
+
+  // Filter and deduplicate by date
+  const byDate = new Map<string, HealthDataRow[]>();
+  for (const row of healthData) {
+    if (row.data_type !== dataType) continue;
+    const existing = byDate.get(row.recorded_at) || [];
+    existing.push(row);
+    byDate.set(row.recorded_at, existing);
+  }
+
+  // Get dates that meet the minimum value (using highest priority source)
+  const meetsDates = new Set<string>();
+  for (const [date, entries] of byDate.entries()) {
+    // Sort by priority
+    entries.sort((a, b) => {
+      const priorityA = SOURCE_PRIORITY.indexOf(a.source);
+      const priorityB = SOURCE_PRIORITY.indexOf(b.source);
+      return (priorityA === -1 ? 99 : priorityA) - (priorityB === -1 ? 99 : priorityB);
+    });
+    if (entries[0].value >= minValue) {
+      meetsDates.add(date.split('T')[0]);
+    }
+  }
+
+  if (meetsDates.size === 0) return 0;
+
+  // Count consecutive days starting from today or yesterday
+  const today = new Date();
+  const formatDate = (d: Date) => d.toISOString().split('T')[0];
+  
+  let streak = 0;
+  let currentDate = new Date(today);
+  const todayStr = formatDate(currentDate);
+  
+  // Start from today if it's in the set
+  currentDate.setDate(currentDate.getDate() - 1);
+  const yesterdayStr = formatDate(currentDate);
+  
+  if (meetsDates.has(todayStr)) {
+    streak = 1;
+    currentDate = new Date(today);
+    currentDate.setDate(currentDate.getDate() - 1);
+  } else if (meetsDates.has(yesterdayStr)) {
+    streak = 1;
+    currentDate.setDate(currentDate.getDate() - 1);
+  } else {
+    return 0;
+  }
+
+  // Count consecutive previous days (up to 365)
+  for (let i = 0; i < 365 && streak < 365; i++) {
+    const checkDate = formatDate(currentDate);
+    if (meetsDates.has(checkDate)) {
+      streak++;
+      currentDate.setDate(currentDate.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+
+  return streak;
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -107,11 +173,13 @@ serve(async (req) => {
       throw badgeError;
     }
 
-    // Filter to only health-related badges
+    // Filter to only health-related badges (including streak badges)
     const healthBadgeTypes = [
       'steps_total', 'calories_total', 'active_minutes_total',
       'distance_total', 'sleep_hours_total', 'wearable_workout_count',
-      'device_connected', 'devices_connected'
+      'device_connected', 'devices_connected',
+      // Streak badge types
+      'steps_streak', 'calories_streak', 'active_minutes_streak', 'sleep_streak'
     ];
 
     const healthBadges = (badges || []).filter((b: HealthBadge) => 
@@ -134,11 +202,16 @@ serve(async (req) => {
     const existingBadgeIds = new Set(existingBadges?.map(b => b.badge_id) || []);
 
     // Get health data (excluding manual entries) with source and date for deduplication
+    // Fetch up to 1 year of data for streak calculations
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    
     const { data: healthData, error: healthError } = await supabase
       .from('health_data_sync')
       .select('data_type, value, source, recorded_at')
       .eq('client_id', clientId)
-      .neq('source', 'manual');
+      .neq('source', 'manual')
+      .gte('recorded_at', oneYearAgo.toISOString().split('T')[0]);
 
     if (healthError) {
       console.error('[check-health-achievements] Error fetching health data:', healthError);
@@ -149,6 +222,20 @@ serve(async (req) => {
     const totals = deduplicateHealthData(healthData as HealthDataRow[]);
 
     console.log(`[check-health-achievements] Health data totals:`, totals);
+
+    // Calculate streaks for common metrics
+    const streaks = {
+      steps_5k: calculateStreak(healthData as HealthDataRow[], 'steps', 5000),
+      steps_10k: calculateStreak(healthData as HealthDataRow[], 'steps', 10000),
+      calories_300: calculateStreak(healthData as HealthDataRow[], 'calories', 300),
+      calories_500: calculateStreak(healthData as HealthDataRow[], 'calories', 500),
+      active_minutes_30: calculateStreak(healthData as HealthDataRow[], 'active_minutes', 30),
+      active_minutes_60: calculateStreak(healthData as HealthDataRow[], 'active_minutes', 60),
+      sleep_7h: calculateStreak(healthData as HealthDataRow[], 'sleep', 420), // 7 hours in minutes
+      sleep_8h: calculateStreak(healthData as HealthDataRow[], 'sleep', 480), // 8 hours in minutes
+    };
+
+    console.log(`[check-health-achievements] Streaks:`, streaks);
 
     // Get wearable connections count
     const { data: connections, error: connError } = await supabase
@@ -218,6 +305,20 @@ serve(async (req) => {
         case 'devices_connected':
           totalValue = uniqueProviders;
           break;
+        // Streak-based badges
+        case 'steps_streak':
+          // Use the higher of 5k or 10k streaks based on required value
+          totalValue = requiredValue >= 10000 ? streaks.steps_10k : streaks.steps_5k;
+          break;
+        case 'calories_streak':
+          totalValue = requiredValue >= 500 ? streaks.calories_500 : streaks.calories_300;
+          break;
+        case 'active_minutes_streak':
+          totalValue = requiredValue >= 60 ? streaks.active_minutes_60 : streaks.active_minutes_30;
+          break;
+        case 'sleep_streak':
+          totalValue = requiredValue >= 480 ? streaks.sleep_8h : streaks.sleep_7h;
+          break;
       }
 
       console.log(`[check-health-achievements] Badge "${badge.name}": current=${totalValue}, required=${requiredValue}`);
@@ -234,6 +335,7 @@ serve(async (req) => {
               source: 'wearable_sync',
               total_value: totalValue,
               criteria_value: requiredValue,
+              streaks: criteriaType.includes('streak') ? streaks : undefined,
             },
           });
 
@@ -299,6 +401,7 @@ serve(async (req) => {
         checked: results.length,
         awarded: awardedCount,
         results: results.filter(r => r.wasAwarded),
+        streaks,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
