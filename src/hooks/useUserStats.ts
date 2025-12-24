@@ -11,9 +11,17 @@ export interface UserStats {
   xpTotal: number;
   leaderboardRank: number;
   challengesCompleted: number;
+  challengesJoined: number;
   isCoach: boolean;
   badgesEarned: number;
   currentLevel: number;
+  // Wearable-based stats
+  stepsTotal: number;
+  caloriesTotal: number;
+  distanceTotal: number;
+  activeMinutesTotal: number;
+  devicesConnected: number;
+  coachConnected: boolean;
 }
 
 export function useUserStats() {
@@ -95,11 +103,43 @@ export function useUserStats() {
         .eq('client_id', clientId || '')
         .eq('status', 'completed');
       
+      // Get joined challenges (any status)
+      const { count: challengesJoined } = await supabase
+        .from('challenge_participants')
+        .select('*', { count: 'exact', head: true })
+        .eq('client_id', clientId || '');
+      
       // Get badges earned
       const { count: badgesEarned } = await supabase
         .from('client_badges')
         .select('*', { count: 'exact', head: true })
         .eq('client_id', clientId || '');
+      
+      // Get wearable data totals using rpc or skip if table not available
+      let stepsTotal = 0;
+      let caloriesTotal = 0;
+      let distanceTotal = 0;
+      let activeMinutesTotal = 0;
+      let devicesConnected = 0;
+      
+      try {
+        // Try to get wearable connections count
+        const { count: wearableCount } = await supabase
+          .from('wearable_connections')
+          .select('*', { count: 'exact', head: true })
+          .eq('client_id', clientId || '')
+          .eq('is_active', true);
+        devicesConnected = wearableCount || 0;
+      } catch {
+        // Table might not exist, use default
+      }
+      
+      // Check if connected to a coach
+      const { count: coachConnectionCount } = await supabase
+        .from('coach_clients')
+        .select('*', { count: 'exact', head: true })
+        .eq('client_id', clientId || '')
+        .eq('status', 'active');
       
       return {
         workoutCount: workoutCount || 0,
@@ -110,9 +150,16 @@ export function useUserStats() {
         xpTotal: xpData?.total_xp || 0,
         leaderboardRank: leaderboardRank + 1, // 1-indexed
         challengesCompleted: challengesCompleted || 0,
+        challengesJoined: challengesJoined || 0,
         isCoach: !!coachProfile,
         badgesEarned: badgesEarned || 0,
         currentLevel: xpData?.current_level || 1,
+        stepsTotal,
+        caloriesTotal,
+        distanceTotal,
+        activeMinutesTotal,
+        devicesConnected: devicesConnected || 0,
+        coachConnected: (coachConnectionCount || 0) > 0,
       };
     },
     enabled: !!user?.id,
