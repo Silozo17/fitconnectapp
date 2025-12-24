@@ -50,98 +50,142 @@ export const useWearables = () => {
     enabled: !!user,
   });
 
-  // Helper function to sync HealthKit data to database using client_progress table
+  // Map HealthKit type identifiers to health_data_sync data types
+  const mapHealthKitToDataType = (hkType: string): string | null => {
+    const mappings: Record<string, string> = {
+      'HKQuantityTypeIdentifierStepCount': 'steps',
+      'HKQuantityTypeIdentifierActiveEnergyBurned': 'calories',
+      'HKQuantityTypeIdentifierDistanceWalkingRunning': 'distance',
+      'HKQuantityTypeIdentifierHeartRate': 'heart_rate',
+      'HKCategoryTypeIdentifierSleepAnalysis': 'sleep',
+      'HKQuantityTypeIdentifierAppleExerciseTime': 'active_minutes',
+      'HKQuantityTypeIdentifierBodyMass': 'weight',
+    };
+    return mappings[hkType] || null;
+  };
+
+  // Get the appropriate unit for each data type
+  const getUnitForDataType = (dataType: string): string => {
+    const units: Record<string, string> = {
+      'steps': 'count',
+      'calories': 'kcal',
+      'distance': 'meters',
+      'heart_rate': 'bpm',
+      'sleep': 'minutes',
+      'active_minutes': 'minutes',
+      'weight': 'kg',
+    };
+    return units[dataType] || 'count';
+  };
+
+  // Helper function to sync HealthKit data to health_data_sync table
   const syncHealthDataToDatabase = useCallback(async (clientId: string, healthData: unknown, connectionId?: string) => {
     if (!healthData) {
       console.log('[useWearables] No health data to sync');
       return;
     }
 
-    console.log('[useWearables] Syncing health data to database:', healthData);
+    console.log('[useWearables] Syncing health data to health_data_sync:', healthData);
 
     try {
       // Parse the health data based on its structure
       // HealthKit returns data in format: { HKQuantityTypeIdentifier...: [{ date, value, unit }] }
       const data = healthData as Record<string, Array<{ date?: string; value?: number; unit?: string; startDate?: string; endDate?: string }>>;
       
-      // Group data by date for client_progress entries
-      const dataByDate: Record<string, Record<string, number>> = {};
-      
+      // Build entries for health_data_sync table
+      const healthDataEntries: Array<{
+        client_id: string;
+        data_type: string;
+        recorded_at: string;
+        value: number;
+        unit: string;
+        source: 'apple_health' | 'fitbit' | 'garmin' | 'health_connect' | 'manual';
+        wearable_connection_id: string | null;
+      }> = [];
+
+      // Group data by date and type for aggregation
+      const aggregatedData: Record<string, Record<string, { sum: number; count: number }>> = {};
+
       for (const [metricType, readings] of Object.entries(data)) {
         if (!Array.isArray(readings)) continue;
 
-        const mappedType = mapHealthKitToMetricType(metricType);
-        
+        const dataType = mapHealthKitToDataType(metricType);
+        if (!dataType) {
+          console.log(`[useWearables] Skipping unmapped metric type: ${metricType}`);
+          continue;
+        }
+
         for (const reading of readings) {
           if (reading.value === undefined || reading.value === null) continue;
-          
+
           const dateStr = (reading.date || reading.startDate || new Date().toISOString()).split('T')[0];
-          
-          if (!dataByDate[dateStr]) {
-            dataByDate[dateStr] = {};
+
+          if (!aggregatedData[dateStr]) {
+            aggregatedData[dateStr] = {};
           }
-          
-          // Aggregate values for the same day (sum for steps/calories, avg for heart rate)
-          if (mappedType === 'heart_rate') {
-            // Average for heart rate
-            const existing = dataByDate[dateStr][mappedType];
-            dataByDate[dateStr][mappedType] = existing 
-              ? (existing + reading.value) / 2 
-              : reading.value;
-          } else {
-            // Sum for steps, calories, distance
-            dataByDate[dateStr][mappedType] = (dataByDate[dateStr][mappedType] || 0) + reading.value;
+          if (!aggregatedData[dateStr][dataType]) {
+            aggregatedData[dateStr][dataType] = { sum: 0, count: 0 };
           }
+
+          aggregatedData[dateStr][dataType].sum += reading.value;
+          aggregatedData[dateStr][dataType].count += 1;
         }
       }
 
-      // Insert progress entries for each date
-      const progressEntries = Object.entries(dataByDate).map(([date, measurements]) => ({
-        client_id: clientId,
-        recorded_at: date,
-        data_source: 'apple_health',
-        wearable_connection_id: connectionId || null,
-        measurements: measurements,
-        is_verified: true, // Data from wearable is verified
-      }));
+      // Convert aggregated data to entries
+      for (const [dateStr, types] of Object.entries(aggregatedData)) {
+        for (const [dataType, { sum, count }] of Object.entries(types)) {
+          // For heart_rate, use average; for others, use sum
+          const value = dataType === 'heart_rate' ? Math.round(sum / count) : sum;
 
-      if (progressEntries.length > 0) {
-        console.log(`[useWearables] Inserting ${progressEntries.length} progress entries...`);
-        
-        // Insert entries - use individual inserts to handle duplicates gracefully
-        for (const entry of progressEntries) {
-          // Check if entry exists for this date
-          const { data: existing } = await supabase
-            .from('client_progress')
-            .select('id, measurements')
-            .eq('client_id', clientId)
-            .eq('recorded_at', entry.recorded_at)
-            .eq('data_source', 'apple_health')
-            .maybeSingle();
-
-          if (existing) {
-            // Merge measurements with existing data
-            const existingMeasurements = (existing.measurements as Record<string, unknown>) || {};
-            const mergedMeasurements = {
-              ...existingMeasurements,
-              ...entry.measurements
-            };
-            
-            await supabase
-              .from('client_progress')
-              .update({ measurements: mergedMeasurements as unknown as Json })
-              .eq('id', existing.id);
-          } else {
-            await supabase
-              .from('client_progress')
-              .insert({
-                ...entry,
-                measurements: entry.measurements as unknown as Json
-              });
-          }
+          healthDataEntries.push({
+            client_id: clientId,
+            data_type: dataType,
+            recorded_at: dateStr,
+            value: value,
+            unit: getUnitForDataType(dataType),
+            source: 'apple_health',
+            wearable_connection_id: connectionId || null,
+          });
         }
-        
-        console.log(`[useWearables] Successfully synced ${progressEntries.length} days of health data`);
+      }
+
+      if (healthDataEntries.length > 0) {
+        console.log(`[useWearables] Upserting ${healthDataEntries.length} health_data_sync entries...`);
+
+        // Upsert entries - the table has a unique constraint on (client_id, data_type, recorded_at, source)
+        const { error: upsertError } = await supabase
+          .from('health_data_sync')
+          .upsert(healthDataEntries, {
+            onConflict: 'client_id,data_type,recorded_at,source',
+            ignoreDuplicates: false,
+          });
+
+        if (upsertError) {
+          console.error('[useWearables] Error upserting health data:', upsertError);
+          throw upsertError;
+        }
+
+        console.log(`[useWearables] Successfully synced ${healthDataEntries.length} health data entries`);
+
+        // Trigger achievement checks
+        console.log('[useWearables] Triggering achievement check...');
+        supabase.functions.invoke('check-health-achievements', {
+          body: { clientId }
+        }).then(({ error }) => {
+          if (error) console.error('[useWearables] Achievement check error:', error);
+          else console.log('[useWearables] Achievement check completed');
+        });
+
+        // Trigger challenge progress sync
+        console.log('[useWearables] Triggering challenge progress sync...');
+        supabase.functions.invoke('sync-challenge-progress', {
+          body: { clientId }
+        }).then(({ error }) => {
+          if (error) console.error('[useWearables] Challenge sync error:', error);
+          else console.log('[useWearables] Challenge sync completed');
+        });
+
       } else {
         console.log('[useWearables] No health data to insert');
       }
@@ -149,21 +193,6 @@ export const useWearables = () => {
       console.error('[useWearables] Error syncing health data:', e);
     }
   }, []);
-
-  // Map HealthKit type identifiers to our metric types
-  const mapHealthKitToMetricType = (hkType: string): string => {
-    const mappings: Record<string, string> = {
-      'HKQuantityTypeIdentifierStepCount': 'steps',
-      'HKQuantityTypeIdentifierActiveEnergyBurned': 'calories_burned',
-      'HKQuantityTypeIdentifierDistanceWalkingRunning': 'distance',
-      'HKQuantityTypeIdentifierHeartRate': 'heart_rate',
-      'HKCategoryTypeIdentifierSleepAnalysis': 'sleep',
-      'HKQuantityTypeIdentifierBodyMass': 'weight',
-      'HKQuantityTypeIdentifierHeight': 'height',
-      'HKQuantityTypeIdentifierFlightsClimbed': 'floors_climbed',
-    };
-    return mappings[hkType] || hkType.replace('HKQuantityTypeIdentifier', '').replace('HKCategoryTypeIdentifier', '').toLowerCase();
-  };
 
   // Handle native HealthKit connection for iOS using correct Despia SDK pattern
   const handleNativeHealthKitConnect = useCallback(async (): Promise<{ success: boolean }> => {
