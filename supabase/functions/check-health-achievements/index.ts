@@ -6,6 +6,10 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Priority order for data sources - higher priority sources take precedence
+// This prevents double-counting when users have multiple devices
+const SOURCE_PRIORITY = ['apple_health', 'health_connect', 'fitbit', 'garmin', 'manual'];
+
 interface HealthBadge {
   id: string;
   name: string;
@@ -23,6 +27,54 @@ interface AwardedBadge {
   totalValue?: number;
   requiredValue?: number;
 }
+
+interface HealthDataRow {
+  data_type: string;
+  value: number;
+  source: string;
+  recorded_at: string;
+}
+
+// Deduplicate health data by date and type, taking highest priority source for each
+const deduplicateHealthData = (healthData: HealthDataRow[]): Record<string, number> => {
+  if (!healthData || healthData.length === 0) return {};
+
+  // Group by data_type, then by date
+  const byTypeAndDate = new Map<string, Map<string, HealthDataRow[]>>();
+  
+  for (const row of healthData) {
+    if (!byTypeAndDate.has(row.data_type)) {
+      byTypeAndDate.set(row.data_type, new Map());
+    }
+    const byDate = byTypeAndDate.get(row.data_type)!;
+    const existing = byDate.get(row.recorded_at) || [];
+    existing.push(row);
+    byDate.set(row.recorded_at, existing);
+  }
+
+  // Calculate totals with deduplication
+  const totals: Record<string, number> = {};
+  
+  for (const [dataType, byDate] of byTypeAndDate.entries()) {
+    let total = 0;
+    for (const entries of byDate.values()) {
+      if (entries.length === 1) {
+        total += entries[0].value || 0;
+      } else {
+        // Sort by priority (lower index = higher priority)
+        entries.sort((a, b) => {
+          const priorityA = SOURCE_PRIORITY.indexOf(a.source);
+          const priorityB = SOURCE_PRIORITY.indexOf(b.source);
+          return (priorityA === -1 ? 99 : priorityA) - (priorityB === -1 ? 99 : priorityB);
+        });
+        total += entries[0].value || 0;
+      }
+    }
+    totals[dataType] = total;
+  }
+
+  return totals;
+};
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -81,10 +133,10 @@ serve(async (req) => {
 
     const existingBadgeIds = new Set(existingBadges?.map(b => b.badge_id) || []);
 
-    // Get health data totals (excluding manual entries)
-    const { data: healthTotals, error: healthError } = await supabase
+    // Get health data (excluding manual entries) with source and date for deduplication
+    const { data: healthData, error: healthError } = await supabase
       .from('health_data_sync')
-      .select('data_type, value')
+      .select('data_type, value, source, recorded_at')
       .eq('client_id', clientId)
       .neq('source', 'manual');
 
@@ -93,11 +145,8 @@ serve(async (req) => {
       throw healthError;
     }
 
-    // Aggregate by data type
-    const totals: Record<string, number> = {};
-    for (const row of healthTotals || []) {
-      totals[row.data_type] = (totals[row.data_type] || 0) + (row.value || 0);
-    }
+    // Deduplicate by date and type using priority system to prevent double-counting
+    const totals = deduplicateHealthData(healthData as HealthDataRow[]);
 
     console.log(`[check-health-achievements] Health data totals:`, totals);
 

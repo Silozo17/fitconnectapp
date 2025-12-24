@@ -6,6 +6,10 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Priority order for data sources - higher priority sources take precedence
+// This prevents double-counting when users have multiple devices
+const SOURCE_PRIORITY = ['apple_health', 'health_connect', 'fitbit', 'garmin', 'manual'];
+
 interface ChallengeParticipant {
   id: string;
   challenge_id: string;
@@ -24,6 +28,43 @@ interface Challenge {
   requires_verification: boolean;
   data_source: string | null;
 }
+
+interface HealthDataRow {
+  value: number;
+  source: string;
+  recorded_at: string;
+}
+
+// Deduplicate health data by date, taking highest priority source for each date
+const deduplicateByDateAndPriority = (healthData: HealthDataRow[]): number => {
+  if (!healthData || healthData.length === 0) return 0;
+
+  // Group by date
+  const byDate = new Map<string, HealthDataRow[]>();
+  for (const row of healthData) {
+    const existing = byDate.get(row.recorded_at) || [];
+    existing.push(row);
+    byDate.set(row.recorded_at, existing);
+  }
+
+  // For each date, take only the highest priority source's value
+  let total = 0;
+  for (const entries of byDate.values()) {
+    if (entries.length === 1) {
+      total += entries[0].value || 0;
+    } else {
+      // Sort by priority (lower index = higher priority)
+      entries.sort((a, b) => {
+        const priorityA = SOURCE_PRIORITY.indexOf(a.source);
+        const priorityB = SOURCE_PRIORITY.indexOf(b.source);
+        return (priorityA === -1 ? 99 : priorityA) - (priorityB === -1 ? 99 : priorityB);
+      });
+      total += entries[0].value || 0;
+    }
+  }
+
+  return total;
+};
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -92,10 +133,11 @@ serve(async (req) => {
         continue;
       }
 
-      // Get sum of wearable data for this challenge period (excluding manual entries)
+      // Get wearable data for this challenge period (excluding manual entries)
+      // We need source and recorded_at for deduplication
       const { data: healthData, error: healthError } = await supabase
         .from('health_data_sync')
-        .select('value')
+        .select('value, source, recorded_at')
         .eq('client_id', clientId)
         .eq('data_type', challenge.wearable_data_type)
         .neq('source', 'manual')
@@ -107,7 +149,8 @@ serve(async (req) => {
         continue;
       }
 
-      const totalProgress = healthData?.reduce((sum, row) => sum + (row.value || 0), 0) || 0;
+      // Deduplicate by date using priority system to prevent double-counting from multiple devices
+      const totalProgress = deduplicateByDateAndPriority(healthData as HealthDataRow[]);
       const isCompleted = totalProgress >= challenge.target_value;
 
       console.log(`[sync-challenge-progress] Challenge ${challenge.id}: wearable total = ${totalProgress}, target = ${challenge.target_value}, completed = ${isCompleted}`);
