@@ -16,88 +16,114 @@ const BADGE_CATEGORIES = [
   'milestone',
 ] as const;
 
+// Extended stats interface for badge progress calculation
+interface BadgeStats {
+  workoutCount: number;
+  habitStreak: number;
+  progressEntries: number;
+  progressPhotos: number;
+  challengesCompleted: number;
+  challengesJoined: number;
+  xpTotal: number;
+  badgesEarned: number;
+  stepsTotal: number;
+  caloriesTotal: number;
+  distanceTotal: number;
+  activeMinutesTotal: number;
+  devicesConnected: number;
+  coachConnected: boolean;
+}
+
 // Calculate progress for a badge based on its criteria
+// Supports both {type, value} format and legacy {key: value} format
 const calculateBadgeProgress = (
   badge: Badge,
-  stats: {
-    workoutCount: number;
-    habitStreak: number;
-    progressEntries: number;
-    challengesCompleted: number;
-    xpTotal: number;
-    badgesEarned: number;
-  }
+  stats: BadgeStats
 ): BadgeProgress | undefined => {
-  const criteria = badge.criteria as Record<string, number> | null;
+  const criteria = badge.criteria as { type?: string; value?: number } & Record<string, number> | null;
   if (!criteria) return undefined;
 
-  // Workout-based badges
-  if (criteria.workout_count !== undefined) {
-    const target = criteria.workout_count;
-    const current = Math.min(stats.workoutCount, target);
-    return {
-      current,
-      target,
-      percentage: Math.min((current / target) * 100, 100),
-    };
+  let criteriaType: string | undefined;
+  let target: number | undefined;
+
+  // Check for {type, value} format (database structure)
+  if (criteria.type && criteria.value !== undefined) {
+    criteriaType = criteria.type;
+    target = criteria.value;
+  } else {
+    // Fallback to legacy {key: value} format
+    const legacyKeys = ['workout_count', 'streak_days', 'progress_logs', 'progress_count', 
+      'photo_count', 'challenge_count', 'challenge_completed', 'challenge_joined',
+      'xp_threshold', 'badges_earned', 'steps_total', 'calories_total', 
+      'distance_total', 'active_minutes_total', 'devices_connected', 'coach_connected'];
+    
+    for (const key of legacyKeys) {
+      if (criteria[key] !== undefined) {
+        criteriaType = key;
+        target = criteria[key];
+        break;
+      }
+    }
   }
 
-  // Streak-based badges
-  if (criteria.streak_days !== undefined) {
-    const target = criteria.streak_days;
-    const current = Math.min(stats.habitStreak, target);
-    return {
-      current,
-      target,
-      percentage: Math.min((current / target) * 100, 100),
-    };
+  if (!criteriaType || target === undefined) return undefined;
+
+  let current = 0;
+
+  switch (criteriaType) {
+    case 'workout_count':
+      current = stats.workoutCount;
+      break;
+    case 'streak_days':
+      current = stats.habitStreak;
+      break;
+    case 'progress_logs':
+    case 'progress_count':
+      current = stats.progressEntries;
+      break;
+    case 'photo_count':
+      current = stats.progressPhotos;
+      break;
+    case 'challenge_count':
+    case 'challenge_completed':
+      current = stats.challengesCompleted;
+      break;
+    case 'challenge_joined':
+      current = stats.challengesJoined;
+      break;
+    case 'xp_threshold':
+      current = stats.xpTotal;
+      break;
+    case 'badges_earned':
+      current = stats.badgesEarned;
+      break;
+    case 'steps_total':
+      current = stats.stepsTotal;
+      break;
+    case 'calories_total':
+      current = stats.caloriesTotal;
+      break;
+    case 'distance_total':
+      current = stats.distanceTotal;
+      break;
+    case 'active_minutes_total':
+      current = stats.activeMinutesTotal;
+      break;
+    case 'devices_connected':
+      current = stats.devicesConnected;
+      break;
+    case 'coach_connected':
+      current = stats.coachConnected ? 1 : 0;
+      break;
+    default:
+      return undefined;
   }
 
-  // Progress log badges
-  if (criteria.progress_logs !== undefined) {
-    const target = criteria.progress_logs;
-    const current = Math.min(stats.progressEntries, target);
-    return {
-      current,
-      target,
-      percentage: Math.min((current / target) * 100, 100),
-    };
-  }
-
-  // Challenge-based badges
-  if (criteria.challenge_count !== undefined) {
-    const target = criteria.challenge_count;
-    const current = Math.min(stats.challengesCompleted, target);
-    return {
-      current,
-      target,
-      percentage: Math.min((current / target) * 100, 100),
-    };
-  }
-
-  // XP-based badges
-  if (criteria.xp_threshold !== undefined) {
-    const target = criteria.xp_threshold;
-    const current = Math.min(stats.xpTotal, target);
-    return {
-      current,
-      target,
-      percentage: Math.min((current / target) * 100, 100),
-    };
-  }
-
-  // Badge collection badges
-  if (criteria.badges_earned !== undefined) {
-    const target = criteria.badges_earned;
-    const current = Math.min(stats.badgesEarned, target);
-    return {
-      current,
-      target,
-      percentage: Math.min((current / target) * 100, 100),
-    };
-  }
-
-  return undefined;
+  return {
+    current: Math.min(current, target),
+    target,
+    percentage: Math.min((current / target) * 100, 100),
+  };
 };
 
 export function BadgeGrid() {
@@ -125,13 +151,21 @@ export function BadgeGrid() {
   const totalCount = badges?.length || 0;
 
   // Build stats object for progress calculation
-  const stats = {
+  const stats: BadgeStats = {
     workoutCount: userStats?.workoutCount ?? 0,
     habitStreak: userStats?.habitStreak ?? 0,
     progressEntries: userStats?.progressEntries ?? 0,
+    progressPhotos: userStats?.progressPhotos ?? 0,
     challengesCompleted: userStats?.challengesCompleted ?? 0,
+    challengesJoined: userStats?.challengesJoined ?? 0,
     xpTotal: userStats?.xpTotal ?? 0,
     badgesEarned: earnedCount,
+    stepsTotal: userStats?.stepsTotal ?? 0,
+    caloriesTotal: userStats?.caloriesTotal ?? 0,
+    distanceTotal: userStats?.distanceTotal ?? 0,
+    activeMinutesTotal: userStats?.activeMinutesTotal ?? 0,
+    devicesConnected: userStats?.devicesConnected ?? 0,
+    coachConnected: userStats?.coachConnected ?? false,
   };
   
   const filterBadges = (category: string) => {
