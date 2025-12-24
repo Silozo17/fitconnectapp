@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { logAdminAction } from "@/hooks/useAuditLog";
 
 export type DocumentType = 'identity' | 'certification' | 'insurance' | 'qualification';
 export type DocumentStatus = 'pending' | 'approved' | 'rejected';
@@ -440,10 +441,24 @@ export const useReviewVerification = () => {
           // Don't throw - profile was already approved
         }
       }
+
+      // Log the verification action to audit log
+      await logAdminAction({
+        userId: adminId,
+        action: approved ? "APPROVE_COACH_VERIFICATION" : "REJECT_COACH_VERIFICATION",
+        entityType: "coach_profiles",
+        entityId: coachId,
+        newValues: {
+          verification_status: approved ? "approved" : "rejected",
+          is_verified: approved,
+          notes: notes || null,
+        },
+      });
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["admin-verifications"] });
       queryClient.invalidateQueries({ queryKey: ["coach-verification-documents"] });
+      queryClient.invalidateQueries({ queryKey: ["audit-logs"] });
       toast.success(
         variables.approved 
           ? "Coach verified - all pending documents auto-approved" 
@@ -483,9 +498,19 @@ export const useReviewDocument = () => {
         .eq("id", documentId);
 
       if (error) throw error;
+
+      // Log the document review action to audit log
+      await logAdminAction({
+        userId: adminId,
+        action: status === "approved" ? "APPROVE_VERIFICATION_DOCUMENT" : "REJECT_VERIFICATION_DOCUMENT",
+        entityType: "coach_verification_documents",
+        entityId: documentId,
+        newValues: { status, notes: notes || null },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["coach-verification-documents"] });
+      queryClient.invalidateQueries({ queryKey: ["audit-logs"] });
       toast.success("Document reviewed");
     },
     onError: (error) => {

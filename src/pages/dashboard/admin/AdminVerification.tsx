@@ -43,12 +43,14 @@ import {
   useReviewVerification,
   useReviewDocument,
   useRerunAIAnalysis,
+  useDocumentSignedUrl,
   VerificationStatus,
   VerificationDocument,
   AIDocumentAnalysis,
 } from "@/hooks/useVerification";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 const statusConfig = {
   pending: { label: "Pending", color: "bg-amber-500/10 text-amber-500", icon: Clock },
@@ -265,15 +267,19 @@ const DocumentCard = ({
   onApprove, 
   onReject,
   onRerunAI,
+  onViewDocument,
   isReviewing,
   isRerunning,
+  isViewingDoc,
 }: {
   doc: VerificationDocument;
   onApprove: () => void;
   onReject: () => void;
   onRerunAI: () => void;
+  onViewDocument: () => void;
   isReviewing: boolean;
   isRerunning: boolean;
+  isViewingDoc: boolean;
 }) => {
   const aiAnalysis = doc.ai_analysis as AIDocumentAnalysis | null;
 
@@ -324,12 +330,15 @@ const DocumentCard = ({
         <Button
           variant="outline"
           size="sm"
-          asChild
+          onClick={onViewDocument}
+          disabled={isViewingDoc}
         >
-          <a href={doc.file_url} target="_blank" rel="noopener noreferrer">
+          {isViewingDoc ? (
+            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+          ) : (
             <ExternalLink className="w-3 h-3 mr-1" />
-            View
-          </a>
+          )}
+          View
         </Button>
         {doc.status === "pending" && (
           <>
@@ -363,6 +372,7 @@ const AdminVerification = () => {
   const [activeTab, setActiveTab] = useState<VerificationStatus>("pending");
   const [selectedCoach, setSelectedCoach] = useState<any>(null);
   const [reviewNotes, setReviewNotes] = useState("");
+  const [viewingDocId, setViewingDocId] = useState<string | null>(null);
 
   const { data: coaches = [], isLoading } = usePendingVerifications(activeTab);
   const { data: stats } = useVerificationStats();
@@ -370,6 +380,7 @@ const AdminVerification = () => {
   const reviewMutation = useReviewVerification();
   const reviewDocMutation = useReviewDocument();
   const rerunAIMutation = useRerunAIAnalysis();
+  const signedUrlMutation = useDocumentSignedUrl();
 
   // Calculate AI summary for selected coach
   const getAISummary = () => {
@@ -410,6 +421,24 @@ const AdminVerification = () => {
 
   const handleRerunAI = async (doc: VerificationDocument) => {
     await rerunAIMutation.mutateAsync(doc);
+  };
+
+  const handleViewDocument = async (doc: VerificationDocument) => {
+    setViewingDocId(doc.id);
+    try {
+      // Handle both legacy full URLs and new storage paths
+      const filePath = doc.file_url.includes('supabase.co') 
+        ? doc.file_url.split('/documents/')[1] // Extract path from legacy URL
+        : doc.file_url;
+      
+      const signedUrl = await signedUrlMutation.mutateAsync(filePath);
+      window.open(signedUrl, '_blank');
+    } catch (error) {
+      console.error('Failed to get signed URL:', error);
+      toast.error("Failed to open document");
+    } finally {
+      setViewingDocId(null);
+    }
   };
 
   return (
@@ -611,8 +640,10 @@ const AdminVerification = () => {
                         onApprove={() => handleDocumentReview(doc.id, "approved")}
                         onReject={() => handleDocumentReview(doc.id, "rejected")}
                         onRerunAI={() => handleRerunAI(doc)}
+                        onViewDocument={() => handleViewDocument(doc)}
                         isReviewing={reviewDocMutation.isPending}
                         isRerunning={rerunAIMutation.isPending}
+                        isViewingDoc={viewingDocId === doc.id}
                       />
                     ))
                   )}
