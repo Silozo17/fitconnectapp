@@ -3812,6 +3812,7 @@ export type Database = {
           recorded_at: string
           source: Database["public"]["Enums"]["wearable_provider"]
           unit: string
+          updated_at: string | null
           value: number
           wearable_connection_id: string | null
         }
@@ -3824,6 +3825,7 @@ export type Database = {
           recorded_at: string
           source: Database["public"]["Enums"]["wearable_provider"]
           unit: string
+          updated_at?: string | null
           value: number
           wearable_connection_id?: string | null
         }
@@ -3836,6 +3838,7 @@ export type Database = {
           recorded_at?: string
           source?: Database["public"]["Enums"]["wearable_provider"]
           unit?: string
+          updated_at?: string | null
           value?: number
           wearable_connection_id?: string | null
         }
