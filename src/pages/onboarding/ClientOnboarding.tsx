@@ -309,6 +309,17 @@ const ClientOnboarding = () => {
       
       console.log("[ClientOnboarding] Profile upserted successfully:", upsertResult);
 
+      // Also update user_profiles with first/last name
+      const displayName = formData.firstName ? `${formData.firstName}${formData.lastName ? ` ${formData.lastName}` : ""}` : null;
+      await supabase
+        .from("user_profiles")
+        .update({
+          first_name: formData.firstName || null,
+          last_name: formData.lastName || null,
+          display_name: displayName,
+        })
+        .eq("user_id", user.id);
+
       // Also unlock the selected avatar for the user (add to user_avatars table)
       if (formData.selectedAvatarId) {
         await supabase
