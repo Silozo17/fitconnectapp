@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdminView } from "@/contexts/AdminContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -85,6 +86,7 @@ const CoachOnboarding = () => {
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
   const [hasSelectedPlan, setHasSelectedPlan] = useState(false);
   const { user } = useAuth();
+  const { refreshProfiles } = useAdminView();
   const navigate = useNavigate();
   const { isNativeMobile } = useIOSRestrictions();
   
@@ -92,7 +94,7 @@ const CoachOnboarding = () => {
   const formDataRef = useRef<{ alsoClient: boolean }>({ alsoClient: false });
   
   // Handle successful IAP purchase - show celebration and navigate
-  const handleIAPSuccess = useCallback((tier: SubscriptionTier) => {
+  const handleIAPSuccess = useCallback(async (tier: SubscriptionTier) => {
     // Trigger confetti celebration
     triggerConfetti(confettiPresets.medium);
     triggerHaptic('success');
@@ -104,6 +106,9 @@ const CoachOnboarding = () => {
       duration: 3000,
     });
     
+    // Refresh profiles so ViewSwitcher updates immediately
+    await refreshProfiles();
+    
     // Navigate after a short delay to let the celebration show
     setTimeout(() => {
       if (formDataRef.current.alsoClient) {
@@ -112,7 +117,7 @@ const CoachOnboarding = () => {
         navigate("/dashboard/coach");
       }
     }, 2500);
-  }, [navigate]);
+  }, [navigate, refreshProfiles]);
   
   const { purchase: nativePurchase, state: iapState } = useNativeIAP({
     onPurchaseComplete: handleIAPSuccess,
@@ -411,9 +416,11 @@ const CoachOnboarding = () => {
         toast.success("Profile saved! Complete your subscription to unlock all features.");
         navigate(`/subscribe?tier=${formData.subscriptionTier}&billing=${billingInterval}`);
       } else if (formData.alsoClient) {
+        await refreshProfiles();
         toast.success("Profile completed! Welcome to FitConnect.");
         navigate("/onboarding/client");
       } else {
+        await refreshProfiles();
         toast.success("Profile completed! Welcome to FitConnect.");
         navigate("/dashboard/coach");
       }
