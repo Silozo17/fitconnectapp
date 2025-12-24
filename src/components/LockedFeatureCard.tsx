@@ -1,10 +1,13 @@
 import { Link } from "react-router-dom";
-import { Lock, ArrowRight, Sparkles } from "lucide-react";
+import { Lock, ArrowRight, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { FeatureKey, FEATURE_NAMES, FEATURE_DESCRIPTIONS } from "@/lib/feature-config";
 import { TierKey, SUBSCRIPTION_TIERS } from "@/lib/stripe-config";
 import { useActivePricing } from "@/hooks/useActivePricing";
+import { useNativePricing } from "@/hooks/useNativePricing";
+import { useNativeIAP, SubscriptionTier } from "@/hooks/useNativeIAP";
+import { isDespia } from "@/lib/despia";
 
 interface LockedFeatureCardProps {
   feature: FeatureKey;
@@ -16,11 +19,28 @@ export const LockedFeatureCard = ({ feature, requiredTier, className }: LockedFe
   const tierConfig = SUBSCRIPTION_TIERS[requiredTier];
   const featureName = FEATURE_NAMES[feature];
   const featureDescription = FEATURE_DESCRIPTIONS[feature];
-  const pricing = useActivePricing();
+  
+  // Platform detection and pricing
+  const isNativeApp = isDespia();
+  const webPricing = useActivePricing();
+  const nativePricing = useNativePricing();
+  const pricing = isNativeApp ? nativePricing : webPricing;
+  
+  // Native IAP hook
+  const { purchase: nativePurchase, state: iapState } = useNativeIAP();
+  
   const isPricedTier = ['starter', 'pro', 'enterprise'].includes(requiredTier);
   const monthlyPrice = isPricedTier 
-    ? pricing.getSubscriptionPrice(requiredTier as 'starter' | 'pro' | 'enterprise', 'monthly')
+    ? pricing.getSubscriptionPrice(requiredTier as SubscriptionTier, 'monthly')
     : tierConfig.prices.monthly.amount;
+
+  const handleNativeUpgrade = () => {
+    if (isPricedTier) {
+      nativePurchase(requiredTier as SubscriptionTier, 'monthly');
+    }
+  };
+
+  const isPurchasing = iapState.isPurchasing || iapState.isPolling;
   
   return (
     <Card className={`border-dashed border-2 border-muted-foreground/30 bg-muted/20 ${className}`}>
@@ -44,13 +64,29 @@ export const LockedFeatureCard = ({ feature, requiredTier, className }: LockedFe
           </p>
         </div>
         
-        <Link to="/subscribe">
-          <Button className="gap-2">
-            <Sparkles className="w-4 h-4" />
+        {isNativeApp && isPricedTier ? (
+          <Button 
+            onClick={handleNativeUpgrade}
+            disabled={isPurchasing}
+            className="gap-2"
+          >
+            {isPurchasing ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Sparkles className="w-4 h-4" />
+            )}
             Upgrade to {tierConfig.name}
             <ArrowRight className="w-4 h-4" />
           </Button>
-        </Link>
+        ) : (
+          <Link to="/subscribe">
+            <Button className="gap-2">
+              <Sparkles className="w-4 h-4" />
+              Upgrade to {tierConfig.name}
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </Link>
+        )}
       </CardContent>
     </Card>
   );

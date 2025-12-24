@@ -35,6 +35,7 @@ interface UseNativeIAPReturn {
   purchase: (tier: SubscriptionTier, interval: BillingInterval) => Promise<void>;
   isAvailable: boolean;
   dismissUnsuccessfulModal: () => void;
+  resetState: () => void;
 }
 
 const POLL_INTERVAL_MS = 2000;
@@ -205,6 +206,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
 
   /**
    * Handle IAP cancel callback from Despia
+   * Cancel is a user choice, not an error - show friendly toast, not error modal
    */
   const handleIAPCancel = useCallback(() => {
     console.log('[NativeIAP] Purchase cancelled by user');
@@ -213,8 +215,10 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
       ...prev,
       isPurchasing: false,
       error: null,
-      showUnsuccessfulModal: true,
+      showUnsuccessfulModal: false,
+      purchasedProductId: null,
     }));
+    toast.info('Purchase cancelled', { duration: 2000 });
   }, [clearPurchaseTimeout]);
 
   /**
@@ -304,8 +308,6 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
       purchasedProductId: null,
     }));
 
-    triggerHaptic('light');
-
     // Clear any existing timeout
     clearPurchaseTimeout();
 
@@ -327,25 +329,51 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
       });
     }, PURCHASE_TIMEOUT_MS);
 
-    // Trigger the native purchase
-    const triggered = triggerRevenueCatPurchase(externalId, productId);
+    // Use requestAnimationFrame to batch state updates and prevent UI jitter
+    requestAnimationFrame(() => {
+      triggerHaptic('light');
+      
+      // Trigger the native purchase
+      const triggered = triggerRevenueCatPurchase(externalId, productId);
 
-    if (!triggered) {
-      clearPurchaseTimeout();
-      setState(prev => ({
-        ...prev,
-        isPurchasing: false,
-        error: 'Failed to start purchase',
-      }));
-      toast.error('Failed to start purchase');
-    }
+      if (!triggered) {
+        clearPurchaseTimeout();
+        setState(prev => ({
+          ...prev,
+          isPurchasing: false,
+          error: 'Failed to start purchase',
+        }));
+        toast.error('Failed to start purchase');
+      }
+    });
   }, [state.isAvailable, user, clearPurchaseTimeout]);
+
+  /**
+   * Reset all state - useful for recovering from stuck states
+   */
+  const resetState = useCallback(() => {
+    clearPurchaseTimeout();
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
+    pollAttemptsRef.current = 0;
+    setState({
+      isAvailable: isNativeIAPAvailable(),
+      isPurchasing: false,
+      isPolling: false,
+      purchasedProductId: null,
+      error: null,
+      showUnsuccessfulModal: false,
+    });
+  }, [clearPurchaseTimeout]);
 
   return {
     state,
     purchase,
     isAvailable: state.isAvailable,
     dismissUnsuccessfulModal,
+    resetState,
   };
 };
 
