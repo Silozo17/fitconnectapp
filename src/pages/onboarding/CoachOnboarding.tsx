@@ -81,6 +81,7 @@ const CoachOnboarding = () => {
   const [isNavigating, setIsNavigating] = useState(false);
   const [coachProfileId, setCoachProfileId] = useState<string | null>(null);
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
+  const [hasSelectedPlan, setHasSelectedPlan] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
   const { isNativeMobile } = useIOSRestrictions();
@@ -453,12 +454,12 @@ const CoachOnboarding = () => {
           secondary: baseSecondary ? { ...baseSecondary, disabled: isNavigating } : undefined,
         };
 
-      // Step 8: Choose Plan
+      // Step 8: Choose Plan - unified for all devices
       case 8: {
         const isPaidTier = formData.subscriptionTier !== "free";
         const isProcessingIAP = iapState.isPurchasing;
         
-        // On native mobile (iOS/Android): trigger IAP directly, no skip allowed
+        // On native mobile (iOS/Android): trigger IAP directly
         if (isNativeMobile) {
           return {
             primary: { 
@@ -473,19 +474,19 @@ const CoachOnboarding = () => {
                   await handleComplete();
                 }
               },
-              disabled: isNavigating || isProcessingIAP,
+              disabled: isNavigating || isProcessingIAP || !hasSelectedPlan,
               loading: isSubmitting || isProcessingIAP,
             },
             secondary: baseSecondary ? { ...baseSecondary, disabled: isNavigating || isProcessingIAP } : undefined,
           };
         }
         
-        // Non-iOS: existing behavior
+        // Web: unified "Select Plan" button
         return {
           primary: { 
-            label: "Complete Setup", 
+            label: "Select Plan", 
             onClick: handleComplete,
-            disabled: isNavigating,
+            disabled: isNavigating || !hasSelectedPlan,
             loading: isSubmitting,
           },
           secondary: baseSecondary ? { ...baseSecondary, disabled: isNavigating } : undefined,
@@ -802,6 +803,7 @@ const CoachOnboarding = () => {
                           type="button"
                           onClick={() => {
                             handleInputChange("subscriptionTier", "free");
+                            setHasSelectedPlan(true);
                           }}
                           className={`w-full max-w-xs p-4 rounded-xl border-2 transition-all text-left ${
                             formData.subscriptionTier === "free" 
@@ -856,6 +858,7 @@ const CoachOnboarding = () => {
                             onClick={() => {
                               handleInputChange("subscriptionTier", tier.id);
                               setBillingInterval('monthly');
+                              setHasSelectedPlan(true);
                             }}
                             className={`w-full p-3 rounded-xl border-2 transition-all text-left relative ${
                               isSelectedMonthly ? "border-primary bg-primary/10" : "border-border hover:border-muted-foreground"
@@ -892,6 +895,7 @@ const CoachOnboarding = () => {
                             onClick={() => {
                               handleInputChange("subscriptionTier", tier.id);
                               setBillingInterval('yearly');
+                              setHasSelectedPlan(true);
                             }}
                             className={`w-full p-3 rounded-xl border-2 transition-all text-left relative ${
                               isSelectedYearly ? "border-primary bg-primary/10" : "border-border hover:border-muted-foreground"
@@ -936,21 +940,37 @@ const CoachOnboarding = () => {
                 </CarouselContent>
               </Carousel>
 
-              {/* Dot indicators for iOS */}
+              {/* Dot indicators for iOS - clickable */}
               <div className="flex justify-center gap-1.5 pt-2">
                 {[freeTier, ...paidTiers].filter(Boolean).map((tier) => {
                   if (!tier) return null;
                   const isActive = formData.subscriptionTier === tier.id;
                   return (
-                    <div
+                    <button
                       key={tier.id}
-                      className={`w-2 h-2 rounded-full transition-colors ${
-                        isActive ? "bg-primary" : "bg-border"
+                      type="button"
+                      onClick={() => {
+                        handleInputChange("subscriptionTier", tier.id);
+                        if (tier.id !== 'free') setBillingInterval('monthly');
+                        setHasSelectedPlan(true);
+                      }}
+                      className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                        isActive ? "bg-primary" : "bg-border hover:bg-muted-foreground"
                       }`}
+                      aria-label={`Select ${tier.name}`}
                     />
                   );
                 })}
               </div>
+              
+              {/* Visual hint when no plan selected */}
+              {!hasSelectedPlan && (
+                <div className="text-center py-2">
+                  <p className="text-sm text-amber-500 font-medium animate-pulse">
+                    👆 Tap a plan to select it
+                  </p>
+                </div>
+              )}
             </div>
           );
         }
@@ -977,7 +997,10 @@ const CoachOnboarding = () => {
                     <CarouselItem key={tier.id} className="pl-2 basis-[85%] sm:basis-1/2">
                       <button
                         type="button"
-                        onClick={() => handleInputChange("subscriptionTier", tier.id)}
+                        onClick={() => {
+                          handleInputChange("subscriptionTier", tier.id);
+                          setHasSelectedPlan(true);
+                        }}
                         className={`w-full h-full p-4 rounded-xl border-2 transition-all text-left relative ${
                           isSelected ? "border-primary bg-primary/10" : "border-border hover:border-muted-foreground"
                         }`}
@@ -1018,17 +1041,32 @@ const CoachOnboarding = () => {
               </CarouselContent>
             </Carousel>
 
-            {/* Dot indicators */}
+            {/* Dot indicators - clickable */}
             <div className="flex justify-center gap-1.5 pt-2">
               {tiers.map((tier) => (
-                <div
+                <button
                   key={tier.id}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    formData.subscriptionTier === tier.id ? "bg-primary" : "bg-border"
+                  type="button"
+                  onClick={() => {
+                    handleInputChange("subscriptionTier", tier.id);
+                    setHasSelectedPlan(true);
+                  }}
+                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                    formData.subscriptionTier === tier.id ? "bg-primary" : "bg-border hover:bg-muted-foreground"
                   }`}
+                  aria-label={`Select ${tier.name}`}
                 />
               ))}
             </div>
+            
+            {/* Visual hint when no plan selected */}
+            {!hasSelectedPlan && (
+              <div className="text-center py-2">
+                <p className="text-sm text-amber-500 font-medium animate-pulse">
+                  👆 Tap a plan to select it
+                </p>
+              </div>
+            )}
           </div>
         );
       }
