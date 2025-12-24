@@ -6,16 +6,25 @@ import { format } from 'date-fns';
 import { Lock } from 'lucide-react';
 import { ShareAchievementButton } from './ShareAchievementButton';
 import { getBadgeIcon } from '@/lib/badge-icons';
+import { Progress } from '@/components/ui/progress';
+
+export interface BadgeProgress {
+  current: number;
+  target: number;
+  percentage: number;
+  label?: string;
+}
 
 interface BadgeCardProps {
   badge: BadgeType;
   earned?: boolean;
   earnedAt?: string;
   showDetails?: boolean;
+  progress?: BadgeProgress;
 }
 
 export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
-  ({ badge, earned = false, earnedAt, showDetails = true }, ref) => {
+  ({ badge, earned = false, earnedAt, showDetails = true, progress }, ref) => {
     const { t } = useTranslation('gamification');
     const rarityColors = RARITY_COLORS[badge.rarity] || RARITY_COLORS.common;
     
@@ -106,6 +115,22 @@ export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
               {!earned && badge.xp_reward > 0 && (
                 <div className="text-xs text-primary mt-2">
                   +{badge.xp_reward} XP
+                </div>
+              )}
+              
+              {/* Progress bar for unearned badges */}
+              {!earned && progress && progress.target > 0 && (
+                <div className="mt-3 space-y-1.5">
+                  <Progress 
+                    value={progress.percentage} 
+                    className="h-1.5" 
+                  />
+                  <div className="text-xs text-muted-foreground">
+                    {progress.label || t('badges.progress', { 
+                      current: progress.current, 
+                      target: progress.target 
+                    })}
+                  </div>
                 </div>
               )}
             </>

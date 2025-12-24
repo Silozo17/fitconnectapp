@@ -20,6 +20,7 @@
     "title": "Badges",
     "unlocked": "{{earned}} of {{total}} unlocked",
     "earned": "Earned {{date}}",
+    "progress": "{{current}} of {{target}}",
     "categories": {
       "all": "All",
       "workout": "Workout",

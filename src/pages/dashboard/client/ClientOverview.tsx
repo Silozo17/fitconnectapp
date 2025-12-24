@@ -215,11 +215,11 @@ const ClientOverview = () => {
         </Alert>
       )}
 
+      {/* Today's Health - Primary focus */}
+      <HealthDataWidget compact className="mb-6" />
+
       {/* Avatar Stats Hero */}
       <AvatarStatsHero firstName={firstName} />
-
-      {/* Today's Health */}
-      <HealthDataWidget compact className="mb-6" />
 
       {/* Friend Requests */}
       <UserConnectionRequests />

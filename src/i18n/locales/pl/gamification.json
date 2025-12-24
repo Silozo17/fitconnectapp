@@ -20,6 +20,7 @@
     "title": "Odznaki",
     "unlocked": "{{earned}} z {{total}} odblokowanych",
     "earned": "Zdobyto {{date}}",
+    "progress": "{{current}} z {{target}}",
     "categories": {
       "all": "Wszystkie",
       "workout": "Trening",
