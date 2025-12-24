@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdminView } from "@/contexts/AdminContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -62,6 +63,7 @@ const ClientOnboarding = () => {
   const [isNavigating, setIsNavigating] = useState(false);
   const [clientProfileId, setClientProfileId] = useState<string | null>(null);
   const { user } = useAuth();
+  const { refreshProfiles } = useAdminView();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -322,6 +324,9 @@ const ClientOnboarding = () => {
 
       // Invalidate the onboarding status cache before navigating
       queryClient.invalidateQueries({ queryKey: ["client-onboarding-status", user.id] });
+      
+      // Refresh profiles so ViewSwitcher updates immediately
+      await refreshProfiles();
       
       toast.success("Profile completed! Let's find you a coach.");
       navigate("/dashboard/client");
