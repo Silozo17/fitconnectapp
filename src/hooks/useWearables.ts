@@ -4,9 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { 
   isDespia, 
-  registerHealthKitCallbacks, 
-  unregisterHealthKitCallbacks, 
-  requestHealthKitPermissions,
+  checkHealthKitConnection,
   triggerHaptic
 } from "@/lib/despia";
 import { useCallback } from "react";
@@ -50,86 +48,87 @@ export const useWearables = () => {
     enabled: !!user,
   });
 
-  // Handle native HealthKit connection for iOS
-  const handleNativeHealthKitConnect = useCallback(async () => {
+  // Handle native HealthKit connection for iOS using correct Despia SDK pattern
+  const handleNativeHealthKitConnect = useCallback(async (): Promise<{ success: boolean }> => {
     if (!user) {
       toast.error("Please sign in to connect Apple Health");
-      return;
+      throw new Error("Not signed in");
     }
 
+    console.log('[useWearables] Starting native HealthKit connection...');
+
     // Get client profile ID
-    const { data: clientProfile } = await supabase
+    const { data: clientProfile, error: profileError } = await supabase
       .from("client_profiles")
       .select("id")
       .eq("user_id", user.id)
       .single();
 
-    if (!clientProfile) {
+    if (profileError || !clientProfile) {
+      console.error('[useWearables] Client profile not found:', profileError);
       toast.error("Client profile not found");
-      return;
+      throw new Error("Client profile not found");
     }
 
-    // Register callbacks for HealthKit permission result
-    registerHealthKitCallbacks({
-      onSuccess: async () => {
-        triggerHaptic('success');
-        
-        // Check if connection already exists
-        const { data: existing } = await supabase
-          .from("wearable_connections")
-          .select("id")
-          .eq("client_id", clientProfile.id)
-          .eq("provider", "apple_health")
-          .maybeSingle();
+    // Attempt to connect using the correct Despia SDK pattern
+    // This triggers the iOS permission dialog automatically on first read
+    console.log('[useWearables] Calling checkHealthKitConnection...');
+    const result = await checkHealthKitConnection();
+    
+    console.log('[useWearables] HealthKit connection result:', result);
 
-        let dbError = null;
-        
-        if (existing) {
-          // Update existing connection
-          const { error } = await supabase
-            .from("wearable_connections")
-            .update({ is_active: true, last_synced_at: new Date().toISOString() })
-            .eq("id", existing.id);
-          dbError = error;
-        } else {
-          // Insert new connection
-          // For native HealthKit, we use a placeholder access_token since 
-          // the native SDK handles authentication, not OAuth tokens
-          const { error } = await supabase
-            .from("wearable_connections")
-            .insert({
-              client_id: clientProfile.id,
-              provider: "apple_health" as const,
-              is_active: true,
-              provider_user_id: user.id,
-              access_token: "native_healthkit", // Placeholder for native SDK auth
-            });
-          dbError = error;
-        }
-
-        if (dbError) {
-          console.error("Failed to save Apple Health connection:", dbError);
-          toast.error("Connected but failed to save. Please try again.");
-        } else {
-          toast.success("Apple Health connected successfully!");
-          queryClient.invalidateQueries({ queryKey: ["wearable-connections"] });
-        }
-        
-        unregisterHealthKitCallbacks();
-      },
-      onError: (errorMessage) => {
-        triggerHaptic('error');
-        toast.error("Failed to connect Apple Health: " + errorMessage);
-        unregisterHealthKitCallbacks();
-      },
-    });
-
-    // Trigger native HealthKit permission request
-    const triggered = requestHealthKitPermissions();
-    if (!triggered) {
-      toast.error("Failed to request Apple Health permissions");
-      unregisterHealthKitCallbacks();
+    if (!result.success) {
+      triggerHaptic('error');
+      const errorMsg = result.error || "Unknown error";
+      toast.error("Failed to connect Apple Health: " + errorMsg);
+      throw new Error(errorMsg);
     }
+
+    // Success - user granted permissions
+    triggerHaptic('success');
+    console.log('[useWearables] HealthKit permission granted, saving to database...');
+
+    // Save connection to database
+    const { data: existing } = await supabase
+      .from("wearable_connections")
+      .select("id")
+      .eq("client_id", clientProfile.id)
+      .eq("provider", "apple_health")
+      .maybeSingle();
+
+    let dbError = null;
+
+    if (existing) {
+      // Update existing connection
+      const { error } = await supabase
+        .from("wearable_connections")
+        .update({ is_active: true, last_synced_at: new Date().toISOString() })
+        .eq("id", existing.id);
+      dbError = error;
+    } else {
+      // Insert new connection
+      const { error } = await supabase
+        .from("wearable_connections")
+        .insert({
+          client_id: clientProfile.id,
+          provider: "apple_health" as const,
+          is_active: true,
+          provider_user_id: user.id,
+          access_token: "native_healthkit", // Placeholder for native SDK auth
+        });
+      dbError = error;
+    }
+
+    if (dbError) {
+      console.error("[useWearables] Failed to save Apple Health connection:", dbError);
+      toast.error("Connected but failed to save. Please try again.");
+      throw dbError;
+    }
+
+    toast.success("Apple Health connected successfully!");
+    queryClient.invalidateQueries({ queryKey: ["wearable-connections"] });
+    
+    return { success: true };
   }, [user, queryClient]);
 
   const connectWearable = useMutation({

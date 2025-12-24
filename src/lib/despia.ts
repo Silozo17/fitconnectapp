@@ -205,67 +205,122 @@ export const isBioAuthAvailable = (): boolean => {
 // ============================================================================
 
 /**
- * HealthKit permission result handlers
+ * HealthKit connection result
  */
-export interface HealthKitCallbacks {
-  onSuccess: () => void;
-  onError: (errorMessage: string) => void;
+export interface HealthKitConnectionResult {
+  success: boolean;
+  error?: string;
+  data?: unknown;
 }
 
-let healthKitCallbacks: HealthKitCallbacks | null = null;
-
 /**
- * Register global callbacks for HealthKit permission request
+ * Check Apple Health connection by attempting to read a small sample of data.
+ * This will trigger the iOS permission dialog if not yet authorized.
+ * 
+ * According to Despia docs, the correct pattern is:
+ * await despia('healthkit://read?types=...&days=...', ['healthkitResponse'])
+ * 
+ * The SDK automatically handles permission requests on first read attempt.
+ * 
+ * @returns Object with success status and any error message
  */
-export const registerHealthKitCallbacks = (callbacks: HealthKitCallbacks): void => {
-  healthKitCallbacks = callbacks;
-  
-  // Expose callbacks globally for Despia runtime
-  if (typeof window !== 'undefined') {
-    (window as any).onHealthKitSuccess = () => {
-      if (isDespia() && healthKitCallbacks) {
-        console.log('[Despia HealthKit] Permission granted');
-        healthKitCallbacks.onSuccess();
-      }
-    };
-    
-    (window as any).onHealthKitError = (error: string) => {
-      if (isDespia() && healthKitCallbacks) {
-        console.error('[Despia HealthKit] Permission error:', error);
-        healthKitCallbacks.onError(error);
-      }
-    };
-  }
-};
-
-/**
- * Cleanup HealthKit callbacks
- */
-export const unregisterHealthKitCallbacks = (): void => {
-  healthKitCallbacks = null;
-  if (typeof window !== 'undefined') {
-    delete (window as any).onHealthKitSuccess;
-    delete (window as any).onHealthKitError;
-  }
-};
-
-/**
- * Request HealthKit permissions on iOS via Despia native runtime
- * @returns true if the request was triggered, false if not in Despia environment
- */
-export const requestHealthKitPermissions = (): boolean => {
+export const checkHealthKitConnection = async (): Promise<HealthKitConnectionResult> => {
   if (!isDespia()) {
     console.warn('[Despia HealthKit] Attempted outside of Despia environment');
-    return false;
+    return { success: false, error: 'Not running in native app' };
   }
-  
+
+  if (!isDespiaIOS()) {
+    console.warn('[Despia HealthKit] HealthKit is only available on iOS');
+    return { success: false, error: 'HealthKit is only available on iOS' };
+  }
+
   try {
-    console.log('[Despia HealthKit] Requesting permissions...');
-    despia('healthkit://permissions');
-    return true;
+    console.log('[Despia HealthKit] Attempting to read data (triggers permission if needed)...');
+    
+    // Attempt to read step count for 1 day - this triggers the permission dialog
+    // The SDK returns a promise that resolves when the user responds to permission prompt
+    const response = await despia(
+      'healthkit://read?types=HKQuantityTypeIdentifierStepCount&days=1',
+      ['healthkitResponse']
+    );
+    
+    console.log('[Despia HealthKit] Response received:', response);
+    
+    // If we get here without throwing, the SDK accepted the request
+    // Check if we got a valid response object
+    if (response && typeof response === 'object') {
+      // The response should contain healthkitResponse key with data
+      const healthData = (response as Record<string, unknown>).healthkitResponse;
+      
+      if (healthData !== undefined) {
+        console.log('[Despia HealthKit] Successfully read health data:', healthData);
+        return { success: true, data: healthData };
+      }
+    }
+    
+    // If response is null/undefined but no error was thrown, 
+    // permissions might have been denied or there's no data
+    // We still consider this a success for connection purposes
+    console.log('[Despia HealthKit] Read completed (may be empty data)');
+    return { success: true };
+    
   } catch (e) {
-    console.error('[Despia HealthKit] Failed to request permissions:', e);
-    return false;
+    console.error('[Despia HealthKit] Error during read attempt:', e);
+    
+    // Parse the error to provide a user-friendly message
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    
+    // Check for common HealthKit error patterns
+    if (errorMessage.includes('denied') || errorMessage.includes('authorization')) {
+      return { success: false, error: 'Permission denied. Please enable Health access in Settings.' };
+    }
+    
+    if (errorMessage.includes('unavailable') || errorMessage.includes('not available')) {
+      return { success: false, error: 'HealthKit is not available on this device.' };
+    }
+    
+    return { success: false, error: errorMessage || 'Failed to connect to Apple Health' };
+  }
+};
+
+/**
+ * Sync health data from Apple Health via native HealthKit
+ * @param days Number of days of data to sync (default: 7)
+ * @returns Object with success status and synced data
+ */
+export const syncHealthKitData = async (days: number = 7): Promise<HealthKitConnectionResult> => {
+  if (!isDespia() || !isDespiaIOS()) {
+    return { success: false, error: 'HealthKit is only available on iOS native app' };
+  }
+
+  try {
+    console.log(`[Despia HealthKit] Syncing ${days} days of health data...`);
+    
+    // Read multiple health types
+    const types = [
+      'HKQuantityTypeIdentifierStepCount',
+      'HKQuantityTypeIdentifierActiveEnergyBurned',
+      'HKQuantityTypeIdentifierDistanceWalkingRunning',
+      'HKQuantityTypeIdentifierHeartRate',
+      'HKCategoryTypeIdentifierSleepAnalysis'
+    ].join(',');
+    
+    const response = await despia(
+      `healthkit://read?types=${types}&days=${days}`,
+      ['healthkitResponse']
+    );
+    
+    console.log('[Despia HealthKit] Sync response:', response);
+    
+    if (response && typeof response === 'object') {
+      return { success: true, data: (response as Record<string, unknown>).healthkitResponse };
+    }
+    
+    return { success: true };
+  } catch (e) {
+    console.error('[Despia HealthKit] Sync error:', e);
+    return { success: false, error: e instanceof Error ? e.message : 'Sync failed' };
   }
 };
 
