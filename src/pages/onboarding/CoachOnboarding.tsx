@@ -471,12 +471,12 @@ const CoachOnboarding = () => {
         navigate(`/subscribe?tier=${formData.subscriptionTier}&billing=${billingInterval}&from=onboarding`);
       } else if (formData.alsoClient) {
         await refreshProfiles();
-        toast.success("Profile completed! Welcome to FitConnect.");
-        navigate("/onboarding/client");
+        toast.success("Coach profile completed! Now let's set up your client profile.");
+        navigate("/onboarding/client", { replace: true });
       } else {
         await refreshProfiles();
         toast.success("Profile completed! Welcome to FitConnect.");
-        navigate("/dashboard/coach");
+        navigate("/dashboard/coach", { replace: true });
       }
       // Don't reset isNavigating on success - we're navigating away
     } catch (error) {
