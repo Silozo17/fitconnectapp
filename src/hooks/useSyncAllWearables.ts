@@ -37,6 +37,12 @@ export const useSyncAllWearables = () => {
       }
 
       console.log('[useSyncAllWearables] HealthKit data received:', result.data);
+      
+      // DEEP DEBUG: Log full raw response structure
+      console.log('[useSyncAllWearables] ==== DEEP DEBUG: RAW HEALTHKIT RESPONSE ====');
+      console.log('[useSyncAllWearables] Response type:', typeof result.data);
+      console.log('[useSyncAllWearables] Response keys:', Object.keys(result.data as object));
+      console.log('[useSyncAllWearables] Full response JSON:', JSON.stringify(result.data, null, 2));
 
       // Process and sync the data
       const healthData = result.data as Record<string, Array<{ date?: string; value?: number; unit?: string; startDate?: string; endDate?: string }>>;
@@ -66,13 +72,21 @@ export const useSyncAllWearables = () => {
         return units[dataType] || 'count';
       };
 
-      // Log raw data for debugging
-      console.log('[useSyncAllWearables] Raw HealthKit data by type:');
+      // SLEEP_VALUES: Actual sleep stages to include (exclude 0=inBed, 2=awake)
+      const SLEEP_VALUES = [1, 3, 4, 5]; // 1=asleepUnspecified, 3=asleepCore, 4=asleepDeep, 5=asleepREM
+
+      // DEEP DEBUG: Log each type's structure
+      console.log('[useSyncAllWearables] ==== RAW DATA BY TYPE ====');
       for (const [metricType, readings] of Object.entries(healthData)) {
-        console.log(`  ${metricType}: ${Array.isArray(readings) ? readings.length : 0} readings`);
+        console.log(`[useSyncAllWearables] Type "${metricType}":`);
+        console.log(`  - Is Array: ${Array.isArray(readings)}`);
+        console.log(`  - Length: ${Array.isArray(readings) ? readings.length : 'N/A'}`);
         if (Array.isArray(readings) && readings.length > 0) {
-          console.log('    First sample:', JSON.stringify(readings[0]));
-          console.log('    Last sample:', JSON.stringify(readings[readings.length - 1]));
+          console.log(`  - First sample FULL:`, JSON.stringify(readings[0], null, 2));
+          console.log(`  - All keys in first sample:`, Object.keys(readings[0]));
+          if (readings.length > 1) {
+            console.log(`  - Last sample FULL:`, JSON.stringify(readings[readings.length - 1], null, 2));
+          }
         }
       }
 
@@ -91,26 +105,39 @@ export const useSyncAllWearables = () => {
         // Special handling for sleep data - calculate duration from startDate/endDate
         if (dataType === 'sleep') {
           console.log(`[useSyncAllWearables] Processing ${readings.length} sleep samples...`);
+          let processedCount = 0;
+          let skippedMissingDates = 0;
+          let skippedNonSleep = 0;
+          let skippedInvalidDuration = 0;
+          
           for (const reading of readings) {
+            // Handle null/undefined values
+            if (reading === null || reading === undefined) {
+              console.log('[useSyncAllWearables] Sleep sample is null/undefined');
+              continue;
+            }
+            
             const startDate = reading.startDate ? new Date(reading.startDate) : null;
             const endDate = reading.endDate ? new Date(reading.endDate) : null;
             
             // Skip if missing dates
             if (!startDate || !endDate) {
-              console.log('[useSyncAllWearables] Skipping sleep sample - missing dates');
+              skippedMissingDates++;
+              console.log('[useSyncAllWearables] Skipping sleep sample - missing dates:', JSON.stringify(reading));
               continue;
             }
             
-            // Skip "awake" samples (value=2) and "inBed" only (value=0)
-            // Value 1 = asleepUnspecified, 3 = asleepCore, 4 = asleepDeep, 5 = asleepREM
+            // Explicitly include only actual sleep values using SLEEP_VALUES array
             const sleepValue = reading.value;
-            if (sleepValue === 0 || sleepValue === 2) {
+            if (!SLEEP_VALUES.includes(sleepValue as number)) {
+              skippedNonSleep++;
               console.log(`[useSyncAllWearables] Skipping non-sleep sample (value=${sleepValue})`);
               continue;
             }
             
             const durationMinutes = (endDate.getTime() - startDate.getTime()) / 60000;
             if (durationMinutes <= 0) {
+              skippedInvalidDuration++;
               console.log('[useSyncAllWearables] Skipping sleep sample - invalid duration');
               continue;
             }
@@ -125,8 +152,11 @@ export const useSyncAllWearables = () => {
             
             aggregatedData[dateStr]['sleep'].sum += durationMinutes;
             aggregatedData[dateStr]['sleep'].count += 1;
+            processedCount++;
             console.log(`[useSyncAllWearables] Sleep: ${durationMinutes.toFixed(1)} min on ${dateStr} (total: ${aggregatedData[dateStr]['sleep'].sum.toFixed(1)} min)`);
           }
+          
+          console.log(`[useSyncAllWearables] Sleep summary: ${processedCount} processed, ${skippedMissingDates} missing dates, ${skippedNonSleep} non-sleep, ${skippedInvalidDuration} invalid duration`);
           continue; // Skip normal processing for sleep
         }
 
@@ -136,7 +166,16 @@ export const useSyncAllWearables = () => {
         const isCumulative = cumulativeTypes.includes(dataType);
 
         for (const reading of readings) {
-          if (reading.value === undefined || reading.value === null) continue;
+          // Handle null/undefined values gracefully
+          if (reading === null || reading === undefined) {
+            console.log(`[useSyncAllWearables] ${dataType}: Sample is null/undefined`);
+            continue;
+          }
+          
+          if (reading.value === undefined || reading.value === null) {
+            console.log(`[useSyncAllWearables] ${dataType}: Sample missing value field:`, JSON.stringify(reading));
+            continue;
+          }
 
           const dateStr = (reading.date || reading.startDate || new Date().toISOString()).split('T')[0];
 
@@ -156,6 +195,15 @@ export const useSyncAllWearables = () => {
           }
         }
       }
+      
+      // Log synced types summary
+      const syncedTypes = new Set<string>();
+      for (const [dateStr, types] of Object.entries(aggregatedData)) {
+        for (const dataType of Object.keys(types)) {
+          syncedTypes.add(dataType);
+        }
+      }
+      console.log('[useSyncAllWearables] Successfully aggregated types:', [...syncedTypes]);
       
       console.log('[useSyncAllWearables] Aggregated data summary:');
       for (const [dateStr, types] of Object.entries(aggregatedData)) {

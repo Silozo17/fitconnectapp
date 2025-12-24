@@ -103,14 +103,24 @@ export const useWearables = () => {
         wearable_connection_id: string | null;
       }> = [];
 
-      // Log raw data for debugging
-      console.log('[useWearables] Raw HealthKit data by type:');
+      // DEEP DEBUG: Log full raw response structure
+      console.log('[useWearables] ==== DEEP DEBUG: RAW HEALTHKIT DATA ====');
+      console.log('[useWearables] Data type:', typeof data);
+      console.log('[useWearables] Data keys:', Object.keys(data));
+      console.log('[useWearables] Full data JSON:', JSON.stringify(data, null, 2));
+      
       for (const [metricType, readings] of Object.entries(data)) {
-        console.log(`  ${metricType}: ${Array.isArray(readings) ? readings.length : 0} readings`);
+        console.log(`[useWearables] Type "${metricType}":`);
+        console.log(`  - Is Array: ${Array.isArray(readings)}`);
+        console.log(`  - Length: ${Array.isArray(readings) ? readings.length : 'N/A'}`);
         if (Array.isArray(readings) && readings.length > 0) {
-          console.log('    First sample:', JSON.stringify(readings[0]));
+          console.log(`  - First sample FULL:`, JSON.stringify(readings[0], null, 2));
+          console.log(`  - All keys in first sample:`, Object.keys(readings[0]));
         }
       }
+
+      // SLEEP_VALUES: Actual sleep stages to include (exclude 0=inBed, 2=awake)
+      const SLEEP_VALUES = [1, 3, 4, 5]; // 1=asleepUnspecified, 3=asleepCore, 4=asleepDeep, 5=asleepREM
 
       // Group data by date and type for aggregation
       const aggregatedData: Record<string, Record<string, { sum: number; count: number; maxValue?: number }>> = {};
@@ -127,17 +137,31 @@ export const useWearables = () => {
         // Special handling for sleep data - calculate duration from startDate/endDate
         if (dataType === 'sleep') {
           console.log(`[useWearables] Processing ${readings.length} sleep samples...`);
+          let processedCount = 0;
+          let skippedMissingDates = 0;
+          let skippedNonSleep = 0;
+          
           for (const reading of readings) {
+            // Handle null/undefined
+            if (reading === null || reading === undefined) continue;
+            
             const startDate = reading.startDate ? new Date(reading.startDate) : null;
             const endDate = reading.endDate ? new Date(reading.endDate) : null;
             
             // Skip if missing dates
-            if (!startDate || !endDate) continue;
+            if (!startDate || !endDate) {
+              skippedMissingDates++;
+              console.log('[useWearables] Skipping sleep sample - missing dates:', JSON.stringify(reading));
+              continue;
+            }
             
-            // Skip "awake" samples (value=2) and "inBed" only (value=0)
-            // Value 1 = asleepUnspecified, 3 = asleepCore, 4 = asleepDeep, 5 = asleepREM
+            // Explicitly include only actual sleep values
             const sleepValue = reading.value;
-            if (sleepValue === 0 || sleepValue === 2) continue;
+            if (!SLEEP_VALUES.includes(sleepValue as number)) {
+              skippedNonSleep++;
+              console.log(`[useWearables] Skipping non-sleep sample (value=${sleepValue})`);
+              continue;
+            }
             
             const durationMinutes = (endDate.getTime() - startDate.getTime()) / 60000;
             if (durationMinutes <= 0) continue;
@@ -152,8 +176,11 @@ export const useWearables = () => {
             
             aggregatedData[dateStr]['sleep'].sum += durationMinutes;
             aggregatedData[dateStr]['sleep'].count += 1;
+            processedCount++;
             console.log(`[useWearables] Sleep: ${durationMinutes.toFixed(1)} min on ${dateStr}`);
           }
+          
+          console.log(`[useWearables] Sleep summary: ${processedCount} processed, ${skippedMissingDates} missing dates, ${skippedNonSleep} non-sleep`);
           continue; // Skip normal processing for sleep
         }
 
@@ -162,7 +189,16 @@ export const useWearables = () => {
         const isCumulative = cumulativeTypes.includes(dataType);
 
         for (const reading of readings) {
-          if (reading.value === undefined || reading.value === null) continue;
+          // Handle null/undefined values gracefully
+          if (reading === null || reading === undefined) {
+            console.log(`[useWearables] ${dataType}: Sample is null/undefined`);
+            continue;
+          }
+          
+          if (reading.value === undefined || reading.value === null) {
+            console.log(`[useWearables] ${dataType}: Sample missing value field:`, JSON.stringify(reading));
+            continue;
+          }
 
           const dateStr = (reading.date || reading.startDate || new Date().toISOString()).split('T')[0];
 
@@ -182,6 +218,14 @@ export const useWearables = () => {
         }
       }
       
+      // Log synced types summary
+      const syncedTypes = new Set<string>();
+      for (const types of Object.values(aggregatedData)) {
+        for (const dataType of Object.keys(types)) {
+          syncedTypes.add(dataType);
+        }
+      }
+      console.log('[useWearables] Successfully aggregated types:', [...syncedTypes]);
       console.log('[useWearables] Aggregated data:', aggregatedData);
 
       // Convert aggregated data to entries
