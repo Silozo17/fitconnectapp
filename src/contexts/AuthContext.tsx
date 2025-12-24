@@ -50,17 +50,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     // Handle visibility change for PWA/browser background/foreground
-    const handleVisibilityChange = () => {
+    const handleVisibilityChange = async () => {
       if (document.visibilityState === 'visible') {
         // App is now visible - start auto refresh and revalidate session
         supabase.auth.startAutoRefresh();
-        supabase.auth.getSession().then(({ data: { session } }) => {
-          setSession(session);
-          setUser(session?.user ?? null);
-          if (session?.user) {
-            setTimeout(() => fetchUserRole(session.user.id), 0);
+        try {
+          const { data: { session }, error } = await supabase.auth.getSession();
+          
+          // If session is invalid or expired, try to refresh it
+          if (error || !session) {
+            console.log('Auth: Session invalid or expired, attempting refresh...');
+            const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+            
+            if (refreshError || !refreshData.session) {
+              // Session cannot be recovered - clear state
+              console.log('Auth: Unable to refresh session, clearing state');
+              setSession(null);
+              setUser(null);
+              setRole(null);
+              setAllRoles([]);
+              return;
+            }
+            
+            setSession(refreshData.session);
+            setUser(refreshData.session.user);
+            if (refreshData.session.user) {
+              setTimeout(() => fetchUserRole(refreshData.session.user.id), 0);
+            }
+          } else {
+            setSession(session);
+            setUser(session.user ?? null);
+            if (session.user) {
+              setTimeout(() => fetchUserRole(session.user.id), 0);
+            }
           }
-        });
+        } catch (err) {
+          console.error('Auth: Error handling visibility change:', err);
+        }
       } else {
         // App is in background - stop auto refresh to save resources
         supabase.auth.stopAutoRefresh();
@@ -68,16 +94,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     // Handle focus events for Despia native app
-    const handleFocus = () => {
+    const handleFocus = async () => {
       if (isDespia()) {
         supabase.auth.startAutoRefresh();
-        supabase.auth.getSession().then(({ data: { session } }) => {
-          setSession(session);
-          setUser(session?.user ?? null);
-          if (session?.user) {
-            setTimeout(() => fetchUserRole(session.user.id), 0);
+        try {
+          const { data: { session }, error } = await supabase.auth.getSession();
+          
+          if (error || !session) {
+            // Try to refresh the session
+            const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+            
+            if (refreshError || !refreshData.session) {
+              setSession(null);
+              setUser(null);
+              setRole(null);
+              setAllRoles([]);
+              return;
+            }
+            
+            setSession(refreshData.session);
+            setUser(refreshData.session.user);
+            if (refreshData.session.user) {
+              setTimeout(() => fetchUserRole(refreshData.session.user.id), 0);
+            }
+          } else {
+            setSession(session);
+            setUser(session.user ?? null);
+            if (session.user) {
+              setTimeout(() => fetchUserRole(session.user.id), 0);
+            }
           }
-        });
+        } catch (err) {
+          console.error('Auth: Error handling focus:', err);
+        }
       }
     };
 
