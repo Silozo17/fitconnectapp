@@ -28,7 +28,8 @@ import { triggerConfetti, confettiPresets } from "@/lib/confetti";
 import { triggerHaptic } from "@/lib/despia";
 import { IAPUnsuccessfulDialog } from "@/components/iap/IAPUnsuccessfulDialog";
 
-const STEPS = [
+// Full steps array (for new users without client profile)
+const FULL_STEPS = [
   "Basic Info",
   "Specialties",
   "Services & Pricing",
@@ -39,6 +40,21 @@ const STEPS = [
   "Verification",
   "Choose Your Plan"
 ];
+
+// Steps without Dual Account (for users who already have a client profile)
+const STEPS_WITHOUT_DUAL = [
+  "Basic Info",
+  "Specialties",
+  "Services & Pricing",
+  "Availability",
+  "Connect Payments",
+  "Integrations",
+  "Verification",
+  "Choose Your Plan"
+];
+
+// Get steps based on whether user has existing client profile
+const getSteps = (hasClientProfile: boolean) => hasClientProfile ? STEPS_WITHOUT_DUAL : FULL_STEPS;
 
 // Map tier icons for display
 const TIER_ICONS: Record<TierKey, typeof Sparkles> = {
@@ -86,10 +102,17 @@ const CoachOnboarding = () => {
   const [coachProfileId, setCoachProfileId] = useState<string | null>(null);
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
   const [hasSelectedPlan, setHasSelectedPlan] = useState(false);
+  const [hasExistingClientProfile, setHasExistingClientProfile] = useState(false);
   const { user } = useAuth();
   const { refreshProfiles } = useAdminView();
   const navigate = useNavigate();
   const { isNativeMobile } = useIOSRestrictions();
+  
+  // Dynamic steps array - excludes Dual Account step for users with existing client profile
+  const STEPS = getSteps(hasExistingClientProfile);
+  
+  // Helper to find step index by name (makes code more readable and maintainable)
+  const getStepIndex = (stepName: string) => STEPS.indexOf(stepName);
   
   // Store formData in a ref for the callback to access latest values
   const formDataRef = useRef<{ alsoClient: boolean }>({ alsoClient: false });
@@ -154,16 +177,36 @@ const CoachOnboarding = () => {
     formDataRef.current.alsoClient = formData.alsoClient;
   }, [formData.alsoClient]);
 
-  // Check if onboarding is already completed and restore saved step
+  // Check if onboarding is already completed, restore saved step, and check for existing client profile
   useEffect(() => {
     const checkProfile = async () => {
       if (!user) return;
 
-      const { data } = await supabase
-        .from("coach_profiles")
-        .select("id, onboarding_completed, onboarding_progress")
-        .eq("user_id", user.id)
-        .maybeSingle();
+      // Check for coach profile and existing client profile in parallel
+      const [coachResult, clientResult] = await Promise.all([
+        supabase
+          .from("coach_profiles")
+          .select("id, onboarding_completed, onboarding_progress")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+        supabase
+          .from("client_profiles")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle()
+      ]);
+
+      const { data } = coachResult;
+      const hasClientProfile = !!clientResult.data;
+      
+      // Set client profile status first (affects STEPS array)
+      setHasExistingClientProfile(hasClientProfile);
+      
+      // If user already has client profile, pre-set alsoClient to true
+      if (hasClientProfile) {
+        setFormData(prev => ({ ...prev, alsoClient: true }));
+        console.log("[CoachOnboarding] Existing client profile detected - skipping Dual Account step");
+      }
 
       if (data?.onboarding_completed) {
         navigate("/dashboard/coach");
@@ -171,9 +214,17 @@ const CoachOnboarding = () => {
         setCoachProfileId(data?.id || null);
         
         // Restore saved step from onboarding_progress
+        // Use FULL_STEPS for validation since we need to handle both cases
         const progress = data?.onboarding_progress as { current_step?: number; form_data?: typeof formData } | null;
-        if (progress?.current_step !== undefined && progress.current_step >= 0 && progress.current_step < STEPS.length) {
-          setCurrentStep(progress.current_step);
+        if (progress?.current_step !== undefined && progress.current_step >= 0 && progress.current_step < FULL_STEPS.length) {
+          // If user has client profile and saved step is beyond Dual Account (step 6),
+          // we need to adjust the step index since Dual Account is now excluded
+          let restoredStep = progress.current_step;
+          if (hasClientProfile && restoredStep > 5) {
+            // Steps 6+ shift down by 1 when Dual Account is excluded
+            restoredStep = restoredStep - 1;
+          }
+          setCurrentStep(restoredStep);
         }
         
         // Restore saved form data if available
@@ -186,7 +237,7 @@ const CoachOnboarding = () => {
         // Check if returning from Stripe (overrides saved step)
         const stripeReturning = searchParams.get("stripe");
         if (stripeReturning === "returning") {
-          setCurrentStep(4); // Go to Stripe step
+          setCurrentStep(4); // Go to Stripe step (Connect Payments is always step 4)
         }
       }
     };
@@ -267,14 +318,16 @@ const CoachOnboarding = () => {
       return;
     }
     
+    const currentStepName = STEPS[currentStep];
+    
     // Validate specialties step - require at least one specialty
-    if (currentStep === 1 && formData.coachTypes.length === 0) {
+    if (currentStepName === "Specialties" && formData.coachTypes.length === 0) {
       toast.error("Please select at least one specialty");
       return;
     }
 
     // Validate availability step - require location if in-person is enabled
-    if (currentStep === 3) {
+    if (currentStepName === "Availability") {
       if (formData.inPersonAvailable && !formData.locationData) {
         toast.error("Please select a valid location for in-person sessions");
         return;
@@ -287,11 +340,11 @@ const CoachOnboarding = () => {
 
     // Set navigating flag BEFORE any async work
     setIsNavigating(true);
-    console.log("[CoachOnboarding] handleNext - step", currentStep, "-> navigating");
+    console.log("[CoachOnboarding] handleNext - step", currentStep, currentStepName, "-> navigating");
 
     try {
-      // Handle dual account step
-      if (currentStep === 6 && dualAccountActionRef.current) {
+      // Handle dual account step (only present in full steps array)
+      if (currentStepName === "Dual Account" && dualAccountActionRef.current) {
         const success = await dualAccountActionRef.current();
         if (!success) {
           setIsNavigating(false);
@@ -301,7 +354,7 @@ const CoachOnboarding = () => {
       }
 
       // Handle verification step
-      if (currentStep === 7 && verificationSubmitRef.current && verificationState.hasAnyDocs) {
+      if (currentStepName === "Verification" && verificationSubmitRef.current && verificationState.hasAnyDocs) {
         await verificationSubmitRef.current();
       }
       
@@ -316,7 +369,7 @@ const CoachOnboarding = () => {
         console.log("[CoachOnboarding] Navigation unlocked");
       }, 150);
     }
-  }, [isNavigating, currentStep, formData.coachTypes.length, formData.inPersonAvailable, formData.locationData, formData.onlineAvailable, dualAccountState.selectedOption, verificationState.hasAnyDocs]);
+  }, [isNavigating, currentStep, STEPS, formData.coachTypes.length, formData.inPersonAvailable, formData.locationData, formData.onlineAvailable, dualAccountState.selectedOption, verificationState.hasAnyDocs]);
 
   const handleBack = useCallback(() => {
     // Guard: prevent navigation during existing navigation
@@ -446,105 +499,106 @@ const CoachOnboarding = () => {
   // Determine footer actions based on current step
   const getFooterActions = () => {
     const baseSecondary = currentStep > 0 ? { label: "Back", onClick: handleBack } : undefined;
+    const currentStepName = STEPS[currentStep];
 
-    switch (currentStep) {
-      // Steps 0-3: Basic navigation
-      case 0:
-      case 1:
-      case 2:
-      case 3:
-        return {
-          primary: { label: "Next", onClick: handleNext, disabled: isNavigating },
-          secondary: baseSecondary ? { ...baseSecondary, disabled: isNavigating } : undefined,
-        };
+    // Steps with basic navigation
+    if (["Basic Info", "Specialties", "Services & Pricing", "Availability"].includes(currentStepName)) {
+      return {
+        primary: { label: "Next", onClick: handleNext, disabled: isNavigating },
+        secondary: baseSecondary ? { ...baseSecondary, disabled: isNavigating } : undefined,
+      };
+    }
 
-      // Step 4: Stripe - component handles its own navigation buttons
-      // Hide footer to prevent duplicate navigation and freeze issues
-      case 4:
-        return undefined;
+    // Connect Payments: Stripe component handles its own navigation
+    if (currentStepName === "Connect Payments") {
+      return undefined;
+    }
 
-      // Step 5: Integrations
-      case 5:
-        return {
-          primary: { 
-            label: integrationsState.hasAnyConnection ? "Continue" : "Skip", 
-            onClick: handleNext,
-            disabled: isNavigating,
-          },
-          secondary: baseSecondary ? { ...baseSecondary, disabled: isNavigating } : undefined,
-        };
+    // Integrations
+    if (currentStepName === "Integrations") {
+      return {
+        primary: { 
+          label: integrationsState.hasAnyConnection ? "Continue" : "Skip", 
+          onClick: handleNext,
+          disabled: isNavigating,
+        },
+        secondary: baseSecondary ? { ...baseSecondary, disabled: isNavigating } : undefined,
+      };
+    }
 
-      // Step 6: Dual Account
-      case 6:
-        return {
-          primary: { 
-            label: "Continue", 
-            onClick: handleNext,
-            disabled: !dualAccountState.selectedOption || isNavigating,
-            loading: dualAccountState.isCreating,
-          },
-          secondary: baseSecondary ? { ...baseSecondary, disabled: isNavigating } : undefined,
-        };
+    // Dual Account (only shown for users without existing client profile)
+    if (currentStepName === "Dual Account") {
+      return {
+        primary: { 
+          label: "Continue", 
+          onClick: handleNext,
+          disabled: !dualAccountState.selectedOption || isNavigating,
+          loading: dualAccountState.isCreating,
+        },
+        secondary: baseSecondary ? { ...baseSecondary, disabled: isNavigating } : undefined,
+      };
+    }
 
-      // Step 7: Verification
-      case 7:
-        return {
-          primary: { 
-            label: verificationState.hasAnyDocs ? "Submit & Continue" : "Skip", 
-            onClick: handleNext,
-            disabled: isNavigating,
-            loading: verificationState.isSubmitting,
-          },
-          secondary: baseSecondary ? { ...baseSecondary, disabled: isNavigating } : undefined,
-        };
+    // Verification
+    if (currentStepName === "Verification") {
+      return {
+        primary: { 
+          label: verificationState.hasAnyDocs ? "Submit & Continue" : "Skip", 
+          onClick: handleNext,
+          disabled: isNavigating,
+          loading: verificationState.isSubmitting,
+        },
+        secondary: baseSecondary ? { ...baseSecondary, disabled: isNavigating } : undefined,
+      };
+    }
 
-      // Step 8: Choose Plan - unified for all devices
-      case 8: {
-        const isPaidTier = formData.subscriptionTier !== "free";
-        const isProcessingIAP = iapState.isPurchasing;
-        
-        // On native mobile (iOS/Android): trigger IAP directly
-        if (isNativeMobile) {
-          return {
-            primary: { 
-              label: "Select Plan", 
-              onClick: async () => {
-                if (isPaidTier) {
-                  // Trigger native IAP immediately
-                  const tier = formData.subscriptionTier as SubscriptionTier;
-                  await nativePurchase(tier, billingInterval);
-                } else {
-                  // Free tier - just complete onboarding
-                  await handleComplete();
-                }
-              },
-              disabled: isNavigating || isProcessingIAP || !hasSelectedPlan,
-              loading: isSubmitting || isProcessingIAP,
-            },
-            secondary: baseSecondary ? { ...baseSecondary, disabled: isNavigating || isProcessingIAP } : undefined,
-          };
-        }
-        
-        // Web: unified "Select Plan" button
+    // Choose Your Plan
+    if (currentStepName === "Choose Your Plan") {
+      const isPaidTier = formData.subscriptionTier !== "free";
+      const isProcessingIAP = iapState.isPurchasing;
+      
+      // On native mobile (iOS/Android): trigger IAP directly
+      if (isNativeMobile) {
         return {
           primary: { 
             label: "Select Plan", 
-            onClick: handleComplete,
-            disabled: isNavigating || !hasSelectedPlan,
-            loading: isSubmitting,
+            onClick: async () => {
+              if (isPaidTier) {
+                // Trigger native IAP immediately
+                const tier = formData.subscriptionTier as SubscriptionTier;
+                await nativePurchase(tier, billingInterval);
+              } else {
+                // Free tier - just complete onboarding
+                await handleComplete();
+              }
+            },
+            disabled: isNavigating || isProcessingIAP || !hasSelectedPlan,
+            loading: isSubmitting || isProcessingIAP,
           },
-          secondary: baseSecondary ? { ...baseSecondary, disabled: isNavigating } : undefined,
+          secondary: baseSecondary ? { ...baseSecondary, disabled: isNavigating || isProcessingIAP } : undefined,
         };
       }
-
-      default:
-        return undefined;
+      
+      // Web: unified "Select Plan" button
+      return {
+        primary: { 
+          label: "Select Plan", 
+          onClick: handleComplete,
+          disabled: isNavigating || !hasSelectedPlan,
+          loading: isSubmitting,
+        },
+        secondary: baseSecondary ? { ...baseSecondary, disabled: isNavigating } : undefined,
+      };
     }
+
+    return undefined;
   };
 
   const renderStepContent = () => {
-    switch (currentStep) {
-      case 0:
+    const currentStepName = STEPS[currentStep];
+    
+    switch (currentStepName) {
+      case "Basic Info":
         return (
           <div className="space-y-5">
             <div className="mb-4">
@@ -602,7 +656,7 @@ const CoachOnboarding = () => {
           </div>
         );
 
-      case 1:
+      case "Specialties":
         return (
           <div className="space-y-5">
             <div className="mb-4">
@@ -701,7 +755,7 @@ const CoachOnboarding = () => {
           </div>
         );
 
-      case 2:
+      case "Services & Pricing":
         return (
           <div className="space-y-5">
             <div className="mb-4">
@@ -728,7 +782,7 @@ const CoachOnboarding = () => {
           </div>
         );
 
-      case 3:
+      case "Availability":
         return (
           <div className="space-y-5">
             <div className="mb-4">
@@ -782,7 +836,7 @@ const CoachOnboarding = () => {
           </div>
         );
 
-      case 4:
+      case "Connect Payments":
         return coachProfileId ? (
           <StripeConnectOnboardingStep
             coachId={coachProfileId}
@@ -792,7 +846,7 @@ const CoachOnboarding = () => {
           />
         ) : null;
 
-      case 5:
+      case "Integrations":
         return coachProfileId ? (
           <IntegrationsOnboardingStep
             coachId={coachProfileId}
@@ -800,7 +854,7 @@ const CoachOnboarding = () => {
           />
         ) : null;
 
-      case 6:
+      case "Dual Account":
         return coachProfileId ? (
           <DualAccountStep
             coachId={coachProfileId}
@@ -809,7 +863,7 @@ const CoachOnboarding = () => {
           />
         ) : null;
 
-      case 7:
+      case "Verification":
         return coachProfileId ? (
           <VerificationOnboardingStep
             coachId={coachProfileId}
@@ -818,7 +872,7 @@ const CoachOnboarding = () => {
           />
         ) : null;
 
-      case 8: {
+      case "Choose Your Plan": {
         const tiers = getDisplayableTiers();
         const freeTier = tiers.find(t => t.id === 'free');
         const paidTiers = tiers.filter(t => t.id !== 'free');
@@ -1392,11 +1446,11 @@ const CoachOnboarding = () => {
         totalSteps={STEPS.length}
         title={STEPS[currentStep]}
         headerLogo
-        showBackButton={currentStep > 0 && currentStep !== 4 && !isNavigating}
+        showBackButton={currentStep > 0 && STEPS[currentStep] !== "Connect Payments" && !isNavigating}
         onBack={handleBack}
         footerActions={getFooterActions()}
-        hideFooter={currentStep === 4}
-        maxWidth={currentStep === 8 ? "2xl" : currentStep === 1 ? "xl" : "lg"}
+        hideFooter={STEPS[currentStep] === "Connect Payments"}
+        maxWidth={STEPS[currentStep] === "Choose Your Plan" ? "2xl" : STEPS[currentStep] === "Specialties" ? "xl" : "lg"}
         backDisabled={isNavigating}
         skipDisabled={isNavigating}
       >
