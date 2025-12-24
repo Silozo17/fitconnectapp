@@ -31,17 +31,27 @@ export const useSyncAllWearables = () => {
         return { success: false, error: result.error };
       }
 
+      // TYPE GUARD: Validate result.data is a proper object before processing
       if (!result.data) {
         console.log('[useSyncAllWearables] No HealthKit data returned');
         return { success: true, dataPoints: 0 };
       }
 
+      // Check if result.data is a valid object (not null, not array, not primitive)
+      if (typeof result.data !== 'object' || Array.isArray(result.data)) {
+        console.log('[useSyncAllWearables] Invalid HealthKit data format:', typeof result.data, Array.isArray(result.data) ? '(array)' : '');
+        return { success: true, dataPoints: 0 };
+      }
+
       console.log('[useSyncAllWearables] HealthKit data received:', result.data);
       
-      // DEEP DEBUG: Log full raw response structure
+      // DEEP DEBUG: Log full raw response structure (safe now)
       console.log('[useSyncAllWearables] ==== DEEP DEBUG: RAW HEALTHKIT RESPONSE ====');
       console.log('[useSyncAllWearables] Response type:', typeof result.data);
-      console.log('[useSyncAllWearables] Response keys:', Object.keys(result.data as object));
+      
+      // Safe Object.keys call with fallback
+      const responseKeys = Object.keys(result.data || {});
+      console.log('[useSyncAllWearables] Response keys:', responseKeys);
       console.log('[useSyncAllWearables] Full response JSON:', JSON.stringify(result.data, null, 2));
 
       // Process and sync the data
@@ -75,15 +85,15 @@ export const useSyncAllWearables = () => {
       // SLEEP_VALUES: Actual sleep stages to include (exclude 0=inBed, 2=awake)
       const SLEEP_VALUES = [1, 3, 4, 5]; // 1=asleepUnspecified, 3=asleepCore, 4=asleepDeep, 5=asleepREM
 
-      // DEEP DEBUG: Log each type's structure
+      // DEEP DEBUG: Log each type's structure (safe iteration)
       console.log('[useSyncAllWearables] ==== RAW DATA BY TYPE ====');
-      for (const [metricType, readings] of Object.entries(healthData)) {
+      for (const [metricType, readings] of Object.entries(healthData || {})) {
         console.log(`[useSyncAllWearables] Type "${metricType}":`);
         console.log(`  - Is Array: ${Array.isArray(readings)}`);
         console.log(`  - Length: ${Array.isArray(readings) ? readings.length : 'N/A'}`);
         if (Array.isArray(readings) && readings.length > 0) {
           console.log(`  - First sample FULL:`, JSON.stringify(readings[0], null, 2));
-          console.log(`  - All keys in first sample:`, Object.keys(readings[0]));
+          console.log(`  - All keys in first sample:`, Object.keys(readings[0] || {}));
           if (readings.length > 1) {
             console.log(`  - Last sample FULL:`, JSON.stringify(readings[readings.length - 1], null, 2));
           }
@@ -93,7 +103,7 @@ export const useSyncAllWearables = () => {
       // Aggregate data by date and type
       const aggregatedData: Record<string, Record<string, { sum: number; count: number; maxValue?: number }>> = {};
 
-      for (const [metricType, readings] of Object.entries(healthData)) {
+      for (const [metricType, readings] of Object.entries(healthData || {})) {
         if (!Array.isArray(readings)) continue;
 
         const dataType = mapHealthKitToDataType(metricType);
