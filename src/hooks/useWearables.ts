@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { useEnvironment } from "@/hooks/useEnvironment";
 import { 
   isDespia, 
   registerHealthKitCallbacks, 
@@ -10,7 +9,7 @@ import {
   requestHealthKitPermissions,
   triggerHaptic
 } from "@/lib/despia";
-import { useEffect, useCallback } from "react";
+import { useCallback } from "react";
 
 export type WearableProvider = "health_connect" | "fitbit" | "garmin" | "apple_health";
 
@@ -27,9 +26,6 @@ interface WearableConnection {
 export const useWearables = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const { isIOS, isAndroid } = useEnvironment();
-  const isIOSNative = isDespia() && isIOS;
-  const isAndroidNative = isDespia() && isAndroid;
 
   const { data: connections, isLoading, error } = useQuery({
     queryKey: ["wearable-connections", user?.id],
@@ -138,14 +134,31 @@ export const useWearables = () => {
 
   const connectWearable = useMutation({
     mutationFn: async (provider: WearableProvider) => {
+      // Evaluate platform detection at mutation execution time, not at render time
+      // This fixes the closure capture bug where isIOS/isAndroid from useEnvironment
+      // may not have updated yet when the mutation is created
+      const isDespiaEnv = isDespia();
+      const isIOSNativeNow = isDespiaEnv && /iPad|iPhone|iPod/i.test(navigator.userAgent);
+      const isAndroidNativeNow = isDespiaEnv && /Android/i.test(navigator.userAgent);
+      
+      console.log('[useWearables] Platform detection at mutation time:', {
+        provider,
+        isDespiaEnv,
+        isIOSNativeNow,
+        isAndroidNativeNow,
+        userAgent: navigator.userAgent
+      });
+
       // For Apple Health on iOS native, use native HealthKit flow
-      if (provider === "apple_health" && isIOSNative) {
+      if (provider === "apple_health" && isIOSNativeNow) {
+        console.log('[useWearables] Using native HealthKit flow');
         await handleNativeHealthKitConnect();
         return { native: true };
       }
 
       // For Health Connect on Android native, use native Health Connect flow
-      if (provider === "health_connect" && isAndroidNative) {
+      if (provider === "health_connect" && isAndroidNativeNow) {
+        console.log('[useWearables] Using native Health Connect flow');
         // TODO: Implement native Health Connect flow when available
         toast.info("Health Connect integration coming soon");
         return { native: true };
