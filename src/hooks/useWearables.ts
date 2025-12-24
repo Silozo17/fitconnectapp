@@ -103,8 +103,17 @@ export const useWearables = () => {
         wearable_connection_id: string | null;
       }> = [];
 
+      // Log raw data for debugging
+      console.log('[useWearables] Raw HealthKit data by type:');
+      for (const [metricType, readings] of Object.entries(data)) {
+        console.log(`  ${metricType}: ${Array.isArray(readings) ? readings.length : 0} readings`);
+        if (Array.isArray(readings) && readings.length > 0) {
+          console.log('    First sample:', JSON.stringify(readings[0]));
+        }
+      }
+
       // Group data by date and type for aggregation
-      const aggregatedData: Record<string, Record<string, { sum: number; count: number }>> = {};
+      const aggregatedData: Record<string, Record<string, { sum: number; count: number; maxValue?: number }>> = {};
 
       for (const [metricType, readings] of Object.entries(data)) {
         if (!Array.isArray(readings)) continue;
@@ -115,6 +124,43 @@ export const useWearables = () => {
           continue;
         }
 
+        // Special handling for sleep data - calculate duration from startDate/endDate
+        if (dataType === 'sleep') {
+          console.log(`[useWearables] Processing ${readings.length} sleep samples...`);
+          for (const reading of readings) {
+            const startDate = reading.startDate ? new Date(reading.startDate) : null;
+            const endDate = reading.endDate ? new Date(reading.endDate) : null;
+            
+            // Skip if missing dates
+            if (!startDate || !endDate) continue;
+            
+            // Skip "awake" samples (value=2) and "inBed" only (value=0)
+            // Value 1 = asleepUnspecified, 3 = asleepCore, 4 = asleepDeep, 5 = asleepREM
+            const sleepValue = reading.value;
+            if (sleepValue === 0 || sleepValue === 2) continue;
+            
+            const durationMinutes = (endDate.getTime() - startDate.getTime()) / 60000;
+            if (durationMinutes <= 0) continue;
+            
+            // Use end date as recorded date (when you wake up)
+            const dateStr = endDate.toISOString().split('T')[0];
+            
+            if (!aggregatedData[dateStr]) aggregatedData[dateStr] = {};
+            if (!aggregatedData[dateStr]['sleep']) {
+              aggregatedData[dateStr]['sleep'] = { sum: 0, count: 0 };
+            }
+            
+            aggregatedData[dateStr]['sleep'].sum += durationMinutes;
+            aggregatedData[dateStr]['sleep'].count += 1;
+            console.log(`[useWearables] Sleep: ${durationMinutes.toFixed(1)} min on ${dateStr}`);
+          }
+          continue; // Skip normal processing for sleep
+        }
+
+        // For cumulative metrics, track max value per day
+        const cumulativeTypes = ['steps', 'calories', 'distance', 'active_minutes'];
+        const isCumulative = cumulativeTypes.includes(dataType);
+
         for (const reading of readings) {
           if (reading.value === undefined || reading.value === null) continue;
 
@@ -124,13 +170,19 @@ export const useWearables = () => {
             aggregatedData[dateStr] = {};
           }
           if (!aggregatedData[dateStr][dataType]) {
-            aggregatedData[dateStr][dataType] = { sum: 0, count: 0 };
+            aggregatedData[dateStr][dataType] = { sum: 0, count: 0, maxValue: 0 };
           }
 
           aggregatedData[dateStr][dataType].sum += reading.value;
           aggregatedData[dateStr][dataType].count += 1;
+          
+          if (isCumulative && reading.value > (aggregatedData[dateStr][dataType].maxValue || 0)) {
+            aggregatedData[dateStr][dataType].maxValue = reading.value;
+          }
         }
       }
+      
+      console.log('[useWearables] Aggregated data:', aggregatedData);
 
       // Convert aggregated data to entries
       for (const [dateStr, types] of Object.entries(aggregatedData)) {

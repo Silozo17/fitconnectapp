@@ -66,14 +66,74 @@ export const useSyncAllWearables = () => {
         return units[dataType] || 'count';
       };
 
+      // Log raw data for debugging
+      console.log('[useSyncAllWearables] Raw HealthKit data by type:');
+      for (const [metricType, readings] of Object.entries(healthData)) {
+        console.log(`  ${metricType}: ${Array.isArray(readings) ? readings.length : 0} readings`);
+        if (Array.isArray(readings) && readings.length > 0) {
+          console.log('    First sample:', JSON.stringify(readings[0]));
+          console.log('    Last sample:', JSON.stringify(readings[readings.length - 1]));
+        }
+      }
+
       // Aggregate data by date and type
-      const aggregatedData: Record<string, Record<string, { sum: number; count: number }>> = {};
+      const aggregatedData: Record<string, Record<string, { sum: number; count: number; maxValue?: number }>> = {};
 
       for (const [metricType, readings] of Object.entries(healthData)) {
         if (!Array.isArray(readings)) continue;
 
         const dataType = mapHealthKitToDataType(metricType);
-        if (!dataType) continue;
+        if (!dataType) {
+          console.log(`[useSyncAllWearables] Skipping unmapped type: ${metricType}`);
+          continue;
+        }
+
+        // Special handling for sleep data - calculate duration from startDate/endDate
+        if (dataType === 'sleep') {
+          console.log(`[useSyncAllWearables] Processing ${readings.length} sleep samples...`);
+          for (const reading of readings) {
+            const startDate = reading.startDate ? new Date(reading.startDate) : null;
+            const endDate = reading.endDate ? new Date(reading.endDate) : null;
+            
+            // Skip if missing dates
+            if (!startDate || !endDate) {
+              console.log('[useSyncAllWearables] Skipping sleep sample - missing dates');
+              continue;
+            }
+            
+            // Skip "awake" samples (value=2) and "inBed" only (value=0)
+            // Value 1 = asleepUnspecified, 3 = asleepCore, 4 = asleepDeep, 5 = asleepREM
+            const sleepValue = reading.value;
+            if (sleepValue === 0 || sleepValue === 2) {
+              console.log(`[useSyncAllWearables] Skipping non-sleep sample (value=${sleepValue})`);
+              continue;
+            }
+            
+            const durationMinutes = (endDate.getTime() - startDate.getTime()) / 60000;
+            if (durationMinutes <= 0) {
+              console.log('[useSyncAllWearables] Skipping sleep sample - invalid duration');
+              continue;
+            }
+            
+            // Use end date as recorded date (when you wake up determines the "day")
+            const dateStr = endDate.toISOString().split('T')[0];
+            
+            if (!aggregatedData[dateStr]) aggregatedData[dateStr] = {};
+            if (!aggregatedData[dateStr]['sleep']) {
+              aggregatedData[dateStr]['sleep'] = { sum: 0, count: 0 };
+            }
+            
+            aggregatedData[dateStr]['sleep'].sum += durationMinutes;
+            aggregatedData[dateStr]['sleep'].count += 1;
+            console.log(`[useSyncAllWearables] Sleep: ${durationMinutes.toFixed(1)} min on ${dateStr} (total: ${aggregatedData[dateStr]['sleep'].sum.toFixed(1)} min)`);
+          }
+          continue; // Skip normal processing for sleep
+        }
+
+        // For cumulative metrics (steps, calories, distance), track the max value per day
+        // HealthKit may return cumulative totals, so we want the highest value
+        const cumulativeTypes = ['steps', 'calories', 'distance', 'active_minutes'];
+        const isCumulative = cumulativeTypes.includes(dataType);
 
         for (const reading of readings) {
           if (reading.value === undefined || reading.value === null) continue;
@@ -84,11 +144,23 @@ export const useSyncAllWearables = () => {
             aggregatedData[dateStr] = {};
           }
           if (!aggregatedData[dateStr][dataType]) {
-            aggregatedData[dateStr][dataType] = { sum: 0, count: 0 };
+            aggregatedData[dateStr][dataType] = { sum: 0, count: 0, maxValue: 0 };
           }
 
           aggregatedData[dateStr][dataType].sum += reading.value;
           aggregatedData[dateStr][dataType].count += 1;
+          
+          // Track max for cumulative types
+          if (isCumulative && reading.value > (aggregatedData[dateStr][dataType].maxValue || 0)) {
+            aggregatedData[dateStr][dataType].maxValue = reading.value;
+          }
+        }
+      }
+      
+      console.log('[useSyncAllWearables] Aggregated data summary:');
+      for (const [dateStr, types] of Object.entries(aggregatedData)) {
+        for (const [dataType, data] of Object.entries(types)) {
+          console.log(`  ${dateStr} ${dataType}: sum=${data.sum.toFixed(1)}, count=${data.count}, max=${data.maxValue || 'N/A'}`);
         }
       }
 
