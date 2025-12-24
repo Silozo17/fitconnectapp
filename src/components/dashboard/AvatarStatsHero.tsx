@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, forwardRef } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useSelectedAvatar, getAvatarImageUrl } from '@/hooks/useAvatars';
@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
+
+
 interface StatItemProps {
   icon: React.ReactNode;
   label: string;
@@ -26,7 +28,10 @@ interface StatItemProps {
   delay: number;
 }
 
-function StatItem({ icon, label, value, suffix, color, delay }: StatItemProps) {
+const StatItem = forwardRef<HTMLDivElement, StatItemProps>(function StatItem(
+  { icon, label, value, suffix, color, delay },
+  ref
+) {
   const [displayValue, setDisplayValue] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -74,6 +79,7 @@ function StatItem({ icon, label, value, suffix, color, delay }: StatItemProps) {
 
   return (
     <div 
+      ref={ref}
       className="flex items-center gap-3 p-3 rounded-lg bg-card/50 border border-border/50 hover:border-primary/30 transition-all hover:scale-105 animate-fade-in overflow-hidden"
       style={{ animationDelay: `${delay}ms` }}
     >
@@ -89,7 +95,7 @@ function StatItem({ icon, label, value, suffix, color, delay }: StatItemProps) {
       </div>
     </div>
   );
-}
+});
 
 interface AvatarStatsHeroProps {
   firstName?: string;
