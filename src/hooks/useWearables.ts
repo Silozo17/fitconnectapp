@@ -88,6 +88,12 @@ export const useWearables = () => {
     console.log('[useWearables] Syncing health data to health_data_sync:', healthData);
 
     try {
+      // TYPE GUARD: Validate healthData is a proper object before processing
+      if (typeof healthData !== 'object' || Array.isArray(healthData)) {
+        console.log('[useWearables] Invalid health data format:', typeof healthData, Array.isArray(healthData) ? '(array)' : '');
+        return;
+      }
+
       // Parse the health data based on its structure
       // HealthKit returns data in format: { HKQuantityTypeIdentifier...: [{ date, value, unit }] }
       const data = healthData as Record<string, Array<{ date?: string; value?: number; unit?: string; startDate?: string; endDate?: string }>>;
@@ -103,19 +109,22 @@ export const useWearables = () => {
         wearable_connection_id: string | null;
       }> = [];
 
-      // DEEP DEBUG: Log full raw response structure
+      // DEEP DEBUG: Log full raw response structure (safe now)
       console.log('[useWearables] ==== DEEP DEBUG: RAW HEALTHKIT DATA ====');
       console.log('[useWearables] Data type:', typeof data);
-      console.log('[useWearables] Data keys:', Object.keys(data));
+      
+      // Safe Object.keys call with fallback
+      const dataKeys = Object.keys(data || {});
+      console.log('[useWearables] Data keys:', dataKeys);
       console.log('[useWearables] Full data JSON:', JSON.stringify(data, null, 2));
       
-      for (const [metricType, readings] of Object.entries(data)) {
+      for (const [metricType, readings] of Object.entries(data || {})) {
         console.log(`[useWearables] Type "${metricType}":`);
         console.log(`  - Is Array: ${Array.isArray(readings)}`);
         console.log(`  - Length: ${Array.isArray(readings) ? readings.length : 'N/A'}`);
         if (Array.isArray(readings) && readings.length > 0) {
           console.log(`  - First sample FULL:`, JSON.stringify(readings[0], null, 2));
-          console.log(`  - All keys in first sample:`, Object.keys(readings[0]));
+          console.log(`  - All keys in first sample:`, Object.keys(readings[0] || {}));
         }
       }
 
@@ -125,7 +134,7 @@ export const useWearables = () => {
       // Group data by date and type for aggregation
       const aggregatedData: Record<string, Record<string, { sum: number; count: number; maxValue?: number }>> = {};
 
-      for (const [metricType, readings] of Object.entries(data)) {
+      for (const [metricType, readings] of Object.entries(data || {})) {
         if (!Array.isArray(readings)) continue;
 
         const dataType = mapHealthKitToDataType(metricType);
