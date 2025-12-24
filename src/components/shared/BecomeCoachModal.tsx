@@ -11,10 +11,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Briefcase, Loader2 } from "lucide-react";
+import { Briefcase, Loader2, CheckCircle2 } from "lucide-react";
 import { getErrorMessage, logError } from "@/lib/error-utils";
 
 interface BecomeCoachModalProps {
@@ -23,10 +21,9 @@ interface BecomeCoachModalProps {
 }
 
 const BecomeCoachModal = ({ open, onOpenChange }: BecomeCoachModalProps) => {
-  const { user } = useAuth();
+  const { user, refreshRole } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [displayName, setDisplayName] = useState("");
 
   const handleBecomeCoach = async () => {
     if (!user?.id) return;
@@ -66,7 +63,7 @@ const BecomeCoachModal = ({ open, onOpenChange }: BecomeCoachModalProps) => {
         clientProfile?.username ||
         `coach${Math.floor(Math.random() * 99999)}`;
 
-      const finalDisplayName = displayName.trim() || 
+      const displayName = 
         `${clientProfile?.first_name || ''} ${clientProfile?.last_name || ''}`.trim() ||
         username;
 
@@ -75,9 +72,9 @@ const BecomeCoachModal = ({ open, onOpenChange }: BecomeCoachModalProps) => {
         user_id: user.id,
         username,
         user_profile_id: existingUserProfile?.id || null,
-        display_name: finalDisplayName,
+        display_name: displayName,
         subscription_tier: "free",
-        onboarding_completed: false, // Will go through coach onboarding
+        onboarding_completed: false,
       });
 
       if (error) throw error;
@@ -90,9 +87,11 @@ const BecomeCoachModal = ({ open, onOpenChange }: BecomeCoachModalProps) => {
           { onConflict: 'user_id,role', ignoreDuplicates: true }
         );
 
-      toast.success("Coach profile created! Let's set up your profile.");
+      // Refresh role in AuthContext so ProtectedRoute sees the new role
+      await refreshRole();
+
+      toast.success("Let's set up your coach profile!");
       onOpenChange(false);
-      setDisplayName("");
       
       // Navigate to coach onboarding
       navigate("/onboarding/coach");
@@ -115,34 +114,39 @@ const BecomeCoachModal = ({ open, onOpenChange }: BecomeCoachModalProps) => {
             <div>
               <DialogTitle>Become a Coach</DialogTitle>
               <DialogDescription>
-                Start offering your fitness services and training clients on the platform.
+                Start offering your fitness services on the platform.
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="coachDisplayName">Display Name</Label>
-            <Input
-              id="coachDisplayName"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="How clients will see your name"
-            />
-            <p className="text-xs text-muted-foreground">
-              This will be shown on your coach profile. You can change it later.
-            </p>
+          <div className="rounded-lg bg-muted/50 p-4 text-sm space-y-3">
+            <p className="font-medium">You'll be able to:</p>
+            <ul className="text-muted-foreground space-y-2">
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
+                <span>Create your coaching profile</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
+                <span>Set up services and pricing</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
+                <span>Configure your availability</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
+                <span>Start accepting bookings from clients</span>
+              </li>
+            </ul>
           </div>
 
-          <div className="rounded-lg bg-muted/50 p-4 text-sm space-y-2">
-            <p className="font-medium">What happens next?</p>
-            <ul className="text-muted-foreground space-y-1 list-disc list-inside">
-              <li>Set up your coach profile</li>
-              <li>Add your services and pricing</li>
-              <li>Configure availability</li>
-              <li>Start accepting bookings</li>
-            </ul>
+          <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 text-sm">
+            <p className="text-amber-600 dark:text-amber-400">
+              <strong>Note:</strong> Once you start the coach setup, you'll need to complete it before accessing your coach dashboard.
+            </p>
           </div>
         </div>
 
@@ -156,7 +160,7 @@ const BecomeCoachModal = ({ open, onOpenChange }: BecomeCoachModalProps) => {
             ) : (
               <Briefcase className="w-4 h-4 mr-2" />
             )}
-            Start as Coach
+            Yes, Let's Go!
           </Button>
         </DialogFooter>
       </DialogContent>
