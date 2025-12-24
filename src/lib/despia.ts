@@ -9,10 +9,26 @@ import despia from 'despia-native';
 
 /**
  * Check if the app is running inside the Despia native environment
+ * Uses multiple fallback detection methods for reliability
  */
 export const isDespia = (): boolean => {
-  if (typeof navigator === 'undefined') return false;
-  return navigator.userAgent.toLowerCase().includes('despia');
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
+  
+  // Method 1: User agent check (primary)
+  const hasUserAgent = navigator.userAgent.toLowerCase().includes('despia');
+  
+  // Method 2: Check for Despia runtime functions on window
+  const hasRuntimeFunctions = typeof (window as any).onBioAuthSuccess === 'function' ||
+                              typeof (window as any).iapSuccess === 'function' ||
+                              typeof (window as any).onHealthKitSuccess === 'function';
+  
+  // Method 3: Check for despia-native SDK marker
+  const hasSDKMarker = !!(window as any).__DESPIA__;
+  
+  // Method 4: Check if the despia function is callable (from imported module)
+  const hasDespiaFunction = typeof despia === 'function';
+  
+  return hasUserAgent || hasRuntimeFunctions || hasSDKMarker || hasDespiaFunction;
 };
 
 /**
