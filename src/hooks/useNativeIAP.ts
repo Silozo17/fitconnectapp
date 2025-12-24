@@ -9,7 +9,7 @@ import {
   registerIAPCallbacks,
   unregisterIAPCallbacks,
   triggerRevenueCatPurchase,
-  IAP_PRODUCT_IDS,
+  getPlatformProductId,
   IAPSuccessData,
   triggerHaptic,
 } from '@/lib/despia';
@@ -221,14 +221,15 @@ export const useNativeIAP = (): UseNativeIAPReturn => {
     // Use auth user ID so RevenueCat can match with webhook
     const externalId = user.id;
 
-    // Get the product ID
-    const productKey = `${tier}_${interval}` as keyof typeof IAP_PRODUCT_IDS;
-    const productId = IAP_PRODUCT_IDS[productKey];
+    // Get the platform-specific product ID (iOS or Android)
+    const productId = getPlatformProductId(tier, interval);
 
     if (!productId) {
-      toast.error('Invalid subscription selection');
+      toast.error('Invalid subscription selection for this platform');
       return;
     }
+
+    console.log('[NativeIAP] Starting purchase:', { tier, interval, productId });
 
     setState(prev => ({
       ...prev,

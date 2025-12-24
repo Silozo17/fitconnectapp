@@ -273,21 +273,76 @@ export const requestHealthKitPermissions = (): boolean => {
 // ============================================================================
 
 /**
- * Native IAP product IDs for subscription tiers
- * These must match the products configured in RevenueCat
+ * Check if the app is running on iOS inside Despia
  */
-export const IAP_PRODUCT_IDS = {
-  // Monthly subscriptions (matching App Store Connect product IDs)
+export const isDespiaIOS = (): boolean => {
+  if (!isDespia()) return false;
+  return /iPad|iPhone|iPod/.test(navigator.userAgent);
+};
+
+/**
+ * Check if the app is running on Android inside Despia
+ */
+export const isDespiaAndroid = (): boolean => {
+  if (!isDespia()) return false;
+  return /Android/i.test(navigator.userAgent);
+};
+
+/**
+ * iOS App Store product IDs for subscription tiers
+ * These must match the products configured in App Store Connect
+ */
+export const IOS_IAP_PRODUCT_IDS = {
   starter_monthly: 'fitconnect.starter.monthly',
-  pro_monthly: 'fitconnect.pro.monthly',
-  enterprise_monthly: 'fitconnect.enterprise.monthly',
-  // Annual subscriptions (matching App Store Connect product IDs)
   starter_yearly: 'fitconnect.starter.annual',
+  pro_monthly: 'fitconnect.pro.monthly',
   pro_yearly: 'fitconnect.pro.annual',
+  enterprise_monthly: 'fitconnect.enterprise.monthly',
   enterprise_yearly: 'fitconnect.enterprise.annual',
 } as const;
 
-export type IAPProductId = typeof IAP_PRODUCT_IDS[keyof typeof IAP_PRODUCT_IDS];
+/**
+ * Android Google Play product IDs for subscription tiers
+ * Format: product.interval.play:base-plan-id
+ * These must match the products configured in Google Play Console
+ */
+export const ANDROID_IAP_PRODUCT_IDS = {
+  starter_monthly: 'starter.monthly.play:starter-monthly-play',
+  starter_yearly: 'starter.annual.play:starter-annual-play',
+  pro_monthly: 'pro.monthly.play:pro-monthly-play',
+  pro_yearly: 'pro.annual.play:pro-annual-play',
+  enterprise_monthly: 'enterprise.monthly.play:enterprise-monthly-play',
+  enterprise_yearly: 'enterprise.annual.play:enterprise-annual-play',
+} as const;
+
+// Legacy export for backwards compatibility
+export const IAP_PRODUCT_IDS = IOS_IAP_PRODUCT_IDS;
+
+export type IAPProductId = typeof IOS_IAP_PRODUCT_IDS[keyof typeof IOS_IAP_PRODUCT_IDS] | 
+                           typeof ANDROID_IAP_PRODUCT_IDS[keyof typeof ANDROID_IAP_PRODUCT_IDS];
+
+/**
+ * Get the correct product ID for the current platform
+ * @param tier The subscription tier (starter, pro, enterprise)
+ * @param interval The billing interval (monthly, yearly)
+ * @returns The platform-specific product ID or null if not in native environment
+ */
+export const getPlatformProductId = (
+  tier: 'starter' | 'pro' | 'enterprise',
+  interval: 'monthly' | 'yearly'
+): string | null => {
+  const key = `${tier}_${interval}` as keyof typeof IOS_IAP_PRODUCT_IDS;
+  
+  if (isDespiaAndroid()) {
+    return ANDROID_IAP_PRODUCT_IDS[key] || null;
+  }
+  
+  if (isDespiaIOS()) {
+    return IOS_IAP_PRODUCT_IDS[key] || null;
+  }
+  
+  return null;
+};
 
 /**
  * IAP success callback data provided by Despia native runtime

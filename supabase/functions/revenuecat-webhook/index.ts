@@ -58,13 +58,22 @@ interface RevenueCatWebhookPayload {
 
 // Map RevenueCat product IDs to our tier names
 const productToTier: Record<string, string> = {
-  // App Store Connect product IDs (matching your configuration)
+  // iOS App Store product IDs
   "fitconnect.starter.monthly": "starter",
   "fitconnect.starter.annual": "starter",
   "fitconnect.pro.monthly": "pro",
   "fitconnect.pro.annual": "pro",
   "fitconnect.enterprise.monthly": "enterprise",
   "fitconnect.enterprise.annual": "enterprise",
+  
+  // Android Google Play product IDs (just the product ID part, before the colon)
+  "starter.monthly.play": "starter",
+  "starter.annual.play": "starter",
+  "pro.monthly.play": "pro",
+  "pro.annual.play": "pro",
+  "enterprise.monthly.play": "enterprise",
+  "enterprise.annual.play": "enterprise",
+  
   // Legacy underscore format for backwards compatibility
   "fitconnect_starter_monthly": "starter",
   "fitconnect_starter_yearly": "starter",
@@ -140,6 +149,7 @@ serve(async (req) => {
       id: event.id, 
       appUserId: event.app_user_id,
       productId: event.product_id,
+      store: event.store,
       environment: event.environment 
     });
 
