@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useState, useMemo, useCallback, R
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
+import { clearLastRoute } from "@/hooks/useRouteRestoration";
+import { isDespia } from "@/lib/despia";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
@@ -54,7 +56,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
+    // Handle focus events for Despia native app
+    const handleFocus = () => {
+      if (isDespia()) {
+        supabase.auth.startAutoRefresh();
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          setSession(session);
+          setUser(session?.user ?? null);
+          if (session?.user) {
+            setTimeout(() => fetchUserRole(session.user.id), 0);
+          }
+        });
+      }
+    };
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
     
     // Start auto refresh on mount
     supabase.auth.startAutoRefresh();
@@ -100,6 +117,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
       supabase.auth.stopAutoRefresh();
       subscription.unsubscribe();
     };
@@ -155,6 +173,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setSession(null);
     setUser(null);
     setRole(null);
+    // Clear saved route so next login starts fresh
+    clearLastRoute();
   }, []);
 
   const value = useMemo(() => ({
