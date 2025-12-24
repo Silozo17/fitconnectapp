@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Save, LogOut, AlertTriangle, Info, Bell, User, Heart, Globe, Plug, Shield } from "lucide-react";
+import { Loader2, Save, LogOut, AlertTriangle, Info, Bell, User, Heart, Globe, Plug, Shield, Briefcase } from "lucide-react";
 import { HealthTagInput } from "@/components/dashboard/clients/HealthTagInput";
 import { CurrencySelector } from "@/components/shared/CurrencySelector";
 import { LanguageSelector } from "@/components/shared/LanguageSelector";
@@ -24,6 +24,7 @@ import { AvatarPicker } from "@/components/avatars/AvatarPicker";
 import { AvatarShowcase } from "@/components/avatars/AvatarShowcase";
 import { useSelectedAvatar } from "@/hooks/useAvatars";
 import { useTranslation } from "react-i18next";
+import BecomeCoachModal from "@/components/shared/BecomeCoachModal";
 
 import WearableConnectionList from "@/components/integrations/WearableConnectionList";
 import { HealthDataPrivacySettings } from "@/components/dashboard/clients/HealthDataPrivacySettings";
@@ -122,6 +123,22 @@ const ClientSettings = () => {
   const { data: selectedAvatar } = useSelectedAvatar('client');
   const { connectCalendar, disconnectCalendar, toggleSync, getConnection, isLoading: calendarLoading } = useCalendarSync();
   const [showAppleCalendarModal, setShowAppleCalendarModal] = useState(false);
+  const [showBecomeCoachModal, setShowBecomeCoachModal] = useState(false);
+  
+  // Check if user already has a coach profile
+  const { data: hasCoachProfile } = useQuery({
+    queryKey: ["has-coach-profile", user?.id],
+    queryFn: async () => {
+      if (!user) return false;
+      const { data } = await supabase
+        .from("coach_profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      return !!data;
+    },
+    enabled: !!user?.id,
+  });
   
   // Track initial data for dirty state detection
   const initialProfileRef = useRef<ClientProfile | null>(null);
@@ -604,6 +621,30 @@ const ClientSettings = () => {
               <div className="space-y-6">
                 <AccountSecuritySection role="client" />
                 
+                {/* Become a Coach Section */}
+                {!hasCoachProfile && (
+                  <Card className="border-orange-500/30 bg-gradient-to-br from-orange-500/5 to-transparent">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Briefcase className="w-5 h-5 text-orange-500" />
+                        Become a Coach
+                      </CardTitle>
+                      <CardDescription>
+                        Want to offer your fitness services? Register as a coach to start training clients on the platform.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Button 
+                        onClick={() => setShowBecomeCoachModal(true)}
+                        className="bg-orange-500 hover:bg-orange-600 text-white"
+                      >
+                        <Briefcase className="w-4 h-4 mr-2" />
+                        Register as Coach
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+                
                 <Card>
                   <CardHeader>
                     <CardTitle>{t('account.title')}</CardTitle>
@@ -618,6 +659,11 @@ const ClientSettings = () => {
                 </Card>
               </div>
             )}
+            
+            <BecomeCoachModal 
+              open={showBecomeCoachModal} 
+              onOpenChange={setShowBecomeCoachModal} 
+            />
           </div>
         </div>
       </div>

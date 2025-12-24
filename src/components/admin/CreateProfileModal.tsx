@@ -80,6 +80,14 @@ const CreateProfileModal = ({
 
         if (error) throw error;
 
+        // Explicitly ensure client role exists (trigger should handle, but be safe)
+        await supabase
+          .from("user_roles")
+          .upsert(
+            { user_id: user.id, role: "client" as const },
+            { onConflict: 'user_id,role', ignoreDuplicates: true }
+          );
+
         toast.success("Client profile created successfully");
       } else {
         // Check if coach profile already exists
@@ -117,6 +125,14 @@ const CreateProfileModal = ({
         });
 
         if (error) throw error;
+
+        // Explicitly ensure coach role exists (trigger should handle, but be safe)
+        await supabase
+          .from("user_roles")
+          .upsert(
+            { user_id: user.id, role: "coach" as const },
+            { onConflict: 'user_id,role', ignoreDuplicates: true }
+          );
 
         toast.success("Coach profile created successfully");
       }
