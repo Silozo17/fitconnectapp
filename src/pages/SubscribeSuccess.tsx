@@ -2,20 +2,26 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { CheckCircle, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAdminView } from "@/contexts/AdminContext";
 
 export default function SubscribeSuccess() {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const [isVerifying, setIsVerifying] = useState(true);
+  const { refreshProfiles } = useAdminView();
 
   useEffect(() => {
-    // Give a short delay to let webhook process
-    const timer = setTimeout(() => {
+    const refreshAndVerify = async () => {
+      // Refresh profiles so ViewSwitcher updates immediately
+      await refreshProfiles();
       setIsVerifying(false);
-    }, 2000);
+    };
+
+    // Give a short delay to let webhook process, then refresh profiles
+    const timer = setTimeout(refreshAndVerify, 2000);
 
     return () => clearTimeout(timer);
-  }, [sessionId]);
+  }, [sessionId, refreshProfiles]);
 
   if (isVerifying) {
     return (
