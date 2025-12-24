@@ -8,7 +8,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
-  const { user, role, loading } = useAuth();
+  const { user, role, allRoles, loading } = useAuth();
   const location = useLocation();
 
   // Show loading while auth is initializing or while role is being fetched
@@ -25,17 +25,21 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   }
 
   // Admin can access all routes
-  if (role === "admin") {
+  if (allRoles.includes("admin")) {
     return <>{children}</>;
   }
 
-  // If user exists but role couldn't be fetched, redirect to home
-  if (!role) {
+  // If user exists but no roles could be fetched, redirect to home
+  if (allRoles.length === 0) {
     return <Navigate to="/" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(role)) {
-    return <Navigate to="/" replace />;
+  // Check if user has ANY of the allowed roles
+  if (allowedRoles) {
+    const hasPermission = allRoles.some(userRole => allowedRoles.includes(userRole));
+    if (!hasPermission) {
+      return <Navigate to="/" replace />;
+    }
   }
 
   return <>{children}</>;
