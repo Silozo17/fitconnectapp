@@ -157,6 +157,8 @@ const CoachOnboarding = () => {
   const verificationSubmitRef = useRef<(() => Promise<void>) | null>(null);
 
   const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
     displayName: "",
     bio: "",
     experienceYears: "",
@@ -320,6 +322,12 @@ const CoachOnboarding = () => {
     
     const currentStepName = STEPS[currentStep];
     
+    // Validate Basic Info step - require first name
+    if (currentStepName === "Basic Info" && !formData.firstName.trim()) {
+      toast.error("Please enter your first name");
+      return;
+    }
+    
     // Validate specialties step - require at least one specialty
     if (currentStepName === "Specialties" && formData.coachTypes.length === 0) {
       toast.error("Please select at least one specialty");
@@ -454,6 +462,16 @@ const CoachOnboarding = () => {
 
       if (error) throw error;
 
+      // Also update user_profiles with first/last name
+      const displayName = formData.firstName ? `${formData.firstName}${formData.lastName ? ` ${formData.lastName}` : ""}` : null;
+      await supabase
+        .from("user_profiles")
+        .update({
+          first_name: formData.firstName || null,
+          last_name: formData.lastName || null,
+          display_name: displayName,
+        })
+        .eq("user_id", user.id);
       // If paid tier selected, handle payment
       if (isPaidTier) {
         const tier = formData.subscriptionTier as SubscriptionTier;
@@ -620,13 +638,41 @@ const CoachOnboarding = () => {
               />
             </div>
 
+            {/* First and Last Name */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <div>
+                <Label htmlFor="firstName" className="text-foreground text-sm">
+                  First Name <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="firstName"
+                  value={formData.firstName}
+                  onChange={(e) => handleInputChange("firstName", e.target.value)}
+                  className="mt-1.5 bg-secondary border-border text-foreground h-9 sm:h-10"
+                  placeholder="John"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="lastName" className="text-foreground text-sm">Last Name</Label>
+                <Input
+                  id="lastName"
+                  value={formData.lastName}
+                  onChange={(e) => handleInputChange("lastName", e.target.value)}
+                  className="mt-1.5 bg-secondary border-border text-foreground h-9 sm:h-10"
+                  placeholder="Doe"
+                />
+              </div>
+            </div>
+
             <div>
               <Label htmlFor="displayName" className="text-foreground text-sm">Display Name</Label>
+              <p className="text-xs text-muted-foreground mt-0.5 mb-1.5">Your professional coaching name shown to clients</p>
               <Input
                 id="displayName"
                 value={formData.displayName}
                 onChange={(e) => handleInputChange("displayName", e.target.value)}
-                className="mt-1.5 bg-secondary border-border text-foreground h-9 sm:h-10"
+                className="bg-secondary border-border text-foreground h-9 sm:h-10"
                 placeholder="Coach Mike"
               />
             </div>
