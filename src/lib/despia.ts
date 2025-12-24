@@ -326,14 +326,27 @@ export const syncHealthKitData = async (days: number = 7): Promise<HealthKitConn
   try {
     console.log(`[Despia HealthKit] Syncing ${days} days of health data...`);
     
-    // Read multiple health types
+    /**
+     * KNOWN LIMITATION: Sleep data (HKCategoryTypeIdentifierSleepAnalysis)
+     * 
+     * Sleep analysis is a CATEGORY type, not a QUANTITY type. 
+     * Despia's HealthKitManager uses HKStatisticsCollectionQuery which only 
+     * works with quantity types. Attempting to query sleep data causes:
+     * 
+     * Exception: -[HKQuantityType supportsStatisticOptions:] 
+     * "Statistics cannot be calculated for samples of type HKCategoryTypeIdentifierSleepAnalysis"
+     * 
+     * To support sleep data, Despia would need to use HKSampleQuery instead.
+     * Until Despia adds support, sleep data must be entered manually or 
+     * synced through a different provider (Fitbit, Garmin).
+     */
     const types = [
       'HKQuantityTypeIdentifierStepCount',
       'HKQuantityTypeIdentifierActiveEnergyBurned',
       'HKQuantityTypeIdentifierDistanceWalkingRunning',
       'HKQuantityTypeIdentifierHeartRate',
-      'HKCategoryTypeIdentifierSleepAnalysis',
       'HKQuantityTypeIdentifierAppleExerciseTime'
+      // NOTE: HKCategoryTypeIdentifierSleepAnalysis is NOT supported - causes native crash
     ].join(',');
     
     const response = await despia(
