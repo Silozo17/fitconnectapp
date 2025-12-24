@@ -222,7 +222,7 @@ export interface HealthKitConnectionResult {
  * 
  * The SDK automatically handles permission requests on first read attempt.
  * 
- * @returns Object with success status and any error message
+ * @returns Object with success status, error message, and any health data
  */
 export const checkHealthKitConnection = async (): Promise<HealthKitConnectionResult> => {
   if (!isDespia()) {
@@ -245,25 +245,44 @@ export const checkHealthKitConnection = async (): Promise<HealthKitConnectionRes
       ['healthkitResponse']
     );
     
-    console.log('[Despia HealthKit] Response received:', response);
+    console.log('[Despia HealthKit] Response received:', JSON.stringify(response, null, 2));
     
-    // If we get here without throwing, the SDK accepted the request
-    // Check if we got a valid response object
+    // Strictly check if we got actual data back
     if (response && typeof response === 'object') {
-      // The response should contain healthkitResponse key with data
       const healthData = (response as Record<string, unknown>).healthkitResponse;
       
-      if (healthData !== undefined) {
-        console.log('[Despia HealthKit] Successfully read health data:', healthData);
+      // Check if healthkitResponse exists and has actual data
+      if (healthData !== undefined && healthData !== null) {
+        // If it's an array, check it's not empty
+        if (Array.isArray(healthData)) {
+          if (healthData.length > 0) {
+            console.log('[Despia HealthKit] Successfully read health data:', healthData);
+            return { success: true, data: healthData };
+          } else {
+            // Empty array means permission granted but no data recorded yet
+            console.log('[Despia HealthKit] Permission granted, but no step data recorded yet');
+            return { success: true, data: [] };
+          }
+        }
+        
+        // If it's an object with data
+        if (typeof healthData === 'object' && Object.keys(healthData as object).length > 0) {
+          console.log('[Despia HealthKit] Successfully read health data object:', healthData);
+          return { success: true, data: healthData };
+        }
+        
+        // Data exists but might be empty object
+        console.log('[Despia HealthKit] Permission granted (empty data)');
         return { success: true, data: healthData };
       }
     }
     
-    // If response is null/undefined but no error was thrown, 
-    // permissions might have been denied or there's no data
-    // We still consider this a success for connection purposes
-    console.log('[Despia HealthKit] Read completed (may be empty data)');
-    return { success: true };
+    // If response is null/undefined, the SDK timed out or permission was denied
+    console.warn('[Despia HealthKit] No response received - permission may have been denied');
+    return { 
+      success: false, 
+      error: 'No response from Apple Health. Please check Settings → Privacy & Security → Health → [App Name] and enable all permissions.' 
+    };
     
   } catch (e) {
     console.error('[Despia HealthKit] Error during read attempt:', e);
@@ -273,11 +292,21 @@ export const checkHealthKitConnection = async (): Promise<HealthKitConnectionRes
     
     // Check for common HealthKit error patterns
     if (errorMessage.includes('denied') || errorMessage.includes('authorization')) {
-      return { success: false, error: 'Permission denied. Please enable Health access in Settings.' };
+      return { 
+        success: false, 
+        error: 'Permission denied. Please go to Settings → Privacy & Security → Health and enable access for this app.' 
+      };
     }
     
     if (errorMessage.includes('unavailable') || errorMessage.includes('not available')) {
       return { success: false, error: 'HealthKit is not available on this device.' };
+    }
+    
+    if (errorMessage.includes('timeout')) {
+      return { 
+        success: false, 
+        error: 'Connection timed out. Please ensure HealthKit permissions are enabled in Settings.' 
+      };
     }
     
     return { success: false, error: errorMessage || 'Failed to connect to Apple Health' };
