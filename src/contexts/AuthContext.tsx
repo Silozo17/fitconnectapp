@@ -11,6 +11,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   role: AppRole | null;
+  allRoles: AppRole[];
   loading: boolean;
   signUp: (email: string, password: string, role: AppRole) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
@@ -24,6 +25,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<AppRole | null>(null);
+  const [allRoles, setAllRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchUserRole = async (userId: string) => {
@@ -40,6 +42,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .map(r => r.role)
         .sort((a, b) => roleOrder.indexOf(a) - roleOrder.indexOf(b));
       setRole(sortedRoles[0]);
+      setAllRoles(sortedRoles);
+    } else {
+      setAllRoles([]);
     }
   };
 
@@ -103,6 +108,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }, 0);
         } else {
           setRole(null);
+          setAllRoles([]);
         }
         
         setLoading(false);
@@ -179,6 +185,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setSession(null);
     setUser(null);
     setRole(null);
+    setAllRoles([]);
     // Clear saved route so next login starts fresh
     clearLastRoute();
   }, []);
@@ -193,12 +200,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     user,
     session,
     role,
+    allRoles,
     loading,
     signUp,
     signIn,
     signOut,
     refreshRole,
-  }), [user, session, role, loading, signUp, signIn, signOut, refreshRole]);
+  }), [user, session, role, allRoles, loading, signUp, signIn, signOut, refreshRole]);
 
   return (
     <AuthContext.Provider value={value}>
