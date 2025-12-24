@@ -24,12 +24,19 @@ interface BadgeStats {
   progressPhotos: number;
   challengesCompleted: number;
   challengesJoined: number;
+  challengesWon: number;
   xpTotal: number;
+  currentLevel: number;
   badgesEarned: number;
+  leaderboardRank: number;
+  goalsAchieved: number;
+  macroDays: number;
   stepsTotal: number;
   caloriesTotal: number;
   distanceTotal: number;
   activeMinutesTotal: number;
+  wearableWorkoutCount: number;
+  sleepHoursTotal: number;
   devicesConnected: number;
   coachConnected: boolean;
 }
@@ -52,10 +59,15 @@ const calculateBadgeProgress = (
     target = criteria.value;
   } else {
     // Fallback to legacy {key: value} format
-    const legacyKeys = ['workout_count', 'streak_days', 'progress_logs', 'progress_count', 
+    const legacyKeys = [
+      'workout_count', 'streak_days', 'progress_logs', 'progress_count', 
       'photo_count', 'challenge_count', 'challenge_completed', 'challenge_joined',
-      'xp_threshold', 'badges_earned', 'steps_total', 'calories_total', 
-      'distance_total', 'active_minutes_total', 'devices_connected', 'coach_connected'];
+      'challenge_won', 'xp_threshold', 'level_reached', 'badges_earned', 
+      'leaderboard_entry', 'leaderboard_rank', 'goal_achieved',
+      'nutrition_days', 'meal_days', 'macro_days',
+      'steps_total', 'calories_total', 'distance_total', 'active_minutes_total', 
+      'wearable_workout_count', 'sleep_hours_total', 'devices_connected', 'coach_connected'
+    ];
     
     for (const key of legacyKeys) {
       if (criteria[key] !== undefined) {
@@ -71,12 +83,17 @@ const calculateBadgeProgress = (
   let current = 0;
 
   switch (criteriaType) {
+    // Workout criteria
     case 'workout_count':
       current = stats.workoutCount;
       break;
+    
+    // Streak criteria
     case 'streak_days':
       current = stats.habitStreak;
       break;
+    
+    // Progress criteria
     case 'progress_logs':
     case 'progress_count':
       current = stats.progressEntries;
@@ -84,6 +101,8 @@ const calculateBadgeProgress = (
     case 'photo_count':
       current = stats.progressPhotos;
       break;
+    
+    // Challenge criteria
     case 'challenge_count':
     case 'challenge_completed':
       current = stats.challengesCompleted;
@@ -91,12 +110,45 @@ const calculateBadgeProgress = (
     case 'challenge_joined':
       current = stats.challengesJoined;
       break;
+    case 'challenge_won':
+      current = stats.challengesWon;
+      break;
+    
+    // XP and level criteria
     case 'xp_threshold':
       current = stats.xpTotal;
       break;
+    case 'level_reached':
+      current = stats.currentLevel;
+      break;
+    
+    // Badge collection criteria
     case 'badges_earned':
       current = stats.badgesEarned;
       break;
+    
+    // Leaderboard criteria
+    case 'leaderboard_entry':
+      current = stats.leaderboardRank > 0 ? 1 : 0;
+      break;
+    case 'leaderboard_rank':
+      // For rank, lower is better, so invert the logic
+      current = stats.leaderboardRank > 0 && stats.leaderboardRank <= target ? target : 0;
+      break;
+    
+    // Goal criteria
+    case 'goal_achieved':
+      current = stats.goalsAchieved;
+      break;
+    
+    // Nutrition criteria
+    case 'nutrition_days':
+    case 'meal_days':
+    case 'macro_days':
+      current = stats.macroDays;
+      break;
+    
+    // Wearable criteria
     case 'steps_total':
       current = stats.stepsTotal;
       break;
@@ -109,12 +161,28 @@ const calculateBadgeProgress = (
     case 'active_minutes_total':
       current = stats.activeMinutesTotal;
       break;
+    case 'wearable_workout_count':
+      current = stats.wearableWorkoutCount;
+      break;
+    case 'sleep_hours_total':
+      current = stats.sleepHoursTotal;
+      break;
     case 'devices_connected':
       current = stats.devicesConnected;
       break;
+    
+    // Coach connection
     case 'coach_connected':
       current = stats.coachConnected ? 1 : 0;
       break;
+    
+    // Special workout types (time-based, not yet tracked)
+    case 'early_workout':
+    case 'late_workout':
+    case 'weekend_workouts':
+      current = 0; // Not yet implemented
+      break;
+    
     default:
       return undefined;
   }
@@ -158,12 +226,19 @@ export function BadgeGrid() {
     progressPhotos: userStats?.progressPhotos ?? 0,
     challengesCompleted: userStats?.challengesCompleted ?? 0,
     challengesJoined: userStats?.challengesJoined ?? 0,
+    challengesWon: userStats?.challengesWon ?? 0,
     xpTotal: userStats?.xpTotal ?? 0,
+    currentLevel: userStats?.currentLevel ?? 1,
     badgesEarned: earnedCount,
+    leaderboardRank: userStats?.leaderboardRank ?? 0,
+    goalsAchieved: userStats?.goalsAchieved ?? 0,
+    macroDays: userStats?.macroDays ?? 0,
     stepsTotal: userStats?.stepsTotal ?? 0,
     caloriesTotal: userStats?.caloriesTotal ?? 0,
     distanceTotal: userStats?.distanceTotal ?? 0,
     activeMinutesTotal: userStats?.activeMinutesTotal ?? 0,
+    wearableWorkoutCount: userStats?.wearableWorkoutCount ?? 0,
+    sleepHoursTotal: userStats?.sleepHoursTotal ?? 0,
     devicesConnected: userStats?.devicesConnected ?? 0,
     coachConnected: userStats?.coachConnected ?? false,
   };

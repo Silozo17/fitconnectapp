@@ -35,6 +35,7 @@ export interface Badge {
   xp_reward: number;
   criteria: Record<string, any>;
   is_active: boolean;
+  is_challenge_exclusive?: boolean | null;
   created_at: string;
 }
 

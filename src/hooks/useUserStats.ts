@@ -12,14 +12,18 @@ export interface UserStats {
   leaderboardRank: number;
   challengesCompleted: number;
   challengesJoined: number;
+  challengesWon: number;
   isCoach: boolean;
   badgesEarned: number;
   currentLevel: number;
+  goalsAchieved: number;
   // Wearable-based stats
   stepsTotal: number;
   caloriesTotal: number;
   distanceTotal: number;
   activeMinutesTotal: number;
+  wearableWorkoutCount: number;
+  sleepHoursTotal: number;
   devicesConnected: number;
   coachConnected: boolean;
 }
@@ -108,6 +112,15 @@ export function useUserStats() {
         .from('challenge_participants')
         .select('*', { count: 'exact', head: true })
         .eq('client_id', clientId || '');
+
+      // Get won challenges (completed challenges that have ended)
+      const { data: wonChallenges } = await supabase
+        .from('challenge_participants')
+        .select('challenge:challenges!inner(end_date)')
+        .eq('client_id', clientId || '')
+        .eq('status', 'completed')
+        .lte('challenges.end_date', new Date().toISOString());
+      const challengesWon = wonChallenges?.length || 0;
       
       // Get badges earned
       const { count: badgesEarned } = await supabase
@@ -115,11 +128,20 @@ export function useUserStats() {
         .select('*', { count: 'exact', head: true })
         .eq('client_id', clientId || '');
       
-      // Get wearable data totals using rpc or skip if table not available
+      // Get goals achieved count from XP transactions
+      const { count: goalsAchieved } = await supabase
+        .from('xp_transactions')
+        .select('*', { count: 'exact', head: true })
+        .eq('client_id', clientId || '')
+        .eq('source', 'goal_achieved');
+      
+      // Get wearable data totals - initialize with defaults
       let stepsTotal = 0;
       let caloriesTotal = 0;
       let distanceTotal = 0;
       let activeMinutesTotal = 0;
+      let wearableWorkoutCount = 0;
+      let sleepHoursTotal = 0;
       let devicesConnected = 0;
       
       try {
@@ -151,13 +173,17 @@ export function useUserStats() {
         leaderboardRank: leaderboardRank + 1, // 1-indexed
         challengesCompleted: challengesCompleted || 0,
         challengesJoined: challengesJoined || 0,
+        challengesWon,
         isCoach: !!coachProfile,
         badgesEarned: badgesEarned || 0,
         currentLevel: xpData?.current_level || 1,
+        goalsAchieved: goalsAchieved || 0,
         stepsTotal,
         caloriesTotal,
         distanceTotal,
         activeMinutesTotal,
+        wearableWorkoutCount,
+        sleepHoursTotal,
         devicesConnected: devicesConnected || 0,
         coachConnected: (coachConnectionCount || 0) > 0,
       };

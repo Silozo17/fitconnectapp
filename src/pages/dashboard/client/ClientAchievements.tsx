@@ -7,6 +7,7 @@ import { AchievementShareCard } from '@/components/gamification/AchievementShare
 import { AvatarShowcase } from '@/components/avatars/AvatarShowcase';
 import { AvatarPicker } from '@/components/avatars/AvatarPicker';
 import { useSelectedAvatar } from '@/hooks/useAvatars';
+import { useAutoAwardClientBadges } from '@/hooks/useAutoAwardClientBadges';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,9 @@ export default function ClientAchievements() {
   const { data: transactions, isLoading: transactionsLoading } = useXPTransactions(50);
   const { data: xpData } = useClientXP();
   const { data: selectedAvatar } = useSelectedAvatar('client');
+  
+  // Automatically award badges when criteria are met
+  useAutoAwardClientBadges();
   
   return (
     <ClientDashboardLayout>
