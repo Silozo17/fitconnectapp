@@ -243,9 +243,25 @@ export const useSyncAllWearables = () => {
         wearable_connection_id: null;
       }> = [];
 
+      // For cumulative metrics (steps, calories, distance, active_minutes), use MAX value
+      // HealthKit returns running totals throughout the day, so the highest value is the latest total
+      const cumulativeTypes = ['steps', 'calories', 'distance', 'active_minutes'];
+
       for (const [dateStr, types] of Object.entries(aggregatedData)) {
-        for (const [dataType, { sum, count }] of Object.entries(types)) {
-          const value = dataType === 'heart_rate' ? Math.round(sum / count) : sum;
+        for (const [dataType, { sum, count, maxValue }] of Object.entries(types)) {
+          let value: number;
+          
+          if (cumulativeTypes.includes(dataType) && maxValue !== undefined && maxValue > 0) {
+            // Use MAX for cumulative metrics - this is the latest running total
+            value = maxValue;
+            console.log(`[useSyncAllWearables] ${dateStr} ${dataType}: using MAX value ${maxValue} (sum was ${sum})`);
+          } else if (dataType === 'heart_rate') {
+            // Average for heart rate
+            value = Math.round(sum / count);
+          } else {
+            // Sum for other types
+            value = sum;
+          }
 
           healthDataSyncEntries.push({
             client_id: clientId,

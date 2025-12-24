@@ -36,7 +36,7 @@ export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
           earned 
             ? `${rarityColors.bg} ${rarityColors.border}` 
             : 'bg-muted/30 border-muted grayscale opacity-60',
-          badge.rarity === 'legendary' && earned && 'animate-pulse'
+          badge.rarity === 'legendary' && earned && 'ring-2 ring-yellow-400/50 shadow-lg shadow-yellow-500/20'
         )}
       >
         {!earned && (
