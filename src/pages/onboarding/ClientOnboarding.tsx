@@ -397,7 +397,7 @@ const ClientOnboarding = () => {
               <p className="text-sm text-muted-foreground mt-1.5">Tell us a bit about yourself.</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
               <div>
                 <Label htmlFor="firstName" className="text-foreground text-sm">
                   First Name <span className="text-destructive">*</span>
@@ -406,7 +406,7 @@ const ClientOnboarding = () => {
                   id="firstName"
                   value={formData.firstName}
                   onChange={(e) => handleInputChange("firstName", e.target.value)}
-                  className="mt-1 bg-secondary border-border text-foreground h-9 sm:h-10"
+                  className="mt-1 bg-secondary border-border text-foreground h-10 sm:h-11"
                   placeholder="John"
                   required
                 />
@@ -417,7 +417,7 @@ const ClientOnboarding = () => {
                   id="lastName"
                   value={formData.lastName}
                   onChange={(e) => handleInputChange("lastName", e.target.value)}
-                  className="mt-1 bg-secondary border-border text-foreground h-9 sm:h-10"
+                  className="mt-1 bg-secondary border-border text-foreground h-10 sm:h-11"
                   placeholder="Doe"
                 />
               </div>
@@ -467,7 +467,7 @@ const ClientOnboarding = () => {
               <p className="text-sm text-muted-foreground mt-1.5">This helps coaches create personalized plans.</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
               <div>
                 <Label htmlFor="height" className="text-foreground text-sm">Height (cm)</Label>
                 <Input
@@ -475,7 +475,7 @@ const ClientOnboarding = () => {
                   type="number"
                   value={formData.heightCm}
                   onChange={(e) => handleInputChange("heightCm", e.target.value)}
-                  className="mt-1 bg-secondary border-border text-foreground h-9 sm:h-10"
+                  className="mt-1 bg-secondary border-border text-foreground h-10 sm:h-11"
                   placeholder="175"
                 />
               </div>
@@ -486,7 +486,7 @@ const ClientOnboarding = () => {
                   type="number"
                   value={formData.weightKg}
                   onChange={(e) => handleInputChange("weightKg", e.target.value)}
-                  className="mt-1 bg-secondary border-border text-foreground h-9 sm:h-10"
+                  className="mt-1 bg-secondary border-border text-foreground h-10 sm:h-11"
                   placeholder="70"
                 />
               </div>
@@ -508,7 +508,7 @@ const ClientOnboarding = () => {
               <p className="text-sm text-muted-foreground mt-1.5">Select all that apply.</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 sm:gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
               {FITNESS_GOALS.map((goal) => {
                 const IconComponent = goal.icon;
                 return (
@@ -548,7 +548,7 @@ const ClientOnboarding = () => {
 
             <div>
               <Label className="text-foreground text-sm mb-2 block">Dietary Restrictions</Label>
-              <div className="flex flex-wrap gap-1.5 sm:gap-2">
+              <div className="flex flex-wrap gap-2 sm:gap-2.5 md:gap-3">
                 {DIETARY_RESTRICTIONS.map((item) => (
                   <button
                     key={item.id}
