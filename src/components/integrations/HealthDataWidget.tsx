@@ -1,14 +1,15 @@
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Footprints, Heart, Moon, Flame, Activity, Clock, Watch, RefreshCw } from "lucide-react";
+import { Footprints, Heart, Moon, Flame, Activity, Clock, Watch, RefreshCw, Smartphone } from "lucide-react";
 import { useHealthData, HealthDataType } from "@/hooks/useHealthData";
 import { useWearables } from "@/hooks/useWearables";
 import { useSyncAllWearables } from "@/hooks/useSyncAllWearables";
 import { useWearableAutoSync } from "@/hooks/useWearableAutoSync";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, differenceInHours } from "date-fns";
+import { isDespia } from "@/lib/despia";
 
 const metrics: {
   type: HealthDataType;
@@ -77,6 +78,15 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
 
   const hasConnectedDevice = connections && connections.length > 0;
   const hasData = data && data.length > 0;
+
+  // Check if Apple Health needs iOS sync
+  const hasAppleHealth = connections?.some(c => c.provider === 'apple_health');
+  const isDespiaEnv = isDespia();
+  const isIOSNative = isDespiaEnv && /iPad|iPhone|iPod/i.test(navigator.userAgent);
+  const needsIOSSync = hasAppleHealth && !isIOSNative;
+  
+  // Check if sync is stale (more than 1 hour old)
+  const isSyncStale = lastSyncedAt ? differenceInHours(new Date(), lastSyncedAt) >= 1 : true;
 
   const handleSync = async () => {
     try {
@@ -183,7 +193,10 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
           </div>
           <div className="flex items-center gap-2">
             {lastSyncedAt && (
-              <span className="text-xs text-muted-foreground">
+              <span className={cn(
+                "text-xs",
+                isSyncStale ? "text-amber-500" : "text-muted-foreground"
+              )}>
                 {formatDistanceToNow(lastSyncedAt, { addSuffix: true })}
               </span>
             )}
@@ -201,6 +214,14 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
         </div>
       </CardHeader>
       <CardContent>
+        {needsIOSSync && isSyncStale && (
+          <div className="flex items-center gap-2 p-2 mb-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+            <Smartphone className="w-4 h-4 text-amber-500 shrink-0" />
+            <p className="text-xs text-amber-600 dark:text-amber-400">
+              Open the app on your iPhone to sync Apple Health data
+            </p>
+          </div>
+        )}
         <div className={cn(
           "grid gap-2 sm:gap-3",
           compact ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-2 sm:grid-cols-3"
