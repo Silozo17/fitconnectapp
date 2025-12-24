@@ -1,6 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables, TablesInsert } from '@/integrations/supabase/types';
+import { toast } from 'sonner';
+import { triggerHaptic } from '@/lib/despia';
+import { checkIsFirstProgressPhoto } from '@/hooks/useFirstTimeTracker';
 
 export type ClientProgress = Tables<'client_progress'>;
 export type ClientProgressInsert = TablesInsert<'client_progress'>;
@@ -62,11 +65,24 @@ export const useMyProgress = () => {
   });
 };
 
-export const useCreateProgress = () => {
+// Pass celebration callback from component that has access to useCelebration
+export const useCreateProgress = (callbacks?: {
+  onFirstPhoto?: () => void;
+}) => {
   const queryClient = useQueryClient();
   
   return useMutation({
     mutationFn: async (progress: ClientProgressInsert) => {
+      // Check if this will be the first photo BEFORE inserting
+      const hasPhotos = progress.photo_urls && 
+        Array.isArray(progress.photo_urls) && 
+        progress.photo_urls.length > 0;
+      
+      let isFirstPhoto = false;
+      if (hasPhotos) {
+        isFirstPhoto = await checkIsFirstProgressPhoto(progress.client_id);
+      }
+      
       const { data, error } = await supabase
         .from('client_progress')
         .insert([progress])
@@ -74,11 +90,23 @@ export const useCreateProgress = () => {
         .single();
       
       if (error) throw error;
-      return data;
+      return { ...data, isFirstPhoto };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['client-progress'] });
       queryClient.invalidateQueries({ queryKey: ['my-progress'] });
+      queryClient.invalidateQueries({ queryKey: ['first-time-progress-photos'] });
+      queryClient.invalidateQueries({ queryKey: ['user-stats'] });
+      
+      // Haptic feedback for progress logged
+      triggerHaptic('success');
+      
+      // Check for first photo achievement
+      if (data.isFirstPhoto && callbacks?.onFirstPhoto) {
+        callbacks.onFirstPhoto();
+      } else {
+        toast.success('Progress logged!');
+      }
     },
   });
 };

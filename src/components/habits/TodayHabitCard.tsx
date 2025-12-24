@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { HabitWithStreak, getHabitCategory, useLogHabit, useUnlogHabit } from "@/hooks/useHabits";
+import { useCelebration, StreakMilestone } from "@/contexts/CelebrationContext";
 
 interface TodayHabitCardProps {
   habit: HabitWithStreak;
@@ -28,7 +29,12 @@ const getCategoryIcon = (iconName: string, className: string = "h-6 w-6") => {
 const TodayHabitCard = ({ habit }: TodayHabitCardProps) => {
   const { t } = useTranslation("client");
   const [isAnimating, setIsAnimating] = useState(false);
-  const logHabit = useLogHabit();
+  const { showFirstTimeAchievement, showStreakMilestone } = useCelebration();
+  
+  const logHabit = useLogHabit({
+    onFirstHabit: () => showFirstTimeAchievement('first_habit'),
+    onStreakMilestone: (days: StreakMilestone, habitName: string) => showStreakMilestone(days, habitName),
+  });
   const unlogHabit = useUnlogHabit();
   
   const category = getHabitCategory(habit.category);
@@ -81,7 +87,11 @@ const TodayHabitCard = ({ habit }: TodayHabitCardProps) => {
       unlogHabit.mutate(habit.todayLog.id);
     } else {
       setIsAnimating(true);
-      await logHabit.mutateAsync({ habitId: habit.id });
+      await logHabit.mutateAsync({ 
+        habitId: habit.id, 
+        habitName: habit.name,
+        previousStreak: currentStreak 
+      });
       setTimeout(() => setIsAnimating(false), 600);
     }
   };

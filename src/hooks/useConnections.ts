@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { triggerHaptic } from "@/lib/despia";
+import { checkIsFirstConnection } from "@/hooks/useFirstTimeTracker";
 
 export interface UserConnection {
   id: string;
@@ -386,6 +388,8 @@ export const useConnections = () => {
         return false;
       }
 
+      // Haptic feedback for sending request
+      triggerHaptic('light');
       toast.success("Connection request sent!");
       fetchConnections();
       return true;
@@ -396,9 +400,17 @@ export const useConnections = () => {
     }
   };
 
-  // Accept connection request
-  const acceptRequest = async (connectionId: string): Promise<boolean> => {
+  // Accept connection request - accepts optional callback for first connection celebration
+  const acceptRequest = async (
+    connectionId: string,
+    onFirstConnection?: () => void
+  ): Promise<boolean> => {
+    if (!user) return false;
+    
     try {
+      // Check if this is the first connection BEFORE accepting
+      const isFirst = await checkIsFirstConnection(user.id);
+      
       const { error } = await supabase
         .from("user_connections")
         .update({ status: "accepted", responded_at: new Date().toISOString() })
@@ -406,7 +418,16 @@ export const useConnections = () => {
 
       if (error) throw error;
 
-      toast.success("Connection accepted!");
+      // Haptic feedback for accepting
+      triggerHaptic('success');
+      
+      // Trigger first connection celebration if applicable
+      if (isFirst && onFirstConnection) {
+        onFirstConnection();
+      } else {
+        toast.success("Connection accepted!");
+      }
+      
       fetchConnections();
       return true;
     } catch (error) {

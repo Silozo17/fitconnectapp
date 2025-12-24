@@ -2,12 +2,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { triggerConfetti, confettiPresets } from "@/lib/confetti";
 import { triggerHaptic } from "@/lib/despia";
+import { useCelebration, StreakMilestone } from "@/contexts/CelebrationContext";
+import { checkIsFirstHabitLog } from "@/hooks/useFirstTimeTracker";
 
 // Streak milestones that trigger celebrations
 const STREAK_MILESTONES = [7, 30, 100] as const;
-type StreakMilestone = typeof STREAK_MILESTONES[number];
 
 export interface Habit {
   id: string;
@@ -300,26 +300,19 @@ const checkStreakMilestone = (newStreak: number): StreakMilestone | null => {
   return null;
 };
 
-// Helper to trigger appropriate celebration for streak milestone
-const triggerStreakCelebration = (milestone: StreakMilestone) => {
-  const preset = milestone >= 100 
-    ? confettiPresets.streakLegendary 
-    : milestone >= 30 
-      ? confettiPresets.streakMonth 
-      : confettiPresets.streakWeek;
-  
-  triggerConfetti(preset);
-  triggerHaptic(milestone >= 30 ? 'success' : 'light');
-};
-
 // Mutation to log a habit (client)
-export const useLogHabit = () => {
+// Pass celebration callbacks from component that has access to useCelebration
+export const useLogHabit = (callbacks?: {
+  onFirstHabit?: () => void;
+  onStreakMilestone?: (days: StreakMilestone, habitName: string) => void;
+}) => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   
   return useMutation({
-    mutationFn: async ({ habitId, notes, previousStreak = 0 }: { 
+    mutationFn: async ({ habitId, habitName, notes, previousStreak = 0 }: { 
       habitId: string; 
+      habitName?: string;
       notes?: string;
       previousStreak?: number;
     }) => {
@@ -331,6 +324,9 @@ export const useLogHabit = () => {
         .single();
       
       if (!clientProfile) throw new Error('Client profile not found');
+      
+      // Check if this is the first habit BEFORE logging
+      const isFirst = await checkIsFirstHabitLog(clientProfile.id);
       
       const today = new Date().toISOString().split('T')[0];
       
@@ -350,18 +346,30 @@ export const useLogHabit = () => {
       
       if (error) throw error;
       
-      // Return data with streak info for celebration check
-      return { ...data, previousStreak };
+      // Return data with streak info and first-time flag
+      return { ...data, previousStreak, isFirst, habitName };
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['my-habits'] });
+      queryClient.invalidateQueries({ queryKey: ['first-time-habit-logs'] });
+      
+      // Haptic feedback for every habit completion
+      triggerHaptic('light');
+      
+      // Check for first-time achievement
+      if (data.isFirst && callbacks?.onFirstHabit) {
+        callbacks.onFirstHabit();
+        return; // Don't show other toasts for first habit
+      }
       
       // Check for streak milestone celebration
       const newStreak = (data.previousStreak || 0) + 1;
       const milestone = checkStreakMilestone(newStreak);
       
-      if (milestone) {
-        triggerStreakCelebration(milestone);
+      if (milestone && callbacks?.onStreakMilestone) {
+        callbacks.onStreakMilestone(milestone, data.habitName || 'Daily Habit');
+      } else if (milestone) {
+        // Fallback toast if no celebration callback
         toast.success(`${milestone}-day streak! 🔥`, {
           description: 'Keep up the amazing work!',
         });

@@ -4,16 +4,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useConnections } from "@/hooks/useConnections";
+import { useCelebration } from "@/contexts/CelebrationContext";
 import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
 
 const UserConnectionRequests = () => {
   const { pendingRequests, acceptRequest, rejectRequest, loading } = useConnections();
+  const { showFirstTimeAchievement } = useCelebration();
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   const handleAccept = async (id: string) => {
     setProcessingId(id);
-    await acceptRequest(id);
+    await acceptRequest(id, () => showFirstTimeAchievement('first_connection'));
     setProcessingId(null);
   };
 
