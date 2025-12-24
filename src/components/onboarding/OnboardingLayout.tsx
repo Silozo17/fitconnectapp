@@ -154,12 +154,12 @@ export function OnboardingLayout({
 
         {/* Progress Bar */}
         {!hideProgress && (
-          <div className={cn("px-4 pt-3 mx-auto w-full", maxWidthClass)}>
-            <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
+          <div className={cn("px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 mx-auto w-full", maxWidthClass)}>
+            <div className="flex items-center justify-between text-xs sm:text-sm text-muted-foreground mb-1.5 sm:mb-2">
               <span>Step {currentStep + 1} of {totalSteps}</span>
               <span>{Math.round(progressPercent)}%</span>
             </div>
-            <Progress value={progressPercent} className="h-1.5" />
+            <Progress value={progressPercent} className="h-1.5 sm:h-2" />
           </div>
         )}
 

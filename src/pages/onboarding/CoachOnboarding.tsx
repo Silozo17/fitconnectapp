@@ -650,7 +650,7 @@ const CoachOnboarding = () => {
               </div>
             </div>
 
-            <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-2">
+            <div className="space-y-4 max-h-[40vh] lg:max-h-[50vh] xl:max-h-[60vh] overflow-y-auto pr-2">
               {COACH_TYPE_CATEGORIES.map((category) => {
                 const CategoryIcon = category.icon;
                 const typesInCategory = getCoachTypesByCategory(category.id);
@@ -659,9 +659,9 @@ const CoachOnboarding = () => {
                   <div key={category.id}>
                     <div className="flex items-center gap-2 mb-2 sm:mb-3">
                       <CategoryIcon className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                      <h3 className="font-medium text-foreground text-sm">{category.label}</h3>
+                      <h3 className="font-medium text-foreground text-sm sm:text-base">{category.label}</h3>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
                       {typesInCategory.map((type) => {
                         const IconComponent = type.icon;
                         const isSelected = formData.coachTypes.includes(type.id);
@@ -1018,24 +1018,166 @@ const CoachOnboarding = () => {
           );
         }
         
-        // Non-iOS: Web version with Monthly + Annual options
-        return (
-          <div className="space-y-5">
-            <div className="text-center mb-4">
-              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">
-                Choose your plan
-              </h2>
-              <p className="text-muted-foreground text-sm mt-1.5">Swipe to browse. Upgrade anytime.</p>
+        // Non-iOS: Web version with responsive grid on desktop, carousel on mobile
+        const isMobileView = typeof window !== 'undefined' && window.innerWidth < 768;
+        
+        // Desktop grid layout - all plans visible at once
+        const renderDesktopGrid = () => (
+          <div className="hidden md:block">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+              {/* Free tier */}
+              {freeTier && (() => {
+                const Icon = freeTier.icon;
+                const isSelected = formData.subscriptionTier === freeTier.id;
+                return (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleInputChange("subscriptionTier", freeTier.id);
+                      setBillingInterval('monthly');
+                      setHasSelectedPlan(true);
+                    }}
+                    className={`w-full h-full p-4 lg:p-5 rounded-xl border-2 transition-all text-left relative hover:shadow-lg ${
+                      isSelected ? "border-primary bg-primary/10 shadow-md" : "border-border hover:border-muted-foreground"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center ${
+                        isSelected ? "bg-primary" : "bg-secondary"
+                      }`}>
+                        <Icon className={`w-5 h-5 lg:w-6 lg:h-6 ${isSelected ? "text-primary-foreground" : "text-muted-foreground"}`} />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-display font-bold text-foreground text-base lg:text-lg">{freeTier.name}</h3>
+                        <span className="text-xl lg:text-2xl font-bold text-primary">Free</span>
+                      </div>
+                      {isSelected && <Check className="w-6 h-6 text-primary" />}
+                    </div>
+                    <p className="text-muted-foreground text-sm mb-3">{freeTier.description}</p>
+                    <ul className="space-y-1">
+                      {freeTier.features.slice(0, 4).map((feature, i) => (
+                        <li key={i} className="text-xs lg:text-sm text-muted-foreground flex items-start gap-2">
+                          <Check className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                          <span className="break-words">{feature}</span>
+                        </li>
+                      ))}
+                      {freeTier.features.length > 4 && (
+                        <li className="text-sm text-primary font-medium">+{freeTier.features.length - 4} more</li>
+                      )}
+                    </ul>
+                  </button>
+                );
+              })()}
+              
+              {/* Paid tiers - each with Monthly + Annual stacked */}
+              {paidTiers.map((tier) => {
+                const Icon = tier.icon;
+                const tierConfig = SUBSCRIPTION_TIERS[tier.id as TierKey];
+                const monthlyPrice = tierConfig.prices.monthly.amount;
+                const yearlyPrice = tierConfig.prices.yearly.amount;
+                const yearlyMonthlyEquivalent = Math.round(yearlyPrice / 12);
+                const savings = tierConfig.prices.yearly.savings;
+                
+                const isSelectedMonthly = formData.subscriptionTier === tier.id && billingInterval === 'monthly';
+                const isSelectedYearly = formData.subscriptionTier === tier.id && billingInterval === 'yearly';
+                
+                return (
+                  <div key={tier.id} className="flex flex-col gap-3">
+                    {/* Monthly card */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleInputChange("subscriptionTier", tier.id);
+                        setBillingInterval('monthly');
+                        setHasSelectedPlan(true);
+                      }}
+                      className={`w-full p-4 lg:p-5 rounded-xl border-2 transition-all text-left relative hover:shadow-lg ${
+                        isSelectedMonthly ? "border-primary bg-primary/10 shadow-md" : "border-border hover:border-muted-foreground"
+                      }`}
+                    >
+                      {tier.popular && (
+                        <span className="absolute -top-2.5 right-3 px-3 py-1 bg-accent text-accent-foreground text-xs font-bold rounded-full">
+                          Popular
+                        </span>
+                      )}
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center ${
+                          isSelectedMonthly ? "bg-primary" : "bg-secondary"
+                        }`}>
+                          <Icon className={`w-5 h-5 lg:w-6 lg:h-6 ${isSelectedMonthly ? "text-primary-foreground" : "text-muted-foreground"}`} />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-display font-bold text-foreground text-base lg:text-lg">{tier.name}</h3>
+                          <span className="text-xl lg:text-2xl font-bold text-primary">£{monthlyPrice}<span className="text-sm text-muted-foreground">/mo</span></span>
+                        </div>
+                        {isSelectedMonthly && <Check className="w-6 h-6 text-primary" />}
+                      </div>
+                      <p className="text-muted-foreground text-sm mb-3">{tier.description}</p>
+                      <ul className="space-y-1">
+                        {tier.features.slice(0, 3).map((feature, i) => (
+                          <li key={i} className="text-xs lg:text-sm text-muted-foreground flex items-start gap-2">
+                            <Check className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                            <span className="break-words line-clamp-1">{feature}</span>
+                          </li>
+                        ))}
+                        {tier.features.length > 3 && (
+                          <li className="text-sm text-primary font-medium">+{tier.features.length - 3} more</li>
+                        )}
+                      </ul>
+                    </button>
+                    
+                    {/* Annual card with savings */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleInputChange("subscriptionTier", tier.id);
+                        setBillingInterval('yearly');
+                        setHasSelectedPlan(true);
+                      }}
+                      className={`w-full p-4 lg:p-5 rounded-xl border-2 transition-all text-left relative hover:shadow-lg ${
+                        isSelectedYearly ? "border-primary bg-primary/10 shadow-md" : "border-border hover:border-muted-foreground"
+                      }`}
+                    >
+                      {savings > 0 && (
+                        <span className="absolute -top-2.5 right-3 px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full">
+                          Save £{savings}
+                        </span>
+                      )}
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center ${
+                          isSelectedYearly ? "bg-primary" : "bg-secondary"
+                        }`}>
+                          <Icon className={`w-5 h-5 lg:w-6 lg:h-6 ${isSelectedYearly ? "text-primary-foreground" : "text-muted-foreground"}`} />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-display font-bold text-foreground text-base lg:text-lg">{tier.name} <span className="text-xs lg:text-sm font-normal text-muted-foreground">(Annual)</span></h3>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-xl lg:text-2xl font-bold text-primary">£{yearlyMonthlyEquivalent}<span className="text-sm text-muted-foreground">/mo</span></span>
+                            <span className="text-sm text-muted-foreground line-through">£{monthlyPrice}</span>
+                          </div>
+                        </div>
+                        {isSelectedYearly && <Check className="w-6 h-6 text-primary" />}
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-2">Billed annually at £{yearlyPrice}/year</p>
+                    </button>
+                  </div>
+                );
+              })}
             </div>
-
+          </div>
+        );
+        
+        // Mobile carousel layout
+        const renderMobileCarousel = () => (
+          <div className="md:hidden">
             <Carousel
               opts={{ align: "center", loop: true }}
               className="w-full"
             >
-              <CarouselContent className="-ml-2 md:-ml-4">
+              <CarouselContent className="-ml-2">
                 {/* Free tier - single card */}
                 {freeTier && (
-                  <CarouselItem className="pl-2 md:pl-4 basis-[85%] sm:basis-[70%] md:basis-1/2 lg:basis-1/3">
+                  <CarouselItem className="pl-2 basis-[85%]">
                     {(() => {
                       const Icon = freeTier.icon;
                       const isSelected = formData.subscriptionTier === freeTier.id;
@@ -1094,7 +1236,7 @@ const CoachOnboarding = () => {
                   const isSelectedYearly = formData.subscriptionTier === tier.id && billingInterval === 'yearly';
                   
                   return (
-                    <CarouselItem key={tier.id} className="pl-2 md:pl-4 basis-[85%] sm:basis-[70%] md:basis-1/2 lg:basis-1/3">
+                    <CarouselItem key={tier.id} className="pl-2 basis-[85%]">
                       <div className="flex flex-col gap-3">
                         {/* Monthly card */}
                         <button
@@ -1151,7 +1293,6 @@ const CoachOnboarding = () => {
                             isSelectedYearly ? "border-primary bg-primary/10" : "border-border hover:border-muted-foreground"
                           }`}
                         >
-                          {/* Savings badge */}
                           {savings > 0 && (
                             <span className="absolute -top-2 right-3 px-2 py-0.5 bg-green-500 text-white text-xs font-bold rounded-full">
                               Save £{savings}
@@ -1181,8 +1322,8 @@ const CoachOnboarding = () => {
               </CarouselContent>
             </Carousel>
 
-            {/* Dot indicators - clickable */}
-            <div className="flex justify-center gap-1.5 pt-2">
+            {/* Dot indicators - mobile only */}
+            <div className="flex justify-center gap-1.5 pt-3">
               {[freeTier, ...paidTiers].filter(Boolean).map((tier) => {
                 if (!tier) return null;
                 const isActive = formData.subscriptionTier === tier.id;
@@ -1203,12 +1344,29 @@ const CoachOnboarding = () => {
                 );
               })}
             </div>
+          </div>
+        );
+        
+        return (
+          <div className="space-y-5">
+            <div className="text-center mb-4 md:mb-6">
+              <h2 className="font-display text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">
+                Choose your plan
+              </h2>
+              <p className="text-muted-foreground text-sm md:text-base mt-1.5">
+                <span className="md:hidden">Swipe to browse. </span>Upgrade anytime.
+              </p>
+            </div>
+
+            {renderDesktopGrid()}
+            {renderMobileCarousel()}
             
             {/* Visual hint when no plan selected */}
             {!hasSelectedPlan && (
               <div className="text-center py-2">
                 <p className="text-sm text-amber-500 font-medium animate-pulse">
-                  👆 Tap a plan to select it
+                  <span className="md:hidden">👆 Swipe and tap to select a plan</span>
+                  <span className="hidden md:inline">👆 Click a plan to select it</span>
                 </p>
               </div>
             )}
@@ -1237,7 +1395,7 @@ const CoachOnboarding = () => {
         onBack={handleBack}
         footerActions={getFooterActions()}
         hideFooter={currentStep === 4}
-        maxWidth={currentStep === 8 ? "xl" : "lg"}
+        maxWidth={currentStep === 8 ? "2xl" : currentStep === 1 ? "xl" : "lg"}
         backDisabled={isNavigating}
         skipDisabled={isNavigating}
       >
