@@ -18,16 +18,46 @@ export interface EnvironmentInfo {
   isAndroid: boolean;
 }
 
+// Compute initial values synchronously to prevent hydration flash
+const getInitialPlatformState = () => {
+  if (typeof navigator === 'undefined' || typeof window === 'undefined') {
+    return { isIOS: false, isAndroid: false, isPWA: false, isDespiaEnv: false, isNativeApp: false };
+  }
+  
+  const ua = navigator.userAgent.toLowerCase();
+  const iOS = ua.includes('iphone') || ua.includes('ipad') || ua.includes('ipod');
+  const android = ua.includes('android');
+  const despiaEnv = isDespia();
+  const isCapacitor = !!(window as any).Capacitor;
+  const isCordova = !!(window as any).cordova;
+  const nativeApp = isCapacitor || isCordova;
+  
+  const isStandaloneMode = window.matchMedia("(display-mode: standalone)").matches;
+  const isIOSStandalone = (navigator as any).standalone === true;
+  const isFullscreen = window.matchMedia("(display-mode: fullscreen)").matches;
+  const pwa = (isStandaloneMode || isIOSStandalone || isFullscreen) && !nativeApp && !despiaEnv;
+  
+  return {
+    isIOS: iOS,
+    isAndroid: android,
+    isPWA: pwa,
+    isDespiaEnv: despiaEnv,
+    isNativeApp: nativeApp,
+  };
+};
+
+const initialPlatform = getInitialPlatformState();
+
 /**
  * Centralized environment detection hook.
  * Detects if running in browser, PWA, or native app context.
  */
 export const useEnvironment = (): EnvironmentInfo => {
-  const [isPWA, setIsPWA] = useState(false);
-  const [isNativeApp, setIsNativeApp] = useState(false);
-  const [isDespiaEnv, setIsDespiaEnv] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
-  const [isAndroid, setIsAndroid] = useState(false);
+  const [isPWA, setIsPWA] = useState(initialPlatform.isPWA);
+  const [isNativeApp, setIsNativeApp] = useState(initialPlatform.isNativeApp);
+  const [isDespiaEnv, setIsDespiaEnv] = useState(initialPlatform.isDespiaEnv);
+  const [isIOS, setIsIOS] = useState(initialPlatform.isIOS);
+  const [isAndroid, setIsAndroid] = useState(initialPlatform.isAndroid);
 
   useEffect(() => {
     const ua = navigator.userAgent.toLowerCase();

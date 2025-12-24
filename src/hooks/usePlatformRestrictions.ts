@@ -53,7 +53,8 @@ export const usePlatformRestrictions = (): PlatformRestrictions => {
       shouldHideMarketplace,
       shouldHideCoachMarketplace: shouldHideMarketplace,
       shouldHidePackagePurchasing: shouldHideMarketplace,
-      shouldHideCoachDiscovery: shouldHideMarketplace,
+      // Coach discovery is ALLOWED on native apps, only restricted on PWA
+      shouldHideCoachDiscovery: isPWA,
       // Payment-related restrictions only apply on iOS native (App Store rules)
       shouldHideWebPurchases: isIOSNative,
       shouldHidePricingPage: isIOSNative,

@@ -18,7 +18,7 @@ interface NavItem {
 
 const clientNavItemsConfig: NavItem[] = [
   { icon: Home, labelKey: "bottomNav.home", route: "/dashboard/client" },
-  { icon: Search, labelKey: "bottomNav.discover", route: "/dashboard/client/find-coaches", disabledOnIOS: true },
+  { icon: Search, labelKey: "bottomNav.discover", route: "/dashboard/client/find-coaches" },
   { icon: Calendar, labelKey: "bottomNav.plans", route: "/dashboard/client/plans" },
   { icon: MessageSquare, labelKey: "bottomNav.messages", route: "/dashboard/client/messages" },
   { icon: User, labelKey: "bottomNav.profile", route: "/dashboard/client/settings" },
@@ -115,7 +115,7 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
                 onClick={() => navigate(item.route)}
                 className={cn(
                   "flex items-center justify-center w-14 h-14 rounded-2xl transition-all duration-200",
-                  "touch-manipulation",
+                  "touch-manipulation will-change-transform",
                   active
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
