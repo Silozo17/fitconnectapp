@@ -236,13 +236,18 @@ export function ChallengeCard({ challenge, showJoinButton = true, showProgress =
         
         {isJoined && (
           <div className="space-y-2">
-            <div className="flex justify-between text-sm">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
               <span className="text-muted-foreground">{t('challenges.yourProgress')}</span>
-              <span className="font-medium">
-                {challenge.my_participation?.current_progress || 0} / {challenge.target_value} {challenge.target_unit}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">
+                  {challenge.my_participation?.current_progress || 0} / {challenge.target_value} {challenge.target_unit}
+                </span>
+                <span className="text-primary font-bold text-base">
+                  {Math.round(progress)}%
+                </span>
+              </div>
             </div>
-            <Progress value={progress} className="h-2" />
+            <Progress value={progress} className="h-2.5" />
             
             {showVerifiedSplit && (
               <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
@@ -258,6 +263,27 @@ export function ChallengeCard({ challenge, showJoinButton = true, showProgress =
                 )}
               </div>
             )}
+          </div>
+        )}
+        
+        {/* Progress preview for non-joined active challenges */}
+        {!isJoined && hasStarted && !hasEnded && showJoinButton && (
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+              <span className="text-muted-foreground">{t('challenges.goalProgress', 'Goal Progress')}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">
+                  0 / {challenge.target_value} {challenge.target_unit}
+                </span>
+                <span className="text-muted-foreground font-medium">
+                  0%
+                </span>
+              </div>
+            </div>
+            <Progress value={0} className="h-2.5 opacity-50" />
+            <p className="text-xs text-muted-foreground italic">
+              {t('challenges.joinToTrack', 'Join to start tracking your progress')}
+            </p>
           </div>
         )}
         

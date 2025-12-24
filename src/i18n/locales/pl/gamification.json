@@ -101,7 +101,9 @@
     "joinedBadge": "Dołączono",
     "requiresWearable": "Wymaga połączonego urządzenia",
     "comingSoon": "Wkrótce",
-    "joinChallenge": "Dołącz do wyzwania"
+    "joinChallenge": "Dołącz do wyzwania",
+    "goalProgress": "Postęp celu",
+    "joinToTrack": "Dołącz aby śledzić swój postęp"
   },
   "rewards": {
     "exclusiveReward": "Ekskluzywna nagroda",

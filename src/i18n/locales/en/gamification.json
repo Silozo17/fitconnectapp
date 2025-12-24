@@ -101,7 +101,9 @@
     "joinedBadge": "Joined",
     "requiresWearable": "Requires connected wearable device",
     "comingSoon": "Coming Soon",
-    "joinChallenge": "Join Challenge"
+    "joinChallenge": "Join Challenge",
+    "goalProgress": "Goal Progress",
+    "joinToTrack": "Join to start tracking your progress"
   },
   "rewards": {
     "exclusiveReward": "Exclusive Reward",
