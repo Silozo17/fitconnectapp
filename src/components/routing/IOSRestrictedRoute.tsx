@@ -1,18 +1,18 @@
 /**
- * Component that blocks access to iOS-restricted routes.
- * Shows a friendly message and redirects to dashboard.
+ * Component that blocks access to platform-restricted routes.
+ * Shows a friendly message for iOS, Android, and PWA users.
  */
 
 import { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
-import { useIOSRestrictions } from "@/hooks/useIOSRestrictions";
+import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Globe, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 
-interface IOSRestrictedRouteProps {
+interface PlatformRestrictedRouteProps {
   children: ReactNode;
   /** Type of restriction - determines which check to use */
   restrictionType: "marketplace" | "checkout" | "pricing" | "coaches";
@@ -20,25 +20,24 @@ interface IOSRestrictedRouteProps {
   redirectTo?: string;
 }
 
-export const IOSRestrictedRoute = ({
+export const PlatformRestrictedRoute = ({
   children,
   restrictionType,
   redirectTo,
-}: IOSRestrictedRouteProps) => {
+}: PlatformRestrictedRouteProps) => {
   const { t } = useTranslation("common");
   const {
-    isIOSNative,
-    shouldHideCoachMarketplace,
-    shouldHidePackagePurchasing,
+    shouldHideMarketplace,
     shouldHideWebPurchases,
     shouldHidePricingPage,
-  } = useIOSRestrictions();
+    shouldHideCoachMarketplace,
+  } = usePlatformRestrictions();
 
   // Determine if this route should be restricted
   const isRestricted = (() => {
     switch (restrictionType) {
       case "marketplace":
-        return shouldHidePackagePurchasing;
+        return shouldHideMarketplace;
       case "checkout":
         return shouldHideWebPurchases;
       case "pricing":
@@ -50,8 +49,8 @@ export const IOSRestrictedRoute = ({
     }
   })();
 
-  // If not iOS native or not restricted, render children normally
-  if (!isIOSNative || !isRestricted) {
+  // If not restricted, render children normally
+  if (!isRestricted) {
     return <>{children}</>;
   }
 
@@ -60,7 +59,7 @@ export const IOSRestrictedRoute = ({
     return <Navigate to={redirectTo} replace />;
   }
 
-  // Show friendly message for iOS users
+  // Show friendly message for restricted platform users
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="max-w-md w-full">
@@ -69,12 +68,12 @@ export const IOSRestrictedRoute = ({
             <Globe className="w-8 h-8 text-primary" />
           </div>
           <h2 className="font-display text-xl font-bold text-foreground">
-            {t("ios.featureNotAvailable", "Feature Not Available")}
+            {t("platform.webOnly.title", "Only available on website")}
           </h2>
           <p className="text-muted-foreground text-sm">
             {t(
-              "ios.visitWebsite",
-              "This feature is available on our website. Please visit getfitconnect.co.uk to access this content."
+              "platform.webOnly.routeDescription",
+              "This feature is available on our website. Please visit getfitconnect.co.uk in your browser to access this content."
             )}
           </p>
           <Button asChild variant="outline" className="w-full">
@@ -89,4 +88,7 @@ export const IOSRestrictedRoute = ({
   );
 };
 
-export default IOSRestrictedRoute;
+// Backwards compatibility alias
+export const IOSRestrictedRoute = PlatformRestrictedRoute;
+
+export default PlatformRestrictedRoute;

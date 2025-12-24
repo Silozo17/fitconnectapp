@@ -40,7 +40,8 @@ import { UserAvatar } from "@/components/shared/UserAvatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useSelectedAvatar } from "@/hooks/useAvatars";
-import { useIOSRestrictions } from "@/hooks/useIOSRestrictions";
+import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
+import { WebOnlyFeatureDialog } from "@/components/shared/WebOnlyFeatureDialog";
 import { Rarity } from "@/lib/avatar-utils";
 import {
   Collapsible,
@@ -158,12 +159,16 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
   const { data: selectedAvatar } = useSelectedAvatar('client');
   const { unreadCount } = useUnreadMessages();
   const { newPlans, pendingConnections } = useClientBadges();
-  const { isIOSNative } = useIOSRestrictions();
+  const { shouldHideMarketplace } = usePlatformRestrictions();
+  
+  // State for web-only feature dialog
+  const [showWebOnlyDialog, setShowWebOnlyDialog] = useState(false);
+  const [blockedFeatureName, setBlockedFeatureName] = useState("");
 
-  // Filter menu groups and items based on iOS restrictions
-  // Items with disabledOnIOS are kept but rendered as disabled
+  // Filter menu groups and items based on platform restrictions
+  // Items with disabledOnIOS are kept but rendered as disabled with popup
   const menuGroups = useMemo(() => {
-    if (!isIOSNative) return menuGroupsConfig;
+    if (!shouldHideMarketplace) return menuGroupsConfig;
 
     return menuGroupsConfig
       .filter(group => !group.hideOnIOS)
@@ -171,7 +176,7 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
         ...group,
         items: group.items.filter(item => !item.hideOnIOS),
       }));
-  }, [isIOSNative]);
+  }, [shouldHideMarketplace]);
 
   // Initialize open groups based on current path
   const getInitialOpenGroups = () => {
@@ -229,22 +234,28 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
     setOpenGroups((prev) => ({ ...prev, [groupId]: !prev[groupId] }));
   };
 
+  const handleRestrictedItemClick = (item: MenuItem) => {
+    setBlockedFeatureName(t(item.titleKey));
+    setShowWebOnlyDialog(true);
+  };
+
   const renderMenuItem = (item: MenuItem, indented = false, isCollapsed = false) => {
     const isActive = location.pathname === item.path;
     const badgeCount = getBadgeCount(item.badgeKey);
     const title = t(item.titleKey);
-    const isDisabledOnIOS = isIOSNative && item.disabledOnIOS;
+    const isDisabledOnPlatform = shouldHideMarketplace && item.disabledOnIOS;
 
     if (isCollapsed) {
       return (
         <Tooltip key={item.path} delayDuration={0}>
           <TooltipTrigger asChild>
-            {isDisabledOnIOS ? (
-              <div
-                className="flex items-center justify-center p-2.5 rounded-lg opacity-50 cursor-not-allowed"
+            {isDisabledOnPlatform ? (
+              <button
+                onClick={() => handleRestrictedItemClick(item)}
+                className="flex items-center justify-center p-2.5 rounded-lg opacity-50 cursor-pointer hover:bg-muted/50"
               >
                 <item.icon className="w-5 h-5 text-muted-foreground" />
-              </div>
+              </button>
             ) : (
               <Link
                 to={item.path}
@@ -263,27 +274,47 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
             )}
           </TooltipTrigger>
           <TooltipContent side="right" className="font-medium">
-            {isDisabledOnIOS ? `${title} (Web Only)` : title}
+            {isDisabledOnPlatform ? `${title} (Web Only)` : title}
           </TooltipContent>
         </Tooltip>
       );
     }
 
-    if (isDisabledOnIOS) {
+    if (isDisabledOnPlatform) {
       return (
-        <div
+        <button
           key={item.path}
+          onClick={() => handleRestrictedItemClick(item)}
           className={cn(
-            "flex items-center gap-3 px-3 py-2 rounded-lg opacity-50 cursor-not-allowed",
+            "flex items-center gap-3 px-3 py-2 rounded-lg opacity-60 cursor-pointer hover:bg-muted/50 w-full text-left",
             indented && "ml-4"
           )}
         >
           <item.icon className="w-4 h-4 flex-shrink-0 text-muted-foreground" />
           <span className="font-medium text-sm flex-1 text-muted-foreground">{title}</span>
-          <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">Web Only</span>
-        </div>
+          <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">Web</span>
+        </button>
       );
     }
+
+    return (
+      <Link
+        key={item.path}
+        to={item.path}
+        className={cn(
+          "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors relative",
+          indented && "ml-4",
+          isActive
+            ? "bg-primary text-primary-foreground"
+            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+        )}
+      >
+        <item.icon className="w-4 h-4 flex-shrink-0" />
+        <span className="font-medium text-sm flex-1">{title}</span>
+        {badgeCount > 0 && <SidebarBadge count={badgeCount} />}
+      </Link>
+    );
+  };
 
     return (
       <Link
@@ -518,6 +549,13 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Web Only Feature Dialog */}
+      <WebOnlyFeatureDialog
+        open={showWebOnlyDialog}
+        onOpenChange={setShowWebOnlyDialog}
+        featureName={blockedFeatureName}
+      />
     </TooltipProvider>
   );
 };

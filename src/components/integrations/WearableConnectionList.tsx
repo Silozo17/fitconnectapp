@@ -22,43 +22,53 @@ const WearableConnectionList = () => {
   } = useWearables();
 
   // Platform-aware provider configuration
-  // Apple Health: only visible on iOS native and web (hidden on Android native)
-  // Health Connect: only visible on Android native and web (hidden on iOS native)
+  // STRICT RULES:
+  // - Apple Health: ONLY visible on iOS native (NOT on web, NOT on Android)
+  // - Health Connect: ONLY visible on Android native (NOT on web, NOT on iOS)
+  // - Fitbit/Garmin: Always available (OAuth-based, works everywhere)
   const providers = useMemo(() => {
     const isIOSNative = isDespia && isIOS;
     const isAndroidNative = isDespia && isAndroid;
-    const isWeb = !isDespia;
 
-    const allProviders = [
-      // Apple Health: Hide on Android native, show on iOS native and web
-      ...(!isAndroidNative ? [{
+    const allProviders: Array<{
+      id: WearableProvider;
+      name: string;
+      icon: React.ReactNode;
+      color: string;
+      disabled?: boolean;
+      disabledMessage?: string;
+    }> = [];
+
+    // Apple Health: ONLY on iOS native - never on web, never on Android
+    if (isIOSNative) {
+      allProviders.push({
         id: "apple_health" as WearableProvider,
         name: "Apple Health",
         icon: <Apple className="w-6 h-6 text-white" />,
         color: "bg-gradient-to-br from-pink-500 to-red-500",
-        disabled: isWeb, // Disabled on web (needs app install)
-        disabledMessage: isWeb 
-          ? t('integrations.installIOSApp', 'Install the iOS app to connect')
-          : undefined,
-      }] : []),
-      // Health Connect: Hide on iOS native, show on Android native and web
-      ...(!isIOSNative ? [{
+        disabled: false,
+      });
+    }
+
+    // Health Connect: ONLY on Android native - never on web, never on iOS
+    if (isAndroidNative) {
+      allProviders.push({
         id: "health_connect" as WearableProvider,
         name: "Health Connect",
         icon: <Activity className="w-6 h-6 text-white" />,
         color: "bg-gradient-to-br from-green-500 to-teal-500",
-        disabled: isWeb, // Disabled on web (needs app install)
-        disabledMessage: isWeb 
-          ? t('integrations.installAndroidApp', 'Install the Android app to connect')
-          : undefined,
-      }] : []),
+        disabled: false,
+      });
+    }
+
+    // Fitbit and Garmin: Always available (OAuth-based, works on all platforms)
+    allProviders.push(
       {
         id: "fitbit" as WearableProvider,
         name: "Fitbit",
         icon: <Heart className="w-6 h-6 text-white" />,
         color: "bg-gradient-to-br from-teal-500 to-cyan-500",
         disabled: false,
-        disabledMessage: undefined,
       },
       {
         id: "garmin" as WearableProvider,
@@ -66,12 +76,11 @@ const WearableConnectionList = () => {
         icon: <Watch className="w-6 h-6 text-white" />,
         color: "bg-gradient-to-br from-blue-600 to-blue-800",
         disabled: false,
-        disabledMessage: undefined,
-      },
-    ];
+      }
+    );
 
     return allProviders;
-  }, [isDespia, isIOS, isAndroid, t]);
+  }, [isDespia, isIOS, isAndroid]);
 
   if (isLoading) {
     return (
