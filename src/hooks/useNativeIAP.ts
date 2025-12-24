@@ -127,24 +127,19 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
           isPolling: false,
           isPurchasing: false,
         }));
-        
-        triggerHaptic('success');
-        toast.success('Subscription activated!', {
-          description: `Your ${expectedTier} plan is now active.`,
-        });
 
         // Invalidate queries to refresh subscription data throughout the app
         queryClient.invalidateQueries({ queryKey: ['coach-profile'] });
         queryClient.invalidateQueries({ queryKey: ['platform-subscription'] });
         queryClient.invalidateQueries({ queryKey: ['feature-access'] });
         
-        // Call the success callback if provided
+        // Call the success callback if provided (handles celebration/navigation)
         options?.onPurchaseComplete?.(expectedTier);
         return;
       }
 
       if (pollAttemptsRef.current >= MAX_POLL_ATTEMPTS) {
-        // Max attempts reached, stop polling
+        // Max attempts reached, stop polling but still proceed
         if (pollIntervalRef.current) {
           clearInterval(pollIntervalRef.current);
         }
@@ -152,15 +147,19 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
           ...prev,
           isPolling: false,
           isPurchasing: false,
-          error: 'Subscription confirmation is taking longer than expected. Please check back later.',
         }));
         
-        toast.info('Subscription pending', {
-          description: 'Your purchase is being processed. It may take a few minutes to reflect.',
+        // Still call success callback - payment was successful, just webhook is slow
+        // The subscription will be active when webhook processes
+        toast.info('Processing your subscription...', {
+          description: 'Your payment was successful! Your plan will be active momentarily.',
         });
+        
+        // Navigate user forward even if confirmation is pending
+        options?.onPurchaseComplete?.(expectedTier);
       }
     }, POLL_INTERVAL_MS);
-  }, [pollSubscriptionStatus]);
+  }, [pollSubscriptionStatus, queryClient, options]);
 
   /**
    * Handle IAP success callback from Despia
