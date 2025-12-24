@@ -30,6 +30,8 @@ export interface AIDocumentAnalysis {
   summary: string;
 }
 
+export type AIAnalysisStatus = 'pending' | 'analyzing' | 'completed' | 'failed';
+
 export interface VerificationDocument {
   id: string;
   coach_id: string;
@@ -49,6 +51,9 @@ export interface VerificationDocument {
   ai_flagged: boolean | null;
   ai_flagged_reasons: string[] | null;
   ai_analyzed_at: string | null;
+  // New status tracking fields
+  ai_analysis_status: AIAnalysisStatus | null;
+  ai_analysis_error: string | null;
 }
 
 export interface CoachVerificationStatus {
@@ -107,7 +112,7 @@ export const useVerificationDocuments = () => {
   });
 };
 
-// Analyze document with AI
+// Analyze document with AI - with status tracking
 export const useAIDocumentAnalysis = () => {
   const queryClient = useQueryClient();
 
@@ -123,35 +128,81 @@ export const useAIDocumentAnalysis = () => {
       documentType: DocumentType;
       fileName: string;
     }) => {
-      // Call AI analysis edge function
-      const { data, error } = await supabase.functions.invoke('ai-document-verification', {
-        body: { documentUrl, documentType, fileName },
-      });
-
-      if (error) throw error;
-
-      const analysis = data.analysis as AIDocumentAnalysis;
-
-      // Update document with AI analysis results
-      const { error: updateError } = await supabase
+      // Set status to 'analyzing' before calling AI
+      await supabase
         .from("coach_verification_documents")
         .update({
-          ai_analysis: analysis as any,
-          ai_confidence_score: analysis.confidenceScore,
-          ai_flagged: analysis.shouldFlag,
-          ai_flagged_reasons: analysis.flagReasons,
-          ai_analyzed_at: new Date().toISOString(),
+          ai_analysis_status: 'analyzing',
+          ai_analysis_error: null,
         })
         .eq("id", documentId);
 
-      if (updateError) throw updateError;
+      try {
+        // Call AI analysis edge function
+        const { data, error } = await supabase.functions.invoke('ai-document-verification', {
+          body: { documentUrl, documentType, fileName },
+        });
 
-      return analysis;
+        if (error) {
+          // Update status to 'failed' with error
+          await supabase
+            .from("coach_verification_documents")
+            .update({
+              ai_analysis_status: 'failed',
+              ai_analysis_error: error.message || 'AI analysis failed',
+            })
+            .eq("id", documentId);
+          throw error;
+        }
+
+        // Check for error in response body
+        if (data.error) {
+          await supabase
+            .from("coach_verification_documents")
+            .update({
+              ai_analysis_status: 'failed',
+              ai_analysis_error: data.error,
+            })
+            .eq("id", documentId);
+          throw new Error(data.error);
+        }
+
+        const analysis = data.analysis as AIDocumentAnalysis;
+
+        // Update document with AI analysis results - status 'completed'
+        const { error: updateError } = await supabase
+          .from("coach_verification_documents")
+          .update({
+            ai_analysis: analysis as any,
+            ai_confidence_score: analysis.confidenceScore,
+            ai_flagged: analysis.shouldFlag,
+            ai_flagged_reasons: analysis.flagReasons,
+            ai_analyzed_at: new Date().toISOString(),
+            ai_analysis_status: 'completed',
+            ai_analysis_error: null,
+          })
+          .eq("id", documentId);
+
+        if (updateError) throw updateError;
+
+        return analysis;
+      } catch (err) {
+        // Ensure status is set to failed on any error
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        await supabase
+          .from("coach_verification_documents")
+          .update({
+            ai_analysis_status: 'failed',
+            ai_analysis_error: errorMessage,
+          })
+          .eq("id", documentId);
+        throw err;
+      }
     },
     onSuccess: (analysis) => {
       queryClient.invalidateQueries({ queryKey: ["verification-documents"] });
       queryClient.invalidateQueries({ queryKey: ["coach-verification-documents"] });
-      
+
       if (analysis.shouldFlag) {
         toast.warning(`AI flagged document for review: ${analysis.flagReasons[0] || 'See details'}`);
       } else if (analysis.recommendation === 'approve') {
@@ -161,6 +212,8 @@ export const useAIDocumentAnalysis = () => {
       }
     },
     onError: (error) => {
+      queryClient.invalidateQueries({ queryKey: ["verification-documents"] });
+      queryClient.invalidateQueries({ queryKey: ["coach-verification-documents"] });
       console.error('AI analysis failed:', error);
       toast.error("AI analysis failed - manual review required");
     },
@@ -182,6 +235,25 @@ export const useUploadVerificationDocument = () => {
       documentType: DocumentType;
     }) => {
       if (!user) throw new Error("Not authenticated");
+
+      // Validate file size (max 10MB)
+      const MAX_FILE_SIZE = 10 * 1024 * 1024;
+      if (file.size > MAX_FILE_SIZE) {
+        throw new Error('File too large. Maximum size is 10MB.');
+      }
+
+      // Validate image dimensions for image files
+      if (file.type.startsWith('image/')) {
+        try {
+          const img = await createImageBitmap(file);
+          if (img.width < 400 || img.height < 400) {
+            throw new Error('Image resolution too low. Minimum 400x400 pixels for clear analysis.');
+          }
+        } catch (dimError) {
+          // If we can't check dimensions, continue anyway
+          console.warn('Could not validate image dimensions:', dimError);
+        }
+      }
 
       // Get coach profile
       const { data: profile } = await supabase
@@ -211,10 +283,9 @@ export const useUploadVerificationDocument = () => {
       if (signedError) throw signedError;
 
       // Store the file path (not signed URL) for permanent storage
-      // We'll generate signed URLs on-demand when needed
       const storedUrl = `verification/${user.id}/${fileName}`;
 
-      // Create document record with the storage path
+      // Create document record with the storage path and initial AI status
       const { data, error } = await supabase
         .from("coach_verification_documents")
         .insert({
@@ -223,6 +294,7 @@ export const useUploadVerificationDocument = () => {
           file_name: file.name,
           file_url: storedUrl,
           file_size: file.size,
+          ai_analysis_status: 'pending',
         })
         .select()
         .single();

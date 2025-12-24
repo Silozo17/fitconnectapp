@@ -27,6 +27,64 @@ interface DocumentAnalysis {
   summary: string;
 }
 
+// Retry logic with exponential backoff
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  maxRetries = 3
+): Promise<Response> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+
+      // Retry on 5xx errors and rate limits (not 402 which is credits)
+      if (response.status >= 500 || response.status === 429) {
+        const delay = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s
+        console.log(`Retry ${attempt + 1}/${maxRetries} after ${delay}ms (status: ${response.status})`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+
+      return response;
+    } catch (error) {
+      lastError = error as Error;
+      const delay = Math.pow(2, attempt) * 1000;
+      console.log(`Retry ${attempt + 1}/${maxRetries} after network error: ${lastError.message}`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+
+  throw lastError || new Error('Max retries exceeded');
+}
+
+// Convert image URL to base64
+async function fetchImageAsBase64(url: string): Promise<{ base64: string; mimeType: string }> {
+  console.log('Fetching document from URL...');
+  const response = await fetch(url);
+  
+  if (!response.ok) {
+    throw new Error(`Failed to fetch document: ${response.status} ${response.statusText}`);
+  }
+
+  const arrayBuffer = await response.arrayBuffer();
+  const uint8Array = new Uint8Array(arrayBuffer);
+  
+  // Convert to base64
+  let binary = '';
+  for (let i = 0; i < uint8Array.length; i++) {
+    binary += String.fromCharCode(uint8Array[i]);
+  }
+  const base64 = btoa(binary);
+
+  // Detect mime type
+  const contentType = response.headers.get('content-type') || 'image/jpeg';
+  console.log(`Document fetched: ${uint8Array.length} bytes, type: ${contentType}`);
+
+  return { base64, mimeType: contentType };
+}
+
 // Detailed validation rules for each document type
 const documentRules = {
   identity: {
@@ -155,6 +213,73 @@ const documentRules = {
   }
 };
 
+// Tool calling schema for structured output
+const analysisToolSchema = {
+  type: "function",
+  function: {
+    name: "document_analysis",
+    description: "Provide structured document verification analysis results",
+    parameters: {
+      type: "object",
+      properties: {
+        documentTypeMatch: {
+          type: "boolean",
+          description: "Whether the document matches the expected type"
+        },
+        extractedInfo: {
+          type: "object",
+          properties: {
+            holderName: { type: "string", description: "Name on the document" },
+            issuingAuthority: { type: "string", description: "Organization that issued the document" },
+            issueDate: { type: "string", description: "Date the document was issued" },
+            expiryDate: { type: "string", description: "Expiry date if applicable" },
+            documentNumber: { type: "string", description: "Document ID or certificate number" }
+          }
+        },
+        qualityAssessment: {
+          type: "object",
+          properties: {
+            isReadable: { type: "boolean", description: "Text is clearly readable" },
+            isComplete: { type: "boolean", description: "Full document is visible" },
+            hasWatermarks: { type: "boolean", description: "Has security features/watermarks" }
+          },
+          required: ["isReadable", "isComplete", "hasWatermarks"]
+        },
+        issues: {
+          type: "array",
+          items: { type: "string" },
+          description: "List of issues found with the document"
+        },
+        confidenceScore: {
+          type: "number",
+          minimum: 0,
+          maximum: 100,
+          description: "Confidence score 0-100"
+        },
+        shouldFlag: {
+          type: "boolean",
+          description: "Whether document should be flagged for manual review"
+        },
+        flagReasons: {
+          type: "array",
+          items: { type: "string" },
+          description: "Reasons for flagging"
+        },
+        recommendation: {
+          type: "string",
+          enum: ["approve", "review", "reject"],
+          description: "Final recommendation"
+        },
+        summary: {
+          type: "string",
+          description: "2-3 sentence human-readable summary"
+        }
+      },
+      required: ["documentTypeMatch", "qualityAssessment", "issues", "confidenceScore", "shouldFlag", "flagReasons", "recommendation", "summary"]
+    }
+  }
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -164,20 +289,83 @@ serve(async (req) => {
     const { documentUrl, documentType, fileName } = await req.json();
 
     if (!documentUrl || !documentType) {
-      throw new Error('Document URL and type are required');
+      return new Response(
+        JSON.stringify({ 
+          error: 'Document URL and type are required',
+          errorCode: 'INVALID_INPUT',
+          retryable: false
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
+      return new Response(
+        JSON.stringify({ 
+          error: 'AI service not configured',
+          errorCode: 'SERVICE_NOT_CONFIGURED',
+          retryable: false
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     console.log(`Analyzing document: ${documentType} - ${fileName}`);
 
+    // Check for PDF files - flag for manual review
+    const isPDF = fileName.toLowerCase().endsWith('.pdf') || documentUrl.includes('.pdf');
+    if (isPDF) {
+      console.log('PDF document detected - flagging for manual review');
+      const pdfAnalysis: DocumentAnalysis = {
+        documentTypeMatch: true,
+        extractedInfo: {},
+        qualityAssessment: {
+          isReadable: false,
+          isComplete: false,
+          hasWatermarks: false,
+        },
+        issues: ['PDF documents cannot be analyzed automatically'],
+        confidenceScore: 0,
+        shouldFlag: true,
+        flagReasons: ['PDF format requires manual review - AI cannot process multi-page documents'],
+        recommendation: 'review',
+        summary: 'This PDF document requires manual review. Please upload an image (JPG, PNG) for automatic analysis, or an admin will review the PDF manually.'
+      };
+      return new Response(
+        JSON.stringify({ analysis: pdfAnalysis }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Get the specific rules for this document type
     const rules = documentRules[documentType as keyof typeof documentRules];
     if (!rules) {
-      throw new Error(`Unknown document type: ${documentType}`);
+      return new Response(
+        JSON.stringify({ 
+          error: `Unknown document type: ${documentType}`,
+          errorCode: 'INVALID_DOCUMENT_TYPE',
+          retryable: false
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Fetch and convert image to base64
+    let imageData: { base64: string; mimeType: string };
+    try {
+      imageData = await fetchImageAsBase64(documentUrl);
+    } catch (fetchError) {
+      console.error('Failed to fetch document:', fetchError);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Could not access the document. It may have expired or been deleted.',
+          errorCode: 'DOCUMENT_FETCH_FAILED',
+          retryable: true,
+          details: 'Please try uploading the document again.'
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const systemPrompt = `You are an expert document verification analyst for a fitness coaching platform in the UK. Your task is to thoroughly analyze uploaded verification documents from coaches applying to be listed on the platform.
@@ -211,31 +399,10 @@ ${rules.tips}
 6. If document passes all checks and confidence is high (80%+), recommend APPROVE
 7. Be thorough but fair - coaches need these documents to work
 
-## Response Format
-You MUST respond with a valid JSON object (no markdown, no code blocks, just raw JSON) containing:
-{
-  "documentTypeMatch": boolean,
-  "extractedInfo": {
-    "holderName": string or null,
-    "issuingAuthority": string or null,
-    "issueDate": string or null,
-    "expiryDate": string or null,
-    "documentNumber": string or null
-  },
-  "qualityAssessment": {
-    "isReadable": boolean,
-    "isComplete": boolean,
-    "hasWatermarks": boolean
-  },
-  "issues": string[],
-  "confidenceScore": number (0-100),
-  "shouldFlag": boolean,
-  "flagReasons": string[],
-  "recommendation": "approve" | "review" | "reject",
-  "summary": string (2-3 sentence human-readable summary)
-}`;
+Use the document_analysis function to provide your structured assessment.`;
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    // Call AI with retry logic and tool calling for structured output
+    const response = await fetchWithRetry('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${LOVABLE_API_KEY}`,
@@ -250,87 +417,111 @@ You MUST respond with a valid JSON object (no markdown, no code blocks, just raw
             content: [
               {
                 type: 'text',
-                text: `Please analyze this ${documentType} document (filename: ${fileName}) and provide your verification assessment. Be thorough and check all the criteria listed in your instructions.`
+                text: `Please analyze this ${documentType} document (filename: ${fileName}) and provide your verification assessment using the document_analysis function.`
               },
               {
                 type: 'image_url',
                 image_url: {
-                  url: documentUrl
+                  url: `data:${imageData.mimeType};base64,${imageData.base64}`
                 }
               }
             ]
           }
         ],
+        tools: [analysisToolSchema],
+        tool_choice: { type: "function", function: { name: "document_analysis" } }
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error('AI Gateway error:', response.status, errorText);
-      
+
       if (response.status === 429) {
         return new Response(
-          JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
+          JSON.stringify({ 
+            error: 'AI service is busy. Please try again in a moment.',
+            errorCode: 'RATE_LIMITED',
+            retryable: true
+          }),
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       if (response.status === 402) {
         return new Response(
-          JSON.stringify({ error: 'AI credits exhausted. Please add funds.' }),
+          JSON.stringify({ 
+            error: 'AI service credits exhausted. Please contact support.',
+            errorCode: 'CREDITS_EXHAUSTED',
+            retryable: false
+          }),
           { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      
-      throw new Error(`AI analysis failed: ${response.status}`);
+
+      return new Response(
+        JSON.stringify({ 
+          error: 'AI analysis temporarily unavailable. Document flagged for manual review.',
+          errorCode: 'AI_SERVICE_ERROR',
+          retryable: true
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
+    console.log('AI response received');
 
-    if (!content) {
-      throw new Error('No response from AI');
-    }
-
-    console.log('AI response:', content);
-
-    // Parse the JSON response - handle potential markdown code blocks
+    // Parse the response - try tool calling first, then fallback to content
     let analysis: DocumentAnalysis;
-    try {
-      // Remove markdown code blocks if present
-      let jsonContent = content.trim();
-      if (jsonContent.startsWith('```json')) {
-        jsonContent = jsonContent.slice(7);
-      } else if (jsonContent.startsWith('```')) {
-        jsonContent = jsonContent.slice(3);
+
+    // Check for tool call response
+    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+    if (toolCall?.function?.name === 'document_analysis' && toolCall.function.arguments) {
+      try {
+        analysis = JSON.parse(toolCall.function.arguments);
+        console.log('Parsed from tool call successfully');
+      } catch (parseError) {
+        console.error('Failed to parse tool call arguments:', parseError);
+        analysis = createFallbackAnalysis('Tool call parsing failed');
       }
-      if (jsonContent.endsWith('```')) {
-        jsonContent = jsonContent.slice(0, -3);
+    } else {
+      // Fallback to content parsing if tool calling didn't work
+      const content = data.choices?.[0]?.message?.content;
+      if (!content) {
+        console.error('No content in AI response');
+        analysis = createFallbackAnalysis('No response from AI');
+      } else {
+        try {
+          // Remove markdown code blocks if present
+          let jsonContent = content.trim();
+          if (jsonContent.startsWith('```json')) {
+            jsonContent = jsonContent.slice(7);
+          } else if (jsonContent.startsWith('```')) {
+            jsonContent = jsonContent.slice(3);
+          }
+          if (jsonContent.endsWith('```')) {
+            jsonContent = jsonContent.slice(0, -3);
+          }
+          jsonContent = jsonContent.trim();
+
+          analysis = JSON.parse(jsonContent);
+          console.log('Parsed from content successfully');
+        } catch (parseError) {
+          console.error('Failed to parse AI content:', parseError);
+          analysis = createFallbackAnalysis('Failed to parse AI response');
+        }
       }
-      jsonContent = jsonContent.trim();
-      
-      analysis = JSON.parse(jsonContent);
-    } catch (parseError) {
-      console.error('Failed to parse AI response:', parseError);
-      // Return a fallback analysis indicating manual review needed
-      analysis = {
-        documentTypeMatch: false,
-        extractedInfo: {},
-        qualityAssessment: {
-          isReadable: false,
-          isComplete: false,
-          hasWatermarks: false,
-        },
-        issues: ['AI could not analyze document properly'],
-        confidenceScore: 0,
-        shouldFlag: true,
-        flagReasons: ['AI analysis failed - manual review required'],
-        recommendation: 'review',
-        summary: 'Document could not be analyzed automatically. Manual review required.'
-      };
     }
 
     // Ensure confidence score is within bounds
     analysis.confidenceScore = Math.max(0, Math.min(100, analysis.confidenceScore || 0));
+
+    // Ensure required fields exist
+    if (!analysis.qualityAssessment) {
+      analysis.qualityAssessment = { isReadable: false, isComplete: false, hasWatermarks: false };
+    }
+    if (!analysis.issues) analysis.issues = [];
+    if (!analysis.flagReasons) analysis.flagReasons = [];
 
     console.log('Document analysis complete:', analysis.recommendation, 'confidence:', analysis.confidenceScore);
 
@@ -342,8 +533,32 @@ You MUST respond with a valid JSON object (no markdown, no code blocks, just raw
     console.error('Error in ai-document-verification:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ 
+        error: errorMessage,
+        errorCode: 'INTERNAL_ERROR',
+        retryable: true,
+        details: 'An unexpected error occurred. The document has been flagged for manual review.'
+      }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
+
+// Helper to create a fallback analysis when AI fails
+function createFallbackAnalysis(reason: string): DocumentAnalysis {
+  return {
+    documentTypeMatch: false,
+    extractedInfo: {},
+    qualityAssessment: {
+      isReadable: false,
+      isComplete: false,
+      hasWatermarks: false,
+    },
+    issues: [reason],
+    confidenceScore: 0,
+    shouldFlag: true,
+    flagReasons: [`AI analysis incomplete: ${reason} - manual review required`],
+    recommendation: 'review',
+    summary: `Document could not be analyzed automatically (${reason}). Manual review required.`
+  };
+}
