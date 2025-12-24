@@ -53,7 +53,7 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   });
 
   const handleSubscribe = (tierKey: TierKey) => {
-    navigate(`/subscribe?tier=${tierKey}&billing=monthly`);
+    navigate(`/subscribe?tier=${tierKey}&billing=monthly&from=settings`);
   };
 
   const handleManageSubscription = async () => {

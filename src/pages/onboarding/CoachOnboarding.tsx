@@ -468,7 +468,7 @@ const CoachOnboarding = () => {
         
         // On web, redirect to web checkout
         toast.success("Profile saved! Complete your subscription to unlock all features.");
-        navigate(`/subscribe?tier=${formData.subscriptionTier}&billing=${billingInterval}`);
+        navigate(`/subscribe?tier=${formData.subscriptionTier}&billing=${billingInterval}&from=onboarding`);
       } else if (formData.alsoClient) {
         await refreshProfiles();
         toast.success("Profile completed! Welcome to FitConnect.");
