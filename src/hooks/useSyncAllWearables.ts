@@ -208,10 +208,11 @@ export const useSyncAllWearables = () => {
         // TODO: Implement Health Connect sync when available
       }
 
-      // Invalidate all relevant queries to refresh data
+      // Refetch all relevant queries to refresh data immediately
+      console.log('[useSyncAllWearables] Refetching all health-related queries...');
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["health-data"] }),
-        queryClient.invalidateQueries({ queryKey: ["wearable-connections"] }),
+        queryClient.refetchQueries({ queryKey: ["health-data"], exact: false }),
+        queryClient.refetchQueries({ queryKey: ["wearable-connections"], exact: false }),
         queryClient.invalidateQueries({ queryKey: ["habits"] }),
         queryClient.invalidateQueries({ queryKey: ["habit-logs"] }),
         queryClient.invalidateQueries({ queryKey: ["challenges"] }),
@@ -219,6 +220,7 @@ export const useSyncAllWearables = () => {
         queryClient.invalidateQueries({ queryKey: ["client-progress"] }),
         queryClient.invalidateQueries({ queryKey: ["client-badges"] }),
       ]);
+      console.log('[useSyncAllWearables] Query refetch complete');
 
       const totalDataPoints = totalSynced + clientSideDataPoints;
 
