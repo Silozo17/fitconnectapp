@@ -87,11 +87,45 @@ const ClientOnboarding = () => {
     const checkProfile = async () => {
       if (!user) return;
 
-      const { data } = await supabase
+      let { data } = await supabase
         .from("client_profiles")
         .select("id, onboarding_completed, onboarding_progress")
         .eq("user_id", user.id)
         .maybeSingle();
+
+      // If no profile exists, create one (handles legacy users with missing profiles)
+      if (!data) {
+        console.log("[ClientOnboarding] No profile found, creating one for user:", user.id);
+        
+        // Get user_profile info for username
+        const { data: userProfile } = await supabase
+          .from("user_profiles")
+          .select("id, username, first_name")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        
+        const { data: newProfile, error: createError } = await supabase
+          .from("client_profiles")
+          .insert({
+            user_id: user.id,
+            username: userProfile?.username || `user_${user.id.substring(0, 8)}`,
+            first_name: userProfile?.first_name || null,
+            user_profile_id: userProfile?.id || null,
+            onboarding_completed: false,
+          })
+          .select("id, onboarding_completed, onboarding_progress")
+          .single();
+        
+        if (createError) {
+          console.error("[ClientOnboarding] Failed to create profile:", createError);
+          toast.error("Failed to initialize profile. Please refresh and try again.");
+          setIsCheckingProfile(false);
+          return;
+        }
+        
+        data = newProfile;
+        console.log("[ClientOnboarding] Created new profile:", newProfile?.id);
+      }
 
       if (data?.onboarding_completed) {
         navigate("/dashboard/client");
@@ -239,10 +273,20 @@ const ClientOnboarding = () => {
     setIsSubmitting(true);
 
     try {
-      // Update client profile with all data including selected avatar
-      const { error } = await supabase
+      // Get user_profile info for username fallback
+      const { data: userProfile } = await supabase
+        .from("user_profiles")
+        .select("id, username")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      // Use UPSERT to ensure profile is created/updated even if missing
+      const { error, data: upsertResult } = await supabase
         .from("client_profiles")
-        .update({
+        .upsert({
+          user_id: user.id,
+          username: userProfile?.username || `user_${user.id.substring(0, 8)}`,
+          user_profile_id: userProfile?.id || null,
           first_name: formData.firstName || null,
           last_name: formData.lastName || null,
           age: formData.age ? parseInt(formData.age) : null,
@@ -254,10 +298,14 @@ const ClientOnboarding = () => {
           allergies: formData.allergies,
           selected_avatar_id: formData.selectedAvatarId,
           onboarding_completed: true,
+        }, {
+          onConflict: 'user_id'
         })
-        .eq("user_id", user.id);
+        .select();
 
       if (error) throw error;
+      
+      console.log("[ClientOnboarding] Profile upserted successfully:", upsertResult);
 
       // Also unlock the selected avatar for the user (add to user_avatars table)
       if (formData.selectedAvatarId) {
@@ -285,7 +333,7 @@ const ClientOnboarding = () => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [user, isNavigating, isSubmitting, formData, navigate]);
+  }, [user, isNavigating, isSubmitting, formData, navigate, queryClient]);
 
   if (isCheckingProfile) {
     return (
