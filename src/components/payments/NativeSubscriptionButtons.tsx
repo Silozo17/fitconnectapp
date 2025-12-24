@@ -8,7 +8,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { useNativeIAP, SubscriptionTier, BillingInterval } from '@/hooks/useNativeIAP';
-import { isDespia } from '@/lib/despia';
+import { isDespia, isDespiaAndroid } from '@/lib/despia';
 import { SUBSCRIPTION_TIERS, TierKey, normalizeTier, getTierPosition } from '@/lib/stripe-config';
 import { useNativePricing } from '@/hooks/useNativePricing';
 
@@ -38,9 +38,22 @@ export const NativeSubscriptionButtons = ({
 
   const activeTier = normalizeTier(currentTier);
   const currentPosition = getTierPosition(activeTier);
+  const isAndroid = isDespiaAndroid();
+
+  // On Android, Enterprise tier doesn't have yearly pricing
+  const isYearlyAvailable = (tierKey: string) => {
+    if (isAndroid && tierKey === 'enterprise') {
+      return false;
+    }
+    return true;
+  };
 
   const handlePurchase = async (tierKey: SubscriptionTier) => {
-    await purchase(tierKey, billingInterval);
+    // Force monthly for Enterprise on Android
+    const effectiveInterval = (isAndroid && tierKey === 'enterprise') 
+      ? 'monthly' 
+      : billingInterval;
+    await purchase(tierKey, effectiveInterval);
   };
 
   const getButtonText = (tierKey: TierKey) => {
@@ -98,15 +111,21 @@ export const NativeSubscriptionButtons = ({
 
         {/* Subscription tiers */}
         <div className="grid grid-cols-1 gap-4">
-          {purchasableTiers.map(({ key, tier }) => {
+        {purchasableTiers.map(({ key, tier }) => {
             const isCurrentTier = activeTier === key;
             const isProcessing = (state.isPurchasing || state.isPolling);
             const isPurchasable = key === 'starter' || key === 'pro' || key === 'enterprise';
             const tierPosition = getTierPosition(key);
             const canUpgrade = tierPosition > currentPosition;
+            const showYearlyOption = isYearlyAvailable(key);
 
-            // Get price for current interval
-            const price = billingInterval === 'monthly'
+            // For Enterprise on Android, force monthly even if yearly is selected
+            const effectiveInterval = (!showYearlyOption && billingInterval === 'yearly') 
+              ? 'monthly' 
+              : billingInterval;
+
+            // Get price for effective interval
+            const price = effectiveInterval === 'monthly'
               ? pricing.getSubscriptionPrice(key, 'monthly')
               : pricing.getSubscriptionPrice(key, 'yearly');
 
@@ -142,11 +161,16 @@ export const NativeSubscriptionButtons = ({
                       {pricing.formatPrice(price)}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {billingInterval === 'monthly' ? '/month' : '/year'}
+                      {effectiveInterval === 'monthly' ? '/month' : '/year'}
                     </div>
-                    {billingInterval === 'yearly' && (
+                    {billingInterval === 'yearly' && showYearlyOption && (
                       <div className="text-xs text-primary">
                         Save {pricing.formatPrice(pricing.getSubscriptionSavings(key))}
+                      </div>
+                    )}
+                    {!showYearlyOption && billingInterval === 'yearly' && (
+                      <div className="text-xs text-muted-foreground">
+                        Monthly only
                       </div>
                     )}
                   </div>
