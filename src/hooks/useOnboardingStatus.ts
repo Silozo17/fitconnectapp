@@ -44,7 +44,7 @@ export const useClientOnboardingStatus = () => {
       }
     },
     enabled: !!user?.id,
-    staleTime: 0, // Always refetch to avoid stale onboarding status after completion
+    staleTime: 5 * 60 * 1000, // 5 minutes - prevents waterfall loading on dashboard
     gcTime: 60 * 60 * 1000, // 1 hour
     refetchOnWindowFocus: true,
     retry: 2, // Retry twice before giving up

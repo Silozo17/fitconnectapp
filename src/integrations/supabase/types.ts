@@ -5592,6 +5592,10 @@ export type Database = {
         Returns: string
       }
       generate_unique_username: { Args: { base_name: string }; Returns: string }
+      get_client_leaderboard_rank: {
+        Args: { client_id_param: string }
+        Returns: number
+      }
       has_role:
         | {
             Args: { _role: Database["public"]["Enums"]["app_role"] }
