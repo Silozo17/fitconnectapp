@@ -363,24 +363,39 @@ export interface IAPSuccessData {
 export interface IAPCallbacks {
   onSuccess: (data: IAPSuccessData) => void;
   onError?: (error: string) => void;
+  onCancel?: () => void;
 }
 
 // Store callbacks globally so Despia can access them
 let iapCallbacks: IAPCallbacks | null = null;
 
 /**
- * Register global callback for IAP success
+ * Register global callbacks for IAP events
  * Must be called before triggering purchases
  */
 export const registerIAPCallbacks = (callbacks: IAPCallbacks): void => {
   iapCallbacks = callbacks;
   
-  // Expose iapSuccess globally for Despia runtime
+  // Expose callbacks globally for Despia runtime
   if (typeof window !== 'undefined') {
     (window as any).iapSuccess = (data: IAPSuccessData) => {
       if (isDespia() && iapCallbacks) {
         console.log('[Despia IAP] Purchase success callback received:', data);
         iapCallbacks.onSuccess(data);
+      }
+    };
+    
+    (window as any).iapCancel = () => {
+      if (isDespia()) {
+        console.log('[Despia IAP] Purchase cancelled by user');
+        iapCallbacks?.onCancel?.();
+      }
+    };
+    
+    (window as any).iapError = (error: string) => {
+      if (isDespia()) {
+        console.error('[Despia IAP] Purchase error:', error);
+        iapCallbacks?.onError?.(error);
       }
     };
   }
@@ -393,6 +408,8 @@ export const unregisterIAPCallbacks = (): void => {
   iapCallbacks = null;
   if (typeof window !== 'undefined') {
     delete (window as any).iapSuccess;
+    delete (window as any).iapCancel;
+    delete (window as any).iapError;
   }
 };
 
