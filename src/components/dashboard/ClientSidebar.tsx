@@ -316,25 +316,6 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
     );
   };
 
-    return (
-      <Link
-        key={item.path}
-        to={item.path}
-        className={cn(
-          "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors relative",
-          indented && "ml-4",
-          isActive
-            ? "bg-primary text-primary-foreground"
-            : "text-muted-foreground hover:bg-muted hover:text-foreground"
-        )}
-      >
-        <item.icon className="w-4 h-4 flex-shrink-0" />
-        <span className="font-medium text-sm flex-1">{title}</span>
-        {badgeCount > 0 && <SidebarBadge count={badgeCount} />}
-      </Link>
-    );
-  };
-
   const renderGroup = (group: MenuGroup, isCollapsed = false) => {
     if (!group.collapsible) {
       return (
