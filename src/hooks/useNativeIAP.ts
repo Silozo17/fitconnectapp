@@ -37,6 +37,7 @@ interface UseNativeIAPReturn {
 
 const POLL_INTERVAL_MS = 2000;
 const MAX_POLL_ATTEMPTS = 30; // 60 seconds max polling
+const PURCHASE_TIMEOUT_MS = 120000; // 2 minutes timeout for stuck purchases
 
 /**
  * Hook for handling native in-app purchases via Despia + RevenueCat
@@ -55,17 +56,29 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
   
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const pollAttemptsRef = useRef(0);
+  const purchaseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup purchase timeout helper
+  const clearPurchaseTimeout = useCallback(() => {
+    if (purchaseTimeoutRef.current) {
+      clearTimeout(purchaseTimeoutRef.current);
+      purchaseTimeoutRef.current = null;
+    }
+  }, []);
 
   // Check availability on mount
   useEffect(() => {
     setState(prev => ({ ...prev, isAvailable: isNativeIAPAvailable() }));
   }, []);
 
-  // Cleanup polling on unmount
+  // Cleanup polling and timeout on unmount
   useEffect(() => {
     return () => {
       if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current);
+      }
+      if (purchaseTimeoutRef.current) {
+        clearTimeout(purchaseTimeoutRef.current);
       }
     };
   }, []);
@@ -166,6 +179,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
    */
   const handleIAPSuccess = useCallback((data: IAPSuccessData) => {
     console.log('[NativeIAP] IAP Success received:', data);
+    clearPurchaseTimeout();
     
     // Extract tier from product ID
     const productIdLower = data.planID.toLowerCase();
@@ -184,35 +198,66 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
 
     // Start polling for webhook confirmation
     startPolling(tier);
-  }, [startPolling]);
+  }, [startPolling, clearPurchaseTimeout]);
+
+  /**
+   * Handle IAP cancel callback from Despia
+   */
+  const handleIAPCancel = useCallback(() => {
+    console.log('[NativeIAP] Purchase cancelled by user');
+    clearPurchaseTimeout();
+    setState(prev => ({
+      ...prev,
+      isPurchasing: false,
+      error: null,
+    }));
+    toast.info('Purchase cancelled', {
+      description: 'You can select a plan when ready.',
+    });
+  }, [clearPurchaseTimeout]);
+
+  /**
+   * Handle IAP error callback from Despia
+   */
+  const handleIAPError = useCallback((error: string) => {
+    console.error('[NativeIAP] IAP Error:', error);
+    clearPurchaseTimeout();
+    triggerHaptic('error');
+    setState(prev => ({
+      ...prev,
+      isPurchasing: false,
+      error,
+    }));
+    toast.error('Purchase failed', { description: error });
+  }, [clearPurchaseTimeout]);
 
   // Register IAP callbacks
   useEffect(() => {
     if (state.isAvailable) {
       registerIAPCallbacks({
         onSuccess: handleIAPSuccess,
-        onError: (error) => {
-          console.error('[NativeIAP] IAP Error:', error);
-          triggerHaptic('error');
-          setState(prev => ({
-            ...prev,
-            isPurchasing: false,
-            error,
-          }));
-          toast.error('Purchase failed', { description: error });
-        },
+        onError: handleIAPError,
+        onCancel: handleIAPCancel,
       });
     }
 
     return () => {
       unregisterIAPCallbacks();
     };
-  }, [state.isAvailable, handleIAPSuccess]);
+  }, [state.isAvailable, handleIAPSuccess, handleIAPError, handleIAPCancel]);
 
   /**
    * Trigger a purchase
    */
   const purchase = useCallback(async (tier: SubscriptionTier, interval: BillingInterval) => {
+    // === DEBUG LOGGING START ===
+    console.log('[NativeIAP] === PURCHASE DEBUG START ===');
+    console.log('[NativeIAP] Tier received:', tier);
+    console.log('[NativeIAP] Interval received:', interval);
+    console.log('[NativeIAP] Tier type:', typeof tier);
+    console.log('[NativeIAP] Interval type:', typeof interval);
+    // === DEBUG LOGGING END ===
+
     if (!state.isAvailable) {
       toast.error('Native purchases not available');
       return;
@@ -230,6 +275,10 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     // Get the platform-specific product ID (iOS or Android)
     const productId = getPlatformProductId(tier, interval);
 
+    console.log('[NativeIAP] Product ID resolved:', productId);
+    console.log('[NativeIAP] External ID:', externalId);
+    console.log('[NativeIAP] === PURCHASE DEBUG END ===');
+
     if (!productId) {
       toast.error('Invalid subscription selection for this platform');
       return;
@@ -246,10 +295,32 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
 
     triggerHaptic('light');
 
+    // Clear any existing timeout
+    clearPurchaseTimeout();
+
+    // Set a timeout to reset if no response received (2 minutes)
+    purchaseTimeoutRef.current = setTimeout(() => {
+      console.warn('[NativeIAP] Purchase timeout - no response received after 2 minutes');
+      setState(prev => {
+        if (prev.isPurchasing && !prev.isPolling) {
+          toast.error('Purchase timed out', {
+            description: 'Please try again or contact support if the issue persists.',
+          });
+          return {
+            ...prev,
+            isPurchasing: false,
+            error: 'Purchase timed out. Please try again.',
+          };
+        }
+        return prev;
+      });
+    }, PURCHASE_TIMEOUT_MS);
+
     // Trigger the native purchase
     const triggered = triggerRevenueCatPurchase(externalId, productId);
 
     if (!triggered) {
+      clearPurchaseTimeout();
       setState(prev => ({
         ...prev,
         isPurchasing: false,
@@ -257,7 +328,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
       }));
       toast.error('Failed to start purchase');
     }
-  }, [state.isAvailable, user]);
+  }, [state.isAvailable, user, clearPurchaseTimeout]);
 
   return {
     state,
