@@ -23,6 +23,8 @@ import { SUBSCRIPTION_TIERS, TierKey } from "@/lib/stripe-config";
 import { useTranslation } from "react-i18next";
 import { useIOSRestrictions } from "@/hooks/useIOSRestrictions";
 import { useNativeIAP, SubscriptionTier, BillingInterval } from "@/hooks/useNativeIAP";
+import { triggerConfetti, confettiPresets } from "@/lib/confetti";
+import { triggerHaptic } from "@/lib/despia";
 
 const STEPS = [
   "Basic Info",
@@ -85,7 +87,36 @@ const CoachOnboarding = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { isNativeMobile } = useIOSRestrictions();
-  const { purchase: nativePurchase, state: iapState } = useNativeIAP();
+  
+  // Store formData in a ref for the callback to access latest values
+  const formDataRef = useRef<{ alsoClient: boolean }>({ alsoClient: false });
+  
+  // Handle successful IAP purchase - show celebration and navigate
+  const handleIAPSuccess = useCallback((tier: SubscriptionTier) => {
+    // Trigger confetti celebration
+    triggerConfetti(confettiPresets.medium);
+    triggerHaptic('success');
+    
+    // Show celebration toast with tier name
+    const tierName = SUBSCRIPTION_TIERS[tier]?.name || tier;
+    toast.success(`🎉 Welcome to ${tierName}!`, {
+      description: 'Your subscription is now active. Let\'s get started!',
+      duration: 3000,
+    });
+    
+    // Navigate after a short delay to let the celebration show
+    setTimeout(() => {
+      if (formDataRef.current.alsoClient) {
+        navigate("/onboarding/client");
+      } else {
+        navigate("/dashboard/coach");
+      }
+    }, 2500);
+  }, [navigate]);
+  
+  const { purchase: nativePurchase, state: iapState } = useNativeIAP({
+    onPurchaseComplete: handleIAPSuccess,
+  });
 
   // Step component state
   const [integrationsState, setIntegrationsState] = useState({ hasAnyConnection: false });
@@ -111,6 +142,11 @@ const CoachOnboarding = () => {
     profileImageUrl: null as string | null,
     alsoClient: false,
   });
+
+  // Keep formDataRef in sync with formData.alsoClient for the IAP callback
+  useEffect(() => {
+    formDataRef.current.alsoClient = formData.alsoClient;
+  }, [formData.alsoClient]);
 
   // Check if onboarding is already completed and restore saved step
   useEffect(() => {

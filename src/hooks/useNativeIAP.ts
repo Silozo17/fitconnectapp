@@ -25,6 +25,10 @@ interface NativeIAPState {
   error: string | null;
 }
 
+interface UseNativeIAPOptions {
+  onPurchaseComplete?: (tier: SubscriptionTier) => void;
+}
+
 interface UseNativeIAPReturn {
   state: NativeIAPState;
   purchase: (tier: SubscriptionTier, interval: BillingInterval) => Promise<void>;
@@ -37,7 +41,7 @@ const MAX_POLL_ATTEMPTS = 30; // 60 seconds max polling
 /**
  * Hook for handling native in-app purchases via Despia + RevenueCat
  */
-export const useNativeIAP = (): UseNativeIAPReturn => {
+export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn => {
   const { user } = useAuth();
   const { data: coachProfileId } = useCoachProfileId();
   const queryClient = useQueryClient();
@@ -133,6 +137,9 @@ export const useNativeIAP = (): UseNativeIAPReturn => {
         queryClient.invalidateQueries({ queryKey: ['coach-profile'] });
         queryClient.invalidateQueries({ queryKey: ['platform-subscription'] });
         queryClient.invalidateQueries({ queryKey: ['feature-access'] });
+        
+        // Call the success callback if provided
+        options?.onPurchaseComplete?.(expectedTier);
         return;
       }
 
