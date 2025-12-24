@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { Shield, User, Briefcase, Check, Plus, Loader2 } from "lucide-react";
 import CreateProfileModal from "./CreateProfileModal";
+import BecomeClientModal from "@/components/shared/BecomeClientModal";
 
 const ViewSwitcher = () => {
   const { t } = useTranslation("admin");
@@ -42,7 +43,8 @@ const ViewSwitcher = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [profileTypeToCreate, setProfileTypeToCreate] = useState<"client" | "coach">("client");
+  const [profileTypeToCreate, setProfileTypeToCreate] = useState<"client" | "coach">("coach");
+  const [becomeClientModalOpen, setBecomeClientModalOpen] = useState(false);
 
   // Extract current page from path: /dashboard/admin/settings → "settings"
   const getCurrentPage = (pathname: string): string | null => {
@@ -59,8 +61,8 @@ const ViewSwitcher = () => {
   const handleViewChange = (value: string) => {
     // Check if trying to create a new profile
     if (value === "create-client") {
-      setProfileTypeToCreate("client");
-      setCreateModalOpen(true);
+      // Use BecomeClientModal for confirmation + onboarding flow
+      setBecomeClientModalOpen(true);
       return;
     }
     if (value === "create-coach") {
@@ -165,6 +167,11 @@ const ViewSwitcher = () => {
         onOpenChange={setCreateModalOpen}
         profileType={profileTypeToCreate}
         onSuccess={handleProfileCreated}
+      />
+
+      <BecomeClientModal
+        open={becomeClientModalOpen}
+        onOpenChange={setBecomeClientModalOpen}
       />
     </>
   );
