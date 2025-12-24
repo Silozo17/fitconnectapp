@@ -332,7 +332,8 @@ export const syncHealthKitData = async (days: number = 7): Promise<HealthKitConn
       'HKQuantityTypeIdentifierActiveEnergyBurned',
       'HKQuantityTypeIdentifierDistanceWalkingRunning',
       'HKQuantityTypeIdentifierHeartRate',
-      'HKCategoryTypeIdentifierSleepAnalysis'
+      'HKCategoryTypeIdentifierSleepAnalysis',
+      'HKQuantityTypeIdentifierAppleExerciseTime'
     ].join(',');
     
     const response = await despia(
