@@ -122,7 +122,7 @@ export function CreateInvoiceModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-2xl max-w-[calc(100vw-2rem)] max-h-[90vh] overflow-y-auto overflow-x-hidden p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-primary" />
@@ -178,9 +178,10 @@ export function CreateInvoiceModal({
               {lineItems.map((item, index) => (
                 <div
                   key={item.id}
-                  className="grid gap-3 grid-cols-12 items-end p-3 rounded-lg bg-muted/50"
+                  className="flex flex-col gap-3 sm:grid sm:grid-cols-12 sm:items-end p-3 rounded-lg bg-muted/50"
                 >
-                  <div className="col-span-12 sm:col-span-5 space-y-1">
+                  {/* Description - full width on mobile */}
+                  <div className="w-full sm:col-span-5 space-y-1">
                     {index === 0 && (
                       <Label className="text-xs text-muted-foreground">
                         Description
@@ -194,56 +195,60 @@ export function CreateInvoiceModal({
                       }
                     />
                   </div>
-                  <div className="col-span-4 sm:col-span-2 space-y-1">
-                    {index === 0 && (
-                      <Label className="text-xs text-muted-foreground">Qty</Label>
-                    )}
-                    <Input
-                      type="number"
-                      min="1"
-                      value={item.quantity}
-                      onChange={(e) =>
-                        updateLineItem(
-                          item.id,
-                          "quantity",
-                          parseInt(e.target.value) || 1
-                        )
-                      }
-                    />
-                  </div>
-                  <div className="col-span-5 sm:col-span-3 space-y-1">
-                    {index === 0 && (
-                      <Label className="text-xs text-muted-foreground">
-                        Unit Price (pence)
-                      </Label>
-                    )}
-                    <Input
-                      type="number"
-                      min="0"
-                      value={item.unitPrice}
-                      onChange={(e) =>
-                        updateLineItem(
-                          item.id,
-                          "unitPrice",
-                          parseInt(e.target.value) || 0
-                        )
-                      }
-                    />
-                  </div>
-                  <div className="col-span-3 sm:col-span-2 flex items-center justify-between">
-                    <span className="text-sm font-medium">
-                      {formatCurrency(item.quantity * item.unitPrice / 100)}
-                    </span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                      onClick={() => removeLineItem(item.id)}
-                      disabled={lineItems.length === 1}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                  
+                  {/* Qty/Price/Total row - inline on mobile */}
+                  <div className="flex gap-2 sm:contents">
+                    <div className="w-16 flex-shrink-0 sm:w-auto sm:col-span-2 space-y-1">
+                      {index === 0 && (
+                        <Label className="text-xs text-muted-foreground">Qty</Label>
+                      )}
+                      <Input
+                        type="number"
+                        min="1"
+                        value={item.quantity}
+                        onChange={(e) =>
+                          updateLineItem(
+                            item.id,
+                            "quantity",
+                            parseInt(e.target.value) || 1
+                          )
+                        }
+                      />
+                    </div>
+                    <div className="flex-1 sm:col-span-3 space-y-1">
+                      {index === 0 && (
+                        <Label className="text-xs text-muted-foreground">
+                          Price (p)
+                        </Label>
+                      )}
+                      <Input
+                        type="number"
+                        min="0"
+                        value={item.unitPrice}
+                        onChange={(e) =>
+                          updateLineItem(
+                            item.id,
+                            "unitPrice",
+                            parseInt(e.target.value) || 0
+                          )
+                        }
+                      />
+                    </div>
+                    <div className="flex-shrink-0 sm:col-span-2 flex items-end gap-2">
+                      <span className="text-sm font-medium whitespace-nowrap pb-2">
+                        {formatCurrency(item.quantity * item.unitPrice / 100)}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 text-muted-foreground hover:text-destructive flex-shrink-0"
+                        onClick={() => removeLineItem(item.id)}
+                        disabled={lineItems.length === 1}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -294,7 +299,7 @@ export function CreateInvoiceModal({
           </div>
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-0">
+        <DialogFooter className="gap-2 sm:gap-0 flex-col-reverse sm:flex-row">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
