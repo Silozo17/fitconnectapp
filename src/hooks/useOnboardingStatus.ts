@@ -32,8 +32,9 @@ export const useClientOnboardingStatus = () => {
       };
     },
     enabled: !!user?.id,
-    staleTime: 30 * 60 * 1000, // 30 minutes - onboarding status rarely changes
+    staleTime: 0, // Always refetch to avoid stale onboarding status after completion
     gcTime: 60 * 60 * 1000, // 1 hour
+    refetchOnWindowFocus: true,
   });
 };
 
