@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -62,6 +63,7 @@ const ClientOnboarding = () => {
   const [clientProfileId, setClientProfileId] = useState<string | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   // Wearables step state
   const [wearablesState, setWearablesState] = useState({ hasAnyConnection: false, isLoading: false });
@@ -281,6 +283,9 @@ const ClientOnboarding = () => {
           });
       }
 
+      // Invalidate the onboarding status cache before navigating
+      queryClient.invalidateQueries({ queryKey: ["client-onboarding-status", user.id] });
+      
       toast.success("Profile completed! Let's find you a coach.");
       navigate("/dashboard/client");
       // Don't reset isNavigating on success - we're navigating away
