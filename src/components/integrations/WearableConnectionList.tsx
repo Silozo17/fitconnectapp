@@ -123,7 +123,7 @@ const WearableConnectionList = () => {
               lastSynced={connection?.last_synced_at}
               onConnect={() => handleConnect(provider.id)}
               onDisconnect={() => connection && disconnectWearable.mutate(connection.id)}
-              onSync={() => connection && syncWearable.mutate(connection.id)}
+              onSync={() => connection && syncWearable.mutate(provider.id)}
               isConnecting={connectingProvider === provider.id}
               isSyncing={syncWearable.isPending}
               disabled={provider.disabled}
