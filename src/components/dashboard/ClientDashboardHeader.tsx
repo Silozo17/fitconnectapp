@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdminView } from "@/contexts/AdminContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useSelectedAvatar } from "@/hooks/useAvatars";
 import ViewSwitcher from "@/components/admin/ViewSwitcher";
@@ -27,8 +28,15 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
   const { t } = useTranslation('dashboard');
   const navigate = useNavigate();
   const { signOut, role } = useAuth();
+  const { availableProfiles } = useAdminView();
   const { displayName, avatarUrl } = useUserProfile();
   const { data: selectedAvatar } = useSelectedAvatar('client');
+
+  // Show ViewSwitcher when user has multiple profiles (coach + client, admin + any, etc.)
+  const hasMultipleProfiles = 
+    (availableProfiles.client ? 1 : 0) + 
+    (availableProfiles.coach ? 1 : 0) + 
+    (availableProfiles.admin ? 1 : 0) > 1;
 
   return (
     <header 
@@ -66,8 +74,8 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
 
         {/* Right side */}
         <div className="flex items-center gap-2 sm:gap-4">
-          {/* Admin View Switcher */}
-          {role === "admin" && <ViewSwitcher />}
+          {/* View Switcher - visible for admins or users with multiple profiles */}
+          {(role === "admin" || hasMultipleProfiles) && <ViewSwitcher />}
           
           {/* Feedback */}
           <FeedbackModal />
