@@ -42,14 +42,16 @@ serve(async (req) => {
       });
     }
 
-    // Verify user is an admin using the has_role function
+    // Verify user is an admin using direct query (RPC fails with service role since auth.uid() is null)
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
-    const { data: isAdmin, error: roleError } = await supabaseAdmin.rpc("has_role", {
-      _user_id: user.id,
-      _role: "admin",
-    });
+    const { data: roleData, error: roleError } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .in("role", ["admin", "manager", "staff"])
+      .maybeSingle();
 
-    if (roleError || !isAdmin) {
+    if (roleError || !roleData) {
       console.error("Role check failed:", roleError);
       return new Response(JSON.stringify({ error: "Admin access required" }), {
         status: 403,
