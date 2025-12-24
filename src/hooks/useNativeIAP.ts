@@ -23,6 +23,7 @@ interface NativeIAPState {
   isPolling: boolean;
   purchasedProductId: string | null;
   error: string | null;
+  showUnsuccessfulModal: boolean;
 }
 
 interface UseNativeIAPOptions {
@@ -33,6 +34,7 @@ interface UseNativeIAPReturn {
   state: NativeIAPState;
   purchase: (tier: SubscriptionTier, interval: BillingInterval) => Promise<void>;
   isAvailable: boolean;
+  dismissUnsuccessfulModal: () => void;
 }
 
 const POLL_INTERVAL_MS = 2000;
@@ -52,6 +54,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     isPolling: false,
     purchasedProductId: null,
     error: null,
+    showUnsuccessfulModal: false,
   });
   
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -210,11 +213,19 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
       ...prev,
       isPurchasing: false,
       error: null,
+      showUnsuccessfulModal: true,
     }));
-    toast.info('Purchase cancelled', {
-      description: 'You can select a plan when ready.',
-    });
   }, [clearPurchaseTimeout]);
+
+  /**
+   * Dismiss the unsuccessful modal
+   */
+  const dismissUnsuccessfulModal = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      showUnsuccessfulModal: false,
+    }));
+  }, []);
 
   /**
    * Handle IAP error callback from Despia
@@ -334,6 +345,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     state,
     purchase,
     isAvailable: state.isAvailable,
+    dismissUnsuccessfulModal,
   };
 };
 

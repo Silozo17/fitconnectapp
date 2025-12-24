@@ -26,6 +26,7 @@ import { useIOSRestrictions } from "@/hooks/useIOSRestrictions";
 import { useNativeIAP, SubscriptionTier, BillingInterval } from "@/hooks/useNativeIAP";
 import { triggerConfetti, confettiPresets } from "@/lib/confetti";
 import { triggerHaptic } from "@/lib/despia";
+import { IAPUnsuccessfulDialog } from "@/components/iap/IAPUnsuccessfulDialog";
 
 const STEPS = [
   "Basic Info",
@@ -119,7 +120,7 @@ const CoachOnboarding = () => {
     }, 2500);
   }, [navigate, refreshProfiles]);
   
-  const { purchase: nativePurchase, state: iapState } = useNativeIAP({
+  const { purchase: nativePurchase, state: iapState, dismissUnsuccessfulModal } = useNativeIAP({
     onPurchaseComplete: handleIAPSuccess,
   });
 
@@ -1401,6 +1402,12 @@ const CoachOnboarding = () => {
       >
         {renderStepContent()}
       </OnboardingLayout>
+
+      {/* IAP Unsuccessful Modal */}
+      <IAPUnsuccessfulDialog 
+        open={iapState.showUnsuccessfulModal} 
+        onOpenChange={dismissUnsuccessfulModal}
+      />
     </>
   );
 };
