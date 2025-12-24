@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Dumbbell, Apple, Trophy, Users } from "lucide-react";
+import { useIOSRestrictions } from "@/hooks/useIOSRestrictions";
 
 const slides = [
   {
@@ -30,6 +31,7 @@ const slides = [
 const GetStarted = () => {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const { isIOSNative } = useIOSRestrictions();
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -61,12 +63,14 @@ const GetStarted = () => {
       </Helmet>
 
       <div className="h-dvh bg-background flex flex-col overflow-hidden">
-        {/* Skip button */}
-        <div className="absolute top-3 right-3 z-10">
-          <Button variant="ghost" size="sm" onClick={handleSkip} className="text-muted-foreground">
-            Skip
-          </Button>
-        </div>
+        {/* Skip button - hidden on iOS native */}
+        {!isIOSNative && (
+          <div className="absolute top-3 right-3 z-10">
+            <Button variant="ghost" size="sm" onClick={handleSkip} className="text-muted-foreground">
+              Skip
+            </Button>
+          </div>
+        )}
 
         {/* Main content */}
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-4 sm:py-8">
