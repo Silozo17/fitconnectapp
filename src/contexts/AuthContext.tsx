@@ -59,12 +59,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           
           // If session is invalid or expired, try to refresh it
           if (error || !session) {
-            console.log('Auth: Session invalid or expired, attempting refresh...');
+            console.log('[Auth] Session invalid or expired, attempting refresh...');
             const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
             
             if (refreshError || !refreshData.session) {
               // Session cannot be recovered - clear state
-              console.log('Auth: Unable to refresh session, clearing state');
+              console.log('[Auth] Unable to refresh session, clearing state');
               setSession(null);
               setUser(null);
               setRole(null);
@@ -85,7 +85,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
           }
         } catch (err) {
-          console.error('Auth: Error handling visibility change:', err);
+          console.error('[Auth] Error handling visibility change:', err);
         }
       } else {
         // App is in background - stop auto refresh to save resources
@@ -96,11 +96,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Handle focus events for Despia native app
     const handleFocus = async () => {
       if (isDespia()) {
+        console.log('[Auth] Despia app focused, checking session...');
         supabase.auth.startAutoRefresh();
         try {
           const { data: { session }, error } = await supabase.auth.getSession();
           
-          if (error || !session) {
+          // Check for invalid JWT (common in native apps after background)
+          if (error) {
+            console.warn('[Auth] Session error on focus:', error.message);
+            
+            // If it's a JWT error, try to refresh
+            if (error.message?.includes('JWT') || error.message?.includes('token') || error.message?.includes('claim')) {
+              console.log('[Auth] JWT error detected, attempting full session refresh...');
+              const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+              
+              if (refreshError || !refreshData.session) {
+                console.log('[Auth] Session refresh failed, clearing state');
+                setSession(null);
+                setUser(null);
+                setRole(null);
+                setAllRoles([]);
+                return;
+              }
+              
+              console.log('[Auth] Session refreshed successfully');
+              setSession(refreshData.session);
+              setUser(refreshData.session.user);
+              if (refreshData.session.user) {
+                setTimeout(() => fetchUserRole(refreshData.session.user.id), 0);
+              }
+              return;
+            }
+          }
+          
+          if (!session) {
             // Try to refresh the session
             const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
             
@@ -118,6 +147,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               setTimeout(() => fetchUserRole(refreshData.session.user.id), 0);
             }
           } else {
+            // Validate the session token before using it
+            try {
+              // Test the token by making a simple request
+              const { error: testError } = await supabase.auth.getUser();
+              if (testError) {
+                console.warn('[Auth] Token validation failed:', testError.message);
+                // Token is invalid, try to refresh
+                const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+                
+                if (refreshError || !refreshData.session) {
+                  console.log('[Auth] Token refresh failed, clearing state');
+                  setSession(null);
+                  setUser(null);
+                  setRole(null);
+                  setAllRoles([]);
+                  return;
+                }
+                
+                setSession(refreshData.session);
+                setUser(refreshData.session.user);
+                if (refreshData.session.user) {
+                  setTimeout(() => fetchUserRole(refreshData.session.user.id), 0);
+                }
+                return;
+              }
+            } catch (validationErr) {
+              console.error('[Auth] Token validation error:', validationErr);
+            }
+            
             setSession(session);
             setUser(session.user ?? null);
             if (session.user) {
@@ -125,7 +183,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
           }
         } catch (err) {
-          console.error('Auth: Error handling focus:', err);
+          console.error('[Auth] Error handling focus:', err);
         }
       }
     };
@@ -140,11 +198,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (event === 'TOKEN_REFRESHED') {
-          console.log('Auth: Token refreshed successfully');
+          console.log('[Auth] Token refreshed successfully');
         }
         
         if (event === 'SIGNED_OUT') {
-          console.log('Auth: User signed out');
+          console.log('[Auth] User signed out');
         }
 
         setSession(session);
@@ -164,17 +222,65 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     );
 
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        fetchUserRole(session.user.id);
+    // Check for existing session with validation
+    const initializeSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        // Handle potential JWT errors during initialization
+        if (error) {
+          console.warn('[Auth] Initial session error:', error.message);
+          if (error.message?.includes('JWT') || error.message?.includes('token') || error.message?.includes('claim')) {
+            // Clear any corrupted session data
+            console.log('[Auth] Clearing corrupted session data');
+            await supabase.auth.signOut();
+            setSession(null);
+            setUser(null);
+            setRole(null);
+            setAllRoles([]);
+            setLoading(false);
+            return;
+          }
+        }
+        
+        if (session) {
+          // Validate the session by checking if the user can be fetched
+          const { error: userError } = await supabase.auth.getUser();
+          if (userError) {
+            console.warn('[Auth] User validation failed:', userError.message);
+            // Try to refresh the session
+            const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+            if (refreshError || !refreshData.session) {
+              console.log('[Auth] Session recovery failed, clearing state');
+              setSession(null);
+              setUser(null);
+              setRole(null);
+              setAllRoles([]);
+              setLoading(false);
+              return;
+            }
+            setSession(refreshData.session);
+            setUser(refreshData.session.user);
+            if (refreshData.session.user) {
+              fetchUserRole(refreshData.session.user.id);
+            }
+          } else {
+            setSession(session);
+            setUser(session.user ?? null);
+            if (session.user) {
+              fetchUserRole(session.user.id);
+            }
+          }
+        }
+        
+        setLoading(false);
+      } catch (err) {
+        console.error('[Auth] Session initialization error:', err);
+        setLoading(false);
       }
-      
-      setLoading(false);
-    });
+    };
+    
+    initializeSession();
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
