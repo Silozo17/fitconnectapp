@@ -83,7 +83,7 @@ const CoachOnboarding = () => {
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { isIOSNative } = useIOSRestrictions();
+  const { isNativeMobile } = useIOSRestrictions();
   const { purchase: nativePurchase, state: iapState } = useNativeIAP();
 
   // Step component state
@@ -373,15 +373,15 @@ const CoachOnboarding = () => {
       if (isPaidTier) {
         const tier = formData.subscriptionTier as SubscriptionTier;
         
-        // On iOS native, trigger native IAP directly
-        if (isIOSNative && (tier === 'starter' || tier === 'pro' || tier === 'enterprise')) {
+        // On native mobile (iOS/Android), trigger native IAP directly
+        if (isNativeMobile && (tier === 'starter' || tier === 'pro' || tier === 'enterprise')) {
           toast.success("Profile saved! Completing subscription...");
           await nativePurchase(tier, billingInterval);
           // IAP hook handles success/error and navigation
           return;
         }
         
-        // On web/Android, redirect to web checkout
+        // On web, redirect to web checkout
         toast.success("Profile saved! Complete your subscription to unlock all features.");
         navigate(`/subscribe?tier=${formData.subscriptionTier}&billing=${billingInterval}`);
       } else if (formData.alsoClient) {
@@ -469,8 +469,8 @@ const CoachOnboarding = () => {
         const isPaidTier = formData.subscriptionTier !== "free";
         const isProcessingIAP = iapState.isPurchasing;
         
-        // On iOS: trigger IAP directly, no skip allowed
-        if (isIOSNative) {
+        // On native mobile (iOS/Android): trigger IAP directly, no skip allowed
+        if (isNativeMobile) {
           return {
             primary: { 
               label: "Select Plan", 
@@ -789,8 +789,8 @@ const CoachOnboarding = () => {
         const freeTier = tiers.find(t => t.id === 'free');
         const paidTiers = tiers.filter(t => t.id !== 'free');
         
-        // For iOS: show Monthly + Annual stacked vertically for paid tiers
-        if (isIOSNative) {
+        // For native mobile (iOS/Android): show Monthly + Annual stacked vertically for paid tiers
+        if (isNativeMobile) {
           return (
             <div className="space-y-5">
               <div className="text-center mb-4">
@@ -1063,7 +1063,7 @@ const CoachOnboarding = () => {
         headerLogo
         showBackButton={currentStep > 0 && currentStep !== 4 && !isNavigating}
         onBack={handleBack}
-        onSkip={(isIOSNative && currentStep === 8) ? undefined : handleSkip}
+        onSkip={(isNativeMobile && currentStep === 8) ? undefined : handleSkip}
         skipLabel="Skip for now"
         footerActions={getFooterActions()}
         hideFooter={currentStep === 4}

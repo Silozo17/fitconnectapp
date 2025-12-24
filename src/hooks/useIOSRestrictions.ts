@@ -11,6 +11,8 @@ export interface IOSRestrictions {
   isIOSNative: boolean;
   /** True if running on Android inside Despia native app */
   isAndroidNative: boolean;
+  /** True if running on ANY native platform (iOS or Android) inside Despia */
+  isNativeMobile: boolean;
   /** Hide web checkout, Stripe, external payment links on iOS */
   shouldHideWebPurchases: boolean;
   /** Hide coach marketplace and booking on iOS (App Store guideline 3.1.1) */
@@ -29,10 +31,12 @@ export const useIOSRestrictions = (): IOSRestrictions => {
   return useMemo(() => {
     const isIOSNative = isDespia && isIOS;
     const isAndroidNative = isDespia && isAndroid;
+    const isNativeMobile = isIOSNative || isAndroidNative;
 
     return {
       isIOSNative,
       isAndroidNative,
+      isNativeMobile,
       // All purchase-related restrictions apply only on iOS native
       shouldHideWebPurchases: isIOSNative,
       shouldHideCoachMarketplace: isIOSNative,
