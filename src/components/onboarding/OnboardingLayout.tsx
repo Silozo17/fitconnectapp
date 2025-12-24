@@ -221,7 +221,7 @@ export function OnboardingLayout({
             "transition-transform duration-200 ease-out"
           )}
           style={{
-            paddingBottom: keyboardVisible ? '0.5rem' : 'max(env(safe-area-inset-bottom), 1rem)',
+            paddingBottom: keyboardVisible ? '0.5rem' : 'max(env(safe-area-inset-bottom), 1.5rem)',
             // When keyboard is visible, footer stays at visual viewport bottom
             transform: keyboardVisible ? `translateY(0)` : undefined,
           }}

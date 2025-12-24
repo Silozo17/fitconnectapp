@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Dumbbell, Apple, Trophy, Users } from "lucide-react";
-import { useIOSRestrictions } from "@/hooks/useIOSRestrictions";
 
 const slides = [
   {
@@ -31,7 +30,6 @@ const slides = [
 const GetStarted = () => {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { isNativeMobile } = useIOSRestrictions();
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -49,10 +47,6 @@ const GetStarted = () => {
     navigate("/auth?mode=login");
   };
 
-  const handleSkip = () => {
-    navigate("/");
-  };
-
   const CurrentIcon = slides[currentSlide].icon;
 
   return (
@@ -63,15 +57,6 @@ const GetStarted = () => {
       </Helmet>
 
       <div className="h-dvh bg-background flex flex-col overflow-hidden">
-        {/* Skip button - hidden on iOS native */}
-        {!isNativeMobile && (
-          <div className="absolute top-3 right-3 z-10">
-            <Button variant="ghost" size="sm" onClick={handleSkip} className="text-muted-foreground">
-              Skip
-            </Button>
-          </div>
-        )}
-
         {/* Main content */}
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-4 sm:py-8">
           {/* Logo */}
@@ -140,7 +125,10 @@ const GetStarted = () => {
         </div>
 
         {/* Action buttons */}
-        <div className="px-6 pb-6 sm:pb-8 space-y-2 sm:space-y-3 max-w-sm mx-auto w-full">
+        <div 
+          className="px-6 space-y-2 sm:space-y-3 max-w-sm mx-auto w-full"
+          style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 1.5rem)' }}
+        >
           <Button 
             onClick={handleGetStarted} 
             className="w-full h-11 sm:h-12 text-base sm:text-lg font-semibold"

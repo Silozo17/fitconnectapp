@@ -52,7 +52,7 @@ export const DeleteAccountModal = ({ open, onOpenChange, role }: DeleteAccountMo
       });
 
       await signOut();
-      navigate("/");
+      navigate("/get-started");
     } catch (error: unknown) {
       logError("DeleteAccountModal", error);
       toast.error(t('deleteAccount.error'), {

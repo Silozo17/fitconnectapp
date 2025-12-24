@@ -296,17 +296,6 @@ const CoachOnboarding = () => {
     }
   }, [isNavigating, currentStep]);
 
-  const handleSkip = useCallback(() => {
-    // Guard: prevent skip during existing navigation
-    if (isNavigating) {
-      console.log("[CoachOnboarding] handleSkip blocked - already navigating");
-      return;
-    }
-    
-    setIsNavigating(true);
-    console.log("[CoachOnboarding] handleSkip - navigating to dashboard");
-    navigate("/dashboard/coach");
-  }, [isNavigating, navigate]);
 
   // Fail-safe: if isNavigating gets stuck, force unlock after 2 seconds
   useEffect(() => {
@@ -1063,8 +1052,6 @@ const CoachOnboarding = () => {
         headerLogo
         showBackButton={currentStep > 0 && currentStep !== 4 && !isNavigating}
         onBack={handleBack}
-        onSkip={(isNativeMobile && currentStep === 8) ? undefined : handleSkip}
-        skipLabel="Skip for now"
         footerActions={getFooterActions()}
         hideFooter={currentStep === 4}
         maxWidth="lg"
