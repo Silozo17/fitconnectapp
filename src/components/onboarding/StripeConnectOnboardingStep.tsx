@@ -290,12 +290,12 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip, onBack }: St
         </span>
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex flex-col-reverse sm:flex-row gap-3">
         <Button
           type="button"
           variant="outline"
           onClick={() => onBackRef.current()}
-          className="flex-1"
+          className="w-full sm:flex-1"
         >
           {t('onboarding.goBack')}
         </Button>
@@ -303,7 +303,7 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip, onBack }: St
           type="button"
           variant="outline"
           onClick={handleSkipClick}
-          className="flex-1"
+          className="w-full sm:flex-1"
         >
           {t('onboarding.setUpLater')}
         </Button>
@@ -311,7 +311,7 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip, onBack }: St
           type="button"
           onClick={handleConnect} 
           disabled={isLoading}
-          className="flex-1 bg-primary text-primary-foreground"
+          className="w-full sm:flex-1 bg-primary text-primary-foreground"
         >
           {isLoading ? (
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
