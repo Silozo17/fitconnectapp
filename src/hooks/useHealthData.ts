@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { format, subDays } from "date-fns";
+import { format, subDays, startOfDay } from "date-fns";
+import { useMemo, useEffect } from "react";
 
 export type HealthDataType = "steps" | "heart_rate" | "sleep" | "calories" | "distance" | "active_minutes";
 
@@ -41,15 +42,24 @@ const getHighestPriorityEntry = (entries: HealthDataPoint[]): HealthDataPoint | 
 
 export const useHealthData = (options: UseHealthDataOptions = {}) => {
   const { user } = useAuth();
+  
+  // Memoize default dates to prevent query key instability
+  const defaultStartDate = useMemo(() => startOfDay(subDays(new Date(), 7)), []);
+  const defaultEndDate = useMemo(() => startOfDay(new Date()), []);
+  
   const {
     dataType,
-    startDate = subDays(new Date(), 7),
-    endDate = new Date(),
+    startDate = defaultStartDate,
+    endDate = defaultEndDate,
     clientId,
   } = options;
 
+  // Use stable date strings for query key
+  const startDateKey = format(startDate, "yyyy-MM-dd");
+  const endDateKey = format(endDate, "yyyy-MM-dd");
+
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ["health-data", user?.id, clientId, dataType, startDate.toISOString(), endDate.toISOString()],
+    queryKey: ["health-data", user?.id, clientId, dataType, startDateKey, endDateKey],
     queryFn: async () => {
       let targetClientId = clientId;
 
@@ -112,37 +122,43 @@ export const useHealthData = (options: UseHealthDataOptions = {}) => {
       return data as HealthDataPoint[];
     },
     enabled: !!user,
+    staleTime: 1000 * 60 * 5, // 5 minutes - prevents unnecessary refetches
   });
 
-  // Get today's summary
-  const todayStr = format(new Date(), "yyyy-MM-dd");
+  // Memoize today's date string
+  const todayStr = useMemo(() => format(new Date(), "yyyy-MM-dd"), []);
   
   // Filter today's data with improved date comparison
-  const todayData = data?.filter((d) => {
-    // Handle both string dates and full ISO timestamps
-    const recordedDate = typeof d.recorded_at === 'string' 
-      ? d.recorded_at.split('T')[0]  // Extract date part from ISO string
-      : format(new Date(d.recorded_at), "yyyy-MM-dd");
-    return recordedDate === todayStr;
-  });
+  const todayData = useMemo(() => {
+    return data?.filter((d) => {
+      // Handle both string dates and full ISO timestamps
+      const recordedDate = typeof d.recorded_at === 'string' 
+        ? d.recorded_at.split('T')[0]  // Extract date part from ISO string
+        : format(new Date(d.recorded_at), "yyyy-MM-dd");
+      return recordedDate === todayStr;
+    });
+  }, [data, todayStr]);
 
-  // Debug logging for troubleshooting
-  console.log('[useHealthData] Today string:', todayStr);
-  console.log('[useHealthData] Total data points:', data?.length ?? 0);
-  console.log('[useHealthData] Today data points:', todayData?.length ?? 0);
-  if (todayData && todayData.length > 0) {
-    console.log('[useHealthData] Today data sample:', todayData.slice(0, 3));
-  } else if (data && data.length > 0) {
-    console.log('[useHealthData] Data dates available:', [...new Set(data.map(d => d.recorded_at))]);
-  }
+  // Debug logging in useEffect to avoid console spam during renders
+  useEffect(() => {
+    if (!isLoading) {
+      console.log('[useHealthData] Query key:', ["health-data", user?.id, clientId, dataType, startDateKey, endDateKey]);
+      console.log('[useHealthData] Today string:', todayStr);
+      console.log('[useHealthData] Total data points:', data?.length ?? 0);
+      console.log('[useHealthData] Today data points:', todayData?.length ?? 0);
+      if (todayData && todayData.length > 0) {
+        console.log('[useHealthData] Today data sample:', todayData.slice(0, 3));
+      } else if (data && data.length > 0) {
+        console.log('[useHealthData] Data dates available:', [...new Set(data.map(d => d.recorded_at))]);
+      }
+    }
+  }, [data, todayData, isLoading, user?.id, clientId, dataType, startDateKey, endDateKey, todayStr]);
 
   // Get today's value using priority-based selection for multi-device deduplication
   const getTodayValue = (type: HealthDataType) => {
     const entriesForType = todayData?.filter((d) => d.data_type === type) ?? [];
     const highestPriorityEntry = getHighestPriorityEntry(entriesForType);
-    const value = highestPriorityEntry?.value ?? 0;
-    console.log(`[useHealthData] getTodayValue(${type}):`, value, 'from', entriesForType.length, 'entries');
-    return value;
+    return highestPriorityEntry?.value ?? 0;
   };
 
   // Get the source of today's data for a type
