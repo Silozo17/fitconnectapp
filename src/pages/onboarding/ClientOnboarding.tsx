@@ -227,17 +227,6 @@ const ClientOnboarding = () => {
     }
   }, [isNavigating, currentStep]);
 
-  const handleSkip = useCallback(() => {
-    // Guard: prevent during existing navigation
-    if (isNavigating) {
-      console.log("[ClientOnboarding] handleSkip blocked - already navigating");
-      return;
-    }
-    
-    setIsNavigating(true);
-    console.log("[ClientOnboarding] handleSkip - navigating to dashboard");
-    navigate("/dashboard/client");
-  }, [isNavigating, navigate]);
 
   const handleComplete = useCallback(async () => {
     // Guard: prevent during existing navigation or submission
@@ -577,8 +566,6 @@ const ClientOnboarding = () => {
         headerLogo
         showBackButton={currentStep > 0}
         onBack={handleBack}
-        onSkip={handleSkip}
-        skipLabel="Skip"
         footerActions={getFooterActions()}
         maxWidth="lg"
       >
