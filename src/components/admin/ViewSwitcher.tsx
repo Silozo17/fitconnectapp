@@ -86,13 +86,10 @@ const ViewSwitcher = () => {
     }
   };
 
-  const handleProfileCreated = () => {
-    // After creating a profile, switch to that view
-    const profileId = availableProfiles[profileTypeToCreate];
-    if (profileId) {
-      setActiveProfile(profileTypeToCreate, profileId);
-      navigate(`/dashboard/${profileTypeToCreate}`);
-    }
+  const handleProfileCreated = (newProfileId: string) => {
+    // Use the profile ID passed directly from the modal (avoids stale state)
+    setActiveProfile(profileTypeToCreate, newProfileId);
+    navigate(`/dashboard/${profileTypeToCreate}`);
   };
 
   if (isLoadingProfiles) {

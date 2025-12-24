@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdminView } from "@/contexts/AdminContext";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
@@ -22,6 +23,7 @@ interface BecomeCoachModalProps {
 
 const BecomeCoachModal = ({ open, onOpenChange }: BecomeCoachModalProps) => {
   const { user, refreshRole } = useAuth();
+  const { refreshProfiles } = useAdminView();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -89,6 +91,9 @@ const BecomeCoachModal = ({ open, onOpenChange }: BecomeCoachModalProps) => {
 
       // Refresh role in AuthContext so ProtectedRoute sees the new role
       await refreshRole();
+      
+      // Refresh profiles in AdminContext so ViewSwitcher updates immediately
+      await refreshProfiles();
 
       toast.success("Let's set up your coach profile!");
       onOpenChange(false);

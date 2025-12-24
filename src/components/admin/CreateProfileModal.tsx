@@ -21,7 +21,7 @@ interface CreateProfileModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   profileType: "client" | "coach";
-  onSuccess: () => void;
+  onSuccess: (profileId: string) => void;
 }
 
 const CreateProfileModal = ({
@@ -54,7 +54,7 @@ const CreateProfileModal = ({
         if (existingClientProfile) {
           toast.success("Client profile already exists");
           await refreshProfiles();
-          onSuccess();
+          onSuccess(existingClientProfile.id);
           onOpenChange(false);
           return;
         }
@@ -69,14 +69,14 @@ const CreateProfileModal = ({
         const username = existingUserProfile?.username || 
           `${(firstName || 'user').toLowerCase().replace(/[^a-z0-9]/g, '')}${Math.floor(Math.random() * 9999)}`;
 
-        const { error } = await supabase.from("client_profiles").insert({
+        const { data: newClientProfile, error } = await supabase.from("client_profiles").insert({
           user_id: user.id,
           username,
           user_profile_id: existingUserProfile?.id || null,
           first_name: firstName || null,
           last_name: lastName || null,
           onboarding_completed: true,
-        });
+        }).select('id').single();
 
         if (error) throw error;
 
@@ -88,63 +88,70 @@ const CreateProfileModal = ({
             { onConflict: 'user_id,role', ignoreDuplicates: true }
           );
 
+        await refreshProfiles();
+        onSuccess(newClientProfile.id);
+        onOpenChange(false);
+        setFirstName("");
+        setLastName("");
+        setDisplayName("");
         toast.success("Client profile created successfully");
-      } else {
-        // Check if coach profile already exists
-        const { data: existingCoachProfile } = await supabase
-          .from("coach_profiles")
-          .select("id")
-          .eq("user_id", user.id)
-          .maybeSingle();
-
-        if (existingCoachProfile) {
-          toast.success("Coach profile already exists");
-          await refreshProfiles();
-          onSuccess();
-          onOpenChange(false);
-          return;
-        }
-
-        // Fetch existing user_profile to link and reuse username
-        const { data: existingUserProfile } = await supabase
-          .from("user_profiles")
-          .select("id, username")
-          .eq("user_id", user.id)
-          .maybeSingle();
-
-        const username = existingUserProfile?.username || 
-          `${(displayName || 'coach').toLowerCase().replace(/[^a-z0-9]/g, '')}${Math.floor(Math.random() * 9999)}`;
-
-        const { error } = await supabase.from("coach_profiles").insert({
-          user_id: user.id,
-          username,
-          user_profile_id: existingUserProfile?.id || null,
-          display_name: displayName || `${firstName} ${lastName}`.trim() || null,
-          subscription_tier: "free",
-          onboarding_completed: true,
-        });
-
-        if (error) throw error;
-
-        // Explicitly ensure coach role exists (trigger should handle, but be safe)
-        await supabase
-          .from("user_roles")
-          .upsert(
-            { user_id: user.id, role: "coach" as const },
-            { onConflict: 'user_id,role', ignoreDuplicates: true }
-          );
-
-        toast.success("Coach profile created successfully");
+        return;
       }
 
+      // Coach profile creation
+      // Check if coach profile already exists
+      const { data: existingCoachProfile } = await supabase
+        .from("coach_profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (existingCoachProfile) {
+        toast.success("Coach profile already exists");
+        await refreshProfiles();
+        onSuccess(existingCoachProfile.id);
+        onOpenChange(false);
+        return;
+      }
+
+      // Fetch existing user_profile to link and reuse username
+      const { data: existingUserProfile } = await supabase
+        .from("user_profiles")
+        .select("id, username")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      const username = existingUserProfile?.username || 
+        `${(displayName || 'coach').toLowerCase().replace(/[^a-z0-9]/g, '')}${Math.floor(Math.random() * 9999)}`;
+
+      const { data: newCoachProfile, error } = await supabase.from("coach_profiles").insert({
+        user_id: user.id,
+        username,
+        user_profile_id: existingUserProfile?.id || null,
+        display_name: displayName || `${firstName} ${lastName}`.trim() || null,
+        subscription_tier: "free",
+        onboarding_completed: true,
+      }).select('id').single();
+
+      if (error) throw error;
+
+      // Explicitly ensure coach role exists (trigger should handle, but be safe)
+      await supabase
+        .from("user_roles")
+        .upsert(
+          { user_id: user.id, role: "coach" as const },
+          { onConflict: 'user_id,role', ignoreDuplicates: true }
+        );
+
       await refreshProfiles();
-      onSuccess();
+      onSuccess(newCoachProfile.id);
       onOpenChange(false);
       
       // Reset form
       setFirstName("");
       setLastName("");
       setDisplayName("");
+      toast.success("Coach profile created successfully");
     } catch (error: unknown) {
       logError("CreateProfileModal", error);
       toast.error(getErrorMessage(error, "Failed to create profile"));

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { User, Briefcase, CheckCircle, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdminView } from "@/contexts/AdminContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -22,6 +23,7 @@ export function useDualAccountState() {
 const DualAccountStep = ({ coachId, onStateChange, onActionRef }: DualAccountStepProps) => {
   const { t } = useTranslation('common');
   const { user } = useAuth();
+  const { refreshProfiles } = useAdminView();
   const [selectedOption, setSelectedOption] = useState<'both' | 'coach_only' | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
@@ -55,6 +57,8 @@ const DualAccountStep = ({ coachId, onStateChange, onActionRef }: DualAccountSte
           .update({ also_client: true })
           .eq("id", coachId);
         
+        // Refresh profiles so ViewSwitcher updates immediately
+        await refreshProfiles();
         toast.success(t('onboarding.clientAccountSetup'));
         return true;
       }
@@ -107,6 +111,8 @@ const DualAccountStep = ({ coachId, onStateChange, onActionRef }: DualAccountSte
         .update({ also_client: true })
         .eq("id", coachId);
 
+      // Refresh profiles so ViewSwitcher updates immediately
+      await refreshProfiles();
       toast.success(t('onboarding.clientAccountCreated'));
       return true;
     } catch (error) {
