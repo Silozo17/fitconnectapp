@@ -101,7 +101,19 @@ export const useSyncAllWearables = () => {
         'HKCategoryTypeIdentifierAppleStandHour',
       ];
 
-      // Map HealthKit QUANTITY types to our data types (sleep removed - causes crash)
+      /**
+       * TEMPORARY FIX: Only map step count to avoid Despia SDK crash
+       * 
+       * Despia's HealthKitManager.swift has hardcoded type identifiers that
+       * cause crashes with HKStatisticsCollectionQuery. Until they fix it,
+       * we only process step count data which is confirmed to work.
+       * 
+       * TODO: Re-enable when Despia fixes their SDK:
+       * - 'HKQuantityTypeIdentifierActiveEnergyBurned': 'calories',
+       * - 'HKQuantityTypeIdentifierDistanceWalkingRunning': 'distance',
+       * - 'HKQuantityTypeIdentifierHeartRate': 'heart_rate',
+       * - 'HKQuantityTypeIdentifierAppleExerciseTime': 'active_minutes',
+       */
       const mapHealthKitToDataType = (hkType: string): string | null => {
         // Skip unsupported category types entirely
         if (UNSUPPORTED_CATEGORY_TYPES.some(cat => hkType.includes(cat))) {
@@ -109,15 +121,13 @@ export const useSyncAllWearables = () => {
           return null;
         }
         
-        const mappings: Record<string, string> = {
-          'HKQuantityTypeIdentifierStepCount': 'steps',
-          'HKQuantityTypeIdentifierActiveEnergyBurned': 'calories',
-          'HKQuantityTypeIdentifierDistanceWalkingRunning': 'distance',
-          'HKQuantityTypeIdentifierHeartRate': 'heart_rate',
-          'HKQuantityTypeIdentifierAppleExerciseTime': 'active_minutes',
-          // NOTE: Sleep (HKCategoryTypeIdentifierSleepAnalysis) removed - causes native crash
-        };
-        return mappings[hkType] || null;
+        // TEMPORARY: Only steps work reliably due to Despia SDK bug
+        if (hkType === 'HKQuantityTypeIdentifierStepCount') {
+          return 'steps';
+        }
+        
+        console.log(`[useSyncAllWearables] Skipping ${hkType} - temporarily disabled due to Despia SDK bug`);
+        return null;
       };
 
       const getUnitForDataType = (dataType: string): string => {

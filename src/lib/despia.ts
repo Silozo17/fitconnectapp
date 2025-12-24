@@ -327,27 +327,25 @@ export const syncHealthKitData = async (days: number = 7): Promise<HealthKitConn
     console.log(`[Despia HealthKit] Syncing ${days} days of health data...`);
     
     /**
-     * KNOWN LIMITATION: Sleep data (HKCategoryTypeIdentifierSleepAnalysis)
+     * TEMPORARY FIX: Only sync step count to avoid Despia SDK crash
      * 
-     * Sleep analysis is a CATEGORY type, not a QUANTITY type. 
-     * Despia's HealthKitManager uses HKStatisticsCollectionQuery which only 
-     * works with quantity types. Attempting to query sleep data causes:
+     * The Despia HealthKitManager.swift has a bug where it uses hardcoded
+     * HealthKit type identifiers internally, regardless of what we pass in
+     * the types parameter. This causes crashes when it attempts to use
+     * HKStatisticsCollectionQuery with category types or certain quantity types.
      * 
-     * Exception: -[HKQuantityType supportsStatisticOptions:] 
-     * "Statistics cannot be calculated for samples of type HKCategoryTypeIdentifierSleepAnalysis"
+     * Until Despia fixes their native SDK, we only request step count which
+     * is confirmed to work reliably.
      * 
-     * To support sleep data, Despia would need to use HKSampleQuery instead.
-     * Until Despia adds support, sleep data must be entered manually or 
-     * synced through a different provider (Fitbit, Garmin).
+     * TODO: Re-enable full health data sync when Despia fixes HealthKitManager.swift
+     * Full list that should work:
+     * - HKQuantityTypeIdentifierStepCount
+     * - HKQuantityTypeIdentifierActiveEnergyBurned
+     * - HKQuantityTypeIdentifierDistanceWalkingRunning
+     * - HKQuantityTypeIdentifierHeartRate
+     * - HKQuantityTypeIdentifierAppleExerciseTime
      */
-    const types = [
-      'HKQuantityTypeIdentifierStepCount',
-      'HKQuantityTypeIdentifierActiveEnergyBurned',
-      'HKQuantityTypeIdentifierDistanceWalkingRunning',
-      'HKQuantityTypeIdentifierHeartRate',
-      'HKQuantityTypeIdentifierAppleExerciseTime'
-      // NOTE: HKCategoryTypeIdentifierSleepAnalysis is NOT supported - causes native crash
-    ].join(',');
+    const types = 'HKQuantityTypeIdentifierStepCount';
     
     const response = await despia(
       `healthkit://read?types=${types}&days=${days}`,
