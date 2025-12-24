@@ -87,7 +87,7 @@ const menuGroupsConfig: MenuGroup[] = [
     collapsible: false,
     items: [
       { titleKey: "navigation.client.home", icon: Home, path: "/dashboard/client" },
-      { titleKey: "navigation.client.findCoaches", icon: Search, path: "/dashboard/client/find-coaches", disabledOnIOS: true },
+      { titleKey: "navigation.client.findCoaches", icon: Search, path: "/dashboard/client/find-coaches" },
       { titleKey: "navigation.client.marketplace", icon: ShoppingBag, path: "/dashboard/client/marketplace", disabledOnIOS: true },
       { titleKey: "navigation.client.messages", icon: MessageSquare, path: "/dashboard/client/messages", badgeKey: "messages" },
       { titleKey: "navigation.client.connections", icon: UserPlus, path: "/dashboard/client/connections", badgeKey: "connections" },
