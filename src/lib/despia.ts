@@ -9,39 +9,11 @@ import despia from 'despia-native';
 
 /**
  * Check if the app is running inside the Despia native environment
- * Uses multiple fallback detection methods for reliability
+ * Uses user agent string check as per official Despia documentation
  */
 export const isDespia = (): boolean => {
-  if (typeof window === 'undefined') return false;
   if (typeof navigator === 'undefined') return false;
-  
-  // Method 1: User agent check (primary - case insensitive for reliability)
-  const hasUserAgent = navigator.userAgent.toLowerCase().includes('despia');
-  
-  // Method 2: Check for Despia runtime callback functions on window
-  // These are set by Despia native when the webview loads
-  const hasRuntimeFunctions = typeof (window as any).onBioAuthSuccess === 'function' ||
-                              typeof (window as any).iapSuccess === 'function' ||
-                              typeof (window as any).onHealthKitSuccess === 'function';
-  
-  // Method 3: Check for despia-native SDK marker set by the native app
-  const hasSDKMarker = !!(window as any).__DESPIA__;
-  
-  // Method 4: Check if Despia sets window.despiaReady (native bridge check)
-  const hasNativeBridge = typeof (window as any).despiaReady !== 'undefined';
-  
-  // Debug logging for TestFlight debugging
-  const result = hasUserAgent || hasRuntimeFunctions || hasSDKMarker || hasNativeBridge;
-  console.log('[Despia Detection]', {
-    userAgent: navigator.userAgent,
-    hasUserAgent,
-    hasRuntimeFunctions,
-    hasSDKMarker,
-    hasNativeBridge,
-    result
-  });
-  
-  return result;
+  return navigator.userAgent.toLowerCase().includes('despia');
 };
 
 /**
@@ -303,18 +275,21 @@ export const requestHealthKitPermissions = (): boolean => {
 
 /**
  * Check if the app is running on iOS inside Despia
+ * Uses lowercase user agent check as per official Despia documentation
  */
 export const isDespiaIOS = (): boolean => {
   if (!isDespia()) return false;
-  return /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const ua = navigator.userAgent.toLowerCase();
+  return ua.includes('iphone') || ua.includes('ipad');
 };
 
 /**
  * Check if the app is running on Android inside Despia
+ * Uses lowercase user agent check as per official Despia documentation
  */
 export const isDespiaAndroid = (): boolean => {
   if (!isDespia()) return false;
-  return /Android/i.test(navigator.userAgent);
+  return navigator.userAgent.toLowerCase().includes('android');
 };
 
 /**
