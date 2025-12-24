@@ -30,12 +30,14 @@ export const useEnvironment = (): EnvironmentInfo => {
   const [isAndroid, setIsAndroid] = useState(false);
 
   useEffect(() => {
-    // Detect iOS
-    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    const ua = navigator.userAgent.toLowerCase();
+    
+    // Detect iOS (using lowercase as per Despia docs)
+    const iOS = ua.includes('iphone') || ua.includes('ipad') || ua.includes('ipod');
     setIsIOS(iOS);
 
-    // Detect Android
-    const android = /Android/i.test(navigator.userAgent);
+    // Detect Android (using lowercase as per Despia docs)
+    const android = ua.includes('android');
     setIsAndroid(android);
 
     // Detect native app (Capacitor or Cordova)
@@ -107,10 +109,9 @@ export const getEnvironment = (): EnvironmentInfo => {
   const isStandalone = isPWA || isNativeApp || isDespiaEnv;
   const isBrowser = !isStandalone;
 
-  const isIOS = typeof navigator !== "undefined" && 
-    /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
-  const isAndroid = typeof navigator !== "undefined" && 
-    /Android/i.test(navigator.userAgent);
+  const ua = typeof navigator !== "undefined" ? navigator.userAgent.toLowerCase() : "";
+  const isIOS = ua.includes('iphone') || ua.includes('ipad') || ua.includes('ipod');
+  const isAndroid = ua.includes('android');
 
   return {
     isBrowser,
