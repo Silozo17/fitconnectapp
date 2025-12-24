@@ -67,7 +67,7 @@ interface HealthDataWidgetProps {
 
 const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps) => {
   const { t } = useTranslation('settings');
-  const { getTodayValue, getTodaySource, isLoading, data } = useHealthData();
+  const { getTodayValue, getTodaySource, isLoading, data, refetch } = useHealthData();
   const { connections, isLoading: wearablesLoading, error: wearablesError } = useWearables();
   const { syncAll, isSyncing, lastSyncedAt } = useSyncAllWearables();
 
@@ -77,6 +77,10 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
   const handleSync = async () => {
     try {
       await syncAll();
+      // Explicitly refetch health data after sync completes
+      console.log('[HealthDataWidget] Sync complete, triggering explicit refetch...');
+      await refetch();
+      console.log('[HealthDataWidget] Refetch complete');
     } catch (error) {
       // Error handled in hook
     }

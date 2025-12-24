@@ -116,13 +116,33 @@ export const useHealthData = (options: UseHealthDataOptions = {}) => {
 
   // Get today's summary
   const todayStr = format(new Date(), "yyyy-MM-dd");
-  const todayData = data?.filter((d) => d.recorded_at === todayStr);
+  
+  // Filter today's data with improved date comparison
+  const todayData = data?.filter((d) => {
+    // Handle both string dates and full ISO timestamps
+    const recordedDate = typeof d.recorded_at === 'string' 
+      ? d.recorded_at.split('T')[0]  // Extract date part from ISO string
+      : format(new Date(d.recorded_at), "yyyy-MM-dd");
+    return recordedDate === todayStr;
+  });
+
+  // Debug logging for troubleshooting
+  console.log('[useHealthData] Today string:', todayStr);
+  console.log('[useHealthData] Total data points:', data?.length ?? 0);
+  console.log('[useHealthData] Today data points:', todayData?.length ?? 0);
+  if (todayData && todayData.length > 0) {
+    console.log('[useHealthData] Today data sample:', todayData.slice(0, 3));
+  } else if (data && data.length > 0) {
+    console.log('[useHealthData] Data dates available:', [...new Set(data.map(d => d.recorded_at))]);
+  }
 
   // Get today's value using priority-based selection for multi-device deduplication
   const getTodayValue = (type: HealthDataType) => {
     const entriesForType = todayData?.filter((d) => d.data_type === type) ?? [];
     const highestPriorityEntry = getHighestPriorityEntry(entriesForType);
-    return highestPriorityEntry?.value ?? 0;
+    const value = highestPriorityEntry?.value ?? 0;
+    console.log(`[useHealthData] getTodayValue(${type}):`, value, 'from', entriesForType.length, 'entries');
+    return value;
   };
 
   // Get the source of today's data for a type
