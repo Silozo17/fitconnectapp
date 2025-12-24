@@ -290,28 +290,12 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip, onBack }: St
         </span>
       </div>
 
-      <div className="flex flex-col-reverse sm:flex-row gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => onBackRef.current()}
-          className="w-full sm:flex-1"
-        >
-          {t('onboarding.goBack')}
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleSkipClick}
-          className="w-full sm:flex-1"
-        >
-          {t('onboarding.setUpLater')}
-        </Button>
+      <div className="flex flex-col gap-3">
         <Button 
           type="button"
           onClick={handleConnect} 
           disabled={isLoading}
-          className="w-full sm:flex-1 bg-primary text-primary-foreground"
+          className="w-full bg-primary text-primary-foreground"
         >
           {isLoading ? (
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -320,6 +304,24 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip, onBack }: St
           )}
           {t('onboarding.connectStripe')}
         </Button>
+        <div className="flex gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onBackRef.current()}
+            className="flex-1"
+          >
+            {t('onboarding.goBack')}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleSkipClick}
+            className="flex-1"
+          >
+            {t('onboarding.setUpLater')}
+          </Button>
+        </div>
       </div>
 
       {/* Skip confirmation bottom sheet */}
