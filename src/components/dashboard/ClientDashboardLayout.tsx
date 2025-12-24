@@ -44,45 +44,34 @@ const ClientDashboardLayout = ({
     }
   }, [isLoading]);
 
-  // Handle redirect to onboarding
+  // Handle redirect to onboarding - navigate immediately
   useEffect(() => {
     if (!isLoading && onboardingStatus && !onboardingStatus.isOnboarded && !onboardingStatus.error) {
-      navigate("/onboarding/client");
+      navigate("/onboarding/client", { replace: true });
     }
   }, [onboardingStatus, isLoading, navigate]);
 
-  const handleRetry = () => {
-    setLoadingTimedOut(false);
-    refetch();
-  };
-
-  // Show error/timeout state
-  if (isError || loadingTimedOut || onboardingStatus?.error) {
+  // Show loading state ONLY while actually fetching data
+  // Once we have data and user is not onboarded, we're redirecting - show loading during that transition
+  if (isLoading) {
     return (
       <>
-        <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 p-4" role="alert">
-          <p className="text-muted-foreground text-center">
-            {loadingTimedOut 
-              ? "Loading is taking longer than expected." 
-              : "Unable to load dashboard. Please try again."}
-          </p>
-          <Button onClick={handleRetry} variant="outline" className="gap-2">
-            <RefreshCw className="h-4 w-4" />
-            Retry
-          </Button>
+        <div className="min-h-screen bg-background flex items-center justify-center" role="status" aria-label="Loading dashboard">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" aria-hidden="true" />
+          <span className="sr-only">Loading dashboard...</span>
         </div>
         <MobileBottomNav variant="client" />
       </>
     );
   }
 
-  // Show loading state (but with timeout protection)
-  if (isLoading || !onboardingStatus?.isOnboarded) {
+  // If not onboarded, show loading spinner while redirect happens (prevents "frozen" appearance)
+  if (!onboardingStatus?.isOnboarded) {
     return (
       <>
-        <div className="min-h-screen bg-background flex items-center justify-center" role="status" aria-label="Loading dashboard">
+        <div className="min-h-screen bg-background flex items-center justify-center" role="status" aria-label="Redirecting to onboarding">
           <Loader2 className="w-8 h-8 animate-spin text-primary" aria-hidden="true" />
-          <span className="sr-only">Loading dashboard...</span>
+          <span className="sr-only">Redirecting to onboarding...</span>
         </div>
         <MobileBottomNav variant="client" />
       </>

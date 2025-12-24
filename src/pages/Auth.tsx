@@ -44,6 +44,7 @@ const Auth = () => {
   const [passwordValue, setPasswordValue] = useState("");
   const [showOTPVerification, setShowOTPVerification] = useState(false);
   const [pendingSignupData, setPendingSignupData] = useState<{ email: string; password: string } | null>(null);
+  const [hasNavigated, setHasNavigated] = useState(false); // Prevent duplicate navigation after signup
   const { signIn, signUp, user, role } = useAuth();
   
   // Get return URL from query params or location state
@@ -101,6 +102,8 @@ const Auth = () => {
 
   useEffect(() => {
     const handleRedirect = async () => {
+      // Skip if we already navigated directly after signup (prevents duplicate navigation)
+      if (hasNavigated) return;
       if (!user || !role) return;
       
       // If there's a return URL, redirect there instead of default dashboard
@@ -144,7 +147,7 @@ const Auth = () => {
     };
     
     handleRedirect();
-  }, [user, role, navigate, returnUrl]);
+  }, [user, role, navigate, returnUrl, hasNavigated]);
 
   // Send OTP email
   const sendOTPEmail = async (email: string) => {
@@ -230,6 +233,9 @@ const Auth = () => {
           },
         }).catch((err) => console.error("Failed to send welcome email:", err));
 
+        // Mark that we've already navigated to prevent useEffect from triggering duplicate navigation
+        setHasNavigated(true);
+        
         // Explicit navigation based on selected role
         const targetRoute = selectedRole === "coach" 
           ? "/onboarding/coach" 
