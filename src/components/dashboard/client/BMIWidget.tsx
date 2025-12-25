@@ -7,12 +7,12 @@ import { useClientProfileData, calculateBMI, getBMICategory } from '@/hooks/useC
 import { cn } from '@/lib/utils';
 
 // Convert polar coordinates to cartesian for SVG
-// Angle 0 = right, 90 = bottom, 180 = left, 270 = top (standard SVG)
+// SVG y-axis points DOWN, so we subtract to draw arcs UPWARD
 function polarToCartesian(cx: number, cy: number, radius: number, angleInDegrees: number) {
   const angleInRadians = (angleInDegrees * Math.PI) / 180;
   return {
     x: cx + radius * Math.cos(angleInRadians),
-    y: cy + radius * Math.sin(angleInRadians)
+    y: cy - radius * Math.sin(angleInRadians)  // SUBTRACT for upward arcs
   };
 }
 
