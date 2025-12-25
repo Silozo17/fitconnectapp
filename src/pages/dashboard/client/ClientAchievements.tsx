@@ -32,17 +32,17 @@ function AchievementsContent() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <Skeleton className="h-8 w-48 mb-2" />
-            <Skeleton className="h-4 w-64" />
+            <Skeleton className="h-8 w-48 mb-2 rounded-xl" />
+            <Skeleton className="h-4 w-64 rounded-xl" />
           </div>
         </div>
         <div className="flex flex-col md:flex-row gap-6 items-start">
           <Skeleton className="h-32 w-32 rounded-full" />
           <div className="flex-1 w-full">
-            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-24 w-full rounded-2xl" />
           </div>
         </div>
-        <Skeleton className="h-64 w-full" />
+        <Skeleton className="h-64 w-full rounded-3xl" />
       </div>
     );
   }
@@ -110,22 +110,24 @@ function AchievementsContent() {
       </div>
       
       <Tabs defaultValue="badges" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="badges">{t('achievements.tabs.badges')}</TabsTrigger>
-          <TabsTrigger value="history">{t('achievements.tabs.history')}</TabsTrigger>
+        <TabsList className="bg-muted/50 backdrop-blur-sm p-1 rounded-2xl">
+          <TabsTrigger value="badges" className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm">{t('achievements.tabs.badges')}</TabsTrigger>
+          <TabsTrigger value="history" className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm">{t('achievements.tabs.history')}</TabsTrigger>
         </TabsList>
         
         <TabsContent value="badges">
           <ErrorBoundary fallback={
-            <Card>
-              <CardContent className="py-8">
+            <Card className="rounded-3xl border-border/50 bg-card/50 backdrop-blur-sm">
+              <CardContent className="py-12">
                 <div className="text-center text-muted-foreground">
-                  <AlertTriangle className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p>Unable to load badges</p>
+                  <div className="w-16 h-16 rounded-3xl bg-destructive/10 flex items-center justify-center mx-auto mb-4">
+                    <AlertTriangle className="h-8 w-8 text-destructive/70" />
+                  </div>
+                  <p className="font-medium mb-1">Unable to load badges</p>
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="mt-4"
+                    className="mt-4 rounded-xl"
                     onClick={() => window.location.reload()}
                   >
                     <RefreshCw className="h-4 w-4 mr-2" />
@@ -140,32 +142,36 @@ function AchievementsContent() {
         </TabsContent>
         
         <TabsContent value="history">
-          <Card>
+          <Card className="rounded-3xl border-border/50 bg-card/50 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="text-lg">{t('achievements.xpHistory.title')}</CardTitle>
             </CardHeader>
             <CardContent>
               {transactionsLoading ? (
-                <div className="space-y-2">
-                  {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 rounded-lg" />)}
+                <div className="space-y-3">
+                  {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-14 rounded-2xl" />)}
                 </div>
               ) : transactionsError ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <AlertTriangle className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p>Unable to load XP history</p>
+                <div className="text-center py-12 text-muted-foreground">
+                  <div className="w-16 h-16 rounded-3xl bg-destructive/10 flex items-center justify-center mx-auto mb-4">
+                    <AlertTriangle className="h-8 w-8 text-destructive/70" />
+                  </div>
+                  <p className="font-medium">Unable to load XP history</p>
                 </div>
               ) : !transactions || transactions.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Zap className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p>{t('achievements.xpHistory.noXpYet')}</p>
+                <div className="text-center py-12 text-muted-foreground">
+                  <div className="w-16 h-16 rounded-3xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                    <Zap className="h-8 w-8 text-primary/70" />
+                  </div>
+                  <p className="font-medium mb-1">{t('achievements.xpHistory.noXpYet')}</p>
                   <p className="text-sm">{t('achievements.xpHistory.earnXp')}</p>
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {transactions.map((tx) => (
-                    <div key={tx.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <div key={tx.id} className="flex items-center justify-between p-4 bg-muted/30 rounded-2xl border border-border/30 hover:bg-muted/50 transition-colors">
                       <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-full ${tx.amount > 0 ? 'bg-primary/20' : 'bg-destructive/20'}`}>
+                        <div className={`p-2.5 rounded-xl ${tx.amount > 0 ? 'bg-primary/20' : 'bg-destructive/20'}`}>
                           {tx.amount > 0 ? <TrendingUp className="h-4 w-4 text-primary" /> : <TrendingDown className="h-4 w-4 text-destructive" />}
                         </div>
                         <div>

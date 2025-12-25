@@ -73,10 +73,10 @@ const ClientReceipts = () => {
         </div>
 
         {receipts.length === 0 ? (
-          <Card>
-            <CardContent className="py-12">
+          <Card className="rounded-3xl border-border/50 bg-card/50 backdrop-blur-sm">
+            <CardContent className="py-16">
               <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 rounded-3xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
                   <Receipt className="w-8 h-8 text-muted-foreground" />
                 </div>
                 <h3 className="font-semibold mb-2">No receipts yet</h3>
@@ -89,22 +89,22 @@ const ClientReceipts = () => {
         ) : (
           <div className="grid gap-4">
             {receipts.map((receipt) => (
-              <Card key={receipt.id} className="hover:bg-muted/50 transition-colors">
-                <CardContent className="p-4">
+              <Card key={receipt.id} className="hover:bg-muted/50 transition-colors rounded-2xl border-border/50 bg-card/50 backdrop-blur-sm">
+                <CardContent className="p-5">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                        <FileText className="w-5 h-5 text-primary" />
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                        <FileText className="w-6 h-6 text-primary" />
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <h3 className="font-semibold">{receipt.invoice_number}</h3>
                           <Badge 
                             variant="secondary" 
-                            className={receipt.status === "refunded" 
+                            className={`rounded-full ${receipt.status === "refunded" 
                               ? "bg-orange-500/10 text-orange-500" 
                               : "bg-green-500/10 text-green-500"
-                            }
+                            }`}
                           >
                             {receipt.status === "refunded" ? "Refunded" : "Paid"}
                           </Badge>
@@ -128,6 +128,7 @@ const ClientReceipts = () => {
                         <Button
                           variant="outline"
                           size="sm"
+                          className="rounded-xl"
                           onClick={() => setSelectedReceipt(receipt)}
                         >
                           <Eye className="w-4 h-4 sm:mr-2" />

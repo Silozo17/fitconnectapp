@@ -69,16 +69,16 @@ const ClientTools = () => {
               <button
                 key={tool.id}
                 onClick={() => setSelectedTool(tool.id)}
-                className="p-5 rounded-xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/30 transition-all text-left group"
+                className="p-5 rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 hover:border-primary/50 hover:bg-card hover:shadow-float transition-all text-left group active:scale-[0.98]"
               >
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-                    <tool.icon className="w-6 h-6 text-primary" />
+                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 group-hover:shadow-glow-sm transition-all">
+                    <tool.icon className="w-7 h-7 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
                       <p className="font-semibold text-foreground">{tool.name}</p>
-                      <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                      <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
                     </div>
                     <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{tool.description}</p>
                   </div>

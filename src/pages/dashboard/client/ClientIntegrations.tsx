@@ -111,9 +111,11 @@ const ClientIntegrations = () => {
         <Separator />
 
         {/* Data & Privacy */}
-        <Card className="p-4 bg-muted/50 border-muted">
-          <div className="flex items-start gap-3">
-            <Shield className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+        <Card className="p-5 bg-muted/30 border-muted/50 rounded-2xl backdrop-blur-sm">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center shrink-0">
+              <Shield className="h-5 w-5 text-muted-foreground" />
+            </div>
             <div className="space-y-2">
               <h3 className="font-medium">Data & Privacy</h3>
               <p className="text-sm text-muted-foreground">

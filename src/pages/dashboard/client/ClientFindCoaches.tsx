@@ -215,7 +215,7 @@ const ClientFindCoaches = () => {
             </>
           ) : (
             <div className="text-center py-16">
-              <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 rounded-3xl bg-secondary/50 flex items-center justify-center mx-auto mb-4">
                 <Users className="w-8 h-8 text-muted-foreground" />
               </div>
               <h3 className="font-semibold text-xl text-foreground mb-2">

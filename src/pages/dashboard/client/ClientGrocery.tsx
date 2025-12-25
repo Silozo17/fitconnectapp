@@ -193,9 +193,9 @@ const ClientGrocery = () => {
 
           {/* No Meal Plan Info Card */}
           {!plansLoading && !hasNutritionPlans && (
-            <Card className="border-amber-500/30 bg-amber-500/5">
-              <CardContent className="flex items-start gap-4 py-4">
-                <div className="p-2 rounded-full bg-amber-500/10">
+            <Card className="border-amber-500/30 bg-amber-500/5 rounded-2xl">
+              <CardContent className="flex items-start gap-4 py-5">
+                <div className="p-3 rounded-xl bg-amber-500/10">
                   <Utensils className="w-5 h-5 text-amber-500" />
                 </div>
                 <div>
@@ -234,14 +234,16 @@ const ClientGrocery = () => {
                 ))}
               </div>
             ) : (
-              <Card className="bg-card/50 border-border/50">
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <ShoppingCart className="w-12 h-12 text-muted-foreground mb-4" />
+              <Card className="bg-card/50 border-border/50 rounded-3xl backdrop-blur-sm">
+                <CardContent className="flex flex-col items-center justify-center py-16">
+                  <div className="w-16 h-16 rounded-3xl bg-muted/50 flex items-center justify-center mb-4">
+                    <ShoppingCart className="w-8 h-8 text-muted-foreground" />
+                  </div>
                   <CardTitle className="text-lg mb-2">No active lists</CardTitle>
                   <CardDescription className="text-center mb-4">
                     Create a new shopping list or generate one from your meal plan
                   </CardDescription>
-                  <Button onClick={() => setCreateDialogOpen(true)}>
+                  <Button onClick={() => setCreateDialogOpen(true)} className="rounded-xl">
                     <Plus className="w-4 h-4 mr-2" />
                     Create List
                   </Button>
