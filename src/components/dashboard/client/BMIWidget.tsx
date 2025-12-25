@@ -6,41 +6,46 @@ import { Settings } from 'lucide-react';
 import { useClientProfileData, calculateBMI, getBMICategory } from '@/hooks/useClientProfileData';
 import { cn } from '@/lib/utils';
 
-// SVG arc path generator
-function describeArc(x: number, y: number, radius: number, startAngle: number, endAngle: number): string {
-  const start = polarToCartesian(x, y, radius, endAngle);
-  const end = polarToCartesian(x, y, radius, startAngle);
-  const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+// Convert angle in degrees to radians
+function toRadians(degrees: number): number {
+  return (degrees * Math.PI) / 180;
+}
+
+// SVG arc path generator for semi-circle (top half)
+// startAngle and endAngle are in degrees where 180 = left, 0 = right
+function describeArc(cx: number, cy: number, radius: number, startAngle: number, endAngle: number): string {
+  // Convert to radians - we're drawing from left (180°) to right (0°)
+  const startRad = toRadians(startAngle);
+  const endRad = toRadians(endAngle);
   
-  return [
-    "M", start.x, start.y,
-    "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y
-  ].join(" ");
+  // Calculate start and end points
+  const x1 = cx + radius * Math.cos(Math.PI - startRad);
+  const y1 = cy - radius * Math.sin(Math.PI - startRad);
+  const x2 = cx + radius * Math.cos(Math.PI - endRad);
+  const y2 = cy - radius * Math.sin(Math.PI - endRad);
+  
+  const largeArcFlag = Math.abs(endAngle - startAngle) > 180 ? 1 : 0;
+  const sweepFlag = 1; // Always sweep clockwise
+  
+  return `M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${x2} ${y2}`;
 }
 
-function polarToCartesian(centerX: number, centerY: number, radius: number, angleInDegrees: number) {
-  const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
-  return {
-    x: centerX + (radius * Math.cos(angleInRadians)),
-    y: centerY + (radius * Math.sin(angleInRadians))
-  };
-}
-
-// Calculate angle position for BMI value on the gauge (180 degree arc)
-function getBMIAngle(bmi: number): number {
+// Get position for the indicator dot
+function getIndicatorPosition(bmi: number, cx: number, cy: number, radius: number) {
   // BMI scale: 15 to 40 mapped to 180 degrees (left to right)
   const minBMI = 15;
   const maxBMI = 40;
   const clampedBMI = Math.max(minBMI, Math.min(maxBMI, bmi));
   const percentage = (clampedBMI - minBMI) / (maxBMI - minBMI);
-  // Start at 180 (left), end at 0 (right)
-  return 180 - (percentage * 180);
-}
-
-// Get position for the indicator dot
-function getIndicatorPosition(bmi: number, cx: number, cy: number, radius: number) {
-  const angle = getBMIAngle(bmi);
-  return polarToCartesian(cx, cy, radius, angle);
+  
+  // Angle from 180° (left) to 0° (right)
+  const angle = 180 - (percentage * 180);
+  const rad = toRadians(angle);
+  
+  return {
+    x: cx + radius * Math.cos(Math.PI - rad),
+    y: cy - radius * Math.sin(Math.PI - rad)
+  };
 }
 
 export function BMIWidget() {
@@ -63,19 +68,20 @@ export function BMIWidget() {
   const hasMissingData = !profile?.weight_kg || !profile?.height_cm;
   
   // Gauge dimensions
-  const width = 240;
-  const height = 140;
+  const width = 260;
+  const height = 150;
   const cx = width / 2;
-  const cy = height - 10;
+  const cy = height - 20;
   const radius = 100;
-  const strokeWidth = 16;
+  const strokeWidth = 14;
   
-  // Segment angles (each segment is ~45 degrees with gaps)
+  // Segment angles (180 degree arc split into 4 segments with gaps)
+  // Each segment ~42° with 3° gaps between
   const segments = [
     { startAngle: 180, endAngle: 138, color: '#3B82F6' },  // Underweight - blue
-    { startAngle: 135, endAngle: 93, color: '#22C55E' },   // Normal - green
+    { startAngle: 135, endAngle: 93, color: '#22C55E' },   // Normal - green  
     { startAngle: 90, endAngle: 48, color: '#EAB308' },    // Overweight - yellow
-    { startAngle: 45, endAngle: 0, color: '#EF4444' },     // Obese - red
+    { startAngle: 45, endAngle: 3, color: '#EF4444' },     // Obese - red
   ];
   
   const category = bmi ? getBMICategory(bmi) : null;
