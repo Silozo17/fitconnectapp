@@ -15,6 +15,7 @@ import CoachPricingSection from "@/components/packages/CoachPricingSection";
 import { useCoachReviews, calculateAverageRating } from "@/hooks/useReviews";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdminView } from "@/contexts/AdminContext";
 import { formatCurrency, type CurrencyCode } from "@/lib/currency";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -39,7 +40,8 @@ const ClientCoachProfile = () => {
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [startingConversation, setStartingConversation] = useState(false);
-  const { user, role } = useAuth();
+  const { user } = useAuth();
+  const { activeProfileType } = useAdminView();
 
   const handleMessageCoach = async () => {
     if (!user || !coach) return;
@@ -88,7 +90,7 @@ const ClientCoachProfile = () => {
     );
   }
 
-  const isClient = user && (role === "client" || role === "admin");
+  const isClient = user && (activeProfileType === "client" || activeProfileType === "admin");
 
   return (
     <ClientDashboardLayout 
