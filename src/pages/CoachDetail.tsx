@@ -16,6 +16,7 @@ import CoachPricingSection from "@/components/packages/CoachPricingSection";
 import { useCoachReviews, calculateAverageRating } from "@/hooks/useReviews";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdminView } from "@/contexts/AdminContext";
 import { formatCurrency, type CurrencyCode } from "@/lib/currency";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -47,7 +48,8 @@ const CoachDetail = () => {
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [startingConversation, setStartingConversation] = useState(false);
-  const { user, role } = useAuth();
+  const { user, allRoles } = useAuth();
+  const { activeProfileType } = useAdminView();
 
   const handleMessageCoach = async () => {
     if (!user || !coach) return;
@@ -247,7 +249,7 @@ const CoachDetail = () => {
 
                   {/* CTA Buttons */}
                   <div className="space-y-3">
-                    {user && (role === "client" || role === "admin") ? (
+                    {user && (activeProfileType === "client" || activeProfileType === "admin" || allRoles.includes("client")) ? (
                       <>
                         <Button 
                           className="w-full" 
