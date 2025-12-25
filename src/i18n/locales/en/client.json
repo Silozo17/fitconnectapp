@@ -477,7 +477,9 @@
     "sessions": "Sessions",
     "noCoaches": "No coaches yet",
     "noCoachesDescription": "Browse our marketplace to find the perfect coach for your goals.",
-    "browseCoaches": "Browse Coaches"
+    "browseCoaches": "Browse Coaches",
+    "loadError": "Failed to load your coaches. Please try again.",
+    "connectionError": "There was an error loading your coaching connections."
   },
   "integrations": {
     "title": "Integrations",

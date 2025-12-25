@@ -477,7 +477,9 @@
     "sessions": "Sesje",
     "noCoaches": "Brak trenerów",
     "noCoachesDescription": "Przeglądaj marketplace, aby znaleźć idealnego trenera dla swoich celów.",
-    "browseCoaches": "Przeglądaj trenerów"
+    "browseCoaches": "Przeglądaj trenerów",
+    "loadError": "Nie udało się załadować trenerów. Spróbuj ponownie.",
+    "connectionError": "Wystąpił błąd podczas ładowania połączeń z trenerami."
   },
   "integrations": {
     "title": "Integracje",
