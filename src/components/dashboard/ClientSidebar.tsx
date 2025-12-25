@@ -38,11 +38,14 @@ import { useClientBadges } from "@/hooks/useSidebarBadges";
 import { SidebarBadge } from "@/components/shared/SidebarBadge";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdminView } from "@/contexts/AdminContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useSelectedAvatar } from "@/hooks/useAvatars";
 import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
 import { WebOnlyFeatureDialog } from "@/components/shared/WebOnlyFeatureDialog";
 import { Rarity } from "@/lib/avatar-utils";
+import ViewSwitcher from "@/components/admin/ViewSwitcher";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import {
   Collapsible,
   CollapsibleContent,
@@ -451,7 +454,7 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
 
       {/* Mobile Sidebar */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="w-64 p-0 flex flex-col" onOpenAutoFocus={(e) => e.preventDefault()}>
+        <SheetContent side="left" className="w-72 p-0 flex flex-col" onOpenAutoFocus={(e) => e.preventDefault()}>
           {/* Logo */}
           <div className="p-4 border-b border-border">
             <div className="flex items-center gap-2">
@@ -460,6 +463,12 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
               </div>
               <span className="font-bold text-lg text-foreground">{t("app.name")}</span>
             </div>
+          </div>
+
+          {/* View Switcher & Notifications - Mobile only */}
+          <div className="p-3 border-b border-border flex items-center justify-between gap-2">
+            <ViewSwitcher />
+            <NotificationCenter />
           </div>
 
           {/* Search - Mobile only */}
