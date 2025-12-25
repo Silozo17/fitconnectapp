@@ -16,27 +16,8 @@ import { useCoachLinkPrefix } from "@/hooks/useCoachLinkPrefix";
 import { useExchangeRates } from "@/hooks/useExchangeRates";
 import { getDisplayLocation } from "@/lib/location-utils";
 import { useTranslation } from "@/hooks/useTranslation";
-import { getCoachTypeById, COACH_TYPES } from "@/constants/coachTypes";
+import { getCoachTypeDisplayLabel } from "@/constants/coachTypes";
 import { useIOSRestrictions } from "@/hooks/useIOSRestrictions";
-
-// Helper to get display label for coach type (handles custom types)
-const getCoachTypeDisplayLabel = (type: string): string => {
-  // First check if it's an ID in the predefined list
-  const byId = getCoachTypeById(type);
-  if (byId) return byId.label;
-  
-  // Check if it matches a label directly
-  const byLabel = COACH_TYPES.find(t => t.label === type);
-  if (byLabel) return byLabel.label;
-  
-  // It's a custom type - clean up the display
-  if (type.startsWith("custom_")) {
-    return type.replace("custom_", "").replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
-  }
-  
-  // Return as-is but with title case
-  return type.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
-};
 
 interface CoachCardProps {
   coach: MarketplaceCoach;
