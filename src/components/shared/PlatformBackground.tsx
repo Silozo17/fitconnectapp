@@ -1,6 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import platformBg from "@/assets/backgrounds/platform-bg.jpg";
+import platformBg from "@/assets/backgrounds/platform-bg.png";
 
 interface PlatformBackgroundProps {
   className?: string;
@@ -19,7 +19,7 @@ interface PlatformBackgroundProps {
  */
 export const PlatformBackground = React.memo(function PlatformBackground({
   className,
-  overlayOpacity = 0.7,
+  overlayOpacity = 0.4,
   showImage = true,
   showAmbientGlow = true,
 }: PlatformBackgroundProps) {
