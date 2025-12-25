@@ -63,17 +63,22 @@ export function BMICircle({
   showCategory = true,
   className,
 }: BMICircleProps) {
+  // Force numeric conversion at entry point to ensure consistency
+  const numericBmi = bmi !== null && bmi !== undefined ? Number(bmi) : null;
+  const validBmi = numericBmi !== null && !isNaN(numericBmi) && isFinite(numericBmi) ? numericBmi : null;
+  
   const resolvedSize = typeof size === 'number' ? size : sizeMap[size];
   const strokeWidth = resolvedSize * 0.1;
   const radius = (resolvedSize - strokeWidth) / 2;
   const cx = resolvedSize / 2;
   const cy = resolvedSize / 2;
 
-  const category = bmi ? getBMICategory(bmi) : null;
-  const indicatorAngle = bmi ? getIndicatorAngle(bmi) : -90;
-  const indicatorPos = bmi ? polarToCartesian(cx, cy, radius, indicatorAngle) : null;
+  // Use validBmi for ALL calculations to ensure consistency
+  const category = validBmi ? getBMICategory(validBmi) : null;
+  const indicatorAngle = validBmi ? getIndicatorAngle(validBmi) : -90;
+  const indicatorPos = validBmi ? polarToCartesian(cx, cy, radius, indicatorAngle) : null;
 
-  if (!bmi) {
+  if (!validBmi) {
     return (
       <div 
         className={cn('relative flex items-center justify-center', className)}
@@ -162,7 +167,7 @@ export function BMICircle({
           className="font-bold text-foreground font-display"
           style={{ fontSize: resolvedSize * 0.22 }}
         >
-          {bmi.toFixed(1)}
+          {validBmi.toFixed(1)}
         </span>
         {showCategory && category && (
           <span 
