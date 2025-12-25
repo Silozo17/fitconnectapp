@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { ProgressCircle } from '@/components/stats/ProgressCircle';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   DropdownMenu,
@@ -23,9 +24,10 @@ interface ChallengeCardProps {
   challenge: Challenge;
   showJoinButton?: boolean;
   showProgress?: boolean;
+  progressVariant?: 'linear' | 'circular';
 }
 
-export function ChallengeCard({ challenge, showJoinButton = true, showProgress = false }: ChallengeCardProps) {
+export function ChallengeCard({ challenge, showJoinButton = true, showProgress = false, progressVariant = 'linear' }: ChallengeCardProps) {
   const { t } = useTranslation('gamification');
   const joinChallenge = useJoinChallenge();
   const [copied, setCopied] = useState(false);
