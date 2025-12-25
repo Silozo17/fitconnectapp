@@ -105,9 +105,9 @@ const CoachClients = () => {
   if (error) {
     return (
       <DashboardLayout title={t("clients.pageTitle")} description={t("clients.pageDescription")}>
-        <div className="card-elevated p-12 text-center">
+        <Card variant="glass" className="p-12 text-center">
           <p className="text-destructive">{t("clients.errorLoading")}: {error.message}</p>
-        </div>
+        </Card>
       </DashboardLayout>
     );
   }
@@ -133,7 +133,7 @@ const CoachClients = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <Card variant="glass" className="glass-card rounded-2xl p-5 overflow-hidden">
+        <Card variant="glass" className="p-5 overflow-hidden">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
               <Users className="w-5 h-5 text-primary shrink-0" />
@@ -142,7 +142,7 @@ const CoachClients = () => {
           <p className="text-2xl font-display font-bold text-foreground truncate">{stats.total}</p>
           <p className="text-sm text-muted-foreground truncate">{t("stats.totalClients")}</p>
         </Card>
-        <Card variant="glass" className="glass-card rounded-2xl p-5 overflow-hidden">
+        <Card variant="glass" className="p-5 overflow-hidden">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
               <UserCheck className="w-5 h-5 text-success shrink-0" />
@@ -151,7 +151,7 @@ const CoachClients = () => {
           <p className="text-2xl font-display font-bold text-success truncate">{stats.active}</p>
           <p className="text-sm text-muted-foreground truncate">{t("clients.active")}</p>
         </Card>
-        <Card variant="glass" className="glass-card rounded-2xl p-5 overflow-hidden">
+        <Card variant="glass" className="p-5 overflow-hidden">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center">
               <Clock className="w-5 h-5 text-warning shrink-0" />
@@ -160,7 +160,7 @@ const CoachClients = () => {
           <p className="text-2xl font-display font-bold text-warning truncate">{stats.pending}</p>
           <p className="text-sm text-muted-foreground truncate">{t("clients.pending")}</p>
         </Card>
-        <Card variant="glass" className="glass-card rounded-2xl p-5 overflow-hidden">
+        <Card variant="glass" className="p-5 overflow-hidden">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
               <TrendingUp className="w-5 h-5 text-accent shrink-0" />
@@ -179,7 +179,7 @@ const CoachClients = () => {
       </div>
 
       {/* Filters */}
-      <Card variant="glass" className="glass-card rounded-2xl p-4 mb-6">
+      <Card variant="glass" className="p-4 mb-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -219,14 +219,14 @@ const CoachClients = () => {
 
       {/* Loading State */}
       {isLoading && (
-        <Card variant="glass" className="glass-card rounded-3xl p-12 flex items-center justify-center">
+        <Card variant="glass" className="p-12 flex items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </Card>
       )}
 
       {/* Clients List */}
       {!isLoading && (
-        <Card variant="glass" className="glass-card rounded-3xl overflow-hidden">
+        <Card variant="glass" className="overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-secondary/50">
