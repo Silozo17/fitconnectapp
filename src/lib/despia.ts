@@ -425,15 +425,14 @@ export const IAP_PRODUCT_IDS = IOS_IAP_PRODUCT_IDS;
 
 /**
  * iOS App Store Boost product ID
- * Placeholder - user will provide the actual ID from App Store Connect
  */
-export const IOS_BOOST_PRODUCT_ID = 'fitconnect.boost.30day';
+export const IOS_BOOST_PRODUCT_ID = 'fitconnect.boost';
 
 /**
  * Android Google Play Boost product ID
- * Placeholder - user will provide the actual ID from Google Play Console
+ * Format: product_id:base_plan_id
  */
-export const ANDROID_BOOST_PRODUCT_ID = 'boost.30day.play:boost-30day-play';
+export const ANDROID_BOOST_PRODUCT_ID = 'fitconnect.boost.play:fitconnect-boost';
 
 /**
  * Get the platform-specific boost product ID

@@ -86,9 +86,9 @@ const productToTier: Record<string, string> = {
 // Boost product IDs (one-time purchases)
 const boostProductIds = [
   // iOS
-  "fitconnect.boost.30day",
+  "fitconnect.boost",
   // Android (just the product ID part, before the colon)
-  "boost.30day.play",
+  "fitconnect.boost.play",
 ];
 
 /**

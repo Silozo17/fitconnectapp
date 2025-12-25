@@ -148,7 +148,7 @@ export const NATIVE_PRICING_CONFIGS: Record<PricingCountry, CountryPricingConfig
       pro: { monthly: 59.99, yearly: 599.99, savings: 119.89 },
       enterprise: { monthly: 109.99, yearly: 1099.99, savings: 219.89 },
     },
-    boost: 7, // £7 on iOS/Android to account for app store fees
+    boost: 6.99,
   },
   PL: {
     subscriptions: {
@@ -157,7 +157,7 @@ export const NATIVE_PRICING_CONFIGS: Record<PricingCountry, CountryPricingConfig
       pro: { monthly: 259, yearly: 2599, savings: 509 },
       enterprise: { monthly: 519, yearly: 5199, savings: 1029 },
     },
-    boost: 35, // ~35 zł on iOS/Android to account for app store fees
+    boost: 34.99,
   },
 };
 
