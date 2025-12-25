@@ -57,13 +57,35 @@ interface NutritionContent {
 }
 
 const NutritionPlanView = ({ content }: NutritionPlanViewProps) => {
-  // Parse the content structure
+  // Parse the content structure with comprehensive handling
   const parseContent = (): { days: NutritionDay[]; targets: NutritionTargets | null } => {
-    if (!content) return { days: [], targets: null };
+    // Handle null/undefined
+    if (!content) {
+      console.log('NutritionPlanView: No content provided');
+      return { days: [], targets: null };
+    }
     
-    // If it's an object with days and targets
-    if (typeof content === 'object' && !Array.isArray(content)) {
-      const contentObj = content as NutritionContent;
+    // Handle string content (JSON that needs parsing)
+    let parsedContent = content;
+    if (typeof content === 'string') {
+      try {
+        parsedContent = JSON.parse(content);
+        console.log('NutritionPlanView: Parsed JSON string content');
+      } catch (e) {
+        console.error('NutritionPlanView: Failed to parse string content', e);
+        return { days: [], targets: null };
+      }
+    }
+    
+    // If it's an object with days and/or targets
+    if (typeof parsedContent === 'object' && !Array.isArray(parsedContent)) {
+      const contentObj = parsedContent as NutritionContent;
+      console.log('NutritionPlanView: Content structure:', {
+        hasDays: !!contentObj.days,
+        daysCount: contentObj.days?.length || 0,
+        hasTargets: !!contentObj.targets,
+        targets: contentObj.targets
+      });
       return {
         days: Array.isArray(contentObj.days) ? contentObj.days : [],
         targets: contentObj.targets || null
@@ -71,10 +93,12 @@ const NutritionPlanView = ({ content }: NutritionPlanViewProps) => {
     }
     
     // If it's already an array of days
-    if (Array.isArray(content)) {
-      return { days: content as unknown as NutritionDay[], targets: null };
+    if (Array.isArray(parsedContent)) {
+      console.log('NutritionPlanView: Content is array with', parsedContent.length, 'days');
+      return { days: parsedContent as unknown as NutritionDay[], targets: null };
     }
     
+    console.warn('NutritionPlanView: Unknown content format', typeof parsedContent);
     return { days: [], targets: null };
   };
 

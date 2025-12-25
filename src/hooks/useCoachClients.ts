@@ -40,10 +40,19 @@ export function useCoachProfile() {
         .eq("user_id", user.id)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Failed to fetch coach profile:", error);
+        throw error;
+      }
+      
+      if (!data) {
+        console.warn("No coach profile found for user:", user.id);
+      }
+      
       return data;
     },
     enabled: !!user?.id,
+    retry: 2,
   });
 }
 
