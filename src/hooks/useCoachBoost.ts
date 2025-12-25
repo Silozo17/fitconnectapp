@@ -329,6 +329,32 @@ export const useUpdateBoostSettings = () => {
   });
 };
 
+// Reset pending boost mutation - called when user cancels checkout
+export const useResetPendingBoost = () => {
+  const queryClient = useQueryClient();
+  const { data: coachProfileId } = useCoachProfileId();
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!coachProfileId) throw new Error("Coach profile not found");
+
+      const { error } = await supabase
+        .from("coach_boosts")
+        .update({
+          payment_status: "cancelled",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("coach_id", coachProfileId)
+        .eq("payment_status", "pending"); // Only reset if still pending
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["coach-boost-status"] });
+    },
+  });
+};
+
 // Calculate boost fee helper
 // Logic: Fee is 30% of booking, but calculated on a clamped range:
 // - Floor: min_fee (£30) - bookings below this still pay 30% of min_fee

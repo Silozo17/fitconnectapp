@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Rocket, Zap, TrendingUp, Shield, Clock, CreditCard, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useCoachBoostStatus, usePurchaseBoost, useBoostSettings, isBoostActive, getBoostRemainingDays } from "@/hooks/useCoachBoost";
+import { useCoachBoostStatus, usePurchaseBoost, useBoostSettings, isBoostActive, getBoostRemainingDays, useResetPendingBoost } from "@/hooks/useCoachBoost";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
@@ -23,6 +23,7 @@ export const BoostToggleCard = () => {
   const nativePricing = useNativePricing();
   const purchaseBoost = usePurchaseBoost(pricing.country);
   const nativeBoost = useNativeBoostPurchase();
+  const resetPendingBoost = useResetPendingBoost();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -54,9 +55,11 @@ export const BoostToggleCard = () => {
       setSearchParams({});
     } else if (paymentStatus === "cancelled") {
       toast.info(t("boostCard.purchaseCancelled"));
+      // Reset pending status so user can try again
+      resetPendingBoost.mutate();
       setSearchParams({});
     }
-  }, [searchParams, setSearchParams, queryClient, t]);
+  }, [searchParams, setSearchParams, queryClient, t, resetPendingBoost]);
 
   const handlePurchase = () => {
     if (isNative) {

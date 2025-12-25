@@ -627,7 +627,34 @@ serve(async (req) => {
           if (error) {
             console.error("Error updating boost to failed:", error);
           } else {
-            console.log("Boost payment marked as failed for coach:", metadata.coach_id);
+          console.log("Boost payment marked as failed for coach:", metadata.coach_id);
+          }
+        }
+
+        break;
+      }
+
+      case "checkout.session.expired": {
+        // Handle expired checkout sessions - reset pending boost status
+        const session = event.data.object as Stripe.Checkout.Session;
+        const metadata = session.metadata || {};
+
+        console.log("Checkout session expired:", session.id, metadata);
+
+        if (metadata.type === "boost_activation" && metadata.coach_id) {
+          const { error } = await supabase
+            .from("coach_boosts")
+            .update({
+              payment_status: "cancelled",
+              updated_at: new Date().toISOString(),
+            })
+            .eq("coach_id", metadata.coach_id)
+            .eq("payment_status", "pending"); // Only if still pending
+
+          if (error) {
+            console.error("Error resetting expired boost:", error);
+          } else {
+            console.log("Boost payment reset after session expired for coach:", metadata.coach_id);
           }
         }
 
