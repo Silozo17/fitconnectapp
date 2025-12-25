@@ -42,6 +42,7 @@ serve(async (req) => {
       message,
       successUrl,
       cancelUrl,
+      embedded = false,
     } = await req.json();
 
     // Resolve client_id from JWT if not provided
@@ -360,8 +361,8 @@ serve(async (req) => {
 
     logStep("Fees calculated", { platformFee: platformFeeAmount, boostFee: boostFeeInCents, totalFee: applicationFeeAmount });
 
-    // Create Stripe checkout session
-    const session = await stripe.checkout.sessions.create({
+    // Create Stripe checkout session - support both embedded and redirect modes
+    const sessionParams: Record<string, unknown> = {
       mode: 'payment',
       line_items: [{
         price_data: {
@@ -374,8 +375,6 @@ serve(async (req) => {
         },
         quantity: 1,
       }],
-      success_url: successUrl,
-      cancel_url: cancelUrl,
       metadata,
       payment_intent_data: {
         application_fee_amount: applicationFeeAmount,
@@ -384,7 +383,18 @@ serve(async (req) => {
         },
         metadata,
       },
-    });
+    };
+
+    // Add embedded or redirect-specific parameters
+    if (embedded) {
+      sessionParams.ui_mode = "embedded";
+      sessionParams.return_url = successUrl || `${Deno.env.get("SITE_URL") || "https://getfitconnect.co.uk"}/dashboard/client/sessions?booking=success`;
+    } else {
+      sessionParams.success_url = successUrl;
+      sessionParams.cancel_url = cancelUrl;
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams as Stripe.Checkout.SessionCreateParams);
 
     // Update booking request with Stripe session ID
     await supabase
@@ -396,10 +406,13 @@ serve(async (req) => {
 
     logStep("Stripe checkout session created", { sessionId: session.id });
 
+    logStep("Stripe checkout session created", { sessionId: session.id, embedded });
+
     return new Response(
       JSON.stringify({ 
         sessionId: session.id,
         url: session.url,
+        clientSecret: session.client_secret, // For embedded mode
         bookingRequestId: finalBookingRequestId,
         amountDue,
         currency: currency.toUpperCase(),
