@@ -202,19 +202,19 @@ const CoachPlanBuilder = () => {
               <p className="text-muted-foreground">{t("workoutBuilder.designPlan")}</p>
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             {canUseAI && <AIWorkoutGenerator onPlanGenerated={handleAIPlanGenerated} />}
-            <Button variant="outline" disabled>
-              <Eye className="w-4 h-4 mr-2" />
-              {t("workoutBuilder.preview")}
+            <Button variant="outline" disabled size="sm" className="px-2 sm:px-4">
+              <Eye className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">{t("workoutBuilder.preview")}</span>
             </Button>
-            <Button onClick={handleSave} disabled={isSaving}>
+            <Button onClick={handleSave} disabled={isSaving} size="sm" className="px-2 sm:px-4">
               {isSaving ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <Loader2 className="w-4 h-4 sm:mr-2 animate-spin" />
               ) : (
-                <Save className="w-4 h-4 mr-2" />
+                <Save className="w-4 h-4 sm:mr-2" />
               )}
-              {isEditing ? t("workoutBuilder.updatePlan") : t("workoutBuilder.savePlan")}
+              <span className="hidden sm:inline">{isEditing ? t("workoutBuilder.updatePlan") : t("workoutBuilder.savePlan")}</span>
             </Button>
           </div>
         </div>

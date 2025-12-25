@@ -246,14 +246,14 @@ const CoachNutritionBuilder = () => {
               </p>
             </div>
           </div>
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={() => setCreateFoodOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              {t("nutritionBuilder.addCustomFood")}
+          <div className="flex flex-wrap gap-2 sm:gap-3">
+            <Button variant="outline" onClick={() => setCreateFoodOpen(true)} size="sm" className="px-2 sm:px-4">
+              <Plus className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">{t("nutritionBuilder.addCustomFood")}</span>
             </Button>
-            <Button onClick={handleSave} disabled={isSaving}>
-              <Save className="h-4 w-4 mr-2" />
-              {isSaving ? t("nutritionBuilder.saving") : isEditing ? t("nutritionBuilder.updatePlan") : t("nutritionBuilder.savePlan")}
+            <Button onClick={handleSave} disabled={isSaving} size="sm" className="px-2 sm:px-4">
+              <Save className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">{isSaving ? t("nutritionBuilder.saving") : isEditing ? t("nutritionBuilder.updatePlan") : t("nutritionBuilder.savePlan")}</span>
             </Button>
           </div>
         </div>
