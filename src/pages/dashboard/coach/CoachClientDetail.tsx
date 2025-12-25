@@ -60,7 +60,7 @@ const CoachClientDetail = () => {
   };
 
   // Fetch real data
-  const { data: coachProfile } = useCoachProfile();
+  const { data: coachProfile, isLoading: isLoadingCoachProfile } = useCoachProfile();
   const { data: clientData, isLoading: isLoadingClient } = useClientDetail(id);
   const { data: sessions = [], isLoading: isLoadingSessions } = useClientSessions(id);
   const { data: notes = [], isLoading: isLoadingNotes } = useClientNotes(id);
@@ -176,7 +176,7 @@ const CoachClientDetail = () => {
     }
   };
 
-  const isLoading = isLoadingClient || isLoadingSessions || isLoadingNotes || isLoadingProgress || isLoadingPlans || isLoadingPackage;
+  const isLoading = isLoadingCoachProfile || isLoadingClient || isLoadingSessions || isLoadingNotes || isLoadingProgress || isLoadingPlans || isLoadingPackage;
 
   // Status translations
   const getStatusLabel = (status: string) => {
