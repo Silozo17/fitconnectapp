@@ -104,11 +104,10 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
                   <button
                     key={item.route}
                     onClick={() => handleRestrictedItemClick(item)}
-                    className="flex flex-col items-center justify-center w-14 h-12 opacity-40 cursor-pointer hover:opacity-60 transition-all duration-200"
+                    className="flex items-center justify-center w-14 h-12 opacity-40 cursor-pointer hover:opacity-60 transition-all duration-200"
                     aria-label={`${t(item.labelKey)} (Web Only)`}
                   >
-                    <Icon className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
-                    <span className="text-[9px] text-muted-foreground mt-0.5">Web</span>
+                    <Icon className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} />
                   </button>
                 );
               }
@@ -118,7 +117,7 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
                   key={item.route}
                   onClick={() => navigate(item.route)}
                   className={cn(
-                    "relative flex flex-col items-center justify-center w-14 h-12 rounded-2xl transition-all duration-300",
+                    "relative flex items-center justify-center w-14 h-12 rounded-2xl transition-all duration-300",
                     "touch-manipulation will-change-transform",
                     active
                       ? "text-primary"
@@ -134,21 +133,11 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
                   
                   <Icon
                     className={cn(
-                      "h-5 w-5 transition-all duration-300",
+                      "h-6 w-6 transition-all duration-300",
                       active && "scale-110"
                     )}
                     strokeWidth={active ? 2.5 : 1.5}
                   />
-                  
-                  {/* Label - only show on active */}
-                  <span 
-                    className={cn(
-                      "text-[10px] font-medium mt-0.5 transition-all duration-200",
-                      active ? "opacity-100" : "opacity-0 h-0"
-                    )}
-                  >
-                    {t(item.labelKey)}
-                  </span>
                 </button>
               );
             })}
