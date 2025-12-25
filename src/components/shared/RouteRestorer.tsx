@@ -51,14 +51,29 @@ const RouteRestorer = () => {
           (lastRoute.startsWith("/dashboard/client") && (role === "client" || role === "coach"));
 
         if (isValidRoute) {
+          // Sync admin_active_role localStorage with the restored route
+          const viewModeFromPath = lastRoute.match(/^\/dashboard\/(admin|coach|client)/)?.[1];
+          if (viewModeFromPath) {
+            localStorage.setItem("admin_active_role", JSON.stringify({ type: viewModeFromPath, profileId: null }));
+          }
           navigate(lastRoute, { replace: true });
         } else if (isNativeApp) {
           // Invalid saved route in native app - go to default dashboard
-          navigate(getDefaultDashboardForRole(role), { replace: true });
+          const defaultDashboard = getDefaultDashboardForRole(role);
+          const viewModeFromDefault = defaultDashboard.match(/^\/dashboard\/(admin|coach|client)/)?.[1];
+          if (viewModeFromDefault) {
+            localStorage.setItem("admin_active_role", JSON.stringify({ type: viewModeFromDefault, profileId: null }));
+          }
+          navigate(defaultDashboard, { replace: true });
         }
       } else if (isNativeApp && currentPath === "/" && !lastRoute) {
         // No saved route but authenticated in native app - go to dashboard
-        navigate(getDefaultDashboardForRole(role), { replace: true });
+        const defaultDashboard = getDefaultDashboardForRole(role);
+        const viewModeFromDefault = defaultDashboard.match(/^\/dashboard\/(admin|coach|client)/)?.[1];
+        if (viewModeFromDefault) {
+          localStorage.setItem("admin_active_role", JSON.stringify({ type: viewModeFromDefault, profileId: null }));
+        }
+        navigate(defaultDashboard, { replace: true });
       }
 
       hasRestored.current = true;
