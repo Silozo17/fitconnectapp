@@ -32,7 +32,7 @@ export default function GettingStarted() {
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">Choose Your Path</h2>
         <div className="grid md:grid-cols-2 gap-6">
-          <Card className="bg-card">
+          <Card variant="glass">
             <CardHeader>
               <User className="h-10 w-10 text-blue-500 mb-2" />
               <CardTitle>I'm Looking for a Coach</CardTitle>
@@ -49,7 +49,7 @@ export default function GettingStarted() {
             </CardContent>
           </Card>
 
-          <Card className="bg-card">
+          <Card variant="glass">
             <CardHeader>
               <Dumbbell className="h-10 w-10 text-amber-500 mb-2" />
               <CardTitle>I'm a Fitness Coach</CardTitle>

@@ -41,8 +41,8 @@ const VideoProviderCard = ({
   const { t } = useTranslation('common');
 
   return (
-    <Card className={cn(
-      "bg-card/50 border-border/50 transition-all",
+    <Card variant="glass" className={cn(
+      "transition-all",
       isBlocked && !isConnected ? "opacity-60" : "hover:border-primary/30"
     )}>
       <CardHeader className="pb-3">

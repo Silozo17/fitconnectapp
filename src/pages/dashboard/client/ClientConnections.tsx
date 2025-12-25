@@ -98,7 +98,7 @@ const ClientConnections = () => {
 
           {/* Friends Tab */}
           <TabsContent value="friends">
-            <Card className="bg-card/50 border-border/50">
+            <Card variant="glass">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="w-5 h-5 text-primary" />
@@ -143,7 +143,7 @@ const ClientConnections = () => {
 
           {/* Pending Tab */}
           <TabsContent value="pending">
-            <Card className="bg-card/50 border-border/50">
+            <Card variant="glass">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Clock className="w-5 h-5 text-primary" />
@@ -181,7 +181,7 @@ const ClientConnections = () => {
 
           {/* Sent Tab */}
           <TabsContent value="sent">
-            <Card className="bg-card/50 border-border/50">
+            <Card variant="glass">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Send className="w-5 h-5 text-primary" />

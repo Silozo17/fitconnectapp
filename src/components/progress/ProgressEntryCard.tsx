@@ -39,7 +39,7 @@ export const ProgressEntryCard = ({ entry }: ProgressEntryCardProps) => {
   };
 
   return (
-    <Card className="bg-card border-border hover:border-primary/30 transition-colors">
+    <Card variant="glass" className="hover:border-primary/30 transition-colors">
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">

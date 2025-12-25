@@ -496,7 +496,7 @@ export default function Community() {
               <TabsContent value="avatars" className="space-y-8">
                 {/* How to unlock section */}
                 <div className="grid md:grid-cols-3 gap-4">
-                  <Card className="p-6 bg-card/50 border-border/50">
+                  <Card variant="glass" className="p-6">
                     <div className="flex items-center gap-4">
                       <div className="p-3 rounded-xl bg-primary/10">
                         <Trophy className="h-6 w-6 text-primary" />
@@ -507,7 +507,7 @@ export default function Community() {
                       </div>
                     </div>
                   </Card>
-                  <Card className="p-6 bg-card/50 border-border/50">
+                  <Card variant="glass" className="p-6">
                     <div className="flex items-center gap-4">
                       <div className="p-3 rounded-xl bg-accent/10">
                         <Target className="h-6 w-6 text-accent" />
@@ -518,7 +518,7 @@ export default function Community() {
                       </div>
                     </div>
                   </Card>
-                  <Card className="p-6 bg-card/50 border-border/50">
+                  <Card variant="glass" className="p-6">
                     <div className="flex items-center gap-4">
                       <div className="p-3 rounded-xl bg-orange-500/10">
                         <Flame className="h-6 w-6 text-orange-500" />

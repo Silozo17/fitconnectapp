@@ -61,7 +61,7 @@ export const MacroTracker = ({
   // Circular display mode
   if (displayMode === 'circular') {
     return (
-      <div className="bg-card border border-border rounded-xl p-4">
+      <div className="glass-card rounded-xl p-4">
         <h3 className="text-lg font-semibold text-foreground mb-4">
           {t('nutritionBuilder.dailyMacros')}
         </h3>
@@ -115,7 +115,7 @@ export const MacroTracker = ({
 
   // Linear display mode (default)
   return (
-    <div className="bg-card border border-border rounded-xl p-4">
+    <div className="glass-card rounded-xl p-4">
       <h3 className="text-lg font-semibold text-foreground mb-4">
         {t('nutritionBuilder.dailyMacros')}
       </h3>

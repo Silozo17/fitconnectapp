@@ -207,7 +207,7 @@ export const BoostStatsCard = () => {
               {[20, 50, 100, 150].map((amount) => {
                 const fee = calculateBoostFee(amount, settings);
                 return (
-                  <div key={amount} className="p-3 rounded-lg bg-muted/50 text-center">
+                  <div key={amount} className="p-3 rounded-lg glass-item text-center">
                     <p className="text-sm text-muted-foreground">{pricing.formatPrice(amount)} {t("boostStats.booking")}</p>
                     <p className="text-lg font-bold text-primary">{pricing.formatPrice(fee)} {t("boostStats.fee")}</p>
                   </div>

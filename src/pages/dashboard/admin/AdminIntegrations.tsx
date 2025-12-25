@@ -244,7 +244,7 @@ const AdminIntegrations = () => {
                     icon={card.icon}
                     showComparison={showComparison}
                     description={`${card.active} currently active`}
-                    className="bg-card/50 border-border/50"
+                    className="glass-card"
                   />
                 ))}
               </div>
@@ -252,7 +252,7 @@ const AdminIntegrations = () => {
               {/* Usage Overview */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Popular Integrations */}
-                <Card className="bg-card/50 border-border/50">
+                <Card variant="glass">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <TrendingUp className="w-5 h-5 text-primary" />
@@ -287,7 +287,7 @@ const AdminIntegrations = () => {
                 </Card>
 
                 {/* Recent Activity */}
-                <Card className="bg-card/50 border-border/50">
+                <Card variant="glass">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Activity className="w-5 h-5 text-primary" />
@@ -329,7 +329,7 @@ const AdminIntegrations = () => {
               </div>
 
               {/* Integration Health */}
-              <Card className="bg-card/50 border-border/50">
+              <Card variant="glass">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <AlertCircle className="w-5 h-5 text-primary" />

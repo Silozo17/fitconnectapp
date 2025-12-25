@@ -200,7 +200,7 @@ export function CoachDashboardCustomizer({ open, onOpenChange }: CoachDashboardC
                     return (
                       <div 
                         key={type}
-                        className="flex items-center justify-between p-3 rounded-lg bg-muted/50 gap-3"
+                        className="flex items-center justify-between p-3 rounded-lg glass-item gap-3"
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <Switch

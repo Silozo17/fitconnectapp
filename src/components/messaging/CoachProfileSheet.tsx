@@ -164,13 +164,13 @@ export const CoachProfileSheet = ({
             {/* Experience & Rate */}
             <div className="grid grid-cols-2 gap-4">
               {profile.experience_years && (
-                <div className="p-3 rounded-lg bg-muted/50">
+                <div className="p-3 rounded-lg glass-item">
                   <p className="text-xs text-muted-foreground">Experience</p>
                   <p className="text-sm font-medium">{profile.experience_years} years</p>
                 </div>
               )}
               {profile.hourly_rate && (
-                <div className="p-3 rounded-lg bg-muted/50">
+                <div className="p-3 rounded-lg glass-item">
                   <p className="text-xs text-muted-foreground">Hourly Rate</p>
                   <p className="text-sm font-medium">
                     {profile.currency === 'GBP' ? '£' : profile.currency === 'EUR' ? '€' : '$'}

@@ -40,7 +40,7 @@ export const MealCard = ({ meal, onUpdateMeal, onDeleteMeal }: MealCardProps) =>
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <div className="bg-card border border-border rounded-xl overflow-hidden">
+      <div className="glass-card rounded-xl overflow-hidden">
         {/* Header */}
         <CollapsibleTrigger asChild>
           <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-background/50 transition-colors">

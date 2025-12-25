@@ -215,7 +215,7 @@ const Pricing = () => {
                     </div>
 
                     {/* Client Limit */}
-                    <div className="flex items-center gap-2 mb-4 p-3 rounded-lg bg-muted/50">
+                    <div className="flex items-center gap-2 mb-4 p-3 rounded-lg glass-item">
                       <Users className="w-5 h-5 text-primary" />
                       <span className="font-semibold">
                         {tier.clientLimit === null 

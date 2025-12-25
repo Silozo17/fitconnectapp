@@ -124,7 +124,7 @@ const StripeConnectButton = ({ coachId, onSuccess }: StripeConnectButtonProps) =
               {t("stripeConnect.active")}
             </Badge>
           </div>
-          <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
+          <div className="flex items-center gap-2 p-3 rounded-lg glass-item">
             <Percent className="w-4 h-4 text-primary flex-shrink-0" />
             <span className="text-xs sm:text-sm">
               <span className="font-medium">{t("stripeConnect.platformFee", { percent: commissionPercent })}</span>

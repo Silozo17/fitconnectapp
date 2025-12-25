@@ -43,7 +43,7 @@ export const ProgressChart = ({ data, type }: ProgressChartProps) => {
 
   if (chartData.length < 2) {
     return (
-      <Card className="bg-card border-border">
+      <Card variant="glass">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg">{getTitle()}</CardTitle>
         </CardHeader>
