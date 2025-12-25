@@ -854,6 +854,8 @@
       "syncToCalendar": "Sync sessions to calendar",
       "twoWaySync": "2-Way Sync",
       "twoWaySyncDescription": "Your calendar events will be synced to block availability for booking.",
+      "syncAllSessions": "Sync All Sessions",
+      "syncing": "Syncing...",
       "googleCalendar": {
         "name": "Google Calendar",
         "description": "Sync sessions with Google Calendar"

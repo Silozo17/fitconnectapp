@@ -60,6 +60,9 @@ verify_jwt = false
 [functions.calendar-sync-session]
 verify_jwt = true
 
+[functions.calendar-sync-existing-sessions]
+verify_jwt = true
+
 [functions.calendar-caldav-fetch-events]
 verify_jwt = false
 

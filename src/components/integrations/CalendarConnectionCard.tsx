@@ -17,7 +17,9 @@ export interface CalendarConnectionCardProps {
   onConnect: () => void;
   onDisconnect: () => void;
   onToggleSync?: (enabled: boolean) => void;
+  onSyncAll?: () => void;
   isConnecting?: boolean;
+  isSyncing?: boolean;
   supportsTwoWaySync?: boolean;
 }
 
@@ -31,7 +33,9 @@ const CalendarConnectionCard = ({
   onConnect,
   onDisconnect,
   onToggleSync,
+  onSyncAll,
   isConnecting,
+  isSyncing,
   supportsTwoWaySync = false,
 }: CalendarConnectionCardProps) => {
   const { t } = useTranslation('common');
@@ -88,6 +92,22 @@ const CalendarConnectionCard = ({
               <p className="text-xs text-muted-foreground">
                 {t('integrations.calendar.twoWaySyncDescription')}
               </p>
+            )}
+            {onSyncAll && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={onSyncAll}
+                disabled={isSyncing}
+                className="w-full"
+              >
+                {isSyncing ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : (
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                )}
+                {isSyncing ? t('integrations.calendar.syncing') : t('integrations.calendar.syncAllSessions')}
+              </Button>
             )}
             <Button
               size="sm"

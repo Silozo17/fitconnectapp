@@ -75,6 +75,24 @@ serve(async (req) => {
 
     console.log("Calendar connection saved successfully");
 
+    // Sync existing future sessions to the newly connected calendar
+    try {
+      console.log("Triggering sync of existing sessions for user:", userId);
+      const syncResponse = await fetch(`${SUPABASE_URL}/functions/v1/calendar-sync-existing-sessions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        },
+        body: JSON.stringify({ userId }),
+      });
+      const syncResult = await syncResponse.json();
+      console.log("Existing sessions sync result:", syncResult);
+    } catch (syncError: any) {
+      // Non-blocking - just log the error
+      console.error("Failed to sync existing sessions (non-blocking):", syncError?.message);
+    }
+
     // Get the app URL
     const appUrl = Deno.env.get("APP_URL") || "https://getfitconnect.co.uk";
 
@@ -95,7 +113,7 @@ serve(async (req) => {
 
     return new Response(null, {
       status: 302,
-      headers: { Location: `${appUrl}${redirectPath}?connected=${provider}` },
+      headers: { Location: `${appUrl}${redirectPath}?connected=${provider}&synced=true` },
     });
   } catch (error: any) {
     console.error("Error in calendar-oauth-callback:", error);
