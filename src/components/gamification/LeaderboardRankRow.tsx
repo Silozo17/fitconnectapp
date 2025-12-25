@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { XPLeaderboardEntry, getLevelTitle } from '@/hooks/useGamification';
+import { XPLeaderboardEntry } from '@/hooks/useGamification';
 import { getAvatarImageUrl } from '@/hooks/useAvatars';
 import { RARITY_CONFIG } from '@/lib/avatar-utils';
 import { Zap } from 'lucide-react';
@@ -29,15 +29,14 @@ export function LeaderboardRankRow({ entry, currentUserId, index }: LeaderboardR
   return (
     <div
       className={cn(
-        'flex items-center gap-3 p-3 rounded-xl transition-all',
-        'glass-subtle hover:bg-white/[0.08]',
-        isCurrentUser && 'ring-1 ring-primary/50 bg-primary/5',
+        'flex items-center gap-3 py-3 border-b border-border/30 last:border-b-0',
+        isCurrentUser && 'bg-primary/5 -mx-4 px-4 rounded-lg border-none',
         'animate-[leaderboard-row-enter_0.3s_ease-out_forwards]'
       )}
       style={{ animationDelay: `${index * 50}ms`, opacity: 0 }}
     >
       {/* Rank */}
-      <div className="w-8 h-8 rounded-lg bg-muted/50 flex items-center justify-center text-sm font-semibold text-muted-foreground">
+      <div className="w-8 text-center text-sm font-medium text-muted-foreground">
         {entry.rank}
       </div>
 
@@ -45,8 +44,7 @@ export function LeaderboardRankRow({ entry, currentUserId, index }: LeaderboardR
       {hasAvatar ? (
         <div className={cn(
           'h-10 w-10 rounded-full overflow-hidden border-2 shrink-0',
-          rarityConfig.border,
-          rarityConfig.glow
+          rarityConfig.border
         )}>
           <img
             src={getAvatarImageUrl(entryWithAvatar.selected_avatar_slug!)}
@@ -58,7 +56,7 @@ export function LeaderboardRankRow({ entry, currentUserId, index }: LeaderboardR
           />
         </div>
       ) : (
-        <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold shrink-0">
+        <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-foreground font-medium shrink-0">
           {initials}
         </div>
       )}
@@ -77,7 +75,7 @@ export function LeaderboardRankRow({ entry, currentUserId, index }: LeaderboardR
         </div>
         <div className="text-xs text-muted-foreground truncate">
           {locationDisplay && <span>{locationDisplay} • </span>}
-          Level {entry.current_level} • {getLevelTitle(entry.current_level)}
+          Level {entry.current_level}
         </div>
       </div>
 
