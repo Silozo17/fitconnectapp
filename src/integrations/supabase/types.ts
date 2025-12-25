@@ -5600,6 +5600,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      coach_has_client: {
+        Args: { client_profile_id: string }
+        Returns: boolean
+      }
       coach_has_messaged_client: {
         Args: { coach_profile_id: string }
         Returns: boolean
