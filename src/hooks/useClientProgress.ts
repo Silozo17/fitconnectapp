@@ -92,11 +92,29 @@ export const useCreateProgress = (callbacks?: {
       if (error) throw error;
       return { ...data, isFirstPhoto };
     },
-    onSuccess: (data) => {
+    onSuccess: async (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['client-progress'] });
       queryClient.invalidateQueries({ queryKey: ['my-progress'] });
       queryClient.invalidateQueries({ queryKey: ['first-time-progress-photos'] });
       queryClient.invalidateQueries({ queryKey: ['user-stats'] });
+      
+      // Sync weight to client_profiles if weight was logged
+      if (variables.weight_kg) {
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            await supabase
+              .from('client_profiles')
+              .update({ weight_kg: variables.weight_kg })
+              .eq('user_id', user.id);
+            
+            // Invalidate client profile data to refresh BMI widget
+            queryClient.invalidateQueries({ queryKey: ['client-profile-data'] });
+          }
+        } catch (error) {
+          console.error('Failed to sync weight to profile:', error);
+        }
+      }
       
       // Haptic feedback for progress logged
       triggerHaptic('success');
