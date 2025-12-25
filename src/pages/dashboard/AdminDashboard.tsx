@@ -175,14 +175,14 @@ const AdminDashboard = () => {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground font-display">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground font-display tracking-tight">
                 {(() => {
                   const hour = new Date().getHours();
                   const greeting = hour < 12 ? t("admin.greeting.morning", "Good morning") 
                     : hour < 18 ? t("admin.greeting.afternoon", "Good afternoon") 
                     : t("admin.greeting.evening", "Good evening");
                   return displayName ? (
-                    <>{greeting}, <span className="text-primary">{displayName}</span></>
+                    <>{greeting}, <span className="gradient-text">{displayName}</span></>
                   ) : (
                     <>{greeting}!</>
                   );
