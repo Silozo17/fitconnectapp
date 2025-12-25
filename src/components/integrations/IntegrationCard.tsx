@@ -89,7 +89,7 @@ const IntegrationCard = ({
   };
 
   return (
-    <Card className="bg-card/50 border-border/50 hover:border-primary/30 transition-all duration-300">
+    <Card variant="glass" className="glass-card hover:border-primary/30 transition-all duration-300">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">

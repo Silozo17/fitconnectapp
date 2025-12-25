@@ -65,7 +65,7 @@ export const ConnectionCard = ({ connection, currentUserId, onRemove }: Connecti
 
   return (
     <>
-      <Card className="p-4 bg-card/50 border-border/50 hover:border-primary/30 transition-colors">
+      <Card variant="glass" className="glass-card p-4 hover:border-primary/30 transition-colors">
         <div className="flex items-center gap-4">
           <div 
             className="cursor-pointer pt-3"

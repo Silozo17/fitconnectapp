@@ -162,7 +162,7 @@ const CoachReviews = () => {
     <DashboardLayout title={t("reviewsPage.title")} description={t("reviewsPage.subtitle")}>
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card className="rounded-2xl border-border/50 bg-card/50 backdrop-blur-sm">
+        <Card variant="glass" className="glass-card rounded-2xl">
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
               <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center">
@@ -175,7 +175,7 @@ const CoachReviews = () => {
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-2xl border-border/50 bg-card/50 backdrop-blur-sm">
+        <Card variant="glass" className="glass-card rounded-2xl">
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
               <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
@@ -188,7 +188,7 @@ const CoachReviews = () => {
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-2xl border-border/50 bg-card/50 backdrop-blur-sm">
+        <Card variant="glass" className="glass-card rounded-2xl">
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
               <div className="w-14 h-14 rounded-2xl bg-warning/10 flex items-center justify-center">
@@ -204,7 +204,7 @@ const CoachReviews = () => {
       </div>
 
       {/* Reviews List */}
-      <Card className="rounded-3xl border-border/50 bg-card/50 backdrop-blur-sm">
+      <Card variant="glass" className="glass-card rounded-3xl">
         <CardHeader>
           <CardTitle>{t("reviewsPage.allReviews")}</CardTitle>
         </CardHeader>
@@ -227,7 +227,7 @@ const CoachReviews = () => {
                   : t("reviewsPage.anonymous");
 
                 return (
-                  <Card key={review.id}>
+                  <Card key={review.id} variant="glass" className="glass-card">
                     <CardContent className="p-4">
                       <div className="flex items-start gap-3">
                         <UserAvatar
