@@ -18,7 +18,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useTrainingPlan, useUpdateTrainingPlan } from "@/hooks/useTrainingPlans";
+import { useTrainingPlan, useUpdateTrainingPlan, useCreateTrainingPlan } from "@/hooks/useTrainingPlans";
 import { useTranslation } from "@/hooks/useTranslation";
 
 const CoachNutritionBuilder = () => {
@@ -62,6 +62,7 @@ const CoachNutritionBuilder = () => {
   // Fetch existing plan when editing
   const { data: existingPlan } = useTrainingPlan(planId);
   const updatePlanMutation = useUpdateTrainingPlan();
+  const createPlanMutation = useCreateTrainingPlan();
 
   // Load existing plan data
   useEffect(() => {
@@ -194,18 +195,16 @@ const CoachNutritionBuilder = () => {
         });
         toast.success(t("nutritionBuilder.planUpdated"));
       } else {
-        // Create new plan
-        const { error } = await supabase.from("training_plans").insert([{
+        // Create new plan using mutation hook for proper cache invalidation
+        await createPlanMutation.mutateAsync({
+          coach_id: coachProfileId,
           name: planName,
           description: planDescription,
           plan_type: "nutrition",
           duration_weeks: durationWeeks,
-          content: JSON.parse(JSON.stringify(planContent)),
-          coach_id: coachProfileId,
+          content: JSON.parse(JSON.stringify(planContent)) as any,
           is_template: false,
-        }]);
-
-        if (error) throw error;
+        });
         toast.success(t("nutritionBuilder.planSaved"));
       }
       navigate("/dashboard/coach/plans");

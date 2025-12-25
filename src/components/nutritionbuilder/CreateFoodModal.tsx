@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFoodCategories, useCreateFood, FoodInsert } from '@/hooks/useFoods';
 import { toast } from 'sonner';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface CreateFoodModalProps {
   open: boolean;
@@ -27,6 +28,7 @@ interface FoodFormData {
 }
 
 export const CreateFoodModal = ({ open, onOpenChange, coachId }: CreateFoodModalProps) => {
+  const { t } = useTranslation('coach');
   const { data: categories } = useFoodCategories();
   const createFood = useCreateFood();
   
@@ -53,11 +55,11 @@ export const CreateFoodModal = ({ open, onOpenChange, coachId }: CreateFoodModal
       };
       
       await createFood.mutateAsync(foodData);
-      toast.success('Custom food created!');
+      toast.success(t('nutritionBuilder.createFood.successMessage'));
       reset();
       onOpenChange(false);
     } catch (error) {
-      toast.error('Failed to create food');
+      toast.error(t('nutritionBuilder.createFood.errorMessage'));
       console.error(error);
     }
   };
@@ -66,17 +68,17 @@ export const CreateFoodModal = ({ open, onOpenChange, coachId }: CreateFoodModal
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] bg-card border-border">
         <DialogHeader>
-          <DialogTitle className="text-foreground">Create Custom Food</DialogTitle>
+          <DialogTitle className="text-foreground">{t('nutritionBuilder.createFood.title')}</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Name */}
           <div className="space-y-2">
-            <Label htmlFor="name">Food Name *</Label>
+            <Label htmlFor="name">{t('nutritionBuilder.createFood.foodName')} *</Label>
             <Input
               id="name"
-              {...register('name', { required: 'Name is required' })}
-              placeholder="e.g., Grilled Chicken Thigh"
+              {...register('name', { required: t('nutritionBuilder.createFood.nameRequired') })}
+              placeholder={t('nutritionBuilder.createFood.foodNamePlaceholder')}
               className="bg-background border-border"
             />
             {errors.name && (
@@ -86,10 +88,10 @@ export const CreateFoodModal = ({ open, onOpenChange, coachId }: CreateFoodModal
 
           {/* Category */}
           <div className="space-y-2">
-            <Label>Category</Label>
+            <Label>{t('nutritionBuilder.createFood.category')}</Label>
             <Select onValueChange={(value) => setValue('category_id', value)}>
               <SelectTrigger className="bg-background border-border">
-                <SelectValue placeholder="Select category" />
+                <SelectValue placeholder={t('nutritionBuilder.createFood.selectCategory')} />
               </SelectTrigger>
               <SelectContent>
                 {categories?.map((category) => (
@@ -103,7 +105,7 @@ export const CreateFoodModal = ({ open, onOpenChange, coachId }: CreateFoodModal
 
           {/* Calories */}
           <div className="space-y-2">
-            <Label htmlFor="calories">Calories (per 100g) *</Label>
+            <Label htmlFor="calories">{t('nutritionBuilder.createFood.caloriesPer100g')} *</Label>
             <Input
               id="calories"
               type="number"
@@ -116,7 +118,7 @@ export const CreateFoodModal = ({ open, onOpenChange, coachId }: CreateFoodModal
           {/* Macros Grid */}
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="protein" className="text-red-400">Protein (g)</Label>
+              <Label htmlFor="protein" className="text-red-400">{t('nutritionBuilder.createFood.protein')}</Label>
               <Input
                 id="protein"
                 type="number"
@@ -126,7 +128,7 @@ export const CreateFoodModal = ({ open, onOpenChange, coachId }: CreateFoodModal
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="carbs" className="text-yellow-400">Carbs (g)</Label>
+              <Label htmlFor="carbs" className="text-yellow-400">{t('nutritionBuilder.createFood.carbs')}</Label>
               <Input
                 id="carbs"
                 type="number"
@@ -136,7 +138,7 @@ export const CreateFoodModal = ({ open, onOpenChange, coachId }: CreateFoodModal
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="fat" className="text-blue-400">Fat (g)</Label>
+              <Label htmlFor="fat" className="text-blue-400">{t('nutritionBuilder.createFood.fat')}</Label>
               <Input
                 id="fat"
                 type="number"
@@ -149,7 +151,7 @@ export const CreateFoodModal = ({ open, onOpenChange, coachId }: CreateFoodModal
 
           {/* Fiber */}
           <div className="space-y-2">
-            <Label htmlFor="fiber">Fiber (g)</Label>
+            <Label htmlFor="fiber">{t('nutritionBuilder.createFood.fiber')}</Label>
             <Input
               id="fiber"
               type="number"
@@ -162,7 +164,7 @@ export const CreateFoodModal = ({ open, onOpenChange, coachId }: CreateFoodModal
           {/* Serving Info */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="serving_size">Serving Size (g)</Label>
+              <Label htmlFor="serving_size">{t('nutritionBuilder.createFood.servingSize')}</Label>
               <Input
                 id="serving_size"
                 type="number"
@@ -171,11 +173,11 @@ export const CreateFoodModal = ({ open, onOpenChange, coachId }: CreateFoodModal
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="serving_desc">Serving Description</Label>
+              <Label htmlFor="serving_desc">{t('nutritionBuilder.createFood.servingDesc')}</Label>
               <Input
                 id="serving_desc"
                 {...register('serving_description')}
-                placeholder="e.g., 1 cup, 1 medium"
+                placeholder={t('nutritionBuilder.createFood.servingDescPlaceholder')}
                 className="bg-background border-border"
               />
             </div>
@@ -183,10 +185,10 @@ export const CreateFoodModal = ({ open, onOpenChange, coachId }: CreateFoodModal
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t('nutritionBuilder.createFood.cancel')}
             </Button>
             <Button type="submit" disabled={createFood.isPending}>
-              {createFood.isPending ? 'Creating...' : 'Create Food'}
+              {createFood.isPending ? t('nutritionBuilder.createFood.creating') : t('nutritionBuilder.createFood.createFood')}
             </Button>
           </DialogFooter>
         </form>
