@@ -93,7 +93,7 @@ const DashboardLayout = memo(({ children, title = "Coach Dashboard", description
         {description && <meta name="description" content={description} />}
       </Helmet>
 
-      <PlatformBackground />
+      <PlatformBackground showAmbientGlow={false} />
       <SkipNavigation />
 
       <div className="h-dvh overflow-hidden relative">

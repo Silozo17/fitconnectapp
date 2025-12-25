@@ -12,7 +12,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
   return (
     <>
-      <PlatformBackground />
+      <PlatformBackground showAmbientGlow={false} />
       <div className="h-dvh flex w-full overflow-hidden relative">
         <AdminSidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
         <div className="flex-1 flex flex-col xl:ml-64 min-w-0 overflow-hidden">
