@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MessageSquare, Calendar, MoreVertical, TrendingUp, Eye, User } from "lucide-react";
+import { MessageSquare, Calendar, MoreVertical, TrendingUp, Eye, User, Package } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface Client {
   id: string;
@@ -16,6 +17,10 @@ interface Client {
   sessionsCompleted: number;
   nextSession?: string;
   progress?: number;
+  packageCredits?: {
+    remaining: number;
+    total: number;
+  } | null;
 }
 
 interface ClientCardProps {
@@ -32,6 +37,7 @@ const statusColors = {
 
 export function ClientCard({ client, onMessage, onSchedule }: ClientCardProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation("coach");
 
   return (
     <Card className="bg-card border-border hover:border-primary/50 transition-colors">
@@ -82,20 +88,35 @@ export function ClientCard({ client, onMessage, onSchedule }: ClientCardProps) {
           </Badge>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="grid grid-cols-3 gap-2 mb-4">
           <div className="p-2 rounded-lg bg-background">
             <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
               <User className="h-3 w-3" />
-              Sessions
+              {t("packageCredits.sessions")}
             </div>
             <p className="text-lg font-semibold text-foreground">{client.sessionsCompleted}</p>
           </div>
           <div className="p-2 rounded-lg bg-background">
             <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
               <TrendingUp className="h-3 w-3" />
-              Progress
+              {t("packageCredits.progress")}
             </div>
             <p className="text-lg font-semibold text-foreground">{client.progress || 0}%</p>
+          </div>
+          <div className="p-2 rounded-lg bg-background">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
+              <Package className="h-3 w-3" />
+              {t("packageCredits.credits")}
+            </div>
+            <p className="text-lg font-semibold text-foreground">
+              {client.packageCredits ? (
+                <span className={client.packageCredits.remaining <= 2 ? "text-warning" : ""}>
+                  {client.packageCredits.remaining}/{client.packageCredits.total}
+                </span>
+              ) : (
+                <span className="text-muted-foreground text-sm">-</span>
+              )}
+            </p>
           </div>
         </div>
 

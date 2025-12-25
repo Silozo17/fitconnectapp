@@ -7,8 +7,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Calendar, Clock, MapPin, Video } from "lucide-react";
-import { useScheduleSession } from "@/hooks/useCoachClients";
+import { useScheduleSessionWithPackage } from "@/hooks/useScheduleSessionWithPackage";
+import { useClientActivePackage } from "@/hooks/usePackages";
+import { useCoachProfile } from "@/hooks/useCoachClients";
 import { useTranslation } from "@/hooks/useTranslation";
+import { PackageCreditsInfo } from "./PackageCreditsInfo";
 
 interface ScheduleSessionModalProps {
   open: boolean;
@@ -26,8 +29,11 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
   const [isOnline, setIsOnline] = useState(false);
   const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
+  const [usePackageCredits, setUsePackageCredits] = useState(true);
 
-  const scheduleSessionMutation = useScheduleSession();
+  const { data: coachProfile } = useCoachProfile();
+  const { data: activePackage, isLoading: isLoadingPackage } = useClientActivePackage(clientId, coachProfile?.id);
+  const scheduleSessionMutation = useScheduleSessionWithPackage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,6 +50,7 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
       isOnline,
       location: isOnline ? undefined : location,
       notes: notes || undefined,
+      usePackageCredits: activePackage ? usePackageCredits : false,
     }, {
       onSuccess: () => {
         resetForm();
@@ -60,6 +67,7 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
     setIsOnline(false);
     setLocation("");
     setNotes("");
+    setUsePackageCredits(true);
   };
 
   return (
@@ -160,6 +168,15 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
                 />
               </div>
             </div>
+          )}
+
+          {/* Package Credits Info */}
+          {!isLoadingPackage && (
+            <PackageCreditsInfo
+              activePackage={activePackage}
+              useCredits={usePackageCredits}
+              onUseCreditsChange={setUsePackageCredits}
+            />
           )}
           
           <div className="space-y-2">
