@@ -40,7 +40,7 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
 
   return (
     <header 
-      className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border"
+      className="sticky top-0 z-40 glass-premium border-b border-border/30"
       role="banner"
       aria-label="Dashboard header"
     >
@@ -59,13 +59,13 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
             <Menu className="w-5 h-5" aria-hidden="true" />
           </Button>
 
-          {/* Search - Hidden on mobile */}
+          {/* Search - Hidden on mobile - Premium floating design */}
           <div className="hidden xl:flex flex-1 max-w-md" role="search">
             <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
               <Input
                 placeholder={t('header.search')}
-                className="pl-10 bg-muted/50 border-transparent focus:border-primary"
+                className="pl-11 h-11 bg-secondary/50 border-border/50 rounded-xl focus:border-primary focus:bg-secondary/80 transition-all"
                 aria-label={t('header.searchDashboard')}
               />
             </div>
@@ -73,7 +73,7 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
         </div>
 
         {/* Right side */}
-        <div className="flex items-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3">
           {/* View Switcher - visible for admins or users with multiple profiles */}
           {(role === "admin" || hasMultipleProfiles) && <ViewSwitcher />}
           
@@ -89,7 +89,7 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
               <DropdownMenuTrigger asChild>
                 <Button 
                   variant="ghost" 
-                  className="flex items-center gap-2 p-1 pt-5 overflow-visible bg-transparent hover:bg-transparent"
+                  className="flex items-center gap-3 px-2 py-1.5 h-auto rounded-xl hover:bg-secondary/80 transition-all"
                   aria-label={`Account menu for ${displayName || t('header.roleClient')}`}
                 >
                   <UserAvatar
@@ -100,10 +100,10 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
                     variant="squircle"
                     size="xs"
                   />
-                  <span className="hidden md:block font-medium">{displayName || t('header.roleClient')}</span>
+                  <span className="hidden md:block font-medium text-sm">{displayName || t('header.roleClient')}</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuContent align="end" className="w-56 rounded-xl shadow-float-md">
                 <DropdownMenuLabel>
                   <div className="flex flex-col">
                     <span>{displayName || t('header.roleClient')}</span>
@@ -113,12 +113,12 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
+                <DropdownMenuItem onClick={() => navigate("/dashboard/profile")} className="rounded-lg">
                   <User className="w-4 h-4 mr-2" />
                   {t('header.myProfile')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={signOut} className="text-destructive">
+                <DropdownMenuItem onClick={signOut} className="text-destructive rounded-lg">
                   <LogOut className="w-4 h-4 mr-2" />
                   {t('header.signOut')}
                 </DropdownMenuItem>

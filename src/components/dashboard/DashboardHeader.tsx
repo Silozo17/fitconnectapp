@@ -43,7 +43,7 @@ const DashboardHeader = memo(({ subscriptionTier, onMenuToggle }: DashboardHeade
 
   return (
     <header 
-      className="h-16 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-30"
+      className="h-16 glass-premium border-b border-border/30 sticky top-0 z-30"
       role="banner"
       aria-label="Dashboard header"
     >
@@ -62,13 +62,13 @@ const DashboardHeader = memo(({ subscriptionTier, onMenuToggle }: DashboardHeade
             <Menu className="w-5 h-5" aria-hidden="true" />
           </Button>
 
-          {/* Search - Hidden on mobile */}
+          {/* Search - Hidden on mobile - Premium floating design */}
           <div className="hidden xl:flex flex-1 max-w-md" role="search">
             <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
               <Input
                 placeholder={t('header.searchClients')}
-                className="pl-10 bg-secondary border-border"
+                className="pl-11 h-11 bg-secondary/50 border-border/50 rounded-xl focus:border-primary focus:bg-secondary/80 transition-all"
                 aria-label={t('header.searchDashboard')}
               />
             </div>
@@ -76,12 +76,12 @@ const DashboardHeader = memo(({ subscriptionTier, onMenuToggle }: DashboardHeade
         </div>
 
         {/* Right Section */}
-        <div className="flex items-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3">
           {/* Role Switcher - for admins and coaches */}
           {(role === "admin" || role === "manager" || role === "staff" || role === "coach") && <ViewSwitcher />}
           
-          {/* Subscription Tier */}
-          <span className="hidden sm:inline-flex px-3 py-1 rounded-full text-xs font-bold bg-primary/20 text-primary">
+          {/* Subscription Tier - Premium pill design */}
+          <span className="hidden sm:inline-flex px-3 py-1.5 rounded-full text-xs font-bold bg-primary/15 text-primary border border-primary/20">
             {tierLabel}
           </span>
 
@@ -94,23 +94,24 @@ const DashboardHeader = memo(({ subscriptionTier, onMenuToggle }: DashboardHeade
           {/* Profile Dropdown - Hidden on mobile */}
           <div className="hidden xl:block">
             <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                className="relative h-auto p-0 pt-4 overflow-visible bg-transparent hover:bg-transparent"
-                aria-label={`Account menu for ${displayName || "Coach"}`}
-              >
-                <UserAvatar
-                  src={avatarUrl}
-                  avatarSlug={selectedAvatar?.slug}
-                  avatarRarity={selectedAvatar?.rarity as any}
-                  name={displayName}
-                  variant="squircle"
-                  size="xs"
-                />
-              </Button>
-            </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  className="flex items-center gap-3 px-2 py-1.5 h-auto rounded-xl hover:bg-secondary/80 transition-all"
+                  aria-label={`Account menu for ${displayName || "Coach"}`}
+                >
+                  <UserAvatar
+                    src={avatarUrl}
+                    avatarSlug={selectedAvatar?.slug}
+                    avatarRarity={selectedAvatar?.rarity as any}
+                    name={displayName}
+                    variant="squircle"
+                    size="xs"
+                  />
+                  <span className="hidden md:block font-medium text-sm">{displayName || t('header.roleCoach')}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 rounded-xl shadow-float-md" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">{displayName || t('header.roleCoach')}</p>
@@ -120,11 +121,11 @@ const DashboardHeader = memo(({ subscriptionTier, onMenuToggle }: DashboardHeade
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleProfileClick}>
+                <DropdownMenuItem onClick={handleProfileClick} className="rounded-lg">
                   <User className="h-4 w-4 mr-2" />
                   {t('header.myProfile')}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleSignOut}>
+                <DropdownMenuItem onClick={handleSignOut} className="rounded-lg">
                   <LogOut className="h-4 w-4 mr-2" />
                   {t('header.signOut')}
                 </DropdownMenuItem>
