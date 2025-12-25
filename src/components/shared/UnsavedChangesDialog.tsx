@@ -33,12 +33,12 @@ export function UnsavedChangesDialog({ open, onStay, onLeave }: UnsavedChangesDi
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={onStay}>
+          <AlertDialogCancel onClick={onStay} className="rounded-xl">
             {t('unsavedChanges.stayOnPage')}
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={onLeave}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
           >
             {t('unsavedChanges.leaveWithoutSaving')}
           </AlertDialogAction>
