@@ -7,6 +7,7 @@ import { VerifiedBadge } from "@/components/verification/VerifiedBadge";
 import { CoachFeaturedBadges } from "@/components/coaches/CoachFeaturedBadges";
 import StarRating from "@/components/reviews/StarRating";
 import { getDisplayLocation } from "@/lib/location-utils";
+import { getCoachTypeDisplayLabel } from "@/constants/coachTypes";
 
 interface CoachHeroSectionProps {
   coach: {
@@ -91,7 +92,7 @@ export function CoachHeroSection({ coach, averageRating, reviewCount }: CoachHer
                   variant="secondary"
                   className="px-2.5 py-0.5 text-xs font-medium"
                 >
-                  {type}
+                  {getCoachTypeDisplayLabel(type)}
                 </Badge>
               ))}
               <CoachFeaturedBadges coachId={coach.id} />

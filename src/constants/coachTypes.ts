@@ -123,3 +123,22 @@ export const COACH_TYPE_ID_TO_LABEL: Record<string, string> = COACH_TYPES.reduce
   (acc, type) => ({ ...acc, [type.id]: type.label }),
   {}
 );
+
+// Helper to get display label for any coach type (handles custom types)
+export const getCoachTypeDisplayLabel = (type: string): string => {
+  // First check if it's an ID in the predefined list
+  const byId = getCoachTypeById(type);
+  if (byId) return byId.label;
+  
+  // Check if it matches a label directly
+  const byLabel = COACH_TYPES.find(t => t.label === type);
+  if (byLabel) return byLabel.label;
+  
+  // It's a custom type - clean up the display
+  if (type.startsWith("custom_")) {
+    return type.replace("custom_", "").replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+  }
+  
+  // Return as-is but with title case
+  return type.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+};
