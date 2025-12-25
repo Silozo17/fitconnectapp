@@ -198,19 +198,21 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     fetchProfiles();
   }, [user?.id, canSwitchRoles]);
 
-  // Sync context with URL when route changes (handles browser back/forward, direct URL navigation)
+  // Sync context with URL when route changes (handles browser back/forward, direct URL navigation, RouteRestorer)
+  // This effect runs when profiles finish loading OR when the URL changes
+  // URL always takes priority to ensure ViewSwitcher matches the current route
   useEffect(() => {
     if (isLoadingProfiles) return;
     
     const pathViewMode = getViewModeFromPath(location.pathname);
     
-    // Only sync if we're on a dashboard route and it differs from current context
-    if (pathViewMode && pathViewMode !== activeProfileType) {
+    // Sync with URL path - URL is the source of truth for view mode
+    if (pathViewMode) {
       const hasAccess = pathViewMode === "admin" 
         ? isAdminUser 
         : !!availableProfiles[pathViewMode];
       
-      if (hasAccess) {
+      if (hasAccess && pathViewMode !== activeProfileType) {
         const profileId = availableProfiles[pathViewMode] || null;
         setActiveProfileType(pathViewMode);
         setActiveProfileId(profileId);
@@ -218,7 +220,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify({ type: pathViewMode, profileId }));
       }
     }
-  }, [location.pathname, availableProfiles, isLoadingProfiles, isAdminUser]);
+  }, [location.pathname, availableProfiles, isLoadingProfiles, isAdminUser, activeProfileType]);
 
   const setActiveProfile = useCallback((type: ViewMode, profileId: string | null) => {
     setActiveProfileType(type);
