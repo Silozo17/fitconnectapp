@@ -58,14 +58,14 @@ const CoachOverview = () => {
       {/* Welcome & Quick Stats */}
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold text-foreground mb-2">
+        <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground tracking-tight">
             {(() => {
               const hour = new Date().getHours();
               const greeting = hour < 12 ? t("dashboard.greeting.morning", "Good morning") 
                 : hour < 18 ? t("dashboard.greeting.afternoon", "Good afternoon") 
                 : t("dashboard.greeting.evening", "Good evening");
               return stats?.displayName ? (
-                <>{greeting}, <span className="text-primary">{stats.displayName}</span></>
+                <>{greeting}, <span className="gradient-text">{stats.displayName}</span></>
               ) : (
                 <>{greeting}!</>
               );
