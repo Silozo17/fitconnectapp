@@ -10,28 +10,42 @@ import { useEffect } from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useActivePricing } from "@/hooks/useActivePricing";
+import { useNativePricing } from "@/hooks/useNativePricing";
+import { useNativeBoostPurchase } from "@/hooks/useNativeBoostPurchase";
+import { isDespia } from "@/lib/despia";
+import { IAPUnsuccessfulDialog } from "@/components/iap/IAPUnsuccessfulDialog";
 
 export const BoostToggleCard = () => {
   const { t } = useTranslation("coach");
   const { data: boostStatus, isLoading: statusLoading } = useCoachBoostStatus();
   const { data: settings, isLoading: settingsLoading } = useBoostSettings();
   const pricing = useActivePricing();
+  const nativePricing = useNativePricing();
   const purchaseBoost = usePurchaseBoost(pricing.country);
+  const nativeBoost = useNativeBoostPurchase();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
 
+  const isNative = isDespia();
   const isActive = isBoostActive(boostStatus);
   const remainingDays = getBoostRemainingDays(boostStatus);
   const isLoading = statusLoading || settingsLoading;
   const isPending = boostStatus?.payment_status === "pending";
   const isMigratedFree = boostStatus?.payment_status === "migrated_free";
   
-  // Get boost price from pricing config (no conversion)
-  const boostPrice = pricing.prices.boost;
+  // Use native pricing on native devices, web pricing otherwise
+  const boostPrice = isNative ? nativePricing.prices.boost : pricing.prices.boost;
+  const formattedBoostPrice = isNative 
+    ? nativePricing.formatPrice(nativePricing.prices.boost) 
+    : pricing.formatPrice(boostPrice);
   const boostDuration = settings?.boost_duration_days || 30;
-  const formattedBoostPrice = pricing.formatPrice(boostPrice);
 
-  // Handle payment success/cancel from URL params
+  // Combined purchasing state
+  const isPurchasing = isNative 
+    ? (nativeBoost.state.isPurchasing || nativeBoost.state.isPolling)
+    : purchaseBoost.isPending;
+
+  // Handle payment success/cancel from URL params (web only)
   useEffect(() => {
     const paymentStatus = searchParams.get("payment");
     if (paymentStatus === "success") {
@@ -45,7 +59,13 @@ export const BoostToggleCard = () => {
   }, [searchParams, setSearchParams, queryClient, t]);
 
   const handlePurchase = () => {
-    purchaseBoost.mutate();
+    if (isNative) {
+      // Native IAP flow - opens immediately
+      nativeBoost.purchase();
+    } else {
+      // Web Stripe checkout flow
+      purchaseBoost.mutate();
+    }
   };
 
   if (isLoading) {
@@ -63,177 +83,185 @@ export const BoostToggleCard = () => {
   }
 
   return (
-    <Card className={`border-2 transition-all ${isActive ? "border-primary bg-primary/5" : "border-border"}`}>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${isActive ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
-              <Rocket className="h-5 w-5" />
-            </div>
-            <div>
-              <CardTitle className="text-xl">{t("boostCard.title")}</CardTitle>
-              <CardDescription>
-                {t("boostCard.subtitle")}
-              </CardDescription>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            {isActive && (
-              <Badge className="bg-primary text-primary-foreground animate-pulse">
-                <Zap className="h-3 w-3 mr-1" />
-                {t("boostCard.active")}
-              </Badge>
-            )}
-            {isPending && (
-              <Badge variant="secondary">
-                <Clock className="h-3 w-3 mr-1" />
-                {t("boostCard.paymentPending")}
-              </Badge>
-            )}
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {isActive ? (
-          <div className="space-y-3">
-            {isMigratedFree && (
-              <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3">
-                <p className="text-sm text-amber-600 dark:text-amber-400 font-medium">
-                  🎁 {t("boostCard.freeExtension")}
-                </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                  {t("boostCard.earlyAdopterMessage", { price: formattedBoostPrice, days: boostDuration })}
-                </p>
+    <>
+      <Card className={`border-2 transition-all ${isActive ? "border-primary bg-primary/5" : "border-border"}`}>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-lg ${isActive ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+                <Rocket className="h-5 w-5" />
               </div>
-            )}
-            <div className="rounded-lg bg-primary/10 border border-primary/20 p-4">
-              <p className="text-sm text-primary font-medium flex items-center gap-2">
-                <TrendingUp className="h-4 w-4" />
-                {t("boostCard.appearingAtTop")}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {remainingDays} {t("boostCard.daysRemaining")}
-                {boostStatus?.boost_end_date && (
-                  <span className="ml-1">
-                    ({t("boostCard.expires")} {new Date(boostStatus.boost_end_date).toLocaleDateString()})
-                  </span>
-                )}
-              </p>
+              <div>
+                <CardTitle className="text-xl">{t("boostCard.title")}</CardTitle>
+                <CardDescription>
+                  {t("boostCard.subtitle")}
+                </CardDescription>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              {isActive && (
+                <Badge className="bg-primary text-primary-foreground animate-pulse">
+                  <Zap className="h-3 w-3 mr-1" />
+                  {t("boostCard.active")}
+                </Badge>
+              )}
+              {isPending && (
+                <Badge variant="secondary">
+                  <Clock className="h-3 w-3 mr-1" />
+                  {t("boostCard.paymentPending")}
+                </Badge>
+              )}
             </div>
           </div>
-        ) : (
-          <div className="space-y-3">
-            <div className="rounded-lg bg-muted/50 border border-border p-4">
-              <div className="flex items-center justify-between flex-wrap gap-4">
-                <div>
-                  <p className="text-sm font-medium">
-                    {t("boostCard.activateFor", { price: formattedBoostPrice })}
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {isActive ? (
+            <div className="space-y-3">
+              {isMigratedFree && (
+                <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3">
+                  <p className="text-sm text-amber-600 dark:text-amber-400 font-medium">
+                    🎁 {t("boostCard.freeExtension")}
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    {t("boostCard.visibilityBoost", { days: boostDuration })}
+                <p className="text-xs text-muted-foreground mt-1">
+                    {t("boostCard.earlyAdopterMessage", { price: formattedBoostPrice, days: boostDuration })}
                   </p>
                 </div>
-                <Button 
-                  onClick={handlePurchase}
-                  disabled={purchaseBoost.isPending || isPending}
-                  className="gap-2"
-                >
-                  {purchaseBoost.isPending ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      {t("boostCard.processing")}
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard className="h-4 w-4" />
-                      {t("boostCard.purchaseBoost")}
-                    </>
+              )}
+              <div className="rounded-lg bg-primary/10 border border-primary/20 p-4">
+                <p className="text-sm text-primary font-medium flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4" />
+                  {t("boostCard.appearingAtTop")}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  {remainingDays} {t("boostCard.daysRemaining")}
+                  {boostStatus?.boost_end_date && (
+                    <span className="ml-1">
+                      ({t("boostCard.expires")} {new Date(boostStatus.boost_end_date).toLocaleDateString()})
+                    </span>
                   )}
-                </Button>
+                </p>
               </div>
             </div>
-            <div className="rounded-lg bg-blue-500/5 border border-blue-500/20 p-3">
-              <p className="text-xs text-muted-foreground">
-                <span className="font-medium text-foreground">{t("boostCard.whatYouPay")}:</span> {formattedBoostPrice} {t("boostCard.activation")} + {settings ? `${Math.round(settings.commission_rate * 100)}%` : "30%"} {t("boostCard.ofFirstBooking")}.
-                {t("boostCard.afterDays", { days: boostDuration })}
-              </p>
+          ) : (
+            <div className="space-y-3">
+              <div className="rounded-lg bg-muted/50 border border-border p-4">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div>
+                    <p className="text-sm font-medium">
+                      {t("boostCard.activateFor", { price: formattedBoostPrice })}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {t("boostCard.visibilityBoost", { days: boostDuration })}
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={handlePurchase}
+                    disabled={isPurchasing || isPending}
+                    className="gap-2 min-h-[44px]"
+                  >
+                    {isPurchasing ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        {t("boostCard.processing")}
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="h-4 w-4" />
+                        {t("boostCard.purchaseBoost")}
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+              <div className="rounded-lg bg-blue-500/5 border border-blue-500/20 p-3">
+                <p className="text-xs text-muted-foreground">
+                  <span className="font-medium text-foreground">{t("boostCard.whatYouPay")}:</span> {formattedBoostPrice} {t("boostCard.activation")} + {settings ? `${Math.round(settings.commission_rate * 100)}%` : "30%"} {t("boostCard.ofFirstBooking")}.
+                  {t("boostCard.afterDays", { days: boostDuration })}
+                </p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="flex items-start gap-3">
-            <div className="p-1.5 rounded bg-primary/10">
-              <CreditCard className="h-4 w-4 text-primary" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="flex items-start gap-3">
+              <div className="p-1.5 rounded bg-primary/10">
+                <CreditCard className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">{t("boostCard.priceForDays", { price: formattedBoostPrice, days: boostDuration })}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t("boostCard.oneTimePayment")}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium">{t("boostCard.priceForDays", { price: formattedBoostPrice, days: boostDuration })}</p>
-              <p className="text-xs text-muted-foreground">
-                {t("boostCard.oneTimePayment")}
-              </p>
+
+            <div className="flex items-start gap-3">
+              <div className="p-1.5 rounded bg-primary/10">
+                <Zap className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">{t("boostCard.plusCommission", { rate: settings ? Math.round(settings.commission_rate * 100) : 30 })}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t("boostCard.onlyFirstBooking")}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="p-1.5 rounded bg-primary/10">
+                <Shield className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">{t("boostCard.noShowProtection")}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t("boostCard.noFeeIfNoShow")}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="p-1.5 rounded bg-primary/10">
+                <TrendingUp className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">{t("boostCard.repeatClients")}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t("boostCard.commissionOnlyFirst")}
+                </p>
+              </div>
             </div>
           </div>
 
-          <div className="flex items-start gap-3">
-            <div className="p-1.5 rounded bg-primary/10">
-              <Zap className="h-4 w-4 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm font-medium">{t("boostCard.plusCommission", { rate: settings ? Math.round(settings.commission_rate * 100) : 30 })}</p>
-              <p className="text-xs text-muted-foreground">
-                {t("boostCard.onlyFirstBooking")}
+          {isActive && remainingDays <= 5 && remainingDays > 0 && (
+            <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-4">
+              <p className="text-sm text-amber-600 font-medium">
+                {t("boostCard.expiresSoon")}
               </p>
+              <Button 
+                onClick={handlePurchase}
+                disabled={isPurchasing}
+                variant="outline"
+                size="sm"
+                className="mt-2 gap-2 min-h-[44px]"
+              >
+                {isPurchasing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <CreditCard className="h-4 w-4" />
+                )}
+                {t("boostCard.renewBoost")}
+              </Button>
             </div>
-          </div>
+          )}
+        </CardContent>
+      </Card>
 
-          <div className="flex items-start gap-3">
-            <div className="p-1.5 rounded bg-primary/10">
-              <Shield className="h-4 w-4 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm font-medium">{t("boostCard.noShowProtection")}</p>
-              <p className="text-xs text-muted-foreground">
-                {t("boostCard.noFeeIfNoShow")}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <div className="p-1.5 rounded bg-primary/10">
-              <TrendingUp className="h-4 w-4 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm font-medium">{t("boostCard.repeatClients")}</p>
-              <p className="text-xs text-muted-foreground">
-                {t("boostCard.commissionOnlyFirst")}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {isActive && remainingDays <= 5 && remainingDays > 0 && (
-          <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-4">
-            <p className="text-sm text-amber-600 font-medium">
-              {t("boostCard.expiresSoon")}
-            </p>
-            <Button 
-              onClick={handlePurchase}
-              disabled={purchaseBoost.isPending}
-              variant="outline"
-              size="sm"
-              className="mt-2 gap-2"
-            >
-              {purchaseBoost.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <CreditCard className="h-4 w-4" />
-              )}
-              {t("boostCard.renewBoost")}
-            </Button>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      {/* IAP Unsuccessful Dialog for native purchases */}
+      <IAPUnsuccessfulDialog
+        open={nativeBoost.state.showUnsuccessfulModal}
+        onOpenChange={nativeBoost.dismissUnsuccessfulModal}
+      />
+    </>
   );
 };
