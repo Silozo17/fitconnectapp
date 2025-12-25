@@ -161,11 +161,11 @@ const Pricing = () => {
               return (
                 <Card 
                   key={key} 
+                  variant={isPopular ? "glass-elevated" : "glass"}
+                  withInnerHighlight
                   className={cn(
-                    "relative border-0 shadow-soft overflow-hidden transition-all duration-300 hover:shadow-lg flex flex-col",
-                    isPopular 
-                      ? "bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5 ring-2 ring-primary/30" 
-                      : "bg-card/80 backdrop-blur-sm"
+                    "relative overflow-hidden transition-all duration-300 flex flex-col",
+                    isPopular && "ring-2 ring-primary/40"
                   )}
                 >
                   {isPopular && (
@@ -266,7 +266,7 @@ const Pricing = () => {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {platformFeatures.map((feature, index) => (
-              <Card key={index} className="border-0 shadow-soft bg-card/80 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
+              <Card key={index} variant="glass" withInnerHighlight className="hover:shadow-lg transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center shrink-0">
