@@ -366,18 +366,26 @@ export const useConnections = () => {
   const sendConnectionRequest = async (
     addresseeUserId: string,
     addresseeProfileType: string,
-    message?: string
+    message?: string,
+    addresseeProfile?: {
+      first_name?: string | null;
+      last_name?: string | null;
+      display_name?: string | null;
+      username?: string | null;
+      avatar_url?: string | null;
+      profile_image_url?: string | null;
+    }
   ): Promise<boolean> => {
     if (!user) return false;
 
     try {
-      const { error } = await supabase.from("user_connections").insert({
+      const { data, error } = await supabase.from("user_connections").insert({
         requester_user_id: user.id,
         requester_profile_type: getProfileType(),
         addressee_user_id: addresseeUserId,
         addressee_profile_type: addresseeProfileType,
         message: message || null,
-      });
+      }).select().single();
 
       if (error) {
         if (error.code === "23505") {
@@ -388,9 +396,35 @@ export const useConnections = () => {
         return false;
       }
 
+      // Optimistically add the new request to sentRequests immediately
+      if (data) {
+        const optimisticRequest: UserConnection = {
+          id: data.id,
+          requester_user_id: data.requester_user_id,
+          requester_profile_type: data.requester_profile_type,
+          addressee_user_id: data.addressee_user_id,
+          addressee_profile_type: data.addressee_profile_type,
+          status: data.status,
+          message: data.message,
+          created_at: data.created_at,
+          responded_at: data.responded_at,
+          profile: addresseeProfile ? {
+            first_name: addresseeProfile.first_name,
+            last_name: addresseeProfile.last_name,
+            display_name: addresseeProfile.display_name,
+            username: addresseeProfile.username,
+            avatar_url: addresseeProfile.avatar_url,
+            profile_image_url: addresseeProfile.profile_image_url,
+          } : undefined,
+        };
+        setSentRequests(prev => [optimisticRequest, ...prev]);
+      }
+
       // Haptic feedback for sending request
       triggerHaptic('light');
       toast.success("Connection request sent!");
+      
+      // Fetch in background to get full profile data
       fetchConnections();
       return true;
     } catch (error) {

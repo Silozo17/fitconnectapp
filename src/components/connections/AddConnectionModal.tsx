@@ -51,7 +51,15 @@ export const AddConnectionModal = ({
     const success = await sendConnectionRequest(
       selectedUser.user_id,
       selectedUser.primary_profile_type, // Use primary profile type for connection
-      message || undefined
+      message || undefined,
+      {
+        first_name: selectedUser.first_name,
+        last_name: selectedUser.last_name,
+        display_name: selectedUser.display_name,
+        username: selectedUser.username,
+        avatar_url: selectedUser.avatar_url,
+        profile_image_url: selectedUser.profile_image_url,
+      }
     );
     setSending(false);
 
