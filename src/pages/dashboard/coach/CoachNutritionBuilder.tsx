@@ -4,13 +4,12 @@ import { ArrowLeft, Save, Plus, Target, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { FoodLibrary } from "@/components/nutritionbuilder/FoodLibrary";
 import { MealCard } from "@/components/nutritionbuilder/MealCard";
 import { MacroTracker } from "@/components/nutritionbuilder/MacroTracker";
 import { CreateFoodModal } from "@/components/nutritionbuilder/CreateFoodModal";
-import { AIMealSuggestion } from "@/components/nutritionbuilder/AIMealSuggestion";
+import { AIMealGeneratorModal } from "@/components/nutritionbuilder/AIMealGeneratorModal";
 import { AIMacroCalculator } from "@/components/ai/AIMacroCalculator";
 import { FeatureGate } from "@/components/FeatureGate";
 import { Food, Meal, NutritionDay, MealFood, calculateDayMacros } from "@/hooks/useFoods";
@@ -36,7 +35,7 @@ const CoachNutritionBuilder = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [createFoodOpen, setCreateFoodOpen] = useState(false);
   const [coachProfileId, setCoachProfileId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("builder");
+  const [aiModalOpen, setAiModalOpen] = useState(false);
   const [isLoadingPlan, setIsLoadingPlan] = useState(isEditing);
   
   // Macro targets
@@ -298,12 +297,25 @@ const CoachNutritionBuilder = () => {
 
         {/* Macro Targets */}
         <div className="card-elevated p-4 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 flex-1">
               <Target className="h-5 w-5 text-primary" />
               <h3 className="font-semibold text-foreground">{t("nutritionBuilder.dailyMacroTargets")}</h3>
             </div>
-            {canUseAI && <AIMacroCalculator onMacrosCalculated={handleMacrosCalculated} />}
+            <div className="flex items-center gap-2">
+              {canUseAI && <AIMacroCalculator onMacrosCalculated={handleMacrosCalculated} />}
+              {canUseAI && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setAiModalOpen(true)}
+                  className="gap-2"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  {t("nutritionBuilder.aiGenerate")}
+                </Button>
+              )}
+            </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="space-y-2">
@@ -345,92 +357,64 @@ const CoachNutritionBuilder = () => {
           </div>
         </div>
 
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-          <TabsList className="bg-secondary">
-            <TabsTrigger value="builder">{t("nutritionBuilder.mealBuilder")}</TabsTrigger>
-            {canUseAI && (
-              <TabsTrigger value="ai">
-                <Sparkles className="h-4 w-4 mr-2" />
-                {t("nutritionBuilder.aiSuggestions")}
-              </TabsTrigger>
-            )}
-          </TabsList>
+        {/* Day Selector */}
+        <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
+          {days.map((day, index) => (
+            <Button
+              key={day.id}
+              variant={selectedDayIndex === index ? "default" : "outline"}
+              onClick={() => setSelectedDayIndex(index)}
+              className="shrink-0"
+            >
+              {day.name}
+            </Button>
+          ))}
+          <Button variant="outline" onClick={addDay} className="shrink-0">
+            <Plus className="h-4 w-4 mr-2" />
+            {t("nutritionBuilder.addDay")}
+          </Button>
+        </div>
 
-          <TabsContent value="builder" className="mt-6">
-            {/* Day Selector */}
-            <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
-              {days.map((day, index) => (
-                <Button
-                  key={day.id}
-                  variant={selectedDayIndex === index ? "default" : "outline"}
-                  onClick={() => setSelectedDayIndex(index)}
-                  className="shrink-0"
-                >
-                  {day.name}
-                </Button>
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Food Library */}
+          <div className="lg:col-span-1 h-[600px]">
+            <FoodLibrary onAddFood={(food) => addFoodToMeal(food, 0)} />
+          </div>
+
+          {/* Meals */}
+          <div className="lg:col-span-2 space-y-4">
+            {/* Macro Summary */}
+            <MacroTracker
+              calories={dayMacros.calories}
+              protein={dayMacros.protein}
+              carbs={dayMacros.carbs}
+              fat={dayMacros.fat}
+              targetCalories={targetCalories}
+              targetProtein={targetProtein}
+              targetCarbs={targetCarbs}
+              targetFat={targetFat}
+            />
+
+            {/* Meals List */}
+            <div className="space-y-4">
+              {currentDay?.meals.map((meal, index) => (
+                <MealCard
+                  key={meal.id}
+                  meal={meal}
+                  onUpdateMeal={(updatedMeal) => updateMeal(index, updatedMeal)}
+                  onDeleteMeal={() => deleteMeal(index)}
+                />
               ))}
-              <Button variant="outline" onClick={addDay} className="shrink-0">
-                <Plus className="h-4 w-4 mr-2" />
-                {t("nutritionBuilder.addDay")}
-              </Button>
             </div>
 
-            {/* Main Content */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Food Library */}
-              <div className="lg:col-span-1 h-[600px]">
-                <FoodLibrary onAddFood={(food) => addFoodToMeal(food, 0)} />
-              </div>
-
-              {/* Meals */}
-              <div className="lg:col-span-2 space-y-4">
-                {/* Macro Summary */}
-                <MacroTracker
-                  calories={dayMacros.calories}
-                  protein={dayMacros.protein}
-                  carbs={dayMacros.carbs}
-                  fat={dayMacros.fat}
-                  targetCalories={targetCalories}
-                  targetProtein={targetProtein}
-                  targetCarbs={targetCarbs}
-                  targetFat={targetFat}
-                />
-
-                {/* Meals List */}
-                <div className="space-y-4">
-                  {currentDay?.meals.map((meal, index) => (
-                    <MealCard
-                      key={meal.id}
-                      meal={meal}
-                      onUpdateMeal={(updatedMeal) => updateMeal(index, updatedMeal)}
-                      onDeleteMeal={() => deleteMeal(index)}
-                    />
-                  ))}
-                </div>
-
-                {/* Add Meal Button */}
-                <Button variant="outline" className="w-full" onClick={addMeal}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  {t("nutritionBuilder.addMeal")}
-                </Button>
-              </div>
-            </div>
-          </TabsContent>
-
-          {canUseAI && (
-            <TabsContent value="ai" className="mt-6">
-              <div className="max-w-2xl mx-auto">
-                <AIMealSuggestion
-                  targetCalories={targetCalories}
-                  targetProtein={targetProtein}
-                  targetCarbs={targetCarbs}
-                  targetFat={targetFat}
-                />
-              </div>
-            </TabsContent>
-          )}
-        </Tabs>
+            {/* Add Meal Button */}
+            <Button variant="outline" className="w-full" onClick={addMeal}>
+              <Plus className="h-4 w-4 mr-2" />
+              {t("nutritionBuilder.addMeal")}
+            </Button>
+          </div>
+        </div>
 
         {/* Create Food Modal */}
         {coachProfileId && (
@@ -438,6 +422,22 @@ const CoachNutritionBuilder = () => {
             open={createFoodOpen}
             onOpenChange={setCreateFoodOpen}
             coachId={coachProfileId}
+          />
+        )}
+
+        {/* AI Meal Generator Modal */}
+        {canUseAI && (
+          <AIMealGeneratorModal
+            open={aiModalOpen}
+            onOpenChange={setAiModalOpen}
+            targetCalories={targetCalories}
+            targetProtein={targetProtein}
+            targetCarbs={targetCarbs}
+            targetFat={targetFat}
+            onMealPlanGenerated={(generatedDays) => {
+              setDays(generatedDays);
+              setSelectedDayIndex(0);
+            }}
           />
         )}
       </FeatureGate>
