@@ -1,10 +1,11 @@
 import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { FileX, Loader2, Calendar, ClipboardList, AlertCircle } from "lucide-react";
+import { FileX, Loader2, Calendar, ClipboardList, AlertCircle, ChevronRight } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useMyPlans } from "@/hooks/useMyPlans";
@@ -90,63 +91,70 @@ const ClientPlans = () => {
               assignment.end_date
             );
             return (
-              <Card key={assignment.id} className="hover:border-primary/50 transition-colors">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg">
-                        {assignment.plan?.name || 'Unnamed Plan'}
-                      </CardTitle>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        by {assignment.coach?.display_name || "Coach"}
+              <Link 
+                key={assignment.id} 
+                to={`/dashboard/client/plans/${assignment.plan?.id}`}
+                className="block"
+              >
+                <Card className="hover:border-primary/50 transition-colors cursor-pointer group">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                          {assignment.plan?.name || 'Unnamed Plan'}
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          by {assignment.coach?.display_name || "Coach"}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {getPlanTypeBadge(assignment.plan?.plan_type || 'workout')}
+                        <Badge
+                          variant={assignment.status === "active" ? "default" : "secondary"}
+                        >
+                          {assignment.status || 'unknown'}
+                        </Badge>
+                        <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {assignment.plan?.description && (
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                        {assignment.plan.description}
                       </p>
-                    </div>
-                    <div className="flex gap-2">
-                      {getPlanTypeBadge(assignment.plan?.plan_type || 'workout')}
-                      <Badge
-                        variant={assignment.status === "active" ? "default" : "secondary"}
-                      >
-                        {assignment.status || 'unknown'}
-                      </Badge>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {assignment.plan?.description && (
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                      {assignment.plan.description}
-                    </p>
-                  )}
-
-                  <div className="space-y-3">
-                    {assignment.plan?.duration_weeks && (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <ClipboardList className="w-4 h-4" />
-                        <span>{assignment.plan.duration_weeks} weeks</span>
-                      </div>
                     )}
 
-                    {assignment.start_date && (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Calendar className="w-4 h-4" />
-                        <span>
-                          Started {format(new Date(assignment.start_date), "PP")}
-                        </span>
-                      </div>
-                    )}
-
-                    {assignment.status === "active" && assignment.start_date && assignment.end_date && (
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Progress</span>
-                          <span className="font-medium">{progress}%</span>
+                    <div className="space-y-3">
+                      {assignment.plan?.duration_weeks && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <ClipboardList className="w-4 h-4" />
+                          <span>{assignment.plan.duration_weeks} weeks</span>
                         </div>
-                        <Progress value={progress} className="h-2" />
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+                      )}
+
+                      {assignment.start_date && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Calendar className="w-4 h-4" />
+                          <span>
+                            Started {format(new Date(assignment.start_date), "PP")}
+                          </span>
+                        </div>
+                      )}
+
+                      {assignment.status === "active" && assignment.start_date && assignment.end_date && (
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Progress</span>
+                            <span className="font-medium">{progress}%</span>
+                          </div>
+                          <Progress value={progress} className="h-2" />
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             );
           })}
         </div>
