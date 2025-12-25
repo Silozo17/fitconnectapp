@@ -82,7 +82,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className={cn("fixed top-0 left-0 right-0 z-50 transition-all duration-300", isScrolled ? "bg-background/90 backdrop-blur-xl shadow-soft border-b border-border/50" : "bg-transparent")}>
+    <nav className={cn("fixed top-0 left-0 right-0 z-50 transition-all duration-300", isScrolled ? "glass-nav border-b border-border/40" : "bg-transparent")}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
           <Link to="/" className="flex items-center gap-2 group">

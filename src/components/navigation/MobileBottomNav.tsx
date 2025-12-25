@@ -76,7 +76,7 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
   // This ensures nav is visible before JS hydrates in PWA/Despia
   return (
     <>
-      {/* Floating Bottom Navigation - Premium Design */}
+      {/* Floating Bottom Navigation - Premium Glass Design */}
       <nav
         className={cn(
           "fixed bottom-0 left-0 right-0 z-50",
@@ -91,8 +91,14 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
         role="navigation"
         aria-label={t("bottomNav.mobileNavigation")}
       >
-        {/* Floating pill container */}
-        <div className="glass-floating mx-auto max-w-md px-2 py-3">
+        {/* Enhanced floating pill container with stronger glass effect */}
+        <div className="glass-nav mx-auto max-w-md rounded-3xl border border-border/40 px-2 py-3">
+          {/* Subtle gradient border on top */}
+          <div 
+            className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" 
+            aria-hidden="true"
+          />
+          
           <div className="flex items-center justify-around">
             {navItems.map((item) => {
               const active = isActive(item.route);
@@ -118,7 +124,7 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
                   onClick={() => navigate(item.route)}
                   className={cn(
                     "relative flex items-center justify-center w-14 h-12 rounded-2xl transition-all duration-300",
-                    "touch-manipulation will-change-transform",
+                    "touch-manipulation will-change-transform active:scale-95",
                     active
                       ? "text-primary"
                       : "text-muted-foreground hover:text-foreground"
@@ -126,14 +132,25 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
                   aria-current={active ? "page" : undefined}
                   aria-label={t(item.labelKey)}
                 >
+                  {/* Active indicator - glowing pill background */}
+                  {active && (
+                    <span 
+                      className="absolute inset-1 rounded-xl bg-primary/10" 
+                      aria-hidden="true"
+                    />
+                  )}
+                  
                   {/* Active indicator - glowing dot */}
                   {active && (
-                    <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary shadow-glow-sm" />
+                    <span 
+                      className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary shadow-glow-sm" 
+                      aria-hidden="true"
+                    />
                   )}
                   
                   <Icon
                     className={cn(
-                      "h-6 w-6 transition-all duration-300",
+                      "relative z-10 h-6 w-6 transition-all duration-300",
                       active && "scale-110"
                     )}
                     strokeWidth={active ? 2.5 : 1.5}

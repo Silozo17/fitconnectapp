@@ -216,6 +216,13 @@ export default {
         "glow-purple": "0 0 30px hsl(var(--gradient-purple) / 0.3)",
         // Inner glow for glass effects
         "inner-glow": "inset 0 1px 0 hsl(0 0% 100% / 0.08)",
+        "inner-glow-strong": "inset 0 1px 0 hsl(0 0% 100% / 0.12), inset 0 -1px 0 hsl(0 0% 0% / 0.1)",
+        // Glass card shadows
+        "glass-sm": "0 4px 16px hsl(0 0% 0% / 0.2), inset 0 1px 0 hsl(0 0% 100% / 0.06)",
+        "glass-md": "0 8px 32px hsl(0 0% 0% / 0.25), inset 0 1px 0 hsl(0 0% 100% / 0.08)",
+        "glass-lg": "0 16px 48px hsl(0 0% 0% / 0.3), inset 0 1px 0 hsl(0 0% 100% / 0.1)",
+        // Interactive shadows
+        "interactive-hover": "0 8px 24px hsl(0 0% 0% / 0.25), 0 0 20px hsl(var(--gradient-lime) / 0.1)",
       },
     },
   },
