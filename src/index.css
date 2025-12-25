@@ -552,3 +552,18 @@
     text-wrap: pretty;
   }
 }
+
+/* Dark mode date/time picker icons - make calendar/clock icons visible */
+.dark input[type="date"]::-webkit-calendar-picker-indicator,
+.dark input[type="time"]::-webkit-calendar-picker-indicator,
+.dark input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8) brightness(1.2);
+  cursor: pointer;
+}
+
+/* Firefox/Safari color scheme for dark mode date inputs */
+.dark input[type="date"],
+.dark input[type="time"],
+.dark input[type="datetime-local"] {
+  color-scheme: dark;
+}
