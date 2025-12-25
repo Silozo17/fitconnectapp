@@ -11,6 +11,7 @@ import DashboardHeader from "./DashboardHeader";
 import SkipNavigation from "@/components/shared/SkipNavigation";
 import MobileBottomNav from "@/components/navigation/MobileBottomNav";
 import { Button } from "@/components/ui/button";
+import PlatformBackground from "@/components/shared/PlatformBackground";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -92,9 +93,10 @@ const DashboardLayout = memo(({ children, title = "Coach Dashboard", description
         {description && <meta name="description" content={description} />}
       </Helmet>
 
+      <PlatformBackground />
       <SkipNavigation />
 
-      <div className="h-dvh bg-background overflow-hidden">
+      <div className="h-dvh overflow-hidden relative">
         <CoachSidebar
           collapsed={sidebarCollapsed}
           onToggle={handleToggleSidebar}
