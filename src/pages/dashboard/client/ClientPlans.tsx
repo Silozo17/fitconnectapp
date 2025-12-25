@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { format } from "date-fns";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,9 +8,16 @@ import { FileX, Loader2, Calendar, ClipboardList, AlertCircle } from "lucide-rea
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useMyPlans } from "@/hooks/useMyPlans";
+import { useClientBadges } from "@/hooks/useSidebarBadges";
 
 const ClientPlans = () => {
   const { data: plans = [], isLoading, error, refetch } = useMyPlans();
+  const { markPlansViewed } = useClientBadges();
+
+  // Mark plans as viewed when page loads
+  useEffect(() => {
+    markPlansViewed();
+  }, [markPlansViewed]);
 
   const calculateProgress = (startDate: string | null, endDate: string | null) => {
     if (!startDate || !endDate) return 0;
