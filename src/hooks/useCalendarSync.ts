@@ -107,6 +107,29 @@ export const useCalendarSync = () => {
     },
   });
 
+  const syncAllSessions = useMutation({
+    mutationFn: async () => {
+      if (!user?.id) throw new Error("Not authenticated");
+      
+      const { data, error } = await supabase.functions.invoke("calendar-sync-existing-sessions", {
+        body: { userId: user.id },
+      });
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      if (data.syncedCount > 0) {
+        toast.success(`Synced ${data.syncedCount} session${data.syncedCount > 1 ? 's' : ''} to your calendar`);
+      } else {
+        toast.info("No upcoming sessions to sync");
+      }
+    },
+    onError: () => {
+      toast.error("Failed to sync sessions. Please try again.");
+    },
+  });
+
   const isConnected = (provider: CalendarProvider) => {
     return connections?.some((c) => c.provider === provider);
   };
@@ -122,6 +145,7 @@ export const useCalendarSync = () => {
     disconnectCalendar,
     toggleSync,
     syncSession,
+    syncAllSessions,
     isConnected,
     getConnection,
   };

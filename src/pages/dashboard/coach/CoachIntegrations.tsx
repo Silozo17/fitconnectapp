@@ -70,6 +70,7 @@ const CoachIntegrations = () => {
     connectCalendar,
     disconnectCalendar,
     toggleSync,
+    syncAllSessions,
     getConnection,
     isLoading: calendarLoading,
   } = useCalendarSync();
@@ -165,7 +166,9 @@ const CoachIntegrations = () => {
                   onToggleSync={(enabled) =>
                     connection && toggleSync.mutate({ connectionId: connection.id, enabled })
                   }
+                  onSyncAll={() => syncAllSessions.mutate()}
                   isConnecting={connectCalendar.isPending}
+                  isSyncing={syncAllSessions.isPending}
                   supportsTwoWaySync={provider.isCalDAV}
                 />
               );
