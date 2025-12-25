@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   DollarSign, 
   Calendar, 
@@ -36,6 +36,7 @@ import { Badge } from "@/components/ui/badge";
 import { useSessionTypes } from "@/hooks/useCoachSchedule";
 import { useMessageTemplates } from "@/hooks/useMessageTemplates";
 import { useAdminView } from "@/contexts/AdminContext";
+import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
 import SessionOfferDialog from "./SessionOfferDialog";
 
 interface ChatQuickActionsProps {
@@ -43,18 +44,32 @@ interface ChatQuickActionsProps {
   /** The auth user_id of the participant (not client_profile.id) */
   participantUserId?: string;
   onSendMessage: (message: string) => Promise<boolean>;
+  /** External control for opening the mobile drawer */
+  externalDrawerOpen?: boolean;
+  onExternalDrawerChange?: (open: boolean) => void;
 }
 
-const ChatQuickActions = ({ coachId, participantUserId, onSendMessage }: ChatQuickActionsProps) => {
+const ChatQuickActions = ({ 
+  coachId, 
+  participantUserId, 
+  onSendMessage,
+  externalDrawerOpen,
+  onExternalDrawerChange 
+}: ChatQuickActionsProps) => {
   const [showPricingDialog, setShowPricingDialog] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [showTemplatesPopover, setShowTemplatesPopover] = useState(false);
   const [showSessionOfferDialog, setShowSessionOfferDialog] = useState(false);
-  const [showMobileDrawer, setShowMobileDrawer] = useState(false);
+  const [internalDrawerOpen, setInternalDrawerOpen] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState("");
   const [paymentDescription, setPaymentDescription] = useState("");
   const [sending, setSending] = useState(false);
   const { activeProfileType } = useAdminView();
+  const { isIOSNative } = usePlatformRestrictions();
+
+  // Use external control if provided, otherwise internal state
+  const showMobileDrawer = externalDrawerOpen ?? internalDrawerOpen;
+  const setShowMobileDrawer = onExternalDrawerChange ?? setInternalDrawerOpen;
 
   const { data: sessionTypes = [] } = useSessionTypes(coachId);
   const { templates, loading: templatesLoading } = useMessageTemplates();
@@ -224,15 +239,18 @@ const ChatQuickActions = ({ coachId, participantUserId, onSendMessage }: ChatQui
         </Button>
       )}
 
-      <Button
-        variant="outline"
-        size="sm"
-        className="h-8 text-xs flex-shrink-0"
-        onClick={() => setShowPaymentDialog(true)}
-      >
-        <CreditCard className="h-3 w-3 mr-1" />
-        Payment
-      </Button>
+      {/* Payment button - hidden on iOS native per App Store rules */}
+      {!isIOSNative && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-8 text-xs flex-shrink-0"
+          onClick={() => setShowPaymentDialog(true)}
+        >
+          <CreditCard className="h-3 w-3 mr-1" />
+          Payment
+        </Button>
+      )}
     </div>
   );
 
@@ -312,17 +330,20 @@ const ChatQuickActions = ({ coachId, participantUserId, onSendMessage }: ChatQui
                 </Button>
               )}
               
-              <Button
-                variant="outline"
-                className="h-14 flex-col gap-1"
-                onClick={() => {
-                  setShowMobileDrawer(false);
-                  setShowPaymentDialog(true);
-                }}
-              >
-                <CreditCard className="h-5 w-5" />
-                <span className="text-xs">Payment</span>
-              </Button>
+              {/* Payment button - hidden on iOS native */}
+              {!isIOSNative && (
+                <Button
+                  variant="outline"
+                  className="h-14 flex-col gap-1"
+                  onClick={() => {
+                    setShowMobileDrawer(false);
+                    setShowPaymentDialog(true);
+                  }}
+                >
+                  <CreditCard className="h-5 w-5" />
+                  <span className="text-xs">Payment</span>
+                </Button>
+              )}
             </div>
           </div>
         </DrawerContent>
