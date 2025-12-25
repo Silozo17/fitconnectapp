@@ -95,10 +95,17 @@ export default {
         xl: "calc(var(--radius) + 4px)",
         "2xl": "calc(var(--radius) + 8px)",
         "3xl": "calc(var(--radius) + 16px)",
+        "4xl": "2rem",
       },
       fontFamily: {
         sans: ["Inter", "sans-serif"],
         display: ["Space Grotesk", "sans-serif"],
+      },
+      spacing: {
+        "safe-top": "env(safe-area-inset-top, 0px)",
+        "safe-bottom": "env(safe-area-inset-bottom, 0px)",
+        "safe-left": "env(safe-area-inset-left, 0px)",
+        "safe-right": "env(safe-area-inset-right, 0px)",
       },
       keyframes: {
         "accordion-down": {
@@ -163,6 +170,10 @@ export default {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-5px)" },
         },
+        "slide-up": {
+          "0%": { opacity: "0", transform: "translateY(100%)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -180,18 +191,31 @@ export default {
         "pulse-glow": "pulse-glow 2s ease-in-out infinite",
         "spin-slow": "spin-slow 3s linear infinite",
         "bounce-subtle": "bounce-subtle 2s ease-in-out infinite",
+        "slide-up": "slide-up 0.4s cubic-bezier(0.32, 0.72, 0, 1)",
       },
       backgroundImage: {
         "hero-pattern": "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(var(--gradient-purple) / 0.15), transparent)",
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
       },
       boxShadow: {
+        // Premium shadow scale
+        "elevation-1": "0 2px 8px hsl(0 0% 0% / 0.15)",
+        "elevation-2": "0 4px 16px hsl(0 0% 0% / 0.2)",
+        "elevation-3": "0 8px 32px hsl(0 0% 0% / 0.25)",
+        "elevation-4": "0 16px 48px hsl(0 0% 0% / 0.3)",
+        // Floating elements
+        "float-sm": "0 8px 24px hsl(0 0% 0% / 0.25), 0 4px 8px hsl(0 0% 0% / 0.15)",
+        "float-md": "0 16px 40px hsl(0 0% 0% / 0.3), 0 8px 16px hsl(0 0% 0% / 0.2)",
+        "float-lg": "0 24px 60px hsl(0 0% 0% / 0.35), 0 12px 24px hsl(0 0% 0% / 0.25)",
+        // Legacy support
         soft: "0 4px 24px hsl(0 0% 0% / 0.2), 0 1px 2px hsl(0 0% 0% / 0.1)",
         "soft-lg": "0 12px 40px hsl(0 0% 0% / 0.3), 0 4px 12px hsl(0 0% 0% / 0.15)",
         glow: "0 0 20px hsl(var(--gradient-lime) / 0.4), 0 0 40px hsl(var(--gradient-lime) / 0.2)",
         "glow-sm": "0 0 15px hsl(var(--gradient-lime) / 0.3)",
         "glow-lg": "0 0 40px hsl(var(--gradient-lime) / 0.4), 0 0 80px hsl(var(--gradient-lime) / 0.2)",
         "glow-purple": "0 0 30px hsl(var(--gradient-purple) / 0.3)",
+        // Inner glow for glass effects
+        "inner-glow": "inset 0 1px 0 hsl(0 0% 100% / 0.08)",
       },
     },
   },

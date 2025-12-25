@@ -126,7 +126,75 @@
 }
 
 @layer components {
-  /* Gradient text utilities - Energy theme */
+  /* ========================================
+     PREMIUM UI SYSTEM - Foundation
+     ======================================== */
+  
+  /* Safe Area Utilities - Device bezels */
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  
+  .safe-left {
+    padding-left: env(safe-area-inset-left, 0px);
+  }
+  
+  .safe-right {
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+  
+  .safe-x {
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+  
+  .safe-y {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* ========================================
+     GLASSMORPHISM EFFECTS
+     ======================================== */
+  .glass {
+    @apply bg-card/80 backdrop-blur-xl border-b border-border/50;
+  }
+
+  .glass-dark {
+    background: linear-gradient(135deg, 
+      hsl(var(--card) / 0.95), 
+      hsl(var(--card) / 0.85));
+    @apply backdrop-blur-xl border border-border/50;
+  }
+
+  .glass-premium {
+    background: linear-gradient(135deg, 
+      hsl(var(--card) / 0.6), 
+      hsl(var(--card) / 0.4));
+    @apply backdrop-blur-2xl border border-border/30;
+    box-shadow: 
+      0 8px 32px hsl(0 0% 0% / 0.3),
+      inset 0 1px 0 hsl(0 0% 100% / 0.05);
+  }
+
+  .glass-floating {
+    background: linear-gradient(135deg, 
+      hsl(var(--card) / 0.9), 
+      hsl(var(--card) / 0.8));
+    @apply backdrop-blur-2xl border border-border/40 rounded-3xl;
+    box-shadow: 
+      0 20px 60px hsl(0 0% 0% / 0.4),
+      0 8px 24px hsl(0 0% 0% / 0.3),
+      inset 0 1px 0 hsl(0 0% 100% / 0.08);
+  }
+
+  /* ========================================
+     GRADIENT TEXT UTILITIES
+     ======================================== */
   .gradient-text {
     @apply bg-clip-text text-transparent;
     background-image: linear-gradient(135deg, hsl(var(--gradient-lime)) 0%, hsl(var(--gradient-cyan)) 100%);
@@ -142,7 +210,9 @@
     background-image: linear-gradient(135deg, hsl(var(--gradient-purple)) 0%, hsl(var(--gradient-magenta)) 100%);
   }
 
-  /* Gradient backgrounds - Energy theme */
+  /* ========================================
+     GRADIENT BACKGROUNDS
+     ======================================== */
   .gradient-bg-primary {
     background: linear-gradient(135deg, hsl(var(--gradient-lime)) 0%, hsl(var(--gradient-lime-dark)) 100%);
   }
@@ -162,7 +232,24 @@
       hsl(var(--background));
   }
 
-  /* Neon glow effects */
+  /* Premium curved header background */
+  .gradient-header {
+    background: linear-gradient(180deg, 
+      hsl(var(--gradient-purple) / 0.15) 0%,
+      hsl(var(--gradient-lime) / 0.05) 50%,
+      transparent 100%);
+  }
+
+  .gradient-header-curved {
+    background: linear-gradient(180deg, 
+      hsl(var(--card)) 0%,
+      hsl(var(--background)) 100%);
+    clip-path: ellipse(120% 100% at 50% 0%);
+  }
+
+  /* ========================================
+     GLOW EFFECTS
+     ======================================== */
   .glow-lime {
     box-shadow: 
       0 0 20px hsl(var(--gradient-lime) / 0.4),
@@ -180,19 +267,9 @@
     box-shadow: 0 0 15px hsl(var(--gradient-lime) / 0.3);
   }
 
-  /* Glass effect - darker */
-  .glass {
-    @apply bg-card/80 backdrop-blur-xl border-b border-border/50;
-  }
-
-  .glass-dark {
-    background: linear-gradient(135deg, 
-      hsl(var(--card) / 0.95), 
-      hsl(var(--card) / 0.85));
-    @apply backdrop-blur-xl border border-border/50;
-  }
-
-  /* Card styles - dark theme */
+  /* ========================================
+     PREMIUM CARD STYLES
+     ======================================== */
   .card-elevated {
     @apply bg-card border border-border rounded-2xl;
     box-shadow: 
@@ -206,6 +283,32 @@
       0 0 30px hsl(var(--gradient-purple) / 0.1);
   }
 
+  .card-floating {
+    @apply bg-card border border-border/50 rounded-3xl;
+    box-shadow: 
+      0 20px 60px hsl(0 0% 0% / 0.35),
+      0 8px 24px hsl(0 0% 0% / 0.2),
+      inset 0 1px 0 hsl(0 0% 100% / 0.05);
+  }
+
+  .card-floating:hover {
+    transform: translateY(-4px);
+    box-shadow: 
+      0 28px 70px hsl(0 0% 0% / 0.4),
+      0 12px 32px hsl(0 0% 0% / 0.25),
+      0 0 40px hsl(var(--gradient-lime) / 0.08);
+  }
+
+  .card-glass {
+    background: linear-gradient(135deg, 
+      hsl(var(--card) / 0.8), 
+      hsl(var(--card) / 0.6));
+    @apply backdrop-blur-xl border border-border/30 rounded-2xl;
+    box-shadow: 
+      0 8px 32px hsl(0 0% 0% / 0.25),
+      inset 0 1px 0 hsl(0 0% 100% / 0.05);
+  }
+
   .card-glow {
     @apply bg-card border border-border rounded-2xl transition-all duration-300;
   }
@@ -217,7 +320,28 @@
       0 0 60px hsl(var(--gradient-purple) / 0.05);
   }
 
-  /* Hover effects */
+  /* Icon square backgrounds - like reference images */
+  .icon-square {
+    @apply flex items-center justify-center rounded-2xl;
+    width: 56px;
+    height: 56px;
+  }
+
+  .icon-square-sm {
+    @apply flex items-center justify-center rounded-xl;
+    width: 44px;
+    height: 44px;
+  }
+
+  .icon-square-lg {
+    @apply flex items-center justify-center rounded-2xl;
+    width: 64px;
+    height: 64px;
+  }
+
+  /* ========================================
+     HOVER EFFECTS
+     ======================================== */
   .hover-lift {
     @apply transition-all duration-300;
   }
@@ -226,11 +350,30 @@
     @apply -translate-y-1;
   }
 
+  .hover-scale {
+    @apply transition-transform duration-200;
+  }
+
+  .hover-scale:hover {
+    @apply scale-[1.02];
+  }
+
   .hover-glow:hover {
     box-shadow: 0 0 20px hsl(var(--gradient-lime) / 0.3);
   }
 
-  /* Gradient border - lime/purple */
+  /* Press effect for buttons */
+  .press-scale {
+    @apply transition-transform duration-100;
+  }
+
+  .press-scale:active {
+    @apply scale-[0.97];
+  }
+
+  /* ========================================
+     GRADIENT BORDER
+     ======================================== */
   .gradient-border {
     position: relative;
     background: hsl(var(--card));
@@ -250,7 +393,9 @@
     mask-composite: exclude;
   }
 
-  /* Dotted pattern decoration */
+  /* ========================================
+     DECORATIVE PATTERNS
+     ======================================== */
   .dotted-circle {
     border: 2px dashed hsl(var(--gradient-lime) / 0.3);
     border-radius: 50%;
@@ -261,7 +406,9 @@
     background-size: 20px 20px;
   }
 
-  /* Blob shapes - updated colors */
+  /* ========================================
+     ANIMATIONS
+     ======================================== */
   .blob {
     border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
     animation: blob-morph 8s ease-in-out infinite;
@@ -282,7 +429,6 @@
     }
   }
 
-  /* Pulse animation for badges */
   @keyframes pulse-glow {
     0%, 100% {
       box-shadow: 0 0 15px hsl(var(--gradient-lime) / 0.3);
@@ -296,7 +442,6 @@
     animation: pulse-glow 2s ease-in-out infinite;
   }
 
-  /* Floating animation */
   @keyframes float {
     0%, 100% {
       transform: translateY(0px);
@@ -327,11 +472,12 @@
     @apply bg-accent/10 text-accent border border-accent/20;
   }
 
-  /* Blog prose styles - optimized for dark theme */
+  /* ========================================
+     BLOG PROSE STYLES
+     ======================================== */
   .prose-blog {
     @apply prose prose-lg prose-invert max-w-none;
     
-    /* Headings */
     --tw-prose-headings: hsl(var(--foreground));
     --tw-prose-body: hsl(var(--muted-foreground));
     --tw-prose-bold: hsl(var(--foreground));
@@ -541,6 +687,18 @@
   
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Horizontal scroll with snap */
+  .scroll-snap-x {
+    @apply overflow-x-auto scrollbar-hide;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .scroll-snap-item {
+    scroll-snap-align: start;
+    flex-shrink: 0;
   }
 
   /* Responsive text utilities */
