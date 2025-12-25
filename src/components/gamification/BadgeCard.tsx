@@ -32,21 +32,28 @@ export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
       <div
         ref={ref}
         className={cn(
-          'relative rounded-xl p-4 transition-all duration-300 glass-card',
+          'relative rounded-xl p-4 transition-all duration-300 glass-card overflow-hidden',
           earned 
-            ? `${rarityColors.bg} ${rarityColors.border} border` 
-            : 'border border-white/10 grayscale opacity-60',
+            ? `${rarityColors.border} border` 
+            : 'border border-white/10',
           badge.rarity === 'legendary' && earned && 'ring-2 ring-yellow-400/50 shadow-lg shadow-yellow-500/20'
         )}
       >
+        {/* Rarity color overlay for earned badges */}
+        {earned && (
+          <div 
+            className={cn('absolute inset-0 pointer-events-none opacity-30', rarityColors.bg)}
+          />
+        )}
+        
         {!earned && (
-          <div className="absolute top-2 right-2">
+          <div className="absolute top-2 right-2 z-10">
             <Lock className="h-4 w-4 text-muted-foreground" />
           </div>
         )}
         
         {earned && (
-          <div className="absolute top-2 right-2">
+          <div className="absolute top-2 right-2 z-10">
             <ShareAchievementButton
               achievement={{
                 type: 'badge',
@@ -60,7 +67,7 @@ export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
           </div>
         )}
         
-        <div className="text-center">
+        <div className={cn("relative text-center", !earned && "grayscale opacity-70")}>
           <div 
             className={cn(
               'w-16 h-16 mx-auto mb-2 flex items-center justify-center',
