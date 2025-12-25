@@ -162,11 +162,11 @@ const CoachReviews = () => {
     <DashboardLayout title={t("reviewsPage.title")} description={t("reviewsPage.subtitle")}>
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card>
+        <Card className="rounded-2xl border-border/50 bg-card/50 backdrop-blur-sm">
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                <Star className="w-6 h-6 text-amber-500" />
+              <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center">
+                <Star className="w-7 h-7 text-amber-500" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{averageRating}</p>
@@ -175,11 +175,11 @@ const CoachReviews = () => {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="rounded-2xl border-border/50 bg-card/50 backdrop-blur-sm">
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <MessageSquareText className="w-6 h-6 text-primary" />
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+                <MessageSquareText className="w-7 h-7 text-primary" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{reviews.length}</p>
@@ -188,11 +188,11 @@ const CoachReviews = () => {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="rounded-2xl border-border/50 bg-card/50 backdrop-blur-sm">
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center">
-                <Flag className="w-6 h-6 text-warning" />
+              <div className="w-14 h-14 rounded-2xl bg-warning/10 flex items-center justify-center">
+                <Flag className="w-7 h-7 text-warning" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{disputes.filter((d) => d.status === "pending").length}</p>
@@ -204,16 +204,18 @@ const CoachReviews = () => {
       </div>
 
       {/* Reviews List */}
-      <Card>
+      <Card className="rounded-3xl border-border/50 bg-card/50 backdrop-blur-sm">
         <CardHeader>
           <CardTitle>{t("reviewsPage.allReviews")}</CardTitle>
         </CardHeader>
         <CardContent>
           {reviewsLoading ? (
-            <div className="text-center py-8 text-muted-foreground">{t("reviewsPage.loading")}</div>
+            <div className="text-center py-12 text-muted-foreground">{t("reviewsPage.loading")}</div>
           ) : reviews.length === 0 ? (
-            <div className="text-center py-8">
-              <MessageSquareText className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+            <div className="text-center py-16">
+              <div className="w-16 h-16 rounded-3xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                <MessageSquareText className="w-8 h-8 text-muted-foreground" />
+              </div>
               <p className="text-muted-foreground">{t("reviewsPage.noReviews")}</p>
             </div>
           ) : (

@@ -40,10 +40,10 @@ const CoachMessages = () => {
           </Button>
         </div>
 
-        <div className="flex-1 card-elevated overflow-hidden flex">
+        <div className="flex-1 bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl overflow-hidden flex">
           {/* Conversations List - Hidden on mobile when in chat */}
-          <div className={`w-full lg:w-80 border-r border-border flex flex-col ${participantId ? "hidden lg:flex" : "flex"}`}>
-            <div className="p-4 border-b border-border">
+          <div className={`w-full lg:w-80 border-r border-border/50 flex flex-col ${participantId ? "hidden lg:flex" : "flex"}`}>
+            <div className="p-4 border-b border-border/50">
               <h2 className="font-semibold text-foreground">{t('inbox.title')}</h2>
             </div>
             <div className="flex-1 overflow-y-auto">
@@ -62,14 +62,14 @@ const CoachMessages = () => {
               />
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <div className="w-16 h-16 rounded-3xl bg-primary/10 flex items-center justify-center mb-4">
                   <MessageSquare className="w-8 h-8 text-primary" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-2">{t('selectConversation')}</h3>
                 <p className="text-muted-foreground max-w-sm mb-4">
                   {t('selectConversationDescription')}
                 </p>
-                <Button onClick={() => setShowNewConversation(true)}>
+                <Button onClick={() => setShowNewConversation(true)} className="rounded-xl">
                   <Plus className="h-4 w-4 mr-2" />
                   {t('startConversation')}
                 </Button>
@@ -79,7 +79,7 @@ const CoachMessages = () => {
 
           {/* Side Panel - Desktop only */}
           {participantId && showSidePanel && (
-            <div className="hidden lg:block border-l border-border">
+            <div className="hidden lg:block border-l border-border/50">
               <MessageSidePanel
                 participantId={participantId}
                 clientId={participantId}

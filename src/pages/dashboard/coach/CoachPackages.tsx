@@ -45,13 +45,13 @@ const CoachPackages = () => {
   };
 
   const PackageCard = ({ pkg }: { pkg: CoachPackage }) => (
-    <Card className={!pkg.is_active ? "opacity-60" : ""}>
+    <Card className={`rounded-2xl border-border/50 bg-card/50 backdrop-blur-sm ${!pkg.is_active ? "opacity-60" : ""}`}>
       <CardContent className="p-5">
         <div className="flex items-start justify-between mb-3">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <h3 className="font-semibold text-foreground">{pkg.name}</h3>
-              <Badge variant={pkg.is_active ? "default" : "secondary"}>
+              <Badge variant={pkg.is_active ? "default" : "secondary"} className="rounded-full">
                 {pkg.is_active ? t('packages.active') : t('packages.inactive')}
               </Badge>
             </div>
@@ -63,6 +63,7 @@ const CoachPackages = () => {
             <Button
               variant="ghost"
               size="icon"
+              className="rounded-xl"
               aria-label={t('packages.editPackage')}
               onClick={() => {
                 setEditPackage(pkg);
@@ -74,6 +75,7 @@ const CoachPackages = () => {
             <Button
               variant="ghost"
               size="icon"
+              className="rounded-xl"
               aria-label={pkg.is_active ? t('packages.inactive') : t('packages.active')}
               onClick={() => handleTogglePackage(pkg)}
             >
@@ -86,7 +88,7 @@ const CoachPackages = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 text-center pt-4 border-t border-border">
+        <div className="grid grid-cols-3 gap-4 text-center pt-4 border-t border-border/50">
           <div>
             <p className="text-2xl font-bold text-foreground">{pkg.session_count}</p>
             <p className="text-xs text-muted-foreground">{t('packagesPage.sessions')}</p>
@@ -109,13 +111,13 @@ const CoachPackages = () => {
   );
 
   const SubscriptionCard = ({ plan }: { plan: CoachSubscriptionPlan }) => (
-    <Card className={!plan.is_active ? "opacity-60" : ""}>
+    <Card className={`rounded-2xl border-border/50 bg-card/50 backdrop-blur-sm ${!plan.is_active ? "opacity-60" : ""}`}>
       <CardContent className="p-5">
         <div className="flex items-start justify-between mb-3">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <h3 className="font-semibold text-foreground">{plan.name}</h3>
-              <Badge variant={plan.is_active ? "default" : "secondary"}>
+              <Badge variant={plan.is_active ? "default" : "secondary"} className="rounded-full">
                 {plan.is_active ? t('subscriptionPlans.active') : t('packages.inactive')}
               </Badge>
             </div>
@@ -127,6 +129,7 @@ const CoachPackages = () => {
             <Button
               variant="ghost"
               size="icon"
+              className="rounded-xl"
               onClick={() => {
                 setEditPlan(plan);
                 setShowPlanModal(true);
@@ -137,6 +140,7 @@ const CoachPackages = () => {
             <Button
               variant="ghost"
               size="icon"
+              className="rounded-xl"
               onClick={() => handleTogglePlan(plan)}
             >
               {plan.is_active ? (
@@ -190,12 +194,12 @@ const CoachPackages = () => {
       ) : (
         <Tabs defaultValue="packages" className="space-y-6">
           <div className="flex items-center justify-between">
-            <TabsList>
-              <TabsTrigger value="packages" className="gap-2">
+            <TabsList className="bg-muted/50 backdrop-blur-sm p-1 rounded-2xl">
+              <TabsTrigger value="packages" className="gap-2 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm">
                 <Package className="h-4 w-4" />
                 {t('packagesPage.packages')} ({packages.length})
               </TabsTrigger>
-              <TabsTrigger value="subscriptions" className="gap-2">
+              <TabsTrigger value="subscriptions" className="gap-2 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm">
                 <RefreshCcw className="h-4 w-4" />
                 {t('packagesPage.subscriptions')} ({plans.length})
               </TabsTrigger>
@@ -211,14 +215,16 @@ const CoachPackages = () => {
             </div>
 
             {packages.length === 0 ? (
-              <Card>
-                <CardContent className="py-12 text-center">
-                  <Package className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
+              <Card className="rounded-3xl border-border/50 bg-card/50 backdrop-blur-sm">
+                <CardContent className="py-16 text-center">
+                  <div className="w-16 h-16 rounded-3xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                    <Package className="h-8 w-8 text-muted-foreground" />
+                  </div>
                   <h3 className="font-semibold text-foreground mb-2">{t('packagesPage.noPackages')}</h3>
                   <p className="text-muted-foreground mb-4">
                     {t('packagesPage.noPackagesDesc')}
                   </p>
-                  <Button onClick={() => setShowPackageModal(true)}>
+                  <Button onClick={() => setShowPackageModal(true)} className="rounded-xl">
                     <Plus className="h-4 w-4 mr-2" />
                     {t('packagesPage.createFirstPackage')}
                   </Button>
@@ -242,14 +248,16 @@ const CoachPackages = () => {
             </div>
 
             {plans.length === 0 ? (
-              <Card>
-                <CardContent className="py-12 text-center">
-                  <RefreshCcw className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
+              <Card className="rounded-3xl border-border/50 bg-card/50 backdrop-blur-sm">
+                <CardContent className="py-16 text-center">
+                  <div className="w-16 h-16 rounded-3xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                    <RefreshCcw className="h-8 w-8 text-muted-foreground" />
+                  </div>
                   <h3 className="font-semibold text-foreground mb-2">{t('packagesPage.noSubscriptions')}</h3>
                   <p className="text-muted-foreground mb-4">
                     {t('packagesPage.noSubscriptionsDesc')}
                   </p>
-                  <Button onClick={() => setShowPlanModal(true)}>
+                  <Button onClick={() => setShowPlanModal(true)} className="rounded-xl">
                     <Plus className="h-4 w-4 mr-2" />
                     {t('packagesPage.createFirstPlan')}
                   </Button>
