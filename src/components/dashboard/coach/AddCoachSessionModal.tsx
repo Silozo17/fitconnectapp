@@ -34,6 +34,7 @@ import { useCoachClients } from "@/hooks/useCoachClients";
 import { useSessionTypes } from "@/hooks/useCoachSchedule";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { VenueAutocomplete } from "@/components/shared/VenueAutocomplete";
 
 interface AddCoachSessionModalProps {
   open: boolean;
@@ -448,15 +449,11 @@ export const AddCoachSessionModal = ({
           {!isOnline && (
             <div className="space-y-2">
               <Label>Location</Label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder="Enter session location"
-                  className="pl-10"
-                />
-              </div>
+              <VenueAutocomplete
+                value={location}
+                onVenueChange={(loc) => setLocation(loc)}
+                placeholder="Search for gym or venue..."
+              />
             </div>
           )}
 

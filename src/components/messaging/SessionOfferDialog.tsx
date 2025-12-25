@@ -33,6 +33,7 @@ import { useSessionTypes } from "@/hooks/useCoachSchedule";
 import { useCreateSessionOffer } from "@/hooks/useSessionOffers";
 import { useParticipantClientProfileId } from "@/hooks/useParticipantClientProfileId";
 import { cn } from "@/lib/utils";
+import { VenueAutocomplete } from "@/components/shared/VenueAutocomplete";
 
 interface SessionOfferDialogProps {
   open: boolean;
@@ -292,11 +293,10 @@ const SessionOfferDialog = ({
           {!isOnline && (
             <div className="space-y-2">
               <Label className="text-xs">Location</Label>
-              <Input
+              <VenueAutocomplete
                 value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="Enter location"
-                className="h-9"
+                onVenueChange={(loc) => setLocation(loc)}
+                placeholder="Search for gym or venue..."
                 disabled={!hasClientProfile}
               />
             </div>
