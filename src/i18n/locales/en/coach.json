@@ -422,6 +422,7 @@
     "aiGenerateInfo": "AI will generate a complete meal plan that matches your macro targets. You can then edit and fine-tune it in the meal builder.",
     "generating": "Generating...",
     "generatePlan": "Generate Plan",
+    "cancel": "Cancel",
     "aiMealPlanGenerated": "Meal plan generated! You can now edit and fine-tune it.",
     "aiRateLimitError": "Rate limit exceeded. Please try again in a moment.",
     "aiCreditsError": "AI credits exhausted. Please add credits to continue.",
@@ -450,7 +451,28 @@
       "snacks": "Snacks",
       "beverages": "Beverages"
     },
-    "dailyMacros": "Daily Macros"
+    "dailyMacros": "Daily Macros",
+    "createFood": {
+      "title": "Create Custom Food",
+      "foodName": "Food Name",
+      "foodNamePlaceholder": "e.g., Grilled Chicken Thigh",
+      "nameRequired": "Name is required",
+      "category": "Category",
+      "selectCategory": "Select category",
+      "caloriesPer100g": "Calories (per 100g)",
+      "protein": "Protein (g)",
+      "carbs": "Carbs (g)",
+      "fat": "Fat (g)",
+      "fiber": "Fiber (g)",
+      "servingSize": "Serving Size (g)",
+      "servingDesc": "Serving Description",
+      "servingDescPlaceholder": "e.g., 1 cup, 1 medium",
+      "cancel": "Cancel",
+      "creating": "Creating...",
+      "createFood": "Create Food",
+      "successMessage": "Custom food created!",
+      "errorMessage": "Failed to create food"
+    }
   },
   "workoutBuilder": {
     "title": "Create Plan",

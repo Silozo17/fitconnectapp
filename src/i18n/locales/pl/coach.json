@@ -422,6 +422,7 @@
     "aiGenerateInfo": "AI wygeneruje kompletny plan posiłków dopasowany do Twoich celów makroskładników. Następnie możesz go edytować i dostosować w kreatorze posiłków.",
     "generating": "Generowanie...",
     "generatePlan": "Generuj plan",
+    "cancel": "Anuluj",
     "aiMealPlanGenerated": "Plan posiłków wygenerowany! Możesz teraz go edytować i dostosować.",
     "aiRateLimitError": "Limit zapytań przekroczony. Spróbuj ponownie za chwilę.",
     "aiCreditsError": "Kredyty AI wyczerpane. Dodaj kredyty, aby kontynuować.",
@@ -450,7 +451,28 @@
       "snacks": "Przekąski",
       "beverages": "Napoje"
     },
-    "dailyMacros": "Dzienne makro"
+    "dailyMacros": "Dzienne makro",
+    "createFood": {
+      "title": "Utwórz własny produkt",
+      "foodName": "Nazwa produktu",
+      "foodNamePlaceholder": "np. Grillowany udziec z kurczaka",
+      "nameRequired": "Nazwa jest wymagana",
+      "category": "Kategoria",
+      "selectCategory": "Wybierz kategorię",
+      "caloriesPer100g": "Kalorie (na 100g)",
+      "protein": "Białko (g)",
+      "carbs": "Węglowodany (g)",
+      "fat": "Tłuszcz (g)",
+      "fiber": "Błonnik (g)",
+      "servingSize": "Wielkość porcji (g)",
+      "servingDesc": "Opis porcji",
+      "servingDescPlaceholder": "np. 1 szklanka, 1 średni",
+      "cancel": "Anuluj",
+      "creating": "Tworzenie...",
+      "createFood": "Utwórz produkt",
+      "successMessage": "Własny produkt utworzony!",
+      "errorMessage": "Nie udało się utworzyć produktu"
+    }
   },
   "workoutBuilder": {
     "title": "Utwórz plan",
