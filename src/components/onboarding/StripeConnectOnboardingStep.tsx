@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { CreditCard, ExternalLink, Loader2, CheckCircle, AlertTriangle, Percent } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -47,7 +48,7 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip, onBack }: St
   }, []);
 
   // Only query Stripe status when not skipped
-  const { data: coachProfile, refetch } = useQuery({
+  const { data: coachProfile, refetch, isLoading: isProfileLoading } = useQuery({
     queryKey: ["coach-stripe-onboarding", coachId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -104,17 +105,21 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip, onBack }: St
           coachId,
           userId: user.id,
           returnUrl,
+          // Pass existing account ID to avoid creating duplicates
+          existingAccountId: coachProfile?.stripe_connect_id || null,
         },
       });
 
       if (error) throw error;
 
       if (data.onboardingUrl) {
-        // Save the account ID before redirecting
-        await supabase
-          .from("coach_profiles")
-          .update({ stripe_connect_id: data.accountId })
-          .eq("id", coachId);
+        // Save the account ID before redirecting (only if new)
+        if (!coachProfile?.stripe_connect_id) {
+          await supabase
+            .from("coach_profiles")
+            .update({ stripe_connect_id: data.accountId })
+            .eq("id", coachId);
+        }
 
         // Redirect to Stripe onboarding
         window.location.href = data.onboardingUrl;
@@ -174,42 +179,61 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip, onBack }: St
     );
   }
 
+  // Show loading skeleton while fetching profile
+  if (isProfileLoading) {
+    return (
+      <div className="space-y-5">
+        <div className="mb-4">
+          <Skeleton className="h-7 w-48" />
+          <Skeleton className="h-4 w-64 mt-2" />
+        </div>
+        <Skeleton className="h-32 w-full rounded-xl" />
+        <Skeleton className="h-12 w-full rounded-xl" />
+        <Skeleton className="h-11 w-full" />
+        <div className="flex gap-3">
+          <Skeleton className="h-11 flex-1" />
+          <Skeleton className="h-11 flex-1" />
+        </div>
+      </div>
+    );
+  }
+
   if (stripeStatus === "connected" || coachProfile?.stripe_connect_onboarded) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-5 sm:space-y-6">
         <div>
-          <h2 className="font-display text-2xl font-bold text-foreground mb-2">
+          <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-2">
             {t('onboarding.paymentSetupComplete')}
           </h2>
-          <p className="text-muted-foreground">{t('onboarding.stripeReady')}</p>
+          <p className="text-sm sm:text-base text-muted-foreground">{t('onboarding.stripeReady')}</p>
         </div>
 
-        <div className="p-6 rounded-xl bg-green-500/10 border-2 border-green-500/30">
+        <div className="p-4 sm:p-6 rounded-xl bg-green-500/10 border-2 border-green-500/30">
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-full bg-green-500/20 flex items-center justify-center">
-              <CheckCircle className="h-6 w-6 text-green-500" />
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+              <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-green-500" />
             </div>
-            <div className="flex-1">
-              <p className="font-medium text-foreground">{t('onboarding.stripeConnected')}</p>
-              <p className="text-sm text-muted-foreground">
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-foreground text-sm sm:text-base">{t('onboarding.stripeConnected')}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 {t('onboarding.canReceivePayments')}
               </p>
             </div>
-            <Badge variant="outline" className="text-green-600 border-green-500/30">
+            <Badge variant="outline" className="text-green-600 border-green-500/30 flex-shrink-0">
               {t('status.active')}
             </Badge>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 p-4 rounded-xl bg-secondary">
-          <Percent className="w-5 h-5 text-primary" />
-          <span className="text-sm">
+        <div className="flex items-center gap-2 p-3 sm:p-4 rounded-xl bg-secondary">
+          <Percent className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+          <span className="text-xs sm:text-sm">
             <span className="font-medium">{commissionPercent}%</span> {t('onboarding.platformFee', { percent: '' }).replace('{{percent}}%', '')}
             <span className="text-muted-foreground ml-1">({tierData?.name || 'Free'} {t('onboarding.plan')})</span>
           </span>
         </div>
 
-        <Button onClick={onComplete} className="w-full bg-primary text-primary-foreground">
+        <Button onClick={onComplete} className="w-full bg-primary text-primary-foreground min-h-[44px]">
           {t('actions.continue')}
         </Button>
       </div>
@@ -218,18 +242,18 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip, onBack }: St
 
   if (isReturningFromStripe && coachProfile?.stripe_connect_id) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-5 sm:space-y-6">
         <div>
-          <h2 className="font-display text-2xl font-bold text-foreground mb-2">
+          <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-2">
             {t('onboarding.almostThere')}
           </h2>
-          <p className="text-muted-foreground">{t('onboarding.completeStripeSetup')}</p>
+          <p className="text-sm sm:text-base text-muted-foreground">{t('onboarding.completeStripeSetup')}</p>
         </div>
 
-        <div className="p-6 rounded-xl bg-primary/10 border-2 border-primary/30 text-center">
-          <CheckCircle className="h-12 w-12 text-primary mx-auto mb-4" />
-          <p className="font-medium text-foreground mb-2">{t('onboarding.stripeAccountCreated')}</p>
-          <p className="text-sm text-muted-foreground">
+        <div className="p-4 sm:p-6 rounded-xl bg-primary/10 border-2 border-primary/30 text-center">
+          <CheckCircle className="h-10 w-10 sm:h-12 sm:w-12 text-primary mx-auto mb-3 sm:mb-4" />
+          <p className="font-medium text-foreground mb-2 text-sm sm:text-base">{t('onboarding.stripeAccountCreated')}</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             {t('onboarding.clickFinalize')}
           </p>
         </div>
@@ -237,7 +261,7 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip, onBack }: St
         <Button 
           onClick={handleCompleteOnboarding} 
           disabled={isLoading}
-          className="w-full bg-primary text-primary-foreground"
+          className="w-full bg-primary text-primary-foreground min-h-[44px]"
         >
           {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
           {t('onboarding.completeSetup')}
@@ -247,44 +271,44 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip, onBack }: St
   }
 
   return (
-    <div className="space-y-5">
-      <div className="mb-4">
+    <div className="space-y-4 sm:space-y-5">
+      <div className="mb-3 sm:mb-4">
         <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">
           {t('onboarding.connectPayment')}
         </h2>
-        <p className="text-muted-foreground text-sm mt-1.5">
+        <p className="text-muted-foreground text-xs sm:text-sm mt-1.5">
           {t('onboarding.connectStripeDesc')}
         </p>
       </div>
 
-      <div className="p-6 rounded-xl bg-secondary">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-xl bg-[#635BFF] flex items-center justify-center flex-shrink-0">
-            <CreditCard className="w-6 h-6 text-white" />
+      <div className="p-4 sm:p-6 rounded-xl bg-secondary">
+        <div className="flex items-start gap-3 sm:gap-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#635BFF] flex items-center justify-center flex-shrink-0">
+            <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           </div>
-          <div className="flex-1">
-            <h3 className="font-medium text-foreground mb-2">{t('onboarding.whyConnectStripe')}</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
+          <div className="flex-1 min-w-0">
+            <h3 className="font-medium text-foreground mb-2 text-sm sm:text-base">{t('onboarding.whyConnectStripe')}</h3>
+            <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground">
               <li className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                {t('onboarding.acceptCards')}
+                <span>{t('onboarding.acceptCards')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                {t('onboarding.automaticTransfers')}
+                <span>{t('onboarding.automaticTransfers')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                {t('onboarding.securePayments')}
+                <span>{t('onboarding.securePayments')}</span>
               </li>
             </ul>
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 p-4 rounded-xl bg-primary/10">
-        <Percent className="w-5 h-5 text-primary" />
-        <span className="text-sm">
+      <div className="flex items-center gap-2 p-3 sm:p-4 rounded-xl bg-primary/10">
+        <Percent className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+        <span className="text-xs sm:text-sm">
           {t('onboarding.platformFee', { percent: commissionPercent })}
           <span className="text-muted-foreground ml-1">({tierData?.name || 'Free'} {t('onboarding.plan')})</span>
         </span>
@@ -295,7 +319,7 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip, onBack }: St
           type="button"
           onClick={handleConnect} 
           disabled={isLoading}
-          className="w-full bg-primary text-primary-foreground"
+          className="w-full bg-primary text-primary-foreground min-h-[44px]"
         >
           {isLoading ? (
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -309,7 +333,7 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip, onBack }: St
             type="button"
             variant="outline"
             onClick={() => onBackRef.current()}
-            className="flex-1"
+            className="flex-1 min-h-[44px]"
           >
             {t('onboarding.goBack')}
           </Button>
@@ -317,7 +341,7 @@ const StripeConnectOnboardingStep = ({ coachId, onComplete, onSkip, onBack }: St
             type="button"
             variant="outline"
             onClick={handleSkipClick}
-            className="flex-1"
+            className="flex-1 min-h-[44px]"
           >
             {t('onboarding.setUpLater')}
           </Button>
