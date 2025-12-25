@@ -16,29 +16,31 @@ const ClientMessages = () => {
   return (
     <ClientDashboardLayout title={t('title')} description={t('description')}>
       <div className="flex flex-col h-full min-h-0">
-        <div className="flex items-center gap-2 mb-4">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-5">
           {participantId && (
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden"
+              className="lg:hidden rounded-xl"
               onClick={() => navigate("/dashboard/client/messages")}
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
           )}
-          <h1 className="text-2xl font-bold text-foreground">{t('title')}</h1>
+          <h1 className="text-2xl font-bold text-foreground font-display">{t('title')}</h1>
         </div>
 
-        <div className="flex-1 bg-card border border-border rounded-lg overflow-hidden flex">
+        {/* Chat Container */}
+        <div className="flex-1 bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl overflow-hidden flex shadow-float">
           {/* Conversations List */}
           <div
-            className={`w-full lg:w-80 border-r border-border flex flex-col ${
+            className={`w-full lg:w-80 border-r border-border/50 flex flex-col bg-background/50 ${
               participantId ? "hidden lg:flex" : "flex"
             }`}
           >
-            <div className="p-4 border-b border-border">
-              <h2 className="font-semibold text-foreground">{t('inbox.title')}</h2>
+            <div className="p-5 border-b border-border/50">
+              <h2 className="font-semibold text-foreground text-lg">{t('inbox.title')}</h2>
             </div>
             <div className="flex-1 overflow-y-auto">
               <ConversationList activeConversationId={participantId} />
@@ -47,7 +49,7 @@ const ClientMessages = () => {
 
           {/* Chat Area */}
           <div
-            className={`flex-1 flex flex-col ${
+            className={`flex-1 flex flex-col bg-background/30 ${
               !participantId ? "hidden lg:flex" : "flex"
             }`}
           >
@@ -55,13 +57,13 @@ const ClientMessages = () => {
               <ChatWindow participantId={participantId} participantName={participantName} />
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <MessageSquare className="w-8 h-8 text-primary" />
+                <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center mb-5 shadow-glow-sm">
+                  <MessageSquare className="w-10 h-10 text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">
+                <h3 className="text-xl font-bold text-foreground mb-2 font-display">
                   {t('selectConversation')}
                 </h3>
-                <p className="text-muted-foreground max-w-sm">
+                <p className="text-muted-foreground max-w-sm text-lg">
                   {t('selectConversationDescription')}
                 </p>
               </div>

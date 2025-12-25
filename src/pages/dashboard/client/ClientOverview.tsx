@@ -11,9 +11,9 @@ import UserConnectionRequests from "@/components/dashboard/client/UserConnection
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
 import { HorizontalScroll, ScrollItem } from "@/components/ui/horizontal-scroll";
 import { IconSquare } from "@/components/ui/icon-square";
+import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
 import {
   Users,
   Calendar,
@@ -31,17 +31,17 @@ import {
 const HealthDataWidget = lazy(() => import("@/components/integrations/HealthDataWidget"));
 
 const HealthWidgetSkeleton = () => (
-  <Card variant="elevated" className="mb-6">
-    <CardContent className="p-5">
-      <div className="flex items-center gap-3 mb-4">
-        <Skeleton className="h-10 w-10 rounded-xl" />
-        <Skeleton className="h-5 w-32" />
+  <Card variant="elevated" className="mb-6 rounded-3xl overflow-hidden">
+    <CardContent className="p-6">
+      <div className="flex items-center gap-4 mb-5">
+        <ShimmerSkeleton className="h-12 w-12 rounded-2xl" />
+        <ShimmerSkeleton className="h-5 w-36" />
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[1, 2, 3, 4].map((i) => (
           <div key={i} className="space-y-2">
-            <Skeleton className="h-4 w-16" />
-            <Skeleton className="h-6 w-24" />
+            <ShimmerSkeleton className="h-4 w-16" />
+            <ShimmerSkeleton className="h-7 w-24" />
           </div>
         ))}
       </div>
@@ -124,8 +124,8 @@ const ClientOverview = () => {
     >
       {/* Error Alert */}
       {error && (
-        <Alert variant="destructive" className="mb-6 rounded-2xl">
-          <AlertCircle className="h-4 w-4" />
+        <Alert variant="glass" className="mb-6">
+          <AlertCircle className="h-5 w-5" />
           <AlertDescription className="flex items-center justify-between">
             <span>{t('client.overview.errorLoading')}</span>
             <Button 
@@ -133,7 +133,7 @@ const ClientOverview = () => {
               size="sm" 
               onClick={() => refetch()}
               disabled={isRefetching}
-              className="ml-4"
+              className="ml-4 rounded-xl"
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${isRefetching ? 'animate-spin' : ''}`} />
               {t('client.overview.retry')}
@@ -143,11 +143,11 @@ const ClientOverview = () => {
       )}
 
       {/* Hero Greeting */}
-      <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground font-display">
+      <div className="mb-8">
+        <h1 className="text-3xl md:text-4xl font-bold text-foreground font-display tracking-tight">
           {getGreeting()}, <span className="gradient-text">{displayName || 'there'}</span>
         </h1>
-        <p className="text-muted-foreground mt-1">
+        <p className="text-muted-foreground mt-2 text-lg">
           {t('client.overview.welcomeBack', "Let's crush your goals today")}
         </p>
       </div>
@@ -168,8 +168,8 @@ const ClientOverview = () => {
 
       {/* Quick Actions - Horizontal scroll on mobile, grid on desktop */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-foreground font-display">Quick Actions</h2>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-xl font-bold text-foreground font-display">Quick Actions</h2>
         </div>
         
         {/* Mobile: Horizontal scroll */}
@@ -178,11 +178,11 @@ const ClientOverview = () => {
             {isLoading ? (
               Array.from({ length: 4 }).map((_, i) => (
                 <ScrollItem key={i} className="w-[200px]">
-                  <Card variant="elevated" className="h-full">
-                    <CardContent className="p-4">
-                      <Skeleton className="h-12 w-12 rounded-xl mb-3" />
-                      <Skeleton className="h-5 w-24 mb-2" />
-                      <Skeleton className="h-4 w-32" />
+                  <Card variant="elevated" className="h-full rounded-3xl">
+                    <CardContent className="p-5">
+                      <ShimmerSkeleton className="h-14 w-14 rounded-2xl mb-4" />
+                      <ShimmerSkeleton className="h-5 w-24 mb-2" />
+                      <ShimmerSkeleton className="h-4 w-32" />
                     </CardContent>
                   </Card>
                 </ScrollItem>
@@ -191,13 +191,13 @@ const ClientOverview = () => {
               quickActions.map((action) => (
                 <ScrollItem key={action.href} className="w-[180px]">
                   <Link to={action.href}>
-                    <Card variant="elevated" className="h-full hover:scale-[1.02] transition-transform">
-                      <CardContent className="p-4">
-                        <IconSquare icon={action.icon} color={action.color} size="md" className="mb-3" />
-                        <h3 className="font-semibold text-foreground text-sm">
+                    <Card variant="elevated" className="h-full rounded-3xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
+                      <CardContent className="p-5">
+                        <IconSquare icon={action.icon} color={action.color} size="md" className="mb-4" />
+                        <h3 className="font-semibold text-foreground">
                           {action.title}
                         </h3>
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
                           {action.description}
                         </p>
                       </CardContent>
@@ -210,16 +210,16 @@ const ClientOverview = () => {
         </div>
 
         {/* Desktop: Grid */}
-        <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-5">
           {isLoading ? (
             Array.from({ length: 6 }).map((_, i) => (
-              <Card key={i} variant="elevated">
-                <CardContent className="p-5">
-                  <div className="flex items-start gap-4">
-                    <Skeleton className="h-14 w-14 rounded-xl" />
+              <Card key={i} variant="elevated" className="rounded-3xl">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-5">
+                    <ShimmerSkeleton className="h-16 w-16 rounded-2xl" />
                     <div className="flex-1 space-y-2">
-                      <Skeleton className="h-5 w-24" />
-                      <Skeleton className="h-4 w-32" />
+                      <ShimmerSkeleton className="h-5 w-28" />
+                      <ShimmerSkeleton className="h-4 w-36" />
                     </div>
                   </div>
                 </CardContent>
@@ -228,15 +228,15 @@ const ClientOverview = () => {
           ) : (
             quickActions.map((action) => (
               <Link key={action.href} to={action.href}>
-                <Card variant="elevated" className="h-full group">
-                  <CardContent className="p-5">
-                    <div className="flex items-start gap-4">
+                <Card variant="elevated" className="h-full rounded-3xl group hover:shadow-float-lg transition-all duration-300">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-5">
                       <IconSquare icon={action.icon} color={action.color} size="lg" />
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors text-lg">
                           {action.title}
                         </h3>
-                        <p className="text-sm text-muted-foreground mt-0.5">
+                        <p className="text-muted-foreground mt-1">
                           {action.description}
                         </p>
                       </div>
@@ -252,26 +252,26 @@ const ClientOverview = () => {
 
       {/* CTA Section - Find a Coach */}
       {!isLoading && (stats?.coachCount || 0) === 0 && (
-        <Card variant="floating" className="relative overflow-hidden">
+        <Card variant="floating" className="relative overflow-hidden rounded-3xl">
           {/* Background gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-transparent to-accent/15 pointer-events-none" />
           
-          <CardContent className="relative p-6 md:p-8">
-            <div className="flex items-start gap-4">
-              <div className="p-3 rounded-2xl bg-primary/15">
-                <Sparkles className="w-6 h-6 text-primary" />
+          <CardContent className="relative p-8 md:p-10">
+            <div className="flex items-start gap-5">
+              <div className="p-4 rounded-2xl bg-primary/15 shadow-glow-sm">
+                <Sparkles className="w-7 h-7 text-primary" />
               </div>
               <div className="flex-1">
-                <h3 className="text-xl font-bold text-foreground font-display mb-2">
+                <h3 className="text-2xl font-bold text-foreground font-display mb-3">
                   {t('client.cta.startJourney')}
                 </h3>
-                <p className="text-muted-foreground mb-4 max-w-md">
+                <p className="text-muted-foreground mb-5 max-w-md text-lg">
                   {t('client.cta.startJourneyDesc')}
                 </p>
-                <Button variant="lime" size="lg" asChild>
+                <Button variant="lime" size="lg" className="rounded-2xl h-14 px-8 text-base" asChild>
                   <Link to={coachLinkPrefix}>
                     {t('client.cta.findCoach')}
-                    <ArrowRight className="w-4 h-4 ml-2" />
+                    <ArrowRight className="w-5 h-5 ml-2" />
                   </Link>
                 </Button>
               </div>
