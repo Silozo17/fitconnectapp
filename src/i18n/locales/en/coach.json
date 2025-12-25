@@ -267,6 +267,10 @@
     "createLink": "Create Link",
     "locationTbd": "Location TBD",
     "rescheduledFrom": "Rescheduled from",
+    "requestReview": "Request Review",
+    "reviewReceived": "Review Received",
+    "reviewRequestSent": "Review request sent!",
+    "reviewRequestFailed": "Failed to send review request",
     "status": {
       "scheduled": "Scheduled",
       "completed": "Completed",

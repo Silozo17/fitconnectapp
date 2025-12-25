@@ -3,12 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Calendar, Clock, MapPin, Video, User, CheckCircle, XCircle, AlertCircle, CalendarDays, Link2, ExternalLink } from "lucide-react";
+import { Calendar, Clock, MapPin, Video, User, CheckCircle, XCircle, AlertCircle, CalendarDays, Link2, ExternalLink, Star, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSessionManagement } from "@/hooks/useSessionManagement";
 import { RescheduleSessionModal } from "./RescheduleSessionModal";
 import { CancelSessionModal } from "./CancelSessionModal";
 import { useTranslation } from "@/hooks/useTranslation";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface Session {
   id: string;
@@ -22,6 +24,7 @@ interface Session {
   notes?: string;
   videoMeetingUrl?: string;
   rescheduledFrom?: string;
+  hasReview?: boolean;
 }
 
 interface SessionDetailModalProps {
@@ -36,6 +39,8 @@ export function SessionDetailModal({ open, onOpenChange, session, onRefresh }: S
   const [notes, setNotes] = useState(session?.notes || "");
   const [showReschedule, setShowReschedule] = useState(false);
   const [showCancel, setShowCancel] = useState(false);
+  const [sendingReviewRequest, setSendingReviewRequest] = useState(false);
+  const [reviewExists, setReviewExists] = useState(session?.hasReview ?? false);
   
   const {
     cancelSession,
@@ -51,7 +56,27 @@ export function SessionDetailModal({ open, onOpenChange, session, onRefresh }: S
     if (session?.notes) {
       setNotes(session.notes);
     }
-  }, [session?.notes]);
+    setReviewExists(session?.hasReview ?? false);
+  }, [session?.notes, session?.hasReview]);
+
+  // Check if review exists for this session
+  useEffect(() => {
+    const checkReview = async () => {
+      if (!session || session.status !== "completed") return;
+      
+      const { data } = await supabase
+        .from("reviews")
+        .select("id")
+        .eq("session_id", session.id)
+        .maybeSingle();
+      
+      setReviewExists(!!data);
+    };
+    
+    if (open && session) {
+      checkReview();
+    }
+  }, [open, session]);
 
   if (!session) return null;
 
@@ -98,13 +123,31 @@ export function SessionDetailModal({ open, onOpenChange, session, onRefresh }: S
     onRefresh?.();
   };
 
+  const handleRequestReview = async () => {
+    setSendingReviewRequest(true);
+    try {
+      const { error } = await supabase.functions.invoke("send-review-request", {
+        body: { sessionId: session.id },
+      });
+      
+      if (error) throw error;
+      
+      toast.success(t('sessionDetailModal.reviewRequestSent'));
+    } catch (err) {
+      toast.error(t('sessionDetailModal.reviewRequestFailed'));
+    } finally {
+      setSendingReviewRequest(false);
+    }
+  };
+
   const isLoading = 
     cancelSession.isPending || 
     rescheduleSession.isPending || 
     completeSession.isPending || 
     markNoShow.isPending ||
     saveNotes.isPending ||
-    createVideoMeeting.isPending;
+    createVideoMeeting.isPending ||
+    sendingReviewRequest;
 
   return (
     <>
@@ -207,7 +250,29 @@ export function SessionDetailModal({ open, onOpenChange, session, onRefresh }: S
                 </Button>
               </>
             )}
-            {session.status !== "scheduled" && (
+            {session.status === "completed" && (
+              <div className="flex flex-col sm:flex-row gap-2 w-full">
+                <Button 
+                  variant="outline" 
+                  onClick={handleRequestReview} 
+                  disabled={isLoading || reviewExists}
+                  className="w-full sm:w-auto gap-2"
+                >
+                  {sendingReviewRequest ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Star className="h-4 w-4" />
+                  )}
+                  {reviewExists 
+                    ? t('sessionDetailModal.reviewReceived') 
+                    : t('sessionDetailModal.requestReview')}
+                </Button>
+                <Button variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
+                  {t('sessionDetailModal.close')}
+                </Button>
+              </div>
+            )}
+            {session.status !== "scheduled" && session.status !== "completed" && (
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 {t('sessionDetailModal.close')}
               </Button>

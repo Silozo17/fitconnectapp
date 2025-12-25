@@ -234,10 +234,35 @@ export const useSessionManagement = () => {
 
       if (error) throw error;
       
-      // Send review request email to client
-      await supabase.functions.invoke("send-review-request", {
-        body: { sessionId },
-      }).catch((err) => console.error("Failed to send review request email:", err));
+      // Get session to find coach
+      const { data: session } = await supabase
+        .from("coaching_sessions")
+        .select("coach_id")
+        .eq("id", sessionId)
+        .single();
+
+      if (session) {
+        // Check coach's review request settings
+        const { data: coachSettings } = await supabase
+          .from("coach_profiles")
+          .select("review_request_mode, review_request_delay_hours, custom_review_message")
+          .eq("id", session.coach_id)
+          .single();
+
+        // Only send review request if mode is 'auto' (default behavior)
+        const reviewMode = coachSettings?.review_request_mode || "auto";
+        
+        if (reviewMode === "auto") {
+          // Send review request email to client
+          await supabase.functions.invoke("send-review-request", {
+            body: { 
+              sessionId,
+              customMessage: coachSettings?.custom_review_message || null,
+              delayHours: coachSettings?.review_request_delay_hours || 0,
+            },
+          }).catch((err) => console.error("Failed to send review request email:", err));
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["coaching-sessions"] });

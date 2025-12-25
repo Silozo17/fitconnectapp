@@ -685,5 +685,40 @@
     "processing": "Processing...",
     "noResults": "No results found",
     "searchPlaceholder": "Search..."
+  },
+
+  "reviewRequests": {
+    "title": "Review Requests",
+    "description": "Control when and how review requests are sent to clients after sessions",
+    "saved": "Review request settings saved",
+    "mode": {
+      "label": "When to send review requests",
+      "auto": "Automatic",
+      "autoDesc": "Send review requests automatically when you mark a session as complete",
+      "manual": "Manual",
+      "manualDesc": "Only send review requests when you click the 'Request Review' button"
+    },
+    "delay": {
+      "label": "Send review request",
+      "hint": "Choose when the review request email is sent after session completion",
+      "immediately": "Immediately",
+      "1hour": "After 1 hour",
+      "2hours": "After 2 hours",
+      "6hours": "After 6 hours",
+      "12hours": "After 12 hours",
+      "24hours": "After 24 hours",
+      "48hours": "After 48 hours"
+    },
+    "customMessage": {
+      "label": "Personal message (optional)",
+      "placeholder": "Add a personal touch to your review requests...",
+      "hint": "This message will be included in the review request email",
+      "variables": "Use {client_name} and {session_date} to personalize"
+    },
+    "preview": {
+      "show": "Preview message",
+      "hide": "Hide preview",
+      "title": "Preview:"
+    }
   }
 }

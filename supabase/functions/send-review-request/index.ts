@@ -15,6 +15,8 @@ const corsHeaders = {
 
 interface ReviewRequestEmailRequest {
   sessionId: string;
+  customMessage?: string | null;
+  delayHours?: number;
 }
 
 serve(async (req) => {
@@ -33,9 +35,16 @@ serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const { sessionId }: ReviewRequestEmailRequest = await req.json();
+    const { sessionId, customMessage, delayHours = 0 }: ReviewRequestEmailRequest = await req.json();
 
-    console.log(`Sending review request for session ${sessionId}`);
+    console.log(`Sending review request for session ${sessionId}, delay: ${delayHours}h`);
+
+    // If delay is specified, we'd ideally schedule this - for now just log it
+    // In production, you'd use a job queue or scheduled function
+    if (delayHours > 0) {
+      console.log(`Note: Review request should be delayed by ${delayHours} hours`);
+      // Future enhancement: store in a queue table and process with a scheduled function
+    }
 
     // Get session details
     const { data: session, error: sessionError } = await supabase
@@ -105,6 +114,14 @@ serve(async (req) => {
       month: 'long'
     });
 
+    // Process custom message with variable substitution
+    let personalizedMessage = "";
+    if (customMessage) {
+      personalizedMessage = customMessage
+        .replace(/{client_name}/g, clientName)
+        .replace(/{session_date}/g, formattedDate);
+    }
+
     const reviewUrl = `${siteUrl}/coaches/${session.coach.id}?review=true`;
 
     const emailContent = `
@@ -121,6 +138,17 @@ serve(async (req) => {
       </p>
       
       ${squircleAvatarComponent(avatarUrl, coachName, 80)}
+      
+      ${personalizedMessage ? `
+      <div style="background: rgba(255,255,255,0.03); border-left: 3px solid ${colors.primary}; padding: 16px 20px; margin: 24px 0; border-radius: 0 8px 8px 0;">
+        <p style="color: ${colors.text}; margin: 0; font-style: italic; line-height: 1.6;">
+          "${personalizedMessage}"
+        </p>
+        <p style="color: ${colors.textMuted}; margin: 8px 0 0 0; font-size: 13px;">
+          — ${coachName.split(' ')[0]}
+        </p>
+      </div>
+      ` : ''}
       
       <div style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 24px; margin: 24px 0; text-align: center;">
         <p style="color: ${colors.textMuted}; margin: 0 0 16px 0;">
