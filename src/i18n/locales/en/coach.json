@@ -1341,5 +1341,21 @@
       "approved": "Dispute approved",
       "rejected": "Dispute rejected"
     }
+  },
+  "packageCredits": {
+    "title": "Package Credits",
+    "remaining": "Remaining",
+    "noPackage": "No package credits available",
+    "useCredit": "Use 1 credit for this session",
+    "expires": "Expires",
+    "creditUsed": "Credit used",
+    "creditReturned": "Credit returned",
+    "history": "Credit History",
+    "active": "Active Package",
+    "lowCredits": "Low credits remaining",
+    "credits": "Credits",
+    "sessions": "Sessions",
+    "progress": "Progress",
+    "package": "Package"
   }
 }

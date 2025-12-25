@@ -14,6 +14,7 @@ import {
   FileText,
   Dumbbell,
   Loader2,
+  Package,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +31,7 @@ import { GoalProgressCard } from "@/components/dashboard/clients/GoalProgressCar
 import { NoteCard } from "@/components/dashboard/clients/NoteCard";
 import { SessionCalendar } from "@/components/dashboard/clients/SessionCalendar";
 import { HealthProfileCard } from "@/components/dashboard/clients/HealthProfileCard";
+import { PackageCreditsInfo } from "@/components/dashboard/clients/PackageCreditsInfo";
 import HabitManager from "@/components/dashboard/clients/HabitManager";
 import { FeatureGate } from "@/components/FeatureGate";
 import { 
@@ -40,6 +42,7 @@ import {
   useClientPlanAssignments,
   useCoachProfile
 } from "@/hooks/useCoachClients";
+import { useClientActivePackage } from "@/hooks/usePackages";
 import { format } from "date-fns";
 import { enGB, pl } from "date-fns/locale";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -63,6 +66,7 @@ const CoachClientDetail = () => {
   const { data: notes = [], isLoading: isLoadingNotes } = useClientNotes(id);
   const { data: progressData = [], isLoading: isLoadingProgress } = useClientProgress(id);
   const { data: planAssignments = [], isLoading: isLoadingPlans } = useClientPlanAssignments(id);
+  const { data: activePackage, isLoading: isLoadingPackage } = useClientActivePackage(id, coachProfile?.id);
 
   // Modal states
   const [isScheduleSessionOpen, setIsScheduleSessionOpen] = useState(false);
@@ -172,7 +176,7 @@ const CoachClientDetail = () => {
     }
   };
 
-  const isLoading = isLoadingClient || isLoadingSessions || isLoadingNotes || isLoadingProgress || isLoadingPlans;
+  const isLoading = isLoadingClient || isLoadingSessions || isLoadingNotes || isLoadingProgress || isLoadingPlans || isLoadingPackage;
 
   // Status translations
   const getStatusLabel = (status: string) => {
@@ -272,7 +276,7 @@ const CoachClientDetail = () => {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         <div className="card-elevated p-4">
           <div className="flex items-center gap-2 mb-2">
             <Calendar className="w-4 h-4 text-primary" />
@@ -286,6 +290,21 @@ const CoachClientDetail = () => {
             <span className="text-sm text-muted-foreground">{t('clientDetail.stats.upcoming')}</span>
           </div>
           <p className="text-2xl font-display font-bold text-foreground">{sessionStats.upcoming}</p>
+        </div>
+        <div className="card-elevated p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Package className="w-4 h-4 text-primary" />
+            <span className="text-sm text-muted-foreground">{t('packageCredits.credits')}</span>
+          </div>
+          <p className="text-2xl font-display font-bold text-foreground">
+            {activePackage ? (
+              <span className={(activePackage.sessions_total - (activePackage.sessions_used || 0)) <= 2 ? "text-warning" : ""}>
+                {activePackage.sessions_total - (activePackage.sessions_used || 0)}/{activePackage.sessions_total}
+              </span>
+            ) : (
+              <span className="text-muted-foreground text-lg">-</span>
+            )}
+          </p>
         </div>
         <div className="card-elevated p-4">
           <div className="flex items-center gap-2 mb-2">
@@ -304,6 +323,13 @@ const CoachClientDetail = () => {
           <p className="text-2xl font-display font-bold text-foreground">{notes.length}</p>
         </div>
       </div>
+
+      {/* Package Credits Card (if active) */}
+      {activePackage && (
+        <div className="mb-6">
+          <PackageCreditsInfo activePackage={activePackage} />
+        </div>
+      )}
 
       {/* Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">

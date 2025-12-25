@@ -1341,5 +1341,21 @@
       "approved": "Spór zatwierdzony",
       "rejected": "Spór odrzucony"
     }
+  },
+  "packageCredits": {
+    "title": "Kredyty pakietu",
+    "remaining": "Pozostało",
+    "noPackage": "Brak dostępnych kredytów pakietu",
+    "useCredit": "Użyj 1 kredytu na tę sesję",
+    "expires": "Wygasa",
+    "creditUsed": "Kredyt wykorzystany",
+    "creditReturned": "Kredyt zwrócony",
+    "history": "Historia kredytów",
+    "active": "Aktywny pakiet",
+    "lowCredits": "Niska liczba kredytów",
+    "credits": "Kredyty",
+    "sessions": "Sesje",
+    "progress": "Postęp",
+    "package": "Pakiet"
   }
 }
