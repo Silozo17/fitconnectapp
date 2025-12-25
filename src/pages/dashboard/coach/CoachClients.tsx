@@ -132,31 +132,38 @@ const CoachClients = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <div className="card-elevated p-4 overflow-hidden">
+        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-5 overflow-hidden">
           <div className="flex items-center gap-2 mb-2">
-            <Users className="w-4 h-4 text-primary shrink-0" />
-            <p className="text-sm text-muted-foreground truncate">{t("stats.totalClients")}</p>
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Users className="w-5 h-5 text-primary shrink-0" />
+            </div>
           </div>
           <p className="text-2xl font-display font-bold text-foreground truncate">{stats.total}</p>
+          <p className="text-sm text-muted-foreground truncate">{t("stats.totalClients")}</p>
         </div>
-        <div className="card-elevated p-4 overflow-hidden">
+        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-5 overflow-hidden">
           <div className="flex items-center gap-2 mb-2">
-            <UserCheck className="w-4 h-4 text-success shrink-0" />
-            <p className="text-sm text-muted-foreground truncate">{t("clients.active")}</p>
+            <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
+              <UserCheck className="w-5 h-5 text-success shrink-0" />
+            </div>
           </div>
           <p className="text-2xl font-display font-bold text-success truncate">{stats.active}</p>
+          <p className="text-sm text-muted-foreground truncate">{t("clients.active")}</p>
         </div>
-        <div className="card-elevated p-4 overflow-hidden">
+        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-5 overflow-hidden">
           <div className="flex items-center gap-2 mb-2">
-            <Clock className="w-4 h-4 text-warning shrink-0" />
-            <p className="text-sm text-muted-foreground truncate">{t("clients.pending")}</p>
+            <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center">
+              <Clock className="w-5 h-5 text-warning shrink-0" />
+            </div>
           </div>
           <p className="text-2xl font-display font-bold text-warning truncate">{stats.pending}</p>
+          <p className="text-sm text-muted-foreground truncate">{t("clients.pending")}</p>
         </div>
-        <div className="card-elevated p-4 overflow-hidden">
+        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-5 overflow-hidden">
           <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-4 h-4 text-accent shrink-0" />
-            <p className="text-sm text-muted-foreground truncate">{t("stats.thisMonth")}</p>
+            <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-accent shrink-0" />
+            </div>
           </div>
           <p className="text-2xl font-display font-bold text-accent truncate">
             {clients.filter(c => {
@@ -166,11 +173,12 @@ const CoachClients = () => {
               return startDate.getMonth() === now.getMonth() && startDate.getFullYear() === now.getFullYear();
             }).length}
           </p>
+          <p className="text-sm text-muted-foreground truncate">{t("stats.thisMonth")}</p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="card-elevated p-4 mb-6">
+      <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-4 mb-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -210,14 +218,14 @@ const CoachClients = () => {
 
       {/* Loading State */}
       {isLoading && (
-        <div className="card-elevated p-12 flex items-center justify-center">
+        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl p-12 flex items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       )}
 
       {/* Clients List */}
       {!isLoading && (
-        <div className="card-elevated overflow-hidden">
+        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-secondary/50">
@@ -230,12 +238,12 @@ const CoachClients = () => {
                   <th className="text-right p-4 text-sm font-medium text-muted-foreground">{t("clients.tableHeaders.actions")}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-border/50">
                 {filteredClients.map((client) => (
-                  <tr key={client.id} className="hover:bg-secondary/30 transition-colors">
+                  <tr key={client.id} className="hover:bg-muted/30 transition-colors">
                     <td className="p-4">
                       <Link to={`/dashboard/coach/clients/${client.client_id}`} className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
+                        <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
                           {getInitials(client)}
                         </div>
                         <div>
@@ -326,12 +334,14 @@ const CoachClients = () => {
           </div>
 
           {filteredClients.length === 0 && !isLoading && (
-            <div className="p-12 text-center">
-              <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <div className="p-16 text-center">
+              <div className="w-16 h-16 rounded-3xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                <Users className="w-8 h-8 text-muted-foreground" />
+              </div>
               <p className="text-muted-foreground mb-4">
                 {clients.length === 0 ? t("clients.noClients") : t("clients.noClientsMatch")}
               </p>
-              <Button onClick={() => setIsAddClientOpen(true)} variant="outline">
+              <Button onClick={() => setIsAddClientOpen(true)} variant="outline" className="rounded-xl">
                 <Plus className="w-4 h-4 mr-2" />
                 {t("clients.addFirstClient")}
               </Button>

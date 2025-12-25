@@ -74,10 +74,10 @@ const CoachOverview = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div className="card-elevated p-6 hover-lift">
+        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl p-6 hover:shadow-float transition-all">
           <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Users className="w-6 h-6 text-primary" />
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+              <Users className="w-7 h-7 text-primary" />
             </div>
             {!isLoading && (stats?.activeClients || 0) > 0 && (
               <span className="text-xs text-success flex items-center gap-1">
@@ -86,37 +86,37 @@ const CoachOverview = () => {
             )}
           </div>
           {isLoading ? (
-            <Skeleton className="h-9 w-16 mb-1" />
+            <Skeleton className="h-9 w-16 mb-1 rounded-xl" />
           ) : (
             <p className="text-3xl font-display font-bold text-foreground">{stats?.activeClients || 0}</p>
           )}
           <p className="text-sm text-muted-foreground">{t("stats.activeClients")}</p>
         </div>
 
-        <div className="card-elevated p-6 hover-lift">
+        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl p-6 hover:shadow-float transition-all">
           <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
-              <Calendar className="w-6 h-6 text-accent" />
+            <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center">
+              <Calendar className="w-7 h-7 text-accent" />
             </div>
             <span className="text-xs text-muted-foreground flex items-center gap-1">
               <Clock className="w-3 h-3" /> {t("stats.thisWeek")}
             </span>
           </div>
           {isLoading ? (
-            <Skeleton className="h-9 w-16 mb-1" />
+            <Skeleton className="h-9 w-16 mb-1 rounded-xl" />
           ) : (
             <p className="text-3xl font-display font-bold text-foreground">{stats?.sessionsThisWeek || 0}</p>
           )}
           <p className="text-sm text-muted-foreground">{t("stats.sessionsScheduled")}</p>
         </div>
 
-        <div className="card-elevated p-6 hover-lift">
+        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl p-6 hover:shadow-float transition-all">
           <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center">
-              <MessageSquare className="w-6 h-6 text-warning" />
+            <div className="w-14 h-14 rounded-2xl bg-warning/10 flex items-center justify-center">
+              <MessageSquare className="w-7 h-7 text-warning" />
             </div>
             {unreadMessages > 0 && (
-              <span className="w-5 h-5 rounded-full bg-accent text-accent-foreground text-xs flex items-center justify-center font-bold">
+              <span className="w-6 h-6 rounded-full bg-accent text-accent-foreground text-xs flex items-center justify-center font-bold">
                 {unreadMessages}
               </span>
             )}
@@ -125,10 +125,10 @@ const CoachOverview = () => {
           <p className="text-sm text-muted-foreground">{t("stats.unreadMessages")}</p>
         </div>
 
-        <div className="card-elevated p-6 hover-lift">
+        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl p-6 hover:shadow-float transition-all">
           <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
-              <Star className="w-6 h-6 text-success" />
+            <div className="w-14 h-14 rounded-2xl bg-success/10 flex items-center justify-center">
+              <Star className="w-7 h-7 text-success" />
             </div>
             {!isLoading && (stats?.totalReviews || 0) > 0 && (
               <span className="text-xs text-muted-foreground">
@@ -137,7 +137,7 @@ const CoachOverview = () => {
             )}
           </div>
           {isLoading ? (
-            <Skeleton className="h-9 w-16 mb-1" />
+            <Skeleton className="h-9 w-16 mb-1 rounded-xl" />
           ) : (
             <p className="text-3xl font-display font-bold text-foreground">
               {(stats?.averageRating || 0) > 0 ? stats?.averageRating.toFixed(1) : "—"}
@@ -151,27 +151,35 @@ const CoachOverview = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <Button 
           variant="outline" 
-          className="h-auto py-4 flex flex-col gap-2 border-dashed"
+          className="h-auto py-5 flex flex-col gap-2 border-dashed rounded-2xl hover:bg-card hover:border-primary/50 transition-all"
           onClick={() => setAddClientOpen(true)}
         >
-          <Plus className="w-5 h-5" />
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <Plus className="w-5 h-5 text-primary" />
+          </div>
           <span className="text-sm">{t("quickActions.addClient")}</span>
         </Button>
         <Link to="/dashboard/coach/schedule">
-          <Button variant="outline" className="w-full h-auto py-4 flex flex-col gap-2 border-dashed">
-            <Calendar className="w-5 h-5" />
+          <Button variant="outline" className="w-full h-auto py-5 flex flex-col gap-2 border-dashed rounded-2xl hover:bg-card hover:border-primary/50 transition-all">
+            <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+              <Calendar className="w-5 h-5 text-accent" />
+            </div>
             <span className="text-sm">{t("quickActions.setAvailability")}</span>
           </Button>
         </Link>
         <Link to="/dashboard/coach/plans">
-          <Button variant="outline" className="w-full h-auto py-4 flex flex-col gap-2 border-dashed">
-            <Plus className="w-5 h-5" />
+          <Button variant="outline" className="w-full h-auto py-5 flex flex-col gap-2 border-dashed rounded-2xl hover:bg-card hover:border-primary/50 transition-all">
+            <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
+              <Plus className="w-5 h-5 text-success" />
+            </div>
             <span className="text-sm">{t("quickActions.createPlan")}</span>
           </Button>
         </Link>
         <Link to="/dashboard/coach/messages">
-          <Button variant="outline" className="w-full h-auto py-4 flex flex-col gap-2 border-dashed">
-            <MessageSquare className="w-5 h-5" />
+          <Button variant="outline" className="w-full h-auto py-5 flex flex-col gap-2 border-dashed rounded-2xl hover:bg-card hover:border-primary/50 transition-all">
+            <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center">
+              <MessageSquare className="w-5 h-5 text-warning" />
+            </div>
             <span className="text-sm">{t("quickActions.sendMessage")}</span>
           </Button>
         </Link>
@@ -188,30 +196,30 @@ const CoachOverview = () => {
       {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Upcoming Sessions */}
-        <div className="card-elevated">
-          <div className="p-4 border-b border-border flex items-center justify-between">
+        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl overflow-hidden">
+          <div className="p-5 border-b border-border/50 flex items-center justify-between">
             <h2 className="font-display font-bold text-foreground">{t("clients.upcomingSessions")}</h2>
             <Link to="/dashboard/coach/schedule">
-              <Button variant="ghost" size="sm" className="text-primary">
+              <Button variant="ghost" size="sm" className="text-primary rounded-xl">
                 {t("common:viewAll")} <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </Link>
           </div>
-          <div className="divide-y divide-border">
+          <div className="divide-y divide-border/50">
             {isLoading ? (
               Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="p-4 flex items-center gap-4">
-                  <Skeleton className="w-10 h-10 rounded-full" />
+                  <Skeleton className="w-12 h-12 rounded-xl" />
                   <div className="flex-1">
-                    <Skeleton className="h-4 w-32 mb-2" />
-                    <Skeleton className="h-3 w-24" />
+                    <Skeleton className="h-4 w-32 mb-2 rounded-lg" />
+                    <Skeleton className="h-3 w-24 rounded-lg" />
                   </div>
                 </div>
               ))
             ) : (
               upcomingSessions.map((session) => (
-                <div key={session.id} className="p-4 flex items-center gap-4 hover:bg-secondary/50 transition-colors">
-                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
+                <div key={session.id} className="p-4 flex items-center gap-4 hover:bg-muted/30 transition-colors">
+                  <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
                     {session.avatar}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -226,19 +234,21 @@ const CoachOverview = () => {
             )}
           </div>
           {!isLoading && upcomingSessions.length === 0 && (
-            <div className="p-8 text-center">
-              <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <div className="p-12 text-center">
+              <div className="w-16 h-16 rounded-3xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                <Calendar className="w-8 h-8 text-muted-foreground" />
+              </div>
               <p className="text-muted-foreground">{t("dashboard.noUpcomingSessions")}</p>
             </div>
           )}
         </div>
 
         {/* Reviews Summary */}
-        <div className="card-elevated">
-          <div className="p-4 border-b border-border flex items-center justify-between">
+        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl overflow-hidden">
+          <div className="p-5 border-b border-border/50 flex items-center justify-between">
             <h2 className="font-display font-bold text-foreground">{t("dashboard.yourReviews")}</h2>
             <Link to="/dashboard/coach/reviews">
-              <Button variant="ghost" size="sm" className="text-primary">
+              <Button variant="ghost" size="sm" className="text-primary rounded-xl">
                 {t("common:viewAll")} <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </Link>
@@ -248,7 +258,7 @@ const CoachOverview = () => {
               <div className="flex items-center gap-2">
                 <Star className="w-8 h-8 text-warning fill-warning" />
                 {isLoading ? (
-                  <Skeleton className="h-10 w-12" />
+                  <Skeleton className="h-10 w-12 rounded-xl" />
                 ) : (
                   <span className="text-4xl font-bold text-foreground">
                     {(stats?.averageRating || 0) > 0 ? stats?.averageRating.toFixed(1) : "—"}
@@ -257,7 +267,7 @@ const CoachOverview = () => {
               </div>
               <div className="text-muted-foreground">
                 {isLoading ? (
-                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-24 rounded-lg" />
                 ) : (
                   <p className="text-sm">{stats?.totalReviews || 0} {t("dashboard.totalReviews")}</p>
                 )}
