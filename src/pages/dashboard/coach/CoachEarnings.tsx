@@ -55,7 +55,7 @@ const CoachEarnings = () => {
   const maxRevenue = Math.max(...monthlyData.map(d => d.netRevenue), 100);
 
   const handleConnectStripe = () => {
-    navigate("/dashboard/coach/settings");
+    navigate("/dashboard/coach/settings?tab=subscription");
   };
 
   const handleManageStripe = () => {
