@@ -59,7 +59,17 @@ const CoachOverview = () => {
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="font-display text-3xl font-bold text-foreground mb-2">
-            {t("dashboard.welcomeBack")}{stats?.displayName ? `, ${stats.displayName}` : ""}!
+            {(() => {
+              const hour = new Date().getHours();
+              const greeting = hour < 12 ? t("dashboard.greeting.morning", "Good morning") 
+                : hour < 18 ? t("dashboard.greeting.afternoon", "Good afternoon") 
+                : t("dashboard.greeting.evening", "Good evening");
+              return stats?.displayName ? (
+                <>{greeting}, <span className="text-primary">{stats.displayName}</span></>
+              ) : (
+                <>{greeting}!</>
+              );
+            })()}
           </h1>
           <p className="text-muted-foreground">{t("dashboard.whatsHappening")}</p>
         </div>

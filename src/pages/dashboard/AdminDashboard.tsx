@@ -5,6 +5,7 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Settings2, Loader2, Move, Check } from "lucide-react";
 import { useAdminWidgets, useDashboardStats, useReorderWidgets, WIDGET_TYPES, DashboardWidget } from "@/hooks/useAdminWidgets";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { StatWidget } from "@/components/admin/widgets/StatWidget";
 import { ActivityWidget } from "@/components/admin/widgets/ActivityWidget";
 import { QuickActionsWidget } from "@/components/admin/widgets/QuickActionsWidget";
@@ -41,6 +42,7 @@ const AdminDashboard = () => {
   const [editMode, setEditMode] = useState(false);
   const { data: widgets, isLoading: widgetsLoading } = useAdminWidgets();
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
+  const { displayName } = useUserProfile();
   const reorderWidgets = useReorderWidgets();
 
   const isLoading = widgetsLoading || statsLoading;
@@ -173,7 +175,19 @@ const AdminDashboard = () => {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{t('admin.overview.title')}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground font-display">
+                {(() => {
+                  const hour = new Date().getHours();
+                  const greeting = hour < 12 ? t("admin.greeting.morning", "Good morning") 
+                    : hour < 18 ? t("admin.greeting.afternoon", "Good afternoon") 
+                    : t("admin.greeting.evening", "Good evening");
+                  return displayName ? (
+                    <>{greeting}, <span className="text-primary">{displayName}</span></>
+                  ) : (
+                    <>{greeting}!</>
+                  );
+                })()}
+              </h1>
               <p className="text-muted-foreground mt-1">{t('admin.overview.description')}</p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
