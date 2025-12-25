@@ -24,11 +24,16 @@ export const useMyCoaches = () => {
       if (!user) return [];
 
       // Get client profile first
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from("client_profiles")
         .select("id")
         .eq("user_id", user.id)
         .maybeSingle();
+
+      if (profileError) {
+        console.error("Error fetching client profile:", profileError);
+        throw profileError;
+      }
 
       if (!profile) return [];
 
@@ -50,10 +55,15 @@ export const useMyCoaches = () => {
         .eq("client_id", profile.id)
         .eq("status", "active");
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching coach connections:", error);
+        throw error;
+      }
+      
       return (data as unknown as CoachConnection[]) || [];
     },
     enabled: !!user,
     staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 2,
   });
 };
