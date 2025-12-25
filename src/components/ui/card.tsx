@@ -10,7 +10,10 @@ const cardVariants = cva(
         default: "bg-card border border-border shadow-elevation-1",
         elevated: "bg-card border border-border/50 shadow-elevation-3 hover:shadow-elevation-4 hover:-translate-y-1",
         floating: "bg-card border border-border/30 shadow-float-md hover:shadow-float-lg hover:-translate-y-1",
-        glass: "glass-premium",
+        glass: "glass-card",
+        "glass-elevated": "glass-card-elevated",
+        "glass-interactive": "glass-interactive cursor-pointer",
+        "glass-subtle": "glass-subtle",
         ghost: "bg-transparent border-none shadow-none",
       },
     },
@@ -22,15 +25,32 @@ const cardVariants = cva(
 
 export interface CardProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof cardVariants> {}
+    VariantProps<typeof cardVariants> {
+  /** Adds a subtle gradient overlay */
+  withGradient?: boolean;
+  /** Adds primary glow effect on hover */
+  withGlow?: boolean;
+}
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant, ...props }, ref) => (
+  ({ className, variant, withGradient, withGlow, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn(cardVariants({ variant, className }))}
+      className={cn(
+        cardVariants({ variant, className }),
+        withGradient && "relative overflow-hidden",
+        withGlow && "hover:shadow-interactive-hover"
+      )}
       {...props}
-    />
+    >
+      {withGradient && (
+        <div 
+          className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" 
+          aria-hidden="true"
+        />
+      )}
+      {props.children}
+    </div>
   )
 );
 Card.displayName = "Card";

@@ -19,7 +19,9 @@ const buttonVariants = cva(
         lime: "bg-primary text-primary-foreground shadow-elevation-2 hover:shadow-glow hover:scale-[1.02]",
         "lime-outline": "border-2 border-primary text-primary bg-transparent hover:bg-primary/10 hover:shadow-glow-sm",
         floating: "bg-card text-foreground border border-border/50 shadow-float-sm hover:shadow-float-md hover:-translate-y-0.5",
-        glass: "glass-premium text-foreground hover:bg-card/80",
+        glass: "glass-interactive text-foreground",
+        "glass-elevated": "glass-card-elevated text-foreground hover:shadow-glass-lg",
+        "glass-glow": "glass-interactive text-foreground hover:shadow-glow-sm hover:border-primary/30",
       },
       size: {
         default: "h-11 px-5 py-2",
