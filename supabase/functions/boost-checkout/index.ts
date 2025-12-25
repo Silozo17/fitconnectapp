@@ -67,21 +67,28 @@ serve(async (req) => {
     // Check for existing active boost
     const { data: existingBoost } = await supabase
       .from("coach_boosts")
-      .select("id, boost_end_date, payment_status")
+      .select("id, boost_end_date, payment_status, updated_at")
       .eq("coach_id", coachProfile.id)
       .maybeSingle();
 
     // Check if boost is still active (end date in the future)
     if (existingBoost?.boost_end_date) {
       const endDate = new Date(existingBoost.boost_end_date);
-      if (endDate > new Date()) {
+      if (endDate > new Date() && (existingBoost.payment_status === "succeeded" || existingBoost.payment_status === "migrated_free")) {
         throw new Error("You already have an active Boost. It expires on " + endDate.toLocaleDateString());
       }
     }
 
-    // Check if there's a pending payment
+    // Check if there's a pending payment - only block if updated in last 30 minutes
     if (existingBoost?.payment_status === "pending") {
-      throw new Error("You have a pending Boost payment. Please complete or cancel it first.");
+      const updatedAt = new Date(existingBoost.updated_at || existingBoost.id);
+      const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+      
+      if (updatedAt > thirtyMinutesAgo) {
+        throw new Error("You have a pending Boost payment. Please complete or cancel it first.");
+      }
+      // Stale pending payment (>30 min old) - allow retry
+      logStep("Stale pending payment found, allowing retry", { updatedAt: updatedAt.toISOString() });
     }
 
     logStep("No active boost found, proceeding with checkout");
