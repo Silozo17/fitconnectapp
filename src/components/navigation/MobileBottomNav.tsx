@@ -76,63 +76,83 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
   // This ensures nav is visible before JS hydrates in PWA/Despia
   return (
     <>
+      {/* Floating Bottom Navigation - Premium Design */}
       <nav
         className={cn(
-          "fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border",
-          "md:hidden" // CSS-based hiding on desktop (≥768px)
+          "fixed bottom-0 left-0 right-0 z-50",
+          "md:hidden", // CSS-based hiding on desktop (≥768px)
+          "px-4 pb-2"
         )}
         style={{ 
-          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom, 0px))',
           // JS fallback for edge cases where CSS hasn't applied yet
           display: isMobile === false ? 'none' : undefined
         }}
         role="navigation"
         aria-label={t("bottomNav.mobileNavigation")}
       >
-        <div className="flex items-center justify-around h-24 px-4">
-          {navItems.map((item) => {
-            const active = isActive(item.route);
-            const Icon = item.icon;
-            const isDisabledOnPlatform = shouldHideMarketplace && item.disabledOnIOS;
+        {/* Floating pill container */}
+        <div className="glass-floating mx-auto max-w-md px-2 py-3">
+          <div className="flex items-center justify-around">
+            {navItems.map((item) => {
+              const active = isActive(item.route);
+              const Icon = item.icon;
+              const isDisabledOnPlatform = shouldHideMarketplace && item.disabledOnIOS;
 
-            if (isDisabledOnPlatform) {
+              if (isDisabledOnPlatform) {
+                return (
+                  <button
+                    key={item.route}
+                    onClick={() => handleRestrictedItemClick(item)}
+                    className="flex flex-col items-center justify-center w-14 h-12 opacity-40 cursor-pointer hover:opacity-60 transition-all duration-200"
+                    aria-label={`${t(item.labelKey)} (Web Only)`}
+                  >
+                    <Icon className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
+                    <span className="text-[9px] text-muted-foreground mt-0.5">Web</span>
+                  </button>
+                );
+              }
+
               return (
                 <button
                   key={item.route}
-                  onClick={() => handleRestrictedItemClick(item)}
-                  className="flex flex-col items-center justify-center w-14 h-14 opacity-50 cursor-pointer hover:opacity-70 transition-opacity"
-                  aria-label={`${t(item.labelKey)} (Web Only)`}
+                  onClick={() => navigate(item.route)}
+                  className={cn(
+                    "relative flex flex-col items-center justify-center w-14 h-12 rounded-2xl transition-all duration-300",
+                    "touch-manipulation will-change-transform",
+                    active
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                  aria-current={active ? "page" : undefined}
+                  aria-label={t(item.labelKey)}
                 >
-                  <Icon className="h-5 w-5 text-muted-foreground" strokeWidth={2} />
-                  <span className="text-[9px] text-muted-foreground mt-0.5">Web</span>
+                  {/* Active indicator - glowing dot */}
+                  {active && (
+                    <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary shadow-glow-sm" />
+                  )}
+                  
+                  <Icon
+                    className={cn(
+                      "h-5 w-5 transition-all duration-300",
+                      active && "scale-110"
+                    )}
+                    strokeWidth={active ? 2.5 : 1.5}
+                  />
+                  
+                  {/* Label - only show on active */}
+                  <span 
+                    className={cn(
+                      "text-[10px] font-medium mt-0.5 transition-all duration-200",
+                      active ? "opacity-100" : "opacity-0 h-0"
+                    )}
+                  >
+                    {t(item.labelKey)}
+                  </span>
                 </button>
               );
-            }
-
-            return (
-              <button
-                key={item.route}
-                onClick={() => navigate(item.route)}
-                className={cn(
-                  "flex items-center justify-center w-14 h-14 rounded-2xl transition-all duration-200",
-                  "touch-manipulation will-change-transform",
-                  active
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                )}
-                aria-current={active ? "page" : undefined}
-                aria-label={t(item.labelKey)}
-              >
-                <Icon
-                  className={cn(
-                    "h-6 w-6 transition-transform duration-200",
-                    active && "scale-110"
-                  )}
-                  strokeWidth={active ? 2.5 : 2}
-                />
-              </button>
-            );
-          })}
+            })}
+          </div>
         </div>
       </nav>
 
