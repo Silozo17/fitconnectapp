@@ -1,6 +1,8 @@
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/hooks/useTranslation';
+import { CalorieCircle } from '@/components/stats/CalorieCircle';
+import { ProgressCircle } from '@/components/stats/ProgressCircle';
 
 interface MacroTrackerProps {
   calories: number;
@@ -12,6 +14,7 @@ interface MacroTrackerProps {
   targetCarbs?: number;
   targetFat?: number;
   compact?: boolean;
+  displayMode?: 'linear' | 'circular';
 }
 
 export const MacroTracker = ({
@@ -24,6 +27,7 @@ export const MacroTracker = ({
   targetCarbs = 200,
   targetFat = 65,
   compact = false,
+  displayMode = 'linear',
 }: MacroTrackerProps) => {
   const { t } = useTranslation('coach');
   const caloriePercent = Math.min((calories / targetCalories) * 100, 100);
@@ -54,6 +58,62 @@ export const MacroTracker = ({
     );
   }
 
+  // Circular display mode
+  if (displayMode === 'circular') {
+    return (
+      <div className="bg-card border border-border rounded-xl p-4">
+        <h3 className="text-lg font-semibold text-foreground mb-4">
+          {t('nutritionBuilder.dailyMacros')}
+        </h3>
+        
+        {/* Main calorie circle */}
+        <div className="flex justify-center mb-6">
+          <CalorieCircle 
+            current={calories} 
+            target={targetCalories} 
+            size="lg"
+            variant="default"
+          />
+        </div>
+        
+        {/* Macro circles grid */}
+        <div className="grid grid-cols-3 gap-4">
+          <ProgressCircle
+            value={protein}
+            maxValue={targetProtein}
+            size="sm"
+            color="hsl(0, 84%, 60%)"
+            showPercentage={false}
+            title={t('nutritionBuilder.protein')}
+            subtitle={`${Math.round(protein)}g / ${targetProtein}g`}
+            variant="compact"
+          />
+          <ProgressCircle
+            value={carbs}
+            maxValue={targetCarbs}
+            size="sm"
+            color="hsl(48, 96%, 53%)"
+            showPercentage={false}
+            title={t('nutritionBuilder.carbs')}
+            subtitle={`${Math.round(carbs)}g / ${targetCarbs}g`}
+            variant="compact"
+          />
+          <ProgressCircle
+            value={fat}
+            maxValue={targetFat}
+            size="sm"
+            color="hsl(217, 91%, 60%)"
+            showPercentage={false}
+            title={t('nutritionBuilder.fat')}
+            subtitle={`${Math.round(fat)}g / ${targetFat}g`}
+            variant="compact"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Linear display mode (default)
   return (
     <div className="bg-card border border-border rounded-xl p-4">
       <h3 className="text-lg font-semibold text-foreground mb-4">

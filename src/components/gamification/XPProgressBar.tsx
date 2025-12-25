@@ -2,12 +2,14 @@ import { useTranslation } from 'react-i18next';
 import { Progress } from '@/components/ui/progress';
 import { useClientXP, getLevelTitle, calculateLevelFromXP } from '@/hooks/useGamification';
 import { Zap } from 'lucide-react';
+import { ProgressCircle } from '@/components/stats/ProgressCircle';
 
 interface XPProgressBarProps {
   compact?: boolean;
+  variant?: 'linear' | 'circular';
 }
 
-export function XPProgressBar({ compact = false }: XPProgressBarProps) {
+export function XPProgressBar({ compact = false, variant = 'linear' }: XPProgressBarProps) {
   const { t } = useTranslation('gamification');
   const { data: clientXP, isLoading } = useClientXP();
   
@@ -33,7 +35,42 @@ export function XPProgressBar({ compact = false }: XPProgressBarProps) {
       </div>
     );
   }
+
+  // Circular variant
+  if (variant === 'circular') {
+    return (
+      <div className="bg-card border border-border rounded-xl p-4">
+        <div className="flex items-center gap-4">
+          <ProgressCircle
+            value={xpInLevel}
+            maxValue={xpForNextLevel}
+            size="lg"
+            color="primary"
+            showPercentage={false}
+            showCompletedIcon={false}
+          >
+            <div className="flex flex-col items-center justify-center">
+              <Zap className="h-6 w-6 text-primary mb-1" />
+              <span className="text-2xl font-bold text-foreground font-display">
+                {level}
+              </span>
+              <span className="text-[10px] text-muted-foreground">LEVEL</span>
+            </div>
+          </ProgressCircle>
+          
+          <div className="flex-1">
+            <div className="font-bold text-foreground text-lg">{title}</div>
+            <div className="text-2xl font-bold text-primary">{totalXP.toLocaleString()} XP</div>
+            <div className="text-xs text-muted-foreground mt-1">
+              {xpInLevel.toLocaleString()} / {xpForNextLevel.toLocaleString()} to Level {level + 1}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   
+  // Linear variant (default)
   return (
     <div className="bg-card border border-border rounded-xl p-4">
       <div className="flex items-center justify-between mb-2">
