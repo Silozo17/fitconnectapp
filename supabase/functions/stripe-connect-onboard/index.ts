@@ -21,30 +21,54 @@ serve(async (req) => {
       apiVersion: "2023-10-16",
     });
 
-    const { coachId, userId, returnUrl } = await req.json();
+    const { coachId, userId, returnUrl, existingAccountId } = await req.json();
 
     if (!coachId || !userId || !returnUrl) {
       throw new Error("Missing required parameters");
     }
 
-    console.log("Creating Stripe Connect account for coach:", coachId);
+    console.log("Stripe Connect onboard request for coach:", coachId);
 
-    // Create a Stripe Connect account
-    const account = await stripe.accounts.create({
-      type: "express",
-      metadata: {
-        coach_id: coachId,
-        user_id: userId,
-      },
-    });
+    let accountId = existingAccountId;
 
-    console.log("Stripe Connect account created:", account.id);
+    // If we have an existing account ID, just create a new account link
+    // This is much faster than creating a new account
+    if (existingAccountId) {
+      console.log("Using existing Stripe Connect account:", existingAccountId);
+      
+      try {
+        // Verify the account exists
+        const existingAccount = await stripe.accounts.retrieve(existingAccountId);
+        if (existingAccount) {
+          accountId = existingAccountId;
+          console.log("Verified existing account, creating new link");
+        }
+      } catch (accountError) {
+        // Account doesn't exist or is invalid, create a new one
+        console.log("Existing account not found, creating new account");
+        accountId = null;
+      }
+    }
+
+    // Create a new account if we don't have a valid one
+    if (!accountId) {
+      console.log("Creating new Stripe Connect account for coach:", coachId);
+      const account = await stripe.accounts.create({
+        type: "express",
+        metadata: {
+          coach_id: coachId,
+          user_id: userId,
+        },
+      });
+      accountId = account.id;
+      console.log("Stripe Connect account created:", accountId);
+    }
 
     // Create an account link for onboarding
     const accountLink = await stripe.accountLinks.create({
-      account: account.id,
+      account: accountId,
       refresh_url: `${returnUrl}?refresh=true`,
-      return_url: `${returnUrl}?success=true&account_id=${account.id}`,
+      return_url: `${returnUrl}?success=true&account_id=${accountId}`,
       type: "account_onboarding",
     });
 
@@ -52,7 +76,7 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({
-        accountId: account.id,
+        accountId: accountId,
         onboardingUrl: accountLink.url,
       }),
       {

@@ -189,11 +189,19 @@ const CoachSettings = () => {
   const documentTypes = getDocumentTypeConfig(t);
   const statusConfig = getStatusConfig(t);
   
-  // Read tab from URL params for deep linking (e.g., ?tab=verification)
+  // Read tab from URL params for deep linking (e.g., ?tab=verification or ?tab=subscription)
   const urlTab = searchParams.get("tab");
-  const validTabs = ["profile", "notifications", "preferences", "subscription", "invoice", "integrations", "verification", "security"];
+  const validTabs = ["profile", "notifications", "preferences", "subscription", "invoice", "integrations", "verification", "security", "marketplace", "services", "account"];
   const initialTab = urlTab && validTabs.includes(urlTab) ? urlTab : "profile";
   const [selectedTab, setSelectedTab] = useState(initialTab);
+
+  // Sync selectedTab with URL params when they change (for navigation from other pages)
+  useEffect(() => {
+    const tabFromUrl = searchParams.get("tab");
+    if (tabFromUrl && validTabs.includes(tabFromUrl) && tabFromUrl !== selectedTab) {
+      setSelectedTab(tabFromUrl);
+    }
+  }, [searchParams]);
   const [saving, setSaving] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [checkingUsername, setCheckingUsername] = useState(false);
