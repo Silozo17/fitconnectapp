@@ -40,7 +40,7 @@ export function ClientCard({ client, onMessage, onSchedule }: ClientCardProps) {
   const { t } = useTranslation("coach");
 
   return (
-    <Card className="bg-card border-border hover:border-primary/50 transition-colors">
+    <Card variant="glass" className="hover:border-primary/30 transition-all duration-300" withInnerHighlight>
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">

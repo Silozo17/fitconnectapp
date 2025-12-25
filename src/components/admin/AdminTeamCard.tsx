@@ -48,8 +48,8 @@ export const AdminTeamCard = ({
 
   return (
     <div
-      className={`flex items-center gap-2 p-3 rounded-lg border bg-card cursor-pointer hover:bg-muted/50 transition-colors ${
-        selected ? "border-primary ring-1 ring-primary" : ""
+      className={`flex items-center gap-2 p-3 rounded-xl glass-subtle cursor-pointer hover:bg-muted/30 transition-all duration-200 ${
+        selected ? "border-primary ring-1 ring-primary" : "border border-border/30"
       }`}
       onClick={onClick}
     >

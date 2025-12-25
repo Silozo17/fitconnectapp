@@ -14,6 +14,7 @@ const cardVariants = cva(
         "glass-elevated": "glass-card-elevated",
         "glass-interactive": "glass-interactive cursor-pointer",
         "glass-subtle": "glass-subtle",
+        "glass-premium": "glass-premium",
         ghost: "bg-transparent border-none shadow-none",
       },
     },
@@ -30,22 +31,34 @@ export interface CardProps
   withGradient?: boolean;
   /** Adds primary glow effect on hover */
   withGlow?: boolean;
+  /** Adds inner highlight border for premium feel */
+  withInnerHighlight?: boolean;
 }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant, withGradient, withGlow, ...props }, ref) => (
+  ({ className, variant, withGradient, withGlow, withInnerHighlight, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
         cardVariants({ variant, className }),
         withGradient && "relative overflow-hidden",
-        withGlow && "hover:shadow-interactive-hover"
+        withGlow && "hover:shadow-interactive-hover",
+        withInnerHighlight && "relative"
       )}
       {...props}
     >
       {withGradient && (
         <div 
           className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" 
+          aria-hidden="true"
+        />
+      )}
+      {withInnerHighlight && (
+        <div 
+          className="absolute inset-0 rounded-[inherit] pointer-events-none"
+          style={{
+            boxShadow: "inset 0 1px 0 hsl(0 0% 100% / 0.08), inset 0 -1px 0 hsl(0 0% 0% / 0.1)"
+          }}
           aria-hidden="true"
         />
       )}

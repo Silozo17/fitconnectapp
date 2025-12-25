@@ -84,7 +84,7 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
     : null;
 
   return (
-    <div className={`group card-glow rounded-2xl overflow-hidden hover-lift relative ${coach.is_sponsored ? "ring-2 ring-primary/50" : ""}`}>
+    <div className={`group glass-card-elevated rounded-2xl overflow-hidden hover-lift relative ${coach.is_sponsored ? "ring-2 ring-primary/50" : ""}`}>
       <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
         {coach.is_sponsored && (
           <Badge className="bg-primary/90 text-primary-foreground border-0 backdrop-blur-sm">
