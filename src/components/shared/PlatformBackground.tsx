@@ -45,15 +45,11 @@ export const PlatformBackground = React.memo(function PlatformBackground({
         />
       )}
       
-      {/* Gradient overlay for depth and readability */}
+      {/* Subtle depth overlay - no colored tints */}
       <div 
         className="absolute inset-0"
         style={{
-          background: `
-            radial-gradient(ellipse at 20% 20%, hsl(var(--primary) / 0.15) 0%, transparent 50%),
-            radial-gradient(ellipse at 80% 80%, hsl(var(--primary) / 0.1) 0%, transparent 50%),
-            radial-gradient(ellipse at 50% 50%, hsl(var(--background)) 0%, transparent 100%)
-          `,
+          background: `radial-gradient(ellipse at 50% 50%, transparent 0%, hsl(var(--background) / 0.3) 100%)`,
         }}
       />
       
