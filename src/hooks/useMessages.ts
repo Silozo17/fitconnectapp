@@ -551,6 +551,7 @@ export const useMessages = (participantId?: string) => {
     }
 
     const channelName = `messages-${currentProfileId}`;
+    console.log("[useMessages] Setting up realtime subscription for:", channelName);
     
     const channel = supabase
       .channel(channelName)
@@ -562,6 +563,8 @@ export const useMessages = (participantId?: string) => {
           table: "messages",
         },
         (payload) => {
+          console.log("[useMessages] Realtime event received:", payload.eventType, payload.new);
+          
           if (payload.eventType === "INSERT") {
             const newMessage = payload.new as Message;
             
@@ -570,6 +573,7 @@ export const useMessages = (participantId?: string) => {
             const isSent = newMessage.sender_id === currentProfileId;
             
             if (!isReceived && !isSent) {
+              console.log("[useMessages] Message not for this user, ignoring");
               return;
             }
             
