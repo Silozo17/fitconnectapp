@@ -174,7 +174,7 @@ const CoachPipeline = () => {
     const avatarRarity = lead.client_profile?.avatar?.rarity as Rarity | undefined;
     
     return (
-      <Card key={lead.id} className={`mb-3 border-l-4 ${stage.borderColor} hover:shadow-md transition-shadow bg-card`}>
+      <Card key={lead.id} variant="glass" className={`glass-card mb-3 border-l-4 ${stage.borderColor} hover:shadow-md transition-shadow`}>
         <CardContent className="p-4">
           {/* Header: Avatar + Name + Quick Actions */}
           <div className="flex items-start gap-3">
@@ -351,7 +351,7 @@ const CoachPipeline = () => {
                 </div>
               </div>
 
-              <div className="flex-1 min-h-[200px] p-2 rounded-lg bg-muted/30 border border-dashed border-border">
+              <div className="flex-1 min-h-[200px] p-2 rounded-lg glass-card border border-border/30">
                 {leadsByStage[stage.key].length === 0 ? (
                   <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
                     {t("pipeline.noLeads")}

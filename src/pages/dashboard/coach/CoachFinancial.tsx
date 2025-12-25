@@ -189,7 +189,7 @@ export default function CoachFinancial() {
 
         {/* Stats Cards */}
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-          <Card>
+          <Card variant="glass" className="glass-card">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-green-500/10">
@@ -203,7 +203,7 @@ export default function CoachFinancial() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card variant="glass" className="glass-card">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-blue-500/10">
@@ -217,7 +217,7 @@ export default function CoachFinancial() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card variant="glass" className="glass-card">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-destructive/10">
@@ -231,7 +231,7 @@ export default function CoachFinancial() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card variant="glass" className="glass-card">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className={`p-2 rounded-lg ${summary.netProfit >= 0 ? "bg-green-500/10" : "bg-destructive/10"}`}>
@@ -275,7 +275,7 @@ export default function CoachFinancial() {
 
           {/* Invoices Tab */}
           <TabsContent value="invoices" className="space-y-4">
-            <Card>
+            <Card variant="glass" className="glass-card">
               <CardHeader>
                 <CardTitle>{t("financial.tabs.invoices")}</CardTitle>
                 <CardDescription>{t("financial.manageInvoices")}</CardDescription>
@@ -313,7 +313,7 @@ export default function CoachFinancial() {
 
           {/* Expenses Tab */}
           <TabsContent value="expenses" className="space-y-4">
-            <Card>
+            <Card variant="glass" className="glass-card">
               <CardHeader>
                 <CardTitle>{t("financial.tabs.expenses")}</CardTitle>
                 <CardDescription>{t("financial.trackExpenses")}</CardDescription>
@@ -351,7 +351,7 @@ export default function CoachFinancial() {
             <FeatureGate feature="advanced_reporting">
               <div className="grid gap-4 lg:grid-cols-2">
                 {/* Income vs Expenses Chart */}
-                <Card>
+                <Card variant="glass" className="glass-card">
                   <CardHeader>
                     <CardTitle>{t("financial.reports.incomeVsExpenses")}</CardTitle>
                     <CardDescription>{t("financial.reports.last6Months")}</CardDescription>
@@ -376,7 +376,7 @@ export default function CoachFinancial() {
                 </Card>
 
                 {/* Expense Breakdown */}
-                <Card>
+                <Card variant="glass" className="glass-card">
                   <CardHeader>
                     <CardTitle>{t("financial.reports.expenseBreakdown")}</CardTitle>
                     <CardDescription>{t("financial.reports.byCategory")}</CardDescription>
@@ -417,7 +417,7 @@ export default function CoachFinancial() {
 
           {/* Tax Tab */}
           <TabsContent value="tax" className="space-y-4">
-            <Card>
+            <Card variant="glass" className="glass-card">
               <CardHeader>
                 <CardTitle>{t("financial.tax.title")}</CardTitle>
                 <CardDescription>{t("financial.tax.description")}</CardDescription>

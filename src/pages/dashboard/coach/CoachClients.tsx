@@ -14,6 +14,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -132,7 +133,7 @@ const CoachClients = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-5 overflow-hidden">
+        <Card variant="glass" className="glass-card rounded-2xl p-5 overflow-hidden">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
               <Users className="w-5 h-5 text-primary shrink-0" />
@@ -140,8 +141,8 @@ const CoachClients = () => {
           </div>
           <p className="text-2xl font-display font-bold text-foreground truncate">{stats.total}</p>
           <p className="text-sm text-muted-foreground truncate">{t("stats.totalClients")}</p>
-        </div>
-        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-5 overflow-hidden">
+        </Card>
+        <Card variant="glass" className="glass-card rounded-2xl p-5 overflow-hidden">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
               <UserCheck className="w-5 h-5 text-success shrink-0" />
@@ -149,8 +150,8 @@ const CoachClients = () => {
           </div>
           <p className="text-2xl font-display font-bold text-success truncate">{stats.active}</p>
           <p className="text-sm text-muted-foreground truncate">{t("clients.active")}</p>
-        </div>
-        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-5 overflow-hidden">
+        </Card>
+        <Card variant="glass" className="glass-card rounded-2xl p-5 overflow-hidden">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center">
               <Clock className="w-5 h-5 text-warning shrink-0" />
@@ -158,8 +159,8 @@ const CoachClients = () => {
           </div>
           <p className="text-2xl font-display font-bold text-warning truncate">{stats.pending}</p>
           <p className="text-sm text-muted-foreground truncate">{t("clients.pending")}</p>
-        </div>
-        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-5 overflow-hidden">
+        </Card>
+        <Card variant="glass" className="glass-card rounded-2xl p-5 overflow-hidden">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
               <TrendingUp className="w-5 h-5 text-accent shrink-0" />
@@ -174,11 +175,11 @@ const CoachClients = () => {
             }).length}
           </p>
           <p className="text-sm text-muted-foreground truncate">{t("stats.thisMonth")}</p>
-        </div>
+        </Card>
       </div>
 
       {/* Filters */}
-      <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-4 mb-6">
+      <Card variant="glass" className="glass-card rounded-2xl p-4 mb-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -214,18 +215,18 @@ const CoachClients = () => {
             </Select>
           )}
         </div>
-      </div>
+      </Card>
 
       {/* Loading State */}
       {isLoading && (
-        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl p-12 flex items-center justify-center">
+        <Card variant="glass" className="glass-card rounded-3xl p-12 flex items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
+        </Card>
       )}
 
       {/* Clients List */}
       {!isLoading && (
-        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl overflow-hidden">
+        <Card variant="glass" className="glass-card rounded-3xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-secondary/50">
@@ -347,7 +348,7 @@ const CoachClients = () => {
               </Button>
             </div>
           )}
-        </div>
+        </Card>
       )}
 
       {/* Modals */}

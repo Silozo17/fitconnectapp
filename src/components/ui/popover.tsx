@@ -12,13 +12,17 @@ const PopoverContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
 >(({ className, align = "center", sideOffset = 4, ...props }, ref) => (
   <PopoverPrimitive.Portal>
-    <PopoverPrimitive.Content
+      <PopoverPrimitive.Content
       ref={ref}
       align={align}
       sideOffset={sideOffset}
       className={cn(
         // Premium glass styling
-        "z-50 w-72 rounded-2xl border border-border/50 bg-popover/95 backdrop-blur-xl p-4 text-popover-foreground shadow-float-md outline-none",
+        "z-50 w-72 p-4 text-popover-foreground outline-none",
+        "glass-floating",
+        // Inner highlight
+        "before:absolute before:inset-0 before:rounded-[inherit] before:pointer-events-none",
+        "before:shadow-[inset_0_1px_0_hsl(0_0%_100%/0.1),inset_0_-1px_0_hsl(0_0%_0%/0.15)]",
         // Animations
         "data-[state=open]:animate-in data-[state=closed]:animate-out",
         "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
