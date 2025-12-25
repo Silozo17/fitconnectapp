@@ -42,15 +42,25 @@ export const useClientBadges = () => {
   const fetchBadges = useCallback(async () => {
     if (!clientProfileId || !user) return;
 
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    // Get client's last viewed timestamp for plans
+    const { data: clientProfile } = await supabase
+      .from("client_profiles")
+      .select("plans_last_viewed_at")
+      .eq("id", clientProfileId)
+      .single();
 
-    const { count: plansCount } = await supabase
+    // Count new plans assigned after last viewed (or all active if never viewed)
+    let plansQuery = supabase
       .from("plan_assignments")
       .select("*", { count: "exact", head: true })
       .eq("client_id", clientProfileId)
-      .gte("assigned_at", sevenDaysAgo.toISOString())
       .eq("status", "active");
+
+    if (clientProfile?.plans_last_viewed_at) {
+      plansQuery = plansQuery.gt("created_at", clientProfile.plans_last_viewed_at);
+    }
+
+    const { count: plansCount } = await plansQuery;
 
     // Pending connection requests (where user is addressee)
     const { count: connectionsCount } = await supabase
@@ -64,6 +74,18 @@ export const useClientBadges = () => {
 
   useEffect(() => {
     if (clientProfileId) fetchBadges();
+  }, [clientProfileId, fetchBadges]);
+
+  // Mark plans as viewed and refresh badge
+  const markPlansViewed = useCallback(async () => {
+    if (!clientProfileId) return;
+    
+    await supabase
+      .from("client_profiles")
+      .update({ plans_last_viewed_at: new Date().toISOString() })
+      .eq("id", clientProfileId);
+    
+    fetchBadges();
   }, [clientProfileId, fetchBadges]);
 
   // Realtime subscription for plan assignments and connections
@@ -100,7 +122,7 @@ export const useClientBadges = () => {
     };
   }, [clientProfileId, user, fetchBadges]);
 
-  return badges;
+  return { badges, markPlansViewed };
 };
 
 export const useCoachBadges = () => {

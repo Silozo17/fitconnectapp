@@ -158,7 +158,7 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
   const { displayName, avatarUrl } = useUserProfile();
   const { data: selectedAvatar } = useSelectedAvatar('client');
   const { unreadCount } = useUnreadMessages();
-  const { newPlans, pendingConnections } = useClientBadges();
+  const { badges: { newPlans, pendingConnections } } = useClientBadges();
   const { shouldHideMarketplace } = usePlatformRestrictions();
   
   // State for web-only feature dialog
