@@ -15,6 +15,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
@@ -84,7 +85,7 @@ const CoachOverview = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl p-6 hover:shadow-float transition-all">
+        <Card variant="glass" className="p-6 hover:shadow-float transition-all">
           <div className="flex items-center justify-between mb-3">
             <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
               <Users className="w-7 h-7 text-primary" />
@@ -101,9 +102,9 @@ const CoachOverview = () => {
             <p className="text-3xl font-display font-bold text-foreground">{stats?.activeClients || 0}</p>
           )}
           <p className="text-sm text-muted-foreground">{t("stats.activeClients")}</p>
-        </div>
+        </Card>
 
-        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl p-6 hover:shadow-float transition-all">
+        <Card variant="glass" className="p-6 hover:shadow-float transition-all">
           <div className="flex items-center justify-between mb-3">
             <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center">
               <Calendar className="w-7 h-7 text-accent" />
@@ -118,9 +119,9 @@ const CoachOverview = () => {
             <p className="text-3xl font-display font-bold text-foreground">{stats?.sessionsThisWeek || 0}</p>
           )}
           <p className="text-sm text-muted-foreground">{t("stats.sessionsScheduled")}</p>
-        </div>
+        </Card>
 
-        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl p-6 hover:shadow-float transition-all">
+        <Card variant="glass" className="p-6 hover:shadow-float transition-all">
           <div className="flex items-center justify-between mb-3">
             <div className="w-14 h-14 rounded-2xl bg-warning/10 flex items-center justify-center">
               <MessageSquare className="w-7 h-7 text-warning" />
@@ -133,9 +134,9 @@ const CoachOverview = () => {
           </div>
           <p className="text-3xl font-display font-bold text-foreground">{unreadMessages}</p>
           <p className="text-sm text-muted-foreground">{t("stats.unreadMessages")}</p>
-        </div>
+        </Card>
 
-        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl p-6 hover:shadow-float transition-all">
+        <Card variant="glass" className="p-6 hover:shadow-float transition-all">
           <div className="flex items-center justify-between mb-3">
             <div className="w-14 h-14 rounded-2xl bg-success/10 flex items-center justify-center">
               <Star className="w-7 h-7 text-success" />
@@ -154,44 +155,44 @@ const CoachOverview = () => {
             </p>
           )}
           <p className="text-sm text-muted-foreground">{t("stats.averageRating")}</p>
-        </div>
+        </Card>
       </div>
 
       {/* Quick Actions */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <Button 
-          variant="outline" 
-          className="h-auto py-5 flex flex-col gap-2 border-dashed rounded-2xl hover:bg-card hover:border-primary/50 transition-all"
+        <Card 
+          variant="glass" 
+          className="p-5 flex flex-col items-center justify-center gap-2 border-dashed cursor-pointer hover:border-primary/50 transition-all"
           onClick={() => setAddClientOpen(true)}
         >
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
             <Plus className="w-5 h-5 text-primary" />
           </div>
-          <span className="text-sm">{t("quickActions.addClient")}</span>
-        </Button>
+          <span className="text-sm font-medium">{t("quickActions.addClient")}</span>
+        </Card>
         <Link to="/dashboard/coach/schedule">
-          <Button variant="outline" className="w-full h-auto py-5 flex flex-col gap-2 border-dashed rounded-2xl hover:bg-card hover:border-primary/50 transition-all">
+          <Card variant="glass" className="h-full p-5 flex flex-col items-center justify-center gap-2 border-dashed hover:border-primary/50 transition-all">
             <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
               <Calendar className="w-5 h-5 text-accent" />
             </div>
-            <span className="text-sm">{t("quickActions.setAvailability")}</span>
-          </Button>
+            <span className="text-sm font-medium">{t("quickActions.setAvailability")}</span>
+          </Card>
         </Link>
         <Link to="/dashboard/coach/plans">
-          <Button variant="outline" className="w-full h-auto py-5 flex flex-col gap-2 border-dashed rounded-2xl hover:bg-card hover:border-primary/50 transition-all">
+          <Card variant="glass" className="h-full p-5 flex flex-col items-center justify-center gap-2 border-dashed hover:border-primary/50 transition-all">
             <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
               <Plus className="w-5 h-5 text-success" />
             </div>
-            <span className="text-sm">{t("quickActions.createPlan")}</span>
-          </Button>
+            <span className="text-sm font-medium">{t("quickActions.createPlan")}</span>
+          </Card>
         </Link>
         <Link to="/dashboard/coach/messages">
-          <Button variant="outline" className="w-full h-auto py-5 flex flex-col gap-2 border-dashed rounded-2xl hover:bg-card hover:border-primary/50 transition-all">
+          <Card variant="glass" className="h-full p-5 flex flex-col items-center justify-center gap-2 border-dashed hover:border-primary/50 transition-all">
             <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center">
               <MessageSquare className="w-5 h-5 text-warning" />
             </div>
-            <span className="text-sm">{t("quickActions.sendMessage")}</span>
-          </Button>
+            <span className="text-sm font-medium">{t("quickActions.sendMessage")}</span>
+          </Card>
         </Link>
       </div>
 
@@ -206,7 +207,7 @@ const CoachOverview = () => {
       {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Upcoming Sessions */}
-        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl overflow-hidden">
+        <Card variant="glass" className="overflow-hidden">
           <div className="p-5 border-b border-border/50 flex items-center justify-between">
             <h2 className="font-display font-bold text-foreground">{t("clients.upcomingSessions")}</h2>
             <Link to="/dashboard/coach/schedule">
@@ -251,10 +252,10 @@ const CoachOverview = () => {
               <p className="text-muted-foreground">{t("dashboard.noUpcomingSessions")}</p>
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Reviews Summary */}
-        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl overflow-hidden">
+        <Card variant="glass" className="overflow-hidden">
           <div className="p-5 border-b border-border/50 flex items-center justify-between">
             <h2 className="font-display font-bold text-foreground">{t("dashboard.yourReviews")}</h2>
             <Link to="/dashboard/coach/reviews">
@@ -289,7 +290,7 @@ const CoachOverview = () => {
               </p>
             )}
           </div>
-        </div>
+        </Card>
       </div>
 
       {/* Modals */}

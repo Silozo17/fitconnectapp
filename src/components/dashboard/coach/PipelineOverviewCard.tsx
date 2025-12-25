@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, UserPlus, MessageCircle, Send, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCoachPipeline } from "@/hooks/useCoachPipeline";
 
@@ -26,7 +27,7 @@ export function PipelineOverviewCard() {
 
   if (isLoading) {
     return (
-      <div className="card-elevated p-6 mb-6">
+      <Card variant="glass" className="p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
           <Skeleton className="h-6 w-32" />
           <Skeleton className="h-8 w-24" />
@@ -39,12 +40,12 @@ export function PipelineOverviewCard() {
             </div>
           ))}
         </div>
-      </div>
+      </Card>
     );
   }
 
   return (
-    <div className="card-elevated p-6 mb-6">
+    <Card variant="glass" className="p-6 mb-6">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="font-display font-bold text-foreground">Sales Pipeline</h2>
@@ -106,6 +107,6 @@ export function PipelineOverviewCard() {
           </p>
         </div>
       )}
-    </div>
+    </Card>
   );
 }

@@ -100,7 +100,7 @@ export function AvatarShowcase() {
             
             {/* Unlock info cards */}
             <div className="space-y-3">
-              <Card className="p-4 bg-card/50 border-border/50">
+              <Card variant="glass" className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-primary/10">
                     <Trophy className="h-5 w-5 text-primary" />
@@ -111,7 +111,7 @@ export function AvatarShowcase() {
                   </div>
                 </div>
               </Card>
-              <Card className="p-4 bg-card/50 border-border/50">
+              <Card variant="glass" className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-accent/10">
                     <Target className="h-5 w-5 text-accent" />
