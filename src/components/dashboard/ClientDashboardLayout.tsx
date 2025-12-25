@@ -10,6 +10,7 @@ import ClientDashboardHeader from "./ClientDashboardHeader";
 import SkipNavigation from "@/components/shared/SkipNavigation";
 import MobileBottomNav from "@/components/navigation/MobileBottomNav";
 import { Button } from "@/components/ui/button";
+import PlatformBackground from "@/components/shared/PlatformBackground";
 
 interface ClientDashboardLayoutProps {
   children: React.ReactNode;
@@ -85,9 +86,10 @@ const ClientDashboardLayout = ({
         {description && <meta name="description" content={description} />}
       </Helmet>
 
+      <PlatformBackground />
       <SkipNavigation />
 
-      <div className="h-dvh bg-background overflow-hidden">
+      <div className="h-dvh overflow-hidden relative">
         <ClientSidebar
           collapsed={sidebarCollapsed}
           onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
