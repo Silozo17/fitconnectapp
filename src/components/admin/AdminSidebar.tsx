@@ -177,7 +177,8 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }: AdminSidebarProps) => {
       {/* Desktop Sidebar */}
       <aside
         className={cn(
-          "hidden xl:flex fixed left-0 top-0 h-full bg-card border-r border-border flex-col transition-all duration-300 z-40",
+          "hidden xl:flex fixed left-0 top-0 h-full border-r border-border/50 flex-col transition-all duration-300 z-40",
+          "bg-sidebar/95 backdrop-blur-xl",
           collapsed ? "w-16" : "w-64"
         )}
       >
@@ -186,7 +187,7 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }: AdminSidebarProps) => {
 
       {/* Mobile Sidebar */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="w-64 p-0 flex flex-col" onOpenAutoFocus={(e) => e.preventDefault()}>
+        <SheetContent side="left" className="w-64 p-0 flex flex-col bg-sidebar/95 backdrop-blur-xl border-r border-sidebar-border/50" onOpenAutoFocus={(e) => e.preventDefault()}>
           {/* Logo */}
           <div className="p-4 border-b border-border flex items-center">
             <div className="flex items-center gap-2">

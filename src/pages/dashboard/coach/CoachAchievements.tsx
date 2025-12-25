@@ -38,22 +38,22 @@ const rarityOrder: Record<string, number> = {
   legendary: 4,
 };
 
-// Subtle gradient for unearned badges
+// Subtle gradient for unearned badges - positioned on right side
 const rarityGradientUnearned: Record<string, string> = {
-  common: "radial-gradient(ellipse at 85% 50%, hsla(0, 0%, 60%, 0.08) 0%, transparent 55%)",
-  uncommon: "radial-gradient(ellipse at 85% 50%, hsla(142, 76%, 36%, 0.08) 0%, transparent 55%)",
-  rare: "radial-gradient(ellipse at 85% 50%, hsla(217, 91%, 60%, 0.08) 0%, transparent 55%)",
-  epic: "radial-gradient(ellipse at 85% 50%, hsla(270, 70%, 60%, 0.08) 0%, transparent 55%)",
-  legendary: "radial-gradient(ellipse at 85% 50%, hsla(45, 93%, 47%, 0.08) 0%, transparent 55%)",
+  common: "radial-gradient(ellipse 120% 100% at 100% 50%, hsla(0, 0%, 60%, 0.15) 0%, transparent 70%)",
+  uncommon: "radial-gradient(ellipse 120% 100% at 100% 50%, hsla(142, 76%, 36%, 0.15) 0%, transparent 70%)",
+  rare: "radial-gradient(ellipse 120% 100% at 100% 50%, hsla(217, 91%, 60%, 0.15) 0%, transparent 70%)",
+  epic: "radial-gradient(ellipse 120% 100% at 100% 50%, hsla(270, 70%, 60%, 0.15) 0%, transparent 70%)",
+  legendary: "radial-gradient(ellipse 120% 100% at 100% 50%, hsla(45, 93%, 47%, 0.15) 0%, transparent 70%)",
 };
 
-// Stronger gradient for earned badges
+// Stronger gradient for earned badges - positioned on right side
 const rarityGradientEarned: Record<string, string> = {
-  common: "radial-gradient(ellipse at 85% 50%, hsla(0, 0%, 60%, 0.25) 0%, transparent 50%)",
-  uncommon: "radial-gradient(ellipse at 85% 50%, hsla(142, 76%, 36%, 0.25) 0%, transparent 50%)",
-  rare: "radial-gradient(ellipse at 85% 50%, hsla(217, 91%, 60%, 0.25) 0%, transparent 50%)",
-  epic: "radial-gradient(ellipse at 85% 50%, hsla(270, 70%, 60%, 0.25) 0%, transparent 50%)",
-  legendary: "radial-gradient(ellipse at 85% 50%, hsla(45, 93%, 47%, 0.25) 0%, transparent 50%)",
+  common: "radial-gradient(ellipse 120% 100% at 100% 50%, hsla(0, 0%, 60%, 0.3) 0%, transparent 65%)",
+  uncommon: "radial-gradient(ellipse 120% 100% at 100% 50%, hsla(142, 76%, 36%, 0.3) 0%, transparent 65%)",
+  rare: "radial-gradient(ellipse 120% 100% at 100% 50%, hsla(217, 91%, 60%, 0.3) 0%, transparent 65%)",
+  epic: "radial-gradient(ellipse 120% 100% at 100% 50%, hsla(270, 70%, 60%, 0.3) 0%, transparent 65%)",
+  legendary: "radial-gradient(ellipse 120% 100% at 100% 50%, hsla(45, 93%, 47%, 0.3) 0%, transparent 65%)",
 };
 
 interface BadgeProgress {
@@ -228,8 +228,8 @@ const CoachAchievements = () => {
       <div
         key={badge.id}
         className={cn(
-          "p-4 rounded-xl border-2 transition-all",
-          isEarned ? rarityColors[badge.rarity] : "border-muted/50 opacity-80"
+          "p-4 rounded-xl border transition-all glass-card",
+          isEarned ? rarityColors[badge.rarity] : "border-white/10 opacity-80"
         )}
         style={{ background: gradientStyle }}
       >
