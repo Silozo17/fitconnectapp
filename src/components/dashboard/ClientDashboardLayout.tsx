@@ -86,7 +86,7 @@ const ClientDashboardLayout = ({
         {description && <meta name="description" content={description} />}
       </Helmet>
 
-      <PlatformBackground />
+      <PlatformBackground showAmbientGlow={false} />
       <SkipNavigation />
 
       <div className="h-dvh overflow-hidden relative">
