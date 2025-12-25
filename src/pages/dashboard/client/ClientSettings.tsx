@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -80,6 +80,7 @@ const ClientSettings = () => {
   const { t } = useTranslation('settings');
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
   const [profile, setProfile] = useState<ClientProfile | null>(null);
   const [saving, setSaving] = useState(false);
@@ -213,6 +214,11 @@ const ClientSettings = () => {
     } else {
       // Reset dirty state after successful save
       initialProfileRef.current = profile ? JSON.parse(JSON.stringify(profile)) : null;
+      
+      // Invalidate the BMI widget's cache so it fetches fresh data
+      queryClient.invalidateQueries({ queryKey: ['client-profile-data'] });
+      queryClient.invalidateQueries({ queryKey: ['client-settings-profile'] });
+      
       toast.success(t('settingsSaved'));
     }
   };
