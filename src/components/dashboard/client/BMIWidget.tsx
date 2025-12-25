@@ -22,8 +22,8 @@ function describeArc(cx: number, cy: number, radius: number, startAngle: number,
   const start = polarToCartesian(cx, cy, radius, startAngle);
   const end = polarToCartesian(cx, cy, radius, endAngle);
   
-  // For going from higher angle to lower (e.g., 180 to 135), we sweep counter-clockwise (0)
-  const sweepFlag = startAngle > endAngle ? 0 : 1;
+  // After y-flip, going from higher to lower angle needs sweep=1 (clockwise in screen coords)
+  const sweepFlag = startAngle > endAngle ? 1 : 0;
   const largeArcFlag = Math.abs(endAngle - startAngle) > 180 ? 1 : 0;
   
   return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${end.x} ${end.y}`;
@@ -70,13 +70,13 @@ export function BMIWidget() {
   const radius = 100;
   const strokeWidth = 14;
   
-  // Segment angles: 180° (left) to 0° (right), going counter-clockwise (upward arc)
+  // Segment angles: 180° (left) to 0° (right), continuous segments
   // Order: Underweight (left/blue) → Normal (green) → Overweight (yellow) → Obese (right/red)
   const segments = [
-    { startAngle: 180, endAngle: 137, color: '#3B82F6' },  // Underweight - blue
-    { startAngle: 134, endAngle: 91, color: '#22C55E' },   // Normal - green
-    { startAngle: 88, endAngle: 45, color: '#EAB308' },    // Overweight - yellow
-    { startAngle: 42, endAngle: 0, color: '#EF4444' },     // Obese - red
+    { startAngle: 180, endAngle: 135, color: '#3B82F6' },  // Underweight - blue
+    { startAngle: 135, endAngle: 90, color: '#22C55E' },   // Normal - green
+    { startAngle: 90, endAngle: 45, color: '#EAB308' },    // Overweight - yellow
+    { startAngle: 45, endAngle: 0, color: '#EF4444' },     // Obese - red
   ];
   
   const category = bmi ? getBMICategory(bmi) : null;
@@ -107,7 +107,6 @@ export function BMIWidget() {
                   fill="none"
                   stroke={seg.color}
                   strokeWidth={strokeWidth}
-                  strokeLinecap="round"
                 />
               ))}
             </svg>
@@ -130,7 +129,6 @@ export function BMIWidget() {
                   fill="none"
                   stroke={seg.color}
                   strokeWidth={strokeWidth}
-                  strokeLinecap="round"
                   className="opacity-80"
                 />
               ))}
