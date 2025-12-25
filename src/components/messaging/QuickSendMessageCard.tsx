@@ -97,39 +97,88 @@ const QuickSendMessageCard = ({
   // Client can respond if: they received the message, it's pending, and they're in client view
   const canRespond = !isMine && metadata.status === 'pending' && activeProfileType === 'client';
   
+  // Check if this is a free package (price is 0 or undefined)
+  const isFreePackage = metadata.price === 0 || metadata.price === undefined;
+  
   const handleAccept = async () => {
     setUpdating(true);
     try {
-      // Update message status
-      const { error } = await supabase
-        .from('messages')
-        .update({
-          metadata: {
-            ...metadata,
-            status: 'accepted',
-            respondedAt: new Date().toISOString()
+      if (isFreePackage) {
+        // For free packages, directly assign them without checkout
+        // Create the package purchase record
+        if (metadata.itemType === 'package') {
+          const { error: purchaseError } = await supabase
+            .from('client_package_purchases')
+            .insert({
+              client_id: currentProfileId,
+              coach_id: metadata.coachId,
+              package_id: metadata.itemId,
+              sessions_total: metadata.sessionCount || 1,
+              sessions_used: 0,
+              amount_paid: 0,
+              currency: metadata.currency || 'GBP',
+              status: 'active',
+              purchased_at: new Date().toISOString(),
+            });
+          
+          if (purchaseError) {
+            console.error('Error creating package purchase:', purchaseError);
+            throw purchaseError;
           }
-        })
-        .eq('id', message.id);
-      
-      if (error) throw error;
-      
-      toast({
-        title: "Offer accepted!",
-        description: "Redirecting to checkout...",
-      });
-      
-      onStatusUpdate?.();
-      
-      // Navigate to checkout
-      const checkoutParams = new URLSearchParams({
-        type: metadata.itemType,
-        itemId: metadata.itemId,
-        coachId: metadata.coachId,
-        returnUrl: window.location.pathname
-      });
-      
-      navigate(`/checkout?${checkoutParams.toString()}`);
+        }
+        
+        // Update message status to accepted
+        const { error } = await supabase
+          .from('messages')
+          .update({
+            metadata: {
+              ...metadata,
+              status: 'accepted',
+              respondedAt: new Date().toISOString()
+            }
+          })
+          .eq('id', message.id);
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Offer accepted!",
+          description: "The package has been added to your account.",
+        });
+        
+        onStatusUpdate?.();
+      } else {
+        // For paid packages, update status and redirect to checkout
+        const { error } = await supabase
+          .from('messages')
+          .update({
+            metadata: {
+              ...metadata,
+              status: 'accepted',
+              respondedAt: new Date().toISOString()
+            }
+          })
+          .eq('id', message.id);
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Offer accepted!",
+          description: "Redirecting to checkout...",
+        });
+        
+        onStatusUpdate?.();
+        
+        // Navigate to checkout
+        const checkoutParams = new URLSearchParams({
+          type: metadata.itemType,
+          itemId: metadata.itemId,
+          coachId: metadata.coachId,
+          returnUrl: window.location.pathname
+        });
+        
+        navigate(`/checkout?${checkoutParams.toString()}`);
+      }
     } catch (err) {
       console.error('Error accepting offer:', err);
       toast({
@@ -237,10 +286,14 @@ const QuickSendMessageCard = ({
             
             {/* Additional info */}
             <div className="flex flex-wrap gap-2 text-sm">
-              {metadata.price !== undefined && metadata.price > 0 && (
+              {metadata.price !== undefined && metadata.price > 0 ? (
                 <span className="font-medium text-foreground">
                   {formatPrice(metadata.price, metadata.currency)}
                 </span>
+              ) : (
+                <Badge variant="secondary" className="bg-green-500/20 text-green-600 border-green-500/30">
+                  Free
+                </Badge>
               )}
               {metadata.sessionCount && (
                 <span className="text-muted-foreground">
@@ -285,7 +338,7 @@ const QuickSendMessageCard = ({
                 ) : (
                   <>
                     <Check className="w-4 h-4 mr-1" />
-                    Accept & Pay
+                    {isFreePackage ? 'Accept' : 'Accept & Pay'}
                   </>
                 )}
               </Button>

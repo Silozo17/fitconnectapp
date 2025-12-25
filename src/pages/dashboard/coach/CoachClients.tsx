@@ -279,7 +279,15 @@ const CoachClients = () => {
                     </td>
                     <td className="p-4">
                       <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="icon" title={t("clients.message")}>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          title={t("clients.message")}
+                          onClick={() => {
+                            // Navigate to messages with this client
+                            window.location.href = `/dashboard/coach/messages/${client.client_id}`;
+                          }}
+                        >
                           <MessageSquare className="w-4 h-4" />
                         </Button>
                         <Button 

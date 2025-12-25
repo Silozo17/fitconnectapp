@@ -88,7 +88,7 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
             <div className="space-y-2">
               <Label htmlFor="time">{t('scheduleSessionModal.time')}</Label>
               <div className="relative">
-                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
                 <Input
                   id="time"
                   type="time"
@@ -136,7 +136,7 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
 
           <div className="flex items-center justify-between p-3 rounded-lg bg-background border border-border">
             <div className="flex items-center gap-2">
-              <Video className="h-4 w-4 text-muted-foreground" />
+              <Video className="h-4 w-4 text-primary" />
               <Label htmlFor="isOnline" className="cursor-pointer">{t('scheduleSessionModal.onlineSession')}</Label>
             </div>
             <Switch
@@ -150,7 +150,7 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
             <div className="space-y-2">
               <Label htmlFor="location">{t('scheduleSessionModal.location')}</Label>
               <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
                 <Input
                   id="location"
                   value={location}
