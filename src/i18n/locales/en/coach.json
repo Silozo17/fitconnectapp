@@ -138,6 +138,28 @@
       "workoutPlan": "Workout Plan",
       "nutritionPlan": "Nutrition Plan"
     },
+    "planActions": {
+      "editAssignment": "Edit Plan Assignment",
+      "status": "Status",
+      "statusOptions": {
+        "active": "Active",
+        "paused": "Paused",
+        "completed": "Completed"
+      },
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "selectDate": "Select date",
+      "saveChanges": "Save Changes",
+      "removePlan": "Remove Plan",
+      "pausePlan": "Pause Plan",
+      "reactivatePlan": "Reactivate Plan",
+      "confirmRemoveTitle": "Remove Plan Assignment?",
+      "confirmRemoveDescription": "This will remove the plan from the client. They will no longer have access to this plan.",
+      "planUpdated": "Plan assignment updated",
+      "planRemoved": "Plan assignment removed",
+      "planPaused": "Plan paused - client has been notified",
+      "planReactivated": "Plan reactivated - client has been notified"
+    },
     "notes": {
       "addNote": "Add Note",
       "noNotesYet": "No notes yet",
@@ -527,6 +549,27 @@
       "uncategorized": "Uncategorized",
       "exercises": "exercises",
       "addExercise": "Add Exercise"
+    },
+    "createExercise": {
+      "title": "Create Custom Exercise",
+      "exerciseName": "Exercise Name",
+      "exerciseNamePlaceholder": "e.g., Bulgarian Split Squat",
+      "category": "Category",
+      "selectCategory": "Select category",
+      "difficulty": "Difficulty",
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced",
+      "equipment": "Equipment",
+      "equipmentPlaceholder": "e.g., Dumbbells, Barbell, Bodyweight",
+      "muscleGroups": "Muscle Groups (comma-separated)",
+      "muscleGroupsPlaceholder": "e.g., quads, glutes, hamstrings",
+      "videoUrl": "Video URL (YouTube)",
+      "instructions": "Instructions",
+      "instructionsPlaceholder": "Step-by-step instructions for performing this exercise...",
+      "cancel": "Cancel",
+      "createExercise": "Create Exercise",
+      "creating": "Creating..."
     },
     "categories": {
       "chest": "Chest",

@@ -387,3 +387,59 @@ export function useUpdateSession() {
     },
   });
 }
+
+// Plan Assignment Mutations
+export function useUpdatePlanAssignment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {
+      assignmentId: string;
+      status?: string;
+      startDate?: string;
+      endDate?: string;
+    }) => {
+      const updateData: Record<string, unknown> = {};
+      if (data.status !== undefined) updateData.status = data.status;
+      if (data.startDate !== undefined) updateData.start_date = data.startDate;
+      if (data.endDate !== undefined) updateData.end_date = data.endDate;
+      updateData.updated_at = new Date().toISOString();
+
+      const { error } = await supabase
+        .from("plan_assignments")
+        .update(updateData)
+        .eq("id", data.assignmentId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["client-plans"] });
+      toast.success("Plan assignment updated");
+    },
+    onError: () => {
+      toast.error("Failed to update plan assignment");
+    },
+  });
+}
+
+export function useRemovePlanAssignment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (assignmentId: string) => {
+      const { error } = await supabase
+        .from("plan_assignments")
+        .delete()
+        .eq("id", assignmentId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["client-plans"] });
+      toast.success("Plan assignment removed");
+    },
+    onError: () => {
+      toast.error("Failed to remove plan assignment");
+    },
+  });
+}

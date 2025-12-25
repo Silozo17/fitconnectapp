@@ -138,6 +138,28 @@
       "workoutPlan": "Plan treningowy",
       "nutritionPlan": "Plan żywieniowy"
     },
+    "planActions": {
+      "editAssignment": "Edytuj przypisanie planu",
+      "status": "Status",
+      "statusOptions": {
+        "active": "Aktywny",
+        "paused": "Wstrzymany",
+        "completed": "Ukończony"
+      },
+      "startDate": "Data rozpoczęcia",
+      "endDate": "Data zakończenia",
+      "selectDate": "Wybierz datę",
+      "saveChanges": "Zapisz zmiany",
+      "removePlan": "Usuń plan",
+      "pausePlan": "Wstrzymaj plan",
+      "reactivatePlan": "Reaktywuj plan",
+      "confirmRemoveTitle": "Usunąć przypisanie planu?",
+      "confirmRemoveDescription": "Spowoduje to usunięcie planu od klienta. Nie będzie miał już dostępu do tego planu.",
+      "planUpdated": "Przypisanie planu zaktualizowane",
+      "planRemoved": "Przypisanie planu usunięte",
+      "planPaused": "Plan wstrzymany - klient został powiadomiony",
+      "planReactivated": "Plan reaktywowany - klient został powiadomiony"
+    },
     "notes": {
       "addNote": "Dodaj notatkę",
       "noNotesYet": "Brak notatek",
@@ -527,6 +549,27 @@
       "uncategorized": "Bez kategorii",
       "exercises": "ćwiczenia",
       "addExercise": "Dodaj ćwiczenie"
+    },
+    "createExercise": {
+      "title": "Utwórz własne ćwiczenie",
+      "exerciseName": "Nazwa ćwiczenia",
+      "exerciseNamePlaceholder": "np. Bułgarskie przysiady",
+      "category": "Kategoria",
+      "selectCategory": "Wybierz kategorię",
+      "difficulty": "Poziom trudności",
+      "beginner": "Początkujący",
+      "intermediate": "Średniozaawansowany",
+      "advanced": "Zaawansowany",
+      "equipment": "Sprzęt",
+      "equipmentPlaceholder": "np. Hantle, Sztanga, Masa ciała",
+      "muscleGroups": "Partie mięśniowe (rozdzielone przecinkami)",
+      "muscleGroupsPlaceholder": "np. uda, pośladki, dwugłowe",
+      "videoUrl": "URL wideo (YouTube)",
+      "instructions": "Instrukcje",
+      "instructionsPlaceholder": "Krok po kroku instrukcje wykonania tego ćwiczenia...",
+      "cancel": "Anuluj",
+      "createExercise": "Utwórz ćwiczenie",
+      "creating": "Tworzenie..."
     },
     "categories": {
       "chest": "Klatka piersiowa",

@@ -12,7 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useExerciseCategories, useCreateExercise } from "@/hooks/useExercises";
-import { Loader2, Video, Link } from "lucide-react";
+import { Loader2, Video } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface CreateExerciseModalProps {
   open: boolean;
@@ -21,6 +22,7 @@ interface CreateExerciseModalProps {
 }
 
 const CreateExerciseModal = ({ open, onOpenChange, coachId }: CreateExerciseModalProps) => {
+  const { t } = useTranslation("coach");
   const [name, setName] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [equipment, setEquipment] = useState("");
@@ -62,27 +64,29 @@ const CreateExerciseModal = ({ open, onOpenChange, coachId }: CreateExerciseModa
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="font-display">Create Custom Exercise</DialogTitle>
+          <DialogTitle className="font-display">
+            {t("workoutBuilder.createExercise.title")}
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="name">Exercise Name *</Label>
+            <Label htmlFor="name">{t("workoutBuilder.createExercise.exerciseName")} *</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Bulgarian Split Squat"
+              placeholder={t("workoutBuilder.createExercise.exerciseNamePlaceholder")}
               required
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Category</Label>
+              <Label>{t("workoutBuilder.createExercise.category")}</Label>
               <Select value={categoryId} onValueChange={setCategoryId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
+                  <SelectValue placeholder={t("workoutBuilder.createExercise.selectCategory")} />
                 </SelectTrigger>
                 <SelectContent>
                   {categories?.map((cat) => (
@@ -95,42 +99,48 @@ const CreateExerciseModal = ({ open, onOpenChange, coachId }: CreateExerciseModa
             </div>
 
             <div>
-              <Label>Difficulty</Label>
+              <Label>{t("workoutBuilder.createExercise.difficulty")}</Label>
               <Select value={difficulty} onValueChange={setDifficulty}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="beginner">Beginner</SelectItem>
-                  <SelectItem value="intermediate">Intermediate</SelectItem>
-                  <SelectItem value="advanced">Advanced</SelectItem>
+                  <SelectItem value="beginner">
+                    {t("workoutBuilder.createExercise.beginner")}
+                  </SelectItem>
+                  <SelectItem value="intermediate">
+                    {t("workoutBuilder.createExercise.intermediate")}
+                  </SelectItem>
+                  <SelectItem value="advanced">
+                    {t("workoutBuilder.createExercise.advanced")}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           <div>
-            <Label htmlFor="equipment">Equipment</Label>
+            <Label htmlFor="equipment">{t("workoutBuilder.createExercise.equipment")}</Label>
             <Input
               id="equipment"
               value={equipment}
               onChange={(e) => setEquipment(e.target.value)}
-              placeholder="e.g., Dumbbells, Barbell, Bodyweight"
+              placeholder={t("workoutBuilder.createExercise.equipmentPlaceholder")}
             />
           </div>
 
           <div>
-            <Label htmlFor="muscleGroups">Muscle Groups (comma-separated)</Label>
+            <Label htmlFor="muscleGroups">{t("workoutBuilder.createExercise.muscleGroups")}</Label>
             <Input
               id="muscleGroups"
               value={muscleGroups}
               onChange={(e) => setMuscleGroups(e.target.value)}
-              placeholder="e.g., quads, glutes, hamstrings"
+              placeholder={t("workoutBuilder.createExercise.muscleGroupsPlaceholder")}
             />
           </div>
 
           <div>
-            <Label htmlFor="videoUrl">Video URL (YouTube)</Label>
+            <Label htmlFor="videoUrl">{t("workoutBuilder.createExercise.videoUrl")}</Label>
             <div className="relative">
               <Video className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -144,23 +154,25 @@ const CreateExerciseModal = ({ open, onOpenChange, coachId }: CreateExerciseModa
           </div>
 
           <div>
-            <Label htmlFor="instructions">Instructions</Label>
+            <Label htmlFor="instructions">{t("workoutBuilder.createExercise.instructions")}</Label>
             <Textarea
               id="instructions"
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
-              placeholder="Step-by-step instructions for performing this exercise..."
+              placeholder={t("workoutBuilder.createExercise.instructionsPlaceholder")}
               rows={3}
             />
           </div>
 
           <div className="flex justify-end gap-3">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t("workoutBuilder.createExercise.cancel")}
             </Button>
             <Button type="submit" disabled={!name || createExercise.isPending}>
               {createExercise.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Create Exercise
+              {createExercise.isPending 
+                ? t("workoutBuilder.createExercise.creating")
+                : t("workoutBuilder.createExercise.createExercise")}
             </Button>
           </div>
         </form>

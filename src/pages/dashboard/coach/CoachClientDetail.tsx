@@ -15,17 +15,29 @@ import {
   Dumbbell,
   Loader2,
   Package,
+  MoreHorizontal,
+  Pause,
+  Play,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { ScheduleSessionModal } from "@/components/dashboard/clients/ScheduleSessionModal";
 import { SessionDetailModal } from "@/components/dashboard/clients/SessionDetailModal";
 import { AddNoteModal } from "@/components/dashboard/clients/AddNoteModal";
 import { AddProgressModal } from "@/components/dashboard/clients/AddProgressModal";
 import { AssignPlanModal } from "@/components/dashboard/clients/AssignPlanModal";
+import { PlanAssignmentActionsModal } from "@/components/dashboard/clients/PlanAssignmentActionsModal";
 import { ProgressChart } from "@/components/dashboard/clients/ProgressChart";
 import { GoalProgressCard } from "@/components/dashboard/clients/GoalProgressCard";
 import { NoteCard } from "@/components/dashboard/clients/NoteCard";
@@ -40,12 +52,16 @@ import {
   useClientNotes, 
   useClientProgress,
   useClientPlanAssignments,
-  useCoachProfile
+  useCoachProfile,
+  useUpdatePlanAssignment,
+  useRemovePlanAssignment
 } from "@/hooks/useCoachClients";
 import { useClientActivePackage } from "@/hooks/usePackages";
+import { notifyClientAboutPlanChange } from "@/utils/notifications";
 import { format } from "date-fns";
 import { enGB, pl } from "date-fns/locale";
 import { useTranslation } from "@/hooks/useTranslation";
+import { toast } from "sonner";
 import i18n from "@/i18n";
 
 const CoachClientDetail = () => {
@@ -68,12 +84,85 @@ const CoachClientDetail = () => {
   const { data: planAssignments = [], isLoading: isLoadingPlans } = useClientPlanAssignments(id);
   const { data: activePackage, isLoading: isLoadingPackage } = useClientActivePackage(id, coachProfile?.id);
 
+  // Mutation hooks for plan actions
+  const updatePlanAssignment = useUpdatePlanAssignment();
+  const removePlanAssignment = useRemovePlanAssignment();
+
   // Modal states
   const [isScheduleSessionOpen, setIsScheduleSessionOpen] = useState(false);
   const [isSessionDetailOpen, setIsSessionDetailOpen] = useState(false);
   const [isAddNoteOpen, setIsAddNoteOpen] = useState(false);
   const [isAddProgressOpen, setIsAddProgressOpen] = useState(false);
   const [isAssignPlanOpen, setIsAssignPlanOpen] = useState(false);
+  const [isPlanActionsOpen, setIsPlanActionsOpen] = useState(false);
+  const [selectedPlanAssignment, setSelectedPlanAssignment] = useState<typeof planAssignments[0] | null>(null);
+
+  // Plan action handlers
+  const handlePlanAction = (assignment: typeof planAssignments[0]) => {
+    setSelectedPlanAssignment(assignment);
+    setIsPlanActionsOpen(true);
+  };
+
+  const handleUpdatePlanAssignment = async (data: { status: string; startDate?: Date; endDate?: Date }) => {
+    if (!selectedPlanAssignment || !client?.user_id) return;
+    
+    const previousStatus = selectedPlanAssignment.status;
+    
+    await updatePlanAssignment.mutateAsync({
+      assignmentId: selectedPlanAssignment.id,
+      status: data.status,
+      startDate: data.startDate?.toISOString(),
+      endDate: data.endDate?.toISOString(),
+    });
+
+    // Notify client if status changed
+    if (data.status !== previousStatus) {
+      const action = data.status === 'paused' ? 'paused' : 
+                     data.status === 'active' ? 'reactivated' : 'updated';
+      await notifyClientAboutPlanChange({
+        clientUserId: client.user_id,
+        planName: selectedPlanAssignment.training_plan?.name || 'Plan',
+        action,
+        coachName: coachProfile?.display_name || 'Your Coach',
+      });
+    }
+
+    setIsPlanActionsOpen(false);
+    setSelectedPlanAssignment(null);
+  };
+
+  const handleRemovePlanAssignment = async () => {
+    if (!selectedPlanAssignment || !client?.user_id) return;
+    
+    await removePlanAssignment.mutateAsync(selectedPlanAssignment.id);
+    
+    await notifyClientAboutPlanChange({
+      clientUserId: client.user_id,
+      planName: selectedPlanAssignment.training_plan?.name || 'Plan',
+      action: 'removed',
+      coachName: coachProfile?.display_name || 'Your Coach',
+    });
+
+    setIsPlanActionsOpen(false);
+    setSelectedPlanAssignment(null);
+  };
+
+  const handleQuickPauseResume = async (assignment: typeof planAssignments[0]) => {
+    if (!client?.user_id) return;
+    
+    const newStatus = assignment.status === 'active' ? 'paused' : 'active';
+    await updatePlanAssignment.mutateAsync({
+      assignmentId: assignment.id,
+      status: newStatus,
+    });
+
+    await notifyClientAboutPlanChange({
+      clientUserId: client.user_id,
+      planName: assignment.training_plan?.name || 'Plan',
+      action: newStatus === 'paused' ? 'paused' : 'reactivated',
+      coachName: coachProfile?.display_name || 'Your Coach',
+    });
+  };
   const [selectedSession, setSelectedSession] = useState<{
     id: string;
     clientName: string;
@@ -555,12 +644,49 @@ const CoachClientDetail = () => {
                         </p>
                       </div>
                     </div>
-                    <Badge className={
-                      assignment.status === 'active' ? 'bg-success/20 text-success border-success/30' :
-                      'bg-muted text-muted-foreground'
-                    }>
-                      {getStatusLabel(assignment.status)}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge className={
+                        assignment.status === 'active' ? 'bg-success/20 text-success border-success/30' :
+                        assignment.status === 'paused' ? 'bg-warning/20 text-warning border-warning/30' :
+                        'bg-muted text-muted-foreground'
+                      }>
+                        {t(`clientDetail.planActions.statusOptions.${assignment.status}`)}
+                      </Badge>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handlePlanAction(assignment)}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            {t('clientDetail.planActions.editAssignment')}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleQuickPauseResume(assignment)}>
+                            {assignment.status === 'active' ? (
+                              <>
+                                <Pause className="h-4 w-4 mr-2" />
+                                {t('clientDetail.planActions.pausePlan')}
+                              </>
+                            ) : (
+                              <>
+                                <Play className="h-4 w-4 mr-2" />
+                                {t('clientDetail.planActions.reactivatePlan')}
+                              </>
+                            )}
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            onClick={() => handlePlanAction(assignment)}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            {t('clientDetail.planActions.removePlan')}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
                   {assignment.training_plan?.description && (
                     <p className="text-sm text-muted-foreground mb-3">{assignment.training_plan.description}</p>
@@ -665,6 +791,16 @@ const CoachClientDetail = () => {
         onOpenChange={setIsAssignPlanOpen}
         clientName={fullName}
         clientId={id}
+      />
+
+      <PlanAssignmentActionsModal
+        open={isPlanActionsOpen}
+        onOpenChange={setIsPlanActionsOpen}
+        assignment={selectedPlanAssignment}
+        onUpdate={handleUpdatePlanAssignment}
+        onRemove={handleRemovePlanAssignment}
+        isUpdating={updatePlanAssignment.isPending}
+        isRemoving={removePlanAssignment.isPending}
       />
     </DashboardLayout>
   );
