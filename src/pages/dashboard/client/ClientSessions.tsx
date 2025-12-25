@@ -18,9 +18,15 @@ import {
   Star,
   ExternalLink,
   Check,
+  CalendarDays,
+  XCircle,
 } from "lucide-react";
 import WriteReviewModal from "@/components/reviews/WriteReviewModal";
 import { useHasReviewed } from "@/hooks/useReviews";
+import { RescheduleSessionModal } from "@/components/dashboard/clients/RescheduleSessionModal";
+import { CancelSessionModal } from "@/components/dashboard/clients/CancelSessionModal";
+import { useSessionManagement } from "@/hooks/useSessionManagement";
+import { useToast } from "@/hooks/use-toast";
 
 interface Session {
   id: string;
@@ -41,6 +47,7 @@ interface Session {
 const ClientSessions = () => {
   const { user } = useAuth();
   const { t } = useTranslation('booking');
+  const { toast } = useToast();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [clientProfileId, setClientProfileId] = useState<string | null>(null);
@@ -50,6 +57,17 @@ const ClientSessions = () => {
     coachName: string;
     sessionId: string;
   }>({ open: false, coachId: "", coachName: "", sessionId: "" });
+  
+  // Session management states
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+  const [showReschedule, setShowReschedule] = useState(false);
+  const [showCancel, setShowCancel] = useState(false);
+  
+  const {
+    cancelSession,
+    rescheduleSession,
+    DEFAULT_CANCELLATION_NOTICE_HOURS,
+  } = useSessionManagement();
 
   const fetchSessions = useCallback(async (profileId: string) => {
     const { data } = await supabase
@@ -147,6 +165,9 @@ const ClientSessions = () => {
 
   const SessionCard = ({ session }: { session: Session }) => {
     const isCompleted = session.status === "completed";
+    const isScheduled = session.status === "scheduled";
+    const isUpcoming = new Date(session.scheduled_at) >= new Date();
+    const canModify = isScheduled && isUpcoming;
     const { data: hasReviewed } = useHasReviewed(isCompleted ? session.id : undefined);
 
     const handleWriteReview = () => {
@@ -156,6 +177,16 @@ const ClientSessions = () => {
         coachName: session.coach.display_name || "Coach",
         sessionId: session.id,
       });
+    };
+    
+    const handleRescheduleClick = () => {
+      setSelectedSession(session);
+      setShowReschedule(true);
+    };
+    
+    const handleCancelClick = () => {
+      setSelectedSession(session);
+      setShowCancel(true);
     };
 
     return (
@@ -224,6 +255,28 @@ const ClientSessions = () => {
               <Check className="w-3 h-3" />
               {t('clientSessions.reviewSubmitted')}
             </p>
+          )}
+          {canModify && (
+            <div className="flex gap-2 mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={handleRescheduleClick}
+              >
+                <CalendarDays className="w-4 h-4 mr-1" />
+                {t('clientSessions.reschedule', 'Reschedule')}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 text-destructive hover:text-destructive"
+                onClick={handleCancelClick}
+              >
+                <XCircle className="w-4 h-4 mr-1" />
+                {t('clientSessions.cancel', 'Cancel')}
+              </Button>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -299,6 +352,52 @@ const ClientSessions = () => {
         coachName={reviewModal.coachName}
         sessionId={reviewModal.sessionId}
       />
+      
+      {selectedSession && (
+        <>
+          <RescheduleSessionModal
+            open={showReschedule}
+            onOpenChange={setShowReschedule}
+            currentDate={new Date(selectedSession.scheduled_at)}
+            onReschedule={async (newDateTime) => {
+              await rescheduleSession.mutateAsync({ 
+                sessionId: selectedSession.id, 
+                newDateTime 
+              });
+              toast({
+                title: t('clientSessions.rescheduled', 'Session rescheduled'),
+                description: t('clientSessions.rescheduledDesc', 'Your session has been rescheduled successfully.'),
+              });
+              if (clientProfileId) {
+                fetchSessions(clientProfileId);
+              }
+            }}
+            isLoading={rescheduleSession.isPending}
+          />
+
+          <CancelSessionModal
+            open={showCancel}
+            onOpenChange={setShowCancel}
+            sessionDate={new Date(selectedSession.scheduled_at)}
+            onCancel={async (reason, forceCancel) => {
+              await cancelSession.mutateAsync({ 
+                sessionId: selectedSession.id, 
+                reason, 
+                forceCancel 
+              });
+              toast({
+                title: t('clientSessions.cancelled', 'Session cancelled'),
+                description: t('clientSessions.cancelledDesc', 'Your session has been cancelled.'),
+              });
+              if (clientProfileId) {
+                fetchSessions(clientProfileId);
+              }
+            }}
+            isLoading={cancelSession.isPending}
+            cancellationNoticeHours={DEFAULT_CANCELLATION_NOTICE_HOURS}
+          />
+        </>
+      )}
     </ClientDashboardLayout>
   );
 };

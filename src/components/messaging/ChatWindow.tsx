@@ -53,7 +53,7 @@ const ChatWindow = ({
   onToggleSidePanel
 }: ChatWindowProps) => {
   const { t } = useTranslation('messaging');
-  const { messages, loading, error, sendMessage, currentProfileId } = useMessages(participantId);
+  const { messages, loading, error, sendMessage, currentProfileId, softRefreshConversations } = useMessages(participantId);
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -323,6 +323,7 @@ const ChatWindow = ({
                       message={message}
                       isMine={isMine}
                       currentProfileId={currentProfileId || ''}
+                      onStatusUpdate={softRefreshConversations}
                     />
                   );
                 }
