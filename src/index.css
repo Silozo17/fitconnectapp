@@ -120,6 +120,17 @@
     font-family: 'Inter', sans-serif;
   }
 
+  /* Hide scrollbars on mobile globally */
+  @media (max-width: 767px) {
+    * {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    *::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Space Grotesk', sans-serif;
   }
@@ -347,7 +358,12 @@
   }
 
   .hover-lift:hover {
-    @apply -translate-y-1;
+    @apply -translate-y-1 z-10;
+  }
+
+  /* Container for hover-lift items - prevents clipping */
+  .hover-lift-container {
+    @apply py-4 overflow-visible;
   }
 
   .hover-scale {
