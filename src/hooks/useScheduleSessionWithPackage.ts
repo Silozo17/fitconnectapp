@@ -120,7 +120,8 @@ export function useScheduleSessionWithPackage() {
       queryClient.invalidateQueries({ queryKey: ["client-sessions"] });
       queryClient.invalidateQueries({ queryKey: ["client-active-package"] });
       queryClient.invalidateQueries({ queryKey: ["client-package-purchases"] });
-      queryClient.invalidateQueries({ queryKey: ["coaching-sessions"] });
+      // Invalidate with coachId prefix to match CoachSchedule query key pattern
+      queryClient.invalidateQueries({ queryKey: ["coaching-sessions", coachProfile?.id] });
 
       if (result.usedPackage && result.packageInfo) {
         toast.success(
