@@ -72,7 +72,7 @@ const WorkoutDayCard = ({
   };
 
   return (
-    <div className="card-glow rounded-2xl overflow-hidden">
+    <div className="glass-card rounded-2xl overflow-hidden">
       <button
         onClick={onToggleExpand}
         className="w-full p-4 flex items-center justify-between hover:bg-secondary/30 transition-colors"

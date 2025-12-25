@@ -408,7 +408,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
 
       {/* Mobile Sidebar */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="w-72 p-0 flex flex-col bg-sidebar" onOpenAutoFocus={(e) => e.preventDefault()}>
+        <SheetContent side="left" className="w-72 p-0 flex flex-col bg-sidebar/95 backdrop-blur-xl border-r border-sidebar-border/50" onOpenAutoFocus={(e) => e.preventDefault()}>
           {/* Logo */}
           <div className="p-4 border-b border-sidebar-border">
             <div className="flex items-center gap-3">

@@ -36,7 +36,7 @@ export const FoodLibrary = ({ onAddFood }: FoodLibraryProps) => {
   };
 
   return (
-    <div className="bg-card border border-border rounded-xl p-4 h-full flex flex-col">
+    <div className="glass-card rounded-xl p-4 h-full flex flex-col">
       <h3 className="text-lg font-semibold text-foreground mb-4">
         {t('nutritionBuilder.foodLibrary.title')}
       </h3>

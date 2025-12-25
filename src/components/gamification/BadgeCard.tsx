@@ -32,10 +32,10 @@ export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
       <div
         ref={ref}
         className={cn(
-          'relative rounded-xl border-2 p-4 transition-all duration-300 backdrop-blur-sm',
+          'relative rounded-xl border p-4 transition-all duration-300 glass-card',
           earned 
             ? `${rarityColors.bg} ${rarityColors.border}` 
-            : 'bg-white/[0.03] border-white/10 grayscale opacity-60',
+            : 'bg-white/[0.02] border-white/5 grayscale opacity-60',
           badge.rarity === 'legendary' && earned && 'ring-2 ring-yellow-400/50 shadow-lg shadow-yellow-500/20'
         )}
       >

@@ -160,7 +160,7 @@ export function ModernLeaderboard({
 
           {/* List for remaining entries */}
           {(variant === 'compact' ? entries : rest).length > 0 && (
-            <div className="space-y-0">
+            <div className="glass-card rounded-2xl p-3 space-y-0">
               {(variant === 'compact' ? entries : rest).map((entry, idx) => (
                 <LeaderboardRankRow
                   key={entry.client_id}

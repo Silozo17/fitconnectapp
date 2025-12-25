@@ -35,7 +35,7 @@ const ClientMessages = () => {
         <div className="flex-1 glass-card rounded-3xl overflow-hidden flex shadow-float">
           {/* Conversations List */}
           <div
-            className={`w-full lg:w-80 border-r border-border/50 flex flex-col bg-background/50 ${
+            className={`w-full lg:w-80 border-r border-border/50 flex flex-col ${
               participantId ? "hidden lg:flex" : "flex"
             }`}
           >
@@ -49,7 +49,7 @@ const ClientMessages = () => {
 
           {/* Chat Area */}
           <div
-            className={`flex-1 flex flex-col bg-background/30 ${
+            className={`flex-1 flex flex-col ${
               !participantId ? "hidden lg:flex" : "flex"
             }`}
           >
