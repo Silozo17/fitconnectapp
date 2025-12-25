@@ -35,10 +35,23 @@ interface NutritionDay {
 }
 
 const NutritionPlanView = ({ content }: NutritionPlanViewProps) => {
-  // Cast to nutrition format - the content structure varies by plan type
-  const nutritionContent = content as unknown as NutritionDay[];
+  // Safely convert content to array format
+  const getNutritionContent = (): NutritionDay[] => {
+    if (!content) return [];
+    if (Array.isArray(content)) {
+      return content as unknown as NutritionDay[];
+    }
+    // If content is an object with days property
+    if (typeof content === 'object' && 'days' in (content as object)) {
+      const days = (content as { days: unknown }).days;
+      return Array.isArray(days) ? days : [];
+    }
+    return [];
+  };
 
-  if (!nutritionContent || nutritionContent.length === 0) {
+  const nutritionContent = getNutritionContent();
+
+  if (nutritionContent.length === 0) {
     return (
       <Card>
         <CardContent className="py-8 text-center">
