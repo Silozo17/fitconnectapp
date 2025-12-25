@@ -279,7 +279,7 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden">
         <DialogHeader>
           <DialogTitle>Create Digital Product</DialogTitle>
           <DialogDescription>
@@ -288,7 +288,7 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 w-full max-w-full overflow-hidden">
             {/* Basic Info */}
             <div className="space-y-4">
               <FormField
@@ -387,7 +387,7 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
             </div>
 
             {/* Type & Category */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="content_type"
@@ -438,7 +438,7 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="difficulty_level"
@@ -497,7 +497,7 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
             </div>
 
             {/* Pricing */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="price"
