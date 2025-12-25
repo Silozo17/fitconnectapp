@@ -66,7 +66,7 @@ const FavouriteCoachCard = ({ coach, reviewData, linkPrefix }: FavouriteCoachCar
   const reviewCount = reviewData?.count || 0;
 
   return (
-    <Card className="group overflow-hidden hover:shadow-lg transition-shadow">
+    <Card className="group overflow-hidden hover:shadow-float transition-all rounded-3xl border-border/50 bg-card/50 backdrop-blur-sm">
       <CardContent className="p-0">
         <div className="relative">
           {coach.profile_image_url ? (
@@ -93,13 +93,13 @@ const FavouriteCoachCard = ({ coach, reviewData, linkPrefix }: FavouriteCoachCar
           {/* Availability Badges */}
           <div className="absolute bottom-3 left-3 flex gap-2">
             {coach.online_available && (
-              <Badge variant="secondary" className="bg-green-500/90 text-white border-0">
+              <Badge variant="secondary" className="bg-green-500/90 text-white border-0 rounded-full">
                 <Video className="h-3 w-3 mr-1" />
                 Online
               </Badge>
             )}
             {coach.in_person_available && (
-              <Badge variant="secondary" className="bg-blue-500/90 text-white border-0">
+              <Badge variant="secondary" className="bg-blue-500/90 text-white border-0 rounded-full">
                 <Users className="h-3 w-3 mr-1" />
                 In-Person
               </Badge>
@@ -107,7 +107,7 @@ const FavouriteCoachCard = ({ coach, reviewData, linkPrefix }: FavouriteCoachCar
           </div>
         </div>
 
-        <div className="p-4">
+        <div className="p-5">
           <div className="flex items-start justify-between mb-2">
             <div>
               <h3 className="font-semibold text-foreground">
@@ -125,14 +125,14 @@ const FavouriteCoachCard = ({ coach, reviewData, linkPrefix }: FavouriteCoachCar
 
           {/* Coach Types */}
           {coach.coach_types && coach.coach_types.length > 0 && (
-            <div className="flex flex-wrap gap-1 mb-3">
+            <div className="flex flex-wrap gap-1.5 mb-3">
               {coach.coach_types.slice(0, 2).map((type: string) => (
-                <Badge key={type} variant="outline" className="text-xs">
+                <Badge key={type} variant="outline" className="text-xs rounded-full">
                   {type}
                 </Badge>
               ))}
               {coach.coach_types.length > 2 && (
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className="text-xs rounded-full">
                   +{coach.coach_types.length - 2}
                 </Badge>
               )}
@@ -140,7 +140,7 @@ const FavouriteCoachCard = ({ coach, reviewData, linkPrefix }: FavouriteCoachCar
           )}
 
           {/* Price & CTA */}
-          <div className="flex items-center justify-between pt-3 border-t border-border">
+          <div className="flex items-center justify-between pt-4 border-t border-border/50">
             {coach.hourly_rate ? (
               <p className="font-semibold text-foreground">
                 {formatCurrency(coach.hourly_rate, (coach.currency as CurrencyCode) || 'GBP')}<span className="text-sm text-muted-foreground font-normal">/session</span>
@@ -148,7 +148,7 @@ const FavouriteCoachCard = ({ coach, reviewData, linkPrefix }: FavouriteCoachCar
             ) : (
               <p className="text-sm text-muted-foreground">Contact for pricing</p>
             )}
-            <Button size="sm" asChild>
+            <Button size="sm" asChild className="rounded-xl">
               <Link to={`${linkPrefix}/${coach.username || coach.id}`}>View Profile</Link>
             </Button>
           </div>
@@ -183,14 +183,16 @@ const ClientFavourites = () => {
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       ) : coaches.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <Heart className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
+        <Card className="rounded-3xl border-border/50 bg-card/50 backdrop-blur-sm">
+          <CardContent className="py-16 text-center">
+            <div className="w-16 h-16 rounded-3xl bg-pink-500/10 flex items-center justify-center mx-auto mb-4">
+              <Heart className="h-8 w-8 text-pink-500/70" />
+            </div>
             <h3 className="font-semibold text-foreground mb-2">No favourites yet</h3>
             <p className="text-muted-foreground mb-4">
               Save coaches to your favourites for quick access
             </p>
-            <Button asChild>
+            <Button asChild className="rounded-xl">
               <Link to={linkPrefix}>Browse Coaches</Link>
             </Button>
           </CardContent>

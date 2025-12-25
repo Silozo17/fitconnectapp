@@ -28,20 +28,20 @@ export default function ClientLeaderboard() {
         </div>
         
         {myRank && myRank.rank && (
-          <Card className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30">
-            <CardContent className="py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="bg-primary/20 rounded-full p-3"><Crown className="h-6 w-6 text-primary" /></div>
+          <Card className="bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 border-primary/30 rounded-3xl overflow-hidden">
+            <CardContent className="py-5">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="bg-primary/20 rounded-2xl p-3.5 shadow-glow-sm"><Crown className="h-7 w-7 text-primary" /></div>
                   <div>
                     <div className="text-sm text-muted-foreground">Your Global Rank</div>
-                    <div className="text-2xl font-bold">#{myRank.rank}</div>
+                    <div className="text-3xl font-bold">#{myRank.rank}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-right">
                     <div className="text-sm text-muted-foreground">out of {myRank.total} members</div>
-                    <div className="text-lg font-medium text-primary">{myRank.xp?.toLocaleString()} XP</div>
+                    <div className="text-lg font-semibold text-primary">{myRank.xp?.toLocaleString()} XP</div>
                   </div>
                   <ShareAchievementButton 
                     achievement={{
@@ -58,12 +58,12 @@ export default function ClientLeaderboard() {
         )}
         
         <Tabs defaultValue="location" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="location" className="flex items-center gap-2">
+          <TabsList className="grid w-full grid-cols-2 bg-muted/50 backdrop-blur-sm p-1 rounded-2xl">
+            <TabsTrigger value="location" className="flex items-center gap-2 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm">
               <MapPin className="h-4 w-4" />
               By Location
             </TabsTrigger>
-            <TabsTrigger value="time" className="flex items-center gap-2">
+            <TabsTrigger value="time" className="flex items-center gap-2 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm">
               <Calendar className="h-4 w-4" />
               By Time Period
             </TabsTrigger>

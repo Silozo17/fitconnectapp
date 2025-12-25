@@ -67,7 +67,7 @@ const NotificationsContent = () => {
         </div>
       </div>
 
-      <Card>
+      <Card className="rounded-3xl border-border/50 bg-card/50 backdrop-blur-sm">
         <CardHeader className="pb-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <CardTitle className="flex items-center gap-2">
@@ -90,6 +90,7 @@ const NotificationsContent = () => {
               <Button
                 variant={showUnreadOnly ? "default" : "outline"}
                 size="sm"
+                className="rounded-xl"
                 onClick={() => setShowUnreadOnly(!showUnreadOnly)}
               >
                 Unread only
@@ -103,9 +104,11 @@ const NotificationsContent = () => {
               <p className="text-muted-foreground">Loading notifications...</p>
             </div>
           ) : filteredNotifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-40 text-center">
-              <Bell className="w-12 h-12 text-muted-foreground/30 mb-3" />
-              <p className="text-muted-foreground">No notifications found</p>
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="w-16 h-16 rounded-3xl bg-muted/50 flex items-center justify-center mb-4">
+                <Bell className="w-8 h-8 text-muted-foreground/50" />
+              </div>
+              <p className="font-medium text-muted-foreground">No notifications found</p>
               <p className="text-sm text-muted-foreground mt-1">
                 {filter !== "all" || showUnreadOnly
                   ? "Try adjusting your filters"
@@ -113,7 +116,7 @@ const NotificationsContent = () => {
               </p>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {filteredNotifications.map((notification) => (
                 <NotificationItem
                   key={notification.id}
