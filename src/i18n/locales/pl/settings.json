@@ -685,5 +685,40 @@
     "processing": "Przetwarzanie...",
     "noResults": "Nie znaleziono wyników",
     "searchPlaceholder": "Szukaj..."
+  },
+
+  "reviewRequests": {
+    "title": "Prośby o recenzje",
+    "description": "Kontroluj kiedy i jak prośby o recenzje są wysyłane do klientów po sesjach",
+    "saved": "Ustawienia próśb o recenzje zapisane",
+    "mode": {
+      "label": "Kiedy wysyłać prośby o recenzje",
+      "auto": "Automatycznie",
+      "autoDesc": "Wysyłaj prośby o recenzje automatycznie gdy oznaczysz sesję jako ukończoną",
+      "manual": "Ręcznie",
+      "manualDesc": "Wysyłaj prośby o recenzje tylko gdy klikniesz przycisk 'Poproś o recenzję'"
+    },
+    "delay": {
+      "label": "Wyślij prośbę o recenzję",
+      "hint": "Wybierz kiedy e-mail z prośbą o recenzję zostanie wysłany po ukończeniu sesji",
+      "immediately": "Natychmiast",
+      "1hour": "Po 1 godzinie",
+      "2hours": "Po 2 godzinach",
+      "6hours": "Po 6 godzinach",
+      "12hours": "Po 12 godzinach",
+      "24hours": "Po 24 godzinach",
+      "48hours": "Po 48 godzinach"
+    },
+    "customMessage": {
+      "label": "Osobista wiadomość (opcjonalnie)",
+      "placeholder": "Dodaj osobisty akcent do próśb o recenzje...",
+      "hint": "Ta wiadomość zostanie dołączona do e-maila z prośbą o recenzję",
+      "variables": "Użyj {client_name} i {session_date} aby spersonalizować"
+    },
+    "preview": {
+      "show": "Podgląd wiadomości",
+      "hide": "Ukryj podgląd",
+      "title": "Podgląd:"
+    }
   }
 }

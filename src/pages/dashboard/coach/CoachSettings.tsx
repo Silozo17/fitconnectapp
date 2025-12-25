@@ -76,6 +76,7 @@ import { Upload, FileText, Trash2, CheckCircle, XCircle, Clock, AlertCircle, Eye
 import { CoachGalleryUpload } from "@/components/coach/CoachGalleryUpload";
 import { CoachGroupClassesManager } from "@/components/coach/CoachGroupClassesManager";
 import { CoachWhoIWorkWithSection } from "@/components/coach/CoachWhoIWorkWithSection";
+import { ReviewRequestSettings } from "@/components/coach/ReviewRequestSettings";
 import { CoachSocialLinksSection, type SocialLinks } from "@/components/coach/CoachSocialLinksSection";
 import { CoachTypeSelector } from "@/components/coach/CoachTypeSelector";
 import { MarketplaceSection } from "@/components/coach/MarketplaceSection";
@@ -1257,7 +1258,10 @@ const CoachSettings = () => {
 
             {/* Notifications Tab */}
             {selectedTab === "notifications" && (
-              <NotificationPreferences />
+              <div className="space-y-6">
+                <NotificationPreferences />
+                <ReviewRequestSettings />
+              </div>
             )}
 
             {/* Subscription & Payments Tab */}

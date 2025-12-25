@@ -2199,6 +2199,7 @@ export type Database = {
       coach_profiles: {
         Row: {
           also_client: boolean | null
+          auto_review_requests: boolean | null
           bio: string | null
           booking_mode: string | null
           card_image_url: string | null
@@ -2206,6 +2207,7 @@ export type Database = {
           coach_types: string[] | null
           created_at: string
           currency: string | null
+          custom_review_message: string | null
           default_session_location: string | null
           display_name: string | null
           experience_years: number | null
@@ -2236,6 +2238,8 @@ export type Database = {
           pre_booking_buffer_minutes: number | null
           primary_coach_type: string | null
           profile_image_url: string | null
+          review_request_delay_hours: number | null
+          review_request_mode: string | null
           selected_avatar_id: string | null
           status: string | null
           status_reason: string | null
@@ -2260,6 +2264,7 @@ export type Database = {
         }
         Insert: {
           also_client?: boolean | null
+          auto_review_requests?: boolean | null
           bio?: string | null
           booking_mode?: string | null
           card_image_url?: string | null
@@ -2267,6 +2272,7 @@ export type Database = {
           coach_types?: string[] | null
           created_at?: string
           currency?: string | null
+          custom_review_message?: string | null
           default_session_location?: string | null
           display_name?: string | null
           experience_years?: number | null
@@ -2297,6 +2303,8 @@ export type Database = {
           pre_booking_buffer_minutes?: number | null
           primary_coach_type?: string | null
           profile_image_url?: string | null
+          review_request_delay_hours?: number | null
+          review_request_mode?: string | null
           selected_avatar_id?: string | null
           status?: string | null
           status_reason?: string | null
@@ -2321,6 +2329,7 @@ export type Database = {
         }
         Update: {
           also_client?: boolean | null
+          auto_review_requests?: boolean | null
           bio?: string | null
           booking_mode?: string | null
           card_image_url?: string | null
@@ -2328,6 +2337,7 @@ export type Database = {
           coach_types?: string[] | null
           created_at?: string
           currency?: string | null
+          custom_review_message?: string | null
           default_session_location?: string | null
           display_name?: string | null
           experience_years?: number | null
@@ -2358,6 +2368,8 @@ export type Database = {
           pre_booking_buffer_minutes?: number | null
           primary_coach_type?: string | null
           profile_image_url?: string | null
+          review_request_delay_hours?: number | null
+          review_request_mode?: string | null
           selected_avatar_id?: string | null
           status?: string | null
           status_reason?: string | null

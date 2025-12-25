@@ -267,6 +267,10 @@
     "createLink": "Utwórz link",
     "locationTbd": "Lokalizacja do ustalenia",
     "rescheduledFrom": "Przełożono z",
+    "requestReview": "Poproś o recenzję",
+    "reviewReceived": "Recenzja otrzymana",
+    "reviewRequestSent": "Prośba o recenzję wysłana!",
+    "reviewRequestFailed": "Nie udało się wysłać prośby o recenzję",
     "status": {
       "scheduled": "Zaplanowana",
       "completed": "Ukończona",
