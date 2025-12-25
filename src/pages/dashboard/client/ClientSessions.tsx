@@ -27,6 +27,7 @@ import { RescheduleSessionModal } from "@/components/dashboard/clients/Reschedul
 import { CancelSessionModal } from "@/components/dashboard/clients/CancelSessionModal";
 import { useSessionManagement } from "@/hooks/useSessionManagement";
 import { useToast } from "@/hooks/use-toast";
+import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
 
 interface Session {
   id: string;
@@ -150,8 +151,8 @@ const ClientSessions = () => {
   );
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      scheduled: "default",
+    const variants: Record<string, "success" | "secondary" | "destructive" | "outline"> = {
+      scheduled: "success",
       completed: "secondary",
       cancelled: "destructive",
     };
@@ -190,90 +191,97 @@ const ClientSessions = () => {
     };
 
     return (
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-start justify-between mb-3">
+      <Card className="rounded-3xl hover:shadow-float transition-all duration-300">
+        <CardContent className="p-6">
+          <div className="flex items-start justify-between mb-4">
             <div>
-              <h4 className="font-semibold text-foreground">
+              <h4 className="font-bold text-lg text-foreground">
                 {session.coach.display_name || "Coach"}
               </h4>
-              <p className="text-sm text-muted-foreground">{session.session_type}</p>
+              <p className="text-muted-foreground">{session.session_type}</p>
             </div>
             {getStatusBadge(session.status)}
           </div>
-          <div className="space-y-2 text-sm">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Calendar className="w-4 h-4" />
-              <span>{format(new Date(session.scheduled_at), "PPP")}</span>
+          
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 text-muted-foreground">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Calendar className="w-5 h-5 text-primary" />
+              </div>
+              <span className="font-medium">{format(new Date(session.scheduled_at), "PPP")}</span>
             </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Clock className="w-4 h-4" />
-              <span>
+            <div className="flex items-center gap-3 text-muted-foreground">
+              <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+                <Clock className="w-5 h-5 text-accent" />
+              </div>
+              <span className="font-medium">
                 {format(new Date(session.scheduled_at), "p")} ({t('sessions.minutes', { count: session.duration_minutes })})
               </span>
             </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
+            <div className="flex items-center gap-3 text-muted-foreground">
               {session.is_online ? (
                 <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center gap-2">
-                    <Video className="w-4 h-4" />
-                    <span>{t('sessions.online')}</span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center shrink-0">
+                      <Video className="w-5 h-5 text-purple-500" />
+                    </div>
+                    <span className="font-medium">{t('sessions.online')}</span>
                   </div>
                   {session.video_meeting_url && session.status === "scheduled" && (
                     <a
                       href={session.video_meeting_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-xs text-primary hover:underline"
+                      className="flex items-center gap-1.5 text-sm text-primary hover:underline font-medium"
                     >
-                      <ExternalLink className="h-3 w-3" />
+                      <ExternalLink className="h-4 w-4" />
                       {t('sessions.joinSession')}
                     </a>
                   )}
                 </div>
               ) : (
                 <>
-                  <MapPin className="w-4 h-4" />
-                  <span>{session.location || t('sessions.inPerson')}</span>
+                  <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
+                    <MapPin className="w-5 h-5 text-orange-500" />
+                  </div>
+                  <span className="font-medium">{session.location || t('sessions.inPerson')}</span>
                 </>
               )}
             </div>
           </div>
+          
           {isCompleted && !hasReviewed && (
             <Button
               variant="outline"
-              size="sm"
-              className="w-full mt-4"
+              className="w-full mt-5 rounded-2xl h-12"
               onClick={handleWriteReview}
             >
-              <Star className="w-4 h-4 mr-2" />
+              <Star className="w-5 h-5 mr-2" />
               {t('clientSessions.leaveReview')}
             </Button>
           )}
           {isCompleted && hasReviewed && (
-            <p className="text-xs text-muted-foreground text-center mt-4 flex items-center justify-center gap-1">
-              <Check className="w-3 h-3" />
+            <p className="text-sm text-muted-foreground text-center mt-5 flex items-center justify-center gap-2">
+              <Check className="w-4 h-4 text-success" />
               {t('clientSessions.reviewSubmitted')}
             </p>
           )}
           {canModify && (
-            <div className="flex gap-2 mt-4">
+            <div className="flex gap-3 mt-5">
               <Button
                 variant="outline"
-                size="sm"
-                className="flex-1"
+                className="flex-1 rounded-2xl h-12"
                 onClick={handleRescheduleClick}
               >
-                <CalendarDays className="w-4 h-4 mr-1" />
+                <CalendarDays className="w-4 h-4 mr-2" />
                 {t('clientSessions.reschedule', 'Reschedule')}
               </Button>
               <Button
                 variant="outline"
-                size="sm"
-                className="flex-1 text-destructive hover:text-destructive"
+                className="flex-1 rounded-2xl h-12 text-destructive hover:text-destructive border-destructive/30 hover:bg-destructive/10"
                 onClick={handleCancelClick}
               >
-                <XCircle className="w-4 h-4 mr-1" />
+                <XCircle className="w-4 h-4 mr-2" />
                 {t('clientSessions.cancel', 'Cancel')}
               </Button>
             </div>
@@ -284,10 +292,12 @@ const ClientSessions = () => {
   };
 
   const EmptyState = ({ message }: { message: string }) => (
-    <Card>
-      <CardContent className="py-12 text-center">
-        <CalendarX className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-        <p className="text-muted-foreground">{message}</p>
+    <Card className="rounded-3xl border-dashed">
+      <CardContent className="py-16 text-center">
+        <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-muted/50 flex items-center justify-center">
+          <CalendarX className="w-10 h-10 text-muted-foreground" />
+        </div>
+        <p className="text-muted-foreground text-lg">{message}</p>
       </CardContent>
     </Card>
   );
@@ -297,24 +307,42 @@ const ClientSessions = () => {
       title={t('clientSessions.title')}
       description={t('clientSessions.description')}
     >
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">{t('clientSessions.title')}</h1>
-        <p className="text-muted-foreground">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground font-display">{t('clientSessions.title')}</h1>
+        <p className="text-muted-foreground text-lg mt-1">
           {t('clientSessions.description')}
         </p>
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i} className="rounded-3xl">
+              <CardContent className="p-6 space-y-4">
+                <div className="flex justify-between">
+                  <div className="space-y-2">
+                    <ShimmerSkeleton className="h-6 w-32" />
+                    <ShimmerSkeleton className="h-4 w-24" />
+                  </div>
+                  <ShimmerSkeleton className="h-6 w-20 rounded-full" />
+                </div>
+                <div className="space-y-3">
+                  <ShimmerSkeleton className="h-10 w-full rounded-xl" />
+                  <ShimmerSkeleton className="h-10 w-full rounded-xl" />
+                  <ShimmerSkeleton className="h-10 w-full rounded-xl" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       ) : (
-        <Tabs defaultValue="upcoming" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="upcoming">
+        <Tabs defaultValue="upcoming" className="space-y-6">
+          <TabsList className="bg-secondary/50 rounded-2xl p-1.5 h-auto">
+            <TabsTrigger value="upcoming" className="rounded-xl px-6 py-2.5">
               {t('clientSessions.upcoming')} ({upcomingSessions.length})
             </TabsTrigger>
-            <TabsTrigger value="past">
+            <TabsTrigger value="past" className="rounded-xl px-6 py-2.5">
               {t('clientSessions.past')} ({pastSessions.length})
             </TabsTrigger>
           </TabsList>
@@ -323,7 +351,7 @@ const ClientSessions = () => {
             {upcomingSessions.length === 0 ? (
               <EmptyState message={t('clientSessions.noUpcoming')} />
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {upcomingSessions.map((session) => (
                   <SessionCard key={session.id} session={session} />
                 ))}
@@ -335,7 +363,7 @@ const ClientSessions = () => {
             {pastSessions.length === 0 ? (
               <EmptyState message={t('clientSessions.noPast')} />
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {pastSessions.map((session) => (
                   <SessionCard key={session.id} session={session} />
                 ))}

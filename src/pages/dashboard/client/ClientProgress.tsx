@@ -10,6 +10,7 @@ import { LogProgressModal } from "@/components/progress/LogProgressModal";
 import { ProgressChart } from "@/components/progress/ProgressChart";
 import { ProgressEntryCard } from "@/components/progress/ProgressEntryCard";
 import { AIProgressInsights } from "@/components/ai/AIProgressInsights";
+import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
 
 const ClientProgress = () => {
   const { t } = useTranslation('client');
@@ -38,31 +39,35 @@ const ClientProgress = () => {
       title={t('progress.title')}
       description={t('progress.subtitle')}
     >
-      <div className="mb-6 flex items-center justify-between">
+      {/* Header */}
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{t('progress.pageTitle')}</h1>
-          <p className="text-muted-foreground">{t('progress.description')}</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground font-display">{t('progress.pageTitle')}</h1>
+          <p className="text-muted-foreground text-lg mt-1">{t('progress.description')}</p>
         </div>
-        <Button onClick={() => setLogModalOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
+        <Button onClick={() => setLogModalOpen(true)} size="lg" className="rounded-2xl h-12 px-6">
+          <Plus className="w-5 h-5 mr-2" />
           {t('progress.logProgress')}
         </Button>
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="w-10 h-10 animate-spin text-primary" />
         </div>
       ) : progress.length === 0 ? (
-        <Card className="border-border">
-          <CardContent className="py-12 text-center">
-            <BarChart3 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">{t('progress.noData')}</h3>
-            <p className="text-muted-foreground mb-4">
+        /* Empty State */
+        <Card className="rounded-3xl border-dashed">
+          <CardContent className="py-16 text-center">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-primary/10 flex items-center justify-center">
+              <BarChart3 className="w-10 h-10 text-primary" />
+            </div>
+            <h3 className="text-xl font-bold mb-2 font-display">{t('progress.noData')}</h3>
+            <p className="text-muted-foreground mb-6 max-w-sm mx-auto text-lg">
               {t('progress.noDataDescription')}
             </p>
-            <Button onClick={() => setLogModalOpen(true)}>
-              <Plus className="w-4 h-4 mr-2" />
+            <Button onClick={() => setLogModalOpen(true)} size="lg" className="rounded-2xl h-12 px-8">
+              <Plus className="w-5 h-5 mr-2" />
               {t('progress.logFirstEntry')}
             </Button>
           </CardContent>
@@ -70,20 +75,20 @@ const ClientProgress = () => {
       ) : (
         <>
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <Card className="border-border">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg bg-primary/10">
-                    <Scale className="w-5 h-5 text-primary" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <Card className="rounded-3xl">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <Scale className="w-7 h-7 text-primary" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('progress.currentWeight')}</p>
-                    <p className="text-xl font-bold text-foreground">
+                  <div className="min-w-0">
+                    <p className="text-sm text-muted-foreground truncate">{t('progress.currentWeight')}</p>
+                    <p className="text-2xl font-bold text-foreground">
                       {latestEntry?.weight_kg ? Number(latestEntry.weight_kg).toFixed(1) : "-"} kg
                     </p>
                     {weightChange !== null && (
-                      <p className={`text-xs ${weightChange < 0 ? "text-green-500" : "text-orange-500"}`}>
+                      <p className={`text-sm font-medium ${weightChange < 0 ? "text-success" : "text-warning"}`}>
                         {weightChange > 0 ? "+" : ""}{weightChange.toFixed(1)} kg
                       </p>
                     )}
@@ -92,19 +97,19 @@ const ClientProgress = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-border">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg bg-yellow-500/10">
-                    <Percent className="w-5 h-5 text-yellow-500" />
+            <Card className="rounded-3xl">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-yellow-500/10 flex items-center justify-center shrink-0">
+                    <Percent className="w-7 h-7 text-yellow-500" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('progress.bodyFat')}</p>
-                    <p className="text-xl font-bold text-foreground">
+                  <div className="min-w-0">
+                    <p className="text-sm text-muted-foreground truncate">{t('progress.bodyFat')}</p>
+                    <p className="text-2xl font-bold text-foreground">
                       {latestEntry?.body_fat_percentage ? Number(latestEntry.body_fat_percentage).toFixed(1) : "-"}%
                     </p>
                     {bodyFatChange !== null && (
-                      <p className={`text-xs ${bodyFatChange < 0 ? "text-green-500" : "text-orange-500"}`}>
+                      <p className={`text-sm font-medium ${bodyFatChange < 0 ? "text-success" : "text-warning"}`}>
                         {bodyFatChange > 0 ? "+" : ""}{bodyFatChange.toFixed(1)}%
                       </p>
                     )}
@@ -113,33 +118,33 @@ const ClientProgress = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-border">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg bg-green-500/10">
-                    <TrendingUp className="w-5 h-5 text-green-500" />
+            <Card className="rounded-3xl">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-success/10 flex items-center justify-center shrink-0">
+                    <TrendingUp className="w-7 h-7 text-success" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('progress.totalEntries')}</p>
-                    <p className="text-xl font-bold text-foreground">{progress.length}</p>
-                    <p className="text-xs text-muted-foreground">{t('progress.logged')}</p>
+                  <div className="min-w-0">
+                    <p className="text-sm text-muted-foreground truncate">{t('progress.totalEntries')}</p>
+                    <p className="text-2xl font-bold text-foreground">{progress.length}</p>
+                    <p className="text-sm text-muted-foreground">{t('progress.logged')}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-border">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg bg-accent/10">
-                    <Calendar className="w-5 h-5 text-accent" />
+            <Card className="rounded-3xl">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center shrink-0">
+                    <Calendar className="w-7 h-7 text-accent" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('progress.photosCount')}</p>
-                    <p className="text-xl font-bold text-foreground">
+                  <div className="min-w-0">
+                    <p className="text-sm text-muted-foreground truncate">{t('progress.photosCount')}</p>
+                    <p className="text-2xl font-bold text-foreground">
                       {progress.reduce((acc, p) => acc + ((p.photo_urls as string[])?.length || 0), 0)}
                     </p>
-                    <p className="text-xs text-muted-foreground">{t('progress.uploaded')}</p>
+                    <p className="text-sm text-muted-foreground">{t('progress.uploaded')}</p>
                   </div>
                 </div>
               </CardContent>
@@ -148,10 +153,10 @@ const ClientProgress = () => {
 
           {/* Charts & History Tabs */}
           <Tabs defaultValue="charts" className="space-y-6">
-            <TabsList className="bg-secondary">
-              <TabsTrigger value="charts">{t('progress.charts')}</TabsTrigger>
-              <TabsTrigger value="history">{t('progress.history')}</TabsTrigger>
-              <TabsTrigger value="insights">{t('progress.insights')}</TabsTrigger>
+            <TabsList className="bg-secondary/50 rounded-2xl p-1.5 h-auto">
+              <TabsTrigger value="charts" className="rounded-xl px-6 py-2.5">{t('progress.charts')}</TabsTrigger>
+              <TabsTrigger value="history" className="rounded-xl px-6 py-2.5">{t('progress.history')}</TabsTrigger>
+              <TabsTrigger value="insights" className="rounded-xl px-6 py-2.5">{t('progress.insights')}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="charts" className="space-y-6">
