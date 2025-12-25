@@ -1,6 +1,6 @@
 import { memo } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
 
 interface SkeletonCardProps {
   className?: string;
@@ -19,25 +19,29 @@ export const SkeletonCard = memo(({
 }: SkeletonCardProps) => {
   return (
     <div 
-      className={cn("p-4 rounded-lg border border-border bg-card animate-pulse", className)}
+      className={cn(
+        "p-5 rounded-2xl border border-border/30 bg-card/50 backdrop-blur-sm",
+        className
+      )}
       style={style}
     >
       {showImage && (
-        <Skeleton className="w-full h-40 rounded-lg mb-4" />
+        <ShimmerSkeleton variant="image" className="w-full h-40 mb-4" />
       )}
       
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-4">
         {showAvatar && (
-          <Skeleton className="w-10 h-10 rounded-full shrink-0" />
+          <ShimmerSkeleton variant="avatar" className="w-12 h-12 shrink-0" />
         )}
         
-        <div className="flex-1 space-y-2">
-          <Skeleton className="h-4 w-3/4" />
+        <div className="flex-1 space-y-3">
+          <ShimmerSkeleton variant="text" className="h-5 w-3/4" />
           {Array.from({ length: lines - 1 }).map((_, i) => (
-            <Skeleton 
+            <ShimmerSkeleton 
               key={i} 
-              className="h-3" 
-              style={{ width: `${70 - i * 15}%` }} 
+              variant="text"
+              className="h-3.5" 
+              style={{ width: `${75 - i * 15}%` }} 
             />
           ))}
         </div>
@@ -56,7 +60,7 @@ interface SkeletonListProps {
 
 export const SkeletonList = memo(({ count = 3, className, cardProps }: SkeletonListProps) => {
   return (
-    <div className={cn("space-y-3", className)}>
+    <div className={cn("space-y-4", className)}>
       {Array.from({ length: count }).map((_, i) => (
         <SkeletonCard 
           key={i} 

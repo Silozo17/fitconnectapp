@@ -252,10 +252,10 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
         key={item.path}
         to={item.path}
         className={cn(
-          "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors relative",
+          "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 relative",
           indented && "ml-4",
           isActive
-            ? "bg-sidebar-primary text-sidebar-primary-foreground"
+            ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-glow-sm"
             : isLocked
               ? "text-sidebar-foreground/40 hover:bg-sidebar-accent/50"
               : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
@@ -348,9 +348,9 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
   const SidebarContent = ({ isCollapsed = false }: { isCollapsed?: boolean }) => (
     <>
       {/* Logo with Collapse Toggle */}
-      <div className="p-4 border-b border-sidebar-border flex items-center justify-between">
+      <div className="p-4 border-b border-sidebar-border/50 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shrink-0 shadow-glow-sm">
             <Dumbbell className="w-6 h-6 text-primary-foreground" />
           </div>
           {!isCollapsed && (
@@ -365,7 +365,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
             variant="ghost"
             size="icon"
             onClick={onToggle}
-            className="h-8 w-8 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+            className="h-8 w-8 rounded-xl text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
           >
             {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </Button>
@@ -394,7 +394,8 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
       {/* Desktop Sidebar */}
       <aside
         className={cn(
-          "hidden xl:flex fixed left-0 top-0 h-screen bg-sidebar border-r border-sidebar-border flex-col transition-all duration-300 z-40",
+          "hidden xl:flex fixed left-0 top-0 h-screen border-r border-sidebar-border/50 flex-col transition-all duration-300 z-40",
+          "bg-sidebar/95 backdrop-blur-xl",
           collapsed ? "w-16" : "w-64"
         )}
         role="navigation"
