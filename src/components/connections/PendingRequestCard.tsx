@@ -46,7 +46,7 @@ export const PendingRequestCard = ({
     .toUpperCase();
 
   return (
-    <Card className="p-4 bg-card/50 border-border/50 hover:border-primary/30 transition-colors">
+    <Card variant="glass" className="p-4 hover:border-primary/30 transition-colors">
       <div className="flex items-start gap-4">
         <Avatar className="h-12 w-12 border-2 border-border">
           <AvatarImage src={avatarUrl || undefined} alt={displayName} />

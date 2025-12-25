@@ -41,7 +41,7 @@ const CalendarConnectionCard = ({
   const { t } = useTranslation('common');
 
   return (
-    <Card className="bg-card/50 border-border/50 hover:border-primary/30 transition-all">
+    <Card variant="glass" className="hover:border-primary/30 transition-all">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

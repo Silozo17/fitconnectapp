@@ -26,6 +26,7 @@ import { MobileCalendarView } from "@/components/dashboard/coach/MobileCalendarV
 import { SessionDetailModal } from "@/components/dashboard/clients/SessionDetailModal";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
@@ -648,7 +649,7 @@ const CoachSchedule = () => {
           ) : (
             <>
               {/* Week Navigation */}
-              <div className="card-elevated p-4 mb-4">
+              <Card variant="glass" className="p-4 mb-4">
                 <div className="flex items-center justify-between">
                   <Button variant="ghost" size="icon" onClick={() => setWeekStart(prev => addDays(prev, -7))}>
                     <ChevronLeft className="w-5 h-5" />
@@ -679,10 +680,10 @@ const CoachSchedule = () => {
                     <ChevronRight className="w-5 h-5" />
                   </Button>
                 </div>
-              </div>
+              </Card>
 
               {/* Calendar Grid with absolute positioning for multi-hour events */}
-              <div className="card-elevated overflow-hidden">
+              <Card variant="glass" className="overflow-hidden">
                 <div className="overflow-x-auto">
                   <div className="min-w-[800px]">
                     {/* Header */}
@@ -817,7 +818,7 @@ const CoachSchedule = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </Card>
 
               {/* Legend */}
               <div className="flex flex-wrap items-center gap-6 mt-4">
@@ -848,7 +849,7 @@ const CoachSchedule = () => {
 
         {/* Booking Requests Tab */}
         <TabsContent value="requests">
-          <div className="card-elevated">
+          <Card variant="glass">
             <div className="p-4 border-b border-border">
               <h3 className="font-display font-bold text-foreground">{t("schedule.pendingRequests")}</h3>
             </div>
@@ -919,7 +920,7 @@ const CoachSchedule = () => {
                 ))}
               </div>
             )}
-          </div>
+          </Card>
         </TabsContent>
 
         {/* Availability Tab */}
@@ -945,7 +946,7 @@ const CoachSchedule = () => {
           )}
 
           {/* Booking Settings Card */}
-          <div className="card-elevated">
+          <Card variant="glass">
             <div className="p-4 border-b border-border">
               <h3 className="font-display font-bold text-foreground">{t("schedule.bookingSettings.title")}</h3>
               <p className="text-sm text-muted-foreground">{t("schedule.bookingSettings.subtitle")}</p>
@@ -1036,10 +1037,10 @@ const CoachSchedule = () => {
                 </p>
               </div>
             </div>
-          </div>
+          </Card>
 
           {/* Weekly Availability Card */}
-          <div className="card-elevated">
+          <Card variant="glass">
             <div className="p-4 border-b border-border">
               <h3 className="font-display font-bold text-foreground">{t("schedule.weeklyAvailability.title")}</h3>
               <p className="text-sm text-muted-foreground">{t("schedule.weeklyAvailability.subtitle")}</p>
@@ -1103,10 +1104,10 @@ const CoachSchedule = () => {
                 })}
               </div>
             )}
-          </div>
+          </Card>
 
           {/* Session Types */}
-          <div className="card-elevated mt-6">
+          <Card variant="glass" className="mt-6">
             <div className="p-4 border-b border-border flex items-center justify-between">
               <div>
                 <h3 className="font-display font-bold text-foreground">{t("schedule.sessionTypes.title")}</h3>
@@ -1166,7 +1167,7 @@ const CoachSchedule = () => {
                 ))}
               </div>
             )}
-          </div>
+          </Card>
         </TabsContent>
       </Tabs>
 

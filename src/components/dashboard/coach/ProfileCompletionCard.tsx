@@ -3,6 +3,7 @@ import { Check, Circle, Trophy, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { useCoachProfileCompletion } from "@/hooks/useCoachProfileCompletion";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -13,7 +14,7 @@ export const ProfileCompletionCard = () => {
 
   if (isLoading) {
     return (
-      <div className="card-elevated p-4 mb-6">
+      <Card variant="glass" className="p-4 mb-6">
         <Skeleton className="h-4 w-48 mb-2" />
         <Skeleton className="h-2 w-full mb-4" />
         <div className="space-y-2">
@@ -21,7 +22,7 @@ export const ProfileCompletionCard = () => {
           <Skeleton className="h-8 w-full" />
           <Skeleton className="h-8 w-full" />
         </div>
-      </div>
+      </Card>
     );
   }
 
@@ -30,7 +31,7 @@ export const ProfileCompletionCard = () => {
   const { percentage, completedSteps, incompleteSteps, isFullyComplete } = data;
 
   return (
-    <div className="card-elevated p-4 mb-6">
+    <Card variant="glass" className="p-4 mb-6">
       {/* Header */}
       <div 
         className="flex items-center justify-between cursor-pointer"
@@ -138,6 +139,6 @@ export const ProfileCompletionCard = () => {
           )}
         </div>
       )}
-    </div>
+    </Card>
   );
 };
