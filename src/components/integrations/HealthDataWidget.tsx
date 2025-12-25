@@ -124,7 +124,7 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
 
   if (isLoading && !wearablesError && wearablesLoading) {
     return (
-      <Card className={cn("bg-card/50 border-border/50", className)}>
+      <Card variant="glass" className={cn(className)}>
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">
             <Activity className="w-5 h-5 text-primary" />
@@ -144,7 +144,7 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
 
   if (wearablesError || !hasConnectedDevice) {
     return (
-      <Card className={cn("bg-card/50 border-border/50", className)}>
+      <Card variant="glass" className={cn(className)}>
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">
             <Activity className="w-5 h-5 text-primary" />
@@ -177,7 +177,7 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
   const displayMetrics = metrics;
 
   return (
-    <Card className={cn("bg-card/50 border-border/50", className)}>
+    <Card variant="glass" className={cn(className)}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div className="flex flex-col">

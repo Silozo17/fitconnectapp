@@ -7,15 +7,19 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-card border border-border shadow-elevation-1",
-        elevated: "bg-card border border-border/50 shadow-elevation-3 hover:shadow-elevation-4 hover:-translate-y-1",
-        floating: "bg-card border border-border/30 shadow-float-md hover:shadow-float-lg hover:-translate-y-1",
+        // Default now uses glass styling for consistent platform look
+        default: "glass-card",
+        elevated: "glass-card-elevated",
+        floating: "glass-floating",
         glass: "glass-card",
         "glass-elevated": "glass-card-elevated",
         "glass-interactive": "glass-interactive cursor-pointer",
         "glass-subtle": "glass-subtle",
         "glass-premium": "glass-premium",
         ghost: "bg-transparent border-none shadow-none",
+        // Solid variants for when you need opaque backgrounds
+        solid: "bg-card border border-border shadow-elevation-1",
+        "solid-elevated": "bg-card border border-border/50 shadow-elevation-3 hover:shadow-elevation-4 hover:-translate-y-1",
       },
     },
     defaultVariants: {
