@@ -228,12 +228,16 @@ const CoachAchievements = () => {
       <div
         key={badge.id}
         className={cn(
-          "p-4 rounded-xl border transition-all glass-card",
-          isEarned ? rarityColors[badge.rarity] : "border-white/10 opacity-80"
+          "relative p-4 rounded-xl border transition-all glass-card overflow-hidden",
+          isEarned ? rarityColors[badge.rarity] : "border-white/10 opacity-80 grayscale"
         )}
-        style={{ background: gradientStyle }}
       >
-        <div className="flex flex-col sm:flex-row items-start gap-4">
+        {/* Gradient overlay */}
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: gradientStyle }}
+        />
+        <div className="relative flex flex-col sm:flex-row items-start gap-4">
           {/* Left side - Text content */}
           <div className="flex-1 min-w-0 order-2 sm:order-1">
             <h3 className={cn("font-semibold text-lg", isEarned ? "text-foreground" : "text-muted-foreground")}>
