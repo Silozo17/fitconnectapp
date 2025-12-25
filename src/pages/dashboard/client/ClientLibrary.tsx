@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Library, Package, BookOpen, Video, FileText, Headphones, Download, Play, ExternalLink, Lock, RefreshCcw, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -10,6 +10,8 @@ import { useMyLibrary, CONTENT_TYPES, ContentPurchase } from "@/hooks/useDigital
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/currency";
 import { useMarketplaceLinkPrefix } from "@/hooks/useMarketplaceLinkPrefix";
+import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
+import { WebOnlyFeatureDialog } from "@/components/shared/WebOnlyFeatureDialog";
 
 const getContentIcon = (type: string) => {
   switch (type) {
@@ -33,6 +35,16 @@ export default function ClientLibrary() {
   const { toast } = useToast();
   const { data: purchases, isLoading } = useMyLibrary();
   const marketplaceLinkPrefix = useMarketplaceLinkPrefix();
+  const { isNativeMobile } = usePlatformRestrictions();
+  const [showWebOnlyDialog, setShowWebOnlyDialog] = useState(false);
+
+  const handleMarketplaceClick = () => {
+    if (isNativeMobile) {
+      setShowWebOnlyDialog(true);
+    } else {
+      navigate(marketplaceLinkPrefix);
+    }
+  };
 
   // Show success toast if redirected after purchase
   useEffect(() => {
@@ -195,7 +207,7 @@ export default function ClientLibrary() {
               Access your purchased content
             </p>
           </div>
-          <Button onClick={() => navigate(marketplaceLinkPrefix)}>
+          <Button onClick={handleMarketplaceClick}>
             Browse Marketplace
           </Button>
         </div>
@@ -240,13 +252,19 @@ export default function ClientLibrary() {
               <p className="text-muted-foreground mb-6">
                 Browse our marketplace to discover e-books, video courses, templates, and more from top coaches.
               </p>
-              <Button onClick={() => navigate(marketplaceLinkPrefix)} size="lg">
+              <Button onClick={handleMarketplaceClick} size="lg">
                 Explore Marketplace
               </Button>
             </div>
           </Card>
         )}
       </div>
+
+      <WebOnlyFeatureDialog
+        open={showWebOnlyDialog}
+        onOpenChange={setShowWebOnlyDialog}
+        featureName="marketplace"
+      />
     </ClientDashboardLayout>
   );
 }
