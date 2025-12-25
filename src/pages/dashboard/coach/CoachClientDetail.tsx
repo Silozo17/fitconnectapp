@@ -315,6 +315,7 @@ const CoachClientDetail = () => {
 
   return (
     <DashboardLayout title={fullName} description={t('clientDetail.pageDescription')}>
+      <div className="overflow-x-hidden">
       {/* Back Button */}
       <Link to="/dashboard/coach/clients">
         <Button variant="ghost" className="mb-4">
@@ -802,6 +803,7 @@ const CoachClientDetail = () => {
         isUpdating={updatePlanAssignment.isPending}
         isRemoving={removePlanAssignment.isPending}
       />
+      </div>
     </DashboardLayout>
   );
 };
