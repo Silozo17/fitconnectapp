@@ -141,9 +141,9 @@ export function HorizontalScroll({
         </Button>
       )}
 
-      {/* Fade edges on desktop */}
-      <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-background to-transparent pointer-events-none hidden md:block" />
-      <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none hidden md:block" />
+      {/* Fade edges on desktop - don't extend to pagination */}
+      <div className="absolute left-0 top-0 w-8 bg-gradient-to-r from-background to-transparent pointer-events-none hidden md:block" style={{ height: 'calc(100% - 2rem)' }} />
+      <div className="absolute right-0 top-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none hidden md:block" style={{ height: 'calc(100% - 2rem)' }} />
 
       {/* Pagination dots */}
       {showDots && (

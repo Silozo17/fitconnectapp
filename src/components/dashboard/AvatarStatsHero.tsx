@@ -140,7 +140,7 @@ export function AvatarStatsHero({ firstName }: AvatarStatsHeroProps) {
   }
 
   return (
-    <div className="rounded-2xl bg-gradient-to-br from-card via-card/80 to-background border border-border overflow-hidden mb-8">
+    <div className="mb-8">
       <div className="p-6 md:p-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Avatar Section */}
@@ -206,18 +206,8 @@ export function AvatarStatsHero({ firstName }: AvatarStatsHeroProps) {
           
           {/* Stats Section */}
           <div className="flex-1 space-y-6">
-            {/* Welcome & Level */}
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-foreground animate-fade-in">
-                Welcome back{firstName ? `, ${firstName}` : ''}!
-              </h1>
-              <p className="text-muted-foreground mt-1 animate-fade-in" style={{ animationDelay: '100ms' }}>
-                Here's your fitness journey at a glance
-              </p>
-            </div>
-            
             {/* XP Progress Bar */}
-            <div className="space-y-2 animate-fade-in" style={{ animationDelay: '200ms' }}>
+            <div className="space-y-2 animate-fade-in">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 rounded-md bg-primary/20">

@@ -14,11 +14,15 @@ const sizeMap = {
   lg: 180,
 };
 
-// BMI Categories and colors
+// BMI Categories and colors - thresholds based on WHO standards
 const getBMICategory = (bmi: number): { label: string; color: string; hsl: string } => {
-  if (bmi < 18.5) return { label: 'Underweight', color: 'text-blue-400', hsl: 'hsl(217, 91%, 60%)' };
-  if (bmi < 25) return { label: 'Normal', color: 'text-emerald-400', hsl: 'hsl(142, 71%, 45%)' };
-  if (bmi < 30) return { label: 'Overweight', color: 'text-yellow-400', hsl: 'hsl(48, 96%, 53%)' };
+  // Ensure bmi is a valid number
+  const numericBmi = Number(bmi);
+  if (isNaN(numericBmi)) return { label: 'Unknown', color: 'text-muted-foreground', hsl: 'hsl(0, 0%, 50%)' };
+  
+  if (numericBmi < 18.5) return { label: 'Underweight', color: 'text-blue-400', hsl: 'hsl(217, 91%, 60%)' };
+  if (numericBmi < 25) return { label: 'Normal', color: 'text-emerald-400', hsl: 'hsl(142, 71%, 45%)' };
+  if (numericBmi < 30) return { label: 'Overweight', color: 'text-yellow-400', hsl: 'hsl(48, 96%, 53%)' };
   return { label: 'Obese', color: 'text-red-400', hsl: 'hsl(0, 84%, 60%)' };
 };
 

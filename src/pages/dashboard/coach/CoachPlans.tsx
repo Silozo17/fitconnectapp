@@ -164,19 +164,19 @@ const CoachPlans = () => {
             <TabsTrigger value="nutrition">{t("plansPage.nutritionPlans")}</TabsTrigger>
           </TabsList>
 
-          <div className="flex gap-3">
-            <div className="relative">
+          <div className="flex flex-wrap gap-3">
+            <div className="relative flex-1 min-w-0 sm:flex-none sm:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder={t("plansPage.searchPlans")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 w-64"
+                className="pl-10 w-full"
               />
             </div>
-            <Button variant="outline">
-              <Filter className="w-4 h-4 mr-2" />
-              {t("plansPage.filter")}
+            <Button variant="outline" className="shrink-0">
+              <Filter className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">{t("plansPage.filter")}</span>
             </Button>
           </div>
         </div>

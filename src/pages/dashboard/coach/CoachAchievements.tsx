@@ -202,7 +202,15 @@ const CoachAchievements = () => {
     const translationKey = `achievementsPage.badges.${badgeKey}.${field}`;
     const translated = t(translationKey);
     // If translation key returns itself, fall back to database value
-    return translated === translationKey ? badge[field] : translated;
+    if (translated === translationKey) {
+      const originalValue = badge[field];
+      // If the original value looks like a translation key, format it nicely
+      if (originalValue && originalValue.includes('.') && !originalValue.includes(' ')) {
+        return originalValue.split('.').pop()?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || originalValue;
+      }
+      return originalValue;
+    }
+    return translated;
   };
 
   // Get locale for date formatting
