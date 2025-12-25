@@ -35,16 +35,12 @@ const AdminHeader = ({ onMenuToggle }: AdminHeaderProps) => {
 
   return (
     <header className="h-16 border-b border-border bg-card px-4 xl:px-6 flex items-center justify-between sticky top-0 z-10">
+      {/* Left side - Feedback on mobile, Search on desktop */}
       <div className="flex items-center gap-3 flex-1">
-        {/* Mobile Hamburger */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="xl:hidden"
-          onClick={onMenuToggle}
-        >
-          <Menu className="w-5 h-5" />
-        </Button>
+        {/* Feedback - Left on mobile */}
+        <div className="xl:hidden">
+          <FeedbackModal />
+        </div>
 
         {/* Search - Hidden on mobile */}
         <div className="hidden xl:flex flex-1 max-w-md">
@@ -58,12 +54,22 @@ const AdminHeader = ({ onMenuToggle }: AdminHeaderProps) => {
         </div>
       </div>
 
+      {/* Right side */}
       <div className="flex items-center gap-2 sm:gap-4">
-        <ViewSwitcher />
+        {/* View Switcher - Desktop only */}
+        <div className="hidden xl:block">
+          <ViewSwitcher />
+        </div>
         
-        <FeedbackModal />
+        {/* Feedback - Desktop only */}
+        <div className="hidden xl:block">
+          <FeedbackModal />
+        </div>
         
-        <NotificationCenter />
+        {/* Notifications - Desktop only */}
+        <div className="hidden xl:block">
+          <NotificationCenter />
+        </div>
 
         {/* Profile Dropdown - Hidden on mobile */}
         <div className="hidden xl:block">
@@ -101,6 +107,16 @@ const AdminHeader = ({ onMenuToggle }: AdminHeaderProps) => {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+
+        {/* Mobile Hamburger - Right side */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="xl:hidden"
+          onClick={onMenuToggle}
+        >
+          <Menu className="w-5 h-5" />
+        </Button>
       </div>
     </header>
   );

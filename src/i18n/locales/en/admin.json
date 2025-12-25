@@ -508,9 +508,9 @@
     "tableView": "Table View",
     "listView": "List View",
     "selectView": "Select view",
-    "adminView": "Admin View",
-    "coachView": "Coach View",
-    "clientView": "Client View"
+    "adminView": "Admin",
+    "coachView": "Coach",
+    "clientView": "Client"
   },
   "sidebar": {
     "dashboard": "Dashboard",

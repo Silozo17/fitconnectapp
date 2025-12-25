@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Search, LogOut, User, Menu } from "lucide-react";
+import { Search, LogOut, User, Menu, MessageSquarePlus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -45,19 +45,12 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
       aria-label="Dashboard header"
     >
       <div className="flex items-center justify-between h-16 px-4 xl:px-6">
-        {/* Left side - Hamburger + Search (search hidden on mobile) */}
+        {/* Left side - Feedback on mobile, Search on desktop */}
         <div className="flex items-center gap-3 flex-1">
-          {/* Mobile Hamburger */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="xl:hidden"
-            onClick={onMenuToggle}
-            aria-label="Open navigation menu"
-            aria-expanded="false"
-          >
-            <Menu className="w-5 h-5" aria-hidden="true" />
-          </Button>
+          {/* Feedback - Left on mobile, hidden on mobile (shown on right on desktop) */}
+          <div className="xl:hidden">
+            <FeedbackModal />
+          </div>
 
           {/* Search - Hidden on mobile - Premium floating design */}
           <div className="hidden xl:flex flex-1 max-w-md" role="search">
@@ -74,14 +67,22 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
 
         {/* Right side */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* View Switcher - visible for admins or users with multiple profiles */}
-          {(role === "admin" || hasMultipleProfiles) && <ViewSwitcher />}
+          {/* View Switcher - Desktop only */}
+          {(role === "admin" || hasMultipleProfiles) && (
+            <div className="hidden xl:block">
+              <ViewSwitcher />
+            </div>
+          )}
           
-          {/* Feedback */}
-          <FeedbackModal />
+          {/* Feedback - Desktop only */}
+          <div className="hidden xl:block">
+            <FeedbackModal />
+          </div>
           
-          {/* Notifications */}
-          <NotificationCenter />
+          {/* Notifications - Desktop only */}
+          <div className="hidden xl:block">
+            <NotificationCenter />
+          </div>
 
           {/* Profile Dropdown - Hidden on mobile */}
           <div className="hidden xl:block">
@@ -125,6 +126,18 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
+
+          {/* Mobile Hamburger - Right side */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="xl:hidden"
+            onClick={onMenuToggle}
+            aria-label="Open navigation menu"
+            aria-expanded="false"
+          >
+            <Menu className="w-5 h-5" aria-hidden="true" />
+          </Button>
         </div>
       </div>
     </header>

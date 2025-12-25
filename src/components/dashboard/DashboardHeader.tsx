@@ -48,19 +48,12 @@ const DashboardHeader = memo(({ subscriptionTier, onMenuToggle }: DashboardHeade
       aria-label="Dashboard header"
     >
       <div className="h-full px-4 xl:px-6 flex items-center justify-between">
-        {/* Left side - Hamburger + Search (search hidden on mobile) */}
+        {/* Left side - Feedback on mobile, Search on desktop */}
         <div className="flex items-center gap-3 flex-1">
-          {/* Mobile Hamburger */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="xl:hidden"
-            onClick={onMenuToggle}
-            aria-label="Open navigation menu"
-            aria-expanded="false"
-          >
-            <Menu className="w-5 h-5" aria-hidden="true" />
-          </Button>
+          {/* Feedback - Left on mobile */}
+          <div className="xl:hidden">
+            <FeedbackModal />
+          </div>
 
           {/* Search - Hidden on mobile - Premium floating design */}
           <div className="hidden xl:flex flex-1 max-w-md" role="search">
@@ -77,19 +70,27 @@ const DashboardHeader = memo(({ subscriptionTier, onMenuToggle }: DashboardHeade
 
         {/* Right Section */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Role Switcher - for admins and coaches */}
-          {(role === "admin" || role === "manager" || role === "staff" || role === "coach") && <ViewSwitcher />}
+          {/* Role Switcher - Desktop only */}
+          {(role === "admin" || role === "manager" || role === "staff" || role === "coach") && (
+            <div className="hidden xl:block">
+              <ViewSwitcher />
+            </div>
+          )}
           
-          {/* Subscription Tier - Premium pill design */}
-          <span className="hidden sm:inline-flex px-3 py-1.5 rounded-full text-xs font-bold bg-primary/15 text-primary border border-primary/20">
+          {/* Subscription Tier - Desktop only - Premium pill design */}
+          <span className="hidden xl:inline-flex px-3 py-1.5 rounded-full text-xs font-bold bg-primary/15 text-primary border border-primary/20">
             {tierLabel}
           </span>
 
-          {/* Feedback */}
-          <FeedbackModal />
+          {/* Feedback - Desktop only */}
+          <div className="hidden xl:block">
+            <FeedbackModal />
+          </div>
 
-          {/* Notifications */}
-          <NotificationCenter />
+          {/* Notifications - Desktop only */}
+          <div className="hidden xl:block">
+            <NotificationCenter />
+          </div>
 
           {/* Profile Dropdown - Hidden on mobile */}
           <div className="hidden xl:block">
@@ -132,6 +133,18 @@ const DashboardHeader = memo(({ subscriptionTier, onMenuToggle }: DashboardHeade
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
+
+          {/* Mobile Hamburger - Right side */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="xl:hidden"
+            onClick={onMenuToggle}
+            aria-label="Open navigation menu"
+            aria-expanded="false"
+          >
+            <Menu className="w-5 h-5" aria-hidden="true" />
+          </Button>
         </div>
       </div>
     </header>

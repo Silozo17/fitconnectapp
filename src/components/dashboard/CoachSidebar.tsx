@@ -39,6 +39,8 @@ import { useSelectedAvatar } from "@/hooks/useAvatars";
 import { Rarity } from "@/lib/avatar-utils";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { FeatureKey } from "@/lib/feature-config";
+import ViewSwitcher from "@/components/admin/ViewSwitcher";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import {
   Collapsible,
   CollapsibleContent,
@@ -406,7 +408,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
 
       {/* Mobile Sidebar */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="w-64 p-0 flex flex-col bg-sidebar" onOpenAutoFocus={(e) => e.preventDefault()}>
+        <SheetContent side="left" className="w-72 p-0 flex flex-col bg-sidebar" onOpenAutoFocus={(e) => e.preventDefault()}>
           {/* Logo */}
           <div className="p-4 border-b border-sidebar-border">
             <div className="flex items-center gap-3">
@@ -417,6 +419,12 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
                 {t("app.name")}
               </span>
             </div>
+          </div>
+
+          {/* View Switcher & Notifications - Mobile only */}
+          <div className="p-3 border-b border-sidebar-border flex items-center justify-between gap-2">
+            <ViewSwitcher />
+            <NotificationCenter />
           </div>
 
           {/* Search - Mobile only */}
