@@ -421,6 +421,33 @@
       inset 1px 0 0 hsl(0 0% 100% / 0.03);
   }
 
+  /* Glass item - for list rows/items within glass cards */
+  .glass-item {
+    background: hsl(var(--card) / 0.15);
+    @apply rounded-xl transition-colors;
+  }
+
+  .glass-item:hover {
+    background: hsl(var(--card) / 0.25);
+  }
+
+  /* Backward compatibility alias - maps to glass-card-elevated */
+  .card-elevated {
+    background: linear-gradient(145deg, 
+      hsl(var(--card) / 0.3), 
+      hsl(var(--card) / 0.18));
+    backdrop-filter: blur(48px) saturate(160%);
+    -webkit-backdrop-filter: blur(48px) saturate(160%);
+    @apply border border-border/25 rounded-2xl transition-all duration-300;
+    box-shadow: 
+      0 12px 40px hsl(0 0% 0% / 0.35),
+      0 4px 16px hsl(0 0% 0% / 0.25),
+      inset 0 1px 0 hsl(0 0% 100% / 0.15),
+      inset 1px 0 0 hsl(0 0% 100% / 0.08),
+      inset 0 -1px 0 hsl(0 0% 0% / 0.18),
+      inset -1px 0 0 hsl(0 0% 0% / 0.1);
+  }
+
   /* Interactive glass - for buttons/clickable elements */
   .glass-interactive {
     background: linear-gradient(135deg, 

@@ -17,6 +17,7 @@ import { FeatureGate } from "@/components/FeatureGate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
@@ -120,7 +121,7 @@ const CoachPlans = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="card-elevated p-4">
+        <Card variant="glass" className="p-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <Dumbbell className="w-5 h-5 text-primary" />
@@ -130,8 +131,8 @@ const CoachPlans = () => {
               <p className="text-sm text-muted-foreground">{t("plansPage.workoutPlans")}</p>
             </div>
           </div>
-        </div>
-        <div className="card-elevated p-4">
+        </Card>
+        <Card variant="glass" className="p-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center">
               <Apple className="w-5 h-5 text-success" />
@@ -141,8 +142,8 @@ const CoachPlans = () => {
               <p className="text-sm text-muted-foreground">{t("plansPage.nutritionPlans")}</p>
             </div>
           </div>
-        </div>
-        <div className="card-elevated p-4">
+        </Card>
+        <Card variant="glass" className="p-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
               <Users className="w-5 h-5 text-accent" />
@@ -152,7 +153,7 @@ const CoachPlans = () => {
               <p className="text-sm text-muted-foreground">{t("plansPage.activeAssignments")}</p>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
 
       {/* Tabs */}
@@ -184,7 +185,7 @@ const CoachPlans = () => {
         <TabsContent value="workout">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filterPlans(workoutPlans).map((plan) => (
-              <div key={plan.id} className="card-elevated p-6 hover-lift">
+              <Card key={plan.id} variant="glass" className="p-6 hover:-translate-y-1 transition-transform">
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
                     <Dumbbell className="w-6 h-6 text-primary" />
@@ -226,18 +227,18 @@ const CoachPlans = () => {
                   </div>
                   <span>{format(new Date(plan.created_at), "MMM d, yyyy")}</span>
                 </div>
-              </div>
+              </Card>
             ))}
 
             {/* Create New Card */}
             <Link to="/dashboard/coach/plans/new">
-              <div className="card-elevated p-6 border-2 border-dashed border-border hover:border-primary/50 transition-colors flex flex-col items-center justify-center min-h-[200px] cursor-pointer">
+              <Card variant="glass" className="p-6 border-2 border-dashed border-border hover:border-primary/50 transition-colors flex flex-col items-center justify-center min-h-[200px] cursor-pointer">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
                   <Plus className="w-6 h-6 text-primary" />
                 </div>
                 <p className="font-medium text-foreground">{t("plansPage.createNewPlan")}</p>
                 <p className="text-sm text-muted-foreground">{t("plansPage.buildCustomWorkout")}</p>
-              </div>
+              </Card>
             </Link>
           </div>
 
@@ -255,7 +256,7 @@ const CoachPlans = () => {
               const content = plan.content as any;
               const targetCalories = content?.targets?.calories;
               return (
-                <div key={plan.id} className="card-elevated p-6 hover-lift">
+                <Card key={plan.id} variant="glass" className="p-6 hover:-translate-y-1 transition-transform">
                   <div className="flex items-start justify-between mb-4">
                     <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
                       <Apple className="w-6 h-6 text-success" />
@@ -298,19 +299,19 @@ const CoachPlans = () => {
                     </span>
                     <span>{format(new Date(plan.created_at), "MMM d, yyyy")}</span>
                   </div>
-                </div>
+                </Card>
               );
             })}
 
             {/* Create New Card */}
             <Link to="/dashboard/coach/plans/nutrition/new">
-              <div className="card-elevated p-6 border-2 border-dashed border-border hover:border-success/50 transition-colors flex flex-col items-center justify-center min-h-[200px] cursor-pointer">
+              <Card variant="glass" className="p-6 border-2 border-dashed border-border hover:border-success/50 transition-colors flex flex-col items-center justify-center min-h-[200px] cursor-pointer">
                 <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center mb-3">
                   <Plus className="w-6 h-6 text-success" />
                 </div>
                 <p className="font-medium text-foreground">{t("plansPage.createNutritionPlan")}</p>
                 <p className="text-sm text-muted-foreground">{t("plansPage.buildCustomMeal")}</p>
-              </div>
+              </Card>
             </Link>
           </div>
 

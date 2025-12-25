@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -102,7 +103,7 @@ const CoachEarnings = () => {
 
       {/* Stripe Connect Notice */}
       {!hasStripeConnected && (
-        <div className="card-elevated p-4 mb-6 border-warning/30 bg-warning/5">
+        <Card variant="glass" className="p-4 mb-6 border-warning/30 bg-warning/5">
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-warning mt-0.5" />
             <div className="flex-1">
@@ -113,13 +114,13 @@ const CoachEarnings = () => {
               {t("earnings.connectStripe")}
             </Button>
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {/* Net Revenue (Primary) */}
-        <div className="card-elevated p-6">
+        <Card variant="glass" className="p-6">
           <div className="flex items-center justify-between mb-3">
             <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
               <PoundSterling className="w-6 h-6 text-success" />
@@ -144,9 +145,9 @@ const CoachEarnings = () => {
           <p className="text-3xl font-display font-bold text-foreground">{formatCurrency(stats.netRevenue)}</p>
           <p className="text-sm text-muted-foreground">{t("earnings.netRevenue")}</p>
           <p className="text-xs text-muted-foreground mt-1">{t("earnings.afterPlatformFee", { rate: stats.commissionRate })}</p>
-        </div>
+        </Card>
 
-        <div className="card-elevated p-6">
+        <Card variant="glass" className="p-6">
           <div className="flex items-center justify-between mb-3">
             <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
               <Calendar className="w-6 h-6 text-primary" />
@@ -160,9 +161,9 @@ const CoachEarnings = () => {
           </div>
           <p className="text-3xl font-display font-bold text-foreground">{stats.sessions}</p>
           <p className="text-sm text-muted-foreground">{t("earnings.sessionsCompleted")}</p>
-        </div>
+        </Card>
 
-        <div className="card-elevated p-6">
+        <Card variant="glass" className="p-6">
           <div className="flex items-center justify-between mb-3">
             <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
               <PoundSterling className="w-6 h-6 text-accent" />
@@ -170,9 +171,9 @@ const CoachEarnings = () => {
           </div>
           <p className="text-3xl font-display font-bold text-foreground">{formatCurrency(stats.avgSession)}</p>
           <p className="text-sm text-muted-foreground">{t("earnings.avgNetPerSession")}</p>
-        </div>
+        </Card>
 
-        <div className="card-elevated p-6">
+        <Card variant="glass" className="p-6">
           <div className="flex items-center justify-between mb-3">
             <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center">
               <Clock className="w-6 h-6 text-warning" />
@@ -180,11 +181,11 @@ const CoachEarnings = () => {
           </div>
           <p className="text-3xl font-display font-bold text-foreground">{formatCurrency(stats.pending)}</p>
           <p className="text-sm text-muted-foreground">{t("earnings.pendingNet")}</p>
-        </div>
+        </Card>
       </div>
 
       {/* Revenue Chart */}
-      <div className="card-elevated p-6 mb-6">
+      <Card variant="glass" className="p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-display font-bold text-foreground">{t("earnings.revenueOverview")}</h3>
           <Badge variant="outline" className="text-xs">
@@ -220,7 +221,7 @@ const CoachEarnings = () => {
             </div>
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Tabs */}
       <Tabs defaultValue="transactions" className="space-y-6">
@@ -232,7 +233,7 @@ const CoachEarnings = () => {
 
         {/* Transactions Tab */}
         <TabsContent value="transactions">
-          <div className="card-elevated">
+          <Card variant="glass">
             <div className="p-4 border-b border-border flex items-center justify-between">
               <h3 className="font-display font-bold text-foreground">{t("earnings.recentTransactions")}</h3>
               <Button variant="outline" size="sm">
@@ -305,7 +306,7 @@ const CoachEarnings = () => {
                 <p className="text-sm text-muted-foreground mt-1">{t("earnings.transactionsWillAppear")}</p>
               </div>
             )}
-          </div>
+          </Card>
         </TabsContent>
 
         {/* Payouts Tab */}
