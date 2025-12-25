@@ -423,6 +423,28 @@ export const ANDROID_IAP_PRODUCT_IDS = {
 // Legacy export for backwards compatibility
 export const IAP_PRODUCT_IDS = IOS_IAP_PRODUCT_IDS;
 
+/**
+ * iOS App Store Boost product ID
+ * Placeholder - user will provide the actual ID from App Store Connect
+ */
+export const IOS_BOOST_PRODUCT_ID = 'fitconnect.boost.30day';
+
+/**
+ * Android Google Play Boost product ID
+ * Placeholder - user will provide the actual ID from Google Play Console
+ */
+export const ANDROID_BOOST_PRODUCT_ID = 'boost.30day.play:boost-30day-play';
+
+/**
+ * Get the platform-specific boost product ID
+ * @returns The boost product ID for the current platform, or null if not in native environment
+ */
+export const getBoostProductId = (): string | null => {
+  if (isDespiaAndroid()) return ANDROID_BOOST_PRODUCT_ID;
+  if (isDespiaIOS()) return IOS_BOOST_PRODUCT_ID;
+  return null;
+};
+
 export type IAPProductId = typeof IOS_IAP_PRODUCT_IDS[keyof typeof IOS_IAP_PRODUCT_IDS] | 
                            typeof ANDROID_IAP_PRODUCT_IDS[keyof typeof ANDROID_IAP_PRODUCT_IDS];
 

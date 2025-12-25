@@ -83,6 +83,21 @@ const productToTier: Record<string, string> = {
   "fitconnect_enterprise_yearly": "enterprise",
 };
 
+// Boost product IDs (one-time purchases)
+const boostProductIds = [
+  // iOS
+  "fitconnect.boost.30day",
+  // Android (just the product ID part, before the colon)
+  "boost.30day.play",
+];
+
+/**
+ * Check if a product ID is a boost product
+ */
+const isBoostProduct = (productId: string): boolean => {
+  return boostProductIds.some(id => productId.includes(id));
+};
+
 // Extract coach ID from RevenueCat app_user_id
 // We expect the app_user_id to be the coach's profile ID or user ID
 const extractCoachId = async (
@@ -171,6 +186,35 @@ serve(async (req) => {
     switch (event.type) {
       case "INITIAL_PURCHASE": {
         logStep("Processing INITIAL_PURCHASE", { coachId, tier, productId: event.product_id });
+
+        // Check if this is a boost purchase
+        if (event.product_id && isBoostProduct(event.product_id)) {
+          logStep("Processing BOOST purchase", { coachId, productId: event.product_id });
+          
+          const now = new Date();
+          const endDate = new Date(now);
+          endDate.setDate(endDate.getDate() + 30); // 30-day boost
+          
+          const { error: boostError } = await supabase
+            .from("coach_boosts")
+            .upsert({
+              coach_id: coachId,
+              is_active: true,
+              boost_start_date: now.toISOString(),
+              boost_end_date: endDate.toISOString(),
+              payment_status: "succeeded",
+              activation_payment_intent_id: `rc_${event.transaction_id || event.original_transaction_id}`,
+              activated_at: now.toISOString(),
+              updated_at: now.toISOString(),
+            }, { onConflict: "coach_id" });
+
+          if (boostError) {
+            logStep("Error activating boost", { error: boostError.message });
+          } else {
+            logStep("Successfully activated boost via IAP", { coachId, endDate: endDate.toISOString() });
+          }
+          break;
+        }
 
         if (!tier) {
           logStep("Unknown product ID", { productId: event.product_id });
