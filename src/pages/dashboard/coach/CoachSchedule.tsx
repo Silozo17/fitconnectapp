@@ -57,7 +57,7 @@ import {
   useRespondToBooking,
   type SessionType,
 } from "@/hooks/useCoachSchedule";
-import { format, addDays, startOfWeek, isSameDay, parseISO } from "date-fns";
+import { format, addDays, startOfWeek, isSameDay, isSameWeek, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { getCurrencySymbol, type CurrencyCode } from "@/lib/currency";
@@ -491,30 +491,49 @@ const CoachSchedule = () => {
     }
   };
 
-  // Get session for slot - return session if it STARTS at this slot
+  // Get session for slot - return session if it STARTS within this hour
   const getSessionForSlot = (dayIndex: number, time: string) => {
     const date = weekDates[dayIndex];
+    const [slotHour] = time.split(':').map(Number);
+    
     return sessions.find(s => {
       const sessionDate = parseISO(s.scheduled_at);
-      const sessionTime = format(sessionDate, "HH:mm");
-      return isSameDay(sessionDate, date) && sessionTime === time;
+      const sessionHour = sessionDate.getHours();
+      return isSameDay(sessionDate, date) && sessionHour === slotHour;
     });
   };
 
-  // Check if a slot is covered by a multi-hour session that started earlier
+  // Calculate top offset (in pixels) based on start minute within the hour slot
+  // Each hour slot is 60px, so 1 minute = 1px
+  const getSessionTopOffset = (session: typeof sessions[0]) => {
+    const sessionDate = parseISO(session.scheduled_at);
+    return sessionDate.getMinutes(); // 0, 15, 30, 45, etc.
+  };
+
+  // Calculate session height in pixels based on duration (1 minute = 1px)
+  const getSessionHeight = (session: typeof sessions[0]) => {
+    return session.duration_minutes;
+  };
+
+  // Check if a slot is covered by a session that started in an earlier hour
   const isSlotCoveredBySession = (dayIndex: number, time: string) => {
     const date = weekDates[dayIndex];
     const [slotHour] = time.split(':').map(Number);
+    const slotStartMinutes = slotHour * 60;
     
     return sessions.find(s => {
       const sessionDate = parseISO(s.scheduled_at);
       if (!isSameDay(sessionDate, date)) return false;
       
       const sessionStartHour = sessionDate.getHours();
-      const sessionEndHour = sessionStartHour + Math.ceil(s.duration_minutes / 60);
+      const sessionStartMinutes = sessionStartHour * 60 + sessionDate.getMinutes();
+      const sessionEndMinutes = sessionStartMinutes + s.duration_minutes;
       
-      // Check if this slot is covered (but not the start slot)
-      return slotHour > sessionStartHour && slotHour < sessionEndHour;
+      // This slot is "covered" if session started before this slot AND extends into this slot
+      // But only if the session didn't START in this slot's hour
+      if (sessionStartHour === slotHour) return false;
+      
+      return sessionStartMinutes < slotStartMinutes && sessionEndMinutes > slotStartMinutes;
     });
   };
 
@@ -540,11 +559,6 @@ const CoachSchedule = () => {
     return event;
   };
 
-  // Get session span in hours
-  const getSessionSpan = (session: typeof sessions[0]) => {
-    return Math.ceil(session.duration_minutes / 60);
-  };
-
   // Get external event span in hours
   const getEventSpan = (event: typeof externalEvents[0], dayIndex: number) => {
     const eventStart = new Date(event.start_time);
@@ -553,7 +567,32 @@ const CoachSchedule = () => {
     return Math.max(1, Math.ceil(hoursSpan));
   };
 
-  const currentWeekLabel = `${format(weekStart, "MMM d")} - ${format(addDays(weekStart, 6), "d, yyyy")}`;
+  // Check if viewing current week
+  const isCurrentWeek = isSameWeek(weekStart, new Date(), { weekStartsOn: 1 });
+
+  // Get week label - show both months/years if spanning
+  const weekEndDate = addDays(weekStart, 6);
+  const startYear = format(weekStart, "yyyy");
+  const endYear = format(weekEndDate, "yyyy");
+  const startMonth = format(weekStart, "MMM");
+  const endMonth = format(weekEndDate, "MMM");
+  
+  let currentWeekLabel: string;
+  if (startYear !== endYear) {
+    // Crossing year boundary: "Dec 29, 2025 - Jan 4, 2026"
+    currentWeekLabel = `${format(weekStart, "MMM d, yyyy")} - ${format(weekEndDate, "MMM d, yyyy")}`;
+  } else if (startMonth !== endMonth) {
+    // Same year, different months: "Dec 22 - Jan 4, 2026"
+    currentWeekLabel = `${format(weekStart, "MMM d")} - ${format(weekEndDate, "MMM d, yyyy")}`;
+  } else {
+    // Same month: "Dec 22 - 28, 2025"
+    currentWeekLabel = `${format(weekStart, "MMM d")} - ${format(weekEndDate, "d, yyyy")}`;
+  }
+
+  // Navigate to today's week
+  const goToToday = () => {
+    setWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }));
+  };
 
   return (
     <DashboardLayout title={t("schedule.title")} description={t("schedule.description")}>
@@ -608,7 +647,17 @@ const CoachSchedule = () => {
                   <Button variant="ghost" size="icon" onClick={() => setWeekStart(prev => addDays(prev, -7))}>
                     <ChevronLeft className="w-5 h-5" />
                   </Button>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3">
+                    {!isCurrentWeek && (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={goToToday}
+                        className="text-primary border-primary/30 hover:bg-primary/10"
+                      >
+                        {t("schedule.today")}
+                      </Button>
+                    )}
                     <span className="font-display font-bold text-foreground">{currentWeekLabel}</span>
                     <Button 
                       variant="outline" 
@@ -699,21 +748,22 @@ const CoachSchedule = () => {
                               >
                                 {session && (
                                   <div 
-                                    className={`absolute left-1 right-1 top-1 rounded-lg text-xs z-10 overflow-hidden ${
+                                    className={`absolute left-1 right-1 rounded-lg text-xs z-10 overflow-hidden ${
                                       session.is_online 
                                         ? 'bg-primary/20 border border-primary/30' 
                                         : 'bg-accent/20 border border-accent/30'
                                     }`}
                                     style={{
-                                      height: `${getSessionSpan(session) * 60 - 8}px`
+                                      top: `${getSessionTopOffset(session)}px`,
+                                      height: `${getSessionHeight(session) - 4}px`
                                     }}
                                   >
-                                    <div className="p-2">
+                                    <div className="p-2 h-full flex flex-col">
                                       <p className="font-medium text-foreground truncate">
                                         {session.client?.first_name} {session.client?.last_name || t("schedule.externalClient")}
                                       </p>
                                       <p className="text-muted-foreground truncate">{session.session_type}</p>
-                                      <div className="flex items-center gap-1 mt-1">
+                                      <div className="flex items-center gap-1 mt-auto">
                                         {session.is_online ? (
                                           <Video className="w-3 h-3 text-primary" />
                                         ) : (

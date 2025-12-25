@@ -890,6 +890,7 @@
     "title": "Schedule",
     "subtitle": "Manage your availability",
     "description": "Manage your availability and bookings.",
+    "today": "Today",
     "pageDescription": "Manage your calendar, availability, and booking requests",
     "addSession": "Add Session",
     "calendar": "Calendar",
