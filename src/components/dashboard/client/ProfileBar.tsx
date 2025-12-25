@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronDown, Bell } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,20 +25,22 @@ export function ProfileBar() {
     : profile?.avatar_url || '/placeholder.svg';
   
   const currentLevel = xpData?.current_level || 1;
+  const totalXP = xpData?.total_xp || 0;
+  const xpToNext = xpData?.xp_to_next_level || 100;
   const levelTitle = getLevelTitle(currentLevel);
+  
+  // Calculate XP progress percentage
+  const xpProgress = Math.min(100, Math.round((totalXP / (totalXP + xpToNext)) * 100));
   
   if (isLoading) {
     return (
-      <Card className="mb-6 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Skeleton className="h-12 w-12 rounded-full" />
-            <div className="space-y-2">
-              <Skeleton className="h-5 w-32" />
-              <Skeleton className="h-4 w-24" />
-            </div>
+      <Card variant="elevated" className="mb-6 p-5">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-16 w-16 rounded-2xl" />
+          <div className="space-y-2 flex-1">
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-4 w-48" />
           </div>
-          <Skeleton className="h-8 w-8 rounded-full" />
         </div>
       </Card>
     );
@@ -46,57 +48,60 @@ export function ProfileBar() {
   
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <Card className="mb-6 overflow-hidden">
+      <Card variant="elevated" className="mb-6 overflow-hidden">
         <CollapsibleTrigger asChild>
-          <button className="w-full p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
-            <div className="flex items-center gap-3">
-              {/* Avatar */}
-              <div className="relative h-12 w-12 rounded-full overflow-hidden bg-muted border-2 border-primary/30">
-                <img
-                  src={avatarUrl}
-                  alt={displayName}
-                  className="h-full w-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/placeholder.svg';
-                  }}
-                />
-              </div>
-              
-              {/* Name and Level */}
-              <div className="text-left">
-                <h2 className="font-semibold text-foreground">{displayName}</h2>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium">
-                    Level {currentLevel}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {levelTitle}
-                  </span>
+          <button className="w-full p-5 flex items-center gap-4 hover:bg-secondary/30 transition-all duration-200">
+            {/* Avatar - Premium styling */}
+            <div className="relative">
+              <div className="h-16 w-16 rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20 p-0.5">
+                <div className="h-full w-full rounded-[14px] overflow-hidden bg-card">
+                  <img
+                    src={avatarUrl}
+                    alt={displayName}
+                    className="h-full w-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/placeholder.svg';
+                    }}
+                  />
                 </div>
+              </div>
+              {/* Level badge */}
+              <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-elevation-2">
+                {currentLevel}
               </div>
             </div>
             
-            <div className="flex items-center gap-2">
-              {/* Notification Bell */}
-              <Button variant="ghost" size="icon" asChild className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                <Link to="/dashboard/client/notifications">
-                  <Bell className="h-4 w-4 text-muted-foreground" />
-                </Link>
-              </Button>
+            {/* Info */}
+            <div className="flex-1 text-left">
+              <h2 className="font-semibold text-lg text-foreground font-display">{displayName}</h2>
+              <p className="text-sm text-muted-foreground">{levelTitle}</p>
               
-              {/* Expand/Collapse Chevron */}
-              <ChevronDown 
-                className={cn(
-                  'h-5 w-5 text-muted-foreground transition-transform duration-200',
-                  isOpen && 'rotate-180'
-                )} 
-              />
+              {/* XP Progress bar */}
+              <div className="mt-2 flex items-center gap-2">
+                <div className="flex-1 h-1.5 bg-secondary rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-500"
+                    style={{ width: `${xpProgress}%` }}
+                  />
+                </div>
+                <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                  {totalXP} XP
+                </span>
+              </div>
             </div>
+            
+            {/* Expand indicator */}
+            <ChevronRight 
+              className={cn(
+                'h-5 w-5 text-muted-foreground transition-transform duration-300',
+                isOpen && 'rotate-90'
+              )} 
+            />
           </button>
         </CollapsibleTrigger>
         
-        <CollapsibleContent className="border-t border-border">
-          <div className="p-4 pt-0">
+        <CollapsibleContent className="border-t border-border/50">
+          <div className="p-5 pt-0">
             <AvatarStatsHero firstName={profile?.first_name || ''} />
           </div>
         </CollapsibleContent>

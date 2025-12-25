@@ -54,10 +54,10 @@ const UserConnectionRequests = () => {
 
   if (loading) {
     return (
-      <Card className="mb-8">
+      <Card variant="elevated" className="mb-8">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <UserPlus className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 font-display">
+            <UserPlus className="h-5 w-5 text-primary" />
             Friend Requests
           </CardTitle>
         </CardHeader>
@@ -73,16 +73,18 @@ const UserConnectionRequests = () => {
   // Show empty state if there are no pending requests
   if (pendingRequests.length === 0) {
     return (
-      <Card className="mb-8">
+      <Card variant="elevated" className="mb-8">
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2">
-            <UserPlus className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 font-display">
+            <UserPlus className="h-5 w-5 text-primary" />
             Friend Requests
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-6 text-muted-foreground">
-            <UserPlus className="h-8 w-8 mx-auto mb-2 opacity-50" />
+          <div className="text-center py-8 text-muted-foreground">
+            <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-muted/50 flex items-center justify-center">
+              <UserPlus className="h-7 w-7 opacity-50" />
+            </div>
             <p className="text-sm">No pending friend requests</p>
           </div>
         </CardContent>
@@ -91,18 +93,20 @@ const UserConnectionRequests = () => {
   }
 
   return (
-    <Card className="mb-8">
+    <Card variant="elevated" className="mb-8">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <UserPlus className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 font-display">
+            <UserPlus className="h-5 w-5 text-primary" />
             Friend Requests
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
             </span>
           </CardTitle>
-          <Badge variant="secondary">{pendingRequests.length} pending</Badge>
+          <Badge className="bg-primary/15 text-primary border-primary/20 rounded-full px-3">
+            {pendingRequests.length} pending
+          </Badge>
         </div>
       </CardHeader>
       <CardContent>
@@ -110,11 +114,11 @@ const UserConnectionRequests = () => {
           {pendingRequests.map((request) => (
             <div
               key={request.id}
-              className="flex items-start gap-4 p-4 rounded-lg bg-secondary/30 border border-border/50 animate-fade-in"
+              className="flex items-start gap-4 p-4 rounded-2xl bg-secondary/30 border border-border/50 animate-fade-in hover:bg-secondary/50 transition-colors"
             >
-              <Avatar className="h-12 w-12">
-                <AvatarImage src={getAvatarUrl(request.profile)} />
-                <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+              <Avatar className="h-12 w-12 rounded-xl">
+                <AvatarImage src={getAvatarUrl(request.profile)} className="rounded-xl" />
+                <AvatarFallback className="bg-primary/10 text-primary font-semibold rounded-xl">
                   {getInitials(request.profile)}
                 </AvatarFallback>
               </Avatar>
@@ -142,7 +146,7 @@ const UserConnectionRequests = () => {
                 )}
 
                 {request.message && (
-                  <div className="flex items-start gap-2 p-2 bg-background rounded-md mt-2">
+                  <div className="flex items-start gap-2 p-3 bg-background rounded-xl mt-2">
                     <MessageSquare className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                     <p className="text-sm text-muted-foreground line-clamp-2">
                       {request.message}
@@ -153,10 +157,11 @@ const UserConnectionRequests = () => {
 
               <div className="flex gap-2 flex-shrink-0">
                 <Button
-                  size="sm"
+                  size="icon-sm"
                   variant="outline"
                   onClick={() => handleReject(request.id)}
                   disabled={processingId === request.id}
+                  className="rounded-xl"
                 >
                   {processingId === request.id ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -168,6 +173,7 @@ const UserConnectionRequests = () => {
                   size="sm"
                   onClick={() => handleAccept(request.id)}
                   disabled={processingId === request.id}
+                  className="rounded-xl"
                 >
                   {processingId === request.id ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
