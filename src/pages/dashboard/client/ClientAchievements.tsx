@@ -117,7 +117,7 @@ function AchievementsContent() {
         
         <TabsContent value="badges">
           <ErrorBoundary fallback={
-            <Card className="rounded-3xl border-border/50 bg-card/50 backdrop-blur-sm">
+            <Card variant="glass" className="rounded-3xl">
               <CardContent className="py-12">
                 <div className="text-center text-muted-foreground">
                   <div className="w-16 h-16 rounded-3xl bg-destructive/10 flex items-center justify-center mx-auto mb-4">
@@ -142,7 +142,7 @@ function AchievementsContent() {
         </TabsContent>
         
         <TabsContent value="history">
-          <Card className="rounded-3xl border-border/50 bg-card/50 backdrop-blur-sm">
+          <Card variant="glass" className="rounded-3xl">
             <CardHeader>
               <CardTitle className="text-lg">{t('achievements.xpHistory.title')}</CardTitle>
             </CardHeader>
@@ -169,7 +169,7 @@ function AchievementsContent() {
               ) : (
                 <div className="space-y-3">
                   {transactions.map((tx) => (
-                    <div key={tx.id} className="flex items-center justify-between p-4 bg-muted/30 rounded-2xl border border-border/30 hover:bg-muted/50 transition-colors">
+                    <div key={tx.id} className="flex items-center justify-between p-4 glass-item rounded-2xl hover:bg-white/[0.08] transition-colors">
                       <div className="flex items-center gap-3">
                         <div className={`p-2.5 rounded-xl ${tx.amount > 0 ? 'bg-primary/20' : 'bg-destructive/20'}`}>
                           {tx.amount > 0 ? <TrendingUp className="h-4 w-4 text-primary" /> : <TrendingDown className="h-4 w-4 text-destructive" />}

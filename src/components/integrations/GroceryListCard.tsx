@@ -110,7 +110,7 @@ const GroceryListCard = ({
   }, {} as Record<string, GroceryItem[]>);
 
   return (
-    <Card className="bg-card/50 border-border/50">
+    <Card variant="glass">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

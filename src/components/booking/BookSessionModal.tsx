@@ -384,7 +384,7 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
         {step === "details" && selectedDate && selectedTime && selectedSessionType && (
           <div className="space-y-4 py-2">
             {/* Booking Summary */}
-            <div className="p-4 bg-muted/30 rounded-2xl border border-border/30 space-y-3">
+            <div className="p-4 glass-item rounded-2xl space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">{t('bookSession.summary.session')}</span>
                 <span className="font-medium text-foreground">{selectedSessionType.name}</span>

@@ -39,7 +39,7 @@ export function XPProgressBar({ compact = false, variant = 'linear' }: XPProgres
   // Circular variant
   if (variant === 'circular') {
     return (
-      <div className="bg-card border border-border rounded-xl p-4">
+      <div className="glass-card rounded-xl p-4">
         <div className="flex items-center gap-4">
           <ProgressCircle
             value={xpInLevel}
@@ -72,7 +72,7 @@ export function XPProgressBar({ compact = false, variant = 'linear' }: XPProgres
   
   // Linear variant (default)
   return (
-    <div className="bg-card border border-border rounded-xl p-4">
+    <div className="glass-card rounded-xl p-4">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <div className="bg-primary/20 rounded-full p-2">

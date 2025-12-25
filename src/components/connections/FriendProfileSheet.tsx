@@ -391,7 +391,7 @@ export function FriendProfileSheet({
 
                 {/* Bio */}
                 {profile.bio && (
-                  <div className="bg-card border border-border rounded-xl p-4">
+                  <div className="glass-card rounded-xl p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <User className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm font-medium text-foreground">About</span>
@@ -423,7 +423,7 @@ export function FriendProfileSheet({
             {friendProfileType === "client" && (
               <>
                 {/* Level & XP */}
-                <div className="bg-card border border-border rounded-xl p-4">
+                <div className="glass-card rounded-xl p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <div className="bg-primary/20 rounded-full p-2">
@@ -452,22 +452,22 @@ export function FriendProfileSheet({
                 {/* Stats Grid */}
                 {stats && (
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-card border border-border rounded-lg p-3 text-center">
+                    <div className="glass-item rounded-lg p-3 text-center">
                       <Flame className="h-5 w-5 text-orange-500 mx-auto mb-1" />
                       <div className="text-lg font-bold text-foreground">{stats.habitStreak}</div>
                       <div className="text-xs text-muted-foreground">Day Streak</div>
                     </div>
-                    <div className="bg-card border border-border rounded-lg p-3 text-center">
+                    <div className="glass-item rounded-lg p-3 text-center">
                       <Dumbbell className="h-5 w-5 text-blue-500 mx-auto mb-1" />
                       <div className="text-lg font-bold text-foreground">{stats.progressEntries}</div>
                       <div className="text-xs text-muted-foreground">Check-ins</div>
                     </div>
-                    <div className="bg-card border border-border rounded-lg p-3 text-center">
+                    <div className="glass-item rounded-lg p-3 text-center">
                       <Trophy className="h-5 w-5 text-yellow-500 mx-auto mb-1" />
                       <div className="text-lg font-bold text-foreground">{stats.badgesEarned}</div>
                       <div className="text-xs text-muted-foreground">Badges</div>
                     </div>
-                    <div className="bg-card border border-border rounded-lg p-3 text-center">
+                    <div className="glass-item rounded-lg p-3 text-center">
                       <Zap className="h-5 w-5 text-primary mx-auto mb-1" />
                       <div className="text-lg font-bold text-foreground">{level}</div>
                       <div className="text-xs text-muted-foreground">Level</div>

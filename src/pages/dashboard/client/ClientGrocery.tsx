@@ -234,7 +234,7 @@ const ClientGrocery = () => {
                 ))}
               </div>
             ) : (
-              <Card className="bg-card/50 border-border/50 rounded-3xl backdrop-blur-sm">
+              <Card variant="glass" className="rounded-3xl">
                 <CardContent className="flex flex-col items-center justify-center py-16">
                   <div className="w-16 h-16 rounded-3xl bg-muted/50 flex items-center justify-center mb-4">
                     <ShoppingCart className="w-8 h-8 text-muted-foreground" />

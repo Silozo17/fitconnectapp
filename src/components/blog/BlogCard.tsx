@@ -34,7 +34,7 @@ export function BlogCard({ post, featured = false }: BlogCardProps) {
   return (
     <Link 
       to={`/blog/${post.slug}`}
-      className={`group block bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/50 transition-all duration-300 hover:shadow-lg ${
+      className={`group block glass-card rounded-2xl overflow-hidden hover:border-primary/50 transition-all duration-300 hover:shadow-lg ${
         featured ? "md:col-span-2 md:row-span-2" : ""
       }`}
     >

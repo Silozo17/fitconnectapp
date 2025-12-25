@@ -48,7 +48,7 @@ export const StatCard = memo(({
 
   if (loading) {
     return (
-      <Card className={cn("", className)}>
+      <Card variant="glass" className={cn("", className)}>
         <CardContent className="p-6">
           <div className="flex items-start justify-between">
             <div className="space-y-2">
@@ -64,7 +64,7 @@ export const StatCard = memo(({
   }
 
   return (
-    <Card className={cn("transition-shadow hover:shadow-md", className)}>
+    <Card variant="glass" className={cn("transition-shadow hover:shadow-md", className)}>
       <CardContent className="p-6">
         <div className="flex items-start justify-between">
           <div className="space-y-1">

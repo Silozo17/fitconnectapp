@@ -270,11 +270,11 @@ export default function MarketplaceBundle() {
 
                   {/* Bundle Stats */}
                   <div className="grid grid-cols-2 gap-4 text-center">
-                    <div className="p-3 rounded-lg bg-muted/50">
+                    <div className="p-3 rounded-lg glass-item">
                       <p className="text-2xl font-bold text-primary">{bundle.products?.length || 0}</p>
                       <p className="text-xs text-muted-foreground">{t('bundle.stats.items')}</p>
                     </div>
-                    <div className="p-3 rounded-lg bg-muted/50">
+                    <div className="p-3 rounded-lg glass-item">
                       <p className="text-2xl font-bold text-green-500">{savings}%</p>
                       <p className="text-xs text-muted-foreground">{t('bundle.stats.savings')}</p>
                     </div>

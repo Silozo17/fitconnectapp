@@ -20,7 +20,7 @@ export const HealthProfileCard = ({
   const hasMedical = medicalConditions && medicalConditions.length > 0;
 
   return (
-    <div className="card-elevated p-6 space-y-5">
+    <div className="glass-card rounded-2xl p-6 space-y-5">
       <h3 className="font-display font-bold text-foreground">{t('clientDetail.healthProfile.title')}</h3>
 
       {/* Dietary Restrictions */}

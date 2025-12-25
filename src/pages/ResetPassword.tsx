@@ -132,7 +132,7 @@ const ResetPassword = () => {
               </span>
             </Link>
 
-            <div className="bg-card rounded-2xl p-8 border border-border">
+            <div className="glass-card rounded-2xl p-8">
               <h1 className="font-display text-2xl font-bold text-foreground mb-4">
                 {t("auth.invalidResetLink")}
               </h1>

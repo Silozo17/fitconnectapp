@@ -49,7 +49,7 @@ export default function SubscribeSuccess() {
           </p>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-6 mb-8">
+        <div className="glass-card rounded-xl p-6 mb-8">
           <h2 className="font-semibold text-foreground mb-4">What's next?</h2>
           <ul className="text-left space-y-3 text-sm text-muted-foreground">
             <li className="flex items-start gap-3">

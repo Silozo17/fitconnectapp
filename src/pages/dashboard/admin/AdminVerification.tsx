@@ -664,7 +664,7 @@ const AdminVerification = () => {
 
                 {/* Previous Notes */}
                 {selectedCoach.verification_notes && (
-                  <div className="p-3 rounded-lg bg-muted">
+                  <div className="p-3 rounded-lg glass-item">
                     <p className="text-sm font-medium mb-1">Previous Notes:</p>
                     <p className="text-sm text-muted-foreground">
                       {selectedCoach.verification_notes}

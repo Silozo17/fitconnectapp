@@ -33,7 +33,7 @@ export function PackageCreditsInfo({
     if (compact) return null;
     
     return (
-      <div className="p-3 rounded-lg bg-muted/50 border border-border">
+      <div className="p-3 rounded-lg glass-item">
         <div className="flex items-center gap-2 text-muted-foreground">
           <Package className="h-4 w-4" />
           <span className="text-sm">{t("packageCredits.noPackage")}</span>

@@ -40,8 +40,8 @@ const WearableConnectionCard = ({
   const { t } = useTranslation('common');
 
   return (
-    <Card className={cn(
-      "bg-card/50 border-border/50 hover:border-primary/30 transition-all min-h-[160px]",
+    <Card variant="glass" className={cn(
+      "hover:border-primary/30 transition-all min-h-[160px]",
       disabled && "opacity-75"
     )}>
       <CardHeader className="pb-2 pt-4 px-4">

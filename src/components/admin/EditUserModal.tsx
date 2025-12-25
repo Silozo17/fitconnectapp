@@ -210,7 +210,7 @@ const EditUserModal = ({ user, open, onClose, onSaved }: EditUserModalProps) => 
             {/* Basic Info Tab */}
             <TabsContent value="basic" className="space-y-4">
               {/* Status Display */}
-              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+              <div className="flex items-center justify-between p-3 rounded-lg glass-item">
                 <div className="flex items-center gap-2">
                   <Label className="text-sm font-medium">Account Status:</Label>
                   <StatusBadge status={user.status || "active"} />
