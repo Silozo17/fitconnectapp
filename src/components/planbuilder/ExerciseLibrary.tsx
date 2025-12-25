@@ -46,7 +46,7 @@ const ExerciseLibrary = ({ onAddExercise, onCreateCustom }: ExerciseLibraryProps
   };
 
   return (
-    <div className="card-glow rounded-2xl overflow-hidden">
+    <div className="glass-card rounded-2xl overflow-hidden">
       <div className="p-4 border-b border-border">
         <h3 className="font-display font-bold text-foreground mb-4">
           {t('workoutBuilder.exerciseLibrary.title')}

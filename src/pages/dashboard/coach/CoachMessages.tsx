@@ -40,7 +40,7 @@ const CoachMessages = () => {
           </Button>
         </div>
 
-        <div className="flex-1 bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl overflow-hidden flex">
+        <div className="flex-1 glass-card rounded-3xl overflow-hidden flex shadow-float">
           {/* Conversations List - Hidden on mobile when in chat */}
           <div className={`w-full lg:w-80 border-r border-border/50 flex flex-col ${participantId ? "hidden lg:flex" : "flex"}`}>
             <div className="p-4 border-b border-border/50">

@@ -223,7 +223,7 @@ const CoachPlanBuilder = () => {
           {/* Plan Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Basic Info */}
-            <div className="card-glow rounded-2xl p-6">
+            <div className="glass-card rounded-2xl p-6">
               <h2 className="font-display font-bold text-foreground mb-4">{t("workoutBuilder.planDetails")}</h2>
               <div className="space-y-4">
                 <div>
@@ -310,7 +310,7 @@ const CoachPlanBuilder = () => {
           <div className="space-y-6">
             {/* Add to Day Indicator */}
             {addingToDay !== null && (
-              <div className="card-glow rounded-2xl p-4 bg-primary/5 border-primary/20">
+              <div className="glass-card rounded-2xl p-4 bg-primary/5 border-primary/20">
                 <p className="text-sm text-primary font-medium">
                   {t("workoutBuilder.addingTo")} <span className="font-bold">{workoutDays[addingToDay]?.name}</span>
                 </p>
@@ -326,7 +326,7 @@ const CoachPlanBuilder = () => {
             )}
 
             {/* Tips */}
-            <div className="card-glow rounded-2xl p-4">
+            <div className="glass-card rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Lightbulb className="w-5 h-5 text-primary" />
                 <h3 className="font-display font-bold text-foreground">{t("workoutBuilder.tips")}</h3>

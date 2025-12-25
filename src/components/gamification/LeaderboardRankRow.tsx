@@ -29,8 +29,10 @@ export function LeaderboardRankRow({ entry, currentUserId, index }: LeaderboardR
   return (
     <div
       className={cn(
-        'flex items-center gap-3 py-3 border-b border-border/30 last:border-b-0',
-        isCurrentUser && 'bg-primary/5 -mx-4 px-4 rounded-lg border-none',
+        'flex items-center gap-3 py-3 px-2 rounded-xl transition-colors',
+        isCurrentUser 
+          ? 'glass-item bg-primary/10 border border-primary/20' 
+          : 'hover:bg-white/[0.03]',
         'animate-[leaderboard-row-enter_0.3s_ease-out_forwards]'
       )}
       style={{ animationDelay: `${index * 50}ms`, opacity: 0 }}

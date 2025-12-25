@@ -259,7 +259,7 @@ const CoachNutritionBuilder = () => {
         </div>
 
         {/* Plan Info */}
-        <div className="card-elevated p-4 mb-6">
+        <div className="glass-card p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="md:col-span-2 space-y-2">
               <Label htmlFor="planName">{t("nutritionBuilder.planName")} *</Label>
@@ -295,7 +295,7 @@ const CoachNutritionBuilder = () => {
         </div>
 
         {/* Macro Targets */}
-        <div className="card-elevated p-4 mb-6">
+        <div className="glass-card p-4 mb-6">
           <div className="flex items-center gap-2 mb-4">
             <div className="flex items-center gap-2 flex-1">
               <Target className="h-5 w-5 text-primary" />

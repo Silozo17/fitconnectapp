@@ -263,7 +263,7 @@ const ChatWindow = ({
   return (
     <div className="flex flex-col h-full w-full min-w-0 overflow-hidden">
           {/* Header */}
-          <div className="p-4 border-b border-border bg-card flex items-center gap-3">
+          <div className="p-4 border-b border-border/50 backdrop-blur-sm bg-card/50 flex items-center gap-3">
             <Link to={basePath} className="lg:hidden">
               <Button variant="ghost" size="icon">
                 <ArrowLeft className="w-5 h-5" />
@@ -348,7 +348,7 @@ const ChatWindow = ({
                         "max-w-[70%] rounded-2xl px-4 py-2",
                         isMine
                           ? "bg-primary text-primary-foreground rounded-br-md"
-                          : "bg-muted text-foreground rounded-bl-md"
+                          : "glass-item bg-white/[0.06] text-foreground rounded-bl-md"
                       )}
                     >
                       <p className="text-sm whitespace-pre-wrap">{message.content}</p>
@@ -404,13 +404,13 @@ const ChatWindow = ({
 
           {/* Input */}
           {isDeleted ? (
-            <div className="p-4 border-t border-border bg-muted/50">
+            <div className="p-4 border-t border-border/50 glass-item">
               <p className="text-sm text-muted-foreground text-center">
                 {t('chatWindow.deletedUserNotice')}
               </p>
             </div>
           ) : (
-            <form onSubmit={handleSend} className="p-4 border-t border-border bg-card">
+            <form onSubmit={handleSend} className="p-4 border-t border-border/50 backdrop-blur-sm bg-card/50">
               <div className="flex gap-2">
                 <Input
                   value={newMessage}

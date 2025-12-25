@@ -75,8 +75,10 @@ const ConversationList = ({ activeConversationId }: ConversationListProps) => {
         {conversations.map((conversation) => (
           <div
             key={conversation.participantId}
-            className={`block p-4 hover:bg-muted/50 transition-colors ${
-              activeConversationId === conversation.participantId ? "bg-muted" : ""
+            className={`block p-4 transition-colors ${
+              activeConversationId === conversation.participantId 
+                ? "glass-item bg-white/[0.06]" 
+                : "hover:bg-white/[0.03]"
             }`}
           >
             <div className="flex items-start gap-3">
