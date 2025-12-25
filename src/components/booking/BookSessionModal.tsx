@@ -21,6 +21,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import BookingCheckoutModal from "@/components/payments/BookingCheckoutModal";
 
 interface BookSessionModalProps {
   open: boolean;
@@ -70,6 +71,7 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
   const [message, setMessage] = useState("");
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [bypassMessageFirst, setBypassMessageFirst] = useState(false);
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
 
   const { user } = useAuth();
   const { data: availability = [] } = useCoachAvailability(coach.id);
@@ -137,37 +139,9 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
     const [hours, minutes] = selectedTime.split(":").map(Number);
     const requestedAt = setMinutes(setHours(selectedDate, hours), minutes);
 
-    // If payment is required, redirect to Stripe checkout
+    // If payment is required, show embedded checkout modal
     if (paymentRequired !== 'none' && amountDueNow > 0) {
-      setIsProcessingPayment(true);
-      try {
-        const { data, error } = await supabase.functions.invoke('stripe-booking-checkout', {
-          body: {
-            sessionTypeId: selectedSessionType.id,
-            clientId: null, // Will be resolved in edge function
-            coachId: coach.id,
-            requestedAt: requestedAt.toISOString(),
-            durationMinutes: selectedSessionType.duration_minutes,
-            isOnline: effectiveIsOnline,
-            message: message || null,
-            successUrl: `${window.location.origin}/dashboard/client/sessions?booking=success`,
-            cancelUrl: `${window.location.origin}/dashboard/client/coaches?booking=cancelled`,
-          },
-        });
-
-        if (error) throw error;
-
-        if (data?.url) {
-          // Redirect to Stripe checkout
-          window.location.href = data.url;
-        } else {
-          throw new Error('No checkout URL returned');
-        }
-      } catch (error) {
-        console.error('Payment checkout error:', error);
-        toast.error('Failed to start payment process. Please try again.');
-        setIsProcessingPayment(false);
-      }
+      setShowCheckoutModal(true);
       return;
     }
 
@@ -194,6 +168,7 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
     setMessage("");
     setIsProcessingPayment(false);
     setBypassMessageFirst(false);
+    setShowCheckoutModal(false);
   };
 
   const handleClose = () => {
@@ -517,6 +492,43 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
           </div>
         )}
       </DialogContent>
+
+      {/* Embedded Checkout Modal for Paid Sessions */}
+      {selectedSessionType && selectedDate && selectedTime && (
+        <BookingCheckoutModal
+          open={showCheckoutModal}
+          onOpenChange={(open) => {
+            setShowCheckoutModal(open);
+            if (!open) {
+              // User closed the checkout - keep booking modal open
+            }
+          }}
+          sessionType={{
+            id: selectedSessionType.id,
+            name: selectedSessionType.name,
+            price: selectedSessionType.price,
+            currency: selectedSessionType.currency || coach.currency || 'GBP',
+            duration_minutes: selectedSessionType.duration_minutes,
+            payment_required: selectedSessionType.payment_required,
+            deposit_type: selectedSessionType.deposit_type,
+            deposit_value: selectedSessionType.deposit_value,
+          }}
+          coach={{
+            id: coach.id,
+            display_name: coach.display_name,
+            currency: coach.currency,
+          }}
+          bookingDetails={{
+            requestedAt: selectedDate,
+            requestedTime: selectedTime,
+            isOnline: effectiveIsOnline,
+            message: message || undefined,
+          }}
+          amountDue={amountDueNow}
+          depositAmount={depositAmount > 0 ? depositAmount : undefined}
+          remainingBalance={remainingBalance > 0 ? remainingBalance : undefined}
+        />
+      )}
     </Dialog>
   );
 };

@@ -7,7 +7,15 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 
-export type CheckoutType = "package" | "subscription" | "digital-product" | "digital-bundle";
+export type CheckoutType = "package" | "subscription" | "digital-product" | "digital-bundle" | "booking";
+
+interface BookingDetails {
+  sessionTypeId: string;
+  requestedAt: string;
+  durationMinutes: number;
+  isOnline: boolean;
+  message?: string;
+}
 
 interface UnifiedEmbeddedCheckoutProps {
   checkoutType: CheckoutType;
@@ -16,6 +24,7 @@ interface UnifiedEmbeddedCheckoutProps {
   clientId?: string;
   successUrl?: string;
   cancelUrl?: string;
+  bookingDetails?: BookingDetails;
 }
 
 export function UnifiedEmbeddedCheckout({
@@ -25,6 +34,7 @@ export function UnifiedEmbeddedCheckout({
   clientId,
   successUrl,
   cancelUrl,
+  bookingDetails,
 }: UnifiedEmbeddedCheckoutProps) {
   const [error, setError] = useState<string | null>(null);
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
@@ -58,7 +68,20 @@ export function UnifiedEmbeddedCheckout({
       let functionName: string;
       let body: Record<string, any>;
 
-      if (checkoutType === "digital-product" || checkoutType === "digital-bundle") {
+      if (checkoutType === "booking" && bookingDetails) {
+        functionName = "stripe-booking-checkout";
+        body = {
+          sessionTypeId: bookingDetails.sessionTypeId,
+          coachId,
+          requestedAt: bookingDetails.requestedAt,
+          durationMinutes: bookingDetails.durationMinutes,
+          isOnline: bookingDetails.isOnline,
+          message: bookingDetails.message,
+          successUrl,
+          cancelUrl,
+          embedded: true,
+        };
+      } else if (checkoutType === "digital-product" || checkoutType === "digital-bundle") {
         functionName = "content-checkout";
         body = {
           productId: checkoutType === "digital-product" ? itemId : undefined,
@@ -100,7 +123,7 @@ export function UnifiedEmbeddedCheckout({
       setError(message);
       throw err;
     }
-  }, [checkoutType, itemId, coachId, clientId, successUrl, cancelUrl]);
+  }, [checkoutType, itemId, coachId, clientId, successUrl, cancelUrl, bookingDetails]);
 
   if (isLoadingStripe) {
     return <CheckoutLoading />;
