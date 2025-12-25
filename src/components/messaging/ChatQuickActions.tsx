@@ -100,7 +100,11 @@ const ChatQuickActions = ({
   const handleSendBookingLink = async () => {
     setSending(true);
     setShowMobileDrawer(false);
-    const bookingMessage = `**Ready to book a session?**\n\nClick my profile to view my availability and book a time that works for you!`;
+    
+    // Construct an actual booking link with the coach's profile
+    const bookingUrl = `${window.location.origin}/coaches/${coachId}#book`;
+    const bookingMessage = `**Ready to book a session?**\n\n📅 [Click here to view my availability and book a time](${bookingUrl})`;
+    
     await onSendMessage(bookingMessage);
     setSending(false);
   };

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useMessages, getQuickSendMetadata } from "@/hooks/useMessages";
 import { format } from "date-fns";
-import { Send, Loader2, ArrowLeft, Check, CheckCheck, User, Briefcase, Shield, MapPin, PanelRightOpen, PanelRightClose, Zap } from "lucide-react";
+import { Send, Loader2, ArrowLeft, Check, CheckCheck, User, Briefcase, Shield, MapPin, PanelRightOpen, PanelRightClose } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
@@ -294,17 +294,7 @@ const ChatWindow = ({
               </div>
             </button>
 
-            {/* Mobile quick actions button for coaches */}
-            {isCoachView && (
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={() => setQuickActionsOpen(true)}
-                className="lg:hidden"
-              >
-                <Zap className="h-5 w-5 text-primary" />
-              </Button>
-            )}
+            {/* Mobile quick actions: removed duplicate Zap button - QuickSendFAB provides full content */}
 
             {/* Side panel toggle for coaches */}
             {isCoachView && onToggleSidePanel && (
