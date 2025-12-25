@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useMessages, getQuickSendMetadata } from "@/hooks/useMessages";
 import { format } from "date-fns";
-import { Send, Loader2, ArrowLeft, Check, CheckCheck, User, Briefcase, Shield, MapPin, PanelRightOpen, PanelRightClose } from "lucide-react";
+import { Send, Loader2, ArrowLeft, Check, CheckCheck, User, Briefcase, Shield, MapPin, PanelRightOpen, PanelRightClose, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import TypingIndicator, { useTypingBroadcast } from "./TypingIndicator";
 import ProspectProfileSheet from "./ProspectProfileSheet";
 import QuickSendMessageCard from "./QuickSendMessageCard";
+import ChatQuickActions from "./ChatQuickActions";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import {
   Sheet,
@@ -58,6 +59,8 @@ const ChatWindow = ({
   const [sending, setSending] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
+  const [quickActionsOpen, setQuickActionsOpen] = useState(false);
+  const [participantUserId, setParticipantUserId] = useState<string | null>(null);
   const [participantInfo, setParticipantInfo] = useState<ParticipantInfo>({
     name: participantName || "Conversation",
     avatar: participantAvatar || null,
@@ -87,12 +90,13 @@ const ChatWindow = ({
       // Try coach profile first (with avatar)
       const { data: coachData } = await supabase
         .from("coach_profiles")
-        .select("display_name, profile_image_url, location, username, selected_avatar_id, avatars:selected_avatar_id(slug, rarity)")
+        .select("user_id, display_name, profile_image_url, location, username, selected_avatar_id, avatars:selected_avatar_id(slug, rarity)")
         .eq("id", participantId)
         .single();
 
       if (coachData?.display_name) {
         setIsDeleted(false);
+        setParticipantUserId(coachData.user_id);
         setParticipantInfo({
           name: coachData.display_name,
           avatar: coachData.profile_image_url,
@@ -108,12 +112,13 @@ const ChatWindow = ({
       // Try client profile (with avatar)
       const { data: clientData } = await supabase
         .from("client_profiles")
-        .select("first_name, last_name, avatar_url, location, selected_avatar_id, avatars:selected_avatar_id(slug, rarity)")
+        .select("user_id, first_name, last_name, avatar_url, location, selected_avatar_id, avatars:selected_avatar_id(slug, rarity)")
         .eq("id", participantId)
         .single();
 
       if (clientData) {
         setIsDeleted(false);
+        setParticipantUserId(clientData.user_id);
         setParticipantInfo({
           name: `${clientData.first_name || ""} ${clientData.last_name || ""}`.trim() || "Client",
           avatar: clientData.avatar_url,
@@ -129,12 +134,13 @@ const ChatWindow = ({
       // Try admin profile
       const { data: adminData } = await supabase
         .from("admin_profiles")
-        .select("display_name, first_name, last_name, avatar_url")
+        .select("user_id, display_name, first_name, last_name, avatar_url")
         .eq("id", participantId)
         .single();
 
       if (adminData) {
         setIsDeleted(false);
+        setParticipantUserId(adminData.user_id);
         setParticipantInfo({
           name: adminData.display_name || `${adminData.first_name || ""} ${adminData.last_name || ""}`.trim() || "Admin",
           avatar: adminData.avatar_url,
@@ -149,6 +155,7 @@ const ChatWindow = ({
 
       // No profile found - user has been deleted
       setIsDeleted(true);
+      setParticipantUserId(null);
       setParticipantInfo({
         name: t('chatWindow.deletedUser'),
         avatar: null,
@@ -287,6 +294,18 @@ const ChatWindow = ({
               </div>
             </button>
 
+            {/* Mobile quick actions button for coaches */}
+            {isCoachView && (
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => setQuickActionsOpen(true)}
+                className="lg:hidden"
+              >
+                <Zap className="h-5 w-5 text-primary" />
+              </Button>
+            )}
+
             {/* Side panel toggle for coaches */}
             {isCoachView && onToggleSidePanel && (
               <Button 
@@ -382,6 +401,16 @@ const ChatWindow = ({
             <div ref={messagesEndRef} />
           </div>
 
+          {/* Quick Actions for coaches */}
+          {isCoachView && currentProfileId && !isDeleted && (
+            <ChatQuickActions
+              coachId={currentProfileId}
+              participantUserId={participantUserId || undefined}
+              onSendMessage={sendMessage}
+              externalDrawerOpen={quickActionsOpen}
+              onExternalDrawerChange={setQuickActionsOpen}
+            />
+          )}
 
           {/* Input */}
           {isDeleted ? (
