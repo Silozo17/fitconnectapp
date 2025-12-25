@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { AddCoachSessionModal } from "@/components/dashboard/coach/AddCoachSessionModal";
 import { MobileCalendarView } from "@/components/dashboard/coach/MobileCalendarView";
+import { SessionDetailModal } from "@/components/dashboard/clients/SessionDetailModal";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -124,6 +125,10 @@ const CoachSchedule = () => {
   const [showAddSessionModal, setShowAddSessionModal] = useState(false);
   const [preselectedDate, setPreselectedDate] = useState<Date | undefined>();
   const [preselectedTime, setPreselectedTime] = useState<string | undefined>();
+  
+  // Session Detail Modal state
+  const [selectedSession, setSelectedSession] = useState<any>(null);
+  const [showSessionDetailModal, setShowSessionDetailModal] = useState(false);
   
   // Calendar scroll ref
   const calendarScrollRef = useRef<HTMLDivElement>(null);
@@ -748,7 +753,7 @@ const CoachSchedule = () => {
                               >
                                 {session && (
                                   <div 
-                                    className={`absolute left-1 right-1 rounded-lg text-xs z-10 overflow-hidden ${
+                                    className={`absolute left-1 right-1 rounded-lg text-xs z-10 overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all ${
                                       session.is_online 
                                         ? 'bg-primary/20 border border-primary/30' 
                                         : 'bg-accent/20 border border-accent/30'
@@ -757,20 +762,29 @@ const CoachSchedule = () => {
                                       top: `${getSessionTopOffset(session)}px`,
                                       height: `${getSessionHeight(session) - 4}px`
                                     }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedSession({
+                                        id: session.id,
+                                        clientName: `${session.client?.first_name || ''} ${session.client?.last_name || ''}`.trim() || 'Unknown Client',
+                                        sessionType: session.session_type || 'Session',
+                                        scheduledAt: session.scheduled_at,
+                                        duration: session.duration_minutes,
+                                        status: session.status as "scheduled" | "completed" | "cancelled" | "no_show",
+                                        isOnline: session.is_online || false,
+                                        location: session.location,
+                                        notes: session.notes,
+                                        videoMeetingUrl: session.video_meeting_url,
+                                        rescheduledFrom: session.rescheduled_from,
+                                        hasReview: false,
+                                      });
+                                      setShowSessionDetailModal(true);
+                                    }}
                                   >
-                                    <div className="p-2 h-full flex flex-col">
+                                    <div className="p-2 h-full flex items-center">
                                       <p className="font-medium text-foreground truncate">
                                         {session.client?.first_name} {session.client?.last_name || t("schedule.externalClient")}
                                       </p>
-                                      <p className="text-muted-foreground truncate">{session.session_type}</p>
-                                      <div className="flex items-center gap-1 mt-auto">
-                                        {session.is_online ? (
-                                          <Video className="w-3 h-3 text-primary" />
-                                        ) : (
-                                          <MapPin className="w-3 h-3 text-accent" />
-                                        )}
-                                        <span className="text-muted-foreground">{session.duration_minutes}m</span>
-                                      </div>
                                     </div>
                                   </div>
                                 )}
@@ -1363,6 +1377,16 @@ const CoachSchedule = () => {
         preselectedDate={preselectedDate}
         preselectedTime={preselectedTime}
         coachId={coachId}
+      />
+
+      {/* Session Detail Modal */}
+      <SessionDetailModal
+        open={showSessionDetailModal}
+        onOpenChange={setShowSessionDetailModal}
+        session={selectedSession}
+        onRefresh={() => {
+          queryClient.invalidateQueries({ queryKey: ["coaching-sessions"] });
+        }}
       />
     </DashboardLayout>
   );
