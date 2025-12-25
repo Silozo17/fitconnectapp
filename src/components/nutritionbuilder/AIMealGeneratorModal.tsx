@@ -224,7 +224,7 @@ export const AIMealGeneratorModal = ({
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
           >
-            {t('common.cancel')}
+            Cancel
           </Button>
           <Button onClick={generateMealPlan} disabled={isLoading}>
             {isLoading ? (

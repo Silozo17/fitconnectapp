@@ -23,6 +23,7 @@ import { Message, getQuickSendMetadata } from "@/hooks/useMessages";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAdminView } from "@/contexts/AdminContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface QuickSendMessageCardProps {
   message: Message;
@@ -86,6 +87,7 @@ const QuickSendMessageCard = ({
   const navigate = useNavigate();
   const { toast } = useToast();
   const { activeProfileType } = useAdminView();
+  const { role } = useAuth();
   const [updating, setUpdating] = useState(false);
   
   const metadata = getQuickSendMetadata(message.metadata);
@@ -94,8 +96,10 @@ const QuickSendMessageCard = ({
   const config = itemTypeConfig[metadata.itemType] || itemTypeConfig['package'];
   const Icon = config.icon;
   
-  // Client can respond if: they received the message, it's pending, and they're in client view
-  const canRespond = !isMine && metadata.status === 'pending' && activeProfileType === 'client';
+  // Client can respond if: they received the message, it's pending, and they're a client
+  // Use role as fallback when activeProfileType isn't set yet
+  const isClientView = activeProfileType === 'client' || (role === 'client' && !activeProfileType);
+  const canRespond = !isMine && metadata.status === 'pending' && isClientView;
   
   // Check if this is a free package (price is 0 or undefined)
   const isFreePackage = metadata.price === 0 || metadata.price === undefined;
