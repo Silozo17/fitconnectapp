@@ -31,6 +31,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { VenueAutocomplete } from "@/components/shared/VenueAutocomplete";
 import {
   Select,
   SelectContent,
@@ -1010,10 +1011,10 @@ const CoachSchedule = () => {
               {/* Default Location */}
               <div className="space-y-2">
                 <Label>{t("schedule.bookingSettings.defaultLocation")}</Label>
-                <Input
+                <VenueAutocomplete
                   placeholder={t("schedule.bookingSettings.locationPlaceholder")}
                   value={defaultLocation}
-                  onChange={(e) => setDefaultLocation(e.target.value)}
+                  onVenueChange={(location) => setDefaultLocation(location)}
                 />
                 <p className="text-xs text-muted-foreground">
                   {t("schedule.bookingSettings.locationDescription")}

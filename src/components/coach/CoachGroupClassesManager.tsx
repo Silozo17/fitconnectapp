@@ -35,6 +35,7 @@ import {
   GroupClass,
 } from "@/hooks/useCoachGroupClasses";
 import { formatCurrency, type CurrencyCode } from "@/lib/currency";
+import { VenueAutocomplete } from "@/components/shared/VenueAutocomplete";
 
 interface GroupClassFormData {
   title: string;
@@ -128,10 +129,9 @@ function GroupClassForm({
 
         <div className="space-y-2">
           <Label htmlFor="location">{t("groupClasses.form.location")}</Label>
-          <Input
-            id="location"
+          <VenueAutocomplete
             value={formData.location}
-            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+            onVenueChange={(loc) => setFormData({ ...formData, location: loc })}
             placeholder={t("groupClasses.form.locationPlaceholder")}
           />
         </div>
