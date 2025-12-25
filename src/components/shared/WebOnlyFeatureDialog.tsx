@@ -32,7 +32,7 @@ export const WebOnlyFeatureDialog = ({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="max-w-sm">
         <AlertDialogHeader className="text-center">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
             <Globe className="w-8 h-8 text-primary" />
           </div>
           <AlertDialogTitle className="text-center">
@@ -47,7 +47,7 @@ export const WebOnlyFeatureDialog = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="flex-col sm:flex-row">
-          <AlertDialogCancel className="w-full">
+          <AlertDialogCancel className="w-full rounded-xl">
             {t("common.gotIt", "Got it")}
           </AlertDialogCancel>
         </AlertDialogFooter>

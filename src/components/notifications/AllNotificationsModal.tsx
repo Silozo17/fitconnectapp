@@ -97,28 +97,33 @@ export const AllNotificationsModal = ({
         className={cn(
           "p-0 gap-0 flex flex-col",
           "h-[100dvh] w-full max-w-full rounded-none border-0",
-          "sm:h-auto sm:max-h-[85vh] sm:max-w-lg sm:rounded-lg sm:border"
+          "sm:h-auto sm:max-h-[85vh] sm:max-w-lg sm:rounded-3xl sm:border sm:border-border/30"
         )}
       >
         {/* Header */}
-        <DialogHeader className="p-4 pb-3 border-b border-border space-y-0">
+        <DialogHeader className="p-4 pb-3 border-b border-border/30 space-y-0">
           <div className="flex items-center justify-between">
-            <DialogTitle className="flex items-center gap-2">
-              Notifications
-              {unreadCount > 0 && (
-                <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-primary text-primary-foreground">
-                  {unreadCount} unread
-                </span>
-              )}
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Bell className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex flex-col">
+                <span>Notifications</span>
+                {unreadCount > 0 && (
+                  <span className="text-xs font-normal text-muted-foreground">
+                    {unreadCount} unread
+                  </span>
+                )}
+              </div>
             </DialogTitle>
             {unreadCount > 0 && (
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 text-xs"
+                className="h-9 text-xs rounded-xl"
                 onClick={markAllAsRead}
               >
-                <CheckCheck className="w-3 h-3 mr-1" />
+                <CheckCheck className="w-4 h-4 mr-1.5" />
                 Mark all read
               </Button>
             )}
@@ -126,10 +131,10 @@ export const AllNotificationsModal = ({
         </DialogHeader>
 
         {/* Filters */}
-        <div className="flex items-center gap-2 p-3 border-b border-border bg-muted/30">
+        <div className="flex items-center gap-2 p-3 border-b border-border/30 bg-muted/20">
           <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
           <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger className="h-8 flex-1 text-xs">
+            <SelectTrigger className="h-9 flex-1 text-xs rounded-xl">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -143,7 +148,7 @@ export const AllNotificationsModal = ({
           <Button
             variant={showUnreadOnly ? "default" : "outline"}
             size="sm"
-            className="h-8 text-xs shrink-0"
+            className="h-9 text-xs shrink-0 rounded-xl"
             onClick={() => setShowUnreadOnly(!showUnreadOnly)}
           >
             Unread only
@@ -158,13 +163,20 @@ export const AllNotificationsModal = ({
             </div>
           ) : filteredNotifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-40 text-center p-4">
-              <Bell className="w-10 h-10 text-muted-foreground/30 mb-2" />
-              <p className="text-sm text-muted-foreground">
+              <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+                <Bell className="w-7 h-7 text-muted-foreground/50" />
+              </div>
+              <p className="text-sm font-medium text-foreground mb-1">
                 {showUnreadOnly
-                  ? "No unread notifications"
+                  ? "All caught up!"
                   : filter !== "all"
                   ? "No notifications of this type"
                   : "No notifications yet"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {showUnreadOnly
+                  ? "No unread notifications"
+                  : "We'll notify you when something happens"}
               </p>
             </div>
           ) : (

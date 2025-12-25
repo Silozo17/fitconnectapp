@@ -188,23 +188,25 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-4">
-            <div className="flex items-center gap-3 p-4 bg-amber-500/10 rounded-lg border border-amber-500/20">
-              <MessageSquare className="h-5 w-5 text-amber-500" />
+          <div className="space-y-4 py-2">
+            <div className="flex items-center gap-3 p-4 bg-amber-500/10 rounded-2xl border border-amber-500/20">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                <MessageSquare className="h-5 w-5 text-amber-500" />
+              </div>
               <p className="text-sm text-foreground">
                 {t('bookSession.messageFirst.discussFirst', { name: coach.display_name })}
               </p>
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-3 pt-2">
               <Button onClick={() => {
                 handleClose();
                 onMessageFirst?.();
-              }}>
+              }} className="rounded-xl">
                 <MessageSquare className="h-4 w-4 mr-2" />
                 {t('bookSession.messageFirst.startConversation')}
               </Button>
-              <Button variant="outline" onClick={() => setBypassMessageFirst(true)}>
+              <Button variant="outline" onClick={() => setBypassMessageFirst(true)} className="rounded-xl">
                 {t('bookSession.messageFirst.viewSessionTypes')}
               </Button>
             </div>
@@ -228,7 +230,7 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
 
         {/* Step 1: Session Type */}
         {step === "type" && (
-          <div className="space-y-4 py-4">
+          <div className="space-y-4 py-2">
             {sessionTypes.length > 0 ? (
               <RadioGroup value={selectedType || ""} onValueChange={setSelectedType}>
                 {sessionTypes.map((type) => {
@@ -239,47 +241,47 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
                     <label
                       key={type.id}
                       className={cn(
-                        "flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-colors",
+                        "flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all active:scale-[0.99]",
                         selectedType === type.id
-                          ? "border-primary bg-primary/5"
-                          : "border-border hover:border-primary/50"
+                          ? "border-primary bg-primary/5 shadow-glow-sm"
+                          : "border-border/50 hover:border-primary/50 hover:bg-muted/30"
                       )}
                     >
                       <RadioGroupItem value={type.id} className="mt-1" />
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
                           <p className="font-medium text-foreground">{type.name}</p>
                           <p className="font-bold text-primary">{formatCurrency(type.price, typeCurrency)}</p>
                         </div>
                         {type.description && (
                           <p className="text-sm text-muted-foreground mt-1">{type.description}</p>
                         )}
-                        <div className="flex flex-wrap items-center gap-2 mt-2">
-                          <Badge variant="secondary" className="text-xs">
+                        <div className="flex flex-wrap items-center gap-2 mt-3">
+                          <Badge variant="secondary" className="text-xs rounded-full">
                             <Clock className="h-3 w-3 mr-1" />
                             {type.duration_minutes} {t('time.minutes', { count: type.duration_minutes })}
                           </Badge>
                           {type.is_online && (
-                            <Badge variant="outline" className="text-xs">
+                            <Badge variant="outline" className="text-xs rounded-full">
                               <Video className="h-3 w-3 mr-1" />
                               {t('bookSession.online')}
                             </Badge>
                           )}
                           {type.is_in_person && (
-                            <Badge variant="outline" className="text-xs">
+                            <Badge variant="outline" className="text-xs rounded-full">
                               <MapPin className="h-3 w-3 mr-1" />
                               {t('bookSession.inPerson')}
                             </Badge>
                           )}
                           {/* Payment requirement badge */}
                           {type.payment_required === 'full' && (
-                            <Badge className="text-xs bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
+                            <Badge className="text-xs rounded-full bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
                               <CreditCard className="h-3 w-3 mr-1" />
                               {t('bookSession.badges.payUpfront')}
                             </Badge>
                           )}
                           {type.payment_required === 'deposit' && (
-                            <Badge className="text-xs bg-amber-500/20 text-amber-400 border-amber-500/30">
+                            <Badge className="text-xs rounded-full bg-amber-500/20 text-amber-400 border-amber-500/30">
                               <Banknote className="h-3 w-3 mr-1" />
                               {t('bookSession.badges.deposit', { 
                                 value: type.deposit_type === 'percentage' 
@@ -296,6 +298,9 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
               </RadioGroup>
             ) : (
               <div className="text-center py-8">
+                <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                  <Clock className="h-7 w-7 text-muted-foreground" />
+                </div>
                 <p className="text-muted-foreground mb-4">
                   {t('bookSession.noSessionTypes')}
                 </p>
@@ -307,10 +312,11 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
               </div>
             )}
 
-            <div className="flex justify-end">
+            <div className="flex justify-end pt-2">
               <Button 
                 onClick={() => setStep("datetime")} 
                 disabled={!selectedType && sessionTypes.length > 0}
+                className="rounded-xl"
               >
                 {t('bookSession.buttons.continue')}
               </Button>
@@ -320,7 +326,7 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
 
         {/* Step 2: Date & Time */}
         {step === "datetime" && (
-          <div className="space-y-4 py-4 overflow-hidden">
+          <div className="space-y-4 py-2 overflow-hidden">
             <AvailabilityCalendar
               availability={availability}
               bookedSessions={bookedSessions}
@@ -337,19 +343,19 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
                 <RadioGroup 
                   value={isOnline ? "online" : "in-person"} 
                   onValueChange={(v) => setIsOnline(v === "online")}
-                  className="flex gap-4"
+                  className="flex gap-3"
                 >
                   <label className={cn(
-                    "flex items-center gap-2 p-3 rounded-lg border cursor-pointer",
-                    isOnline ? "border-primary bg-primary/5" : "border-border"
+                    "flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all flex-1 justify-center",
+                    isOnline ? "border-primary bg-primary/5 shadow-glow-sm" : "border-border/50 hover:border-primary/50"
                   )}>
                     <RadioGroupItem value="online" />
                     <Video className="h-4 w-4" />
                     <span>{t('bookSession.online')}</span>
                   </label>
                   <label className={cn(
-                    "flex items-center gap-2 p-3 rounded-lg border cursor-pointer",
-                    !isOnline ? "border-primary bg-primary/5" : "border-border"
+                    "flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all flex-1 justify-center",
+                    !isOnline ? "border-primary bg-primary/5 shadow-glow-sm" : "border-border/50 hover:border-primary/50"
                   )}>
                     <RadioGroupItem value="in-person" />
                     <MapPin className="h-4 w-4" />
@@ -359,13 +365,14 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
               </div>
             )}
 
-            <div className="flex justify-between">
-              <Button variant="outline" onClick={() => setStep("type")}>
+            <div className="flex justify-between gap-3 pt-2">
+              <Button variant="outline" onClick={() => setStep("type")} className="rounded-xl">
                 {t('bookSession.buttons.back')}
               </Button>
               <Button 
                 onClick={() => setStep("details")} 
                 disabled={!selectedDate || !selectedTime}
+                className="rounded-xl"
               >
                 {t('bookSession.buttons.continue')}
               </Button>
@@ -375,9 +382,9 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
 
         {/* Step 3: Details & Confirm */}
         {step === "details" && selectedDate && selectedTime && selectedSessionType && (
-          <div className="space-y-4 py-4">
+          <div className="space-y-4 py-2">
             {/* Booking Summary */}
-            <div className="p-4 bg-secondary/50 rounded-lg space-y-3">
+            <div className="p-4 bg-muted/30 rounded-2xl border border-border/30 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">{t('bookSession.summary.session')}</span>
                 <span className="font-medium text-foreground">{selectedSessionType.name}</span>
@@ -405,7 +412,7 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
               </div>
               
               {/* Payment breakdown */}
-              <div className="pt-2 border-t border-border space-y-2">
+              <div className="pt-3 border-t border-border/30 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">{t('bookSession.summary.sessionPrice')}</span>
                   <span className="font-medium text-foreground">{formatCurrency(selectedSessionType.price, currency)}</span>
@@ -455,17 +462,19 @@ const BookSessionModal = ({ open, onOpenChange, coach, onMessageFirst }: BookSes
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 rows={3}
+                className="rounded-xl"
               />
             </div>
 
-            <div className="flex justify-between">
-              <Button variant="outline" onClick={() => setStep("datetime")}>
+            <div className="flex justify-between gap-3 pt-2">
+              <Button variant="outline" onClick={() => setStep("datetime")} className="rounded-xl">
                 {t('bookSession.buttons.back')}
               </Button>
               <Button 
                 onClick={handleSubmit} 
                 disabled={createBooking.isPending || isProcessingPayment}
                 className={cn(
+                  "rounded-xl",
                   paymentRequired !== 'none' && "bg-emerald-600 hover:bg-emerald-700"
                 )}
               >

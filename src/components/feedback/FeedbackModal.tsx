@@ -100,7 +100,7 @@ export const FeedbackModal = () => {
       <Tooltip>
         <TooltipTrigger asChild>
           <DialogTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
+            <Button variant="ghost" size="icon" className="relative rounded-xl">
               <MessageSquarePlus className="h-5 w-5" />
             </Button>
           </DialogTrigger>
@@ -111,8 +111,10 @@ export const FeedbackModal = () => {
       </Tooltip>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <MessageSquarePlus className="h-5 w-5 text-primary" />
+          <DialogTitle className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <MessageSquarePlus className="h-5 w-5 text-primary" />
+            </div>
             {t("feedback.sendFeedback")}
           </DialogTitle>
           <DialogDescription>
@@ -130,7 +132,7 @@ export const FeedbackModal = () => {
                   <FormLabel>{t("feedback.category")}</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="rounded-xl">
                         <SelectValue placeholder={t("feedback.selectCategory")} />
                       </SelectTrigger>
                     </FormControl>
@@ -160,7 +162,7 @@ export const FeedbackModal = () => {
                 <FormItem>
                   <FormLabel>{t("feedback.subject")}</FormLabel>
                   <FormControl>
-                    <Input placeholder={t("feedback.subjectPlaceholder")} {...field} />
+                    <Input placeholder={t("feedback.subjectPlaceholder")} className="rounded-xl" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -176,7 +178,7 @@ export const FeedbackModal = () => {
                   <FormControl>
                     <Textarea
                       placeholder={t("feedback.placeholder")}
-                      className="min-h-[120px] resize-none"
+                      className="min-h-[120px] resize-none rounded-xl"
                       {...field}
                     />
                   </FormControl>
@@ -185,15 +187,16 @@ export const FeedbackModal = () => {
               )}
             />
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex justify-end gap-3 pt-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setOpen(false)}
+                className="rounded-xl"
               >
                 {t("actions.cancel")}
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button type="submit" disabled={isPending} className="rounded-xl">
                 {isPending ? t("feedback.submitting") : t("feedback.submit")}
               </Button>
             </div>

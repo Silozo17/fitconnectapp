@@ -262,7 +262,7 @@ const NewConversationModal = ({ open, onOpenChange }: NewConversationModalProps)
                 placeholder={t('newConversation.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 rounded-xl"
               />
             </div>
 
@@ -273,8 +273,10 @@ const NewConversationModal = ({ open, onOpenChange }: NewConversationModalProps)
                 </div>
               ) : filteredContacts.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  <User className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                  <p>{t('newConversation.noContacts')}</p>
+                  <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                    <User className="h-7 w-7 opacity-50" />
+                  </div>
+                  <p className="font-medium">{t('newConversation.noContacts')}</p>
                   <p className="text-xs mt-1">{t('newConversation.addConnectionsHint')}</p>
                 </div>
               ) : (
@@ -282,14 +284,14 @@ const NewConversationModal = ({ open, onOpenChange }: NewConversationModalProps)
                   <button
                     key={contact.id}
                     onClick={() => setSelectedContact(contact)}
-                    className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
+                    className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-muted/50 transition-all text-left active:scale-[0.98]"
                   >
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
                       {contact.avatar_url ? (
                         <img
                           src={contact.avatar_url}
                           alt={contact.name}
-                          className="w-10 h-10 rounded-full object-cover"
+                          className="w-11 h-11 rounded-xl object-cover"
                         />
                       ) : (
                         <User className="h-5 w-5 text-primary" />
@@ -305,16 +307,16 @@ const NewConversationModal = ({ open, onOpenChange }: NewConversationModalProps)
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-2xl border border-border/30">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
                 {selectedContact.avatar_url ? (
                   <img
                     src={selectedContact.avatar_url}
                     alt={selectedContact.name}
-                    className="w-10 h-10 rounded-full object-cover"
+                    className="w-12 h-12 rounded-xl object-cover"
                   />
                 ) : (
-                  <User className="h-5 w-5 text-primary" />
+                  <User className="h-6 w-6 text-primary" />
                 )}
               </div>
               <div className="flex-1">
@@ -326,6 +328,7 @@ const NewConversationModal = ({ open, onOpenChange }: NewConversationModalProps)
               <Button
                 variant="ghost"
                 size="sm"
+                className="rounded-xl"
                 onClick={() => setSelectedContact(null)}
               >
                 {t('newConversation.change')}
@@ -341,14 +344,15 @@ const NewConversationModal = ({ open, onOpenChange }: NewConversationModalProps)
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 rows={3}
+                className="rounded-xl"
               />
             </div>
 
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
+            <div className="flex justify-end gap-3 pt-2">
+              <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-xl">
                 {t('newConversation.cancel')}
               </Button>
-              <Button onClick={handleStartConversation} disabled={sending}>
+              <Button onClick={handleStartConversation} disabled={sending} className="rounded-xl">
                 {sending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
