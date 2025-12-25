@@ -4,7 +4,8 @@ import { useTranslation } from "react-i18next";
 import { useCoachLinkPrefix } from "@/hooks/useCoachLinkPrefix";
 import { useClientDashboardStats } from "@/hooks/useClientDashboardStats";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
-import { AvatarStatsHero } from "@/components/dashboard/AvatarStatsHero";
+import { ProfileBar } from "@/components/dashboard/client/ProfileBar";
+import { BMIWidget } from "@/components/dashboard/client/BMIWidget";
 import UserConnectionRequests from "@/components/dashboard/client/UserConnectionRequests";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -126,13 +127,16 @@ const ClientOverview = () => {
         </Alert>
       )}
 
+      {/* Profile Bar with Level/XP */}
+      <ProfileBar />
+
       {/* Today's Health - Lazy loaded */}
       <Suspense fallback={<HealthWidgetSkeleton />}>
         <HealthDataWidget compact className="mb-6" />
       </Suspense>
 
-      {/* Avatar Stats Hero */}
-      <AvatarStatsHero firstName={stats?.firstName || ''} />
+      {/* BMI Widget */}
+      <BMIWidget />
 
       {/* Friend Requests - Deferred rendering */}
       <UserConnectionRequests />
