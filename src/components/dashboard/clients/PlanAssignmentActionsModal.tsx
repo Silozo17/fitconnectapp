@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useTranslation } from "@/hooks/useTranslation";
+import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +23,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { CalendarIcon, Loader2, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -68,7 +69,7 @@ export function PlanAssignmentActionsModal({
   isUpdating = false,
   isRemoving = false,
 }: PlanAssignmentActionsModalProps) {
-  const { t } = useTranslation("coach");
+  const { t } = useTranslation();
   const [status, setStatus] = useState(assignment?.status || "active");
   const [startDate, setStartDate] = useState<Date | undefined>(
     assignment?.start_date ? new Date(assignment.start_date) : undefined
@@ -79,13 +80,13 @@ export function PlanAssignmentActionsModal({
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
 
   // Reset state when assignment changes
-  useState(() => {
+  useEffect(() => {
     if (assignment) {
       setStatus(assignment.status);
       setStartDate(assignment.start_date ? new Date(assignment.start_date) : undefined);
       setEndDate(assignment.end_date ? new Date(assignment.end_date) : undefined);
     }
-  });
+  }, [assignment]);
 
   const handleUpdate = () => {
     onUpdate({
@@ -109,92 +110,94 @@ export function PlanAssignmentActionsModal({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
-            <DialogTitle>{t("clientDetail.planActions.editAssignment")}</DialogTitle>
+            <DialogTitle>{t("coach:clientDetail.planActions.editAssignment")}</DialogTitle>
             <DialogDescription>
-              {assignment.training_plan?.name || t("clientDetail.plans.workoutPlan")}
+              {assignment.training_plan?.name || t("coach:clientDetail.plans.workoutPlan")}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4 py-4">
-            {/* Status */}
-            <div className="grid gap-2">
-              <Label>{t("clientDetail.planActions.status")}</Label>
-              <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">
-                    {t("clientDetail.planActions.statusOptions.active")}
-                  </SelectItem>
-                  <SelectItem value="paused">
-                    {t("clientDetail.planActions.statusOptions.paused")}
-                  </SelectItem>
-                  <SelectItem value="completed">
-                    {t("clientDetail.planActions.statusOptions.completed")}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <ScrollArea className="flex-1 pr-4">
+            <div className="grid gap-4 py-4">
+              {/* Status */}
+              <div className="grid gap-2">
+                <Label>{t("coach:clientDetail.planActions.status")}</Label>
+                <Select value={status} onValueChange={setStatus}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">
+                      {t("coach:clientDetail.planActions.statusOptions.active")}
+                    </SelectItem>
+                    <SelectItem value="paused">
+                      {t("coach:clientDetail.planActions.statusOptions.paused")}
+                    </SelectItem>
+                    <SelectItem value="completed">
+                      {t("coach:clientDetail.planActions.statusOptions.completed")}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-            {/* Start Date */}
-            <div className="grid gap-2">
-              <Label>{t("clientDetail.planActions.startDate")}</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "justify-start text-left font-normal",
-                      !startDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {startDate ? format(startDate, "PPP") : t("clientDetail.planActions.selectDate")}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={startDate}
-                    onSelect={setStartDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
+              {/* Start Date */}
+              <div className="grid gap-2">
+                <Label>{t("coach:clientDetail.planActions.startDate")}</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "justify-start text-left font-normal",
+                        !startDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {startDate ? format(startDate, "PPP") : t("coach:clientDetail.planActions.selectDate")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 z-[100]" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={startDate}
+                      onSelect={setStartDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
 
-            {/* End Date */}
-            <div className="grid gap-2">
-              <Label>{t("clientDetail.planActions.endDate")}</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "justify-start text-left font-normal",
-                      !endDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {endDate ? format(endDate, "PPP") : t("clientDetail.planActions.selectDate")}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={endDate}
-                    onSelect={setEndDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              {/* End Date */}
+              <div className="grid gap-2">
+                <Label>{t("coach:clientDetail.planActions.endDate")}</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "justify-start text-left font-normal",
+                        !endDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {endDate ? format(endDate, "PPP") : t("coach:clientDetail.planActions.selectDate")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 z-[100]" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={endDate}
+                      onSelect={setEndDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
-          </div>
+          </ScrollArea>
 
-          <DialogFooter className="flex flex-col sm:flex-row gap-2">
+          <DialogFooter className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
             <Button
               variant="destructive"
               onClick={handleRemoveClick}
@@ -202,14 +205,14 @@ export function PlanAssignmentActionsModal({
               className="sm:mr-auto"
             >
               <Trash2 className="h-4 w-4 mr-2" />
-              {t("clientDetail.planActions.removePlan")}
+              {t("coach:clientDetail.planActions.removePlan")}
             </Button>
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              {t("common.cancel")}
+              {t("common:common.cancel")}
             </Button>
             <Button onClick={handleUpdate} disabled={isUpdating || isRemoving}>
               {isUpdating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {t("clientDetail.planActions.saveChanges")}
+              {t("coach:clientDetail.planActions.saveChanges")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -219,19 +222,19 @@ export function PlanAssignmentActionsModal({
       <AlertDialog open={showRemoveConfirm} onOpenChange={setShowRemoveConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t("clientDetail.planActions.confirmRemoveTitle")}</AlertDialogTitle>
+            <AlertDialogTitle>{t("coach:clientDetail.planActions.confirmRemoveTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t("clientDetail.planActions.confirmRemoveDescription")}
+              {t("coach:clientDetail.planActions.confirmRemoveDescription")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogCancel>{t("common:common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmRemove}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {isRemoving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {t("clientDetail.planActions.removePlan")}
+              {t("coach:clientDetail.planActions.removePlan")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
