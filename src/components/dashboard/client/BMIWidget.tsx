@@ -6,46 +6,41 @@ import { Settings } from 'lucide-react';
 import { useClientProfileData, calculateBMI, getBMICategory } from '@/hooks/useClientProfileData';
 import { cn } from '@/lib/utils';
 
-// Convert angle in degrees to radians
-function toRadians(degrees: number): number {
-  return (degrees * Math.PI) / 180;
+// Convert polar coordinates to cartesian for SVG
+// Angle 0 = right, 90 = bottom, 180 = left, 270 = top (standard SVG)
+function polarToCartesian(cx: number, cy: number, radius: number, angleInDegrees: number) {
+  const angleInRadians = (angleInDegrees * Math.PI) / 180;
+  return {
+    x: cx + radius * Math.cos(angleInRadians),
+    y: cy + radius * Math.sin(angleInRadians)
+  };
 }
 
-// SVG arc path generator for semi-circle (top half)
-// startAngle and endAngle are in degrees where 180 = left, 0 = right
+// Generate SVG arc path
+// For a semi-circle gauge: angles go from 180 (left) to 0 (right), sweeping upward
 function describeArc(cx: number, cy: number, radius: number, startAngle: number, endAngle: number): string {
-  // Convert to radians - we're drawing from left (180°) to right (0°)
-  const startRad = toRadians(startAngle);
-  const endRad = toRadians(endAngle);
+  const start = polarToCartesian(cx, cy, radius, startAngle);
+  const end = polarToCartesian(cx, cy, radius, endAngle);
   
-  // Calculate start and end points
-  const x1 = cx + radius * Math.cos(Math.PI - startRad);
-  const y1 = cy - radius * Math.sin(Math.PI - startRad);
-  const x2 = cx + radius * Math.cos(Math.PI - endRad);
-  const y2 = cy - radius * Math.sin(Math.PI - endRad);
-  
+  // For going from higher angle to lower (e.g., 180 to 135), we sweep counter-clockwise (0)
+  const sweepFlag = startAngle > endAngle ? 0 : 1;
   const largeArcFlag = Math.abs(endAngle - startAngle) > 180 ? 1 : 0;
-  const sweepFlag = 1; // Always sweep clockwise
   
-  return `M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${x2} ${y2}`;
+  return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${end.x} ${end.y}`;
 }
 
-// Get position for the indicator dot
+// Get position for the indicator dot based on BMI value
 function getIndicatorPosition(bmi: number, cx: number, cy: number, radius: number) {
-  // BMI scale: 15 to 40 mapped to 180 degrees (left to right)
+  // BMI scale: 15 (underweight) to 40 (obese) mapped across the arc
   const minBMI = 15;
   const maxBMI = 40;
   const clampedBMI = Math.max(minBMI, Math.min(maxBMI, bmi));
   const percentage = (clampedBMI - minBMI) / (maxBMI - minBMI);
   
-  // Angle from 180° (left) to 0° (right)
+  // Map percentage to angle: 180° (left, low BMI) to 0° (right, high BMI)
   const angle = 180 - (percentage * 180);
-  const rad = toRadians(angle);
   
-  return {
-    x: cx + radius * Math.cos(Math.PI - rad),
-    y: cy - radius * Math.sin(Math.PI - rad)
-  };
+  return polarToCartesian(cx, cy, radius, angle);
 }
 
 export function BMIWidget() {
@@ -67,21 +62,21 @@ export function BMIWidget() {
   const bmi = calculateBMI(profile?.weight_kg, profile?.height_cm);
   const hasMissingData = !profile?.weight_kg || !profile?.height_cm;
   
-  // Gauge dimensions
+  // Gauge dimensions - semi-circle opening upward
   const width = 260;
-  const height = 150;
+  const height = 140;
   const cx = width / 2;
-  const cy = height - 20;
+  const cy = height - 10; // Center at bottom so arc goes upward
   const radius = 100;
   const strokeWidth = 14;
   
-  // Segment angles (180 degree arc split into 4 segments with gaps)
-  // Each segment ~42° with 3° gaps between
+  // Segment angles: 180° (left) to 0° (right), going counter-clockwise (upward arc)
+  // Order: Underweight (left/blue) → Normal (green) → Overweight (yellow) → Obese (right/red)
   const segments = [
-    { startAngle: 180, endAngle: 138, color: '#3B82F6' },  // Underweight - blue
-    { startAngle: 135, endAngle: 93, color: '#22C55E' },   // Normal - green  
-    { startAngle: 90, endAngle: 48, color: '#EAB308' },    // Overweight - yellow
-    { startAngle: 45, endAngle: 3, color: '#EF4444' },     // Obese - red
+    { startAngle: 180, endAngle: 137, color: '#3B82F6' },  // Underweight - blue
+    { startAngle: 134, endAngle: 91, color: '#22C55E' },   // Normal - green
+    { startAngle: 88, endAngle: 45, color: '#EAB308' },    // Overweight - yellow
+    { startAngle: 42, endAngle: 0, color: '#EF4444' },     // Obese - red
   ];
   
   const category = bmi ? getBMICategory(bmi) : null;
