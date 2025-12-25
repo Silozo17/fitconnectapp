@@ -178,6 +178,7 @@
     "onlineSession": "Sesja online",
     "location": "Lokalizacja",
     "locationPlaceholder": "Adres siłowni lub miejsce spotkania",
+    "venuePlaceholder": "Szukaj siłowni, studia, parku...",
     "sessionNotes": "Notatki do sesji (opcjonalnie)",
     "sessionNotesPlaceholder": "Konkretne obszary do pracy lub notatki do tej sesji...",
     "cancel": "Anuluj",

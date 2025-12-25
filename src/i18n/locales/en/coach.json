@@ -178,6 +178,7 @@
     "onlineSession": "Online Session",
     "location": "Location",
     "locationPlaceholder": "Gym address or meeting point",
+    "venuePlaceholder": "Search for a gym, studio, park...",
     "sessionNotes": "Session Notes (Optional)",
     "sessionNotesPlaceholder": "Any specific focus areas or notes for this session...",
     "cancel": "Cancel",

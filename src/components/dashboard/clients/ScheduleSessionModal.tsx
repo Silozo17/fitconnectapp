@@ -1,17 +1,18 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Calendar, Clock, MapPin, Video } from "lucide-react";
+import { Calendar, Clock, Video } from "lucide-react";
 import { useScheduleSessionWithPackage } from "@/hooks/useScheduleSessionWithPackage";
 import { useClientActivePackage } from "@/hooks/usePackages";
 import { useCoachProfile } from "@/hooks/useCoachClients";
 import { useTranslation } from "@/hooks/useTranslation";
 import { PackageCreditsInfo } from "./PackageCreditsInfo";
+import { VenueAutocomplete } from "@/components/shared/VenueAutocomplete";
+import { Input } from "@/components/ui/input";
 
 interface ScheduleSessionModalProps {
   open: boolean;
@@ -157,16 +158,11 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
           {!isOnline && (
             <div className="space-y-2">
               <Label htmlFor="location">{t('scheduleSessionModal.location')}</Label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
-                <Input
-                  id="location"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder={t('scheduleSessionModal.locationPlaceholder')}
-                  className="pl-10 bg-background border-border"
-                />
-              </div>
+              <VenueAutocomplete
+                value={location}
+                onVenueChange={(loc) => setLocation(loc)}
+                placeholder={t('scheduleSessionModal.venuePlaceholder')}
+              />
             </div>
           )}
 
