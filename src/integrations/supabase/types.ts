@@ -1090,7 +1090,15 @@ export type Database = {
           stripe_checkout_session_id?: string | null
           stripe_payment_intent_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "client_package_purchases_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "coach_packages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       client_profiles: {
         Row: {
