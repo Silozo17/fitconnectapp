@@ -209,59 +209,66 @@ export function useUserStats() {
         let localTotal = 0;
         let localArea: string | null = null;
         let localType: 'city' | 'county' | 'global' = 'global';
-        
-        if (clientCity || clientCounty) {
-          // Get all visible profiles with XP in the same area
-          const locationQuery = supabase
+
+        // Prioritize city ranking first, then county, then fall back to global
+        if (clientCity) {
+          // Step 1: Get all visible profiles in the same city
+          const { data: cityProfiles } = await supabase
             .from('client_profiles')
-            .select('id, city, county, client_xp(total_xp)')
-            .eq('leaderboard_visible', true);
+            .select('id')
+            .eq('leaderboard_visible', true)
+            .eq('city', clientCity);
           
-          // Prioritize city, fallback to county
-          if (clientCity) {
-            const { data: cityProfiles } = await locationQuery.eq('city', clientCity);
-            if (cityProfiles && cityProfiles.length > 0) {
-              // Sort by XP descending
-              const sorted = cityProfiles
-                .map(p => ({
-                  id: p.id,
-                  xp: (p.client_xp as any)?.total_xp || 0
-                }))
-                .sort((a, b) => b.xp - a.xp);
-              
-              const userIndex = sorted.findIndex(p => p.id === clientId);
-              if (userIndex !== -1) {
-                localRank = userIndex + 1;
-                localTotal = sorted.length;
-                localArea = clientCity;
-                localType = 'city';
-              }
+          if (cityProfiles && cityProfiles.length > 0) {
+            // Step 2: Get XP for all those profiles
+            const profileIds = cityProfiles.map(p => p.id);
+            const { data: xpData } = await supabase
+              .from('client_xp')
+              .select('client_id, total_xp')
+              .in('client_id', profileIds);
+            
+            // Step 3: Merge and sort
+            const xpMap = new Map(xpData?.map(x => [x.client_id, x.total_xp || 0]) || []);
+            const sorted = cityProfiles
+              .map(p => ({ id: p.id, xp: xpMap.get(p.id) || 0 }))
+              .sort((a, b) => b.xp - a.xp);
+            
+            const userIndex = sorted.findIndex(p => p.id === clientId);
+            if (userIndex !== -1) {
+              localRank = userIndex + 1;
+              localTotal = sorted.length;
+              localArea = clientCity;
+              localType = 'city';
             }
           }
+        }
+
+        // If no city rank found, try county
+        if (localRank === 0 && clientCounty) {
+          const { data: countyProfiles } = await supabase
+            .from('client_profiles')
+            .select('id')
+            .eq('leaderboard_visible', true)
+            .eq('county', clientCounty);
           
-          // If no city rank, try county
-          if (localRank === 0 && clientCounty) {
-            const { data: countyProfiles } = await supabase
-              .from('client_profiles')
-              .select('id, city, county, client_xp(total_xp)')
-              .eq('leaderboard_visible', true)
-              .eq('county', clientCounty);
+          if (countyProfiles && countyProfiles.length > 0) {
+            const profileIds = countyProfiles.map(p => p.id);
+            const { data: xpData } = await supabase
+              .from('client_xp')
+              .select('client_id, total_xp')
+              .in('client_id', profileIds);
             
-            if (countyProfiles && countyProfiles.length > 0) {
-              const sorted = countyProfiles
-                .map(p => ({
-                  id: p.id,
-                  xp: (p.client_xp as any)?.total_xp || 0
-                }))
-                .sort((a, b) => b.xp - a.xp);
-              
-              const userIndex = sorted.findIndex(p => p.id === clientId);
-              if (userIndex !== -1) {
-                localRank = userIndex + 1;
-                localTotal = sorted.length;
-                localArea = clientCounty;
-                localType = 'county';
-              }
+            const xpMap = new Map(xpData?.map(x => [x.client_id, x.total_xp || 0]) || []);
+            const sorted = countyProfiles
+              .map(p => ({ id: p.id, xp: xpMap.get(p.id) || 0 }))
+              .sort((a, b) => b.xp - a.xp);
+            
+            const userIndex = sorted.findIndex(p => p.id === clientId);
+            if (userIndex !== -1) {
+              localRank = userIndex + 1;
+              localTotal = sorted.length;
+              localArea = clientCounty;
+              localType = 'county';
             }
           }
         }
