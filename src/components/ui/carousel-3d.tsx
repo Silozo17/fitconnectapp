@@ -93,36 +93,38 @@ export function Carousel3D({
 
   return (
     <div className={cn("relative", className)}>
-      {/* Carousel viewport */}
-      <div 
-        ref={emblaRef} 
-        className="overflow-hidden"
-        style={{ perspective: "1000px" }}
-      >
+      {/* Carousel viewport - overflow-hidden clips shadows */}
+      <div className="overflow-hidden">
         <div 
-          className="flex items-center py-4"
-          style={{ gap: `${gap}px`, paddingLeft: "20px", paddingRight: "20px" }}
+          ref={emblaRef} 
+          className="overflow-visible"
+          style={{ perspective: "1000px" }}
         >
-          {childArray.map((child, index) => {
-            if (!isValidElement(child)) return null;
-            
-            return (
-              <div
-                key={index}
-                className="flex-shrink-0"
-                style={{
-                  ...getSlideStyle(index),
-                  transformStyle: "preserve-3d",
-                }}
-              >
-                {cloneElement(child as React.ReactElement<any>)}
-              </div>
-            );
-          })}
+          <div 
+            className="flex items-center pt-4 pb-8"
+            style={{ gap: `${gap}px`, paddingLeft: "20px", paddingRight: "20px" }}
+          >
+            {childArray.map((child, index) => {
+              if (!isValidElement(child)) return null;
+              
+              return (
+                <div
+                  key={index}
+                  className="flex-shrink-0"
+                  style={{
+                    ...getSlideStyle(index),
+                    transformStyle: "preserve-3d",
+                  }}
+                >
+                  {cloneElement(child as React.ReactElement<any>)}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      {/* Pagination dots */}
+      {/* Pagination dots - outside overflow clip */}
       {showPagination && slidesCount > 1 && (
         <div className="flex justify-center items-center gap-1.5 mt-4">
           {Array.from({ length: slidesCount }).map((_, index) => (
