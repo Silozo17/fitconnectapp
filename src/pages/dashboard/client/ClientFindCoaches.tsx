@@ -134,7 +134,7 @@ const ClientFindCoaches = () => {
                 <SlidersHorizontal className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] sm:w-[350px] p-0">
+            <SheetContent side="left" className="w-[300px] sm:w-[350px] p-0" onOpenAutoFocus={(e) => e.preventDefault()}>
               <SheetHeader className="p-4 border-b border-border">
                 <SheetTitle>{t('findCoaches.filters')}</SheetTitle>
               </SheetHeader>

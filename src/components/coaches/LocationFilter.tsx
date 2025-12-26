@@ -114,6 +114,7 @@ export function LocationFilter({
             // Delay to allow click on results
             setTimeout(() => setIsSearchFocused(false), 200);
           }}
+          autoFocus={false}
           className="pl-8 h-9 text-sm"
         />
       </div>
