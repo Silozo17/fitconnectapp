@@ -42,11 +42,14 @@ export function LeaderboardSettings({
     : '';
 
   const handleLocationChange = (location: string, data: LocationData | null) => {
+    console.log('[LeaderboardSettings] handleLocationChange called:', { location, data });
     if (data) {
+      console.log('[LeaderboardSettings] Updating fields - city:', data.city, 'county:', data.region, 'country:', data.country);
       onUpdate('city', data.city || null);
       onUpdate('county', data.region || null);
       onUpdate('country', data.country || null);
     } else if (!location) {
+      console.log('[LeaderboardSettings] Clearing all location fields');
       onUpdate('city', null);
       onUpdate('county', null);
       onUpdate('country', null);

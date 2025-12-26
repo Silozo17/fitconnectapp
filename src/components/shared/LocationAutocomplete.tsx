@@ -112,15 +112,21 @@ export function LocationAutocomplete({
 
   const handleSelect = async (prediction: PlacePrediction) => {
     setIsLoading(true);
+    console.log('[LocationAutocomplete] handleSelect called with prediction:', prediction);
     try {
       const { data, error } = await supabase.functions.invoke("places-details", {
         body: { place_id: prediction.place_id },
       });
 
+      console.log('[LocationAutocomplete] Edge function response:', { data, error });
+
       if (error) throw error;
 
       const locationData: LocationData = data;
       const displayValue = `${locationData.city}${locationData.country ? `, ${locationData.country}` : ""}`;
+      
+      console.log('[LocationAutocomplete] Parsed locationData:', locationData);
+      console.log('[LocationAutocomplete] Calling onLocationChange with:', { displayValue, locationData });
       
       setInputValue(displayValue);
       setSelectedLocation(locationData);
@@ -128,7 +134,7 @@ export function LocationAutocomplete({
       setPredictions([]);
       setIsOpen(false);
     } catch (error) {
-      console.error("Failed to get place details:", error);
+      console.error("[LocationAutocomplete] Failed to get place details:", error);
       // Fallback to just using the description
       setInputValue(prediction.description);
       onLocationChange(prediction.description, null);
