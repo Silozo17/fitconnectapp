@@ -37,12 +37,36 @@ export default function AdminIntegrationsDocs() {
             <CheckCircle className="h-5 w-5 text-green-500" />
             <div>
               <h3 className="font-medium">Wearables</h3>
-              <p className="text-sm text-muted-foreground">Apple Health, Google Fit, Fitbit, Garmin</p>
+              <p className="text-sm text-muted-foreground">Apple Health, Health Connect (Android), Fitbit, Garmin</p>
+            </div>
+          </div>
+          <div className="p-4 rounded-lg border border-border bg-card/50 flex items-center gap-3">
+            <CheckCircle className="h-5 w-5 text-green-500" />
+            <div>
+              <h3 className="font-medium">RevenueCat</h3>
+              <p className="text-sm text-muted-foreground">iOS App Store & Google Play subscription billing</p>
             </div>
           </div>
         </div>
       </section>
       <DocTip>Check the integrations page regularly to ensure all services are connected properly.</DocTip>
+      
+      <div className="mt-6 p-4 rounded-lg border border-primary/20 bg-primary/5">
+        <h4 className="font-medium text-sm mb-2">📱 Mobile Subscription Processing</h4>
+        <p className="text-sm text-muted-foreground">
+          Coach subscriptions purchased through the iOS and Android apps are processed 
+          via RevenueCat, which manages Apple App Store and Google Play billing. Web 
+          purchases continue to use Stripe. Both systems sync subscription status to 
+          the platform automatically.
+        </p>
+      </div>
+
+      {/* Changelog */}
+      <section className="mt-16 pt-8 border-t border-border">
+        <p className="text-xs text-muted-foreground">
+          <strong>Changelog:</strong> December 26, 2024 — Added RevenueCat integration status; updated Wearables to show Health Connect (Android).
+        </p>
+      </section>
     </DocsLayout>
   );
 }
