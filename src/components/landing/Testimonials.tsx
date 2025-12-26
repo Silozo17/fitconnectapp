@@ -47,7 +47,7 @@ const Testimonials = () => {
         {/* Testimonials Grid */}
         <div className="grid md:grid-cols-3 gap-6 md:gap-8">
           {testimonials.map((testimonial, index) => (
-            <div key={index} className="card-elevated p-6 md:p-8 relative bg-background">
+            <div key={index} className="glass-card p-6 md:p-8 relative">
               {/* Quote Icon */}
               <div className="absolute top-6 right-6">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gradient-pink/20 to-gradient-purple/10 flex items-center justify-center">

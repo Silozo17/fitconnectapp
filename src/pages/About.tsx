@@ -174,7 +174,7 @@ const About = () => {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {values.map((value, index) => (
-              <Card key={index} className="border-0 shadow-soft bg-card/80 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
+              <Card key={index} variant="glass" className="hover:shadow-lg transition-all duration-300">
                 <CardContent className="p-6 text-center">
                   <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center mx-auto mb-4">
                     <value.icon className="w-7 h-7 text-white" />
@@ -225,7 +225,7 @@ const About = () => {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {team.map((member, index) => (
-              <Card key={index} className="border-0 shadow-soft bg-card/80 backdrop-blur-sm overflow-hidden group hover:shadow-lg transition-all duration-300">
+              <Card key={index} variant="glass" className="overflow-hidden group hover:shadow-lg transition-all duration-300">
                 <div className="aspect-square bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 flex items-center justify-center">
                   <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-3xl font-bold">
                     {member.name.split(' ').map(n => n[0]).join('')}

@@ -29,7 +29,7 @@ const LeaderboardEntry = React.forwardRef<HTMLDivElement, { entry: PublicLeaderb
     return (
       <div 
         ref={ref}
-        className="flex items-center gap-3 p-3 rounded-lg bg-card/50 border border-border/50 hover:border-primary/30 transition-all duration-300"
+        className="flex items-center gap-3 p-3 rounded-lg glass-item hover:border-primary/30 transition-all duration-300"
         style={{ animationDelay: `${index * 100}ms` }}
       >
         <div className="flex items-center justify-center w-10">
@@ -74,7 +74,7 @@ function LeaderboardColumn({
   const { t } = useTranslation('landing');
   
   return (
-    <Card className="p-6 bg-card/80 backdrop-blur-sm border-border/50">
+    <Card className="p-6 glass-card">
       <div className="flex items-center gap-2 mb-4">
         <Icon className="h-5 w-5 text-primary" />
         <h3 className="font-bold text-lg">{title}</h3>

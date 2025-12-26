@@ -234,7 +234,7 @@ const HowItWorks = () => {
                       </ul>
                     </div>
                     <div className={index % 2 === 1 ? 'md:order-1' : ''}>
-                      <Card className="border-0 shadow-soft bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5 aspect-square flex items-center justify-center">
+                      <Card variant="glass" className="aspect-square flex items-center justify-center">
                         <step.icon className="w-24 h-24 text-primary/30" />
                       </Card>
                     </div>
@@ -274,7 +274,7 @@ const HowItWorks = () => {
                       </ul>
                     </div>
                     <div className={index % 2 === 1 ? 'md:order-1' : ''}>
-                      <Card className="border-0 shadow-soft bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5 aspect-square flex items-center justify-center">
+                      <Card variant="glass" className="aspect-square flex items-center justify-center">
                         <step.icon className="w-24 h-24 text-primary/30" />
                       </Card>
                     </div>
@@ -309,7 +309,7 @@ const HowItWorks = () => {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {features.map((feature, index) => (
-              <Card key={index} className="border-0 shadow-soft bg-card/80 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
+              <Card key={index} variant="glass" className="hover:shadow-lg transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center mb-4">
                     <feature.icon className="w-6 h-6 text-primary" />

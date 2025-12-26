@@ -128,7 +128,7 @@ const Contact = () => {
           <div className="container mx-auto">
             <div className="grid md:grid-cols-3 gap-6">
               {contactInfo.map((info, index) => (
-                <Card key={index} className="border-border/50 hover:border-primary/30 transition-all">
+                <Card key={index} variant="glass" className="hover:border-primary/30 transition-all">
                   <CardContent className="p-6 text-center">
                     <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                       <info.icon className="w-6 h-6 text-primary" />
@@ -149,7 +149,7 @@ const Contact = () => {
             <div className="grid lg:grid-cols-3 gap-8">
               {/* Contact Form */}
               <div className="lg:col-span-2">
-                <Card className="border-border/50">
+                <Card variant="glass">
                   <CardHeader>
                     <CardTitle className="font-display text-2xl">{t("contact.form.title")}</CardTitle>
                   </CardHeader>
@@ -220,7 +220,7 @@ const Contact = () => {
               {/* Sidebar */}
               <div className="space-y-6">
                 {/* Quick Links */}
-                <Card className="border-border/50">
+                <Card variant="glass">
                   <CardHeader>
                     <CardTitle className="font-display text-lg flex items-center gap-2">
                       <HelpCircle className="w-5 h-5 text-primary" />
@@ -241,7 +241,7 @@ const Contact = () => {
                 </Card>
 
                 {/* Social Links */}
-                <Card className="border-border/50">
+                <Card variant="glass">
                   <CardHeader>
                     <CardTitle className="font-display text-lg">{t("contact.followUs")}</CardTitle>
                   </CardHeader>

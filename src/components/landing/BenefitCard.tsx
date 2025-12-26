@@ -7,7 +7,7 @@ interface BenefitCardProps {
 }
 
 export const BenefitCard = ({ icon, title, description }: BenefitCardProps) => (
-  <div className="p-6 rounded-xl bg-card border border-border/50 text-center hover:border-primary/30 transition-colors">
+  <div className="p-6 rounded-xl glass-card text-center hover:border-primary/30 transition-colors">
     <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 text-primary">
       {icon}
     </div>

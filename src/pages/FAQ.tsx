@@ -170,7 +170,7 @@ const FAQ = () => {
                     <AccordionItem 
                       key={index} 
                       value={`client-${index}`}
-                      className="border border-border/50 rounded-2xl px-6 bg-card/50 backdrop-blur-sm data-[state=open]:shadow-soft"
+                      className="glass-item rounded-2xl px-6 data-[state=open]:shadow-soft"
                     >
                       <AccordionTrigger className="text-left hover:no-underline py-5">
                         <span className="font-semibold pr-4">{faq.question}</span>
@@ -189,7 +189,7 @@ const FAQ = () => {
                     <AccordionItem 
                       key={index} 
                       value={`coach-${index}`}
-                      className="border border-border/50 rounded-2xl px-6 bg-card/50 backdrop-blur-sm data-[state=open]:shadow-soft"
+                      className="glass-item rounded-2xl px-6 data-[state=open]:shadow-soft"
                     >
                       <AccordionTrigger className="text-left hover:no-underline py-5">
                         <span className="font-semibold pr-4">{faq.question}</span>
@@ -208,7 +208,7 @@ const FAQ = () => {
                     <AccordionItem 
                       key={index} 
                       value={`general-${index}`}
-                      className="border border-border/50 rounded-2xl px-6 bg-card/50 backdrop-blur-sm data-[state=open]:shadow-soft"
+                      className="glass-item rounded-2xl px-6 data-[state=open]:shadow-soft"
                     >
                       <AccordionTrigger className="text-left hover:no-underline py-5">
                         <span className="font-semibold pr-4">{faq.question}</span>

@@ -64,22 +64,22 @@ const Install = () => {
 
         {/* Benefits */}
         <div className="grid grid-cols-2 gap-4 mb-8">
-          <Card className="p-4">
+          <Card variant="glass" className="p-4">
             <Zap className="w-6 h-6 text-primary mb-2" />
             <h3 className="font-medium">Instant Access</h3>
             <p className="text-sm text-muted-foreground">Launch directly from your home screen</p>
           </Card>
-          <Card className="p-4">
+          <Card variant="glass" className="p-4">
             <RefreshCw className="w-6 h-6 text-primary mb-2" />
             <h3 className="font-medium">Seamless Sync</h3>
             <p className="text-sm text-muted-foreground">Your data syncs instantly across all devices</p>
           </Card>
-          <Card className="p-4">
+          <Card variant="glass" className="p-4">
             <Bell className="w-6 h-6 text-primary mb-2" />
             <h3 className="font-medium">Notifications</h3>
             <p className="text-sm text-muted-foreground">Get reminders for sessions & habits</p>
           </Card>
-          <Card className="p-4">
+          <Card variant="glass" className="p-4">
             <Smartphone className="w-6 h-6 text-primary mb-2" />
             <h3 className="font-medium">Full Screen</h3>
             <p className="text-sm text-muted-foreground">App-like experience without browser bars</p>
@@ -87,7 +87,7 @@ const Install = () => {
         </div>
 
         {/* App Store Downloads */}
-        <Card className="mb-6">
+        <Card variant="glass" className="mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Download className="w-5 h-5" />
@@ -132,7 +132,7 @@ const Install = () => {
 
         {/* Install Instructions */}
         {canInstall ? (
-          <Card className="mb-6">
+          <Card variant="glass" className="mb-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Download className="w-5 h-5" />
@@ -150,7 +150,7 @@ const Install = () => {
             </CardContent>
           </Card>
         ) : isIOS ? (
-          <Card className="mb-6">
+          <Card variant="glass" className="mb-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Share className="w-5 h-5" />
@@ -216,7 +216,7 @@ const Install = () => {
             </CardContent>
           </Card>
         ) : (
-          <Card className="mb-6">
+          <Card variant="glass" className="mb-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Download className="w-5 h-5" />

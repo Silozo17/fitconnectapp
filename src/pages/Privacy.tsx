@@ -31,7 +31,7 @@ const Privacy = () => {
       <section className="py-12 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <Card className="border-0 shadow-soft bg-card/80 backdrop-blur-sm">
+            <Card variant="glass">
               <CardContent className="p-8 md:p-12 prose prose-gray dark:prose-invert max-w-none">
                 <h2>1. Introduction</h2>
                 <p>
