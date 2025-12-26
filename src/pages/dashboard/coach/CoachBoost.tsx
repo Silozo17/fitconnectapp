@@ -11,15 +11,15 @@ import {
 } from "@/components/ui/accordion";
 import { FeatureGate } from "@/components/FeatureGate";
 import { useBoostSettings } from "@/hooks/useCoachBoost";
-import { useActivePricing } from "@/hooks/useActivePricing";
+import { useNativePricing } from "@/hooks/useNativePricing";
 import { useTranslation } from "@/hooks/useTranslation";
 
 const CoachBoost = () => {
   const { t } = useTranslation('coach');
   const { data: settings } = useBoostSettings();
-  const pricing = useActivePricing();
+  const pricing = useNativePricing();
   
-  // Get boost price from pricing config (no conversion)
+  // Get boost price from pricing config (uses native pricing on mobile apps)
   const boostPrice = pricing.prices.boost;
   const formattedBoostPrice = pricing.formatPrice(boostPrice);
   
