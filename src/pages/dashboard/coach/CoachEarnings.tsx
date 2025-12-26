@@ -104,16 +104,14 @@ const CoachEarnings = () => {
       {/* Stripe Connect Notice */}
       {!hasStripeConnected && (
         <Card variant="glass" className="p-4 mb-6 border-warning/30 bg-warning/5">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-warning mt-0.5" />
-            <div className="flex-1">
-              <p className="font-medium text-foreground">{t("earnings.connectStripeNotice")}</p>
-              <p className="text-sm text-muted-foreground">{t("earnings.connectStripeDescription")}</p>
-            </div>
+          <div className="flex items-center gap-3 mb-2">
+            <AlertCircle className="w-5 h-5 text-warning" />
+            <p className="font-medium text-foreground flex-1">{t("earnings.connectStripeNotice")}</p>
             <Button size="sm" className="bg-primary text-primary-foreground" onClick={handleConnectStripe}>
               {t("earnings.connectStripe")}
             </Button>
           </div>
+          <p className="text-sm text-muted-foreground">{t("earnings.connectStripeDescription")}</p>
         </Card>
       )}
 

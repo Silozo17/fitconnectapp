@@ -249,26 +249,24 @@ const ClientOverview = () => {
           {/* Background gradient */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-transparent to-accent/15 pointer-events-none" />
           
-          <CardContent className="relative p-8 md:p-10">
-            <div className="flex items-start gap-5">
-              <div className="p-4 rounded-2xl bg-primary/15 shadow-glow-sm">
-                <Sparkles className="w-7 h-7 text-primary" />
+          <CardContent className="relative p-6 md:p-8">
+            <div className="flex items-center gap-4 mb-3">
+              <div className="p-3 rounded-2xl bg-primary/15 shadow-glow-sm">
+                <Sparkles className="w-6 h-6 text-primary" />
               </div>
-              <div className="flex-1">
-                <h3 className="text-2xl font-bold text-foreground font-display mb-3">
-                  {t('client.cta.startJourney')}
-                </h3>
-                <p className="text-muted-foreground mb-5 max-w-md text-lg">
-                  {t('client.cta.startJourneyDesc')}
-                </p>
-                <Button variant="lime" size="lg" className="rounded-2xl h-14 px-8 text-base" asChild>
-                  <Link to={coachLinkPrefix}>
-                    {t('client.cta.findCoach')}
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </Link>
-                </Button>
-              </div>
+              <h3 className="text-xl font-bold text-foreground font-display">
+                {t('client.cta.startJourney')}
+              </h3>
             </div>
+            <p className="text-muted-foreground mb-5 text-base">
+              {t('client.cta.startJourneyDesc')}
+            </p>
+            <Button variant="lime" size="lg" className="w-full rounded-2xl h-12 text-base" asChild>
+              <Link to={coachLinkPrefix}>
+                {t('client.cta.findCoach')}
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Link>
+            </Button>
           </CardContent>
         </Card>
       )}
