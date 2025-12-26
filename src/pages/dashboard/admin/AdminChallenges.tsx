@@ -271,19 +271,19 @@ export default function AdminChallenges() {
         </div>
         
         {/* Actions */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 flex-1">
-            <div className="relative flex-1 max-w-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto sm:flex-1">
+            <div className="relative w-full sm:max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search challenges..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9"
+                className="pl-9 w-full"
               />
             </div>
             <Select value={audienceFilter} onValueChange={setAudienceFilter}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-full sm:w-40">
                 <SelectValue placeholder="Audience" />
               </SelectTrigger>
               <SelectContent>
@@ -294,19 +294,19 @@ export default function AdminChallenges() {
             </Select>
           </div>
           
-          <Button onClick={() => setCreateOpen(true)} className="gap-2">
+          <Button onClick={() => setCreateOpen(true)} className="w-full sm:w-auto gap-2">
             <Plus className="h-4 w-4" />
-            Create Challenge
+            <span className="sm:inline">Create Challenge</span>
           </Button>
         </div>
         
         {/* Challenges List */}
         <Tabs defaultValue="active">
-          <TabsList>
-            <TabsTrigger value="active">Active ({activeChallenges.length})</TabsTrigger>
-            <TabsTrigger value="upcoming">Upcoming ({upcomingChallenges.length})</TabsTrigger>
-            <TabsTrigger value="past">Past ({pastChallenges.length})</TabsTrigger>
-            <TabsTrigger value="all">All ({filteredChallenges?.length || 0})</TabsTrigger>
+          <TabsList className="w-full grid grid-cols-2 sm:inline-flex sm:w-auto h-auto">
+            <TabsTrigger value="active" className="text-xs sm:text-sm">Active ({activeChallenges.length})</TabsTrigger>
+            <TabsTrigger value="upcoming" className="text-xs sm:text-sm">Upcoming ({upcomingChallenges.length})</TabsTrigger>
+            <TabsTrigger value="past" className="text-xs sm:text-sm">Past ({pastChallenges.length})</TabsTrigger>
+            <TabsTrigger value="all" className="text-xs sm:text-sm">All ({filteredChallenges?.length || 0})</TabsTrigger>
           </TabsList>
           
           <Card className="mt-4">

@@ -91,20 +91,20 @@ const AdminAnalytics = () => {
             </div>
           ) : (
             <Tabs defaultValue="overview" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
-                <TabsTrigger value="overview" className="gap-2">
+              <TabsList className="w-full grid grid-cols-2 sm:grid-cols-4 lg:w-auto lg:inline-grid h-auto">
+                <TabsTrigger value="overview" className="gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
                   <LayoutDashboard className="h-4 w-4 hidden sm:block" />
                   {t("analytics.tabOverview")}
                 </TabsTrigger>
-                <TabsTrigger value="monetisation" className="gap-2">
+                <TabsTrigger value="monetisation" className="gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
                   <PoundSterling className="h-4 w-4 hidden sm:block" />
                   {t("analytics.tabMonetisation")}
                 </TabsTrigger>
-                <TabsTrigger value="engagement" className="gap-2">
+                <TabsTrigger value="engagement" className="gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
                   <Heart className="h-4 w-4 hidden sm:block" />
                   {t("analytics.tabEngagement")}
                 </TabsTrigger>
-                <TabsTrigger value="operational" className="gap-2">
+                <TabsTrigger value="operational" className="gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
                   <Settings2 className="h-4 w-4 hidden sm:block" />
                   {t("analytics.tabOperational")}
                 </TabsTrigger>

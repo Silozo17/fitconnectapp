@@ -72,7 +72,7 @@ const AdminBoosts = () => {
       </Helmet>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <Rocket className="h-6 w-6 text-primary" />
@@ -85,7 +85,7 @@ const AdminBoosts = () => {
           
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" onClick={handleOpenDialog}>
+              <Button variant="outline" onClick={handleOpenDialog} className="w-full sm:w-auto">
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
               </Button>
@@ -233,18 +233,18 @@ const AdminBoosts = () => {
               <CardTitle className="text-lg">Current Settings</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
                 <div className="p-4 rounded-lg bg-muted/50">
                   <p className="text-sm text-muted-foreground">Commission Rate</p>
-                  <p className="text-2xl font-bold">{Math.round(settings.commission_rate * 100)}%</p>
+                  <p className="text-xl sm:text-2xl font-bold truncate">{Math.round(settings.commission_rate * 100)}%</p>
                 </div>
                 <div className="p-4 rounded-lg bg-muted/50">
                   <p className="text-sm text-muted-foreground">Minimum Fee</p>
-                  <p className="text-2xl font-bold">{formatCurrency(settings.min_fee, "GBP")}</p>
+                  <p className="text-xl sm:text-2xl font-bold truncate">{formatCurrency(settings.min_fee, "GBP")}</p>
                 </div>
                 <div className="p-4 rounded-lg bg-muted/50">
                   <p className="text-sm text-muted-foreground">Maximum Fee</p>
-                  <p className="text-2xl font-bold">{formatCurrency(settings.max_fee, "GBP")}</p>
+                  <p className="text-xl sm:text-2xl font-bold truncate">{formatCurrency(settings.max_fee, "GBP")}</p>
                 </div>
               </div>
             </CardContent>
