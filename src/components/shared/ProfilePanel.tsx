@@ -94,9 +94,10 @@ const ProfilePanel = ({ children, headerHeight = 64 }: ProfilePanelProps) => {
         style={{ 
           top: headerHeight,
           willChange: 'transform, opacity',
+          transformOrigin: 'top center',
           transform: isOpen 
-            ? 'translateY(0) scale(1) translateZ(0)' 
-            : 'translateY(-100%) scale(0.98) translateZ(0)',
+            ? 'scaleY(1) translateZ(0)' 
+            : 'scaleY(0) translateZ(0)',
         }}
         role="dialog"
         aria-modal="true"
