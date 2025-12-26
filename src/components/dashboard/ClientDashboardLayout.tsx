@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
 import { useClientOnboardingStatus } from "@/hooks/useOnboardingStatus";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useDiscoverModal } from "@/hooks/useDiscoverModal";
 import { Loader2 } from "lucide-react";
 import ClientSidebar from "./ClientSidebar";
 import ClientDashboardHeader from "./ClientDashboardHeader";
@@ -13,6 +13,7 @@ import PlatformBackground from "@/components/shared/PlatformBackground";
 import { ProfilePanelProvider, useProfilePanel } from "@/contexts/ProfilePanelContext";
 import ProfilePanel from "@/components/shared/ProfilePanel";
 import ClientProfileSummary from "@/components/dashboard/client/ClientProfileSummary";
+import { DiscoverModal } from "@/components/discover/DiscoverModal";
 
 interface ClientDashboardLayoutProps {
   children: React.ReactNode;
@@ -33,6 +34,7 @@ const ClientDashboardLayoutInner = ({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { isOpen: profilePanelOpen } = useProfilePanel();
+  const { shouldShow: showDiscover, markAsSeen: markDiscoverSeen } = useDiscoverModal('client');
 
   useEffect(() => {
     if (!isLoading && onboardingStatus && !onboardingStatus.isOnboarded && !onboardingStatus.error) {
@@ -101,6 +103,13 @@ const ClientDashboardLayoutInner = ({
       </div>
 
       <MobileBottomNav variant="client" />
+
+      {/* First-time Discover Modal */}
+      <DiscoverModal 
+        role="client" 
+        open={showDiscover} 
+        onClose={markDiscoverSeen} 
+      />
     </>
   );
 };

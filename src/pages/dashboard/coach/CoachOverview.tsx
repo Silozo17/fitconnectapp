@@ -27,7 +27,7 @@ import { AddClientModal } from "@/components/dashboard/clients/AddClientModal";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { useCoachDashboardStats } from "@/hooks/useCoachDashboardStats";
 import { useCoachProfileRealtime } from "@/hooks/useCoachProfileRealtime";
-
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 const CoachOverview = () => {
   const { t } = useTranslation("coach");
   // Subscribe to real-time coach profile updates (e.g., tier changes by admin)
@@ -42,6 +42,13 @@ const CoachOverview = () => {
 
   return (
     <DashboardLayout title={t("dashboard.overview")} description={t("dashboard.description")}>
+      {/* Page Help Banner */}
+      <PageHelpBanner
+        pageKey="coach_overview"
+        title="Your Coaching Hub"
+        description="See client activity, upcoming sessions, and key stats at a glance."
+      />
+
       {/* Error State */}
       {error && (
         <Alert variant="destructive" className="mb-6">

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { MessageSquare, Calendar, UserPlus, Loader2, AlertCircle } from "lucide-react";
 import { useMyCoaches } from "@/hooks/useMyCoaches";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 const ClientCoaches = () => {
   const { data: coaches = [], isLoading, error, refetch } = useMyCoaches();
@@ -16,6 +17,13 @@ const ClientCoaches = () => {
       title="My Coaches"
       description="View and manage your coaching connections"
     >
+      {/* Page Help Banner */}
+      <PageHelpBanner
+        pageKey="client_coaches"
+        title="Your Coaches"
+        description="Message, book sessions, and view plans from your connected coaches."
+      />
+
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">My Coaches</h1>
