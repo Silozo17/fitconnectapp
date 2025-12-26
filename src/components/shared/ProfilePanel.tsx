@@ -1,0 +1,111 @@
+import { useEffect, useRef, useCallback } from "react";
+import { cn } from "@/lib/utils";
+import { useProfilePanel } from "@/contexts/ProfilePanelContext";
+import ProfileNotch from "./ProfileNotch";
+
+interface ProfilePanelProps {
+  children: React.ReactNode;
+  headerHeight?: number;
+}
+
+const ProfilePanel = ({ children, headerHeight = 64 }: ProfilePanelProps) => {
+  const { isOpen, close } = useProfilePanel();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const touchStartY = useRef<number>(0);
+  const touchCurrentY = useRef<number>(0);
+
+  // Handle swipe up to close
+  const handleTouchStart = useCallback((e: TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+    touchCurrentY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    touchCurrentY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    const swipeDistance = touchStartY.current - touchCurrentY.current;
+    // If swiped up more than 50px, close the panel
+    if (swipeDistance > 50) {
+      close();
+    }
+  }, [close]);
+
+  // Attach touch listeners when panel is open
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!panel || !isOpen) return;
+
+    panel.addEventListener('touchstart', handleTouchStart, { passive: true });
+    panel.addEventListener('touchmove', handleTouchMove, { passive: true });
+    panel.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      panel.removeEventListener('touchstart', handleTouchStart);
+      panel.removeEventListener('touchmove', handleTouchMove);
+      panel.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [isOpen, handleTouchStart, handleTouchMove, handleTouchEnd]);
+
+  // Handle escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        close();
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [isOpen, close]);
+
+  return (
+    <>
+      {/* Backdrop overlay - click to close */}
+      <div
+        className={cn(
+          "fixed inset-0 z-40 bg-background/60 backdrop-blur-sm transition-opacity duration-300",
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        )}
+        style={{ top: headerHeight }}
+        onClick={close}
+        aria-hidden="true"
+      />
+
+      {/* Panel container */}
+      <div
+        ref={panelRef}
+        className={cn(
+          // Positioning
+          "fixed left-0 right-0 z-45",
+          // Height - exactly 50vh
+          "h-[50vh]",
+          // Glass styling
+          "glass-floating",
+          // Border adjustments
+          "rounded-t-none border-t-0",
+          // Animation
+          "transition-transform duration-300 ease-out",
+          isOpen ? "translate-y-0" : "-translate-y-full"
+        )}
+        style={{ 
+          top: headerHeight,
+        }}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Profile panel"
+      >
+        {/* Content area */}
+        <div className="h-full overflow-hidden px-4 pt-4 pb-8">
+          {children}
+        </div>
+
+        {/* Notch at bottom of panel when open */}
+        <ProfileNotch />
+      </div>
+    </>
+  );
+};
+
+export default ProfilePanel;

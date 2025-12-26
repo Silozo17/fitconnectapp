@@ -5,7 +5,6 @@ import { useCoachLinkPrefix } from "@/hooks/useCoachLinkPrefix";
 import { useClientDashboardStats } from "@/hooks/useClientDashboardStats";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
-import { ProfileBar } from "@/components/dashboard/client/ProfileBar";
 import { BMIWidget } from "@/components/dashboard/client/BMIWidget";
 import UserConnectionRequests from "@/components/dashboard/client/UserConnectionRequests";
 import { Card, CardContent } from "@/components/ui/card";
@@ -151,9 +150,6 @@ const ClientOverview = () => {
           {t('client.overview.welcomeBack', "Let's crush your goals today")}
         </p>
       </div>
-
-      {/* Profile Bar with Level/XP */}
-      <ProfileBar />
 
       {/* Today's Health - Lazy loaded */}
       <Suspense fallback={<HealthWidgetSkeleton />}>

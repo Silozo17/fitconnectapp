@@ -4,14 +4,15 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCoachOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { useCoachProfileRealtime } from "@/hooks/useCoachProfileRealtime";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import CoachSidebar from "./CoachSidebar";
 import DashboardHeader from "./DashboardHeader";
 import SkipNavigation from "@/components/shared/SkipNavigation";
 import MobileBottomNav from "@/components/navigation/MobileBottomNav";
-import { Button } from "@/components/ui/button";
 import PlatformBackground from "@/components/shared/PlatformBackground";
+import { ProfilePanelProvider, useProfilePanel } from "@/contexts/ProfilePanelContext";
+import ProfilePanel from "@/components/shared/ProfilePanel";
+import CoachProfileSummary from "@/components/dashboard/coach/CoachProfileSummary";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -19,18 +20,16 @@ interface DashboardLayoutProps {
   description?: string;
 }
 
-const LOADING_TIMEOUT_MS = 10000; // 10 seconds timeout
+const LOADING_TIMEOUT_MS = 10000;
 
-const DashboardLayout = memo(({ children, title = "Coach Dashboard", description }: DashboardLayoutProps) => {
+const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", description }: DashboardLayoutProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { data: onboardingStatus, isLoading, refetch, isError } = useCoachOnboardingStatus();
+  const { data: onboardingStatus, isLoading } = useCoachOnboardingStatus();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [loadingTimedOut, setLoadingTimedOut] = useState(false);
-  const isMobile = useIsMobile();
+  const { isOpen: profilePanelOpen } = useProfilePanel();
   
-  // Subscribe to realtime updates for coach profile (e.g., admin changes subscription tier)
   useCoachProfileRealtime();
 
   const handleToggleSidebar = useCallback(() => {
@@ -41,45 +40,28 @@ const DashboardLayout = memo(({ children, title = "Coach Dashboard", description
     setMobileOpen(true);
   }, []);
 
-  // Loading timeout protection
-  useEffect(() => {
-    if (isLoading) {
-      const timeout = setTimeout(() => {
-        setLoadingTimedOut(true);
-      }, LOADING_TIMEOUT_MS);
-      return () => clearTimeout(timeout);
-    } else {
-      setLoadingTimedOut(false);
-    }
-  }, [isLoading]);
-
-  // Handle redirect to onboarding - navigate immediately
   useEffect(() => {
     if (!isLoading && onboardingStatus && !onboardingStatus.isOnboarded && !onboardingStatus.error) {
       navigate("/onboarding/coach", { replace: true });
     }
   }, [onboardingStatus, isLoading, navigate]);
 
-  // Show loading state ONLY while actually fetching data
   if (isLoading) {
     return (
       <>
-        <div className="min-h-screen bg-background flex items-center justify-center" role="status" aria-label="Loading dashboard">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" aria-hidden="true" />
-          <span className="sr-only">Loading dashboard...</span>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
         <MobileBottomNav variant="coach" />
       </>
     );
   }
 
-  // If not onboarded, show loading spinner while redirect happens (prevents "frozen" appearance)
   if (!onboardingStatus?.isOnboarded) {
     return (
       <>
-        <div className="min-h-screen bg-background flex items-center justify-center" role="status" aria-label="Redirecting to onboarding">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" aria-hidden="true" />
-          <span className="sr-only">Redirecting to onboarding...</span>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
         <MobileBottomNav variant="coach" />
       </>
@@ -109,9 +91,15 @@ const DashboardLayout = memo(({ children, title = "Coach Dashboard", description
             subscriptionTier={onboardingStatus.subscriptionTier} 
             onMenuToggle={handleOpenMobile} 
           />
+          
+          {/* Profile Panel */}
+          <ProfilePanel headerHeight={64}>
+            <CoachProfileSummary />
+          </ProfilePanel>
+
           <main 
             id="main-content" 
-            className="flex-1 p-4 lg:p-6 overflow-y-auto pb-mobile-nav"
+            className={`flex-1 p-4 lg:p-6 overflow-y-auto pb-mobile-nav transition-all duration-300 ${profilePanelOpen ? 'pointer-events-none opacity-50' : ''}`}
             role="main"
             aria-label={title}
             tabIndex={-1}
@@ -126,6 +114,12 @@ const DashboardLayout = memo(({ children, title = "Coach Dashboard", description
   );
 });
 
-DashboardLayout.displayName = "DashboardLayout";
+DashboardLayoutInner.displayName = "DashboardLayoutInner";
+
+const DashboardLayout = (props: DashboardLayoutProps) => (
+  <ProfilePanelProvider>
+    <DashboardLayoutInner {...props} />
+  </ProfilePanelProvider>
+);
 
 export default DashboardLayout;
