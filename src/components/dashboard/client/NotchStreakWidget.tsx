@@ -1,16 +1,25 @@
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { Flame } from "lucide-react";
 import { useUserStats } from "@/hooks/useUserStats";
+import { useProfilePanel } from "@/contexts/ProfilePanelContext";
 import { cn } from "@/lib/utils";
 
 const NotchStreakWidget = () => {
+  const navigate = useNavigate();
+  const { close } = useProfilePanel();
+  
+  const handleClick = () => {
+    close();
+    navigate("/dashboard/client/stats");
+  };
   const { t } = useTranslation("common");
   const { data: stats, isLoading } = useUserStats();
   
   const streak = stats?.habitStreak || 0;
 
   return (
-    <div className="glass-subtle flex items-center gap-3 p-3 rounded-xl">
+    <button onClick={handleClick} className="w-full glass-subtle flex items-center gap-3 p-3 rounded-xl text-left hover:bg-accent/10 transition-colors">
       {/* Flame icon with glow effect */}
       <div className={cn(
         "w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0",
@@ -34,7 +43,7 @@ const NotchStreakWidget = () => {
           {t("stats.streak", "Streak")}
         </p>
       </div>
-    </div>
+    </button>
   );
 };
 

@@ -1,11 +1,20 @@
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { Footprints } from "lucide-react";
 import { useHealthData } from "@/hooks/useHealthData";
+import { useProfilePanel } from "@/contexts/ProfilePanelContext";
 import { cn } from "@/lib/utils";
 
 const DAILY_STEP_GOAL = 10000;
 
 const NotchStepsWidget = () => {
+  const navigate = useNavigate();
+  const { close } = useProfilePanel();
+  
+  const handleClick = () => {
+    close();
+    navigate("/dashboard/client/stats");
+  };
   const { t } = useTranslation("common");
   const { getTodayValue, isLoading, data } = useHealthData();
   
@@ -22,7 +31,7 @@ const NotchStepsWidget = () => {
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   return (
-    <div className="glass-subtle flex items-center gap-3 p-3 rounded-xl">
+    <button onClick={handleClick} className="w-full glass-subtle flex items-center gap-3 p-3 rounded-xl text-left hover:bg-accent/10 transition-colors">
       {/* Circular Progress Ring */}
       <div className="relative w-12 h-12 flex-shrink-0">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
@@ -77,7 +86,7 @@ const NotchStepsWidget = () => {
           {Math.round(progress)}%
         </span>
       </div>
-    </div>
+    </button>
   );
 };
 
