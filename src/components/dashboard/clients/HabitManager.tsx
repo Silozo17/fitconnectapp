@@ -46,7 +46,8 @@ const HabitManager = ({ coachId, clientId }: HabitManagerProps) => {
   // Calculate stats
   const activeHabits = habits?.filter(h => h.is_active) || [];
   const totalStreaks = streaks?.reduce((sum, s) => sum + (s.current_streak || 0), 0) || 0;
-  const bestStreak = Math.max(...(streaks?.map(s => s.longest_streak) || [0]));
+  const streakValues = streaks?.map(s => s.longest_streak || 0) || [];
+  const bestStreak = streakValues.length > 0 ? Math.max(...streakValues) : 0;
   
   const handleEdit = (habit: Habit) => {
     setEditingHabit(habit);
