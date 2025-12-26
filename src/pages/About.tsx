@@ -67,6 +67,7 @@ const About = () => {
     <PageLayout
       title={t("about.meta.title")}
       description={t("about.meta.description")}
+      className="overflow-x-hidden"
     >
       {/* Decorative Avatars */}
       <DecorativeAvatar 
