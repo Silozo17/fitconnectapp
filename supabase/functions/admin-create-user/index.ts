@@ -116,12 +116,36 @@ serve(async (req) => {
     // Wait for trigger to create profile, then update with additional data
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    // Update profile with additional data based on role
+    // Build display_name - always ensure it's set
+    const fullName = [first_name, last_name].filter(Boolean).join(" ");
+    
+    // Get the generated username from user_profiles to use as fallback
+    const { data: userProfile } = await supabaseAdmin
+      .from("user_profiles")
+      .select("username")
+      .eq("user_id", newUser.user.id)
+      .single();
+    
+    const displayName = fullName || (userProfile?.username ? 
+      userProfile.username.charAt(0).toUpperCase() + userProfile.username.slice(1) : 
+      "User");
+
+    // Update user_profiles with provided name data
+    await supabaseAdmin
+      .from("user_profiles")
+      .update({
+        first_name: first_name || null,
+        last_name: last_name || null,
+        display_name: displayName,
+      })
+      .eq("user_id", newUser.user.id);
+
+    // Update role-specific profile with additional data
     if (role === "client") {
       await supabaseAdmin
         .from("client_profiles")
         .update({
-          first_name: first_name || null,
+          first_name: first_name || displayName,
           last_name: last_name || null,
         })
         .eq("user_id", newUser.user.id);
@@ -129,7 +153,7 @@ serve(async (req) => {
       await supabaseAdmin
         .from("coach_profiles")
         .update({
-          display_name: [first_name, last_name].filter(Boolean).join(" ") || null,
+          display_name: displayName,
         })
         .eq("user_id", newUser.user.id);
     } else if (["admin", "manager", "staff"].includes(role)) {
@@ -138,7 +162,7 @@ serve(async (req) => {
         .update({
           first_name: first_name || null,
           last_name: last_name || null,
-          display_name: [first_name, last_name].filter(Boolean).join(" ") || null,
+          display_name: displayName,
           department: department || null,
         })
         .eq("user_id", newUser.user.id);
