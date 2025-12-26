@@ -11,7 +11,7 @@ const NotchStreakWidget = () => {
   
   const handleClick = () => {
     close();
-    navigate("/dashboard/client/stats");
+    navigate("/dashboard/client/habits");
   };
   const { t } = useTranslation("common");
   const { data: stats, isLoading } = useUserStats();
