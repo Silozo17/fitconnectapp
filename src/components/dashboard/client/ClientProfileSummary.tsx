@@ -11,6 +11,8 @@ import { useProfilePanel } from "@/contexts/ProfilePanelContext";
 import NotchStepsWidget from "./NotchStepsWidget";
 import NotchStreakWidget from "./NotchStreakWidget";
 import NotchNearestBadge from "./NotchNearestBadge";
+import NotchMiniStats from "./NotchMiniStats";
+import NotchBMIWidget from "./NotchBMIWidget";
 
 const ClientProfileSummary = () => {
   const { t } = useTranslation("common");
@@ -37,42 +39,42 @@ const ClientProfileSummary = () => {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Avatar and Name Section */}
-      <div className="flex items-center gap-4 mb-4">
-        <Avatar className="h-14 w-14 border-2 border-primary/30">
+      {/* Avatar, Name and BMI Section */}
+      <div className="flex items-center gap-3 mb-3">
+        <Avatar className="h-12 w-12 border-2 border-primary/30 shrink-0">
           <AvatarImage src={avatarUrl || undefined} alt={displayName} />
-          <AvatarFallback className="bg-primary/20 text-primary text-base font-semibold">
+          <AvatarFallback className="bg-primary/20 text-primary text-sm font-semibold">
             {initials}
           </AvatarFallback>
         </Avatar>
         
         <div className="flex-1 min-w-0">
-          <h2 className="text-lg font-semibold text-foreground truncate">
+          <h2 className="text-base font-semibold text-foreground truncate">
             {displayName}
           </h2>
           
           {/* Level and XP Progress */}
-          <div className="flex items-center gap-2 mt-0.5">
-            <span className="text-sm font-medium text-primary">
-              {t("stats.level", "Level")} {xpData?.current_level || 1}
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="text-xs font-medium text-primary">
+              Lv.{xpData?.current_level || 1}
             </span>
-            <span className="text-xs text-muted-foreground">•</span>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-[10px] text-muted-foreground">•</span>
+            <span className="text-[10px] text-muted-foreground truncate">
               {levelTitle}
             </span>
           </div>
           
           {/* XP Progress Bar */}
-          <div className="mt-1.5">
+          <div className="mt-1">
             <Progress 
               value={xpProgress} 
-              className="h-1.5 bg-muted"
+              className="h-1 bg-muted"
             />
-            <p className="text-[10px] text-muted-foreground mt-0.5">
-              {xpData?.xp_to_next_level || 1000} XP {t("stats.toNextLevel", "to next level")}
-            </p>
           </div>
         </div>
+
+        {/* Mini BMI Widget */}
+        <NotchBMIWidget />
       </div>
 
       {/* Compact Widgets - 2 columns for steps/streak */}
@@ -82,8 +84,13 @@ const ClientProfileSummary = () => {
       </div>
 
       {/* Nearest Badge - full width */}
-      <div className="mb-4">
+      <div className="mb-2">
         <NotchNearestBadge />
+      </div>
+
+      {/* Mini Stats Grid */}
+      <div className="mb-3">
+        <NotchMiniStats />
       </div>
 
       {/* Quick Actions */}
@@ -91,20 +98,20 @@ const ClientProfileSummary = () => {
         <Button
           variant="outline"
           size="sm"
-          className="flex-1 glass-interactive border-border/30 hover:border-primary/40"
+          className="flex-1 glass-interactive border-border/30 hover:border-primary/40 text-xs"
           onClick={() => handleNavigate("/dashboard/client/settings")}
         >
           {t("profile.viewProfile", "View Profile")}
-          <ChevronRight className="w-4 h-4 ml-1" />
+          <ChevronRight className="w-3 h-3 ml-1" />
         </Button>
         <Button
           variant="outline"
           size="sm"
-          className="flex-1 glass-interactive border-border/30 hover:border-primary/40"
+          className="flex-1 glass-interactive border-border/30 hover:border-primary/40 text-xs"
           onClick={() => handleNavigate("/dashboard/client/achievements")}
         >
           {t("profile.achievements", "Achievements")}
-          <ChevronRight className="w-4 h-4 ml-1" />
+          <ChevronRight className="w-3 h-3 ml-1" />
         </Button>
       </div>
     </div>
