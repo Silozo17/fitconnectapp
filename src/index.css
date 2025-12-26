@@ -409,6 +409,22 @@
       inset -1px 0 0 hsl(0 0% 0% / 0.1);
   }
 
+  /* Carousel card internal dimming overlay - preserves backdrop-filter */
+  .carousel-dim-overlay {
+    position: relative;
+  }
+  
+  .carousel-dim-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: hsl(var(--background) / var(--carousel-dim, 0));
+    pointer-events: none;
+    border-radius: inherit;
+    transition: background 0.15s ease-out;
+    z-index: 50;
+  }
+
   .glass-card-elevated:hover {
     box-shadow: 
       0 16px 48px hsl(0 0% 0% / 0.4),
