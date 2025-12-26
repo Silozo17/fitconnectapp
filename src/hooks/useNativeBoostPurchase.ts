@@ -65,6 +65,7 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const pollAttemptsRef = useRef(0);
   const purchaseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const reconciliationAttemptedRef = useRef(false);
 
   // Cleanup purchase timeout helper
   const clearPurchaseTimeout = useCallback(() => {
@@ -327,6 +328,59 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
       unregisterIAPCallbacks();
     };
   }, [state.isAvailable, handleIAPSuccess, handleIAPError, handleIAPCancel, handleIAPPending]);
+
+  /**
+   * Reconcile boost entitlement - check RevenueCat for active entitlement
+   * and activate boost in DB if entitlement exists but DB is stuck
+   */
+  const reconcileBoostEntitlement = useCallback(async () => {
+    if (!coachProfileId || !user || reconciliationAttemptedRef.current) {
+      return;
+    }
+
+    reconciliationAttemptedRef.current = true;
+    console.log('[NativeBoostIAP] Checking for boost entitlement reconciliation...');
+
+    try {
+      const { data, error } = await supabase.functions.invoke('verify-boost-entitlement');
+      
+      if (error) {
+        console.error('[NativeBoostIAP] Reconciliation check failed:', error);
+        return;
+      }
+
+      if (data?.reconciled) {
+        console.log('[NativeBoostIAP] Boost reconciled from entitlement!', data);
+        
+        // Invalidate queries to refresh boost data
+        queryClient.invalidateQueries({ queryKey: ['coach-boost-status'] });
+        queryClient.invalidateQueries({ queryKey: ['boost-attributions'] });
+        
+        // Trigger celebration
+        triggerCelebration();
+        toast.success('Boost activated!', {
+          description: 'Your boost has been successfully activated.',
+        });
+      } else {
+        console.log('[NativeBoostIAP] No reconciliation needed:', data?.status);
+      }
+    } catch (e) {
+      console.error('[NativeBoostIAP] Reconciliation check exception:', e);
+    }
+  }, [coachProfileId, user, queryClient, triggerCelebration]);
+
+  // Auto-reconcile on mount when native IAP is available
+  // This catches cases where RevenueCat webhook succeeded but DB update failed
+  useEffect(() => {
+    if (state.isAvailable && coachProfileId && user) {
+      // Small delay to let normal state settle first
+      const timer = setTimeout(() => {
+        reconcileBoostEntitlement();
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [state.isAvailable, coachProfileId, user, reconcileBoostEntitlement]);
 
   /**
    * Trigger a boost purchase
