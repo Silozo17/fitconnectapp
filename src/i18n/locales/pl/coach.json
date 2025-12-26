@@ -1395,6 +1395,26 @@
       "highly_rated": {
         "name": "Wysoko oceniany",
         "description": "Utrzymaj ocenę 4.5+ przy 10+ recenzjach"
+      },
+      "founder": {
+        "name": "Założyciel",
+        "description": "Ekskluzywna odznaka dla trenerów-założycieli FitConnect"
+      },
+      "coaching_legend": {
+        "name": "Legenda coachingu",
+        "description": "Osiągnij 100 aktywnych klientów"
+      },
+      "session_master": {
+        "name": "Mistrz sesji",
+        "description": "Ukończ 500 sesji treningowych"
+      },
+      "top_rated": {
+        "name": "Najwyżej oceniany",
+        "description": "Utrzymaj ocenę 4.8+ przy 50+ recenzjach"
+      },
+      "business_builder": {
+        "name": "Budowniczy biznesu",
+        "description": "Zarób 10 000 £ przez platformę"
       }
     }
   },
