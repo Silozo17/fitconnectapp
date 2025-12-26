@@ -23,7 +23,7 @@ const Terms = () => {
               Service
             </span>
           </h1>
-          <p className="text-muted-foreground">Last updated: December 19, 2024</p>
+          <p className="text-muted-foreground">Last updated: December 26, 2024</p>
         </div>
       </section>
 

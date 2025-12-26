@@ -141,6 +141,19 @@ export default function CoachPackagesDocs() {
           Keep track of clients with expiring packages. A friendly reminder often 
           leads to renewal purchases.
         </DocTip>
+
+        <DocTip type="info" title="📱 iOS App Note">
+          Due to Apple App Store policies, clients cannot purchase packages directly 
+          through the iOS app. iOS users will be directed to complete purchases via 
+          the web or Android app. You can still manage and track all packages from any platform.
+        </DocTip>
+      </section>
+
+      {/* Changelog */}
+      <section className="mt-16 pt-8 border-t border-border">
+        <p className="text-xs text-muted-foreground">
+          <strong>Changelog:</strong> December 26, 2024 — Added iOS App Store purchase limitation note.
+        </p>
       </section>
     </DocsLayout>
   );
