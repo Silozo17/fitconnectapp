@@ -14,21 +14,21 @@ const ProfileNotch = ({ className }: ProfileNotchProps) => {
       onClick={toggle}
       className={cn(
         // Base positioning - centered, protruding below header
-        "absolute left-1/2 -translate-x-1/2 z-50",
-        // Notch moves to bottom of panel when open, stays at header bottom when closed
-        isOpen ? "bottom-0 translate-y-1/2" : "-bottom-6",
+        "absolute left-1/2 -translate-x-1/2 z-[51]",
+        // Position at bottom of header
+        "-bottom-6",
         // Circle styling
         "w-12 h-12 rounded-full",
         // Glass effect matching nav
-        "glass-nav border border-border/40",
+        "bg-background/80 backdrop-blur-xl border border-border/40",
         // Icon centering
         "flex items-center justify-center",
         // Interactive states
         "transition-all duration-300 ease-out",
         "hover:scale-105 active:scale-95",
         "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background",
-        // Shadow for depth - seamless blend with header
-        "shadow-[0_4px_20px_hsl(0_0%_0%/0.4),0_0_0_1px_hsl(var(--border)/0.3)]",
+        // Shadow for depth
+        "shadow-lg",
         // When open, add glow
         isOpen && "ring-2 ring-primary/30",
         className
