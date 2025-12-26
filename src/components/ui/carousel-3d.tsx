@@ -45,10 +45,13 @@ export function Carousel3D({
     if (emblaApi) emblaApi.scrollTo(index);
   }, [emblaApi]);
 
+  const childArray = Children.toArray(children);
+
   useEffect(() => {
     if (!emblaApi) return;
     
-    setSlidesCount(emblaApi.scrollSnapList().length);
+    // Use actual children count for pagination, not scroll snaps
+    setSlidesCount(childArray.length);
     onScroll();
     
     emblaApi.on("scroll", onScroll);
@@ -71,7 +74,7 @@ export function Carousel3D({
       emblaApi.off("pointerUp", onPointerUp);
       emblaApi.off("settle", onSettle);
     };
-  }, [emblaApi, onScroll]);
+  }, [emblaApi, onScroll, childArray.length]);
 
   // Calculate dim amount for internal overlay - NO opacity on wrapper to preserve backdrop-filter
   const getDimAmount = (index: number): number => {
@@ -99,8 +102,6 @@ export function Carousel3D({
     
     return 10 - Math.round(absDistance);
   };
-
-  const childArray = Children.toArray(children);
 
   return (
     <div className={cn("relative", className)}>
