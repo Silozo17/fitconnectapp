@@ -50,12 +50,28 @@ function describeArc(cx: number, cy: number, radius: number, startAngle: number,
   return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${end.x} ${end.y}`;
 }
 
+// Calculate the angle for the indicator dot based on BMI value
+// Maps BMI to position within equal visual segments
 function getIndicatorAngle(bmi: number): number {
-  const minBMI = 10;
-  const maxBMI = 50;
-  const clampedBMI = Math.max(minBMI, Math.min(maxBMI, bmi));
-  // Map BMI to angle: 10 -> -90deg, 50 -> 270deg
-  return ((clampedBMI - minBMI) / (maxBMI - minBMI)) * 360 - 90;
+  const segmentRanges = [
+    { min: 10, max: 18.5, startAngle: -90, endAngle: 0 },    // Underweight (blue)
+    { min: 18.5, max: 25, startAngle: 0, endAngle: 90 },     // Normal (green)
+    { min: 25, max: 30, startAngle: 90, endAngle: 180 },     // Overweight (yellow)
+    { min: 30, max: 50, startAngle: 180, endAngle: 270 },    // Obese (red)
+  ];
+  
+  const clampedBMI = Math.max(10, Math.min(50, bmi));
+  
+  // Find which segment the BMI falls into and calculate position within it
+  for (const seg of segmentRanges) {
+    if (clampedBMI >= seg.min && clampedBMI < seg.max) {
+      const progress = (clampedBMI - seg.min) / (seg.max - seg.min);
+      return seg.startAngle + progress * (seg.endAngle - seg.startAngle);
+    }
+  }
+  
+  // Edge case: BMI >= 50, return end of obese segment
+  return 270;
 }
 
 export function BMICircle({
