@@ -23,7 +23,7 @@ export function Carousel3D({
   gap = 16,
 }: Carousel3DProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
-    loop: false,
+    loop: true,
     align: "center",
     containScroll: false,
     skipSnaps: false,
@@ -85,14 +85,15 @@ export function Carousel3D({
       transform: `perspective(1000px) rotateY(${rotateY}deg) translateZ(${translateZ}px) scale(${scale})`,
       opacity: Math.max(0.4, opacity),
       zIndex: 10 - Math.round(absDistance),
-      transition: "transform 0.1s ease-out, opacity 0.1s ease-out",
+      transition: "transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.25s ease-out",
+      willChange: "transform, opacity",
     };
   };
 
   const childArray = Children.toArray(children);
 
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn("relative overflow-x-hidden", className)}>
       {/* Carousel viewport - overflow-hidden clips shadows */}
       <div className="overflow-hidden">
         <div 
