@@ -1,7 +1,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { useProfilePanel } from "@/contexts/ProfilePanelContext";
-import { User, ChevronUp } from "lucide-react";
+import ProfileNotch from "./ProfileNotch";
 
 interface ProfilePanelProps {
   children: React.ReactNode;
@@ -78,13 +78,13 @@ const ProfilePanel = ({ children, headerHeight = 64 }: ProfilePanelProps) => {
         ref={panelRef}
         className={cn(
           // Positioning
-          "fixed left-0 right-0 z-[45]",
+          "fixed left-0 right-0 z-45",
           // Height - exactly 50vh
           "h-[50vh]",
           // Glass styling
           "glass-floating",
           // Border adjustments
-          "rounded-b-3xl border-t-0",
+          "rounded-t-none border-t-0",
           // Animation
           "transition-transform duration-300 ease-out",
           isOpen ? "translate-y-0" : "-translate-y-full"
@@ -97,27 +97,12 @@ const ProfilePanel = ({ children, headerHeight = 64 }: ProfilePanelProps) => {
         aria-label="Profile panel"
       >
         {/* Content area */}
-        <div className="h-full overflow-hidden px-4 pt-4 pb-16">
+        <div className="h-full overflow-hidden px-4 pt-4 pb-8">
           {children}
         </div>
 
-        {/* Close button at bottom of panel */}
-        <button
-          onClick={close}
-          className={cn(
-            "absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-1/2 z-[46]",
-            "w-12 h-12 rounded-full",
-            "bg-background/80 backdrop-blur-xl border border-border/40",
-            "flex items-center justify-center",
-            "transition-all duration-300 ease-out",
-            "hover:scale-105 active:scale-95",
-            "focus:outline-none focus:ring-2 focus:ring-primary/50",
-            "shadow-lg"
-          )}
-          aria-label="Close profile"
-        >
-          <ChevronUp className="w-5 h-5 text-foreground" />
-        </button>
+        {/* Notch at bottom of panel when open */}
+        <ProfileNotch />
       </div>
     </>
   );
