@@ -604,6 +604,12 @@ const CoachSchedule = () => {
 
   return (
     <DashboardLayout title={t("schedule.title")} description={t("schedule.description")}>
+      <PageHelpBanner
+        pageKey="coach_schedule"
+        title="Your Schedule"
+        description="Manage availability, view bookings, and handle session requests"
+      />
+      
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
