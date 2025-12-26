@@ -1,6 +1,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import platformBg from "@/assets/backgrounds/platform-bg.png";
+import bgHorizontal from "@/assets/bg-horizontal.svg";
+import bgVertical from "@/assets/bg-vertical.svg";
 
 interface PlatformBackgroundProps {
   className?: string;
@@ -14,8 +15,8 @@ interface PlatformBackgroundProps {
 
 /**
  * Platform-wide background component with abstract fluid green/black design.
+ * Uses orientation-aware SVG backgrounds for vertical and horizontal displays.
  * Provides the foundation for glassmorphism card effects.
- * Apply to layout wrappers for consistent visual depth.
  */
 export const PlatformBackground = React.memo(function PlatformBackground({
   className,
@@ -34,15 +35,26 @@ export const PlatformBackground = React.memo(function PlatformBackground({
       {/* Base dark background */}
       <div className="absolute inset-0 bg-background" />
       
-      {/* Background image layer */}
+      {/* Orientation-aware background SVG layers */}
       {showImage && (
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ 
-            backgroundImage: `url(${platformBg})`,
-            opacity: 1 - overlayOpacity,
-          }}
-        />
+        <>
+          {/* Vertical (portrait) background - shown on portrait screens */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat portrait:block landscape:hidden"
+            style={{ 
+              backgroundImage: `url(${bgVertical})`,
+              opacity: 1 - overlayOpacity,
+            }}
+          />
+          {/* Horizontal (landscape) background - shown on landscape screens */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat portrait:hidden landscape:block"
+            style={{ 
+              backgroundImage: `url(${bgHorizontal})`,
+              opacity: 1 - overlayOpacity,
+            }}
+          />
+        </>
       )}
       
       {/* Subtle depth overlay - no colored tints */}
