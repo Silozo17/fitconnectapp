@@ -7,6 +7,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 
 import UserConnectionRequests from "@/components/dashboard/client/UserConnectionRequests";
+import { LocationLeaderboard } from "@/components/gamification/LocationLeaderboard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -241,6 +242,11 @@ const ClientOverview = () => {
             ))
           )}
         </div>
+      </div>
+
+      {/* Leaderboard Widget - Full Width */}
+      <div className="mb-8">
+        <LocationLeaderboard />
       </div>
 
       {/* CTA Section - Find a Coach */}
