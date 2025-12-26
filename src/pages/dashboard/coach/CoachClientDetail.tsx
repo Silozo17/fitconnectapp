@@ -600,7 +600,7 @@ const CoachClientDetail = () => {
 
             {/* Goals Progress */}
             {goals.length > 0 && (
-              <div className="card-elevated p-6">
+              <div className="glass-card p-6">
                 <h3 className="font-display font-bold text-foreground mb-4">{t('clientDetail.progress.goalProgress')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {goals.map((goal) => (
@@ -624,7 +624,7 @@ const CoachClientDetail = () => {
           {planAssignments.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {planAssignments.map((assignment) => (
-                <div key={assignment.id} className="card-elevated p-6">
+                <div key={assignment.id} className="glass-card p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
@@ -700,7 +700,7 @@ const CoachClientDetail = () => {
               ))}
             </div>
           ) : (
-            <div className="card-elevated p-12 text-center">
+            <div className="glass-card p-12 text-center">
               <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground mb-4">{t('clientDetail.plans.noPlansAssigned')}</p>
               <Button onClick={() => setIsAssignPlanOpen(true)} variant="outline">
@@ -741,7 +741,7 @@ const CoachClientDetail = () => {
                 ))}
             </div>
           ) : (
-            <div className="card-elevated p-12 text-center">
+            <div className="glass-card p-12 text-center">
               <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground mb-4">{t('clientDetail.notes.noNotesYet')}</p>
               <Button onClick={() => setIsAddNoteOpen(true)} variant="outline">

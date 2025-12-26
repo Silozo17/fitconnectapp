@@ -21,7 +21,7 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
   const { t } = useTranslation("coach");
 
   return (
-    <Card className={`bg-card border-border ${goal.isCompleted ? 'border-green-500/50' : ''}`}>
+    <Card className={`glass-card ${goal.isCompleted ? 'border-green-500/50' : ''}`}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">
