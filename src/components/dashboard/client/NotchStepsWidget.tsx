@@ -13,7 +13,7 @@ const NotchStepsWidget = () => {
   
   const handleClick = () => {
     close();
-    navigate("/dashboard/client/stats");
+    navigate("/dashboard/client/progress");
   };
   const { t } = useTranslation("common");
   const { getTodayValue, isLoading, data } = useHealthData();

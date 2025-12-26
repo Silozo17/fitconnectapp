@@ -9,7 +9,7 @@ const NotchBMIWidget = () => {
   
   const handleClick = () => {
     close();
-    navigate("/dashboard/client/stats");
+    navigate("/dashboard/client/progress");
   };
   const { data: profileData, isLoading } = useClientProfileData();
 

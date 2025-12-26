@@ -28,10 +28,10 @@ const NotchMiniStats = () => {
   };
 
   const statItems = [
-    { icon: Dumbbell, value: formatNumber(stats.workoutCount), color: "text-blue-400", tooltip: "Workouts", route: "/dashboard/client/training" },
+    { icon: Dumbbell, value: formatNumber(stats.workoutCount), color: "text-blue-400", tooltip: "Workouts", route: "/dashboard/client/plans" },
     { icon: Award, value: formatNumber(stats.badgesEarned), color: "text-purple-400", tooltip: "Badges", route: "/dashboard/client/achievements" },
     { icon: Target, value: formatNumber(stats.challengesCompleted), color: "text-green-400", tooltip: "Challenges", route: "/dashboard/client/challenges" },
-    { icon: TrendingUp, value: formatNumber(stats.progressEntries), color: "text-cyan-400", tooltip: "Progress entries", route: "/dashboard/client/stats" },
+    { icon: TrendingUp, value: formatNumber(stats.progressEntries), color: "text-cyan-400", tooltip: "Progress entries", route: "/dashboard/client/progress" },
     { icon: Zap, value: formatNumber(stats.xpTotal), color: "text-primary", tooltip: "Total XP", route: "/dashboard/client/achievements" },
   ];
 
