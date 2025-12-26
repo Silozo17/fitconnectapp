@@ -13,6 +13,7 @@ import NotchStreakWidget from "./NotchStreakWidget";
 import NotchNearestBadge from "./NotchNearestBadge";
 import NotchMiniStats from "./NotchMiniStats";
 import NotchBMIWidget from "./NotchBMIWidget";
+import NotchLeaderboardWidget from "./NotchLeaderboardWidget";
 
 const ClientProfileSummary = () => {
   const { t } = useTranslation("common");
@@ -89,8 +90,13 @@ const ClientProfileSummary = () => {
       </div>
 
       {/* Mini Stats Grid */}
-      <div className="mb-3">
+      <div className="mb-2">
         <NotchMiniStats />
+      </div>
+
+      {/* Leaderboard Widget */}
+      <div className="mb-3">
+        <NotchLeaderboardWidget />
       </div>
 
       {/* Quick Actions */}
