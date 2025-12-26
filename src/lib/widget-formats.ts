@@ -2,53 +2,61 @@
 export type WidgetDisplayFormat = "number" | "bar" | "line" | "area" | "pie" | "donut";
 
 // Define which formats are available for each widget category
-export const WIDGET_FORMAT_OPTIONS: Record<string, { value: WidgetDisplayFormat; label: string }[]> = {
+export const WIDGET_FORMAT_OPTIONS: Record<string, { value: WidgetDisplayFormat; label: string; shortLabel: string }[]> = {
   stats: [
-    { value: "number", label: "Number" },
-    { value: "bar", label: "Bar Chart" },
-    { value: "line", label: "Line Chart" },
-    { value: "area", label: "Area Chart" },
-    { value: "pie", label: "Pie Chart" },
+    { value: "number", label: "Number", shortLabel: "Num" },
+    { value: "bar", label: "Bar Chart", shortLabel: "Bar" },
+    { value: "line", label: "Line Chart", shortLabel: "Line" },
+    { value: "area", label: "Area Chart", shortLabel: "Area" },
+    { value: "pie", label: "Pie Chart", shortLabel: "Pie" },
   ],
   revenue: [
-    { value: "number", label: "Number" },
-    { value: "bar", label: "Bar Chart" },
-    { value: "line", label: "Line Chart" },
-    { value: "area", label: "Area Chart" },
-    { value: "pie", label: "Pie Chart" },
+    { value: "number", label: "Number", shortLabel: "Num" },
+    { value: "bar", label: "Bar Chart", shortLabel: "Bar" },
+    { value: "line", label: "Line Chart", shortLabel: "Line" },
+    { value: "area", label: "Area Chart", shortLabel: "Area" },
+    { value: "pie", label: "Pie Chart", shortLabel: "Pie" },
   ],
   analytics: [
-    { value: "number", label: "Number" },
-    { value: "bar", label: "Bar Chart" },
-    { value: "pie", label: "Pie Chart" },
-    { value: "donut", label: "Donut Chart" },
+    { value: "number", label: "Number", shortLabel: "Num" },
+    { value: "bar", label: "Bar Chart", shortLabel: "Bar" },
+    { value: "pie", label: "Pie Chart", shortLabel: "Pie" },
+    { value: "donut", label: "Donut Chart", shortLabel: "Donut" },
   ],
   business: [
-    { value: "number", label: "Number" },
-    { value: "bar", label: "Bar Chart" },
-    { value: "line", label: "Line Chart" },
-    { value: "area", label: "Area Chart" },
+    { value: "number", label: "Number", shortLabel: "Num" },
+    { value: "bar", label: "Bar Chart", shortLabel: "Bar" },
+    { value: "line", label: "Line Chart", shortLabel: "Line" },
+    { value: "area", label: "Area Chart", shortLabel: "Area" },
   ],
   engagement: [
-    { value: "number", label: "Number" },
-    { value: "bar", label: "Bar Chart" },
+    { value: "number", label: "Number", shortLabel: "Num" },
+    { value: "bar", label: "Bar Chart", shortLabel: "Bar" },
   ],
   charts: [
-    { value: "bar", label: "Bar Chart" },
-    { value: "line", label: "Line Chart" },
-    { value: "area", label: "Area Chart" },
+    { value: "bar", label: "Bar Chart", shortLabel: "Bar" },
+    { value: "line", label: "Line Chart", shortLabel: "Line" },
+    { value: "area", label: "Area Chart", shortLabel: "Area" },
   ],
   integrations: [
-    { value: "number", label: "Number" },
-    { value: "bar", label: "Bar Chart" },
+    { value: "number", label: "Number", shortLabel: "Num" },
+    { value: "bar", label: "Bar Chart", shortLabel: "Bar" },
   ],
   // Lists and actions don't have format options
   lists: [],
   actions: [],
 };
 
+// Size options with short labels
+export const SIZE_OPTIONS = [
+  { value: "small", label: "Small", shortLabel: "Sm" },
+  { value: "medium", label: "Medium", shortLabel: "Md" },
+  { value: "large", label: "Large", shortLabel: "Lg" },
+  { value: "full", label: "Full", shortLabel: "Full" },
+] as const;
+
 // Get format options for a specific widget type
-export function getFormatOptionsForWidget(category: string): { value: WidgetDisplayFormat; label: string }[] {
+export function getFormatOptionsForWidget(category: string): { value: WidgetDisplayFormat; label: string; shortLabel: string }[] {
   return WIDGET_FORMAT_OPTIONS[category] || [];
 }
 

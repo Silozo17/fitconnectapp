@@ -23,7 +23,7 @@ import {
   WIDGET_CATEGORIES,
   DashboardWidget 
 } from "@/hooks/useAdminWidgets";
-import { getFormatOptionsForWidget, supportsFormatSelection, type WidgetDisplayFormat } from "@/lib/widget-formats";
+import { getFormatOptionsForWidget, supportsFormatSelection, SIZE_OPTIONS, type WidgetDisplayFormat } from "@/lib/widget-formats";
 import { toast } from "sonner";
 import { RotateCcw, Loader2, BarChart3, DollarSign, TrendingUp, LineChart, Link2, List, Zap } from "lucide-react";
 
@@ -200,38 +200,47 @@ export function DashboardCustomizer({ open, onOpenChange }: DashboardCustomizerP
                     const currentFormat = (widgetState?.config?.displayFormat as WidgetDisplayFormat) || "number";
                     const formatOptions = getFormatOptionsForWidget(category);
                     const hasFormatOptions = supportsFormatSelection(category);
+                    const currentSizeOption = SIZE_OPTIONS.find(s => s.value === currentSize);
+                    const currentFormatOption = formatOptions.find(f => f.value === currentFormat);
 
                     return (
                       <div 
                         key={type}
-                        className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg glass-item gap-2 sm:gap-3"
+                        className="flex flex-col p-3 rounded-lg glass-item gap-3"
                       >
-                        <div className="flex items-center gap-3 min-w-0">
+                        {/* Row 1: Toggle + Widget Name */}
+                        <div className="flex items-center gap-3">
                           <Switch
                             id={type}
                             checked={isVisible}
                             onCheckedChange={() => handleToggleWidget(type, widgetState)}
                             disabled={updateWidget.isPending || addWidget.isPending}
+                            className="shrink-0"
                           />
-                          <Label htmlFor={type} className="cursor-pointer truncate text-sm">
+                          <Label htmlFor={type} className="cursor-pointer text-sm font-medium flex-1 min-w-0 truncate">
                             {label}
                           </Label>
                         </div>
                         
-                        <div className="flex items-center gap-2 pl-10 sm:pl-0">
+                        {/* Row 2: Select Controls - aligned under widget name */}
+                        <div className="flex items-center gap-2 ml-[52px]">
                           {hasFormatOptions && (
                             <Select
                               value={currentFormat}
                               onValueChange={(format) => handleFormatChange(type, widgetState, format as WidgetDisplayFormat)}
                               disabled={updateWidget.isPending || addWidget.isPending}
                             >
-                              <SelectTrigger className="w-[80px] sm:w-[100px] h-8 text-xs sm:text-sm">
-                                <SelectValue />
+                              <SelectTrigger className="w-[90px] h-9 text-xs">
+                                <SelectValue>
+                                  <span className="sm:hidden">{currentFormatOption?.shortLabel || currentFormat}</span>
+                                  <span className="hidden sm:inline">{currentFormatOption?.label || currentFormat}</span>
+                                </SelectValue>
                               </SelectTrigger>
                               <SelectContent>
                                 {formatOptions.map((opt) => (
-                                  <SelectItem key={opt.value} value={opt.value}>
-                                    {opt.label}
+                                  <SelectItem key={opt.value} value={opt.value} className="text-sm">
+                                    <span className="sm:hidden">{opt.shortLabel}</span>
+                                    <span className="hidden sm:inline">{opt.label}</span>
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -243,14 +252,19 @@ export function DashboardCustomizer({ open, onOpenChange }: DashboardCustomizerP
                             onValueChange={(size) => handleSizeChange(type, widgetState, size)}
                             disabled={updateWidget.isPending || addWidget.isPending}
                           >
-                            <SelectTrigger className="w-[70px] sm:w-[90px] h-8 text-xs sm:text-sm">
-                              <SelectValue />
+                            <SelectTrigger className="w-[80px] h-9 text-xs">
+                              <SelectValue>
+                                <span className="sm:hidden">{currentSizeOption?.shortLabel || currentSize}</span>
+                                <span className="hidden sm:inline">{currentSizeOption?.label || currentSize}</span>
+                              </SelectValue>
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="small">Small</SelectItem>
-                              <SelectItem value="medium">Medium</SelectItem>
-                              <SelectItem value="large">Large</SelectItem>
-                              <SelectItem value="full">Full</SelectItem>
+                              {SIZE_OPTIONS.map((opt) => (
+                                <SelectItem key={opt.value} value={opt.value} className="text-sm">
+                                  <span className="sm:hidden">{opt.shortLabel}</span>
+                                  <span className="hidden sm:inline">{opt.label}</span>
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>
