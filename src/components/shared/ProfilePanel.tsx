@@ -79,8 +79,8 @@ const ProfilePanel = ({ children, headerHeight = 64 }: ProfilePanelProps) => {
         className={cn(
           // Positioning - below backdrop but above content
           "fixed left-0 right-0 z-[45]",
-          // Height - exactly 60vh
-          "h-[60vh]",
+          // Height - exactly 70vh
+          "h-[70vh]",
           // Glass styling
           "glass-floating",
           // Border adjustments
