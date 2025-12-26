@@ -1,24 +1,19 @@
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { 
-  Users, 
-  Calendar, 
-  Star, 
-  MessageSquare, 
-  TrendingUp,
-  Award,
-  ChevronRight
-} from "lucide-react";
+import { ChevronRight, CheckCircle } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useCoachDashboardStats } from "@/hooks/useCoachDashboardStats";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useSelectedAvatar, getAvatarImageUrl } from "@/hooks/useAvatars";
 import { useCoachProfile } from "@/hooks/useCoachClients";
 import { cn } from "@/lib/utils";
 import { useProfilePanel } from "@/contexts/ProfilePanelContext";
+import NotchCoachEarnings from "./NotchCoachEarnings";
+import NotchNextSession from "./NotchNextSession";
+import NotchCoachMiniStats from "./NotchCoachMiniStats";
+import NotchCoachBadgeProgress from "./NotchCoachBadgeProgress";
 
 const CoachProfileSummary = () => {
   const { t } = useTranslation(["coach", "common"]);
@@ -27,9 +22,6 @@ const CoachProfileSummary = () => {
   const { profile } = useUserProfile();
   const { data: selectedAvatar } = useSelectedAvatar('coach');
   const { data: coachProfile } = useCoachProfile();
-  const { data, isLoading } = useCoachDashboardStats();
-  
-  const stats = data?.stats;
 
   const displayName = profile?.display_name || profile?.first_name || t("common:profile.coach");
   const avatarUrl = selectedAvatar ? getAvatarImageUrl(selectedAvatar.slug) : (coachProfile?.profile_image_url || profile?.avatar_url);
@@ -45,56 +37,23 @@ const CoachProfileSummary = () => {
     navigate(path);
   };
 
-  const statItems = [
-    {
-      icon: Users,
-      label: t("coach:dashboard.activeClients", "Active Clients"),
-      value: stats?.activeClients || 0,
-      color: "text-primary",
-      bgColor: "bg-primary/10"
-    },
-    {
-      icon: Calendar,
-      label: t("coach:dashboard.sessionsThisWeek", "Sessions"),
-      value: stats?.sessionsThisWeek || 0,
-      color: "text-cyan-500",
-      bgColor: "bg-cyan-500/10"
-    },
-    {
-      icon: Star,
-      label: t("coach:dashboard.rating", "Rating"),
-      value: stats?.averageRating ? stats.averageRating.toFixed(1) : "-",
-      color: "text-yellow-500",
-      bgColor: "bg-yellow-500/10"
-    },
-    {
-      icon: MessageSquare,
-      label: t("coach:dashboard.unreadMessages", "Unread"),
-      value: 0, // TODO: Add unread messages to stats
-      color: "text-purple-500",
-      bgColor: "bg-purple-500/10"
-    },
-    {
-      icon: TrendingUp,
-      label: t("coach:dashboard.pendingLeads", "Leads"),
-      value: 0, // TODO: Add leads to stats
-      color: "text-orange-500",
-      bgColor: "bg-orange-500/10"
-    },
-    {
-      icon: Award,
-      label: t("coach:dashboard.reviews", "Reviews"),
-      value: stats?.totalReviews || 0,
-      color: "text-emerald-500",
-      bgColor: "bg-emerald-500/10"
+  // Tier styling
+  const getTierStyle = () => {
+    switch (subscriptionTier) {
+      case "enterprise":
+        return "border-yellow-500/50 text-yellow-500 bg-yellow-500/10";
+      case "pro":
+        return "border-primary/50 text-primary bg-primary/10";
+      default:
+        return "border-border/50 text-muted-foreground bg-muted/50";
     }
-  ];
+  };
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Avatar and Name Section */}
-      <div className="flex items-center gap-4 mb-4">
-        <Avatar className="h-16 w-16 border-2 border-primary/30">
+    <div className="h-full flex flex-col gap-3">
+      {/* Row 1: Avatar and Name Section (compact) */}
+      <div className="flex items-center gap-3">
+        <Avatar className="h-14 w-14 border-2 border-primary/30">
           <AvatarImage src={avatarUrl || undefined} alt={displayName} />
           <AvatarFallback className="bg-primary/20 text-primary text-lg font-semibold">
             {initials}
@@ -103,75 +62,57 @@ const CoachProfileSummary = () => {
         
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-semibold text-foreground truncate">
+            <h2 className="text-lg font-semibold text-foreground truncate">
               {displayName}
             </h2>
             {isVerified && (
-              <Badge variant="secondary" className="bg-primary/20 text-primary text-[10px]">
-                ✓ Verified
-              </Badge>
+              <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
             )}
           </div>
           
-          {/* Tier Badge */}
-          <Badge 
-            variant="outline" 
-            className={cn(
-              "mt-1 text-xs capitalize",
-              subscriptionTier === "pro" && "border-primary/50 text-primary",
-              subscriptionTier === "enterprise" && "border-yellow-500/50 text-yellow-500"
-            )}
-          >
-            {subscriptionTier} {t("common:profile.plan", "Plan")}
-          </Badge>
+          {/* Tier Badge inline */}
+          <div className="flex items-center gap-2 mt-0.5">
+            <Badge 
+              variant="outline" 
+              className={cn("text-[10px] capitalize px-2 py-0", getTierStyle())}
+            >
+              {subscriptionTier} {t("common:profile.plan", "Plan")}
+            </Badge>
+          </div>
           
-          {/* Profile Completion */}
-          <div className="mt-2">
+          {/* Profile Completion (compact) */}
+          <div className="mt-1.5">
             <div className="flex items-center justify-between mb-0.5">
-              <span className="text-xs text-muted-foreground">
+              <span className="text-[10px] text-muted-foreground">
                 {t("coach:profile.completion", "Profile")}
               </span>
-              <span className="text-xs font-medium text-primary">{profileCompletion}%</span>
+              <span className="text-[10px] font-medium text-primary">{profileCompletion}%</span>
             </div>
             <Progress 
               value={profileCompletion} 
-              className="h-1.5 bg-muted"
+              className="h-1 bg-muted"
             />
           </div>
         </div>
       </div>
 
-      {/* Stats Grid - 3x2 layout */}
-      <div className="grid grid-cols-3 gap-2 flex-1 mb-4">
-        {statItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <div
-              key={item.label}
-              className={cn(
-                "glass-subtle flex flex-col items-center justify-center py-3 px-2",
-                isLoading && "animate-pulse"
-              )}
-            >
-              <div className={cn("p-1.5 rounded-lg mb-1", item.bgColor)}>
-                <Icon className={cn("w-4 h-4", item.color)} />
-              </div>
-              <span className="text-lg font-bold text-foreground">
-                {isLoading ? "-" : item.value}
-              </span>
-              <span className="text-[10px] text-muted-foreground uppercase tracking-wide text-center">
-                {item.label}
-              </span>
-            </div>
-          );
-        })}
+      {/* Row 2: Earnings & Next Session (2-column grid) */}
+      <div className="grid grid-cols-2 gap-2">
+        <NotchCoachEarnings />
+        <NotchNextSession />
       </div>
 
-      {/* Quick Actions */}
-      <div className="flex gap-2">
+      {/* Row 3: Nearest Badge Progress (full width) */}
+      <NotchCoachBadgeProgress />
+
+      {/* Row 4: Mini Stats (6-column) */}
+      <NotchCoachMiniStats />
+
+      {/* Row 5: Quick Actions */}
+      <div className="flex gap-2 mt-auto">
         <Button
           variant="outline"
-          className="flex-1 glass-interactive border-border/30 hover:border-primary/40"
+          className="flex-1 glass-interactive border-border/30 hover:border-primary/40 h-9"
           onClick={() => handleNavigate("/dashboard/coach/settings")}
         >
           {t("common:profile.viewProfile", "View Profile")}
@@ -179,7 +120,7 @@ const CoachProfileSummary = () => {
         </Button>
         <Button
           variant="outline"
-          className="flex-1 glass-interactive border-border/30 hover:border-primary/40"
+          className="flex-1 glass-interactive border-border/30 hover:border-primary/40 h-9"
           onClick={() => handleNavigate("/dashboard/coach/clients")}
         >
           {t("coach:dashboard.manageClients", "Clients")}
