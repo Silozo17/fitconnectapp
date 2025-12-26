@@ -71,16 +71,20 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
   const { t } = useTranslation('settings');
   const { getTodayValue, getTodaySource, isLoading, data, refetch } = useHealthData();
   const { connections, isLoading: wearablesLoading, error: wearablesError } = useWearables();
-  const { syncAll, isSyncing, lastSyncedAt } = useSyncAllWearables();
+  const { syncAll, isSyncing, appleHealthStatus, lastSyncedAt } = useSyncAllWearables();
   
-  // Enable auto-sync every 15 minutes
+  // Enable auto-sync every 15 minutes (excludes Apple Health due to Despia limitations)
   useWearableAutoSync();
 
   const hasConnectedDevice = connections && connections.length > 0;
   const hasData = data && data.length > 0;
 
-  // Check if Apple Health needs iOS sync
+  // Check if Apple Health is connected but has no data today
   const hasAppleHealth = connections?.some(c => c.provider === 'apple_health');
+  const hasAppleHealthData = data?.some(d => d.source === 'apple_health');
+  const appleHealthConnectedNoData = hasAppleHealth && !hasAppleHealthData && !isSyncing;
+  
+  // Check if we're on iOS native (where Apple Health sync is possible)
   const isDespiaEnv = isDespia();
   const isIOSNative = isDespiaEnv && /iPad|iPhone|iPod/i.test(navigator.userAgent);
   const needsIOSSync = hasAppleHealth && !isIOSNative;
@@ -214,11 +218,22 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
         </div>
       </CardHeader>
       <CardContent>
+        {/* Apple Health connected but not on iOS - needs native app */}
         {needsIOSSync && isSyncStale && (
           <div className="flex items-center gap-2 p-2 mb-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
             <Smartphone className="w-4 h-4 text-amber-500 shrink-0" />
             <p className="text-xs text-amber-600 dark:text-amber-400">
               Open the app on your iPhone to sync Apple Health data
+            </p>
+          </div>
+        )}
+        
+        {/* Apple Health connected on iOS but no data available */}
+        {appleHealthConnectedNoData && isIOSNative && appleHealthStatus !== 'syncing' && (
+          <div className="flex items-center gap-2 p-2 mb-3 rounded-lg bg-muted/50 border border-border/50">
+            <Smartphone className="w-4 h-4 text-muted-foreground shrink-0" />
+            <p className="text-xs text-muted-foreground">
+              Apple Health connected — no data recorded yet today
             </p>
           </div>
         )}

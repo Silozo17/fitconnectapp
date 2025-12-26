@@ -205,12 +205,20 @@ export const isBioAuthAvailable = (): boolean => {
 // ============================================================================
 
 /**
+ * Timeout for HealthKit operations in milliseconds
+ * Despia native bridge may fail silently - this ensures we don't wait forever
+ */
+const HEALTHKIT_TIMEOUT_MS = 3000;
+
+/**
  * HealthKit connection result
  */
 export interface HealthKitConnectionResult {
   success: boolean;
   error?: string;
   data?: unknown;
+  timedOut?: boolean; // Indicates sync timed out (Despia limitation)
+  dataPoints?: number; // Number of data points received
 }
 
 /**
@@ -238,12 +246,19 @@ export const checkHealthKitConnection = async (): Promise<HealthKitConnectionRes
   try {
     console.log('[Despia HealthKit] Attempting to read data (triggers permission if needed)...');
     
-    // Attempt to read step count for 1 day - this triggers the permission dialog
-    // The SDK returns a promise that resolves when the user responds to permission prompt
-    const response = await despia(
-      'healthkit://read?types=HKQuantityTypeIdentifierStepCount&days=1',
-      ['healthkitResponse']
-    );
+    // Create a timeout promise to prevent infinite waiting (Despia limitation)
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('HEALTHKIT_TIMEOUT')), HEALTHKIT_TIMEOUT_MS);
+    });
+    
+    // Race between actual call and timeout
+    const response = await Promise.race([
+      despia(
+        'healthkit://read?types=HKQuantityTypeIdentifierStepCount&days=1',
+        ['healthkitResponse']
+      ),
+      timeoutPromise
+    ]);
     
     console.log('[Despia HealthKit] Response received:', JSON.stringify(response, null, 2));
     
@@ -277,14 +292,25 @@ export const checkHealthKitConnection = async (): Promise<HealthKitConnectionRes
       }
     }
     
-    // If response is null/undefined, the SDK timed out or permission was denied
-    console.warn('[Despia HealthKit] No response received - permission may have been denied');
+    // If response is null/undefined, the SDK returned nothing
+    console.warn('[Despia HealthKit] No response received');
     return { 
       success: false, 
-      error: 'No response from Apple Health. Please check Settings → Privacy & Security → Health → [App Name] and enable all permissions.' 
+      error: 'NO_RESPONSE',
+      timedOut: false
     };
     
   } catch (e) {
+    // Handle timeout specifically
+    if (e instanceof Error && e.message === 'HEALTHKIT_TIMEOUT') {
+      console.log('[Despia HealthKit] Connection check timed out after 3 seconds');
+      return { 
+        success: false, 
+        error: 'NO_RESPONSE',
+        timedOut: true
+      };
+    }
+    
     console.error('[Despia HealthKit] Error during read attempt:', e);
     
     // Parse the error to provide a user-friendly message
@@ -300,13 +326,6 @@ export const checkHealthKitConnection = async (): Promise<HealthKitConnectionRes
     
     if (errorMessage.includes('unavailable') || errorMessage.includes('not available')) {
       return { success: false, error: 'HealthKit is not available on this device.' };
-    }
-    
-    if (errorMessage.includes('timeout')) {
-      return { 
-        success: false, 
-        error: 'Connection timed out. Please ensure HealthKit permissions are enabled in Settings.' 
-      };
     }
     
     return { success: false, error: errorMessage || 'Failed to connect to Apple Health' };
@@ -336,14 +355,6 @@ export const syncHealthKitData = async (days: number = 7): Promise<HealthKitConn
      * 
      * Until Despia fixes their native SDK, we only request step count which
      * is confirmed to work reliably.
-     * 
-     * TODO: Re-enable full health data sync when Despia fixes HealthKitManager.swift
-     * Full list that should work:
-     * - HKQuantityTypeIdentifierStepCount
-     * - HKQuantityTypeIdentifierActiveEnergyBurned
-     * - HKQuantityTypeIdentifierDistanceWalkingRunning
-     * - HKQuantityTypeIdentifierHeartRate
-     * - HKQuantityTypeIdentifierAppleExerciseTime
      */
     const types = 'HKQuantityTypeIdentifierStepCount';
     
@@ -352,21 +363,43 @@ export const syncHealthKitData = async (days: number = 7): Promise<HealthKitConn
     
     console.log(`[Despia HealthKit] Request: types=${types}, days=${days}, t=${timestamp}`);
     
-    const response = await despia(
-      `healthkit://read?types=${types}&days=${days}&t=${timestamp}`,
-      ['healthkitResponse']
-    );
+    // Create a timeout promise - Despia may fail silently
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('HEALTHKIT_TIMEOUT')), HEALTHKIT_TIMEOUT_MS);
+    });
+    
+    // Race between actual call and timeout
+    const response = await Promise.race([
+      despia(
+        `healthkit://read?types=${types}&days=${days}&t=${timestamp}`,
+        ['healthkitResponse']
+      ),
+      timeoutPromise
+    ]);
     
     console.log('[Despia HealthKit] Sync response:', response);
     
     if (response && typeof response === 'object') {
-      return { success: true, data: (response as Record<string, unknown>).healthkitResponse };
+      const data = (response as Record<string, unknown>).healthkitResponse;
+      return { success: true, data, timedOut: false };
     }
     
-    return { success: true };
+    // No data returned - could be empty or silent failure
+    return { success: true, data: null, timedOut: false, dataPoints: 0 };
   } catch (e) {
+    // Handle timeout specifically
+    if (e instanceof Error && e.message === 'HEALTHKIT_TIMEOUT') {
+      console.log('[Despia HealthKit] Sync timed out after 3 seconds');
+      return { 
+        success: false, 
+        error: 'NO_RESPONSE',
+        timedOut: true,
+        dataPoints: 0
+      };
+    }
+    
     console.error('[Despia HealthKit] Sync error:', e);
-    return { success: false, error: e instanceof Error ? e.message : 'Sync failed' };
+    return { success: false, error: e instanceof Error ? e.message : 'Sync failed', timedOut: false };
   }
 };
 

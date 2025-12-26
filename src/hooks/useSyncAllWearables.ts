@@ -6,6 +6,17 @@ import { toast } from "sonner";
 import { isDespia, syncHealthKitData } from "@/lib/despia";
 import { useAuth } from "@/contexts/AuthContext";
 
+/**
+ * Apple Health sync status - explicit states for honest UX
+ * Due to Despia native bridge limitations, sync can fail silently
+ */
+export type AppleHealthSyncStatus = 
+  | 'idle'      // Ready to sync
+  | 'syncing'   // Currently syncing
+  | 'success'   // Sync completed with data
+  | 'no-data'   // Connected but no data available
+  | 'failed';   // Sync failed or timed out
+
 // Type guard to check if data is a valid object with health data
 const isValidHealthDataObject = (data: unknown): data is Record<string, unknown[]> => {
   if (!data || typeof data !== 'object') return false;
@@ -35,6 +46,7 @@ const safeObjectEntries = <T>(obj: unknown): [string, T][] => {
 
 export const useSyncAllWearables = () => {
   const [isSyncing, setIsSyncing] = useState(false);
+  const [appleHealthStatus, setAppleHealthStatus] = useState<AppleHealthSyncStatus>('idle');
   const queryClient = useQueryClient();
   const { connections } = useWearables();
   const { user } = useAuth();
@@ -47,32 +59,55 @@ export const useSyncAllWearables = () => {
   }, null as Date | null);
 
   // Helper to sync Apple Health data client-side
-  const syncAppleHealthClientSide = useCallback(async (clientId: string) => {
+  const syncAppleHealthClientSide = useCallback(async (clientId: string): Promise<{
+    success: boolean;
+    error?: string;
+    dataPoints?: number;
+    timedOut?: boolean;
+  }> => {
     console.log('[useSyncAllWearables] Starting client-side Apple Health sync...');
+    setAppleHealthStatus('syncing');
     
     try {
       const result = await syncHealthKitData(7); // Sync 7 days
       
+      // Handle timeout - Despia limitation, not an error
+      if (result.timedOut) {
+        console.log('[useSyncAllWearables] Apple Health sync timed out (Despia limitation)');
+        setAppleHealthStatus('no-data');
+        // Reset to idle after delay so user can retry
+        setTimeout(() => setAppleHealthStatus('idle'), 2000);
+        return { success: false, error: 'NO_RESPONSE', timedOut: true, dataPoints: 0 };
+      }
+      
       // Validate result object exists
       if (!result) {
         console.log('[useSyncAllWearables] syncHealthKitData returned null/undefined');
-        return { success: false, error: 'No response from HealthKit' };
+        setAppleHealthStatus('no-data');
+        setTimeout(() => setAppleHealthStatus('idle'), 2000);
+        return { success: false, error: 'No response from HealthKit', dataPoints: 0 };
       }
 
       if (!result.success) {
         console.error('[useSyncAllWearables] HealthKit sync failed:', result.error);
-        return { success: false, error: result.error };
+        setAppleHealthStatus('failed');
+        setTimeout(() => setAppleHealthStatus('idle'), 2000);
+        return { success: false, error: result.error, dataPoints: 0 };
       }
 
       // TYPE GUARD: Validate result.data is a proper object before processing
       if (!result.data) {
         console.log('[useSyncAllWearables] No HealthKit data returned');
+        setAppleHealthStatus('no-data');
+        setTimeout(() => setAppleHealthStatus('idle'), 2000);
         return { success: true, dataPoints: 0 };
       }
 
       // Check if result.data is a valid object (not null, not array, not primitive)
       if (!isValidHealthDataObject(result.data)) {
         console.log('[useSyncAllWearables] Invalid HealthKit data format:', typeof result.data, Array.isArray(result.data) ? '(array)' : '');
+        setAppleHealthStatus('no-data');
+        setTimeout(() => setAppleHealthStatus('idle'), 2000);
         return { success: true, dataPoints: 0 };
       }
 
@@ -325,17 +360,29 @@ export const useSyncAllWearables = () => {
         }
 
         console.log(`[useSyncAllWearables] Successfully synced ${healthDataSyncEntries.length} Apple Health entries`);
+        setAppleHealthStatus('success');
+        setTimeout(() => setAppleHealthStatus('idle'), 2000);
         return { success: true, dataPoints: healthDataSyncEntries.length };
       }
 
+      setAppleHealthStatus('no-data');
+      setTimeout(() => setAppleHealthStatus('idle'), 2000);
       return { success: true, dataPoints: 0 };
     } catch (error) {
       console.error('[useSyncAllWearables] Apple Health sync error:', error);
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+      setAppleHealthStatus('failed');
+      setTimeout(() => setAppleHealthStatus('idle'), 2000);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error', dataPoints: 0 };
     }
   }, [connections]);
 
-  const syncAll = async () => {
+  /**
+   * Sync all connected wearables
+   * @param options.includeAppleHealth - Whether to include Apple Health sync (default: true for manual trigger, false for auto-sync)
+   */
+  const syncAll = async (options: { includeAppleHealth?: boolean } = {}) => {
+    const { includeAppleHealth = true } = options;
+    
     if (!connections || connections.length === 0) {
       toast.info("No wearable devices connected");
       return;
@@ -369,17 +416,22 @@ export const useSyncAllWearables = () => {
 
       let totalSynced = data?.synced || 0;
       let clientSideDataPoints = 0;
+      let appleHealthTimedOut = false;
 
       // Check if we need to do client-side sync for Apple Health
       const hasAppleHealth = connections.some(c => c.provider === 'apple_health');
       const isDespiaEnv = isDespia();
       const isIOSNative = isDespiaEnv && /iPad|iPhone|iPod/i.test(navigator.userAgent);
 
-      if (hasAppleHealth && isIOSNative && clientId) {
+      // Only sync Apple Health if explicitly requested (manual trigger)
+      if (hasAppleHealth && isIOSNative && clientId && includeAppleHealth) {
         console.log('[useSyncAllWearables] Triggering client-side Apple Health sync...');
         const appleResult = await syncAppleHealthClientSide(clientId);
         if (appleResult.success && appleResult.dataPoints) {
           clientSideDataPoints += appleResult.dataPoints;
+        }
+        if (appleResult.timedOut) {
+          appleHealthTimedOut = true;
         }
       }
 
@@ -411,25 +463,32 @@ export const useSyncAllWearables = () => {
       const serverConnections = connections.filter(c => serverSideProviders.includes(c.provider));
       const actualServerSynced = Math.min(data?.synced || 0, serverConnections.length);
 
-      // Show appropriate toast based on what happened
+      // Show appropriate toast based on what happened - HONEST messaging
       if (clientSideDataPoints > 0) {
-        // Primary: Show Apple Health data points synced
+        // Success: Show Apple Health data points synced
         toast.success(`Synced ${clientSideDataPoints} data points from Apple Health`);
-      } else if (hasAppleHealth && isIOSNative) {
-        // On iOS but no data points synced - likely Despia SDK issue
-        toast.info("Sync attempted - waiting for Apple Health data. Try again if steps don't update.", {
-          duration: 5000,
-        });
+      } else if (hasAppleHealth && isIOSNative && includeAppleHealth) {
+        // On iOS but no data points synced - honest messaging about Despia limitation
+        if (appleHealthTimedOut) {
+          toast.info("Apple Health is connected, but no data is available yet.", {
+            description: "This can happen if no steps have been recorded today.",
+            duration: 4000,
+          });
+        } else {
+          toast.info("Apple Health synced — no new data to import.", {
+            duration: 3000,
+          });
+        }
       } else if (hasAppleHealth && !isIOSNative) {
         // User has Apple Health connected but isn't on iOS native
-        toast.info("Apple Health syncs from your iOS device. Open the app on your iPhone to sync latest data.", {
+        toast.info("Apple Health syncs from your iOS device. Open the app on your iPhone to sync.", {
           duration: 5000,
         });
       } else if (actualServerSynced > 0) {
         // Only server-side devices synced (Fitbit, Garmin)
         toast.success(`Synced ${actualServerSynced} device${actualServerSynced > 1 ? "s" : ""}`);
       } else {
-        toast.info("Sync complete - no new data available");
+        toast.info("Sync complete — no new data available");
       }
 
       return { ...data, clientSideDataPoints };
@@ -445,6 +504,7 @@ export const useSyncAllWearables = () => {
   return {
     syncAll,
     isSyncing,
+    appleHealthStatus,
     lastSyncedAt,
     hasConnectedDevices: (connections?.length ?? 0) > 0,
   };
