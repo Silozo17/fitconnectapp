@@ -90,7 +90,7 @@ const ClientDashboardLayoutInner = ({
 
           <main 
             id="main-content" 
-            className={`flex-1 p-4 lg:p-6 overflow-y-auto pb-mobile-nav transition-all duration-300 ${profilePanelOpen ? 'pointer-events-none opacity-50' : ''}`}
+            className={`flex-1 p-4 lg:p-6 overflow-y-auto pb-mobile-nav ${profilePanelOpen ? 'pointer-events-none' : ''}`}
             role="main"
             aria-label={title}
             tabIndex={-1}
