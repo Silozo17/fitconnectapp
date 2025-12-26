@@ -54,7 +54,7 @@ const Install = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="mx-auto w-20 h-20 rounded-2xl flex items-center justify-center mb-4 overflow-hidden">
-            <img src="/logo.svg" alt="FitConnect" className="w-full h-full" />
+            <img src="/fitconnect-icon.png" alt="FitConnect" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-3xl font-bold mb-2">Install FitConnect</h1>
           <p className="text-muted-foreground">
