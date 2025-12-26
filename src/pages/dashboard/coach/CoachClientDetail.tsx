@@ -325,7 +325,7 @@ const CoachClientDetail = () => {
       </Link>
 
       {/* Client Header */}
-      <div className="card-elevated p-6 mb-6">
+      <div className="glass-card p-6 mb-6">
         <div className="flex flex-col md:flex-row md:items-center gap-6">
           <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-2xl">
             {initials}
@@ -367,21 +367,21 @@ const CoachClientDetail = () => {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-        <div className="card-elevated p-4">
+        <div className="glass-subtle p-4">
           <div className="flex items-center gap-2 mb-2">
             <Calendar className="w-4 h-4 text-primary" />
             <span className="text-sm text-muted-foreground">{t('clientDetail.stats.sessionsDone')}</span>
           </div>
           <p className="text-2xl font-display font-bold text-foreground">{sessionStats.completed}</p>
         </div>
-        <div className="card-elevated p-4">
+        <div className="glass-subtle p-4">
           <div className="flex items-center gap-2 mb-2">
             <Clock className="w-4 h-4 text-warning" />
             <span className="text-sm text-muted-foreground">{t('clientDetail.stats.upcoming')}</span>
           </div>
           <p className="text-2xl font-display font-bold text-foreground">{sessionStats.upcoming}</p>
         </div>
-        <div className="card-elevated p-4">
+        <div className="glass-subtle p-4">
           <div className="flex items-center gap-2 mb-2">
             <Package className="w-4 h-4 text-primary" />
             <span className="text-sm text-muted-foreground">{t('packageCredits.credits')}</span>
@@ -396,7 +396,7 @@ const CoachClientDetail = () => {
             )}
           </p>
         </div>
-        <div className="card-elevated p-4">
+        <div className="glass-subtle p-4">
           <div className="flex items-center gap-2 mb-2">
             <Scale className="w-4 h-4 text-success" />
             <span className="text-sm text-muted-foreground">{t('clientDetail.stats.currentWeight')}</span>
@@ -405,7 +405,7 @@ const CoachClientDetail = () => {
             {progressData.length > 0 ? `${progressData[progressData.length - 1].weight_kg || '-'} kg` : `${client?.weight_kg || '-'} kg`}
           </p>
         </div>
-        <div className="card-elevated p-4">
+        <div className="glass-subtle p-4">
           <div className="flex items-center gap-2 mb-2">
             <Target className="w-4 h-4 text-accent" />
             <span className="text-sm text-muted-foreground">{t('clientDetail.stats.notes')}</span>
@@ -436,7 +436,7 @@ const CoachClientDetail = () => {
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Goals */}
-            <div className="card-elevated p-6">
+            <div className="glass-card p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-display font-bold text-foreground">{t('clientDetail.overview.fitnessGoals')}</h3>
                 <Button variant="ghost" size="sm">
@@ -455,7 +455,7 @@ const CoachClientDetail = () => {
             </div>
 
             {/* Upcoming Sessions */}
-            <div className="card-elevated p-6">
+            <div className="glass-card p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-display font-bold text-foreground">{t('clientDetail.overview.upcomingSessions')}</h3>
                 <Button variant="ghost" size="sm" onClick={() => setIsScheduleSessionOpen(true)}>
@@ -518,7 +518,7 @@ const CoachClientDetail = () => {
             </div>
 
             {/* Session List */}
-            <div className="lg:col-span-2 card-elevated">
+            <div className="lg:col-span-2 glass-card">
               <div className="p-4 border-b border-border flex items-center justify-between">
                 <h3 className="font-display font-bold text-foreground">{t('clientDetail.sessions.sessionHistory')}</h3>
                 <Button size="sm" onClick={() => setIsScheduleSessionOpen(true)} className="bg-primary text-primary-foreground">
@@ -588,7 +588,7 @@ const CoachClientDetail = () => {
                 <ProgressChart title={t('clientDetail.progress.bodyFatTrend')} data={chartData} />
               </div>
             ) : (
-              <div className="card-elevated p-12 text-center">
+              <div className="glass-card p-12 text-center">
                 <Scale className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground mb-4">{t('clientDetail.progress.noProgressData')}</p>
                 <Button onClick={() => setIsAddProgressOpen(true)} variant="outline">
