@@ -14,6 +14,7 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
 // RevenueCat event types we care about
 type RevenueCatEventType = 
   | "INITIAL_PURCHASE"
+  | "NON_RENEWING_PURCHASE"  // For one-time purchases like Boost
   | "RENEWAL"
   | "CANCELLATION"
   | "UNCANCELLATION"
@@ -97,12 +98,85 @@ const boostProductIds = [
  * Check if a product or entitlement is for boost
  * Entitlement-first: if entitlement_ids includes 'boost', it's a boost purchase
  */
-const isBoostProduct = (productId: string, entitlementIds?: string[]): boolean => {
+const isBoostProduct = (productId: string | undefined, entitlementIds?: string[]): boolean => {
   // Entitlement check takes priority (most reliable)
   if (entitlementIds?.includes('boost')) {
     return true;
   }
+  if (!productId) return false;
   return boostProductIds.some(id => productId.includes(id));
+};
+
+/**
+ * Activate boost for a coach - handles stacking and idempotency
+ */
+const activateBoost = async (
+  supabase: ReturnType<typeof createClient<Record<string, unknown>>>,
+  coachId: string,
+  event: RevenueCatEvent
+): Promise<{ success: boolean; error?: string; startDate?: Date; endDate?: Date }> => {
+  // Check for existing active boost to stack time
+  const { data: existingBoost } = await supabase
+    .from("coach_boosts")
+    .select("boost_end_date, payment_status, activation_payment_intent_id")
+    .eq("coach_id", coachId)
+    .maybeSingle();
+
+  const transactionId = `rc_${event.transaction_id || event.original_transaction_id}`;
+  
+  // Idempotency check - prevent duplicate activations for same transaction
+  if (existingBoost?.activation_payment_intent_id === transactionId && 
+      existingBoost?.payment_status === 'succeeded') {
+    logStep("Duplicate transaction detected - already processed", { transactionId });
+    return { 
+      success: true, 
+      startDate: new Date(existingBoost.boost_end_date), 
+      endDate: new Date(existingBoost.boost_end_date) 
+    };
+  }
+
+  const now = new Date();
+  let startDate = now;
+  let endDate = new Date(now);
+
+  // If there's an existing active boost that hasn't expired, stack from its end date
+  if (existingBoost?.boost_end_date) {
+    const existingEndDate = new Date(existingBoost.boost_end_date);
+    if (existingEndDate > now && (existingBoost.payment_status === 'succeeded' || existingBoost.payment_status === 'migrated_free')) {
+      // Stack: new 30 days starts from existing end date
+      startDate = existingEndDate;
+      endDate = new Date(existingEndDate);
+      endDate.setDate(endDate.getDate() + 30);
+      logStep("Stacking boost from existing end date", { existingEndDate: existingEndDate.toISOString(), newEndDate: endDate.toISOString() });
+    } else {
+      // Expired or not succeeded - start from now
+      endDate.setDate(endDate.getDate() + 30);
+    }
+  } else {
+    // No existing boost - start from now
+    endDate.setDate(endDate.getDate() + 30);
+  }
+
+  const { error: boostError } = await supabase
+    .from("coach_boosts")
+    .upsert({
+      coach_id: coachId,
+      is_active: true,
+      boost_start_date: startDate.toISOString(),
+      boost_end_date: endDate.toISOString(),
+      payment_status: "succeeded",
+      activation_payment_intent_id: transactionId,
+      activated_at: now.toISOString(),
+      updated_at: now.toISOString(),
+    }, { onConflict: "coach_id" });
+
+  if (boostError) {
+    logStep("Error activating boost", { error: boostError.message });
+    return { success: false, error: boostError.message };
+  }
+
+  logStep("Successfully activated boost via IAP", { coachId, startDate: startDate.toISOString(), endDate: endDate.toISOString() });
+  return { success: true, startDate, endDate };
 };
 
 // Extract coach ID from RevenueCat app_user_id
@@ -191,60 +265,20 @@ serve(async (req) => {
     const tier = event.product_id ? productToTier[event.product_id] : null;
 
     switch (event.type) {
-      case "INITIAL_PURCHASE": {
-        logStep("Processing INITIAL_PURCHASE", { coachId, tier, productId: event.product_id, entitlementIds: event.entitlement_ids });
+      case "INITIAL_PURCHASE":
+      case "NON_RENEWING_PURCHASE": {
+        logStep(`Processing ${event.type}`, { coachId, tier, productId: event.product_id, entitlementIds: event.entitlement_ids });
 
         // Check if this is a boost purchase (entitlement-first)
-        if (event.product_id && isBoostProduct(event.product_id, event.entitlement_ids)) {
+        if (isBoostProduct(event.product_id, event.entitlement_ids)) {
           logStep("Processing BOOST purchase", { coachId, productId: event.product_id, entitlementIds: event.entitlement_ids });
-          
-          // Check for existing active boost to stack time
-          const { data: existingBoost } = await supabase
-            .from("coach_boosts")
-            .select("boost_end_date, payment_status")
-            .eq("coach_id", coachId)
-            .maybeSingle();
+          await activateBoost(supabase, coachId!, event);
+          break;
+        }
 
-          const now = new Date();
-          let startDate = now;
-          let endDate = new Date(now);
-
-          // If there's an existing active boost that hasn't expired, stack from its end date
-          if (existingBoost?.boost_end_date) {
-            const existingEndDate = new Date(existingBoost.boost_end_date);
-            if (existingEndDate > now && (existingBoost.payment_status === 'succeeded' || existingBoost.payment_status === 'migrated_free')) {
-              // Stack: new 30 days starts from existing end date
-              startDate = existingEndDate;
-              endDate = new Date(existingEndDate);
-              endDate.setDate(endDate.getDate() + 30);
-              logStep("Stacking boost from existing end date", { existingEndDate: existingEndDate.toISOString(), newEndDate: endDate.toISOString() });
-            } else {
-              // Expired or not succeeded - start from now
-              endDate.setDate(endDate.getDate() + 30);
-            }
-          } else {
-            // No existing boost - start from now
-            endDate.setDate(endDate.getDate() + 30);
-          }
-          
-          const { error: boostError } = await supabase
-            .from("coach_boosts")
-            .upsert({
-              coach_id: coachId,
-              is_active: true,
-              boost_start_date: startDate.toISOString(),
-              boost_end_date: endDate.toISOString(),
-              payment_status: "succeeded",
-              activation_payment_intent_id: `rc_${event.transaction_id || event.original_transaction_id}`,
-              activated_at: now.toISOString(),
-              updated_at: now.toISOString(),
-            }, { onConflict: "coach_id" });
-
-          if (boostError) {
-            logStep("Error activating boost", { error: boostError.message });
-          } else {
-            logStep("Successfully activated boost via IAP", { coachId, startDate: startDate.toISOString(), endDate: endDate.toISOString() });
-          }
+        // Skip tier handling for NON_RENEWING_PURCHASE (non-subscription products)
+        if (event.type === "NON_RENEWING_PURCHASE") {
+          logStep("NON_RENEWING_PURCHASE is not a subscription product", { productId: event.product_id });
           break;
         }
 
