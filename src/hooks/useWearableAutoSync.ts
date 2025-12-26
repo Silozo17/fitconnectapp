@@ -60,11 +60,14 @@ export const useWearableAutoSync = () => {
     
     if (!shouldSync()) return;
     
-    console.log('[useWearableAutoSync] Performing auto-sync...');
+    console.log('[useWearableAutoSync] Performing auto-sync (excluding Apple Health due to Despia limitations)...');
     lastAutoSyncRef.current = new Date();
     
     try {
-      await syncAll();
+      // IMPORTANT: Disable Apple Health from auto-sync due to Despia native bridge limitations
+      // Apple Health sync can fail silently, leaving UI in broken states
+      // Users must manually trigger Apple Health sync via the sync button
+      await syncAll({ includeAppleHealth: false });
       console.log('[useWearableAutoSync] Auto-sync complete');
     } catch (error) {
       console.error('[useWearableAutoSync] Auto-sync failed:', error);

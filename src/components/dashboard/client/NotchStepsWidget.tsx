@@ -7,10 +7,14 @@ const DAILY_STEP_GOAL = 10000;
 
 const NotchStepsWidget = () => {
   const { t } = useTranslation("common");
-  const { getTodayValue, isLoading } = useHealthData();
+  const { getTodayValue, isLoading, data } = useHealthData();
   
   const steps = getTodayValue("steps");
   const progress = Math.min(100, (steps / DAILY_STEP_GOAL) * 100);
+  
+  // Check if we've loaded data at least once (even if empty)
+  // This prevents infinite loading animation when there's no data
+  const hasLoadedOnce = !isLoading && data !== undefined;
   
   // Calculate circumference for circular progress
   const radius = 20;
@@ -55,9 +59,9 @@ const NotchStepsWidget = () => {
       <div className="flex-1 min-w-0">
         <p className={cn(
           "text-lg font-bold text-foreground tabular-nums",
-          isLoading && "animate-pulse"
+          isLoading && !hasLoadedOnce && "animate-pulse"
         )}>
-          {isLoading ? "—" : steps.toLocaleString()}
+          {isLoading && !hasLoadedOnce ? "—" : steps.toLocaleString()}
         </p>
         <p className="text-xs text-muted-foreground">
           {t("stats.stepsToday", "Steps today")}
