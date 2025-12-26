@@ -1,10 +1,19 @@
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { Calendar, Clock } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useCoachDashboardStats } from "@/hooks/useCoachDashboardStats";
+import { useProfilePanel } from "@/contexts/ProfilePanelContext";
 import { cn } from "@/lib/utils";
 
 const NotchNextSession = () => {
+  const navigate = useNavigate();
+  const { close } = useProfilePanel();
+  
+  const handleClick = () => {
+    close();
+    navigate("/dashboard/coach/schedule");
+  };
   const { t } = useTranslation("coach");
   const { data, isLoading } = useCoachDashboardStats();
 
@@ -24,7 +33,7 @@ const NotchNextSession = () => {
 
   if (!nextSession) {
     return (
-      <div className="glass-subtle p-3 rounded-xl">
+      <button onClick={handleClick} className="w-full glass-subtle p-3 rounded-xl text-left hover:bg-accent/10 transition-colors">
         <div className="flex items-center gap-2 mb-1">
           <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
             <Calendar className="w-4 h-4 text-cyan-500" />
@@ -36,12 +45,12 @@ const NotchNextSession = () => {
         <p className="text-sm text-muted-foreground">
           {t("dashboard.noUpcoming", "No sessions scheduled")}
         </p>
-      </div>
+      </button>
     );
   }
 
   return (
-    <div className="glass-subtle p-3 rounded-xl">
+    <button onClick={handleClick} className="w-full glass-subtle p-3 rounded-xl text-left hover:bg-accent/10 transition-colors">
       <div className="flex items-center gap-2 mb-1">
         <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
           <Clock className="w-4 h-4 text-cyan-500" />
@@ -74,7 +83,7 @@ const NotchNextSession = () => {
           {nextSession.type}
         </span>
       </div>
-    </div>
+    </button>
   );
 };
 

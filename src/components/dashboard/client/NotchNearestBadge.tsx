@@ -1,8 +1,10 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { Trophy, Sparkles } from "lucide-react";
 import { useClientBadgesAvailable, useClientBadges, Badge } from "@/hooks/useGamification";
 import { useUserStats } from "@/hooks/useUserStats";
+import { useProfilePanel } from "@/contexts/ProfilePanelContext";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
@@ -80,9 +82,16 @@ const calculateBadgeProgress = (
 
 const NotchNearestBadge = () => {
   const { t } = useTranslation("common");
+  const navigate = useNavigate();
+  const { close } = useProfilePanel();
   const { data: availableBadges, isLoading: availableLoading } = useClientBadgesAvailable();
   const { data: earnedBadges, isLoading: earnedLoading } = useClientBadges();
   const { data: stats, isLoading: statsLoading } = useUserStats();
+
+  const handleClick = () => {
+    close();
+    navigate("/dashboard/client/achievements");
+  };
 
   const isLoading = availableLoading || earnedLoading || statsLoading;
 
@@ -123,7 +132,7 @@ const NotchNearestBadge = () => {
 
   if (!nearestBadge) {
     return (
-      <div className="glass-subtle p-3 rounded-xl">
+      <button onClick={handleClick} className="w-full glass-subtle p-3 rounded-xl text-left hover:bg-accent/10 transition-colors">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
             <Sparkles className="w-5 h-5 text-primary" />
@@ -137,7 +146,7 @@ const NotchNearestBadge = () => {
             </p>
           </div>
         </div>
-      </div>
+      </button>
     );
   }
 
@@ -145,7 +154,7 @@ const NotchNearestBadge = () => {
   const rarityColor = RARITY_COLORS[badge.rarity] || "text-slate-400";
 
   return (
-    <div className="glass-subtle p-3 rounded-xl">
+    <button onClick={handleClick} className="w-full glass-subtle p-3 rounded-xl text-left hover:bg-accent/10 transition-colors">
       <div className="flex items-center gap-3">
         {/* Badge icon */}
         <div className={cn(
@@ -182,7 +191,7 @@ const NotchNearestBadge = () => {
           </p>
         </div>
       </div>
-    </div>
+    </button>
   );
 };
 

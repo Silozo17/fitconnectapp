@@ -1,9 +1,18 @@
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { TrendingUp, TrendingDown, Wallet } from "lucide-react";
 import { useCoachEarnings, useCoachProfile } from "@/hooks/useCoachEarnings";
+import { useProfilePanel } from "@/contexts/ProfilePanelContext";
 import { cn } from "@/lib/utils";
 
 const NotchCoachEarnings = () => {
+  const navigate = useNavigate();
+  const { close } = useProfilePanel();
+  
+  const handleClick = () => {
+    close();
+    navigate("/dashboard/coach/earnings");
+  };
   const { t } = useTranslation("coach");
   const { data: coachProfile } = useCoachProfile();
   const { stats, isLoading } = useCoachEarnings(coachProfile?.id || null, "month");
@@ -28,7 +37,7 @@ const NotchCoachEarnings = () => {
   const isPositive = revenueChange >= 0;
 
   return (
-    <div className="glass-subtle p-3 rounded-xl">
+    <button onClick={handleClick} className="w-full glass-subtle p-3 rounded-xl text-left hover:bg-accent/10 transition-colors">
       <div className="flex items-center gap-2 mb-1">
         <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
           <Wallet className="w-4 h-4 text-primary" />
@@ -60,7 +69,7 @@ const NotchCoachEarnings = () => {
       <p className="text-[10px] text-muted-foreground mt-0.5">
         {t("dashboard.thisMonth", "This month")}
       </p>
-    </div>
+    </button>
   );
 };
 

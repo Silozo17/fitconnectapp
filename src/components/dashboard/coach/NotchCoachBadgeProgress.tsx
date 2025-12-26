@@ -1,7 +1,9 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { Trophy, Sparkles } from "lucide-react";
 import { useCoachBadges, useAvailableCoachBadges, useCoachStats } from "@/hooks/useCoachGamification";
+import { useProfilePanel } from "@/contexts/ProfilePanelContext";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
@@ -71,9 +73,16 @@ const calculateBadgeProgress = (
 
 const NotchCoachBadgeProgress = () => {
   const { t } = useTranslation("coach");
+  const navigate = useNavigate();
+  const { close } = useProfilePanel();
   const { data: earnedBadges, isLoading: earnedLoading } = useCoachBadges();
   const { data: availableBadges, isLoading: availableLoading } = useAvailableCoachBadges();
   const { data: stats, isLoading: statsLoading } = useCoachStats();
+
+  const handleClick = () => {
+    close();
+    navigate("/dashboard/coach/achievements");
+  };
 
   const isLoading = earnedLoading || availableLoading || statsLoading;
 
@@ -114,7 +123,7 @@ const NotchCoachBadgeProgress = () => {
 
   if (!nearestBadge) {
     return (
-      <div className="glass-subtle p-3 rounded-xl">
+      <button onClick={handleClick} className="w-full glass-subtle p-3 rounded-xl text-left hover:bg-accent/10 transition-colors">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
             <Sparkles className="w-5 h-5 text-primary" />
@@ -128,7 +137,7 @@ const NotchCoachBadgeProgress = () => {
             </p>
           </div>
         </div>
-      </div>
+      </button>
     );
   }
 
@@ -137,7 +146,7 @@ const NotchCoachBadgeProgress = () => {
   const rarityBg = RARITY_BG[badge.rarity] || "bg-slate-500/20";
 
   return (
-    <div className="glass-subtle p-3 rounded-xl">
+    <button onClick={handleClick} className="w-full glass-subtle p-3 rounded-xl text-left hover:bg-accent/10 transition-colors">
       <div className="flex items-center gap-3">
         {/* Badge icon */}
         <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", rarityBg)}>
@@ -168,7 +177,7 @@ const NotchCoachBadgeProgress = () => {
           </p>
         </div>
       </div>
-    </div>
+    </button>
   );
 };
 
