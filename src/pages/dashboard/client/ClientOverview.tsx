@@ -263,7 +263,7 @@ const ClientOverview = () => {
             </p>
             <Button variant="lime" size="lg" className="w-full rounded-2xl h-12 text-base" asChild>
               <Link to={coachLinkPrefix}>
-                {t('client.quickActions.findCoaches')}
+                {t('client.cta.findCoach')}
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Link>
             </Button>

@@ -119,7 +119,7 @@ export const BoostToggleCard = () => {
             </div>
             <div className="flex items-center gap-3">
               {isActive && (
-                <Badge className="bg-primary text-primary-foreground animate-pulse">
+                <Badge className="bg-primary text-primary-foreground">
                   <Zap className="h-3 w-3 mr-1" />
                   {t("boostCard.active")}
                 </Badge>
