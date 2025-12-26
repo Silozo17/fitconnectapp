@@ -81,10 +81,10 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
         className={cn(
           "fixed bottom-0 left-0 right-0 z-50",
           "md:hidden", // CSS-based hiding on desktop (≥768px)
-          "px-4 pb-2"
+          "px-5"
         )}
         style={{ 
-          paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom, 0px))',
+          paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))',
           // JS fallback for edge cases where CSS hasn't applied yet
           display: isMobile === false ? 'none' : undefined
         }}
@@ -92,7 +92,7 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
         aria-label={t("bottomNav.mobileNavigation")}
       >
         {/* Enhanced floating pill container with stronger glass effect */}
-        <div className="glass-nav mx-auto max-w-md rounded-3xl border border-border/40 px-2 py-3">
+        <div className="glass-nav mx-auto max-w-md rounded-3xl border border-border/40 px-3 py-4">
           {/* Subtle gradient border on top */}
           <div 
             className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" 
