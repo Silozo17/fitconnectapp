@@ -83,18 +83,25 @@ const productToTier: Record<string, string> = {
   "fitconnect_enterprise_yearly": "enterprise",
 };
 
-// Boost product IDs (one-time purchases)
+// Boost product IDs (non-renewing subs / consumables)
 const boostProductIds = [
-  // iOS
-  "fitconnect.boost",
-  // Android (just the product ID part, before the colon)
+  // iOS - Non-renewing subscription
+  "boost.fitconnect.apple",
+  // Android - Consumable
   "fitconnect.boost.play",
+  // Legacy fallback
+  "fitconnect.boost",
 ];
 
 /**
- * Check if a product ID is a boost product
+ * Check if a product or entitlement is for boost
+ * Entitlement-first: if entitlement_ids includes 'boost', it's a boost purchase
  */
-const isBoostProduct = (productId: string): boolean => {
+const isBoostProduct = (productId: string, entitlementIds?: string[]): boolean => {
+  // Entitlement check takes priority (most reliable)
+  if (entitlementIds?.includes('boost')) {
+    return true;
+  }
   return boostProductIds.some(id => productId.includes(id));
 };
 
@@ -185,22 +192,47 @@ serve(async (req) => {
 
     switch (event.type) {
       case "INITIAL_PURCHASE": {
-        logStep("Processing INITIAL_PURCHASE", { coachId, tier, productId: event.product_id });
+        logStep("Processing INITIAL_PURCHASE", { coachId, tier, productId: event.product_id, entitlementIds: event.entitlement_ids });
 
-        // Check if this is a boost purchase
-        if (event.product_id && isBoostProduct(event.product_id)) {
-          logStep("Processing BOOST purchase", { coachId, productId: event.product_id });
+        // Check if this is a boost purchase (entitlement-first)
+        if (event.product_id && isBoostProduct(event.product_id, event.entitlement_ids)) {
+          logStep("Processing BOOST purchase", { coachId, productId: event.product_id, entitlementIds: event.entitlement_ids });
           
+          // Check for existing active boost to stack time
+          const { data: existingBoost } = await supabase
+            .from("coach_boosts")
+            .select("boost_end_date, payment_status")
+            .eq("coach_id", coachId)
+            .maybeSingle();
+
           const now = new Date();
-          const endDate = new Date(now);
-          endDate.setDate(endDate.getDate() + 30); // 30-day boost
+          let startDate = now;
+          let endDate = new Date(now);
+
+          // If there's an existing active boost that hasn't expired, stack from its end date
+          if (existingBoost?.boost_end_date) {
+            const existingEndDate = new Date(existingBoost.boost_end_date);
+            if (existingEndDate > now && (existingBoost.payment_status === 'succeeded' || existingBoost.payment_status === 'migrated_free')) {
+              // Stack: new 30 days starts from existing end date
+              startDate = existingEndDate;
+              endDate = new Date(existingEndDate);
+              endDate.setDate(endDate.getDate() + 30);
+              logStep("Stacking boost from existing end date", { existingEndDate: existingEndDate.toISOString(), newEndDate: endDate.toISOString() });
+            } else {
+              // Expired or not succeeded - start from now
+              endDate.setDate(endDate.getDate() + 30);
+            }
+          } else {
+            // No existing boost - start from now
+            endDate.setDate(endDate.getDate() + 30);
+          }
           
           const { error: boostError } = await supabase
             .from("coach_boosts")
             .upsert({
               coach_id: coachId,
               is_active: true,
-              boost_start_date: now.toISOString(),
+              boost_start_date: startDate.toISOString(),
               boost_end_date: endDate.toISOString(),
               payment_status: "succeeded",
               activation_payment_intent_id: `rc_${event.transaction_id || event.original_transaction_id}`,
@@ -211,7 +243,7 @@ serve(async (req) => {
           if (boostError) {
             logStep("Error activating boost", { error: boostError.message });
           } else {
-            logStep("Successfully activated boost via IAP", { coachId, endDate: endDate.toISOString() });
+            logStep("Successfully activated boost via IAP", { coachId, startDate: startDate.toISOString(), endDate: endDate.toISOString() });
           }
           break;
         }

@@ -360,23 +360,48 @@ serve(async (req) => {
             console.log("Content purchase marked as completed");
           }
         } else if (metadata.type === "boost_activation") {
-          // Handle Boost activation payment
+          // Handle Boost activation payment with stacking support
           const coachId = metadata.coach_id;
           const durationDays = parseInt(metadata.duration_days || "30");
           const pricePaid = parseInt(metadata.price_paid || "500");
 
           console.log("Boost activation payment completed:", { coachId, durationDays, pricePaid });
 
+          // Check for existing active boost to stack time
+          const { data: existingBoost } = await supabase
+            .from("coach_boosts")
+            .select("boost_end_date, payment_status")
+            .eq("coach_id", coachId)
+            .maybeSingle();
+
           const now = new Date();
-          const endDate = new Date(now);
-          endDate.setDate(endDate.getDate() + durationDays);
+          let startDate = now;
+          let endDate = new Date(now);
+
+          // If there's an existing active boost that hasn't expired, stack from its end date
+          if (existingBoost?.boost_end_date) {
+            const existingEndDate = new Date(existingBoost.boost_end_date);
+            if (existingEndDate > now && (existingBoost.payment_status === 'succeeded' || existingBoost.payment_status === 'migrated_free')) {
+              // Stack: new period starts from existing end date
+              startDate = existingEndDate;
+              endDate = new Date(existingEndDate);
+              endDate.setDate(endDate.getDate() + durationDays);
+              console.log("Stacking boost from existing end date:", { existingEndDate: existingEndDate.toISOString(), newEndDate: endDate.toISOString() });
+            } else {
+              // Expired or not succeeded - start from now
+              endDate.setDate(endDate.getDate() + durationDays);
+            }
+          } else {
+            // No existing boost - start from now
+            endDate.setDate(endDate.getDate() + durationDays);
+          }
 
           // Update coach_boosts with activation details
           const { error: boostError } = await supabase
             .from("coach_boosts")
             .update({
               is_active: true,
-              boost_start_date: now.toISOString(),
+              boost_start_date: startDate.toISOString(),
               boost_end_date: endDate.toISOString(),
               payment_status: "succeeded",
               activation_payment_intent_id: session.payment_intent as string,

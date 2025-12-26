@@ -71,11 +71,12 @@ serve(async (req) => {
       .eq("coach_id", coachProfile.id)
       .maybeSingle();
 
-    // Check if boost is still active (end date in the future)
+    // Check if boost is still active - allow purchase for stacking (early renewal)
     if (existingBoost?.boost_end_date) {
       const endDate = new Date(existingBoost.boost_end_date);
       if (endDate > new Date() && (existingBoost.payment_status === "succeeded" || existingBoost.payment_status === "migrated_free")) {
-        throw new Error("You already have an active Boost. It expires on " + endDate.toLocaleDateString());
+        // Allow early renewal - time will stack from existing end date
+        logStep("Active boost found - will stack new period from end date", { currentEndDate: endDate.toISOString() });
       }
     }
 
