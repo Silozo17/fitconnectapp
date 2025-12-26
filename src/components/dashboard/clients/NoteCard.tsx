@@ -31,7 +31,7 @@ export function NoteCard({ note, onEdit, onDelete }: NoteCardProps) {
   const config = categoryConfig[note.category];
 
   return (
-    <Card className={`bg-card border-border ${note.isPinned ? 'border-primary/50 bg-primary/5' : ''}`}>
+    <Card className={`glass-card ${note.isPinned ? 'border-primary/50' : ''}`}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">
