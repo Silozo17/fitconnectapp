@@ -17,7 +17,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         <AdminSidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
         <div className="flex-1 flex flex-col xl:ml-64 min-w-0 overflow-hidden">
           <AdminHeader onMenuToggle={() => setMobileOpen(true)} />
-          <main className="flex-1 p-4 lg:p-6 pb-24 overflow-x-hidden overflow-y-auto">
+          <main className="flex-1 p-4 lg:p-6 pb-24 overflow-x-hidden overflow-y-auto mt-header-safe xl:mt-0">
             {children}
           </main>
         </div>

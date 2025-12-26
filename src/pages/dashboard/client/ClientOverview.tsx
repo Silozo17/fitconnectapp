@@ -244,7 +244,7 @@ const ClientOverview = () => {
       </div>
 
       {/* CTA Section - Find a Coach */}
-      {!isLoading && (stats?.coachCount || 0) === 0 && (
+      {!isLoading && (
         <Card variant="floating" className="relative overflow-hidden rounded-3xl">
           {/* Background gradient */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-transparent to-accent/15 pointer-events-none" />
@@ -263,7 +263,7 @@ const ClientOverview = () => {
             </p>
             <Button variant="lime" size="lg" className="w-full rounded-2xl h-12 text-base" asChild>
               <Link to={coachLinkPrefix}>
-                {t('client.cta.findCoach')}
+                {t('client.quickActions.findCoaches')}
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Link>
             </Button>
