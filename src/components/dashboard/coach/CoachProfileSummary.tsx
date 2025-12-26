@@ -47,12 +47,17 @@ const CoachProfileSummary = () => {
   // Tier styling
   const getTierStyle = () => {
     switch (subscriptionTier) {
+      case "founder":
+        return "border-amber-500/50 text-amber-500 bg-amber-500/10"; // Gold
       case "enterprise":
-        return "border-yellow-500/50 text-yellow-500 bg-yellow-500/10";
+        return "border-purple-500/50 text-purple-500 bg-purple-500/10"; // Purple
       case "pro":
-        return "border-primary/50 text-primary bg-primary/10";
+        return "border-green-500/50 text-green-500 bg-green-500/10"; // Green
+      case "starter":
+        return "border-blue-500/50 text-blue-500 bg-blue-500/10"; // Blue
+      case "free":
       default:
-        return "border-border/50 text-muted-foreground bg-muted/50";
+        return "border-gray-500/50 text-gray-400 bg-gray-500/10"; // Grey
     }
   };
 
