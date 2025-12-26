@@ -79,14 +79,14 @@ const ProfilePanel = ({ children, headerHeight = 64 }: ProfilePanelProps) => {
         className={cn(
           // Positioning - below backdrop but above content
           "fixed left-0 right-0 z-[45]",
-          // Height - exactly 70vh
-          "h-[70vh]",
+          // Height - exactly 65vh
+          "h-[65vh]",
           // Glass styling
           "glass-floating",
           // Border adjustments
           "rounded-t-none border-t-0",
-          // Animation - GPU accelerated with specific properties only
-          "transition-[transform,opacity] duration-300 ease-out",
+          // Animation - GPU accelerated with iOS-like spring easing
+          "transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]",
           isOpen 
             ? "opacity-100" 
             : "opacity-0 pointer-events-none"
@@ -94,7 +94,9 @@ const ProfilePanel = ({ children, headerHeight = 64 }: ProfilePanelProps) => {
         style={{ 
           top: headerHeight,
           willChange: 'transform, opacity',
-          transform: isOpen ? 'translateY(0) translateZ(0)' : 'translateY(-100%) translateZ(0)',
+          transform: isOpen 
+            ? 'translateY(0) scale(1) translateZ(0)' 
+            : 'translateY(-100%) scale(0.98) translateZ(0)',
         }}
         role="dialog"
         aria-modal="true"
