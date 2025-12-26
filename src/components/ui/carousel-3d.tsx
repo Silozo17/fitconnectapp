@@ -32,6 +32,7 @@ export function Carousel3D({
   const [scrollProgress, setScrollProgress] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [slidesCount, setSlidesCount] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
   const onScroll = useCallback(() => {
     if (!emblaApi) return;
@@ -54,14 +55,26 @@ export function Carousel3D({
     emblaApi.on("reInit", onScroll);
     emblaApi.on("select", () => setSelectedIndex(emblaApi.selectedScrollSnap()));
     
+    // Drag state detection for smoother transitions
+    const onPointerDown = () => setIsDragging(true);
+    const onPointerUp = () => setIsDragging(false);
+    const onSettle = () => setIsDragging(false);
+    
+    emblaApi.on("pointerDown", onPointerDown);
+    emblaApi.on("pointerUp", onPointerUp);
+    emblaApi.on("settle", onSettle);
+    
     return () => {
       emblaApi.off("scroll", onScroll);
       emblaApi.off("reInit", onScroll);
+      emblaApi.off("pointerDown", onPointerDown);
+      emblaApi.off("pointerUp", onPointerUp);
+      emblaApi.off("settle", onSettle);
     };
   }, [emblaApi, onScroll]);
 
   // Calculate 3D transform for each slide based on its position relative to scroll
-  const getSlideStyle = (index: number) => {
+  const getSlideStyle = (index: number): React.CSSProperties => {
     if (!emblaApi) return {};
     
     const snapList = emblaApi.scrollSnapList();
@@ -85,8 +98,14 @@ export function Carousel3D({
       transform: `perspective(1000px) rotateY(${rotateY}deg) translateZ(${translateZ}px) scale(${scale})`,
       opacity: Math.max(0.4, opacity),
       zIndex: 10 - Math.round(absDistance),
-      transition: "transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.25s ease-out",
+      // Only apply transition when not dragging to prevent flicker
+      transition: isDragging 
+        ? 'none' 
+        : "transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.25s ease-out",
       willChange: "transform, opacity",
+      // Hardware acceleration to prevent flicker
+      backfaceVisibility: 'hidden',
+      WebkitBackfaceVisibility: 'hidden',
     };
   };
 
@@ -103,7 +122,12 @@ export function Carousel3D({
         >
           <div 
             className="flex items-center pt-4 pb-8"
-            style={{ gap: `${gap}px`, paddingLeft: "20px", paddingRight: "20px" }}
+            style={{ 
+              gap: `${gap}px`, 
+              paddingLeft: "20px", 
+              paddingRight: "20px",
+              transform: 'translateZ(0)', // Create compositing layer
+            }}
           >
             {childArray.map((child, index) => {
               if (!isValidElement(child)) return null;
@@ -115,6 +139,7 @@ export function Carousel3D({
                   style={{
                     ...getSlideStyle(index),
                     transformStyle: "preserve-3d",
+                    contain: 'layout style paint', // Isolate repaints
                   }}
                 >
                   {cloneElement(child as React.ReactElement<any>)}
