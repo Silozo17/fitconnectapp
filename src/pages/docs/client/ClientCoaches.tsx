@@ -188,6 +188,12 @@ export default function ClientCoaches() {
           Many coaches offer free initial consultations. Look for "Free Consultation" in their 
           services to try them out before committing.
         </DocTip>
+
+        <DocTip type="warning" title="📱 iOS App Note">
+          Some paid digital products (e-books, training programmes) may not be visible when 
+          browsing on the iOS app due to App Store policies. To see all available products, 
+          visit the coach's profile on web or Android.
+        </DocTip>
       </section>
 
       {/* Tips for Choosing */}
@@ -219,6 +225,14 @@ export default function ClientCoaches() {
             </p>
           </div>
         </div>
+      </section>
+
+      {/* Changelog */}
+      <section className="mt-16 pt-8 border-t border-border">
+        <h2 className="text-lg font-semibold mb-4 text-muted-foreground">Changelog</h2>
+        <ul className="text-sm text-muted-foreground space-y-2">
+          <li><strong>26 December 2024:</strong> Added iOS app note about paid digital product visibility limitations.</li>
+        </ul>
       </section>
     </DocsLayout>
   );

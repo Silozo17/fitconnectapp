@@ -53,8 +53,19 @@ export default function ClientSettingsDocs() {
         </p>
 
         <DocStep number={1} title="Supported Devices">
-          We support Apple Health, Google Fit, Fitbit, and Garmin devices.
+          We support the following health platforms:
         </DocStep>
+        <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-4 mb-4">
+          <li><strong>Apple Health (iOS):</strong> Available on iPhone via the native app</li>
+          <li><strong>Health Connect (Android):</strong> Available on Android via the native app</li>
+          <li><strong>Fitbit:</strong> Connect via the web or any platform</li>
+          <li><strong>Garmin:</strong> Coming soon</li>
+        </ul>
+
+        <DocTip type="info" title="Platform-Specific Integrations">
+          Apple Health is only available on iOS devices, and Health Connect is only available 
+          on Android devices. Install the FitConnect app on your device to access these integrations.
+        </DocTip>
 
         <DocStep number={2} title="Connect a Device">
           Go to <strong>Settings → Integrations</strong> and click <strong>Connect</strong> 
@@ -127,6 +138,14 @@ export default function ClientSettingsDocs() {
           If you suspect unauthorized access to your account, change your password 
           immediately and contact support.
         </DocTip>
+      </section>
+
+      {/* Changelog */}
+      <section className="mt-16 pt-8 border-t border-border">
+        <h2 className="text-lg font-semibold mb-4 text-muted-foreground">Changelog</h2>
+        <ul className="text-sm text-muted-foreground space-y-2">
+          <li><strong>26 December 2024:</strong> Updated wearable integrations to clarify Apple Health (iOS only) and Health Connect (Android only) platform requirements.</li>
+        </ul>
       </section>
     </DocsLayout>
   );

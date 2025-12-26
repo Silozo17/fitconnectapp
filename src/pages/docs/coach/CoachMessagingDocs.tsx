@@ -70,6 +70,13 @@ export default function CoachMessagingDocs() {
           Quick actions save time and ensure clients receive consistent, 
           professional-looking information.
         </DocTip>
+
+        <DocTip type="warning" title="📱 iOS App Limitations">
+          Due to Apple App Store policies, payment-related quick actions (payment requests, 
+          paid product links, package offers) are hidden when using the iOS app. Clients on 
+          iOS will need to complete purchases via the web. Consider directing iOS clients to 
+          your web profile for paid services.
+        </DocTip>
       </section>
 
       <section className="space-y-6 mt-12">
@@ -130,6 +137,14 @@ export default function CoachMessagingDocs() {
           Avoid sharing sensitive health advice via messaging. For medical concerns, 
           always recommend clients consult healthcare professionals.
         </DocTip>
+      </section>
+
+      {/* Changelog */}
+      <section className="mt-16 pt-8 border-t border-border">
+        <h2 className="text-lg font-semibold mb-4 text-muted-foreground">Changelog</h2>
+        <ul className="text-sm text-muted-foreground space-y-2">
+          <li><strong>26 December 2024:</strong> Added iOS app limitations note for payment-related quick actions.</li>
+        </ul>
       </section>
     </DocsLayout>
   );

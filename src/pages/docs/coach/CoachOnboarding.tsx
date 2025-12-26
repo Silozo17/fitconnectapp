@@ -276,6 +276,12 @@ export default function CoachOnboarding() {
           Start with the Free plan to test the platform, then upgrade as you grow. 
           You can change plans anytime from your settings.
         </DocTip>
+
+        <DocTip type="info" title="📱 Subscribing on Mobile">
+          If you're using the iOS or Android app, plan purchases use in-app purchases 
+          (Apple App Store or Google Play) instead of card payments. Prices shown are 
+          platform-specific and managed through your device's app store account.
+        </DocTip>
       </section>
 
       {/* Next Steps */}
@@ -291,6 +297,14 @@ export default function CoachOnboarding() {
           <li><strong>Set up message templates</strong> for common responses</li>
           <li><strong>Build workout and nutrition templates</strong> you can quickly assign to clients</li>
         </ol>
+      </section>
+
+      {/* Changelog */}
+      <section className="mt-16 pt-8 border-t border-border">
+        <h2 className="text-lg font-semibold mb-4 text-muted-foreground">Changelog</h2>
+        <ul className="text-sm text-muted-foreground space-y-2">
+          <li><strong>26 December 2024:</strong> Added mobile in-app purchase note for Step 9 (plan selection).</li>
+        </ul>
       </section>
     </DocsLayout>
   );
