@@ -73,39 +73,27 @@ export function Carousel3D({
     };
   }, [emblaApi, onScroll]);
 
-  // Calculate 3D transform for each slide based on its position relative to scroll
+  // Simplified 2.5D effect using only scale and opacity - no 3D transforms
   const getSlideStyle = (index: number): React.CSSProperties => {
     if (!emblaApi) return {};
     
     const snapList = emblaApi.scrollSnapList();
     const scrollSnap = snapList[index] || 0;
     
-    // Distance from current scroll position (-1 to 1 range for adjacent slides)
+    // Distance from current scroll position
     const distance = (scrollSnap - scrollProgress) * snapList.length;
     const absDistance = Math.abs(distance);
-    
-    // Clamp values for smooth transitions
-    const clampedDistance = Math.max(-2, Math.min(2, distance));
     const clampedAbsDistance = Math.min(2, absDistance);
     
-    // 3D transforms
-    const rotateY = clampedDistance * -25; // Rotate cards on Y axis
-    const translateZ = clampedAbsDistance * -60; // Push away from viewer
-    const scale = 1 - clampedAbsDistance * 0.12; // Scale down distant cards
-    const opacity = 1 - clampedAbsDistance * 0.25; // Fade distant cards
+    // Simple 2.5D effect - only scale and opacity (no rotateY, translateZ)
+    const scale = 1 - clampedAbsDistance * 0.08; // Subtle scale: 1 → 0.92 → 0.84
+    const opacity = 1 - clampedAbsDistance * 0.25; // Fade: 1 → 0.75 → 0.5
     
     return {
-      transform: `perspective(1000px) rotateY(${rotateY}deg) translateZ(${translateZ}px) scale(${scale})`,
-      opacity: Math.max(0.4, opacity),
+      transform: `scale(${scale})`,
+      opacity: Math.max(0.5, opacity),
       zIndex: 10 - Math.round(absDistance),
-      // Only apply transition when not dragging to prevent flicker
-      transition: isDragging 
-        ? 'none' 
-        : "transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.25s ease-out",
-      willChange: "transform, opacity",
-      // Hardware acceleration to prevent flicker
-      backfaceVisibility: 'hidden',
-      WebkitBackfaceVisibility: 'hidden',
+      transition: isDragging ? 'none' : 'transform 0.2s ease-out, opacity 0.2s ease-out',
     };
   };
 
@@ -118,7 +106,6 @@ export function Carousel3D({
         <div 
           ref={emblaRef} 
           className="overflow-x-clip"
-          style={{ perspective: "1000px" }}
         >
           <div 
             className="flex items-center pt-4 pb-8"
@@ -126,7 +113,6 @@ export function Carousel3D({
               gap: `${gap}px`, 
               paddingLeft: "20px", 
               paddingRight: "20px",
-              transform: 'translateZ(0)', // Create compositing layer
             }}
           >
             {childArray.map((child, index) => {
@@ -136,11 +122,7 @@ export function Carousel3D({
                 <div
                   key={index}
                   className="flex-shrink-0"
-                  style={{
-                    ...getSlideStyle(index),
-                    transformStyle: "preserve-3d",
-                    contain: 'layout style paint', // Isolate repaints
-                  }}
+                  style={getSlideStyle(index)}
                 >
                   {cloneElement(child as React.ReactElement<any>)}
                 </div>
@@ -150,7 +132,7 @@ export function Carousel3D({
         </div>
       </div>
 
-      {/* Pagination dots - outside overflow clip */}
+      {/* Pagination dots */}
       {showPagination && slidesCount > 1 && (
         <div className="flex justify-center items-center gap-1.5 mt-4">
           {Array.from({ length: slidesCount }).map((_, index) => (
