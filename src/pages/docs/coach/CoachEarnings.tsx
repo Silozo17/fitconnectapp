@@ -261,6 +261,51 @@ export default function CoachEarnings() {
           </div>
         </div>
       </section>
+
+      {/* Subscribing on Mobile */}
+      <section className="mb-12">
+        <h2 className="text-2xl font-semibold mb-4">Subscribing on Mobile (iOS & Android)</h2>
+        <p className="text-muted-foreground mb-4">
+          FitConnect is available as a native mobile app on iOS (App Store) and Android (Google Play). 
+          If you subscribe to a coach plan through the mobile app, the payment process differs from web:
+        </p>
+
+        <h3 className="text-lg font-medium mt-6 mb-3">How Mobile Subscriptions Work</h3>
+        <ul className="list-disc list-inside space-y-2 text-muted-foreground mb-6">
+          <li><strong>iOS:</strong> Subscriptions are processed through Apple's App Store using In-App Purchase (StoreKit)</li>
+          <li><strong>Android:</strong> Subscriptions are processed through Google Play Billing</li>
+          <li><strong>Web:</strong> Subscriptions are processed through Stripe</li>
+        </ul>
+
+        <h3 className="text-lg font-medium mt-6 mb-3">Key Differences</h3>
+        <ul className="list-disc list-inside space-y-2 text-muted-foreground mb-6">
+          <li>Mobile subscriptions are managed by Apple/Google, not Stripe</li>
+          <li>Renewal and cancellation happen through your device's subscription settings</li>
+          <li>Pricing may vary slightly due to app store currency conversion</li>
+          <li>Your subscription tier syncs automatically across all platforms</li>
+        </ul>
+
+        <DocTip type="info">
+          To manage a subscription purchased on iOS, go to Settings → Apple ID → Subscriptions on your iPhone. 
+          For Android, go to Google Play Store → Menu → Subscriptions.
+        </DocTip>
+
+        <h3 className="text-lg font-medium mt-6 mb-3">Known Limitations</h3>
+        <div className="p-4 rounded-lg border border-amber-500/30 bg-amber-500/10 mb-4">
+          <p className="text-sm text-muted-foreground">
+            <strong>Cross-platform billing:</strong> If you subscribed on mobile, you cannot switch to 
+            Stripe billing without first cancelling your App Store/Play Store subscription at the end 
+            of the billing period.
+          </p>
+        </div>
+      </section>
+
+      {/* Changelog */}
+      <section className="pt-8 border-t border-border">
+        <p className="text-xs text-muted-foreground">
+          <strong>Last updated:</strong> 26 December 2024 — Added "Subscribing on Mobile" section covering iOS/Android In-App Purchase flows.
+        </p>
+      </section>
     </DocsLayout>
   );
 }

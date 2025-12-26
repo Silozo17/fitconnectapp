@@ -41,7 +41,37 @@ export default function CoachProductsDocs() {
         <DocStep stepNumber={3} title="Upload content">Add your files, set price, and write a description.</DocStep>
         <DocStep stepNumber={4} title="Publish">Enable "Published" to list on the marketplace.</DocStep>
       </section>
+
+      {/* iOS App Store Limitations */}
+      <section className="mb-10">
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-amber-600">
+          ⚠️ iOS App Store Limitations
+        </h2>
+        <div className="p-4 rounded-lg border border-amber-500/30 bg-amber-500/10 mb-4">
+          <p className="text-muted-foreground mb-3">
+            Due to Apple App Store policies, <strong>paid digital products</strong> (e-books, video courses, templates, bundles) 
+            are <strong>not visible or purchasable</strong> on the iOS app.
+          </p>
+          <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+            <li>Clients using iOS will not see your paid digital products in the marketplace</li>
+            <li>Paid product purchase buttons are hidden on iOS</li>
+            <li>Free digital products remain visible and accessible on all platforms</li>
+          </ul>
+        </div>
+        <p className="text-muted-foreground">
+          <strong>Recommendation:</strong> Direct iOS clients to the web version at{" "}
+          <span className="font-mono text-sm">getfitconnect.co.uk</span> to browse and purchase your paid digital products.
+        </p>
+      </section>
+
       <DocTip>Create bundles to offer multiple products at a discount and increase average order value.</DocTip>
+
+      {/* Changelog */}
+      <section className="pt-8 border-t border-border mt-10">
+        <p className="text-xs text-muted-foreground">
+          <strong>Last updated:</strong> 26 December 2024 — Added iOS App Store limitations section.
+        </p>
+      </section>
     </DocsLayout>
   );
 }
