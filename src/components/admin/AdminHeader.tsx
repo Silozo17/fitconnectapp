@@ -57,20 +57,16 @@ const AdminHeader = ({ onMenuToggle }: AdminHeaderProps) => {
 
       {/* Right side */}
       <div className="flex items-center gap-2 sm:gap-4">
-        {/* View Switcher - Desktop only */}
-        <div className="hidden xl:block">
-          <ViewSwitcher />
-        </div>
+        {/* View Switcher - Always visible */}
+        <ViewSwitcher />
         
         {/* Feedback - Desktop only */}
         <div className="hidden xl:block">
           <FeedbackModal />
         </div>
         
-        {/* Notifications - Desktop only */}
-        <div className="hidden xl:block">
-          <NotificationCenter />
-        </div>
+        {/* Notifications - Always visible */}
+        <NotificationCenter />
 
         {/* Profile Dropdown - Hidden on mobile */}
         <div className="hidden xl:block">
