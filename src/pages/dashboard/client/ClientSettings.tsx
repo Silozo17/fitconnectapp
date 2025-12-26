@@ -513,6 +513,25 @@ const ClientSettings = () => {
                   onUpdate={(field, value) => updateField(field as keyof ClientProfile, value)}
                 />
 
+                {/* Reset Discovery */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>{t('preferences.discovery.title')}</CardTitle>
+                    <CardDescription>{t('preferences.discovery.description')}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        localStorage.removeItem('fitconnect_discover_seen_client');
+                        toast.success(t('preferences.discovery.resetSuccess'));
+                      }}
+                    >
+                      {t('preferences.discovery.reset')}
+                    </Button>
+                  </CardContent>
+                </Card>
+
                 <div className="flex justify-end">
                   <Button 
                     onClick={handleSave} 

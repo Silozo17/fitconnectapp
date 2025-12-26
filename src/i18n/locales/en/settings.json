@@ -137,6 +137,12 @@
       "reducedMotionTitle": "Reduced Motion Enabled",
       "reducedMotionNotice": "Your system prefers reduced motion. Animations are automatically disabled for accessibility.",
       "accessibilityNote": "Animations respect your system accessibility settings automatically."
+    },
+    "discovery": {
+      "title": "Discovery Tour",
+      "description": "Reset the welcome tour to see the platform introduction again",
+      "reset": "Reset Discovery Tour",
+      "resetSuccess": "Discovery tour has been reset. You'll see it on your next visit."
     }
   },
 
