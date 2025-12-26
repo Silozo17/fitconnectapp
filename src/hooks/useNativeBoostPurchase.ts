@@ -40,6 +40,7 @@ interface UseNativeBoostPurchaseReturn {
   isAvailable: boolean;
   dismissUnsuccessfulModal: () => void;
   resetState: () => void;
+  reconcileBoostEntitlement: () => Promise<boolean>;
 }
 
 const POLL_INTERVAL_MS = 2000;
@@ -93,31 +94,6 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
   }, []);
 
   /**
-   * Safety reset on app resume/foreground
-   * Clears stuck purchasing state if no polling is active
-   */
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        // Give callbacks 2 seconds to fire if there's a pending response
-        setTimeout(() => {
-          setState(prev => {
-            // Only reset if stuck in purchasing (not polling, not pending)
-            if (prev.purchaseStatus === 'purchasing' && !prev.isPolling) {
-              console.log('[NativeBoostIAP] Safety reset on app resume - stuck in purchasing state');
-              return { ...prev, purchaseStatus: 'idle' };
-            }
-            return prev;
-          });
-        }, 2000);
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, []);
-
-  /**
    * Trigger celebration effects
    */
   const triggerCelebration = useCallback(() => {
@@ -132,6 +108,85 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
       colors: ['#22c55e', '#10b981', '#059669', '#16a34a'],
     });
   }, []);
+
+  /**
+   * Reconcile boost entitlement - check RevenueCat for active entitlement
+   * and activate boost in DB if entitlement exists but DB is stuck
+   */
+  const reconcileBoostEntitlement = useCallback(async (): Promise<boolean> => {
+    if (!coachProfileId || !user) {
+      return false;
+    }
+
+    // Skip if recently attempted (prevents rapid-fire calls)
+    if (reconciliationAttemptedRef.current) {
+      console.log('[NativeBoostIAP] Skipping reconciliation - already attempted recently');
+      return false;
+    }
+
+    reconciliationAttemptedRef.current = true;
+    console.log('[NativeBoostIAP] Checking for boost entitlement reconciliation...');
+
+    try {
+      const { data, error } = await supabase.functions.invoke('verify-boost-entitlement');
+      
+      if (error) {
+        console.error('[NativeBoostIAP] Reconciliation check failed:', error);
+        return false;
+      }
+
+      if (data?.reconciled) {
+        console.log('[NativeBoostIAP] Boost reconciled from entitlement!', data);
+        
+        // Invalidate queries to refresh boost data
+        queryClient.invalidateQueries({ queryKey: ['coach-boost-status'] });
+        queryClient.invalidateQueries({ queryKey: ['boost-attributions'] });
+        
+        // Trigger celebration
+        triggerCelebration();
+        toast.success('Boost activated!', {
+          description: 'Your boost has been successfully activated.',
+        });
+        return true;
+      } else {
+        console.log('[NativeBoostIAP] No reconciliation needed:', data?.status);
+        return false;
+      }
+    } catch (e) {
+      console.error('[NativeBoostIAP] Reconciliation check exception:', e);
+      return false;
+    }
+  }, [coachProfileId, user, queryClient, triggerCelebration]);
+
+  /**
+   * Foreground/resume reconciliation + safety reset
+   * Triggers boost entitlement check when app returns to foreground
+   */
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('[NativeBoostIAP] App resumed - checking boost entitlement');
+        
+        // Reset reconciliation flag to allow re-check on resume
+        reconciliationAttemptedRef.current = false;
+        reconcileBoostEntitlement();
+        
+        // Safety reset for stuck purchasing state after delay
+        setTimeout(() => {
+          setState(prev => {
+            if (prev.purchaseStatus === 'purchasing' && !prev.isPolling) {
+              console.log('[NativeBoostIAP] Safety reset on app resume - stuck in purchasing state');
+              return { ...prev, purchaseStatus: 'idle' };
+            }
+            return prev;
+          });
+        }, 2000);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [reconcileBoostEntitlement]);
 
   /**
    * Poll the backend to check if boost has been activated via webhook
@@ -185,6 +240,11 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
         if (pollIntervalRef.current) {
           clearInterval(pollIntervalRef.current);
         }
+        
+        // Force reconciliation to ensure DB state is correct
+        reconciliationAttemptedRef.current = false;
+        await reconcileBoostEntitlement();
+        
         setState(prev => ({
           ...prev,
           isPolling: false,
@@ -214,13 +274,17 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
           purchaseStatus: 'idle',
         }));
 
-        // Still show success - payment was successful, webhook might be slow
-        triggerCelebration();
-        toast.success('Boost purchase successful!', {
-          description: 'Your boost will be active momentarily.',
+        // Try reconciliation as last resort - this calls verify-boost-entitlement
+        toast.info('Verifying your boost...', {
+          description: 'If your boost doesn\'t activate shortly, please try refreshing.',
         });
+        
+        // Reset reconciliation flag and force re-check
+        reconciliationAttemptedRef.current = false;
+        await reconcileBoostEntitlement();
 
         queryClient.invalidateQueries({ queryKey: ['coach-boost-status'] });
+        queryClient.invalidateQueries({ queryKey: ['boost-attributions'] });
       }
     }, POLL_INTERVAL_MS);
   }, [pollBoostStatus, queryClient, triggerCelebration]);
@@ -329,46 +393,6 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
     };
   }, [state.isAvailable, handleIAPSuccess, handleIAPError, handleIAPCancel, handleIAPPending]);
 
-  /**
-   * Reconcile boost entitlement - check RevenueCat for active entitlement
-   * and activate boost in DB if entitlement exists but DB is stuck
-   */
-  const reconcileBoostEntitlement = useCallback(async () => {
-    if (!coachProfileId || !user || reconciliationAttemptedRef.current) {
-      return;
-    }
-
-    reconciliationAttemptedRef.current = true;
-    console.log('[NativeBoostIAP] Checking for boost entitlement reconciliation...');
-
-    try {
-      const { data, error } = await supabase.functions.invoke('verify-boost-entitlement');
-      
-      if (error) {
-        console.error('[NativeBoostIAP] Reconciliation check failed:', error);
-        return;
-      }
-
-      if (data?.reconciled) {
-        console.log('[NativeBoostIAP] Boost reconciled from entitlement!', data);
-        
-        // Invalidate queries to refresh boost data
-        queryClient.invalidateQueries({ queryKey: ['coach-boost-status'] });
-        queryClient.invalidateQueries({ queryKey: ['boost-attributions'] });
-        
-        // Trigger celebration
-        triggerCelebration();
-        toast.success('Boost activated!', {
-          description: 'Your boost has been successfully activated.',
-        });
-      } else {
-        console.log('[NativeBoostIAP] No reconciliation needed:', data?.status);
-      }
-    } catch (e) {
-      console.error('[NativeBoostIAP] Reconciliation check exception:', e);
-    }
-  }, [coachProfileId, user, queryClient, triggerCelebration]);
-
   // Auto-reconcile on mount when native IAP is available
   // This catches cases where RevenueCat webhook succeeded but DB update failed
   useEffect(() => {
@@ -471,6 +495,7 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
     isAvailable: state.isAvailable,
     dismissUnsuccessfulModal,
     resetState,
+    reconcileBoostEntitlement,
   };
 };
 
