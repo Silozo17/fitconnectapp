@@ -1,7 +1,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import bgHorizontal from "@/assets/bg-horizontal.svg";
-import bgVertical from "@/assets/bg-vertical.svg";
+import bgVertical from "@/assets/portrait_bg.svg";
 
 interface PlatformBackgroundProps {
   className?: string;
