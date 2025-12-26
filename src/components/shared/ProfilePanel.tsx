@@ -103,7 +103,7 @@ const ProfilePanel = ({ children, headerHeight = 64 }: ProfilePanelProps) => {
         {/* Content area - hidden when panel is closed */}
         <div 
           className={cn(
-            "h-full overflow-hidden px-4 pt-4 pb-12",
+            "h-full overflow-hidden px-4 pt-4 pb-20",
             !isOpen && "invisible"
           )}
           aria-hidden={!isOpen}
