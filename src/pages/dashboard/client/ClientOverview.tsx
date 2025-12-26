@@ -5,7 +5,7 @@ import { useCoachLinkPrefix } from "@/hooks/useCoachLinkPrefix";
 import { useClientDashboardStats } from "@/hooks/useClientDashboardStats";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
-import { BMIWidget } from "@/components/dashboard/client/BMIWidget";
+
 import UserConnectionRequests from "@/components/dashboard/client/UserConnectionRequests";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -155,9 +155,6 @@ const ClientOverview = () => {
       <Suspense fallback={<HealthWidgetSkeleton />}>
         <HealthDataWidget compact className="mb-6" />
       </Suspense>
-
-      {/* BMI Widget */}
-      <BMIWidget />
 
       {/* Friend Requests */}
       <UserConnectionRequests />
