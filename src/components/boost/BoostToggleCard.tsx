@@ -43,7 +43,7 @@ export const BoostToggleCard = () => {
 
   // Combined purchasing state
   const isPurchasing = isNative 
-    ? (nativeBoost.state.isPurchasing || nativeBoost.state.isPolling)
+    ? (nativeBoost.state.purchaseStatus === 'purchasing' || nativeBoost.state.isPolling)
     : purchaseBoost.isPending;
 
   // Handle payment success/cancel from URL params (web only)

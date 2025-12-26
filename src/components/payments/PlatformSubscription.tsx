@@ -118,7 +118,7 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   };
 
   // Check if any purchase is in progress
-  const isPurchasing = iapState.isPurchasing || iapState.isPolling;
+  const isPurchasing = iapState.purchaseStatus === 'purchasing' || iapState.isPolling;
 
   return (
     <>

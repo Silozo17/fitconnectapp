@@ -17,9 +17,20 @@ import {
 export type SubscriptionTier = 'starter' | 'pro' | 'enterprise';
 export type BillingInterval = 'monthly' | 'yearly';
 
+/**
+ * Explicit purchase status for clean state management
+ */
+export type PurchaseStatus = 
+  | 'idle'           // Ready to purchase
+  | 'purchasing'     // Native IAP dialog is active
+  | 'success'        // Purchase succeeded, may be polling for confirmation
+  | 'cancelled'      // User cancelled - treated as idle for retry
+  | 'failed'         // Error occurred - show retry option
+  | 'pending';       // StoreKit returned deferred (e.g., Ask to Buy)
+
 interface NativeIAPState {
   isAvailable: boolean;
-  isPurchasing: boolean;
+  purchaseStatus: PurchaseStatus;
   isPolling: boolean;
   purchasedProductId: string | null;
   error: string | null;
@@ -51,7 +62,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
   const queryClient = useQueryClient();
   const [state, setState] = useState<NativeIAPState>({
     isAvailable: false,
-    isPurchasing: false,
+    purchaseStatus: 'idle',
     isPolling: false,
     purchasedProductId: null,
     error: null,
@@ -85,6 +96,31 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
         clearTimeout(purchaseTimeoutRef.current);
       }
     };
+  }, []);
+
+  /**
+   * Safety reset on app resume/foreground
+   * Clears stuck purchasing state if no polling is active
+   */
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Give callbacks 2 seconds to fire if there's a pending response
+        setTimeout(() => {
+          setState(prev => {
+            // Only reset if stuck in purchasing (not polling, not pending)
+            if (prev.purchaseStatus === 'purchasing' && !prev.isPolling) {
+              console.log('[NativeIAP] Safety reset on app resume - stuck in purchasing state');
+              return { ...prev, purchaseStatus: 'idle' };
+            }
+            return prev;
+          });
+        }, 2000);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
   /**
@@ -127,7 +163,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     }
 
     pollAttemptsRef.current = 0;
-    setState(prev => ({ ...prev, isPolling: true }));
+    setState(prev => ({ ...prev, isPolling: true, purchaseStatus: 'success' }));
 
     pollIntervalRef.current = setInterval(async () => {
       pollAttemptsRef.current += 1;
@@ -142,7 +178,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
         setState(prev => ({
           ...prev,
           isPolling: false,
-          isPurchasing: false,
+          purchaseStatus: 'idle',
         }));
 
         // Invalidate queries to refresh subscription data throughout the app
@@ -163,7 +199,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
         setState(prev => ({
           ...prev,
           isPolling: false,
-          isPurchasing: false,
+          purchaseStatus: 'idle',
         }));
         
         // Still call success callback - payment was successful, just webhook is slow
@@ -206,14 +242,14 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
 
   /**
    * Handle IAP cancel callback from Despia
-   * Cancel is a user choice, not an error - show friendly toast, not error modal
+   * Cancel is a user choice, not an error - immediately reset to idle for retry
    */
   const handleIAPCancel = useCallback(() => {
     console.log('[NativeIAP] Purchase cancelled by user');
     clearPurchaseTimeout();
     setState(prev => ({
       ...prev,
-      isPurchasing: false,
+      purchaseStatus: 'idle', // Immediately retryable
       error: null,
       showUnsuccessfulModal: false,
       purchasedProductId: null,
@@ -222,12 +258,14 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
   }, [clearPurchaseTimeout]);
 
   /**
-   * Dismiss the unsuccessful modal
+   * Dismiss the unsuccessful modal and reset to idle for retry
    */
   const dismissUnsuccessfulModal = useCallback(() => {
     setState(prev => ({
       ...prev,
       showUnsuccessfulModal: false,
+      purchaseStatus: 'idle', // Allow immediate retry
+      error: null,
     }));
   }, []);
 
@@ -240,26 +278,45 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     triggerHaptic('error');
     setState(prev => ({
       ...prev,
-      isPurchasing: false,
+      purchaseStatus: 'failed',
       error,
+      showUnsuccessfulModal: true,
     }));
-    toast.error('Purchase failed', { description: error });
   }, [clearPurchaseTimeout]);
 
-  // Register IAP callbacks
+  /**
+   * Handle IAP pending callback from Despia (Ask to Buy / deferred)
+   * Only set pending when StoreKit explicitly returns a deferred transaction
+   */
+  const handleIAPPending = useCallback(() => {
+    console.log('[NativeIAP] Purchase pending (Ask to Buy or deferred)');
+    clearPurchaseTimeout();
+    setState(prev => ({
+      ...prev,
+      purchaseStatus: 'pending',
+      error: null,
+    }));
+    toast.info('Purchase requires approval', {
+      description: 'A parent or guardian needs to approve this purchase.',
+      duration: 5000,
+    });
+  }, [clearPurchaseTimeout]);
+
+  // Register IAP callbacks once on mount when available
   useEffect(() => {
     if (state.isAvailable) {
       registerIAPCallbacks({
         onSuccess: handleIAPSuccess,
         onError: handleIAPError,
         onCancel: handleIAPCancel,
+        onPending: handleIAPPending,
       });
     }
 
     return () => {
       unregisterIAPCallbacks();
     };
-  }, [state.isAvailable, handleIAPSuccess, handleIAPError, handleIAPCancel]);
+  }, [state.isAvailable, handleIAPSuccess, handleIAPError, handleIAPCancel, handleIAPPending]);
 
   /**
    * Trigger a purchase
@@ -303,7 +360,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
 
     setState(prev => ({
       ...prev,
-      isPurchasing: true,
+      purchaseStatus: 'purchasing',
       error: null,
       purchasedProductId: null,
     }));
@@ -315,14 +372,15 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     purchaseTimeoutRef.current = setTimeout(() => {
       console.warn('[NativeIAP] Purchase timeout - no response received after 2 minutes');
       setState(prev => {
-        if (prev.isPurchasing && !prev.isPolling) {
+        if (prev.purchaseStatus === 'purchasing' && !prev.isPolling) {
           toast.error('Purchase timed out', {
             description: 'Please try again or contact support if the issue persists.',
           });
           return {
             ...prev,
-            isPurchasing: false,
+            purchaseStatus: 'failed',
             error: 'Purchase timed out. Please try again.',
+            showUnsuccessfulModal: true,
           };
         }
         return prev;
@@ -340,8 +398,9 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
         clearPurchaseTimeout();
         setState(prev => ({
           ...prev,
-          isPurchasing: false,
+          purchaseStatus: 'failed',
           error: 'Failed to start purchase',
+          showUnsuccessfulModal: true,
         }));
         toast.error('Failed to start purchase');
       }
@@ -360,7 +419,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     pollAttemptsRef.current = 0;
     setState({
       isAvailable: isNativeIAPAvailable(),
-      isPurchasing: false,
+      purchaseStatus: 'idle',
       isPolling: false,
       purchasedProductId: null,
       error: null,
