@@ -30,6 +30,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ShoppingCart, Plus, Sparkles, Loader2, AlertCircle, Utensils } from "lucide-react";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 const ClientGrocery = () => {
   const { lists, isLoading, createList, updateItems, completeList, deleteList, generateFromMealPlan } = useGroceryList();
@@ -69,6 +70,11 @@ const ClientGrocery = () => {
         title="Shopping Lists"
         description="Manage your grocery and meal prep shopping"
       >
+        <PageHelpBanner
+          pageKey="client_grocery"
+          title="Shopping Lists"
+          description="Generate grocery lists from meal plans or create your own"
+        />
         <div className="space-y-6">
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

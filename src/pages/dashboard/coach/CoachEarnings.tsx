@@ -39,6 +39,7 @@ import { useLocale } from "@/contexts/LocaleContext";
 import { useCoachEarnings, useCoachProfile, useStripeExpressLogin } from "@/hooks/useCoachEarnings";
 import { format } from "date-fns";
 import { FeatureGate } from "@/components/FeatureGate";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 type PeriodType = "week" | "month" | "quarter" | "year";
 
@@ -76,6 +77,11 @@ const CoachEarnings = () => {
   return (
     <DashboardLayout title={t("earnings.title")} description={t("earnings.pageDescription")}>
       <FeatureGate feature="basic_analytics">
+      <PageHelpBanner
+        pageKey="coach_earnings"
+        title="Track Earnings"
+        description="Monitor revenue, view transactions, and manage payouts"
+      />
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>

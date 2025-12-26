@@ -9,6 +9,7 @@ import { Calendar, Apple, Shield } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 const calendarProviders: {
   id: CalendarProvider;
@@ -50,6 +51,11 @@ const ClientIntegrations = () => {
       title="Integrations"
       description="Connect your fitness wearables and calendars"
     >
+      <PageHelpBanner
+        pageKey="client_integrations"
+        title="Connect Your Devices"
+        description="Sync health data from Apple Health, Google Fit, and wearables"
+      />
       <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">Integrations</h1>

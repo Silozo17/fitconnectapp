@@ -11,6 +11,7 @@ import { AddConnectionModal } from "@/components/connections/AddConnectionModal"
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from "@/hooks/useTranslation";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 const CoachConnections = () => {
   const { t } = useTranslation('coach');
@@ -29,6 +30,11 @@ const CoachConnections = () => {
 
   return (
     <DashboardLayout>
+      <PageHelpBanner
+        pageKey="coach_connections"
+        title="Client Connections"
+        description="Manage connection requests and client relationships"
+      />
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

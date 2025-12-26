@@ -28,6 +28,7 @@ import { CancelSessionModal } from "@/components/dashboard/clients/CancelSession
 import { useSessionManagement } from "@/hooks/useSessionManagement";
 import { useToast } from "@/hooks/use-toast";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 interface Session {
   id: string;
@@ -307,6 +308,11 @@ const ClientSessions = () => {
       title={t('clientSessions.title')}
       description={t('clientSessions.description')}
     >
+      <PageHelpBanner
+        pageKey="client_sessions"
+        title="Manage Sessions"
+        description="View upcoming appointments, reschedule, or leave reviews for completed sessions"
+      />
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-foreground font-display">{t('clientSessions.title')}</h1>

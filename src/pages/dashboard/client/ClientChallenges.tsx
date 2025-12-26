@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Trophy, Target, CheckCircle2, Flame } from 'lucide-react';
+import { PageHelpBanner } from '@/components/discover/PageHelpBanner';
 
 export default function ClientChallenges() {
   const { data: availableChallenges, isLoading: availableLoading } = useAvailableChallenges();
@@ -16,6 +17,11 @@ export default function ClientChallenges() {
   
   return (
     <ClientDashboardLayout>
+      <PageHelpBanner
+        pageKey="client_challenges"
+        title="Fitness Challenges"
+        description="Join challenges to stay motivated and win rewards"
+      />
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold">Challenges</h1>

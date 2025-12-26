@@ -12,6 +12,7 @@ import { formatCurrency } from "@/lib/currency";
 import { useMarketplaceLinkPrefix } from "@/hooks/useMarketplaceLinkPrefix";
 import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
 import { WebOnlyFeatureDialog } from "@/components/shared/WebOnlyFeatureDialog";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 const getContentIcon = (type: string) => {
   switch (type) {
@@ -195,6 +196,11 @@ export default function ClientLibrary() {
 
   return (
     <ClientDashboardLayout>
+      <PageHelpBanner
+        pageKey="client_library"
+        title="Your Content Library"
+        description="Access all digital content you've purchased"
+      />
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

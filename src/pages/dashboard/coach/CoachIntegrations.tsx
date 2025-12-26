@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { FeatureGate } from "@/components/FeatureGate";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 const videoProviders: {
   id: VideoProvider;
@@ -89,6 +90,11 @@ const CoachIntegrations = () => {
       description="Connect video conferencing and calendar services"
     >
       <FeatureGate feature="custom_integrations">
+      <PageHelpBanner
+        pageKey="coach_integrations"
+        title="App Integrations"
+        description="Connect video conferencing and calendar sync"
+      />
       <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">Integrations</h1>

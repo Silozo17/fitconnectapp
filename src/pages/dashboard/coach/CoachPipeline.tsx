@@ -48,6 +48,7 @@ import { toast } from "@/hooks/use-toast";
 import ProspectProfileSheet from "@/components/messaging/ProspectProfileSheet";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { Rarity } from "@/lib/avatar-utils";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 const getStages = (t: (key: string) => string): { key: LeadStage; label: string; icon: React.ReactNode; color: string; borderColor: string }[] => [
   { key: 'new_lead', label: t("pipeline.stages.newLeads"), icon: <UserPlus className="w-4 h-4" />, color: 'bg-blue-500', borderColor: 'border-l-blue-500' },
@@ -315,6 +316,11 @@ const CoachPipeline = () => {
       title={t("pipeline.title")}
       description={t("pipeline.subtitle")}
     >
+      <PageHelpBanner
+        pageKey="coach_pipeline"
+        title="Sales Pipeline"
+        description="Track leads and convert inquiries into clients"
+      />
       {/* Header with Add Button */}
       <div className="flex justify-end mb-4">
         <Button onClick={() => setShowAddLeadModal(true)} size="sm">

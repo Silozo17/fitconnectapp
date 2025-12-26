@@ -8,6 +8,7 @@ import TodayHabitCard from "@/components/habits/TodayHabitCard";
 import HabitStreakCard from "@/components/habits/HabitStreakCard";
 import HabitCalendarHeatmap from "@/components/habits/HabitCalendarHeatmap";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 const ClientHabits = () => {
   const { data: todaysHabits, completedCount, totalCount, isLoading: todayLoading } = useTodaysHabits();
@@ -25,6 +26,11 @@ const ClientHabits = () => {
   
   return (
     <ClientDashboardLayout>
+      <PageHelpBanner
+        pageKey="client_habits"
+        title="Build Healthy Routines"
+        description="Track daily habits assigned by your coach and build streaks"
+      />
       <div className="space-y-8">
         {/* Header */}
         <div>

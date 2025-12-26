@@ -6,6 +6,7 @@ import ChatWindow from "@/components/messaging/ChatWindow";
 import { MessageSquare, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useParticipantName } from "@/hooks/useParticipantName";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 const ClientMessages = () => {
   const { t } = useTranslation('messaging');
@@ -15,6 +16,11 @@ const ClientMessages = () => {
 
   return (
     <ClientDashboardLayout title={t('title')} description={t('description')}>
+      <PageHelpBanner
+        pageKey="client_messages"
+        title="Stay Connected"
+        description="Chat with your coaches, share updates, and get feedback"
+      />
       <div className="flex flex-col h-full min-h-0">
         {/* Header */}
         <div className="flex items-center gap-3 mb-5">

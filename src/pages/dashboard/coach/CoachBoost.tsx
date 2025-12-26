@@ -13,6 +13,7 @@ import { FeatureGate } from "@/components/FeatureGate";
 import { useBoostSettings } from "@/hooks/useCoachBoost";
 import { useNativePricing } from "@/hooks/useNativePricing";
 import { useTranslation } from "@/hooks/useTranslation";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 const CoachBoost = () => {
   const { t } = useTranslation('coach');
@@ -37,6 +38,11 @@ const CoachBoost = () => {
   return (
     <DashboardLayout>
       <FeatureGate feature="boost_marketing">
+        <PageHelpBanner
+          pageKey="coach_boost"
+          title="Boost Visibility"
+          description="Get more exposure in search results and attract new clients"
+        />
         <div className="space-y-6">
           {/* Header */}
           <div>

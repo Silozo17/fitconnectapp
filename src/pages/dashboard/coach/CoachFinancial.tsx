@@ -70,6 +70,7 @@ import {
 } from "recharts";
 import { FeatureGate } from "@/components/FeatureGate";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 const getInvoiceStatusConfig = (t: (key: string) => string) => ({
   draft: { label: t("financial.status.draft"), color: "bg-muted text-muted-foreground", icon: FileText },
@@ -166,6 +167,11 @@ export default function CoachFinancial() {
 
   return (
     <DashboardLayout>
+      <PageHelpBanner
+        pageKey="coach_financial"
+        title="Financial Settings"
+        description="Configure invoicing, tax details, and payment preferences"
+      />
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

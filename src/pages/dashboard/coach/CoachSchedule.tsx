@@ -66,6 +66,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getCurrencySymbol, type CurrencyCode } from "@/lib/currency";
 import { useCoachBoostStatus } from "@/hooks/useCoachBoost";
 import { useExternalCalendarEvents, useSyncExternalCalendar } from "@/hooks/useExternalCalendarEvents";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 // Day names used for availability - will be translated
 const dayIndexMap = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"] as const;

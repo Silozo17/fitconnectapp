@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { cn } from "@/lib/utils";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 interface Review {
   id: string;
@@ -160,6 +161,11 @@ const CoachReviews = () => {
 
   return (
     <DashboardLayout title={t("reviewsPage.title")} description={t("reviewsPage.subtitle")}>
+      <PageHelpBanner
+        pageKey="coach_reviews"
+        title="Client Feedback"
+        description="View and respond to reviews from your clients"
+      />
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <Card variant="glass" className="glass-card rounded-2xl">

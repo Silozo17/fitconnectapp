@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useParticipantName } from "@/hooks/useParticipantName";
 import { useMessages } from "@/hooks/useMessages";
 import { useAdminView } from "@/contexts/AdminContext";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 const CoachMessages = () => {
   const { t } = useTranslation('messaging');
@@ -30,6 +31,11 @@ const CoachMessages = () => {
 
   return (
     <DashboardLayout title={t('title')} description={t('description')}>
+      <PageHelpBanner
+        pageKey="coach_messages"
+        title="Client Messages"
+        description="Communicate with clients and send quick updates"
+      />
       <div className="flex flex-col h-full min-h-0">
         <div className="flex items-center justify-between mb-4">
           <h1 className="font-display text-2xl font-bold text-foreground">{t('title')}</h1>

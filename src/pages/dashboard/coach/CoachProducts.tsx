@@ -13,6 +13,7 @@ import BulkEditPricesModal from "@/components/marketplace/BulkEditPricesModal";
 import { useCoachProducts, useCoachBundles, useDeleteProduct, useDeleteBundle, useUpdateProduct, CONTENT_TYPES } from "@/hooks/useDigitalProducts";
 import { formatCurrency } from "@/lib/currency";
 import { useTranslation } from "@/hooks/useTranslation";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 export default function CoachProducts() {
   const { t } = useTranslation('coach');
@@ -43,6 +44,11 @@ export default function CoachProducts() {
 
   return (
     <DashboardLayout>
+      <PageHelpBanner
+        pageKey="coach_products"
+        title="Digital Products"
+        description="Sell guides, programs, and templates in the marketplace"
+      />
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

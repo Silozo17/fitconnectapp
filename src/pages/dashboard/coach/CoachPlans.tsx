@@ -40,6 +40,7 @@ import { useTrainingPlans, useDeleteTrainingPlan, TrainingPlan } from "@/hooks/u
 import { useCoachProfileId } from "@/hooks/useCoachProfileId";
 import { format } from "date-fns";
 import { useTranslation } from "@/hooks/useTranslation";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 const CoachPlans = () => {
   const { t } = useTranslation('coach');
@@ -103,6 +104,11 @@ const CoachPlans = () => {
   return (
     <DashboardLayout title={t("plansPage.title")} description={t("plansPage.description")}>
       <FeatureGate feature="workout_plan_builder">
+        <PageHelpBanner
+          pageKey="coach_plans"
+          title="Training Plans"
+          description="Create, edit, and assign workout and nutrition plans to clients"
+        />
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>

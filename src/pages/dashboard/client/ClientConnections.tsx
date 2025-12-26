@@ -11,6 +11,7 @@ import { PendingRequestCard } from "@/components/connections/PendingRequestCard"
 import { AddConnectionModal } from "@/components/connections/AddConnectionModal";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 const ClientConnections = () => {
   const { user } = useAuth();
@@ -30,6 +31,11 @@ const ClientConnections = () => {
 
   return (
     <ClientDashboardLayout>
+      <PageHelpBanner
+        pageKey="client_connections"
+        title="Coach Connections"
+        description="Manage your relationships with coaches"
+      />
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

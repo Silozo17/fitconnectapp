@@ -15,6 +15,7 @@ import { useUserLocation } from "@/hooks/useUserLocation";
 import { useMarketplaceLocationFilter } from "@/hooks/useMarketplaceLocationFilter";
 import { useCountry } from "@/hooks/useCountry";
 import { useUserLocalePreference } from "@/hooks/useUserLocalePreference";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 const ClientFindCoaches = () => {
   const { t } = useTranslation("client");
@@ -89,6 +90,11 @@ const ClientFindCoaches = () => {
       title={t('findCoaches.title')}
       description={t('findCoaches.subtitle')}
     >
+      <PageHelpBanner
+        pageKey="client_find_coaches"
+        title="Discover Coaches"
+        description="Find fitness professionals that match your goals and preferences"
+      />
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">

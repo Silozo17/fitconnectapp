@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { enGB, pl } from "date-fns/locale";
 import i18n from "@/i18n";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 const rarityColors: Record<string, string> = {
   common: "border-muted-foreground/30",
@@ -324,6 +325,11 @@ const CoachAchievements = () => {
 
   return (
     <DashboardLayout title={t("achievementsPage.title")} description={t("achievementsPage.subtitle")}>
+      <PageHelpBanner
+        pageKey="coach_achievements"
+        title="Coaching Milestones"
+        description="View badges and achievements from your coaching journey"
+      />
       {/* Summary Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <Card variant="glass" className="p-4 text-center">

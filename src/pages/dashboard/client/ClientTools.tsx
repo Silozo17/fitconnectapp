@@ -10,6 +10,7 @@ import WaterIntakeCalculator from "@/components/tools/WaterIntakeCalculator";
 import HeartRateZoneCalculator from "@/components/tools/HeartRateZoneCalculator";
 import { Calculator, Scale, Flame, Utensils, Target, Percent, Dumbbell, Droplets, Heart, ArrowLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 const toolsList = [
   { id: "bmi", name: "BMI Calculator", icon: Scale, description: "Calculate your Body Mass Index to assess weight status", component: BMICalculator },
@@ -32,6 +33,11 @@ const ClientTools = () => {
       title="Fitness Tools"
       description="Free fitness calculators to track your metrics and optimize your training"
     >
+      <PageHelpBanner
+        pageKey="client_tools"
+        title="Fitness Calculators"
+        description="Use tools to calculate calories, macros, BMI, and more"
+      />
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center gap-3">
