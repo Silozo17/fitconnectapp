@@ -11,18 +11,23 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
   console.log(`[REVENUECAT-WEBHOOK] ${step}${detailsStr}`);
 };
 
-// RevenueCat event types we care about
+// RevenueCat event types - comprehensive list
 type RevenueCatEventType = 
   | "INITIAL_PURCHASE"
-  | "NON_RENEWING_PURCHASE"  // For one-time purchases like Boost
+  | "NON_RENEWING_PURCHASE"
   | "RENEWAL"
   | "CANCELLATION"
   | "UNCANCELLATION"
   | "EXPIRATION"
   | "BILLING_ISSUE"
+  | "BILLING_ISSUES_GRACE_PERIOD_EXPIRED"
   | "SUBSCRIBER_ALIAS"
   | "PRODUCT_CHANGE"
-  | "TRANSFER";
+  | "TRANSFER"
+  | "REFUND"
+  | "SUBSCRIPTION_PAUSED"
+  | "SUBSCRIPTION_RESUMED"
+  | "TEST";
 
 interface RevenueCatEvent {
   type: RevenueCatEventType;
@@ -84,6 +89,13 @@ const productToTier: Record<string, string> = {
   "fitconnect_enterprise_yearly": "enterprise",
 };
 
+// Entitlement ID to tier mapping (entitlement-first approach)
+const entitlementToTier: Record<string, string> = {
+  'starter': 'starter',
+  'pro': 'pro',
+  'enterprise': 'enterprise',
+};
+
 // Boost product IDs (non-renewing subs / consumables)
 const boostProductIds = [
   // iOS - Non-renewing subscription
@@ -105,6 +117,36 @@ const isBoostProduct = (productId: string | undefined, entitlementIds?: string[]
   }
   if (!productId) return false;
   return boostProductIds.some(id => productId.includes(id));
+};
+
+/**
+ * Get tier from event using entitlement-first approach
+ * Falls back to product ID mapping if no entitlement match
+ */
+const getTierFromEvent = (event: RevenueCatEvent): string | null => {
+  // First, check entitlements (most reliable - handles product ID variations)
+  if (event.entitlement_ids?.length) {
+    for (const entId of event.entitlement_ids) {
+      if (entitlementToTier[entId]) {
+        logStep("Tier from entitlement", { entitlementId: entId, tier: entitlementToTier[entId] });
+        return entitlementToTier[entId];
+      }
+    }
+  }
+  
+  // Fallback to product ID mapping
+  if (event.product_id && productToTier[event.product_id]) {
+    logStep("Tier from product_id", { productId: event.product_id, tier: productToTier[event.product_id] });
+    return productToTier[event.product_id];
+  }
+  
+  // Also check new_product_id for PRODUCT_CHANGE events
+  if (event.new_product_id && productToTier[event.new_product_id]) {
+    logStep("Tier from new_product_id", { newProductId: event.new_product_id, tier: productToTier[event.new_product_id] });
+    return productToTier[event.new_product_id];
+  }
+  
+  return null;
 };
 
 /**
@@ -245,6 +287,7 @@ serve(async (req) => {
       id: event.id, 
       appUserId: event.app_user_id,
       productId: event.product_id,
+      entitlementIds: event.entitlement_ids,
       store: event.store,
       environment: event.environment 
     });
@@ -252,7 +295,7 @@ serve(async (req) => {
     // Get coach ID from app_user_id
     const coachId = await extractCoachId(supabase, event.app_user_id);
 
-    if (!coachId && event.type !== "SUBSCRIBER_ALIAS") {
+    if (!coachId && event.type !== "SUBSCRIBER_ALIAS" && event.type !== "TEST") {
       logStep("Coach not found for app_user_id", { appUserId: event.app_user_id });
       // Return 200 to acknowledge receipt but log the issue
       return new Response(JSON.stringify({ received: true, warning: "Coach not found" }), {
@@ -261,8 +304,8 @@ serve(async (req) => {
       });
     }
 
-    // Map product ID to tier
-    const tier = event.product_id ? productToTier[event.product_id] : null;
+    // Get tier using entitlement-first approach
+    const tier = getTierFromEvent(event);
 
     switch (event.type) {
       case "INITIAL_PURCHASE":
@@ -283,7 +326,23 @@ serve(async (req) => {
         }
 
         if (!tier) {
-          logStep("Unknown product ID", { productId: event.product_id });
+          logStep("Unknown product ID / no matching entitlement", { productId: event.product_id, entitlementIds: event.entitlement_ids });
+          break;
+        }
+
+        const transactionId = `rc_${event.original_transaction_id || event.transaction_id}`;
+        
+        // Idempotency check - prevent duplicate subscription activations
+        const { data: existingSub } = await supabase
+          .from("platform_subscriptions")
+          .select("stripe_subscription_id, status, tier")
+          .eq("coach_id", coachId)
+          .maybeSingle();
+
+        if (existingSub?.stripe_subscription_id === transactionId && 
+            existingSub?.status === 'active' && 
+            existingSub?.tier === tier) {
+          logStep("Duplicate subscription transaction - already processed", { transactionId, tier });
           break;
         }
 
@@ -303,7 +362,7 @@ serve(async (req) => {
               : new Date().toISOString(),
             current_period_end: periodEnd,
             // Store RevenueCat IDs in stripe fields for now (they're just identifiers)
-            stripe_subscription_id: `rc_${event.original_transaction_id || event.transaction_id}`,
+            stripe_subscription_id: transactionId,
             stripe_customer_id: `rc_${event.app_user_id}`,
             updated_at: new Date().toISOString(),
           }, { onConflict: "coach_id" });
@@ -327,28 +386,43 @@ serve(async (req) => {
       }
 
       case "RENEWAL": {
-        logStep("Processing RENEWAL", { coachId, tier, productId: event.product_id });
+        logStep("Processing RENEWAL", { coachId, tier, productId: event.product_id, entitlementIds: event.entitlement_ids });
 
         const periodEnd = event.expiration_at_ms 
           ? new Date(event.expiration_at_ms).toISOString() 
           : null;
 
+        // Update subscription record
+        const updateData: Record<string, unknown> = {
+          status: "active",
+          current_period_start: event.purchased_at_ms 
+            ? new Date(event.purchased_at_ms).toISOString() 
+            : new Date().toISOString(),
+          current_period_end: periodEnd,
+          updated_at: new Date().toISOString(),
+        };
+        
+        // Also update tier if available (handles tier changes during renewal)
+        if (tier) {
+          updateData.tier = tier;
+        }
+
         const { error } = await supabase
           .from("platform_subscriptions")
-          .update({
-            status: "active",
-            current_period_start: event.purchased_at_ms 
-              ? new Date(event.purchased_at_ms).toISOString() 
-              : new Date().toISOString(),
-            current_period_end: periodEnd,
-            updated_at: new Date().toISOString(),
-          })
+          .update(updateData)
           .eq("coach_id", coachId);
 
         if (error) {
           logStep("Error processing RENEWAL", { error: error.message });
         } else {
-          logStep("Successfully processed RENEWAL", { coachId });
+          // Also update coach profile tier if we have it
+          if (tier) {
+            await supabase
+              .from("coach_profiles")
+              .update({ subscription_tier: tier })
+              .eq("id", coachId);
+          }
+          logStep("Successfully processed RENEWAL", { coachId, tier });
         }
         break;
       }
@@ -425,6 +499,7 @@ serve(async (req) => {
       case "BILLING_ISSUE": {
         logStep("Processing BILLING_ISSUE", { coachId });
 
+        // Mark as past_due - user is in grace period
         const { error } = await supabase
           .from("platform_subscriptions")
           .update({
@@ -441,13 +516,133 @@ serve(async (req) => {
         break;
       }
 
-      case "PRODUCT_CHANGE": {
-        logStep("Processing PRODUCT_CHANGE", { coachId, oldProduct: event.product_id, newProduct: event.new_product_id });
+      case "BILLING_ISSUES_GRACE_PERIOD_EXPIRED": {
+        logStep("Processing BILLING_ISSUES_GRACE_PERIOD_EXPIRED", { coachId });
 
-        const newTier = event.new_product_id ? productToTier[event.new_product_id] : null;
+        // Grace period over - same as EXPIRATION, downgrade to free
+        const { error: subError } = await supabase
+          .from("platform_subscriptions")
+          .update({
+            status: "expired",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("coach_id", coachId);
+
+        if (subError) {
+          logStep("Error updating subscription after grace period", { error: subError.message });
+        }
+
+        // Downgrade to free tier
+        const { error: profileError } = await supabase
+          .from("coach_profiles")
+          .update({ subscription_tier: "free" })
+          .eq("id", coachId);
+
+        if (profileError) {
+          logStep("Error downgrading tier after grace period", { error: profileError.message });
+        } else {
+          logStep("Successfully processed grace period expiration - downgraded to free", { coachId });
+        }
+        break;
+      }
+
+      case "REFUND": {
+        logStep("Processing REFUND", { coachId, productId: event.product_id });
+
+        // Check if this is a boost refund
+        if (isBoostProduct(event.product_id, event.entitlement_ids)) {
+          logStep("Processing BOOST refund", { coachId });
+          const { error: boostError } = await supabase
+            .from("coach_boosts")
+            .update({
+              is_active: false,
+              payment_status: "refunded",
+              deactivated_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            })
+            .eq("coach_id", coachId);
+
+          if (boostError) {
+            logStep("Error processing boost refund", { error: boostError.message });
+          } else {
+            logStep("Successfully processed BOOST refund", { coachId });
+          }
+          break;
+        }
+
+        // Subscription refund - mark as refunded and downgrade
+        const { error: subError } = await supabase
+          .from("platform_subscriptions")
+          .update({
+            status: "refunded",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("coach_id", coachId);
+
+        if (subError) {
+          logStep("Error updating subscription status for refund", { error: subError.message });
+        }
+
+        // Downgrade to free tier
+        const { error: profileError } = await supabase
+          .from("coach_profiles")
+          .update({ subscription_tier: "free" })
+          .eq("id", coachId);
+
+        if (profileError) {
+          logStep("Error downgrading tier on refund", { error: profileError.message });
+        } else {
+          logStep("Successfully processed REFUND - downgraded to free", { coachId });
+        }
+        break;
+      }
+
+      case "SUBSCRIPTION_PAUSED": {
+        logStep("Processing SUBSCRIPTION_PAUSED (Google Play)", { coachId });
+
+        const { error } = await supabase
+          .from("platform_subscriptions")
+          .update({
+            status: "paused",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("coach_id", coachId);
+
+        if (error) {
+          logStep("Error pausing subscription", { error: error.message });
+        } else {
+          logStep("Successfully paused subscription", { coachId });
+        }
+        break;
+      }
+
+      case "SUBSCRIPTION_RESUMED": {
+        logStep("Processing SUBSCRIPTION_RESUMED (Google Play)", { coachId });
+
+        const { error } = await supabase
+          .from("platform_subscriptions")
+          .update({
+            status: "active",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("coach_id", coachId);
+
+        if (error) {
+          logStep("Error resuming subscription", { error: error.message });
+        } else {
+          logStep("Successfully resumed subscription", { coachId });
+        }
+        break;
+      }
+
+      case "PRODUCT_CHANGE": {
+        logStep("Processing PRODUCT_CHANGE", { coachId, oldProduct: event.product_id, newProduct: event.new_product_id, entitlementIds: event.entitlement_ids });
+
+        // Use entitlement-first tier detection
+        const newTier = getTierFromEvent(event);
 
         if (!newTier) {
-          logStep("Unknown new product ID", { newProductId: event.new_product_id });
+          logStep("Unknown new product ID / no matching entitlement", { newProductId: event.new_product_id, entitlementIds: event.entitlement_ids });
           break;
         }
 
@@ -456,6 +651,7 @@ serve(async (req) => {
           .from("platform_subscriptions")
           .update({
             tier: newTier,
+            status: "active",
             updated_at: new Date().toISOString(),
           })
           .eq("coach_id", coachId);
@@ -484,7 +680,19 @@ serve(async (req) => {
         break;
       }
 
+      case "TEST": {
+        // Test event from RevenueCat - acknowledge and log
+        logStep("Received TEST event - acknowledging", { 
+          appUserId: event.app_user_id,
+          environment: event.environment,
+          store: event.store
+        });
+        break;
+      }
+
       default: {
+        // Type-safe exhaustive check
+        const _exhaustiveCheck: never = event.type;
         logStep("Unhandled event type", { type: event.type });
       }
     }
@@ -503,4 +711,3 @@ serve(async (req) => {
     });
   }
 });
-
