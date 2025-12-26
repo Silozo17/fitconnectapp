@@ -85,9 +85,11 @@ const ProfilePanel = ({ children, headerHeight = 64 }: ProfilePanelProps) => {
           "glass-floating",
           // Border adjustments
           "rounded-t-none border-t-0",
-          // Animation
-          "transition-transform duration-300 ease-out",
-          isOpen ? "translate-y-0" : "-translate-y-full"
+          // Animation - includes opacity for proper hiding
+          "transition-all duration-300 ease-out",
+          isOpen 
+            ? "translate-y-0 opacity-100" 
+            : "-translate-y-full opacity-0 pointer-events-none"
         )}
         style={{ 
           top: headerHeight,
@@ -96,8 +98,14 @@ const ProfilePanel = ({ children, headerHeight = 64 }: ProfilePanelProps) => {
         aria-modal="true"
         aria-label="Profile panel"
       >
-        {/* Content area */}
-        <div className="h-full overflow-hidden px-4 pt-4 pb-8">
+        {/* Content area - hidden when panel is closed */}
+        <div 
+          className={cn(
+            "h-full overflow-hidden px-4 pt-4 pb-8",
+            !isOpen && "invisible"
+          )}
+          aria-hidden={!isOpen}
+        >
           {children}
         </div>
       </div>
