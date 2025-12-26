@@ -115,7 +115,7 @@ function LeaderboardCard({ entry, t }: { entry: PublicLeaderboardEntry; t: any }
   const location = [entry.city, entry.country].filter(Boolean).join(', ');
 
   return (
-    <Card className="p-4 bg-card/80 border-border/50 hover:border-primary/30 transition-all">
+    <Card className="p-4 glass-card hover:border-primary/30 transition-all">
       <div className="flex items-center gap-3">
         <div className="flex items-center justify-center w-10">{getRankDisplay(entry.rank)}</div>
         <div className="flex-1 min-w-0">
@@ -306,7 +306,7 @@ export default function Community() {
               {/* Leaderboards Tab */}
               <TabsContent value="leaderboards" className="space-y-6">
                 {/* Filters */}
-                <Card className="p-4 md:p-6 bg-card/80 border-border/50">
+                <Card className="p-4 md:p-6 glass-card">
                   <div className="flex items-center gap-2 mb-4">
                     <Filter className="h-4 w-4 text-primary" />
                     <span className="font-semibold text-sm">{t('community.leaderboard.filters')}</span>

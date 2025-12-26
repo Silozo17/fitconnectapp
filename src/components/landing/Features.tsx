@@ -72,7 +72,7 @@ const Features = () => {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="group card-elevated p-6 md:p-8 hover-lift bg-background"
+              className="group glass-card p-6 md:p-8 hover-lift"
             >
               <div
                 className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-soft`}

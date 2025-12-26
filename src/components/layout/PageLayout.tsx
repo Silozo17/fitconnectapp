@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { SEOHead, createBreadcrumbSchema } from "@/components/shared/SEOHead";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import { PlatformBackground } from "@/components/shared/PlatformBackground";
 
 interface BreadcrumbItem {
   name: string;
@@ -53,7 +54,8 @@ const PageLayout = ({
         keywords={keywords}
         schema={combinedSchema}
       />
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background relative">
+        <PlatformBackground />
         <Navbar />
         <main className="relative pb-mobile-nav">{children}</main>
         <Footer />

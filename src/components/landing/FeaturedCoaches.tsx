@@ -122,7 +122,7 @@ const FeaturedCoaches = () => {
               <Link
                 key={coach.id}
                 to={`/coaches/${coach.username || coach.id}`}
-                className="group card-elevated overflow-hidden hover-lift"
+                className="group glass-card overflow-hidden hover-lift"
               >
                 {/* Image - 3-tier fallback matching CoachCard */}
                 <div className="relative aspect-square overflow-hidden">

@@ -160,7 +160,7 @@ const ForCoaches = () => {
               </div>
             </div>
             <div className="relative">
-              <Card className="border-0 shadow-lg bg-card/80 backdrop-blur-sm">
+              <Card variant="glass-elevated">
                 <CardContent className="p-8">
                   <div className="text-center mb-6">
                     <Clock className="w-12 h-12 text-primary mx-auto mb-4" />
@@ -247,7 +247,7 @@ const ForCoaches = () => {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {benefits.map((benefit, index) => (
-              <Card key={index} className="border-0 shadow-soft bg-card/80 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
+              <Card key={index} variant="glass" className="hover:shadow-lg transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center mb-4">
                     <benefit.icon className="w-6 h-6 text-white" />
@@ -332,7 +332,7 @@ const ForCoaches = () => {
           
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="border-0 shadow-soft bg-card/80 backdrop-blur-sm">
+              <Card key={index} variant="glass">
                 <CardContent className="p-6">
                   <div className="flex gap-1 mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
@@ -365,7 +365,7 @@ const ForCoaches = () => {
               </p>
             </div>
             
-            <Card className="border-0 shadow-lg bg-card/80 backdrop-blur-sm">
+            <Card variant="glass-elevated">
               <CardContent className="p-8">
                 <ul className="space-y-4">
                   {requirements.map((requirement, index) => (

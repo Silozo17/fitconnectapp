@@ -164,7 +164,7 @@ const SuccessStories = () => {
           <div className="container mx-auto">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredStories.map((story) => (
-                <Card key={story.id} className="overflow-hidden border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-glow-sm">
+                <Card key={story.id} variant="glass" className="overflow-hidden hover:border-primary/30 transition-all duration-300 hover:shadow-glow-sm">
                   <div className="aspect-video relative overflow-hidden">
                     <img 
                       src={story.image} 
