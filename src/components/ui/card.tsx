@@ -16,7 +16,7 @@ const cardVariants = cva(
         "glass-interactive": "glass-interactive cursor-pointer",
         "glass-subtle": "glass-subtle",
         "glass-premium": "glass-premium",
-        "glass-solid": "glass-card-solid",
+        
         ghost: "bg-transparent border-none shadow-none",
         // Solid variants for when you need opaque backgrounds
         solid: "bg-card border border-border shadow-elevation-1",

@@ -171,7 +171,7 @@ const ClientOverview = () => {
             {isLoading ? (
               Array.from({ length: 4 }).map((_, i) => (
                 <Carousel3DItem key={i} className="w-[170px]">
-                  <Card variant="glass-solid" className="h-full rounded-3xl">
+                  <Card variant="elevated" className="h-full rounded-3xl">
                     <CardContent className="p-5">
                       <ShimmerSkeleton className="h-14 w-14 rounded-2xl mb-4" />
                       <ShimmerSkeleton className="h-5 w-24 mb-2" />
@@ -184,7 +184,7 @@ const ClientOverview = () => {
               quickActions.map((action) => (
                 <Carousel3DItem key={action.href} className="w-[170px]">
                   <Link to={action.href}>
-                    <Card variant="glass-solid" className="h-full rounded-3xl transition-all duration-200">
+                    <Card variant="elevated" className="h-full rounded-3xl transition-all duration-200">
                       <CardContent className="p-5">
                         <IconSquare icon={action.icon} color={action.color} size="md" className="mb-4" />
                         <h3 className="font-semibold text-foreground">
