@@ -306,6 +306,15 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
+  /* Edge-to-edge iOS immersive experience */
+  .pt-safe-status {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .mt-header-safe {
+    margin-top: calc(4rem + env(safe-area-inset-top, 0px));
+  }
+
   /* ========================================
      GLASSMORPHISM EFFECTS - Premium Frost System
      ======================================== */

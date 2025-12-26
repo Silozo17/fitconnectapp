@@ -40,7 +40,7 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
 
   return (
     <header 
-      className="sticky top-0 z-40 glass-premium border-b border-border/30 relative"
+      className="fixed top-0 left-0 right-0 z-40 glass-premium border-b border-border/30 pt-safe-status xl:static xl:pt-0"
       role="banner"
       aria-label="Dashboard header"
     >
