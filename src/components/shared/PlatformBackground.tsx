@@ -106,10 +106,11 @@ export const PlatformBackground = React.memo(function PlatformBackground({
         </>
       )}
       
-      {/* Top vignette for header area */}
+      {/* Top vignette for header area - extends behind status bar */}
       <div 
-        className="absolute inset-x-0 top-0 h-32"
+        className="absolute inset-x-0 top-0"
         style={{
+          height: "calc(env(safe-area-inset-top, 0px) + 8rem)",
           background: "linear-gradient(to bottom, hsl(var(--background) / 0.9), transparent)",
         }}
       />

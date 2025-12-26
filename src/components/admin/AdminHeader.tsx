@@ -34,7 +34,8 @@ const AdminHeader = ({ onMenuToggle }: AdminHeaderProps) => {
   const { data: selectedAvatar } = useSelectedAvatar(avatarProfileType);
 
   return (
-    <header className="h-16 border-b border-border bg-card px-4 xl:px-6 flex items-center justify-between sticky top-0 z-10">
+    <header className="fixed top-0 left-0 right-0 z-10 border-b border-border bg-card pt-safe-status xl:static xl:pt-0">
+      <div className="h-16 px-4 xl:px-6 flex items-center justify-between">
       {/* Left side - Feedback on mobile, Search on desktop */}
       <div className="flex items-center gap-3 flex-1">
         {/* Feedback - Left on mobile */}
@@ -117,6 +118,7 @@ const AdminHeader = ({ onMenuToggle }: AdminHeaderProps) => {
         >
           <Menu className="w-5 h-5" />
         </Button>
+      </div>
       </div>
     </header>
   );
