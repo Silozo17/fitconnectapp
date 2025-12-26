@@ -854,7 +854,7 @@ const CoachSettings = () => {
                 </MarketplaceSection>
 
                 {/* Sticky Save Button */}
-                <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-background/95 backdrop-blur border-t p-4 z-40">
+                <div className="fixed bottom-20 md:bottom-0 left-0 right-0 xl:left-64 bg-background/95 backdrop-blur border-t p-4 z-40">
                   <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
                     <p className="text-sm text-muted-foreground hidden sm:block">
                       {checkIsDirty() ? t('unsavedChanges') : t('allChangesSaved')}

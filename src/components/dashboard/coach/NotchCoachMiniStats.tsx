@@ -64,7 +64,7 @@ const NotchCoachMiniStats = () => {
       label: t("dashboard.leads", "Leads"),
       color: "text-orange-500",
       bgColor: "bg-orange-500/10",
-      route: "/dashboard/coach/clients"
+      route: "/dashboard/coach/pipeline"
     },
     {
       icon: MessageSquare,
