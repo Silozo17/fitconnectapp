@@ -10,6 +10,12 @@ export interface UserStats {
   macroDays: number;
   xpTotal: number;
   leaderboardRank: number;
+  totalLeaderboardUsers: number;
+  // Location-based ranking
+  localRank: number;
+  localTotal: number;
+  localArea: string | null; // city or county name
+  localType: 'city' | 'county' | 'global'; // which level the rank is for
   challengesCompleted: number;
   challengesJoined: number;
   challengesWon: number;
@@ -36,6 +42,11 @@ const defaultStats: UserStats = {
   macroDays: 0,
   xpTotal: 0,
   leaderboardRank: 0,
+  totalLeaderboardUsers: 0,
+  localRank: 0,
+  localTotal: 0,
+  localArea: null,
+  localType: 'global',
   challengesCompleted: 0,
   challengesJoined: 0,
   challengesWon: 0,
@@ -62,11 +73,11 @@ export function useUserStats() {
       if (!user?.id) throw new Error('Not authenticated');
       
       try {
-        // BATCH 1: Get profiles in parallel
+        // BATCH 1: Get profiles in parallel (including location for local ranking)
         const [clientProfileResult, coachProfileResult] = await Promise.all([
           supabase
             .from('client_profiles')
-            .select('id')
+            .select('id, city, county, leaderboard_visible')
             .eq('user_id', user.id)
             .maybeSingle(),
           supabase
@@ -77,6 +88,8 @@ export function useUserStats() {
         ]);
         
         const clientId = clientProfileResult.data?.id;
+        const clientCity = clientProfileResult.data?.city;
+        const clientCounty = clientProfileResult.data?.county;
         const isCoach = !!coachProfileResult.data;
         
         // Return default stats if no client profile exists yet
@@ -92,6 +105,7 @@ export function useUserStats() {
           progressPhotosResult,
           xpDataResult,
           leaderboardRankResult,
+          totalLeaderboardResult,
           challengesCompletedResult,
           challengesJoinedResult,
           completedChallengesResult,
@@ -135,6 +149,12 @@ export function useUserStats() {
           
           // Leaderboard rank via RPC (optimized server-side calculation)
           supabase.rpc('get_client_leaderboard_rank', { client_id_param: clientId }),
+          
+          // Total leaderboard users (visible profiles with XP)
+          supabase
+            .from('client_profiles')
+            .select('id', { count: 'exact', head: true })
+            .eq('leaderboard_visible', true),
           
           // Completed challenges
           supabase
@@ -184,6 +204,76 @@ export function useUserStats() {
             .eq('status', 'active'),
         ]);
         
+        // BATCH 3: Location-based ranking (only if city or county is set)
+        let localRank = 0;
+        let localTotal = 0;
+        let localArea: string | null = null;
+        let localType: 'city' | 'county' | 'global' = 'global';
+        
+        if (clientCity || clientCounty) {
+          // Get all visible profiles with XP in the same area
+          const locationQuery = supabase
+            .from('client_profiles')
+            .select('id, city, county, client_xp(total_xp)')
+            .eq('leaderboard_visible', true);
+          
+          // Prioritize city, fallback to county
+          if (clientCity) {
+            const { data: cityProfiles } = await locationQuery.eq('city', clientCity);
+            if (cityProfiles && cityProfiles.length > 0) {
+              // Sort by XP descending
+              const sorted = cityProfiles
+                .map(p => ({
+                  id: p.id,
+                  xp: (p.client_xp as any)?.total_xp || 0
+                }))
+                .sort((a, b) => b.xp - a.xp);
+              
+              const userIndex = sorted.findIndex(p => p.id === clientId);
+              if (userIndex !== -1) {
+                localRank = userIndex + 1;
+                localTotal = sorted.length;
+                localArea = clientCity;
+                localType = 'city';
+              }
+            }
+          }
+          
+          // If no city rank, try county
+          if (localRank === 0 && clientCounty) {
+            const { data: countyProfiles } = await supabase
+              .from('client_profiles')
+              .select('id, city, county, client_xp(total_xp)')
+              .eq('leaderboard_visible', true)
+              .eq('county', clientCounty);
+            
+            if (countyProfiles && countyProfiles.length > 0) {
+              const sorted = countyProfiles
+                .map(p => ({
+                  id: p.id,
+                  xp: (p.client_xp as any)?.total_xp || 0
+                }))
+                .sort((a, b) => b.xp - a.xp);
+              
+              const userIndex = sorted.findIndex(p => p.id === clientId);
+              if (userIndex !== -1) {
+                localRank = userIndex + 1;
+                localTotal = sorted.length;
+                localArea = clientCounty;
+                localType = 'county';
+              }
+            }
+          }
+        }
+        
+        // Fallback to global if no local rank
+        if (localRank === 0) {
+          localRank = leaderboardRankResult.data || 0;
+          localTotal = totalLeaderboardResult.count || 0;
+          localArea = null;
+          localType = 'global';
+        }
+        
         // Process results
         const longestStreak = habitStreaksResult.data?.reduce(
           (max, s) => Math.max(max, s.longest_streak || 0), 0
@@ -209,6 +299,11 @@ export function useUserStats() {
           macroDays: 0, // TODO: implement macro tracking
           xpTotal: xpDataResult.data?.total_xp || 0,
           leaderboardRank: leaderboardRankResult.data || 0,
+          totalLeaderboardUsers: totalLeaderboardResult.count || 0,
+          localRank,
+          localTotal,
+          localArea,
+          localType,
           challengesCompleted: challengesCompletedResult.count || 0,
           challengesJoined: challengesJoinedResult.count || 0,
           challengesWon,
