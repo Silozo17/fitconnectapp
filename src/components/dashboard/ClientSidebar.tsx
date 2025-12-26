@@ -442,7 +442,7 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
       {/* Desktop Sidebar */}
       <aside
         className={cn(
-          "hidden xl:flex fixed left-0 top-0 h-full border-r border-border/50 transition-all duration-300 z-50 flex-col",
+          "hidden xl:flex fixed left-0 top-0 h-full border-r border-border/50 transition-all duration-300 z-40 flex-col",
           "bg-sidebar/95 backdrop-blur-xl",
           collapsed ? "w-16" : "w-64"
         )}
