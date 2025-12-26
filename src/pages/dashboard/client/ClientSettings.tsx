@@ -224,8 +224,10 @@ const ClientSettings = () => {
   };
 
   const updateField = (field: keyof ClientProfile, value: string | number | string[] | null | boolean) => {
-    if (!profile) return;
-    setProfile({ ...profile, [field]: value });
+    setProfile(prev => {
+      if (!prev) return prev;
+      return { ...prev, [field]: value };
+    });
   };
 
 
