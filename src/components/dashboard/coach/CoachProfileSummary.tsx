@@ -1,15 +1,16 @@
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { ChevronRight, CheckCircle } from "lucide-react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { ChevronRight, CheckCircle, Zap, AlertTriangle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useUserProfile } from "@/hooks/useUserProfile";
-import { useSelectedAvatar, getAvatarImageUrl } from "@/hooks/useAvatars";
+import { useSelectedAvatar } from "@/hooks/useAvatars";
 import { useCoachProfile } from "@/hooks/useCoachClients";
+import { useCoachBoostStatus, isBoostActive, getBoostRemainingDays } from "@/hooks/useCoachBoost";
 import { cn } from "@/lib/utils";
 import { useProfilePanel } from "@/contexts/ProfilePanelContext";
+import { UserAvatar } from "@/components/shared/UserAvatar";
 import NotchCoachEarnings from "./NotchCoachEarnings";
 import NotchNextSession from "./NotchNextSession";
 import NotchCoachMiniStats from "./NotchCoachMiniStats";
@@ -23,11 +24,17 @@ const CoachProfileSummary = () => {
   const { data: selectedAvatar } = useSelectedAvatar('coach');
   const { data: coachProfile } = useCoachProfile();
 
+  const { data: boostStatus } = useCoachBoostStatus();
+  
   const displayName = profile?.display_name || profile?.first_name || t("common:profile.coach");
-  const avatarUrl = selectedAvatar ? getAvatarImageUrl(selectedAvatar.slug) : (coachProfile?.profile_image_url || profile?.avatar_url);
-  const initials = displayName?.slice(0, 2).toUpperCase() || "C";
   const subscriptionTier = coachProfile?.subscription_tier || "free";
   const isVerified = coachProfile?.is_verified;
+  
+  // Boost status
+  const boostActive = isBoostActive(boostStatus);
+  const remainingDays = getBoostRemainingDays(boostStatus);
+  const showExpiryWarning = boostActive && remainingDays <= 7;
+  const isUrgent = remainingDays <= 3;
 
   // Profile completion
   const profileCompletion = coachProfile ? calculateProfileCompletion(coachProfile) : 0;
@@ -52,13 +59,15 @@ const CoachProfileSummary = () => {
   return (
     <div className="h-full flex flex-col gap-3">
       {/* Row 1: Avatar and Name Section (compact) */}
-      <div className="flex items-center gap-3">
-        <Avatar className="h-14 w-14 border-2 border-primary/30">
-          <AvatarImage src={avatarUrl || undefined} alt={displayName} />
-          <AvatarFallback className="bg-primary/20 text-primary text-lg font-semibold">
-            {initials}
-          </AvatarFallback>
-        </Avatar>
+      <div className="flex items-start gap-3">
+        <UserAvatar
+          src={selectedAvatar ? undefined : (coachProfile?.profile_image_url || profile?.avatar_url)}
+          avatarSlug={selectedAvatar?.slug}
+          avatarRarity={selectedAvatar?.rarity}
+          name={displayName}
+          size="lg"
+          className="shrink-0 border-2 border-primary/30"
+        />
         
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
@@ -94,6 +103,35 @@ const CoachProfileSummary = () => {
             />
           </div>
         </div>
+        
+        {/* Boost Status Badge */}
+        <button
+          onClick={() => handleNavigate("/dashboard/coach/boost")}
+          className="flex flex-col items-end gap-0.5 shrink-0"
+        >
+          <Badge 
+            variant="outline"
+            className={cn(
+              "text-[10px] px-2 py-0.5 flex items-center gap-1",
+              boostActive 
+                ? "border-primary/50 text-primary bg-primary/10" 
+                : "border-border/50 text-muted-foreground bg-muted/50"
+            )}
+          >
+            <Zap className="w-3 h-3" />
+            {boostActive ? t("coach:boost.active", "Boost Active") : t("coach:boost.inactive", "Boost Inactive")}
+          </Badge>
+          
+          {showExpiryWarning && (
+            <span className={cn(
+              "text-[10px] flex items-center gap-0.5",
+              isUrgent ? "text-destructive" : "text-orange-500"
+            )}>
+              {isUrgent && <AlertTriangle className="w-3 h-3" />}
+              {t("coach:boost.expiresIn", "Expires in")} {remainingDays}d
+            </span>
+          )}
+        </button>
       </div>
 
       {/* Row 2: Earnings & Next Session (2-column grid) */}
