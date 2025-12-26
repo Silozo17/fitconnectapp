@@ -47,6 +47,7 @@ interface UseNativeIAPReturn {
   isAvailable: boolean;
   dismissUnsuccessfulModal: () => void;
   resetState: () => void;
+  reconcileSubscription: () => Promise<void>;
 }
 
 const POLL_INTERVAL_MS = 2000;
@@ -72,6 +73,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const pollAttemptsRef = useRef(0);
   const purchaseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const reconciliationAttemptedRef = useRef(false);
 
   // Cleanup purchase timeout helper
   const clearPurchaseTimeout = useCallback(() => {
@@ -122,6 +124,66 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
+
+  /**
+   * Reconcile subscription entitlement with RevenueCat
+   * Calls the verify-subscription-entitlement edge function to check RevenueCat
+   * and reconcile DB state if there's a mismatch
+   */
+  const reconcileSubscription = useCallback(async () => {
+    if (!coachProfileId || !user || reconciliationAttemptedRef.current) {
+      return;
+    }
+
+    reconciliationAttemptedRef.current = true;
+    console.log('[NativeIAP] Checking for subscription entitlement reconciliation...');
+
+    try {
+      const { data, error } = await supabase.functions.invoke('verify-subscription-entitlement');
+      
+      if (error) {
+        console.error('[NativeIAP] Subscription reconciliation failed:', error);
+        return;
+      }
+
+      if (data?.reconciled) {
+        console.log('[NativeIAP] Subscription reconciled!', data);
+        
+        // Invalidate queries to refresh subscription data
+        queryClient.invalidateQueries({ queryKey: ['coach-profile'] });
+        queryClient.invalidateQueries({ queryKey: ['platform-subscription'] });
+        queryClient.invalidateQueries({ queryKey: ['feature-access'] });
+        
+        if (data.tier && data.tier !== 'free') {
+          toast.success('Subscription activated!', {
+            description: `Your ${data.tier} plan is now active.`,
+          });
+          
+          // Trigger celebration
+          triggerHaptic('success');
+        }
+      } else {
+        console.log('[NativeIAP] No subscription reconciliation needed:', data?.status);
+      }
+    } catch (e) {
+      console.error('[NativeIAP] Subscription reconciliation exception:', e);
+    }
+  }, [coachProfileId, user, queryClient]);
+
+  /**
+   * Auto-reconcile on mount when native IAP is available
+   * This recovers from webhook failures or delayed processing
+   */
+  useEffect(() => {
+    if (state.isAvailable && coachProfileId && user) {
+      // Delay slightly to avoid race conditions on app startup
+      const timer = setTimeout(() => {
+        reconcileSubscription();
+      }, 1500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [state.isAvailable, coachProfileId, user, reconcileSubscription]);
 
   /**
    * Poll the backend to check if the subscription has been updated via webhook
@@ -192,7 +254,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
       }
 
       if (pollAttemptsRef.current >= MAX_POLL_ATTEMPTS) {
-        // Max attempts reached, stop polling but still proceed
+        // Max attempts reached, stop polling and try reconciliation as fallback
         if (pollIntervalRef.current) {
           clearInterval(pollIntervalRef.current);
         }
@@ -202,17 +264,20 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
           purchaseStatus: 'idle',
         }));
         
-        // Still call success callback - payment was successful, just webhook is slow
-        // The subscription will be active when webhook processes
-        toast.info('Processing your subscription...', {
-          description: 'Your payment was successful! Your plan will be active momentarily.',
+        // Try reconciliation as last resort for webhook failures
+        toast.info('Verifying your subscription...', {
+          description: 'If your plan doesn\'t activate shortly, please contact support.',
         });
         
-        // Navigate user forward even if confirmation is pending
+        // Reset reconciliation flag and try again
+        reconciliationAttemptedRef.current = false;
+        await reconcileSubscription();
+        
+        // Still call success callback - payment was successful, just webhook is slow
         options?.onPurchaseComplete?.(expectedTier);
       }
     }, POLL_INTERVAL_MS);
-  }, [pollSubscriptionStatus, queryClient, options]);
+  }, [pollSubscriptionStatus, queryClient, options, reconcileSubscription]);
 
   /**
    * Handle IAP success callback from Despia
@@ -417,6 +482,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
       pollIntervalRef.current = null;
     }
     pollAttemptsRef.current = 0;
+    reconciliationAttemptedRef.current = false;
     setState({
       isAvailable: isNativeIAPAvailable(),
       purchaseStatus: 'idle',
@@ -433,6 +499,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     isAvailable: state.isAvailable,
     dismissUnsuccessfulModal,
     resetState,
+    reconcileSubscription,
   };
 };
 

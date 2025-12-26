@@ -221,3 +221,6 @@ verify_jwt = false
 
 [functions.verify-boost-entitlement]
 verify_jwt = true
+
+[functions.verify-subscription-entitlement]
+verify_jwt = true
