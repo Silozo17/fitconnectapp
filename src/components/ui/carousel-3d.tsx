@@ -73,9 +73,9 @@ export function Carousel3D({
     };
   }, [emblaApi, onScroll]);
 
-  // Opacity-only depth effect - NO TRANSFORMS to preserve backdrop-filter/glassmorphism
-  const getSlideStyle = (index: number): React.CSSProperties => {
-    if (!emblaApi) return {};
+  // Calculate dim amount for internal overlay - NO opacity on wrapper to preserve backdrop-filter
+  const getDimAmount = (index: number): number => {
+    if (!emblaApi) return 0;
     
     const snapList = emblaApi.scrollSnapList();
     const scrollSnap = snapList[index] || 0;
@@ -85,14 +85,19 @@ export function Carousel3D({
     const absDistance = Math.abs(distance);
     const clampedAbsDistance = Math.min(2, absDistance);
     
-    // Opacity-only depth effect - NO transforms to preserve backdrop-filter
-    const opacity = 1 - clampedAbsDistance * 0.35; // 1 → 0.65 → 0.3
+    // Return dim amount (0 = no dim, 0.6 = max dim)
+    return clampedAbsDistance * 0.3;
+  };
+  
+  const getZIndex = (index: number): number => {
+    if (!emblaApi) return 10;
     
-    return {
-      opacity: Math.max(0.4, opacity),
-      zIndex: 10 - Math.round(absDistance),
-      transition: isDragging ? 'none' : 'opacity 0.2s ease-out',
-    };
+    const snapList = emblaApi.scrollSnapList();
+    const scrollSnap = snapList[index] || 0;
+    const distance = (scrollSnap - scrollProgress) * snapList.length;
+    const absDistance = Math.abs(distance);
+    
+    return 10 - Math.round(absDistance);
   };
 
   const childArray = Children.toArray(children);
@@ -115,19 +120,22 @@ export function Carousel3D({
           {childArray.map((child, index) => {
             if (!isValidElement(child)) return null;
             
-            const slideStyle = getSlideStyle(index);
+            const dimAmount = getDimAmount(index);
+            const zIndex = getZIndex(index);
             
             return (
               <div
                 key={index}
                 className="flex-shrink-0"
-                style={{
-                  opacity: slideStyle.opacity,
-                  zIndex: slideStyle.zIndex,
-                  transition: slideStyle.transition,
-                }}
+                style={{ zIndex }}
               >
-                {cloneElement(child as React.ReactElement<any>)}
+                {cloneElement(child as React.ReactElement<any>, {
+                  'data-dim-amount': dimAmount,
+                  style: {
+                    ...(child.props?.style || {}),
+                    '--carousel-dim': dimAmount,
+                  } as React.CSSProperties,
+                })}
               </div>
             );
           })}
