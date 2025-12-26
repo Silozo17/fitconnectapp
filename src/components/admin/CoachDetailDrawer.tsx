@@ -643,6 +643,8 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan,
             </div>
           </div>
         </div>
+        {/* Bottom safe area padding */}
+        <div className="h-8" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }} />
       </SheetContent>
 
       {/* Grant Avatar Modal */}

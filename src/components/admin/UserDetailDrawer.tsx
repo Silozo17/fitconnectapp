@@ -876,7 +876,7 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved, onEdit, on
           </div>
         </div>
 
-        <div className="mt-6 flex justify-end">
+        <div className="mt-6 pb-8 flex justify-end" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom, 0px))' }}>
           <Button onClick={handleSave} disabled={saving}>
             {saving ? (
               <>

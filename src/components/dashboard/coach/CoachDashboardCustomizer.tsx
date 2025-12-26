@@ -160,31 +160,33 @@ export function CoachDashboardCustomizer({ open, onOpenChange }: CoachDashboardC
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={activeCategory} onValueChange={setActiveCategory} className="flex-1">
-          <TabsList className="grid w-full grid-cols-5">
-            {COACH_WIDGET_CATEGORIES.map((cat) => {
-              const Icon = categoryIcons[cat.key] || BarChart3;
-              const count = getCategoryCount(cat.key);
-              return (
-                <TabsTrigger key={cat.key} value={cat.key} className="flex items-center gap-1 text-xs">
-                  <Icon className="h-3 w-3" />
-                  <span className="hidden sm:inline">{cat.label.split(" ")[0]}</span>
-                  <Badge variant="secondary" className="h-4 w-4 p-0 text-[10px] justify-center">
-                    {count.visible}
-                  </Badge>
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
+        <Tabs value={activeCategory} onValueChange={setActiveCategory} className="flex-1 min-h-0">
+          <div className="overflow-x-auto -mx-2 px-2">
+            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-5 gap-1">
+              {COACH_WIDGET_CATEGORIES.map((cat) => {
+                const Icon = categoryIcons[cat.key] || BarChart3;
+                const count = getCategoryCount(cat.key);
+                return (
+                  <TabsTrigger key={cat.key} value={cat.key} className="flex items-center gap-1 text-xs whitespace-nowrap px-2 sm:px-3">
+                    <Icon className="h-3 w-3 flex-shrink-0" />
+                    <span className="hidden sm:inline">{cat.label.split(" ")[0]}</span>
+                    <Badge variant="secondary" className="h-4 min-w-[16px] px-1 text-[10px] justify-center">
+                      {count.visible}
+                    </Badge>
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+          </div>
 
-          <ScrollArea className="h-[400px] mt-4 pr-4">
+          <ScrollArea className="h-[300px] sm:h-[400px] mt-4 pr-2 sm:pr-4">
             {COACH_WIDGET_CATEGORIES.map((cat) => (
               <TabsContent key={cat.key} value={cat.key} className="mt-0">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold">{cat.label}</h3>
-                    <Badge variant="outline">
-                      {getCategoryCount(cat.key).visible}/{getCategoryCount(cat.key).total} visible
+                    <h3 className="font-semibold text-sm sm:text-base">{cat.label}</h3>
+                    <Badge variant="outline" className="text-xs">
+                      {getCategoryCount(cat.key).visible}/{getCategoryCount(cat.key).total}
                     </Badge>
                   </div>
                   <Separator />
@@ -200,7 +202,7 @@ export function CoachDashboardCustomizer({ open, onOpenChange }: CoachDashboardC
                     return (
                       <div 
                         key={type}
-                        className="flex items-center justify-between p-3 rounded-lg glass-item gap-3"
+                        className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg glass-item gap-2 sm:gap-3"
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <Switch
@@ -214,14 +216,14 @@ export function CoachDashboardCustomizer({ open, onOpenChange }: CoachDashboardC
                           </Label>
                         </div>
                         
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 pl-10 sm:pl-0">
                           {hasFormatOptions && (
                             <Select
                               value={currentFormat}
                               onValueChange={(format) => handleFormatChange(type, widgetState, format as WidgetDisplayFormat)}
                               disabled={updateWidget.isPending || addWidget.isPending}
                             >
-                              <SelectTrigger className="w-[100px]">
+                              <SelectTrigger className="w-[80px] sm:w-[100px] h-8 text-xs sm:text-sm">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -239,7 +241,7 @@ export function CoachDashboardCustomizer({ open, onOpenChange }: CoachDashboardC
                             onValueChange={(size) => handleSizeChange(type, widgetState, size)}
                             disabled={updateWidget.isPending || addWidget.isPending}
                           >
-                            <SelectTrigger className="w-[90px]">
+                            <SelectTrigger className="w-[70px] sm:w-[90px] h-8 text-xs sm:text-sm">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -261,11 +263,12 @@ export function CoachDashboardCustomizer({ open, onOpenChange }: CoachDashboardC
 
         <Separator />
 
-        <div className="flex justify-between">
+        <div className="flex flex-col-reverse sm:flex-row justify-between gap-2">
           <Button 
             variant="outline" 
             onClick={handleReset}
             disabled={resetWidgets.isPending}
+            className="w-full sm:w-auto"
           >
             {resetWidgets.isPending ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -274,7 +277,7 @@ export function CoachDashboardCustomizer({ open, onOpenChange }: CoachDashboardC
             )}
             Reset to Defaults
           </Button>
-          <Button onClick={() => onOpenChange(false)}>
+          <Button onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
             Done
           </Button>
         </div>
