@@ -24,6 +24,8 @@ import {
   Sheet,
   SheetContent,
 } from "@/components/ui/sheet";
+import ViewSwitcher from "@/components/admin/ViewSwitcher";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 
 type BadgeKey = "users" | "verification" | "feedback";
 
@@ -196,6 +198,12 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }: AdminSidebarProps) => {
               </div>
               <span className="font-bold text-lg text-foreground">FitConnect</span>
             </div>
+          </div>
+
+          {/* View Switcher & Notifications - Mobile only */}
+          <div className="p-3 border-b border-border flex items-center justify-between gap-2">
+            <ViewSwitcher />
+            <NotificationCenter />
           </div>
 
           {/* Search - Mobile only */}
