@@ -26,15 +26,13 @@ const getBMICategory = (bmi: number): { label: string; color: string; hsl: strin
   return { label: 'Obese', color: 'text-red-400', hsl: 'hsl(0, 84%, 60%)' };
 };
 
-// Segment definitions - angles calculated from BMI thresholds on scale 10-50 mapped to -90° to 270°
-// BMI 18.5 → ((18.5-10)/40) × 360 - 90 = -13.5°
-// BMI 25 → ((25-10)/40) × 360 - 90 = 45°
-// BMI 30 → ((30-10)/40) × 360 - 90 = 90°
+// Segment definitions - equal visual segments (90° each) for better aesthetics
+// Visual: 4 equal segments, but indicator position still maps to actual BMI
 const segments = [
-  { startAngle: -90, endAngle: -13.5, color: 'hsl(217, 91%, 60%)', range: [10, 18.5] },   // blue - underweight
-  { startAngle: -13.5, endAngle: 45, color: 'hsl(142, 71%, 45%)', range: [18.5, 25] },    // green - normal
-  { startAngle: 45, endAngle: 90, color: 'hsl(48, 96%, 53%)', range: [25, 30] },          // yellow - overweight
-  { startAngle: 90, endAngle: 270, color: 'hsl(0, 84%, 60%)', range: [30, 50] },          // red - obese
+  { startAngle: -90, endAngle: 0, color: 'hsl(217, 91%, 60%)', range: [10, 18.5] },     // blue - underweight
+  { startAngle: 0, endAngle: 90, color: 'hsl(142, 71%, 45%)', range: [18.5, 25] },      // green - normal
+  { startAngle: 90, endAngle: 180, color: 'hsl(48, 96%, 53%)', range: [25, 30] },       // yellow - overweight
+  { startAngle: 180, endAngle: 270, color: 'hsl(0, 84%, 60%)', range: [30, 50] },       // red - obese
 ];
 
 function polarToCartesian(cx: number, cy: number, radius: number, angleInDegrees: number) {

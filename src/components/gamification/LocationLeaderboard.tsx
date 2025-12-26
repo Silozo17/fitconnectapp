@@ -32,10 +32,14 @@ function useLocationLeaderboard(locationType: LocationType, locationValue: strin
   return useQuery({
     queryKey: ['location-leaderboard', locationType, locationValue],
     queryFn: async () => {
-      // Get all client profiles that are visible on leaderboards
+      // Get all client profiles that are visible on leaderboards with avatar data
       const { data: visibleProfiles } = await supabase
         .from('client_profiles')
-        .select('id, first_name, leaderboard_display_name, city, county, country, avatar_url')
+        .select(`
+          id, first_name, leaderboard_display_name, city, county, country, avatar_url,
+          selected_avatar_id,
+          selected_avatar:avatars!client_profiles_selected_avatar_id_fkey(slug, rarity)
+        `)
         .eq('leaderboard_visible', true);
 
       if (!visibleProfiles || visibleProfiles.length === 0) {
@@ -70,9 +74,11 @@ function useLocationLeaderboard(locationType: LocationType, locationValue: strin
 
       if (!xpData) return [];
 
-      // Map to leaderboard entries with privacy-safe data
+      // Map to leaderboard entries with privacy-safe data including avatar
       const entries: XPLeaderboardEntry[] = xpData.map((xp, index) => {
         const profile = filteredProfiles.find(p => p.id === xp.client_id);
+        const avatarData = profile?.selected_avatar as { slug: string; rarity: string } | null;
+        
         return {
           client_id: xp.client_id,
           total_xp: xp.total_xp,
@@ -80,10 +86,12 @@ function useLocationLeaderboard(locationType: LocationType, locationValue: strin
           rank: index + 1,
           first_name: profile?.leaderboard_display_name || profile?.first_name || 'Anonymous',
           last_name: null,
-          avatar_url: null,
+          avatar_url: profile?.avatar_url || null,
           city: profile?.city || null,
           county: profile?.county || null,
           country: profile?.country || null,
+          selected_avatar_slug: avatarData?.slug || null,
+          selected_avatar_rarity: avatarData?.rarity || null,
         };
       });
 

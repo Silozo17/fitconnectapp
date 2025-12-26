@@ -60,6 +60,8 @@ export interface XPLeaderboardEntry {
   city?: string | null;
   county?: string | null;
   country?: string | null;
+  selected_avatar_slug?: string | null;
+  selected_avatar_rarity?: string | null;
 }
 
 export const XP_ACTIONS = {
