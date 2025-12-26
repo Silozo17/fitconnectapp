@@ -102,12 +102,12 @@ export function DateRangeFilter({
   };
 
   return (
-    <div className={cn("flex flex-wrap items-center gap-2", className)}>
+    <div className={cn("flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2", className)}>
       {/* Preset / Date Range Selector */}
       <Popover open={isCalendarOpen} onOpenChange={handleCalendarOpenChange}>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
           <Select value={preset} onValueChange={handlePresetChange}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className="w-full sm:w-[160px]">
               <SelectValue placeholder="Select range" />
             </SelectTrigger>
             <SelectContent>
@@ -123,13 +123,13 @@ export function DateRangeFilter({
             <Button
               variant="outline"
               className={cn(
-                "justify-start text-left font-normal min-w-[200px]",
+                "justify-start text-left font-normal w-full sm:min-w-[200px] sm:w-auto",
                 !startDate && "text-muted-foreground"
               )}
             >
               <Calendar className="mr-2 h-4 w-4" />
-              {dateRangeLabel}
-              <ChevronDown className="ml-auto h-4 w-4 opacity-50" />
+              <span className="truncate">{dateRangeLabel}</span>
+              <ChevronDown className="ml-auto h-4 w-4 opacity-50 shrink-0" />
             </Button>
           </PopoverTrigger>
         </div>
@@ -182,8 +182,8 @@ export function DateRangeFilter({
       {/* Comparison Selector */}
       {showComparison && (
         <Select value={compareMode} onValueChange={(v) => onCompareModeChange(v as CompareMode)}>
-          <SelectTrigger className="w-[180px]">
-            <GitCompare className="mr-2 h-4 w-4" />
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <GitCompare className="mr-2 h-4 w-4 shrink-0" />
             <SelectValue placeholder="Compare to..." />
           </SelectTrigger>
           <SelectContent>

@@ -149,18 +149,18 @@ const AdminReviews = () => {
             <TabsContent value="reviews" className="space-y-4">
               <Card>
                 <CardHeader>
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                       <CardTitle>All Reviews</CardTitle>
                       <CardDescription>View and moderate platform reviews</CardDescription>
                     </div>
-                    <div className="relative">
+                    <div className="relative w-full sm:w-64">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         placeholder="Search reviews..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10 w-64"
+                        className="pl-10 w-full"
                       />
                     </div>
                   </div>
