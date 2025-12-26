@@ -79,8 +79,8 @@ const ProfilePanel = ({ children, headerHeight = 64 }: ProfilePanelProps) => {
         className={cn(
           // Positioning - below backdrop but above content
           "fixed left-0 right-0 z-[45]",
-          // Height - exactly 50vh
-          "h-[50vh]",
+          // Height - exactly 60vh
+          "h-[60vh]",
           // Glass styling
           "glass-floating",
           // Border adjustments
@@ -103,7 +103,7 @@ const ProfilePanel = ({ children, headerHeight = 64 }: ProfilePanelProps) => {
         {/* Content area - hidden when panel is closed */}
         <div 
           className={cn(
-            "h-full overflow-hidden px-4 pt-4 pb-20",
+            "h-full overflow-hidden px-4 pt-4 pb-8",
             !isOpen && "invisible"
           )}
           aria-hidden={!isOpen}

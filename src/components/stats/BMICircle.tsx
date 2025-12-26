@@ -163,8 +163,8 @@ export function BMICircle({
         {indicatorPos && (
           <>
             <circle
-              cx={indicatorPos.x}
-              cy={indicatorPos.y}
+              cx={indicatorPos.x + padding}
+              cy={indicatorPos.y + padding}
               r={indicatorRadius}
               fill="hsl(var(--background))"
               stroke={category?.hsl || 'hsl(var(--primary))'}
@@ -174,8 +174,8 @@ export function BMICircle({
               }}
             />
             <circle
-              cx={indicatorPos.x}
-              cy={indicatorPos.y}
+              cx={indicatorPos.x + padding}
+              cy={indicatorPos.y + padding}
               r={strokeWidth * 0.35}
               fill={category?.hsl || 'hsl(var(--primary))'}
             />
