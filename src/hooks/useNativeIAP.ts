@@ -101,31 +101,6 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
   }, []);
 
   /**
-   * Safety reset on app resume/foreground
-   * Clears stuck purchasing state if no polling is active
-   */
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        // Give callbacks 2 seconds to fire if there's a pending response
-        setTimeout(() => {
-          setState(prev => {
-            // Only reset if stuck in purchasing (not polling, not pending)
-            if (prev.purchaseStatus === 'purchasing' && !prev.isPolling) {
-              console.log('[NativeIAP] Safety reset on app resume - stuck in purchasing state');
-              return { ...prev, purchaseStatus: 'idle' };
-            }
-            return prev;
-          });
-        }, 2000);
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, []);
-
-  /**
    * Reconcile subscription entitlement with RevenueCat
    * Calls the verify-subscription-entitlement edge function to check RevenueCat
    * and reconcile DB state if there's a mismatch
@@ -184,6 +159,40 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
       return () => clearTimeout(timer);
     }
   }, [state.isAvailable, coachProfileId, user, reconcileSubscription]);
+
+  /**
+   * Foreground/resume reconciliation and safety reset
+   * When app returns to foreground:
+   * 1. Re-check subscription entitlement (handles StoreKit interruptions, slow webhooks)
+   * 2. Clear stuck purchasing state if no polling is active
+   */
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('[NativeIAP] App resumed - checking subscription entitlement');
+        
+        // Reset reconciliation flag and re-check entitlement
+        // This handles: StoreKit interruptions, background purchases, slow webhooks
+        reconciliationAttemptedRef.current = false;
+        reconcileSubscription();
+        
+        // Give callbacks 2 seconds to fire if there's a pending response
+        setTimeout(() => {
+          setState(prev => {
+            // Only reset if stuck in purchasing (not polling, not pending)
+            if (prev.purchaseStatus === 'purchasing' && !prev.isPolling) {
+              console.log('[NativeIAP] Safety reset on app resume - stuck in purchasing state');
+              return { ...prev, purchaseStatus: 'idle' };
+            }
+            return prev;
+          });
+        }, 2000);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [reconcileSubscription]);
 
   /**
    * Poll the backend to check if the subscription has been updated via webhook
