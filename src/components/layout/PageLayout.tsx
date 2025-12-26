@@ -20,6 +20,7 @@ interface PageLayoutProps {
   keywords?: string[];
   schema?: object | object[];
   breadcrumbs?: BreadcrumbItem[];
+  className?: string;
 }
 
 const PageLayout = ({ 
@@ -33,6 +34,7 @@ const PageLayout = ({
   keywords,
   schema,
   breadcrumbs,
+  className,
 }: PageLayoutProps) => {
   // Combine custom schema with breadcrumb schema if breadcrumbs provided
   const combinedSchema = breadcrumbs 
@@ -54,7 +56,7 @@ const PageLayout = ({
         keywords={keywords}
         schema={combinedSchema}
       />
-      <div className="min-h-screen bg-background relative">
+      <div className={`min-h-screen bg-background relative ${className || ''}`}>
         <PlatformBackground />
         <Navbar />
         <main className="relative pb-mobile-nav">{children}</main>
