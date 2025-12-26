@@ -10,7 +10,7 @@ import UserConnectionRequests from "@/components/dashboard/client/UserConnection
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { HorizontalScroll, ScrollItem } from "@/components/ui/horizontal-scroll";
+import { Carousel3D, Carousel3DItem } from "@/components/ui/carousel-3d";
 import { IconSquare } from "@/components/ui/icon-square";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
 import {
@@ -165,12 +165,12 @@ const ClientOverview = () => {
           <h2 className="text-xl font-bold text-foreground font-display">Quick Actions</h2>
         </div>
         
-        {/* Mobile: Horizontal scroll */}
-        <div className="md:hidden">
-          <HorizontalScroll showArrows={false} gap="md">
+        {/* Mobile: 3D Carousel */}
+        <div className="md:hidden -mx-5">
+          <Carousel3D gap={12}>
             {isLoading ? (
               Array.from({ length: 4 }).map((_, i) => (
-                <ScrollItem key={i} className="w-[200px]">
+                <Carousel3DItem key={i} className="w-[170px]">
                   <Card variant="elevated" className="h-full rounded-3xl">
                     <CardContent className="p-5">
                       <ShimmerSkeleton className="h-14 w-14 rounded-2xl mb-4" />
@@ -178,13 +178,13 @@ const ClientOverview = () => {
                       <ShimmerSkeleton className="h-4 w-32" />
                     </CardContent>
                   </Card>
-                </ScrollItem>
+                </Carousel3DItem>
               ))
             ) : (
               quickActions.map((action) => (
-                <ScrollItem key={action.href} className="w-[180px]">
+                <Carousel3DItem key={action.href} className="w-[170px]">
                   <Link to={action.href}>
-                    <Card variant="elevated" className="h-full rounded-3xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
+                    <Card variant="elevated" className="h-full rounded-3xl transition-all duration-200">
                       <CardContent className="p-5">
                         <IconSquare icon={action.icon} color={action.color} size="md" className="mb-4" />
                         <h3 className="font-semibold text-foreground">
@@ -196,10 +196,10 @@ const ClientOverview = () => {
                       </CardContent>
                     </Card>
                   </Link>
-                </ScrollItem>
+                </Carousel3DItem>
               ))
             )}
-          </HorizontalScroll>
+          </Carousel3D>
         </div>
 
         {/* Desktop: Grid */}
