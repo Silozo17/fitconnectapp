@@ -927,7 +927,7 @@ const CoachSchedule = () => {
         <TabsContent value="availability" className="space-y-6">
           {/* Stripe Connect Banner */}
           {!stripeConnected && (
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-warning/10 border border-warning/30 rounded-lg">
+            <div className="glass-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 border-l-4 border-l-warning">
               <div className="flex items-start gap-3">
                 <CreditCard className="w-5 h-5 text-warning mt-0.5 shrink-0" />
                 <div>

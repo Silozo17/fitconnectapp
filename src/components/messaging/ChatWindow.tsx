@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useMessages, getQuickSendMetadata } from "@/hooks/useMessages";
 import { format } from "date-fns";
-import { Send, Loader2, ArrowLeft, Check, CheckCheck, User, Briefcase, Shield, MapPin, PanelRightOpen, PanelRightClose } from "lucide-react";
+import { Send, Loader2, ArrowLeft, Check, CheckCheck, User, Briefcase, Shield, MapPin, PanelRightOpen, PanelRightClose, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
@@ -42,6 +42,7 @@ interface ChatWindowProps {
   participantLocation?: string | null;
   showSidePanel?: boolean;
   onToggleSidePanel?: () => void;
+  onQuickSendClick?: () => void;
 }
 
 const ChatWindow = ({ 
@@ -51,7 +52,8 @@ const ChatWindow = ({
   participantType,
   participantLocation,
   showSidePanel = false,
-  onToggleSidePanel
+  onToggleSidePanel,
+  onQuickSendClick
 }: ChatWindowProps) => {
   const { t } = useTranslation('messaging');
   const { messages, loading, error, sendMessage, currentProfileId, softRefreshConversations } = useMessages(participantId);
@@ -294,7 +296,17 @@ const ChatWindow = ({
               </div>
             </button>
 
-            {/* Mobile quick actions: removed duplicate Zap button - QuickSendFAB provides full content */}
+            {/* Quick Send button for coaches - mobile only */}
+            {isCoachView && onQuickSendClick && (
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={onQuickSendClick}
+                className="lg:hidden"
+              >
+                <Zap className="h-5 w-5" />
+              </Button>
+            )}
 
             {/* Side panel toggle for coaches */}
             {isCoachView && onToggleSidePanel && (

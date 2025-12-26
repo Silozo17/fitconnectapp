@@ -5,7 +5,6 @@ import ConversationList from "@/components/messaging/ConversationList";
 import ChatWindow from "@/components/messaging/ChatWindow";
 import NewConversationModal from "@/components/messaging/NewConversationModal";
 import MessageSidePanel from "@/components/messaging/MessageSidePanel";
-import QuickSendFAB from "@/components/messaging/QuickSendFAB";
 import QuickSendSheet from "@/components/messaging/QuickSendSheet";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { MessageSquare, Plus } from "lucide-react";
@@ -59,6 +58,7 @@ const CoachMessages = () => {
                 participantName={participantName}
                 showSidePanel={showSidePanel}
                 onToggleSidePanel={() => setShowSidePanel(!showSidePanel)}
+                onQuickSendClick={() => setShowQuickSendSheet(true)}
               />
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
@@ -91,18 +91,15 @@ const CoachMessages = () => {
         </div>
       </div>
 
-      {/* Mobile FAB and Sheet for Quick Send - Only for coaches */}
+      {/* Quick Send Sheet for coaches */}
       {participantId && activeProfileType === "coach" && (
-        <>
-          <QuickSendFAB onClick={() => setShowQuickSendSheet(true)} />
-          <QuickSendSheet
-            open={showQuickSendSheet}
-            onOpenChange={setShowQuickSendSheet}
-            participantId={participantId}
-            clientId={participantId}
-            onSendMessage={handleSendMessage}
-          />
-        </>
+        <QuickSendSheet
+          open={showQuickSendSheet}
+          onOpenChange={setShowQuickSendSheet}
+          participantId={participantId}
+          clientId={participantId}
+          onSendMessage={handleSendMessage}
+        />
       )}
 
       <NewConversationModal 
