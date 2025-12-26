@@ -34,8 +34,8 @@ const ProfileNotch = ({ className, headerHeight = 64 }: ProfileNotchProps) => {
       )}
       style={{
         // When closed: at bottom of header, protruding down
-        // When open: at bottom of panel (header + 50vh), protruding down
-        top: isOpen ? `calc(${headerHeight}px + 50vh - 24px)` : `${headerHeight - 24}px`,
+        // When open: at bottom of panel (header + 70vh), protruding down
+        top: isOpen ? `calc(${headerHeight}px + 70vh - 24px)` : `${headerHeight - 24}px`,
       }}
       aria-label={isOpen ? "Close profile" : "Open profile"}
       aria-expanded={isOpen}
