@@ -98,41 +98,39 @@ export function Carousel3D({
   const childArray = Children.toArray(children);
 
   return (
-    <div className={cn("relative overflow-hidden", className)}>
-      {/* Carousel viewport */}
-      <div className="overflow-hidden">
+    <div className={cn("relative", className)}>
+      {/* Carousel viewport - single overflow container to preserve backdrop-filter */}
+      <div 
+        ref={emblaRef} 
+        className="overflow-x-clip"
+      >
         <div 
-          ref={emblaRef} 
-          className="overflow-x-clip"
+          className="flex items-center pt-4 pb-8"
+          style={{ 
+            gap: `${gap}px`, 
+            paddingLeft: "20px", 
+            paddingRight: "20px",
+          }}
         >
-          <div 
-            className="flex items-center pt-4 pb-8"
-            style={{ 
-              gap: `${gap}px`, 
-              paddingLeft: "20px", 
-              paddingRight: "20px",
-            }}
-          >
-            {childArray.map((child, index) => {
-              if (!isValidElement(child)) return null;
-              
-              const slideStyle = getSlideStyle(index);
-              
-              return (
-                <div
-                  key={index}
-                  className="flex-shrink-0"
-                  style={{
-                    opacity: slideStyle.opacity,
-                    zIndex: slideStyle.zIndex,
-                    transition: slideStyle.transition,
-                  }}
-                >
-                  {cloneElement(child as React.ReactElement<any>)}
-                </div>
-              );
-            })}
-          </div>
+          {childArray.map((child, index) => {
+            if (!isValidElement(child)) return null;
+            
+            const slideStyle = getSlideStyle(index);
+            
+            return (
+              <div
+                key={index}
+                className="flex-shrink-0"
+                style={{
+                  opacity: slideStyle.opacity,
+                  zIndex: slideStyle.zIndex,
+                  transition: slideStyle.transition,
+                }}
+              >
+                {cloneElement(child as React.ReactElement<any>)}
+              </div>
+            );
+          })}
         </div>
       </div>
 

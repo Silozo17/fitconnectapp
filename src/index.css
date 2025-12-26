@@ -392,6 +392,7 @@
 
   /* Elevated glass card - for interactive/prominent cards */
   .glass-card-elevated {
+    isolation: isolate; /* Creates clean stacking context for backdrop-filter */
     background: linear-gradient(145deg, 
       hsl(var(--card) / 0.3), 
       hsl(var(--card) / 0.18));

@@ -166,7 +166,7 @@ const ClientOverview = () => {
         </div>
         
         {/* Mobile: 3D Carousel */}
-        <div className="md:hidden -mx-5 overflow-hidden">
+        <div className="md:hidden -mx-5">
           <Carousel3D gap={12}>
             {isLoading ? (
               Array.from({ length: 4 }).map((_, i) => (
