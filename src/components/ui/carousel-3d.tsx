@@ -23,7 +23,7 @@ export function Carousel3D({
   gap = 16,
 }: Carousel3DProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
-    loop: true,
+    loop: false,
     align: "center",
     containScroll: false,
     skipSnaps: false,
@@ -118,13 +118,26 @@ export function Carousel3D({
             {childArray.map((child, index) => {
               if (!isValidElement(child)) return null;
               
+              const slideStyle = getSlideStyle(index);
+              
               return (
                 <div
                   key={index}
                   className="flex-shrink-0"
-                  style={getSlideStyle(index)}
+                  style={{
+                    zIndex: slideStyle.zIndex,
+                  }}
                 >
-                  {cloneElement(child as React.ReactElement<any>)}
+                  {/* Inner wrapper for transforms - keeps backdrop-filter working on children */}
+                  <div 
+                    style={{
+                      transform: slideStyle.transform,
+                      opacity: slideStyle.opacity,
+                      transition: slideStyle.transition,
+                    }}
+                  >
+                    {cloneElement(child as React.ReactElement<any>)}
+                  </div>
                 </div>
               );
             })}
