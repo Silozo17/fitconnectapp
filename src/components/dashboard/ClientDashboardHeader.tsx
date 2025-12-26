@@ -19,7 +19,7 @@ import ViewSwitcher from "@/components/admin/ViewSwitcher";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { FeedbackModal } from "@/components/feedback/FeedbackModal";
-import ProfileNotch from "@/components/shared/ProfileNotch";
+
 
 interface ClientDashboardHeaderProps {
   onMenuToggle: () => void;
@@ -114,9 +114,6 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
           </Button>
         </div>
       </div>
-
-      {/* Profile Notch - centered, protruding below header */}
-      <ProfileNotch />
     </header>
   );
 };

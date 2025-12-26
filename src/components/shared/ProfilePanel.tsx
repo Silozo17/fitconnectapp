@@ -77,8 +77,8 @@ const ProfilePanel = ({ children, headerHeight = 64 }: ProfilePanelProps) => {
       <div
         ref={panelRef}
         className={cn(
-          // Positioning
-          "fixed left-0 right-0 z-45",
+          // Positioning - below backdrop but above content
+          "fixed left-0 right-0 z-[45]",
           // Height - exactly 50vh
           "h-[50vh]",
           // Glass styling
@@ -100,10 +100,10 @@ const ProfilePanel = ({ children, headerHeight = 64 }: ProfilePanelProps) => {
         <div className="h-full overflow-hidden px-4 pt-4 pb-8">
           {children}
         </div>
-
-        {/* Notch at bottom of panel when open */}
-        <ProfileNotch />
       </div>
+
+      {/* Notch - always visible, fixed position */}
+      <ProfileNotch headerHeight={headerHeight} />
     </>
   );
 };
