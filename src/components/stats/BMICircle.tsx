@@ -86,9 +86,14 @@ export function BMICircle({
   
   const resolvedSize = typeof size === 'number' ? size : sizeMap[size];
   const strokeWidth = resolvedSize * 0.1;
+  const indicatorRadius = strokeWidth * 0.8;
+  const indicatorStroke = 3;
+  // Add padding to prevent indicator clipping
+  const padding = indicatorRadius + indicatorStroke + 2;
+  const containerSize = resolvedSize + padding * 2;
   const radius = (resolvedSize - strokeWidth) / 2;
-  const cx = resolvedSize / 2;
-  const cy = resolvedSize / 2;
+  const cx = resolvedSize / 2 + padding;
+  const cy = resolvedSize / 2 + padding;
 
   // Use validBmi for ALL calculations to ensure consistency
   const category = validBmi ? getBMICategory(validBmi) : null;
@@ -99,9 +104,9 @@ export function BMICircle({
     return (
       <div 
         className={cn('relative flex items-center justify-center', className)}
-        style={{ width: resolvedSize, height: resolvedSize }}
+        style={{ width: containerSize, height: containerSize }}
       >
-        <svg width={resolvedSize} height={resolvedSize} className="opacity-30">
+        <svg width={containerSize} height={containerSize} className="opacity-30" style={{ overflow: 'visible' }}>
           {segments.map((seg, i) => (
             <path
               key={i}
@@ -123,9 +128,9 @@ export function BMICircle({
   return (
     <div 
       className={cn('relative flex items-center justify-center', className)}
-      style={{ width: resolvedSize, height: resolvedSize }}
+      style={{ width: containerSize, height: containerSize }}
     >
-      <svg width={resolvedSize} height={resolvedSize}>
+      <svg width={containerSize} height={containerSize} style={{ overflow: 'visible' }}>
         {/* Background track */}
         <circle
           cx={cx}
@@ -158,19 +163,19 @@ export function BMICircle({
         {indicatorPos && (
           <>
             <circle
-              cx={indicatorPos.x}
-              cy={indicatorPos.y}
-              r={strokeWidth * 0.8}
+              cx={indicatorPos.x + padding}
+              cy={indicatorPos.y + padding}
+              r={indicatorRadius}
               fill="hsl(var(--background))"
               stroke={category?.hsl || 'hsl(var(--primary))'}
-              strokeWidth={3}
+              strokeWidth={indicatorStroke}
               style={{
                 filter: `drop-shadow(0 0 6px ${category?.hsl || 'hsl(var(--primary))'})`,
               }}
             />
             <circle
-              cx={indicatorPos.x}
-              cy={indicatorPos.y}
+              cx={indicatorPos.x + padding}
+              cy={indicatorPos.y + padding}
               r={strokeWidth * 0.35}
               fill={category?.hsl || 'hsl(var(--primary))'}
             />

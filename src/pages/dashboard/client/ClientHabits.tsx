@@ -17,7 +17,8 @@ const ClientHabits = () => {
   
   // Calculate total streaks
   const totalCurrentStreak = allHabits?.reduce((sum, h) => sum + (h.streak?.current_streak || 0), 0) || 0;
-  const bestStreak = Math.max(...(allHabits?.map(h => h.streak?.longest_streak || 0) || [0]));
+  const streakValues = allHabits?.map(h => h.streak?.longest_streak || 0) || [];
+  const bestStreak = streakValues.length > 0 ? Math.max(...streakValues) : 0;
   const totalCompletions = allHabits?.reduce((sum, h) => sum + (h.streak?.total_completions || 0), 0) || 0;
   
   const isLoading = todayLoading || habitsLoading;
