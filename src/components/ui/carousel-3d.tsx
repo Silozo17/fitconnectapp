@@ -93,12 +93,12 @@ export function Carousel3D({
   const childArray = Children.toArray(children);
 
   return (
-    <div className={cn("relative overflow-x-hidden", className)}>
-      {/* Carousel viewport - overflow-hidden clips shadows */}
+    <div className={cn("relative overflow-hidden", className)}>
+      {/* Carousel viewport */}
       <div className="overflow-hidden">
         <div 
           ref={emblaRef} 
-          className="overflow-visible"
+          className="overflow-x-clip"
           style={{ perspective: "1000px" }}
         >
           <div 

@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useSelectedAvatar, getAvatarImageUrl } from "@/hooks/useAvatars";
-import { useClientXP, getLevelTitle } from "@/hooks/useGamification";
+import { useClientXP, getLevelTitle, calculateLevelFromXP } from "@/hooks/useGamification";
 import { useProfilePanel } from "@/contexts/ProfilePanelContext";
 import NotchStepsWidget from "./NotchStepsWidget";
 import NotchStreakWidget from "./NotchStreakWidget";
@@ -28,9 +28,10 @@ const ClientProfileSummary = () => {
   const initials = displayName?.slice(0, 2).toUpperCase() || "U";
   const levelTitle = getLevelTitle(xpData?.current_level || 1);
 
-  // Calculate XP progress percentage
-  const xpProgress = xpData?.xp_to_next_level 
-    ? Math.min(100, ((xpData.total_xp % 1000) / (xpData.xp_to_next_level || 1000)) * 100) 
+  // Calculate XP progress percentage using correct level calculation
+  const { xpInLevel, xpForNextLevel } = calculateLevelFromXP(xpData?.total_xp || 0);
+  const xpProgress = xpForNextLevel > 0 
+    ? Math.max((xpInLevel / xpForNextLevel) * 100, 8) 
     : 0;
 
   const handleNavigate = (path: string) => {

@@ -91,7 +91,7 @@ export function XPProgressBar({ compact = false, variant = 'linear' }: XPProgres
       
       <div className="space-y-1">
         <Progress 
-          value={Math.max(progressPercent, 3)} 
+          value={Math.max(progressPercent, 8)} 
           className="h-3 bg-muted"
         />
         <div className="flex justify-between text-xs text-muted-foreground">
