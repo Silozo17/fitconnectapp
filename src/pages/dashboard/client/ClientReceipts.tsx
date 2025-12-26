@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useClientReceipts } from "@/hooks/useCoachInvoiceSettings";
 import { InvoicePreview, InvoiceData, BusinessDetails } from "@/components/invoice/InvoicePreview";
 import { TemplateId } from "@/hooks/useCoachInvoiceSettings";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 const ClientReceipts = () => {
   const { data: receipts = [], isLoading } = useClientReceipts();
@@ -66,6 +67,11 @@ const ClientReceipts = () => {
 
   return (
     <ClientDashboardLayout>
+      <PageHelpBanner
+        pageKey="client_receipts"
+        title="Payment History"
+        description="View and download invoices for all your purchases"
+      />
       <div className="space-y-6">
         <div>
           <h1 className="font-display text-2xl font-bold text-foreground">Receipts</h1>

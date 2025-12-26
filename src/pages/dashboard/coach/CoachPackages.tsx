@@ -12,6 +12,7 @@ import CreateSubscriptionPlanModal from "@/components/packages/CreateSubscriptio
 import { toast } from "sonner";
 import { useLocale } from "@/contexts/LocaleContext";
 import { useTranslation } from "@/hooks/useTranslation";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 const CoachPackages = () => {
   const { t } = useTranslation('coach');
@@ -180,6 +181,11 @@ const CoachPackages = () => {
 
   return (
     <DashboardLayout title={t('packagesPage.title')} description={t('packagesPage.subtitle')}>
+      <PageHelpBanner
+        pageKey="coach_packages"
+        title="Session Packages"
+        description="Create bundles and subscription plans for your services"
+      />
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">{t('packagesPage.title')}</h1>
         <p className="text-muted-foreground">

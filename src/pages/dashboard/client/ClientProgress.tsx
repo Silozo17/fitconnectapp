@@ -11,6 +11,7 @@ import { ProgressChart } from "@/components/progress/ProgressChart";
 import { ProgressEntryCard } from "@/components/progress/ProgressEntryCard";
 import { AIProgressInsights } from "@/components/ai/AIProgressInsights";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 const ClientProgress = () => {
   const { t } = useTranslation('client');
@@ -39,6 +40,11 @@ const ClientProgress = () => {
       title={t('progress.title')}
       description={t('progress.subtitle')}
     >
+      <PageHelpBanner
+        pageKey="client_progress"
+        title="Track Your Journey"
+        description="Log weight, measurements, and photos to visualize your progress over time"
+      />
       {/* Header */}
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

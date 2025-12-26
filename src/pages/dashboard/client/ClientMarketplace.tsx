@@ -9,6 +9,7 @@ import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout"
 import { useMarketplaceProducts, useMarketplaceBundles, useFeaturedProducts, CONTENT_CATEGORIES, CONTENT_TYPES } from "@/hooks/useDigitalProducts";
 import ProductCard from "@/components/marketplace/ProductCard";
 import BundleCard from "@/components/marketplace/BundleCard";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 export default function ClientMarketplace() {
   const { t } = useTranslation("client");
@@ -30,6 +31,11 @@ export default function ClientMarketplace() {
 
   return (
     <ClientDashboardLayout>
+      <PageHelpBanner
+        pageKey="client_marketplace"
+        title="Digital Fitness Content"
+        description="Browse and purchase guides, programs, and resources from coaches"
+      />
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

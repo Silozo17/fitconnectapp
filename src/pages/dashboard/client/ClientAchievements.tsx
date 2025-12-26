@@ -16,6 +16,7 @@ import { Zap, TrendingUp, TrendingDown, Pencil, AlertTriangle, RefreshCw } from 
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslation } from '@/hooks/useTranslation';
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
+import { PageHelpBanner } from '@/components/discover/PageHelpBanner';
 
 function AchievementsContent() {
   const { t } = useTranslation('client');
@@ -54,6 +55,11 @@ function AchievementsContent() {
   
   return (
     <div className="space-y-6">
+      <PageHelpBanner
+        pageKey="client_achievements"
+        title="Your Milestones"
+        description="Celebrate badges earned from your fitness journey"
+      />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">{t('achievements.title')}</h1>

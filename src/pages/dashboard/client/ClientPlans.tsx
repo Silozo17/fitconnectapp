@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useMyPlans } from "@/hooks/useMyPlans";
 import { useClientBadges } from "@/hooks/useSidebarBadges";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 const ClientPlans = () => {
   const { data: plans = [], isLoading, error, refetch } = useMyPlans();
@@ -49,6 +50,11 @@ const ClientPlans = () => {
       title="My Plans"
       description="View your assigned training and nutrition plans"
     >
+      <PageHelpBanner
+        pageKey="client_plans"
+        title="Your Training Plans"
+        description="View workout and nutrition plans assigned by your coach"
+      />
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-foreground font-display">My Plans</h1>

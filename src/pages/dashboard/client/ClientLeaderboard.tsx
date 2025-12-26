@@ -3,10 +3,16 @@ import ClientDashboardLayout from '@/components/dashboard/ClientDashboardLayout'
 import { LocationLeaderboard } from '@/components/gamification/LocationLeaderboard';
 import { Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PageHelpBanner } from '@/components/discover/PageHelpBanner';
 
 export default function ClientLeaderboard() {
   return (
     <ClientDashboardLayout>
+      <PageHelpBanner
+        pageKey="client_leaderboard"
+        title="Community Rankings"
+        description="See how you compare with other users in your area"
+      />
       <div className="space-y-6">
         {/* Simple Header - no card */}
         <div className="flex items-center justify-between">

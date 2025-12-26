@@ -14,6 +14,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCoachLinkPrefix } from "@/hooks/useCoachLinkPrefix";
 import { getDisplayLocation } from "@/lib/location-utils";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
+
 // Batch fetch reviews for all coaches at once
 const useBatchCoachReviews = (coachIds: string[]) => {
   return useQuery({
@@ -171,6 +173,11 @@ const ClientFavourites = () => {
       title="Favourite Coaches"
       description="Your saved favourite coaches"
     >
+      <PageHelpBanner
+        pageKey="client_favourites"
+        title="Saved Coaches"
+        description="Quick access to coaches you've bookmarked"
+      />
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Favourite Coaches</h1>
         <p className="text-muted-foreground">
