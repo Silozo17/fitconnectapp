@@ -573,7 +573,7 @@ const CoachOnboarding = () => {
     // Choose Your Plan
     if (currentStepName === "Choose Your Plan") {
       const isPaidTier = formData.subscriptionTier !== "free";
-      const isProcessingIAP = iapState.isPurchasing;
+      const isProcessingIAP = iapState.purchaseStatus === 'purchasing' || iapState.isPolling;
       
       // On native mobile (iOS/Android): trigger IAP directly
       if (isNativeMobile) {

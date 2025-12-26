@@ -15,9 +15,20 @@ import {
   triggerHaptic,
 } from '@/lib/despia';
 
+/**
+ * Explicit purchase status for clean state management
+ */
+export type BoostPurchaseStatus = 
+  | 'idle'           // Ready to purchase
+  | 'purchasing'     // Native IAP dialog is active
+  | 'success'        // Purchase succeeded, may be polling for confirmation
+  | 'cancelled'      // User cancelled - treated as idle for retry
+  | 'failed'         // Error occurred - show retry option
+  | 'pending';       // StoreKit returned deferred (e.g., Ask to Buy)
+
 interface NativeBoostPurchaseState {
   isAvailable: boolean;
-  isPurchasing: boolean;
+  purchaseStatus: BoostPurchaseStatus;
   isPolling: boolean;
   error: string | null;
   showUnsuccessfulModal: boolean;
@@ -45,7 +56,7 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
   const queryClient = useQueryClient();
   const [state, setState] = useState<NativeBoostPurchaseState>({
     isAvailable: false,
-    isPurchasing: false,
+    purchaseStatus: 'idle',
     isPolling: false,
     error: null,
     showUnsuccessfulModal: false,
@@ -54,7 +65,6 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const pollAttemptsRef = useRef(0);
   const purchaseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isRegisteredRef = useRef(false);
 
   // Cleanup purchase timeout helper
   const clearPurchaseTimeout = useCallback(() => {
@@ -79,6 +89,31 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
         clearTimeout(purchaseTimeoutRef.current);
       }
     };
+  }, []);
+
+  /**
+   * Safety reset on app resume/foreground
+   * Clears stuck purchasing state if no polling is active
+   */
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Give callbacks 2 seconds to fire if there's a pending response
+        setTimeout(() => {
+          setState(prev => {
+            // Only reset if stuck in purchasing (not polling, not pending)
+            if (prev.purchaseStatus === 'purchasing' && !prev.isPolling) {
+              console.log('[NativeBoostIAP] Safety reset on app resume - stuck in purchasing state');
+              return { ...prev, purchaseStatus: 'idle' };
+            }
+            return prev;
+          });
+        }, 2000);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
   /**
@@ -137,7 +172,7 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
     }
 
     pollAttemptsRef.current = 0;
-    setState(prev => ({ ...prev, isPolling: true }));
+    setState(prev => ({ ...prev, isPolling: true, purchaseStatus: 'success' }));
 
     pollIntervalRef.current = setInterval(async () => {
       pollAttemptsRef.current += 1;
@@ -152,7 +187,7 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
         setState(prev => ({
           ...prev,
           isPolling: false,
-          isPurchasing: false,
+          purchaseStatus: 'idle',
         }));
 
         // Invalidate queries to refresh boost data
@@ -175,7 +210,7 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
         setState(prev => ({
           ...prev,
           isPolling: false,
-          isPurchasing: false,
+          purchaseStatus: 'idle',
         }));
 
         // Still show success - payment was successful, webhook might be slow
@@ -202,26 +237,45 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
 
   /**
    * Handle IAP cancel callback from Despia
+   * Cancel is a user choice - reset database pending status and allow immediate retry
    */
-  const handleIAPCancel = useCallback(() => {
+  const handleIAPCancel = useCallback(async () => {
     console.log('[NativeBoostIAP] Purchase cancelled by user');
     clearPurchaseTimeout();
+    
+    // Reset any pending database record so user can retry
+    if (coachProfileId) {
+      try {
+        await supabase
+          .from('coach_boosts')
+          .delete()
+          .eq('coach_id', coachProfileId)
+          .eq('payment_status', 'pending');
+        
+        queryClient.invalidateQueries({ queryKey: ['coach-boost-status'] });
+      } catch (e) {
+        console.error('[NativeBoostIAP] Failed to reset pending boost:', e);
+      }
+    }
+    
     setState(prev => ({
       ...prev,
-      isPurchasing: false,
+      purchaseStatus: 'idle', // Immediately retryable
       error: null,
       showUnsuccessfulModal: false,
     }));
     toast.info('Purchase cancelled', { duration: 2000 });
-  }, [clearPurchaseTimeout]);
+  }, [clearPurchaseTimeout, coachProfileId, queryClient]);
 
   /**
-   * Dismiss the unsuccessful modal
+   * Dismiss the unsuccessful modal and reset to idle for retry
    */
   const dismissUnsuccessfulModal = useCallback(() => {
     setState(prev => ({
       ...prev,
       showUnsuccessfulModal: false,
+      purchaseStatus: 'idle', // Allow immediate retry
+      error: null,
     }));
   }, []);
 
@@ -234,39 +288,45 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
     triggerHaptic('error');
     setState(prev => ({
       ...prev,
-      isPurchasing: false,
+      purchaseStatus: 'failed',
       error,
       showUnsuccessfulModal: true,
     }));
   }, [clearPurchaseTimeout]);
 
-  // Register IAP callbacks when purchasing boost
+  /**
+   * Handle IAP pending callback from Despia (Ask to Buy / deferred)
+   * Only set pending when StoreKit explicitly returns a deferred transaction
+   */
+  const handleIAPPending = useCallback(() => {
+    console.log('[NativeBoostIAP] Purchase pending (Ask to Buy or deferred)');
+    clearPurchaseTimeout();
+    setState(prev => ({
+      ...prev,
+      purchaseStatus: 'pending',
+      error: null,
+    }));
+    toast.info('Purchase requires approval', {
+      description: 'A parent or guardian needs to approve this purchase.',
+      duration: 5000,
+    });
+  }, [clearPurchaseTimeout]);
+
+  // Register IAP callbacks once on mount when available
   useEffect(() => {
-    if (state.isAvailable && state.isPurchasing && !isRegisteredRef.current) {
-      isRegisteredRef.current = true;
+    if (state.isAvailable) {
       registerIAPCallbacks({
         onSuccess: handleIAPSuccess,
         onError: handleIAPError,
         onCancel: handleIAPCancel,
+        onPending: handleIAPPending,
       });
     }
 
-    // Only unregister when we're done purchasing
-    if (!state.isPurchasing && !state.isPolling && isRegisteredRef.current) {
-      isRegisteredRef.current = false;
-      // Don't unregister immediately - let callbacks settle
-    }
-  }, [state.isAvailable, state.isPurchasing, state.isPolling, handleIAPSuccess, handleIAPError, handleIAPCancel]);
-
-  // Cleanup on unmount
-  useEffect(() => {
     return () => {
-      if (isRegisteredRef.current) {
-        unregisterIAPCallbacks();
-        isRegisteredRef.current = false;
-      }
+      unregisterIAPCallbacks();
     };
-  }, []);
+  }, [state.isAvailable, handleIAPSuccess, handleIAPError, handleIAPCancel, handleIAPPending]);
 
   /**
    * Trigger a boost purchase
@@ -292,17 +352,9 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
       return;
     }
 
-    // Register callbacks before starting purchase
-    registerIAPCallbacks({
-      onSuccess: handleIAPSuccess,
-      onError: handleIAPError,
-      onCancel: handleIAPCancel,
-    });
-    isRegisteredRef.current = true;
-
     setState(prev => ({
       ...prev,
-      isPurchasing: true,
+      purchaseStatus: 'purchasing',
       error: null,
     }));
 
@@ -313,10 +365,10 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
     purchaseTimeoutRef.current = setTimeout(() => {
       console.warn('[NativeBoostIAP] Purchase timeout');
       setState(prev => {
-        if (prev.isPurchasing && !prev.isPolling) {
+        if (prev.purchaseStatus === 'purchasing' && !prev.isPolling) {
           return {
             ...prev,
-            isPurchasing: false,
+            purchaseStatus: 'failed',
             error: 'Purchase timed out. Please try again.',
             showUnsuccessfulModal: true,
           };
@@ -333,15 +385,15 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
       clearPurchaseTimeout();
       setState(prev => ({
         ...prev,
-        isPurchasing: false,
+        purchaseStatus: 'failed',
         error: 'Failed to start purchase',
         showUnsuccessfulModal: true,
       }));
     }
-  }, [state.isAvailable, user, clearPurchaseTimeout, handleIAPSuccess, handleIAPError, handleIAPCancel]);
+  }, [state.isAvailable, user, clearPurchaseTimeout]);
 
   /**
-   * Reset all state
+   * Reset all state - useful for recovering from stuck states
    */
   const resetState = useCallback(() => {
     clearPurchaseTimeout();
@@ -350,13 +402,9 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
       pollIntervalRef.current = null;
     }
     pollAttemptsRef.current = 0;
-    if (isRegisteredRef.current) {
-      unregisterIAPCallbacks();
-      isRegisteredRef.current = false;
-    }
     setState({
       isAvailable: isNativeIAPAvailable(),
-      isPurchasing: false,
+      purchaseStatus: 'idle',
       isPolling: false,
       error: null,
       showUnsuccessfulModal: false,

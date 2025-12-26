@@ -58,7 +58,7 @@ export const NativeSubscriptionButtons = ({
 
   const getButtonText = (tierKey: TierKey) => {
     const targetPosition = getTierPosition(tierKey);
-    if (state.isPurchasing || state.isPolling) {
+    if (state.purchaseStatus === 'purchasing' || state.isPolling) {
       return state.isPolling ? 'Confirming...' : 'Processing...';
     }
     if (targetPosition > currentPosition) {
@@ -113,7 +113,7 @@ export const NativeSubscriptionButtons = ({
         <div className="grid grid-cols-1 gap-4">
         {purchasableTiers.map(({ key, tier }) => {
             const isCurrentTier = activeTier === key;
-            const isProcessing = (state.isPurchasing || state.isPolling);
+            const isProcessing = (state.purchaseStatus === 'purchasing' || state.isPolling);
             const isPurchasable = key === 'starter' || key === 'pro' || key === 'enterprise';
             const tierPosition = getTierPosition(key);
             const canUpgrade = tierPosition > currentPosition;

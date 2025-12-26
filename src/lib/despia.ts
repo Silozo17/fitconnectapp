@@ -486,6 +486,7 @@ export interface IAPCallbacks {
   onSuccess: (data: IAPSuccessData) => void;
   onError?: (error: string) => void;
   onCancel?: () => void;
+  onPending?: () => void; // For Ask to Buy / deferred transactions
 }
 
 // Store callbacks globally so Despia can access them
@@ -520,6 +521,13 @@ export const registerIAPCallbacks = (callbacks: IAPCallbacks): void => {
         iapCallbacks?.onError?.(error);
       }
     };
+
+    (window as any).iapPending = () => {
+      if (isDespia()) {
+        console.log('[Despia IAP] Purchase pending (Ask to Buy / deferred)');
+        iapCallbacks?.onPending?.();
+      }
+    };
   }
 };
 
@@ -532,6 +540,7 @@ export const unregisterIAPCallbacks = (): void => {
     delete (window as any).iapSuccess;
     delete (window as any).iapCancel;
     delete (window as any).iapError;
+    delete (window as any).iapPending;
   }
 };
 

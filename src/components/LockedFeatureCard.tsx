@@ -40,7 +40,7 @@ export const LockedFeatureCard = ({ feature, requiredTier, className }: LockedFe
     }
   };
 
-  const isPurchasing = iapState.isPurchasing || iapState.isPolling;
+  const isPurchasing = iapState.purchaseStatus === 'purchasing' || iapState.isPolling;
   
   return (
     <Card className={`border-dashed border-2 border-muted-foreground/30 bg-muted/20 ${className}`}>
