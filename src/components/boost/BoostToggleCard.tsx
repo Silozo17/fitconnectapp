@@ -1,12 +1,12 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Rocket, Zap, TrendingUp, Shield, Clock, CreditCard, Loader2 } from "lucide-react";
+import { Rocket, Zap, TrendingUp, Shield, Clock, CreditCard, Loader2, RefreshCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useCoachBoostStatus, usePurchaseBoost, useBoostSettings, isBoostActive, getBoostRemainingDays, useResetPendingBoost } from "@/hooks/useCoachBoost";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSearchParams } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useActivePricing } from "@/hooks/useActivePricing";
@@ -34,6 +34,14 @@ export const BoostToggleCard = () => {
   const isPending = boostStatus?.payment_status === "pending";
   const isMigratedFree = boostStatus?.payment_status === "migrated_free";
   
+  // Check if pending is stale (>30 min old) - allow retry
+  const pendingIsStale = useMemo(() => {
+    if (!isPending || !boostStatus?.updated_at) return false;
+    const updatedAt = new Date(boostStatus.updated_at);
+    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+    return updatedAt < thirtyMinutesAgo;
+  }, [isPending, boostStatus?.updated_at]);
+  
   // Use native pricing on native devices, web pricing otherwise
   const boostPrice = isNative ? nativePricing.prices.boost : pricing.prices.boost;
   const formattedBoostPrice = isNative 
@@ -45,6 +53,14 @@ export const BoostToggleCard = () => {
   const isPurchasing = isNative 
     ? (nativeBoost.state.purchaseStatus === 'purchasing' || nativeBoost.state.isPolling)
     : purchaseBoost.isPending;
+
+  // Auto-reset stale pending boost on mount
+  useEffect(() => {
+    if (pendingIsStale) {
+      console.log('[BoostToggleCard] Auto-resetting stale pending boost');
+      resetPendingBoost.mutate();
+    }
+  }, [pendingIsStale, resetPendingBoost]);
 
   // Handle payment success/cancel from URL params (web only)
   useEffect(() => {
@@ -148,6 +164,28 @@ export const BoostToggleCard = () => {
             </div>
           ) : (
             <div className="space-y-3">
+              {/* Show manual reset for stuck pending state */}
+              {isPending && !pendingIsStale && !isPurchasing && (
+                <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3">
+                  <p className="text-sm text-amber-600 dark:text-amber-400 font-medium">
+                    Payment pending from previous attempt
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="mt-2 gap-2"
+                    onClick={() => resetPendingBoost.mutate()}
+                    disabled={resetPendingBoost.isPending}
+                  >
+                    {resetPendingBoost.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-4 w-4" />
+                    )}
+                    Reset & Try Again
+                  </Button>
+                </div>
+              )}
               <div className="rounded-lg bg-muted/50 border border-border p-4">
                 <div className="flex items-center justify-between flex-wrap gap-4">
                   <div>
@@ -160,7 +198,7 @@ export const BoostToggleCard = () => {
                   </div>
                   <Button 
                     onClick={handlePurchase}
-                    disabled={isPurchasing || isPending}
+                    disabled={isPurchasing || (isPending && !pendingIsStale)}
                     className="gap-2 min-h-[44px]"
                   >
                     {isPurchasing ? (

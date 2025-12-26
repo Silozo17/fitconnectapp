@@ -330,6 +330,7 @@ export const useUpdateBoostSettings = () => {
 };
 
 // Reset pending boost mutation - called when user cancels checkout
+// Deletes the pending record entirely to allow clean retry
 export const useResetPendingBoost = () => {
   const queryClient = useQueryClient();
   const { data: coachProfileId } = useCoachProfileId();
@@ -338,14 +339,13 @@ export const useResetPendingBoost = () => {
     mutationFn: async () => {
       if (!coachProfileId) throw new Error("Coach profile not found");
 
+      // Delete any pending boost records (not just update to cancelled)
+      // This ensures a clean state for retry
       const { error } = await supabase
         .from("coach_boosts")
-        .update({
-          payment_status: "cancelled",
-          updated_at: new Date().toISOString(),
-        })
+        .delete()
         .eq("coach_id", coachProfileId)
-        .eq("payment_status", "pending"); // Only reset if still pending
+        .eq("payment_status", "pending");
 
       if (error) throw error;
     },

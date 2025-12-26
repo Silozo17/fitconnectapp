@@ -458,14 +458,15 @@ export const IAP_PRODUCT_IDS = IOS_IAP_PRODUCT_IDS;
 
 /**
  * iOS App Store Boost product ID
+ * Non-renewing subscription configured in App Store Connect
  */
-export const IOS_BOOST_PRODUCT_ID = 'fitconnect.boost';
+export const IOS_BOOST_PRODUCT_ID = 'boost.fitconnect.apple';
 
 /**
  * Android Google Play Boost product ID
- * Format: product_id:base_plan_id
+ * Consumable product configured in Google Play Console
  */
-export const ANDROID_BOOST_PRODUCT_ID = 'fitconnect.boost.play:fitconnect-boost';
+export const ANDROID_BOOST_PRODUCT_ID = 'fitconnect.boost.play';
 
 /**
  * Get the platform-specific boost product ID
