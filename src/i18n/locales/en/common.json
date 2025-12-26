@@ -495,7 +495,12 @@
       "profile": "Profile",
       "clients": "Clients",
       "schedule": "Schedule",
-      "mobileNavigation": "Mobile navigation"
+      "mobileNavigation": "Mobile navigation",
+      "dashboard": "Dashboard",
+      "users": "Users",
+      "coaches": "Coaches",
+      "analytics": "Analytics",
+      "settings": "Settings"
     }
   },
   "coach": {

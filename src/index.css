@@ -306,6 +306,11 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
+  /* Safe bottom padding for modal footers */
+  .pb-safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
   /* Edge-to-edge iOS immersive experience */
   .pt-safe-status {
     padding-top: env(safe-area-inset-top, 0px);
