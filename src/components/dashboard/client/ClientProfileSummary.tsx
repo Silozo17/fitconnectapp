@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
+import { UserAvatar } from "@/components/shared/UserAvatar";
 import { Button } from "@/components/ui/button";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useSelectedAvatar, getAvatarImageUrl } from "@/hooks/useAvatars";
@@ -43,12 +43,14 @@ const ClientProfileSummary = () => {
     <div className="h-full flex flex-col">
       {/* Avatar, Name and BMI Section */}
       <div className="flex items-center gap-3 mb-3">
-        <Avatar className="h-12 w-12 border-2 border-primary/30 shrink-0">
-          <AvatarImage src={avatarUrl || undefined} alt={displayName} />
-          <AvatarFallback className="bg-primary/20 text-primary text-sm font-semibold">
-            {initials}
-          </AvatarFallback>
-        </Avatar>
+        <UserAvatar
+          src={selectedAvatar ? undefined : profile?.avatar_url}
+          avatarSlug={selectedAvatar?.slug}
+          avatarRarity={selectedAvatar?.rarity}
+          name={displayName}
+          size="md"
+          className="shrink-0 border-2 border-primary/30"
+        />
         
         <div className="flex-1 min-w-0">
           <h2 className="text-base font-semibold text-foreground truncate">
