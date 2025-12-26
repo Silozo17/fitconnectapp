@@ -73,7 +73,7 @@ export function Carousel3D({
     };
   }, [emblaApi, onScroll]);
 
-  // Simplified 2.5D effect using only scale and opacity - no 3D transforms
+  // Opacity-only depth effect - NO TRANSFORMS to preserve backdrop-filter/glassmorphism
   const getSlideStyle = (index: number): React.CSSProperties => {
     if (!emblaApi) return {};
     
@@ -85,15 +85,13 @@ export function Carousel3D({
     const absDistance = Math.abs(distance);
     const clampedAbsDistance = Math.min(2, absDistance);
     
-    // Simple 2.5D effect - only scale and opacity (no rotateY, translateZ)
-    const scale = 1 - clampedAbsDistance * 0.08; // Subtle scale: 1 → 0.92 → 0.84
-    const opacity = 1 - clampedAbsDistance * 0.25; // Fade: 1 → 0.75 → 0.5
+    // Opacity-only depth effect - NO transforms to preserve backdrop-filter
+    const opacity = 1 - clampedAbsDistance * 0.35; // 1 → 0.65 → 0.3
     
     return {
-      transform: `scale(${scale})`,
-      opacity: Math.max(0.5, opacity),
+      opacity: Math.max(0.4, opacity),
       zIndex: 10 - Math.round(absDistance),
-      transition: isDragging ? 'none' : 'transform 0.2s ease-out, opacity 0.2s ease-out',
+      transition: isDragging ? 'none' : 'opacity 0.2s ease-out',
     };
   };
 
@@ -125,19 +123,12 @@ export function Carousel3D({
                   key={index}
                   className="flex-shrink-0"
                   style={{
+                    opacity: slideStyle.opacity,
                     zIndex: slideStyle.zIndex,
+                    transition: slideStyle.transition,
                   }}
                 >
-                  {/* Inner wrapper for transforms - keeps backdrop-filter working on children */}
-                  <div 
-                    style={{
-                      transform: slideStyle.transform,
-                      opacity: slideStyle.opacity,
-                      transition: slideStyle.transition,
-                    }}
-                  >
-                    {cloneElement(child as React.ReactElement<any>)}
-                  </div>
+                  {cloneElement(child as React.ReactElement<any>)}
                 </div>
               );
             })}
