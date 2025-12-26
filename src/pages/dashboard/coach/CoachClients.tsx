@@ -37,6 +37,7 @@ import { AssignPlanModal } from "@/components/dashboard/clients/AssignPlanModal"
 import { AddNoteModal } from "@/components/dashboard/clients/AddNoteModal";
 import { useCoachClients, CoachClient } from "@/hooks/useCoachClients";
 import ClientRequests from "@/components/dashboard/coach/ClientRequests";
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 const CoachClients = () => {
   const { t } = useTranslation("coach");
@@ -114,6 +115,13 @@ const CoachClients = () => {
 
   return (
     <DashboardLayout title={t("clients.pageTitle")} description={t("clients.pageDescription")}>
+      {/* Page Help Banner */}
+      <PageHelpBanner
+        pageKey="coach_clients"
+        title="Your Client Roster"
+        description="View progress, assign plans, and manage all your client connections."
+      />
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>

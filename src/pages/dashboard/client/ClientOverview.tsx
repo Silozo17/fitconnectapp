@@ -25,7 +25,7 @@ import {
   RefreshCw,
   Sparkles,
 } from "lucide-react";
-
+import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 // Lazy load HealthDataWidget - it has realtime subscriptions that slow initial render
 const HealthDataWidget = lazy(() => import("@/components/integrations/HealthDataWidget"));
 
@@ -121,6 +121,12 @@ const ClientOverview = () => {
       title={t('client.overview.title')}
       description={t('client.overview.description')}
     >
+      {/* Page Help Banner */}
+      <PageHelpBanner
+        pageKey="client_overview"
+        title="Your Fitness Dashboard"
+        description="Track progress, upcoming sessions, and quick actions all in one place."
+      />
       {/* Error Alert */}
       {error && (
         <Alert variant="glass" className="mb-6">

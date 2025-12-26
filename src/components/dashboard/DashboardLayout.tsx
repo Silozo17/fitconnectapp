@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCoachOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { useCoachProfileRealtime } from "@/hooks/useCoachProfileRealtime";
+import { useDiscoverModal } from "@/hooks/useDiscoverModal";
 import { Loader2 } from "lucide-react";
 import CoachSidebar from "./CoachSidebar";
 import DashboardHeader from "./DashboardHeader";
@@ -13,6 +14,7 @@ import PlatformBackground from "@/components/shared/PlatformBackground";
 import { ProfilePanelProvider, useProfilePanel } from "@/contexts/ProfilePanelContext";
 import ProfilePanel from "@/components/shared/ProfilePanel";
 import CoachProfileSummary from "@/components/dashboard/coach/CoachProfileSummary";
+import { DiscoverModal } from "@/components/discover/DiscoverModal";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -29,6 +31,7 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { isOpen: profilePanelOpen } = useProfilePanel();
+  const { shouldShow: showDiscover, markAsSeen: markDiscoverSeen } = useDiscoverModal('coach');
   
   useCoachProfileRealtime();
 
@@ -110,6 +113,13 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
       </div>
 
       <MobileBottomNav variant="coach" />
+
+      {/* First-time Discover Modal */}
+      <DiscoverModal 
+        role="coach" 
+        open={showDiscover} 
+        onClose={markDiscoverSeen} 
+      />
     </>
   );
 });
