@@ -22,8 +22,18 @@ export function useDiscoverModal(role: 'client' | 'coach') {
     }
   }, [storageKey]);
 
+  const resetSeen = useCallback(() => {
+    try {
+      localStorage.removeItem(storageKey);
+      setHasSeen(false);
+    } catch {
+      // localStorage not available
+    }
+  }, [storageKey]);
+
   return { 
     shouldShow: !hasSeen, 
-    markAsSeen 
+    markAsSeen,
+    resetSeen
   };
 }

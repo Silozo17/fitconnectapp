@@ -1257,6 +1257,25 @@ const CoachSettings = () => {
 
                 {/* Animation Settings */}
                 <AnimationSettingsCard />
+
+                {/* Reset Discovery */}
+                <div className="card-elevated p-6">
+                  <h2 className="font-display font-bold text-foreground mb-2">
+                    {t('preferences.discovery.title')}
+                  </h2>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {t('preferences.discovery.description')}
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      localStorage.removeItem('fitconnect_discover_seen_coach');
+                      toast.success(t('preferences.discovery.resetSuccess'));
+                    }}
+                  >
+                    {t('preferences.discovery.reset')}
+                  </Button>
+                </div>
               </div>
             )}
 

@@ -137,6 +137,12 @@
       "reducedMotionTitle": "Włączono ograniczony ruch",
       "reducedMotionNotice": "Twój system preferuje ograniczony ruch. Animacje są automatycznie wyłączone dla dostępności.",
       "accessibilityNote": "Animacje automatycznie respektują ustawienia dostępności Twojego systemu."
+    },
+    "discovery": {
+      "title": "Przewodnik odkrywania",
+      "description": "Zresetuj tour powitalny, aby ponownie zobaczyć wprowadzenie do platformy",
+      "reset": "Resetuj przewodnik",
+      "resetSuccess": "Przewodnik został zresetowany. Zobaczysz go przy następnej wizycie."
     }
   },
 
