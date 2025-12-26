@@ -853,26 +853,22 @@ const CoachSettings = () => {
                   />
                 </MarketplaceSection>
 
-                {/* Sticky Save Button */}
-                <div className="fixed bottom-20 md:bottom-0 left-0 right-0 xl:left-64 bg-background/95 backdrop-blur border-t p-4 z-40">
-                  <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
-                    <p className="text-sm text-muted-foreground hidden sm:block">
-                      {checkIsDirty() ? t('unsavedChanges') : t('allChangesSaved')}
-                    </p>
-                    <Button 
-                      onClick={handleSaveProfile} 
-                      disabled={saving || !checkIsDirty()} 
-                      size="lg"
-                      variant={checkIsDirty() ? "default" : "outline"}
-                    >
-                      {saving ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <Save className="w-4 h-4 mr-2" />
-                      )}
-                      {t('saveChanges')}
-                    </Button>
-                  </div>
+                {/* Save Changes Button */}
+                <div className="pt-6 pb-8">
+                  <Button 
+                    onClick={handleSaveProfile} 
+                    disabled={saving || !checkIsDirty()} 
+                    size="lg"
+                    className="w-full sm:w-auto"
+                    variant={checkIsDirty() ? "default" : "secondary"}
+                  >
+                    {saving ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Save className="w-4 h-4 mr-2" />
+                    )}
+                    {t('saveChanges')}
+                  </Button>
                 </div>
               </div>
             )}
