@@ -97,7 +97,7 @@ const CoachFilters = ({
         {/* Coach Type by Category */}
         <div>
           <h4 className="font-medium mb-3 text-sm">{t('filters.specialty')}</h4>
-          <Accordion type="multiple" className="w-full" defaultValue={["combat", "fitness"]}>
+          <Accordion type="multiple" className="w-full" defaultValue={[]}>
             {COACH_TYPE_CATEGORIES.map((category) => {
               const CategoryIcon = category.icon;
               const typesInCategory = getCoachTypesByCategory(category.id);
