@@ -52,10 +52,14 @@ const DialogContent = React.forwardRef<
         "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
         "data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%]",
         "data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]",
-        // Mobile optimizations
-        "max-h-[90vh] overflow-y-auto",
+        // Mobile optimizations with safe area insets
+        "max-h-[calc(90vh-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px))] overflow-y-auto",
         className,
       )}
+      style={{
+        paddingTop: 'max(1.5rem, env(safe-area-inset-top, 0px))',
+        paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom, 0px))',
+      }}
       {...props}
     >
       {children}
@@ -74,7 +78,14 @@ const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 DialogHeader.displayName = "DialogHeader";
 
 const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("flex flex-col-reverse gap-3 sm:flex-row sm:justify-end mt-4", className)} {...props} />
+  <div 
+    className={cn(
+      "flex flex-col-reverse gap-3 sm:flex-row sm:justify-end mt-4",
+      "pb-safe-bottom",
+      className
+    )} 
+    {...props} 
+  />
 );
 DialogFooter.displayName = "DialogFooter";
 

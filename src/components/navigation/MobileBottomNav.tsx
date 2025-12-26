@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Home, Search, Calendar, MessageSquare, User, Users } from "lucide-react";
+import { Home, Search, Calendar, MessageSquare, User, Users, BarChart3, Settings, LayoutDashboard } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
 import { WebOnlyFeatureDialog } from "@/components/shared/WebOnlyFeatureDialog";
@@ -32,8 +32,16 @@ const coachNavItems: NavItem[] = [
   { icon: User, labelKey: "bottomNav.profile", route: "/dashboard/coach/settings" },
 ];
 
+const adminNavItems: NavItem[] = [
+  { icon: LayoutDashboard, labelKey: "bottomNav.dashboard", route: "/dashboard/admin" },
+  { icon: Users, labelKey: "bottomNav.users", route: "/dashboard/admin/users" },
+  { icon: User, labelKey: "bottomNav.coaches", route: "/dashboard/admin/coaches" },
+  { icon: BarChart3, labelKey: "bottomNav.analytics", route: "/dashboard/admin/analytics" },
+  { icon: Settings, labelKey: "bottomNav.settings", route: "/dashboard/admin/settings" },
+];
+
 interface MobileBottomNavProps {
-  variant: "client" | "coach";
+  variant: "client" | "coach" | "admin";
 }
 
 const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
@@ -49,6 +57,7 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
 
   // Keep all items but mark restricted ones for rendering
   const navItems = useMemo(() => {
+    if (variant === "admin") return adminNavItems;
     if (variant === "coach") return coachNavItems;
     
     if (shouldHideMarketplace) {
@@ -60,7 +69,7 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
 
   const isActive = (route: string) => {
     // Exact match for home routes
-    if (route === "/dashboard/client" || route === "/dashboard/coach") {
+    if (route === "/dashboard/client" || route === "/dashboard/coach" || route === "/dashboard/admin") {
       return location.pathname === route;
     }
     // Starts with for other routes
