@@ -65,7 +65,7 @@ const ProfilePanel = ({ children, headerHeight = 64 }: ProfilePanelProps) => {
       {/* Backdrop overlay - click to close */}
       <div
         className={cn(
-          "fixed inset-0 z-40 bg-background/60 backdrop-blur-sm transition-opacity duration-300",
+          "fixed inset-0 z-40 bg-background/70 transition-opacity duration-300",
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         )}
         style={{ top: headerHeight }}
@@ -85,14 +85,16 @@ const ProfilePanel = ({ children, headerHeight = 64 }: ProfilePanelProps) => {
           "glass-floating",
           // Border adjustments
           "rounded-t-none border-t-0",
-          // Animation - includes opacity for proper hiding
-          "transition-all duration-300 ease-out",
+          // Animation - GPU accelerated with specific properties only
+          "transition-[transform,opacity] duration-300 ease-out",
           isOpen 
-            ? "translate-y-0 opacity-100" 
-            : "-translate-y-full opacity-0 pointer-events-none"
+            ? "opacity-100" 
+            : "opacity-0 pointer-events-none"
         )}
         style={{ 
           top: headerHeight,
+          willChange: 'transform, opacity',
+          transform: isOpen ? 'translateY(0) translateZ(0)' : 'translateY(-100%) translateZ(0)',
         }}
         role="dialog"
         aria-modal="true"
