@@ -20,7 +20,7 @@ import ViewSwitcher from "@/components/admin/ViewSwitcher";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { FeedbackModal } from "@/components/feedback/FeedbackModal";
 import { normalizeTier, SUBSCRIPTION_TIERS } from "@/lib/stripe-config";
-import ProfileNotch from "@/components/shared/ProfileNotch";
+
 
 interface DashboardHeaderProps {
   subscriptionTier?: string | null;
@@ -120,9 +120,6 @@ const DashboardHeader = memo(({ subscriptionTier, onMenuToggle }: DashboardHeade
           </Button>
         </div>
       </div>
-
-      {/* Profile Notch - centered, protruding below header */}
-      <ProfileNotch />
     </header>
   );
 });

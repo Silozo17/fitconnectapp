@@ -4,19 +4,18 @@ import { useProfilePanel } from "@/contexts/ProfilePanelContext";
 
 interface ProfileNotchProps {
   className?: string;
+  headerHeight?: number;
 }
 
-const ProfileNotch = ({ className }: ProfileNotchProps) => {
+const ProfileNotch = ({ className, headerHeight = 64 }: ProfileNotchProps) => {
   const { toggle, isOpen } = useProfilePanel();
 
   return (
     <button
       onClick={toggle}
       className={cn(
-        // Base positioning - centered, protruding below header
-        "absolute left-1/2 -translate-x-1/2 z-50",
-        // Notch moves to bottom of panel when open, stays at header bottom when closed
-        isOpen ? "bottom-0 translate-y-1/2" : "-bottom-6",
+        // Fixed positioning - always on top
+        "fixed left-1/2 -translate-x-1/2 z-50",
         // Circle styling
         "w-12 h-12 rounded-full",
         // Glass effect matching nav
@@ -27,12 +26,17 @@ const ProfileNotch = ({ className }: ProfileNotchProps) => {
         "transition-all duration-300 ease-out",
         "hover:scale-105 active:scale-95",
         "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background",
-        // Shadow for depth - seamless blend with header
+        // Shadow for depth
         "shadow-[0_4px_20px_hsl(0_0%_0%/0.4),0_0_0_1px_hsl(var(--border)/0.3)]",
         // When open, add glow
         isOpen && "ring-2 ring-primary/30",
         className
       )}
+      style={{
+        // When closed: at bottom of header, protruding down
+        // When open: at bottom of panel (header + 50vh), protruding down
+        top: isOpen ? `calc(${headerHeight}px + 50vh - 24px)` : `${headerHeight - 24}px`,
+      }}
       aria-label={isOpen ? "Close profile" : "Open profile"}
       aria-expanded={isOpen}
     >
