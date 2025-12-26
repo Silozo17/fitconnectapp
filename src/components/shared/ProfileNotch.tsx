@@ -22,8 +22,8 @@ const ProfileNotch = ({ className, headerHeight = 64 }: ProfileNotchProps) => {
         "glass-nav border border-border/40",
         // Icon centering
         "flex items-center justify-center",
-        // Interactive states
-        "transition-all duration-300 ease-out",
+        // Interactive states - synced with panel animation
+        "transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]",
         "hover:scale-105 active:scale-95",
         "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background",
         // Shadow for depth
@@ -34,8 +34,8 @@ const ProfileNotch = ({ className, headerHeight = 64 }: ProfileNotchProps) => {
       )}
       style={{
         // When closed: at bottom of header, protruding down
-        // When open: at bottom of panel (header + 70vh), protruding down
-        top: isOpen ? `calc(${headerHeight}px + 70vh - 24px)` : `${headerHeight - 24}px`,
+        // When open: at bottom of panel (header + 65vh), protruding down
+        top: isOpen ? `calc(${headerHeight}px + 65vh - 24px)` : `${headerHeight - 24}px`,
       }}
       aria-label={isOpen ? "Close profile" : "Open profile"}
       aria-expanded={isOpen}
