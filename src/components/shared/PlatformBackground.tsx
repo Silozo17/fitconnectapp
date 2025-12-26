@@ -27,7 +27,7 @@ export const PlatformBackground = React.memo(function PlatformBackground({
   return (
     <div 
       className={cn(
-        "fixed inset-0 -z-10 pointer-events-none",
+        "fixed inset-0 -z-10 pointer-events-none overflow-hidden",
         className
       )}
       aria-hidden="true"
