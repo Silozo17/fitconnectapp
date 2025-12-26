@@ -123,7 +123,7 @@ export function HorizontalScroll({
         className={cn(
           "flex overflow-x-auto scrollbar-hide scroll-smooth snap-x snap-mandatory py-4 -my-4",
           gapClasses[gap],
-          edgePadding && "px-4 -mx-4 md:px-0 md:mx-0"
+          edgePadding && "px-5 -mx-5 md:px-0 md:mx-0"
         )}
       >
         {children}
@@ -140,10 +140,6 @@ export function HorizontalScroll({
           <ChevronRight className="h-4 w-4" />
         </Button>
       )}
-
-      {/* Fade edges on desktop - don't extend to pagination */}
-      <div className="absolute left-0 top-0 w-8 bg-gradient-to-r from-background to-transparent pointer-events-none hidden md:block" style={{ height: 'calc(100% - 2rem)' }} />
-      <div className="absolute right-0 top-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none hidden md:block" style={{ height: 'calc(100% - 2rem)' }} />
 
       {/* Pagination dots */}
       {showDots && (
