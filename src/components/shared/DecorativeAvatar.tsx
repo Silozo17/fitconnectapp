@@ -8,6 +8,8 @@ interface DecorativeAvatarProps {
   className?: string;
   animate?: boolean;
   opacity?: number;
+  /** Set to true for LCP-critical images to improve page load performance */
+  priority?: boolean;
 }
 
 const sizeClasses = {
@@ -33,6 +35,7 @@ export function DecorativeAvatar({
   className,
   animate = true,
   opacity = 30,
+  priority = false,
 }: DecorativeAvatarProps) {
   // Convert hyphens to underscores for the avatar URL function
   const normalizedSlug = avatarSlug.replace(/-/g, '_');
@@ -53,6 +56,7 @@ export function DecorativeAvatar({
         alt=""
         className="w-full h-full object-contain drop-shadow-2xl"
         aria-hidden="true"
+        fetchPriority={priority ? "high" : undefined}
       />
     </div>
   );
