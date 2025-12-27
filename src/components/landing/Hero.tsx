@@ -39,6 +39,7 @@ const Hero = () => {
         size="xl" 
         opacity={25}
         className="right-8 bottom-8 z-0"
+        priority
       />
 
       {/* Background decorations */}
