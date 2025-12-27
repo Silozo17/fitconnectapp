@@ -96,6 +96,7 @@ const Hero = () => {
         </div>
 
         <div className="relative mt-20 max-w-5xl mx-auto">
+          <h2 className="sr-only">{t('hero.servicesHeading', 'Our Services')}</h2>
           <div className="grid md:grid-cols-3 gap-6 relative">
             <div className="card-glow p-6 animate-float" style={{ animationDelay: '0s' }}>
               <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mb-4">
