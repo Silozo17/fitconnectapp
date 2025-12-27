@@ -1019,6 +1019,7 @@
       "alreadySubscribed": "You're already subscribed!",
       "subscribeFailed": "Failed to subscribe. Please try again.",
       "invalidEmail": "Please enter a valid email address",
+      "subscribeButtonLabel": "Subscribe to newsletter",
       "copyright": "© {{year}} FitConnect. All rights reserved.",
       "madeWith": "Made with passion for fitness",
       "sections": {
