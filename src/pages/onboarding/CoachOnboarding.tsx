@@ -377,7 +377,7 @@ const CoachOnboarding = () => {
         console.log("[CoachOnboarding] Navigation unlocked");
       }, 150);
     }
-  }, [isNavigating, currentStep, STEPS, formData.coachTypes.length, formData.inPersonAvailable, formData.locationData, formData.onlineAvailable, dualAccountState.selectedOption, verificationState.hasAnyDocs]);
+  }, [isNavigating, currentStep, STEPS, formData.firstName, formData.coachTypes.length, formData.inPersonAvailable, formData.locationData, formData.onlineAvailable, dualAccountState.selectedOption, verificationState.hasAnyDocs]);
 
   const handleBack = useCallback(() => {
     // Guard: prevent navigation during existing navigation
