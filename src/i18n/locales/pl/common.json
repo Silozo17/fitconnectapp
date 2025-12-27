@@ -1011,6 +1011,7 @@
       "alreadySubscribed": "Już jesteś zapisany!",
       "subscribeFailed": "Nie udało się zapisać. Spróbuj ponownie.",
       "invalidEmail": "Wprowadź prawidłowy adres email",
+      "subscribeButtonLabel": "Zapisz się do newslettera",
       "copyright": "© {{year}} FitConnect. Wszelkie prawa zastrzeżone.",
       "madeWith": "Stworzone z pasją do fitnessu",
       "sections": {

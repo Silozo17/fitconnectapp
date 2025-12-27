@@ -41,6 +41,7 @@ export const CookieConsentBanner = () => {
                 size="sm"
                 onClick={() => setShowPreferences(true)}
                 className="gap-1.5"
+                aria-label={t('cookies.banner.manage')}
               >
                 <Settings className="h-4 w-4" />
                 <span className="hidden xs:inline">{t('cookies.banner.manage')}</span>

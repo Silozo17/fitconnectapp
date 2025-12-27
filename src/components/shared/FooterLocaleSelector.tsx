@@ -66,7 +66,7 @@ export const FooterLocaleSelector = () => {
           <span>Language</span>
         </div>
         <Select value={language} onValueChange={(val) => changeLanguage(val as RouteLanguageCode)}>
-          <SelectTrigger className="w-full bg-background">
+          <SelectTrigger className="w-full bg-background" aria-label="Select language">
             <SelectValue>
               {currentLanguage?.nativeName || language.toUpperCase()}
             </SelectValue>
@@ -91,7 +91,7 @@ export const FooterLocaleSelector = () => {
           <span>Location</span>
         </div>
         <Select value={location} onValueChange={(val) => changeLocation(val as RouteLocationCode)}>
-          <SelectTrigger className="w-full bg-background">
+          <SelectTrigger className="w-full bg-background" aria-label="Select location">
             <SelectValue>
               {currentLocation && (
                 <span className="flex items-center gap-2">

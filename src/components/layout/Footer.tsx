@@ -99,6 +99,7 @@ const Footer = () => {
                 type="submit" 
                 className="bg-primary text-primary-foreground hover:bg-primary/90"
                 disabled={isSubscribing}
+                aria-label={t("website.footer.subscribeButtonLabel")}
               >
                 {isSubscribing ? "..." : <ArrowRight className="w-5 h-5" />}
               </Button>
