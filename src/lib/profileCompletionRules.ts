@@ -34,11 +34,19 @@ export interface CompletionRule {
   label: string;
   weight: number;
   check: (ctx: CompletionContext) => boolean;
+  /** If true, this item is REQUIRED for marketplace visibility */
+  isRequiredForVisibility?: boolean;
 }
 
 /**
  * All profile completion rules with their weights
  * Total weight: 100
+ * 
+ * Required for marketplace visibility:
+ * - Bio, Specialisations, Location, Session availability
+ * 
+ * Optional (nice to have):
+ * - Profile photo, Experience, Who you work with, Gallery, Social links, Stripe
  */
 export const PROFILE_COMPLETION_RULES: CompletionRule[] = [
   {
@@ -46,48 +54,56 @@ export const PROFILE_COMPLETION_RULES: CompletionRule[] = [
     label: "Profile photo",
     weight: 10,
     check: (ctx) => !!ctx.profile.card_image_url,
+    isRequiredForVisibility: false, // Optional - not required to appear in marketplace
   },
   {
     id: "bio",
     label: "Bio",
     weight: 10,
     check: (ctx) => !!ctx.profile.bio && ctx.profile.bio.length > 50,
+    isRequiredForVisibility: true,
   },
   {
     id: "specialisations",
     label: "Coach specialisations",
     weight: 10,
     check: (ctx) => !!(ctx.profile.coach_types && ctx.profile.coach_types.length > 0),
+    isRequiredForVisibility: true,
   },
   {
     id: "experience",
     label: "Years of experience",
     weight: 10,
     check: (ctx) => ctx.profile.experience_years !== null && ctx.profile.experience_years !== undefined,
+    isRequiredForVisibility: false,
   },
   {
     id: "location",
     label: "Location",
     weight: 10,
     check: (ctx) => !!ctx.profile.location,
+    isRequiredForVisibility: true,
   },
   {
     id: "availability",
     label: "Session availability",
     weight: 10,
     check: (ctx) => !!(ctx.profile.online_available || ctx.profile.in_person_available),
+    isRequiredForVisibility: true,
   },
   {
     id: "who_i_work_with",
     label: "Who you work with",
     weight: 10,
     check: (ctx) => !!ctx.profile.who_i_work_with && ctx.profile.who_i_work_with.length > 20,
+    isRequiredForVisibility: false,
   },
   {
     id: "gallery",
     label: "Gallery images",
     weight: 10,
     check: (ctx) => ctx.galleryCount >= 1,
+    isRequiredForVisibility: false,
   },
   {
     id: "social_links",
@@ -102,12 +118,14 @@ export const PROFILE_COMPLETION_RULES: CompletionRule[] = [
       ctx.profile.linkedin_url ||
       ctx.profile.threads_url
     ),
+    isRequiredForVisibility: false,
   },
   {
     id: "stripe_connected",
     label: "Connect Stripe",
     weight: 10,
     check: (ctx) => !!ctx.profile.stripe_connect_id && !!ctx.profile.stripe_connect_onboarded,
+    isRequiredForVisibility: false,
   },
 ];
 

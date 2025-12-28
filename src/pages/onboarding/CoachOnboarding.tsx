@@ -334,10 +334,10 @@ const CoachOnboarding = () => {
       return;
     }
 
-    // Validate availability step - require location if in-person is enabled
+    // Validate availability step - require location for ALL coaches
     if (currentStepName === "Availability") {
-      if (formData.inPersonAvailable && !formData.locationData) {
-        toast.error("Please select a valid location for in-person sessions");
+      if (!formData.locationData) {
+        toast.error("Please select a location so clients can find you");
         return;
       }
       if (!formData.onlineAvailable && !formData.inPersonAvailable) {
@@ -862,23 +862,21 @@ const CoachOnboarding = () => {
               </div>
             </div>
 
-            {/* Location - Required for in-person */}
-            {formData.inPersonAvailable && (
-              <div>
-                <Label className="text-foreground text-sm">
-                  Location <span className="text-destructive">*</span>
-                </Label>
-                <p className="text-xs text-muted-foreground mb-2">
-                  Select your city so clients can find you
-                </p>
-                <LocationAutocomplete
-                  value={formData.location}
-                  onLocationChange={handleLocationChange}
-                  placeholder="Search for your city..."
-                  required={formData.inPersonAvailable}
-                />
-              </div>
-            )}
+            {/* Location - Required for ALL coaches */}
+            <div>
+              <Label className="text-foreground text-sm">
+                Location <span className="text-destructive">*</span>
+              </Label>
+              <p className="text-xs text-muted-foreground mb-2">
+                Enter your city, county, or country. The more accurate your location, the better your visibility in that area.
+              </p>
+              <LocationAutocomplete
+                value={formData.location}
+                onLocationChange={handleLocationChange}
+                placeholder="Search for your city, region, or country..."
+                required={true}
+              />
+            </div>
           </div>
         );
 
