@@ -340,8 +340,8 @@ const ClientSettings = () => {
                           className="w-44"
                           max={new Date().toISOString().split('T')[0]}
                         />
-                        {profile?.age !== null && (
-                          <span className="text-sm text-muted-foreground">Age: {profile.age} years</span>
+{profile?.age != null && (
+  <span className="text-sm text-muted-foreground">Age: {profile.age} years</span>
                         )}
                       </div>
                     </div>
