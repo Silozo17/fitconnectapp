@@ -172,20 +172,19 @@ serve(async (req) => {
 
     const accessToken = await getAccessToken();
 
-    // Call FatSecret foods.search API (v1 - basic scope)
-    const searchUrl = new URL('https://platform.fatsecret.com/rest/server.api');
-    searchUrl.searchParams.set('method', 'foods.search');
-    searchUrl.searchParams.set('search_expression', query);
-    searchUrl.searchParams.set('format', 'json');
-    searchUrl.searchParams.set('max_results', String(maxResults));
-
-    console.log('FatSecret API URL:', searchUrl.toString());
-
-    const searchResponse = await fetch(searchUrl.toString(), {
-      method: 'GET',
+    // Call FatSecret foods.search API (v1 - basic scope) using POST with form-encoded body
+    const searchResponse = await fetch('https://platform.fatsecret.com/rest/server.api', {
+      method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
+      body: new URLSearchParams({
+        method: 'foods.search',
+        search_expression: query,
+        format: 'json',
+        max_results: String(maxResults),
+      }),
     });
 
     if (!searchResponse.ok) {
@@ -196,7 +195,8 @@ serve(async (req) => {
 
     const searchData = await searchResponse.json();
     
-    console.log('FatSecret raw response keys:', Object.keys(searchData));
+    // Log raw response for debugging
+    console.log('FatSecret raw response:', JSON.stringify(searchData).substring(0, 500));
     
     // v1 API response structure: { foods: { food: [...] } }
     const foodsRaw = searchData.foods?.food || [];
