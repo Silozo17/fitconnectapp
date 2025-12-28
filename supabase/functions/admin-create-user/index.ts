@@ -157,6 +157,7 @@ serve(async (req) => {
         })
         .eq("user_id", newUser.user.id);
     } else if (["admin", "manager", "staff"].includes(role)) {
+      // Update admin profile
       await supabaseAdmin
         .from("admin_profiles")
         .update({
@@ -164,6 +165,22 @@ serve(async (req) => {
           last_name: last_name || null,
           display_name: displayName,
           department: department || null,
+        })
+        .eq("user_id", newUser.user.id);
+      
+      // For team members, also update client and coach profiles created by trigger
+      await supabaseAdmin
+        .from("client_profiles")
+        .update({
+          first_name: first_name || displayName,
+          last_name: last_name || null,
+        })
+        .eq("user_id", newUser.user.id);
+      
+      await supabaseAdmin
+        .from("coach_profiles")
+        .update({
+          display_name: displayName,
         })
         .eq("user_id", newUser.user.id);
     }

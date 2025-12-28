@@ -119,7 +119,7 @@ const Auth = () => {
       }
       
       // Default role-based redirects
-      if (role === "admin") {
+      if (role === "admin" || role === "manager" || role === "staff") {
         navigate("/dashboard/admin", { replace: true });
         return;
       }
