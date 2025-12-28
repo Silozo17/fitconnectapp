@@ -55,6 +55,9 @@ export interface FoodSubstitution {
   whyGoodSubstitute: string;
   prepTips?: string;
   whereToBuy?: string;
+  // FatSecret verification fields (Phase 6)
+  fatsecret_id?: string | null;
+  source?: 'fatsecret' | 'manual' | 'ai_generated';
 }
 
 export interface MacroCalculation {
@@ -206,6 +209,7 @@ export const useAIExerciseAlternatives = () => {
 };
 
 // Hook for AI Food Substitutions
+// PHASE 6: Updated to require FatSecret-verified data
 export const useAIFoodSubstitutions = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -216,7 +220,7 @@ export const useAIFoodSubstitutions = () => {
     currentMacros?: { calories: number; protein: number; carbs: number; fat: number };
     dietaryRestrictions?: string[];
     allergies?: string[];
-  }): Promise<{ originalFood: string; substitutions: FoodSubstitution[] } | null> => {
+  }): Promise<{ originalFood: string; substitutions: FoodSubstitution[]; hasUnverifiedResults?: boolean } | null> => {
     setIsLoading(true);
     setError(null);
 
@@ -228,27 +232,37 @@ export const useAIFoodSubstitutions = () => {
       if (fnError) throw fnError;
       if (data?.error) throw new Error(data.error);
 
-      // Validate food substitution macros
-      if (data?.substitutions) {
-        data.substitutions = data.substitutions.map((sub: FoodSubstitution) => {
-          if (sub.macros) {
-            // Recalculate calories from macros as ground truth
-            const calculatedCals = 
-              (sub.macros.protein * 4) + 
-              (sub.macros.carbs * 4) + 
-              (sub.macros.fat * 9);
-            
-            // If stated calories differ significantly, use calculated
-            if (Math.abs(calculatedCals - sub.macros.calories) > 20) {
-              console.warn(`Food substitution ${sub.name}: adjusting calories from ${sub.macros.calories} to ${calculatedCals}`);
-              sub.macros.calories = Math.round(calculatedCals);
-            }
-          }
-          return sub;
-        });
+      if (!data?.substitutions) {
+        return data || null;
       }
 
-      return data || null;
+      // PHASE 6: Filter to only FatSecret-verified substitutions
+      const verifiedSubstitutions: FoodSubstitution[] = [];
+      let hasUnverifiedResults = false;
+
+      for (const sub of data.substitutions as FoodSubstitution[]) {
+        // Check for FatSecret verification
+        if (sub.fatsecret_id && sub.source === 'fatsecret') {
+          // Verified substitution - keep as-is (macros come from FatSecret)
+          verifiedSubstitutions.push(sub);
+        } else {
+          // Unverified - log and skip
+          console.warn(`Rejecting unverified substitution: ${sub.name} (source: ${sub.source}, fatsecret_id: ${sub.fatsecret_id})`);
+          hasUnverifiedResults = true;
+        }
+      }
+
+      // If no verified substitutions found, return with warning
+      if (verifiedSubstitutions.length === 0 && data.substitutions.length > 0) {
+        console.error('All substitutions were unverified and rejected');
+        toast.warning('No verified food alternatives found. Try a different search.');
+      }
+
+      return {
+        originalFood: data.originalFood,
+        substitutions: verifiedSubstitutions,
+        hasUnverifiedResults,
+      };
     } catch (err: unknown) {
       const message = getErrorMessage(err, 'Failed to find substitutions');
       setError(message);

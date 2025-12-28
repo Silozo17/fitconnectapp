@@ -27,6 +27,8 @@ export interface FoodItem {
   protein: number;
   carbs: number;
   fat: number;
+  fatsecret_id?: string | null;
+  source?: 'fatsecret' | 'manual' | 'ai_generated' | 'custom';
 }
 
 export interface MealPlan {
@@ -35,6 +37,14 @@ export interface MealPlan {
     time: string;
     foods: FoodItem[];
   }>;
+}
+
+export interface FatSecretValidationResult {
+  isValid: boolean;
+  totalFoods: number;
+  verifiedFoods: number;
+  unverifiedFoods: FoodItem[];
+  errors: string[];
 }
 
 export interface ValidationResult {
@@ -368,4 +378,128 @@ export function getAccuracyMessage(validation: ValidationResult): {
       message: `Meal plan is significantly ${direction} target (${validation.actualTotals.calories} vs ${validation.targetTotals.calories} kcal). Review and adjust meals.`,
     };
   }
+}
+
+/**
+ * PHASE 5: Validate all foods have FatSecret backing
+ * Ensures no AI-hallucinated nutrition data
+ */
+export function validateAllFoodsHaveFatSecretId(mealPlan: MealPlan): FatSecretValidationResult {
+  const errors: string[] = [];
+  const unverifiedFoods: FoodItem[] = [];
+  let verifiedCount = 0;
+  let totalCount = 0;
+
+  for (const meal of mealPlan.meals) {
+    for (const food of meal.foods) {
+      totalCount++;
+      
+      if (food.fatsecret_id && food.source === 'fatsecret') {
+        verifiedCount++;
+      } else {
+        unverifiedFoods.push(food);
+        errors.push(`"${food.name}" is not verified by FatSecret database`);
+      }
+    }
+  }
+
+  return {
+    isValid: unverifiedFoods.length === 0,
+    totalFoods: totalCount,
+    verifiedFoods: verifiedCount,
+    unverifiedFoods,
+    errors,
+  };
+}
+
+/**
+ * Reject foods that have AI-generated/invented data
+ * Returns only foods with verified FatSecret IDs
+ */
+export function rejectAIGeneratedFoods(foods: FoodItem[]): FoodItem[] {
+  return foods.filter(food => {
+    // Only keep foods with valid FatSecret backing
+    if (food.source === 'ai_generated') {
+      console.warn(`Rejecting AI-generated food: ${food.name}`);
+      return false;
+    }
+    
+    if (!food.fatsecret_id && food.source !== 'manual' && food.source !== 'custom') {
+      console.warn(`Rejecting unverified food: ${food.name}`);
+      return false;
+    }
+    
+    return true;
+  });
+}
+
+/**
+ * Strict validation for meal plans - rejects if not FatSecret-verified
+ * Use this for AI-generated meal plans
+ */
+export function strictValidateMealPlan(
+  mealPlan: MealPlan,
+  targets: MacroTargets,
+  options: {
+    requireFatSecretIds?: boolean;
+    tolerancePercent?: number;
+  } = {}
+): {
+  isValid: boolean;
+  macroValidation: ValidationResult;
+  fatSecretValidation: FatSecretValidationResult | null;
+  canProceed: boolean;
+  rejectionReason?: string;
+} {
+  const { requireFatSecretIds = true, tolerancePercent = 10 } = options;
+  
+  // Validate macros
+  const macroValidation = validateMealPlanMacros(mealPlan, targets, tolerancePercent);
+  
+  // Validate FatSecret IDs if required
+  let fatSecretValidation: FatSecretValidationResult | null = null;
+  if (requireFatSecretIds) {
+    fatSecretValidation = validateAllFoodsHaveFatSecretId(mealPlan);
+  }
+  
+  // Determine if we can proceed
+  const macrosOk = macroValidation.isWithinTolerance;
+  const fatSecretOk = !requireFatSecretIds || (fatSecretValidation?.isValid ?? true);
+  const canProceed = macrosOk && fatSecretOk;
+  
+  let rejectionReason: string | undefined;
+  if (!canProceed) {
+    if (!macrosOk) {
+      rejectionReason = `Macros are ${Math.round(macroValidation.discrepancy.caloriePercent)}% off target`;
+    } else if (!fatSecretOk && fatSecretValidation) {
+      rejectionReason = `${fatSecretValidation.unverifiedFoods.length} foods lack verified nutrition data`;
+    }
+  }
+  
+  return {
+    isValid: canProceed,
+    macroValidation,
+    fatSecretValidation,
+    canProceed,
+    rejectionReason,
+  };
+}
+
+/**
+ * Check if a food substitution response has valid FatSecret backing
+ */
+export function validateSubstitutionHasFatSecretId(substitution: {
+  fatsecret_id?: string | null;
+  source?: string;
+  name: string;
+}): boolean {
+  if (!substitution.fatsecret_id) {
+    console.warn(`Substitution "${substitution.name}" has no FatSecret ID`);
+    return false;
+  }
+  if (substitution.source !== 'fatsecret') {
+    console.warn(`Substitution "${substitution.name}" is not from FatSecret (source: ${substitution.source})`);
+    return false;
+  }
+  return true;
 }
