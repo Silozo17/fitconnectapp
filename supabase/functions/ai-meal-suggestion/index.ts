@@ -9,6 +9,8 @@ const corsHeaders = {
 // TYPES
 // =====================================
 
+type DietaryPreference = 'balanced' | 'high_protein' | 'low_carb' | 'keto' | 'vegan';
+
 interface AIFood {
   name: string;
   serving: string;
@@ -51,29 +53,61 @@ interface ValidationResult {
 }
 
 // =====================================
-// VALIDATION FUNCTIONS (No AI - Pure Math)
+// DIET CONSTRAINTS (Same as macro calculator)
 // =====================================
 
-/**
- * Recalculate calories from macros (ground truth formula)
- * Protein: 4 cal/g, Carbs: 4 cal/g, Fat: 9 cal/g
- */
+const DIET_CONSTRAINTS: Record<DietaryPreference, {
+  name: string;
+  carbsGrams?: { min: number; max: number };
+  description: string;
+  foodGuidance: string;
+  avoidFoods?: string;
+}> = {
+  balanced: {
+    name: 'Balanced',
+    description: 'Flexible macro distribution',
+    foodGuidance: 'Include a variety of whole grains, lean proteins, fruits, vegetables, and healthy fats',
+  },
+  high_protein: {
+    name: 'High Protein',
+    description: 'Elevated protein for muscle retention',
+    foodGuidance: 'Emphasize protein-rich foods at every meal: lean meats, fish, eggs, Greek yogurt, cottage cheese, legumes',
+  },
+  low_carb: {
+    name: 'Low Carb',
+    carbsGrams: { min: 70, max: 130 },
+    description: 'Moderate carb restriction (NOT ketogenic)',
+    foodGuidance: 'Focus on proteins, vegetables, and healthy fats. Limit grains, bread, pasta',
+    avoidFoods: 'Limit: bread, pasta, rice, potatoes, sugary foods',
+  },
+  keto: {
+    name: 'Ketogenic',
+    carbsGrams: { min: 20, max: 30 },
+    description: 'Very low carb for ketosis',
+    foodGuidance: 'High-fat foods: avocado, olive oil, nuts, fatty fish, eggs, cheese, meat',
+    avoidFoods: 'AVOID: grains, bread, pasta, rice, potatoes, sugary foods, most fruits, beans',
+  },
+  vegan: {
+    name: 'Vegan',
+    description: 'Plant-based only',
+    foodGuidance: 'Plant proteins: tofu, tempeh, seitan, legumes, edamame, quinoa, lentils, nuts',
+    avoidFoods: 'NO: meat, fish, dairy, eggs, honey',
+  },
+};
+
+// =====================================
+// VALIDATION FUNCTIONS
+// =====================================
+
 function recalculateCalories(protein: number, carbs: number, fat: number): number {
   return Math.round((protein * 4) + (carbs * 4) + (fat * 9));
 }
 
-/**
- * Calculate meal plan totals from all foods
- */
 function calculateMealPlanTotals(mealPlan: AIMealPlan): MacroTargets {
-  let totalCalories = 0;
-  let totalProtein = 0;
-  let totalCarbs = 0;
-  let totalFat = 0;
+  let totalCalories = 0, totalProtein = 0, totalCarbs = 0, totalFat = 0;
 
   for (const meal of mealPlan.meals) {
     for (const food of meal.foods) {
-      // Use recalculated calories (ground truth)
       const actualCalories = recalculateCalories(food.protein, food.carbs, food.fat);
       totalCalories += actualCalories;
       totalProtein += food.protein;
@@ -90,77 +124,54 @@ function calculateMealPlanTotals(mealPlan: AIMealPlan): MacroTargets {
   };
 }
 
-/**
- * Fix each food's calories to match its macros
- */
 function fixFoodCalories(mealPlan: AIMealPlan): AIMealPlan {
-  const fixedMeals = mealPlan.meals.map((meal) => ({
-    ...meal,
-    foods: meal.foods.map((food) => ({
-      ...food,
-      calories: recalculateCalories(food.protein, food.carbs, food.fat),
-      protein: Math.round(food.protein * 10) / 10,
-      carbs: Math.round(food.carbs * 10) / 10,
-      fat: Math.round(food.fat * 10) / 10,
+  return {
+    meals: mealPlan.meals.map(meal => ({
+      ...meal,
+      foods: meal.foods.map(food => ({
+        ...food,
+        calories: recalculateCalories(food.protein, food.carbs, food.fat),
+        protein: Math.round(food.protein * 10) / 10,
+        carbs: Math.round(food.carbs * 10) / 10,
+        fat: Math.round(food.fat * 10) / 10,
+      })),
     })),
-  }));
-
-  return { meals: fixedMeals };
+  };
 }
 
-/**
- * Scale all portions to match target calories
- */
 function scaleMealPortions(mealPlan: AIMealPlan, targetCalories: number): AIMealPlan {
   const currentTotals = calculateMealPlanTotals(mealPlan);
-  
-  if (currentTotals.calories === 0) {
-    console.warn('Cannot scale: meal plan has 0 calories');
-    return mealPlan;
-  }
+  if (currentTotals.calories === 0) return mealPlan;
   
   const scaleFactor = targetCalories / currentTotals.calories;
-  
-  // Don't scale if factor is too extreme (bad data)
   if (scaleFactor < 0.5 || scaleFactor > 2.0) {
-    console.warn(`Scale factor ${scaleFactor.toFixed(2)} too extreme, skipping scaling`);
+    console.warn(`Scale factor ${scaleFactor.toFixed(2)} too extreme`);
     return mealPlan;
   }
   
-  console.log(`Scaling meal plan by factor ${scaleFactor.toFixed(3)} to match ${targetCalories} kcal target`);
+  console.log(`Scaling by ${scaleFactor.toFixed(3)} to match ${targetCalories} kcal`);
   
-  const scaledMeals = mealPlan.meals.map(meal => ({
-    ...meal,
-    foods: meal.foods.map(food => {
-      const scaledProtein = Math.round(food.protein * scaleFactor * 10) / 10;
-      const scaledCarbs = Math.round(food.carbs * scaleFactor * 10) / 10;
-      const scaledFat = Math.round(food.fat * scaleFactor * 10) / 10;
-      const scaledCalories = recalculateCalories(scaledProtein, scaledCarbs, scaledFat);
-      
-      return {
-        ...food,
-        protein: scaledProtein,
-        carbs: scaledCarbs,
-        fat: scaledFat,
-        calories: scaledCalories,
-        serving: scaleFactor !== 1 
-          ? `${food.serving} (adjusted)` 
-          : food.serving,
-      };
-    }),
-  }));
-  
-  return { meals: scaledMeals };
+  return {
+    meals: mealPlan.meals.map(meal => ({
+      ...meal,
+      foods: meal.foods.map(food => {
+        const scaledProtein = Math.round(food.protein * scaleFactor * 10) / 10;
+        const scaledCarbs = Math.round(food.carbs * scaleFactor * 10) / 10;
+        const scaledFat = Math.round(food.fat * scaleFactor * 10) / 10;
+        return {
+          ...food,
+          protein: scaledProtein,
+          carbs: scaledCarbs,
+          fat: scaledFat,
+          calories: recalculateCalories(scaledProtein, scaledCarbs, scaledFat),
+          serving: scaleFactor !== 1 ? `${food.serving} (adjusted)` : food.serving,
+        };
+      }),
+    })),
+  };
 }
 
-/**
- * Validate meal plan against targets
- */
-function validateMealPlan(
-  mealPlan: AIMealPlan,
-  targets: MacroTargets,
-  tolerancePercent: number = 10
-): ValidationResult {
+function validateMealPlan(mealPlan: AIMealPlan, targets: MacroTargets, tolerancePercent: number = 10): ValidationResult {
   const actualTotals = calculateMealPlanTotals(mealPlan);
   const warnings: string[] = [];
   const errors: string[] = [];
@@ -179,59 +190,73 @@ function validateMealPlan(
   const isWithinTolerance = caloriePercent <= tolerancePercent;
   
   if (!isWithinTolerance) {
-    const direction = calorieDiff > 0 ? 'above' : 'below';
-    errors.push(`Total calories (${actualTotals.calories}) are ${Math.round(caloriePercent)}% ${direction} target (${targets.calories})`);
+    errors.push(`Calories (${actualTotals.calories}) ${Math.round(caloriePercent)}% off target (${targets.calories})`);
   } else if (caloriePercent > 5) {
-    const direction = calorieDiff > 0 ? 'above' : 'below';
-    warnings.push(`Total calories slightly ${direction} target by ${Math.round(caloriePercent)}%`);
+    warnings.push(`Calories slightly off by ${Math.round(caloriePercent)}%`);
   }
   
-  // Check protein accuracy (important for fitness)
   const proteinDiffPercent = Math.abs(discrepancy.protein / targets.protein) * 100;
   if (proteinDiffPercent > 15) {
-    warnings.push(`Protein ${discrepancy.protein > 0 ? 'exceeds' : 'falls short of'} target by ${Math.round(proteinDiffPercent)}%`);
+    warnings.push(`Protein ${discrepancy.protein > 0 ? 'exceeds' : 'below'} target by ${Math.round(proteinDiffPercent)}%`);
   }
   
-  return {
-    isValid: errors.length === 0,
-    isWithinTolerance,
-    actualTotals,
-    discrepancy,
-    warnings,
-    errors,
-  };
+  return { isValid: errors.length === 0, isWithinTolerance, actualTotals, discrepancy, warnings, errors };
 }
 
 /**
- * Calculate per-meal calorie targets for the AI prompt
+ * Validate diet-specific constraints
  */
+function validateDietConstraints(
+  totals: MacroTargets,
+  diet: DietaryPreference
+): { isValid: boolean; errors: string[]; warnings: string[] } {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+  const config = DIET_CONSTRAINTS[diet];
+  
+  if (config.carbsGrams) {
+    if (totals.carbs > config.carbsGrams.max + 15) {
+      errors.push(`Carbs (${totals.carbs}g) exceed ${diet} limit of ${config.carbsGrams.max}g`);
+    } else if (totals.carbs > config.carbsGrams.max) {
+      warnings.push(`Carbs (${totals.carbs}g) slightly above ${diet} target`);
+    }
+  }
+  
+  return { isValid: errors.length === 0, errors, warnings };
+}
+
 function calculatePerMealTargets(dailyCalories: number, mealCount: number = 4): string {
   const configs: Record<number, Array<{ name: string; pct: number }>> = {
-    3: [
-      { name: 'Breakfast', pct: 0.25 },
-      { name: 'Lunch', pct: 0.40 },
-      { name: 'Dinner', pct: 0.35 },
-    ],
-    4: [
-      { name: 'Breakfast', pct: 0.25 },
-      { name: 'Lunch', pct: 0.35 },
-      { name: 'Dinner', pct: 0.30 },
-      { name: 'Snack', pct: 0.10 },
-    ],
-    5: [
-      { name: 'Breakfast', pct: 0.20 },
-      { name: 'Morning Snack', pct: 0.10 },
-      { name: 'Lunch', pct: 0.30 },
-      { name: 'Afternoon Snack', pct: 0.10 },
-      { name: 'Dinner', pct: 0.30 },
-    ],
+    3: [{ name: 'Breakfast', pct: 0.25 }, { name: 'Lunch', pct: 0.40 }, { name: 'Dinner', pct: 0.35 }],
+    4: [{ name: 'Breakfast', pct: 0.25 }, { name: 'Lunch', pct: 0.35 }, { name: 'Dinner', pct: 0.30 }, { name: 'Snack', pct: 0.10 }],
+    5: [{ name: 'Breakfast', pct: 0.20 }, { name: 'Morning Snack', pct: 0.10 }, { name: 'Lunch', pct: 0.30 }, { name: 'Afternoon Snack', pct: 0.10 }, { name: 'Dinner', pct: 0.30 }],
   };
   
-  const mealConfigs = configs[mealCount] || configs[4];
+  return (configs[mealCount] || configs[4]).map(m => `- ${m.name}: ~${Math.round(dailyCalories * m.pct)} kcal`).join('\n');
+}
+
+/**
+ * Generate diet-specific prompt instructions
+ */
+function getDietPromptInstructions(diet: DietaryPreference, targets: MacroTargets): string {
+  const config = DIET_CONSTRAINTS[diet];
+  const lines: string[] = [];
   
-  return mealConfigs.map(m => 
-    `- ${m.name}: ~${Math.round(dailyCalories * m.pct)} kcal`
-  ).join('\n');
+  if (config.carbsGrams) {
+    lines.push(`\nCRITICAL DIET CONSTRAINT (${config.name}):`);
+    lines.push(`- Total carbs MUST be between ${config.carbsGrams.min}g and ${config.carbsGrams.max}g`);
+    lines.push(`- Target carbs: ${targets.carbs}g (stay within ${config.carbsGrams.min}-${config.carbsGrams.max}g range)`);
+  }
+  
+  if (config.foodGuidance) {
+    lines.push(`\nFood guidance: ${config.foodGuidance}`);
+  }
+  
+  if (config.avoidFoods) {
+    lines.push(`${config.avoidFoods}`);
+  }
+  
+  return lines.join('\n');
 }
 
 // =====================================
@@ -242,40 +267,42 @@ async function callAIWithRetry(
   apiKey: string,
   targets: MacroTargets,
   preferences: string | undefined,
+  dietType: DietaryPreference,
   maxRetries: number = 2
 ): Promise<{ mealPlan: AIMealPlan; validation: ValidationResult; attempts: number }> {
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    console.log(`AI meal generation attempt ${attempt}/${maxRetries}`);
+    console.log(`AI meal generation attempt ${attempt}/${maxRetries} for ${dietType} diet`);
     
-    // More strict prompt on retry
     const strictnessNote = attempt > 1 
-      ? `\n\nIMPORTANT: Previous attempt had incorrect totals. Be VERY precise with macro values. The sum of all food macros MUST equal the daily targets.`
+      ? `\n\nIMPORTANT: Previous attempt had incorrect totals. Be VERY precise. Sum MUST equal targets.`
       : '';
+    
+    const dietInstructions = getDietPromptInstructions(dietType, targets);
     
     const systemPrompt = `You are a professional nutritionist creating accurate meal plans.
 
 CRITICAL RULES:
 1. Each food's calories MUST equal: (protein × 4) + (carbs × 4) + (fat × 9)
 2. Use realistic nutrition values for common foods
-3. The TOTAL of all foods MUST hit the daily targets closely
+3. TOTAL of all foods MUST hit daily targets closely
 4. Distribute calories appropriately across meals
-
+${dietInstructions}
 ${strictnessNote}`;
 
     const perMealTargets = calculatePerMealTargets(targets.calories, 4);
     
-    const userPrompt = `Create a daily meal plan matching these EXACT targets:
+    const userPrompt = `Create a ${DIET_CONSTRAINTS[dietType].name} meal plan matching these EXACT targets:
 - Total Daily Calories: ${targets.calories} kcal
 - Protein: ${targets.protein}g
 - Carbohydrates: ${targets.carbs}g
 - Fat: ${targets.fat}g
 
-Suggested per-meal calorie distribution:
+Per-meal distribution:
 ${perMealTargets}
-${preferences ? `\nDietary preferences: ${preferences}` : ''}
+${preferences ? `\nAdditional preferences: ${preferences}` : ''}
 
-Provide 4-5 meals with accurate nutrition values that sum to the daily targets.`;
+Provide 4-5 meals with accurate nutrition values that sum to daily targets.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -293,7 +320,7 @@ Provide 4-5 meals with accurate nutrition values that sum to the daily targets.`
           type: "function",
           function: {
             name: "create_meal_plan",
-            description: "Create a structured daily meal plan. Each food's calories must equal (protein×4)+(carbs×4)+(fat×9)",
+            description: "Create meal plan. calories = (protein×4)+(carbs×4)+(fat×9)",
             parameters: {
               type: "object",
               properties: {
@@ -334,86 +361,66 @@ Provide 4-5 meals with accurate nutrition values that sum to the daily targets.`
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('AI gateway error:', response.status, errorText);
-      
-      if (response.status === 429) {
-        throw new Error('Rate limit exceeded. Please try again later.');
-      }
-      if (response.status === 402) {
-        throw new Error('AI credits exhausted. Please add credits to continue.');
-      }
-      throw new Error(`AI gateway error: ${response.status}`);
+      console.error('AI error:', response.status, errorText);
+      if (response.status === 429) throw new Error('Rate limit exceeded');
+      if (response.status === 402) throw new Error('AI credits exhausted');
+      throw new Error(`AI error: ${response.status}`);
     }
 
     const data = await response.json();
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
     
     if (!toolCall?.function?.arguments) {
-      console.error('No valid tool call in AI response');
+      console.error('No tool call in response');
       if (attempt < maxRetries) continue;
       throw new Error('Failed to generate meal plan');
     }
 
     try {
       let rawMealPlan: AIMealPlan = JSON.parse(toolCall.function.arguments);
-      
-      // Step 1: Fix all food calories to match macros
       rawMealPlan = fixFoodCalories(rawMealPlan);
-      
-      // Step 2: Validate against targets
       let validation = validateMealPlan(rawMealPlan, targets, 10);
       
-      console.log(`Attempt ${attempt} - Actual: ${validation.actualTotals.calories} kcal, Target: ${targets.calories} kcal, Diff: ${validation.discrepancy.caloriePercent}%`);
+      // Check diet constraints
+      const dietValidation = validateDietConstraints(validation.actualTotals, dietType);
+      validation.warnings.push(...dietValidation.warnings);
+      validation.errors.push(...dietValidation.errors);
       
-      // Step 3: If off by >10% but <100%, try scaling
+      console.log(`Attempt ${attempt}: ${validation.actualTotals.calories} kcal (target: ${targets.calories}), carbs: ${validation.actualTotals.carbs}g`);
+      
+      // Scale if needed
       if (!validation.isWithinTolerance && validation.discrepancy.caloriePercent < 100) {
-        console.log('Attempting to scale portions to match targets...');
         const scaledMealPlan = scaleMealPortions(rawMealPlan, targets.calories);
         const scaledValidation = validateMealPlan(scaledMealPlan, targets, 10);
         
+        const scaledDietValidation = validateDietConstraints(scaledValidation.actualTotals, dietType);
+        scaledValidation.warnings.push(...scaledDietValidation.warnings);
+        scaledValidation.errors.push(...scaledDietValidation.errors);
+        
         if (scaledValidation.isWithinTolerance) {
-          console.log(`Scaling successful: ${scaledValidation.actualTotals.calories} kcal`);
-          return {
-            mealPlan: scaledMealPlan,
-            validation: scaledValidation,
-            attempts: attempt,
-          };
-        } else {
-          console.log(`Scaling still off by ${scaledValidation.discrepancy.caloriePercent}%`);
-          // Use scaled version anyway if it's better
-          if (scaledValidation.discrepancy.caloriePercent < validation.discrepancy.caloriePercent) {
-            rawMealPlan = scaledMealPlan;
-            validation = scaledValidation;
-          }
-        }
-      }
-      
-      // Step 4: If within tolerance or last attempt, return
-      if (validation.isWithinTolerance || attempt === maxRetries) {
-        if (!validation.isWithinTolerance) {
-          console.warn(`Final attempt still off by ${validation.discrepancy.caloriePercent}%. Returning best effort.`);
-          validation.warnings.push(`Meal plan is ${validation.discrepancy.caloriePercent}% off target. Consider adjusting portions manually.`);
+          return { mealPlan: scaledMealPlan, validation: scaledValidation, attempts: attempt };
         }
         
-        return {
-          mealPlan: rawMealPlan,
-          validation,
-          attempts: attempt,
-        };
+        if (scaledValidation.discrepancy.caloriePercent < validation.discrepancy.caloriePercent) {
+          rawMealPlan = scaledMealPlan;
+          validation = scaledValidation;
+        }
       }
       
-      // Continue to next attempt
-      console.log(`Retrying due to ${validation.discrepancy.caloriePercent}% calorie discrepancy...`);
+      if (validation.isWithinTolerance || attempt === maxRetries) {
+        if (!validation.isWithinTolerance) {
+          validation.warnings.push(`Plan is ${validation.discrepancy.caloriePercent}% off target`);
+        }
+        return { mealPlan: rawMealPlan, validation, attempts: attempt };
+      }
       
     } catch (parseError) {
-      console.error('Failed to parse AI response:', parseError);
-      if (attempt === maxRetries) {
-        throw new Error('Failed to parse meal plan from AI');
-      }
+      console.error('Parse error:', parseError);
+      if (attempt === maxRetries) throw new Error('Failed to parse meal plan');
     }
   }
   
-  throw new Error('Failed to generate accurate meal plan after retries');
+  throw new Error('Failed after retries');
 }
 
 // =====================================
@@ -426,39 +433,28 @@ serve(async (req) => {
   }
 
   try {
-    const { targetCalories, targetProtein, targetCarbs, targetFat, preferences, structured } = await req.json();
+    const { targetCalories, targetProtein, targetCarbs, targetFat, preferences, structured, dietType } = await req.json();
     
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
-    }
+    if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
 
-    const targets: MacroTargets = {
-      calories: targetCalories,
-      protein: targetProtein,
-      carbs: targetCarbs,
-      fat: targetFat,
-    };
+    const targets: MacroTargets = { calories: targetCalories, protein: targetProtein, carbs: targetCarbs, fat: targetFat };
+    const diet: DietaryPreference = dietType || 'balanced';
 
-    // Validate inputs
     if (!targetCalories || targetCalories < 500 || targetCalories > 10000) {
-      throw new Error('Invalid calorie target. Must be between 500 and 10000.');
+      throw new Error('Invalid calorie target (500-10000)');
     }
 
     if (structured) {
-      console.log('Generating structured meal plan for:', targets, 'preferences:', preferences);
+      console.log('Generating structured meal plan:', targets, 'diet:', diet, 'prefs:', preferences);
       
-      const { mealPlan, validation, attempts } = await callAIWithRetry(
-        LOVABLE_API_KEY,
-        targets,
-        preferences,
-        2 // Max 2 attempts
-      );
+      const { mealPlan, validation, attempts } = await callAIWithRetry(LOVABLE_API_KEY, targets, preferences, diet, 2);
       
-      console.log(`Meal plan generated in ${attempts} attempt(s). Valid: ${validation.isValid}, Within tolerance: ${validation.isWithinTolerance}`);
+      console.log(`Generated in ${attempts} attempts. Valid: ${validation.isValid}`);
       
       return new Response(JSON.stringify({
         mealPlan,
+        dietType: diet,
         validation: {
           totals: validation.actualTotals,
           targets,
@@ -473,10 +469,10 @@ serve(async (req) => {
       });
     }
 
-    // Legacy text-based response
-    const systemPrompt = `You are a professional nutritionist. Create practical meal plans based on macro targets.`;
+    // Legacy text response
+    const systemPrompt = `You are a nutritionist. Create practical ${DIET_CONSTRAINTS[diet].name} meal plans.`;
     
-    const userPrompt = `Create a daily meal plan for:
+    const userPrompt = `Create a ${DIET_CONSTRAINTS[diet].name} meal plan for:
 - Calories: ${targetCalories} kcal
 - Protein: ${targetProtein}g
 - Carbs: ${targetCarbs}g
@@ -500,30 +496,27 @@ ${preferences ? `\nPreferences: ${preferences}` : ''}`;
 
     if (!response.ok) {
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }), {
-          status: 429,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        return new Response(JSON.stringify({ error: 'Rate limit exceeded' }), {
+          status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: 'AI credits exhausted. Please add credits.' }), {
-          status: 402,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        return new Response(JSON.stringify({ error: 'AI credits exhausted' }), {
+          status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-      throw new Error(`AI gateway error: ${response.status}`);
+      throw new Error(`AI error: ${response.status}`);
     }
 
     const data = await response.json();
-    const suggestion = data.choices?.[0]?.message?.content || 'Unable to generate suggestion';
+    const suggestion = data.choices?.[0]?.message?.content || 'Unable to generate';
 
-    return new Response(JSON.stringify({ suggestion }), {
+    return new Response(JSON.stringify({ suggestion, dietType: diet }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error in ai-meal-suggestion:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    console.error('Error:', error);
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

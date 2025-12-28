@@ -6,29 +6,36 @@
  * computed values and provide explanations/suggestions.
  * 
  * All formulas are industry-standard and verified.
+ * 
+ * CALCULATION ORDER (Protein-First Approach):
+ * 1. Calculate BMR (Mifflin-St Jeor)
+ * 2. Calculate TDEE (BMR × activity multiplier)
+ * 3. Calculate target calories (TDEE ± goal adjustment)
+ * 4. Calculate PROTEIN FIRST (bodyweight × requirement) - NON-NEGOTIABLE
+ * 5. Apply diet constraints for CARBS (hard limits for keto/low-carb)
+ * 6. Calculate FAT from remaining calories
+ * 7. Validate and adjust if needed
  */
 
-export type Gender = 'male' | 'female';
-export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
-export type Goal = 'lose_weight' | 'maintain' | 'build_muscle' | 'body_recomp';
-export type DietaryPreference = 'balanced' | 'high_protein' | 'low_carb' | 'keto' | 'vegan';
+import {
+  Gender,
+  ActivityLevel,
+  Goal,
+  DietaryPreference,
+  ACTIVITY_MULTIPLIERS,
+  GOAL_ADJUSTMENTS,
+  DIET_CONSTRAINTS,
+  SAFETY_FLOORS,
+  FIBER_PER_1000_KCAL,
+  getProteinRequirement,
+  getCarbConstraint,
+  checkDietGoalConflicts,
+  getMinimumSafeCalories,
+} from './nutrition-science-config';
 
-// Activity level multipliers for TDEE calculation
-export const ACTIVITY_MULTIPLIERS: Record<ActivityLevel, number> = {
-  sedentary: 1.2,      // Little or no exercise
-  light: 1.375,        // Light exercise 1-3 days/week
-  moderate: 1.55,      // Moderate exercise 3-5 days/week
-  active: 1.725,       // Hard exercise 6-7 days/week
-  very_active: 1.9,    // Very hard exercise, physical job
-};
-
-// Goal calorie adjustments
-export const GOAL_ADJUSTMENTS: Record<Goal, number> = {
-  lose_weight: -500,    // 500 calorie deficit for ~1lb/week loss
-  maintain: 0,
-  build_muscle: 300,    // Moderate surplus for lean gains
-  body_recomp: -100,    // Slight deficit with high protein
-};
+// Re-export types for convenience
+export type { Gender, ActivityLevel, Goal, DietaryPreference };
+export { ACTIVITY_MULTIPLIERS, GOAL_ADJUSTMENTS };
 
 export interface MacroResult {
   protein: number;
@@ -52,6 +59,8 @@ export interface CalculationResult {
   caloriesFromMacros: number;
   isValid: boolean;
   warnings: string[];
+  dietType: DietaryPreference;
+  proteinPerKg: number;
 }
 
 /**
@@ -83,16 +92,135 @@ export function calculateTDEE(bmr: number, activityLevel: ActivityLevel): number
 /**
  * Calculate target calories based on goal
  */
-export function calculateTargetCalories(tdee: number, goal: Goal): number {
+export function calculateTargetCalories(tdee: number, goal: Goal, gender: Gender): number {
   const adjustment = GOAL_ADJUSTMENTS[goal];
   const target = tdee + adjustment;
-  // Ensure minimum safe calories (women: 1200, men: 1500 - using 1200 as floor)
-  return Math.max(1200, Math.round(target));
+  const minCalories = getMinimumSafeCalories(gender);
+  return Math.max(minCalories, Math.round(target));
 }
 
 /**
- * Calculate macros based on target calories, goal, and dietary preference
- * Returns macros in grams
+ * Calculate physiological macros using PROTEIN-FIRST approach
+ * 
+ * This is the CORRECT way to calculate macros:
+ * 1. Protein is a REQUIREMENT based on bodyweight, not a percentage
+ * 2. Carbs are constrained by diet type (hard limits for keto/low-carb)
+ * 3. Fat fills the remaining calories
+ */
+export function calculatePhysiologicalMacros(
+  targetCalories: number,
+  weightKg: number,
+  goal: Goal,
+  dietaryPreference: DietaryPreference,
+  gender: Gender
+): { macros: MacroResult; warnings: string[]; proteinPerKg: number } {
+  const warnings: string[] = [];
+  
+  // Check for diet/goal conflicts
+  const conflicts = checkDietGoalConflicts(dietaryPreference, goal);
+  warnings.push(...conflicts);
+  
+  // STEP 1: Calculate PROTEIN FIRST (non-negotiable requirement)
+  const proteinReq = getProteinRequirement(weightKg, goal, dietaryPreference);
+  let proteinGrams = proteinReq.grams;
+  
+  if (proteinReq.warning) {
+    warnings.push(proteinReq.warning);
+  }
+  
+  // STEP 2: Calculate CARBS based on diet type
+  let carbsGrams: number;
+  const carbConstraint = getCarbConstraint(dietaryPreference);
+  
+  if (carbConstraint) {
+    // Hard carb limit (keto or low-carb) - use the max of the range
+    carbsGrams = carbConstraint.max;
+  } else {
+    // For balanced/high-protein/vegan: calculate from remainder after ensuring min fat
+    // We'll calculate this after determining fat
+    carbsGrams = 0; // Will be recalculated
+  }
+  
+  // STEP 3: Calculate FAT from remaining calories
+  const dietConfig = DIET_CONSTRAINTS[dietaryPreference];
+  const proteinCalories = proteinGrams * 4;
+  const carbCalories = carbsGrams * 4;
+  
+  let fatGrams: number;
+  
+  if (carbConstraint) {
+    // Diet with fixed carbs: fat gets the remainder
+    const remainingCalories = targetCalories - proteinCalories - carbCalories;
+    fatGrams = Math.round(remainingCalories / 9);
+  } else {
+    // Balanced/high-protein/vegan: calculate fat %, then carbs from remainder
+    const avgFatPercent = (dietConfig.fatPercent.min + dietConfig.fatPercent.max) / 2;
+    const remainingAfterProtein = targetCalories - proteinCalories;
+    
+    // Fat gets its percentage of remaining calories
+    const fatCalories = remainingAfterProtein * avgFatPercent;
+    fatGrams = Math.round(fatCalories / 9);
+    
+    // Carbs get what's left
+    const carbCaloriesRemaining = targetCalories - proteinCalories - (fatGrams * 9);
+    carbsGrams = Math.round(carbCaloriesRemaining / 4);
+  }
+  
+  // STEP 4: Apply safety floors and validate
+  
+  // Ensure minimum fat
+  if (fatGrams < SAFETY_FLOORS.minFatGrams) {
+    const neededFatCalories = SAFETY_FLOORS.minFatGrams * 9;
+    const currentFatCalories = fatGrams * 9;
+    const caloriesNeeded = neededFatCalories - currentFatCalories;
+    
+    // Take from carbs if possible
+    if (!carbConstraint && carbsGrams * 4 > caloriesNeeded + (SAFETY_FLOORS.minCarbsGrams * 4)) {
+      carbsGrams -= Math.ceil(caloriesNeeded / 4);
+      fatGrams = SAFETY_FLOORS.minFatGrams;
+      warnings.push('Fat increased to minimum safe level');
+    } else {
+      fatGrams = SAFETY_FLOORS.minFatGrams;
+      warnings.push('Fat set to minimum; calories may not match exactly');
+    }
+  }
+  
+  // Ensure minimum carbs for non-keto diets
+  if (dietaryPreference !== 'keto' && carbsGrams < SAFETY_FLOORS.minCarbsGrams) {
+    carbsGrams = SAFETY_FLOORS.minCarbsGrams;
+    warnings.push('Carbs set to minimum safe level for brain function');
+  }
+  
+  // Ensure protein doesn't get squeezed (this is NON-NEGOTIABLE)
+  const totalMacroCalories = (proteinGrams * 4) + (carbsGrams * 4) + (fatGrams * 9);
+  if (totalMacroCalories > targetCalories * 1.1) {
+    // Over budget by >10% - reduce fat first (never reduce protein)
+    const excessCalories = totalMacroCalories - targetCalories;
+    const fatReduction = Math.min(Math.floor(excessCalories / 9), fatGrams - SAFETY_FLOORS.minFatGrams);
+    
+    if (fatReduction > 0) {
+      fatGrams -= fatReduction;
+    }
+  }
+  
+  // Fiber recommendation
+  const fiberGrams = Math.round((targetCalories / 1000) * FIBER_PER_1000_KCAL);
+  
+  return {
+    macros: {
+      protein: proteinGrams,
+      carbs: carbsGrams,
+      fat: fatGrams,
+      fiber: fiberGrams,
+    },
+    warnings,
+    proteinPerKg: proteinReq.gPerKg,
+  };
+}
+
+/**
+ * Legacy function for backwards compatibility
+ * Now uses the protein-first approach internally
  */
 export function calculateMacros(
   targetCalories: number,
@@ -100,68 +228,14 @@ export function calculateMacros(
   goal: Goal,
   dietaryPreference: DietaryPreference
 ): MacroResult {
-  let proteinRatio: number;
-  let fatRatio: number;
-  let carbRatio: number;
-
-  // Determine macro ratios based on dietary preference
-  switch (dietaryPreference) {
-    case 'high_protein':
-      proteinRatio = 0.35;
-      fatRatio = 0.30;
-      carbRatio = 0.35;
-      break;
-    case 'low_carb':
-      proteinRatio = 0.30;
-      fatRatio = 0.40;
-      carbRatio = 0.30;
-      break;
-    case 'keto':
-      proteinRatio = 0.25;
-      fatRatio = 0.70;
-      carbRatio = 0.05;
-      break;
-    case 'vegan':
-    case 'balanced':
-    default:
-      proteinRatio = 0.25;
-      fatRatio = 0.30;
-      carbRatio = 0.45;
-      break;
-  }
-
-  // Adjust protein for muscle building or body recomp goals
-  if (goal === 'build_muscle' || goal === 'body_recomp') {
-    // Aim for 1.6-2.2g per kg for muscle building
-    const minProteinGrams = Math.round(weightKg * 1.8);
-    const proteinFromRatio = Math.round((targetCalories * proteinRatio) / 4);
-    
-    if (proteinFromRatio < minProteinGrams) {
-      const proteinCalories = minProteinGrams * 4;
-      proteinRatio = proteinCalories / targetCalories;
-      // Redistribute remaining calories
-      const remaining = 1 - proteinRatio;
-      const originalFatCarb = fatRatio + carbRatio;
-      fatRatio = (fatRatio / originalFatCarb) * remaining;
-      carbRatio = remaining - fatRatio;
-    }
-  }
-
-  // Calculate grams from calories
-  // Protein: 4 cal/g, Carbs: 4 cal/g, Fat: 9 cal/g
-  const proteinGrams = Math.round((targetCalories * proteinRatio) / 4);
-  const carbsGrams = Math.round((targetCalories * carbRatio) / 4);
-  const fatGrams = Math.round((targetCalories * fatRatio) / 9);
-  
-  // Fiber recommendation: 14g per 1000 calories
-  const fiberGrams = Math.round((targetCalories / 1000) * 14);
-
-  return {
-    protein: proteinGrams,
-    carbs: carbsGrams,
-    fat: fatGrams,
-    fiber: fiberGrams,
-  };
+  const result = calculatePhysiologicalMacros(
+    targetCalories,
+    weightKg,
+    goal,
+    dietaryPreference,
+    'male' // Default gender for legacy function
+  );
+  return result.macros;
 }
 
 /**
@@ -200,6 +274,10 @@ export function validateMacroCalorieMatch(
 export function calculateMacroPercentages(macros: MacroResult): MacroPercentages {
   const totalCalories = calculateCaloriesFromMacros(macros);
   
+  if (totalCalories === 0) {
+    return { protein: 0, carbs: 0, fat: 0 };
+  }
+  
   return {
     protein: Math.round(((macros.protein * 4) / totalCalories) * 100),
     carbs: Math.round(((macros.carbs * 4) / totalCalories) * 100),
@@ -233,11 +311,22 @@ export function calculateAll(
     warnings.push('Height outside typical range. Results may be less accurate.');
   }
 
-  // Calculate all values
+  // Calculate all values using protein-first approach
   const bmr = calculateBMR(weightKg, heightCm, age, gender);
   const tdee = calculateTDEE(bmr, activityLevel);
-  const targetCalories = calculateTargetCalories(tdee, goal);
-  const macros = calculateMacros(targetCalories, weightKg, goal, dietaryPreference);
+  const targetCalories = calculateTargetCalories(tdee, goal, gender);
+  
+  const macroResult = calculatePhysiologicalMacros(
+    targetCalories,
+    weightKg,
+    goal,
+    dietaryPreference,
+    gender
+  );
+  
+  const macros = macroResult.macros;
+  warnings.push(...macroResult.warnings);
+  
   const percentages = calculateMacroPercentages(macros);
   const caloriesFromMacros = calculateCaloriesFromMacros(macros);
   
@@ -256,6 +345,8 @@ export function calculateAll(
     caloriesFromMacros,
     isValid: validation.isValid,
     warnings,
+    dietType: dietaryPreference,
+    proteinPerKg: macroResult.proteinPerKg,
   };
 }
 
@@ -334,4 +425,42 @@ export function validateMealMacros(
  */
 export function recalculateFoodCalories(food: { protein: number; carbs: number; fat: number }): number {
   return Math.round((food.protein * 4) + (food.carbs * 4) + (food.fat * 9));
+}
+
+/**
+ * Validate diet constraints for a meal plan
+ */
+export function validateDietConstraints(
+  totals: { carbs: number; protein: number; fat: number },
+  diet: DietaryPreference,
+  weightKg: number
+): { isValid: boolean; errors: string[]; warnings: string[] } {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+  const dietConfig = DIET_CONSTRAINTS[diet];
+  
+  // Check carb constraints
+  if (dietConfig.carbsGrams) {
+    if (totals.carbs > dietConfig.carbsGrams.max + 10) {
+      errors.push(`Carbs (${totals.carbs}g) exceed ${diet} limit of ${dietConfig.carbsGrams.max}g`);
+    } else if (totals.carbs > dietConfig.carbsGrams.max) {
+      warnings.push(`Carbs (${totals.carbs}g) slightly above ${diet} target of ${dietConfig.carbsGrams.max}g`);
+    }
+    
+    if (totals.carbs < dietConfig.carbsGrams.min - 10) {
+      warnings.push(`Carbs (${totals.carbs}g) below minimum of ${dietConfig.carbsGrams.min}g`);
+    }
+  }
+  
+  // Check protein requirements
+  const minProtein = weightKg * SAFETY_FLOORS.minProteinGPerKg;
+  if (totals.protein < minProtein) {
+    errors.push(`Protein (${totals.protein}g) below minimum requirement of ${Math.round(minProtein)}g`);
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors,
+    warnings,
+  };
 }

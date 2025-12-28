@@ -6,14 +6,69 @@ const corsHeaders = {
 };
 
 // =====================================
-// DETERMINISTIC CALCULATION FUNCTIONS
-// AI MUST NOT perform these calculations
+// TYPES
 // =====================================
 
 type Gender = 'male' | 'female';
 type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
 type Goal = 'lose_weight' | 'maintain' | 'build_muscle' | 'body_recomp';
 type DietaryPreference = 'balanced' | 'high_protein' | 'low_carb' | 'keto' | 'vegan';
+
+// =====================================
+// EVIDENCE-BASED NUTRITION CONSTANTS
+// Sources: ISSN Position Stand on Protein (2017), Mifflin-St Jeor
+// =====================================
+
+/**
+ * Protein requirements based on goal (g/kg bodyweight)
+ * Based on ISSN Position Stand on Protein and Exercise
+ */
+const PROTEIN_REQUIREMENTS: Record<Goal, { min: number; max: number; default: number }> = {
+  lose_weight: { min: 1.6, max: 2.2, default: 2.0 },   // High protein preserves muscle
+  maintain: { min: 1.2, max: 1.6, default: 1.4 },      // General health
+  build_muscle: { min: 1.6, max: 2.2, default: 2.0 },  // Hypertrophy
+  body_recomp: { min: 1.8, max: 2.4, default: 2.2 },   // Highest needs
+};
+
+/**
+ * Diet type constraints with HARD carb limits where applicable
+ */
+const DIET_CONSTRAINTS: Record<DietaryPreference, {
+  name: string;
+  carbsGrams?: { min: number; max: number };
+  fatPercent: { min: number; max: number };
+  proteinMultiplier?: number;
+  proteinModerate?: boolean;
+  proteinCapped?: boolean;
+  maxRealisticProtein?: number;
+}> = {
+  balanced: {
+    name: 'Balanced',
+    fatPercent: { min: 0.25, max: 0.35 },
+  },
+  high_protein: {
+    name: 'High Protein',
+    proteinMultiplier: 1.2,
+    fatPercent: { min: 0.20, max: 0.30 },
+  },
+  low_carb: {
+    name: 'Low Carb',
+    carbsGrams: { min: 70, max: 130 }, // HARD LIMIT
+    fatPercent: { min: 0.35, max: 0.50 },
+  },
+  keto: {
+    name: 'Ketogenic',
+    carbsGrams: { min: 20, max: 30 }, // HARD LIMIT for ketosis
+    fatPercent: { min: 0.65, max: 0.75 },
+    proteinModerate: true,
+  },
+  vegan: {
+    name: 'Vegan',
+    fatPercent: { min: 0.25, max: 0.35 },
+    proteinCapped: true,
+    maxRealisticProtein: 1.8,
+  },
+};
 
 const ACTIVITY_MULTIPLIERS: Record<ActivityLevel, number> = {
   sedentary: 1.2,
@@ -30,6 +85,17 @@ const GOAL_ADJUSTMENTS: Record<Goal, number> = {
   body_recomp: -100,
 };
 
+const SAFETY_FLOORS = {
+  minCalories: { male: 1500, female: 1200 },
+  minProteinGPerKg: 1.2,
+  minFatGrams: 40,
+  minCarbsGrams: 50,
+};
+
+// =====================================
+// CALCULATION FUNCTIONS
+// =====================================
+
 function calculateBMR(weightKg: number, heightCm: number, age: number, gender: Gender): number {
   const base = (10 * weightKg) + (6.25 * heightCm) - (5 * age);
   const adjustment = gender === 'male' ? 5 : -161;
@@ -37,75 +103,130 @@ function calculateBMR(weightKg: number, heightCm: number, age: number, gender: G
 }
 
 function calculateTDEE(bmr: number, activityLevel: ActivityLevel): number {
-  const multiplier = ACTIVITY_MULTIPLIERS[activityLevel];
-  return Math.round(bmr * multiplier);
+  return Math.round(bmr * ACTIVITY_MULTIPLIERS[activityLevel]);
 }
 
-function calculateTargetCalories(tdee: number, goal: Goal): number {
+function calculateTargetCalories(tdee: number, goal: Goal, gender: Gender): number {
   const adjustment = GOAL_ADJUSTMENTS[goal];
-  return Math.max(1200, Math.round(tdee + adjustment));
+  const minCalories = SAFETY_FLOORS.minCalories[gender];
+  return Math.max(minCalories, Math.round(tdee + adjustment));
 }
 
-function calculateMacros(
+/**
+ * Get protein requirement using PROTEIN-FIRST approach
+ */
+function getProteinRequirement(
+  weightKg: number,
+  goal: Goal,
+  diet: DietaryPreference
+): { grams: number; gPerKg: number; warning?: string } {
+  const baseReq = PROTEIN_REQUIREMENTS[goal];
+  const dietConfig = DIET_CONSTRAINTS[diet];
+  
+  let gPerKg = baseReq.default;
+  let warning: string | undefined;
+  
+  // Apply diet multiplier
+  if (dietConfig.proteinMultiplier) {
+    gPerKg = Math.min(gPerKg * dietConfig.proteinMultiplier, baseReq.max * 1.1);
+  }
+  
+  // Moderate for keto
+  if (dietConfig.proteinModerate) {
+    gPerKg = Math.min(gPerKg, 1.8);
+  }
+  
+  // Cap for vegan
+  if (dietConfig.proteinCapped && dietConfig.maxRealisticProtein) {
+    if (gPerKg > dietConfig.maxRealisticProtein) {
+      gPerKg = dietConfig.maxRealisticProtein;
+      warning = `Protein capped at ${dietConfig.maxRealisticProtein} g/kg for plant-based diet`;
+    }
+  }
+  
+  gPerKg = Math.max(gPerKg, SAFETY_FLOORS.minProteinGPerKg);
+  
+  return {
+    grams: Math.round(weightKg * gPerKg),
+    gPerKg: Math.round(gPerKg * 10) / 10,
+    warning,
+  };
+}
+
+/**
+ * PROTEIN-FIRST macro calculation
+ */
+function calculatePhysiologicalMacros(
   targetCalories: number,
   weightKg: number,
   goal: Goal,
-  dietaryPreference: DietaryPreference
-): { protein: number; carbs: number; fat: number; fiber: number } {
-  let proteinRatio: number;
-  let fatRatio: number;
-  let carbRatio: number;
-
-  switch (dietaryPreference) {
-    case 'high_protein':
-      proteinRatio = 0.35;
-      fatRatio = 0.30;
-      carbRatio = 0.35;
-      break;
-    case 'low_carb':
-      proteinRatio = 0.30;
-      fatRatio = 0.40;
-      carbRatio = 0.30;
-      break;
-    case 'keto':
-      proteinRatio = 0.25;
-      fatRatio = 0.70;
-      carbRatio = 0.05;
-      break;
-    case 'vegan':
-    case 'balanced':
-    default:
-      proteinRatio = 0.25;
-      fatRatio = 0.30;
-      carbRatio = 0.45;
-      break;
+  diet: DietaryPreference,
+  gender: Gender
+): { macros: { protein: number; carbs: number; fat: number; fiber: number }; warnings: string[]; proteinPerKg: number } {
+  const warnings: string[] = [];
+  const dietConfig = DIET_CONSTRAINTS[diet];
+  
+  // STEP 1: PROTEIN FIRST
+  const proteinReq = getProteinRequirement(weightKg, goal, diet);
+  const proteinGrams = proteinReq.grams;
+  if (proteinReq.warning) warnings.push(proteinReq.warning);
+  
+  // STEP 2: CARBS based on diet constraints
+  let carbsGrams: number;
+  const carbConstraint = dietConfig.carbsGrams;
+  
+  if (carbConstraint) {
+    carbsGrams = carbConstraint.max;
+  } else {
+    carbsGrams = 0; // Calculate after fat
   }
-
-  // Adjust protein for muscle building goals
-  if (goal === 'build_muscle' || goal === 'body_recomp') {
-    const minProteinGrams = Math.round(weightKg * 1.8);
-    const proteinFromRatio = Math.round((targetCalories * proteinRatio) / 4);
+  
+  // STEP 3: FAT
+  let fatGrams: number;
+  const proteinCalories = proteinGrams * 4;
+  
+  if (carbConstraint) {
+    // Fixed carbs: fat gets remainder
+    const carbCalories = carbsGrams * 4;
+    const remainingCalories = targetCalories - proteinCalories - carbCalories;
+    fatGrams = Math.round(remainingCalories / 9);
+  } else {
+    // Calculate fat %, then carbs from remainder
+    const avgFatPercent = (dietConfig.fatPercent.min + dietConfig.fatPercent.max) / 2;
+    const remainingAfterProtein = targetCalories - proteinCalories;
+    const fatCalories = remainingAfterProtein * avgFatPercent;
+    fatGrams = Math.round(fatCalories / 9);
     
-    if (proteinFromRatio < minProteinGrams) {
-      const proteinCalories = minProteinGrams * 4;
-      proteinRatio = proteinCalories / targetCalories;
-      const remaining = 1 - proteinRatio;
-      const originalFatCarb = fatRatio + carbRatio;
-      fatRatio = (fatRatio / originalFatCarb) * remaining;
-      carbRatio = remaining - fatRatio;
-    }
+    const carbCaloriesRemaining = targetCalories - proteinCalories - (fatGrams * 9);
+    carbsGrams = Math.round(carbCaloriesRemaining / 4);
   }
-
-  const proteinGrams = Math.round((targetCalories * proteinRatio) / 4);
-  const carbsGrams = Math.round((targetCalories * carbRatio) / 4);
-  const fatGrams = Math.round((targetCalories * fatRatio) / 9);
+  
+  // STEP 4: Safety floors
+  if (fatGrams < SAFETY_FLOORS.minFatGrams) {
+    const neededCalories = (SAFETY_FLOORS.minFatGrams - fatGrams) * 9;
+    if (!carbConstraint && carbsGrams * 4 > neededCalories + (SAFETY_FLOORS.minCarbsGrams * 4)) {
+      carbsGrams -= Math.ceil(neededCalories / 4);
+    }
+    fatGrams = SAFETY_FLOORS.minFatGrams;
+  }
+  
+  if (diet !== 'keto' && carbsGrams < SAFETY_FLOORS.minCarbsGrams) {
+    carbsGrams = SAFETY_FLOORS.minCarbsGrams;
+  }
+  
+  // Fiber
   const fiberGrams = Math.round((targetCalories / 1000) * 14);
-
-  return { protein: proteinGrams, carbs: carbsGrams, fat: fatGrams, fiber: fiberGrams };
+  
+  return {
+    macros: { protein: proteinGrams, carbs: carbsGrams, fat: fatGrams, fiber: fiberGrams },
+    warnings,
+    proteinPerKg: proteinReq.gPerKg,
+  };
 }
 
 function calculatePercentages(macros: { protein: number; carbs: number; fat: number }) {
   const totalCals = (macros.protein * 4) + (macros.carbs * 4) + (macros.fat * 9);
+  if (totalCals === 0) return { protein: 0, carbs: 0, fat: 0 };
   return {
     protein: Math.round(((macros.protein * 4) / totalCals) * 100),
     carbs: Math.round(((macros.carbs * 4) / totalCals) * 100),
@@ -123,17 +244,8 @@ serve(async (req) => {
   }
 
   try {
-    const { 
-      age,
-      gender,
-      weightKg,
-      heightCm,
-      activityLevel,
-      goal,
-      dietaryPreference,
-    } = await req.json();
+    const { age, gender, weightKg, heightCm, activityLevel, goal, dietaryPreference } = await req.json();
 
-    // Input validation
     if (!age || !gender || !weightKg || !heightCm || !activityLevel || !goal) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
         status: 400,
@@ -141,16 +253,20 @@ serve(async (req) => {
       });
     }
 
-    console.log('Calculating macros (server-side) for:', { age, gender, weightKg, goal });
+    const diet: DietaryPreference = dietaryPreference || 'balanced';
+    
+    console.log('Calculating macros with PROTEIN-FIRST approach:', { age, gender, weightKg, goal, diet });
 
-    // STEP 1: Calculate all values SERVER-SIDE (deterministic, verified formulas)
+    // Calculate all values SERVER-SIDE
     const bmr = calculateBMR(weightKg, heightCm, age, gender);
     const tdee = calculateTDEE(bmr, activityLevel);
-    const targetCalories = calculateTargetCalories(tdee, goal);
-    const macros = calculateMacros(targetCalories, weightKg, goal, dietaryPreference || 'balanced');
+    const targetCalories = calculateTargetCalories(tdee, goal, gender);
+    
+    const macroResult = calculatePhysiologicalMacros(targetCalories, weightKg, goal, diet, gender);
+    const macros = macroResult.macros;
     const percentages = calculatePercentages(macros);
     
-    // Calculate per-meal distribution (4 meals)
+    // Per-meal distribution
     const mealsPerDay = 4;
     const mealSuggestion = {
       meals: mealsPerDay,
@@ -159,50 +275,41 @@ serve(async (req) => {
       fatPerMeal: Math.round(macros.fat / mealsPerDay),
     };
 
-    console.log('Server calculated:', { bmr, tdee, targetCalories, macros });
+    console.log('Calculated:', { bmr, tdee, targetCalories, macros, proteinPerKg: macroResult.proteinPerKg });
 
-    // STEP 2: Get AI to generate ONLY explanation and tips (no calculations)
+    // Get AI explanation
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
-      // Return calculated values without AI explanation
       return new Response(JSON.stringify({
-        bmr,
-        tdee,
-        targetCalories,
-        macros,
-        percentages,
-        mealSuggestion,
-        explanation: `Based on your profile, your Basal Metabolic Rate (BMR) is ${bmr} calories. With your ${activityLevel} activity level, your Total Daily Energy Expenditure (TDEE) is ${tdee} calories. For your goal of ${goal.replace('_', ' ')}, your target is ${targetCalories} calories per day.`,
-        tips: [
-          'Spread protein intake across all meals for optimal absorption',
-          'Drink plenty of water throughout the day',
-          'Track your intake for the first few weeks to build awareness',
-          'Adjust based on your progress after 2-3 weeks',
-        ],
+        bmr, tdee, targetCalories, macros, percentages, mealSuggestion,
+        dietType: diet,
+        proteinPerKg: macroResult.proteinPerKg,
+        warnings: macroResult.warnings,
+        explanation: `Your BMR is ${bmr} cal. With ${activityLevel} activity, your TDEE is ${tdee} cal. Target: ${targetCalories} cal for ${goal.replace('_', ' ')}.`,
+        tips: ['Spread protein across all meals', 'Stay hydrated', 'Track intake for 2 weeks'],
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const systemPrompt = `You are a sports nutritionist. You will receive pre-calculated macro targets. Your job is ONLY to:
-1. Explain WHY these targets make sense for the user
-2. Provide practical tips for hitting these targets
+    const dietConfig = DIET_CONSTRAINTS[diet];
+    const systemPrompt = `You are a sports nutritionist. Explain pre-calculated macro targets. DO NOT recalculate.`;
+    
+    const userPrompt = `Explain these calculated targets for a ${age}-year-old ${gender} (${weightKg}kg, ${heightCm}cm, ${activityLevel} activity), goal: ${goal}, diet: ${diet}:
 
-DO NOT recalculate or change any numbers. The calculations are already done correctly.`;
-
-    const userPrompt = `Here are the calculated macro targets for a ${age}-year-old ${gender} weighing ${weightKg}kg, height ${heightCm}cm, with ${activityLevel} activity, goal: ${goal}, preference: ${dietaryPreference || 'balanced'}:
-
-- BMR: ${bmr} calories
-- TDEE: ${tdee} calories  
-- Target: ${targetCalories} calories/day
-- Protein: ${macros.protein}g (${percentages.protein}%)
-- Carbs: ${macros.carbs}g (${percentages.carbs}%)
+- BMR: ${bmr} cal (Mifflin-St Jeor)
+- TDEE: ${tdee} cal
+- Target: ${targetCalories} cal/day
+- Protein: ${macros.protein}g (${macroResult.proteinPerKg} g/kg - ${percentages.protein}%)
+- Carbs: ${macros.carbs}g (${percentages.carbs}%)${dietConfig.carbsGrams ? ` [${diet} constraint: ${dietConfig.carbsGrams.min}-${dietConfig.carbsGrams.max}g]` : ''}
 - Fat: ${macros.fat}g (${percentages.fat}%)
 - Fiber: ${macros.fiber}g
 
+${macroResult.warnings.length > 0 ? `Notes: ${macroResult.warnings.join('; ')}` : ''}
+
 Provide:
-1. A brief explanation of why these targets are appropriate for this person's goals
-2. 4-5 practical tips for hitting these macro targets daily`;
+1. Brief explanation of why these targets suit this person
+2. 4-5 practical tips for hitting these macros${diet !== 'balanced' ? `, considering ${dietConfig.name} diet requirements` : ''}`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -220,19 +327,12 @@ Provide:
           type: 'function',
           function: {
             name: 'provide_explanation',
-            description: 'Provide explanation and tips for the calculated macros',
+            description: 'Provide explanation and tips',
             parameters: {
               type: 'object',
               properties: {
-                explanation: { 
-                  type: 'string', 
-                  description: 'Explanation of why these targets are appropriate' 
-                },
-                tips: {
-                  type: 'array',
-                  items: { type: 'string' },
-                  description: 'Practical tips for hitting these targets',
-                },
+                explanation: { type: 'string' },
+                tips: { type: 'array', items: { type: 'string' } },
               },
               required: ['explanation', 'tips'],
             },
@@ -244,31 +344,26 @@ Provide:
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('AI gateway error:', response.status, errorText);
+      console.error('AI error:', response.status, errorText);
       
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }), {
-          status: 429,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        return new Response(JSON.stringify({ error: 'Rate limit exceeded' }), {
+          status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: 'AI credits exhausted. Please add credits to continue.' }), {
-          status: 402,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        return new Response(JSON.stringify({ error: 'AI credits exhausted' }), {
+          status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
       
-      // Return calculated values without AI explanation
       return new Response(JSON.stringify({
-        bmr,
-        tdee,
-        targetCalories,
-        macros,
-        percentages,
-        mealSuggestion,
-        explanation: `Your calculated targets are: BMR ${bmr} cal, TDEE ${tdee} cal, Target ${targetCalories} cal.`,
-        tips: ['Track your intake consistently', 'Adjust after 2-3 weeks based on progress'],
+        bmr, tdee, targetCalories, macros, percentages, mealSuggestion,
+        dietType: diet,
+        proteinPerKg: macroResult.proteinPerKg,
+        warnings: macroResult.warnings,
+        explanation: `Your BMR is ${bmr} cal, TDEE is ${tdee} cal, target ${targetCalories} cal.`,
+        tips: ['Track intake consistently', 'Spread protein across meals'],
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -277,8 +372,8 @@ Provide:
     const data = await response.json();
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
     
-    let explanation = `Your Basal Metabolic Rate (BMR) is ${bmr} calories. With your activity level, your TDEE is ${tdee} calories. Target: ${targetCalories} calories for ${goal.replace('_', ' ')}.`;
-    let tips = ['Track your intake consistently', 'Spread protein across meals', 'Stay hydrated'];
+    let explanation = `Your BMR is ${bmr} cal. TDEE: ${tdee} cal. Target: ${targetCalories} cal for ${goal.replace('_', ' ')}.`;
+    let tips = ['Track intake', 'Spread protein across meals', 'Stay hydrated'];
 
     if (toolCall?.function?.arguments) {
       try {
@@ -286,28 +381,23 @@ Provide:
         explanation = aiResponse.explanation || explanation;
         tips = aiResponse.tips || tips;
       } catch (e) {
-        console.error('Failed to parse AI response:', e);
+        console.error('Parse error:', e);
       }
     }
 
-    // IMPORTANT: Return SERVER-CALCULATED values, not AI values
     return new Response(JSON.stringify({
-      bmr,
-      tdee,
-      targetCalories,
-      macros,
-      percentages,
-      mealSuggestion,
-      explanation,
-      tips,
+      bmr, tdee, targetCalories, macros, percentages, mealSuggestion,
+      dietType: diet,
+      proteinPerKg: macroResult.proteinPerKg,
+      warnings: macroResult.warnings,
+      explanation, tips,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
-    console.error('Error in ai-macro-calculator:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    console.error('Error:', error);
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

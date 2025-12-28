@@ -92,6 +92,12 @@ export const AIMealGeneratorModal = ({
     setValidationResult(null);
 
     try {
+      // Infer diet type from carb ratio
+      let dietType: 'balanced' | 'low_carb' | 'keto' | 'high_protein' | 'vegan' = 'balanced';
+      const carbPercent = (targetCarbs * 4) / targetCalories * 100;
+      if (carbPercent < 10) dietType = 'keto';
+      else if (carbPercent < 30) dietType = 'low_carb';
+      
       const response = await supabase.functions.invoke('ai-meal-suggestion', {
         body: {
           targetCalories,
@@ -100,6 +106,7 @@ export const AIMealGeneratorModal = ({
           targetFat,
           preferences,
           structured: true,
+          dietType,
         },
       });
 
