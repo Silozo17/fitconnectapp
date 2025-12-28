@@ -26,6 +26,7 @@ import {
   Moon,
   Watch,
   Bluetooth,
+  GraduationCap,
 } from "lucide-react";
 
 // Map badge icon names stored in DB to actual Lucide components
@@ -67,6 +68,8 @@ export const BADGE_ICON_MAP: Record<string, LucideIcon> = {
   Watch,
   bluetooth: Bluetooth,
   Bluetooth,
+  graduationcap: GraduationCap,
+  GraduationCap,
 };
 
 export function getBadgeIcon(iconName: string): LucideIcon {

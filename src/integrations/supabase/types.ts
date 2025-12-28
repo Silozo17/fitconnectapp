@@ -5733,7 +5733,8 @@ export type Database = {
           p_user_region?: string
         }
         Returns: {
-          average_rating: number
+          avatar_rarity: string
+          avatar_slug: string
           bio: string
           card_image_url: string
           coach_types: string[]
@@ -5747,7 +5748,7 @@ export type Database = {
           id: string
           in_person_available: boolean
           instagram_url: string
-          is_boosted: boolean
+          is_sponsored: boolean
           is_verified: boolean
           linkedin_url: string
           location: string
@@ -5758,16 +5759,15 @@ export type Database = {
           location_score: number
           location_tier: number
           online_available: boolean
-          primary_coach_type: string
           profile_image_url: string
           profile_score: number
-          review_count: number
-          threads_url: string
           tiktok_url: string
           total_score: number
+          twitter_url: string
           user_id: string
           username: string
-          x_url: string
+          verified_at: string
+          verified_qualification_count: number
           youtube_url: string
         }[]
       }

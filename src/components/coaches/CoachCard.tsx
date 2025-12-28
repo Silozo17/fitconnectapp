@@ -6,6 +6,7 @@ import { UserAvatar } from "@/components/shared/UserAvatar";
 import FavouriteButton from "@/components/favourites/FavouriteButton";
 import StarRating from "@/components/reviews/StarRating";
 import { VerifiedBadge } from "@/components/verification/VerifiedBadge";
+import { QualifiedCoachBadge } from "@/components/verification/QualifiedCoachBadge";
 import { useCoachReviews, calculateAverageRating } from "@/hooks/useReviews";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatCurrency, type CurrencyCode } from "@/lib/currency";
@@ -141,6 +142,9 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
           </h3>
           {coach.is_verified && (
             <VerifiedBadge verifiedAt={coach.verified_at} size="sm" />
+          )}
+          {(coach.verified_qualification_count ?? 0) >= 1 && (
+            <QualifiedCoachBadge count={coach.verified_qualification_count!} size="sm" />
           )}
         </div>
         {coach.coach_types && coach.coach_types.length > 0 && (

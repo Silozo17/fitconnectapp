@@ -67,6 +67,8 @@ export type MarketplaceCoach = {
   location_tier?: number;
   review_count?: number;
   avg_rating?: number | null;
+  // Qualification count
+  verified_qualification_count?: number;
 };
 
 export interface UseCoachMarketplaceOptions {
@@ -190,6 +192,8 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
             matchLevel,
             isSponsored: row.is_sponsored || false,
           },
+          // Qualification count
+          verified_qualification_count: row.verified_qualification_count || 0,
         };
       });
 
