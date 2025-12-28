@@ -14,6 +14,7 @@ import { AIMacroCalculator } from "@/components/ai/AIMacroCalculator";
 import { FeatureGate } from "@/components/FeatureGate";
 import { Food, Meal, NutritionDay, MealFood, calculateDayMacros } from "@/hooks/useFoods";
 import { MacroCalculation } from "@/hooks/useAI";
+import { NutritionContext } from "@/lib/client-profile-mapping";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,6 +38,9 @@ const CoachNutritionBuilder = () => {
   const [coachProfileId, setCoachProfileId] = useState<string | null>(null);
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const [isLoadingPlan, setIsLoadingPlan] = useState(isEditing);
+  
+  // Nutrition context for downstream tools (Meal Planner, Shopping List)
+  const [nutritionContext, setNutritionContext] = useState<NutritionContext | null>(null);
   
   // Macro targets
   const [targetCalories, setTargetCalories] = useState(2000);
@@ -99,11 +103,16 @@ const CoachNutritionBuilder = () => {
     fetchCoachProfile();
   }, [user]);
 
-  const handleMacrosCalculated = (macros: MacroCalculation) => {
+  const handleMacrosCalculated = (macros: MacroCalculation, context?: NutritionContext) => {
     setTargetCalories(Math.round(macros.targetCalories));
     setTargetProtein(Math.round(macros.macros.protein));
     setTargetCarbs(Math.round(macros.macros.carbs));
     setTargetFat(Math.round(macros.macros.fat));
+    
+    // Store nutrition context for downstream tools
+    if (context) {
+      setNutritionContext(context);
+    }
   };
 
   const currentDay = days[selectedDayIndex];

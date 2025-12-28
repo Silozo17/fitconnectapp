@@ -80,6 +80,15 @@ export interface MacroCalculation {
     carbsPerMeal: number;
     fatPerMeal: number;
   };
+  // Nutrition context for downstream tools (Meal Planner, Shopping List)
+  nutritionContext?: {
+    clientId?: string;
+    clientName?: string;
+    allergies?: string[];
+    dietaryRestrictions?: string[];
+    medicalConditions?: string[];
+    inferredDietType?: string;
+  };
   // Validation metadata
   _validation?: {
     isServerCalculated: boolean;
