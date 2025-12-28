@@ -36,6 +36,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import { AssignClientToPlanModal } from "@/components/dashboard/clients/AssignClientToPlanModal";
 import { useTrainingPlans, useDeleteTrainingPlan, TrainingPlan } from "@/hooks/useTrainingPlans";
 import { useCoachProfileId } from "@/hooks/useCoachProfileId";
 import { format } from "date-fns";
@@ -47,6 +48,7 @@ const CoachPlans = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [planToDelete, setPlanToDelete] = useState<TrainingPlan | null>(null);
+  const [planToAssign, setPlanToAssign] = useState<TrainingPlan | null>(null);
 
   // Use cached coach profile ID
   const { data: coachProfileId, isLoading: loadingProfile } = useCoachProfileId();
@@ -217,8 +219,10 @@ const CoachPlans = () => {
                       <DropdownMenuItem onClick={() => handleDuplicatePlan(plan)}>
                         <Copy className="w-4 h-4 mr-2" /> {t("plansPage.actions.duplicate")}
                       </DropdownMenuItem>
-                      <DropdownMenuItem><Users className="w-4 h-4 mr-2" /> {t("plansPage.actions.assign")}</DropdownMenuItem>
-                      <DropdownMenuItem 
+                      <DropdownMenuItem onClick={() => setPlanToAssign(plan)}>
+                        <Users className="w-4 h-4 mr-2" /> {t("plansPage.actions.assign")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
                         className="text-destructive"
                         onClick={() => setPlanToDelete(plan)}
                       >
@@ -288,8 +292,10 @@ const CoachPlans = () => {
                       <DropdownMenuItem onClick={() => handleDuplicatePlan(plan)}>
                         <Copy className="w-4 h-4 mr-2" /> {t("plansPage.actions.duplicate")}
                       </DropdownMenuItem>
-                      <DropdownMenuItem><Users className="w-4 h-4 mr-2" /> {t("plansPage.actions.assign")}</DropdownMenuItem>
-                      <DropdownMenuItem 
+                      <DropdownMenuItem onClick={() => setPlanToAssign(plan)}>
+                        <Users className="w-4 h-4 mr-2" /> {t("plansPage.actions.assign")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
                         className="text-destructive"
                         onClick={() => setPlanToDelete(plan)}
                       >
@@ -357,6 +363,13 @@ const CoachPlans = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Assign Client to Plan Modal */}
+      <AssignClientToPlanModal
+        open={!!planToAssign}
+        onOpenChange={(open) => !open && setPlanToAssign(null)}
+        plan={planToAssign}
+      />
       </FeatureGate>
     </DashboardLayout>
   );

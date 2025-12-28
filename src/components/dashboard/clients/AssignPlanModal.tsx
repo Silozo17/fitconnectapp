@@ -98,11 +98,13 @@ export function AssignPlanModal({ open, onOpenChange, clientName, clientId }: As
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl bg-card border-border">
+      <DialogContent className="sm:max-w-xl w-[calc(100%-2rem)] max-w-[calc(100%-2rem)] bg-card border-border overflow-x-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
-            <ClipboardList className="h-5 w-5 text-primary" />
-            {clientName ? t('assignPlanModal.titleWithClient', { clientName }) : t('assignPlanModal.title')}
+            <ClipboardList className="h-5 w-5 text-primary shrink-0" />
+            <span className="truncate">
+              {clientName ? t('assignPlanModal.titleWithClient', { clientName }) : t('assignPlanModal.title')}
+            </span>
           </DialogTitle>
           <DialogDescription className="sr-only">
             Select a training or nutrition plan to assign to this client
@@ -139,7 +141,7 @@ export function AssignPlanModal({ open, onOpenChange, clientName, clientId }: As
               />
             </div>
 
-            <ScrollArea className="h-[300px] pr-4">
+            <ScrollArea className="h-[280px] -mx-1 px-1">
               <div className="space-y-2">
                 {filteredPlans.map((plan) => {
                   const config = getTypeConfig(plan.plan_type);
@@ -150,22 +152,22 @@ export function AssignPlanModal({ open, onOpenChange, clientName, clientId }: As
                     <div 
                       key={plan.id} 
                       onClick={() => setSelectedPlan(plan.id)} 
-                      className={`p-4 rounded-lg border cursor-pointer transition-all ${
+                      className={`p-3 rounded-lg border cursor-pointer transition-all ${
                         isSelected 
                           ? "border-primary bg-primary/10" 
                           : "border-border bg-background hover:border-primary/50"
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1">
+                      <div className="flex items-start gap-3">
+                        <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-medium text-foreground">{plan.name}</h4>
-                            {isSelected && <CheckCircle className="h-4 w-4 text-primary" />}
+                            <h4 className="font-medium text-foreground truncate">{plan.name}</h4>
+                            {isSelected && <CheckCircle className="h-4 w-4 text-primary shrink-0" />}
                           </div>
                           {plan.description && (
                             <p className="text-sm text-muted-foreground line-clamp-2">{plan.description}</p>
                           )}
-                          <div className="flex items-center gap-2 mt-2">
+                          <div className="flex items-center gap-2 mt-2 flex-wrap">
                             <Badge variant="secondary" className={config.color}>
                               <Icon className="h-3 w-3 mr-1" />
                               {plan.plan_type}
@@ -203,11 +205,11 @@ export function AssignPlanModal({ open, onOpenChange, clientName, clientId }: As
               </div>
             )}
             
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <DialogFooter className="flex-col sm:flex-row gap-2">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
                 {t('assignPlanModal.cancel')}
               </Button>
-              <Button type="submit" disabled={isAssigning || !selectedPlan}>
+              <Button type="submit" disabled={isAssigning || !selectedPlan} className="w-full sm:w-auto">
                 {isAssigning ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />

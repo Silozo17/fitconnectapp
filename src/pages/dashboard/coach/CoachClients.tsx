@@ -35,6 +35,7 @@ import { AddClientModal } from "@/components/dashboard/clients/AddClientModal";
 import { ScheduleSessionModal } from "@/components/dashboard/clients/ScheduleSessionModal";
 import { AssignPlanModal } from "@/components/dashboard/clients/AssignPlanModal";
 import { AddNoteModal } from "@/components/dashboard/clients/AddNoteModal";
+import { ClientCardMobile } from "@/components/dashboard/clients/ClientCardMobile";
 import { useCoachClients, CoachClient } from "@/hooks/useCoachClients";
 import ClientRequests from "@/components/dashboard/coach/ClientRequests";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
@@ -234,129 +235,159 @@ const CoachClients = () => {
 
       {/* Clients List */}
       {!isLoading && (
-        <Card variant="glass" className="overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-secondary/50">
-                <tr>
-                  <th className="text-left p-4 text-sm font-medium text-muted-foreground">{t("clients.tableHeaders.client")}</th>
-                  <th className="text-left p-4 text-sm font-medium text-muted-foreground hidden md:table-cell">{t("clients.tableHeaders.plan")}</th>
-                  <th className="text-left p-4 text-sm font-medium text-muted-foreground">{t("clients.tableHeaders.status")}</th>
-                  <th className="text-left p-4 text-sm font-medium text-muted-foreground hidden lg:table-cell">{t("clients.tableHeaders.startDate")}</th>
-                  <th className="text-left p-4 text-sm font-medium text-muted-foreground hidden sm:table-cell">{t("clients.tableHeaders.goals")}</th>
-                  <th className="text-right p-4 text-sm font-medium text-muted-foreground">{t("clients.tableHeaders.actions")}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/50">
-                {filteredClients.map((client) => (
-                  <tr key={client.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="p-4">
-                      <Link to={`/dashboard/coach/clients/${client.client_id}`} className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
-                          {getInitials(client)}
-                        </div>
-                        <div>
-                          <p className="font-medium text-foreground hover:text-primary transition-colors">
-                            {getFullName(client)}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {client.client_profile?.weight_kg ? `${client.client_profile.weight_kg}kg` : t("clients.noData")}
-                          </p>
-                        </div>
-                      </Link>
-                    </td>
-                    <td className="p-4 hidden md:table-cell">
-                      <span className="text-foreground">{client.plan_type || '-'}</span>
-                    </td>
-                    <td className="p-4">
-                      <Badge
-                        variant={client.status === 'active' ? 'default' : client.status === 'pending' ? 'secondary' : 'outline'}
-                        className={
-                          client.status === 'active' ? 'bg-success/20 text-success border-success/30' :
-                          client.status === 'pending' ? 'bg-warning/20 text-warning border-warning/30' :
-                          'bg-muted text-muted-foreground'
-                        }
-                      >
-                        {client.status}
-                      </Badge>
-                    </td>
-                    <td className="p-4 hidden lg:table-cell">
-                      <span className="text-muted-foreground">
-                        {client.start_date ? new Date(client.start_date).toLocaleDateString() : '-'}
-                      </span>
-                    </td>
-                    <td className="p-4 hidden sm:table-cell">
-                      <div className="flex flex-wrap gap-1">
-                        {client.client_profile?.fitness_goals?.slice(0, 2).map((goal, i) => (
-                          <Badge key={i} variant="outline" className="text-xs">
-                            {goal}
-                          </Badge>
-                        )) || <span className="text-muted-foreground">-</span>}
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          title={t("clients.message")}
-                          onClick={() => {
-                            // Navigate to messages with this client
-                            window.location.href = `/dashboard/coach/messages/${client.client_id}`;
-                          }}
-                        >
-                          <MessageSquare className="w-4 h-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          title={t("clients.scheduleSession")}
-                          onClick={() => handleScheduleSession(client)}
-                        >
-                          <Calendar className="w-4 h-4" />
-                        </Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem asChild>
-                              <Link to={`/dashboard/coach/clients/${client.client_id}`}>{t("clients.viewProfile")}</Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleAssignPlan(client)}>
-                              {t("clients.assignPlan")}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleAddNote(client)}>
-                              {t("clients.addNotes")}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">{t("clients.removeClient")}</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <>
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-3">
+            {filteredClients.map((client) => (
+              <ClientCardMobile
+                key={client.id}
+                client={client}
+                onScheduleSession={handleScheduleSession}
+                onAssignPlan={handleAssignPlan}
+                onAddNote={handleAddNote}
+              />
+            ))}
+            
+            {filteredClients.length === 0 && (
+              <Card variant="glass" className="p-12 text-center">
+                <div className="w-16 h-16 rounded-3xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <p className="text-muted-foreground mb-4">
+                  {clients.length === 0 ? t("clients.noClients") : t("clients.noClientsMatch")}
+                </p>
+                <Button onClick={() => setIsAddClientOpen(true)} variant="outline" className="rounded-xl">
+                  <Plus className="w-4 h-4 mr-2" />
+                  {t("clients.addFirstClient")}
+                </Button>
+              </Card>
+            )}
           </div>
 
-          {filteredClients.length === 0 && !isLoading && (
-            <div className="p-16 text-center">
-              <div className="w-16 h-16 rounded-3xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
-                <Users className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <p className="text-muted-foreground mb-4">
-                {clients.length === 0 ? t("clients.noClients") : t("clients.noClientsMatch")}
-              </p>
-              <Button onClick={() => setIsAddClientOpen(true)} variant="outline" className="rounded-xl">
-                <Plus className="w-4 h-4 mr-2" />
-                {t("clients.addFirstClient")}
-              </Button>
+          {/* Desktop Table View */}
+          <Card variant="glass" className="overflow-hidden hidden md:block">
+            <div className="overflow-x-hidden">
+              <table className="w-full table-fixed">
+                <thead className="bg-secondary/50">
+                  <tr>
+                    <th className="text-left p-4 text-sm font-medium text-muted-foreground w-[30%]">{t("clients.tableHeaders.client")}</th>
+                    <th className="text-left p-4 text-sm font-medium text-muted-foreground w-[15%]">{t("clients.tableHeaders.plan")}</th>
+                    <th className="text-left p-4 text-sm font-medium text-muted-foreground w-[12%]">{t("clients.tableHeaders.status")}</th>
+                    <th className="text-left p-4 text-sm font-medium text-muted-foreground hidden lg:table-cell w-[13%]">{t("clients.tableHeaders.startDate")}</th>
+                    <th className="text-left p-4 text-sm font-medium text-muted-foreground w-[18%]">{t("clients.tableHeaders.goals")}</th>
+                    <th className="text-right p-4 text-sm font-medium text-muted-foreground w-[12%]">{t("clients.tableHeaders.actions")}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/50">
+                  {filteredClients.map((client) => (
+                    <tr key={client.id} className="hover:bg-muted/30 transition-colors">
+                      <td className="p-4">
+                        <Link to={`/dashboard/coach/clients/${client.client_id}`} className="flex items-center gap-3 min-w-0">
+                          <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary font-bold text-sm shrink-0">
+                            {getInitials(client)}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium text-foreground hover:text-primary transition-colors truncate">
+                              {getFullName(client)}
+                            </p>
+                            <p className="text-sm text-muted-foreground truncate">
+                              {client.client_profile?.weight_kg ? `${client.client_profile.weight_kg}kg` : t("clients.noData")}
+                            </p>
+                          </div>
+                        </Link>
+                      </td>
+                      <td className="p-4">
+                        <span className="text-foreground truncate block">{client.plan_type || '-'}</span>
+                      </td>
+                      <td className="p-4">
+                        <Badge
+                          variant={client.status === 'active' ? 'default' : client.status === 'pending' ? 'secondary' : 'outline'}
+                          className={
+                            client.status === 'active' ? 'bg-success/20 text-success border-success/30' :
+                            client.status === 'pending' ? 'bg-warning/20 text-warning border-warning/30' :
+                            'bg-muted text-muted-foreground'
+                          }
+                        >
+                          {client.status}
+                        </Badge>
+                      </td>
+                      <td className="p-4 hidden lg:table-cell">
+                        <span className="text-muted-foreground truncate block">
+                          {client.start_date ? new Date(client.start_date).toLocaleDateString() : '-'}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex flex-wrap gap-1">
+                          {client.client_profile?.fitness_goals?.slice(0, 2).map((goal, i) => (
+                            <Badge key={i} variant="outline" className="text-xs truncate max-w-[80px]">
+                              {goal}
+                            </Badge>
+                          )) || <span className="text-muted-foreground">-</span>}
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            title={t("clients.message")}
+                            onClick={() => {
+                              window.location.href = `/dashboard/coach/messages/${client.client_id}`;
+                            }}
+                          >
+                            <MessageSquare className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            title={t("clients.scheduleSession")}
+                            onClick={() => handleScheduleSession(client)}
+                          >
+                            <Calendar className="w-4 h-4" />
+                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreVertical className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="bg-popover border-border">
+                              <DropdownMenuItem asChild>
+                                <Link to={`/dashboard/coach/clients/${client.client_id}`}>{t("clients.viewProfile")}</Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleAssignPlan(client)}>
+                                {t("clients.assignPlan")}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleAddNote(client)}>
+                                {t("clients.addNotes")}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-destructive">{t("clients.removeClient")}</DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          )}
-        </Card>
+
+            {filteredClients.length === 0 && (
+              <div className="p-16 text-center">
+                <div className="w-16 h-16 rounded-3xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <p className="text-muted-foreground mb-4">
+                  {clients.length === 0 ? t("clients.noClients") : t("clients.noClientsMatch")}
+                </p>
+                <Button onClick={() => setIsAddClientOpen(true)} variant="outline" className="rounded-xl">
+                  <Plus className="w-4 h-4 mr-2" />
+                  {t("clients.addFirstClient")}
+                </Button>
+              </div>
+            )}
+          </Card>
+        </>
       )}
 
       {/* Modals */}

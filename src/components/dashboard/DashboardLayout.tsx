@@ -81,7 +81,7 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
       <PlatformBackground showAmbientGlow={false} />
       <SkipNavigation />
 
-      <div className="h-dvh overflow-hidden relative">
+      <div className="h-dvh overflow-hidden relative overflow-x-clip">
         <CoachSidebar
           collapsed={sidebarCollapsed}
           onToggle={handleToggleSidebar}
