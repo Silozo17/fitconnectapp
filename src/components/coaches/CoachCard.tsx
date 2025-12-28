@@ -172,8 +172,8 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
           </div>
         )}
 
-        <div className="flex items-center justify-between gap-3 pt-4 border-t border-border">
-          <div className="min-w-0 flex-shrink">
+        <div className="flex flex-col gap-3 pt-4 border-t border-border sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
             {convertedRate ? (
               <>
                 <span className="font-display font-bold text-xl text-foreground">
@@ -194,7 +194,7 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
           {/* Action Buttons - Hide booking/connection on iOS native */}
           {isClient ? (
             <TooltipProvider>
-              <div className="flex items-center gap-1 flex-shrink-0">
+              <div className="flex items-center gap-1 flex-shrink-0 w-full sm:w-auto justify-end">
                 {/* Message button - always show */}
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -249,7 +249,7 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
               </div>
             </TooltipProvider>
           ) : !isAuthenticated ? (
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-2 flex-shrink-0 w-full sm:w-auto justify-end">
               <Button asChild variant="lime-outline" size="sm">
                 <Link to={`${effectiveLinkPrefix}/${coach.username || coach.id}`}>{t('card.viewProfile')}</Link>
               </Button>
@@ -258,9 +258,11 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
               </Button>
             </div>
           ) : (
-            <Button asChild variant="lime-outline" size="sm">
-              <Link to={`${effectiveLinkPrefix}/${coach.username || coach.id}`}>{t('card.viewProfile')}</Link>
-            </Button>
+            <div className="flex items-center gap-2 flex-shrink-0 w-full sm:w-auto justify-end">
+              <Button asChild variant="lime-outline" size="sm">
+                <Link to={`${effectiveLinkPrefix}/${coach.username || coach.id}`}>{t('card.viewProfile')}</Link>
+              </Button>
+            </div>
           )}
         </div>
       </div>
