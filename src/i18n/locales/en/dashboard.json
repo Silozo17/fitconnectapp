@@ -105,7 +105,13 @@
       "approve": "Approve",
       "reject": "Reject",
       "suspend": "Suspend",
-      "delete": "Delete"
+      "delete": "Delete",
+      "addUser": "Add User",
+      "addCoach": "Add Coach",
+      "verifications": "Verifications",
+      "revenue": "Revenue",
+      "settings": "Settings",
+      "analytics": "Analytics"
     }
   },
   "header": {

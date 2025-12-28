@@ -11,15 +11,18 @@ interface PlacePrediction {
   secondary_text: string;
 }
 
-interface LocationData {
-  place_id: string;
-  formatted_address: string;
-  city: string;
-  region: string;
-  country: string;
-  country_code: string;
-  lat: number;
-  lng: number;
+export interface LocationData {
+  place_id?: string;
+  formatted_address?: string;
+  formattedAddress?: string;
+  city?: string;
+  region?: string;
+  county?: string;
+  country?: string;
+  country_code?: string;
+  countryCode?: string;
+  lat?: number;
+  lng?: number;
 }
 
 interface LocationAutocompleteProps {
