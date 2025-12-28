@@ -369,12 +369,25 @@ const handler = async (req: Request): Promise<Response> => {
       try {
         console.log(`[Profile Reminder] Sending ${emailType} to ${user.email}...`);
         
-        await resend.emails.send({
-          from: "FitConnect <noreply@fitconnect.uk>",
-          to: [user.email],
-          subject,
-          html,
+        // Send email via Resend API
+        const emailResponse = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${RESEND_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from: "FitConnect <noreply@fitconnect.uk>",
+            to: [user.email],
+            subject,
+            html,
+          }),
         });
+
+        if (!emailResponse.ok) {
+          const errorData = await emailResponse.json();
+          throw new Error(errorData.message || `Resend API error: ${emailResponse.status}`);
+        }
 
         // Log the email
         await supabase.from("email_logs").insert({
