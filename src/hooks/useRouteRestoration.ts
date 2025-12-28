@@ -1,10 +1,11 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { saveRoute } from "@/lib/view-restoration";
 
-const STORAGE_KEY = "fitconnect_last_route";
-const VIEW_MODE_KEY = "fitconnect_last_view_mode";
-const ADMIN_ROLE_KEY = "admin_active_role";
-
+/**
+ * Hook to track and save route changes for restoration on native app relaunch.
+ * Uses the centralized view-restoration utility.
+ */
 export const useRouteRestoration = () => {
   const location = useLocation();
 
@@ -14,56 +15,14 @@ export const useRouteRestoration = () => {
     
     // Only save dashboard routes for restoration
     if (pathname.startsWith("/dashboard")) {
-      try {
-        localStorage.setItem(STORAGE_KEY, pathname);
-        
-        // Also save the view mode separately for redundancy
-        const viewMode = pathname.match(/^\/dashboard\/(admin|coach|client)/)?.[1];
-        if (viewMode) {
-          localStorage.setItem(VIEW_MODE_KEY, viewMode);
-          
-          // Keep admin_active_role in sync as well
-          const currentAdminRole = localStorage.getItem(ADMIN_ROLE_KEY);
-          try {
-            const parsed = currentAdminRole ? JSON.parse(currentAdminRole) : {};
-            if (parsed.type !== viewMode) {
-              localStorage.setItem(ADMIN_ROLE_KEY, JSON.stringify({ 
-                type: viewMode, 
-                profileId: parsed.profileId || null 
-              }));
-            }
-          } catch {
-            localStorage.setItem(ADMIN_ROLE_KEY, JSON.stringify({ type: viewMode, profileId: null }));
-          }
-        }
-      } catch {
-        // Ignore storage errors (e.g., private browsing)
-      }
+      saveRoute(pathname);
     }
   }, [location.pathname]);
 };
 
-export const getLastRoute = (): string | null => {
-  try {
-    return localStorage.getItem(STORAGE_KEY);
-  } catch {
-    return null;
-  }
-};
-
-export const getLastViewMode = (): string | null => {
-  try {
-    return localStorage.getItem(VIEW_MODE_KEY);
-  } catch {
-    return null;
-  }
-};
-
-export const clearLastRoute = () => {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(VIEW_MODE_KEY);
-  } catch {
-    // Ignore storage errors
-  }
-};
+// Re-export functions from centralized utility for backward compatibility
+export { 
+  getSavedRoute as getLastRoute,
+  getSavedViewState as getLastViewMode,
+  clearViewState as clearLastRoute,
+} from "@/lib/view-restoration";
