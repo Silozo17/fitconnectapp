@@ -68,13 +68,40 @@ export const DEFAULT_AVATAR = {
   rarity: 'common' as const,
 };
 
-export const FREE_AVATARS = [
-  { slug: 'strongman_bear', name: 'Strongman Bear' },
-  { slug: 'weightlifting_lion', name: 'Weightlifting Lion' },
-  { slug: 'crossfit_wolf', name: 'CrossFit Wolf' },
-  { slug: 'sprinter_cheetah', name: 'Sprinter Cheetah' },
-  { slug: 'parkour_monkey', name: 'Parkour Monkey' },
+export type FreeAvatarItem = {
+  slug: string;
+  name: string;
+  gender: 'male' | 'female';
+};
+
+export const FREE_AVATARS_MALE: FreeAvatarItem[] = [
+  { slug: 'strongman_bear', name: 'Strongman Bear', gender: 'male' },
+  { slug: 'weightlifting_lion', name: 'Weightlifting Lion', gender: 'male' },
+  { slug: 'crossfit_wolf', name: 'CrossFit Wolf', gender: 'male' },
+  { slug: 'sprinter_cheetah', name: 'Sprinter Cheetah', gender: 'male' },
+  { slug: 'parkour_monkey', name: 'Parkour Monkey', gender: 'male' },
 ];
+
+export const FREE_AVATARS_FEMALE: FreeAvatarItem[] = [
+  { slug: 'strongwoman_bear_female', name: 'Strongwoman Bear', gender: 'female' },
+  { slug: 'weightlifting_tigress', name: 'Weightlifting Tigress', gender: 'female' },
+  { slug: 'crossfit_wolf_female', name: 'CrossFit Wolf', gender: 'female' },
+  { slug: 'sprinter_cheetah_female', name: 'Sprinter Cheetah', gender: 'female' },
+  { slug: 'parkour_monkey_female', name: 'Parkour Monkey', gender: 'female' },
+];
+
+// Combined for backwards compatibility
+export const FREE_AVATARS = FREE_AVATARS_MALE;
+
+/**
+ * Get free avatars filtered by gender
+ */
+export function getFreeAvatarsByGender(gender: string | null): FreeAvatarItem[] {
+  if (gender === 'female') return FREE_AVATARS_FEMALE;
+  if (gender === 'male') return FREE_AVATARS_MALE;
+  // For 'prefer_not_to_say' or null, return all
+  return [...FREE_AVATARS_MALE, ...FREE_AVATARS_FEMALE];
+}
 
 // ==================== UTILITY FUNCTIONS ====================
 

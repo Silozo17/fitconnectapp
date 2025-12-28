@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { useAvatars, useUnlockedAvatars, useSelectAvatar, Avatar } from '@/hooks/useAvatars';
 import { useUserStats } from '@/hooks/useUserStats';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
 import { AvatarCard } from './AvatarCard';
 import { AvatarShowcase } from './AvatarShowcase';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -17,6 +20,25 @@ interface AvatarPickerProps {
   trigger?: React.ReactNode;
 }
 
+// Hook to get user's gender from client profile (gender is only on client_profiles)
+function useUserGender() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ['user-gender', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      // Gender is only stored in client_profiles
+      const { data } = await supabase
+        .from('client_profiles')
+        .select('gender')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      return data?.gender as string | null;
+    },
+    enabled: !!user?.id,
+  });
+}
+
 export function AvatarPicker({ selectedAvatar, profileType, trigger }: AvatarPickerProps) {
   const [open, setOpen] = useState(false);
   const [previewAvatar, setPreviewAvatar] = useState<Avatar | null>(null);
@@ -24,6 +46,7 @@ export function AvatarPicker({ selectedAvatar, profileType, trigger }: AvatarPic
   const { data: avatars, isLoading: avatarsLoading } = useAvatars();
   const { data: unlockedAvatars, isLoading: unlockedLoading } = useUnlockedAvatars();
   const { data: stats } = useUserStats();
+  const { data: userGender } = useUserGender();
   const selectAvatar = useSelectAvatar();
   
   const isLoading = avatarsLoading || unlockedLoading;
@@ -35,6 +58,17 @@ export function AvatarPicker({ selectedAvatar, profileType, trigger }: AvatarPic
   
   // Coach exclusive check
   const isCoach = profileType === 'coach' || stats?.isCoach;
+
+  // Filter avatars by user's gender
+  const filterByGender = (avatarList: Avatar[] | undefined) => {
+    if (!avatarList) return [];
+    // If gender is not set or 'prefer_not_to_say', show all avatars
+    if (!userGender || userGender === 'prefer_not_to_say') {
+      return avatarList;
+    }
+    // Otherwise filter to matching gender
+    return avatarList.filter(a => a.gender === userGender || a.gender === null);
+  };
   
   const getProgress = (avatar: Avatar) => {
     if (!stats || avatar.category === 'free' || !avatar.unlock_threshold) return undefined;
@@ -72,9 +106,11 @@ export function AvatarPicker({ selectedAvatar, profileType, trigger }: AvatarPic
     setPreviewAvatar(null);
   };
   
-  const freeAvatars = avatars?.filter(a => a.category === 'free') || [];
-  const challengeAvatars = avatars?.filter(a => a.category === 'challenge_unlock') || [];
-  const coachAvatars = avatars?.filter(a => a.category === 'coach_exclusive') || [];
+  // Filter all avatar categories by gender
+  const genderedAvatars = filterByGender(avatars);
+  const freeAvatars = genderedAvatars.filter(a => a.category === 'free');
+  const challengeAvatars = genderedAvatars.filter(a => a.category === 'challenge_unlock');
+  const coachAvatars = genderedAvatars.filter(a => a.category === 'coach_exclusive');
   
   const displayAvatar = previewAvatar || selectedAvatar;
   
@@ -221,9 +257,9 @@ export function AvatarPicker({ selectedAvatar, profileType, trigger }: AvatarPic
                     </div>
                   </TabsContent>
                   
-                  <TabsContent value="unlocked" className="m-0">
+                <TabsContent value="unlocked" className="m-0">
                     <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
-                      {avatars?.filter(a => isAvatarUnlocked(a)).map(avatar => (
+                      {genderedAvatars.filter(a => isAvatarUnlocked(a)).map(avatar => (
                         <AvatarCard
                           key={avatar.id}
                           avatar={avatar}
@@ -237,7 +273,7 @@ export function AvatarPicker({ selectedAvatar, profileType, trigger }: AvatarPic
                   
                   <TabsContent value="locked" className="m-0">
                     <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
-                      {avatars?.filter(a => !isAvatarUnlocked(a)).map(avatar => (
+                      {genderedAvatars.filter(a => !isAvatarUnlocked(a)).map(avatar => (
                         <AvatarCard
                           key={avatar.id}
                           avatar={avatar}
