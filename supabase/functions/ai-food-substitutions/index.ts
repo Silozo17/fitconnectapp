@@ -5,112 +5,277 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const FATSECRET_API_URL = 'https://platform.fatsecret.com/rest/server.api';
+
 // =====================================
-// VALIDATION FUNCTIONS (No AI - Pure Math)
+// OAUTH 1.0 FOR FATSECRET
 // =====================================
 
-/**
- * Recalculate calories from macros (ground truth)
- */
+async function hmacSha1(key: string, message: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(key);
+  const messageData = encoder.encode(message);
+  
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw', keyData, { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']
+  );
+  
+  const signature = await crypto.subtle.sign('HMAC', cryptoKey, messageData);
+  return btoa(String.fromCharCode(...new Uint8Array(signature)));
+}
+
+function percentEncode(str: string): string {
+  return encodeURIComponent(str)
+    .replace(/!/g, '%21').replace(/\*/g, '%2A')
+    .replace(/'/g, '%27').replace(/\(/g, '%28').replace(/\)/g, '%29');
+}
+
+async function generateOAuthParams(
+  method: string, url: string, params: Record<string, string>
+): Promise<Record<string, string>> {
+  const consumerKey = Deno.env.get('FATSECRET_CONSUMER_KEY');
+  const consumerSecret = Deno.env.get('FATSECRET_CONSUMER_SECRET');
+
+  if (!consumerKey || !consumerSecret) {
+    throw new Error('FatSecret API credentials not configured');
+  }
+
+  const oauthParams: Record<string, string> = {
+    oauth_consumer_key: consumerKey,
+    oauth_signature_method: 'HMAC-SHA1',
+    oauth_timestamp: Math.floor(Date.now() / 1000).toString(),
+    oauth_nonce: crypto.randomUUID().replace(/-/g, ''),
+    oauth_version: '1.0',
+  };
+
+  const allParams = { ...params, ...oauthParams };
+  const sortedParams = Object.keys(allParams).sort()
+    .map(key => `${percentEncode(key)}=${percentEncode(allParams[key])}`).join('&');
+
+  const signatureBaseString = `${method}&${percentEncode(url)}&${percentEncode(sortedParams)}`;
+  const signingKey = `${percentEncode(consumerSecret)}&`;
+  const signature = await hmacSha1(signingKey, signatureBaseString);
+
+  return { ...allParams, oauth_signature: signature };
+}
+
+// =====================================
+// TYPES
+// =====================================
+
+interface FatSecretFood {
+  fatsecret_id: string;
+  name: string;
+  brand_name: string | null;
+  serving_description: string;
+  serving_size_g: number;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+interface ValidatedSubstitution {
+  name: string;
+  servingSize: string;
+  macros: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+    fiber?: number;
+  };
+  whyGoodSubstitute: string;
+  prepTips?: string;
+  whereToBuy?: string;
+  fatsecret_id: string;
+  source: 'fatsecret';
+  isAIEstimate: false;
+}
+
+// =====================================
+// FATSECRET SEARCH
+// =====================================
+
+async function searchFatSecret(query: string, maxResults: number = 10): Promise<FatSecretFood[]> {
+  const apiParams = {
+    method: 'foods.search',
+    search_expression: query,
+    format: 'json',
+    max_results: String(maxResults),
+  };
+
+  const signedParams = await generateOAuthParams('POST', FATSECRET_API_URL, apiParams);
+  const response = await fetch(FATSECRET_API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams(signedParams),
+  });
+
+  if (!response.ok) return [];
+
+  const data = await response.json();
+  if (data.error) return [];
+
+  const foodsRaw = data.foods?.food || [];
+  const foodsArray = Array.isArray(foodsRaw) ? foodsRaw : (foodsRaw ? [foodsRaw] : []);
+
+  return foodsArray.map((food: {
+    food_id: string;
+    food_name: string;
+    brand_name?: string;
+    food_description: string;
+  }) => {
+    const parsed = parseDescription(food.food_description);
+    if (!parsed) return null;
+    return {
+      fatsecret_id: food.food_id,
+      name: food.food_name,
+      brand_name: food.brand_name || null,
+      serving_description: parsed.servingPart,
+      serving_size_g: parsed.servingSizeG,
+      calories: parsed.calories,
+      protein: parsed.protein,
+      carbs: parsed.carbs,
+      fat: parsed.fat,
+    };
+  }).filter((f: FatSecretFood | null): f is FatSecretFood => f !== null);
+}
+
+function parseDescription(description: string): { 
+  servingPart: string; calories: number; fat: number; carbs: number; protein: number; servingSizeG: number;
+} | null {
+  try {
+    const parts = description.split(' - ');
+    if (parts.length < 2) return null;
+    
+    const servingPart = parts[0];
+    const nutritionPart = parts.slice(1).join(' - ');
+    
+    const per100gMatch = /per\s+100\s*g/i.test(servingPart);
+    const gramsMatch = servingPart.match(/per\s+(\d+)\s*g/i);
+    const servingSizeG = per100gMatch ? 100 : (gramsMatch ? parseInt(gramsMatch[1]) : 100);
+    
+    const caloriesMatch = nutritionPart.match(/Calories:\s*([\d.]+)\s*kcal/i);
+    const fatMatch = nutritionPart.match(/Fat:\s*([\d.]+)\s*g/i);
+    const carbsMatch = nutritionPart.match(/Carbs:\s*([\d.]+)\s*g/i);
+    const proteinMatch = nutritionPart.match(/Protein:\s*([\d.]+)\s*g/i);
+    
+    return {
+      servingPart: servingPart.replace(/^Per\s+/i, ''),
+      calories: caloriesMatch ? parseFloat(caloriesMatch[1]) : 0,
+      fat: fatMatch ? parseFloat(fatMatch[1]) : 0,
+      carbs: carbsMatch ? parseFloat(carbsMatch[1]) : 0,
+      protein: proteinMatch ? parseFloat(proteinMatch[1]) : 0,
+      servingSizeG,
+    };
+  } catch {
+    return null;
+  }
+}
+
 function recalculateCalories(protein: number, carbs: number, fat: number): number {
   return Math.round((protein * 4) + (carbs * 4) + (fat * 9));
 }
 
-/**
- * Validate that food macros are realistic
- */
-function validateFoodMacros(
-  macros: { calories: number; protein: number; carbs: number; fat: number },
-  servingSize: string
-): { isRealistic: boolean; warnings: string[]; correctedCalories: number } {
-  const warnings: string[] = [];
+// =====================================
+// AI: GET SUBSTITUTE NAMES
+// =====================================
+
+async function getAISubstituteNames(
+  apiKey: string,
+  foodName: string,
+  reason: string,
+  dietaryRestrictions?: string[],
+  allergies?: string[]
+): Promise<{ originalFood: string; substituteNames: string[]; reasons: Record<string, string> }> {
   
-  // Recalculate calories from macros (ground truth)
-  const correctedCalories = recalculateCalories(macros.protein, macros.carbs, macros.fat);
-  
-  if (Math.abs(correctedCalories - macros.calories) > 15) {
-    warnings.push(`Calories adjusted from ${macros.calories} to ${correctedCalories} based on macros`);
+  const systemPrompt = `You are a registered dietitian. Suggest food substitutions by NAME ONLY.
+
+CRITICAL RULES:
+1. You are NOT a nutrition database - do NOT include any calorie or macro values
+2. Suggest ONLY simple, searchable food names (e.g., "chicken breast", "tofu", "tempeh")
+3. Use generic ingredient names that would be found in a food database
+4. Each substitute should be a single ingredient, not a recipe or dish
+
+GOOD names: chicken breast, tofu, tempeh, cottage cheese, Greek yogurt, salmon, turkey breast
+BAD names: grilled herb chicken, protein shake, homemade seitan, Asian-style tofu`;
+
+  const userPrompt = `I need substitutes for: ${foodName}
+Reason: ${reason}
+${dietaryRestrictions?.length ? `Dietary restrictions: ${dietaryRestrictions.join(', ')}` : ''}
+${allergies?.length ? `Allergies to avoid: ${allergies.join(', ')}` : ''}
+
+Suggest 5 alternative food NAMES that could replace this. Only provide names and brief reasons.`;
+
+  const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'google/gemini-2.5-flash',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+      tools: [{
+        type: 'function',
+        function: {
+          name: 'suggest_substitute_names',
+          description: 'Suggest substitute food NAMES only. No nutrition values.',
+          parameters: {
+            type: 'object',
+            properties: {
+              originalFood: { type: 'string' },
+              substitutes: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    name: { type: 'string', description: 'Simple food name (e.g., "chicken breast", "tofu")' },
+                    whyGoodSubstitute: { type: 'string', description: 'Brief reason why this is a good substitute' },
+                    prepTips: { type: 'string' },
+                  },
+                  required: ['name', 'whyGoodSubstitute'],
+                },
+              },
+            },
+            required: ['originalFood', 'substitutes'],
+          },
+        },
+      }],
+      tool_choice: { type: 'function', function: { name: 'suggest_substitute_names' } },
+    }),
+  });
+
+  if (!response.ok) {
+    if (response.status === 429) throw new Error('Rate limit exceeded');
+    if (response.status === 402) throw new Error('AI credits exhausted');
+    throw new Error(`AI error: ${response.status}`);
   }
+
+  const data = await response.json();
+  const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
   
-  // Check for unrealistic protein density
-  const servingMatch = servingSize.match(/(\d+)\s*g/i);
-  if (servingMatch) {
-    const servingGrams = parseInt(servingMatch[1]);
-    if (servingGrams > 0) {
-      const proteinPer100g = (macros.protein / servingGrams) * 100;
-      // Pure protein sources rarely exceed 35g/100g (chicken breast: ~31g)
-      // Protein powders can be higher (~80g/100g), so warn at 50
-      if (proteinPer100g > 50) {
-        warnings.push(`High protein density (${Math.round(proteinPer100g)}g/100g) - verify accuracy`);
-      }
-    }
+  if (!toolCall?.function?.arguments) {
+    throw new Error('AI did not return substitution suggestions');
   }
-  
-  // Check for impossible macro combinations
-  // Total macro weight can't exceed serving weight significantly
-  const totalMacroGrams = macros.protein + macros.carbs + macros.fat;
-  const servingMatchGeneral = servingSize.match(/(\d+)/);
-  if (servingMatchGeneral) {
-    const estimatedWeight = parseInt(servingMatchGeneral[1]);
-    // Allow 150% for moisture loss in calculations
-    if (totalMacroGrams > estimatedWeight * 1.5 && estimatedWeight > 50) {
-      warnings.push(`Macro totals (${Math.round(totalMacroGrams)}g) seem high for serving size`);
-    }
-  }
-  
-  // Check calorie density (most foods < 900 cal/100g, except pure oils at ~884)
-  if (servingMatch) {
-    const servingGrams = parseInt(servingMatch[1]);
-    if (servingGrams > 0) {
-      const calPer100g = (correctedCalories / servingGrams) * 100;
-      if (calPer100g > 900) {
-        warnings.push(`Very high calorie density (${Math.round(calPer100g)} cal/100g)`);
-      }
-    }
-  }
+
+  const result = JSON.parse(toolCall.function.arguments);
   
   return {
-    isRealistic: warnings.length <= 1, // Allow 1 minor warning
-    warnings,
-    correctedCalories,
+    originalFood: result.originalFood,
+    substituteNames: result.substitutes.map((s: { name: string }) => s.name),
+    reasons: result.substitutes.reduce((acc: Record<string, string>, s: { name: string; whyGoodSubstitute: string; prepTips?: string }) => {
+      acc[s.name.toLowerCase()] = JSON.stringify({ 
+        whyGoodSubstitute: s.whyGoodSubstitute, 
+        prepTips: s.prepTips 
+      });
+      return acc;
+    }, {}),
   };
-}
-
-/**
- * Post-process AI substitutions to add validation and flags
- */
-function processSubstitutions(
-  substitutions: Array<{
-    name: string;
-    servingSize: string;
-    macros: { calories: number; protein: number; carbs: number; fat: number; fiber?: number };
-    whyGoodSubstitute: string;
-    prepTips?: string;
-    whereToBuy?: string;
-  }>
-): Array<{
-  name: string;
-  servingSize: string;
-  macros: { calories: number; protein: number; carbs: number; fat: number; fiber?: number };
-  whyGoodSubstitute: string;
-  prepTips?: string;
-  whereToBuy?: string;
-  isAIEstimate: boolean;
-  validationWarnings: string[];
-}> {
-  return substitutions.map(sub => {
-    const validation = validateFoodMacros(sub.macros, sub.servingSize);
-    
-    return {
-      ...sub,
-      macros: {
-        ...sub.macros,
-        calories: validation.correctedCalories, // Use corrected value
-      },
-      isAIEstimate: true, // Flag that this is AI-generated
-      validationWarnings: validation.warnings,
-    };
-  });
 }
 
 // =====================================
@@ -125,9 +290,9 @@ serve(async (req) => {
   try {
     const { 
       foodName,
-      reason, // 'allergy', 'dietary', 'preference', 'availability'
-      currentMacros, // { calories, protein, carbs, fat }
-      dietaryRestrictions, // ['vegan', 'gluten-free', etc.]
+      reason,
+      currentMacros,
+      dietaryRestrictions,
       allergies,
     } = await req.json();
 
@@ -136,152 +301,122 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    console.log('Finding substitutions for:', foodName, 'reason:', reason);
+    console.log('Finding FatSecret-verified substitutions for:', foodName, 'reason:', reason);
 
-    // Build the prompt with macro targets if available
-    const macroContext = currentMacros 
-      ? `Target macros per serving - Calories: ${currentMacros.calories}, Protein: ${currentMacros.protein}g, Carbs: ${currentMacros.carbs}g, Fat: ${currentMacros.fat}g. 
-         Try to match these values closely. Calories MUST equal (protein×4)+(carbs×4)+(fat×9).`
-      : 'Provide accurate nutrition information for each substitute.';
-
-    const systemPrompt = `You are a registered dietitian. Suggest food substitutions with accurate nutrition values.
-
-CRITICAL RULES:
-1. For each food, calories MUST equal: (protein × 4) + (carbs × 4) + (fat × 9)
-2. Use realistic, verified nutrition values based on common foods
-3. Serving sizes should be practical (e.g., "100g", "1 cup", "2 medium eggs")
-4. Protein values: chicken breast ~31g/100g, eggs ~13g/100g, tofu ~8g/100g
-5. Be conservative with estimates - accuracy over precision`;
-
-    const userPrompt = `I need substitutions for: ${foodName}
-
-Reason for substitution: ${reason}
-${macroContext}
-${dietaryRestrictions?.length ? `Dietary restrictions: ${dietaryRestrictions.join(', ')}` : ''}
-${allergies?.length ? `Allergies to avoid: ${allergies.join(', ')}` : ''}
-
-Provide 3-5 alternatives with accurate macros and practical tips.`;
-
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        tools: [{
-          type: 'function',
-          function: {
-            name: 'suggest_substitutions',
-            description: 'Suggest food substitutions with accurate macros. Calories must equal (protein×4)+(carbs×4)+(fat×9)',
-            parameters: {
-              type: 'object',
-              properties: {
-                originalFood: { type: 'string' },
-                substitutions: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      name: { type: 'string' },
-                      servingSize: { type: 'string', description: 'Practical serving size like "100g", "1 cup", "2 eggs"' },
-                      macros: {
-                        type: 'object',
-                        properties: {
-                          calories: { type: 'number', description: 'Must equal (protein×4)+(carbs×4)+(fat×9)' },
-                          protein: { type: 'number' },
-                          carbs: { type: 'number' },
-                          fat: { type: 'number' },
-                          fiber: { type: 'number' },
-                        },
-                        required: ['calories', 'protein', 'carbs', 'fat'],
-                      },
-                      whyGoodSubstitute: { type: 'string' },
-                      prepTips: { type: 'string' },
-                      whereToBuy: { type: 'string' },
-                    },
-                    required: ['name', 'servingSize', 'macros', 'whyGoodSubstitute'],
-                  },
-                },
-              },
-              required: ['originalFood', 'substitutions'],
-            },
-          },
-        }],
-        tool_choice: { type: 'function', function: { name: 'suggest_substitutions' } },
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('AI gateway error:', response.status, errorText);
-      
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }), {
-          status: 429,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: 'AI credits exhausted. Please add credits to continue.' }), {
-          status: 402,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      
-      throw new Error(`AI gateway error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+    // Step 1: AI suggests substitute NAMES only
+    const { originalFood, substituteNames, reasons } = await getAISubstituteNames(
+      LOVABLE_API_KEY, foodName, reason, dietaryRestrictions, allergies
+    );
     
-    if (toolCall?.function?.arguments) {
-      const rawResult = JSON.parse(toolCall.function.arguments);
+    console.log(`AI suggested ${substituteNames.length} substitutes:`, substituteNames);
+
+    // Step 2: Look up each substitute in FatSecret
+    const validatedSubstitutions: ValidatedSubstitution[] = [];
+    const unavailable: string[] = [];
+
+    for (const subName of substituteNames) {
+      const cleanName = subName.toLowerCase()
+        .replace(/\s+\(.*?\)/g, '')
+        .replace(/grilled|baked|raw|cooked|fresh|organic/gi, '')
+        .trim();
       
-      // Process and validate substitutions
-      const processedSubstitutions = processSubstitutions(rawResult.substitutions || []);
+      const results = await searchFatSecret(cleanName, 5);
       
-      // Log any validation issues
-      const allWarnings = processedSubstitutions.flatMap(s => s.validationWarnings);
-      if (allWarnings.length > 0) {
-        console.warn('Substitution validation warnings:', allWarnings);
+      if (results.length === 0) {
+        // Try simpler search
+        const simpler = cleanName.split(' ').slice(0, 2).join(' ');
+        const altResults = simpler.length >= 2 ? await searchFatSecret(simpler, 3) : [];
+        
+        if (altResults.length === 0) {
+          unavailable.push(subName);
+          continue;
+        }
+        results.push(...altResults);
       }
+
+      // Pick best match (prefer non-branded)
+      let best = results[0];
+      for (const food of results) {
+        if (!food.brand_name && best.brand_name) {
+          best = food;
+          break;
+        }
+      }
+
+      // Get AI reasoning for this substitute
+      let whyGoodSubstitute = 'Similar nutritional profile';
+      let prepTips: string | undefined;
       
-      console.log('Found', processedSubstitutions.length, 'substitutions with validation');
-      
-      return new Response(JSON.stringify({
-        originalFood: rawResult.originalFood,
-        substitutions: processedSubstitutions,
-        meta: {
-          isAIGenerated: true,
-          disclaimer: 'Nutrition values are AI estimates. Verify with food labels for precise tracking.',
+      const reasonData = reasons[subName.toLowerCase()];
+      if (reasonData) {
+        try {
+          const parsed = JSON.parse(reasonData);
+          whyGoodSubstitute = parsed.whyGoodSubstitute || whyGoodSubstitute;
+          prepTips = parsed.prepTips;
+        } catch {
+          // Ignore parse errors
+        }
+      }
+
+      // Scale to match target macros if provided
+      let portionMultiplier = 1;
+      if (currentMacros?.protein && best.protein > 0) {
+        portionMultiplier = currentMacros.protein / best.protein;
+        // Clamp to reasonable range
+        portionMultiplier = Math.max(0.5, Math.min(3, portionMultiplier));
+      }
+
+      const scaledProtein = Math.round(best.protein * portionMultiplier * 10) / 10;
+      const scaledCarbs = Math.round(best.carbs * portionMultiplier * 10) / 10;
+      const scaledFat = Math.round(best.fat * portionMultiplier * 10) / 10;
+      const scaledCalories = recalculateCalories(scaledProtein, scaledCarbs, scaledFat);
+
+      validatedSubstitutions.push({
+        name: best.name,
+        servingSize: portionMultiplier !== 1 
+          ? `${Math.round(best.serving_size_g * portionMultiplier)}g` 
+          : best.serving_description,
+        macros: {
+          calories: scaledCalories,
+          protein: scaledProtein,
+          carbs: scaledCarbs,
+          fat: scaledFat,
         },
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        whyGoodSubstitute,
+        prepTips,
+        fatsecret_id: best.fatsecret_id,
+        source: 'fatsecret',
+        isAIEstimate: false,
       });
+
+      // Small delay to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 50));
     }
 
-    // Fallback for text response
-    const content = data.choices?.[0]?.message?.content;
-    return new Response(JSON.stringify({ 
-      content,
+    console.log(`Found ${validatedSubstitutions.length} verified substitutions, ${unavailable.length} unavailable`);
+
+    return new Response(JSON.stringify({
+      originalFood,
+      substitutions: validatedSubstitutions,
+      unavailable,
       meta: {
-        isAIGenerated: true,
-        disclaimer: 'AI-generated suggestions. Verify nutrition information.',
+        dataSource: 'fatsecret',
+        disclaimer: 'All nutrition data verified by FatSecret food database',
+        isAIGenerated: false,
       },
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
+
   } catch (error) {
     console.error('Error in ai-food-substitutions:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    const status = errorMessage.includes('Rate limit') ? 429 
+      : errorMessage.includes('credits') ? 402 : 500;
+    
     return new Response(JSON.stringify({ error: errorMessage }), {
-      status: 500,
+      status,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }

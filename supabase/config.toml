@@ -227,3 +227,6 @@ verify_jwt = true
 
 [functions.fatsecret-search]
 verify_jwt = true
+
+[functions.fatsecret-batch-lookup]
+verify_jwt = true

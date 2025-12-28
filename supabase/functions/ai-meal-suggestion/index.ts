@@ -5,30 +5,13 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const FATSECRET_API_URL = 'https://platform.fatsecret.com/rest/server.api';
+
 // =====================================
 // TYPES
 // =====================================
 
 type DietaryPreference = 'balanced' | 'high_protein' | 'low_carb' | 'keto' | 'vegan';
-
-interface AIFood {
-  name: string;
-  serving: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-}
-
-interface AIMeal {
-  name: string;
-  time: string;
-  foods: AIFood[];
-}
-
-interface AIMealPlan {
-  meals: AIMeal[];
-}
 
 interface MacroTargets {
   calories: number;
@@ -37,390 +20,517 @@ interface MacroTargets {
   fat: number;
 }
 
-interface ValidationResult {
-  isValid: boolean;
-  isWithinTolerance: boolean;
-  actualTotals: MacroTargets;
-  discrepancy: {
-    calories: number;
-    caloriePercent: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-  };
-  warnings: string[];
-  errors: string[];
+interface FatSecretFood {
+  fatsecret_id: string;
+  name: string;
+  brand_name: string | null;
+  serving_description: string;
+  serving_size_g: number;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+interface MealFood {
+  name: string;
+  serving: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  fatsecret_id: string;
+  source: 'fatsecret';
+  portionMultiplier: number;
+}
+
+interface Meal {
+  name: string;
+  time: string;
+  foods: MealFood[];
+}
+
+interface MealPlan {
+  meals: Meal[];
 }
 
 // =====================================
-// DIET CONSTRAINTS (Same as macro calculator)
+// OAUTH 1.0 FOR FATSECRET
+// =====================================
+
+async function hmacSha1(key: string, message: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(key);
+  const messageData = encoder.encode(message);
+  
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw', keyData, { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']
+  );
+  
+  const signature = await crypto.subtle.sign('HMAC', cryptoKey, messageData);
+  return btoa(String.fromCharCode(...new Uint8Array(signature)));
+}
+
+function percentEncode(str: string): string {
+  return encodeURIComponent(str)
+    .replace(/!/g, '%21').replace(/\*/g, '%2A')
+    .replace(/'/g, '%27').replace(/\(/g, '%28').replace(/\)/g, '%29');
+}
+
+async function generateOAuthParams(
+  method: string, url: string, params: Record<string, string>
+): Promise<Record<string, string>> {
+  const consumerKey = Deno.env.get('FATSECRET_CONSUMER_KEY');
+  const consumerSecret = Deno.env.get('FATSECRET_CONSUMER_SECRET');
+
+  if (!consumerKey || !consumerSecret) {
+    throw new Error('FatSecret API credentials not configured');
+  }
+
+  const oauthParams: Record<string, string> = {
+    oauth_consumer_key: consumerKey,
+    oauth_signature_method: 'HMAC-SHA1',
+    oauth_timestamp: Math.floor(Date.now() / 1000).toString(),
+    oauth_nonce: crypto.randomUUID().replace(/-/g, ''),
+    oauth_version: '1.0',
+  };
+
+  const allParams = { ...params, ...oauthParams };
+  const sortedParams = Object.keys(allParams).sort()
+    .map(key => `${percentEncode(key)}=${percentEncode(allParams[key])}`).join('&');
+
+  const signatureBaseString = `${method}&${percentEncode(url)}&${percentEncode(sortedParams)}`;
+  const signingKey = `${percentEncode(consumerSecret)}&`;
+  const signature = await hmacSha1(signingKey, signatureBaseString);
+
+  return { ...allParams, oauth_signature: signature };
+}
+
+// =====================================
+// FATSECRET SEARCH
+// =====================================
+
+async function searchFatSecret(query: string, maxResults: number = 5): Promise<FatSecretFood[]> {
+  const apiParams = {
+    method: 'foods.search',
+    search_expression: query,
+    format: 'json',
+    max_results: String(maxResults),
+  };
+
+  const signedParams = await generateOAuthParams('POST', FATSECRET_API_URL, apiParams);
+  const response = await fetch(FATSECRET_API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams(signedParams),
+  });
+
+  if (!response.ok) return [];
+
+  const data = await response.json();
+  if (data.error) return [];
+
+  const foodsRaw = data.foods?.food || [];
+  const foodsArray = Array.isArray(foodsRaw) ? foodsRaw : (foodsRaw ? [foodsRaw] : []);
+
+  return foodsArray.map((food: {
+    food_id: string;
+    food_name: string;
+    brand_name?: string;
+    food_description: string;
+  }) => {
+    const parsed = parseDescription(food.food_description);
+    if (!parsed) return null;
+    return {
+      fatsecret_id: food.food_id,
+      name: food.food_name,
+      brand_name: food.brand_name || null,
+      serving_description: parsed.servingPart,
+      serving_size_g: parsed.servingSizeG,
+      calories: parsed.calories,
+      protein: parsed.protein,
+      carbs: parsed.carbs,
+      fat: parsed.fat,
+    };
+  }).filter((f: FatSecretFood | null): f is FatSecretFood => f !== null);
+}
+
+function parseDescription(description: string): { 
+  servingPart: string; calories: number; fat: number; carbs: number; protein: number; servingSizeG: number;
+} | null {
+  try {
+    const parts = description.split(' - ');
+    if (parts.length < 2) return null;
+    
+    const servingPart = parts[0];
+    const nutritionPart = parts.slice(1).join(' - ');
+    
+    const per100gMatch = /per\s+100\s*g/i.test(servingPart);
+    const gramsMatch = servingPart.match(/per\s+(\d+)\s*g/i);
+    const servingSizeG = per100gMatch ? 100 : (gramsMatch ? parseInt(gramsMatch[1]) : 100);
+    
+    const caloriesMatch = nutritionPart.match(/Calories:\s*([\d.]+)\s*kcal/i);
+    const fatMatch = nutritionPart.match(/Fat:\s*([\d.]+)\s*g/i);
+    const carbsMatch = nutritionPart.match(/Carbs:\s*([\d.]+)\s*g/i);
+    const proteinMatch = nutritionPart.match(/Protein:\s*([\d.]+)\s*g/i);
+    
+    return {
+      servingPart: servingPart.replace(/^Per\s+/i, ''),
+      calories: caloriesMatch ? parseFloat(caloriesMatch[1]) : 0,
+      fat: fatMatch ? parseFloat(fatMatch[1]) : 0,
+      carbs: carbsMatch ? parseFloat(carbsMatch[1]) : 0,
+      protein: proteinMatch ? parseFloat(proteinMatch[1]) : 0,
+      servingSizeG,
+    };
+  } catch {
+    return null;
+  }
+}
+
+// =====================================
+// INGREDIENT LOOKUP
+// =====================================
+
+async function lookupIngredient(name: string): Promise<FatSecretFood | null> {
+  const cleanName = name.toLowerCase()
+    .replace(/\s+\(.*?\)/g, '')
+    .replace(/grilled|baked|raw|cooked|boiled|steamed|fried|fresh|organic/gi, '')
+    .trim();
+
+  const results = await searchFatSecret(cleanName, 10);
+  if (results.length === 0) {
+    // Try simpler search
+    const simpler = cleanName.split(' ').slice(0, 2).join(' ');
+    if (simpler.length >= 2) {
+      const altResults = await searchFatSecret(simpler, 5);
+      if (altResults.length > 0) return findBestMatch(name, altResults);
+    }
+    return null;
+  }
+  return findBestMatch(name, results);
+}
+
+function findBestMatch(query: string, foods: FatSecretFood[]): FatSecretFood | null {
+  if (foods.length === 0) return null;
+  
+  const q = query.toLowerCase();
+  let best = foods[0];
+  let bestScore = 0;
+  
+  for (const food of foods) {
+    const name = food.name.toLowerCase();
+    let score = 0;
+    
+    if (name === q) score = 1.0;
+    else if (name.includes(q) || q.includes(name)) score = 0.8;
+    else {
+      const qWords = new Set(q.split(/\s+/));
+      const nWords = new Set(name.split(/\s+/));
+      const overlap = [...qWords].filter(w => nWords.has(w)).length;
+      score = overlap / Math.max(qWords.size, nWords.size);
+    }
+    
+    // Prefer generic over branded
+    if (food.brand_name) score -= 0.1;
+    
+    if (score > bestScore) {
+      bestScore = score;
+      best = food;
+    }
+  }
+  return best;
+}
+
+// =====================================
+// DIET CONSTRAINTS
 // =====================================
 
 const DIET_CONSTRAINTS: Record<DietaryPreference, {
   name: string;
   carbsGrams?: { min: number; max: number };
-  description: string;
   foodGuidance: string;
   avoidFoods?: string;
 }> = {
   balanced: {
     name: 'Balanced',
-    description: 'Flexible macro distribution',
-    foodGuidance: 'Include a variety of whole grains, lean proteins, fruits, vegetables, and healthy fats',
+    foodGuidance: 'Include whole grains, lean proteins, fruits, vegetables, healthy fats',
   },
   high_protein: {
     name: 'High Protein',
-    description: 'Elevated protein for muscle retention',
-    foodGuidance: 'Emphasize protein-rich foods at every meal: lean meats, fish, eggs, Greek yogurt, cottage cheese, legumes',
+    foodGuidance: 'Emphasize protein-rich foods: lean meats, fish, eggs, Greek yogurt, cottage cheese, legumes',
   },
   low_carb: {
     name: 'Low Carb',
     carbsGrams: { min: 70, max: 130 },
-    description: 'Moderate carb restriction (NOT ketogenic)',
-    foodGuidance: 'Focus on proteins, vegetables, and healthy fats. Limit grains, bread, pasta',
+    foodGuidance: 'Focus on proteins, vegetables, healthy fats. Limit grains, bread, pasta',
     avoidFoods: 'Limit: bread, pasta, rice, potatoes, sugary foods',
   },
   keto: {
     name: 'Ketogenic',
     carbsGrams: { min: 20, max: 30 },
-    description: 'Very low carb for ketosis',
     foodGuidance: 'High-fat foods: avocado, olive oil, nuts, fatty fish, eggs, cheese, meat',
     avoidFoods: 'AVOID: grains, bread, pasta, rice, potatoes, sugary foods, most fruits, beans',
   },
   vegan: {
     name: 'Vegan',
-    description: 'Plant-based only',
     foodGuidance: 'Plant proteins: tofu, tempeh, seitan, legumes, edamame, quinoa, lentils, nuts',
     avoidFoods: 'NO: meat, fish, dairy, eggs, honey',
   },
 };
 
 // =====================================
-// VALIDATION FUNCTIONS
+// AI: GET INGREDIENT SUGGESTIONS
+// =====================================
+
+async function getAIIngredientSuggestions(
+  apiKey: string,
+  targets: MacroTargets,
+  diet: DietaryPreference,
+  preferences: string | undefined
+): Promise<{ meals: Array<{ name: string; time: string; ingredients: Array<{ name: string; portionGrams: number }> }> }> {
+  
+  const config = DIET_CONSTRAINTS[diet];
+  
+  const systemPrompt = `You are a nutritionist planning meal structures. You suggest INGREDIENT NAMES ONLY.
+
+CRITICAL RULES - YOU MUST FOLLOW THESE:
+1. You are NOT a nutrition database - do NOT include any calorie or macro values
+2. Suggest ONLY simple, searchable food ingredients (e.g., "chicken breast", "brown rice", "broccoli")
+3. Use generic ingredient names, not dish names or recipes
+4. Avoid compound foods - break them into ingredients
+5. Portion sizes should be in grams (e.g., 150)
+
+GOOD ingredient names: chicken breast, brown rice, olive oil, eggs, oats, banana, almonds, salmon, broccoli, sweet potato
+BAD ingredient names: grilled herb chicken, homemade stir-fry, mom's casserole, protein shake mix
+
+${config.foodGuidance}
+${config.avoidFoods ? config.avoidFoods : ''}
+${config.carbsGrams ? `Carb limit: ${config.carbsGrams.min}-${config.carbsGrams.max}g total daily` : ''}`;
+
+  const userPrompt = `Create a ${config.name} meal structure for these daily targets:
+- Calories: ${targets.calories} kcal
+- Protein: ${targets.protein}g  
+- Carbs: ${targets.carbs}g
+- Fat: ${targets.fat}g
+${preferences ? `\nPreferences: ${preferences}` : ''}
+
+Suggest 4 meals with simple ingredients. Return ONLY ingredient names and portion sizes in grams.`;
+
+  const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'google/gemini-2.5-flash',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+      tools: [{
+        type: "function",
+        function: {
+          name: "suggest_meal_ingredients",
+          description: "Suggest meal structure with simple ingredient names. NO macro values - just names and portions.",
+          parameters: {
+            type: "object",
+            properties: {
+              meals: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    name: { type: "string", description: "Meal name like 'Breakfast' or 'Lunch'" },
+                    time: { type: "string", description: "Time like '07:00' or '12:00'" },
+                    ingredients: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          name: { type: "string", description: "Simple ingredient name (e.g., 'chicken breast', 'rice')" },
+                          portionGrams: { type: "number", description: "Portion size in grams" },
+                        },
+                        required: ["name", "portionGrams"],
+                      },
+                    },
+                  },
+                  required: ["name", "time", "ingredients"],
+                },
+              },
+            },
+            required: ["meals"],
+          },
+        },
+      }],
+      tool_choice: { type: "function", function: { name: "suggest_meal_ingredients" } },
+    }),
+  });
+
+  if (!response.ok) {
+    if (response.status === 429) throw new Error('Rate limit exceeded');
+    if (response.status === 402) throw new Error('AI credits exhausted');
+    throw new Error(`AI error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+  
+  if (!toolCall?.function?.arguments) {
+    throw new Error('AI did not return ingredient suggestions');
+  }
+
+  return JSON.parse(toolCall.function.arguments);
+}
+
+// =====================================
+// MEAL PLAN BUILDER
 // =====================================
 
 function recalculateCalories(protein: number, carbs: number, fat: number): number {
   return Math.round((protein * 4) + (carbs * 4) + (fat * 9));
 }
 
-function calculateMealPlanTotals(mealPlan: AIMealPlan): MacroTargets {
-  let totalCalories = 0, totalProtein = 0, totalCarbs = 0, totalFat = 0;
+async function buildMealPlan(
+  aiSuggestions: { meals: Array<{ name: string; time: string; ingredients: Array<{ name: string; portionGrams: number }> }> },
+  targets: MacroTargets
+): Promise<{ mealPlan: MealPlan; unavailable: string[]; validation: object }> {
+  
+  const meals: Meal[] = [];
+  const unavailable: string[] = [];
+  const ingredientCache: Map<string, FatSecretFood | null> = new Map();
 
-  for (const meal of mealPlan.meals) {
+  // Look up all ingredients
+  for (const aiMeal of aiSuggestions.meals) {
+    const mealFoods: MealFood[] = [];
+
+    for (const ingredient of aiMeal.ingredients) {
+      const cleanName = ingredient.name.toLowerCase().trim();
+      
+      // Check cache
+      if (!ingredientCache.has(cleanName)) {
+        const food = await lookupIngredient(cleanName);
+        ingredientCache.set(cleanName, food);
+        
+        // Small delay to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+
+      const food = ingredientCache.get(cleanName);
+      
+      if (!food) {
+        unavailable.push(ingredient.name);
+        continue;
+      }
+
+      // Calculate portion multiplier
+      const portionMultiplier = ingredient.portionGrams / food.serving_size_g;
+      
+      mealFoods.push({
+        name: food.name,
+        serving: `${ingredient.portionGrams}g`,
+        calories: Math.round(food.calories * portionMultiplier),
+        protein: Math.round(food.protein * portionMultiplier * 10) / 10,
+        carbs: Math.round(food.carbs * portionMultiplier * 10) / 10,
+        fat: Math.round(food.fat * portionMultiplier * 10) / 10,
+        fatsecret_id: food.fatsecret_id,
+        source: 'fatsecret',
+        portionMultiplier,
+      });
+    }
+
+    if (mealFoods.length > 0) {
+      meals.push({
+        name: aiMeal.name,
+        time: aiMeal.time,
+        foods: mealFoods,
+      });
+    }
+  }
+
+  // Calculate totals
+  let totalCalories = 0, totalProtein = 0, totalCarbs = 0, totalFat = 0;
+  for (const meal of meals) {
     for (const food of meal.foods) {
-      const actualCalories = recalculateCalories(food.protein, food.carbs, food.fat);
-      totalCalories += actualCalories;
+      // Recalculate calories from macros for accuracy
+      const actualCal = recalculateCalories(food.protein, food.carbs, food.fat);
+      food.calories = actualCal;
+      totalCalories += actualCal;
       totalProtein += food.protein;
       totalCarbs += food.carbs;
       totalFat += food.fat;
     }
   }
 
-  return {
-    calories: Math.round(totalCalories),
-    protein: Math.round(totalProtein),
-    carbs: Math.round(totalCarbs),
-    fat: Math.round(totalFat),
-  };
-}
-
-function fixFoodCalories(mealPlan: AIMealPlan): AIMealPlan {
-  return {
-    meals: mealPlan.meals.map(meal => ({
-      ...meal,
-      foods: meal.foods.map(food => ({
-        ...food,
-        calories: recalculateCalories(food.protein, food.carbs, food.fat),
-        protein: Math.round(food.protein * 10) / 10,
-        carbs: Math.round(food.carbs * 10) / 10,
-        fat: Math.round(food.fat * 10) / 10,
-      })),
-    })),
-  };
-}
-
-function scaleMealPortions(mealPlan: AIMealPlan, targetCalories: number): AIMealPlan {
-  const currentTotals = calculateMealPlanTotals(mealPlan);
-  if (currentTotals.calories === 0) return mealPlan;
-  
-  const scaleFactor = targetCalories / currentTotals.calories;
-  if (scaleFactor < 0.5 || scaleFactor > 2.0) {
-    console.warn(`Scale factor ${scaleFactor.toFixed(2)} too extreme`);
-    return mealPlan;
+  // Scale portions if needed
+  const calorieRatio = targets.calories / totalCalories;
+  if (calorieRatio >= 0.5 && calorieRatio <= 2.0 && Math.abs(calorieRatio - 1) > 0.05) {
+    console.log(`Scaling portions by ${calorieRatio.toFixed(2)} to match ${targets.calories} kcal`);
+    
+    for (const meal of meals) {
+      for (const food of meal.foods) {
+        food.protein = Math.round(food.protein * calorieRatio * 10) / 10;
+        food.carbs = Math.round(food.carbs * calorieRatio * 10) / 10;
+        food.fat = Math.round(food.fat * calorieRatio * 10) / 10;
+        food.calories = recalculateCalories(food.protein, food.carbs, food.fat);
+        
+        // Update serving description
+        const origGrams = parseFloat(food.serving) || 100;
+        food.serving = `${Math.round(origGrams * calorieRatio)}g (adjusted)`;
+      }
+    }
+    
+    // Recalculate totals after scaling
+    totalCalories = 0; totalProtein = 0; totalCarbs = 0; totalFat = 0;
+    for (const meal of meals) {
+      for (const food of meal.foods) {
+        totalCalories += food.calories;
+        totalProtein += food.protein;
+        totalCarbs += food.carbs;
+        totalFat += food.fat;
+      }
+    }
   }
-  
-  console.log(`Scaling by ${scaleFactor.toFixed(3)} to match ${targetCalories} kcal`);
-  
-  return {
-    meals: mealPlan.meals.map(meal => ({
-      ...meal,
-      foods: meal.foods.map(food => {
-        const scaledProtein = Math.round(food.protein * scaleFactor * 10) / 10;
-        const scaledCarbs = Math.round(food.carbs * scaleFactor * 10) / 10;
-        const scaledFat = Math.round(food.fat * scaleFactor * 10) / 10;
-        return {
-          ...food,
-          protein: scaledProtein,
-          carbs: scaledCarbs,
-          fat: scaledFat,
-          calories: recalculateCalories(scaledProtein, scaledCarbs, scaledFat),
-          serving: scaleFactor !== 1 ? `${food.serving} (adjusted)` : food.serving,
-        };
-      }),
-    })),
-  };
-}
 
-function validateMealPlan(mealPlan: AIMealPlan, targets: MacroTargets, tolerancePercent: number = 10): ValidationResult {
-  const actualTotals = calculateMealPlanTotals(mealPlan);
+  const calorieDiff = totalCalories - targets.calories;
+  const caloriePercent = Math.abs(calorieDiff / targets.calories) * 100;
+  
   const warnings: string[] = [];
   const errors: string[] = [];
   
-  const calorieDiff = actualTotals.calories - targets.calories;
-  const caloriePercent = Math.abs(calorieDiff / targets.calories) * 100;
-  
-  const discrepancy = {
-    calories: calorieDiff,
-    caloriePercent: Math.round(caloriePercent * 10) / 10,
-    protein: actualTotals.protein - targets.protein,
-    carbs: actualTotals.carbs - targets.carbs,
-    fat: actualTotals.fat - targets.fat,
-  };
-  
-  const isWithinTolerance = caloriePercent <= tolerancePercent;
-  
-  if (!isWithinTolerance) {
-    errors.push(`Calories (${actualTotals.calories}) ${Math.round(caloriePercent)}% off target (${targets.calories})`);
+  if (unavailable.length > 0) {
+    warnings.push(`${unavailable.length} ingredient(s) not found in database`);
+  }
+  if (caloriePercent > 10) {
+    errors.push(`Calories ${Math.round(caloriePercent)}% off target`);
   } else if (caloriePercent > 5) {
     warnings.push(`Calories slightly off by ${Math.round(caloriePercent)}%`);
   }
-  
-  const proteinDiffPercent = Math.abs(discrepancy.protein / targets.protein) * 100;
-  if (proteinDiffPercent > 15) {
-    warnings.push(`Protein ${discrepancy.protein > 0 ? 'exceeds' : 'below'} target by ${Math.round(proteinDiffPercent)}%`);
-  }
-  
-  return { isValid: errors.length === 0, isWithinTolerance, actualTotals, discrepancy, warnings, errors };
-}
 
-/**
- * Validate diet-specific constraints
- */
-function validateDietConstraints(
-  totals: MacroTargets,
-  diet: DietaryPreference
-): { isValid: boolean; errors: string[]; warnings: string[] } {
-  const errors: string[] = [];
-  const warnings: string[] = [];
-  const config = DIET_CONSTRAINTS[diet];
-  
-  if (config.carbsGrams) {
-    if (totals.carbs > config.carbsGrams.max + 15) {
-      errors.push(`Carbs (${totals.carbs}g) exceed ${diet} limit of ${config.carbsGrams.max}g`);
-    } else if (totals.carbs > config.carbsGrams.max) {
-      warnings.push(`Carbs (${totals.carbs}g) slightly above ${diet} target`);
-    }
-  }
-  
-  return { isValid: errors.length === 0, errors, warnings };
-}
-
-function calculatePerMealTargets(dailyCalories: number, mealCount: number = 4): string {
-  const configs: Record<number, Array<{ name: string; pct: number }>> = {
-    3: [{ name: 'Breakfast', pct: 0.25 }, { name: 'Lunch', pct: 0.40 }, { name: 'Dinner', pct: 0.35 }],
-    4: [{ name: 'Breakfast', pct: 0.25 }, { name: 'Lunch', pct: 0.35 }, { name: 'Dinner', pct: 0.30 }, { name: 'Snack', pct: 0.10 }],
-    5: [{ name: 'Breakfast', pct: 0.20 }, { name: 'Morning Snack', pct: 0.10 }, { name: 'Lunch', pct: 0.30 }, { name: 'Afternoon Snack', pct: 0.10 }, { name: 'Dinner', pct: 0.30 }],
-  };
-  
-  return (configs[mealCount] || configs[4]).map(m => `- ${m.name}: ~${Math.round(dailyCalories * m.pct)} kcal`).join('\n');
-}
-
-/**
- * Generate diet-specific prompt instructions
- */
-function getDietPromptInstructions(diet: DietaryPreference, targets: MacroTargets): string {
-  const config = DIET_CONSTRAINTS[diet];
-  const lines: string[] = [];
-  
-  if (config.carbsGrams) {
-    lines.push(`\nCRITICAL DIET CONSTRAINT (${config.name}):`);
-    lines.push(`- Total carbs MUST be between ${config.carbsGrams.min}g and ${config.carbsGrams.max}g`);
-    lines.push(`- Target carbs: ${targets.carbs}g (stay within ${config.carbsGrams.min}-${config.carbsGrams.max}g range)`);
-  }
-  
-  if (config.foodGuidance) {
-    lines.push(`\nFood guidance: ${config.foodGuidance}`);
-  }
-  
-  if (config.avoidFoods) {
-    lines.push(`${config.avoidFoods}`);
-  }
-  
-  return lines.join('\n');
-}
-
-// =====================================
-// AI CALL WITH RETRY
-// =====================================
-
-async function callAIWithRetry(
-  apiKey: string,
-  targets: MacroTargets,
-  preferences: string | undefined,
-  dietType: DietaryPreference,
-  maxRetries: number = 2
-): Promise<{ mealPlan: AIMealPlan; validation: ValidationResult; attempts: number }> {
-  
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    console.log(`AI meal generation attempt ${attempt}/${maxRetries} for ${dietType} diet`);
-    
-    const strictnessNote = attempt > 1 
-      ? `\n\nIMPORTANT: Previous attempt had incorrect totals. Be VERY precise. Sum MUST equal targets.`
-      : '';
-    
-    const dietInstructions = getDietPromptInstructions(dietType, targets);
-    
-    const systemPrompt = `You are a professional nutritionist creating accurate meal plans.
-
-CRITICAL RULES:
-1. Each food's calories MUST equal: (protein × 4) + (carbs × 4) + (fat × 9)
-2. Use realistic nutrition values for common foods
-3. TOTAL of all foods MUST hit daily targets closely
-4. Distribute calories appropriately across meals
-${dietInstructions}
-${strictnessNote}`;
-
-    const perMealTargets = calculatePerMealTargets(targets.calories, 4);
-    
-    const userPrompt = `Create a ${DIET_CONSTRAINTS[dietType].name} meal plan matching these EXACT targets:
-- Total Daily Calories: ${targets.calories} kcal
-- Protein: ${targets.protein}g
-- Carbohydrates: ${targets.carbs}g
-- Fat: ${targets.fat}g
-
-Per-meal distribution:
-${perMealTargets}
-${preferences ? `\nAdditional preferences: ${preferences}` : ''}
-
-Provide 4-5 meals with accurate nutrition values that sum to daily targets.`;
-
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
+  return {
+    mealPlan: { meals },
+    unavailable,
+    validation: {
+      totals: {
+        calories: Math.round(totalCalories),
+        protein: Math.round(totalProtein),
+        carbs: Math.round(totalCarbs),
+        fat: Math.round(totalFat),
       },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        tools: [{
-          type: "function",
-          function: {
-            name: "create_meal_plan",
-            description: "Create meal plan. calories = (protein×4)+(carbs×4)+(fat×9)",
-            parameters: {
-              type: "object",
-              properties: {
-                meals: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      name: { type: "string" },
-                      time: { type: "string" },
-                      foods: {
-                        type: "array",
-                        items: {
-                          type: "object",
-                          properties: {
-                            name: { type: "string" },
-                            serving: { type: "string" },
-                            calories: { type: "number" },
-                            protein: { type: "number" },
-                            carbs: { type: "number" },
-                            fat: { type: "number" },
-                          },
-                          required: ["name", "serving", "calories", "protein", "carbs", "fat"],
-                        },
-                      },
-                    },
-                    required: ["name", "time", "foods"],
-                  },
-                },
-              },
-              required: ["meals"],
-            },
-          },
-        }],
-        tool_choice: { type: "function", function: { name: "create_meal_plan" } },
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('AI error:', response.status, errorText);
-      if (response.status === 429) throw new Error('Rate limit exceeded');
-      if (response.status === 402) throw new Error('AI credits exhausted');
-      throw new Error(`AI error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    
-    if (!toolCall?.function?.arguments) {
-      console.error('No tool call in response');
-      if (attempt < maxRetries) continue;
-      throw new Error('Failed to generate meal plan');
-    }
-
-    try {
-      let rawMealPlan: AIMealPlan = JSON.parse(toolCall.function.arguments);
-      rawMealPlan = fixFoodCalories(rawMealPlan);
-      let validation = validateMealPlan(rawMealPlan, targets, 10);
-      
-      // Check diet constraints
-      const dietValidation = validateDietConstraints(validation.actualTotals, dietType);
-      validation.warnings.push(...dietValidation.warnings);
-      validation.errors.push(...dietValidation.errors);
-      
-      console.log(`Attempt ${attempt}: ${validation.actualTotals.calories} kcal (target: ${targets.calories}), carbs: ${validation.actualTotals.carbs}g`);
-      
-      // Scale if needed
-      if (!validation.isWithinTolerance && validation.discrepancy.caloriePercent < 100) {
-        const scaledMealPlan = scaleMealPortions(rawMealPlan, targets.calories);
-        const scaledValidation = validateMealPlan(scaledMealPlan, targets, 10);
-        
-        const scaledDietValidation = validateDietConstraints(scaledValidation.actualTotals, dietType);
-        scaledValidation.warnings.push(...scaledDietValidation.warnings);
-        scaledValidation.errors.push(...scaledDietValidation.errors);
-        
-        if (scaledValidation.isWithinTolerance) {
-          return { mealPlan: scaledMealPlan, validation: scaledValidation, attempts: attempt };
-        }
-        
-        if (scaledValidation.discrepancy.caloriePercent < validation.discrepancy.caloriePercent) {
-          rawMealPlan = scaledMealPlan;
-          validation = scaledValidation;
-        }
-      }
-      
-      if (validation.isWithinTolerance || attempt === maxRetries) {
-        if (!validation.isWithinTolerance) {
-          validation.warnings.push(`Plan is ${validation.discrepancy.caloriePercent}% off target`);
-        }
-        return { mealPlan: rawMealPlan, validation, attempts: attempt };
-      }
-      
-    } catch (parseError) {
-      console.error('Parse error:', parseError);
-      if (attempt === maxRetries) throw new Error('Failed to parse meal plan');
-    }
-  }
-  
-  throw new Error('Failed after retries');
+      targets,
+      discrepancy: {
+        calories: Math.round(calorieDiff),
+        caloriePercent: Math.round(caloriePercent * 10) / 10,
+        protein: Math.round(totalProtein - targets.protein),
+        carbs: Math.round(totalCarbs - targets.carbs),
+        fat: Math.round(totalFat - targets.fat),
+      },
+      warnings,
+      errors,
+      isAccurate: caloriePercent <= 10,
+      dataSource: 'fatsecret',
+    },
+  };
 }
 
 // =====================================
@@ -438,7 +548,12 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
 
-    const targets: MacroTargets = { calories: targetCalories, protein: targetProtein, carbs: targetCarbs, fat: targetFat };
+    const targets: MacroTargets = { 
+      calories: targetCalories, 
+      protein: targetProtein, 
+      carbs: targetCarbs, 
+      fat: targetFat 
+    };
     const diet: DietaryPreference = dietType || 'balanced';
 
     if (!targetCalories || targetCalories < 500 || targetCalories > 10000) {
@@ -446,38 +561,47 @@ serve(async (req) => {
     }
 
     if (structured) {
-      console.log('Generating structured meal plan:', targets, 'diet:', diet, 'prefs:', preferences);
+      console.log(`Generating FatSecret-grounded meal plan: ${targets.calories} kcal, diet: ${diet}`);
       
-      const { mealPlan, validation, attempts } = await callAIWithRetry(LOVABLE_API_KEY, targets, preferences, diet, 2);
+      // Step 1: AI suggests ingredient names only
+      const aiSuggestions = await getAIIngredientSuggestions(LOVABLE_API_KEY, targets, diet, preferences);
+      console.log(`AI suggested ${aiSuggestions.meals.length} meals with ingredients`);
       
-      console.log(`Generated in ${attempts} attempts. Valid: ${validation.isValid}`);
+      // Step 2: Look up each ingredient in FatSecret and build meal plan
+      const { mealPlan, unavailable, validation } = await buildMealPlan(aiSuggestions, targets);
+      
+      if (unavailable.length > 0) {
+        console.log(`Unavailable ingredients: ${unavailable.join(', ')}`);
+      }
+      
+      console.log(`Meal plan built with ${mealPlan.meals.length} meals, validation:`, validation);
       
       return new Response(JSON.stringify({
         mealPlan,
         dietType: diet,
-        validation: {
-          totals: validation.actualTotals,
-          targets,
-          discrepancy: validation.discrepancy,
-          warnings: validation.warnings,
-          errors: validation.errors,
-          isAccurate: validation.isWithinTolerance,
-          attempts,
+        validation,
+        unavailableIngredients: unavailable,
+        meta: {
+          dataSource: 'fatsecret',
+          disclaimer: 'All nutrition data verified by FatSecret food database',
         },
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Legacy text response
-    const systemPrompt = `You are a nutritionist. Create practical ${DIET_CONSTRAINTS[diet].name} meal plans.`;
+    // Legacy text response (non-structured)
+    const config = DIET_CONSTRAINTS[diet];
+    const systemPrompt = `You are a nutritionist. Create practical ${config.name} meal plans using simple, common ingredients.`;
     
-    const userPrompt = `Create a ${DIET_CONSTRAINTS[diet].name} meal plan for:
+    const userPrompt = `Create a ${config.name} meal plan for:
 - Calories: ${targetCalories} kcal
 - Protein: ${targetProtein}g
 - Carbs: ${targetCarbs}g
 - Fat: ${targetFat}g
-${preferences ? `\nPreferences: ${preferences}` : ''}`;
+${preferences ? `\nPreferences: ${preferences}` : ''}
+
+List meals with simple ingredients. Note: Exact nutrition values will be looked up from a food database.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -495,29 +619,27 @@ ${preferences ? `\nPreferences: ${preferences}` : ''}`;
     });
 
     if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: 'Rate limit exceeded' }), {
-          status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: 'AI credits exhausted' }), {
-          status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
+      if (response.status === 429) throw new Error('Rate limit exceeded');
+      if (response.status === 402) throw new Error('AI credits exhausted');
       throw new Error(`AI error: ${response.status}`);
     }
 
     const data = await response.json();
-    const suggestion = data.choices?.[0]?.message?.content || 'Unable to generate';
+    const content = data.choices?.[0]?.message?.content || 'Unable to generate meal plan';
 
-    return new Response(JSON.stringify({ suggestion, dietType: diet }), {
+    return new Response(JSON.stringify({ suggestion: content }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
+
   } catch (error) {
-    console.error('Error:', error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {
-      status: 500,
+    console.error('AI meal suggestion error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    const status = errorMessage.includes('Rate limit') ? 429 
+      : errorMessage.includes('credits') ? 402 : 500;
+    
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      status,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
