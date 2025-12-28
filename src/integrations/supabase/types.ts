@@ -5754,8 +5754,6 @@ export type Database = {
           location_city: string
           location_country: string
           location_country_code: string
-          location_lat: number
-          location_lng: number
           location_region: string
           location_score: number
           location_tier: number
