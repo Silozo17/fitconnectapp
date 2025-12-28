@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useMemo, useCallback, R
 import { useLocation } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { isDespia } from "@/lib/despia";
 
 // Helper to extract view mode from URL path
 const getViewModeFromPath = (pathname: string): ViewMode | null => {
@@ -32,20 +33,57 @@ const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
 const STORAGE_KEY = "admin_active_role";
 
+// Helper to get initial view mode considering saved preferences
+const getInitialViewMode = (currentRole: string | null): ViewMode => {
+  // First check localStorage for saved preference
+  try {
+    const savedRole = localStorage.getItem(STORAGE_KEY);
+    if (savedRole) {
+      const { type } = JSON.parse(savedRole);
+      const isAdminUser = currentRole === "admin" || currentRole === "manager" || currentRole === "staff";
+      const isCoach = currentRole === "coach";
+      
+      // Validate the saved type is accessible for this role
+      if (type === "admin" && isAdminUser) return "admin";
+      if (type === "coach" && (isAdminUser || isCoach)) return "coach";
+      if (type === "client") return "client"; // Everyone can access client view
+    }
+  } catch {
+    // Invalid saved role, fall through to default
+  }
+  
+  // Default based on role
+  if (currentRole === "client") return "client";
+  if (currentRole === "coach") return "coach";
+  return "admin"; // admins, managers, staff
+};
+
 export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const { user, role } = useAuth();
   const location = useLocation();
   
-  // Smart default based on role - prevents wrong navigation for clients
+  // Smart default based on role and saved preference
   const getDefaultViewMode = (currentRole: string | null): ViewMode => {
     if (currentRole === "client") return "client";
     if (currentRole === "coach") return "coach";
     return "admin"; // admins, managers, staff
   };
   
-  const [viewMode, setViewMode] = useState<ViewMode>(() => getDefaultViewMode(role));
+  // Initialize with saved preference for native apps
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    // On native apps, prioritize saved preference
+    if (isDespia()) {
+      return getInitialViewMode(role);
+    }
+    return getDefaultViewMode(role);
+  });
   const [availableProfiles, setAvailableProfiles] = useState<AvailableProfiles>({});
-  const [activeProfileType, setActiveProfileType] = useState<ViewMode>(() => getDefaultViewMode(role));
+  const [activeProfileType, setActiveProfileType] = useState<ViewMode>(() => {
+    if (isDespia()) {
+      return getInitialViewMode(role);
+    }
+    return getDefaultViewMode(role);
+  });
   const [activeProfileId, setActiveProfileId] = useState<string | null>(null);
   const [isLoadingProfiles, setIsLoadingProfiles] = useState(true);
 
@@ -65,9 +103,36 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   }, [user]);
   
   // Update state when role first becomes available (fixes race condition for notification clicks)
+  // For native apps, respect saved preference if valid
   useEffect(() => {
     if (!user) return; // Guard against logout state
     
+    const isNativeApp = isDespia();
+    
+    // On native apps, check if we have a valid saved preference first
+    if (isNativeApp && canSwitchRoles) {
+      try {
+        const savedRole = localStorage.getItem(STORAGE_KEY);
+        if (savedRole) {
+          const { type } = JSON.parse(savedRole);
+          // Validate saved type is accessible
+          const isValidSavedType = 
+            (type === "admin" && isAdminUser) ||
+            (type === "coach" && (isAdminUser || role === "coach")) ||
+            type === "client";
+          
+          if (isValidSavedType) {
+            setActiveProfileType(type);
+            setViewMode(type);
+            return; // Don't override with role-based default
+          }
+        }
+      } catch {
+        // Invalid saved role, fall through to role-based default
+      }
+    }
+    
+    // Fall back to role-based defaults for non-native or when no valid saved preference
     if (role === "client") {
       setActiveProfileType("client");
       setViewMode("client");
@@ -75,7 +140,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       setActiveProfileType("coach");
       setViewMode("coach");
     }
-  }, [role, isAdminUser, user]);
+  }, [role, isAdminUser, user, canSwitchRoles]);
 
   // Fetch all profiles for the user
   const fetchProfiles = async () => {

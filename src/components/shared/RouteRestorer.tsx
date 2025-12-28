@@ -4,6 +4,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { getLastRoute, useRouteRestoration } from "@/hooks/useRouteRestoration";
 import { isDespia } from "@/lib/despia";
 
+const ADMIN_ROLE_KEY = "admin_active_role";
+
 const getDefaultDashboardForRole = (role: string): string => {
   switch (role) {
     case "admin":
@@ -14,6 +16,30 @@ const getDefaultDashboardForRole = (role: string): string => {
       return "/dashboard/coach";
     default:
       return "/dashboard/client";
+  }
+};
+
+const validateRouteForRole = (route: string, role: string): boolean => {
+  const isAdminUser = role === "admin" || role === "manager" || role === "staff";
+  const isCoach = role === "coach";
+  
+  if (route.startsWith("/dashboard/admin")) {
+    return isAdminUser;
+  }
+  if (route.startsWith("/dashboard/coach")) {
+    return isAdminUser || isCoach;
+  }
+  if (route.startsWith("/dashboard/client")) {
+    // Admins, coaches, and clients can all access client dashboard
+    return true;
+  }
+  return false;
+};
+
+const syncViewModeToStorage = (route: string) => {
+  const viewModeFromPath = route.match(/^\/dashboard\/(admin|coach|client)/)?.[1];
+  if (viewModeFromPath) {
+    localStorage.setItem(ADMIN_ROLE_KEY, JSON.stringify({ type: viewModeFromPath, profileId: null }));
   }
 };
 
@@ -37,42 +63,43 @@ const RouteRestorer = () => {
       const currentPath = location.pathname;
       const isNativeApp = isDespia();
 
-      // In native app (Despia), always try to restore from homepage or auth pages
-      // In web browser, only restore from /auth or /get-started pages
+      // Paths that should trigger restoration
+      // Now also includes /dashboard (the redirect page) for native apps
       const shouldRestore = isNativeApp
-        ? currentPath === "/" || currentPath === "/auth" || currentPath === "/get-started"
+        ? currentPath === "/" || currentPath === "/auth" || currentPath === "/get-started" || currentPath === "/dashboard"
         : currentPath === "/auth" || currentPath === "/get-started";
 
       if (lastRoute && shouldRestore && lastRoute !== currentPath) {
-        // Verify the saved route matches the user's role
-        const isValidRoute =
-          (lastRoute.startsWith("/dashboard/admin") && (role === "admin" || role === "manager" || role === "staff")) ||
-          (lastRoute.startsWith("/dashboard/coach") && role === "coach") ||
-          (lastRoute.startsWith("/dashboard/client") && (role === "client" || role === "coach"));
-
-        if (isValidRoute) {
-          // Sync admin_active_role localStorage with the restored route
-          const viewModeFromPath = lastRoute.match(/^\/dashboard\/(admin|coach|client)/)?.[1];
-          if (viewModeFromPath) {
-            localStorage.setItem("admin_active_role", JSON.stringify({ type: viewModeFromPath, profileId: null }));
-          }
+        // Use the new validation that supports multi-role users
+        if (validateRouteForRole(lastRoute, role)) {
+          syncViewModeToStorage(lastRoute);
           navigate(lastRoute, { replace: true });
         } else if (isNativeApp) {
           // Invalid saved route in native app - go to default dashboard
           const defaultDashboard = getDefaultDashboardForRole(role);
-          const viewModeFromDefault = defaultDashboard.match(/^\/dashboard\/(admin|coach|client)/)?.[1];
-          if (viewModeFromDefault) {
-            localStorage.setItem("admin_active_role", JSON.stringify({ type: viewModeFromDefault, profileId: null }));
-          }
+          syncViewModeToStorage(defaultDashboard);
           navigate(defaultDashboard, { replace: true });
         }
-      } else if (isNativeApp && currentPath === "/" && !lastRoute) {
-        // No saved route but authenticated in native app - go to dashboard
-        const defaultDashboard = getDefaultDashboardForRole(role);
-        const viewModeFromDefault = defaultDashboard.match(/^\/dashboard\/(admin|coach|client)/)?.[1];
-        if (viewModeFromDefault) {
-          localStorage.setItem("admin_active_role", JSON.stringify({ type: viewModeFromDefault, profileId: null }));
+      } else if (isNativeApp && (currentPath === "/" || currentPath === "/dashboard") && !lastRoute) {
+        // No saved route but authenticated in native app - check for saved view preference
+        try {
+          const savedRole = localStorage.getItem(ADMIN_ROLE_KEY);
+          if (savedRole) {
+            const { type } = JSON.parse(savedRole);
+            const preferredRoute = `/dashboard/${type}`;
+            if (validateRouteForRole(preferredRoute, role)) {
+              navigate(preferredRoute, { replace: true });
+              hasRestored.current = true;
+              return;
+            }
+          }
+        } catch {
+          // Invalid saved role, fall through to default
         }
+        
+        // Fall back to default dashboard
+        const defaultDashboard = getDefaultDashboardForRole(role);
+        syncViewModeToStorage(defaultDashboard);
         navigate(defaultDashboard, { replace: true });
       }
 
