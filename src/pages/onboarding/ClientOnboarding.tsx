@@ -48,11 +48,18 @@ const ALLERGIES = [
   { id: "none", label: "No Allergies" },
 ];
 
-const PRONOUNS = [
-  { id: "he/him", label: "He/Him" },
-  { id: "she/her", label: "She/Her" },
-  { id: "they/them", label: "They/Them" },
-  { id: "prefer_not", label: "Prefer not to say" },
+const GENDER_OPTIONS = [
+  { id: "male", label: "Male" },
+  { id: "female", label: "Female" },
+  { id: "prefer_not_to_say", label: "Prefer not to say" },
+];
+
+const ACTIVITY_LEVELS = [
+  { id: "sedentary", label: "Sedentary", description: "Office job, no exercise" },
+  { id: "light", label: "Light", description: "1-2 days/week" },
+  { id: "moderate", label: "Moderate", description: "3-5 days/week" },
+  { id: "active", label: "Active", description: "6-7 days/week" },
+  { id: "very_active", label: "Very Active", description: "Athlete / physical job" },
 ];
 
 const ClientOnboarding = () => {
@@ -76,7 +83,8 @@ const ClientOnboarding = () => {
     firstName: "",
     lastName: "",
     age: "",
-    genderPronouns: "",
+    gender: "",
+    activityLevel: "moderate",
     heightCm: "",
     weightKg: "",
     fitnessGoals: [] as string[],
@@ -292,7 +300,8 @@ const ClientOnboarding = () => {
           first_name: formData.firstName || null,
           last_name: formData.lastName || null,
           age: formData.age ? parseInt(formData.age) : null,
-          gender_pronouns: formData.genderPronouns || null,
+          gender: formData.gender || null,
+          activity_level: formData.activityLevel || 'moderate',
           height_cm: formData.heightCm ? parseFloat(formData.heightCm) : null,
           weight_kg: formData.weightKg ? parseFloat(formData.weightKg) : null,
           fitness_goals: formData.fitnessGoals,
@@ -452,20 +461,43 @@ const ClientOnboarding = () => {
             </div>
 
             <div>
-              <Label className="text-foreground text-sm mb-2 block">Pronouns</Label>
+              <Label className="text-foreground text-sm mb-2 block">Gender</Label>
               <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                {PRONOUNS.map((pronoun) => (
+                {GENDER_OPTIONS.map((option) => (
                   <button
-                    key={pronoun.id}
+                    key={option.id}
                     type="button"
-                    onClick={() => handleInputChange("genderPronouns", pronoun.id)}
+                    onClick={() => handleInputChange("gender", option.id)}
                     className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg border-2 transition-all text-sm ${
-                      formData.genderPronouns === pronoun.id
+                      formData.gender === option.id
                         ? "border-primary bg-primary/10 text-foreground"
                         : "border-border hover:border-muted-foreground text-muted-foreground"
                     }`}
                   >
-                    {pronoun.label}
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-foreground text-sm mb-2 block">Activity Level</Label>
+              <div className="flex flex-col gap-2">
+                {ACTIVITY_LEVELS.map((level) => (
+                  <button
+                    key={level.id}
+                    type="button"
+                    onClick={() => handleInputChange("activityLevel", level.id)}
+                    className={`flex items-center justify-between px-4 py-3 rounded-lg border-2 transition-all text-left ${
+                      formData.activityLevel === level.id
+                        ? "border-primary bg-primary/10"
+                        : "border-border hover:border-muted-foreground"
+                    }`}
+                  >
+                    <span className={formData.activityLevel === level.id ? "text-foreground font-medium" : "text-muted-foreground"}>
+                      {level.label}
+                    </span>
+                    <span className="text-xs text-muted-foreground">{level.description}</span>
                   </button>
                 ))}
               </div>

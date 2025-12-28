@@ -1102,6 +1102,7 @@ export type Database = {
       }
       client_profiles: {
         Row: {
+          activity_level: string | null
           age: number | null
           allergies: string[] | null
           avatar_url: string | null
@@ -1113,6 +1114,7 @@ export type Database = {
           dietary_restrictions: string[] | null
           first_name: string | null
           fitness_goals: string[] | null
+          gender: string | null
           gender_pronouns: string | null
           height_cm: number | null
           id: string
@@ -1136,6 +1138,7 @@ export type Database = {
           weight_kg: number | null
         }
         Insert: {
+          activity_level?: string | null
           age?: number | null
           allergies?: string[] | null
           avatar_url?: string | null
@@ -1147,6 +1150,7 @@ export type Database = {
           dietary_restrictions?: string[] | null
           first_name?: string | null
           fitness_goals?: string[] | null
+          gender?: string | null
           gender_pronouns?: string | null
           height_cm?: number | null
           id?: string
@@ -1170,6 +1174,7 @@ export type Database = {
           weight_kg?: number | null
         }
         Update: {
+          activity_level?: string | null
           age?: number | null
           allergies?: string[] | null
           avatar_url?: string | null
@@ -1181,6 +1186,7 @@ export type Database = {
           dietary_restrictions?: string[] | null
           first_name?: string | null
           fitness_goals?: string[] | null
+          gender?: string | null
           gender_pronouns?: string | null
           height_cm?: number | null
           id?: string

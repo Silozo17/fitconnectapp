@@ -5,7 +5,8 @@
  * Provides validation, warnings, and context for downstream tools (Meal Planner, Shopping List).
  */
 
-import type { DietaryPreference, Goal } from './nutrition-science-config';
+import type { DietaryPreference, Goal, ActivityLevel } from './nutrition-science-config';
+import { getGenderForCalculation, getValidActivityLevel, type Gender } from './activity-level-config';
 
 // ============================================
 // TYPES
@@ -18,7 +19,8 @@ export interface ClientProfileData {
   age: number | null;
   weight_kg: number | null;
   height_cm: number | null;
-  gender_pronouns: string | null;
+  gender: Gender | null;
+  activity_level: ActivityLevel | null;
   fitness_goals: string[] | null;
   dietary_restrictions: string[] | null;
   allergies: string[] | null;
@@ -33,6 +35,7 @@ export interface NutritionContext {
   medicalConditions: string[];
   inferredDietType: DietaryPreference;
   inferredGoal: Goal | null;
+  activityLevel: ActivityLevel;
   warnings: string[];
 }
 
@@ -41,6 +44,7 @@ export interface ClientFormData {
   gender: 'male' | 'female';
   weightKg: number;
   heightCm: number;
+  activityLevel: ActivityLevel;
   dietaryPreference: DietaryPreference;
   goal: Goal;
 }
@@ -56,48 +60,32 @@ export interface ProfileValidation {
 // ============================================
 
 /**
- * Maps gender pronouns to binary gender for BMR calculation.
- * Returns 'male' as default if unable to determine.
+ * Maps stored gender to binary gender for BMR calculation.
+ * Returns 'male' as default for 'prefer_not_to_say' or null.
  */
-export function mapGenderPronouns(pronouns: string | null): { 
+export function mapGender(gender: Gender | null): { 
   gender: 'male' | 'female'; 
   warning?: string;
 } {
-  if (!pronouns) {
+  if (!gender) {
     return { 
       gender: 'male', 
       warning: 'Gender not specified — using male for BMR calculation' 
     };
   }
 
-  const normalized = pronouns.toLowerCase().trim();
-
-  // Female indicators
-  if (
-    normalized.includes('she') ||
-    normalized.includes('her') ||
-    normalized === 'female' ||
-    normalized === 'f' ||
-    normalized === 'woman'
-  ) {
+  if (gender === 'female') {
     return { gender: 'female' };
   }
 
-  // Male indicators
-  if (
-    normalized.includes('he') ||
-    normalized.includes('him') ||
-    normalized === 'male' ||
-    normalized === 'm' ||
-    normalized === 'man'
-  ) {
+  if (gender === 'male') {
     return { gender: 'male' };
   }
 
-  // Non-binary or other — default to male for BMR with warning
+  // 'prefer_not_to_say' — default to male for BMR with info message
   return { 
     gender: 'male', 
-    warning: `Using male BMR formula for "${pronouns}" — adjust if needed` 
+    warning: 'Using male BMR formula (gender not specified)' 
   };
 }
 
@@ -227,7 +215,7 @@ export function validateClientProfile(profile: ClientProfileData): ProfileValida
   }
 
   // Gender warning (not blocking)
-  const genderResult = mapGenderPronouns(profile.gender_pronouns);
+  const genderResult = mapGender(profile.gender);
   if (genderResult.warning) {
     warnings.push(genderResult.warning);
   }
@@ -255,11 +243,14 @@ export function mapClientProfileToFormData(profile: ClientProfileData): {
   const validation = validateClientProfile(profile);
   const warnings = [...validation.warnings];
 
-  // Map gender
-  const genderResult = mapGenderPronouns(profile.gender_pronouns);
-  if (genderResult.warning) {
+  // Map gender (directly from profile.gender now)
+  const genderResult = mapGender(profile.gender);
+  if (genderResult.warning && !warnings.includes(genderResult.warning)) {
     warnings.push(genderResult.warning);
   }
+
+  // Get activity level from profile or default
+  const activityLevel = getValidActivityLevel(profile.activity_level);
 
   // Map dietary preference
   const dietResult = mapDietaryRestrictions(profile.dietary_restrictions);
@@ -273,6 +264,7 @@ export function mapClientProfileToFormData(profile: ClientProfileData): {
     gender: genderResult.gender,
     weightKg: profile.weight_kg || 70,
     heightCm: profile.height_cm || 170,
+    activityLevel,
     dietaryPreference: dietResult.preference,
     goal: goalResult.goal,
   };
@@ -291,6 +283,7 @@ export function mapClientProfileToFormData(profile: ClientProfileData): {
     medicalConditions: profile.medical_conditions || [],
     inferredDietType: dietResult.preference,
     inferredGoal: goalResult.goal,
+    activityLevel,
     warnings,
   };
 

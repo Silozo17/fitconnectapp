@@ -20,7 +20,8 @@ export interface CoachClient {
     weight_kg: number | null;
     height_cm: number | null;
     age: number | null;
-    gender_pronouns: string | null;
+    gender: string | null;
+    activity_level: string | null;
     dietary_restrictions: string[] | null;
     allergies: string[] | null;
     medical_conditions: string[] | null;
@@ -78,7 +79,8 @@ export function useCoachClients() {
             weight_kg,
             height_cm,
             age,
-            gender_pronouns,
+            gender,
+            activity_level,
             dietary_restrictions,
             allergies,
             medical_conditions

@@ -39,7 +39,8 @@ interface ClientProfile {
   last_name: string | null;
   username: string;
   age: number | null;
-  gender_pronouns: string | null;
+  gender: string | null;
+  activity_level: string | null;
   location: string | null;
   weight_kg: number | null;
   height_cm: number | null;
@@ -54,6 +55,20 @@ interface ClientProfile {
   county: string | null;
   country: string | null;
 }
+
+const GENDER_OPTIONS = [
+  { id: "male", label: "Male" },
+  { id: "female", label: "Female" },
+  { id: "prefer_not_to_say", label: "Prefer not to say" },
+];
+
+const ACTIVITY_LEVELS = [
+  { id: "sedentary", label: "Sedentary", description: "Office job, no exercise" },
+  { id: "light", label: "Light", description: "1-2 days/week" },
+  { id: "moderate", label: "Moderate", description: "3-5 days/week" },
+  { id: "active", label: "Active", description: "6-7 days/week" },
+  { id: "very_active", label: "Very Active", description: "Athlete / physical job" },
+];
 
 const DIETARY_SUGGESTIONS = [
   "Vegetarian", "Vegan", "Halal", "Kosher", "Gluten-Free", 
@@ -162,7 +177,7 @@ const ClientSettings = () => {
 
       const { data } = await supabase
         .from("client_profiles")
-        .select("first_name, last_name, username, age, gender_pronouns, location, weight_kg, height_cm, fitness_goals, dietary_restrictions, allergies, medical_conditions, avatar_url, leaderboard_visible, leaderboard_display_name, city, county, country")
+        .select("first_name, last_name, username, age, gender, activity_level, location, weight_kg, height_cm, fitness_goals, dietary_restrictions, allergies, medical_conditions, avatar_url, leaderboard_visible, leaderboard_display_name, city, county, country")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -190,7 +205,8 @@ const ClientSettings = () => {
         first_name: profile.first_name,
         last_name: profile.last_name,
         age: profile.age,
-        gender_pronouns: profile.gender_pronouns,
+        gender: profile.gender,
+        activity_level: profile.activity_level,
         location: profile.location,
         weight_kg: profile.weight_kg,
         height_cm: profile.height_cm,
@@ -302,6 +318,57 @@ const ClientSettings = () => {
                   <CardContent className="flex flex-col items-center gap-4">
                     <AvatarShowcase avatar={selectedAvatar} size="lg" />
                     <AvatarPicker selectedAvatar={selectedAvatar} profileType="client" />
+                  </CardContent>
+                </Card>
+
+                {/* Gender & Activity Level */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Personal Details</CardTitle>
+                    <CardDescription>Your gender and activity level are used for accurate macro calculations</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Gender</Label>
+                      <div className="flex flex-wrap gap-2">
+                        {GENDER_OPTIONS.map((option) => (
+                          <button
+                            key={option.id}
+                            type="button"
+                            onClick={() => updateField("gender", option.id)}
+                            className={`px-3 py-1.5 rounded-lg border-2 text-sm transition-colors ${
+                              profile?.gender === option.id
+                                ? "border-primary bg-primary/10 text-foreground"
+                                : "border-border hover:border-muted-foreground text-muted-foreground"
+                            }`}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Activity Level</Label>
+                      <div className="flex flex-col gap-2">
+                        {ACTIVITY_LEVELS.map((level) => (
+                          <button
+                            key={level.id}
+                            type="button"
+                            onClick={() => updateField("activity_level", level.id)}
+                            className={`flex items-center justify-between px-4 py-3 rounded-lg border-2 text-left transition-colors ${
+                              profile?.activity_level === level.id
+                                ? "border-primary bg-primary/10"
+                                : "border-border hover:border-muted-foreground"
+                            }`}
+                          >
+                            <span className={profile?.activity_level === level.id ? "text-foreground font-medium" : "text-muted-foreground"}>
+                              {level.label}
+                            </span>
+                            <span className="text-xs text-muted-foreground">{level.description}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
 
