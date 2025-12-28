@@ -423,13 +423,13 @@ const CoachClientDetail = () => {
 
       {/* Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="bg-secondary">
-          <TabsTrigger value="overview">{t('clientDetail.tabs.overview')}</TabsTrigger>
-          <TabsTrigger value="sessions">{t('clientDetail.tabs.sessions')}</TabsTrigger>
-          <TabsTrigger value="progress">{t('clientDetail.tabs.progress')}</TabsTrigger>
-          <TabsTrigger value="plans">{t('clientDetail.tabs.plans')}</TabsTrigger>
-          <TabsTrigger value="habits">{t('clientDetail.tabs.habits')}</TabsTrigger>
-          <TabsTrigger value="notes">{t('clientDetail.tabs.notes')}</TabsTrigger>
+        <TabsList className="bg-secondary flex-wrap h-auto gap-1 p-1">
+          <TabsTrigger value="overview" className="text-xs sm:text-sm">{t('clientDetail.tabs.overview')}</TabsTrigger>
+          <TabsTrigger value="sessions" className="text-xs sm:text-sm">{t('clientDetail.tabs.sessions')}</TabsTrigger>
+          <TabsTrigger value="progress" className="text-xs sm:text-sm">{t('clientDetail.tabs.progress')}</TabsTrigger>
+          <TabsTrigger value="plans" className="text-xs sm:text-sm">{t('clientDetail.tabs.plans')}</TabsTrigger>
+          <TabsTrigger value="habits" className="text-xs sm:text-sm">{t('clientDetail.tabs.habits')}</TabsTrigger>
+          <TabsTrigger value="notes" className="text-xs sm:text-sm">{t('clientDetail.tabs.notes')}</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}

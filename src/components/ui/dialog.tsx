@@ -38,11 +38,13 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        // Positioning
+        // Positioning - fixed centered, no horizontal overflow
         "fixed left-[50%] top-[50%] z-50 grid w-[calc(100%-2rem)] max-w-lg translate-x-[-50%] translate-y-[-50%]",
         // Premium glass styling
         "gap-4 p-6",
         "glass-floating",
+        // Overflow containment - prevent horizontal scroll
+        "overflow-x-hidden overflow-y-auto",
         // Inner highlight for depth
         "before:absolute before:inset-0 before:rounded-[inherit] before:pointer-events-none",
         "before:shadow-[inset_0_1px_0_hsl(0_0%_100%/0.1),inset_0_-1px_0_hsl(0_0%_0%/0.15)]",
@@ -53,7 +55,7 @@ const DialogContent = React.forwardRef<
         "data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%]",
         "data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]",
         // Mobile optimizations with safe area insets
-        "max-h-[calc(90vh-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px))] overflow-y-auto",
+        "max-h-[calc(90vh-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px))]",
         className,
       )}
       style={{
