@@ -1,20 +1,15 @@
 /**
  * Hook for fetching coaches for the marketplace (/coaches and /dashboard/client/find-coaches)
  * 
- * VALIDATION ASSERTIONS:
- * ✅ Uses sortCoachesByUnifiedRanking from unified-coach-ranking.ts (not duplicated)
- * ✅ filterByLocationWithExpansion() runs BEFORE sortCoachesByUnifiedRanking()
- * ✅ No hardcoded coach IDs
- * ✅ Fake coaches filtered via isRealCoach() when realCoachesOnly=true
+ * Uses SQL-first ranking via get_ranked_coaches RPC:
+ * - Location tier is primary factor (city > region > country > online)
+ * - Boost only reorders within the same location tier
+ * - Verified, profile completeness, and engagement are secondary factors
  */
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useCoachEngagement, createEmptyEngagementMap } from "./useCoachEngagement";
-import { calculateLocationScore, filterByLocationWithExpansion } from "@/lib/coach-ranking";
-import { sortCoachesByUnifiedRanking, extractRankingFactors } from "@/lib/unified-coach-ranking";
-import { matchesCountryFilterStrict } from "@/lib/location-utils";
-import { isRealCoach } from "@/lib/coach-validation";
-import type { LocationData, CoachLocationData, CoachProfileData, RankingScore } from "@/types/ranking";
+import type { LocationData, RankingScore, LocationMatchLevel } from "@/types/ranking";
+
 // Type for public coach profile data (GDPR-safe columns only)
 export type MarketplaceCoach = {
   id: string;
@@ -67,6 +62,11 @@ export type MarketplaceCoach = {
   tags?: string[] | null;
   // Ranking data (added after ranking)
   ranking?: RankingScore;
+  // From RPC
+  visibility_score?: number;
+  location_tier?: number;
+  review_count?: number;
+  avg_rating?: number | null;
 };
 
 export interface UseCoachMarketplaceOptions {
@@ -83,11 +83,11 @@ export interface UseCoachMarketplaceOptions {
   userLocation?: LocationData | null;
   /** Enable location-based ranking (default: true) */
   enableLocationRanking?: boolean;
-  /** Minimum results before expanding location radius (default: 5) */
+  /** Minimum results before expanding location radius (default: 5) - not used in SQL version */
   minResultsBeforeExpansion?: number;
   /** Filter coaches by country code (e.g., 'gb', 'pl') - case insensitive */
   countryCode?: string;
-  /** Only show coaches with complete profiles (real coaches, not test/placeholder) */
+  /** Only show coaches with complete profiles (real coaches, not test/placeholder) - handled by RPC */
   realCoachesOnly?: boolean;
 }
 
@@ -102,260 +102,116 @@ export interface UseCoachMarketplaceResult {
 }
 
 /**
- * Extracts location and profile data from a coach for ranking
+ * Determines the match level based on location tier score from RPC
  */
-function extractCoachRankingData(coach: MarketplaceCoach, boostedCoachIds: string[]): {
-  location: CoachLocationData;
-  profile: CoachProfileData;
-  isSponsored: boolean;
-} {
-  return {
-    location: {
-      location_city: coach.location_city,
-      location_region: coach.location_region,
-      location_country: coach.location_country,
-      online_available: coach.online_available,
-      in_person_available: coach.in_person_available,
-    },
-    profile: {
-      bio: coach.bio,
-      profile_image_url: coach.profile_image_url,
-      card_image_url: coach.card_image_url,
-      coach_types: coach.coach_types,
-      hourly_rate: coach.hourly_rate,
-      location: coach.location,
-      certifications: coach.certifications,
-      is_verified: coach.is_verified,
-    },
-    isSponsored: boostedCoachIds.includes(coach.id),
-  };
+function getMatchLevelFromTier(locationTier: number): LocationMatchLevel {
+  if (locationTier >= 1000) return 'exact_city';
+  if (locationTier >= 700) return 'same_region';
+  if (locationTier >= 400) return 'same_country';
+  if (locationTier >= 300) return 'online_only';
+  return 'no_match';
 }
 
 export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): UseCoachMarketplaceResult => {
-  const showSponsoredFirst = options.showSponsoredFirst !== false; // Default true
-  const enableLocationRanking = options.enableLocationRanking !== false; // Default true
-  const minResultsBeforeExpansion = options.minResultsBeforeExpansion ?? 5;
-
-  // Main query to fetch coaches
-  const coachesQuery = useQuery({
-    queryKey: ["marketplace-coaches", options],
+  const query = useQuery({
+    queryKey: ["marketplace-coaches-rpc", options],
     queryFn: async () => {
-      // First, get boosted coach IDs if showing sponsored first
-      // Only include coaches with active, non-expired boosts
-      // Accepts both 'succeeded' (paid) and 'migrated_free' (legacy migration) as valid statuses
-      let boostedCoachIds: string[] = [];
-      if (showSponsoredFirst) {
-        const now = new Date().toISOString();
-        const { data: boosts } = await supabase
-          .from("coach_boosts")
-          .select("coach_id, boost_end_date, payment_status")
-          .eq("is_active", true)
-          .in("payment_status", ["succeeded", "migrated_free"])
-          .gt("boost_end_date", now);
-        
-        // Filter out any null end dates (shouldn't happen, but be safe)
-        boostedCoachIds = (boosts || [])
-          .filter(b => b.boost_end_date !== null)
-          .map(b => b.coach_id);
-      }
-
-      // Query the GDPR-safe public view with location columns
-      let query = supabase
-        .from("public_coach_profiles")
-        .select(`
-          *,
-          avatars(slug, rarity, image_url)
-        `);
-
-      // Apply filters
-      if (options.search) {
-        query = query.or(
-          `display_name.ilike.%${options.search}%,bio.ilike.%${options.search}%,location.ilike.%${options.search}%`
-        );
-      }
-
-      if (options.location) {
-        query = query.ilike("location", `%${options.location}%`);
-      }
-
-      if (options.coachTypes && options.coachTypes.length > 0) {
-        query = query.overlaps("coach_types", options.coachTypes);
-      }
-
-      if (options.priceRange) {
-        query = query
-          .gte("hourly_rate", options.priceRange.min)
-          .lte("hourly_rate", options.priceRange.max);
-      }
-
-      if (options.onlineOnly) {
-        query = query.eq("online_available", true);
-      }
-
-      if (options.inPersonOnly) {
-        query = query.eq("in_person_available", true);
-      }
-
-      // Apply country filter at DB level - fetch matching codes + NULL for legacy parsing
-      if (options.countryCode) {
-        query = query.or(
-          `location_country_code.ilike.${options.countryCode},location_country_code.is.null`
-        );
-      }
-
-      // Don't limit at DB level if we're doing ranking (we'll limit after)
-      const dbLimit = enableLocationRanking ? undefined : options.limit;
-      if (dbLimit) {
-        query = query.limit(dbLimit);
-      }
-
-      // Default ordering by hourly_rate descending (will be overridden by ranking)
-      query = query.order("hourly_rate", { ascending: false, nullsFirst: false });
-
-      const { data, error } = await query;
+      // Call the SQL ranking function
+      const { data, error } = await supabase.rpc('get_ranked_coaches', {
+        p_user_city: options.userLocation?.city || null,
+        p_user_region: options.userLocation?.region || options.userLocation?.county || null,
+        p_user_country_code: options.userLocation?.countryCode || null,
+        p_filter_country_code: options.countryCode || null,
+        p_search_term: options.search || null,
+        p_coach_types: options.coachTypes && options.coachTypes.length > 0 ? options.coachTypes : null,
+        p_min_price: options.priceRange?.min || null,
+        p_max_price: options.priceRange?.max || null,
+        p_online_only: options.onlineOnly || false,
+        p_in_person_only: options.inPersonOnly || false,
+        p_limit: options.limit || 50,
+      });
 
       if (error) throw error;
 
-      let coaches = (data || []) as unknown as MarketplaceCoach[];
+      // Map RPC results to MarketplaceCoach type with ranking data
+      const coaches: MarketplaceCoach[] = (data || []).map((row: any) => {
+        const locationTier = row.location_tier || 0;
+        const matchLevel = getMatchLevelFromTier(locationTier);
+        
+        return {
+          id: row.id,
+          username: row.username,
+          display_name: row.display_name,
+          bio: row.bio,
+          coach_types: row.coach_types,
+          certifications: row.certifications,
+          experience_years: row.experience_years,
+          hourly_rate: row.hourly_rate,
+          currency: row.currency,
+          location: row.location,
+          location_city: row.location_city,
+          location_region: row.location_region,
+          location_country: row.location_country,
+          location_country_code: row.location_country_code,
+          online_available: row.online_available,
+          in_person_available: row.in_person_available,
+          profile_image_url: row.profile_image_url,
+          card_image_url: row.card_image_url,
+          booking_mode: row.booking_mode,
+          is_verified: row.is_verified,
+          verified_at: row.verified_at,
+          gym_affiliation: row.gym_affiliation,
+          marketplace_visible: row.marketplace_visible,
+          selected_avatar_id: row.selected_avatar_id,
+          created_at: row.created_at,
+          onboarding_completed: row.onboarding_completed || false,
+          who_i_work_with: row.who_i_work_with,
+          facebook_url: row.facebook_url,
+          instagram_url: row.instagram_url,
+          tiktok_url: row.tiktok_url,
+          x_url: row.x_url,
+          threads_url: row.threads_url,
+          linkedin_url: row.linkedin_url,
+          youtube_url: row.youtube_url,
+          // Computed fields from RPC
+          is_sponsored: row.is_sponsored,
+          visibility_score: row.visibility_score,
+          location_tier: locationTier,
+          review_count: row.review_count,
+          avg_rating: row.avg_rating,
+          rating: row.avg_rating,
+          reviews_count: row.review_count,
+          // Ranking data for components that need it
+          ranking: {
+            locationScore: locationTier,
+            engagementScore: 0,
+            profileScore: 0,
+            totalScore: row.visibility_score || 0,
+            matchLevel,
+            isSponsored: row.is_sponsored || false,
+          },
+        };
+      });
 
-      // STRICT COUNTRY FILTERING: Post-query filter to handle legacy coaches
-      // Only include coaches that definitively match the country filter
-      if (options.countryCode) {
-        coaches = coaches.filter(coach => matchesCountryFilterStrict(coach, options.countryCode));
-      }
+      // Determine effective match level from first coach (already sorted by tier)
+      const effectiveMatchLevel = coaches.length > 0 
+        ? getMatchLevelFromTier(coaches[0].location_tier || 0)
+        : 'no_match';
 
-      // REAL COACH FILTERING: Only show complete profiles (excludes test/placeholder)
-      if (options.realCoachesOnly) {
-        coaches = coaches.filter(coach => isRealCoach(coach));
-      }
-
-      // Return filtered data with boosted IDs for ranking step
       return {
         coaches,
-        boostedCoachIds,
+        effectiveMatchLevel,
       };
     },
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
 
-  // Get coach IDs for engagement query
-  const coachIds = coachesQuery.data?.coaches.map(c => c.id) ?? [];
-  const boostedCoachIds = coachesQuery.data?.boostedCoachIds ?? [];
-
-  // Fetch engagement data for ranking
-  const engagementQuery = useCoachEngagement({
-    coachIds,
-    enabled: coachIds.length > 0 && enableLocationRanking,
-  });
-
-  // Apply unified ranking algorithm
-  const rankedData = (() => {
-    if (!coachesQuery.data?.coaches) {
-      return undefined;
-    }
-
-    const coaches = coachesQuery.data.coaches;
-
-    // If ranking is disabled, just mark sponsored and return
-    if (!enableLocationRanking) {
-      return {
-        coaches: coaches.map(coach => ({
-          ...coach,
-          is_sponsored: boostedCoachIds.includes(coach.id),
-        })),
-        locationExpanded: false,
-        effectiveMatchLevel: undefined,
-      };
-    }
-
-    // Get engagement map (use empty map if still loading)
-    const engagementMap = engagementQuery.data ?? createEmptyEngagementMap(coachIds);
-
-    // Calculate location scores for each coach
-    const coachesWithLocation = coaches.map(coach => {
-      const { score: locationScore, matchLevel } = calculateLocationScore(
-        options.userLocation ?? null,
-        {
-          location_city: coach.location_city,
-          location_region: coach.location_region,
-          location_country: coach.location_country,
-          online_available: coach.online_available,
-          in_person_available: coach.in_person_available,
-          location: coach.location,
-        }
-      );
-      return { coach, locationScore, matchLevel };
-    });
-
-    // Build ranked array for location filtering (uses legacy format)
-    const rankedForFilter = coachesWithLocation.map(({ coach, locationScore, matchLevel }) => ({
-      coach,
-      ranking: {
-        locationScore,
-        engagementScore: 0,
-        profileScore: 0,
-        totalScore: locationScore,
-        matchLevel,
-        isSponsored: boostedCoachIds.includes(coach.id),
-      },
-    }));
-
-    // Apply location expansion if needed
-    const hasExplicitCountryFilter = !!options.countryCode;
-    const { coaches: filteredByLocation, effectiveMatchLevel, expanded } = 
-      filterByLocationWithExpansion(rankedForFilter, minResultsBeforeExpansion, !hasExplicitCountryFilter);
-
-    // Apply unified ranking to location-filtered coaches
-    const sorted = sortCoachesByUnifiedRanking(
-      filteredByLocation.map(r => r.coach),
-      (coach) => {
-        const locationData = coachesWithLocation.find(c => c.coach.id === coach.id);
-        return extractRankingFactors(
-          coach.id,
-          locationData?.locationScore ?? 0,
-          locationData?.matchLevel ?? 'no_match',
-          coach.is_verified === true,
-          boostedCoachIds.includes(coach.id),
-          engagementMap
-        );
-      }
-    );
-
-    // Map back to MarketplaceCoach with ranking data
-    let result = sorted.map(({ coach, factors }) => {
-      const locationData = coachesWithLocation.find(c => c.coach.id === coach.id);
-      return {
-        ...coach,
-        is_sponsored: factors.isBoosted,
-        ranking: {
-          locationScore: factors.locationScore,
-          engagementScore: 0,
-          profileScore: 0,
-          totalScore: factors.locationScore,
-          matchLevel: locationData?.matchLevel ?? 'no_match',
-          isSponsored: factors.isBoosted,
-        },
-      };
-    });
-
-    // Apply limit if specified
-    if (options.limit && result.length > options.limit) {
-      result = result.slice(0, options.limit);
-    }
-
-    return {
-      coaches: result,
-      locationExpanded: expanded,
-      effectiveMatchLevel,
-    };
-  })();
-
   return {
-    data: rankedData?.coaches,
-    isLoading: coachesQuery.isLoading || (enableLocationRanking && engagementQuery.isLoading),
-    error: coachesQuery.error ?? engagementQuery.error ?? null,
-    locationExpanded: rankedData?.locationExpanded,
-    effectiveMatchLevel: rankedData?.effectiveMatchLevel,
+    data: query.data?.coaches,
+    isLoading: query.isLoading,
+    error: query.error ?? null,
+    locationExpanded: false, // SQL handles this internally
+    effectiveMatchLevel: query.data?.effectiveMatchLevel,
   };
 };
 
