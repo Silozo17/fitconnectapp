@@ -78,8 +78,17 @@ async function fetchImageAsBase64(url: string): Promise<{ base64: string; mimeTy
   }
   const base64 = btoa(binary);
 
-  // Detect mime type
-  const contentType = response.headers.get('content-type') || 'image/jpeg';
+  // Detect mime type from content-type header or infer from URL
+  let contentType = response.headers.get('content-type') || '';
+  
+  // Check if it's a PDF based on content-type or magic bytes
+  if (contentType.includes('application/pdf') || 
+      (uint8Array[0] === 0x25 && uint8Array[1] === 0x50 && uint8Array[2] === 0x44 && uint8Array[3] === 0x46)) {
+    contentType = 'application/pdf';
+  } else if (!contentType || contentType === 'application/octet-stream') {
+    contentType = 'image/jpeg'; // Default fallback
+  }
+  
   console.log(`Document fetched: ${uint8Array.length} bytes, type: ${contentType}`);
 
   return { base64, mimeType: contentType };
@@ -313,29 +322,10 @@ serve(async (req) => {
 
     console.log(`Analyzing document: ${documentType} - ${fileName}`);
 
-    // Check for PDF files - flag for manual review
+    // Check for PDF files - Gemini supports PDFs natively
     const isPDF = fileName.toLowerCase().endsWith('.pdf') || documentUrl.includes('.pdf');
     if (isPDF) {
-      console.log('PDF document detected - flagging for manual review');
-      const pdfAnalysis: DocumentAnalysis = {
-        documentTypeMatch: true,
-        extractedInfo: {},
-        qualityAssessment: {
-          isReadable: false,
-          isComplete: false,
-          hasWatermarks: false,
-        },
-        issues: ['PDF documents cannot be analyzed automatically'],
-        confidenceScore: 0,
-        shouldFlag: true,
-        flagReasons: ['PDF format requires manual review - AI cannot process multi-page documents'],
-        recommendation: 'review',
-        summary: 'This PDF document requires manual review. Please upload an image (JPG, PNG) for automatic analysis, or an admin will review the PDF manually.'
-      };
-      return new Response(
-        JSON.stringify({ analysis: pdfAnalysis }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      console.log('PDF document detected - using Gemini native PDF support for multi-page analysis');
     }
 
     // Get the specific rules for this document type
@@ -393,11 +383,12 @@ ${rules.tips}
 ## Your Analysis Task
 1. First, determine if the uploaded document matches the expected type (${documentType})
 2. Extract all visible information (names, dates, numbers, organizations)
-3. Assess image quality and readability
-4. Check against rejection criteria - if ANY match, recommend REJECT
-5. Check against flag criteria - if ANY match, recommend REVIEW
-6. If document passes all checks and confidence is high (80%+), recommend APPROVE
-7. Be thorough but fair - coaches need these documents to work
+3. Assess image/document quality and readability
+4. For multi-page PDFs: analyze ALL pages thoroughly - important information may be on any page
+5. Check against rejection criteria - if ANY match, recommend REJECT
+6. Check against flag criteria - if ANY match, recommend REVIEW
+7. If document passes all checks and confidence is high (80%+), recommend APPROVE
+8. Be thorough but fair - coaches need these documents to work
 
 Use the document_analysis function to provide your structured assessment.`;
 

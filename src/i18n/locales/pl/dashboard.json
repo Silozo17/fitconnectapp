@@ -105,7 +105,13 @@
       "approve": "Zatwierdź",
       "reject": "Odrzuć",
       "suspend": "Zawieś",
-      "delete": "Usuń"
+      "delete": "Usuń",
+      "addUser": "Dodaj Użytkownika",
+      "addCoach": "Dodaj Trenera",
+      "verifications": "Weryfikacje",
+      "revenue": "Przychody",
+      "settings": "Ustawienia",
+      "analytics": "Analityka"
     }
   },
   "header": {
