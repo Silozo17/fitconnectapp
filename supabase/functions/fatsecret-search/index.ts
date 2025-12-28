@@ -41,8 +41,8 @@ async function generateOAuthParams(
   url: string,
   params: Record<string, string>
 ): Promise<Record<string, string>> {
-  const consumerKey = Deno.env.get('FATSECRET_CLIENT_ID');
-  const consumerSecret = Deno.env.get('FATSECRET_CLIENT_SECRET');
+  const consumerKey = Deno.env.get('FATSECRET_CONSUMER_KEY');
+  const consumerSecret = Deno.env.get('FATSECRET_CONSUMER_SECRET');
 
   if (!consumerKey || !consumerSecret) {
     throw new Error('FatSecret API credentials not configured');
