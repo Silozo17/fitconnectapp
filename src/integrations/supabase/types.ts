@@ -5718,61 +5718,113 @@ export type Database = {
         Args: { client_id_param: string }
         Returns: number
       }
-      get_ranked_coaches: {
-        Args: {
-          p_coach_types?: string[]
-          p_filter_country_code?: string
-          p_in_person_only?: boolean
-          p_limit?: number
-          p_max_price?: number
-          p_min_price?: number
-          p_online_only?: boolean
-          p_search_term?: string
-          p_user_city?: string
-          p_user_country_code?: string
-          p_user_region?: string
-        }
-        Returns: {
-          average_rating: number
-          bio: string
-          card_image_url: string
-          coach_types: string[]
-          currency: string
-          display_name: string
-          engagement_score: number
-          experience_years: number
-          facebook_url: string
-          gym_affiliation: string
-          hourly_rate: number
-          id: string
-          in_person_available: boolean
-          instagram_url: string
-          is_boosted: boolean
-          is_verified: boolean
-          linkedin_url: string
-          location: string
-          location_city: string
-          location_country: string
-          location_country_code: string
-          location_match_level: string
-          location_region: string
-          location_score: number
-          online_available: boolean
-          primary_coach_type: string
-          profile_image_url: string
-          profile_score: number
-          review_count: number
-          threads_url: string
-          tiktok_url: string
-          total_score: number
-          total_sessions: number
-          username: string
-          verification_status: string
-          who_i_work_with: string
-          x_url: string
-          youtube_url: string
-        }[]
-      }
+      get_ranked_coaches:
+        | {
+            Args: {
+              p_coach_types?: string[]
+              p_filter_country_code?: string
+              p_in_person_only?: boolean
+              p_max_price?: number
+              p_min_price?: number
+              p_online_only?: boolean
+              p_user_city?: string
+              p_user_lat?: number
+              p_user_lng?: number
+              p_user_region?: string
+            }
+            Returns: {
+              average_rating: number
+              bio: string
+              card_image_url: string
+              coach_types: string[]
+              currency: string
+              display_name: string
+              distance_km: number
+              experience_years: number
+              facebook_url: string
+              gym_affiliation: string
+              hourly_rate: number
+              id: string
+              in_person_available: boolean
+              instagram_url: string
+              is_verified: boolean
+              linkedin_url: string
+              location: string
+              location_city: string
+              location_country: string
+              location_country_code: string
+              location_lat: number
+              location_lng: number
+              location_region: string
+              location_tier: number
+              online_available: boolean
+              primary_coach_type: string
+              profile_image_url: string
+              ranking_score: number
+              review_count: number
+              threads_url: string
+              tiktok_url: string
+              user_id: string
+              username: string
+              x_url: string
+              youtube_url: string
+            }[]
+          }
+        | {
+            Args: {
+              p_coach_types?: string[]
+              p_filter_country_code?: string
+              p_in_person_only?: boolean
+              p_limit?: number
+              p_max_price?: number
+              p_min_price?: number
+              p_online_only?: boolean
+              p_search_term?: string
+              p_user_city?: string
+              p_user_country_code?: string
+              p_user_region?: string
+            }
+            Returns: {
+              average_rating: number
+              bio: string
+              card_image_url: string
+              coach_types: string[]
+              currency: string
+              display_name: string
+              engagement_score: number
+              experience_years: number
+              facebook_url: string
+              gym_affiliation: string
+              hourly_rate: number
+              id: string
+              in_person_available: boolean
+              instagram_url: string
+              is_boosted: boolean
+              is_verified: boolean
+              linkedin_url: string
+              location: string
+              location_city: string
+              location_country: string
+              location_country_code: string
+              location_match_level: string
+              location_region: string
+              location_score: number
+              online_available: boolean
+              primary_coach_type: string
+              profile_image_url: string
+              profile_score: number
+              review_count: number
+              threads_url: string
+              tiktok_url: string
+              total_score: number
+              total_sessions: number
+              username: string
+              verification_status: string
+              who_i_work_with: string
+              x_url: string
+              youtube_url: string
+            }[]
+          }
       has_role:
         | {
             Args: { _role: Database["public"]["Enums"]["app_role"] }
