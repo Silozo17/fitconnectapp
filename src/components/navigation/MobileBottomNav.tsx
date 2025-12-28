@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Home, Search, Calendar, MessageSquare, User, Users, BarChart3, Settings, LayoutDashboard } from "lucide-react";
+import { Home, Search, Calendar, MessageSquare, User, Users, BarChart3, Settings } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
 import { WebOnlyFeatureDialog } from "@/components/shared/WebOnlyFeatureDialog";
@@ -16,26 +16,29 @@ interface NavItem {
   disabledOnIOS?: boolean;
 }
 
+// Client nav: Dashboard (Home) in middle (3rd position)
 const clientNavItemsConfig: NavItem[] = [
-  { icon: Home, labelKey: "bottomNav.home", route: "/dashboard/client" },
   { icon: Search, labelKey: "bottomNav.discover", route: "/dashboard/client/find-coaches" },
   { icon: Calendar, labelKey: "bottomNav.plans", route: "/dashboard/client/plans" },
+  { icon: Home, labelKey: "bottomNav.home", route: "/dashboard/client" },
   { icon: MessageSquare, labelKey: "bottomNav.messages", route: "/dashboard/client/messages" },
   { icon: User, labelKey: "bottomNav.profile", route: "/dashboard/client/settings" },
 ];
 
+// Coach nav: Dashboard (Home) in middle (3rd position)
 const coachNavItems: NavItem[] = [
-  { icon: Home, labelKey: "bottomNav.home", route: "/dashboard/coach" },
   { icon: Users, labelKey: "bottomNav.clients", route: "/dashboard/coach/clients" },
   { icon: Calendar, labelKey: "bottomNav.schedule", route: "/dashboard/coach/schedule" },
+  { icon: Home, labelKey: "bottomNav.home", route: "/dashboard/coach" },
   { icon: MessageSquare, labelKey: "bottomNav.messages", route: "/dashboard/coach/messages" },
   { icon: User, labelKey: "bottomNav.profile", route: "/dashboard/coach/settings" },
 ];
 
+// Admin nav: Dashboard (Home) in middle (3rd position)
 const adminNavItems: NavItem[] = [
-  { icon: LayoutDashboard, labelKey: "bottomNav.dashboard", route: "/dashboard/admin" },
   { icon: Users, labelKey: "bottomNav.users", route: "/dashboard/admin/users" },
   { icon: User, labelKey: "bottomNav.coaches", route: "/dashboard/admin/coaches" },
+  { icon: Home, labelKey: "bottomNav.dashboard", route: "/dashboard/admin" },
   { icon: BarChart3, labelKey: "bottomNav.analytics", route: "/dashboard/admin/analytics" },
   { icon: Settings, labelKey: "bottomNav.settings", route: "/dashboard/admin/settings" },
 ];
@@ -109,10 +112,12 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
           />
           
           <div className="flex items-center justify-around">
-            {navItems.map((item) => {
+            {navItems.map((item, index) => {
               const active = isActive(item.route);
               const Icon = item.icon;
               const isDisabledOnPlatform = shouldHideMarketplace && item.disabledOnIOS;
+              // Center item (3rd position, index 2) should be bigger
+              const isCenterItem = index === Math.floor(navItems.length / 2);
 
               if (isDisabledOnPlatform) {
                 return (
@@ -122,7 +127,13 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
                     className="flex items-center justify-center w-14 h-12 opacity-40 cursor-pointer hover:opacity-60 transition-all duration-200"
                     aria-label={`${t(item.labelKey)} (Web Only)`}
                   >
-                    <Icon className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} />
+                    <Icon 
+                      className={cn(
+                        "text-muted-foreground",
+                        isCenterItem ? "h-7 w-7" : "h-6 w-6"
+                      )} 
+                      strokeWidth={1.5} 
+                    />
                   </button>
                 );
               }
@@ -159,7 +170,8 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
                   
                   <Icon
                     className={cn(
-                      "relative z-10 h-6 w-6 transition-all duration-300",
+                      "relative z-10 transition-all duration-300",
+                      isCenterItem ? "h-7 w-7" : "h-6 w-6",
                       active && "scale-110"
                     )}
                     strokeWidth={active ? 2.5 : 1.5}
