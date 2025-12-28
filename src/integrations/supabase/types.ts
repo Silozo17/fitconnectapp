@@ -2429,6 +2429,73 @@ export type Database = {
           },
         ]
       }
+      coach_qualifications: {
+        Row: {
+          coach_id: string
+          created_at: string | null
+          document_number: string | null
+          expiry_date: string | null
+          id: string
+          is_verified: boolean | null
+          issue_date: string | null
+          issuing_authority: string | null
+          name: string
+          updated_at: string | null
+          verification_document_id: string | null
+          verification_source: string | null
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string | null
+          document_number?: string | null
+          expiry_date?: string | null
+          id?: string
+          is_verified?: boolean | null
+          issue_date?: string | null
+          issuing_authority?: string | null
+          name: string
+          updated_at?: string | null
+          verification_document_id?: string | null
+          verification_source?: string | null
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string | null
+          document_number?: string | null
+          expiry_date?: string | null
+          id?: string
+          is_verified?: boolean | null
+          issue_date?: string | null
+          issuing_authority?: string | null
+          name?: string
+          updated_at?: string | null
+          verification_document_id?: string | null
+          verification_source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_qualifications_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_qualifications_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_qualifications_verification_document_id_fkey"
+            columns: ["verification_document_id"]
+            isOneToOne: false
+            referencedRelation: "coach_verification_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coach_subscription_plans: {
         Row: {
           billing_period: string

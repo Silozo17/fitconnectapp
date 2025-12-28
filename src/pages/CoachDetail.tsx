@@ -28,6 +28,7 @@ import { CoachAboutSection } from "@/components/coach/CoachAboutSection";
 import { CoachSocialLinksDisplay } from "@/components/coach/CoachSocialLinksDisplay";
 import { CoachSocialLinksSection } from "@/components/coach/CoachSocialLinksSection";
 import { CoachDigitalProductsSection } from "@/components/coach/CoachDigitalProductsSection";
+import { CoachQualificationsSection } from "@/components/coach/CoachQualificationsSection";
 import { useExchangeRates } from "@/hooks/useExchangeRates";
 import { getDisplayLocation } from "@/lib/location-utils";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -195,7 +196,10 @@ const CoachDetail = () => {
                 whoIWorkWith={coach.who_i_work_with}
               />
 
-              {/* 4. Social Media Links */}
+              {/* 4. Qualifications & Certifications */}
+              <CoachQualificationsSection coachId={coach.id} />
+
+              {/* 5. Social Media Links */}
               <CoachSocialLinksDisplay 
                 socialLinks={{
                   facebook_url: coach.facebook_url,
@@ -208,19 +212,19 @@ const CoachDetail = () => {
                 }}
               />
 
-              {/* 5. Gallery Section */}
+              {/* 6. Gallery Section */}
               <CoachGallerySection coachId={coach.id} />
 
-              {/* 6. Pricing & Packages */}
+              {/* 7. Pricing & Packages */}
               <CoachPricingSection coachId={coach.id} />
 
-              {/* 7. Group Classes */}
+              {/* 8. Group Classes */}
               <CoachGroupClassesSection coachId={coach.id} />
 
-              {/* 8. Digital Products */}
+              {/* 9. Digital Products */}
               <CoachDigitalProductsSection coachId={coach.id} />
 
-              {/* 9. Reviews Section */}
+              {/* 10. Reviews Section */}
               <CoachReviewsSection coachId={coach.id} />
             </div>
 
