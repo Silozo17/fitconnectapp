@@ -4,6 +4,7 @@ import { UserAvatar } from "@/components/shared/UserAvatar";
 import { ShareButton } from "@/components/shared/ShareButton";
 import FavouriteButton from "@/components/favourites/FavouriteButton";
 import { VerifiedBadge } from "@/components/verification/VerifiedBadge";
+import { QualifiedCoachBadge } from "@/components/verification/QualifiedCoachBadge";
 import { CoachFeaturedBadges } from "@/components/coaches/CoachFeaturedBadges";
 import StarRating from "@/components/reviews/StarRating";
 import { getDisplayLocation } from "@/lib/location-utils";
@@ -24,6 +25,7 @@ interface CoachHeroSectionProps {
     gym_affiliation: string | null;
     coach_types: string[] | null;
     bio: string | null;
+    verified_qualification_count?: number;
   };
   averageRating: number;
   reviewCount: number;
@@ -59,6 +61,9 @@ export function CoachHeroSection({ coach, averageRating, reviewCount }: CoachHer
               </h1>
               {coach.is_verified && (
                 <VerifiedBadge verifiedAt={coach.verified_at} size="lg" />
+              )}
+              {(coach.verified_qualification_count ?? 0) >= 1 && (
+                <QualifiedCoachBadge count={coach.verified_qualification_count!} size="lg" />
               )}
             </div>
 
