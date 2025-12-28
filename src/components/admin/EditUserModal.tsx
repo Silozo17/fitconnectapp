@@ -28,6 +28,7 @@ interface ClientUser {
   first_name: string | null;
   last_name: string | null;
   age: number | null;
+  date_of_birth: string | null;
   onboarding_completed: boolean;
   created_at: string;
   status?: string | null;
@@ -57,7 +58,7 @@ const EditUserModal = ({ user, open, onClose, onSaved }: EditUserModalProps) => 
   // Basic Info
   const [firstName, setFirstName] = useState(user.first_name || "");
   const [lastName, setLastName] = useState(user.last_name || "");
-  const [age, setAge] = useState(user.age?.toString() || "");
+  const [dateOfBirth, setDateOfBirth] = useState(user.date_of_birth || "");
   const [pronouns, setPronouns] = useState(user.gender_pronouns || "");
   
   // Email
@@ -108,7 +109,7 @@ const EditUserModal = ({ user, open, onClose, onSaved }: EditUserModalProps) => 
   useEffect(() => {
     setFirstName(user.first_name || "");
     setLastName(user.last_name || "");
-    setAge(user.age?.toString() || "");
+    setDateOfBirth(user.date_of_birth || "");
     setPronouns(user.gender_pronouns || "");
     setCity(user.city || "");
     setCounty(user.county || "");
@@ -147,7 +148,7 @@ const EditUserModal = ({ user, open, onClose, onSaved }: EditUserModalProps) => 
       .update({
         first_name: firstName || null,
         last_name: lastName || null,
-        age: age ? parseInt(age) : null,
+        date_of_birth: dateOfBirth || null, // Age auto-calculated by trigger
         gender_pronouns: pronouns || null,
         city: city || null,
         county: county || null,
@@ -277,14 +278,17 @@ const EditUserModal = ({ user, open, onClose, onSaved }: EditUserModalProps) => 
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="age">Age</Label>
+                  <Label htmlFor="dateOfBirth">Date of Birth</Label>
                   <Input
-                    id="age"
-                    type="number"
-                    value={age}
-                    onChange={(e) => setAge(e.target.value)}
-                    placeholder="Enter age"
+                    id="dateOfBirth"
+                    type="date"
+                    value={dateOfBirth}
+                    onChange={(e) => setDateOfBirth(e.target.value)}
+                    max={new Date().toISOString().split('T')[0]}
                   />
+                  {user.age !== null && (
+                    <p className="text-xs text-muted-foreground">Current age: {user.age} years</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="pronouns">Pronouns</Label>

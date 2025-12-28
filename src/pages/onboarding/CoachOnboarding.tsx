@@ -428,10 +428,15 @@ const CoachOnboarding = () => {
       // For paid tiers, save as free first - payment will upgrade it
       const tierToSave = isPaidTier ? "free" : formData.subscriptionTier;
       
+      // Calculate experience_start_date from entered years
+      const experienceStartDate = formData.experienceYears 
+        ? new Date(new Date().setFullYear(new Date().getFullYear() - parseInt(formData.experienceYears))).toISOString().split('T')[0]
+        : null;
+      
       const updateData: Record<string, any> = {
         display_name: formData.displayName || null,
         bio: formData.bio || null,
-        experience_years: formData.experienceYears ? parseInt(formData.experienceYears) : null,
+        experience_start_date: experienceStartDate, // experience_years auto-calculated by trigger
         coach_types: formData.coachTypes,
         primary_coach_type: formData.primaryCoachType || null,
         hourly_rate: formData.hourlyRate ? parseFloat(formData.hourlyRate) : null,

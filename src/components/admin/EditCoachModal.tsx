@@ -63,6 +63,7 @@ interface CoachProfileData {
   online_available: boolean | null;
   in_person_available: boolean | null;
   experience_years: number | null;
+  experience_start_date: string | null;
   gym_affiliation: string | null;
 }
 
@@ -85,6 +86,7 @@ const EditCoachModal = ({ coach, open, onClose, onSaved }: EditCoachModalProps) 
   const [onlineAvailable, setOnlineAvailable] = useState(false);
   const [inPersonAvailable, setInPersonAvailable] = useState(false);
   const [experienceYears, setExperienceYears] = useState("");
+  const [experienceStartDate, setExperienceStartDate] = useState("");
   const [gymAffiliation, setGymAffiliation] = useState("");
   
   const { getUserEmail, updateEmail } = useAdminUserManagement("coach");
@@ -97,7 +99,7 @@ const EditCoachModal = ({ coach, open, onClose, onSaved }: EditCoachModalProps) 
       setLoadingProfile(true);
       const { data, error } = await supabase
         .from("coach_profiles")
-        .select("bio, location, location_city, location_region, location_country, location_country_code, location_lat, location_lng, coach_types, online_available, in_person_available, experience_years, gym_affiliation")
+        .select("bio, location, location_city, location_region, location_country, location_country_code, location_lat, location_lng, coach_types, online_available, in_person_available, experience_years, experience_start_date, gym_affiliation")
         .eq("id", coach.id)
         .single();
       
@@ -111,6 +113,7 @@ const EditCoachModal = ({ coach, open, onClose, onSaved }: EditCoachModalProps) 
         setOnlineAvailable(profile.online_available || false);
         setInPersonAvailable(profile.in_person_available || false);
         setExperienceYears(profile.experience_years?.toString() || "");
+        setExperienceStartDate(profile.experience_start_date || "");
         setGymAffiliation(profile.gym_affiliation || "");
         
         if (profile.location) {
@@ -181,7 +184,10 @@ const EditCoachModal = ({ coach, open, onClose, onSaved }: EditCoachModalProps) 
       coach_types: coachTypes.length > 0 ? coachTypes : null,
       online_available: onlineAvailable,
       in_person_available: inPersonAvailable,
-      experience_years: experienceYears ? parseInt(experienceYears, 10) : null,
+      // Calculate experience_start_date from years if years changed
+      experience_start_date: experienceYears 
+        ? new Date(new Date().setFullYear(new Date().getFullYear() - parseInt(experienceYears, 10))).toISOString().split('T')[0]
+        : experienceStartDate || null,
       gym_affiliation: gymAffiliation || null,
     };
 
@@ -386,6 +392,7 @@ const EditCoachModal = ({ coach, open, onClose, onSaved }: EditCoachModalProps) 
                       onChange={(e) => setExperienceYears(e.target.value)}
                       placeholder="Enter years of experience"
                     />
+                    <p className="text-xs text-muted-foreground">Experience years auto-increment each year from start date</p>
                   </div>
                 </>
               )}
