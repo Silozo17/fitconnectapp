@@ -38,12 +38,14 @@ const RARITY_ORDER: Record<string, number> = {
   legendary: 5,
 };
 
-// Sort avatars by name first, then by rarity
+// Sort avatars by rarity first, then by name
 function sortAvatars(avatars: Avatar[]): Avatar[] {
   return [...avatars].sort((a, b) => {
-    const nameCompare = a.name.localeCompare(b.name);
-    if (nameCompare !== 0) return nameCompare;
-    return (RARITY_ORDER[a.rarity] || 0) - (RARITY_ORDER[b.rarity] || 0);
+    // Primary sort: by rarity (common → legendary)
+    const rarityCompare = (RARITY_ORDER[a.rarity] || 0) - (RARITY_ORDER[b.rarity] || 0);
+    if (rarityCompare !== 0) return rarityCompare;
+    // Secondary sort: by name (alphabetical)
+    return a.name.localeCompare(b.name);
   });
 }
 
