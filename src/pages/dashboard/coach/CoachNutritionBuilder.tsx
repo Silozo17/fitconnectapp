@@ -232,26 +232,26 @@ const CoachNutritionBuilder = () => {
     >
       <FeatureGate feature="nutrition_plan_builder">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3 min-w-0">
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0">
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <div>
-              <h1 className="font-display text-2xl font-bold text-foreground">
+            <div className="min-w-0">
+              <h1 className="font-display text-xl sm:text-2xl font-bold text-foreground truncate">
                 {isEditing ? t("nutritionBuilder.editTitle") : t("nutritionBuilder.pageTitle")}
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-sm text-muted-foreground truncate">
                 {isEditing ? t("nutritionBuilder.editDescription") : t("nutritionBuilder.pageDescription")}
               </p>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2 sm:gap-3">
-            <Button variant="outline" onClick={() => setCreateFoodOpen(true)} size="sm" className="px-2 sm:px-4">
+          <div className="flex gap-2 shrink-0">
+            <Button variant="outline" onClick={() => setCreateFoodOpen(true)} size="sm" className="flex-1 sm:flex-none">
               <Plus className="h-4 w-4 sm:mr-2" />
               <span className="hidden sm:inline">{t("nutritionBuilder.addCustomFood")}</span>
             </Button>
-            <Button onClick={handleSave} disabled={isSaving} size="sm" className="px-2 sm:px-4">
+            <Button onClick={handleSave} disabled={isSaving} size="sm" className="flex-1 sm:flex-none">
               <Save className="h-4 w-4 sm:mr-2" />
               <span className="hidden sm:inline">{isSaving ? t("nutritionBuilder.saving") : isEditing ? t("nutritionBuilder.updatePlan") : t("nutritionBuilder.savePlan")}</span>
             </Button>
@@ -295,15 +295,15 @@ const CoachNutritionBuilder = () => {
         </div>
 
         {/* Macro Targets */}
-        <div className="glass-card p-4 mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="flex items-center gap-2 flex-1">
-              <Target className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold text-foreground">{t("nutritionBuilder.dailyMacroTargets")}</h3>
+        <div className="glass-card p-4 mb-6 overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+            <div className="flex items-center gap-2 min-w-0">
+              <Target className="h-5 w-5 text-primary shrink-0" />
+              <h3 className="font-semibold text-foreground truncate">{t("nutritionBuilder.dailyMacroTargets")}</h3>
             </div>
-            <div className="flex items-center gap-2">
-              {canUseAI && <AIMacroCalculator onMacrosCalculated={handleMacrosCalculated} />}
-              {canUseAI && (
+            {canUseAI && (
+              <div className="flex items-center gap-2 sm:ml-auto shrink-0">
+                <AIMacroCalculator onMacrosCalculated={handleMacrosCalculated} />
                 <Button 
                   variant="outline" 
                   size="sm" 
@@ -311,14 +311,14 @@ const CoachNutritionBuilder = () => {
                   className="gap-2"
                 >
                   <Sparkles className="h-4 w-4" />
-                  {t("nutritionBuilder.aiGenerate")}
+                  <span className="hidden xs:inline">{t("nutritionBuilder.aiGenerate")}</span>
                 </Button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="space-y-2">
-              <Label className="text-primary">{t("nutritionBuilder.calories")}</Label>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-primary text-sm">{t("nutritionBuilder.calories")}</Label>
               <Input
                 type="number"
                 value={targetCalories}
@@ -326,8 +326,8 @@ const CoachNutritionBuilder = () => {
                 className="bg-background border-border"
               />
             </div>
-            <div className="space-y-2">
-              <Label className="text-red-400">{t("nutritionBuilder.proteinG")}</Label>
+            <div className="space-y-1.5">
+              <Label className="text-red-400 text-sm">{t("nutritionBuilder.proteinG")}</Label>
               <Input
                 type="number"
                 value={targetProtein}
@@ -335,8 +335,8 @@ const CoachNutritionBuilder = () => {
                 className="bg-background border-border"
               />
             </div>
-            <div className="space-y-2">
-              <Label className="text-yellow-400">{t("nutritionBuilder.carbsG")}</Label>
+            <div className="space-y-1.5">
+              <Label className="text-yellow-400 text-sm">{t("nutritionBuilder.carbsG")}</Label>
               <Input
                 type="number"
                 value={targetCarbs}
@@ -344,8 +344,8 @@ const CoachNutritionBuilder = () => {
                 className="bg-background border-border"
               />
             </div>
-            <div className="space-y-2">
-              <Label className="text-blue-400">{t("nutritionBuilder.fatG")}</Label>
+            <div className="space-y-1.5">
+              <Label className="text-blue-400 text-sm">{t("nutritionBuilder.fatG")}</Label>
               <Input
                 type="number"
                 value={targetFat}
@@ -357,27 +357,30 @@ const CoachNutritionBuilder = () => {
         </div>
 
         {/* Day Selector */}
-        <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
-          {days.map((day, index) => (
-            <Button
-              key={day.id}
-              variant={selectedDayIndex === index ? "default" : "outline"}
-              onClick={() => setSelectedDayIndex(index)}
-              className="shrink-0"
-            >
-              {day.name}
+        <div className="w-full min-w-0 mb-6">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+            {days.map((day, index) => (
+              <Button
+                key={day.id}
+                variant={selectedDayIndex === index ? "default" : "outline"}
+                onClick={() => setSelectedDayIndex(index)}
+                size="sm"
+                className="shrink-0"
+              >
+                {day.name}
+              </Button>
+            ))}
+            <Button variant="outline" onClick={addDay} size="sm" className="shrink-0">
+              <Plus className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">{t("nutritionBuilder.addDay")}</span>
             </Button>
-          ))}
-          <Button variant="outline" onClick={addDay} className="shrink-0">
-            <Plus className="h-4 w-4 mr-2" />
-            {t("nutritionBuilder.addDay")}
-          </Button>
+          </div>
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-hidden">
           {/* Food Library */}
-          <div className="lg:col-span-1 h-[600px]">
+          <div className="lg:col-span-1 h-[400px] lg:h-[600px]">
             <FoodLibrary onAddFood={(food) => addFoodToMeal(food, 0)} />
           </div>
 
