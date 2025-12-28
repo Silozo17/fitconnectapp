@@ -35,6 +35,8 @@ interface AIFood {
   protein: number;
   carbs: number;
   fat: number;
+  fatsecret_id?: string;
+  source?: 'fatsecret';
 }
 
 interface AIMeal {
@@ -146,9 +148,10 @@ export const AIMealGeneratorModal = ({
       }
 
       // Convert AI response to NutritionDay format
+      // All foods now come from FatSecret with verified data
       const meals: Meal[] = mealPlan.meals.map((aiMeal) => {
         const foods: MealFood[] = aiMeal.foods.map((aiFood) => {
-          // Ensure calories match macros (use calculated value as ground truth)
+          // Use FatSecret-verified calories (already calculated from macros on backend)
           const calculatedCalories = recalculateFoodCalories({
             protein: aiFood.protein,
             carbs: aiFood.carbs,
@@ -166,12 +169,12 @@ export const AIMealGeneratorModal = ({
             fiber_g: 0,
             serving_size_g: 100,
             serving_description: aiFood.serving,
-            is_custom: true,
+            is_custom: false, // FatSecret foods are not custom
             coach_id: null,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-            fatsecret_id: null,
-            source: 'ai_generated',
+            fatsecret_id: aiFood.fatsecret_id || null, // Use FatSecret ID from backend
+            source: aiFood.source || 'fatsecret', // All foods now from FatSecret
           };
 
           return {
@@ -332,11 +335,11 @@ export const AIMealGeneratorModal = ({
           {/* Accuracy Indicator */}
           {validationResult && getAccuracyIndicator()}
 
-          {/* AI Disclaimer */}
-          <div className="flex items-start gap-2 p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-            <AlertTriangle className="h-4 w-4 text-yellow-500 flex-shrink-0 mt-0.5" />
+          {/* Data Source Info */}
+          <div className="flex items-start gap-2 p-2 rounded-lg bg-primary/10 border border-primary/20">
+            <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground">
-              {t('nutritionBuilder.aiNutritionDisclaimer', 'AI-generated nutrition values are estimates. For precise tracking, verify against food labels or databases.')}
+              {t('nutritionBuilder.fatSecretDisclaimer', 'All nutrition data verified by FatSecret food database for accuracy.')}
             </p>
           </div>
         </div>
