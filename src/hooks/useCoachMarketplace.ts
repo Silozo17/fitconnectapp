@@ -175,6 +175,12 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
           threads_url: row.threads_url,
           linkedin_url: row.linkedin_url,
           youtube_url: row.youtube_url,
+          // Map avatar data from RPC flat fields to nested avatars object
+          avatars: row.avatar_slug ? {
+            slug: row.avatar_slug,
+            rarity: row.avatar_rarity,
+            image_url: null
+          } : null,
           // Computed fields from RPC
           is_sponsored: row.is_sponsored,
           visibility_score: row.visibility_score,
