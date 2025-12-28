@@ -5,59 +5,88 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Token cache to avoid unnecessary OAuth calls
-let cachedToken: { token: string; expiresAt: number } | null = null;
+const API_URL = 'https://platform.fatsecret.com/rest/server.api';
 
-async function getAccessToken(): Promise<string> {
-  // Check if we have a valid cached token
-  if (cachedToken && cachedToken.expiresAt > Date.now()) {
-    console.log('Using cached FatSecret access token');
-    return cachedToken.token;
-  }
+// OAuth 1.0 HMAC-SHA1 signature generation
+async function hmacSha1(key: string, message: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(key);
+  const messageData = encoder.encode(message);
+  
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    keyData,
+    { name: 'HMAC', hash: 'SHA-1' },
+    false,
+    ['sign']
+  );
+  
+  const signature = await crypto.subtle.sign('HMAC', cryptoKey, messageData);
+  return btoa(String.fromCharCode(...new Uint8Array(signature)));
+}
 
-  const clientId = Deno.env.get('FATSECRET_CLIENT_ID');
-  const clientSecret = Deno.env.get('FATSECRET_CLIENT_SECRET');
+// RFC 3986 percent encoding (required for OAuth 1.0)
+function percentEncode(str: string): string {
+  return encodeURIComponent(str)
+    .replace(/!/g, '%21')
+    .replace(/\*/g, '%2A')
+    .replace(/'/g, '%27')
+    .replace(/\(/g, '%28')
+    .replace(/\)/g, '%29');
+}
 
-  if (!clientId || !clientSecret) {
+// Generate OAuth 1.0 signed request
+async function generateOAuthParams(
+  method: string,
+  url: string,
+  params: Record<string, string>
+): Promise<Record<string, string>> {
+  const consumerKey = Deno.env.get('FATSECRET_CLIENT_ID');
+  const consumerSecret = Deno.env.get('FATSECRET_CLIENT_SECRET');
+
+  if (!consumerKey || !consumerSecret) {
     throw new Error('FatSecret API credentials not configured');
   }
 
-  console.log('Fetching new FatSecret access token...');
-
-  const response = await fetch('https://oauth.fatsecret.com/connect/token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: new URLSearchParams({
-      grant_type: 'client_credentials',
-      client_id: clientId,
-      client_secret: clientSecret,
-      scope: 'basic',
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('FatSecret OAuth error:', errorText);
-    throw new Error(`FatSecret OAuth failed: ${response.status}`);
-  }
-
-  const data = await response.json();
-  
-  // Cache the token (expires_in is in seconds, subtract 60s buffer)
-  cachedToken = {
-    token: data.access_token,
-    expiresAt: Date.now() + (data.expires_in - 60) * 1000,
+  // OAuth 1.0 parameters
+  const oauthParams: Record<string, string> = {
+    oauth_consumer_key: consumerKey,
+    oauth_signature_method: 'HMAC-SHA1',
+    oauth_timestamp: Math.floor(Date.now() / 1000).toString(),
+    oauth_nonce: crypto.randomUUID().replace(/-/g, ''),
+    oauth_version: '1.0',
   };
 
-  console.log('FatSecret access token obtained successfully');
-  return data.access_token;
+  // Combine all params for signature
+  const allParams = { ...params, ...oauthParams };
+
+  // Sort and encode params for signature base string
+  const sortedParams = Object.keys(allParams)
+    .sort()
+    .map(key => `${percentEncode(key)}=${percentEncode(allParams[key])}`)
+    .join('&');
+
+  // Create signature base string: METHOD&URL&PARAMS
+  const signatureBaseString = `${method}&${percentEncode(url)}&${percentEncode(sortedParams)}`;
+  
+  console.log('Signature base string (first 200 chars):', signatureBaseString.substring(0, 200));
+
+  // Signing key for 2-legged OAuth (no access token): consumerSecret&
+  const signingKey = `${percentEncode(consumerSecret)}&`;
+
+  // Generate HMAC-SHA1 signature
+  const signature = await hmacSha1(signingKey, signatureBaseString);
+  
+  console.log('Generated OAuth signature');
+
+  return {
+    ...allParams,
+    oauth_signature: signature,
+  };
 }
 
 // v1 API returns food_description as text like:
 // "Per 100g - Calories: 52kcal | Fat: 0.17g | Carbs: 13.81g | Protein: 0.26g"
-// "Per 1 medium - Calories: 95kcal | Fat: 0.31g | Carbs: 25.13g | Protein: 0.47g"
 interface FatSecretFoodV1 {
   food_id: string;
   food_name: string;
@@ -89,19 +118,14 @@ function parseDescription(description: string): {
   isPer100g: boolean;
 } | null {
   try {
-    // Format: "Per 100g - Calories: 52kcal | Fat: 0.17g | Carbs: 13.81g | Protein: 0.26g"
-    // Or: "Per 1 medium - Calories: 95kcal | Fat: 0.31g | Carbs: 25.13g | Protein: 0.47g"
-    
     const parts = description.split(' - ');
     if (parts.length < 2) return null;
     
-    const servingPart = parts[0]; // "Per 100g" or "Per 1 medium"
-    const nutritionPart = parts.slice(1).join(' - '); // The rest
+    const servingPart = parts[0];
+    const nutritionPart = parts.slice(1).join(' - ');
     
-    // Check if this is per 100g
     const isPer100g = /per\s+100\s*g/i.test(servingPart);
     
-    // Extract values using regex
     const caloriesMatch = nutritionPart.match(/Calories:\s*([\d.]+)\s*kcal/i);
     const fatMatch = nutritionPart.match(/Fat:\s*([\d.]+)\s*g/i);
     const carbsMatch = nutritionPart.match(/Carbs:\s*([\d.]+)\s*g/i);
@@ -129,9 +153,6 @@ function normalizeFood(food: FatSecretFoodV1): NormalizedFood | null {
       return null;
     }
 
-    // For v1 API, we get values per serving. 
-    // If it's per 100g, use directly. Otherwise, we keep the per-serving values
-    // but note that we can't normalize without knowing the serving weight
     const { calories, fat, carbs, protein, isPer100g, servingPart } = parsed;
 
     return {
@@ -139,12 +160,12 @@ function normalizeFood(food: FatSecretFoodV1): NormalizedFood | null {
       name: food.food_name,
       brand_name: food.brand_name || null,
       serving_description: servingPart.replace(/^Per\s+/i, ''),
-      serving_size_g: isPer100g ? 100 : 0, // 0 means "per serving, unknown grams"
-      calories_per_100g: isPer100g ? calories : calories, // Store as-is for now
+      serving_size_g: isPer100g ? 100 : 0,
+      calories_per_100g: isPer100g ? calories : calories,
       protein_g: protein,
       carbs_g: carbs,
       fat_g: fat,
-      fiber_g: 0, // v1 API doesn't include fiber in description
+      fiber_g: 0,
     };
   } catch (error) {
     console.error('Error normalizing food:', food.food_name, error);
@@ -153,7 +174,6 @@ function normalizeFood(food: FatSecretFoodV1): NormalizedFood | null {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -168,43 +188,49 @@ serve(async (req) => {
       );
     }
 
-    console.log(`FatSecret search: "${query}" (max ${maxResults} results)`);
+    console.log(`FatSecret OAuth 1.0 search: "${query}" (max ${maxResults} results)`);
 
-    const accessToken = await getAccessToken();
+    // API parameters (without OAuth)
+    const apiParams = {
+      method: 'foods.search',
+      search_expression: query,
+      format: 'json',
+      max_results: String(maxResults),
+    };
 
-    // Call FatSecret foods.search API (v1 - basic scope) using POST with form-encoded body
-    const searchResponse = await fetch('https://platform.fatsecret.com/rest/server.api', {
+    // Generate OAuth 1.0 signed params
+    const signedParams = await generateOAuthParams('POST', API_URL, apiParams);
+
+    // Make the API call with all params in body
+    const searchResponse = await fetch(API_URL, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: new URLSearchParams({
-        method: 'foods.search',
-        search_expression: query,
-        format: 'json',
-        max_results: String(maxResults),
-      }),
+      body: new URLSearchParams(signedParams),
     });
 
+    const responseText = await searchResponse.text();
+    console.log('FatSecret raw response:', responseText.substring(0, 500));
+
     if (!searchResponse.ok) {
-      const errorText = await searchResponse.text();
-      console.error('FatSecret search error:', errorText);
+      console.error('FatSecret search error:', responseText);
       throw new Error(`FatSecret search failed: ${searchResponse.status}`);
     }
 
-    const searchData = await searchResponse.json();
+    const searchData = JSON.parse(responseText);
     
-    // Log raw response for debugging
-    console.log('FatSecret raw response:', JSON.stringify(searchData).substring(0, 500));
+    // Check for API errors
+    if (searchData.error) {
+      console.error('FatSecret API error:', searchData.error);
+      throw new Error(`FatSecret API error: ${searchData.error.message || JSON.stringify(searchData.error)}`);
+    }
     
-    // v1 API response structure: { foods: { food: [...] } }
     const foodsRaw = searchData.foods?.food || [];
     console.log('Foods found:', Array.isArray(foodsRaw) ? foodsRaw.length : (foodsRaw ? 1 : 0));
     
     const foodsArray = Array.isArray(foodsRaw) ? foodsRaw : (foodsRaw ? [foodsRaw] : []);
 
-    // Normalize foods to our format
     const foods: NormalizedFood[] = foodsArray
       .map(normalizeFood)
       .filter((f): f is NormalizedFood => f !== null);
