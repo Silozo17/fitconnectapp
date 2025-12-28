@@ -2,6 +2,10 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getErrorMessage } from '@/lib/error-utils';
+import { 
+  validateMacroCalorieMatch, 
+  calculateCaloriesFromMacros 
+} from '@/lib/fitness-calculations';
 
 // Types for AI responses
 export interface WorkoutPlan {
@@ -75,6 +79,12 @@ export interface MacroCalculation {
     proteinPerMeal: number;
     carbsPerMeal: number;
     fatPerMeal: number;
+  };
+  // Validation metadata
+  _validation?: {
+    isServerCalculated: boolean;
+    caloriesFromMacros: number;
+    isValid: boolean;
   };
 }
 
@@ -209,6 +219,26 @@ export const useAIFoodSubstitutions = () => {
       if (fnError) throw fnError;
       if (data?.error) throw new Error(data.error);
 
+      // Validate food substitution macros
+      if (data?.substitutions) {
+        data.substitutions = data.substitutions.map((sub: FoodSubstitution) => {
+          if (sub.macros) {
+            // Recalculate calories from macros as ground truth
+            const calculatedCals = 
+              (sub.macros.protein * 4) + 
+              (sub.macros.carbs * 4) + 
+              (sub.macros.fat * 9);
+            
+            // If stated calories differ significantly, use calculated
+            if (Math.abs(calculatedCals - sub.macros.calories) > 20) {
+              console.warn(`Food substitution ${sub.name}: adjusting calories from ${sub.macros.calories} to ${calculatedCals}`);
+              sub.macros.calories = Math.round(calculatedCals);
+            }
+          }
+          return sub;
+        });
+      }
+
       return data || null;
     } catch (err: unknown) {
       const message = getErrorMessage(err, 'Failed to find substitutions');
@@ -248,7 +278,35 @@ export const useAIMacroCalculator = () => {
       if (fnError) throw fnError;
       if (data?.error) throw new Error(data.error);
 
-      return data || null;
+      if (!data) return null;
+
+      // VALIDATION: Ensure macros add up correctly
+      // The backend now calculates these server-side, but we double-check
+      if (data.macros) {
+        const validation = validateMacroCalorieMatch(data.targetCalories, {
+          protein: data.macros.protein,
+          carbs: data.macros.carbs,
+          fat: data.macros.fat,
+          fiber: data.macros.fiber || 0,
+        });
+
+        if (!validation.isValid) {
+          console.warn('Macro validation warning:', {
+            target: data.targetCalories,
+            calculated: validation.actualCalories,
+            difference: validation.difference,
+          });
+        }
+
+        // Add validation metadata
+        data._validation = {
+          isServerCalculated: true,
+          caloriesFromMacros: validation.actualCalories,
+          isValid: validation.isValid,
+        };
+      }
+
+      return data;
     } catch (err: unknown) {
       const message = getErrorMessage(err, 'Failed to calculate macros');
       setError(message);

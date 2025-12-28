@@ -5,6 +5,118 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// =====================================
+// DETERMINISTIC CALCULATION FUNCTIONS
+// AI MUST NOT perform these calculations
+// =====================================
+
+type Gender = 'male' | 'female';
+type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
+type Goal = 'lose_weight' | 'maintain' | 'build_muscle' | 'body_recomp';
+type DietaryPreference = 'balanced' | 'high_protein' | 'low_carb' | 'keto' | 'vegan';
+
+const ACTIVITY_MULTIPLIERS: Record<ActivityLevel, number> = {
+  sedentary: 1.2,
+  light: 1.375,
+  moderate: 1.55,
+  active: 1.725,
+  very_active: 1.9,
+};
+
+const GOAL_ADJUSTMENTS: Record<Goal, number> = {
+  lose_weight: -500,
+  maintain: 0,
+  build_muscle: 300,
+  body_recomp: -100,
+};
+
+function calculateBMR(weightKg: number, heightCm: number, age: number, gender: Gender): number {
+  const base = (10 * weightKg) + (6.25 * heightCm) - (5 * age);
+  const adjustment = gender === 'male' ? 5 : -161;
+  return Math.round(base + adjustment);
+}
+
+function calculateTDEE(bmr: number, activityLevel: ActivityLevel): number {
+  const multiplier = ACTIVITY_MULTIPLIERS[activityLevel];
+  return Math.round(bmr * multiplier);
+}
+
+function calculateTargetCalories(tdee: number, goal: Goal): number {
+  const adjustment = GOAL_ADJUSTMENTS[goal];
+  return Math.max(1200, Math.round(tdee + adjustment));
+}
+
+function calculateMacros(
+  targetCalories: number,
+  weightKg: number,
+  goal: Goal,
+  dietaryPreference: DietaryPreference
+): { protein: number; carbs: number; fat: number; fiber: number } {
+  let proteinRatio: number;
+  let fatRatio: number;
+  let carbRatio: number;
+
+  switch (dietaryPreference) {
+    case 'high_protein':
+      proteinRatio = 0.35;
+      fatRatio = 0.30;
+      carbRatio = 0.35;
+      break;
+    case 'low_carb':
+      proteinRatio = 0.30;
+      fatRatio = 0.40;
+      carbRatio = 0.30;
+      break;
+    case 'keto':
+      proteinRatio = 0.25;
+      fatRatio = 0.70;
+      carbRatio = 0.05;
+      break;
+    case 'vegan':
+    case 'balanced':
+    default:
+      proteinRatio = 0.25;
+      fatRatio = 0.30;
+      carbRatio = 0.45;
+      break;
+  }
+
+  // Adjust protein for muscle building goals
+  if (goal === 'build_muscle' || goal === 'body_recomp') {
+    const minProteinGrams = Math.round(weightKg * 1.8);
+    const proteinFromRatio = Math.round((targetCalories * proteinRatio) / 4);
+    
+    if (proteinFromRatio < minProteinGrams) {
+      const proteinCalories = minProteinGrams * 4;
+      proteinRatio = proteinCalories / targetCalories;
+      const remaining = 1 - proteinRatio;
+      const originalFatCarb = fatRatio + carbRatio;
+      fatRatio = (fatRatio / originalFatCarb) * remaining;
+      carbRatio = remaining - fatRatio;
+    }
+  }
+
+  const proteinGrams = Math.round((targetCalories * proteinRatio) / 4);
+  const carbsGrams = Math.round((targetCalories * carbRatio) / 4);
+  const fatGrams = Math.round((targetCalories * fatRatio) / 9);
+  const fiberGrams = Math.round((targetCalories / 1000) * 14);
+
+  return { protein: proteinGrams, carbs: carbsGrams, fat: fatGrams, fiber: fiberGrams };
+}
+
+function calculatePercentages(macros: { protein: number; carbs: number; fat: number }) {
+  const totalCals = (macros.protein * 4) + (macros.carbs * 4) + (macros.fat * 9);
+  return {
+    protein: Math.round(((macros.protein * 4) / totalCals) * 100),
+    carbs: Math.round(((macros.carbs * 4) / totalCals) * 100),
+    fat: Math.round(((macros.fat * 9) / totalCals) * 100),
+  };
+}
+
+// =====================================
+// MAIN HANDLER
+// =====================================
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -16,37 +128,81 @@ serve(async (req) => {
       gender,
       weightKg,
       heightCm,
-      activityLevel, // 'sedentary', 'light', 'moderate', 'active', 'very_active'
-      goal, // 'lose_weight', 'maintain', 'build_muscle', 'body_recomp'
-      dietaryPreference, // 'balanced', 'high_protein', 'low_carb', 'keto', 'vegan'
+      activityLevel,
+      goal,
+      dietaryPreference,
     } = await req.json();
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
+    // Input validation
+    if (!age || !gender || !weightKg || !heightCm || !activityLevel || !goal) {
+      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    console.log('Calculating macros for:', { age, gender, weightKg, goal });
+    console.log('Calculating macros (server-side) for:', { age, gender, weightKg, goal });
 
-    const systemPrompt = `You are a sports nutritionist and registered dietitian. Calculate optimal macro targets based on scientific formulas (Mifflin-St Jeor, Harris-Benedict) and adjust for the user's specific goals. Provide practical, achievable targets with explanations.`;
+    // STEP 1: Calculate all values SERVER-SIDE (deterministic, verified formulas)
+    const bmr = calculateBMR(weightKg, heightCm, age, gender);
+    const tdee = calculateTDEE(bmr, activityLevel);
+    const targetCalories = calculateTargetCalories(tdee, goal);
+    const macros = calculateMacros(targetCalories, weightKg, goal, dietaryPreference || 'balanced');
+    const percentages = calculatePercentages(macros);
+    
+    // Calculate per-meal distribution (4 meals)
+    const mealsPerDay = 4;
+    const mealSuggestion = {
+      meals: mealsPerDay,
+      proteinPerMeal: Math.round(macros.protein / mealsPerDay),
+      carbsPerMeal: Math.round(macros.carbs / mealsPerDay),
+      fatPerMeal: Math.round(macros.fat / mealsPerDay),
+    };
 
-    const userPrompt = `Calculate optimal daily macros for:
+    console.log('Server calculated:', { bmr, tdee, targetCalories, macros });
 
-Age: ${age} years
-Gender: ${gender}
-Weight: ${weightKg} kg
-Height: ${heightCm} cm
-Activity Level: ${activityLevel}
-Goal: ${goal}
-Dietary Preference: ${dietaryPreference}
+    // STEP 2: Get AI to generate ONLY explanation and tips (no calculations)
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      // Return calculated values without AI explanation
+      return new Response(JSON.stringify({
+        bmr,
+        tdee,
+        targetCalories,
+        macros,
+        percentages,
+        mealSuggestion,
+        explanation: `Based on your profile, your Basal Metabolic Rate (BMR) is ${bmr} calories. With your ${activityLevel} activity level, your Total Daily Energy Expenditure (TDEE) is ${tdee} calories. For your goal of ${goal.replace('_', ' ')}, your target is ${targetCalories} calories per day.`,
+        tips: [
+          'Spread protein intake across all meals for optimal absorption',
+          'Drink plenty of water throughout the day',
+          'Track your intake for the first few weeks to build awareness',
+          'Adjust based on your progress after 2-3 weeks',
+        ],
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const systemPrompt = `You are a sports nutritionist. You will receive pre-calculated macro targets. Your job is ONLY to:
+1. Explain WHY these targets make sense for the user
+2. Provide practical tips for hitting these targets
+
+DO NOT recalculate or change any numbers. The calculations are already done correctly.`;
+
+    const userPrompt = `Here are the calculated macro targets for a ${age}-year-old ${gender} weighing ${weightKg}kg, height ${heightCm}cm, with ${activityLevel} activity, goal: ${goal}, preference: ${dietaryPreference || 'balanced'}:
+
+- BMR: ${bmr} calories
+- TDEE: ${tdee} calories  
+- Target: ${targetCalories} calories/day
+- Protein: ${macros.protein}g (${percentages.protein}%)
+- Carbs: ${macros.carbs}g (${percentages.carbs}%)
+- Fat: ${macros.fat}g (${percentages.fat}%)
+- Fiber: ${macros.fiber}g
 
 Provide:
-1. BMR calculation
-2. TDEE calculation
-3. Recommended calorie target
-4. Macro split (protein, carbs, fat in grams)
-5. Explanation of the recommendations
-6. Tips for hitting these targets`;
+1. A brief explanation of why these targets are appropriate for this person's goals
+2. 4-5 practical tips for hitting these macro targets daily`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -63,53 +219,26 @@ Provide:
         tools: [{
           type: 'function',
           function: {
-            name: 'calculate_macros',
-            description: 'Calculate and recommend daily macros',
+            name: 'provide_explanation',
+            description: 'Provide explanation and tips for the calculated macros',
             parameters: {
               type: 'object',
               properties: {
-                bmr: { type: 'number', description: 'Basal Metabolic Rate' },
-                tdee: { type: 'number', description: 'Total Daily Energy Expenditure' },
-                targetCalories: { type: 'number', description: 'Recommended daily calories' },
-                macros: {
-                  type: 'object',
-                  properties: {
-                    protein: { type: 'number', description: 'Grams of protein' },
-                    carbs: { type: 'number', description: 'Grams of carbohydrates' },
-                    fat: { type: 'number', description: 'Grams of fat' },
-                    fiber: { type: 'number', description: 'Recommended fiber intake' },
-                  },
-                  required: ['protein', 'carbs', 'fat'],
+                explanation: { 
+                  type: 'string', 
+                  description: 'Explanation of why these targets are appropriate' 
                 },
-                percentages: {
-                  type: 'object',
-                  properties: {
-                    protein: { type: 'number' },
-                    carbs: { type: 'number' },
-                    fat: { type: 'number' },
-                  },
-                },
-                explanation: { type: 'string', description: 'Why these targets are recommended' },
                 tips: {
                   type: 'array',
                   items: { type: 'string' },
                   description: 'Practical tips for hitting these targets',
                 },
-                mealSuggestion: {
-                  type: 'object',
-                  properties: {
-                    meals: { type: 'number', description: 'Recommended meals per day' },
-                    proteinPerMeal: { type: 'number' },
-                    carbsPerMeal: { type: 'number' },
-                    fatPerMeal: { type: 'number' },
-                  },
-                },
               },
-              required: ['bmr', 'tdee', 'targetCalories', 'macros', 'explanation'],
+              required: ['explanation', 'tips'],
             },
           },
         }],
-        tool_choice: { type: 'function', function: { name: 'calculate_macros' } },
+        tool_choice: { type: 'function', function: { name: 'provide_explanation' } },
       }),
     });
 
@@ -130,24 +259,51 @@ Provide:
         });
       }
       
-      throw new Error(`AI gateway error: ${response.status}`);
+      // Return calculated values without AI explanation
+      return new Response(JSON.stringify({
+        bmr,
+        tdee,
+        targetCalories,
+        macros,
+        percentages,
+        mealSuggestion,
+        explanation: `Your calculated targets are: BMR ${bmr} cal, TDEE ${tdee} cal, Target ${targetCalories} cal.`,
+        tips: ['Track your intake consistently', 'Adjust after 2-3 weeks based on progress'],
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const data = await response.json();
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
     
+    let explanation = `Your Basal Metabolic Rate (BMR) is ${bmr} calories. With your activity level, your TDEE is ${tdee} calories. Target: ${targetCalories} calories for ${goal.replace('_', ' ')}.`;
+    let tips = ['Track your intake consistently', 'Spread protein across meals', 'Stay hydrated'];
+
     if (toolCall?.function?.arguments) {
-      const macroCalculation = JSON.parse(toolCall.function.arguments);
-      console.log('Calculated macros:', macroCalculation.targetCalories, 'calories');
-      return new Response(JSON.stringify(macroCalculation), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      try {
+        const aiResponse = JSON.parse(toolCall.function.arguments);
+        explanation = aiResponse.explanation || explanation;
+        tips = aiResponse.tips || tips;
+      } catch (e) {
+        console.error('Failed to parse AI response:', e);
+      }
     }
 
-    const content = data.choices?.[0]?.message?.content;
-    return new Response(JSON.stringify({ content }), {
+    // IMPORTANT: Return SERVER-CALCULATED values, not AI values
+    return new Response(JSON.stringify({
+      bmr,
+      tdee,
+      targetCalories,
+      macros,
+      percentages,
+      mealSuggestion,
+      explanation,
+      tips,
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
+
   } catch (error) {
     console.error('Error in ai-macro-calculator:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';

@@ -5,6 +5,110 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// =====================================
+// VALIDATION FUNCTIONS
+// Ensure AI-generated meal data is correct
+// =====================================
+
+interface AIFood {
+  name: string;
+  serving: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+interface AIMeal {
+  name: string;
+  time: string;
+  foods: AIFood[];
+}
+
+interface AIMealPlan {
+  meals: AIMeal[];
+}
+
+/**
+ * Recalculate calories from macros (ground truth)
+ */
+function recalculateCalories(protein: number, carbs: number, fat: number): number {
+  return Math.round((protein * 4) + (carbs * 4) + (fat * 9));
+}
+
+/**
+ * Validate and fix AI-generated meal plan
+ * - Ensures macro calories match stated calories
+ * - Logs warnings for significant discrepancies
+ */
+function validateAndFixMealPlan(
+  mealPlan: AIMealPlan,
+  targetCalories: number,
+  targetProtein: number,
+  targetCarbs: number,
+  targetFat: number
+): { mealPlan: AIMealPlan; warnings: string[]; totals: { calories: number; protein: number; carbs: number; fat: number } } {
+  const warnings: string[] = [];
+  let totalCalories = 0;
+  let totalProtein = 0;
+  let totalCarbs = 0;
+  let totalFat = 0;
+
+  // Fix each food item
+  const fixedMeals = mealPlan.meals.map((meal) => {
+    const fixedFoods = meal.foods.map((food) => {
+      // Recalculate calories from macros (this is the ground truth)
+      const calculatedCalories = recalculateCalories(food.protein, food.carbs, food.fat);
+      
+      // Check if AI's stated calories differ significantly
+      if (Math.abs(calculatedCalories - food.calories) > 20) {
+        warnings.push(`Fixed ${food.name}: stated ${food.calories} cal, actual ${calculatedCalories} cal from macros`);
+      }
+
+      // Use the calculated calories, not AI's stated value
+      const fixedFood: AIFood = {
+        ...food,
+        calories: calculatedCalories,
+        protein: Math.round(food.protein),
+        carbs: Math.round(food.carbs),
+        fat: Math.round(food.fat),
+      };
+
+      totalCalories += fixedFood.calories;
+      totalProtein += fixedFood.protein;
+      totalCarbs += fixedFood.carbs;
+      totalFat += fixedFood.fat;
+
+      return fixedFood;
+    });
+
+    return { ...meal, foods: fixedFoods };
+  });
+
+  // Check total discrepancy from targets
+  const calorieDiscrepancy = Math.abs(totalCalories - targetCalories);
+  const calorieDiscrepancyPercent = (calorieDiscrepancy / targetCalories) * 100;
+
+  if (calorieDiscrepancyPercent > 15) {
+    warnings.push(`Total calories (${totalCalories}) differ from target (${targetCalories}) by ${Math.round(calorieDiscrepancyPercent)}%`);
+  }
+
+  return {
+    mealPlan: { meals: fixedMeals },
+    warnings,
+    totals: {
+      calories: totalCalories,
+      protein: totalProtein,
+      carbs: totalCarbs,
+      fat: totalFat,
+    },
+  };
+}
+
+// =====================================
+// MAIN HANDLER
+// =====================================
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -22,16 +126,25 @@ serve(async (req) => {
     if (structured) {
       console.log('Generating structured meal plan for:', { targetCalories, targetProtein, targetCarbs, targetFat, preferences });
       
-      const systemPrompt = `You are a professional nutritionist. Create a practical meal plan that hits the given macro targets as closely as possible. Use common, readily available foods with realistic portion sizes.`;
+      // Include reminder to AI that macros must be accurate
+      const systemPrompt = `You are a professional nutritionist. Create a practical meal plan that hits the given macro targets.
 
-      const userPrompt = `Create a daily meal plan with these macro targets:
+CRITICAL RULES FOR MACROS:
+1. For each food, the calories MUST equal: (protein × 4) + (carbs × 4) + (fat × 9)
+2. All macros should be realistic for the food (e.g., chicken breast is ~31g protein per 100g, not 50g)
+3. Use common, readily available foods with standard nutrition values
+4. The total of all foods should approximately match the daily targets
+
+Be accurate with nutrition values - they will be validated.`;
+
+      const userPrompt = `Create a daily meal plan with these EXACT macro targets:
 - Calories: ${targetCalories} kcal
 - Protein: ${targetProtein}g  
 - Carbohydrates: ${targetCarbs}g
 - Fat: ${targetFat}g
 ${preferences ? `\nDietary preferences: ${preferences}` : ''}
 
-Provide 4-5 meals for the day that together hit these macro targets.`;
+Provide 4-5 meals. For each food, ensure calories = (protein × 4) + (carbs × 4) + (fat × 9).`;
 
       const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
         method: 'POST',
@@ -50,7 +163,7 @@ Provide 4-5 meals for the day that together hit these macro targets.`;
               type: "function",
               function: {
                 name: "create_meal_plan",
-                description: "Create a structured daily meal plan with foods and macros",
+                description: "Create a structured daily meal plan with foods and macros. Each food's calories must equal (protein×4)+(carbs×4)+(fat×9)",
                 parameters: {
                   type: "object",
                   properties: {
@@ -76,7 +189,7 @@ Provide 4-5 meals for the day that together hit these macro targets.`;
                               properties: {
                                 name: { type: "string", description: "Food name" },
                                 serving: { type: "string", description: "Serving size (e.g., 150g, 1 cup, 2 eggs)" },
-                                calories: { type: "number", description: "Calories for this serving" },
+                                calories: { type: "number", description: "Calories for this serving (must equal protein×4 + carbs×4 + fat×9)" },
                                 protein: { type: "number", description: "Protein in grams" },
                                 carbs: { type: "number", description: "Carbohydrates in grams" },
                                 fat: { type: "number", description: "Fat in grams" }
@@ -122,15 +235,37 @@ Provide 4-5 meals for the day that together hit these macro targets.`;
       }
 
       const data = await response.json();
-      console.log('AI response:', JSON.stringify(data, null, 2));
+      console.log('AI response received');
       
       // Extract the tool call result
       const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
       if (toolCall?.function?.arguments) {
         try {
-          const mealPlan = JSON.parse(toolCall.function.arguments);
-          console.log('Parsed meal plan:', JSON.stringify(mealPlan, null, 2));
-          return new Response(JSON.stringify({ mealPlan }), {
+          const rawMealPlan: AIMealPlan = JSON.parse(toolCall.function.arguments);
+          
+          // CRITICAL: Validate and fix the meal plan
+          const { mealPlan, warnings, totals } = validateAndFixMealPlan(
+            rawMealPlan,
+            targetCalories,
+            targetProtein,
+            targetCarbs,
+            targetFat
+          );
+          
+          // Log any issues found
+          if (warnings.length > 0) {
+            console.warn('Meal plan validation warnings:', warnings);
+          }
+          console.log('Meal plan totals:', totals, 'Targets:', { targetCalories, targetProtein, targetCarbs, targetFat });
+          
+          return new Response(JSON.stringify({ 
+            mealPlan,
+            validation: {
+              totals,
+              warnings,
+              isAccurate: warnings.length === 0,
+            }
+          }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
         } catch (parseError) {

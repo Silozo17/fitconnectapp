@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Sparkles, Loader2, ChefHat, Target } from 'lucide-react';
+import { Sparkles, Loader2, ChefHat, Target, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { NutritionDay, Meal, MealFood, Food } from '@/hooks/useFoods';
 import { useTranslation } from '@/hooks/useTranslation';
+import { recalculateFoodCalories } from '@/lib/fitness-calculations';
 
 interface AIMealGeneratorModalProps {
   open: boolean;
@@ -45,6 +46,17 @@ interface AIMealPlan {
   meals: AIMeal[];
 }
 
+interface ValidationResult {
+  totals: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  };
+  warnings: string[];
+  isAccurate: boolean;
+}
+
 export const AIMealGeneratorModal = ({
   open,
   onOpenChange,
@@ -69,7 +81,7 @@ export const AIMealGeneratorModal = ({
           targetCarbs,
           targetFat,
           preferences,
-          structured: true, // Request structured JSON response
+          structured: true,
         },
       });
 
@@ -78,27 +90,45 @@ export const AIMealGeneratorModal = ({
       }
 
       const mealPlan: AIMealPlan = response.data?.mealPlan;
+      const validation: ValidationResult | undefined = response.data?.validation;
       
       if (!mealPlan || !mealPlan.meals || mealPlan.meals.length === 0) {
         throw new Error('Invalid meal plan received from AI');
       }
 
+      // Show warning if validation found issues
+      if (validation && !validation.isAccurate) {
+        console.warn('AI meal plan had accuracy issues:', validation.warnings);
+        toast.warning(t('nutritionBuilder.aiMacrosAdjusted', 'Note: Some nutrition values were adjusted for accuracy'));
+      }
+
       // Convert AI response to NutritionDay format
+      // IMPORTANT: AI values are per-serving, not per-100g
       const meals: Meal[] = mealPlan.meals.map((aiMeal) => {
         const foods: MealFood[] = aiMeal.foods.map((aiFood) => {
+          // Ensure calories match macros (use calculated value as ground truth)
+          const calculatedCalories = recalculateFoodCalories({
+            protein: aiFood.protein,
+            carbs: aiFood.carbs,
+            fat: aiFood.fat,
+          });
+
           // Create a Food object from the AI response
-          // Use calories_per_100g and protein_g etc. to match the database schema
-          // We set 100g as serving size and use the AI values directly
+          // CRITICAL FIX: The values from AI are per-serving, not per-100g
+          // We set serving_size_g to 100 and use the values directly
+          // This means 1 serving = the AI's stated serving
           const food: Food = {
             id: crypto.randomUUID(),
             name: aiFood.name,
-            category_id: '', // Will be empty for AI-generated foods
-            calories_per_100g: aiFood.calories,
-            protein_g: aiFood.protein,
-            carbs_g: aiFood.carbs,
-            fat_g: aiFood.fat,
+            category_id: '',
+            // Store the per-serving values as if they were per-100g
+            // with serving_size_g = 100, so 1 serving = stated values
+            calories_per_100g: calculatedCalories, // Use calculated, not AI-stated
+            protein_g: Math.round(aiFood.protein * 10) / 10,
+            carbs_g: Math.round(aiFood.carbs * 10) / 10,
+            fat_g: Math.round(aiFood.fat * 10) / 10,
             fiber_g: 0,
-            serving_size_g: 100, // Treat AI values as per-serving
+            serving_size_g: 100, // 1 serving = 100g for calculation purposes
             serving_description: aiFood.serving,
             is_custom: true,
             coach_id: null,
@@ -109,7 +139,7 @@ export const AIMealGeneratorModal = ({
           return {
             id: crypto.randomUUID(),
             food,
-            servings: 1,
+            servings: 1, // 1 serving = the AI's stated serving
           };
         });
 
@@ -135,7 +165,6 @@ export const AIMealGeneratorModal = ({
     } catch (error) {
       console.error('AI meal plan generation error:', error);
       
-      // Handle specific error cases
       if (error instanceof Error) {
         if (error.message.includes('Rate limit')) {
           toast.error(t('nutritionBuilder.aiRateLimitError'));
@@ -214,6 +243,14 @@ export const AIMealGeneratorModal = ({
             <ChefHat className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
             <p className="text-sm text-muted-foreground">
               {t('nutritionBuilder.aiGenerateInfo')}
+            </p>
+          </div>
+
+          {/* AI Disclaimer */}
+          <div className="flex items-start gap-2 p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+            <AlertTriangle className="h-4 w-4 text-yellow-500 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground">
+              {t('nutritionBuilder.aiNutritionDisclaimer', 'AI-generated nutrition values are estimates. For precise tracking, verify against food labels or databases.')}
             </p>
           </div>
         </div>
