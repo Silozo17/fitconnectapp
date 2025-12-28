@@ -46,6 +46,7 @@ import { LanguageSelector } from "@/components/shared/LanguageSelector";
 import { AnimationSettingsCard } from "@/components/settings/AnimationSettingsCard";
 import { LocationAutocomplete } from "@/components/shared/LocationAutocomplete";
 import { LocationSelector } from "@/components/shared/LocationSelector";
+import { GymAutocomplete } from "@/components/shared/GymAutocomplete";
 import { useLocale } from "@/contexts/LocaleContext";
 import { getCurrencySymbol } from "@/lib/currency";
 import { NotificationPreferences } from "@/components/notifications/NotificationPreferences";
@@ -779,11 +780,16 @@ const CoachSettings = () => {
                       </div>
                       <div>
                         <Label>{t('marketplace.gymAffiliation')}</Label>
-                        <Input
+                        <GymAutocomplete
                           value={profile.gym_affiliation || ""}
-                          onChange={(e) => setProfile({ ...profile, gym_affiliation: e.target.value })}
-                          className="mt-1"
+                          onChange={(gymName) => setProfile({ ...profile, gym_affiliation: gymName })}
                           placeholder={t('marketplace.gymPlaceholder')}
+                          className="mt-1"
+                          locationBias={
+                            profile.location_lat && profile.location_lng
+                              ? { lat: profile.location_lat, lng: profile.location_lng }
+                              : null
+                          }
                         />
                         <p className="text-xs text-muted-foreground mt-1">
                           {t('marketplace.gymHint')}
