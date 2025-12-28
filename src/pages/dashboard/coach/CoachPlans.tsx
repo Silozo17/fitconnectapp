@@ -116,10 +116,16 @@ const CoachPlans = () => {
           <p className="text-muted-foreground">{t("plansPage.subtitle")}</p>
         </div>
         <div className="flex gap-3">
+          <Link to="/dashboard/coach/plans/nutrition/new">
+            <Button className="bg-emerald-600 text-white hover:bg-emerald-700">
+              <Apple className="w-4 h-4 mr-2" />
+              Create Meal Plan
+            </Button>
+          </Link>
           <Link to="/dashboard/coach/plans/new">
-            <Button className="bg-primary text-primary-foreground">
-              <Plus className="w-4 h-4 mr-2" />
-              {t("plansPage.createPlan")}
+            <Button variant="destructive">
+              <Dumbbell className="w-4 h-4 mr-2" />
+              Create Training Plan
             </Button>
           </Link>
         </div>
