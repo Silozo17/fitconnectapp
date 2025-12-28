@@ -17,6 +17,7 @@ export interface Avatar {
   is_active: boolean;
   is_challenge_exclusive?: boolean;
   challenge_id?: string | null;
+  gender: 'male' | 'female' | null;
 }
 
 export interface UserAvatar {
@@ -234,6 +235,7 @@ export function useCheckAvatarUnlocks() {
 
 // Mapping of slugs to exact filenames (handles special cases like HIIT, CrossFit)
 const AVATAR_FILENAMES: Record<string, string> = {
+  // Male avatars
   strongman_bear: 'Strongman_Bear',
   weightlifting_lion: 'Weightlifting_Lion',
   crossfit_wolf: 'CrossFit_Wolf',
@@ -253,6 +255,27 @@ const AVATAR_FILENAMES: Record<string, string> = {
   streetwear_gorilla_trainer: 'Streetwear_Gorilla_Trainer',
   meditative_android_monk: 'Meditative_Android_Monk',
   elite_personal_trainer_human: 'Elite_Personal_Trainer_Human',
+  // Female avatars
+  strongwoman_bear_female: 'strongwoman_bear_female',
+  weightlifting_tigress: 'weightlifting_tigress',
+  crossfit_wolf_female: 'crossfit_wolf_female',
+  sprinter_cheetah_female: 'sprinter_cheetah_female',
+  parkour_monkey_female: 'parkour_monkey_female',
+  hiit_fox_female: 'HIIT_fox_female',
+  martial_arts_crane_female: 'martial_arts_crane_female',
+  armoured_rhino_female: 'armoured_rhino_female',
+  bodybuilder_lioness: 'bodybuilder_lioness',
+  rogue_runner_cyborg_female: 'rogue_runner_cyborg_female',
+  yoga_wolf_female: 'yoga_wolf_female',
+  yoga_deer_female: 'yoga_deer_female',
+  boxer_dog_female: 'boxer_dog_female',
+  kickboxer_panther_female: 'kickboxer_panther_female',
+  powerlifting_gorilla_female: 'powerlifting_gorilla_female',
+  shaolin_tigress: 'shaolin_tigress',
+  streetwear_gorilla_trainer_female: 'streetwear_gorilla_trainer_female',
+  deadlift_boar_female: 'deadlift_boar_female',
+  meditative_android_monk_female: 'meditative_android_monk_female',
+  elite_personal_trainer_human_female: 'elite_personal_trainer_human_female',
 };
 
 // Get avatar image URL from storage

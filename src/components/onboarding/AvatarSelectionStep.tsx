@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Check, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { FREE_AVATARS, RARITY_CONFIG } from "@/lib/avatar-utils";
+import { getFreeAvatarsByGender, RARITY_CONFIG } from "@/lib/avatar-utils";
 import { getAvatarImageUrl } from "@/hooks/useAvatars";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
@@ -17,6 +17,7 @@ import {
 interface AvatarSelectionStepProps {
   selectedAvatarId: string | null;
   onSelect: (avatarId: string | null, avatarSlug: string) => void;
+  userGender?: string | null; // Gender from onboarding step
 }
 
 interface AvatarOption {
@@ -26,24 +27,29 @@ interface AvatarOption {
   imageUrl: string;
 }
 
-export function AvatarSelectionStep({ selectedAvatarId, onSelect }: AvatarSelectionStepProps) {
+export function AvatarSelectionStep({ selectedAvatarId, onSelect, userGender }: AvatarSelectionStepProps) {
   const { t } = useTranslation('common');
   const [avatars, setAvatars] = useState<AvatarOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
 
+  // Get gender-appropriate free avatars
+  const genderedFreeAvatars = getFreeAvatarsByGender(userGender ?? null);
+
   useEffect(() => {
     const fetchFreeAvatars = async () => {
+      const slugs = genderedFreeAvatars.map(a => a.slug);
+      
       const { data, error } = await supabase
         .from("avatars")
         .select("id, slug, name")
-        .in("slug", FREE_AVATARS.map(a => a.slug))
+        .in("slug", slugs)
         .eq("is_active", true);
 
       if (error) {
         console.error("Error fetching avatars:", error);
-        setAvatars(FREE_AVATARS.map(a => ({
+        setAvatars(genderedFreeAvatars.map(a => ({
           id: a.slug,
           slug: a.slug,
           name: a.name,
@@ -61,7 +67,7 @@ export function AvatarSelectionStep({ selectedAvatarId, onSelect }: AvatarSelect
     };
 
     fetchFreeAvatars();
-  }, []);
+  }, [userGender]); // Re-fetch when gender changes
 
   useEffect(() => {
     if (!api) return;

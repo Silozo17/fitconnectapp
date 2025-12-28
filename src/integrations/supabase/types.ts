@@ -236,6 +236,7 @@ export type Database = {
           challenge_id: string | null
           created_at: string | null
           description: string | null
+          gender: string | null
           id: string
           image_url: string | null
           is_active: boolean | null
@@ -252,6 +253,7 @@ export type Database = {
           challenge_id?: string | null
           created_at?: string | null
           description?: string | null
+          gender?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean | null
@@ -268,6 +270,7 @@ export type Database = {
           challenge_id?: string | null
           created_at?: string | null
           description?: string | null
+          gender?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean | null
