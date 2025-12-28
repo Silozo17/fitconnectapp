@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Plus, Loader2, Apple, BookmarkCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, Plus, Loader2, Apple, BookmarkCheck, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,7 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useFatSecretSearch, FatSecretFood } from '@/hooks/useFatSecretSearch';
 import { useSaveFood } from '@/hooks/useSaveFood';
-import { useFoods, Food } from '@/hooks/useFoods';
+import { useFoods, Food, useDeleteFood } from '@/hooks/useFoods';
 import { useDebounce } from '@/hooks/useDebounce';
 import { toast } from '@/hooks/use-toast';
 
@@ -39,11 +39,32 @@ export const FatSecretFoodLibrary: React.FC<FatSecretFoodLibraryProps> = ({
   } = useFoods(undefined, activeTab === 'saved' ? debouncedQuery : undefined);
 
   const saveFood = useSaveFood();
+  const deleteFood = useDeleteFood();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // Filter saved foods to only show FatSecret-sourced foods
   const fatSecretSavedFoods = savedFoods?.filter(f => 
     (f as any).source === 'fatsecret' || (f as any).fatsecret_id
   ) || [];
+
+  const handleRemoveSavedFood = async (food: Food) => {
+    setDeletingId(food.id);
+    try {
+      await deleteFood.mutateAsync(food.id);
+      toast({
+        title: 'Food removed',
+        description: `${food.name} has been removed from your saved foods`,
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to remove food. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const handleAddFromSearch = async (food: FatSecretFood) => {
     try {
@@ -155,6 +176,8 @@ export const FatSecretFoodLibrary: React.FC<FatSecretFoodLibraryProps> = ({
                     key={food.id}
                     food={food}
                     onAdd={() => handleAddFromSaved(food)}
+                    onRemove={() => handleRemoveSavedFood(food)}
+                    isRemoving={deletingId === food.id}
                   />
                 ))
               )}
@@ -223,9 +246,11 @@ const FoodSearchItem: React.FC<FoodSearchItemProps> = ({ food, onAdd, isLoading 
 interface SavedFoodItemProps {
   food: Food;
   onAdd: () => void;
+  onRemove: () => void;
+  isRemoving: boolean;
 }
 
-const SavedFoodItem: React.FC<SavedFoodItemProps> = ({ food, onAdd }) => {
+const SavedFoodItem: React.FC<SavedFoodItemProps> = ({ food, onAdd, onRemove, isRemoving }) => {
   return (
     <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors">
       <div className="flex-1 min-w-0">
@@ -242,14 +267,28 @@ const SavedFoodItem: React.FC<SavedFoodItemProps> = ({ food, onAdd }) => {
           </span>
         </div>
       </div>
-      <Button
-        size="sm"
-        variant="ghost"
-        onClick={onAdd}
-        className="ml-2 shrink-0"
-      >
-        <Plus className="h-4 w-4" />
-      </Button>
+      <div className="flex items-center gap-1 ml-2 shrink-0">
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={onRemove}
+          disabled={isRemoving}
+          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+        >
+          {isRemoving ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Trash2 className="h-4 w-4" />
+          )}
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={onAdd}
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 };
