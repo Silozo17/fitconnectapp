@@ -26,6 +26,7 @@ import { CoachQuickStats } from "@/components/coach/CoachQuickStats";
 import { CoachAboutSection } from "@/components/coach/CoachAboutSection";
 import { CoachSocialLinksDisplay } from "@/components/coach/CoachSocialLinksDisplay";
 import { CoachDigitalProductsSection } from "@/components/coach/CoachDigitalProductsSection";
+import { CoachQualificationsSection } from "@/components/coach/CoachQualificationsSection";
 
 const ClientCoachProfile = () => {
   const { coachSlug } = useParams<{ coachSlug: string }>();
@@ -134,6 +135,9 @@ const ClientCoachProfile = () => {
             bio={coach.bio}
             whoIWorkWith={coach.who_i_work_with}
           />
+
+          {/* Qualifications & Certifications */}
+          <CoachQualificationsSection coachId={coach.id} />
 
           {/* Social Media Links */}
           <CoachSocialLinksDisplay 

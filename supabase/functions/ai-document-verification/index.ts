@@ -358,7 +358,14 @@ serve(async (req) => {
       );
     }
 
+    // Get current date for accurate expiry calculations
+    const currentDate = new Date().toISOString().split('T')[0];
+    
     const systemPrompt = `You are an expert document verification analyst for a fitness coaching platform in the UK. Your task is to thoroughly analyze uploaded verification documents from coaches applying to be listed on the platform.
+
+## IMPORTANT: Current Date
+Today's date is: ${currentDate}
+Use this date to accurately determine if documents are expired or will expire within specific timeframes. Always calculate time differences from this date.
 
 ## Document Type Being Analyzed: ${rules.name}
 
@@ -389,6 +396,7 @@ ${rules.tips}
 6. Check against flag criteria - if ANY match, recommend REVIEW
 7. If document passes all checks and confidence is high (80%+), recommend APPROVE
 8. Be thorough but fair - coaches need these documents to work
+9. When calculating expiry timeframes, use today's date (${currentDate}) as the reference point
 
 Use the document_analysis function to provide your structured assessment.`;
 

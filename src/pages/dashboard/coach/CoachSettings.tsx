@@ -23,6 +23,7 @@ import {
   Users as UsersIcon,
   Link as LinkIcon,
   Apple,
+  Award,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -84,6 +85,7 @@ import { MarketplaceSection } from "@/components/coach/MarketplaceSection";
 import { ProfileCompletionProgress } from "@/components/coach/ProfileCompletionProgress";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import AppleCalendarConnectModal from "@/components/integrations/AppleCalendarConnectModal";
+import { CoachQualificationsManager } from "@/components/coach/CoachQualificationsManager";
 
 interface CoachProfile {
   display_name: string | null;
@@ -192,7 +194,7 @@ const CoachSettings = () => {
   
   // Read tab from URL params for deep linking (e.g., ?tab=verification or ?tab=subscription)
   const urlTab = searchParams.get("tab");
-  const validTabs = ["profile", "notifications", "preferences", "subscription", "invoice", "integrations", "verification", "security", "marketplace", "services", "account"];
+  const validTabs = ["profile", "notifications", "preferences", "subscription", "invoice", "integrations", "verification", "security", "marketplace", "services", "account", "qualifications"];
   const initialTab = urlTab && validTabs.includes(urlTab) ? urlTab : "profile";
   const [selectedTab, setSelectedTab] = useState(initialTab);
 
@@ -529,6 +531,7 @@ const CoachSettings = () => {
               {[
                 { id: "profile", icon: User, label: t('tabs.profile') },
                 { id: "marketplace", icon: Store, label: t('tabs.marketplace') },
+                { id: "qualifications", icon: Award, label: t('tabs.qualifications', 'Qualifications') },
                 { id: "services", icon: CreditCard, label: t('tabs.services') },
                 { id: "invoice", icon: Receipt, label: t('tabs.invoice') },
                 { id: "verification", icon: Shield, label: t('tabs.verification') },
@@ -1322,6 +1325,27 @@ const CoachSettings = () => {
                       <LogOut className="w-4 h-4 mr-2" />
                       {t('account.signOut')}
                     </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Qualifications Tab */}
+            {selectedTab === "qualifications" && (
+              <div className="space-y-6">
+                <CoachQualificationsManager />
+                
+                <Card className="bg-muted/50 border-muted">
+                  <CardContent className="pt-4">
+                    <div className="flex items-start gap-3">
+                      <Award className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+                      <div className="space-y-2">
+                        <h3 className="font-medium">{t('qualifications.verificationTip', 'Verification Tip')}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {t('qualifications.verificationTipDesc', 'To get your qualifications verified with a green checkmark, upload the relevant certification documents in the Verification tab. Once approved, your qualifications will automatically be marked as verified.')}
+                        </p>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
