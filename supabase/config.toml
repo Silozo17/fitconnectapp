@@ -230,3 +230,6 @@ verify_jwt = true
 
 [functions.fatsecret-batch-lookup]
 verify_jwt = true
+
+[functions.send-profile-completion-reminder]
+verify_jwt = false
