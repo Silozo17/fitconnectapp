@@ -55,30 +55,16 @@ async function getAccessToken(): Promise<string> {
   return data.access_token;
 }
 
-interface FatSecretServing {
-  serving_id: string;
-  serving_description: string;
-  serving_url?: string;
-  metric_serving_amount?: string;
-  metric_serving_unit?: string;
-  number_of_units?: string;
-  measurement_description?: string;
-  calories?: string;
-  carbohydrate?: string;
-  protein?: string;
-  fat?: string;
-  fiber?: string;
-}
-
-interface FatSecretFood {
+// v1 API returns food_description as text like:
+// "Per 100g - Calories: 52kcal | Fat: 0.17g | Carbs: 13.81g | Protein: 0.26g"
+// "Per 1 medium - Calories: 95kcal | Fat: 0.31g | Carbs: 25.13g | Protein: 0.47g"
+interface FatSecretFoodV1 {
   food_id: string;
   food_name: string;
   food_type: string;
   food_url?: string;
   brand_name?: string;
-  servings?: {
-    serving: FatSecretServing | FatSecretServing[];
-  };
+  food_description: string;
 }
 
 interface NormalizedFood {
@@ -94,53 +80,71 @@ interface NormalizedFood {
   fiber_g: number;
 }
 
-function normalizeFood(food: FatSecretFood): NormalizedFood | null {
+function parseDescription(description: string): { 
+  servingPart: string;
+  calories: number;
+  fat: number;
+  carbs: number;
+  protein: number;
+  isPer100g: boolean;
+} | null {
   try {
-    // Get the servings - could be single object or array
-    const servingsData = food.servings?.serving;
-    if (!servingsData) return null;
+    // Format: "Per 100g - Calories: 52kcal | Fat: 0.17g | Carbs: 13.81g | Protein: 0.26g"
+    // Or: "Per 1 medium - Calories: 95kcal | Fat: 0.31g | Carbs: 25.13g | Protein: 0.47g"
+    
+    const parts = description.split(' - ');
+    if (parts.length < 2) return null;
+    
+    const servingPart = parts[0]; // "Per 100g" or "Per 1 medium"
+    const nutritionPart = parts.slice(1).join(' - '); // The rest
+    
+    // Check if this is per 100g
+    const isPer100g = /per\s+100\s*g/i.test(servingPart);
+    
+    // Extract values using regex
+    const caloriesMatch = nutritionPart.match(/Calories:\s*([\d.]+)\s*kcal/i);
+    const fatMatch = nutritionPart.match(/Fat:\s*([\d.]+)\s*g/i);
+    const carbsMatch = nutritionPart.match(/Carbs:\s*([\d.]+)\s*g/i);
+    const proteinMatch = nutritionPart.match(/Protein:\s*([\d.]+)\s*g/i);
+    
+    return {
+      servingPart,
+      calories: caloriesMatch ? parseFloat(caloriesMatch[1]) : 0,
+      fat: fatMatch ? parseFloat(fatMatch[1]) : 0,
+      carbs: carbsMatch ? parseFloat(carbsMatch[1]) : 0,
+      protein: proteinMatch ? parseFloat(proteinMatch[1]) : 0,
+      isPer100g,
+    };
+  } catch (error) {
+    console.error('Error parsing description:', description, error);
+    return null;
+  }
+}
 
-    const servings = Array.isArray(servingsData) ? servingsData : [servingsData];
-    
-    // Prefer 100g serving, otherwise use the first available
-    let serving = servings.find(s => 
-      s.serving_description?.toLowerCase().includes('100 g') ||
-      s.serving_description?.toLowerCase() === '100g'
-    );
-    
-    if (!serving) {
-      serving = servings[0];
+function normalizeFood(food: FatSecretFoodV1): NormalizedFood | null {
+  try {
+    const parsed = parseDescription(food.food_description);
+    if (!parsed) {
+      console.log('Could not parse food description:', food.food_name, food.food_description);
+      return null;
     }
 
-    if (!serving) return null;
-
-    // Parse serving size in grams
-    let servingSizeG = 100;
-    if (serving.metric_serving_amount && serving.metric_serving_unit?.toLowerCase() === 'g') {
-      servingSizeG = parseFloat(serving.metric_serving_amount) || 100;
-    }
-
-    // Get nutritional values (per serving)
-    const calories = parseFloat(serving.calories || '0');
-    const protein = parseFloat(serving.protein || '0');
-    const carbs = parseFloat(serving.carbohydrate || '0');
-    const fat = parseFloat(serving.fat || '0');
-    const fiber = parseFloat(serving.fiber || '0');
-
-    // Normalize to per 100g
-    const multiplier = 100 / servingSizeG;
+    // For v1 API, we get values per serving. 
+    // If it's per 100g, use directly. Otherwise, we keep the per-serving values
+    // but note that we can't normalize without knowing the serving weight
+    const { calories, fat, carbs, protein, isPer100g, servingPart } = parsed;
 
     return {
       fatsecret_id: food.food_id,
       name: food.food_name,
       brand_name: food.brand_name || null,
-      serving_description: serving.serving_description || `${servingSizeG}g`,
-      serving_size_g: servingSizeG,
-      calories_per_100g: Math.round(calories * multiplier * 10) / 10,
-      protein_g: Math.round(protein * multiplier * 10) / 10,
-      carbs_g: Math.round(carbs * multiplier * 10) / 10,
-      fat_g: Math.round(fat * multiplier * 10) / 10,
-      fiber_g: Math.round(fiber * multiplier * 10) / 10,
+      serving_description: servingPart.replace(/^Per\s+/i, ''),
+      serving_size_g: isPer100g ? 100 : 0, // 0 means "per serving, unknown grams"
+      calories_per_100g: isPer100g ? calories : calories, // Store as-is for now
+      protein_g: protein,
+      carbs_g: carbs,
+      fat_g: fat,
+      fiber_g: 0, // v1 API doesn't include fiber in description
     };
   } catch (error) {
     console.error('Error normalizing food:', food.food_name, error);
@@ -168,13 +172,14 @@ serve(async (req) => {
 
     const accessToken = await getAccessToken();
 
-    // Call FatSecret foods.search API (v2 for detailed serving info)
+    // Call FatSecret foods.search API (v1 - basic scope)
     const searchUrl = new URL('https://platform.fatsecret.com/rest/server.api');
-    searchUrl.searchParams.set('method', 'foods.search.v3');
+    searchUrl.searchParams.set('method', 'foods.search');
     searchUrl.searchParams.set('search_expression', query);
     searchUrl.searchParams.set('format', 'json');
     searchUrl.searchParams.set('max_results', String(maxResults));
-    searchUrl.searchParams.set('include_food_attributes', 'true');
+
+    console.log('FatSecret API URL:', searchUrl.toString());
 
     const searchResponse = await fetch(searchUrl.toString(), {
       method: 'GET',
@@ -191,9 +196,13 @@ serve(async (req) => {
 
     const searchData = await searchResponse.json();
     
-    // Extract foods from response
-    const foodsRaw = searchData.foods_search?.results?.food || [];
-    const foodsArray = Array.isArray(foodsRaw) ? foodsRaw : [foodsRaw];
+    console.log('FatSecret raw response keys:', Object.keys(searchData));
+    
+    // v1 API response structure: { foods: { food: [...] } }
+    const foodsRaw = searchData.foods?.food || [];
+    console.log('Foods found:', Array.isArray(foodsRaw) ? foodsRaw.length : (foodsRaw ? 1 : 0));
+    
+    const foodsArray = Array.isArray(foodsRaw) ? foodsRaw : (foodsRaw ? [foodsRaw] : []);
 
     // Normalize foods to our format
     const foods: NormalizedFood[] = foodsArray
