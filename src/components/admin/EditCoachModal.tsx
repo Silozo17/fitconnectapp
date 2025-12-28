@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Mail, MapPin, FileText, Globe, User, Clock } from "lucide-react";
+import { Loader2, Mail, MapPin, FileText, Globe, User, Clock, Building2 } from "lucide-react";
 import { useAdminUserManagement } from "@/hooks/useAdminUserManagement";
 import { StatusBadge } from "./StatusBadge";
 import { LocationAutocomplete, LocationData } from "@/components/shared/LocationAutocomplete";
@@ -29,6 +29,7 @@ import { CoachTypeSelector } from "@/components/coach/CoachTypeSelector";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { AdminQualificationsManager } from "./AdminQualificationsManager";
+import { GymAutocomplete } from "@/components/shared/GymAutocomplete";
 
 interface CoachUser {
   id: string;
@@ -62,6 +63,7 @@ interface CoachProfileData {
   online_available: boolean | null;
   in_person_available: boolean | null;
   experience_years: number | null;
+  gym_affiliation: string | null;
 }
 
 const EditCoachModal = ({ coach, open, onClose, onSaved }: EditCoachModalProps) => {
@@ -83,6 +85,7 @@ const EditCoachModal = ({ coach, open, onClose, onSaved }: EditCoachModalProps) 
   const [onlineAvailable, setOnlineAvailable] = useState(false);
   const [inPersonAvailable, setInPersonAvailable] = useState(false);
   const [experienceYears, setExperienceYears] = useState("");
+  const [gymAffiliation, setGymAffiliation] = useState("");
   
   const { getUserEmail, updateEmail } = useAdminUserManagement("coach");
 
@@ -94,7 +97,7 @@ const EditCoachModal = ({ coach, open, onClose, onSaved }: EditCoachModalProps) 
       setLoadingProfile(true);
       const { data, error } = await supabase
         .from("coach_profiles")
-        .select("bio, location, location_city, location_region, location_country, location_country_code, location_lat, location_lng, coach_types, online_available, in_person_available, experience_years")
+        .select("bio, location, location_city, location_region, location_country, location_country_code, location_lat, location_lng, coach_types, online_available, in_person_available, experience_years, gym_affiliation")
         .eq("id", coach.id)
         .single();
       
@@ -108,6 +111,7 @@ const EditCoachModal = ({ coach, open, onClose, onSaved }: EditCoachModalProps) 
         setOnlineAvailable(profile.online_available || false);
         setInPersonAvailable(profile.in_person_available || false);
         setExperienceYears(profile.experience_years?.toString() || "");
+        setGymAffiliation(profile.gym_affiliation || "");
         
         if (profile.location) {
           setLocationData({
@@ -178,6 +182,7 @@ const EditCoachModal = ({ coach, open, onClose, onSaved }: EditCoachModalProps) 
       online_available: onlineAvailable,
       in_person_available: inPersonAvailable,
       experience_years: experienceYears ? parseInt(experienceYears, 10) : null,
+      gym_affiliation: gymAffiliation || null,
     };
 
     // Add location data if set
@@ -351,6 +356,19 @@ const EditCoachModal = ({ coach, open, onClose, onSaved }: EditCoachModalProps) 
                       value={location}
                       onLocationChange={handleLocationChange}
                       placeholder="Search for location..."
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="gymAffiliation" className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4" />
+                      Gym Affiliation
+                    </Label>
+                    <GymAutocomplete
+                      value={gymAffiliation}
+                      onChange={setGymAffiliation}
+                      placeholder="Search for a gym or studio..."
+                      locationBias={locationData ? { lat: locationData.lat!, lng: locationData.lng! } : null}
                     />
                   </div>
 
