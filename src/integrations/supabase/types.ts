@@ -5721,6 +5721,54 @@ export type Database = {
       get_ranked_coaches:
         | {
             Args: {
+              p_filter_city?: string
+              p_filter_coach_types?: string[]
+              p_filter_country_code?: string
+              p_filter_in_person?: boolean
+              p_filter_max_price?: number
+              p_filter_min_price?: number
+              p_filter_online?: boolean
+              p_filter_verified?: boolean
+              p_limit?: number
+              p_offset?: number
+              p_user_lat?: number
+              p_user_lng?: number
+            }
+            Returns: {
+              average_rating: number
+              bio: string
+              card_image_url: string
+              coach_types: string[]
+              created_at: string
+              currency: string
+              display_name: string
+              distance_km: number
+              experience_years: number
+              gym_affiliation: string
+              hourly_rate: number
+              id: string
+              in_person_available: boolean
+              instagram_url: string
+              is_boosted: boolean
+              is_verified: boolean
+              location: string
+              location_city: string
+              location_country: string
+              location_country_code: string
+              location_lat: number
+              location_lng: number
+              online_available: boolean
+              primary_coach_type: string
+              profile_image_url: string
+              rank_score: number
+              total_clients: number
+              total_reviews: number
+              user_id: string
+              username: string
+            }[]
+          }
+        | {
+            Args: {
               p_coach_types?: string[]
               p_in_person_available?: boolean
               p_limit?: number
