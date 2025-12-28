@@ -5796,38 +5796,36 @@ export type Database = {
               card_image_url: string
               certifications: Json
               coach_types: string[]
+              created_at: string
               currency: string
               display_name: string
               experience_years: number
-              facebook_url: string
               gym_affiliation: string
               hourly_rate: number
               id: string
               in_person_available: boolean
-              instagram_url: string
               is_sponsored: boolean
               is_verified: boolean
-              linkedin_url: string
               location: string
               location_city: string
               location_country: string
               location_country_code: string
               location_lat: number
               location_lng: number
+              location_place_id: string
               location_region: string
               location_tier: number
+              marketplace_visible: boolean
               online_available: boolean
               primary_coach_type: string
               profile_image_url: string
               review_count: number
-              threads_url: string
-              tiktok_url: string
+              subscription_tier: string
+              updated_at: string
               user_id: string
               username: string
+              verification_status: string
               visibility_score: number
-              who_i_work_with: string
-              x_url: string
-              youtube_url: string
             }[]
           }
       has_role:
