@@ -5,10 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
-import { FoodLibrary } from "@/components/nutritionbuilder/FoodLibrary";
+import { FatSecretFoodLibrary } from "@/components/nutritionbuilder/FatSecretFoodLibrary";
 import { MealCard } from "@/components/nutritionbuilder/MealCard";
 import { MacroTracker } from "@/components/nutritionbuilder/MacroTracker";
-import { CreateFoodModal } from "@/components/nutritionbuilder/CreateFoodModal";
 import { AIMealGeneratorModal } from "@/components/nutritionbuilder/AIMealGeneratorModal";
 import { AIMacroCalculator } from "@/components/ai/AIMacroCalculator";
 import { FeatureGate } from "@/components/FeatureGate";
@@ -34,7 +33,7 @@ const CoachNutritionBuilder = () => {
   const [planDescription, setPlanDescription] = useState("");
   const [durationWeeks, setDurationWeeks] = useState(4);
   const [isSaving, setIsSaving] = useState(false);
-  const [createFoodOpen, setCreateFoodOpen] = useState(false);
+  const [selectedMealIndex, setSelectedMealIndex] = useState(0);
   const [coachProfileId, setCoachProfileId] = useState<string | null>(null);
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const [isLoadingPlan, setIsLoadingPlan] = useState(isEditing);
@@ -256,10 +255,6 @@ const CoachNutritionBuilder = () => {
             </div>
           </div>
           <div className="flex gap-2 shrink-0">
-            <Button variant="outline" onClick={() => setCreateFoodOpen(true)} size="sm" className="flex-1 sm:flex-none">
-              <Plus className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">{t("nutritionBuilder.addCustomFood")}</span>
-            </Button>
             <Button onClick={handleSave} disabled={isSaving} size="sm" className="flex-1 sm:flex-none">
               <Save className="h-4 w-4 sm:mr-2" />
               <span className="hidden sm:inline">{isSaving ? t("nutritionBuilder.saving") : isEditing ? t("nutritionBuilder.updatePlan") : t("nutritionBuilder.savePlan")}</span>
@@ -389,8 +384,13 @@ const CoachNutritionBuilder = () => {
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-hidden">
           {/* Food Library */}
-          <div className="lg:col-span-1 h-[400px] lg:h-[600px]">
-            <FoodLibrary onAddFood={(food) => addFoodToMeal(food, 0)} />
+          <div className="lg:col-span-1 h-[500px] lg:h-[600px] glass-card overflow-hidden">
+            {coachProfileId && (
+              <FatSecretFoodLibrary 
+                coachId={coachProfileId} 
+                onAddFood={(food) => addFoodToMeal(food, selectedMealIndex)} 
+              />
+            )}
           </div>
 
           {/* Meals */}
@@ -410,12 +410,17 @@ const CoachNutritionBuilder = () => {
             {/* Meals List */}
             <div className="space-y-4">
               {currentDay?.meals.map((meal, index) => (
-                <MealCard
-                  key={meal.id}
-                  meal={meal}
-                  onUpdateMeal={(updatedMeal) => updateMeal(index, updatedMeal)}
-                  onDeleteMeal={() => deleteMeal(index)}
-                />
+                <div 
+                  key={meal.id} 
+                  onClick={() => setSelectedMealIndex(index)}
+                  className={`cursor-pointer rounded-lg transition-all ${selectedMealIndex === index ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}`}
+                >
+                  <MealCard
+                    meal={meal}
+                    onUpdateMeal={(updatedMeal) => updateMeal(index, updatedMeal)}
+                    onDeleteMeal={() => deleteMeal(index)}
+                  />
+                </div>
               ))}
             </div>
 
@@ -426,15 +431,6 @@ const CoachNutritionBuilder = () => {
             </Button>
           </div>
         </div>
-
-        {/* Create Food Modal */}
-        {coachProfileId && (
-          <CreateFoodModal
-            open={createFoodOpen}
-            onOpenChange={setCreateFoodOpen}
-            coachId={coachProfileId}
-          />
-        )}
 
         {/* AI Meal Generator Modal */}
         {canUseAI && (

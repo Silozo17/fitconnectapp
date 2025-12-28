@@ -3480,6 +3480,7 @@ export type Database = {
           coach_id: string | null
           created_at: string
           fat_g: number
+          fatsecret_id: string | null
           fiber_g: number | null
           id: string
           is_custom: boolean | null
@@ -3487,6 +3488,7 @@ export type Database = {
           protein_g: number
           serving_description: string | null
           serving_size_g: number | null
+          source: string | null
           updated_at: string
         }
         Insert: {
@@ -3496,6 +3498,7 @@ export type Database = {
           coach_id?: string | null
           created_at?: string
           fat_g?: number
+          fatsecret_id?: string | null
           fiber_g?: number | null
           id?: string
           is_custom?: boolean | null
@@ -3503,6 +3506,7 @@ export type Database = {
           protein_g?: number
           serving_description?: string | null
           serving_size_g?: number | null
+          source?: string | null
           updated_at?: string
         }
         Update: {
@@ -3512,6 +3516,7 @@ export type Database = {
           coach_id?: string | null
           created_at?: string
           fat_g?: number
+          fatsecret_id?: string | null
           fiber_g?: number | null
           id?: string
           is_custom?: boolean | null
@@ -3519,6 +3524,7 @@ export type Database = {
           protein_g?: number
           serving_description?: string | null
           serving_size_g?: number | null
+          source?: string | null
           updated_at?: string
         }
         Relationships: [

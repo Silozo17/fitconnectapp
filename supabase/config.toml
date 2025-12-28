@@ -224,3 +224,6 @@ verify_jwt = true
 
 [functions.verify-subscription-entitlement]
 verify_jwt = true
+
+[functions.fatsecret-search]
+verify_jwt = true
