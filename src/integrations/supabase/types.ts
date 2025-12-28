@@ -5739,7 +5739,6 @@ export type Database = {
           card_image_url: string
           certifications: Json
           coach_types: string[]
-          created_at: string
           currency: string
           display_name: string
           experience_years: number
@@ -5749,25 +5748,26 @@ export type Database = {
           id: string
           in_person_available: boolean
           instagram_url: string
-          is_sponsored: boolean
+          is_boosted: boolean
           is_verified: boolean
           linkedin_url: string
           location: string
           location_city: string
           location_country: string
           location_country_code: string
+          location_lat: number
+          location_lng: number
           location_region: string
           location_tier: number
-          marketplace_visible: boolean
-          onboarding_completed: boolean
           online_available: boolean
+          primary_coach_type: string
           profile_image_url: string
           review_count: number
-          selected_avatar_id: string
           threads_url: string
           tiktok_url: string
+          user_id: string
           username: string
-          verified_at: string
+          verification_status: string
           visibility_score: number
           who_i_work_with: string
           x_url: string
