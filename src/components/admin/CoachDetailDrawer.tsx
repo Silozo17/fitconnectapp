@@ -586,12 +586,14 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan,
               {adminStatsLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <Badge variant={
+              <Badge variant={
                   adminStats?.subscription?.status === "active" ? "default" :
                   adminStats?.subscription?.status === "cancelled" ? "destructive" :
                   "secondary"
                 }>
-                  {adminStats?.subscription?.status || "Free"}
+                  {adminStats?.subscription?.tier 
+                    ? `${adminStats.subscription.tier.charAt(0).toUpperCase() + adminStats.subscription.tier.slice(1)}${adminStats.subscription.isGifted ? " (Gifted)" : ""}`
+                    : "Free"}
                 </Badge>
               )}
             </div>
@@ -601,7 +603,7 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan,
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <p className="flex items-center gap-1">
-                  {adminStats?.verificationStatus === "verified" ? (
+                  {adminStats?.verificationStatus === "verified" || adminStats?.verificationStatus === "approved" ? (
                     <><ShieldCheck className="h-3 w-3 text-green-500" /> Verified</>
                   ) : adminStats?.verificationStatus === "pending" ? (
                     <><ShieldAlert className="h-3 w-3 text-amber-500" /> Pending</>

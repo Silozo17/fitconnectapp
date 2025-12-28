@@ -5,6 +5,7 @@ interface CoachAdminStats {
   subscription: {
     status: string;
     tier: string;
+    isGifted?: boolean;
   } | null;
   activeClients: number;
   totalCommissionPaid: number;
@@ -24,7 +25,15 @@ export function useCoachAdminStats(coachId: string | undefined, userId: string |
         };
       }
 
-      // Fetch platform subscription
+      // Fetch granted subscriptions (admin-gifted plans like founder)
+      const grantedResult = await supabase
+        .from("admin_granted_subscriptions")
+        .select("tier, is_active")
+        .eq("coach_id", coachId)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      // Fetch platform subscription (paid subscriptions)
       const subResult = await supabase
         .from("platform_subscriptions")
         .select("status, tier")
@@ -32,11 +41,35 @@ export function useCoachAdminStats(coachId: string | undefined, userId: string |
         .order("created_at", { ascending: false })
         .limit(1);
       
-      const subData = (subResult.data as any)?.[0];
-      const subscription = subData ? { 
-        status: String(subData.status || ""), 
-        tier: String(subData.tier || "") 
-      } : null;
+      // Fetch coach profile for subscription_tier fallback
+      const profileTierResult = await supabase
+        .from("coach_profiles")
+        .select("subscription_tier")
+        .eq("id", coachId)
+        .single();
+
+      // Determine subscription in priority order: granted > platform > profile tier
+      let subscription: { status: string; tier: string; isGifted?: boolean } | null = null;
+      
+      if (grantedResult.data?.is_active) {
+        subscription = { 
+          status: "active", 
+          tier: String(grantedResult.data.tier || ""), 
+          isGifted: true 
+        };
+      } else if ((subResult.data as any)?.[0]) {
+        const subData = (subResult.data as any)[0];
+        subscription = { 
+          status: String(subData.status || ""), 
+          tier: String(subData.tier || "") 
+        };
+      } else if ((profileTierResult.data as any)?.subscription_tier && 
+                 (profileTierResult.data as any).subscription_tier !== "free") {
+        subscription = { 
+          status: "active", 
+          tier: String((profileTierResult.data as any).subscription_tier || "") 
+        };
+      }
 
       // Fetch active client count
       const clientsResult = await supabase
