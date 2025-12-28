@@ -14,7 +14,7 @@ export function useUserLastLogin(userId: string | undefined) {
 
       if (error) throw error;
       
-      const lastSignInAt = data?.lastSignInAt;
+      const lastSignInAt = data?.lastSignInAt || data?.last_sign_in_at;
       
       if (!lastSignInAt) {
         return {

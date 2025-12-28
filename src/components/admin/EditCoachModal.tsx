@@ -28,6 +28,7 @@ import { LocationAutocomplete, LocationData } from "@/components/shared/Location
 import { CoachTypeSelector } from "@/components/coach/CoachTypeSelector";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { AdminQualificationsManager } from "./AdminQualificationsManager";
 
 interface CoachUser {
   id: string;
@@ -417,6 +418,11 @@ const EditCoachModal = ({ coach, open, onClose, onSaved }: EditCoachModalProps) 
                 </>
               )}
             </div>
+
+            <Separator />
+
+            {/* Qualifications Section */}
+            <AdminQualificationsManager coachId={coach.id} />
           </div>
         </ScrollArea>
 

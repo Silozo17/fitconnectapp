@@ -10,6 +10,8 @@ export interface CoachQualification {
   issue_date: string | null;
   expiry_date: string | null;
   document_number: string | null;
+  document_url: string | null;
+  verification_status: 'pending' | 'approved' | 'rejected';
   is_verified: boolean;
   verification_source: string | null;
   verification_document_id: string | null;
@@ -24,6 +26,8 @@ export interface CreateQualificationInput {
   issue_date?: string;
   expiry_date?: string;
   document_number?: string;
+  document_url?: string;
+  verification_status?: 'pending' | 'approved' | 'rejected';
 }
 
 export interface UpdateQualificationInput {
@@ -33,6 +37,9 @@ export interface UpdateQualificationInput {
   issue_date?: string;
   expiry_date?: string;
   document_number?: string;
+  document_url?: string;
+  verification_status?: 'pending' | 'approved' | 'rejected';
+  is_verified?: boolean;
 }
 
 // Hook to fetch qualifications for a coach (public view)
@@ -99,7 +106,9 @@ export function useCreateQualification() {
           issue_date: input.issue_date || null,
           expiry_date: input.expiry_date || null,
           document_number: input.document_number || null,
-          is_verified: false,
+          document_url: input.document_url || null,
+          verification_status: input.verification_status || 'pending',
+          is_verified: input.verification_status === 'approved',
           verification_source: null,
         })
         .select()
@@ -126,9 +135,18 @@ export function useUpdateQualification() {
   return useMutation({
     mutationFn: async (input: UpdateQualificationInput) => {
       const { id, ...updates } = input;
+      
+      // If verification_status is being set to approved, also set is_verified
+      const updateData: Record<string, unknown> = { ...updates };
+      if (updates.verification_status === 'approved') {
+        updateData.is_verified = true;
+      } else if (updates.verification_status === 'rejected' || updates.verification_status === 'pending') {
+        updateData.is_verified = false;
+      }
+
       const { data, error } = await supabase
         .from("coach_qualifications")
-        .update(updates)
+        .update(updateData)
         .eq("id", id)
         .select()
         .single();

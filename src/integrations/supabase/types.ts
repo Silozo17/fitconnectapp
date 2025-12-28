@@ -2434,6 +2434,7 @@ export type Database = {
           coach_id: string
           created_at: string | null
           document_number: string | null
+          document_url: string | null
           expiry_date: string | null
           id: string
           is_verified: boolean | null
@@ -2443,11 +2444,13 @@ export type Database = {
           updated_at: string | null
           verification_document_id: string | null
           verification_source: string | null
+          verification_status: string | null
         }
         Insert: {
           coach_id: string
           created_at?: string | null
           document_number?: string | null
+          document_url?: string | null
           expiry_date?: string | null
           id?: string
           is_verified?: boolean | null
@@ -2457,11 +2460,13 @@ export type Database = {
           updated_at?: string | null
           verification_document_id?: string | null
           verification_source?: string | null
+          verification_status?: string | null
         }
         Update: {
           coach_id?: string
           created_at?: string | null
           document_number?: string | null
+          document_url?: string | null
           expiry_date?: string | null
           id?: string
           is_verified?: boolean | null
@@ -2471,6 +2476,7 @@ export type Database = {
           updated_at?: string | null
           verification_document_id?: string | null
           verification_source?: string | null
+          verification_status?: string | null
         }
         Relationships: [
           {
