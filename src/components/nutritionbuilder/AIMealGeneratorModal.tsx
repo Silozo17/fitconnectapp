@@ -170,6 +170,8 @@ export const AIMealGeneratorModal = ({
             coach_id: null,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
+            fatsecret_id: null,
+            source: 'ai_generated',
           };
 
           return {

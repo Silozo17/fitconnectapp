@@ -6,6 +6,9 @@ export type Food = Tables<'foods'>;
 export type FoodCategory = Tables<'food_categories'>;
 export type FoodInsert = TablesInsert<'foods'>;
 
+// Extend Food type for backwards compatibility
+export type FoodWithCategory = Food & { food_categories: FoodCategory | null };
+
 export interface MealFood {
   id: string;
   food: Food;
@@ -65,7 +68,7 @@ export const useFoods = (categoryId?: string, searchQuery?: string) => {
       const { data, error } = await query;
       
       if (error) throw error;
-      return data as (Food & { food_categories: FoodCategory | null })[];
+      return data as FoodWithCategory[];
     },
   });
 };
