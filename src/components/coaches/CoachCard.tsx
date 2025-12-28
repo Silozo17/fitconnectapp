@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, Video, User, MessageSquare, Calendar, UserPlus, Building, Rocket } from "lucide-react";
-import { UserAvatar } from "@/components/shared/UserAvatar";
+import fallbackCoachImage from "@/assets/fallback-coach.webp";
 import FavouriteButton from "@/components/favourites/FavouriteButton";
 import StarRating from "@/components/reviews/StarRating";
 import { VerifiedBadge } from "@/components/verification/VerifiedBadge";
@@ -110,16 +110,12 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
             />
           </div>
         ) : (
-          // Priority 3: Fallback to initials with matching gradient
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-cyan-400 via-emerald-400 to-lime-400 overflow-hidden">
-            <UserAvatar 
-              src={null} 
-              name={coach.display_name} 
-              variant="squircle"
-              size="xl"
-              className="scale-150"
-            />
-          </div>
+          // Priority 3: Fallback to gym image
+          <img 
+            src={fallbackCoachImage} 
+            alt={coach.display_name || "Coach"} 
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
         )}
         <div className="absolute bottom-3 left-3 flex gap-2">
           {coach.in_person_available && (
