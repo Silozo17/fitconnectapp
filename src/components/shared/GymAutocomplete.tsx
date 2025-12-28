@@ -36,6 +36,7 @@ export function GymAutocomplete({
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const isSelectingRef = useRef(false);
 
   // Sync input value with external value
   useEffect(() => {
@@ -112,7 +113,7 @@ export function GymAutocomplete({
   };
 
   const handleSelect = (prediction: GymPrediction) => {
-    // Just use the main gym name
+    isSelectingRef.current = true;
     const gymName = prediction.main_text;
     
     setInputValue(gymName);
@@ -131,11 +132,11 @@ export function GymAutocomplete({
   };
 
   const handleBlur = () => {
-    // Allow free-text if no selection made
     setTimeout(() => {
-      if (!isSelected && inputValue) {
+      if (!isSelectingRef.current && !isSelected && inputValue) {
         onChange(inputValue);
       }
+      isSelectingRef.current = false;
     }, 200);
   };
 
@@ -184,7 +185,10 @@ export function GymAutocomplete({
             <button
               key={prediction.place_id}
               type="button"
-              onClick={() => handleSelect(prediction)}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                handleSelect(prediction);
+              }}
               className="w-full px-4 py-3 text-left hover:bg-secondary transition-colors flex items-start gap-3"
             >
               <Building2 className="w-4 h-4 text-primary mt-0.5 shrink-0" />
