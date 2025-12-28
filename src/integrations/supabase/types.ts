@@ -5793,7 +5793,6 @@ export type Database = {
             Returns: {
               avg_rating: number
               bio: string
-              booking_mode: string
               card_image_url: string
               certifications: Json
               coach_types: string[]
@@ -5806,7 +5805,7 @@ export type Database = {
               id: string
               in_person_available: boolean
               instagram_url: string
-              is_boosted: boolean
+              is_sponsored: boolean
               is_verified: boolean
               linkedin_url: string
               location: string
@@ -5825,7 +5824,6 @@ export type Database = {
               tiktok_url: string
               user_id: string
               username: string
-              verification_status: string
               visibility_score: number
               who_i_work_with: string
               x_url: string
