@@ -103,17 +103,13 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const [isLoadingProfiles, setIsLoadingProfiles] = useState(true);
   const [hasInitializedFromRole, setHasInitializedFromRole] = useState(false);
   
-  // Track if we've restored from storage to prevent fetchProfiles from overwriting
-  const hasRestoredFromStorageRef = useRef(false);
+  // CRITICAL FIX: Initialize synchronously to prevent race condition
+  // This ref is set IMMEDIATELY if there's a saved state, not in a useEffect
+  const hasRestoredFromStorageRef = useRef(!!getSavedViewState());
   
-  // Mark that we've read from storage on initial mount
-  useEffect(() => {
-    const savedState = getSavedViewState();
-    if (savedState) {
-      hasRestoredFromStorageRef.current = true;
-      console.log('[AdminContext] Marked as restored from storage:', savedState.type);
-    }
-  }, []);
+  if (hasRestoredFromStorageRef.current) {
+    console.log('[AdminContext] hasRestoredFromStorageRef initialized TRUE (saved state exists)');
+  }
   
   // Reset state when user logs out
   useEffect(() => {
@@ -157,35 +153,51 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     setHasInitializedFromRole(true);
   }, [user, role, canSwitchRoles, hasInitializedFromRole]);
 
-  // CRITICAL FIX: Add visibilitychange handler for app resume (background → foreground)
+  // CRITICAL FIX: Add visibilitychange AND focus handlers for app resume (background → foreground)
+  // Some native WebViews fire focus instead of visibilitychange
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && isDespia() && user && role) {
-        console.log('[AdminContext] App resumed - checking persisted view');
-        const savedState = getSavedViewState();
+    const restoreViewOnResume = (source: string) => {
+      if (!isDespia() || !user || !role) return;
+      
+      console.log(`[AdminContext] ${source} - checking persisted view`);
+      const savedState = getSavedViewState();
+      
+      if (savedState && savedState.type !== activeProfileType) {
+        // Validate that user has access to the saved view
+        const hasAccess = savedState.type === "admin" 
+          ? isAdminUser 
+          : savedState.type === "coach"
+            ? (isAdminUser || role === "coach")
+            : true; // Everyone can access client view
         
-        if (savedState && savedState.type !== activeProfileType) {
-          // Validate that user has access to the saved view
-          const hasAccess = savedState.type === "admin" 
-            ? isAdminUser 
-            : savedState.type === "coach"
-              ? (isAdminUser || role === "coach")
-              : true; // Everyone can access client view
-          
-          if (hasAccess) {
-            console.log('[AdminContext] Restoring view on resume:', savedState.type, '(was:', activeProfileType, ')');
-            setActiveProfileType(savedState.type);
-            setViewModeState(savedState.type);
-            if (savedState.profileId) {
-              setActiveProfileId(savedState.profileId);
-            }
+        if (hasAccess) {
+          console.log(`[AdminContext] Restoring view on ${source}:`, savedState.type, '(was:', activeProfileType, ')');
+          setActiveProfileType(savedState.type);
+          setViewModeState(savedState.type);
+          if (savedState.profileId) {
+            setActiveProfileId(savedState.profileId);
           }
         }
       }
     };
 
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        restoreViewOnResume('visibilitychange');
+      }
+    };
+
+    const handleFocus = () => {
+      restoreViewOnResume('window.focus');
+    };
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [activeProfileType, isAdminUser, role, user]);
 
   // Fetch all profiles for the user
@@ -261,7 +273,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
           : !!profiles[savedState.type];
         
         if (hasValidProfile) {
-          console.log('[AdminContext] fetchProfiles: Preserving restored view:', savedState.type);
+          console.log('[AdminContext] fetchProfiles: Preserving restored view:', savedState.type, '- NOT overwriting (hasRestoredFromStorageRef=true)');
           // Update profile ID if we now have it
           const profileId = profiles[savedState.type] || null;
           if (profileId && !activeProfileId) {
