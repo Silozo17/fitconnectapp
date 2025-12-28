@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Sparkles, Loader2, ChefHat, Target, AlertTriangle } from 'lucide-react';
+import { Sparkles, Loader2, ChefHat, Target, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Dialog,
   DialogContent,
@@ -53,8 +54,23 @@ interface ValidationResult {
     carbs: number;
     fat: number;
   };
+  targets: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  };
+  discrepancy: {
+    calories: number;
+    caloriePercent: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  };
   warnings: string[];
+  errors: string[];
   isAccurate: boolean;
+  attempts?: number;
 }
 
 export const AIMealGeneratorModal = ({
@@ -69,9 +85,11 @@ export const AIMealGeneratorModal = ({
   const { t } = useTranslation('coach');
   const [isLoading, setIsLoading] = useState(false);
   const [preferences, setPreferences] = useState('');
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
 
   const generateMealPlan = async () => {
     setIsLoading(true);
+    setValidationResult(null);
 
     try {
       const response = await supabase.functions.invoke('ai-meal-suggestion', {
@@ -96,14 +114,31 @@ export const AIMealGeneratorModal = ({
         throw new Error('Invalid meal plan received from AI');
       }
 
-      // Show warning if validation found issues
-      if (validation && !validation.isAccurate) {
-        console.warn('AI meal plan had accuracy issues:', validation.warnings);
-        toast.warning(t('nutritionBuilder.aiMacrosAdjusted', 'Note: Some nutrition values were adjusted for accuracy'));
+      // Store validation result for display
+      if (validation) {
+        setValidationResult(validation);
+      }
+
+      // Check if we should warn about significant discrepancy
+      const calorieDiscrepancy = validation?.discrepancy?.caloriePercent || 0;
+      
+      if (calorieDiscrepancy > 15) {
+        // Significant discrepancy - warn user but still allow use
+        toast.warning(
+          t('nutritionBuilder.aiSignificantDiscrepancy', 
+            `Meal plan is ${Math.round(calorieDiscrepancy)}% off your calorie target. Consider adjusting portions.`
+          )
+        );
+      } else if (calorieDiscrepancy > 5) {
+        // Minor discrepancy - info toast
+        toast.info(
+          t('nutritionBuilder.aiMinorDiscrepancy',
+            'Meal plan macros slightly adjusted for accuracy'
+          )
+        );
       }
 
       // Convert AI response to NutritionDay format
-      // IMPORTANT: AI values are per-serving, not per-100g
       const meals: Meal[] = mealPlan.meals.map((aiMeal) => {
         const foods: MealFood[] = aiMeal.foods.map((aiFood) => {
           // Ensure calories match macros (use calculated value as ground truth)
@@ -113,22 +148,16 @@ export const AIMealGeneratorModal = ({
             fat: aiFood.fat,
           });
 
-          // Create a Food object from the AI response
-          // CRITICAL FIX: The values from AI are per-serving, not per-100g
-          // We set serving_size_g to 100 and use the values directly
-          // This means 1 serving = the AI's stated serving
           const food: Food = {
             id: crypto.randomUUID(),
             name: aiFood.name,
             category_id: '',
-            // Store the per-serving values as if they were per-100g
-            // with serving_size_g = 100, so 1 serving = stated values
-            calories_per_100g: calculatedCalories, // Use calculated, not AI-stated
+            calories_per_100g: calculatedCalories,
             protein_g: Math.round(aiFood.protein * 10) / 10,
             carbs_g: Math.round(aiFood.carbs * 10) / 10,
             fat_g: Math.round(aiFood.fat * 10) / 10,
             fiber_g: 0,
-            serving_size_g: 100, // 1 serving = 100g for calculation purposes
+            serving_size_g: 100,
             serving_description: aiFood.serving,
             is_custom: true,
             coach_id: null,
@@ -139,7 +168,7 @@ export const AIMealGeneratorModal = ({
           return {
             id: crypto.randomUUID(),
             food,
-            servings: 1, // 1 serving = the AI's stated serving
+            servings: 1,
           };
         });
 
@@ -151,7 +180,6 @@ export const AIMealGeneratorModal = ({
         };
       });
 
-      // Create a single day with all the meals
       const generatedDay: NutritionDay = {
         id: crypto.randomUUID(),
         name: t('nutritionBuilder.day') + ' 1',
@@ -159,9 +187,15 @@ export const AIMealGeneratorModal = ({
       };
 
       onMealPlanGenerated([generatedDay]);
-      toast.success(t('nutritionBuilder.aiMealPlanGenerated'));
+      
+      // Show success with accuracy info
+      if (calorieDiscrepancy <= 5) {
+        toast.success(t('nutritionBuilder.aiMealPlanGenerated'));
+      }
+      
       onOpenChange(false);
       setPreferences('');
+      setValidationResult(null);
     } catch (error) {
       console.error('AI meal plan generation error:', error);
       
@@ -178,6 +212,46 @@ export const AIMealGeneratorModal = ({
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Helper to get accuracy indicator
+  const getAccuracyIndicator = () => {
+    if (!validationResult) return null;
+    
+    const percent = validationResult.discrepancy?.caloriePercent || 0;
+    
+    if (percent <= 5) {
+      return (
+        <Alert className="bg-green-500/10 border-green-500/20">
+          <CheckCircle2 className="h-4 w-4 text-green-500" />
+          <AlertDescription className="text-green-600 dark:text-green-400">
+            {t('nutritionBuilder.aiAccuracyGood', 'Meal plan matches your targets accurately')}
+          </AlertDescription>
+        </Alert>
+      );
+    } else if (percent <= 15) {
+      return (
+        <Alert className="bg-yellow-500/10 border-yellow-500/20">
+          <AlertTriangle className="h-4 w-4 text-yellow-500" />
+          <AlertDescription className="text-yellow-600 dark:text-yellow-400">
+            {t('nutritionBuilder.aiAccuracyWarning', 
+              `Plan is ${Math.round(percent)}% off target. Minor adjustments may be needed.`
+            )}
+          </AlertDescription>
+        </Alert>
+      );
+    } else {
+      return (
+        <Alert className="bg-red-500/10 border-red-500/20">
+          <AlertTriangle className="h-4 w-4 text-red-500" />
+          <AlertDescription className="text-red-600 dark:text-red-400">
+            {t('nutritionBuilder.aiAccuracyError',
+              `Plan is ${Math.round(percent)}% off target. Consider regenerating or adjusting manually.`
+            )}
+          </AlertDescription>
+        </Alert>
+      );
     }
   };
 
@@ -245,6 +319,9 @@ export const AIMealGeneratorModal = ({
               {t('nutritionBuilder.aiGenerateInfo')}
             </p>
           </div>
+
+          {/* Accuracy Indicator */}
+          {validationResult && getAccuracyIndicator()}
 
           {/* AI Disclaimer */}
           <div className="flex items-start gap-2 p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
