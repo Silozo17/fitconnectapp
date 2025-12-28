@@ -13,20 +13,25 @@ import { AvatarShowcase } from "@/components/landing/AvatarShowcase";
 import { BlogSection } from "@/components/landing/BlogSection";
 import { useAuth } from "@/contexts/AuthContext";
 import { isDespia } from "@/lib/despia";
+import { getBestDashboardRoute, saveViewState, getViewModeFromPath } from "@/lib/view-restoration";
 
 const Index = () => {
   const { user, role, loading } = useAuth();
   const navigate = useNavigate();
 
   // In native app, authenticated users should not be on homepage - redirect to dashboard
+  // CRITICAL: Use saved view preference, not role-based default
   useEffect(() => {
     if (!loading && user && role && isDespia()) {
-      const dashboardRoute = 
-        role === "admin" || role === "manager" || role === "staff"
-          ? "/dashboard/admin"
-          : role === "coach"
-            ? "/dashboard/coach"
-            : "/dashboard/client";
+      // getBestDashboardRoute checks saved route first, then saved view preference, then falls back to role default
+      const dashboardRoute = getBestDashboardRoute(role);
+      
+      // Sync view state to ensure consistency
+      const viewMode = getViewModeFromPath(dashboardRoute);
+      if (viewMode) {
+        saveViewState(viewMode);
+      }
+      
       navigate(dashboardRoute, { replace: true });
     }
   }, [user, role, loading, navigate]);

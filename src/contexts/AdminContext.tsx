@@ -3,14 +3,14 @@ import { useLocation } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { isDespia } from "@/lib/despia";
-
-// Helper to extract view mode from URL path
-const getViewModeFromPath = (pathname: string): ViewMode | null => {
-  const match = pathname.match(/^\/dashboard\/(admin|coach|client)/);
-  return match ? (match[1] as ViewMode) : null;
-};
-
-type ViewMode = "admin" | "client" | "coach";
+import {
+  ViewMode,
+  getSavedViewState,
+  saveViewState,
+  clearViewState,
+  getViewModeFromPath,
+  validateRouteForRole,
+} from "@/lib/view-restoration";
 
 interface AvailableProfiles {
   admin?: string;
@@ -31,119 +31,87 @@ interface AdminContextType {
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
-const STORAGE_KEY = "admin_active_role";
+/**
+ * Get the default view mode based on user role (used when no saved preference exists)
+ */
+const getDefaultViewModeForRole = (role: string | null): ViewMode => {
+  if (role === "client") return "client";
+  if (role === "coach") return "coach";
+  return "admin"; // admins, managers, staff
+};
 
-// Helper to get initial view mode considering saved preferences
-const getInitialViewMode = (currentRole: string | null): ViewMode => {
-  // First check localStorage for saved preference
-  try {
-    const savedRole = localStorage.getItem(STORAGE_KEY);
-    if (savedRole) {
-      const { type } = JSON.parse(savedRole);
-      const isAdminUser = currentRole === "admin" || currentRole === "manager" || currentRole === "staff";
-      const isCoach = currentRole === "coach";
-      
-      // Validate the saved type is accessible for this role
-      if (type === "admin" && isAdminUser) return "admin";
-      if (type === "coach" && (isAdminUser || isCoach)) return "coach";
-      if (type === "client") return "client"; // Everyone can access client view
+/**
+ * Get initial view mode - checks saved preference first, falls back to role default.
+ * CRITICAL: This must run AFTER role is known to validate saved preference.
+ */
+const getValidatedViewMode = (role: string | null): ViewMode => {
+  // Check saved preference
+  const savedState = getSavedViewState();
+  if (savedState) {
+    const savedRoute = `/dashboard/${savedState.type}`;
+    if (validateRouteForRole(savedRoute, role)) {
+      return savedState.type;
     }
-  } catch {
-    // Invalid saved role, fall through to default
   }
   
-  // Default based on role
-  if (currentRole === "client") return "client";
-  if (currentRole === "coach") return "coach";
-  return "admin"; // admins, managers, staff
+  // Fall back to role default
+  return getDefaultViewModeForRole(role);
 };
 
 export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const { user, role } = useAuth();
   const location = useLocation();
   
-  // Smart default based on role and saved preference
-  const getDefaultViewMode = (currentRole: string | null): ViewMode => {
-    if (currentRole === "client") return "client";
-    if (currentRole === "coach") return "coach";
-    return "admin"; // admins, managers, staff
-  };
-  
-  // Initialize with saved preference for native apps
-  const [viewMode, setViewMode] = useState<ViewMode>(() => {
-    // On native apps, prioritize saved preference
-    if (isDespia()) {
-      return getInitialViewMode(role);
-    }
-    return getDefaultViewMode(role);
-  });
-  const [availableProfiles, setAvailableProfiles] = useState<AvailableProfiles>({});
-  const [activeProfileType, setActiveProfileType] = useState<ViewMode>(() => {
-    if (isDespia()) {
-      return getInitialViewMode(role);
-    }
-    return getDefaultViewMode(role);
-  });
-  const [activeProfileId, setActiveProfileId] = useState<string | null>(null);
-  const [isLoadingProfiles, setIsLoadingProfiles] = useState(true);
-
   const isAdminUser = role === "admin" || role === "manager" || role === "staff";
   const canSwitchRoles = isAdminUser || role === "coach";
+
+  // Initialize with client as safe default - will be updated once role is known
+  const [viewMode, setViewModeState] = useState<ViewMode>("client");
+  const [availableProfiles, setAvailableProfiles] = useState<AvailableProfiles>({});
+  const [activeProfileType, setActiveProfileType] = useState<ViewMode>("client");
+  const [activeProfileId, setActiveProfileId] = useState<string | null>(null);
+  const [isLoadingProfiles, setIsLoadingProfiles] = useState(true);
+  const [hasInitializedFromRole, setHasInitializedFromRole] = useState(false);
   
   // Reset state when user logs out
   useEffect(() => {
     if (!user) {
       setActiveProfileType("client");
       setActiveProfileId(null);
-      setViewMode("client");
+      setViewModeState("client");
       setAvailableProfiles({});
       setIsLoadingProfiles(false);
-      localStorage.removeItem(STORAGE_KEY);
+      setHasInitializedFromRole(false);
+      clearViewState();
     }
   }, [user]);
   
-  // Update state when role first becomes available (fixes race condition for notification clicks)
-  // For native apps, respect saved preference if valid
+  // CRITICAL: Initialize view mode AFTER role becomes available
+  // This fixes the race condition where saved preference was read before role validation was possible
   useEffect(() => {
-    if (!user) return; // Guard against logout state
+    if (!user || !role || hasInitializedFromRole) return;
     
     const isNativeApp = isDespia();
     
-    // On native apps, check if we have a valid saved preference first
+    // For native apps, check saved preference and validate against role
     if (isNativeApp && canSwitchRoles) {
-      try {
-        const savedRole = localStorage.getItem(STORAGE_KEY);
-        if (savedRole) {
-          const { type } = JSON.parse(savedRole);
-          // Validate saved type is accessible
-          const isValidSavedType = 
-            (type === "admin" && isAdminUser) ||
-            (type === "coach" && (isAdminUser || role === "coach")) ||
-            type === "client";
-          
-          if (isValidSavedType) {
-            setActiveProfileType(type);
-            setViewMode(type);
-            return; // Don't override with role-based default
-          }
-        }
-      } catch {
-        // Invalid saved role, fall through to role-based default
-      }
+      const validatedView = getValidatedViewMode(role);
+      setActiveProfileType(validatedView);
+      setViewModeState(validatedView);
+      // Save to ensure consistency
+      saveViewState(validatedView);
+    } else {
+      // Non-native or can't switch roles - use role default
+      const defaultView = getDefaultViewModeForRole(role);
+      setActiveProfileType(defaultView);
+      setViewModeState(defaultView);
     }
     
-    // Fall back to role-based defaults for non-native or when no valid saved preference
-    if (role === "client") {
-      setActiveProfileType("client");
-      setViewMode("client");
-    } else if (role === "coach" && !isAdminUser) {
-      setActiveProfileType("coach");
-      setViewMode("coach");
-    }
-  }, [role, isAdminUser, user, canSwitchRoles]);
+    setHasInitializedFromRole(true);
+  }, [user, role, canSwitchRoles, hasInitializedFromRole]);
 
   // Fetch all profiles for the user
-  const fetchProfiles = async () => {
+  const fetchProfiles = useCallback(async () => {
     if (!user?.id) {
       setIsLoadingProfiles(false);
       return;
@@ -153,7 +121,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     if (!canSwitchRoles) {
       if (role === "client") {
         setActiveProfileType("client");
-        setViewMode("client");
+        setViewModeState("client");
         // Fetch their client profile ID for messaging
         const { data } = await supabase
           .from("client_profiles")
@@ -210,7 +178,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
 
       // Priority: URL path > localStorage > default
       const pathViewMode = getViewModeFromPath(location.pathname);
-      const savedRole = localStorage.getItem(STORAGE_KEY);
+      const savedState = getSavedViewState();
       
       // Check if URL path specifies a valid view mode
       if (pathViewMode) {
@@ -222,46 +190,40 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
           const pathProfileId = profiles[pathViewMode] || null;
           setActiveProfileType(pathViewMode);
           setActiveProfileId(pathProfileId);
-          setViewMode(pathViewMode);
+          setViewModeState(pathViewMode);
           // Update localStorage to match URL
-          localStorage.setItem(STORAGE_KEY, JSON.stringify({ type: pathViewMode, profileId: pathProfileId }));
+          saveViewState(pathViewMode, pathProfileId);
           return;
         }
       }
       
       // Fallback to localStorage if no valid URL path
-      if (savedRole) {
-        try {
-          const { type, profileId } = JSON.parse(savedRole);
-          // Validate saved role is available and appropriate for user type
-          const isValidSavedRole = profiles[type as ViewMode] && 
-            (isAdminUser || type !== "admin"); // Non-admins can't switch to admin
-          
-          if (isValidSavedRole) {
-            setActiveProfileType(type);
-            setActiveProfileId(profileId);
-            setViewMode(type);
-            return;
-          }
-        } catch {
-          // Invalid saved role, fall through to default
+      if (savedState) {
+        const isValidSavedRole = profiles[savedState.type] && 
+          (isAdminUser || savedState.type !== "admin"); // Non-admins can't switch to admin
+        
+        if (isValidSavedRole) {
+          setActiveProfileType(savedState.type);
+          setActiveProfileId(savedState.profileId);
+          setViewModeState(savedState.type);
+          return;
         }
       }
       
       // Default based on user type
       setActiveProfileType(defaultType);
       setActiveProfileId(defaultProfileId || null);
-      setViewMode(defaultType);
+      setViewModeState(defaultType);
     } catch (error) {
       console.error("Error fetching profiles:", error);
     } finally {
       setIsLoadingProfiles(false);
     }
-  };
+  }, [user?.id, canSwitchRoles, role, isAdminUser, location.pathname]);
 
   useEffect(() => {
     fetchProfiles();
-  }, [user?.id, canSwitchRoles]);
+  }, [fetchProfiles]);
 
   // Sync context with URL when route changes (handles browser back/forward, direct URL navigation, RouteRestorer)
   // This effect runs when profiles finish loading OR when the URL changes
@@ -281,8 +243,8 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         const profileId = availableProfiles[pathViewMode] || null;
         setActiveProfileType(pathViewMode);
         setActiveProfileId(profileId);
-        setViewMode(pathViewMode);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ type: pathViewMode, profileId }));
+        setViewModeState(pathViewMode);
+        saveViewState(pathViewMode, profileId);
       }
     }
   }, [location.pathname, availableProfiles, isLoadingProfiles, isAdminUser, activeProfileType]);
@@ -290,18 +252,21 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const setActiveProfile = useCallback((type: ViewMode, profileId: string | null) => {
     setActiveProfileType(type);
     setActiveProfileId(profileId);
-    setViewMode(type);
+    setViewModeState(type);
 
-    // Persist preference
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ type, profileId })
-    );
+    // Persist preference IMMEDIATELY
+    saveViewState(type, profileId);
+  }, []);
+
+  const setViewMode = useCallback((mode: ViewMode) => {
+    setViewModeState(mode);
+    // Also save when view mode is set directly
+    saveViewState(mode);
   }, []);
 
   const refreshProfiles = useCallback(async () => {
     await fetchProfiles();
-  }, []);
+  }, [fetchProfiles]);
 
   const value = useMemo(() => ({
     viewMode,
@@ -312,7 +277,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     setActiveProfile,
     isLoadingProfiles,
     refreshProfiles,
-  }), [viewMode, availableProfiles, activeProfileType, activeProfileId, setActiveProfile, isLoadingProfiles, refreshProfiles]);
+  }), [viewMode, setViewMode, availableProfiles, activeProfileType, activeProfileId, setActiveProfile, isLoadingProfiles, refreshProfiles]);
 
   return (
     <AdminContext.Provider value={value}>
