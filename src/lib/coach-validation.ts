@@ -66,8 +66,8 @@ export function isRealCoach(coach: CoachProfileFields): boolean {
   // Bio must exist with minimum length
   if (!coach.bio || coach.bio.length < MIN_BIO_LENGTH) return false;
   
-  // Must have profile image
-  if (!coach.profile_image_url && !coach.card_image_url) return false;
+  // Profile photo is NOT required for visibility
+  // (users requested this to be optional)
   
   // Must have coach types
   if (!coach.coach_types || coach.coach_types.length === 0) return false;
@@ -91,14 +91,15 @@ export function getProfileCompleteness(coach: CoachProfileFields): ProfileComple
   const missingFields: string[] = [];
   let score = 0;
   
+  // Weights for visibility requirements (total = 100)
+  // Photo is optional - not required for visibility
   const weights = {
-    display_name: 15,
-    bio: 20,
-    profile_image: 15,
-    coach_types: 15,
-    hourly_rate: 10,
-    session_type: 10,
-    location: 15,
+    display_name: 17,
+    bio: 22,
+    coach_types: 17,
+    hourly_rate: 15,
+    session_type: 12,
+    location: 17,
   };
   
   const isBlocked = hasBlockedName(coach.display_name);
@@ -117,12 +118,8 @@ export function getProfileCompleteness(coach: CoachProfileFields): ProfileComple
     missingFields.push('bio');
   }
   
-  // Check profile image
-  if (coach.profile_image_url || coach.card_image_url) {
-    score += weights.profile_image;
-  } else {
-    missingFields.push('profile_image');
-  }
+  // Profile image is optional - NOT added to missingFields or score calculation
+  // (it will show in the general completion tracker but won't block visibility)
   
   // Check coach types
   if (coach.coach_types && coach.coach_types.length > 0) {

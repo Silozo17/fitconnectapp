@@ -31,10 +31,10 @@ serve(async (req) => {
 
     console.log(`Searching places for: ${query}`);
 
-    // Use Google Places Autocomplete API
+    // Use Google Places Autocomplete API - allow regions (cities, counties, countries)
     const url = new URL("https://maps.googleapis.com/maps/api/place/autocomplete/json");
     url.searchParams.set("input", query);
-    url.searchParams.set("types", "(cities)"); // Only return cities
+    url.searchParams.set("types", "(regions)"); // Return cities, counties, states, and countries
     url.searchParams.set("key", apiKey);
 
     const response = await fetch(url.toString());
