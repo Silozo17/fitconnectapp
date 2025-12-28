@@ -1114,6 +1114,7 @@ export type Database = {
           country: string | null
           county: string | null
           created_at: string
+          date_of_birth: string | null
           dietary_restrictions: string[] | null
           first_name: string | null
           fitness_goals: string[] | null
@@ -1150,6 +1151,7 @@ export type Database = {
           country?: string | null
           county?: string | null
           created_at?: string
+          date_of_birth?: string | null
           dietary_restrictions?: string[] | null
           first_name?: string | null
           fitness_goals?: string[] | null
@@ -1186,6 +1188,7 @@ export type Database = {
           country?: string | null
           county?: string | null
           created_at?: string
+          date_of_birth?: string | null
           dietary_restrictions?: string[] | null
           first_name?: string | null
           fitness_goals?: string[] | null
@@ -2230,6 +2233,7 @@ export type Database = {
           custom_review_message: string | null
           default_session_location: string | null
           display_name: string | null
+          experience_start_date: string | null
           experience_years: number | null
           facebook_url: string | null
           gym_affiliation: string | null
@@ -2295,6 +2299,7 @@ export type Database = {
           custom_review_message?: string | null
           default_session_location?: string | null
           display_name?: string | null
+          experience_start_date?: string | null
           experience_years?: number | null
           facebook_url?: string | null
           gym_affiliation?: string | null
@@ -2360,6 +2365,7 @@ export type Database = {
           custom_review_message?: string | null
           default_session_location?: string | null
           display_name?: string | null
+          experience_start_date?: string | null
           experience_years?: number | null
           facebook_url?: string | null
           gym_affiliation?: string | null
@@ -5666,7 +5672,12 @@ export type Database = {
       }
     }
     Functions: {
+      calculate_age: { Args: { dob: string }; Returns: number }
       calculate_boost_fee: { Args: { booking_amount: number }; Returns: number }
+      calculate_experience_years: {
+        Args: { start_date: string }
+        Returns: number
+      }
       check_and_award_health_badges: {
         Args: { p_client_id: string }
         Returns: {

@@ -39,6 +39,7 @@ interface ClientProfile {
   last_name: string | null;
   username: string;
   age: number | null;
+  date_of_birth: string | null;
   gender: string | null;
   activity_level: string | null;
   location: string | null;
@@ -177,7 +178,7 @@ const ClientSettings = () => {
 
       const { data } = await supabase
         .from("client_profiles")
-        .select("first_name, last_name, username, age, gender, activity_level, location, weight_kg, height_cm, fitness_goals, dietary_restrictions, allergies, medical_conditions, avatar_url, leaderboard_visible, leaderboard_display_name, city, county, country")
+        .select("first_name, last_name, username, age, date_of_birth, gender, activity_level, location, weight_kg, height_cm, fitness_goals, dietary_restrictions, allergies, medical_conditions, avatar_url, leaderboard_visible, leaderboard_display_name, city, county, country")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -204,7 +205,7 @@ const ClientSettings = () => {
       .update({
         first_name: profile.first_name,
         last_name: profile.last_name,
-        age: profile.age,
+        date_of_birth: profile.date_of_birth, // Age auto-calculated by trigger
         gender: profile.gender,
         activity_level: profile.activity_level,
         location: profile.location,
@@ -325,9 +326,25 @@ const ClientSettings = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle>Personal Details</CardTitle>
-                    <CardDescription>Your gender and activity level are used for accurate macro calculations</CardDescription>
+                    <CardDescription>Your gender, age and activity level are used for accurate macro calculations</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                      <div className="flex items-center gap-4">
+                        <Input
+                          id="dateOfBirth"
+                          type="date"
+                          value={profile?.date_of_birth || ""}
+                          onChange={(e) => updateField("date_of_birth", e.target.value || null)}
+                          className="w-44"
+                          max={new Date().toISOString().split('T')[0]}
+                        />
+                        {profile?.age !== null && (
+                          <span className="text-sm text-muted-foreground">Age: {profile.age} years</span>
+                        )}
+                      </div>
+                    </div>
                     <div className="space-y-2">
                       <Label>Gender</Label>
                       <div className="flex flex-wrap gap-2">

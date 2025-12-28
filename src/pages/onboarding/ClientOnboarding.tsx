@@ -82,7 +82,7 @@ const ClientOnboarding = () => {
     selectedAvatarSlug: null as string | null,
     firstName: "",
     lastName: "",
-    age: "",
+    dateOfBirth: "", // Store DOB instead of age
     gender: "",
     activityLevel: "moderate",
     heightCm: "",
@@ -299,7 +299,7 @@ const ClientOnboarding = () => {
           user_profile_id: userProfile?.id || null,
           first_name: formData.firstName || null,
           last_name: formData.lastName || null,
-          age: formData.age ? parseInt(formData.age) : null,
+          date_of_birth: formData.dateOfBirth || null, // Age auto-calculated by trigger
           gender: formData.gender || null,
           activity_level: formData.activityLevel || 'moderate',
           height_cm: formData.heightCm ? parseFloat(formData.heightCm) : null,
@@ -449,15 +449,16 @@ const ClientOnboarding = () => {
             </div>
 
             <div>
-              <Label htmlFor="age" className="text-foreground text-sm">Age</Label>
+              <Label htmlFor="dateOfBirth" className="text-foreground text-sm">Date of Birth</Label>
               <Input
-                id="age"
-                type="number"
-                value={formData.age}
-                onChange={(e) => handleInputChange("age", e.target.value)}
-                className="mt-1 bg-secondary border-border text-foreground w-24 h-9 sm:h-10"
-                placeholder="25"
+                id="dateOfBirth"
+                type="date"
+                value={formData.dateOfBirth}
+                onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+                className="mt-1 bg-secondary border-border text-foreground w-44 h-9 sm:h-10"
+                max={new Date().toISOString().split('T')[0]}
               />
+              <p className="text-xs text-muted-foreground mt-1">Your age will be calculated automatically</p>
             </div>
 
             <div>

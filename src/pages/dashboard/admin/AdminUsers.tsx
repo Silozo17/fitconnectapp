@@ -52,6 +52,7 @@ interface ClientUser {
   first_name: string | null;
   last_name: string | null;
   age: number | null;
+  date_of_birth: string | null;
   onboarding_completed: boolean;
   created_at: string;
   email?: string;

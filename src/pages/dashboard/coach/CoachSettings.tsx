@@ -102,6 +102,7 @@ interface CoachProfile {
   location_place_id: string | null;
   gym_affiliation: string | null;
   experience_years: number | null;
+  experience_start_date: string | null;
   hourly_rate: number | null;
   currency: string | null;
   coach_types: string[] | null;
@@ -268,6 +269,7 @@ const CoachSettings = () => {
     location_place_id: null,
     gym_affiliation: "",
     experience_years: null,
+    experience_start_date: null,
     hourly_rate: null,
     currency: "GBP",
     coach_types: [],
@@ -306,7 +308,7 @@ const CoachSettings = () => {
 
       const { data, error } = await supabase
         .from("coach_profiles")
-        .select("id, display_name, username, bio, location, location_city, location_region, location_country, location_country_code, location_lat, location_lng, location_place_id, gym_affiliation, experience_years, hourly_rate, currency, coach_types, online_available, in_person_available, profile_image_url, card_image_url, subscription_tier, is_verified, who_i_work_with, marketplace_visible, facebook_url, instagram_url, tiktok_url, x_url, threads_url, linkedin_url, youtube_url")
+        .select("id, display_name, username, bio, location, location_city, location_region, location_country, location_country_code, location_lat, location_lng, location_place_id, gym_affiliation, experience_years, experience_start_date, hourly_rate, currency, coach_types, online_available, in_person_available, profile_image_url, card_image_url, subscription_tier, is_verified, who_i_work_with, marketplace_visible, facebook_url, instagram_url, tiktok_url, x_url, threads_url, linkedin_url, youtube_url")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -332,6 +334,7 @@ const CoachSettings = () => {
         location_place_id: coachData.location_place_id || null,
         gym_affiliation: coachData.gym_affiliation || "",
         experience_years: coachData.experience_years,
+        experience_start_date: coachData.experience_start_date || null,
         hourly_rate: coachData.hourly_rate,
         currency: coachData.currency || "GBP",
         coach_types: coachData.coach_types || [],
@@ -374,7 +377,10 @@ const CoachSettings = () => {
         location_lng: profile.location_lng,
         location_place_id: profile.location_place_id,
         gym_affiliation: profile.gym_affiliation || null,
-        experience_years: profile.experience_years,
+        // Calculate experience_start_date from years when saving
+        experience_start_date: profile.experience_years 
+          ? new Date(new Date().setFullYear(new Date().getFullYear() - profile.experience_years)).toISOString().split('T')[0]
+          : profile.experience_start_date,
         hourly_rate: profile.hourly_rate,
         currency: profile.currency || "GBP",
         coach_types: profile.coach_types,
@@ -724,6 +730,7 @@ const CoachSettings = () => {
                           className="mt-1"
                           placeholder="e.g., 5"
                         />
+                        <p className="text-xs text-muted-foreground mt-1">Auto-increments each year</p>
                       </div>
                     </div>
 
