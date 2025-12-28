@@ -115,20 +115,22 @@ const CoachPlans = () => {
           <h1 className="font-display text-2xl font-bold text-foreground">{t("plansPage.title")}</h1>
           <p className="text-muted-foreground">{t("plansPage.subtitle")}</p>
         </div>
-        <div className="flex gap-3">
-          <Link to="/dashboard/coach/plans/nutrition/new">
-            <Button className="bg-emerald-600 text-white hover:bg-emerald-700">
-              <Apple className="w-4 h-4 mr-2" />
-              Create Meal Plan
-            </Button>
-          </Link>
-          <Link to="/dashboard/coach/plans/new">
-            <Button variant="destructive">
-              <Dumbbell className="w-4 h-4 mr-2" />
-              Create Training Plan
-            </Button>
-          </Link>
-        </div>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
+            <Link to="/dashboard/coach/plans/nutrition/new" className="w-full sm:w-auto">
+              <Button className="bg-emerald-600 text-white hover:bg-emerald-700 w-full sm:w-auto">
+                <Apple className="w-4 h-4 mr-2" />
+                <span className="sm:hidden">Meal Plan</span>
+                <span className="hidden sm:inline">Create Meal Plan</span>
+              </Button>
+            </Link>
+            <Link to="/dashboard/coach/plans/new" className="w-full sm:w-auto">
+              <Button variant="destructive" className="w-full sm:w-auto">
+                <Dumbbell className="w-4 h-4 mr-2" />
+                <span className="sm:hidden">Training Plan</span>
+                <span className="hidden sm:inline">Create Training Plan</span>
+              </Button>
+            </Link>
+          </div>
       </div>
 
       {/* Stats */}
