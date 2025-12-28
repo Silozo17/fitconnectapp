@@ -12,7 +12,8 @@ export interface ClientProfileData {
   weight_kg: number | null;
   height_cm: number | null;
   age: number | null;
-  gender_pronouns: string | null;
+  gender: string | null;
+  activity_level: string | null;
 }
 
 export function useClientProfileData() {
@@ -25,7 +26,7 @@ export function useClientProfileData() {
       
       const { data, error } = await supabase
         .from('client_profiles')
-        .select('id, user_id, username, first_name, last_name, avatar_url, weight_kg, height_cm, age, gender_pronouns')
+        .select('id, user_id, username, first_name, last_name, avatar_url, weight_kg, height_cm, age, gender, activity_level')
         .eq('user_id', user.id)
         .maybeSingle();
       

@@ -116,6 +116,7 @@ export const AIMacroCalculator = ({
     setGender(formData.gender);
     setWeightKg(formData.weightKg);
     setHeightCm(formData.heightCm);
+    setActivityLevel(formData.activityLevel);
     setDietaryPreference(formData.dietaryPreference);
     setGoal(formData.goal);
 
