@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { DocNav } from "./DocNav";
 import { Button } from "@/components/ui/button";
@@ -15,8 +14,9 @@ import {
 } from "@/components/ui/breadcrumb";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { SEOHead, createBreadcrumbSchema } from "@/components/shared/SEOHead";
 
-interface BreadcrumbItem {
+interface BreadcrumbItemType {
   label: string;
   href?: string;
 }
@@ -24,21 +24,38 @@ interface BreadcrumbItem {
 interface DocsLayoutProps {
   title: string;
   description?: string;
-  breadcrumbs?: BreadcrumbItem[];
+  breadcrumbs?: BreadcrumbItemType[];
   children: React.ReactNode;
   noIndex?: boolean;
 }
 
+const BASE_URL = "https://getfitconnect.co.uk";
+
 export function DocsLayout({ title, description, breadcrumbs = [], children, noIndex = false }: DocsLayoutProps) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const location = useLocation();
+  
+  // Build breadcrumb schema for SEO
+  const breadcrumbSchemaItems = [
+    { name: "Home", url: BASE_URL },
+    { name: "Help Center", url: `${BASE_URL}/docs` },
+    ...breadcrumbs.map(crumb => ({
+      name: crumb.label,
+      url: crumb.href ? `${BASE_URL}${crumb.href}` : `${BASE_URL}${location.pathname}`
+    }))
+  ];
 
   return (
     <>
-      <Helmet>
-        <title>{title} | FitConnect Help Center</title>
-        <meta name="description" content={description || `Learn about ${title} on FitConnect`} />
-        {noIndex && <meta name="robots" content="noindex, nofollow" />}
-      </Helmet>
+      <SEOHead
+        title={`${title} | FitConnect Help Center`}
+        description={description || `Learn about ${title} on FitConnect - comprehensive guides and tutorials for fitness coaches and clients.`}
+        canonicalPath={location.pathname}
+        ogType="article"
+        noIndex={noIndex}
+        keywords={["FitConnect", "help", "documentation", "guide", title.toLowerCase()]}
+        schema={createBreadcrumbSchema(breadcrumbSchemaItems)}
+      />
 
       <div className="min-h-screen flex flex-col bg-background">
         <Navbar />
@@ -83,7 +100,7 @@ export function DocsLayout({ title, description, breadcrumbs = [], children, noI
                           <Link to="/docs">Help Center</Link>
                         </BreadcrumbLink>
                       </BreadcrumbItem>
-                      {breadcrumbs.map((crumb, index) => (
+                      {breadcrumbs.map((crumb: BreadcrumbItemType, index: number) => (
                         <BreadcrumbItem key={index}>
                           <BreadcrumbSeparator />
                           {crumb.href ? (

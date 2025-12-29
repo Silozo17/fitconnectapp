@@ -57,12 +57,15 @@ Allow: /
 # Default Rules
 User-agent: *
 Allow: /
+
+# Protected routes - Disallow crawling
 Disallow: /dashboard/
 Disallow: /onboarding/
 Disallow: /auth
 Disallow: /subscribe
 Disallow: /api/
 Disallow: /checkout
+Disallow: /docs/admin/
 
 # Sitemaps - Dynamic sitemap from edge function
-Sitemap: https://ntgfihgneyoxxbwmtceq.supabase.co/functions/v1/sitemap
+Sitemap: https://getfitconnect.co.uk/sitemap.xml
