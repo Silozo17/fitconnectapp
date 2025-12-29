@@ -28,6 +28,15 @@ interface FoodSearchModalProps {
   mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack';
   onFoodSelected: (food: FoodResult, quantity: number) => void;
   clientAllergens?: string[];
+  initialFood?: {
+    external_id: string;
+    name: string;
+    calories_per_100g: number;
+    protein_g: number;
+    carbs_g: number;
+    fat_g: number;
+    allergens?: string[];
+  } | null;
 }
 
 const MEAL_LABELS = {
@@ -43,6 +52,7 @@ export const FoodSearchModal = ({
   mealType,
   onFoodSelected,
   clientAllergens = [],
+  initialFood = null,
 }: FoodSearchModalProps) => {
   const [query, setQuery] = useState("");
   const [selectedFood, setSelectedFood] = useState<AutocompleteSuggestion | null>(null);
@@ -58,6 +68,7 @@ export const FoodSearchModal = ({
 
   const hasSearched = query.length >= 2;
 
+  // Reset state when modal closes
   useEffect(() => {
     if (!open) {
       setQuery("");
@@ -65,6 +76,26 @@ export const FoodSearchModal = ({
       setQuantity(100);
     }
   }, [open]);
+
+  // Pre-populate with scanned food when provided
+  useEffect(() => {
+    if (open && initialFood) {
+      setSelectedFood({
+        external_id: initialFood.external_id,
+        barcode: null,
+        product_name: initialFood.name,
+        brand: null,
+        calories_per_100g: initialFood.calories_per_100g,
+        protein_g: initialFood.protein_g,
+        carbs_g: initialFood.carbs_g,
+        fat_g: initialFood.fat_g,
+        image_url: null,
+        food_type: 'product',
+        allergens: initialFood.allergens || [],
+      });
+      setQuantity(100);
+    }
+  }, [open, initialFood]);
 
   const handleSelect = (suggestion: AutocompleteSuggestion) => {
     setSelectedFood(suggestion);
@@ -296,8 +327,10 @@ export const FoodSearchModal = ({
                                 : "bg-muted/50 hover:bg-muted"
                             )}
                           >
-                            <div className="flex items-center gap-2">
-                              <p className="font-medium text-sm truncate flex-1">{suggestion.product_name}</p>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <p className="font-medium text-sm flex-1 break-words" style={{ overflowWrap: 'anywhere' }}>
+                                {suggestion.product_name}
+                              </p>
                               {hasConflict && (
                                 <AlertTriangle className="w-4 h-4 text-warning shrink-0" />
                               )}

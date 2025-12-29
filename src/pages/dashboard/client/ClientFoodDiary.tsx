@@ -5,7 +5,7 @@ import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout"
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useFoodDiary, useAddFoodDiaryEntry, useDeleteFoodDiaryEntry, calculateDailyMacros, groupEntriesByMeal, FoodDiaryInsert } from "@/hooks/useFoodDiary";
+import { useFoodDiary, useAddFoodDiaryEntry, useDeleteFoodDiaryEntry, useUpdateFoodDiaryEntry, calculateDailyMacros, groupEntriesByMeal, FoodDiaryInsert, FoodDiaryEntry } from "@/hooks/useFoodDiary";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
@@ -13,6 +13,7 @@ import { ChevronLeft, ChevronRight, Plus, Utensils, Trash2, ScanBarcode, Search,
 import { Progress } from "@/components/ui/progress";
 import { BarcodeScannerModal } from "@/components/nutrition/BarcodeScannerModal";
 import { FoodSearchModal } from "@/components/nutrition/FoodSearchModal";
+import { EditFoodEntryModal } from "@/components/nutrition/EditFoodEntryModal";
 import { cn } from "@/lib/utils";
 
 const MEAL_TYPES = [
@@ -28,6 +29,8 @@ const ClientFoodDiary = () => {
   const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
   const [showFoodSearch, setShowFoodSearch] = useState(false);
   const [activeMealType, setActiveMealType] = useState<'breakfast' | 'lunch' | 'dinner' | 'snack'>('breakfast');
+  const [scannedFood, setScannedFood] = useState<any>(null);
+  const [editingEntry, setEditingEntry] = useState<FoodDiaryEntry | null>(null);
 
   // Get client profile for ID and targets
   const { data: clientProfile } = useQuery({
@@ -50,6 +53,7 @@ const ClientFoodDiary = () => {
   const { data: entries = [], isLoading } = useFoodDiary(clientProfile?.id, selectedDate);
   const addEntry = useAddFoodDiaryEntry();
   const deleteEntry = useDeleteFoodDiaryEntry();
+  const updateEntry = useUpdateFoodDiaryEntry();
 
   const dailyMacros = calculateDailyMacros(entries);
   const groupedEntries = groupEntriesByMeal(entries);
@@ -76,6 +80,23 @@ const ClientFoodDiary = () => {
     };
 
     addEntry.mutate(entry);
+    // Clear scanned food after adding
+    setScannedFood(null);
+  };
+
+  const handleEditSave = (updates: { serving_size_g: number; calories: number; protein_g: number; carbs_g: number; fat_g: number }) => {
+    if (!editingEntry) return;
+    updateEntry.mutate({
+      id: editingEntry.id,
+      ...updates,
+    });
+    setEditingEntry(null);
+  };
+
+  const handleEditDelete = () => {
+    if (!editingEntry) return;
+    deleteEntry.mutate(editingEntry.id);
+    setEditingEntry(null);
   };
 
   const targets = nutritionTargets || { calories: 2000, protein: 150, carbs: 200, fat: 65 };
@@ -176,6 +197,7 @@ const ClientFoodDiary = () => {
               className="rounded-full shadow-lg h-12 w-12"
               onClick={() => {
                 setActiveMealType('snack');
+                setScannedFood(null);
                 setShowFoodSearch(true);
               }}
             >
@@ -221,6 +243,7 @@ const ClientFoodDiary = () => {
                             variant="ghost"
                             onClick={() => {
                               setActiveMealType(meal.id);
+                              setScannedFood(null);
                               setShowFoodSearch(true);
                             }}
                           >
@@ -235,7 +258,8 @@ const ClientFoodDiary = () => {
                           {mealEntries.map((entry) => (
                             <div
                               key={entry.id}
-                              className="flex items-center justify-between p-3 rounded-xl bg-muted/50 group"
+                              onClick={() => setEditingEntry(entry)}
+                              className="flex items-center justify-between p-3 rounded-xl bg-muted/50 group cursor-pointer hover:bg-muted/70 transition-colors"
                             >
                               <div className="flex-1 min-w-0">
                                 <p className="font-medium truncate">{entry.food_name}</p>
@@ -256,7 +280,10 @@ const ClientFoodDiary = () => {
                                   size="icon"
                                   variant="ghost"
                                   className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
-                                  onClick={() => deleteEntry.mutate(entry.id)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    deleteEntry.mutate(entry.id);
+                                  }}
                                 >
                                   <Trash2 className="w-4 h-4 text-destructive" />
                                 </Button>
@@ -283,15 +310,35 @@ const ClientFoodDiary = () => {
         <BarcodeScannerModal
           open={showBarcodeScanner}
           onOpenChange={setShowBarcodeScanner}
-          onFoodFound={(food) => handleFoodFound(food, activeMealType)}
+          onFoodFound={(food) => {
+            // Store scanned food and open quantity modal instead of adding directly
+            setScannedFood(food);
+            setShowBarcodeScanner(false);
+            setActiveMealType('snack'); // Default to snack for scanned items
+            setShowFoodSearch(true);
+          }}
         />
 
         <FoodSearchModal
           open={showFoodSearch}
-          onOpenChange={setShowFoodSearch}
+          onOpenChange={(open) => {
+            setShowFoodSearch(open);
+            if (!open) setScannedFood(null);
+          }}
           mealType={activeMealType}
           onFoodSelected={(food, quantity) => handleFoodFound(food, activeMealType, quantity)}
+          initialFood={scannedFood}
         />
+
+        {editingEntry && (
+          <EditFoodEntryModal
+            open={!!editingEntry}
+            onOpenChange={(open) => !open && setEditingEntry(null)}
+            entry={editingEntry}
+            onSave={handleEditSave}
+            onDelete={handleEditDelete}
+          />
+        )}
       </ClientDashboardLayout>
     </>
   );

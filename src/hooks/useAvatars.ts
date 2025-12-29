@@ -304,6 +304,6 @@ export function getAvatarImageUrl(slug: string): string {
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join('_');
   
-  const { data } = supabase.storage.from('avatars').getPublicUrl(`${filename}.png`);
+  const { data } = supabase.storage.from('avatars').getPublicUrl(`${filename}.webp`);
   return data.publicUrl;
 }
