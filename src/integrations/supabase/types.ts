@@ -1107,6 +1107,7 @@ export type Database = {
         Row: {
           activity_level: string | null
           age: number | null
+          allergen_preferences: Json | null
           allergies: string[] | null
           avatar_url: string | null
           body_measurements: Json | null
@@ -1145,6 +1146,7 @@ export type Database = {
         Insert: {
           activity_level?: string | null
           age?: number | null
+          allergen_preferences?: Json | null
           allergies?: string[] | null
           avatar_url?: string | null
           body_measurements?: Json | null
@@ -1183,6 +1185,7 @@ export type Database = {
         Update: {
           activity_level?: string | null
           age?: number | null
+          allergen_preferences?: Json | null
           allergies?: string[] | null
           avatar_url?: string | null
           body_measurements?: Json | null
@@ -3559,6 +3562,98 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      food_diary: {
+        Row: {
+          calories: number | null
+          carbs_g: number | null
+          client_id: string
+          created_at: string | null
+          fat_g: number | null
+          fatsecret_id: string | null
+          fiber_g: number | null
+          food_id: string | null
+          food_name: string
+          id: string
+          logged_at: string
+          meal_type: string
+          notes: string | null
+          protein_g: number | null
+          serving_size_g: number | null
+          servings: number | null
+          sugar_g: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          calories?: number | null
+          carbs_g?: number | null
+          client_id: string
+          created_at?: string | null
+          fat_g?: number | null
+          fatsecret_id?: string | null
+          fiber_g?: number | null
+          food_id?: string | null
+          food_name: string
+          id?: string
+          logged_at?: string
+          meal_type: string
+          notes?: string | null
+          protein_g?: number | null
+          serving_size_g?: number | null
+          servings?: number | null
+          sugar_g?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          calories?: number | null
+          carbs_g?: number | null
+          client_id?: string
+          created_at?: string | null
+          fat_g?: number | null
+          fatsecret_id?: string | null
+          fiber_g?: number | null
+          food_id?: string | null
+          food_name?: string
+          id?: string
+          logged_at?: string
+          meal_type?: string
+          notes?: string | null
+          protein_g?: number | null
+          serving_size_g?: number | null
+          servings?: number | null
+          sugar_g?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "food_diary_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "food_diary_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "food_diary_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "food_diary_food_id_fkey"
+            columns: ["food_id"]
+            isOneToOne: false
+            referencedRelation: "foods"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       foods: {
         Row: {
