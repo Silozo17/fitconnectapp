@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Loader2, AlertTriangle, Plus, Minus } from "lucide-react";
-import { AutocompleteSuggestion, suggestionToFood } from "@/hooks/useOpenFoodFacts";
-import { useOpenFoodFactsInfinite } from "@/hooks/useOpenFoodFactsInfinite";
+import { Badge } from "@/components/ui/badge";
+import { Search, Loader2, AlertTriangle, Plus, Minus, Leaf, Package } from "lucide-react";
+import { useUnifiedFoodSearch, UnifiedFoodResult } from "@/hooks/useUnifiedFoodSearch";
 import { useUserLocalePreference } from "@/hooks/useUserLocalePreference";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +20,8 @@ interface FoodResult {
   serving_size_g?: number;
   serving_description?: string;
   allergens?: string[];
+  source?: string;
+  food_type?: string;
 }
 
 interface FoodSearchModalProps {
@@ -55,20 +57,11 @@ export const FoodSearchModal = ({
   initialFood = null,
 }: FoodSearchModalProps) => {
   const [query, setQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
-  const [selectedFood, setSelectedFood] = useState<AutocompleteSuggestion | null>(null);
+  const [selectedFood, setSelectedFood] = useState<UnifiedFoodResult | null>(null);
   const [quantity, setQuantity] = useState(100);
   const { countryPreference } = useUserLocalePreference();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
-
-  // Debounce query
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedQuery(query);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [query]);
 
   const { 
     data, 
@@ -76,9 +69,9 @@ export const FoodSearchModal = ({
     isFetchingNextPage,
     hasNextPage,
     fetchNextPage 
-  } = useOpenFoodFactsInfinite(
-    debouncedQuery,
-    open && debouncedQuery.length >= 2,
+  } = useUnifiedFoodSearch(
+    query,
+    open && query.length >= 2,
     countryPreference,
     10
   );
@@ -87,12 +80,12 @@ export const FoodSearchModal = ({
   const results = useMemo(() => {
     if (!data?.pages) return [];
     const seen = new Set<string>();
-    const flattened: AutocompleteSuggestion[] = [];
+    const flattened: UnifiedFoodResult[] = [];
     for (const page of data.pages) {
-      for (const suggestion of page.suggestions) {
-        if (!seen.has(suggestion.external_id)) {
-          seen.add(suggestion.external_id);
-          flattened.push(suggestion);
+      for (const result of page.results) {
+        if (!seen.has(result.external_id)) {
+          seen.add(result.external_id);
+          flattened.push(result);
         }
       }
     }
@@ -117,7 +110,7 @@ export const FoodSearchModal = ({
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const hasSearched = debouncedQuery.length >= 2;
+  const hasSearched = query.length >= 2;
 
   // Reset state when modal closes
   useEffect(() => {
@@ -142,35 +135,34 @@ export const FoodSearchModal = ({
         fat_g: initialFood.fat_g,
         image_url: null,
         food_type: 'product',
+        source: 'openfoodfacts',
         allergens: initialFood.allergens || [],
       });
       setQuantity(100);
     }
   }, [open, initialFood]);
 
-  const handleSelect = (suggestion: AutocompleteSuggestion) => {
-    setSelectedFood(suggestion);
+  const handleSelect = (result: UnifiedFoodResult) => {
+    setSelectedFood(result);
     setQuantity(100);
   };
 
   const handleConfirmAdd = () => {
     if (!selectedFood) return;
     
-    const food = suggestionToFood(selectedFood);
-    const multiplier = quantity / 100;
-    
     onFoodSelected({
-      external_id: food.external_id,
-      name: food.name,
-      brand_name: food.brand_name,
-      calories_per_100g: food.calories_per_100g,
-      protein_g: food.protein_g,
-      carbs_g: food.carbs_g,
-      fat_g: food.fat_g,
-      fiber_g: food.fiber_g,
+      external_id: selectedFood.external_id,
+      name: selectedFood.product_name,
+      brand_name: selectedFood.brand,
+      calories_per_100g: selectedFood.calories_per_100g || 0,
+      protein_g: selectedFood.protein_g || 0,
+      carbs_g: selectedFood.carbs_g || 0,
+      fat_g: selectedFood.fat_g || 0,
+      fiber_g: selectedFood.fiber_g || undefined,
       serving_size_g: quantity,
-      serving_description: food.serving_description,
-      allergens: food.allergens,
+      allergens: selectedFood.allergens,
+      source: selectedFood.source,
+      food_type: selectedFood.food_type,
     }, quantity);
     onOpenChange(false);
   };
@@ -188,9 +180,9 @@ export const FoodSearchModal = ({
     setQuantity(prev => Math.max(0, Math.round((prev + delta) * 10) / 10));
   };
 
-  const hasAllergenConflict = (suggestion: AutocompleteSuggestion) => {
-    if (!suggestion.allergens || !clientAllergens.length) return false;
-    return suggestion.allergens.some(a => 
+  const hasAllergenConflict = (result: UnifiedFoodResult) => {
+    if (!result.allergens || !clientAllergens.length) return false;
+    return result.allergens.some(a => 
       clientAllergens.some(ca => 
         a.toLowerCase().includes(ca.toLowerCase()) || 
         ca.toLowerCase().includes(a.toLowerCase())
@@ -235,7 +227,20 @@ export const FoodSearchModal = ({
           <div className="flex-1 flex flex-col p-4 gap-4 overflow-y-auto">
             {/* Selected Food Info */}
             <div className="bg-muted/50 rounded-xl p-4">
-              <p className="font-medium text-sm">{selectedFood.product_name}</p>
+              <div className="flex items-start gap-2">
+                <p className="font-medium text-sm flex-1">{selectedFood.product_name}</p>
+                {selectedFood.food_type === 'generic' ? (
+                  <Badge variant="secondary" className="text-xs shrink-0">
+                    <Leaf className="w-3 h-3 mr-1" />
+                    Generic
+                  </Badge>
+                ) : selectedFood.brand && (
+                  <Badge variant="outline" className="text-xs shrink-0">
+                    <Package className="w-3 h-3 mr-1" />
+                    Branded
+                  </Badge>
+                )}
+              </div>
               {selectedFood.brand && (
                 <p className="text-xs text-muted-foreground mt-0.5">{selectedFood.brand}</p>
               )}
@@ -347,7 +352,7 @@ export const FoodSearchModal = ({
             <div className="relative shrink-0 px-4 py-3 border-b border-border/30">
               <Search className="absolute left-7 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search foods (e.g., chicken, rice)"
+                placeholder="Search foods (e.g., apple, chicken breast)"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="pl-10 h-10"
@@ -367,12 +372,13 @@ export const FoodSearchModal = ({
                   </div>
                 ) : results.length > 0 ? (
                   <div className="space-y-2">
-                    {results.map((suggestion) => {
-                      const hasConflict = hasAllergenConflict(suggestion);
+                    {results.map((result) => {
+                      const hasConflict = hasAllergenConflict(result);
+                      const isGeneric = result.food_type === 'generic';
                       return (
                         <button
-                          key={suggestion.external_id}
-                          onClick={() => handleSelect(suggestion)}
+                          key={result.external_id}
+                          onClick={() => handleSelect(result)}
                           className={cn(
                             "w-full text-left p-3 rounded-xl transition-colors",
                             hasConflict 
@@ -380,31 +386,41 @@ export const FoodSearchModal = ({
                               : "bg-muted/50 hover:bg-muted"
                           )}
                         >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <p className="font-medium text-sm flex-1 break-words" style={{ overflowWrap: 'anywhere' }}>
-                              {suggestion.product_name}
-                            </p>
+                          <div className="flex items-start gap-2 min-w-0">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <p className="font-medium text-sm break-words" style={{ overflowWrap: 'anywhere' }}>
+                                  {result.product_name}
+                                </p>
+                                {isGeneric && (
+                                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
+                                    <Leaf className="w-2.5 h-2.5 mr-0.5" />
+                                    Generic
+                                  </Badge>
+                                )}
+                              </div>
+                              {result.brand && (
+                                <p className="text-xs text-muted-foreground truncate mt-0.5">
+                                  {result.brand}
+                                </p>
+                              )}
+                            </div>
                             {hasConflict && (
-                              <AlertTriangle className="w-4 h-4 text-warning shrink-0" />
+                              <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
                             )}
                           </div>
-                          {suggestion.brand && (
-                            <p className="text-xs text-muted-foreground truncate mt-0.5">
-                              {suggestion.brand}
-                            </p>
-                          )}
                           <div className="flex items-center gap-2 mt-1.5 text-xs text-muted-foreground">
                             <span>per 100g:</span>
-                            <span className="font-medium text-foreground">{Math.round(suggestion.calories_per_100g || 0)} kcal</span>
+                            <span className="font-medium text-foreground">{Math.round(result.calories_per_100g || 0)} kcal</span>
                           </div>
                           <div className="flex items-center gap-3 mt-1 text-xs">
-                            <span><span className="text-blue-500 font-medium">{suggestion.protein_g || 0}g</span> P</span>
-                            <span><span className="text-amber-500 font-medium">{suggestion.carbs_g || 0}g</span> C</span>
-                            <span><span className="text-rose-500 font-medium">{suggestion.fat_g || 0}g</span> F</span>
+                            <span><span className="text-blue-500 font-medium">{result.protein_g || 0}g</span> P</span>
+                            <span><span className="text-amber-500 font-medium">{result.carbs_g || 0}g</span> C</span>
+                            <span><span className="text-rose-500 font-medium">{result.fat_g || 0}g</span> F</span>
                           </div>
-                          {hasConflict && suggestion.allergens && (
+                          {hasConflict && result.allergens && (
                             <p className="text-xs text-warning mt-2">
-                              Contains: {suggestion.allergens.join(', ')}
+                              Contains: {result.allergens.join(', ')}
                             </p>
                           )}
                         </button>

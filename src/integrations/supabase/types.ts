@@ -3670,6 +3670,7 @@ export type Database = {
           fiber_g: number | null
           food_id: string | null
           food_name: string
+          food_type: string | null
           id: string
           logged_at: string
           meal_type: string
@@ -3677,6 +3678,8 @@ export type Database = {
           protein_g: number | null
           serving_size_g: number | null
           servings: number | null
+          sodium_mg: number | null
+          source: string | null
           sugar_g: number | null
           updated_at: string | null
         }
@@ -3690,6 +3693,7 @@ export type Database = {
           fiber_g?: number | null
           food_id?: string | null
           food_name: string
+          food_type?: string | null
           id?: string
           logged_at?: string
           meal_type: string
@@ -3697,6 +3701,8 @@ export type Database = {
           protein_g?: number | null
           serving_size_g?: number | null
           servings?: number | null
+          sodium_mg?: number | null
+          source?: string | null
           sugar_g?: number | null
           updated_at?: string | null
         }
@@ -3710,6 +3716,7 @@ export type Database = {
           fiber_g?: number | null
           food_id?: string | null
           food_name?: string
+          food_type?: string | null
           id?: string
           logged_at?: string
           meal_type?: string
@@ -3717,6 +3724,8 @@ export type Database = {
           protein_g?: number | null
           serving_size_g?: number | null
           servings?: number | null
+          sodium_mg?: number | null
+          source?: string | null
           sugar_g?: number | null
           updated_at?: string | null
         }
@@ -3870,6 +3879,7 @@ export type Database = {
           product_name: string
           protein_g: number | null
           search_text: string
+          source: string | null
           updated_at: string
         }
         Insert: {
@@ -3890,6 +3900,7 @@ export type Database = {
           product_name: string
           protein_g?: number | null
           search_text: string
+          source?: string | null
           updated_at?: string
         }
         Update: {
@@ -3910,6 +3921,7 @@ export type Database = {
           product_name?: string
           protein_g?: number | null
           search_text?: string
+          source?: string | null
           updated_at?: string
         }
         Relationships: []
