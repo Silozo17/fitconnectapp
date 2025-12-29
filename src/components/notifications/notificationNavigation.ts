@@ -50,6 +50,7 @@ export const getNotificationRoute = (
         : null;
     
     case "badge_earned":
+    case "achievement_earned":
     case "challenge_completed":
     case "level_up":
       return `${baseRoute}/achievements`;
