@@ -19,7 +19,6 @@ import {
   Star,
   Kanban,
   Trophy,
-  Search,
   LogOut,
   User,
   Rocket,
@@ -28,7 +27,6 @@ import {
   Receipt,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { useCoachBadges } from "@/hooks/useSidebarBadges";
 import { SidebarBadge } from "@/components/shared/SidebarBadge";
@@ -209,7 +207,19 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
   }, [location.pathname]);
 
   const toggleGroup = useCallback((groupId: string) => {
-    setOpenGroups((prev) => ({ ...prev, [groupId]: !prev[groupId] }));
+    setOpenGroups((prev) => {
+      const newState = { ...prev, [groupId]: !prev[groupId] };
+      
+      // If opening the group, scroll it into view after animation
+      if (newState[groupId]) {
+        setTimeout(() => {
+          const element = document.getElementById(`nav-group-${groupId}`);
+          element?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 150);
+      }
+      
+      return newState;
+    });
   }, []);
 
   const renderMenuItem = (item: MenuItem, indented = false, isCollapsed = false) => {
@@ -315,6 +325,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
     return (
       <Collapsible
         key={group.id}
+        id={`nav-group-${group.id}`}
         open={isOpen}
         onOpenChange={() => toggleGroup(group.id)}
       >
@@ -422,21 +433,9 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
           </div>
 
           {/* View Switcher & Notifications - Mobile only */}
-          <div className="p-3 border-b border-sidebar-border flex items-center justify-between gap-2">
+          <div className="p-2 border-b border-sidebar-border flex items-center justify-between gap-2">
             <ViewSwitcher />
             <NotificationCenter />
-          </div>
-
-          {/* Search - Mobile only */}
-          <div className="p-3 border-b border-sidebar-border">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder={t("navigation.searchPlaceholder")}
-                autoFocus={false}
-                className="pl-10 bg-sidebar-accent/50 border-transparent focus:border-primary"
-              />
-            </div>
           </div>
 
           {/* Navigation */}
@@ -454,44 +453,48 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
             {renderMenuItem(settingsItem, false, false)}
           </div>
 
-          {/* Profile Section - Mobile only */}
-          <div className="p-3 border-t border-sidebar-border">
-            <div className="flex items-center gap-3 mb-3">
+          {/* Profile Section - Compact single row */}
+          <div className="p-2 border-t border-sidebar-border">
+            <div className="flex items-center justify-between gap-2">
               <UserAvatar 
                 src={avatarUrl} 
                 avatarSlug={selectedAvatar?.slug}
                 avatarRarity={selectedAvatar?.rarity as Rarity}
                 name={displayName} 
-                className="w-10 h-10" 
+                className="w-9 h-9" 
                 showRarityBorder
               />
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate text-sidebar-foreground">{displayName || t("navigation.roleCoach")}</p>
-                <p className="text-xs text-sidebar-foreground/60">{t("navigation.roleCoach")}</p>
+              <div className="flex items-center gap-1">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                      onClick={() => {
+                        navigate("/dashboard/profile");
+                        setMobileOpen(false);
+                      }}
+                    >
+                      <User className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>{t("navigation.myProfile")}</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 text-destructive hover:text-destructive hover:bg-sidebar-accent"
+                      onClick={() => signOut()}
+                    >
+                      <LogOut className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>{t("navigation.signOut")}</TooltipContent>
+                </Tooltip>
               </div>
-            </div>
-            <div className="space-y-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
-                onClick={() => {
-                  navigate("/dashboard/profile");
-                  setMobileOpen(false);
-                }}
-              >
-                <User className="w-4 h-4 mr-2" />
-                {t("navigation.myProfile")}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start text-destructive hover:text-destructive hover:bg-sidebar-accent"
-                onClick={() => signOut()}
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                {t("navigation.signOut")}
-              </Button>
             </div>
           </div>
         </SheetContent>

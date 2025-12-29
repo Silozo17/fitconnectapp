@@ -3,13 +3,12 @@ import { NavLink } from "@/components/NavLink";
 import { 
   LayoutDashboard, Users, Dumbbell, Settings, ChevronLeft, ChevronRight, 
   UsersRound, DollarSign, BarChart3,
-  MessageSquare, Shield, Trophy, FileText, Search, LogOut, User, Rocket,
+  MessageSquare, Shield, Trophy, FileText, LogOut, User, Rocket,
   MessageSquarePlus, Plug, ClipboardList
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { useAdminBadges } from "@/hooks/useSidebarBadges";
@@ -24,6 +23,12 @@ import {
   Sheet,
   SheetContent,
 } from "@/components/ui/sheet";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import ViewSwitcher from "@/components/admin/ViewSwitcher";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 
@@ -175,7 +180,7 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }: AdminSidebarProps) => {
   );
 
   return (
-    <>
+    <TooltipProvider>
       {/* Desktop Sidebar */}
       <aside
         className={cn(
@@ -201,21 +206,9 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }: AdminSidebarProps) => {
           </div>
 
           {/* View Switcher & Notifications - Mobile only */}
-          <div className="p-3 border-b border-border flex items-center justify-between gap-2">
+          <div className="p-2 border-b border-border flex items-center justify-between gap-2">
             <ViewSwitcher />
             <NotificationCenter />
-          </div>
-
-          {/* Search - Mobile only */}
-          <div className="p-3 border-b border-border">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder={t('users.search')}
-                autoFocus={false}
-                className="pl-10 bg-muted/50 border-transparent focus:border-primary"
-              />
-            </div>
           </div>
 
           {/* Navigation */}
@@ -236,49 +229,53 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }: AdminSidebarProps) => {
             {bottomNavItems.map((item) => renderNavItem(item, false))}
           </div>
 
-          {/* Profile Section - Mobile only */}
-          <div className="p-3 border-t border-border">
-            <div className="flex items-center gap-3 mb-3">
+          {/* Profile Section - Compact single row */}
+          <div className="p-2 border-t border-border">
+            <div className="flex items-center justify-between gap-2">
               <UserAvatar 
                 src={avatarUrl} 
                 avatarSlug={selectedAvatar?.slug}
                 avatarRarity={selectedAvatar?.rarity as Rarity}
                 name={displayName} 
-                className="w-10 h-10" 
+                className="w-9 h-9" 
                 showRarityBorder
               />
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate">{displayName || "Admin"}</p>
-                <p className="text-xs text-muted-foreground capitalize">{role}</p>
+              <div className="flex items-center gap-1">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9"
+                      onClick={() => {
+                        navigate("/dashboard/profile");
+                        setMobileOpen(false);
+                      }}
+                    >
+                      <User className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>{t('sidebar.myProfile')}</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 text-destructive hover:text-destructive"
+                      onClick={() => signOut()}
+                    >
+                      <LogOut className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>{t('sidebar.signOut')}</TooltipContent>
+                </Tooltip>
               </div>
-            </div>
-            <div className="space-y-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start"
-                onClick={() => {
-                  navigate("/dashboard/profile");
-                  setMobileOpen(false);
-                }}
-              >
-                <User className="w-4 h-4 mr-2" />
-                {t('sidebar.myProfile')}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start text-destructive hover:text-destructive"
-                onClick={() => signOut()}
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                {t('sidebar.signOut')}
-              </Button>
             </div>
           </div>
         </SheetContent>
       </Sheet>
-    </>
+    </TooltipProvider>
   );
 };
 
