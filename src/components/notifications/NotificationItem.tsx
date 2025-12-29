@@ -7,7 +7,8 @@ import {
   FileText, 
   CreditCard,
   Bell,
-  X
+  X,
+  Trophy
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,11 @@ const getNotificationIcon = (type: string) => {
       return FileText;
     case "payment_received":
       return CreditCard;
+    case "badge_earned":
+    case "achievement_earned":
+    case "challenge_completed":
+    case "level_up":
+      return Trophy;
     default:
       return Bell;
   }
@@ -64,6 +70,11 @@ const getNotificationColor = (type: string) => {
       return "text-purple-500 bg-purple-500/10";
     case "payment_received":
       return "text-emerald-500 bg-emerald-500/10";
+    case "badge_earned":
+    case "achievement_earned":
+    case "challenge_completed":
+    case "level_up":
+      return "text-amber-500 bg-amber-500/10";
     default:
       return "text-muted-foreground bg-muted";
   }

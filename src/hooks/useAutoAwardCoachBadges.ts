@@ -30,13 +30,30 @@ export function useAutoAwardCoachBadges() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       if (data?.badge) {
+        // Create in-app notification for the coach
+        if (user?.id) {
+          await supabase.from("notifications").insert({
+            user_id: user.id,
+            type: "achievement_earned",
+            title: "🏅 Achievement Unlocked!",
+            message: `You earned the "${data.badge.name}" badge!`,
+            data: {
+              badge_id: data.badge_id,
+              badge_name: data.badge.name,
+              is_coach_badge: true,
+            },
+            read: false,
+          });
+        }
+
         toast.success(`🎉 Badge Earned: ${data.badge.name}!`, {
           description: "Check your achievements page to see all your badges.",
         });
       }
       queryClient.invalidateQueries({ queryKey: ["coach-badges"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
   });
 

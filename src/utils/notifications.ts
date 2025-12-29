@@ -9,6 +9,10 @@ export type NotificationType =
   | "session_scheduled"
   | "session_cancelled"
   | "message"
+  | "achievement_earned"
+  | "badge_earned"
+  | "challenge_completed"
+  | "level_up"
   | "general";
 
 interface CreateNotificationParams {
