@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,6 +8,7 @@ import { useOpenFoodFactsBarcode } from "@/hooks/useOpenFoodFacts";
 import { useUserLocalePreference } from "@/hooks/useUserLocalePreference";
 import { toast } from "sonner";
 import { enableScanningMode, disableScanningMode, isDespia } from "@/lib/despia";
+import { Html5Qrcode } from "html5-qrcode";
 
 interface BarcodeScannerModalProps {
   open: boolean;
@@ -38,102 +39,107 @@ export const BarcodeScannerModal = ({
   const [manualBarcode, setManualBarcode] = useState("");
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const scanIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const scannerContainerId = "barcode-scanner-container";
+  const isProcessingRef = useRef(false);
 
   const { countryPreference } = useUserLocalePreference();
   const barcodeMutation = useOpenFoodFactsBarcode();
   const isLoading = barcodeMutation.isPending;
 
-  const stopCamera = useCallback(() => {
-    if (scanIntervalRef.current) {
-      clearInterval(scanIntervalRef.current);
-      scanIntervalRef.current = null;
-    }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
+  const stopScanner = useCallback(async () => {
+    if (scannerRef.current) {
+      try {
+        const state = scannerRef.current.getState();
+        if (state === 2) { // Html5QrcodeScannerState.SCANNING
+          await scannerRef.current.stop();
+        }
+      } catch (e) {
+        // Scanner might already be stopped
+      }
+      scannerRef.current = null;
     }
     setIsScanning(false);
+    isProcessingRef.current = false;
     
-    // Disable Despia scanning mode
     if (isDespia()) {
       disableScanningMode();
     }
   }, []);
 
-  const startCamera = useCallback(async () => {
+  const startScanner = useCallback(async () => {
     setCameraError(null);
     
-    // Enable Despia scanning mode for optimal brightness
     if (isDespia()) {
       enableScanningMode();
     }
     
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { 
-          facingMode: "environment",
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        }
-      });
-      
-      streamRef.current = stream;
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-        setIsScanning(true);
-        
-        // Start barcode detection using BarcodeDetector API if available
-        if ('BarcodeDetector' in window) {
-          startBarcodeDetection();
-        } else {
-          setCameraError("Barcode detection not supported in this browser. Please enter barcode manually.");
-          setMode("manual");
-        }
-      }
-    } catch (error) {
-      console.error("Camera access error:", error);
-      setCameraError("Could not access camera. Please check permissions or enter barcode manually.");
-      setMode("manual");
-    }
-  }, []);
-
-  const startBarcodeDetection = useCallback(async () => {
-    if (!videoRef.current || !canvasRef.current) return;
+    // Wait for DOM to be ready
+    await new Promise(resolve => setTimeout(resolve, 100));
     
+    const container = document.getElementById(scannerContainerId);
+    if (!container) {
+      setCameraError("Scanner container not found");
+      return;
+    }
+
     try {
-      // @ts-ignore - BarcodeDetector is experimental
-      const barcodeDetector = new BarcodeDetector({
-        formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e']
-      });
+      // Create new scanner instance
+      scannerRef.current = new Html5Qrcode(scannerContainerId);
       
-      scanIntervalRef.current = setInterval(async () => {
-        if (!videoRef.current || videoRef.current.readyState !== 4) return;
-        
-        try {
-          const barcodes = await barcodeDetector.detect(videoRef.current);
-          if (barcodes.length > 0) {
-            const barcode = barcodes[0].rawValue;
-            handleBarcodeDetected(barcode);
+      const cameras = await Html5Qrcode.getCameras();
+      if (!cameras || cameras.length === 0) {
+        setCameraError("No cameras found on this device");
+        setMode("manual");
+        return;
+      }
+
+      // Prefer back camera
+      const backCamera = cameras.find(
+        cam => cam.label.toLowerCase().includes('back') || 
+               cam.label.toLowerCase().includes('rear') ||
+               cam.label.toLowerCase().includes('environment')
+      );
+      const cameraId = backCamera?.id || cameras[cameras.length - 1].id;
+
+      await scannerRef.current.start(
+        cameraId,
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 100 },
+          aspectRatio: 1.333,
+        },
+        (decodedText) => {
+          if (!isProcessingRef.current) {
+            isProcessingRef.current = true;
+            handleBarcodeDetected(decodedText);
           }
-        } catch (e) {
-          // Detection failed, continue scanning
+        },
+        () => {
+          // QR code scanning failure - ignore, keep scanning
         }
-      }, 200);
-    } catch (error) {
-      console.error("BarcodeDetector error:", error);
-      setCameraError("Barcode detection failed. Please enter barcode manually.");
+      );
+      
+      setIsScanning(true);
+    } catch (error: any) {
+      console.error("Scanner error:", error);
+      
+      let errorMessage = "Could not start camera scanner.";
+      if (error?.message?.includes("Permission")) {
+        errorMessage = "Camera permission denied. Please allow camera access or enter barcode manually.";
+      } else if (error?.message?.includes("NotAllowed")) {
+        errorMessage = "Camera access not allowed. Please check your browser settings.";
+      } else if (error?.message?.includes("NotFound")) {
+        errorMessage = "No camera found. Please enter barcode manually.";
+      }
+      
+      setCameraError(errorMessage);
       setMode("manual");
     }
   }, []);
 
   const handleBarcodeDetected = async (barcode: string) => {
-    stopCamera();
+    await stopScanner();
     await lookupBarcodeAndNotify(barcode);
   };
 
@@ -161,15 +167,17 @@ export const BarcodeScannerModal = ({
         toast.success(`Found: ${result.food.name}`);
       } else {
         toast.error("Product not found in database");
+        isProcessingRef.current = false;
         if (mode === "camera") {
-          startCamera();
+          startScanner();
         }
       }
     } catch (error) {
       console.error("Barcode lookup error:", error);
       toast.error("Failed to look up product");
+      isProcessingRef.current = false;
       if (mode === "camera") {
-        startCamera();
+        startScanner();
       }
     }
   };
@@ -183,21 +191,22 @@ export const BarcodeScannerModal = ({
 
   useEffect(() => {
     if (open && mode === "camera") {
-      startCamera();
+      startScanner();
     } else {
-      stopCamera();
+      stopScanner();
     }
     
     return () => {
-      stopCamera();
+      stopScanner();
     };
-  }, [open, mode, startCamera, stopCamera]);
+  }, [open, mode, startScanner, stopScanner]);
 
   useEffect(() => {
     if (!open) {
       setManualBarcode("");
       setCameraError(null);
       setMode("camera");
+      isProcessingRef.current = false;
     }
   }, [open]);
 
@@ -209,6 +218,9 @@ export const BarcodeScannerModal = ({
             <Camera className="w-5 h-5" />
             Scan Barcode
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Scan a product barcode to look up nutritional information
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -243,35 +255,22 @@ export const BarcodeScannerModal = ({
                 </div>
               ) : (
                 <>
-                  <div className="relative aspect-[4/3] bg-black rounded-lg overflow-hidden">
-                    <video
-                      ref={videoRef}
-                      className="w-full h-full object-cover"
-                      playsInline
-                      muted
-                    />
-                    <canvas ref={canvasRef} className="hidden" />
-                    
-                    {/* Scanning overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="w-64 h-24 border-2 border-primary rounded-lg relative">
-                        <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-primary rounded-tl" />
-                        <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-primary rounded-tr" />
-                        <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-primary rounded-bl" />
-                        <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-primary rounded-br" />
-                        
-                        {isScanning && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-full h-0.5 bg-primary/50 animate-pulse" />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                  <div 
+                    id={scannerContainerId}
+                    className="relative aspect-[4/3] bg-black rounded-lg overflow-hidden [&_video]:!object-cover [&_video]:!rounded-lg"
+                  />
                   
-                  <p className="text-xs text-muted-foreground text-center mt-2">
-                    Position the barcode within the frame
-                  </p>
+                  {isScanning && (
+                    <p className="text-xs text-muted-foreground text-center mt-2">
+                      Position the barcode within the frame
+                    </p>
+                  )}
+                  
+                  {!isScanning && !cameraError && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
+                      <Loader2 className="w-8 h-8 animate-spin text-white" />
+                    </div>
+                  )}
                 </>
               )}
             </div>
