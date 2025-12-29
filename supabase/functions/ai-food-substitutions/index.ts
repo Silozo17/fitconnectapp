@@ -7,6 +7,9 @@ const corsHeaders = {
 
 const FATSECRET_API_URL = 'https://platform.fatsecret.com/rest/server.api';
 
+// Supported FatSecret regions
+const SUPPORTED_REGIONS = ['GB', 'US', 'AU', 'CA', 'IE', 'NZ', 'FR', 'DE', 'IT', 'ES', 'PL'];
+
 // =====================================
 // OAUTH 1.0 FOR FATSECRET
 // =====================================
@@ -63,6 +66,27 @@ async function generateOAuthParams(
 // TYPES
 // =====================================
 
+interface FatSecretServingV4 {
+  serving_id: string;
+  serving_description: string;
+  metric_serving_amount?: string;
+  metric_serving_unit?: string;
+  is_default?: string;
+  calories?: string;
+  carbohydrate?: string;
+  protein?: string;
+  fat?: string;
+  fiber?: string;
+}
+
+interface FatSecretFoodV4 {
+  food_id: string;
+  food_name: string;
+  food_type: string;
+  brand_name?: string;
+  servings?: { serving: FatSecretServingV4 | FatSecretServingV4[] };
+}
+
 interface FatSecretFood {
   fatsecret_id: string;
   name: string;
@@ -94,15 +118,34 @@ interface ValidatedSubstitution {
 }
 
 // =====================================
-// FATSECRET SEARCH
+// FATSECRET SEARCH (V4)
 // =====================================
 
-async function searchFatSecret(query: string, maxResults: number = 10): Promise<FatSecretFood[]> {
-  const apiParams = {
-    method: 'foods.search',
+function normalizeServingToGrams(serving: FatSecretServingV4): number {
+  if (serving.metric_serving_amount && serving.metric_serving_unit) {
+    const amount = parseFloat(serving.metric_serving_amount);
+    const unit = serving.metric_serving_unit.toLowerCase();
+    if (unit === 'g') return amount;
+    if (unit === 'ml') return amount;
+    if (unit === 'kg') return amount * 1000;
+    if (unit === 'oz') return amount * 28.35;
+  }
+  
+  const desc = serving.serving_description.toLowerCase();
+  const gramsMatch = desc.match(/(\d+(?:\.\d+)?)\s*g(?:rams?)?/i);
+  if (gramsMatch) return parseFloat(gramsMatch[1]);
+  
+  return 100;
+}
+
+async function searchFatSecret(query: string, region: string, maxResults: number = 10): Promise<FatSecretFood[]> {
+  const apiParams: Record<string, string> = {
+    method: 'foods.search.v4',
     search_expression: query,
     format: 'json',
     max_results: String(maxResults),
+    region: region,
+    flag_default_serving: 'true',
   };
 
   const signedParams = await generateOAuthParams('POST', FATSECRET_API_URL, apiParams);
@@ -117,61 +160,31 @@ async function searchFatSecret(query: string, maxResults: number = 10): Promise<
   const data = await response.json();
   if (data.error) return [];
 
-  const foodsRaw = data.foods?.food || [];
+  const foodsRaw = data.foods_search?.results?.food || [];
   const foodsArray = Array.isArray(foodsRaw) ? foodsRaw : (foodsRaw ? [foodsRaw] : []);
 
-  return foodsArray.map((food: {
-    food_id: string;
-    food_name: string;
-    brand_name?: string;
-    food_description: string;
-  }) => {
-    const parsed = parseDescription(food.food_description);
-    if (!parsed) return null;
+  return foodsArray.map((food: FatSecretFoodV4) => {
+    if (!food.servings?.serving) return null;
+    
+    const servingsArray = Array.isArray(food.servings.serving) 
+      ? food.servings.serving 
+      : [food.servings.serving];
+    
+    const serving = servingsArray.find(s => s.is_default === '1') || servingsArray[0];
+    const servingSizeG = normalizeServingToGrams(serving);
+    
     return {
       fatsecret_id: food.food_id,
       name: food.food_name,
       brand_name: food.brand_name || null,
-      serving_description: parsed.servingPart,
-      serving_size_g: parsed.servingSizeG,
-      calories: parsed.calories,
-      protein: parsed.protein,
-      carbs: parsed.carbs,
-      fat: parsed.fat,
+      serving_description: serving.serving_description,
+      serving_size_g: servingSizeG,
+      calories: parseFloat(serving.calories || '0'),
+      protein: parseFloat(serving.protein || '0'),
+      carbs: parseFloat(serving.carbohydrate || '0'),
+      fat: parseFloat(serving.fat || '0'),
     };
   }).filter((f: FatSecretFood | null): f is FatSecretFood => f !== null);
-}
-
-function parseDescription(description: string): { 
-  servingPart: string; calories: number; fat: number; carbs: number; protein: number; servingSizeG: number;
-} | null {
-  try {
-    const parts = description.split(' - ');
-    if (parts.length < 2) return null;
-    
-    const servingPart = parts[0];
-    const nutritionPart = parts.slice(1).join(' - ');
-    
-    const per100gMatch = /per\s+100\s*g/i.test(servingPart);
-    const gramsMatch = servingPart.match(/per\s+(\d+)\s*g/i);
-    const servingSizeG = per100gMatch ? 100 : (gramsMatch ? parseInt(gramsMatch[1]) : 100);
-    
-    const caloriesMatch = nutritionPart.match(/Calories:\s*([\d.]+)\s*kcal/i);
-    const fatMatch = nutritionPart.match(/Fat:\s*([\d.]+)\s*g/i);
-    const carbsMatch = nutritionPart.match(/Carbs:\s*([\d.]+)\s*g/i);
-    const proteinMatch = nutritionPart.match(/Protein:\s*([\d.]+)\s*g/i);
-    
-    return {
-      servingPart: servingPart.replace(/^Per\s+/i, ''),
-      calories: caloriesMatch ? parseFloat(caloriesMatch[1]) : 0,
-      fat: fatMatch ? parseFloat(fatMatch[1]) : 0,
-      carbs: carbsMatch ? parseFloat(carbsMatch[1]) : 0,
-      protein: proteinMatch ? parseFloat(proteinMatch[1]) : 0,
-      servingSizeG,
-    };
-  } catch {
-    return null;
-  }
 }
 
 function recalculateCalories(protein: number, carbs: number, fat: number): number {
@@ -294,6 +307,7 @@ serve(async (req) => {
       currentMacros,
       dietaryRestrictions,
       allergies,
+      region = 'GB',
     } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
@@ -301,7 +315,11 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    console.log('Finding FatSecret-verified substitutions for:', foodName, 'reason:', reason);
+    const validRegion = SUPPORTED_REGIONS.includes(region?.toUpperCase()) 
+      ? region.toUpperCase() 
+      : 'GB';
+
+    console.log('Finding FatSecret-verified substitutions for:', foodName, 'reason:', reason, 'region:', validRegion);
 
     // Step 1: AI suggests substitute NAMES only
     const { originalFood, substituteNames, reasons } = await getAISubstituteNames(
@@ -310,7 +328,7 @@ serve(async (req) => {
     
     console.log(`AI suggested ${substituteNames.length} substitutes:`, substituteNames);
 
-    // Step 2: Look up each substitute in FatSecret
+    // Step 2: Look up each substitute in FatSecret with region
     const validatedSubstitutions: ValidatedSubstitution[] = [];
     const unavailable: string[] = [];
 
@@ -320,12 +338,11 @@ serve(async (req) => {
         .replace(/grilled|baked|raw|cooked|fresh|organic/gi, '')
         .trim();
       
-      const results = await searchFatSecret(cleanName, 5);
+      const results = await searchFatSecret(cleanName, validRegion, 5);
       
       if (results.length === 0) {
-        // Try simpler search
         const simpler = cleanName.split(' ').slice(0, 2).join(' ');
-        const altResults = simpler.length >= 2 ? await searchFatSecret(simpler, 3) : [];
+        const altResults = simpler.length >= 2 ? await searchFatSecret(simpler, validRegion, 3) : [];
         
         if (altResults.length === 0) {
           unavailable.push(subName);
@@ -362,7 +379,6 @@ serve(async (req) => {
       let portionMultiplier = 1;
       if (currentMacros?.protein && best.protein > 0) {
         portionMultiplier = currentMacros.protein / best.protein;
-        // Clamp to reasonable range
         portionMultiplier = Math.max(0.5, Math.min(3, portionMultiplier));
       }
 
@@ -389,7 +405,6 @@ serve(async (req) => {
         isAIEstimate: false,
       });
 
-      // Small delay to avoid rate limiting
       await new Promise(resolve => setTimeout(resolve, 50));
     }
 
@@ -401,8 +416,10 @@ serve(async (req) => {
       unavailable,
       meta: {
         dataSource: 'fatsecret',
+        region: validRegion,
         disclaimer: 'All nutrition data verified by FatSecret food database',
         isAIGenerated: false,
+        api_version: 'v4',
       },
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

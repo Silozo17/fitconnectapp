@@ -7,7 +7,7 @@ const corsHeaders = {
 
 const API_URL = 'https://platform.fatsecret.com/rest/server.api';
 
-// Supported FatSecret regions (ISO 3166-1 alpha-2)
+// Supported FatSecret regions
 const SUPPORTED_REGIONS = ['GB', 'US', 'AU', 'CA', 'IE', 'NZ', 'FR', 'DE', 'IT', 'ES', 'PL'];
 
 // =====================================
@@ -61,7 +61,6 @@ async function generateOAuthParams(
   };
 
   const allParams = { ...params, ...oauthParams };
-
   const sortedParams = Object.keys(allParams)
     .sort()
     .map(key => `${percentEncode(key)}=${percentEncode(allParams[key])}`)
@@ -71,51 +70,34 @@ async function generateOAuthParams(
   const signingKey = `${percentEncode(consumerSecret)}&`;
   const signature = await hmacSha1(signingKey, signatureBaseString);
 
-  return {
-    ...allParams,
-    oauth_signature: signature,
-  };
+  return { ...allParams, oauth_signature: signature };
 }
 
 // =====================================
-// V4 API RESPONSE TYPES
+// TYPES
 // =====================================
 
 interface FatSecretServingV4 {
   serving_id: string;
   serving_description: string;
-  serving_url?: string;
   metric_serving_amount?: string;
   metric_serving_unit?: string;
-  number_of_units?: string;
-  measurement_description?: string;
   is_default?: string;
   calories?: string;
   carbohydrate?: string;
   protein?: string;
   fat?: string;
   saturated_fat?: string;
-  polyunsaturated_fat?: string;
-  monounsaturated_fat?: string;
-  trans_fat?: string;
-  cholesterol?: string;
-  sodium?: string;
-  potassium?: string;
   fiber?: string;
   sugar?: string;
-  vitamin_a?: string;
-  vitamin_c?: string;
-  calcium?: string;
-  iron?: string;
+  sodium?: string;
 }
 
 interface FatSecretFoodV4 {
   food_id: string;
   food_name: string;
   food_type: string;
-  food_url?: string;
   brand_name?: string;
-  food_sub_categories?: { food_sub_category: string[] };
   servings?: { serving: FatSecretServingV4 | FatSecretServingV4[] };
   food_images?: { food_image: { image_url: string; image_type: string }[] };
   food_attributes?: {
@@ -141,42 +123,29 @@ interface NormalizedFood {
   image_url: string | null;
   allergens: string[];
   dietary_preferences: string[];
-  is_default_serving: boolean;
+  barcode: string;
 }
 
 // =====================================
-// NORMALIZATION FUNCTIONS
+// HELPER FUNCTIONS
 // =====================================
 
 function normalizeServingToGrams(serving: FatSecretServingV4): number {
-  // Try metric_serving_amount first
   if (serving.metric_serving_amount && serving.metric_serving_unit) {
     const amount = parseFloat(serving.metric_serving_amount);
     const unit = serving.metric_serving_unit.toLowerCase();
     
     if (unit === 'g') return amount;
-    if (unit === 'ml') return amount; // Approximate for liquids
+    if (unit === 'ml') return amount;
     if (unit === 'kg') return amount * 1000;
     if (unit === 'oz') return amount * 28.35;
-    if (unit === 'lb') return amount * 453.59;
   }
   
-  // Fallback: parse from serving_description
   const desc = serving.serving_description.toLowerCase();
   const gramsMatch = desc.match(/(\d+(?:\.\d+)?)\s*g(?:rams?)?/i);
   if (gramsMatch) return parseFloat(gramsMatch[1]);
   
-  // Common serving estimates
-  if (desc.includes('100g') || desc.includes('100 g')) return 100;
-  if (desc.includes('cup')) return 240;
-  if (desc.includes('tbsp') || desc.includes('tablespoon')) return 15;
-  if (desc.includes('tsp') || desc.includes('teaspoon')) return 5;
-  if (desc.includes('slice')) return 30;
-  if (desc.includes('medium')) return 150;
-  if (desc.includes('large')) return 200;
-  if (desc.includes('small')) return 100;
-  
-  return 100; // Default fallback
+  return 100;
 }
 
 function extractAllergens(food: FatSecretFoodV4): string[] {
@@ -217,41 +186,131 @@ function extractDietaryPreferences(food: FatSecretFoodV4): string[] {
 
 function extractImageUrl(food: FatSecretFoodV4): string | null {
   if (food.food_images?.food_image && food.food_images.food_image.length > 0) {
-    // Prefer the largest image
-    const images = food.food_images.food_image;
-    const preferredTypes = ['large', 'medium', 'small', 'thumbnail'];
-    
-    for (const type of preferredTypes) {
-      const img = images.find(i => i.image_type === type);
-      if (img) return img.image_url;
-    }
-    
-    return images[0].image_url;
+    return food.food_images.food_image[0].image_url;
   }
-  
   return null;
 }
 
-function normalizeFoodV4(food: FatSecretFoodV4): NormalizedFood | null {
+// =====================================
+// MAIN HANDLER
+// =====================================
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
   try {
-    if (!food.servings?.serving) {
-      console.log('No servings found for:', food.food_name);
-      return null;
+    const { barcode, region = 'GB' } = await req.json();
+
+    if (!barcode || typeof barcode !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'Barcode is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
-    
+
+    // Validate barcode format (EAN-13, EAN-8, UPC-A, UPC-E)
+    const cleanBarcode = barcode.replace(/\D/g, '');
+    if (![8, 12, 13, 14].includes(cleanBarcode.length)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid barcode format. Expected EAN-8, EAN-13, UPC-A, or UPC-E' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const validRegion = SUPPORTED_REGIONS.includes(region.toUpperCase()) 
+      ? region.toUpperCase() 
+      : 'GB';
+
+    console.log(`FatSecret barcode lookup: "${cleanBarcode}" (region: ${validRegion})`);
+
+    // Step 1: Find food ID from barcode
+    const barcodeParams: Record<string, string> = {
+      method: 'food.find_id_for_barcode.v2',
+      barcode: cleanBarcode,
+      format: 'json',
+      region: validRegion,
+    };
+
+    const signedBarcodeParams = await generateOAuthParams('POST', API_URL, barcodeParams);
+
+    const barcodeResponse = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(signedBarcodeParams),
+    });
+
+    if (!barcodeResponse.ok) {
+      console.error('FatSecret barcode lookup error:', barcodeResponse.status);
+      return new Response(
+        JSON.stringify({ found: false, error: 'Barcode lookup failed' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const barcodeData = await barcodeResponse.json();
+    console.log('Barcode lookup response:', JSON.stringify(barcodeData).substring(0, 300));
+
+    if (barcodeData.error || !barcodeData.food_id?.value) {
+      console.log('Product not found for barcode:', cleanBarcode);
+      return new Response(
+        JSON.stringify({ 
+          found: false, 
+          barcode: cleanBarcode,
+          message: 'Product not found in database' 
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const foodId = barcodeData.food_id.value;
+    console.log('Found food ID:', foodId);
+
+    // Step 2: Get full food details using food.get.v4
+    const foodParams: Record<string, string> = {
+      method: 'food.get.v4',
+      food_id: foodId,
+      format: 'json',
+      include_food_images: 'true',
+      include_food_attributes: 'true',
+      flag_default_serving: 'true',
+    };
+
+    const signedFoodParams = await generateOAuthParams('POST', API_URL, foodParams);
+
+    const foodResponse = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(signedFoodParams),
+    });
+
+    if (!foodResponse.ok) {
+      console.error('FatSecret food get error:', foodResponse.status);
+      return new Response(
+        JSON.stringify({ found: false, error: 'Failed to fetch food details' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const foodData = await foodResponse.json();
+    const food: FatSecretFoodV4 = foodData.food;
+
+    if (!food || !food.servings?.serving) {
+      return new Response(
+        JSON.stringify({ found: false, error: 'Invalid food data received' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Normalize the food data
     const servingsArray = Array.isArray(food.servings.serving) 
       ? food.servings.serving 
       : [food.servings.serving];
     
-    if (servingsArray.length === 0) return null;
-    
-    // Find the default serving, or use the first one
-    let serving = servingsArray.find(s => s.is_default === '1') || servingsArray[0];
-    const isDefaultServing = serving.is_default === '1';
-    
+    const serving = servingsArray.find(s => s.is_default === '1') || servingsArray[0];
     const servingSizeG = normalizeServingToGrams(serving);
     
-    // Parse nutrients (all are per serving)
     const calories = parseFloat(serving.calories || '0');
     const protein = parseFloat(serving.protein || '0');
     const carbs = parseFloat(serving.carbohydrate || '0');
@@ -261,10 +320,9 @@ function normalizeFoodV4(food: FatSecretFoodV4): NormalizedFood | null {
     const sodium = parseFloat(serving.sodium || '0');
     const saturatedFat = parseFloat(serving.saturated_fat || '0');
     
-    // Calculate per 100g values
     const scaleFactor = servingSizeG > 0 ? 100 / servingSizeG : 1;
-    
-    return {
+
+    const normalizedFood: NormalizedFood = {
       fatsecret_id: food.food_id,
       name: food.food_name,
       brand_name: food.brand_name || null,
@@ -281,106 +339,28 @@ function normalizeFoodV4(food: FatSecretFoodV4): NormalizedFood | null {
       image_url: extractImageUrl(food),
       allergens: extractAllergens(food),
       dietary_preferences: extractDietaryPreferences(food),
-      is_default_serving: isDefaultServing,
-    };
-  } catch (error) {
-    console.error('Error normalizing food:', food.food_name, error);
-    return null;
-  }
-}
-
-// =====================================
-// MAIN HANDLER
-// =====================================
-
-serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
-
-  try {
-    const { query, maxResults = 25, region = 'GB' } = await req.json();
-
-    if (!query || typeof query !== 'string' || query.length < 2) {
-      return new Response(
-        JSON.stringify({ error: 'Query must be at least 2 characters' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Validate region
-    const validRegion = SUPPORTED_REGIONS.includes(region.toUpperCase()) 
-      ? region.toUpperCase() 
-      : 'GB';
-
-    console.log(`FatSecret v4 search: "${query}" (region: ${validRegion}, max: ${maxResults})`);
-
-    // API parameters for foods.search.v4
-    const apiParams: Record<string, string> = {
-      method: 'foods.search.v4',
-      search_expression: query,
-      format: 'json',
-      max_results: String(Math.min(maxResults, 50)),
-      region: validRegion,
-      include_food_images: 'true',
-      include_food_attributes: 'true',
-      flag_default_serving: 'true',
+      barcode: cleanBarcode,
     };
 
-    const signedParams = await generateOAuthParams('POST', API_URL, apiParams);
-
-    const searchResponse = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams(signedParams),
-    });
-
-    const responseText = await searchResponse.text();
-    console.log('FatSecret v4 response (first 500 chars):', responseText.substring(0, 500));
-
-    if (!searchResponse.ok) {
-      console.error('FatSecret search error:', responseText);
-      throw new Error(`FatSecret search failed: ${searchResponse.status}`);
-    }
-
-    const searchData = JSON.parse(responseText);
-    
-    if (searchData.error) {
-      console.error('FatSecret API error:', searchData.error);
-      throw new Error(`FatSecret API error: ${searchData.error.message || JSON.stringify(searchData.error)}`);
-    }
-    
-    const foodsRaw = searchData.foods_search?.results?.food || [];
-    console.log('Foods found:', Array.isArray(foodsRaw) ? foodsRaw.length : (foodsRaw ? 1 : 0));
-    
-    const foodsArray = Array.isArray(foodsRaw) ? foodsRaw : (foodsRaw ? [foodsRaw] : []);
-
-    const foods: NormalizedFood[] = foodsArray
-      .map(normalizeFoodV4)
-      .filter((f): f is NormalizedFood => f !== null);
-
-    console.log(`FatSecret v4 search returned ${foods.length} normalized results`);
+    console.log(`Barcode lookup successful: ${normalizedFood.name}`);
 
     return new Response(
       JSON.stringify({ 
-        foods,
+        found: true,
+        food: normalizedFood,
         meta: {
           region: validRegion,
-          total_results: searchData.foods_search?.total_results || foods.length,
-          page: searchData.foods_search?.page_number || 0,
-          api_version: 'v4',
+          barcode: cleanBarcode,
         }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
-    console.error('FatSecret search error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Search failed';
+    console.error('FatSecret barcode error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Barcode lookup failed';
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ found: false, error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
