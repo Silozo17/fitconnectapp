@@ -54,21 +54,24 @@ const ClientFoodDiary = () => {
   const dailyMacros = calculateDailyMacros(entries);
   const groupedEntries = groupEntriesByMeal(entries);
 
-  const handleFoodFound = (food: any, mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack') => {
+  const handleFoodFound = (food: any, mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack', quantity?: number) => {
     if (!clientProfile?.id) return;
+
+    const servingSize = quantity || food.serving_size_g || 100;
+    const multiplier = servingSize / 100;
 
     const entry: FoodDiaryInsert = {
       client_id: clientProfile.id,
       meal_type: mealType,
       food_name: food.name,
       external_id: food.external_id || food.fatsecret_id || null,
-      serving_size_g: food.serving_size_g || 100,
+      serving_size_g: servingSize,
       servings: 1,
-      calories: food.calories_per_100g ? Math.round((food.calories_per_100g * (food.serving_size_g || 100)) / 100) : food.calories,
-      protein_g: food.protein_g ? Math.round((food.protein_g * (food.serving_size_g || 100)) / 100 * 10) / 10 : null,
-      carbs_g: food.carbs_g ? Math.round((food.carbs_g * (food.serving_size_g || 100)) / 100 * 10) / 10 : null,
-      fat_g: food.fat_g ? Math.round((food.fat_g * (food.serving_size_g || 100)) / 100 * 10) / 10 : null,
-      fiber_g: food.fiber_g ? Math.round((food.fiber_g * (food.serving_size_g || 100)) / 100 * 10) / 10 : null,
+      calories: Math.round((food.calories_per_100g || 0) * multiplier),
+      protein_g: Math.round((food.protein_g || 0) * multiplier * 10) / 10,
+      carbs_g: Math.round((food.carbs_g || 0) * multiplier * 10) / 10,
+      fat_g: Math.round((food.fat_g || 0) * multiplier * 10) / 10,
+      fiber_g: food.fiber_g ? Math.round((food.fiber_g || 0) * multiplier * 10) / 10 : null,
       logged_at: selectedDate.toISOString(),
     };
 
@@ -287,7 +290,7 @@ const ClientFoodDiary = () => {
           open={showFoodSearch}
           onOpenChange={setShowFoodSearch}
           mealType={activeMealType}
-          onFoodSelected={(food) => handleFoodFound(food, activeMealType)}
+          onFoodSelected={(food, quantity) => handleFoodFound(food, activeMealType, quantity)}
         />
       </ClientDashboardLayout>
     </>
