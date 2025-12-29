@@ -1116,6 +1116,7 @@ export type Database = {
           created_at: string
           date_of_birth: string | null
           dietary_restrictions: string[] | null
+          discovery_tour_seen: boolean | null
           first_name: string | null
           fitness_goals: string[] | null
           gender: string | null
@@ -1153,6 +1154,7 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           dietary_restrictions?: string[] | null
+          discovery_tour_seen?: boolean | null
           first_name?: string | null
           fitness_goals?: string[] | null
           gender?: string | null
@@ -1190,6 +1192,7 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           dietary_restrictions?: string[] | null
+          discovery_tour_seen?: boolean | null
           first_name?: string | null
           fitness_goals?: string[] | null
           gender?: string | null
@@ -2232,6 +2235,7 @@ export type Database = {
           currency: string | null
           custom_review_message: string | null
           default_session_location: string | null
+          discovery_tour_seen: boolean | null
           display_name: string | null
           experience_start_date: string | null
           experience_years: number | null
@@ -2298,6 +2302,7 @@ export type Database = {
           currency?: string | null
           custom_review_message?: string | null
           default_session_location?: string | null
+          discovery_tour_seen?: boolean | null
           display_name?: string | null
           experience_start_date?: string | null
           experience_years?: number | null
@@ -2364,6 +2369,7 @@ export type Database = {
           currency?: string | null
           custom_review_message?: string | null
           default_session_location?: string | null
+          discovery_tour_seen?: boolean | null
           display_name?: string | null
           experience_start_date?: string | null
           experience_years?: number | null
