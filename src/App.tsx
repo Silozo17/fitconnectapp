@@ -161,6 +161,18 @@ const DocsAdminAudit = lazy(() => import('@/pages/docs/admin/AdminAuditDocs'));
 
 // Integration Documentation
 const ZoomIntegrationDocs = lazy(() => import('@/pages/docs/integrations/ZoomIntegration'));
+const GoogleMeetIntegrationDocs = lazy(() => import('@/pages/docs/integrations/GoogleMeetIntegration'));
+const GoogleCalendarIntegrationDocs = lazy(() => import('@/pages/docs/integrations/GoogleCalendarIntegration'));
+const AppleCalendarIntegrationDocs = lazy(() => import('@/pages/docs/integrations/AppleCalendarIntegration'));
+const FitbitIntegrationDocs = lazy(() => import('@/pages/docs/integrations/FitbitIntegration'));
+const WearablesOverviewDocs = lazy(() => import('@/pages/docs/integrations/WearablesOverview'));
+
+// Additional Client Documentation
+const DocsClientFoodDiary = lazy(() => import('@/pages/docs/client/ClientFoodDiaryDocs'));
+const DocsClientTrainingLogs = lazy(() => import('@/pages/docs/client/ClientTrainingLogsDocs'));
+const DocsClientDataPrivacy = lazy(() => import('@/pages/docs/client/ClientDataPrivacyDocs'));
+const DocsClientMarketplace = lazy(() => import('@/pages/docs/client/ClientMarketplaceDocs'));
+const DocsClientReceipts = lazy(() => import('@/pages/docs/client/ClientReceiptsDocs'));
 
 // Subscribe pages
 const Subscribe = lazy(() => import('@/pages/Subscribe'));
@@ -254,6 +266,11 @@ const App = () => (
                               <Route path="/docs/client/tools" element={<DocsClientTools />} />
                               <Route path="/docs/client/library" element={<DocsClientLibrary />} />
                               <Route path="/docs/client/connections" element={<DocsClientConnections />} />
+                              <Route path="/docs/client/food-diary" element={<DocsClientFoodDiary />} />
+                              <Route path="/docs/client/training-logs" element={<DocsClientTrainingLogs />} />
+                              <Route path="/docs/client/data-privacy" element={<DocsClientDataPrivacy />} />
+                              <Route path="/docs/client/marketplace" element={<DocsClientMarketplace />} />
+                              <Route path="/docs/client/receipts" element={<DocsClientReceipts />} />
                               <Route path="/docs/coach" element={<DocsCoachOverview />} />
                               <Route path="/docs/coach/onboarding" element={<DocsCoachOnboarding />} />
                               <Route path="/docs/coach/profile" element={<DocsCoachProfile />} />
@@ -287,6 +304,11 @@ const App = () => (
                               
                               {/* Public Integration Documentation Routes */}
                               <Route path="/docs/integrations/zoom" element={<ZoomIntegrationDocs />} />
+                              <Route path="/docs/integrations/google-meet" element={<GoogleMeetIntegrationDocs />} />
+                              <Route path="/docs/integrations/google-calendar" element={<GoogleCalendarIntegrationDocs />} />
+                              <Route path="/docs/integrations/apple-calendar" element={<AppleCalendarIntegrationDocs />} />
+                              <Route path="/docs/integrations/fitbit" element={<FitbitIntegrationDocs />} />
+                              <Route path="/docs/integrations/wearables" element={<WearablesOverviewDocs />} />
                               
                               {/* Dashboard Redirect */}
                               <Route path="/dashboard" element={

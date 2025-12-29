@@ -124,10 +124,17 @@ export default function ClientSettingsDocs() {
           instead of using your real name.
         </DocStep>
 
-        <DocStep number={2} title="Data Sharing">
-          Control what health data is shared with your coaches. You can limit access 
-          to specific data types.
+        <DocStep number={2} title="Data Privacy Controls">
+          Manage what data each of your coaches can access. Control sharing of:
         </DocStep>
+        <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-4 mb-4">
+          <li><strong>Client Data:</strong> Progress photos, meal logs, training logs</li>
+          <li><strong>Health Data:</strong> Wearable metrics like steps, heart rate, sleep</li>
+        </ul>
+        <p className="text-muted-foreground text-sm">
+          Access these settings via <strong>Settings → Privacy → Data Privacy</strong>. 
+          See the <a href="/docs/client/data-privacy" className="text-primary hover:underline">Data Privacy documentation</a> for details.
+        </p>
 
         <DocStep number={3} title="Account Security">
           Enable two-factor authentication for additional account security. You can also 

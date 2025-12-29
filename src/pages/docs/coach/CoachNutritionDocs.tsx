@@ -36,6 +36,21 @@ export default function CoachNutritionDocs() {
           dietary restrictions, and preferences. Review and edit before assigning.
         </p>
       </section>
+
+      <section className="mb-10">
+        <h2 className="text-xl font-semibold mb-4">Food Database</h2>
+        <p className="text-muted-foreground mb-4">
+          Access a comprehensive food database when building nutrition plans:
+        </p>
+        <ul className="list-disc list-inside space-y-2 text-muted-foreground mb-4">
+          <li><strong>Generic Foods (CalorieNinjas):</strong> Common ingredients like chicken, rice, vegetables with accurate macros</li>
+          <li><strong>Branded Products (Open Food Facts):</strong> UK supermarket products with real nutritional data</li>
+          <li><strong>Barcode Scanner:</strong> Scan product barcodes to quickly add items to meal plans</li>
+          <li><strong>Custom Recipes:</strong> Create and save your own recipes with calculated nutritional totals</li>
+        </ul>
+        <DocTip>The database contains over 650,000 food items to choose from.</DocTip>
+      </section>
+
       <DocTip>Clients can generate shopping lists directly from their assigned nutrition plans.</DocTip>
     </DocsLayout>
   );

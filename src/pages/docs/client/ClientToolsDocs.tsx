@@ -30,6 +30,28 @@ export default function ClientToolsDocs() {
 
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+          <Scale className="h-5 w-5 text-green-500" />
+          Food Lookup Tool
+        </h2>
+        <p className="text-muted-foreground mb-4">
+          Search our extensive food database to find nutritional information for any food.
+        </p>
+        <ul className="list-disc list-inside space-y-2 text-muted-foreground mb-4">
+          <li><strong>Generic Foods:</strong> Search for common foods like "chicken breast" or "brown rice" (powered by CalorieNinjas)</li>
+          <li><strong>Branded Products:</strong> Find UK supermarket products like "Tesco Greek Yogurt" (powered by Open Food Facts)</li>
+          <li><strong>Barcode Scanner:</strong> Scan product barcodes to instantly look up nutritional information</li>
+        </ul>
+        <p className="text-muted-foreground text-sm mb-4">
+          The food lookup tool also highlights allergens based on your profile settings, helping you 
+          identify foods that may contain ingredients you're sensitive to.
+        </p>
+        <DocTip>
+          Use the food lookup tool when logging meals in your <a href="/docs/client/food-diary" className="text-primary hover:underline">Food Diary</a>.
+        </DocTip>
+      </section>
+
+      <section className="mb-10">
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
           <Scale className="h-5 w-5 text-blue-500" />
           BMI Calculator
         </h2>

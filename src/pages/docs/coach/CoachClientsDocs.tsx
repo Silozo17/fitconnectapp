@@ -76,6 +76,39 @@ export default function CoachClientsDocs() {
       <section className="space-y-6 mt-12">
         <h2 className="text-2xl font-semibold flex items-center gap-2">
           <TrendingUp className="h-6 w-6 text-primary" />
+          Viewing Client Data
+        </h2>
+        <p className="text-muted-foreground">
+          Access detailed client data when they've granted you permission.
+        </p>
+
+        <DocStep number={1} title="Data Tab">
+          View client meal logs, training logs, and wearable data. This tab shows:
+        </DocStep>
+        <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-4 mb-4">
+          <li><strong>Meal Logs:</strong> Daily food diary entries with calories and macros</li>
+          <li><strong>Training Logs:</strong> Manual workout records with exercises, sets, and reps</li>
+          <li><strong>Wearable Data:</strong> Steps, heart rate, calories burned, sleep, and active minutes</li>
+        </ul>
+
+        <DocStep number={2} title="Photos Tab">
+          Review client progress photos to track visual changes over time.
+        </DocStep>
+
+        <DocStep number={3} title="Reports Tab">
+          Generate AI-powered analysis reports that summarise client progress, including 
+          measurements comparison and wearable summaries.
+        </DocStep>
+
+        <DocTip type="warning">
+          Data visibility depends on client privacy settings. If a client has revoked access 
+          to certain data types, you'll see "No access" messages instead.
+        </DocTip>
+      </section>
+
+      <section className="space-y-6 mt-12">
+        <h2 className="text-2xl font-semibold flex items-center gap-2">
+          <TrendingUp className="h-6 w-6 text-primary" />
           Tracking Client Progress
         </h2>
         <p className="text-muted-foreground">
