@@ -20,7 +20,24 @@
     "retry": "Retry"
   },
   "widgets": {
-    "comingSoon": "Coming Soon",
+    "emptyStates": {
+      "earnings": {
+        "title": "No earnings yet",
+        "description": "When you receive payments from clients, your earnings will appear here"
+      },
+      "packages": {
+        "title": "No active packages",
+        "description": "Create training packages to sell to your clients and track their progress here"
+      },
+      "subscriptions": {
+        "title": "No subscriptions yet",
+        "description": "When clients subscribe to your coaching services, they will be tracked here"
+      },
+      "recentClients": {
+        "title": "No recent activity",
+        "description": "Your most recently active clients will appear here"
+      }
+    },
     "pipeline": {
       "title": "Sales Pipeline",
       "totalLeads": "{{count}} total leads",
