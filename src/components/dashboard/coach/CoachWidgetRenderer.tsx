@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { CoachDashboardWidget } from "@/hooks/useCoachWidgets";
 import { Wallet, Package, CreditCard, Users } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { Card } from "@/components/ui/card";
 import {
   StatsClientsWidget,
   StatsSessionsWidget,
@@ -106,42 +107,50 @@ export function CoachWidgetRenderer({
 
     case "business_earnings":
       return (
-        <EmptyState
-          icon={Wallet}
-          title={t("widgets.emptyStates.earnings.title")}
-          description={t("widgets.emptyStates.earnings.description")}
-          variant="compact"
-        />
+        <Card variant="glass" className="h-full flex items-center justify-center p-6">
+          <EmptyState
+            icon={Wallet}
+            title={t("widgets.emptyStates.earnings.title")}
+            description={t("widgets.emptyStates.earnings.description")}
+            variant="compact"
+          />
+        </Card>
       );
 
     case "business_packages":
       return (
-        <EmptyState
-          icon={Package}
-          title={t("widgets.emptyStates.packages.title")}
-          description={t("widgets.emptyStates.packages.description")}
-          variant="compact"
-        />
+        <Card variant="glass" className="h-full flex items-center justify-center p-6">
+          <EmptyState
+            icon={Package}
+            title={t("widgets.emptyStates.packages.title")}
+            description={t("widgets.emptyStates.packages.description")}
+            variant="compact"
+          />
+        </Card>
       );
 
     case "business_subscriptions":
       return (
-        <EmptyState
-          icon={CreditCard}
-          title={t("widgets.emptyStates.subscriptions.title")}
-          description={t("widgets.emptyStates.subscriptions.description")}
-          variant="compact"
-        />
+        <Card variant="glass" className="h-full flex items-center justify-center p-6">
+          <EmptyState
+            icon={CreditCard}
+            title={t("widgets.emptyStates.subscriptions.title")}
+            description={t("widgets.emptyStates.subscriptions.description")}
+            variant="compact"
+          />
+        </Card>
       );
 
     case "list_recent_clients":
       return (
-        <EmptyState
-          icon={Users}
-          title={t("widgets.emptyStates.recentClients.title")}
-          description={t("widgets.emptyStates.recentClients.description")}
-          variant="compact"
-        />
+        <Card variant="glass" className="h-full flex items-center justify-center p-6">
+          <EmptyState
+            icon={Users}
+            title={t("widgets.emptyStates.recentClients.title")}
+            description={t("widgets.emptyStates.recentClients.description")}
+            variant="compact"
+          />
+        </Card>
       );
 
     default:
