@@ -1570,6 +1570,93 @@ export type Database = {
           },
         ]
       }
+      coach_client_reports: {
+        Row: {
+          ai_disclaimer_acknowledged: boolean | null
+          client_id: string
+          coach_id: string
+          coach_notes: string | null
+          created_at: string
+          id: string
+          measurements_comparison: Json | null
+          photo_comparison: Json | null
+          report_data: Json
+          sent_to_client_at: string | null
+          status: string
+          title: string
+          updated_at: string
+          wearable_summary: Json | null
+        }
+        Insert: {
+          ai_disclaimer_acknowledged?: boolean | null
+          client_id: string
+          coach_id: string
+          coach_notes?: string | null
+          created_at?: string
+          id?: string
+          measurements_comparison?: Json | null
+          photo_comparison?: Json | null
+          report_data: Json
+          sent_to_client_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          wearable_summary?: Json | null
+        }
+        Update: {
+          ai_disclaimer_acknowledged?: boolean | null
+          client_id?: string
+          coach_id?: string
+          coach_notes?: string | null
+          created_at?: string
+          id?: string
+          measurements_comparison?: Json | null
+          photo_comparison?: Json | null
+          report_data?: Json
+          sent_to_client_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          wearable_summary?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_client_reports_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_client_reports_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_client_reports_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_client_reports_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_client_reports_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coach_clients: {
         Row: {
           client_id: string
