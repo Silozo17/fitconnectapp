@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Search, Loader2, ScanBarcode, AlertTriangle, Leaf, Milk, Wheat } from "lucide-react";
 import { useOpenFoodFactsSearch, OpenFoodFactsFood } from "@/hooks/useOpenFoodFacts";
+import { useUserLocalePreference } from "@/hooks/useUserLocalePreference";
 import { BarcodeScannerModal } from "@/components/nutrition/BarcodeScannerModal";
 import { cn } from "@/lib/utils";
 
@@ -40,11 +41,12 @@ const FoodLookupTool = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFood, setSelectedFood] = useState<FoodDetails | null>(null);
   const [showScanner, setShowScanner] = useState(false);
+  const { countryPreference } = useUserLocalePreference();
 
   const { data: results = [], isLoading: isSearching } = useOpenFoodFactsSearch(
     searchQuery,
     searchQuery.length >= 2,
-    'GB'
+    countryPreference
   );
 
   const handleSearch = () => {
