@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { CoachDashboardWidget } from "@/hooks/useCoachWidgets";
 import {
   StatsClientsWidget,
@@ -44,6 +45,8 @@ export function CoachWidgetRenderer({
   isLoading = false,
   onAddClient,
 }: CoachWidgetRendererProps) {
+  const { t } = useTranslation("coach");
+
   switch (widget.widget_type) {
     case "stats_clients":
       return (
@@ -107,7 +110,7 @@ export function CoachWidgetRenderer({
       return (
         <div className="h-full flex items-center justify-center p-6 bg-muted/30 rounded-lg border border-dashed border-border">
           <p className="text-sm text-muted-foreground">
-            {widget.title} - Coming Soon
+            {widget.title} - {t("widgets.comingSoon")}
           </p>
         </div>
       );

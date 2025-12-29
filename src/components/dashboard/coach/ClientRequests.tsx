@@ -1,5 +1,6 @@
 import { useEffect, memo, useMemo, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Check, X, Loader2, UserPlus, MessageSquare, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,6 +31,7 @@ interface ConnectionRequest {
 }
 
 const ClientRequests = memo(() => {
+  const { t } = useTranslation("coach");
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { clientLimit, activeClientCount, canAddClient, isApproachingLimit, currentTier } = useFeatureAccess();
@@ -101,7 +103,7 @@ const ClientRequests = memo(() => {
         },
         (payload) => {
           triggerHaptic('heavy');
-          toast.info("New connection request received!");
+          toast.info(t("widgets.connectionRequests.newRequestReceived"));
           queryClient.invalidateQueries({ queryKey: ["connection-requests", coachProfile.id] });
         }
       )
@@ -134,14 +136,14 @@ const ClientRequests = memo(() => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [coachProfile?.id, queryClient]);
+  }, [coachProfile?.id, queryClient, t]);
 
   // Accept request mutation
   const acceptMutation = useMutation({
     mutationFn: async (request: ConnectionRequest) => {
       // Check client limit FIRST
       if (!canAddClient()) {
-        throw new Error(`Client limit reached (${clientLimit} clients). Upgrade your plan to add more.`);
+        throw new Error(t("widgets.connectionRequests.limitError", { limit: clientLimit }));
       }
 
       // Update request status
@@ -167,12 +169,12 @@ const ClientRequests = memo(() => {
       }).catch((err) => console.error("Failed to send new client email:", err));
     },
     onSuccess: () => {
-      toast.success("Connection request accepted! Client added to your roster.");
+      toast.success(t("widgets.connectionRequests.acceptedSuccess"));
       queryClient.invalidateQueries({ queryKey: ["connection-requests"] });
       queryClient.invalidateQueries({ queryKey: ["coach-clients"] });
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to accept request. Please try again.");
+      toast.error(error.message || t("widgets.connectionRequests.acceptError"));
     },
   });
 
@@ -187,11 +189,11 @@ const ClientRequests = memo(() => {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Connection request declined.");
+      toast.success(t("widgets.connectionRequests.declinedSuccess"));
       queryClient.invalidateQueries({ queryKey: ["connection-requests"] });
     },
     onError: (error) => {
-      toast.error("Failed to decline request. Please try again.");
+      toast.error(t("widgets.connectionRequests.declineError"));
     },
   });
 
@@ -203,10 +205,10 @@ const ClientRequests = memo(() => {
   }, []);
 
   const getClientName = useCallback((profile: ConnectionRequest["client_profile"]) => {
-    if (!profile) return "Unknown Client";
+    if (!profile) return t("widgets.connectionRequests.unknownClient");
     const name = [profile.first_name, profile.last_name].filter(Boolean).join(" ");
-    return name || "Unknown Client";
-  }, []);
+    return name || t("widgets.connectionRequests.unknownClient");
+  }, [t]);
 
   const atLimit = useMemo(() => !canAddClient(), [canAddClient]);
 
@@ -216,7 +218,7 @@ const ClientRequests = memo(() => {
         <CardHeader>
         <CardTitle className="flex items-center gap-2">
             <UserPlus className="h-5 w-5" />
-            Client Requests
+            {t("widgets.connectionRequests.title")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -234,7 +236,7 @@ const ClientRequests = memo(() => {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <UserPlus className="h-5 w-5" />
-            Client Requests
+            {t("widgets.connectionRequests.title")}
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
@@ -243,11 +245,11 @@ const ClientRequests = memo(() => {
           <div className="flex items-center gap-2">
             {clientLimit !== null && (
               <Badge variant={atLimit ? "destructive" : isApproachingLimit() ? "secondary" : "outline"}>
-                {activeClientCount}/{clientLimit} clients
+                {activeClientCount}/{clientLimit} {t("widgets.connectionRequests.clients")}
               </Badge>
             )}
             {requests && requests.length > 0 && (
-              <Badge variant="secondary">{requests.length} pending</Badge>
+              <Badge variant="secondary">{requests.length} {t("widgets.connectionRequests.pending")}</Badge>
             )}
           </div>
         </div>
@@ -259,11 +261,11 @@ const ClientRequests = memo(() => {
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription className="flex items-center justify-between">
               <span>
-                You've reached your client limit ({clientLimit} clients) on the {currentTier} plan.
+                {t("widgets.connectionRequests.limitReached", { limit: clientLimit, tier: currentTier })}
               </span>
               <Link to="/subscribe">
                 <Button size="sm" variant="outline" className="ml-2">
-                  Upgrade
+                  {t("widgets.connectionRequests.upgrade")}
                 </Button>
               </Link>
             </AlertDescription>
@@ -275,11 +277,11 @@ const ClientRequests = memo(() => {
             <AlertTriangle className="h-4 w-4 text-amber-500" />
             <AlertDescription className="flex items-center justify-between text-amber-600">
               <span>
-                You're approaching your client limit ({activeClientCount}/{clientLimit}).
+                {t("widgets.connectionRequests.approachingLimit", { current: activeClientCount, limit: clientLimit })}
               </span>
               <Link to="/subscribe">
                 <Button size="sm" variant="outline" className="ml-2">
-                  Upgrade
+                  {t("widgets.connectionRequests.upgrade")}
                 </Button>
               </Link>
             </AlertDescription>
@@ -347,14 +349,14 @@ const ClientRequests = memo(() => {
                     size="sm"
                     onClick={() => acceptMutation.mutate(request)}
                     disabled={acceptMutation.isPending || rejectMutation.isPending || atLimit}
-                    title={atLimit ? "Client limit reached - upgrade to accept" : "Accept request"}
+                    title={atLimit ? t("widgets.connectionRequests.limitTooltipDisabled") : t("widgets.connectionRequests.acceptTooltip")}
                   >
                     {acceptMutation.isPending ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <>
                         <Check className="h-4 w-4 mr-1" />
-                        Accept
+                        {t("widgets.connectionRequests.accept")}
                       </>
                     )}
                   </Button>
@@ -365,9 +367,9 @@ const ClientRequests = memo(() => {
         ) : (
           <div className="text-center py-8">
             <UserPlus className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-            <p className="text-muted-foreground">No pending client requests</p>
+            <p className="text-muted-foreground">{t("widgets.connectionRequests.emptyTitle")}</p>
             <p className="text-sm text-muted-foreground mt-1">
-              New requests from prospective clients will appear here instantly
+              {t("widgets.connectionRequests.emptyDescription")}
             </p>
           </div>
         )}

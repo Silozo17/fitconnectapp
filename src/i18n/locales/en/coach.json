@@ -19,6 +19,42 @@
     "failedToLoad": "Failed to load dashboard data. Please try again.",
     "retry": "Retry"
   },
+  "widgets": {
+    "comingSoon": "Coming Soon",
+    "pipeline": {
+      "title": "Sales Pipeline",
+      "totalLeads": "{{count}} total leads",
+      "conversionRate": "{{rate}}% conversion rate",
+      "viewPipeline": "View Pipeline",
+      "noLeadsYet": "No leads yet. When clients message you or send booking requests, they'll appear here.",
+      "stages": {
+        "newLeads": "New Leads",
+        "inConversation": "In Conversation",
+        "offerSent": "Offer Sent",
+        "dealClosed": "Deal Closed"
+      }
+    },
+    "connectionRequests": {
+      "title": "Client Requests",
+      "pending": "pending",
+      "accept": "Accept",
+      "upgrade": "Upgrade",
+      "unknownClient": "Unknown Client",
+      "limitReached": "You've reached your client limit ({{limit}} clients) on the {{tier}} plan.",
+      "approachingLimit": "You're approaching your client limit ({{current}}/{{limit}}).",
+      "acceptedSuccess": "Connection request accepted! Client added to your roster.",
+      "declinedSuccess": "Connection request declined.",
+      "acceptError": "Failed to accept request. Please try again.",
+      "declineError": "Failed to decline request. Please try again.",
+      "limitError": "Client limit reached ({{limit}} clients). Upgrade your plan to add more.",
+      "acceptTooltip": "Accept request",
+      "limitTooltipDisabled": "Client limit reached - upgrade to accept",
+      "newRequestReceived": "New connection request received!",
+      "emptyTitle": "No pending client requests",
+      "emptyDescription": "New requests from prospective clients will appear here instantly",
+      "clients": "clients"
+    }
+  },
   "stats": {
     "activeClients": "Active Clients",
     "sessionsScheduled": "Sessions Scheduled",
