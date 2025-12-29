@@ -608,4 +608,97 @@ export const isNativeIAPAvailable = (): boolean => {
   return isDespia();
 };
 
+// ============================================================================
+// SCANNING MODE CONTROL SYSTEM
+// ============================================================================
+
+/**
+ * Scanning mode options for device scanning behavior
+ * - "auto": Automatically adjust scanning and brightness based on conditions
+ * - "on": Enable scanning mode with optimal brightness
+ * - "off": Disable scanning mode and restore normal brightness
+ */
+export type ScanningMode = 'auto' | 'on' | 'off';
+
+/**
+ * Scanning mode result
+ */
+export interface ScanningModeResult {
+  success: boolean;
+  mode: ScanningMode;
+  error?: string;
+}
+
+// Store current scanning mode state
+let currentScanningMode: ScanningMode = 'off';
+
+/**
+ * Set the device scanning mode
+ * Controls device scanning behavior and automatically adjusts screen brightness
+ * for optimal scanning conditions.
+ * 
+ * @param mode The scanning mode to set: "auto", "on", or "off"
+ * @returns Object with success status and current mode
+ */
+export const setScanningMode = (mode: ScanningMode): ScanningModeResult => {
+  if (!isDespia()) {
+    console.warn('[Despia Scanning] Attempted outside of Despia environment');
+    return { success: false, mode: currentScanningMode, error: 'Not running in native app' };
+  }
+
+  try {
+    console.log(`[Despia Scanning] Setting scanning mode to: ${mode}`);
+    despia(`scanningmode://${mode}`);
+    currentScanningMode = mode;
+    return { success: true, mode };
+  } catch (e) {
+    console.error('[Despia Scanning] Failed to set scanning mode:', e);
+    return { 
+      success: false, 
+      mode: currentScanningMode, 
+      error: e instanceof Error ? e.message : 'Failed to set scanning mode' 
+    };
+  }
+};
+
+/**
+ * Enable scanning mode with optimal brightness
+ * Shorthand for setScanningMode('on')
+ */
+export const enableScanningMode = (): ScanningModeResult => {
+  return setScanningMode('on');
+};
+
+/**
+ * Disable scanning mode and restore normal brightness
+ * Shorthand for setScanningMode('off')
+ */
+export const disableScanningMode = (): ScanningModeResult => {
+  return setScanningMode('off');
+};
+
+/**
+ * Set scanning mode to auto (system determines optimal settings)
+ * Shorthand for setScanningMode('auto')
+ */
+export const autoScanningMode = (): ScanningModeResult => {
+  return setScanningMode('auto');
+};
+
+/**
+ * Get the current scanning mode
+ * @returns The current scanning mode
+ */
+export const getCurrentScanningMode = (): ScanningMode => {
+  return currentScanningMode;
+};
+
+/**
+ * Check if scanning mode is currently active
+ * @returns true if scanning mode is 'on' or 'auto'
+ */
+export const isScanningModeActive = (): boolean => {
+  return currentScanningMode === 'on' || currentScanningMode === 'auto';
+};
+
 export default despia;
