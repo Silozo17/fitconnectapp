@@ -118,7 +118,7 @@ export const FoodSearchModal = ({
               </div>
             ) : results.length > 0 ? (
               <div className="space-y-2 pr-4">
-                {results.map((suggestion) => {
+              {results.map((suggestion) => {
                   const hasConflict = hasAllergenConflict(suggestion);
                   return (
                     <button
@@ -131,29 +131,25 @@ export const FoodSearchModal = ({
                           : "bg-muted/50 hover:bg-muted"
                       )}
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="font-medium truncate">{suggestion.product_name}</p>
-                            {hasConflict && (
-                              <AlertTriangle className="w-4 h-4 text-warning shrink-0" />
-                            )}
-                          </div>
-                          {suggestion.brand && (
-                            <p className="text-xs text-muted-foreground truncate">
-                              {suggestion.brand}
-                            </p>
-                          )}
-                          <div className="flex items-center gap-2 mt-1 text-xs">
-                            <span className="text-muted-foreground">per 100g</span>
-                            <span className="font-medium">{Math.round(suggestion.calories_per_100g || 0)} kcal</span>
-                          </div>
-                        </div>
-                        <div className="text-right text-xs shrink-0 space-y-0.5">
-                          <p><span className="text-blue-500 font-medium">{suggestion.protein_g || 0}g</span> P</p>
-                          <p><span className="text-amber-500 font-medium">{suggestion.carbs_g || 0}g</span> C</p>
-                          <p><span className="text-rose-500 font-medium">{suggestion.fat_g || 0}g</span> F</p>
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium truncate flex-1">{suggestion.product_name}</p>
+                        {hasConflict && (
+                          <AlertTriangle className="w-4 h-4 text-warning shrink-0" />
+                        )}
+                      </div>
+                      {suggestion.brand && (
+                        <p className="text-xs text-muted-foreground truncate">
+                          {suggestion.brand}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-2 mt-1 text-xs">
+                        <span className="text-muted-foreground">per 100g</span>
+                        <span className="font-medium">{Math.round(suggestion.calories_per_100g || 0)} kcal</span>
+                      </div>
+                      <div className="flex items-center gap-3 mt-1.5 text-xs">
+                        <span><span className="text-blue-500 font-medium">{suggestion.protein_g || 0}g</span> P</span>
+                        <span><span className="text-amber-500 font-medium">{suggestion.carbs_g || 0}g</span> C</span>
+                        <span><span className="text-rose-500 font-medium">{suggestion.fat_g || 0}g</span> F</span>
                       </div>
                       {hasConflict && suggestion.allergens && (
                         <p className="text-xs text-warning mt-2">
