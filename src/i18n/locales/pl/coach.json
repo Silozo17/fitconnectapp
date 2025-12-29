@@ -19,6 +19,42 @@
     "failedToLoad": "Nie udało się załadować danych panelu. Spróbuj ponownie.",
     "retry": "Ponów"
   },
+  "widgets": {
+    "comingSoon": "Wkrótce",
+    "pipeline": {
+      "title": "Lejek sprzedażowy",
+      "totalLeads": "{{count}} leadów łącznie",
+      "conversionRate": "{{rate}}% konwersji",
+      "viewPipeline": "Zobacz lejek",
+      "noLeadsYet": "Brak leadów. Gdy klienci napiszą do Ciebie lub wyślą prośby o rezerwację, pojawią się tutaj.",
+      "stages": {
+        "newLeads": "Nowe leady",
+        "inConversation": "W rozmowie",
+        "offerSent": "Oferta wysłana",
+        "dealClosed": "Zamknięte"
+      }
+    },
+    "connectionRequests": {
+      "title": "Prośby klientów",
+      "pending": "oczekujące",
+      "accept": "Akceptuj",
+      "upgrade": "Ulepsz plan",
+      "unknownClient": "Nieznany klient",
+      "limitReached": "Osiągnięto limit klientów ({{limit}} klientów) w planie {{tier}}.",
+      "approachingLimit": "Zbliżasz się do limitu klientów ({{current}}/{{limit}}).",
+      "acceptedSuccess": "Prośba zaakceptowana! Klient dodany do Twojej listy.",
+      "declinedSuccess": "Prośba o połączenie odrzucona.",
+      "acceptError": "Nie udało się zaakceptować prośby. Spróbuj ponownie.",
+      "declineError": "Nie udało się odrzucić prośby. Spróbuj ponownie.",
+      "limitError": "Osiągnięto limit klientów ({{limit}} klientów). Ulepsz plan, aby dodać więcej.",
+      "acceptTooltip": "Akceptuj prośbę",
+      "limitTooltipDisabled": "Limit klientów osiągnięty - ulepsz plan, aby zaakceptować",
+      "newRequestReceived": "Otrzymano nową prośbę o połączenie!",
+      "emptyTitle": "Brak oczekujących próśb",
+      "emptyDescription": "Nowe prośby od potencjalnych klientów pojawią się tutaj natychmiast",
+      "clients": "klientów"
+    }
+  },
   "stats": {
     "activeClients": "Aktywni klienci",
     "sessionsScheduled": "Zaplanowane sesje",
