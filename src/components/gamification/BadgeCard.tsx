@@ -26,12 +26,13 @@ interface BadgeCardProps {
   onClaim?: () => void;
 }
 
-const RARITY_GLOW: Record<string, string> = {
-  common: '',
-  uncommon: 'shadow-[0_0_25px_rgba(52,211,153,0.4)]',
-  rare: 'shadow-[0_0_30px_rgba(96,165,250,0.5)]',
-  epic: 'shadow-[0_0_35px_rgba(192,132,252,0.5)]',
-  legendary: 'shadow-[0_0_45px_rgba(251,191,36,0.6)]',
+// Radial gradients positioned BEHIND the badge image (not box-shadow around container)
+const RARITY_GRADIENT: Record<string, string> = {
+  common: 'radial-gradient(ellipse 100% 100% at 50% 50%, hsla(0, 0%, 60%, 0.2) 0%, transparent 70%)',
+  uncommon: 'radial-gradient(ellipse 100% 100% at 50% 50%, hsla(142, 76%, 36%, 0.3) 0%, transparent 70%)',
+  rare: 'radial-gradient(ellipse 100% 100% at 50% 50%, hsla(217, 91%, 60%, 0.35) 0%, transparent 70%)',
+  epic: 'radial-gradient(ellipse 100% 100% at 50% 50%, hsla(270, 70%, 60%, 0.35) 0%, transparent 70%)',
+  legendary: 'radial-gradient(ellipse 100% 100% at 50% 50%, hsla(45, 93%, 47%, 0.4) 0%, transparent 70%)',
 };
 
 export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
@@ -60,17 +61,6 @@ export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
           />
         )}
         
-        {/* Locked overlay for unearned badges - full coverage with blur */}
-        {!earned && (
-          <div className="absolute inset-0 rounded-xl bg-background/70 backdrop-blur-[2px] flex items-center justify-center z-10">
-            <div className="flex flex-col items-center gap-2">
-              <div className="w-14 h-14 rounded-full bg-muted/50 flex items-center justify-center">
-                <Lock className="h-7 w-7 text-muted-foreground/60" />
-              </div>
-            </div>
-          </div>
-        )}
-        
         {/* Share button for claimed earned badges */}
         {earned && isClaimed && (
           <div className="absolute top-2 right-2 z-10">
@@ -88,14 +78,16 @@ export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
         )}
         
         <div className={cn("relative text-center", !earned && "opacity-70")}>
-          {/* Badge icon with rarity glow - LARGER SIZE */}
-          <div 
-            className={cn(
-              'w-24 h-24 mx-auto mb-3 flex items-center justify-center rounded-xl',
-              earned && RARITY_GLOW[badge.rarity],
-              showClaimButton && 'animate-pulse-subtle'
+          {/* Badge display area - LARGER SIZE with glow behind */}
+          <div className='w-28 h-28 mx-auto mb-3 flex items-center justify-center relative'>
+            {/* Rarity glow behind badge (radial gradient) - only for earned badges */}
+            {earned && (
+              <div 
+                className="absolute inset-0 rounded-xl"
+                style={{ background: RARITY_GRADIENT[badge.rarity] || RARITY_GRADIENT.common }}
+              />
             )}
-          >
+            
             {/* Shine effect for claimable badges */}
             {showClaimButton && (
               <div className="absolute inset-0 rounded-xl overflow-hidden">
@@ -103,43 +95,43 @@ export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
               </div>
             )}
             
-            {(() => {
-              // Check if the icon is an emoji
-              const isEmoji = (str: string): boolean => {
-                const emojiRegex = /[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/u;
-                return emojiRegex.test(str);
-              };
+            {/* Show badge if earned, otherwise show lock icon only */}
+            {earned ? (
+              <>
+                {(() => {
+                  const isEmoji = (str: string): boolean => {
+                    const emojiRegex = /[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/u;
+                    return emojiRegex.test(str);
+                  };
 
-              if (badge.image_url) {
-                return (
-                  <img 
-                    src={badge.image_url} 
-                    alt={badge.name} 
-                    className={cn(
-                      'w-20 h-20 object-contain',
-                      !earned && 'grayscale'
-                    )} 
-                  />
-                );
-              } else if (isEmoji(badge.icon)) {
-                return (
-                  <span className={cn(
-                    'text-5xl',
-                    !earned && 'grayscale'
-                  )}>
-                    {badge.icon}
-                  </span>
-                );
-              } else {
-                const IconComponent = getBadgeIcon(badge.icon);
-                return (
-                  <IconComponent className={cn(
-                    'w-14 h-14',
-                    earned ? 'text-primary' : 'text-muted-foreground'
-                  )} />
-                );
-              }
-            })()}
+                  if (badge.image_url) {
+                    return (
+                      <img 
+                        src={badge.image_url} 
+                        alt={badge.name} 
+                        className="w-24 h-24 object-contain relative z-10"
+                      />
+                    );
+                  } else if (isEmoji(badge.icon)) {
+                    return (
+                      <span className="text-6xl relative z-10">
+                        {badge.icon}
+                      </span>
+                    );
+                  } else {
+                    const IconComponent = getBadgeIcon(badge.icon);
+                    return (
+                      <IconComponent className="w-16 h-16 text-primary relative z-10" />
+                    );
+                  }
+                })()}
+              </>
+            ) : (
+              // Locked state - show only lock icon (no badge preview)
+              <div className="w-full h-full rounded-xl bg-muted/30 flex items-center justify-center border border-muted/50">
+                <Lock className="w-10 h-10 text-muted-foreground/50" />
+              </div>
+            )}
           </div>
           
           <h4 className={cn(
