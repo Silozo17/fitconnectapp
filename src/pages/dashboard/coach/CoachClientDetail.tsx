@@ -19,7 +19,14 @@ import {
   Pause,
   Play,
   Trash2,
+  Utensils,
+  Camera,
 } from "lucide-react";
+import { ClientMealLogs } from "@/components/coach/ClientMealLogs";
+import { ClientTrainingLogs } from "@/components/coach/ClientTrainingLogs";
+import { ClientWearableData } from "@/components/coach/ClientWearableData";
+import { ClientProgressPhotos } from "@/components/coach/ClientProgressPhotos";
+import { ClientReportsTab } from "@/components/coach/ClientReportsTab";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -436,8 +443,11 @@ const CoachClientDetail = () => {
           <TabsTrigger value="overview" className="text-xs sm:text-sm">{t('clientDetail.tabs.overview')}</TabsTrigger>
           <TabsTrigger value="sessions" className="text-xs sm:text-sm">{t('clientDetail.tabs.sessions')}</TabsTrigger>
           <TabsTrigger value="progress" className="text-xs sm:text-sm">{t('clientDetail.tabs.progress')}</TabsTrigger>
+          <TabsTrigger value="data" className="text-xs sm:text-sm">{t('clientDetail.tabs.data', 'Data')}</TabsTrigger>
+          <TabsTrigger value="photos" className="text-xs sm:text-sm">{t('clientDetail.tabs.photos', 'Photos')}</TabsTrigger>
           <TabsTrigger value="plans" className="text-xs sm:text-sm">{t('clientDetail.tabs.plans')}</TabsTrigger>
           <TabsTrigger value="habits" className="text-xs sm:text-sm">{t('clientDetail.tabs.habits')}</TabsTrigger>
+          <TabsTrigger value="reports" className="text-xs sm:text-sm">{t('clientDetail.tabs.reports', 'Reports')}</TabsTrigger>
           <TabsTrigger value="notes" className="text-xs sm:text-sm">{t('clientDetail.tabs.notes')}</TabsTrigger>
         </TabsList>
 
