@@ -160,7 +160,7 @@ const CoachPrivacyCard = ({
     <Card>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CardHeader className="pb-3">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10">
                 <AvatarImage src={coach.coach_avatar || undefined} />
@@ -173,13 +173,13 @@ const CoachPrivacyCard = ({
                 </Badge>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => onSetAll(coach.coach_id, true)}
                 disabled={isPending}
-                className="text-xs"
+                className="text-xs flex-1 sm:flex-initial"
               >
                 <Share2 className="h-3 w-3 mr-1" />
                 Share All
@@ -189,7 +189,7 @@ const CoachPrivacyCard = ({
                 size="sm"
                 onClick={() => onSetAll(coach.coach_id, false)}
                 disabled={isPending}
-                className="text-xs text-destructive hover:text-destructive"
+                className="text-xs text-destructive hover:text-destructive flex-1 sm:flex-initial"
               >
                 <ShieldOff className="h-3 w-3 mr-1" />
                 Revoke All
