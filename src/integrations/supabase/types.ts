@@ -739,6 +739,7 @@ export type Database = {
           id: string
           joined_at: string
           last_wearable_sync_at: string | null
+          reward_claimed: boolean | null
           status: string
           unverified_progress: number | null
           verified_progress: number | null
@@ -751,6 +752,7 @@ export type Database = {
           id?: string
           joined_at?: string
           last_wearable_sync_at?: string | null
+          reward_claimed?: boolean | null
           status?: string
           unverified_progress?: number | null
           verified_progress?: number | null
@@ -763,6 +765,7 @@ export type Database = {
           id?: string
           joined_at?: string
           last_wearable_sync_at?: string | null
+          reward_claimed?: boolean | null
           status?: string
           unverified_progress?: number | null
           verified_progress?: number | null
@@ -880,6 +883,7 @@ export type Database = {
           client_id: string
           earned_at: string
           id: string
+          is_claimed: boolean | null
           is_featured: boolean | null
           source_data: Json | null
         }
@@ -888,6 +892,7 @@ export type Database = {
           client_id: string
           earned_at?: string
           id?: string
+          is_claimed?: boolean | null
           is_featured?: boolean | null
           source_data?: Json | null
         }
@@ -896,6 +901,7 @@ export type Database = {
           client_id?: string
           earned_at?: string
           id?: string
+          is_claimed?: boolean | null
           is_featured?: boolean | null
           source_data?: Json | null
         }

@@ -1,9 +1,14 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useClientBadgesAvailable, useClientBadges, Badge, RARITY_ORDER } from '@/hooks/useGamification';
 import { BadgeCard, BadgeProgress } from './BadgeCard';
+import { ClaimBadgeModal } from './ClaimBadgeModal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUserStats } from '@/hooks/useUserStats';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 const BADGE_CATEGORIES = [
   'all',
@@ -196,9 +201,15 @@ const calculateBadgeProgress = (
 
 export function BadgeGrid() {
   const { t } = useTranslation('gamification');
+  const queryClient = useQueryClient();
   const { data: badges, isLoading: badgesLoading } = useClientBadgesAvailable();
   const { data: clientBadges, isLoading: clientBadgesLoading } = useClientBadges();
   const { data: userStats, isLoading: statsLoading } = useUserStats();
+  
+  // Claim modal state
+  const [claimModalOpen, setClaimModalOpen] = useState(false);
+  const [claimingBadge, setClaimingBadge] = useState<Badge | null>(null);
+  const [claimingXP, setClaimingXP] = useState(0);
   
   const isLoading = badgesLoading || clientBadgesLoading || statsLoading;
   
@@ -206,7 +217,7 @@ export function BadgeGrid() {
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {[...Array(8)].map((_, i) => (
-          <Skeleton key={i} className="h-40 rounded-xl" />
+          <Skeleton key={i} className="h-48 rounded-xl" />
         ))}
       </div>
     );
@@ -214,6 +225,7 @@ export function BadgeGrid() {
   
   const earnedBadgeIds = new Set(clientBadges?.map(cb => cb.badge_id));
   const earnedBadgeMap = new Map(clientBadges?.map(cb => [cb.badge_id, cb.earned_at]));
+  const claimedBadgeMap = new Map(clientBadges?.map(cb => [cb.badge_id, (cb as any).is_claimed ?? true]));
   
   const earnedCount = earnedBadgeIds.size;
   const totalCount = badges?.length || 0;
@@ -253,6 +265,40 @@ export function BadgeGrid() {
     if (earnedBadgeIds.has(badge.id)) return undefined;
     return calculateBadgeProgress(badge, stats);
   };
+
+  // Handle claiming a badge
+  const handleClaimBadge = (badge: Badge) => {
+    setClaimingBadge(badge);
+    setClaimingXP(badge.xp_reward);
+    setClaimModalOpen(true);
+  };
+
+  // Mark badge as claimed in database
+  const handleBadgeClaimed = async () => {
+    if (!claimingBadge) return;
+    
+    try {
+      const clientBadge = clientBadges?.find(cb => cb.badge_id === claimingBadge.id);
+      if (clientBadge) {
+        await supabase
+          .from('client_badges')
+          .update({ is_claimed: true })
+          .eq('id', clientBadge.id);
+        
+        // Invalidate queries to refresh data
+        queryClient.invalidateQueries({ queryKey: ['client-badges'] });
+      }
+    } catch (error) {
+      console.error('Error claiming badge:', error);
+      toast.error('Failed to claim badge');
+    }
+  };
+
+  const handleCloseModal = () => {
+    setClaimModalOpen(false);
+    setClaimingBadge(null);
+    setClaimingXP(0);
+  };
   
   return (
     <div className="space-y-4">
@@ -291,19 +337,35 @@ export function BadgeGrid() {
                   if (!aEarned && bEarned) return 1;
                   return 0;
                 })
-                .map(badge => (
-                  <BadgeCard
-                    key={badge.id}
-                    badge={badge}
-                    earned={earnedBadgeIds.has(badge.id)}
-                    earnedAt={earnedBadgeMap.get(badge.id)}
-                    progress={getBadgeProgress(badge)}
-                  />
-                ))}
+                .map(badge => {
+                  const isEarned = earnedBadgeIds.has(badge.id);
+                  const isClaimed = claimedBadgeMap.get(badge.id) ?? true;
+                  
+                  return (
+                    <BadgeCard
+                      key={badge.id}
+                      badge={badge}
+                      earned={isEarned}
+                      earnedAt={earnedBadgeMap.get(badge.id)}
+                      progress={getBadgeProgress(badge)}
+                      isClaimed={isClaimed}
+                      onClaim={isEarned && !isClaimed ? () => handleClaimBadge(badge) : undefined}
+                    />
+                  );
+                })}
             </div>
           </TabsContent>
         ))}
       </Tabs>
+
+      {/* Claim celebration modal */}
+      <ClaimBadgeModal
+        isOpen={claimModalOpen}
+        onClose={handleCloseModal}
+        badge={claimingBadge}
+        xpEarned={claimingXP}
+        onClaimed={handleBadgeClaimed}
+      />
     </div>
   );
 }

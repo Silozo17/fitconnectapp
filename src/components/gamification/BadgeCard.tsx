@@ -3,10 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { Badge as BadgeType, RARITY_COLORS } from '@/hooks/useGamification';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { Lock } from 'lucide-react';
+import { Lock, Gift } from 'lucide-react';
 import { ShareAchievementButton } from './ShareAchievementButton';
 import { getBadgeIcon } from '@/lib/badge-icons';
 import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
 
 export interface BadgeProgress {
   current: number;
@@ -21,12 +22,25 @@ interface BadgeCardProps {
   earnedAt?: string;
   showDetails?: boolean;
   progress?: BadgeProgress;
+  isClaimed?: boolean;
+  onClaim?: () => void;
 }
 
+const RARITY_GLOW: Record<string, string> = {
+  common: '',
+  uncommon: 'shadow-[0_0_25px_rgba(52,211,153,0.4)]',
+  rare: 'shadow-[0_0_30px_rgba(96,165,250,0.5)]',
+  epic: 'shadow-[0_0_35px_rgba(192,132,252,0.5)]',
+  legendary: 'shadow-[0_0_45px_rgba(251,191,36,0.6)]',
+};
+
 export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
-  ({ badge, earned = false, earnedAt, showDetails = true, progress }, ref) => {
+  ({ badge, earned = false, earnedAt, showDetails = true, progress, isClaimed = true, onClaim }, ref) => {
     const { t } = useTranslation('gamification');
     const rarityColors = RARITY_COLORS[badge.rarity] || RARITY_COLORS.common;
+    
+    // Show claim button if earned but not yet claimed
+    const showClaimButton = earned && !isClaimed && onClaim;
     
     return (
       <div
@@ -46,13 +60,19 @@ export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
           />
         )}
         
+        {/* Locked overlay for unearned badges - full coverage with blur */}
         {!earned && (
-          <div className="absolute top-2 right-2 z-10">
-            <Lock className="h-4 w-4 text-muted-foreground" />
+          <div className="absolute inset-0 rounded-xl bg-background/70 backdrop-blur-[2px] flex items-center justify-center z-10">
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-14 h-14 rounded-full bg-muted/50 flex items-center justify-center">
+                <Lock className="h-7 w-7 text-muted-foreground/60" />
+              </div>
+            </div>
           </div>
         )}
         
-        {earned && (
+        {/* Share button for claimed earned badges */}
+        {earned && isClaimed && (
           <div className="absolute top-2 right-2 z-10">
             <ShareAchievementButton
               achievement={{
@@ -67,13 +87,22 @@ export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
           </div>
         )}
         
-        <div className={cn("relative text-center", !earned && "grayscale opacity-70")}>
+        <div className={cn("relative text-center", !earned && "opacity-70")}>
+          {/* Badge icon with rarity glow - LARGER SIZE */}
           <div 
             className={cn(
-              'w-16 h-16 mx-auto mb-2 flex items-center justify-center',
-              !earned && 'grayscale'
+              'w-24 h-24 mx-auto mb-3 flex items-center justify-center rounded-xl',
+              earned && RARITY_GLOW[badge.rarity],
+              showClaimButton && 'animate-pulse-subtle'
             )}
           >
+            {/* Shine effect for claimable badges */}
+            {showClaimButton && (
+              <div className="absolute inset-0 rounded-xl overflow-hidden">
+                <div className="absolute inset-0 animate-shine bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+              </div>
+            )}
+            
             {(() => {
               // Check if the icon is an emoji
               const isEmoji = (str: string): boolean => {
@@ -82,12 +111,33 @@ export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
               };
 
               if (badge.image_url) {
-                return <img src={badge.image_url} alt={badge.name} className="w-14 h-14 object-contain" />;
+                return (
+                  <img 
+                    src={badge.image_url} 
+                    alt={badge.name} 
+                    className={cn(
+                      'w-20 h-20 object-contain',
+                      !earned && 'grayscale'
+                    )} 
+                  />
+                );
               } else if (isEmoji(badge.icon)) {
-                return <span className="text-4xl">{badge.icon}</span>;
+                return (
+                  <span className={cn(
+                    'text-5xl',
+                    !earned && 'grayscale'
+                  )}>
+                    {badge.icon}
+                  </span>
+                );
               } else {
                 const IconComponent = getBadgeIcon(badge.icon);
-                return <IconComponent className="w-12 h-12 text-primary" />;
+                return (
+                  <IconComponent className={cn(
+                    'w-14 h-14',
+                    earned ? 'text-primary' : 'text-muted-foreground'
+                  )} />
+                );
               }
             })()}
           </div>
@@ -113,7 +163,23 @@ export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
                 {t(`badges.rarity.${badge.rarity}`)}
               </div>
               
-              {earned && earnedAt && (
+              {/* Claim button for unclaimed earned badges */}
+              {showClaimButton && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClaim();
+                  }}
+                  className="w-full mt-3 bg-primary hover:bg-primary/90"
+                >
+                  <Gift className="h-4 w-4 mr-2" />
+                  {t('claim.button', 'Claim Reward')}
+                </Button>
+              )}
+              
+              {earned && isClaimed && earnedAt && (
                 <div className="text-xs text-muted-foreground mt-2">
                   {t('badges.earned', { date: format(new Date(earnedAt), 'MMM d, yyyy') })}
                 </div>
