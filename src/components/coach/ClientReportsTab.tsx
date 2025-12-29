@@ -72,7 +72,7 @@ export const ClientReportsTab = ({ clientId, clientName, coachId }: ClientReport
   return (
     <div className="space-y-6">
       {/* AI Disclaimer Banner */}
-      <div className="bg-warning/10 border border-warning/30 rounded-lg p-4 flex items-start gap-3">
+      <div className="glass-card border-warning/30 p-4 flex items-start gap-3">
         <AlertTriangle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
         <div className="text-sm">
           <p className="font-medium text-warning">
