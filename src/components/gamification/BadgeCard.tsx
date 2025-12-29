@@ -88,8 +88,8 @@ export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
         <div className={cn("relative text-center", !earned && "opacity-70")}>
           {/* Badge display area - LARGER SIZE */}
           <div className='w-28 h-28 mx-auto mb-3 flex items-center justify-center relative'>
-            {/* Shine effect for claimable badges */}
-            {showClaimButton && (
+            {/* Shine effect for claimed badges only */}
+            {earned && isClaimed && (
               <div className="absolute inset-0 rounded-xl overflow-hidden">
                 <div className="absolute inset-0 animate-shine bg-gradient-to-r from-transparent via-white/20 to-transparent" />
               </div>
