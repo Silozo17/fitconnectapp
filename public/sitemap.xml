@@ -165,15 +165,21 @@
   <!-- Documentation -->
   <url>
     <loc>https://getfitconnect.co.uk/docs</loc>
-    <lastmod>2025-12-17</lastmod>
+    <lastmod>2025-12-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://getfitconnect.co.uk/docs/getting-started</loc>
-    <lastmod>2025-12-17</lastmod>
+    <lastmod>2025-12-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://getfitconnect.co.uk/docs/integrations/zoom</loc>
+    <lastmod>2025-12-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
   
   <!-- Legal -->
