@@ -277,6 +277,25 @@
       "120min": "2 godziny"
     }
   },
+  "scheduleSession": {
+    "paymentMode": {
+      "title": "Tryb płatności",
+      "free": "Darmowa sesja",
+      "freeDescription": "Brak opłaty za tę sesję",
+      "useCredits": "Użyj kredytów z pakietu",
+      "useCreditsDescription": "Odejmij 1 kredyt z \"{{packageName}}\"",
+      "paid": "Płatna sesja",
+      "paidDescription": "Klient otrzyma prośbę o płatność",
+      "remaining": "pozostało",
+      "noCreditsAvailable": "Klient nie ma kredytów pakietowych"
+    },
+    "pendingPayment": {
+      "title": "Wymagana płatność",
+      "description": "Ta sesja wymaga płatności od klienta",
+      "awaitingPayment": "Oczekiwanie na płatność klienta",
+      "paymentReceived": "Płatność otrzymana"
+    }
+  },
   "addNoteModal": {
     "title": "Dodaj notatkę",
     "titleWithClient": "Dodaj notatkę dla {{clientName}}",
