@@ -55,9 +55,9 @@ export interface FoodSubstitution {
   whyGoodSubstitute: string;
   prepTips?: string;
   whereToBuy?: string;
-  // FatSecret verification fields (Phase 6)
-  fatsecret_id?: string | null;
-  source?: 'fatsecret' | 'manual' | 'ai_generated';
+  // Verification fields
+  external_id?: string | null;
+  source?: 'openfoodfacts' | 'fatsecret' | 'manual' | 'ai_generated';
 }
 
 export interface MacroCalculation {
@@ -241,13 +241,13 @@ export const useAIFoodSubstitutions = () => {
       let hasUnverifiedResults = false;
 
       for (const sub of data.substitutions as FoodSubstitution[]) {
-        // Check for FatSecret verification
-        if (sub.fatsecret_id && sub.source === 'fatsecret') {
-          // Verified substitution - keep as-is (macros come from FatSecret)
+        // Check for verified source (Open Food Facts or FatSecret)
+        if (sub.external_id && (sub.source === 'openfoodfacts' || sub.source === 'fatsecret')) {
+          // Verified substitution - keep as-is (macros come from verified source)
           verifiedSubstitutions.push(sub);
         } else {
           // Unverified - log and skip
-          console.warn(`Rejecting unverified substitution: ${sub.name} (source: ${sub.source}, fatsecret_id: ${sub.fatsecret_id})`);
+          console.warn(`Rejecting unverified substitution: ${sub.name} (source: ${sub.source}, external_id: ${sub.external_id})`);
           hasUnverifiedResults = true;
         }
       }

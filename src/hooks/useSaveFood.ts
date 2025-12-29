@@ -4,7 +4,7 @@ import { FatSecretFood } from './useFatSecretSearch';
 import { Food } from './useFoods';
 
 interface SaveFoodParams {
-  food: FatSecretFood;
+  food: FatSecretFood & { external_id?: string };
   coachId: string;
 }
 
@@ -17,7 +17,7 @@ export const useSaveFood = () => {
       const { data: existingFood } = await supabase
         .from('foods')
         .select('*')
-        .eq('fatsecret_id', food.fatsecret_id)
+        .eq('external_id', food.external_id || food.fatsecret_id)
         .eq('coach_id', coachId)
         .maybeSingle();
 

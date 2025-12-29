@@ -9,7 +9,7 @@ export interface FoodDiaryEntry {
   logged_at: string;
   meal_type: 'breakfast' | 'lunch' | 'dinner' | 'snack';
   food_id: string | null;
-  fatsecret_id: string | null;
+  external_id: string | null;
   food_name: string;
   serving_size_g: number | null;
   servings: number;
@@ -29,7 +29,7 @@ export interface FoodDiaryInsert {
   logged_at?: string;
   meal_type: 'breakfast' | 'lunch' | 'dinner' | 'snack';
   food_id?: string | null;
-  fatsecret_id?: string | null;
+  external_id?: string | null;
   food_name: string;
   serving_size_g?: number | null;
   servings?: number;

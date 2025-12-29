@@ -3569,8 +3569,8 @@ export type Database = {
           carbs_g: number | null
           client_id: string
           created_at: string | null
+          external_id: string | null
           fat_g: number | null
-          fatsecret_id: string | null
           fiber_g: number | null
           food_id: string | null
           food_name: string
@@ -3589,8 +3589,8 @@ export type Database = {
           carbs_g?: number | null
           client_id: string
           created_at?: string | null
+          external_id?: string | null
           fat_g?: number | null
-          fatsecret_id?: string | null
           fiber_g?: number | null
           food_id?: string | null
           food_name: string
@@ -3609,8 +3609,8 @@ export type Database = {
           carbs_g?: number | null
           client_id?: string
           created_at?: string | null
+          external_id?: string | null
           fat_g?: number | null
-          fatsecret_id?: string | null
           fiber_g?: number | null
           food_id?: string | null
           food_name?: string
@@ -3665,8 +3665,8 @@ export type Database = {
           coach_id: string | null
           created_at: string
           dietary_preferences: Json | null
+          external_id: string | null
           fat_g: number
-          fatsecret_id: string | null
           fiber_g: number | null
           id: string
           image_url: string | null
@@ -3690,8 +3690,8 @@ export type Database = {
           coach_id?: string | null
           created_at?: string
           dietary_preferences?: Json | null
+          external_id?: string | null
           fat_g?: number
-          fatsecret_id?: string | null
           fiber_g?: number | null
           id?: string
           image_url?: string | null
@@ -3715,8 +3715,8 @@ export type Database = {
           coach_id?: string | null
           created_at?: string
           dietary_preferences?: Json | null
+          external_id?: string | null
           fat_g?: number
-          fatsecret_id?: string | null
           fiber_g?: number | null
           id?: string
           image_url?: string | null
@@ -3754,6 +3754,69 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      foods_autocomplete: {
+        Row: {
+          allergens: string[] | null
+          barcode: string | null
+          brand: string | null
+          calories_per_100g: number | null
+          carbs_g: number | null
+          country: string
+          created_at: string
+          external_id: string
+          fat_g: number | null
+          food_type: string
+          id: string
+          image_url: string | null
+          language: string
+          popularity_score: number
+          product_name: string
+          protein_g: number | null
+          search_text: string
+          updated_at: string
+        }
+        Insert: {
+          allergens?: string[] | null
+          barcode?: string | null
+          brand?: string | null
+          calories_per_100g?: number | null
+          carbs_g?: number | null
+          country?: string
+          created_at?: string
+          external_id: string
+          fat_g?: number | null
+          food_type?: string
+          id?: string
+          image_url?: string | null
+          language?: string
+          popularity_score?: number
+          product_name: string
+          protein_g?: number | null
+          search_text: string
+          updated_at?: string
+        }
+        Update: {
+          allergens?: string[] | null
+          barcode?: string | null
+          brand?: string | null
+          calories_per_100g?: number | null
+          carbs_g?: number | null
+          country?: string
+          created_at?: string
+          external_id?: string
+          fat_g?: number | null
+          food_type?: string
+          id?: string
+          image_url?: string | null
+          language?: string
+          popularity_score?: number
+          product_name?: string
+          protein_g?: number | null
+          search_text?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       grocery_lists: {
         Row: {

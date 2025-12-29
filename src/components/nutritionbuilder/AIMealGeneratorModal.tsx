@@ -35,8 +35,9 @@ interface AIFood {
   protein: number;
   carbs: number;
   fat: number;
-  fatsecret_id?: string;
-  source?: 'fatsecret';
+  external_id?: string;
+  fatsecret_id?: string; // Legacy support
+  source?: 'openfoodfacts' | 'fatsecret';
 }
 
 interface AIMeal {
@@ -173,8 +174,8 @@ export const AIMealGeneratorModal = ({
             coach_id: null,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-            fatsecret_id: aiFood.fatsecret_id || null,
-            source: aiFood.source || 'fatsecret',
+            external_id: aiFood.external_id || aiFood.fatsecret_id || null,
+            source: aiFood.source || 'openfoodfacts',
             // New FatSecret Premier fields
             sugar_g: null,
             sodium_mg: null,

@@ -239,3 +239,12 @@ verify_jwt = true
 
 [functions.send-profile-completion-reminder]
 verify_jwt = false
+
+[functions.openfoodfacts-search]
+verify_jwt = false
+
+[functions.openfoodfacts-barcode]
+verify_jwt = false
+
+[functions.openfoodfacts-autocomplete]
+verify_jwt = false
