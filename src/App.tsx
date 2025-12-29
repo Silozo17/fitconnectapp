@@ -159,6 +159,9 @@ const DocsAdminBoosts = lazy(() => import('@/pages/docs/admin/AdminBoostsDocs'))
 const DocsAdminIntegrations = lazy(() => import('@/pages/docs/admin/AdminIntegrationsDocs'));
 const DocsAdminAudit = lazy(() => import('@/pages/docs/admin/AdminAuditDocs'));
 
+// Integration Documentation
+const ZoomIntegrationDocs = lazy(() => import('@/pages/docs/integrations/ZoomIntegration'));
+
 // Subscribe pages
 const Subscribe = lazy(() => import('@/pages/Subscribe'));
 const SubscribeSuccess = lazy(() => import('@/pages/SubscribeSuccess'));
@@ -281,6 +284,9 @@ const App = () => (
                               <Route path="/docs/admin/boosts" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminBoosts /></ProtectedRoute>} />
                               <Route path="/docs/admin/integrations" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminIntegrations /></ProtectedRoute>} />
                               <Route path="/docs/admin/audit" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminAudit /></ProtectedRoute>} />
+                              
+                              {/* Public Integration Documentation Routes */}
+                              <Route path="/docs/integrations/zoom" element={<ZoomIntegrationDocs />} />
                               
                               {/* Dashboard Redirect */}
                               <Route path="/dashboard" element={
