@@ -26,6 +26,7 @@ export const FEATURE_ACCESS = {
   // Enterprise tier features
   advanced_reporting: ["enterprise", "founder"],
   custom_integrations: ["enterprise", "founder"],
+  ai_client_analysis: ["enterprise", "founder"],
 } as const;
 
 export type FeatureKey = keyof typeof FEATURE_ACCESS;
@@ -49,6 +50,7 @@ export const FEATURE_NAMES: Record<FeatureKey, string> = {
   boost_marketing: "Boost Marketing",
   advanced_reporting: "Advanced Reporting",
   custom_integrations: "Custom Integrations",
+  ai_client_analysis: "AI Client Analysis",
 };
 
 // Feature descriptions for upgrade prompts
@@ -70,6 +72,7 @@ export const FEATURE_DESCRIPTIONS: Record<FeatureKey, string> = {
   boost_marketing: "Boost your profile visibility in search",
   advanced_reporting: "Generate detailed reports and exports",
   custom_integrations: "Connect with third-party services",
+  ai_client_analysis: "AI-powered analysis of client progress, nutrition, and training",
 };
 
 // Check if a feature requires a specific tier
