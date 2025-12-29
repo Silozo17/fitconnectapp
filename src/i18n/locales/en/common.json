@@ -485,7 +485,8 @@
       "receipts": "Receipts",
       "integrations": "Integrations",
       "favourites": "Favourites",
-      "settings": "Settings"
+      "settings": "Settings",
+      "foodDiary": "Food Diary"
     },
     "bottomNav": {
       "home": "Home",

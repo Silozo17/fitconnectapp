@@ -484,7 +484,8 @@
       "receipts": "Paragony",
       "integrations": "Integracje",
       "favourites": "Ulubione",
-      "settings": "Ustawienia"
+      "settings": "Ustawienia",
+      "foodDiary": "Dziennik żywienia"
     },
     "bottomNav": {
       "home": "Start",
