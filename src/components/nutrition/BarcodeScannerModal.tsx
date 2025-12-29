@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Camera, Loader2, Keyboard, AlertCircle } from "lucide-react";
-import { useOpenFoodFactsBarcode, OpenFoodFactsFood } from "@/hooks/useOpenFoodFacts";
+import { useOpenFoodFactsBarcode } from "@/hooks/useOpenFoodFacts";
+import { useUserLocalePreference } from "@/hooks/useUserLocalePreference";
 import { toast } from "sonner";
 import { enableScanningMode, disableScanningMode, isDespia } from "@/lib/despia";
 
@@ -42,6 +43,7 @@ export const BarcodeScannerModal = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const scanIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  const { countryPreference } = useUserLocalePreference();
   const barcodeMutation = useOpenFoodFactsBarcode();
   const isLoading = barcodeMutation.isPending;
 
@@ -137,7 +139,7 @@ export const BarcodeScannerModal = ({
 
   const lookupBarcodeAndNotify = async (barcode: string) => {
     try {
-      const result = await barcodeMutation.mutateAsync({ barcode, region: 'GB' });
+      const result = await barcodeMutation.mutateAsync({ barcode, region: countryPreference });
       
       if (result.found && result.food) {
         onFoodFound({

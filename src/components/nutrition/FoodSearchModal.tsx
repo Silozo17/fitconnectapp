@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, Loader2, AlertTriangle } from "lucide-react";
 import { useOpenFoodFactsAutocomplete, AutocompleteSuggestion, suggestionToFood } from "@/hooks/useOpenFoodFacts";
+import { useUserLocalePreference } from "@/hooks/useUserLocalePreference";
 import { cn } from "@/lib/utils";
 
 interface FoodResult {
@@ -43,11 +44,12 @@ export const FoodSearchModal = ({
   clientAllergens = [],
 }: FoodSearchModalProps) => {
   const [query, setQuery] = useState("");
+  const { countryPreference } = useUserLocalePreference();
 
   const { data: results = [], isLoading: isSearching } = useOpenFoodFactsAutocomplete(
     query,
     open && query.length >= 2,
-    'GB',
+    countryPreference,
     300
   );
 
@@ -89,12 +91,12 @@ export const FoodSearchModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[80vh] flex flex-col">
+      <DialogContent className="sm:max-w-lg max-h-[85vh] flex flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle>Add to {MEAL_LABELS[mealType]}</DialogTitle>
         </DialogHeader>
 
-        <div className="relative">
+        <div className="relative shrink-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Search foods (e.g., chicken breast, rice)"
@@ -105,7 +107,7 @@ export const FoodSearchModal = ({
           />
         </div>
 
-        <ScrollArea className="flex-1 -mx-6 px-6">
+        <ScrollArea className="h-[55vh] sm:h-[50vh] -mx-6 px-6">
           {isSearching ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />

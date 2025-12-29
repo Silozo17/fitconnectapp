@@ -95,7 +95,7 @@ export const useOpenFoodFactsAutocomplete = (
       const { data, error } = await supabase.functions.invoke<AutocompleteResponse>(
         'openfoodfacts-autocomplete',
         {
-          body: { query: debouncedQuery, country, limit: 10 },
+          body: { query: debouncedQuery, country, limit: 20 },
         }
       );
 
