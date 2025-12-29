@@ -253,24 +253,24 @@ const ClientFoodDiary = () => {
           )}
 
           {/* Quick Add Buttons */}
-          <div className="fixed bottom-20 right-4 flex flex-col gap-2 sm:bottom-6 sm:right-6">
+          <div className="fixed bottom-24 right-4 flex flex-col gap-3 sm:bottom-6 sm:right-6 z-40">
             <Button
               size="lg"
-              className="rounded-full shadow-lg h-14 w-14"
+              className="rounded-full shadow-lg h-12 w-12 sm:h-14 sm:w-14"
               onClick={() => setShowBarcodeScanner(true)}
             >
-              <ScanBarcode className="w-6 h-6" />
+              <ScanBarcode className="w-5 h-5 sm:w-6 sm:h-6" />
             </Button>
             <Button
               size="lg"
               variant="secondary"
-              className="rounded-full shadow-lg h-14 w-14"
+              className="rounded-full shadow-lg h-12 w-12 sm:h-14 sm:w-14"
               onClick={() => {
                 setActiveMealType('snack');
                 setShowFoodSearch(true);
               }}
             >
-              <Search className="w-6 h-6" />
+              <Search className="w-5 h-5 sm:w-6 sm:h-6" />
             </Button>
           </div>
         </div>
