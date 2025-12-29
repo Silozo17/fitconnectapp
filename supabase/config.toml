@@ -231,5 +231,11 @@ verify_jwt = true
 [functions.fatsecret-batch-lookup]
 verify_jwt = true
 
+[functions.fatsecret-autocomplete]
+verify_jwt = true
+
+[functions.fatsecret-barcode]
+verify_jwt = true
+
 [functions.send-profile-completion-reminder]
 verify_jwt = false

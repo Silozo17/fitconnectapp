@@ -12,23 +12,34 @@ export interface FatSecretFood {
   carbs_g: number;
   fat_g: number;
   fiber_g: number;
+  sugar_g?: number;
+  sodium_mg?: number;
+  saturated_fat_g?: number;
+  image_url?: string | null;
+  allergens?: string[];
+  dietary_preferences?: string[];
 }
 
 interface FatSecretSearchResponse {
   foods: FatSecretFood[];
+  meta?: {
+    region: string;
+    total_results: number;
+    api_version: string;
+  };
   error?: string;
 }
 
-export const useFatSecretSearch = (query: string, enabled: boolean = true) => {
+export const useFatSecretSearch = (query: string, enabled: boolean = true, region: string = 'GB') => {
   return useQuery({
-    queryKey: ['fatsecret-search', query],
+    queryKey: ['fatsecret-search', query, region],
     queryFn: async (): Promise<FatSecretFood[]> => {
       if (!query || query.length < 2) {
         return [];
       }
 
       const { data, error } = await supabase.functions.invoke<FatSecretSearchResponse>('fatsecret-search', {
-        body: { query, maxResults: 25 }
+        body: { query, maxResults: 25, region }
       });
 
       if (error) {
@@ -43,8 +54,8 @@ export const useFatSecretSearch = (query: string, enabled: boolean = true) => {
       return data?.foods || [];
     },
     enabled: enabled && query.length >= 2,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     retry: 1,
   });
 };
