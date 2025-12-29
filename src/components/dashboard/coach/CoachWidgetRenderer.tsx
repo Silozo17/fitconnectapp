@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { CoachDashboardWidget } from "@/hooks/useCoachWidgets";
+import { Wallet, Package, CreditCard, Users } from "lucide-react";
+import { EmptyState } from "@/components/shared/EmptyState";
 import {
   StatsClientsWidget,
   StatsSessionsWidget,
@@ -102,17 +104,44 @@ export function CoachWidgetRenderer({
     case "list_pipeline":
       return <PipelineWidget />;
 
-    // Placeholder widgets for business category (can be implemented later)
     case "business_earnings":
+      return (
+        <EmptyState
+          icon={Wallet}
+          title={t("widgets.emptyStates.earnings.title")}
+          description={t("widgets.emptyStates.earnings.description")}
+          variant="compact"
+        />
+      );
+
     case "business_packages":
+      return (
+        <EmptyState
+          icon={Package}
+          title={t("widgets.emptyStates.packages.title")}
+          description={t("widgets.emptyStates.packages.description")}
+          variant="compact"
+        />
+      );
+
     case "business_subscriptions":
+      return (
+        <EmptyState
+          icon={CreditCard}
+          title={t("widgets.emptyStates.subscriptions.title")}
+          description={t("widgets.emptyStates.subscriptions.description")}
+          variant="compact"
+        />
+      );
+
     case "list_recent_clients":
       return (
-        <div className="h-full flex items-center justify-center p-6 bg-muted/30 rounded-lg border border-dashed border-border">
-          <p className="text-sm text-muted-foreground">
-            {widget.title} - {t("widgets.comingSoon")}
-          </p>
-        </div>
+        <EmptyState
+          icon={Users}
+          title={t("widgets.emptyStates.recentClients.title")}
+          description={t("widgets.emptyStates.recentClients.description")}
+          variant="compact"
+        />
       );
 
     default:

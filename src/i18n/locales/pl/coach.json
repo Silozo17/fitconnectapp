@@ -20,7 +20,24 @@
     "retry": "Ponów"
   },
   "widgets": {
-    "comingSoon": "Wkrótce",
+    "emptyStates": {
+      "earnings": {
+        "title": "Brak zarobków",
+        "description": "Gdy otrzymasz płatności od klientów, Twoje zarobki pojawią się tutaj"
+      },
+      "packages": {
+        "title": "Brak aktywnych pakietów",
+        "description": "Twórz pakiety treningowe do sprzedaży klientom i śledź ich postępy tutaj"
+      },
+      "subscriptions": {
+        "title": "Brak subskrypcji",
+        "description": "Gdy klienci zasubskrybują Twoje usługi coachingowe, będą tutaj śledzone"
+      },
+      "recentClients": {
+        "title": "Brak ostatniej aktywności",
+        "description": "Tutaj pojawią się Twoi ostatnio aktywni klienci"
+      }
+    },
     "pipeline": {
       "title": "Lejek sprzedażowy",
       "totalLeads": "{{count}} leadów łącznie",
