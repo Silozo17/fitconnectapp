@@ -10,6 +10,14 @@
     "reachedLevel": "You reached Level {{level}}",
     "tapToDismiss": "Tap to dismiss"
   },
+  "claim": {
+    "button": "Claim Reward",
+    "claimed": "Claimed",
+    "congratulations": "Congratulations!",
+    "youEarned": "You earned",
+    "shareYourAchievement": "Share your achievement",
+    "tapToDismiss": "Tap to close"
+  },
   "xp": {
     "level": "Level",
     "totalXp": "Total XP",
@@ -103,7 +111,8 @@
     "comingSoon": "Coming Soon",
     "joinChallenge": "Join Challenge",
     "goalProgress": "Goal Progress",
-    "joinToTrack": "Join to start tracking your progress"
+    "joinToTrack": "Join to start tracking your progress",
+    "claimReward": "Claim Reward"
   },
   "rewards": {
     "exclusiveReward": "Exclusive Reward",
