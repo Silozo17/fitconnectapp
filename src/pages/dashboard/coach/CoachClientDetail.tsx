@@ -352,16 +352,25 @@ const CoachClientDetail = () => {
               {clientRelation?.plan_type && ` • ${clientRelation.plan_type}`}
             </p>
           </div>
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={() => navigate(`/dashboard/coach/messages/${id}`)}>
-              <MessageSquare className="w-4 h-4 mr-2" />
-              {t('clients.message')}
-            </Button>
-            <Button onClick={() => setIsScheduleSessionOpen(true)} className="bg-primary text-primary-foreground">
-              <Calendar className="w-4 h-4 mr-2" />
-              {t('clients.scheduleSession')}
-            </Button>
-          </div>
+              <div className="flex flex-wrap gap-2 sm:gap-3 w-full md:w-auto">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="flex-1 sm:flex-none"
+                  onClick={() => navigate(`/dashboard/coach/messages/${id}`)}
+                >
+                  <MessageSquare className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">{t('clients.message')}</span>
+                </Button>
+                <Button 
+                  size="sm"
+                  className="flex-1 sm:flex-none bg-primary text-primary-foreground"
+                  onClick={() => setIsScheduleSessionOpen(true)}
+                >
+                  <Calendar className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">{t('clients.scheduleSession')}</span>
+                </Button>
+              </div>
         </div>
       </div>
 
