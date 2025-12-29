@@ -27,6 +27,7 @@ import { useTranslation } from "react-i18next";
 import BecomeCoachModal from "@/components/shared/BecomeCoachModal";
 
 import WearableConnectionList from "@/components/integrations/WearableConnectionList";
+import AllergenPreferencesCard from "@/components/settings/AllergenPreferencesCard";
 import { HealthDataPrivacySettings } from "@/components/dashboard/clients/HealthDataPrivacySettings";
 import CalendarConnectionCard from "@/components/integrations/CalendarConnectionCard";
 import HealthDataWidget from "@/components/integrations/HealthDataWidget";
@@ -539,6 +540,9 @@ const ClientSettings = () => {
                     </p>
                   </CardContent>
                 </Card>
+
+                {/* Allergen Preferences */}
+                <AllergenPreferencesCard />
 
                 <div className="flex justify-end">
                   <Button 

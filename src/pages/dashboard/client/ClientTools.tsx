@@ -8,11 +8,13 @@ import BodyFatCalculator from "@/components/tools/BodyFatCalculator";
 import OneRepMaxCalculator from "@/components/tools/OneRepMaxCalculator";
 import WaterIntakeCalculator from "@/components/tools/WaterIntakeCalculator";
 import HeartRateZoneCalculator from "@/components/tools/HeartRateZoneCalculator";
-import { Calculator, Scale, Flame, Utensils, Target, Percent, Dumbbell, Droplets, Heart, ArrowLeft, ChevronRight } from "lucide-react";
+import FoodLookupTool from "@/components/tools/FoodLookupTool";
+import { Calculator, Scale, Flame, Utensils, Target, Percent, Dumbbell, Droplets, Heart, ArrowLeft, ChevronRight, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 const toolsList = [
+  { id: "food-lookup", name: "Food Lookup", icon: Search, description: "Search foods and scan barcodes for nutrition info", component: FoodLookupTool },
   { id: "bmi", name: "BMI Calculator", icon: Scale, description: "Calculate your Body Mass Index to assess weight status", component: BMICalculator },
   { id: "bmr", name: "BMR Calculator", icon: Flame, description: "Find your Basal Metabolic Rate - calories burned at rest", component: BMRCalculator },
   { id: "tdee", name: "Calorie Calculator", icon: Utensils, description: "Calculate Total Daily Energy Expenditure for your goals", component: TDEECalculator },

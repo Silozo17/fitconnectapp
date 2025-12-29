@@ -86,6 +86,7 @@ const ClientMarketplace = lazy(() => import('@/pages/dashboard/client/ClientMark
 const ClientMarketplaceProduct = lazy(() => import('@/pages/dashboard/client/ClientMarketplaceProduct'));
 const ClientMarketplaceBundle = lazy(() => import('@/pages/dashboard/client/ClientMarketplaceBundle'));
 const ClientPlanDetail = lazy(() => import('@/pages/dashboard/client/ClientPlanDetail'));
+const ClientFoodDiary = lazy(() => import('@/pages/dashboard/client/ClientFoodDiary'));
 
 // Coach Dashboard Pages
 const CoachOverview = lazy(() => import('@/pages/dashboard/coach/CoachOverview'));
@@ -493,6 +494,11 @@ const App = () => (
                               <Route path="/dashboard/client/marketplace" element={
                                 <ProtectedRoute allowedRoles={["client", "admin"]}>
                                   <ClientMarketplace />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/dashboard/client/food-diary" element={
+                                <ProtectedRoute allowedRoles={["client", "admin"]}>
+                                  <ClientFoodDiary />
                                 </ProtectedRoute>
                               } />
                               <Route path="/dashboard/client/tools" element={
