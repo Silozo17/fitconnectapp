@@ -5249,6 +5249,155 @@ export type Database = {
           },
         ]
       }
+      training_log_exercises: {
+        Row: {
+          created_at: string | null
+          exercise_name: string
+          id: string
+          notes: string | null
+          order_index: number
+          training_log_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          exercise_name: string
+          id?: string
+          notes?: string | null
+          order_index?: number
+          training_log_id: string
+        }
+        Update: {
+          created_at?: string | null
+          exercise_name?: string
+          id?: string
+          notes?: string | null
+          order_index?: number
+          training_log_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_log_exercises_training_log_id_fkey"
+            columns: ["training_log_id"]
+            isOneToOne: false
+            referencedRelation: "training_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_log_sets: {
+        Row: {
+          created_at: string | null
+          distance_meters: number | null
+          duration_seconds: number | null
+          exercise_id: string
+          id: string
+          is_drop_set: boolean | null
+          is_warmup: boolean | null
+          notes: string | null
+          reps: number | null
+          rpe: number | null
+          set_number: number
+          weight_kg: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          distance_meters?: number | null
+          duration_seconds?: number | null
+          exercise_id: string
+          id?: string
+          is_drop_set?: boolean | null
+          is_warmup?: boolean | null
+          notes?: string | null
+          reps?: number | null
+          rpe?: number | null
+          set_number?: number
+          weight_kg?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          distance_meters?: number | null
+          duration_seconds?: number | null
+          exercise_id?: string
+          id?: string
+          is_drop_set?: boolean | null
+          is_warmup?: boolean | null
+          notes?: string | null
+          reps?: number | null
+          rpe?: number | null
+          set_number?: number
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_log_sets_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "training_log_exercises"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_logs: {
+        Row: {
+          client_id: string
+          created_at: string | null
+          duration_minutes: number | null
+          fatigue_level: string | null
+          id: string
+          logged_at: string
+          notes: string | null
+          rpe: number | null
+          updated_at: string | null
+          workout_name: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string | null
+          duration_minutes?: number | null
+          fatigue_level?: string | null
+          id?: string
+          logged_at?: string
+          notes?: string | null
+          rpe?: number | null
+          updated_at?: string | null
+          workout_name: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string | null
+          duration_minutes?: number | null
+          fatigue_level?: string | null
+          id?: string
+          logged_at?: string
+          notes?: string | null
+          rpe?: number | null
+          updated_at?: string | null
+          workout_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       training_plans: {
         Row: {
           coach_id: string
@@ -5887,6 +6036,14 @@ export type Database = {
       }
       client_is_connected_to_coach: {
         Args: { coach_profile_id: string }
+        Returns: boolean
+      }
+      coach_can_view_client_data: {
+        Args: {
+          p_client_id: string
+          p_coach_user_id: string
+          p_data_type: string
+        }
         Returns: boolean
       }
       coach_can_view_client_profile: {
