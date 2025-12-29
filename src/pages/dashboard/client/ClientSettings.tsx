@@ -28,8 +28,7 @@ import BecomeCoachModal from "@/components/shared/BecomeCoachModal";
 
 import WearableConnectionList from "@/components/integrations/WearableConnectionList";
 import AllergenPreferencesCard from "@/components/settings/AllergenPreferencesCard";
-import { HealthDataPrivacySettings } from "@/components/dashboard/clients/HealthDataPrivacySettings";
-import { ClientDataPrivacySettings } from "@/components/settings/ClientDataPrivacySettings";
+import { UnifiedDataPrivacySettings } from "@/components/settings/UnifiedDataPrivacySettings";
 import CalendarConnectionCard from "@/components/integrations/CalendarConnectionCard";
 import HealthDataWidget from "@/components/integrations/HealthDataWidget";
 import AppleCalendarConnectModal from "@/components/integrations/AppleCalendarConnectModal";
@@ -564,10 +563,7 @@ const ClientSettings = () => {
 
             {/* Privacy Tab */}
             {selectedTab === "privacy" && (
-              <div className="space-y-6">
-                <ClientDataPrivacySettings />
-                <HealthDataPrivacySettings />
-              </div>
+              <UnifiedDataPrivacySettings />
             )}
 
             {/* Preferences Tab */}
