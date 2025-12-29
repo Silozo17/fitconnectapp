@@ -51,7 +51,7 @@ export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
           earned 
             ? `${rarityColors.border} border` 
             : 'border border-white/10',
-          badge.rarity === 'legendary' && earned && 'ring-2 ring-yellow-400/50 shadow-lg shadow-yellow-500/20'
+          badge.rarity === 'legendary' && earned && isClaimed && 'ring-2 ring-yellow-400/50 shadow-lg shadow-yellow-500/20'
         )}
       >
         {/* Rarity glow behind entire card - only for claimed badges */}
