@@ -5,74 +5,85 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Search, Loader2, ScanBarcode, AlertTriangle, Leaf, Milk, Wheat } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useDebounce } from "@/hooks/useDebounce";
+import { useOpenFoodFactsSearch, OpenFoodFactsFood } from "@/hooks/useOpenFoodFacts";
 import { BarcodeScannerModal } from "@/components/nutrition/BarcodeScannerModal";
 import { cn } from "@/lib/utils";
 
 interface FoodDetails {
-  fatsecret_id: string;
+  external_id: string;
   name: string;
-  brand_name?: string;
+  brand_name?: string | null;
   calories_per_100g: number;
   protein_g: number;
   carbs_g: number;
   fat_g: number;
   fiber_g?: number;
-  sugar_g?: number;
-  sodium_mg?: number;
-  saturated_fat_g?: number;
+  sugar_g?: number | null;
+  sodium_mg?: number | null;
+  saturated_fat_g?: number | null;
   serving_size_g?: number;
   serving_description?: string;
   allergens?: string[];
   dietary_preferences?: string[];
-  image_url?: string;
+  image_url?: string | null;
 }
 
 const ALLERGEN_ICONS: Record<string, React.ReactNode> = {
-  'Milk': <Milk className="w-3 h-3" />,
-  'Dairy': <Milk className="w-3 h-3" />,
-  'Gluten': <Wheat className="w-3 h-3" />,
-  'Wheat': <Wheat className="w-3 h-3" />,
+  'milk': <Milk className="w-3 h-3" />,
+  'dairy': <Milk className="w-3 h-3" />,
+  'gluten': <Wheat className="w-3 h-3" />,
+  'wheat': <Wheat className="w-3 h-3" />,
 };
 
 const FoodLookupTool = () => {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<FoodDetails[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedFood, setSelectedFood] = useState<FoodDetails | null>(null);
-  const [isSearching, setIsSearching] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
 
-  const searchFoods = async () => {
-    if (query.length < 2) return;
+  const { data: results = [], isLoading: isSearching } = useOpenFoodFactsSearch(
+    searchQuery,
+    searchQuery.length >= 2,
+    'GB'
+  );
 
-    setIsSearching(true);
-    setSelectedFood(null);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('fatsecret-search', {
-        body: { query, max_results: 15 }
-      });
-
-      if (error) throw error;
-      setResults(data?.foods || []);
-    } catch (error) {
-      console.error('Food search error:', error);
-      setResults([]);
-    } finally {
-      setIsSearching(false);
+  const handleSearch = () => {
+    if (query.length >= 2) {
+      setSearchQuery(query);
+      setSelectedFood(null);
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      searchFoods();
+      handleSearch();
     }
+  };
+
+  const handleSelectFood = (food: OpenFoodFactsFood) => {
+    setSelectedFood({
+      external_id: food.external_id,
+      name: food.name,
+      brand_name: food.brand_name,
+      calories_per_100g: food.calories_per_100g,
+      protein_g: food.protein_g,
+      carbs_g: food.carbs_g,
+      fat_g: food.fat_g,
+      fiber_g: food.fiber_g,
+      sugar_g: food.sugar_g,
+      sodium_mg: food.sodium_mg,
+      saturated_fat_g: food.saturated_fat_g,
+      serving_size_g: food.serving_size_g,
+      serving_description: food.serving_description,
+      allergens: food.allergens,
+      dietary_preferences: food.dietary_preferences,
+      image_url: food.image_url,
+    });
   };
 
   const handleBarcodeFound = (food: any) => {
     setSelectedFood({
-      fatsecret_id: food.fatsecret_id,
+      external_id: food.external_id,
       name: food.name,
       calories_per_100g: food.calories_per_100g,
       protein_g: food.protein_g,
@@ -85,7 +96,7 @@ const FoodLookupTool = () => {
       allergens: food.allergens,
       dietary_preferences: food.dietary_preferences,
     });
-    setResults([]);
+    setSearchQuery("");
   };
 
   return (
@@ -110,7 +121,7 @@ const FoodLookupTool = () => {
                 className="pl-10"
               />
             </div>
-            <Button onClick={searchFoods} disabled={query.length < 2 || isSearching}>
+            <Button onClick={handleSearch} disabled={query.length < 2 || isSearching}>
               {isSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : "Search"}
             </Button>
             <Button variant="outline" onClick={() => setShowScanner(true)}>
@@ -124,8 +135,8 @@ const FoodLookupTool = () => {
               <div className="p-2 space-y-1">
                 {results.map((food) => (
                   <button
-                    key={food.fatsecret_id}
-                    onClick={() => setSelectedFood(food)}
+                    key={food.external_id}
+                    onClick={() => handleSelectFood(food)}
                     className="w-full text-left p-3 rounded-lg hover:bg-muted transition-colors"
                   >
                     <p className="font-medium truncate">{food.name}</p>
@@ -189,25 +200,25 @@ const FoodLookupTool = () => {
 
             {/* Detailed Nutrition */}
             <div className="grid grid-cols-2 gap-3">
-              {selectedFood.fiber_g !== undefined && (
+              {selectedFood.fiber_g !== undefined && selectedFood.fiber_g !== null && (
                 <div className="flex justify-between p-3 rounded-lg bg-muted/50">
                   <span className="text-sm">Fiber</span>
                   <span className="font-medium">{selectedFood.fiber_g}g</span>
                 </div>
               )}
-              {selectedFood.sugar_g !== undefined && (
+              {selectedFood.sugar_g !== undefined && selectedFood.sugar_g !== null && (
                 <div className="flex justify-between p-3 rounded-lg bg-muted/50">
                   <span className="text-sm">Sugar</span>
                   <span className="font-medium">{selectedFood.sugar_g}g</span>
                 </div>
               )}
-              {selectedFood.saturated_fat_g !== undefined && (
+              {selectedFood.saturated_fat_g !== undefined && selectedFood.saturated_fat_g !== null && (
                 <div className="flex justify-between p-3 rounded-lg bg-muted/50">
                   <span className="text-sm">Saturated Fat</span>
                   <span className="font-medium">{selectedFood.saturated_fat_g}g</span>
                 </div>
               )}
-              {selectedFood.sodium_mg !== undefined && (
+              {selectedFood.sodium_mg !== undefined && selectedFood.sodium_mg !== null && (
                 <div className="flex justify-between p-3 rounded-lg bg-muted/50">
                   <span className="text-sm">Sodium</span>
                   <span className="font-medium">{selectedFood.sodium_mg}mg</span>
@@ -225,7 +236,7 @@ const FoodLookupTool = () => {
                 <div className="flex flex-wrap gap-2">
                   {selectedFood.allergens.map((allergen) => (
                     <Badge key={allergen} variant="outline" className="border-warning/50 text-warning">
-                      {ALLERGEN_ICONS[allergen] || null}
+                      {ALLERGEN_ICONS[allergen.toLowerCase()] || null}
                       <span className="ml-1">{allergen}</span>
                     </Badge>
                   ))}

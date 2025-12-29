@@ -4,14 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Camera, Loader2, Keyboard, AlertCircle } from "lucide-react";
-import { useFatSecretBarcode, BarcodeFood } from "@/hooks/useFatSecretBarcode";
+import { useOpenFoodFactsBarcode, OpenFoodFactsFood } from "@/hooks/useOpenFoodFacts";
 import { toast } from "sonner";
+import { enableScanningMode, disableScanningMode, isDespia } from "@/lib/despia";
 
 interface BarcodeScannerModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onFoodFound: (food: {
-    fatsecret_id: string;
+    external_id: string;
     name: string;
     calories_per_100g: number;
     protein_g: number;
@@ -41,7 +42,7 @@ export const BarcodeScannerModal = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const scanIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const barcodeMutation = useFatSecretBarcode();
+  const barcodeMutation = useOpenFoodFactsBarcode();
   const isLoading = barcodeMutation.isPending;
 
   const stopCamera = useCallback(() => {
@@ -54,10 +55,21 @@ export const BarcodeScannerModal = ({
       streamRef.current = null;
     }
     setIsScanning(false);
+    
+    // Disable Despia scanning mode
+    if (isDespia()) {
+      disableScanningMode();
+    }
   }, []);
 
   const startCamera = useCallback(async () => {
     setCameraError(null);
+    
+    // Enable Despia scanning mode for optimal brightness
+    if (isDespia()) {
+      enableScanningMode();
+    }
+    
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { 
@@ -125,11 +137,11 @@ export const BarcodeScannerModal = ({
 
   const lookupBarcodeAndNotify = async (barcode: string) => {
     try {
-      const result = await barcodeMutation.mutateAsync(barcode);
+      const result = await barcodeMutation.mutateAsync({ barcode, region: 'GB' });
       
       if (result.found && result.food) {
         onFoodFound({
-          fatsecret_id: result.food.fatsecret_id,
+          external_id: result.food.external_id,
           name: result.food.name,
           calories_per_100g: result.food.calories_per_100g,
           protein_g: result.food.protein_g,

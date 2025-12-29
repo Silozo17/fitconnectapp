@@ -1,17 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Loader2, Plus, AlertTriangle } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useDebounce } from "@/hooks/useDebounce";
+import { Search, Loader2, AlertTriangle } from "lucide-react";
+import { useOpenFoodFactsAutocomplete, AutocompleteSuggestion, suggestionToFood } from "@/hooks/useOpenFoodFacts";
 import { cn } from "@/lib/utils";
 
 interface FoodResult {
-  fatsecret_id: string;
+  external_id: string;
   name: string;
-  brand_name?: string;
+  brand_name?: string | null;
   calories_per_100g: number;
   protein_g: number;
   carbs_g: number;
@@ -45,62 +43,43 @@ export const FoodSearchModal = ({
   clientAllergens = [],
 }: FoodSearchModalProps) => {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<FoodResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
 
-  const debouncedQuery = useDebounce(query, 300);
+  const { data: results = [], isLoading: isSearching } = useOpenFoodFactsAutocomplete(
+    query,
+    open && query.length >= 2,
+    'GB',
+    300
+  );
 
-  const searchFoods = useCallback(async (searchQuery: string) => {
-    if (searchQuery.length < 2) {
-      setResults([]);
-      setHasSearched(false);
-      return;
-    }
-
-    setIsSearching(true);
-    setHasSearched(true);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('fatsecret-search', {
-        body: { query: searchQuery, max_results: 20 }
-      });
-
-      if (error) throw error;
-
-      if (data?.foods) {
-        setResults(data.foods);
-      } else {
-        setResults([]);
-      }
-    } catch (error) {
-      console.error('Food search error:', error);
-      setResults([]);
-    } finally {
-      setIsSearching(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    searchFoods(debouncedQuery);
-  }, [debouncedQuery, searchFoods]);
+  const hasSearched = query.length >= 2;
 
   useEffect(() => {
     if (!open) {
       setQuery("");
-      setResults([]);
-      setHasSearched(false);
     }
   }, [open]);
 
-  const handleSelect = (food: FoodResult) => {
-    onFoodSelected(food);
+  const handleSelect = (suggestion: AutocompleteSuggestion) => {
+    const food = suggestionToFood(suggestion);
+    onFoodSelected({
+      external_id: food.external_id,
+      name: food.name,
+      brand_name: food.brand_name,
+      calories_per_100g: food.calories_per_100g,
+      protein_g: food.protein_g,
+      carbs_g: food.carbs_g,
+      fat_g: food.fat_g,
+      fiber_g: food.fiber_g,
+      serving_size_g: food.serving_size_g,
+      serving_description: food.serving_description,
+      allergens: food.allergens,
+    });
     onOpenChange(false);
   };
 
-  const hasAllergenConflict = (food: FoodResult) => {
-    if (!food.allergens || !clientAllergens.length) return false;
-    return food.allergens.some(a => 
+  const hasAllergenConflict = (suggestion: AutocompleteSuggestion) => {
+    if (!suggestion.allergens || !clientAllergens.length) return false;
+    return suggestion.allergens.some(a => 
       clientAllergens.some(ca => 
         a.toLowerCase().includes(ca.toLowerCase()) || 
         ca.toLowerCase().includes(a.toLowerCase())
@@ -133,12 +112,12 @@ export const FoodSearchModal = ({
             </div>
           ) : results.length > 0 ? (
             <div className="space-y-2 py-2">
-              {results.map((food) => {
-                const hasConflict = hasAllergenConflict(food);
+              {results.map((suggestion) => {
+                const hasConflict = hasAllergenConflict(suggestion);
                 return (
                   <button
-                    key={food.fatsecret_id}
-                    onClick={() => handleSelect(food)}
+                    key={suggestion.external_id}
+                    onClick={() => handleSelect(suggestion)}
                     className={cn(
                       "w-full text-left p-3 rounded-xl transition-colors",
                       hasConflict 
@@ -149,32 +128,30 @@ export const FoodSearchModal = ({
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <p className="font-medium truncate">{food.name}</p>
+                          <p className="font-medium truncate">{suggestion.product_name}</p>
                           {hasConflict && (
                             <AlertTriangle className="w-4 h-4 text-warning shrink-0" />
                           )}
                         </div>
-                        {food.brand_name && (
+                        {suggestion.brand && (
                           <p className="text-xs text-muted-foreground truncate">
-                            {food.brand_name}
+                            {suggestion.brand}
                           </p>
                         )}
                         <div className="flex items-center gap-2 mt-1 text-xs">
-                          <span className="text-muted-foreground">
-                            {food.serving_description || `${food.serving_size_g || 100}g`}
-                          </span>
-                          <span className="font-medium">{Math.round(food.calories_per_100g)} kcal/100g</span>
+                          <span className="text-muted-foreground">per 100g</span>
+                          <span className="font-medium">{Math.round(suggestion.calories_per_100g || 0)} kcal</span>
                         </div>
                       </div>
                       <div className="text-right text-xs shrink-0">
-                        <p><span className="text-blue-500">{food.protein_g}g</span> P</p>
-                        <p><span className="text-amber-500">{food.carbs_g}g</span> C</p>
-                        <p><span className="text-rose-500">{food.fat_g}g</span> F</p>
+                        <p><span className="text-blue-500">{suggestion.protein_g || 0}g</span> P</p>
+                        <p><span className="text-amber-500">{suggestion.carbs_g || 0}g</span> C</p>
+                        <p><span className="text-rose-500">{suggestion.fat_g || 0}g</span> F</p>
                       </div>
                     </div>
-                    {hasConflict && food.allergens && (
+                    {hasConflict && suggestion.allergens && (
                       <p className="text-xs text-warning mt-2">
-                        Contains: {food.allergens.join(', ')}
+                        Contains: {suggestion.allergens.join(', ')}
                       </p>
                     )}
                   </button>
