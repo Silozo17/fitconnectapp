@@ -169,12 +169,20 @@ export const AIMealGeneratorModal = ({
             fiber_g: 0,
             serving_size_g: 100,
             serving_description: aiFood.serving,
-            is_custom: false, // FatSecret foods are not custom
+            is_custom: false,
             coach_id: null,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-            fatsecret_id: aiFood.fatsecret_id || null, // Use FatSecret ID from backend
-            source: aiFood.source || 'fatsecret', // All foods now from FatSecret
+            fatsecret_id: aiFood.fatsecret_id || null,
+            source: aiFood.source || 'fatsecret',
+            // New FatSecret Premier fields
+            sugar_g: null,
+            sodium_mg: null,
+            saturated_fat_g: null,
+            image_url: null,
+            allergens: [],
+            dietary_preferences: [],
+            barcode: null,
           };
 
           return {

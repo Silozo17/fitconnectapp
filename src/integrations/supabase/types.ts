@@ -3562,57 +3562,78 @@ export type Database = {
       }
       foods: {
         Row: {
+          allergens: Json | null
+          barcode: string | null
           calories_per_100g: number
           carbs_g: number
           category_id: string | null
           coach_id: string | null
           created_at: string
+          dietary_preferences: Json | null
           fat_g: number
           fatsecret_id: string | null
           fiber_g: number | null
           id: string
+          image_url: string | null
           is_custom: boolean | null
           name: string
           protein_g: number
+          saturated_fat_g: number | null
           serving_description: string | null
           serving_size_g: number | null
+          sodium_mg: number | null
           source: string | null
+          sugar_g: number | null
           updated_at: string
         }
         Insert: {
+          allergens?: Json | null
+          barcode?: string | null
           calories_per_100g?: number
           carbs_g?: number
           category_id?: string | null
           coach_id?: string | null
           created_at?: string
+          dietary_preferences?: Json | null
           fat_g?: number
           fatsecret_id?: string | null
           fiber_g?: number | null
           id?: string
+          image_url?: string | null
           is_custom?: boolean | null
           name: string
           protein_g?: number
+          saturated_fat_g?: number | null
           serving_description?: string | null
           serving_size_g?: number | null
+          sodium_mg?: number | null
           source?: string | null
+          sugar_g?: number | null
           updated_at?: string
         }
         Update: {
+          allergens?: Json | null
+          barcode?: string | null
           calories_per_100g?: number
           carbs_g?: number
           category_id?: string | null
           coach_id?: string | null
           created_at?: string
+          dietary_preferences?: Json | null
           fat_g?: number
           fatsecret_id?: string | null
           fiber_g?: number | null
           id?: string
+          image_url?: string | null
           is_custom?: boolean | null
           name?: string
           protein_g?: number
+          saturated_fat_g?: number | null
           serving_description?: string | null
           serving_size_g?: number | null
+          sodium_mg?: number | null
           source?: string | null
+          sugar_g?: number | null
           updated_at?: string
         }
         Relationships: [
