@@ -169,11 +169,11 @@ serve(async (req) => {
   }
 
   try {
-    const { query, country = 'GB', language = 'en', limit = 10 } = await req.json();
+    const { query, country = 'GB', language = 'en', limit = 10, offset = 0 } = await req.json();
     
     if (!query || query.length < 2) {
       return new Response(
-        JSON.stringify({ suggestions: [], source: 'none' }),
+        JSON.stringify({ suggestions: [], source: 'none', total: 0 }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -182,25 +182,32 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
-    console.log(`[OFF Autocomplete] Query: "${query}" country: ${country}`);
+    console.log(`[OFF Autocomplete] Query: "${query}" country: ${country} limit: ${limit} offset: ${offset}`);
 
     // Query local autocomplete cache first with ranking
     const searchPattern = `%${query.toLowerCase()}%`;
     
+    // Get total count for pagination info
+    const { count: totalCount } = await supabaseClient
+      .from('foods_autocomplete')
+      .select('*', { count: 'exact', head: true })
+      .eq('country', country.toUpperCase())
+      .or(`product_name.ilike.${searchPattern},brand.ilike.${searchPattern},search_text.ilike.${searchPattern}`);
+
     const { data: cachedResults, error: dbError } = await supabaseClient
       .from('foods_autocomplete')
       .select('external_id, barcode, product_name, brand, calories_per_100g, protein_g, carbs_g, fat_g, image_url, food_type, allergens, popularity_score')
       .eq('country', country.toUpperCase())
       .or(`product_name.ilike.${searchPattern},brand.ilike.${searchPattern},search_text.ilike.${searchPattern}`)
       .order('popularity_score', { ascending: false })
-      .limit(50); // Get more for ranking
+      .range(offset, offset + limit + 49); // Get extra for ranking, then slice
 
     if (dbError) {
       console.error('[OFF Autocomplete] DB query error:', dbError);
     }
 
     if (cachedResults && cachedResults.length > 0) {
-      console.log(`[OFF Autocomplete] Cache hit: ${cachedResults.length} results`);
+      console.log(`[OFF Autocomplete] Cache hit: ${cachedResults.length} results (offset: ${offset})`);
       
       // Apply ranking and sort
       const rankedResults = cachedResults
@@ -215,38 +222,50 @@ serve(async (req) => {
         JSON.stringify({ 
           suggestions: rankedResults as AutocompleteSuggestion[],
           source: 'cache',
-          total: cachedResults.length
+          total: totalCount || cachedResults.length
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Cache miss - fallback to Open Food Facts API
-    console.log(`[OFF Autocomplete] Cache miss, falling back to OFF API`);
-    
-    const offResults = await searchOpenFoodFacts(query, country, limit * 2);
-    
-    if (offResults.length > 0) {
-      // Populate cache in background
-      populateAutocompleteCache(offResults, country, supabaseClient).catch(e =>
-        console.error('[OFF Autocomplete] Background cache population failed:', e)
+    // Cache miss - fallback to Open Food Facts API (only on first page)
+    if (offset === 0) {
+      console.log(`[OFF Autocomplete] Cache miss, falling back to OFF API`);
+      
+      const offResults = await searchOpenFoodFacts(query, country, limit * 3);
+      
+      if (offResults.length > 0) {
+        // Populate cache in background
+        populateAutocompleteCache(offResults, country, supabaseClient).catch(e =>
+          console.error('[OFF Autocomplete] Background cache population failed:', e)
+        );
+      }
+
+      // Apply ranking to OFF results
+      const rankedResults = offResults
+        .map(item => ({
+          ...item,
+          score: calculateRankingScore(item, query)
+        }))
+        .sort((a, b) => (b.score || 0) - (a.score || 0))
+        .slice(0, limit);
+
+      return new Response(
+        JSON.stringify({ 
+          suggestions: rankedResults,
+          source: 'openfoodfacts',
+          total: offResults.length
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Apply ranking to OFF results
-    const rankedResults = offResults
-      .map(item => ({
-        ...item,
-        score: calculateRankingScore(item, query)
-      }))
-      .sort((a, b) => (b.score || 0) - (a.score || 0))
-      .slice(0, limit);
-
+    // No more results for pagination beyond first page when cache is empty
     return new Response(
       JSON.stringify({ 
-        suggestions: rankedResults,
-        source: 'openfoodfacts',
-        total: offResults.length
+        suggestions: [],
+        source: 'cache',
+        total: 0
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -254,7 +273,7 @@ serve(async (req) => {
   } catch (error: unknown) {
     console.error('[OFF Autocomplete] Error:', error);
     return new Response(
-      JSON.stringify({ suggestions: [], error: error instanceof Error ? error.message : 'Unknown error', source: 'error' }),
+      JSON.stringify({ suggestions: [], error: error instanceof Error ? error.message : 'Unknown error', source: 'error', total: 0 }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

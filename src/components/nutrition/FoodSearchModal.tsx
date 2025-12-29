@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Search, Loader2, AlertTriangle, Plus, Minus } from "lucide-react";
-import { useOpenFoodFactsAutocomplete, AutocompleteSuggestion, suggestionToFood } from "@/hooks/useOpenFoodFacts";
+import { AutocompleteSuggestion, suggestionToFood } from "@/hooks/useOpenFoodFacts";
+import { useOpenFoodFactsInfinite } from "@/hooks/useOpenFoodFactsInfinite";
 import { useUserLocalePreference } from "@/hooks/useUserLocalePreference";
 import { cn } from "@/lib/utils";
 
@@ -55,18 +55,69 @@ export const FoodSearchModal = ({
   initialFood = null,
 }: FoodSearchModalProps) => {
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [selectedFood, setSelectedFood] = useState<AutocompleteSuggestion | null>(null);
   const [quantity, setQuantity] = useState(100);
   const { countryPreference } = useUserLocalePreference();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
-  const { data: results = [], isLoading: isSearching } = useOpenFoodFactsAutocomplete(
-    query,
-    open && query.length >= 2,
+  // Debounce query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  const { 
+    data, 
+    isLoading: isSearching, 
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage 
+  } = useOpenFoodFactsInfinite(
+    debouncedQuery,
+    open && debouncedQuery.length >= 2,
     countryPreference,
-    300
+    10
   );
 
-  const hasSearched = query.length >= 2;
+  // Flatten pages into single results array with deduplication
+  const results = useMemo(() => {
+    if (!data?.pages) return [];
+    const seen = new Set<string>();
+    const flattened: AutocompleteSuggestion[] = [];
+    for (const page of data.pages) {
+      for (const suggestion of page.suggestions) {
+        if (!seen.has(suggestion.external_id)) {
+          seen.add(suggestion.external_id);
+          flattened.push(suggestion);
+        }
+      }
+    }
+    return flattened;
+  }, [data?.pages]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const hasSearched = debouncedQuery.length >= 2;
 
   // Reset state when modal closes
   useEffect(() => {
@@ -304,79 +355,101 @@ export const FoodSearchModal = ({
               />
             </div>
 
-            {/* Scrollable Results */}
-            <div className="flex-1 min-h-0 overflow-hidden">
-              <ScrollArea className="h-full">
-                <div className="p-4">
-                  {isSearching ? (
-                    <div className="flex items-center justify-center py-12">
-                      <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-                    </div>
-                  ) : results.length > 0 ? (
-                    <div className="space-y-2">
-                      {results.map((suggestion) => {
-                        const hasConflict = hasAllergenConflict(suggestion);
-                        return (
-                          <button
-                            key={suggestion.external_id}
-                            onClick={() => handleSelect(suggestion)}
-                            className={cn(
-                              "w-full text-left p-3 rounded-xl transition-colors",
-                              hasConflict 
-                                ? "bg-warning/10 border border-warning/30 hover:bg-warning/20" 
-                                : "bg-muted/50 hover:bg-muted"
+            {/* Scrollable Results with native scroll */}
+            <div 
+              ref={scrollContainerRef}
+              className="flex-1 min-h-0 overflow-y-auto overscroll-contain"
+            >
+              <div className="p-4">
+                {isSearching && results.length === 0 ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : results.length > 0 ? (
+                  <div className="space-y-2">
+                    {results.map((suggestion) => {
+                      const hasConflict = hasAllergenConflict(suggestion);
+                      return (
+                        <button
+                          key={suggestion.external_id}
+                          onClick={() => handleSelect(suggestion)}
+                          className={cn(
+                            "w-full text-left p-3 rounded-xl transition-colors",
+                            hasConflict 
+                              ? "bg-warning/10 border border-warning/30 hover:bg-warning/20" 
+                              : "bg-muted/50 hover:bg-muted"
+                          )}
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <p className="font-medium text-sm flex-1 break-words" style={{ overflowWrap: 'anywhere' }}>
+                              {suggestion.product_name}
+                            </p>
+                            {hasConflict && (
+                              <AlertTriangle className="w-4 h-4 text-warning shrink-0" />
                             )}
+                          </div>
+                          {suggestion.brand && (
+                            <p className="text-xs text-muted-foreground truncate mt-0.5">
+                              {suggestion.brand}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-2 mt-1.5 text-xs text-muted-foreground">
+                            <span>per 100g:</span>
+                            <span className="font-medium text-foreground">{Math.round(suggestion.calories_per_100g || 0)} kcal</span>
+                          </div>
+                          <div className="flex items-center gap-3 mt-1 text-xs">
+                            <span><span className="text-blue-500 font-medium">{suggestion.protein_g || 0}g</span> P</span>
+                            <span><span className="text-amber-500 font-medium">{suggestion.carbs_g || 0}g</span> C</span>
+                            <span><span className="text-rose-500 font-medium">{suggestion.fat_g || 0}g</span> F</span>
+                          </div>
+                          {hasConflict && suggestion.allergens && (
+                            <p className="text-xs text-warning mt-2">
+                              Contains: {suggestion.allergens.join(', ')}
+                            </p>
+                          )}
+                        </button>
+                      );
+                    })}
+                    
+                    {/* Load more trigger */}
+                    {hasNextPage && (
+                      <div 
+                        ref={loadMoreRef}
+                        className="flex justify-center py-4"
+                      >
+                        {isFetchingNextPage ? (
+                          <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                        ) : (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => fetchNextPage()}
+                            className="text-muted-foreground"
                           >
-                            <div className="flex items-center gap-2 min-w-0">
-                              <p className="font-medium text-sm flex-1 break-words" style={{ overflowWrap: 'anywhere' }}>
-                                {suggestion.product_name}
-                              </p>
-                              {hasConflict && (
-                                <AlertTriangle className="w-4 h-4 text-warning shrink-0" />
-                              )}
-                            </div>
-                            {suggestion.brand && (
-                              <p className="text-xs text-muted-foreground truncate mt-0.5">
-                                {suggestion.brand}
-                              </p>
-                            )}
-                            <div className="flex items-center gap-2 mt-1.5 text-xs text-muted-foreground">
-                              <span>per 100g:</span>
-                              <span className="font-medium text-foreground">{Math.round(suggestion.calories_per_100g || 0)} kcal</span>
-                            </div>
-                            <div className="flex items-center gap-3 mt-1 text-xs">
-                              <span><span className="text-blue-500 font-medium">{suggestion.protein_g || 0}g</span> P</span>
-                              <span><span className="text-amber-500 font-medium">{suggestion.carbs_g || 0}g</span> C</span>
-                              <span><span className="text-rose-500 font-medium">{suggestion.fat_g || 0}g</span> F</span>
-                            </div>
-                            {hasConflict && suggestion.allergens && (
-                              <p className="text-xs text-warning mt-2">
-                                Contains: {suggestion.allergens.join(', ')}
-                              </p>
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  ) : hasSearched && !isSearching ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-center">
-                      <Search className="w-10 h-10 text-muted-foreground/50 mb-3" />
-                      <p className="text-muted-foreground text-sm">No foods found</p>
-                      <p className="text-xs text-muted-foreground/70 mt-1">
-                        Try a different search term
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-12 text-center">
-                      <Search className="w-10 h-10 text-muted-foreground/50 mb-3" />
-                      <p className="text-muted-foreground text-sm">Search for foods</p>
-                      <p className="text-xs text-muted-foreground/70 mt-1">
-                        Type at least 2 characters to search
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </ScrollArea>
+                            Load more
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ) : hasSearched && !isSearching ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <Search className="w-10 h-10 text-muted-foreground/50 mb-3" />
+                    <p className="text-muted-foreground text-sm">No foods found</p>
+                    <p className="text-xs text-muted-foreground/70 mt-1">
+                      Try a different search term
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <Search className="w-10 h-10 text-muted-foreground/50 mb-3" />
+                    <p className="text-muted-foreground text-sm">Search for foods</p>
+                    <p className="text-xs text-muted-foreground/70 mt-1">
+                      Type at least 2 characters to search
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </>
         )}
