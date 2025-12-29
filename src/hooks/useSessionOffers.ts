@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import type { PaymentMode } from "@/hooks/useScheduleSessionWithPackage";
 
 export interface SessionOffer {
   id: string;
@@ -17,6 +18,7 @@ export interface SessionOffer {
   location: string | null;
   notes: string | null;
   status: "pending" | "accepted" | "declined" | "expired" | "cancelled";
+  payment_mode: PaymentMode | null;
   accepted_at: string | null;
   declined_at: string | null;
   created_session_id: string | null;
@@ -36,6 +38,7 @@ export interface CreateSessionOfferData {
   is_online?: boolean;
   location?: string;
   notes?: string;
+  payment_mode?: PaymentMode;
 }
 
 export const useSessionOffers = (clientId?: string) => {
@@ -79,6 +82,7 @@ export const useCreateSessionOffer = () => {
           location: data.location || null,
           notes: data.notes || null,
           status: "pending",
+          payment_mode: data.payment_mode || "paid",
           expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
         })
         .select()
@@ -124,26 +128,122 @@ export const useRespondToSessionOffer = () => {
         [response === "accepted" ? "accepted_at" : "declined_at"]: new Date().toISOString(),
       };
 
-      // If accepted, create a coaching session
+      // If accepted, handle based on payment_mode
       if (response === "accepted") {
-        const { data: session, error: sessionError } = await supabase
-          .from("coaching_sessions")
-          .insert({
-            coach_id: offer.coach_id,
-            client_id: offer.client_id,
-            scheduled_at: offer.proposed_date,
-            duration_minutes: offer.duration_minutes,
-            session_type: offer.session_type,
-            is_online: offer.is_online,
-            location: offer.location,
-            notes: offer.notes,
-            status: "scheduled",
-          })
-          .select("id")
-          .single();
+        const paymentMode = offer.payment_mode || (offer.is_free ? "free" : "paid");
+        
+        // For "use_credits" mode, we need to verify and deduct credits
+        if (paymentMode === "use_credits") {
+          // Check for active package
+          const { data: packages, error: pkgError } = await supabase
+            .from("client_package_purchases")
+            .select("*, coach_packages(*)")
+            .eq("client_id", offer.client_id)
+            .eq("coach_id", offer.coach_id)
+            .eq("status", "active")
+            .order("purchased_at", { ascending: true });
 
-        if (sessionError) throw sessionError;
-        updateData.created_session_id = session.id;
+          if (pkgError) throw pkgError;
+
+          // Find package with available credits
+          const activePackage = packages?.find(pkg => {
+            const tokensRemaining = pkg.sessions_total - (pkg.sessions_used || 0);
+            const notExpired = !pkg.expires_at || new Date(pkg.expires_at) > new Date();
+            return tokensRemaining > 0 && notExpired;
+          });
+
+          if (!activePackage) {
+            throw new Error("No package credits available");
+          }
+
+          // Create the session with credit usage
+          const { data: session, error: sessionError } = await supabase
+            .from("coaching_sessions")
+            .insert({
+              coach_id: offer.coach_id,
+              client_id: offer.client_id,
+              scheduled_at: offer.proposed_date,
+              duration_minutes: offer.duration_minutes,
+              session_type: offer.session_type,
+              is_online: offer.is_online,
+              location: offer.location,
+              notes: offer.notes,
+              status: "scheduled",
+              payment_mode: "use_credits",
+              package_purchase_id: activePackage.id,
+            })
+            .select("id")
+            .single();
+
+          if (sessionError) throw sessionError;
+          updateData.created_session_id = session.id;
+
+          // Deduct credit
+          const newUsage = (activePackage.sessions_used || 0) + 1;
+          const { error: updatePkgError } = await supabase
+            .from("client_package_purchases")
+            .update({ sessions_used: newUsage })
+            .eq("id", activePackage.id);
+
+          if (updatePkgError) throw updatePkgError;
+
+          // Log token usage
+          await supabase
+            .from("session_token_history")
+            .insert({
+              package_purchase_id: activePackage.id,
+              session_id: session.id,
+              action: "used",
+              reason: "Session offer accepted",
+            });
+        } 
+        // For "paid" mode, session should be pending payment
+        else if (paymentMode === "paid" && !offer.is_free && offer.price > 0) {
+          const { data: session, error: sessionError } = await supabase
+            .from("coaching_sessions")
+            .insert({
+              coach_id: offer.coach_id,
+              client_id: offer.client_id,
+              scheduled_at: offer.proposed_date,
+              duration_minutes: offer.duration_minutes,
+              session_type: offer.session_type,
+              is_online: offer.is_online,
+              location: offer.location,
+              notes: offer.notes,
+              status: "pending_payment",
+              payment_mode: "paid",
+              payment_status: "pending",
+              price: offer.price,
+              currency: offer.currency,
+            })
+            .select("id")
+            .single();
+
+          if (sessionError) throw sessionError;
+          updateData.created_session_id = session.id;
+        }
+        // For "free" mode, create session directly
+        else {
+          const { data: session, error: sessionError } = await supabase
+            .from("coaching_sessions")
+            .insert({
+              coach_id: offer.coach_id,
+              client_id: offer.client_id,
+              scheduled_at: offer.proposed_date,
+              duration_minutes: offer.duration_minutes,
+              session_type: offer.session_type,
+              is_online: offer.is_online,
+              location: offer.location,
+              notes: offer.notes,
+              status: "scheduled",
+              payment_mode: "free",
+            })
+            .select("id")
+            .single();
+
+          if (sessionError) throw sessionError;
+          updateData.created_session_id = session.id;
+        }
       }
 
       const { error: updateError } = await supabase
@@ -158,16 +258,29 @@ export const useRespondToSessionOffer = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["session-offers"] });
       queryClient.invalidateQueries({ queryKey: ["coaching-sessions"] });
+      queryClient.invalidateQueries({ queryKey: ["client-active-package"] });
+      queryClient.invalidateQueries({ queryKey: ["client-package-purchases"] });
       
       if (data.response === "accepted") {
-        toast.success("Session accepted and added to your calendar!");
+        const paymentMode = data.offer.payment_mode || (data.offer.is_free ? "free" : "paid");
+        if (paymentMode === "paid" && data.offer.price > 0) {
+          toast.success("Session accepted! Please complete payment to confirm.");
+        } else if (paymentMode === "use_credits") {
+          toast.success("Session accepted and credit used!");
+        } else {
+          toast.success("Session accepted and added to your calendar!");
+        }
       } else {
         toast.info("Session offer declined");
       }
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       console.error("Failed to respond to session offer:", error);
-      toast.error("Failed to respond to session offer");
+      if (error.message === "No package credits available") {
+        toast.error("No package credits available. Please purchase a package.");
+      } else {
+        toast.error("Failed to respond to session offer");
+      }
     },
   });
 };

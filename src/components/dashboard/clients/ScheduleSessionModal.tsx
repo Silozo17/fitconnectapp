@@ -10,9 +10,9 @@ import { useScheduleSessionWithPackage } from "@/hooks/useScheduleSessionWithPac
 import { useClientActivePackage } from "@/hooks/usePackages";
 import { useCoachProfile } from "@/hooks/useCoachClients";
 import { useTranslation } from "@/hooks/useTranslation";
-import { PackageCreditsInfo } from "./PackageCreditsInfo";
 import { VenueAutocomplete } from "@/components/shared/VenueAutocomplete";
 import { Input } from "@/components/ui/input";
+import { PaymentModeSelector, type PaymentMode } from "./PaymentModeSelector";
 
 interface ScheduleSessionModalProps {
   open: boolean;
@@ -30,11 +30,18 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
   const [isOnline, setIsOnline] = useState(false);
   const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
-  const [usePackageCredits, setUsePackageCredits] = useState(true);
+  const [paymentMode, setPaymentMode] = useState<PaymentMode>("free");
+  const [price, setPrice] = useState("");
 
   const { data: coachProfile } = useCoachProfile();
   const { data: activePackage, isLoading: isLoadingPackage } = useClientActivePackage(clientId, coachProfile?.id);
   const scheduleSessionMutation = useScheduleSessionWithPackage();
+
+  const creditsAvailable = activePackage 
+    ? activePackage.sessions_total - (activePackage.sessions_used || 0)
+    : 0;
+  const hasActivePackage = !!activePackage && creditsAvailable > 0;
+  const packageName = activePackage?.coach_packages?.name || "Package";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +58,9 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
       isOnline,
       location: isOnline ? undefined : location,
       notes: notes || undefined,
-      usePackageCredits: activePackage ? usePackageCredits : false,
+      paymentMode,
+      price: paymentMode === "paid" ? parseFloat(price) || 0 : undefined,
+      currency: "GBP",
     }, {
       onSuccess: () => {
         resetForm();
@@ -68,12 +77,13 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
     setIsOnline(false);
     setLocation("");
     setNotes("");
-    setUsePackageCredits(true);
+    setPaymentMode("free");
+    setPrice("");
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg bg-card border-border">
+      <DialogContent className="sm:max-w-lg bg-card border-border max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
             <Calendar className="h-5 w-5 text-primary" />
@@ -166,12 +176,16 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
             </div>
           )}
 
-          {/* Package Credits Info */}
+          {/* Payment Mode Selection */}
           {!isLoadingPackage && (
-            <PackageCreditsInfo
-              activePackage={activePackage}
-              useCredits={usePackageCredits}
-              onUseCreditsChange={setUsePackageCredits}
+            <PaymentModeSelector
+              value={paymentMode}
+              onChange={setPaymentMode}
+              price={price}
+              onPriceChange={setPrice}
+              creditsAvailable={creditsAvailable}
+              hasActivePackage={hasActivePackage}
+              packageName={packageName}
             />
           )}
           
@@ -191,7 +205,15 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               {t('scheduleSessionModal.cancel')}
             </Button>
-            <Button type="submit" disabled={scheduleSessionMutation.isPending || !clientId || !sessionType}>
+            <Button 
+              type="submit" 
+              disabled={
+                scheduleSessionMutation.isPending || 
+                !clientId || 
+                !sessionType ||
+                (paymentMode === "paid" && (!price || parseFloat(price) <= 0))
+              }
+            >
               {scheduleSessionMutation.isPending ? t('scheduleSessionModal.scheduling') : t('scheduleSessionModal.schedule')}
             </Button>
           </DialogFooter>

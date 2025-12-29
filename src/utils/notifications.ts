@@ -8,6 +8,8 @@ export type NotificationType =
   | "plan_reactivated"
   | "session_scheduled"
   | "session_cancelled"
+  | "session_payment_required"
+  | "session_payment_received"
   | "message"
   | "achievement_earned"
   | "badge_earned"

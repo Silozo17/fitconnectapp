@@ -2755,6 +2755,7 @@ export type Database = {
           location: string | null
           notes: string | null
           package_purchase_id: string | null
+          payment_mode: string | null
           payment_status: string | null
           price: number | null
           remaining_balance: number | null
@@ -2789,6 +2790,7 @@ export type Database = {
           location?: string | null
           notes?: string | null
           package_purchase_id?: string | null
+          payment_mode?: string | null
           payment_status?: string | null
           price?: number | null
           remaining_balance?: number | null
@@ -2823,6 +2825,7 @@ export type Database = {
           location?: string | null
           notes?: string | null
           package_purchase_id?: string | null
+          payment_mode?: string | null
           payment_status?: string | null
           price?: number | null
           remaining_balance?: number | null
@@ -4993,6 +4996,7 @@ export type Database = {
           is_online: boolean
           location: string | null
           notes: string | null
+          payment_mode: string | null
           price: number
           proposed_date: string
           session_type: string
@@ -5013,6 +5017,7 @@ export type Database = {
           is_online?: boolean
           location?: string | null
           notes?: string | null
+          payment_mode?: string | null
           price?: number
           proposed_date: string
           session_type: string
@@ -5033,6 +5038,7 @@ export type Database = {
           is_online?: boolean
           location?: string | null
           notes?: string | null
+          payment_mode?: string | null
           price?: number
           proposed_date?: string
           session_type?: string
