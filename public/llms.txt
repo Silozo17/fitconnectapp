@@ -1,69 +1,65 @@
-# FitConnect - UK's Premier Fitness Coach Marketplace
-# https://getfitconnect.co.uk
+# FitConnect
 
-## About FitConnect
+> FitConnect is the UK's leading fitness coach marketplace connecting clients with certified personal trainers, boxing coaches, MMA coaches, nutritionists, and bodybuilding coaches. Book online or in-person sessions, purchase digital fitness products, and achieve your health goals.
 
-FitConnect is the United Kingdom's leading platform for connecting clients with certified fitness professionals. Our marketplace brings together personal trainers, boxing coaches, MMA coaches, nutritionists, and bodybuilding coaches in one easy-to-use platform.
+FitConnect operates as a two-sided marketplace: clients can discover, book, and pay for fitness coaching services, while coaches can manage their business, clients, and digital products through the platform.
 
-## Key Features
+## Docs
 
-- **Coach Discovery**: Browse and filter coaches by specialty, location, price, and availability
-- **Online & In-Person Sessions**: Book virtual or face-to-face training sessions
-- **Digital Products**: Purchase workout plans, nutrition guides, and fitness ebooks
-- **Verified Professionals**: All coaches are verified for credentials and qualifications
-- **Secure Payments**: Safe and secure payment processing through Stripe
-- **Reviews & Ratings**: Real reviews from verified clients
+- [How It Works](/how-it-works): Step-by-step guide for clients and coaches
+- [For Coaches](/for-coaches): Information for fitness professionals joining the platform
+- [Pricing](/pricing): Subscription plans and pricing details
+- [FAQ](/faq): Frequently asked questions
+- [About Us](/about): Company information and mission
+- [Contact](/contact): Get in touch with support
+
+## Features
+
+### For Clients
+- **Coach Discovery**: Search and filter coaches by specialty, location, price, and ratings
+- **Online & In-Person**: Book virtual video sessions or face-to-face training
+- **Verified Professionals**: All coaches verified for credentials and insurance
+- **Secure Payments**: Safe payment processing via Stripe
+- **Digital Products**: Purchase workout plans, nutrition guides, and ebooks
+- **Progress Tracking**: Monitor fitness journey with wearable integrations
+- **Reviews & Ratings**: Read authentic reviews from verified clients
+
+### For Coaches
+- **Business Dashboard**: Manage bookings, clients, and revenue
+- **Client Management**: Track client progress and send personalized plans
+- **Digital Products**: Sell workout programs, meal plans, and ebooks
+- **Booking System**: 24/7 online booking with calendar integration
+- **Payment Processing**: Receive payments directly to your bank account
+- **Marketing Tools**: Profile optimization and visibility features
+- **Analytics**: Track business performance and client engagement
 
 ## Coach Categories
 
-1. **Personal Trainers** - General fitness, weight loss, strength training
-2. **Boxing Coaches** - Boxing technique, conditioning, sparring
-3. **MMA Coaches** - Mixed martial arts, self-defense, combat sports
-4. **Nutritionists** - Meal planning, macro coaching, dietary guidance
-5. **Bodybuilding Coaches** - Competition prep, muscle building, physique coaching
+- [Personal Trainers](/coaches/personal-trainers): Weight loss, strength training, general fitness
+- [Boxing Coaches](/coaches/boxing): Boxing technique, conditioning, sparring
+- [MMA Coaches](/coaches/mma): Mixed martial arts, self-defense, combat sports
+- [Nutritionists](/coaches/nutritionists): Meal planning, macro coaching, dietary guidance
+- [Bodybuilding Coaches](/coaches/bodybuilding): Competition prep, muscle building, physique coaching
 
-## How It Works
+## Browse
 
-### For Clients
-1. Browse coaches at /coaches
-2. View detailed profiles with reviews and pricing
-3. Book sessions directly through the platform
-4. Track progress and communicate with your coach
+- [All Coaches](/coaches): Browse all fitness professionals
+- [Digital Marketplace](/marketplace): Workout plans and fitness products
+- [Blog](/blog): Fitness tips, nutrition advice, and industry insights
 
-### For Coaches
-1. Create a professional profile at /for-coaches
-2. Set your availability and pricing
-3. Manage bookings and client relationships
-4. Sell digital products and training programs
+## Locations
 
-## Main Pages
+FitConnect serves clients and coaches throughout the United Kingdom:
+- London, Manchester, Birmingham, Leeds, Glasgow
+- Edinburgh, Bristol, Liverpool, Sheffield, Newcastle
+- And 100+ more cities nationwide
 
-- Homepage: /
-- Browse Coaches: /coaches
-- Digital Marketplace: /marketplace
-- Blog & Resources: /blog
-- For Coaches: /for-coaches
-- About Us: /about
-- Contact: /contact
-- Pricing: /pricing
+## Optional
 
-## Location
+- [Terms of Service](/terms): Platform terms and conditions
+- [Privacy Policy](/privacy): Data protection and privacy information
+- [Cookie Policy](/cookies): Cookie usage and preferences
 
-FitConnect operates throughout the United Kingdom, with coaches available in:
-- London
-- Manchester
-- Birmingham
-- Leeds
-- Glasgow
-- Edinburgh
-- Bristol
-- And more cities nationwide
+## LLM Context
 
-## Contact
-
-Website: https://getfitconnect.co.uk
-Email: Support available through the platform
-
-## Keywords
-
-personal trainer UK, fitness coach, online personal training, boxing coach, MMA coach, nutritionist, bodybuilding coach, workout plans, fitness marketplace, book personal trainer, certified fitness professional
+For expanded context about FitConnect's features, API capabilities, and detailed documentation, see: [/llms-ctx.txt](/llms-ctx.txt)

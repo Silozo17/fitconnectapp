@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Swords, Target, Zap, Shield, Heart, ArrowRight, Star } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { SEOHead, createFAQPageSchema, createServiceSchema, createBreadcrumbSchema } from "@/components/shared/SEOHead";
 
 const Boxing = () => {
   const { t } = useTranslation('pages');
@@ -64,12 +64,40 @@ const Boxing = () => {
     { name: "Sarah Jones", specialty: t('coachTypes.boxing.featured.specialties.womens'), rating: 4.9, experience: t('coachTypes.boxing.featured.experience', { years: 15 }) },
   ];
 
+  const faqSchema = createFAQPageSchema(faqs);
+  const serviceSchema = createServiceSchema({
+    name: "Boxing Coaching Services",
+    description: "Find certified boxing coaches for technique training, fitness boxing, sparring, and competition prep. Book sessions with experienced boxing trainers across the UK.",
+    url: "/coaches/boxing",
+  });
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Coaches", url: "/coaches" },
+    { name: "Boxing Coaches", url: "/coaches/boxing" },
+  ]);
+
   return (
     <>
-      <Helmet>
-        <title>{t('coachTypes.boxing.meta.title')}</title>
-        <meta name="description" content={t('coachTypes.boxing.meta.description')} />
-      </Helmet>
+      <SEOHead
+        title="Find Boxing Coaches Near Me | Boxing Lessons & Training UK"
+        description="Find and book experienced boxing coaches near you. Learn boxing technique, improve fitness, and train with certified boxing trainers. Online and in-person boxing lessons available across the UK."
+        canonicalPath="/coaches/boxing"
+        keywords={[
+          "boxing coach near me",
+          "boxing coach UK",
+          "boxing lessons near me",
+          "boxing training UK",
+          "learn boxing",
+          "boxing fitness classes",
+          "boxing gym near me",
+          "amateur boxing coach",
+          "boxing trainer",
+          "boxing classes UK",
+          "boxing lessons London",
+          "boxing lessons Manchester",
+        ]}
+        schema={[faqSchema, serviceSchema, breadcrumbSchema]}
+      />
       
       <div className="min-h-screen bg-background">
         <Navbar />
