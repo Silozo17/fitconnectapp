@@ -1,44 +1,100 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import {
-  Users,
-  Calendar,
-  MessageSquare,
-  Clock,
-  Plus,
-  ArrowRight,
-  Star,
-  TrendingUp,
-  Settings2,
-  AlertCircle,
-  RefreshCw,
-} from "lucide-react";
+import { Settings2, AlertCircle, RefreshCw, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
-import ClientRequests from "@/components/dashboard/coach/ClientRequests";
 import { ProfileCompletionCard } from "@/components/dashboard/coach/ProfileCompletionCard";
-import { PipelineOverviewCard } from "@/components/dashboard/coach/PipelineOverviewCard";
 import { CoachDashboardCustomizer } from "@/components/dashboard/coach/CoachDashboardCustomizer";
+import { CoachWidgetRenderer } from "@/components/dashboard/coach/CoachWidgetRenderer";
+import { DraggableWidgetGrid, WidgetItem } from "@/components/dashboard/DraggableWidgetGrid";
 import { AddClientModal } from "@/components/dashboard/clients/AddClientModal";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { useCoachDashboardStats } from "@/hooks/useCoachDashboardStats";
 import { useCoachProfileRealtime } from "@/hooks/useCoachProfileRealtime";
+import { useCoachWidgets, useUpdateCoachWidget, useReorderCoachWidgets } from "@/hooks/useCoachWidgets";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
+import { cn } from "@/lib/utils";
+
+const getSizeClasses = (size: string | null | undefined): string => {
+  switch (size) {
+    case "small":
+      return "col-span-1";
+    case "medium":
+      return "col-span-1 md:col-span-2";
+    case "large":
+      return "col-span-1 md:col-span-2 xl:col-span-3";
+    case "full":
+      return "col-span-1 md:col-span-2 xl:col-span-4";
+    default:
+      return "col-span-1";
+  }
+};
+
 const CoachOverview = () => {
   const { t } = useTranslation("coach");
+  
   // Subscribe to real-time coach profile updates (e.g., tier changes by admin)
   useCoachProfileRealtime();
+  
   const { unreadCount: unreadMessages } = useUnreadMessages();
-  const { data, isLoading, error, refetch } = useCoachDashboardStats();
+  const { data: dashboardData, isLoading: statsLoading, error, refetch } = useCoachDashboardStats();
+  const { data: widgets, isLoading: widgetsLoading } = useCoachWidgets();
+  const updateWidget = useUpdateCoachWidget();
+  const reorderWidgets = useReorderCoachWidgets();
+  
   const [customizerOpen, setCustomizerOpen] = useState(false);
   const [addClientOpen, setAddClientOpen] = useState(false);
+  const [editMode, setEditMode] = useState(false);
 
-  const stats = data?.stats;
-  const upcomingSessions = data?.upcomingSessions || [];
+  const stats = dashboardData?.stats;
+  const upcomingSessions = dashboardData?.upcomingSessions || [];
+  
+  // Transform widgets to WidgetItem format and filter visible ones
+  const visibleWidgets: WidgetItem[] = (widgets || [])
+    .filter((w) => w.is_visible)
+    .sort((a, b) => a.position - b.position)
+    .map((w) => ({
+      id: w.id,
+      widget_type: w.widget_type,
+      title: w.title,
+      position: w.position,
+      size: w.size,
+      is_visible: w.is_visible,
+      config: w.config || {},
+    }));
+
+  const handleReorder = (reorderedWidgets: WidgetItem[]) => {
+    reorderWidgets.mutate(
+      reorderedWidgets.map((w) => ({ id: w.id, position: w.position }))
+    );
+  };
+
+  const handleResize = (widgetId: string, size: "small" | "medium" | "large" | "full") => {
+    updateWidget.mutate({ widgetId, updates: { size } });
+  };
+
+  const renderWidget = (widget: WidgetItem) => (
+    <CoachWidgetRenderer
+      widget={{
+        id: widget.id,
+        coach_id: null,
+        widget_type: widget.widget_type,
+        title: widget.title,
+        position: widget.position,
+        size: widget.size,
+        is_visible: widget.is_visible,
+        config: widget.config,
+      }}
+      stats={stats}
+      upcomingSessions={upcomingSessions}
+      unreadMessages={unreadMessages}
+      isLoading={statsLoading}
+      onAddClient={() => setAddClientOpen(true)}
+    />
+  );
+
+  const isLoading = statsLoading || widgetsLoading;
 
   return (
     <DashboardLayout title={t("dashboard.overview")} description={t("dashboard.description")}>
@@ -63,10 +119,10 @@ const CoachOverview = () => {
         </Alert>
       )}
 
-      {/* Welcome & Quick Stats */}
-      <div className="mb-8 flex items-center justify-between">
+      {/* Welcome & Actions */}
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-        <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground tracking-tight">
+          <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground tracking-tight">
             {(() => {
               const hour = new Date().getHours();
               const greeting = hour < 12 ? t("dashboard.greeting.morning", "Good morning") 
@@ -81,224 +137,50 @@ const CoachOverview = () => {
           </h1>
           <p className="text-muted-foreground">{t("dashboard.whatsHappening")}</p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => setCustomizerOpen(true)}>
-          <Settings2 className="w-4 h-4 mr-2" />
-          {t("dashboard.customize")}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant={editMode ? "default" : "outline"}
+            size="sm"
+            onClick={() => setEditMode(!editMode)}
+          >
+            <Pencil className="w-4 h-4 mr-2" />
+            {editMode ? t("dashboard.done", "Done") : t("dashboard.edit", "Edit")}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setCustomizerOpen(true)}>
+            <Settings2 className="w-4 h-4 mr-2" />
+            {t("dashboard.customize")}
+          </Button>
+        </div>
       </div>
 
       {/* Profile Completion */}
       <ProfileCompletionCard />
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <Card variant="glass" className="p-6 hover:shadow-float transition-all">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
-              <Users className="w-7 h-7 text-primary" />
-            </div>
-            {!isLoading && (stats?.activeClients || 0) > 0 && (
-              <span className="text-xs text-success flex items-center gap-1">
-                <TrendingUp className="w-3 h-3" /> {t("stats.active")}
-              </span>
-            )}
-          </div>
-          {isLoading ? (
-            <Skeleton className="h-9 w-16 mb-1 rounded-xl" />
-          ) : (
-            <p className="text-3xl font-display font-bold text-foreground">{stats?.activeClients || 0}</p>
-          )}
-          <p className="text-sm text-muted-foreground">{t("stats.activeClients")}</p>
-        </Card>
-
-        <Card variant="glass" className="p-6 hover:shadow-float transition-all">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center">
-              <Calendar className="w-7 h-7 text-accent" />
-            </div>
-            <span className="text-xs text-muted-foreground flex items-center gap-1">
-              <Clock className="w-3 h-3" /> {t("stats.thisWeek")}
-            </span>
-          </div>
-          {isLoading ? (
-            <Skeleton className="h-9 w-16 mb-1 rounded-xl" />
-          ) : (
-            <p className="text-3xl font-display font-bold text-foreground">{stats?.sessionsThisWeek || 0}</p>
-          )}
-          <p className="text-sm text-muted-foreground">{t("stats.sessionsScheduled")}</p>
-        </Card>
-
-        <Card variant="glass" className="p-6 hover:shadow-float transition-all">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-14 h-14 rounded-2xl bg-warning/10 flex items-center justify-center">
-              <MessageSquare className="w-7 h-7 text-warning" />
-            </div>
-            {unreadMessages > 0 && (
-              <span className="w-6 h-6 rounded-full bg-accent text-accent-foreground text-xs flex items-center justify-center font-bold">
-                {unreadMessages}
-              </span>
-            )}
-          </div>
-          <p className="text-3xl font-display font-bold text-foreground">{unreadMessages}</p>
-          <p className="text-sm text-muted-foreground">{t("stats.unreadMessages")}</p>
-        </Card>
-
-        <Card variant="glass" className="p-6 hover:shadow-float transition-all">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-14 h-14 rounded-2xl bg-success/10 flex items-center justify-center">
-              <Star className="w-7 h-7 text-success" />
-            </div>
-            {!isLoading && (stats?.totalReviews || 0) > 0 && (
-              <span className="text-xs text-muted-foreground">
-                {stats?.totalReviews} {t("stats.reviews")}
-              </span>
-            )}
-          </div>
-          {isLoading ? (
-            <Skeleton className="h-9 w-16 mb-1 rounded-xl" />
-          ) : (
-            <p className="text-3xl font-display font-bold text-foreground">
-              {(stats?.averageRating || 0) > 0 ? stats?.averageRating.toFixed(1) : "—"}
-            </p>
-          )}
-          <p className="text-sm text-muted-foreground">{t("stats.averageRating")}</p>
-        </Card>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <Card 
-          variant="glass" 
-          className="p-5 flex flex-col items-center justify-center gap-2 border-dashed cursor-pointer hover:border-primary/50 transition-all"
-          onClick={() => setAddClientOpen(true)}
-        >
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Plus className="w-5 h-5 text-primary" />
-          </div>
-          <span className="text-sm font-medium">{t("quickActions.addClient")}</span>
-        </Card>
-        <Link to="/dashboard/coach/schedule">
-          <Card variant="glass" className="h-full p-5 flex flex-col items-center justify-center gap-2 border-dashed hover:border-primary/50 transition-all">
-            <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
-              <Calendar className="w-5 h-5 text-accent" />
-            </div>
-            <span className="text-sm font-medium">{t("quickActions.setAvailability")}</span>
-          </Card>
-        </Link>
-        <Link to="/dashboard/coach/plans">
-          <Card variant="glass" className="h-full p-5 flex flex-col items-center justify-center gap-2 border-dashed hover:border-primary/50 transition-all">
-            <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
-              <Plus className="w-5 h-5 text-success" />
-            </div>
-            <span className="text-sm font-medium">{t("quickActions.createPlan")}</span>
-          </Card>
-        </Link>
-        <Link to="/dashboard/coach/messages">
-          <Card variant="glass" className="h-full p-5 flex flex-col items-center justify-center gap-2 border-dashed hover:border-primary/50 transition-all">
-            <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center">
-              <MessageSquare className="w-5 h-5 text-warning" />
-            </div>
-            <span className="text-sm font-medium">{t("quickActions.sendMessage")}</span>
-          </Card>
-        </Link>
-      </div>
-
-      {/* Client Requests */}
-      <div className="mb-6">
-        <ClientRequests />
-      </div>
-
-      {/* Pipeline Overview */}
-      <PipelineOverviewCard />
-
-      {/* Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Upcoming Sessions */}
-        <Card variant="glass" className="overflow-hidden">
-          <div className="p-5 border-b border-border/50 flex items-center justify-between">
-            <h2 className="font-display font-bold text-foreground">{t("clients.upcomingSessions")}</h2>
-            <Link to="/dashboard/coach/schedule">
-              <Button variant="ghost" size="sm" className="text-primary rounded-xl">
-                {t("common:viewAll")} <ArrowRight className="w-4 h-4 ml-1" />
-              </Button>
-            </Link>
-          </div>
-          <div className="divide-y divide-border/50">
-            {isLoading ? (
-              Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="p-4 flex items-center gap-4">
-                  <Skeleton className="w-12 h-12 rounded-xl" />
-                  <div className="flex-1">
-                    <Skeleton className="h-4 w-32 mb-2 rounded-lg" />
-                    <Skeleton className="h-3 w-24 rounded-lg" />
-                  </div>
-                </div>
-              ))
-            ) : (
-              upcomingSessions.map((session) => (
-                <div key={session.id} className="p-4 flex items-center gap-4 hover:bg-muted/30 transition-colors">
-                  <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
-                    {session.avatar}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-foreground truncate">{session.client}</p>
-                    <p className="text-sm text-muted-foreground">{session.type}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-foreground">{session.time}</p>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-          {!isLoading && upcomingSessions.length === 0 && (
-            <div className="p-12 text-center">
-              <div className="w-16 h-16 rounded-3xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
-                <Calendar className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <p className="text-muted-foreground">{t("dashboard.noUpcomingSessions")}</p>
-            </div>
-          )}
-        </Card>
-
-        {/* Reviews Summary */}
-        <Card variant="glass" className="overflow-hidden">
-          <div className="p-5 border-b border-border/50 flex items-center justify-between">
-            <h2 className="font-display font-bold text-foreground">{t("dashboard.yourReviews")}</h2>
-            <Link to="/dashboard/coach/reviews">
-              <Button variant="ghost" size="sm" className="text-primary rounded-xl">
-                {t("common:viewAll")} <ArrowRight className="w-4 h-4 ml-1" />
-              </Button>
-            </Link>
-          </div>
-          <div className="p-6">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="flex items-center gap-2">
-                <Star className="w-8 h-8 text-warning fill-warning" />
-                {isLoading ? (
-                  <Skeleton className="h-10 w-12 rounded-xl" />
-                ) : (
-                  <span className="text-4xl font-bold text-foreground">
-                    {(stats?.averageRating || 0) > 0 ? stats?.averageRating.toFixed(1) : "—"}
-                  </span>
-                )}
-              </div>
-              <div className="text-muted-foreground">
-                {isLoading ? (
-                  <Skeleton className="h-4 w-24 rounded-lg" />
-                ) : (
-                  <p className="text-sm">{stats?.totalReviews || 0} {t("dashboard.totalReviews")}</p>
-                )}
-              </div>
-            </div>
-            {!isLoading && (stats?.totalReviews || 0) === 0 && (
-              <p className="text-muted-foreground text-center py-4">
-                {t("dashboard.noReviewsYet")}
-              </p>
-            )}
-          </div>
-        </Card>
-      </div>
+      {/* Dynamic Widget Grid */}
+      {visibleWidgets.length > 0 ? (
+        <DraggableWidgetGrid
+          widgets={visibleWidgets}
+          editMode={editMode}
+          onReorder={handleReorder}
+          onResize={handleResize}
+          renderWidget={renderWidget}
+          getSizeClasses={getSizeClasses}
+        />
+      ) : (
+        <div className="flex flex-col items-center justify-center py-16 px-4 border border-dashed border-border rounded-xl bg-muted/20">
+          <Settings2 className="w-12 h-12 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-semibold text-foreground mb-2">
+            {t("dashboard.noWidgets", "No widgets enabled")}
+          </h3>
+          <p className="text-muted-foreground text-center mb-4">
+            {t("dashboard.customizePrompt", "Customize your dashboard to add widgets")}
+          </p>
+          <Button onClick={() => setCustomizerOpen(true)}>
+            <Settings2 className="w-4 h-4 mr-2" />
+            {t("dashboard.customize")}
+          </Button>
+        </div>
+      )}
 
       {/* Modals */}
       <CoachDashboardCustomizer open={customizerOpen} onOpenChange={setCustomizerOpen} />
