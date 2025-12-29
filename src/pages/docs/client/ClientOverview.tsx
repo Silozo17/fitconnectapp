@@ -120,7 +120,7 @@ export default function ClientOverview() {
         <h2 className="text-2xl font-semibold mb-6">Browse Guides</h2>
         <div className="grid md:grid-cols-2 gap-4">
           {clientGuides.map((guide) => (
-            <Link key={guide.href} to={guide.href}>
+            <Link key={guide.href} to={guide.href} className="no-underline">
               <Card className="h-full hover:border-primary/50 transition-colors bg-card">
                 <CardHeader className="pb-2">
                   <guide.icon className="h-8 w-8 text-primary mb-2" />
