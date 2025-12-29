@@ -251,3 +251,9 @@ verify_jwt = false
 
 [functions.openfoodfacts-autocomplete]
 verify_jwt = false
+
+[functions.calorieninjas-search]
+verify_jwt = false
+
+[functions.unified-food-search]
+verify_jwt = false

@@ -39,7 +39,10 @@ export interface FoodDiaryInsert {
   fat_g?: number | null;
   fiber_g?: number | null;
   sugar_g?: number | null;
+  sodium_mg?: number | null;
   notes?: string | null;
+  source?: 'manual' | 'openfoodfacts' | 'calorieninjas' | 'custom';
+  food_type?: 'product' | 'generic' | 'recipe' | 'custom';
 }
 
 export interface DailyMacros {
