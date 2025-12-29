@@ -606,9 +606,17 @@ const ClientSettings = () => {
                   <CardContent>
                     <Button 
                       variant="outline" 
-                      onClick={() => {
-                        localStorage.removeItem('fitconnect_discover_seen_client');
-                        toast.success(t('preferences.discovery.resetSuccess'));
+                      onClick={async () => {
+                        const { data: { user } } = await supabase.auth.getUser();
+                        if (user) {
+                          const { error } = await supabase
+                            .from('client_profiles')
+                            .update({ discovery_tour_seen: false })
+                            .eq('user_id', user.id);
+                          if (!error) {
+                            toast.success(t('preferences.discovery.resetSuccess'));
+                          }
+                        }
                       }}
                     >
                       {t('preferences.discovery.reset')}

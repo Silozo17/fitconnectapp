@@ -1,39 +1,94 @@
 import { useState, useEffect, useCallback } from 'react';
-
-const STORAGE_KEY_PREFIX = 'fitconnect_discover_seen_';
+import { supabase } from '@/integrations/supabase/client';
 
 export function useDiscoverModal(role: 'client' | 'coach') {
-  const storageKey = `${STORAGE_KEY_PREFIX}${role}`;
-  
-  const [hasSeen, setHasSeen] = useState(() => {
-    try {
-      return localStorage.getItem(storageKey) === 'true';
-    } catch {
-      return false;
-    }
-  });
+  const [hasSeen, setHasSeen] = useState(true); // Default to true to prevent flash
+  const [isLoading, setIsLoading] = useState(true);
+  const [profileId, setProfileId] = useState<string | null>(null);
 
-  const markAsSeen = useCallback(() => {
+  // Fetch the discovery tour seen status from the database
+  useEffect(() => {
+    const fetchDiscoveryStatus = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          setIsLoading(false);
+          return;
+        }
+
+        const table = role === 'client' ? 'client_profiles' : 'coach_profiles';
+        const { data, error } = await supabase
+          .from(table)
+          .select('id, discovery_tour_seen')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching discovery status:', error);
+          setIsLoading(false);
+          return;
+        }
+
+        if (data) {
+          setProfileId(data.id);
+          setHasSeen(data.discovery_tour_seen ?? false);
+        }
+      } catch (error) {
+        console.error('Error fetching discovery status:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDiscoveryStatus();
+  }, [role]);
+
+  const markAsSeen = useCallback(async () => {
+    if (!profileId) return;
+
     try {
-      localStorage.setItem(storageKey, 'true');
+      const table = role === 'client' ? 'client_profiles' : 'coach_profiles';
+      const { error } = await supabase
+        .from(table)
+        .update({ discovery_tour_seen: true })
+        .eq('id', profileId);
+
+      if (error) {
+        console.error('Error marking discovery as seen:', error);
+        return;
+      }
+
       setHasSeen(true);
-    } catch {
-      // localStorage not available
+    } catch (error) {
+      console.error('Error marking discovery as seen:', error);
     }
-  }, [storageKey]);
+  }, [profileId, role]);
 
-  const resetSeen = useCallback(() => {
+  const resetSeen = useCallback(async () => {
+    if (!profileId) return;
+
     try {
-      localStorage.removeItem(storageKey);
+      const table = role === 'client' ? 'client_profiles' : 'coach_profiles';
+      const { error } = await supabase
+        .from(table)
+        .update({ discovery_tour_seen: false })
+        .eq('id', profileId);
+
+      if (error) {
+        console.error('Error resetting discovery:', error);
+        return;
+      }
+
       setHasSeen(false);
-    } catch {
-      // localStorage not available
+    } catch (error) {
+      console.error('Error resetting discovery:', error);
     }
-  }, [storageKey]);
+  }, [profileId, role]);
 
   return { 
-    shouldShow: !hasSeen, 
+    shouldShow: !isLoading && !hasSeen, 
     markAsSeen,
-    resetSeen
+    resetSeen,
+    isLoading
   };
 }
