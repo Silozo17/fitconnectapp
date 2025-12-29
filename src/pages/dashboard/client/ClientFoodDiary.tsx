@@ -61,7 +61,7 @@ const ClientFoodDiary = () => {
       client_id: clientProfile.id,
       meal_type: mealType,
       food_name: food.name,
-      fatsecret_id: food.fatsecret_id || null,
+      external_id: food.external_id || food.fatsecret_id || null,
       serving_size_g: food.serving_size_g || 100,
       servings: 1,
       calories: food.calories_per_100g ? Math.round((food.calories_per_100g * (food.serving_size_g || 100)) / 100) : food.calories,

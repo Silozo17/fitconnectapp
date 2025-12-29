@@ -27,8 +27,8 @@ export interface FoodItem {
   protein: number;
   carbs: number;
   fat: number;
-  fatsecret_id?: string | null;
-  source?: 'fatsecret' | 'manual' | 'ai_generated' | 'custom';
+  external_id?: string | null;
+  source?: 'openfoodfacts' | 'fatsecret' | 'manual' | 'ai_generated' | 'custom';
 }
 
 export interface MealPlan {
@@ -394,11 +394,11 @@ export function validateAllFoodsHaveFatSecretId(mealPlan: MealPlan): FatSecretVa
     for (const food of meal.foods) {
       totalCount++;
       
-      if (food.fatsecret_id && food.source === 'fatsecret') {
+      if (food.external_id && (food.source === 'openfoodfacts' || food.source === 'fatsecret')) {
         verifiedCount++;
       } else {
         unverifiedFoods.push(food);
-        errors.push(`"${food.name}" is not verified by FatSecret database`);
+        errors.push(`"${food.name}" is not verified by nutrition database`);
       }
     }
   }
@@ -414,17 +414,17 @@ export function validateAllFoodsHaveFatSecretId(mealPlan: MealPlan): FatSecretVa
 
 /**
  * Reject foods that have AI-generated/invented data
- * Returns only foods with verified FatSecret IDs
+ * Returns only foods with verified external IDs (Open Food Facts or FatSecret)
  */
 export function rejectAIGeneratedFoods(foods: FoodItem[]): FoodItem[] {
   return foods.filter(food => {
-    // Only keep foods with valid FatSecret backing
+    // Only keep foods with valid external backing
     if (food.source === 'ai_generated') {
       console.warn(`Rejecting AI-generated food: ${food.name}`);
       return false;
     }
     
-    if (!food.fatsecret_id && food.source !== 'manual' && food.source !== 'custom') {
+    if (!food.external_id && food.source !== 'manual' && food.source !== 'custom') {
       console.warn(`Rejecting unverified food: ${food.name}`);
       return false;
     }
@@ -486,19 +486,19 @@ export function strictValidateMealPlan(
 }
 
 /**
- * Check if a food substitution response has valid FatSecret backing
+ * Check if a food substitution response has valid external backing
  */
-export function validateSubstitutionHasFatSecretId(substitution: {
-  fatsecret_id?: string | null;
+export function validateSubstitutionHasExternalId(substitution: {
+  external_id?: string | null;
   source?: string;
   name: string;
 }): boolean {
-  if (!substitution.fatsecret_id) {
-    console.warn(`Substitution "${substitution.name}" has no FatSecret ID`);
+  if (!substitution.external_id) {
+    console.warn(`Substitution "${substitution.name}" has no external ID`);
     return false;
   }
-  if (substitution.source !== 'fatsecret') {
-    console.warn(`Substitution "${substitution.name}" is not from FatSecret (source: ${substitution.source})`);
+  if (substitution.source !== 'openfoodfacts' && substitution.source !== 'fatsecret') {
+    console.warn(`Substitution "${substitution.name}" is not from a verified source (source: ${substitution.source})`);
     return false;
   }
   return true;
