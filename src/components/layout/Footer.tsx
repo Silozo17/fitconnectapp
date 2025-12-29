@@ -71,6 +71,7 @@ const Footer = () => {
       { name: t("website.footer.links.aboutUs"), href: "/about" },
       { name: t("website.footer.links.privacyPolicy"), href: "/privacy" },
       { name: t("website.footer.links.termsOfService"), href: "/terms" },
+      { name: "Sitemap", href: "/sitemap.xml" },
     ],
   };
 

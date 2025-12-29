@@ -10,18 +10,70 @@ const BASE_URL = "https://getfitconnect.co.uk";
 
 // Static pages with their priorities and change frequencies
 const STATIC_PAGES = [
+  // Core pages
   { path: "/", priority: "1.0", changefreq: "daily" },
   { path: "/coaches", priority: "0.9", changefreq: "daily" },
   { path: "/marketplace", priority: "0.9", changefreq: "daily" },
   { path: "/blog", priority: "0.8", changefreq: "daily" },
+  
+  // Marketing pages
   { path: "/for-coaches", priority: "0.8", changefreq: "weekly" },
+  { path: "/how-it-works", priority: "0.8", changefreq: "monthly" },
+  { path: "/success-stories", priority: "0.7", changefreq: "weekly" },
+  { path: "/community", priority: "0.7", changefreq: "weekly" },
   { path: "/about", priority: "0.7", changefreq: "monthly" },
-  { path: "/contact", priority: "0.6", changefreq: "monthly" },
   { path: "/pricing", priority: "0.8", changefreq: "weekly" },
   { path: "/faq", priority: "0.6", changefreq: "monthly" },
+  { path: "/contact", priority: "0.6", changefreq: "monthly" },
+  { path: "/install", priority: "0.5", changefreq: "monthly" },
+  
+  // Coach specialty pages
+  { path: "/coaches/personal-trainers", priority: "0.8", changefreq: "daily" },
+  { path: "/coaches/nutritionists", priority: "0.8", changefreq: "daily" },
+  { path: "/coaches/boxing", priority: "0.8", changefreq: "daily" },
+  { path: "/coaches/mma", priority: "0.8", changefreq: "daily" },
+  { path: "/coaches/bodybuilding", priority: "0.8", changefreq: "daily" },
+  
+  // Documentation - Hub
+  { path: "/docs", priority: "0.7", changefreq: "weekly" },
+  
+  // Documentation - Getting Started
+  { path: "/docs/getting-started", priority: "0.7", changefreq: "monthly" },
+  
+  // Documentation - Client guides
+  { path: "/docs/client/booking", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/client/coaches", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/client/communication", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/client/nutrition", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/client/payments", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/client/plans", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/client/profile", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/client/progress", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/client/wearables", priority: "0.6", changefreq: "monthly" },
+  
+  // Documentation - Coach guides
+  { path: "/docs/coach/availability", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/coach/clients", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/coach/marketing", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/coach/nutrition", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/coach/onboarding", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/coach/payments", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/coach/plans", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/coach/profile", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/coach/verification", priority: "0.6", changefreq: "monthly" },
+  
+  // Documentation - Integrations
+  { path: "/docs/integrations/apple-health", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/integrations/calendar", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/integrations/fitbit", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/integrations/garmin", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/integrations/google-fit", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/integrations/stripe", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/integrations/zoom", priority: "0.6", changefreq: "monthly" },
+  
+  // Legal pages
   { path: "/privacy", priority: "0.3", changefreq: "yearly" },
   { path: "/terms", priority: "0.3", changefreq: "yearly" },
-  { path: "/leaderboard", priority: "0.7", changefreq: "hourly" },
 ];
 
 Deno.serve(async (req) => {
@@ -155,7 +207,7 @@ Deno.serve(async (req) => {
 
     xml += `</urlset>`;
 
-    console.log("Sitemap generated successfully");
+    console.log(`Sitemap generated successfully with ${STATIC_PAGES.length + coaches.length + products.length + bundles.length + blogPosts.length} URLs`);
 
     return new Response(xml, {
       headers: corsHeaders,
@@ -182,6 +234,10 @@ Deno.serve(async (req) => {
   <url>
     <loc>${BASE_URL}/blog</loc>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${BASE_URL}/docs</loc>
+    <priority>0.7</priority>
   </url>
 </urlset>`;
 
