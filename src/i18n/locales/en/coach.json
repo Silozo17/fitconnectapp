@@ -153,8 +153,11 @@
       "overview": "Overview",
       "sessions": "Sessions",
       "progress": "Progress",
+      "data": "Data",
+      "photos": "Photos",
       "plans": "Plans",
       "habits": "Habits",
+      "reports": "Reports",
       "notes": "Notes"
     },
     "stats": {
@@ -1518,5 +1521,74 @@
     "sessions": "Sessions",
     "progress": "Progress",
     "package": "Package"
+  },
+  "clientReports": {
+    "title": "AI Analysis Reports",
+    "generateReport": "Generate Report",
+    "regenerate": "Regenerate",
+    "noReports": "No reports yet",
+    "noReportsDesc": "Generate an AI analysis report to get insights about this client's progress, trends, and recommendations.",
+    "generating": "Analyzing client data...",
+    "reportSaved": "Report saved successfully",
+    "reportDeleted": "Report deleted",
+    "reportSent": "Report sent to client",
+    "deleteConfirm": "Delete this report?",
+    "deleteConfirmDesc": "This action cannot be undone.",
+    "sendToClient": "Send to Client",
+    "viewReport": "View Report",
+    "editNotes": "Edit Notes",
+    "coachNotes": "Coach Notes",
+    "coachNotesPlaceholder": "Add your notes and recommendations for the client...",
+    "save": "Save",
+    "send": "Send",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "status": {
+      "draft": "Draft",
+      "finalized": "Finalized",
+      "sent": "Sent"
+    },
+    "sections": {
+      "summary": "Summary",
+      "trends": "Trends & Patterns",
+      "adherence": "Adherence Scores",
+      "risks": "Potential Concerns",
+      "recommendations": "Recommendations",
+      "nextSteps": "Suggested Next Steps",
+      "photoComparison": "Photo Comparison",
+      "measurementsComparison": "Measurements Comparison",
+      "wearableData": "Wearable Data Summary"
+    },
+    "aiDisclaimer": "AI analysis is provided as a helpful tool but should not replace professional judgment. AI can sometimes be inaccurate or miss important context. Always verify insights before making recommendations.",
+    "aiDisclaimerShort": "AI-generated insights - verify before acting",
+    "acknowledgeDisclaimer": "I understand this is AI-generated and will verify the insights",
+    "beforePhoto": "Before",
+    "afterPhoto": "After",
+    "noPhotos": "No progress photos available for comparison",
+    "noMeasurements": "No measurements data available for comparison",
+    "trend": {
+      "improving": "Improving",
+      "stable": "Stable",
+      "declining": "Declining",
+      "insufficient_data": "Insufficient Data"
+    },
+    "riskLevel": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    }
+  },
+  "clientData": {
+    "mealLogs": "Meal Logs",
+    "trainingLogs": "Training Logs",
+    "wearableData": "Wearable Data",
+    "noMealLogs": "No meal logs recorded yet",
+    "noTrainingLogs": "No training logs recorded yet",
+    "noWearableData": "No wearable data synced yet",
+    "steps": "Steps",
+    "heartRate": "Heart Rate",
+    "caloriesBurned": "Calories Burned",
+    "sleep": "Sleep",
+    "activeMinutes": "Active Minutes"
   }
 }
