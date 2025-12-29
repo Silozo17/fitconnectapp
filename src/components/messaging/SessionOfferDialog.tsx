@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { CalendarIcon, Clock, MapPin, Video, Loader2, PoundSterling, AlertCircle } from "lucide-react";
+import { CalendarIcon, Clock, MapPin, Video, Loader2, AlertCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -10,11 +10,9 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -32,8 +30,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useSessionTypes } from "@/hooks/useCoachSchedule";
 import { useCreateSessionOffer } from "@/hooks/useSessionOffers";
 import { useParticipantClientProfileId } from "@/hooks/useParticipantClientProfileId";
+import { useClientActivePackage } from "@/hooks/usePackages";
 import { cn } from "@/lib/utils";
 import { VenueAutocomplete } from "@/components/shared/VenueAutocomplete";
+import { PaymentModeSelector, type PaymentMode } from "@/components/dashboard/clients/PaymentModeSelector";
 
 interface SessionOfferDialogProps {
   open: boolean;
@@ -71,16 +71,41 @@ const SessionOfferDialog = ({
   // Convert user_id to client_profile.id
   const { clientProfileId, hasClientProfile, isLoading: isLoadingProfile } = 
     useParticipantClientProfileId(participantUserId);
+  
+  // Fetch client's active package for credits display
+  const { data: activePackage, isLoading: isLoadingPackage } = useClientActivePackage(
+    clientProfileId || undefined, 
+    coachId
+  );
 
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTime, setSelectedTime] = useState("10:00");
   const [duration, setDuration] = useState("60");
   const [sessionType, setSessionType] = useState("Personal Training");
-  const [isFree, setIsFree] = useState(false);
+  const [paymentMode, setPaymentMode] = useState<PaymentMode>("paid");
   const [price, setPrice] = useState("");
   const [isOnline, setIsOnline] = useState(true);
   const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
+
+  // Calculate credits available
+  const creditsAvailable = activePackage 
+    ? activePackage.sessions_total - (activePackage.sessions_used || 0)
+    : 0;
+  const hasActivePackage = !!activePackage && creditsAvailable > 0;
+  const packageName = activePackage?.coach_packages?.name || "Package";
+
+  // Reset payment mode when package status changes
+  useEffect(() => {
+    if (!isLoadingPackage) {
+      // Default to use_credits if client has credits, otherwise paid
+      if (hasActivePackage) {
+        setPaymentMode("use_credits");
+      } else {
+        setPaymentMode("paid");
+      }
+    }
+  }, [hasActivePackage, isLoadingPackage]);
 
   const handleSubmit = async () => {
     if (!selectedDate || !clientProfileId) return;
@@ -89,21 +114,31 @@ const SessionOfferDialog = ({
     const proposedDate = new Date(selectedDate);
     proposedDate.setHours(hours, minutes, 0, 0);
 
+    const isFree = paymentMode === "free";
+    const finalPrice = paymentMode === "paid" ? parseFloat(price) || 0 : 0;
+
     const offer = await createOffer.mutateAsync({
       coach_id: coachId,
-      client_id: clientProfileId, // Use the resolved client_profile.id
+      client_id: clientProfileId,
       session_type: sessionType,
       proposed_date: proposedDate,
       duration_minutes: parseInt(duration),
-      price: isFree ? 0 : parseFloat(price) || 0,
+      price: finalPrice,
       is_free: isFree,
       is_online: isOnline,
       location: !isOnline ? location : undefined,
       notes: notes || undefined,
+      payment_mode: paymentMode,
     });
 
     // Create a formatted message for the chat
-    const priceText = isFree ? "FREE" : `£${parseFloat(price) || 0}`;
+    let priceText = "FREE";
+    if (paymentMode === "use_credits") {
+      priceText = `1 Package Credit (${creditsAvailable - 1} remaining)`;
+    } else if (paymentMode === "paid") {
+      priceText = `£${finalPrice}`;
+    }
+    
     const formatText = isOnline ? "Online" : `In-person${location ? ` at ${location}` : ""}`;
     const offerDetails = `📅 **Session Offer**\n\n` +
       `**${sessionType}**\n` +
@@ -122,14 +157,15 @@ const SessionOfferDialog = ({
     setSelectedTime("10:00");
     setDuration("60");
     setSessionType("Personal Training");
-    setIsFree(false);
+    setPaymentMode(hasActivePackage ? "use_credits" : "paid");
     setPrice("");
     setIsOnline(true);
     setLocation("");
     setNotes("");
   };
 
-  const canSubmit = selectedDate && hasClientProfile && !isLoadingProfile;
+  const canSubmit = selectedDate && hasClientProfile && !isLoadingProfile && 
+    (paymentMode !== "paid" || (price && parseFloat(price) > 0));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -245,26 +281,19 @@ const SessionOfferDialog = ({
             </div>
           </div>
 
-          {/* Pricing */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs">Free Session</Label>
-              <Switch checked={isFree} onCheckedChange={setIsFree} disabled={!hasClientProfile} />
-            </div>
-            {!isFree && (
-              <div className="relative">
-                <PoundSterling className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  type="number"
-                  placeholder="0.00"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  className="pl-9 h-9"
-                  disabled={!hasClientProfile}
-                />
-              </div>
-            )}
-          </div>
+          {/* Payment Mode Selection */}
+          {!isLoadingPackage && hasClientProfile && (
+            <PaymentModeSelector
+              value={paymentMode}
+              onChange={setPaymentMode}
+              price={price}
+              onPriceChange={setPrice}
+              creditsAvailable={creditsAvailable}
+              hasActivePackage={hasActivePackage}
+              packageName={packageName}
+              disabled={!hasClientProfile}
+            />
+          )}
 
           {/* Format */}
           <div className="space-y-2">
