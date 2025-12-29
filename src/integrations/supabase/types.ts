@@ -5983,6 +5983,10 @@ export type Database = {
         Args: { p_coach_id: string; p_fee_amount: number }
         Returns: undefined
       }
+      increment_food_popularity: {
+        Args: { p_country?: string; p_external_id: string }
+        Returns: undefined
+      }
       is_username_available: {
         Args: { check_username: string }
         Returns: boolean

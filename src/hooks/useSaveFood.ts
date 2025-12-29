@@ -1,10 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { FatSecretFood } from './useFatSecretSearch';
+import { OpenFoodFactsFood } from './useOpenFoodFacts';
 import { Food } from './useFoods';
 
+// Support both FatSecret and Open Food Facts food types
+type SaveableFoodType = (FatSecretFood & { external_id?: string }) | OpenFoodFactsFood;
+
 interface SaveFoodParams {
-  food: FatSecretFood & { external_id?: string };
+  food: SaveableFoodType;
   coachId: string;
 }
 
@@ -13,26 +17,40 @@ export const useSaveFood = () => {
 
   return useMutation({
     mutationFn: async ({ food, coachId }: SaveFoodParams): Promise<Food> => {
-      // First check if this food already exists for this coach
-      const { data: existingFood } = await supabase
-        .from('foods')
-        .select('*')
-        .eq('external_id', food.external_id || food.fatsecret_id)
-        .eq('coach_id', coachId)
-        .maybeSingle();
+      // Get the external ID - support both old and new formats
+      const externalId = 'external_id' in food ? food.external_id : 
+                         'fatsecret_id' in food ? (food as FatSecretFood).fatsecret_id : null;
+      
+      // Determine source
+      const source = 'food_type' in food ? 'openfoodfacts' : 'fatsecret';
+      
+      // Get name with brand
+      const brandName = food.brand_name;
+      const fullName = brandName ? `${food.name} (${brandName})` : food.name;
 
-      if (existingFood) {
-        // Return existing food if already saved
-        return existingFood as Food;
+      // First check if this food already exists for this coach
+      if (externalId) {
+        const { data: existingFood } = await supabase
+          .from('foods')
+          .select('*')
+          .eq('external_id', externalId)
+          .eq('coach_id', coachId)
+          .maybeSingle();
+
+        if (existingFood) {
+          // Increment popularity for cached autocomplete
+          incrementPopularity(externalId);
+          return existingFood as Food;
+        }
       }
 
       // Insert new food
       const { data, error } = await supabase
         .from('foods')
         .insert({
-          name: food.brand_name ? `${food.name} (${food.brand_name})` : food.name,
-          fatsecret_id: food.fatsecret_id,
-          source: 'fatsecret',
+          name: fullName,
+          external_id: externalId,
+          source: source,
           calories_per_100g: food.calories_per_100g,
           protein_g: food.protein_g,
           carbs_g: food.carbs_g,
@@ -51,6 +69,11 @@ export const useSaveFood = () => {
         throw new Error('Failed to save food');
       }
 
+      // Increment popularity for cached autocomplete
+      if (externalId) {
+        incrementPopularity(externalId);
+      }
+
       return data as Food;
     },
     onSuccess: () => {
@@ -60,7 +83,19 @@ export const useSaveFood = () => {
   });
 };
 
-// Hook to get saved FatSecret foods for a coach
+// Helper to increment popularity (fire and forget)
+async function incrementPopularity(externalId: string, country: string = 'GB') {
+  try {
+    await supabase.rpc('increment_food_popularity', {
+      p_external_id: externalId,
+      p_country: country,
+    });
+  } catch (e) {
+    console.warn('[useSaveFood] Failed to increment popularity:', e);
+  }
+}
+
+// Hook to get saved foods for a coach (supports both sources)
 export const useSavedFoods = (coachId: string | undefined, searchQuery?: string) => {
   return useQueryClient().fetchQuery({
     queryKey: ['saved-foods', coachId, searchQuery],
@@ -71,7 +106,6 @@ export const useSavedFoods = (coachId: string | undefined, searchQuery?: string)
         .from('foods')
         .select('*')
         .eq('coach_id', coachId)
-        .eq('source', 'fatsecret')
         .order('name');
 
       if (searchQuery) {
