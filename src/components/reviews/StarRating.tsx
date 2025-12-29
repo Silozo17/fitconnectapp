@@ -22,9 +22,9 @@ const StarRating = ({
 
   if (reviewCount === 0 && !rating) {
     return (
-      <div className="flex items-center gap-1 bg-amber-500/10 px-2 py-1 rounded-full">
-        <Star className={cn(sizes[size], "text-amber-500")} />
-        <span className="text-sm font-medium text-amber-600">New</span>
+      <div className="flex items-center gap-1 bg-muted/50 px-2 py-1 rounded-full">
+        <Star className={cn(sizes[size], "text-muted-foreground")} />
+        <span className="text-sm text-muted-foreground">Not Yet Rated</span>
       </div>
     );
   }

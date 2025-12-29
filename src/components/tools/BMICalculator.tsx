@@ -49,6 +49,13 @@ const getBMICategory = (bmi: number): { label: string; color: string } => {
   }
 };
 
+const getIndicatorColor = (bmi: number): string => {
+  if (bmi < 18.5) return "#3b82f6";  // Blue - Underweight
+  if (bmi < 25) return "#10b981";    // Green - Normal
+  if (bmi < 30) return "#eab308";    // Yellow - Overweight
+  return "#ef4444";                   // Red - Obese
+};
+
 const BMICalculator = () => {
   const [weight, setWeight] = useState("");
   const [height, setHeight] = useState("");
@@ -147,17 +154,17 @@ const BMICalculator = () => {
             })}
 
             {/* Indicator dot */}
-            {bmiResult && (
-              <circle
-                cx={getIndicatorPosition(bmiResult.bmi, centerX, centerY, radius).x}
-                cy={getIndicatorPosition(bmiResult.bmi, centerX, centerY, radius).y}
-                r="8"
-                fill="hsl(var(--background))"
-                stroke="hsl(var(--foreground))"
-                strokeWidth="3"
-                className="drop-shadow-md"
-              />
-            )}
+          {bmiResult && (
+            <circle
+              cx={getIndicatorPosition(bmiResult.bmi, centerX, centerY, radius).x}
+              cy={getIndicatorPosition(bmiResult.bmi, centerX, centerY, radius).y}
+              r="8"
+              fill={getIndicatorColor(bmiResult.bmi)}
+              stroke="hsl(var(--background))"
+              strokeWidth="3"
+              className="drop-shadow-md"
+            />
+          )}
 
             {/* BMI Value in center */}
             <text
