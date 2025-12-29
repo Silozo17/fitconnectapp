@@ -531,5 +531,19 @@
       "noXpYet": "No XP earned yet",
       "earnXp": "Complete habits and workouts to earn XP!"
     }
+  },
+  "pendingPayment": {
+    "title": "Pending Payments",
+    "description": "Complete payment to confirm these sessions",
+    "awaitingPayment": "Payment Required",
+    "online": "Online Session",
+    "inPerson": "In-Person",
+    "payNow": "Pay Now",
+    "decline": "Decline",
+    "declined": "Session declined",
+    "declineFailed": "Failed to decline session",
+    "completePayment": "Complete Payment",
+    "paymentComplete": "Payment completed! Session confirmed.",
+    "checkoutNotReady": "Payment checkout for individual sessions is being set up. Please contact your coach for payment instructions."
   }
 }

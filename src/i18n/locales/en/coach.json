@@ -277,6 +277,25 @@
       "120min": "2 hours"
     }
   },
+  "scheduleSession": {
+    "paymentMode": {
+      "title": "Payment Mode",
+      "free": "Free Session",
+      "freeDescription": "No charge for this session",
+      "useCredits": "Use Package Credits",
+      "useCreditsDescription": "Deduct 1 credit from \"{{packageName}}\"",
+      "paid": "Paid Session",
+      "paidDescription": "Client will receive payment request",
+      "remaining": "remaining",
+      "noCreditsAvailable": "Client has no package credits"
+    },
+    "pendingPayment": {
+      "title": "Payment Required",
+      "description": "This session requires payment from the client",
+      "awaitingPayment": "Awaiting client payment",
+      "paymentReceived": "Payment received"
+    }
+  },
   "addNoteModal": {
     "title": "Add Note",
     "titleWithClient": "Add Note for {{clientName}}",

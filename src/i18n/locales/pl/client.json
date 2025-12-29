@@ -531,5 +531,19 @@
       "noXpYet": "Brak zdobytych XP",
       "earnXp": "Ukończ nawyki i treningi, aby zdobyć XP!"
     }
+  },
+  "pendingPayment": {
+    "title": "Oczekujące płatności",
+    "description": "Dokończ płatność, aby potwierdzić te sesje",
+    "awaitingPayment": "Wymagana płatność",
+    "online": "Sesja online",
+    "inPerson": "Osobiście",
+    "payNow": "Zapłać teraz",
+    "decline": "Odrzuć",
+    "declined": "Sesja odrzucona",
+    "declineFailed": "Nie udało się odrzucić sesji",
+    "completePayment": "Dokończ płatność",
+    "paymentComplete": "Płatność zakończona! Sesja potwierdzona.",
+    "checkoutNotReady": "Płatność za pojedyncze sesje jest w trakcie konfiguracji. Skontaktuj się z trenerem w sprawie instrukcji płatności."
   }
 }
