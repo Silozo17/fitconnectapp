@@ -26,13 +26,13 @@ interface BadgeCardProps {
   onClaim?: () => void;
 }
 
-// Radial gradients positioned BEHIND the badge image (not box-shadow around container)
+// Radial gradients positioned at top-center of card, behind entire card content
 const RARITY_GRADIENT: Record<string, string> = {
-  common: 'radial-gradient(ellipse 100% 100% at 50% 50%, hsla(0, 0%, 60%, 0.2) 0%, transparent 70%)',
-  uncommon: 'radial-gradient(ellipse 100% 100% at 50% 50%, hsla(142, 76%, 36%, 0.3) 0%, transparent 70%)',
-  rare: 'radial-gradient(ellipse 100% 100% at 50% 50%, hsla(217, 91%, 60%, 0.35) 0%, transparent 70%)',
-  epic: 'radial-gradient(ellipse 100% 100% at 50% 50%, hsla(270, 70%, 60%, 0.35) 0%, transparent 70%)',
-  legendary: 'radial-gradient(ellipse 100% 100% at 50% 50%, hsla(45, 93%, 47%, 0.4) 0%, transparent 70%)',
+  common: 'radial-gradient(ellipse 120% 80% at 50% 20%, hsla(0, 0%, 60%, 0.15) 0%, transparent 60%)',
+  uncommon: 'radial-gradient(ellipse 120% 80% at 50% 20%, hsla(142, 76%, 36%, 0.25) 0%, transparent 60%)',
+  rare: 'radial-gradient(ellipse 120% 80% at 50% 20%, hsla(217, 91%, 60%, 0.3) 0%, transparent 60%)',
+  epic: 'radial-gradient(ellipse 120% 80% at 50% 20%, hsla(270, 70%, 60%, 0.3) 0%, transparent 60%)',
+  legendary: 'radial-gradient(ellipse 120% 80% at 50% 20%, hsla(45, 93%, 47%, 0.35) 0%, transparent 60%)',
 };
 
 export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
@@ -54,6 +54,14 @@ export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
           badge.rarity === 'legendary' && earned && 'ring-2 ring-yellow-400/50 shadow-lg shadow-yellow-500/20'
         )}
       >
+        {/* Rarity glow behind entire card - only for earned badges */}
+        {earned && (
+          <div 
+            className="absolute inset-0 pointer-events-none rounded-xl"
+            style={{ background: RARITY_GRADIENT[badge.rarity] || RARITY_GRADIENT.common }}
+          />
+        )}
+        
         {/* Rarity color overlay for earned badges */}
         {earned && (
           <div 
@@ -78,16 +86,8 @@ export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
         )}
         
         <div className={cn("relative text-center", !earned && "opacity-70")}>
-          {/* Badge display area - LARGER SIZE with glow behind */}
+          {/* Badge display area - LARGER SIZE */}
           <div className='w-28 h-28 mx-auto mb-3 flex items-center justify-center relative'>
-            {/* Rarity glow behind badge (radial gradient) - only for earned badges */}
-            {earned && (
-              <div 
-                className="absolute inset-0 rounded-xl"
-                style={{ background: RARITY_GRADIENT[badge.rarity] || RARITY_GRADIENT.common }}
-              />
-            )}
-            
             {/* Shine effect for claimable badges */}
             {showClaimButton && (
               <div className="absolute inset-0 rounded-xl overflow-hidden">
