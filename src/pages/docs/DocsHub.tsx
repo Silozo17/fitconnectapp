@@ -115,7 +115,7 @@ export default function DocsHub() {
           <div className="container">
             <div className={`grid md:grid-cols-2 ${isAdmin ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-6`}>
               {quickLinks.map((link) => (
-                <Link key={link.href} to={link.href}>
+                <Link key={link.href} to={link.href} className="no-underline">
                   <Card className="h-full hover:border-primary/50 transition-colors bg-card">
                     <CardHeader>
                       <link.icon className={`h-10 w-10 ${link.color} mb-2`} />
@@ -143,7 +143,7 @@ export default function DocsHub() {
                 <Link 
                   key={article.href} 
                   to={article.href}
-                  className="flex items-center gap-3 p-4 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors"
+                  className="flex items-center gap-3 p-4 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors no-underline"
                 >
                   <article.icon className="h-5 w-5 text-primary flex-shrink-0" />
                   <span className="text-sm font-medium">{article.title}</span>
