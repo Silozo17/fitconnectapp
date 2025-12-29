@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, Loader2, AlertTriangle } from "lucide-react";
@@ -91,13 +91,16 @@ export const FoodSearchModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[85vh] flex flex-col overflow-hidden">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-lg max-h-[90dvh] flex flex-col p-0 gap-0">
+        <DialogHeader className="px-6 pt-6 pb-4 shrink-0">
           <DialogTitle>Add to {MEAL_LABELS[mealType]}</DialogTitle>
+          <DialogDescription className="sr-only">
+            Search for foods to add to your meal
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="relative shrink-0">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <div className="relative shrink-0 px-6">
+          <Search className="absolute left-9 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Search foods (e.g., chicken breast, rice)"
             value={query}
@@ -107,77 +110,79 @@ export const FoodSearchModal = ({
           />
         </div>
 
-        <ScrollArea className="h-[55vh] sm:h-[50vh] -mx-6 px-6">
-          {isSearching ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : results.length > 0 ? (
-            <div className="space-y-2 py-2">
-              {results.map((suggestion) => {
-                const hasConflict = hasAllergenConflict(suggestion);
-                return (
-                  <button
-                    key={suggestion.external_id}
-                    onClick={() => handleSelect(suggestion)}
-                    className={cn(
-                      "w-full text-left p-3 rounded-xl transition-colors",
-                      hasConflict 
-                        ? "bg-warning/10 border border-warning/30 hover:bg-warning/20" 
-                        : "bg-muted/50 hover:bg-muted"
-                    )}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium truncate">{suggestion.product_name}</p>
-                          {hasConflict && (
-                            <AlertTriangle className="w-4 h-4 text-warning shrink-0" />
+        <div className="flex-1 min-h-0 mt-4 px-6 pb-6">
+          <ScrollArea className="h-full max-h-[55dvh]">
+            {isSearching ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : results.length > 0 ? (
+              <div className="space-y-2 pr-4">
+                {results.map((suggestion) => {
+                  const hasConflict = hasAllergenConflict(suggestion);
+                  return (
+                    <button
+                      key={suggestion.external_id}
+                      onClick={() => handleSelect(suggestion)}
+                      className={cn(
+                        "w-full text-left p-3 rounded-xl transition-colors",
+                        hasConflict 
+                          ? "bg-warning/10 border border-warning/30 hover:bg-warning/20" 
+                          : "bg-muted/50 hover:bg-muted"
+                      )}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium truncate">{suggestion.product_name}</p>
+                            {hasConflict && (
+                              <AlertTriangle className="w-4 h-4 text-warning shrink-0" />
+                            )}
+                          </div>
+                          {suggestion.brand && (
+                            <p className="text-xs text-muted-foreground truncate">
+                              {suggestion.brand}
+                            </p>
                           )}
+                          <div className="flex items-center gap-2 mt-1 text-xs">
+                            <span className="text-muted-foreground">per 100g</span>
+                            <span className="font-medium">{Math.round(suggestion.calories_per_100g || 0)} kcal</span>
+                          </div>
                         </div>
-                        {suggestion.brand && (
-                          <p className="text-xs text-muted-foreground truncate">
-                            {suggestion.brand}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-2 mt-1 text-xs">
-                          <span className="text-muted-foreground">per 100g</span>
-                          <span className="font-medium">{Math.round(suggestion.calories_per_100g || 0)} kcal</span>
+                        <div className="text-right text-xs shrink-0 space-y-0.5">
+                          <p><span className="text-blue-500 font-medium">{suggestion.protein_g || 0}g</span> P</p>
+                          <p><span className="text-amber-500 font-medium">{suggestion.carbs_g || 0}g</span> C</p>
+                          <p><span className="text-rose-500 font-medium">{suggestion.fat_g || 0}g</span> F</p>
                         </div>
                       </div>
-                      <div className="text-right text-xs shrink-0">
-                        <p><span className="text-blue-500">{suggestion.protein_g || 0}g</span> P</p>
-                        <p><span className="text-amber-500">{suggestion.carbs_g || 0}g</span> C</p>
-                        <p><span className="text-rose-500">{suggestion.fat_g || 0}g</span> F</p>
-                      </div>
-                    </div>
-                    {hasConflict && suggestion.allergens && (
-                      <p className="text-xs text-warning mt-2">
-                        Contains: {suggestion.allergens.join(', ')}
-                      </p>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          ) : hasSearched && !isSearching ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Search className="w-12 h-12 text-muted-foreground/50 mb-3" />
-              <p className="text-muted-foreground">No foods found</p>
-              <p className="text-sm text-muted-foreground/70">
-                Try a different search term
-              </p>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Search className="w-12 h-12 text-muted-foreground/50 mb-3" />
-              <p className="text-muted-foreground">Search for foods</p>
-              <p className="text-sm text-muted-foreground/70">
-                Type at least 2 characters to search
-              </p>
-            </div>
-          )}
-        </ScrollArea>
+                      {hasConflict && suggestion.allergens && (
+                        <p className="text-xs text-warning mt-2">
+                          Contains: {suggestion.allergens.join(', ')}
+                        </p>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : hasSearched && !isSearching ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Search className="w-12 h-12 text-muted-foreground/50 mb-3" />
+                <p className="text-muted-foreground">No foods found</p>
+                <p className="text-sm text-muted-foreground/70">
+                  Try a different search term
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Search className="w-12 h-12 text-muted-foreground/50 mb-3" />
+                <p className="text-muted-foreground">Search for foods</p>
+                <p className="text-sm text-muted-foreground/70">
+                  Type at least 2 characters to search
+                </p>
+              </div>
+            )}
+          </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );
