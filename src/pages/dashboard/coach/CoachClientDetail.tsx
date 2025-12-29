@@ -730,10 +730,31 @@ const CoachClientDetail = () => {
           )}
         </TabsContent>
 
+        {/* Data Tab - Meal Logs, Training Logs, Wearable Data */}
+        <TabsContent value="data" className="space-y-6">
+          <div className="grid grid-cols-1 gap-6">
+            <ClientMealLogs clientId={id!} clientName={fullName} />
+            <ClientTrainingLogs clientId={id!} clientName={fullName} />
+            <ClientWearableData clientId={id!} clientName={fullName} />
+          </div>
+        </TabsContent>
+
+        {/* Photos Tab */}
+        <TabsContent value="photos" className="space-y-6">
+          <ClientProgressPhotos clientId={id!} clientName={fullName} />
+        </TabsContent>
+
         {/* Habits Tab */}
         <TabsContent value="habits" className="space-y-6">
           {coachProfile?.id && id && (
             <HabitManager coachId={coachProfile.id} clientId={id} />
+          )}
+        </TabsContent>
+
+        {/* Reports Tab */}
+        <TabsContent value="reports" className="space-y-6">
+          {coachProfile?.id && id && (
+            <ClientReportsTab clientId={id} clientName={fullName} coachId={coachProfile.id} />
           )}
         </TabsContent>
 

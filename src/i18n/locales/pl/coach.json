@@ -153,8 +153,11 @@
       "overview": "Przegląd",
       "sessions": "Sesje",
       "progress": "Postępy",
+      "data": "Dane",
+      "photos": "Zdjęcia",
       "plans": "Plany",
       "habits": "Nawyki",
+      "reports": "Raporty",
       "notes": "Notatki"
     },
     "stats": {
@@ -1517,5 +1520,74 @@
     "sessions": "Sesje",
     "progress": "Postęp",
     "package": "Pakiet"
+  },
+  "clientReports": {
+    "title": "Raporty analizy AI",
+    "generateReport": "Generuj raport",
+    "regenerate": "Regeneruj",
+    "noReports": "Brak raportów",
+    "noReportsDesc": "Wygeneruj raport analizy AI, aby uzyskać wgląd w postępy klienta, trendy i rekomendacje.",
+    "generating": "Analizowanie danych klienta...",
+    "reportSaved": "Raport zapisany",
+    "reportDeleted": "Raport usunięty",
+    "reportSent": "Raport wysłany do klienta",
+    "deleteConfirm": "Usunąć ten raport?",
+    "deleteConfirmDesc": "Tej czynności nie można cofnąć.",
+    "sendToClient": "Wyślij do klienta",
+    "viewReport": "Zobacz raport",
+    "editNotes": "Edytuj notatki",
+    "coachNotes": "Notatki trenera",
+    "coachNotesPlaceholder": "Dodaj swoje notatki i rekomendacje dla klienta...",
+    "save": "Zapisz",
+    "send": "Wyślij",
+    "delete": "Usuń",
+    "cancel": "Anuluj",
+    "status": {
+      "draft": "Szkic",
+      "finalized": "Sfinalizowany",
+      "sent": "Wysłany"
+    },
+    "sections": {
+      "summary": "Podsumowanie",
+      "trends": "Trendy i wzorce",
+      "adherence": "Wyniki adherencji",
+      "risks": "Potencjalne obawy",
+      "recommendations": "Rekomendacje",
+      "nextSteps": "Sugerowane następne kroki",
+      "photoComparison": "Porównanie zdjęć",
+      "measurementsComparison": "Porównanie pomiarów",
+      "wearableData": "Podsumowanie danych z urządzeń"
+    },
+    "aiDisclaimer": "Analiza AI jest pomocnym narzędziem, ale nie powinna zastępować profesjonalnej oceny. AI może czasami być niedokładna lub pomijać ważny kontekst. Zawsze weryfikuj wnioski przed podjęciem rekomendacji.",
+    "aiDisclaimerShort": "Wnioski generowane przez AI - zweryfikuj przed działaniem",
+    "acknowledgeDisclaimer": "Rozumiem, że to jest generowane przez AI i zweryfikuję wnioski",
+    "beforePhoto": "Przed",
+    "afterPhoto": "Po",
+    "noPhotos": "Brak zdjęć postępów do porównania",
+    "noMeasurements": "Brak danych pomiarowych do porównania",
+    "trend": {
+      "improving": "Poprawa",
+      "stable": "Stabilny",
+      "declining": "Spadek",
+      "insufficient_data": "Niewystarczające dane"
+    },
+    "riskLevel": {
+      "low": "Niski",
+      "medium": "Średni",
+      "high": "Wysoki"
+    }
+  },
+  "clientData": {
+    "mealLogs": "Dziennik posiłków",
+    "trainingLogs": "Dziennik treningów",
+    "wearableData": "Dane z urządzeń",
+    "noMealLogs": "Brak zapisanych posiłków",
+    "noTrainingLogs": "Brak zapisanych treningów",
+    "noWearableData": "Brak zsynchronizowanych danych z urządzeń",
+    "steps": "Kroki",
+    "heartRate": "Tętno",
+    "caloriesBurned": "Spalone kalorie",
+    "sleep": "Sen",
+    "activeMinutes": "Aktywne minuty"
   }
 }
