@@ -486,7 +486,8 @@
       "integrations": "Integrations",
       "favourites": "Favourites",
       "settings": "Settings",
-      "foodDiary": "Food Diary"
+      "foodDiary": "Food Diary",
+      "trainingLogs": "Training Logs"
     },
     "bottomNav": {
       "home": "Home",

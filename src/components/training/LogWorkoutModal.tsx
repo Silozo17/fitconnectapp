@@ -154,8 +154,8 @@ export const LogWorkoutModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0">
-        <DialogHeader className="p-6 pb-0">
+      <DialogContent className="w-full max-w-2xl max-h-[90vh] p-0 gap-0 mx-2 sm:mx-0">
+        <DialogHeader className="p-4 sm:p-6 pb-0">
           <DialogTitle>
             {editingLog ? "Edit Workout" : "Log Workout"}
           </DialogTitle>
@@ -166,10 +166,10 @@ export const LogWorkoutModal = ({
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[calc(90vh-200px)] px-6">
-          <div className="space-y-6 py-4">
+        <ScrollArea className="max-h-[calc(90vh-180px)] px-4 sm:px-6">
+          <div className="space-y-4 py-4">
             {/* Workout Details */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div className="col-span-2">
                 <Label htmlFor="workoutName">Workout Name *</Label>
                 <Input
@@ -267,7 +267,7 @@ export const LogWorkoutModal = ({
             </div>
 
             {/* Overall workout details */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <Label htmlFor="rpe">Overall RPE (1-10)</Label>
                 <Select
@@ -319,7 +319,7 @@ export const LogWorkoutModal = ({
           </div>
         </ScrollArea>
 
-        <div className="flex justify-end gap-2 p-6 pt-4 border-t">
+        <div className="flex justify-end gap-2 p-4 sm:p-6 pt-4 border-t">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>

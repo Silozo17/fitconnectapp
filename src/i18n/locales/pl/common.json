@@ -485,7 +485,8 @@
       "integrations": "Integracje",
       "favourites": "Ulubione",
       "settings": "Ustawienia",
-      "foodDiary": "Dziennik żywienia"
+      "foodDiary": "Dziennik żywienia",
+      "trainingLogs": "Dziennik treningów"
     },
     "bottomNav": {
       "home": "Start",
