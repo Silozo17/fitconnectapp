@@ -54,16 +54,16 @@ export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
           badge.rarity === 'legendary' && earned && 'ring-2 ring-yellow-400/50 shadow-lg shadow-yellow-500/20'
         )}
       >
-        {/* Rarity glow behind entire card - only for earned badges */}
-        {earned && (
+        {/* Rarity glow behind entire card - only for claimed badges */}
+        {earned && isClaimed && (
           <div 
             className="absolute inset-0 pointer-events-none rounded-xl"
             style={{ background: RARITY_GRADIENT[badge.rarity] || RARITY_GRADIENT.common }}
           />
         )}
         
-        {/* Rarity color overlay for earned badges */}
-        {earned && (
+        {/* Rarity color overlay for claimed badges */}
+        {earned && isClaimed && (
           <div 
             className={cn('absolute inset-0 pointer-events-none opacity-30', rarityColors.bg)}
           />
@@ -95,8 +95,8 @@ export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
               </div>
             )}
             
-            {/* Show badge if earned, otherwise show lock icon only */}
-            {earned ? (
+            {/* Show badge only if earned AND claimed, otherwise show lock icon */}
+            {earned && isClaimed ? (
               <>
                 {(() => {
                   const isEmoji = (str: string): boolean => {
@@ -166,8 +166,8 @@ export const BadgeCard = forwardRef<HTMLDivElement, BadgeCardProps>(
                   }}
                   className="w-full mt-3 bg-primary hover:bg-primary/90"
                 >
-                  <Gift className="h-4 w-4 mr-2" />
-                  {t('claim.button', 'Claim Reward')}
+                  <Gift className="h-4 w-4 mr-1" />
+                  {t('claim.button', 'Claim')}
                 </Button>
               )}
               
