@@ -455,46 +455,44 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
 
           {/* Profile Section - Compact single row */}
           <div className="p-2 border-t border-sidebar-border">
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center justify-end gap-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                    onClick={() => {
+                      navigate("/dashboard/profile");
+                      setMobileOpen(false);
+                    }}
+                  >
+                    <User className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t("navigation.myProfile")}</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 text-destructive hover:text-destructive hover:bg-sidebar-accent"
+                    onClick={() => signOut()}
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t("navigation.signOut")}</TooltipContent>
+              </Tooltip>
               <UserAvatar 
                 src={avatarUrl} 
                 avatarSlug={selectedAvatar?.slug}
                 avatarRarity={selectedAvatar?.rarity as Rarity}
                 name={displayName} 
-                className="w-9 h-9" 
+                className="w-9 h-9 ml-1" 
                 showRarityBorder
               />
-              <div className="flex items-center gap-1">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-9 w-9 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
-                      onClick={() => {
-                        navigate("/dashboard/profile");
-                        setMobileOpen(false);
-                      }}
-                    >
-                      <User className="w-4 h-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>{t("navigation.myProfile")}</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-9 w-9 text-destructive hover:text-destructive hover:bg-sidebar-accent"
-                      onClick={() => signOut()}
-                    >
-                      <LogOut className="w-4 h-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>{t("navigation.signOut")}</TooltipContent>
-                </Tooltip>
-              </div>
             </div>
           </div>
         </SheetContent>
