@@ -15,51 +15,58 @@ async function hashToken(token: string): Promise<string> {
   return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-// Parse user agent to get device info
+// Parse user agent to get device info (case-insensitive)
 function parseUserAgent(ua: string): { deviceInfo: string; platform: string } {
   let deviceInfo = "Unknown device";
   let platform = "web";
 
-  // Check for mobile devices first
-  if (/iPhone/.test(ua)) {
+  // Convert to lowercase for case-insensitive matching
+  const uaLower = ua.toLowerCase();
+
+  // Check for Despia native app FIRST (highest priority)
+  const isDespia = uaLower.includes("despia");
+
+  // Check for mobile devices
+  if (uaLower.includes("iphone")) {
     deviceInfo = "iPhone";
     platform = "ios";
-  } else if (/iPad/.test(ua)) {
+  } else if (uaLower.includes("ipad")) {
     deviceInfo = "iPad";
     platform = "ios";
-  } else if (/Android/.test(ua)) {
-    if (/Mobile/.test(ua)) {
+  } else if (uaLower.includes("android")) {
+    if (uaLower.includes("mobile")) {
       deviceInfo = "Android Phone";
     } else {
       deviceInfo = "Android Tablet";
     }
     platform = "android";
-  } else if (/Windows/.test(ua)) {
+  } else if (uaLower.includes("windows")) {
     deviceInfo = "Windows PC";
     platform = "web";
-  } else if (/Macintosh/.test(ua)) {
+  } else if (uaLower.includes("macintosh") || uaLower.includes("mac os")) {
     deviceInfo = "Mac";
     platform = "web";
-  } else if (/Linux/.test(ua)) {
+  } else if (uaLower.includes("linux")) {
     deviceInfo = "Linux PC";
     platform = "web";
   }
 
-  // Add browser info
-  if (/Chrome/.test(ua) && !/Edg/.test(ua)) {
-    deviceInfo += " • Chrome";
-  } else if (/Firefox/.test(ua)) {
-    deviceInfo += " • Firefox";
-  } else if (/Safari/.test(ua) && !/Chrome/.test(ua)) {
-    deviceInfo += " • Safari";
-  } else if (/Edg/.test(ua)) {
-    deviceInfo += " • Edge";
+  // Add browser info ONLY for non-native (web) sessions
+  if (!isDespia) {
+    if (uaLower.includes("chrome") && !uaLower.includes("edg")) {
+      deviceInfo += " • Chrome";
+    } else if (uaLower.includes("firefox")) {
+      deviceInfo += " • Firefox";
+    } else if (uaLower.includes("safari") && !uaLower.includes("chrome")) {
+      deviceInfo += " • Safari";
+    } else if (uaLower.includes("edg")) {
+      deviceInfo += " • Edge";
+    }
   }
 
-  // Check for PWA or native app indicators
-  if (/FitConnect/.test(ua) || /Despia/.test(ua)) {
-    platform = /iPhone|iPad/.test(ua) ? "ios" : /Android/.test(ua) ? "android" : "pwa";
-    deviceInfo = deviceInfo.replace(" • Chrome", "").replace(" • Safari", "") + " • App";
+  // Mark as native FitConnect app if in Despia environment
+  if (isDespia) {
+    deviceInfo += " • FitConnect App";
   }
 
   return { deviceInfo, platform };
