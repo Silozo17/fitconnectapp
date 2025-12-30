@@ -106,8 +106,6 @@ const menuGroupsConfig: MenuGroup[] = [
       { titleKey: "navigation.client.sessions", icon: Calendar, path: "/dashboard/client/sessions" },
       { titleKey: "navigation.client.myPlans", icon: ClipboardList, path: "/dashboard/client/plans", badgeKey: "plans" },
       { titleKey: "navigation.client.myLibrary", icon: BookOpen, path: "/dashboard/client/library" },
-      { titleKey: "navigation.client.foodDiary", icon: Utensils, path: "/dashboard/client/food-diary" },
-      { titleKey: "navigation.client.trainingLogs", icon: Dumbbell, path: "/dashboard/client/training-logs" },
     ],
   },
   {
@@ -118,6 +116,8 @@ const menuGroupsConfig: MenuGroup[] = [
     items: [
       { titleKey: "navigation.client.progress", icon: TrendingUp, path: "/dashboard/client/progress" },
       { titleKey: "navigation.client.habits", icon: Target, path: "/dashboard/client/habits" },
+      { titleKey: "navigation.client.foodDiary", icon: Utensils, path: "/dashboard/client/food-diary" },
+      { titleKey: "navigation.client.trainingLogs", icon: Dumbbell, path: "/dashboard/client/training-logs" },
     ],
   },
   {
