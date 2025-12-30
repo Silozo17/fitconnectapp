@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState, useRef } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { isDespia } from "@/lib/despia";
@@ -14,21 +14,20 @@ export const usePushNotifications = () => {
   const { user } = useAuth();
   const [isRegistered, setIsRegistered] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
-  const hasSetExternalUserId = useRef(false);
 
   /**
    * Set the OneSignal external user ID on app load
    * This connects the logged-in user ID with OneSignal for targeted notifications
+   * Called on every app load to ensure the connection is always fresh
    */
   const setExternalUserId = useCallback(async () => {
-    if (!user || !isDespia() || hasSetExternalUserId.current) {
+    if (!user || !isDespia()) {
       return;
     }
 
     try {
       console.log("[Push] Setting OneSignal external user ID:", user.id);
       await despia(`setonesignalplayerid://?user_id=${user.id}`);
-      hasSetExternalUserId.current = true;
       console.log("[Push] OneSignal external user ID set successfully");
     } catch (error) {
       console.error("[Push] Failed to set OneSignal external user ID:", error);
@@ -107,7 +106,6 @@ export const usePushNotifications = () => {
         .eq("user_id", user.id);
 
       setIsRegistered(false);
-      hasSetExternalUserId.current = false;
     } catch (error) {
       console.error("Failed to unregister push:", error);
     }
@@ -139,13 +137,6 @@ export const usePushNotifications = () => {
       setExternalUserId();
     }
   }, [user, setExternalUserId]);
-
-  // Reset the flag when user logs out
-  useEffect(() => {
-    if (!user) {
-      hasSetExternalUserId.current = false;
-    }
-  }, [user]);
 
   // Auto-register on login when in Despia environment
   useEffect(() => {
