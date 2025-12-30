@@ -3,6 +3,8 @@ import { Progress } from '@/components/ui/progress';
 import { useClientXP, getLevelTitle, calculateLevelFromXP } from '@/hooks/useGamification';
 import { Zap } from 'lucide-react';
 import { ProgressCircle } from '@/components/stats/ProgressCircle';
+import { InfoTooltip } from '@/components/ui/info-tooltip';
+import { getMetricExplanation } from '@/lib/metric-explanations';
 
 interface XPProgressBarProps {
   compact?: boolean;
@@ -79,12 +81,18 @@ export function XPProgressBar({ compact = false, variant = 'linear' }: XPProgres
             <Zap className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <div className="font-bold text-foreground">{t('xp.level')} {level}</div>
+            <div className="flex items-center gap-1.5">
+              <span className="font-bold text-foreground">{t('xp.level')} {level}</span>
+              <InfoTooltip explanation={getMetricExplanation('xpLevel')} side="top" />
+            </div>
             <div className="text-xs text-muted-foreground">{title}</div>
           </div>
         </div>
         <div className="text-right">
-          <div className="text-2xl font-bold text-primary">{totalXP.toLocaleString()}</div>
+          <div className="flex items-center gap-1.5 justify-end">
+            <span className="text-2xl font-bold text-primary">{totalXP.toLocaleString()}</span>
+            <InfoTooltip explanation={getMetricExplanation('totalXP')} side="top" />
+          </div>
           <div className="text-xs text-muted-foreground">{t('xp.totalXp')}</div>
         </div>
       </div>
