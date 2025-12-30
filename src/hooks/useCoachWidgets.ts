@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCoachProfile } from "./useCoachClients";
 import type { WidgetDisplayFormat } from "@/lib/widget-formats";
+import { toast } from "sonner";
 
 export interface CoachWidgetConfig {
   displayFormat?: WidgetDisplayFormat;
@@ -73,13 +74,16 @@ const DEFAULT_WIDGETS: Omit<CoachDashboardWidget, "id" | "coach_id">[] = [
   { widget_type: "engagement_reviews", title: "Your Reviews", position: 7, size: "medium", is_visible: true, config: {} },
 ];
 
+const getDefaultWidgets = (): CoachDashboardWidget[] => 
+  DEFAULT_WIDGETS.map((w, i) => ({ ...w, id: `default-${i}`, coach_id: null }));
+
 export function useCoachWidgets() {
   const { data: coachProfile } = useCoachProfile();
 
   return useQuery({
     queryKey: ["coach-widgets", coachProfile?.id],
     queryFn: async () => {
-      if (!coachProfile?.id) return DEFAULT_WIDGETS.map((w, i) => ({ ...w, id: `default-${i}`, coach_id: null }));
+      if (!coachProfile?.id) return getDefaultWidgets();
 
       const { data, error } = await supabase
         .from("coach_dashboard_widgets")
@@ -91,13 +95,13 @@ export function useCoachWidgets() {
 
       // If no custom widgets exist, return defaults
       if (!data || data.length === 0) {
-        return DEFAULT_WIDGETS.map((w, i) => ({ ...w, id: `default-${i}`, coach_id: null })) as CoachDashboardWidget[];
+        return getDefaultWidgets();
       }
 
       return data as CoachDashboardWidget[];
     },
     enabled: !!coachProfile?.id,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 30, // 30 seconds for more responsive updates
   });
 }
 
@@ -138,8 +142,35 @@ export function useUpdateCoachWidget() {
       if (error) throw error;
       return data;
     },
+    onMutate: async ({ widgetId, updates }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["coach-widgets", coachProfile?.id] });
+      
+      // Snapshot current state
+      const previousWidgets = queryClient.getQueryData<CoachDashboardWidget[]>(["coach-widgets", coachProfile?.id]);
+      
+      // Optimistically update cache
+      queryClient.setQueryData<CoachDashboardWidget[]>(["coach-widgets", coachProfile?.id], (old) => {
+        if (!old) return old;
+        return old.map(widget => 
+          widget.id === widgetId ? { ...widget, ...updates } : widget
+        );
+      });
+      
+      return { previousWidgets };
+    },
+    onError: (err, variables, context) => {
+      // Rollback on error
+      if (context?.previousWidgets) {
+        queryClient.setQueryData(["coach-widgets", coachProfile?.id], context.previousWidgets);
+      }
+      toast.error("Failed to update widget");
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["coach-widgets"] });
+      queryClient.invalidateQueries({ 
+        queryKey: ["coach-widgets"],
+        refetchType: 'all'
+      });
     },
   });
 }
@@ -161,8 +192,35 @@ export function useAddCoachWidget() {
       if (error) throw error;
       return data;
     },
+    onMutate: async (newWidget) => {
+      await queryClient.cancelQueries({ queryKey: ["coach-widgets", coachProfile?.id] });
+      
+      const previousWidgets = queryClient.getQueryData<CoachDashboardWidget[]>(["coach-widgets", coachProfile?.id]);
+      
+      // Optimistically add the widget with a temp ID
+      queryClient.setQueryData<CoachDashboardWidget[]>(["coach-widgets", coachProfile?.id], (old) => {
+        if (!old) return old;
+        const tempWidget: CoachDashboardWidget = {
+          ...newWidget,
+          id: `temp-${Date.now()}`,
+          coach_id: coachProfile?.id || null,
+        };
+        return [...old, tempWidget];
+      });
+      
+      return { previousWidgets };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousWidgets) {
+        queryClient.setQueryData(["coach-widgets", coachProfile?.id], context.previousWidgets);
+      }
+      toast.error("Failed to add widget");
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["coach-widgets"] });
+      queryClient.invalidateQueries({ 
+        queryKey: ["coach-widgets"],
+        refetchType: 'all'
+      });
     },
   });
 }
@@ -183,8 +241,27 @@ export function useResetCoachWidgets() {
 
       if (error) throw error;
     },
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["coach-widgets", coachProfile?.id] });
+      
+      const previousWidgets = queryClient.getQueryData<CoachDashboardWidget[]>(["coach-widgets", coachProfile?.id]);
+      
+      // Optimistically reset to defaults
+      queryClient.setQueryData<CoachDashboardWidget[]>(["coach-widgets", coachProfile?.id], getDefaultWidgets());
+      
+      return { previousWidgets };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousWidgets) {
+        queryClient.setQueryData(["coach-widgets", coachProfile?.id], context.previousWidgets);
+      }
+      toast.error("Failed to reset widgets");
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["coach-widgets"] });
+      queryClient.invalidateQueries({ 
+        queryKey: ["coach-widgets"],
+        refetchType: 'all'
+      });
     },
   });
 }
@@ -221,8 +298,33 @@ export function useReorderCoachWidgets() {
 
       await Promise.all(updates);
     },
+    onMutate: async (newOrder) => {
+      await queryClient.cancelQueries({ queryKey: ["coach-widgets", coachProfile?.id] });
+      
+      const previousWidgets = queryClient.getQueryData<CoachDashboardWidget[]>(["coach-widgets", coachProfile?.id]);
+      
+      // Optimistically update positions
+      queryClient.setQueryData<CoachDashboardWidget[]>(["coach-widgets", coachProfile?.id], (old) => {
+        if (!old) return old;
+        return old.map(widget => {
+          const newPos = newOrder.find(o => o.id === widget.id);
+          return newPos ? { ...widget, position: newPos.position } : widget;
+        }).sort((a, b) => a.position - b.position);
+      });
+      
+      return { previousWidgets };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousWidgets) {
+        queryClient.setQueryData(["coach-widgets", coachProfile?.id], context.previousWidgets);
+      }
+      toast.error("Failed to reorder widgets");
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["coach-widgets"] });
+      queryClient.invalidateQueries({ 
+        queryKey: ["coach-widgets"],
+        refetchType: 'all'
+      });
     },
   });
 }
