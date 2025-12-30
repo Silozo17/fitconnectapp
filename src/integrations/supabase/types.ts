@@ -6182,6 +6182,34 @@ export type Database = {
         Args: { client_id_param: string }
         Returns: number
       }
+      get_leaderboard_locations: {
+        Args: { p_location_type: string }
+        Returns: {
+          location_value: string
+          user_count: number
+        }[]
+      }
+      get_public_leaderboard: {
+        Args: {
+          p_limit?: number
+          p_location_type?: string
+          p_location_value?: string
+          p_offset?: number
+        }
+        Returns: {
+          city: string
+          country: string
+          county: string
+          display_name: string
+          level: number
+          rank: number
+          total_xp: number
+        }[]
+      }
+      get_public_leaderboard_count: {
+        Args: { p_location_type?: string; p_location_value?: string }
+        Returns: number
+      }
       get_ranked_coaches: {
         Args: {
           p_coach_types?: string[]
