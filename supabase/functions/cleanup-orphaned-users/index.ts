@@ -75,6 +75,7 @@ Deno.serve(async (req) => {
         console.log(`Cleaning up orphaned user: ${userId}`);
         
         // Delete from ALL user-linked tables to ensure complete cleanup
+        await supabaseAdmin.from("email_logs").delete().eq("user_id", userId);
         await supabaseAdmin.from("notifications").delete().eq("user_id", userId);
         await supabaseAdmin.from("notification_preferences").delete().eq("user_id", userId);
         await supabaseAdmin.from("email_preferences").delete().eq("user_id", userId);

@@ -64,22 +64,24 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Check if user already exists in auth.users
-    const { data: existingUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-    if (!listError && existingUsers?.users) {
-      const existingUser = existingUsers.users.find(
-        u => u.email?.toLowerCase() === email.toLowerCase()
+    // Check if user already exists in auth.users using efficient database function
+    const { data: emailExists, error: checkError } = await supabaseAdmin.rpc('check_email_exists', {
+      email_to_check: email
+    });
+    
+    if (checkError) {
+      console.error(`[send-otp-email] Error checking email existence:`, checkError);
+    }
+    
+    if (emailExists) {
+      console.log(`[send-otp-email] Email already registered: ${email}`);
+      return new Response(
+        JSON.stringify({ 
+          error: "email_already_registered",
+          message: "This email is already registered" 
+        }),
+        { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
-      if (existingUser) {
-        console.log(`[send-otp-email] Email already registered: ${email}`);
-        return new Response(
-          JSON.stringify({ 
-            error: "email_already_registered",
-            message: "This email is already registered" 
-          }),
-          { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
     }
 
     // Generate OTP code
