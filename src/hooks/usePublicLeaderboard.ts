@@ -22,14 +22,20 @@ interface LocationOption {
   count: number;
 }
 
-// Type for the GDPR-safe public leaderboard view
-interface PublicLeaderboardProfile {
-  id: string;
-  leaderboard_display_name: string;
+// RPC response types
+interface LeaderboardRpcRow {
+  rank: number;
+  display_name: string;
   city: string | null;
   county: string | null;
   country: string | null;
-  selected_avatar_id: string | null;
+  level: number;
+  total_xp: number;
+}
+
+interface LocationRpcRow {
+  location_value: string;
+  user_count: number;
 }
 
 const fetchLeaderboardData = async (
@@ -38,87 +44,68 @@ const fetchLeaderboardData = async (
   limit: number = 10,
   offset: number = 0
 ): Promise<LeaderboardResult> => {
-  // Query the GDPR-safe public view instead of the base table
-  // This view only exposes safe columns (no health data, no full names)
-  let countQuery = supabase
-    .from('public_leaderboard_profiles')
-    .select('id', { count: 'exact', head: true });
-
-  if (locationType !== 'global' && locationValue) {
-    countQuery = countQuery.eq(locationType, locationValue);
-  }
-
-  const { count } = await countQuery;
-
-  // Get profile data from the GDPR-safe view
-  let profilesQuery = supabase
-    .from('public_leaderboard_profiles')
-    .select('id, leaderboard_display_name, city, county, country');
-
-  if (locationType !== 'global' && locationValue) {
-    profilesQuery = profilesQuery.eq(locationType, locationValue);
-  }
-
-  const { data: profiles, error: profilesError } = await profilesQuery;
-
-  if (profilesError || !profiles?.length) {
-    return { entries: [], totalParticipants: count || 0 };
-  }
-
-  const typedProfiles = profiles as unknown as PublicLeaderboardProfile[];
-  const profileIds = typedProfiles.map(p => p.id);
+  // Use SECURITY DEFINER RPC functions that bypass RLS
+  // These functions only return GDPR-safe data (no user IDs, emails, etc.)
   
-  const { data: xpData, error: xpError } = await supabase
-    .from('client_xp')
-    .select('client_id, total_xp, current_level')
-    .in('client_id', profileIds)
-    .order('total_xp', { ascending: false })
-    .range(offset, offset + limit - 1);
-
-  if (xpError || !xpData?.length) {
-    return { entries: [], totalParticipants: count || 0 };
-  }
-
-  const profileMap = new Map(typedProfiles.map(p => [p.id, p]));
-
-  const entries: PublicLeaderboardEntry[] = xpData.map((xp, index) => {
-    const profile = profileMap.get(xp.client_id);
-    return {
-      rank: offset + index + 1,
-      displayName: profile?.leaderboard_display_name || 'Anonymous',
-      city: profile?.city || null,
-      county: profile?.county || null,
-      country: profile?.country || null,
-      level: xp.current_level,
-      totalXp: xp.total_xp,
-    };
+  const { data: countData, error: countError } = await supabase.rpc('get_public_leaderboard_count', {
+    p_location_type: locationType,
+    p_location_value: locationValue || null
   });
 
-  return { entries, totalParticipants: count || 0 };
+  if (countError) {
+    console.error('Error fetching leaderboard count:', countError);
+  }
+
+  const { data, error } = await supabase.rpc('get_public_leaderboard', {
+    p_location_type: locationType,
+    p_location_value: locationValue || null,
+    p_limit: limit,
+    p_offset: offset
+  });
+
+  if (error) {
+    console.error('Error fetching leaderboard:', error);
+    return { entries: [], totalParticipants: countData || 0 };
+  }
+
+  if (!data || !Array.isArray(data)) {
+    return { entries: [], totalParticipants: countData || 0 };
+  }
+
+  const entries: PublicLeaderboardEntry[] = (data as LeaderboardRpcRow[]).map((row) => ({
+    rank: row.rank,
+    displayName: row.display_name || 'Anonymous',
+    city: row.city,
+    county: row.county,
+    country: row.country,
+    level: row.level,
+    totalXp: row.total_xp,
+  }));
+
+  return { entries, totalParticipants: countData || 0 };
 };
 
 const fetchLocationOptions = async (
   locationType: 'city' | 'county' | 'country'
 ): Promise<LocationOption[]> => {
-  // Query the GDPR-safe public view for location options
-  const { data, error } = await supabase
-    .from('public_leaderboard_profiles')
-    .select(locationType);
-
-  if (error || !data) return [];
-
-  // Count occurrences
-  const counts = new Map<string, number>();
-  (data as unknown as Record<string, string>[]).forEach((row) => {
-    const value = row[locationType] as string;
-    if (value) {
-      counts.set(value, (counts.get(value) || 0) + 1);
-    }
+  const { data, error } = await supabase.rpc('get_leaderboard_locations', {
+    p_location_type: locationType
   });
 
-  return Array.from(counts.entries())
-    .map(([value, count]) => ({ value, label: value, count }))
-    .sort((a, b) => b.count - a.count);
+  if (error) {
+    console.error('Error fetching location options:', error);
+    return [];
+  }
+
+  if (!data || !Array.isArray(data)) {
+    return [];
+  }
+
+  return (data as LocationRpcRow[]).map((row) => ({
+    value: row.location_value,
+    label: row.location_value,
+    count: row.user_count
+  }));
 };
 
 export function useGlobalLeaderboard(limit: number = 10) {

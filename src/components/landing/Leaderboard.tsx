@@ -90,9 +90,14 @@ function LeaderboardColumn({
             <LeaderboardEntry key={`${entry.displayName}-${index}`} entry={entry} index={index} />
           ))
         ) : (
-          <p className="text-center text-muted-foreground py-8">
-            {t('leaderboard.noParticipants')}
-          </p>
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">
+              {t('leaderboard.noParticipants')}
+            </p>
+            <p className="text-xs text-muted-foreground/70 mt-1">
+              {t('leaderboard.beFirst', 'Be the first to join!')}
+            </p>
+          </div>
         )}
       </div>
 
