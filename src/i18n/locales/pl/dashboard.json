@@ -32,6 +32,67 @@
       "todaysHealth": "Dzisiejsze Zdrowie",
       "friendRequests": "Zaproszenia od Znajomych",
       "recentActivity": "Ostatnia Aktywność"
+    },
+    "dailyTip": {
+      "label": "Porada Dnia",
+      "whyMatters": "Dlaczego to ważne"
+    },
+    "greeting": {
+      "morning": "Dzień dobry",
+      "afternoon": "Dzień dobry",
+      "evening": "Dobry wieczór"
+    },
+    "weeklySummary": {
+      "title": "Podsumowanie Tygodnia",
+      "habits": "Nawyki",
+      "avgSteps": "Śr. Kroki",
+      "workouts": "Treningi",
+      "showMore": "Zobacz szczegóły i spostrzeżenia",
+      "showLess": "Pokaż mniej",
+      "highlights": "Wyróżnienia",
+      "focusAreas": "Obszary do poprawy"
+    },
+    "monthlyReview": {
+      "title": "Przegląd Miesięczny",
+      "aiSummary": "Podsumowanie AI",
+      "workoutsCompleted": "Treningi",
+      "habitsCompleted": "Nawyki",
+      "stepsTotal": "Łączne Kroki",
+      "challengesWon": "Wyzwania",
+      "refresh": "Odśwież"
+    },
+    "readiness": {
+      "title": "Gotowość Dzienna",
+      "score": "Wynik Gotowości",
+      "optimal": "Optymalny",
+      "good": "Dobry",
+      "moderate": "Umiarkowany",
+      "low": "Niski",
+      "sleepQuality": "Jakość Snu",
+      "recoveryStatus": "Status Regeneracji",
+      "recommendation": "Zalecenie"
+    },
+    "wearableTrends": {
+      "title": "Trendy Tygodniowe",
+      "steps": "Kroki",
+      "activeMinutes": "Aktywne Minuty",
+      "sleep": "Sen",
+      "heartRate": "Tętno",
+      "up": "wzrost",
+      "down": "spadek",
+      "noChange": "bez zmian",
+      "vsLastWeek": "vs zeszły tydzień"
+    },
+    "goalSuggestions": {
+      "title": "Sugestia Celu",
+      "weightPlateau": "Wykryto plateau wagi",
+      "weightPlateauDesc": "Rozważ dostosowanie kaloryczności lub intensywności treningu",
+      "rapidLoss": "Szybka zmiana wagi",
+      "rapidLossDesc": "Twoja waga zmienia się szybko. Skonsultuj się z trenerem",
+      "habitStreak": "Świetna konsekwencja nawyków!",
+      "habitStreakDesc": "Możesz być gotowy na bardziej wymagające nawyki",
+      "dismiss": "Odrzuć",
+      "takeAction": "Podejmij działanie"
     }
   },
   "coach": {

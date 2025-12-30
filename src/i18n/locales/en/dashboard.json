@@ -41,6 +41,58 @@
       "morning": "Good morning",
       "afternoon": "Good afternoon",
       "evening": "Good evening"
+    },
+    "weeklySummary": {
+      "title": "Weekly Summary",
+      "habits": "Habits",
+      "avgSteps": "Avg Steps",
+      "workouts": "Workouts",
+      "showMore": "View highlights & insights",
+      "showLess": "Show less",
+      "highlights": "Highlights",
+      "focusAreas": "Focus Areas"
+    },
+    "monthlyReview": {
+      "title": "Monthly Review",
+      "aiSummary": "AI Summary",
+      "workoutsCompleted": "Workouts",
+      "habitsCompleted": "Habits",
+      "stepsTotal": "Total Steps",
+      "challengesWon": "Challenges",
+      "refresh": "Refresh"
+    },
+    "readiness": {
+      "title": "Daily Readiness",
+      "score": "Readiness Score",
+      "optimal": "Optimal",
+      "good": "Good",
+      "moderate": "Moderate",
+      "low": "Low",
+      "sleepQuality": "Sleep Quality",
+      "recoveryStatus": "Recovery Status",
+      "recommendation": "Recommendation"
+    },
+    "wearableTrends": {
+      "title": "Weekly Trends",
+      "steps": "Steps",
+      "activeMinutes": "Active Minutes",
+      "sleep": "Sleep",
+      "heartRate": "Heart Rate",
+      "up": "up",
+      "down": "down",
+      "noChange": "no change",
+      "vsLastWeek": "vs last week"
+    },
+    "goalSuggestions": {
+      "title": "Goal Suggestion",
+      "weightPlateau": "Weight plateau detected",
+      "weightPlateauDesc": "Consider adjusting your calorie intake or workout intensity",
+      "rapidLoss": "Rapid weight change",
+      "rapidLossDesc": "Your weight is changing quickly. Consider consulting your coach",
+      "habitStreak": "Great habit consistency!",
+      "habitStreakDesc": "You might be ready for more challenging habits",
+      "dismiss": "Dismiss",
+      "takeAction": "Take Action"
     }
   },
   "coach": {
