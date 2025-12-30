@@ -51,6 +51,12 @@ export const TwoFactorGate = ({ children }: TwoFactorGateProps) => {
         }
       }
 
+      // Check if user just signed up (created within last 5 minutes)
+      // If so, auto-verify 2FA since they just completed email OTP during signup
+      const userCreatedAt = new Date(user.created_at).getTime();
+      const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
+      const isRecentSignup = userCreatedAt > fiveMinutesAgo;
+
       // Check database for 2FA settings
       const { data: settings } = await supabase
         .from("user_security_settings")
@@ -60,14 +66,26 @@ export const TwoFactorGate = ({ children }: TwoFactorGateProps) => {
 
       if (!settings) {
         // No settings exist - create default (2FA enabled for privileged users)
+        // If recent signup, also mark as verified to skip duplicate OTP
         await supabase
           .from("user_security_settings")
           .insert({
             user_id: user.id,
             two_factor_enabled: true,
             two_factor_method: "email",
+            two_factor_verified_at: isRecentSignup ? new Date().toISOString() : null,
           });
-        setRequires2FA(true);
+        
+        if (isRecentSignup) {
+          // Auto-verify for fresh signups
+          sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
+            timestamp: Date.now(),
+            userId: user.id,
+          }));
+          setIsVerified(true);
+        } else {
+          setRequires2FA(true);
+        }
       } else if (settings.two_factor_enabled) {
         // Check if recently verified in database
         if (settings.two_factor_verified_at) {
@@ -80,9 +98,32 @@ export const TwoFactorGate = ({ children }: TwoFactorGateProps) => {
               timestamp: verifiedAt,
               userId: user.id,
             }));
+          } else if (isRecentSignup) {
+            // User just signed up but somehow settings already exist without verification
+            // Auto-verify to prevent duplicate OTP
+            await supabase
+              .from("user_security_settings")
+              .update({ two_factor_verified_at: new Date().toISOString() })
+              .eq("user_id", user.id);
+            sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
+              timestamp: Date.now(),
+              userId: user.id,
+            }));
+            setIsVerified(true);
           } else {
             setRequires2FA(true);
           }
+        } else if (isRecentSignup) {
+          // Fresh signup with 2FA enabled but not yet verified - auto-verify
+          await supabase
+            .from("user_security_settings")
+            .update({ two_factor_verified_at: new Date().toISOString() })
+            .eq("user_id", user.id);
+          sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
+            timestamp: Date.now(),
+            userId: user.id,
+          }));
+          setIsVerified(true);
         } else {
           setRequires2FA(true);
         }
