@@ -23,9 +23,9 @@ export const COACH_FEATURE_FLAGS = {
   GOAL_ADHERENCE_TRACKER: true,
   CLIENT_OUTCOMES_SHOWCASE: true,
   
-  // Phase 3 Features (disabled until ready)
+  // Phase 3 Features
   AI_PLAN_RECOMMENDATIONS: false,
-  AI_CHECKIN_COMPOSER: false,
+  AI_CHECKIN_COMPOSER: true, // Enabled
   AUTO_PLAN_PROGRESSION: false,
   SCHEDULED_CHECKIN_AUTOMATION: false,
   CASE_STUDY_GENERATOR: false,
