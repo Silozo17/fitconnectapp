@@ -39,7 +39,7 @@ export interface OutcomeShowcase {
 export interface EligibleClient {
   clientId: string;
   clientName: string;
-  consent: ClientConsent;
+  consent: ClientConsent | null;
   hasProgress: boolean;
   progressStats: {
     weightChange?: number;
@@ -91,33 +91,46 @@ export function useEligibleClients() {
     queryFn: async (): Promise<EligibleClient[]> => {
       if (!coachId) throw new Error("No coach ID");
 
-      // Get all active consents
-      const { data: consents, error: consentsError } = await supabase
-        .from("client_outcome_consents")
-        .select(
-          `
-          *,
-          client_profile:client_profiles!client_outcome_consents_client_id_fkey(
+      // Get all active clients for this coach
+      const { data: clients, error: clientsError } = await supabase
+        .from("coach_clients")
+        .select(`
+          client_id,
+          client_profile:client_profiles!coach_clients_client_id_fkey(
             id, first_name, last_name
           )
-        `
-        )
+        `)
         .eq("coach_id", coachId)
-        .eq("is_active", true);
+        .eq("status", "active");
 
-      if (consentsError) throw consentsError;
+      if (clientsError) throw clientsError;
+
+      // Get existing consents for these clients
+      const clientIds = (clients || []).map(c => c.client_id);
+      const { data: consents } = await supabase
+        .from("client_outcome_consents")
+        .select("*")
+        .eq("coach_id", coachId)
+        .eq("is_active", true)
+        .in("client_id", clientIds);
+
+      const consentMap = new Map(
+        (consents || []).map(c => [c.client_id, c])
+      );
 
       const eligible: EligibleClient[] = [];
 
-      for (const consent of consents || []) {
-        const profile = consent.client_profile as any;
+      for (const client of clients || []) {
+        const profile = client.client_profile as any;
         if (!profile) continue;
+
+        const existingConsent = consentMap.get(client.client_id);
 
         // Get progress data for this client
         const { data: progressData } = await supabase
           .from("client_progress")
           .select("recorded_at, weight_kg")
-          .eq("client_id", consent.client_id)
+          .eq("client_id", client.client_id)
           .order("recorded_at", { ascending: true });
 
         let progressStats = null;
@@ -134,19 +147,17 @@ export function useEligibleClients() {
         }
 
         eligible.push({
-          clientId: consent.client_id,
-          clientName: `${profile.first_name || ""} ${
-            profile.last_name || ""
-          }`.trim(),
-          consent: {
-            id: consent.id,
-            clientId: consent.client_id,
-            coachId: consent.coach_id,
-            consentType: consent.consent_type as ConsentType,
-            grantedAt: new Date(consent.granted_at),
-            revokedAt: consent.revoked_at ? new Date(consent.revoked_at) : null,
-            isActive: consent.is_active || false,
-          },
+          clientId: client.client_id,
+          clientName: `${profile.first_name || ""} ${profile.last_name || ""}`.trim(),
+          consent: existingConsent ? {
+            id: existingConsent.id,
+            clientId: existingConsent.client_id,
+            coachId: existingConsent.coach_id,
+            consentType: existingConsent.consent_type as ConsentType,
+            grantedAt: new Date(existingConsent.granted_at),
+            revokedAt: existingConsent.revoked_at ? new Date(existingConsent.revoked_at) : null,
+            isActive: existingConsent.is_active || false,
+          } : null,
           hasProgress: progressStats !== null,
           progressStats,
         });
@@ -292,7 +303,7 @@ export function useCreateShowcase() {
   return useMutation({
     mutationFn: async (data: {
       clientId: string;
-      consentId: string;
+      consentId?: string | null;
       title?: string;
       description?: string;
       beforePhotoUrl?: string;
@@ -302,6 +313,25 @@ export function useCreateShowcase() {
       displayName?: string;
     }) => {
       if (!coachId) throw new Error("No coach ID");
+
+      let consentId = data.consentId;
+
+      // If no consent exists, create one automatically
+      if (!consentId) {
+        const { data: newConsent, error: consentError } = await supabase
+          .from("client_outcome_consents")
+          .insert({
+            client_id: data.clientId,
+            coach_id: coachId,
+            consent_type: "stats_only",
+            is_active: true,
+          })
+          .select()
+          .single();
+
+        if (consentError) throw consentError;
+        consentId = newConsent.id;
+      }
 
       // Get max display order
       const { data: existing } = await supabase
@@ -316,7 +346,7 @@ export function useCreateShowcase() {
       const { error } = await supabase.from("coach_outcome_showcases").insert({
         coach_id: coachId,
         client_id: data.clientId,
-        consent_id: data.consentId,
+        consent_id: consentId,
         title: data.title,
         description: data.description,
         before_photo_url: data.beforePhotoUrl,
@@ -325,12 +355,14 @@ export function useCreateShowcase() {
         is_anonymized: data.isAnonymized || false,
         display_name: data.displayName,
         display_order: nextOrder,
+        is_published: false, // Start unpublished until client confirms consent
       });
 
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["showcase-items"] });
+      queryClient.invalidateQueries({ queryKey: ["eligible-showcase-clients"] });
       toast.success("Showcase created");
     },
     onError: () => {

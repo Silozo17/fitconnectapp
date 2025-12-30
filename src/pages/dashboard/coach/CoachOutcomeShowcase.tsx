@@ -104,7 +104,7 @@ export default function CoachOutcomeShowcase() {
 
     createShowcase.mutate({
       clientId: client.clientId,
-      consentId: client.consent.id,
+      consentId: client.consent?.id,
       displayName: client.clientName.split(" ")[0],
       stats: client.progressStats ? {
         weightChange: client.progressStats.weightChange,
@@ -401,21 +401,21 @@ export default function CoachOutcomeShowcase() {
                         <div className="flex items-center gap-2">
                           <Users className="w-4 h-4" />
                           {client.clientName}
-                          <Badge variant="secondary" className="text-xs ml-2">
-                            {t("showcase.hasConsent", "Consent given")}
-                          </Badge>
+                          {client.consent ? (
+                            <Badge variant="secondary" className="text-xs ml-2">
+                              {t("showcase.hasConsent", "Consent given")}
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-xs ml-2">
+                              {t("showcase.consentPending", "Consent pending")}
+                            </Badge>
+                          )}
                         </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-
-              {eligibleClients.length === 0 && (
-                <div className="text-center py-4 text-muted-foreground text-sm">
-                  {t("showcase.noEligible", "No clients with consent available. Request consent from clients first.")}
-                </div>
-              )}
             </div>
 
             <DialogFooter>
