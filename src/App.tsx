@@ -22,6 +22,7 @@ import { InstallBanner } from "./components/pwa/InstallBanner";
 import { CookieConsentBanner } from "./components/shared/CookieConsentBanner";
 import { ErrorBoundary } from "./components/shared/ErrorBoundary";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { SessionActivityTracker } from "@/components/auth/SessionActivityTracker";
 
 import PageLoadingSpinner from "@/components/shared/PageLoadingSpinner";
 
@@ -217,6 +218,7 @@ const App = () => (
               <CookieConsentBanner />
               <CountryProvider>
                 <AuthProvider>
+                  <SessionActivityTracker />
                   <AnimationSettingsProvider>
                     <CelebrationProvider>
                       <CelebrationListeners />

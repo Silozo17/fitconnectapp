@@ -1,6 +1,7 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
+import { TwoFactorGate } from "./TwoFactorGate";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -26,7 +27,8 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
 
   // Admin can access all routes
   if (allRoles.includes("admin")) {
-    return <>{children}</>;
+    // Admin still needs 2FA verification
+    return <TwoFactorGate>{children}</TwoFactorGate>;
   }
 
   // If user exists but no roles could be fetched, redirect to home
@@ -40,6 +42,15 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
     if (!hasPermission) {
       return <Navigate to="/" replace />;
     }
+  }
+
+  // Check if user is privileged (admin, manager, staff, coach) - require 2FA
+  const isPrivilegedUser = allRoles.some(r => 
+    ['admin', 'manager', 'staff', 'coach'].includes(r)
+  );
+
+  if (isPrivilegedUser) {
+    return <TwoFactorGate>{children}</TwoFactorGate>;
   }
 
   return <>{children}</>;
