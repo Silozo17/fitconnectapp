@@ -30,6 +30,8 @@ export const COACH_WIDGET_TYPES = {
   business_earnings: { label: "Monthly Earnings", category: "business", icon: "DollarSign" },
   business_packages: { label: "Active Packages", category: "business", icon: "Package" },
   business_subscriptions: { label: "Active Subscriptions", category: "business", icon: "CreditCard" },
+  business_revenue_forecast: { label: "Revenue Forecast", category: "business", icon: "TrendingUp" },
+  business_client_ltv: { label: "Client Lifetime Value", category: "business", icon: "Crown" },
   
   // Lists Category
   list_upcoming: { label: "Upcoming Sessions", category: "lists", icon: "Calendar" },
@@ -40,10 +42,11 @@ export const COACH_WIDGET_TYPES = {
   engagement_connection_requests: { label: "Connection Requests", category: "engagement", icon: "UserPlus" },
   engagement_reviews: { label: "Recent Reviews", category: "engagement", icon: "MessageSquare" },
   
-  // Intelligence Category (Phase 3)
-  intelligence_client_risk: { label: "Client Attention Needed", category: "intelligence", icon: "AlertTriangle" },
+  // Intelligence Category
+  intelligence_client_risk: { label: "Churn Risk Analysis", category: "intelligence", icon: "AlertTriangle" },
   intelligence_ai_insights: { label: "AI Insights", category: "intelligence", icon: "Sparkles" },
   intelligence_checkin_suggestions: { label: "Smart Check-ins", category: "intelligence", icon: "MessageCircle" },
+  intelligence_engagement_score: { label: "Client Engagement", category: "intelligence", icon: "Activity" },
   
   // Actions Category
   quick_actions: { label: "Quick Actions", category: "actions", icon: "Zap" },

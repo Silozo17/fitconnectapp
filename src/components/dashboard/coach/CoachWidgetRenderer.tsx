@@ -13,10 +13,15 @@ import {
   ReviewsWidget,
   ConnectionRequestsWidget,
   PipelineWidget,
+  EngagementScoreWidget,
+  RevenueForecastWidget,
+  ClientLTVWidget,
+  EnhancedChurnWidget,
 } from "./widgets";
 import { ClientRiskWidget } from "./ClientRiskWidget";
 import { AIClientInsightsWidget } from "./AIClientInsightsWidget";
 import { CheckInSuggestionsWidget } from "./CheckInSuggestionsWidget";
+import { isFeatureEnabled } from "@/lib/coach-feature-flags";
 
 interface UpcomingSession {
   id: string;
@@ -109,13 +114,23 @@ export function CoachWidgetRenderer({
       return <PipelineWidget />;
 
     case "intelligence_client_risk":
-      return <ClientRiskWidget />;
+      // Use enhanced churn widget if feature enabled, otherwise fallback to basic
+      return isFeatureEnabled("ENHANCED_CHURN_PREDICTION") ? <EnhancedChurnWidget /> : <ClientRiskWidget />;
 
     case "intelligence_ai_insights":
       return <AIClientInsightsWidget />;
 
     case "intelligence_checkin_suggestions":
       return <CheckInSuggestionsWidget />;
+
+    case "intelligence_engagement_score":
+      return isFeatureEnabled("CLIENT_ENGAGEMENT_SCORING") ? <EngagementScoreWidget /> : null;
+
+    case "business_revenue_forecast":
+      return isFeatureEnabled("REVENUE_FORECASTING") ? <RevenueForecastWidget /> : null;
+
+    case "business_client_ltv":
+      return isFeatureEnabled("CLIENT_LTV") ? <ClientLTVWidget /> : null;
 
     case "business_earnings":
       return (

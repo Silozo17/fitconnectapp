@@ -7,3 +7,7 @@ export { UpcomingSessionsWidget } from "./UpcomingSessionsWidget";
 export { ReviewsWidget } from "./ReviewsWidget";
 export { ConnectionRequestsWidget } from "./ConnectionRequestsWidget";
 export { PipelineWidget } from "./PipelineWidget";
+export { EngagementScoreWidget } from "./EngagementScoreWidget";
+export { RevenueForecastWidget } from "./RevenueForecastWidget";
+export { ClientLTVWidget } from "./ClientLTVWidget";
+export { EnhancedChurnWidget } from "./EnhancedChurnWidget";
