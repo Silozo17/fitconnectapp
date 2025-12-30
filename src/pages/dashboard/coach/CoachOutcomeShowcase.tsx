@@ -38,6 +38,10 @@ import {
   ExternalLink,
   AlertTriangle,
   Loader2,
+  Send,
+  Clock,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
 import {
@@ -47,7 +51,9 @@ import {
   useUpdateShowcase,
   useDeleteShowcase,
   useCreateExternalShowcase,
+  useRequestShowcaseConsent,
   OutcomeShowcase,
+  ConsentStatus,
 } from "@/hooks/useOutcomeShowcase";
 
 export default function CoachOutcomeShowcase() {
@@ -58,6 +64,7 @@ export default function CoachOutcomeShowcase() {
   const updateShowcase = useUpdateShowcase();
   const deleteShowcase = useDeleteShowcase();
   const createExternalShowcase = useCreateExternalShowcase();
+  const requestConsent = useRequestShowcaseConsent();
 
   const [editingItem, setEditingItem] = useState<OutcomeShowcase | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -87,6 +94,10 @@ export default function CoachOutcomeShowcase() {
   });
 
   const handleTogglePublish = (item: OutcomeShowcase) => {
+    // Only allow publishing if consent is granted or it's external
+    if (!item.isExternal && item.consentStatus !== "granted") {
+      return;
+    }
     updateShowcase.mutate({
       showcaseId: item.id,
       isPublished: !item.isPublished,
@@ -95,6 +106,50 @@ export default function CoachOutcomeShowcase() {
 
   const handleDelete = (id: string) => {
     deleteShowcase.mutate(id);
+  };
+
+  const handleRequestConsent = (item: OutcomeShowcase) => {
+    requestConsent.mutate({
+      showcaseId: item.id,
+      clientId: item.clientId,
+    });
+  };
+
+  const getConsentStatusBadge = (status: ConsentStatus, isExternal: boolean) => {
+    if (isExternal) return null;
+    
+    switch (status) {
+      case "pending":
+        return (
+          <Badge variant="outline" className="text-xs">
+            <Clock className="w-3 h-3 mr-1" />
+            Consent Pending
+          </Badge>
+        );
+      case "requested":
+        return (
+          <Badge variant="secondary" className="text-xs">
+            <Send className="w-3 h-3 mr-1" />
+            Request Sent
+          </Badge>
+        );
+      case "granted":
+        return (
+          <Badge variant="default" className="text-xs bg-success">
+            <CheckCircle className="w-3 h-3 mr-1" />
+            Consent Granted
+          </Badge>
+        );
+      case "denied":
+        return (
+          <Badge variant="destructive" className="text-xs">
+            <XCircle className="w-3 h-3 mr-1" />
+            Denied
+          </Badge>
+        );
+      default:
+        return null;
+    }
   };
 
   const handleAddShowcase = () => {
@@ -327,6 +382,29 @@ export default function CoachOutcomeShowcase() {
                     <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab" />
                   </div>
 
+                  {/* Consent Status */}
+                  {!item.isExternal && (
+                    <div className="flex items-center gap-2">
+                      {getConsentStatusBadge(item.consentStatus, item.isExternal)}
+                      {item.consentStatus === "pending" && (
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="h-7 text-xs"
+                          onClick={() => handleRequestConsent(item)}
+                          disabled={requestConsent.isPending}
+                        >
+                          {requestConsent.isPending ? (
+                            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                          ) : (
+                            <Send className="w-3 h-3 mr-1" />
+                          )}
+                          Request Consent
+                        </Button>
+                      )}
+                    </div>
+                  )}
+
                   {/* Stats */}
                   {item.stats && Object.keys(item.stats).length > 0 && (
                     <div className="flex flex-wrap gap-2">
@@ -350,10 +428,15 @@ export default function CoachOutcomeShowcase() {
                       <Switch
                         checked={item.isPublished}
                         onCheckedChange={() => handleTogglePublish(item)}
+                        disabled={!item.isExternal && item.consentStatus !== "granted"}
                         aria-label={t("showcase.togglePublish", "Toggle publish")}
                       />
                       <Label className="text-xs text-muted-foreground">
-                        {item.isPublished ? t("showcase.published", "Published") : t("showcase.unpublished", "Unpublished")}
+                        {item.isPublished 
+                          ? t("showcase.published", "Published") 
+                          : (!item.isExternal && item.consentStatus !== "granted")
+                            ? t("showcase.awaitingConsent", "Awaiting consent")
+                            : t("showcase.unpublished", "Unpublished")}
                       </Label>
                     </div>
                     <div className="flex items-center gap-1">

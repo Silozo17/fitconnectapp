@@ -14,6 +14,7 @@ export interface ClientConsent {
   revokedAt: Date | null;
   isActive: boolean;
 }
+export type ConsentStatus = "pending" | "requested" | "granted" | "denied";
 
 export interface OutcomeShowcase {
   id: string;
@@ -34,6 +35,8 @@ export interface OutcomeShowcase {
   isExternal: boolean;
   externalClientName: string | null;
   coachConsentAcknowledged: boolean;
+  consentStatus: ConsentStatus;
+  scheduledPublishAt: Date | null;
 }
 
 export interface EligibleClient {
@@ -207,6 +210,8 @@ export function useShowcaseItems(coachId?: string, publishedOnly = false) {
         isExternal: s.is_external || false,
         externalClientName: s.external_client_name,
         coachConsentAcknowledged: s.coach_consent_acknowledged || false,
+        consentStatus: (s.consent_status as ConsentStatus) || "pending",
+        scheduledPublishAt: s.scheduled_publish_at ? new Date(s.scheduled_publish_at) : null,
       }));
     },
     enabled: !!coachId,
@@ -314,25 +319,6 @@ export function useCreateShowcase() {
     }) => {
       if (!coachId) throw new Error("No coach ID");
 
-      let consentId = data.consentId;
-
-      // If no consent exists, create one automatically
-      if (!consentId) {
-        const { data: newConsent, error: consentError } = await supabase
-          .from("client_outcome_consents")
-          .insert({
-            client_id: data.clientId,
-            coach_id: coachId,
-            consent_type: "stats_only",
-            is_active: true,
-          })
-          .select()
-          .single();
-
-        if (consentError) throw consentError;
-        consentId = newConsent.id;
-      }
-
       // Get max display order
       const { data: existing } = await supabase
         .from("coach_outcome_showcases")
@@ -343,10 +329,13 @@ export function useCreateShowcase() {
 
       const nextOrder = (existing?.[0]?.display_order || 0) + 1;
 
+      // Determine consent status based on whether consent exists
+      const consentStatus = data.consentId ? "granted" : "pending";
+
       const { error } = await supabase.from("coach_outcome_showcases").insert({
         coach_id: coachId,
         client_id: data.clientId,
-        consent_id: consentId,
+        consent_id: data.consentId || null,
         title: data.title,
         description: data.description,
         before_photo_url: data.beforePhotoUrl,
@@ -355,7 +344,8 @@ export function useCreateShowcase() {
         is_anonymized: data.isAnonymized || false,
         display_name: data.displayName,
         display_order: nextOrder,
-        is_published: false, // Start unpublished until client confirms consent
+        is_published: false,
+        consent_status: consentStatus,
       });
 
       if (error) throw error;
@@ -363,7 +353,7 @@ export function useCreateShowcase() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["showcase-items"] });
       queryClient.invalidateQueries({ queryKey: ["eligible-showcase-clients"] });
-      toast.success("Showcase created");
+      toast.success("Showcase created as draft");
     },
     onError: () => {
       toast.error("Failed to create showcase");
@@ -504,6 +494,112 @@ export function useCreateExternalShowcase() {
     },
     onError: () => {
       toast.error("Failed to add external transformation");
+    },
+  });
+}
+
+export function useRequestShowcaseConsent() {
+  const queryClient = useQueryClient();
+  const { data: coachId } = useCoachProfileId();
+
+  return useMutation({
+    mutationFn: async (data: { showcaseId: string; clientId: string }) => {
+      if (!coachId) throw new Error("No coach ID");
+
+      // Get coach name for notification
+      const { data: coachProfile } = await supabase
+        .from("coach_profiles")
+        .select("display_name")
+        .eq("id", coachId)
+        .single();
+
+      // Get client's user_id for notification
+      const { data: clientProfile } = await supabase
+        .from("client_profiles")
+        .select("user_id")
+        .eq("id", data.clientId)
+        .single();
+
+      if (!clientProfile?.user_id) throw new Error("Client not found");
+
+      // Update showcase consent status
+      const { error: updateError } = await supabase
+        .from("coach_outcome_showcases")
+        .update({ consent_status: "requested" })
+        .eq("id", data.showcaseId);
+
+      if (updateError) throw updateError;
+
+      // Create notification for client
+      const { error: notifError } = await supabase.from("notifications").insert({
+        user_id: clientProfile.user_id,
+        type: "showcase_consent_request",
+        title: "Transformation Showcase Request",
+        message: `${coachProfile?.display_name || "Your coach"} would like to feature your transformation on their profile.`,
+        data: { showcaseId: data.showcaseId, coachId },
+      });
+
+      if (notifError) console.error("Failed to create notification:", notifError);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["showcase-items"] });
+      toast.success("Consent request sent to client");
+    },
+    onError: () => {
+      toast.error("Failed to send consent request");
+    },
+  });
+}
+
+export function useScheduleShowcasePublish() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: { showcaseId: string; publishAt: Date }) => {
+      const { error } = await supabase
+        .from("coach_outcome_showcases")
+        .update({
+          scheduled_publish_at: data.publishAt.toISOString(),
+        })
+        .eq("id", data.showcaseId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["showcase-items"] });
+      toast.success("Publish scheduled");
+    },
+    onError: () => {
+      toast.error("Failed to schedule publish");
+    },
+  });
+}
+
+export function useUpdateShowcaseConsentStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: { showcaseId: string; consentStatus: ConsentStatus; consentId?: string }) => {
+      const updates: Record<string, any> = {
+        consent_status: data.consentStatus,
+      };
+
+      if (data.consentId) {
+        updates.consent_id = data.consentId;
+      }
+
+      const { error } = await supabase
+        .from("coach_outcome_showcases")
+        .update(updates)
+        .eq("id", data.showcaseId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["showcase-items"] });
+    },
+    onError: () => {
+      toast.error("Failed to update consent status");
     },
   });
 }

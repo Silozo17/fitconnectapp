@@ -15,6 +15,9 @@ export type NotificationType =
   | "badge_earned"
   | "challenge_completed"
   | "level_up"
+  | "showcase_consent_request"
+  | "showcase_consent_granted"
+  | "showcase_published"
   | "general";
 
 interface CreateNotificationParams {

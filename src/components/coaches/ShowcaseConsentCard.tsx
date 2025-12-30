@@ -79,7 +79,11 @@ export function ShowcaseConsentCard({ coachId, coachName, existingConsent }: Sho
 
   const handleRevoke = () => {
     if (existingConsent) {
-      revokeConsent.mutate(existingConsent.id);
+      revokeConsent.mutate({ 
+        consentId: existingConsent.id, 
+        coachId, 
+        clientId: existingConsent.clientId
+      });
     }
   };
 
