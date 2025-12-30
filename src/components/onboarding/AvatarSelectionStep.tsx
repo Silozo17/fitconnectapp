@@ -105,6 +105,11 @@ export function AvatarSelectionStep({ selectedAvatarId, onSelect, userGender }: 
         <p className="text-sm text-muted-foreground">
           {t('onboarding.pickCharacter')}
         </p>
+        {userGender && userGender !== 'prefer_not_to_say' && (
+          <p className="text-xs text-muted-foreground/70 mt-1">
+            Avatars personalized based on your selection.
+          </p>
+        )}
       </div>
 
       {/* Carousel for avatars - swipeable on mobile */}
