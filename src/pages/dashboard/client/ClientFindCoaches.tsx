@@ -56,12 +56,11 @@ const ClientFindCoaches = () => {
    */
   const effectiveCountryCode = manualCountryCode ?? userCountryPreference ?? contextCountryCode;
 
+  // Determine if location is ready (manual selection or auto-detection complete)
+  const isLocationReady = isManualSelection || !autoLocationLoading;
+
   // Determine effective location for city-level ranking (manual overrides auto)
-  const effectiveLocation = isManualSelection
-    ? manualLocation
-    : autoLocationLoading
-      ? null
-      : autoLocation;
+  const effectiveLocation = isManualSelection ? manualLocation : autoLocation;
 
   const { data: coaches, isLoading, error } = useCoachMarketplace({
     search: searchQuery || undefined,
@@ -72,6 +71,7 @@ const ClientFindCoaches = () => {
     userLocation: effectiveLocation,
     enableLocationRanking: true,
     countryCode: effectiveCountryCode,
+    enabled: isLocationReady,
   });
 
   const handleBook = useCallback((coach: MarketplaceCoach) => {
