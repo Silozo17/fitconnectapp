@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dumbbell, Target, TrendingUp, Users, CheckCircle, ArrowRight, Star } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
-import { SEOHead, createFAQPageSchema, createServiceSchema, createBreadcrumbSchema } from "@/components/shared/SEOHead";
 
 const PersonalTrainers = () => {
   const { t } = useTranslation('pages');
@@ -64,41 +64,12 @@ const PersonalTrainers = () => {
     { name: "Mike Johnson", specialty: t('coachTypes.personalTrainers.featured.specialties.functional'), rating: 4.9, sessions: 420 },
   ];
 
-  const faqSchema = createFAQPageSchema(faqs);
-  const serviceSchema = createServiceSchema({
-    name: "Personal Training Services",
-    description: "Find certified personal trainers for weight loss, strength training, and general fitness coaching. Book online or in-person sessions across the UK.",
-    url: "/coaches/personal-trainers",
-  });
-  const breadcrumbSchema = createBreadcrumbSchema([
-    { name: "Home", url: "/" },
-    { name: "Coaches", url: "/coaches" },
-    { name: "Personal Trainers", url: "/coaches/personal-trainers" },
-  ]);
-
   return (
     <>
-      <SEOHead
-        title="Find Personal Trainers Near Me | Certified Fitness Coaches UK"
-        description="Find and book certified personal trainers near you. Get personalized workout plans, weight loss coaching, strength training, and fitness guidance. Online and in-person sessions available across the UK."
-        canonicalPath="/coaches/personal-trainers"
-        keywords={[
-          "personal trainer near me",
-          "personal trainer UK",
-          "certified personal trainer",
-          "find personal trainer",
-          "book personal trainer",
-          "fitness coach near me",
-          "weight loss trainer",
-          "strength training coach",
-          "online personal trainer UK",
-          "personal training sessions",
-          "hire personal trainer",
-          "personal trainer London",
-          "personal trainer Manchester",
-        ]}
-        schema={[faqSchema, serviceSchema, breadcrumbSchema]}
-      />
+      <Helmet>
+        <title>{t('coachTypes.personalTrainers.meta.title')}</title>
+        <meta name="description" content={t('coachTypes.personalTrainers.meta.description')} />
+      </Helmet>
       
       <div className="min-h-screen bg-background">
         <Navbar />
