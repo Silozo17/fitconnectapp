@@ -37,7 +37,9 @@ serve(async (req) => {
       );
     }
 
-    const { email } = requestBody;
+    // purpose: "signup" (default) - Check if email exists and reject if it does
+    // purpose: "2fa" - Skip the email existence check (user is already authenticated)
+    const { email, purpose = "signup" } = requestBody;
 
     if (!email) {
       console.error(`[send-otp-email] Email missing from request body`);
@@ -57,31 +59,35 @@ serve(async (req) => {
       );
     }
 
-    console.log(`[send-otp-email] Generating OTP for email: ${email} (Device: ${isIPad ? 'iPad' : isIOS ? 'iPhone' : 'Other'})`);
+    console.log(`[send-otp-email] Generating OTP for email: ${email}, purpose: ${purpose} (Device: ${isIPad ? 'iPad' : isIOS ? 'iPhone' : 'Other'})`);
 
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Check if user already exists in auth.users using efficient database function
-    const { data: emailExists, error: checkError } = await supabaseAdmin.rpc('check_email_exists', {
-      email_to_check: email
-    });
-    
-    if (checkError) {
-      console.error(`[send-otp-email] Error checking email existence:`, checkError);
-    }
-    
-    if (emailExists) {
-      console.log(`[send-otp-email] Email already registered: ${email}`);
-      return new Response(
-        JSON.stringify({ 
-          error: "email_already_registered",
-          message: "This email is already registered" 
-        }),
-        { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    // Only check email existence for signup flow (not for 2FA)
+    if (purpose === "signup") {
+      const { data: emailExists, error: checkError } = await supabaseAdmin.rpc('check_email_exists', {
+        email_to_check: email
+      });
+      
+      if (checkError) {
+        console.error(`[send-otp-email] Error checking email existence:`, checkError);
+      }
+      
+      if (emailExists) {
+        console.log(`[send-otp-email] Email already registered: ${email}`);
+        return new Response(
+          JSON.stringify({ 
+            error: "email_already_registered",
+            message: "This email is already registered" 
+          }),
+          { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    } else {
+      console.log(`[send-otp-email] Skipping email existence check for 2FA purpose`);
     }
 
     // Generate OTP code
