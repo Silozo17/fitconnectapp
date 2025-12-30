@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { isDespia } from "@/lib/despia";
@@ -14,35 +14,21 @@ export const usePushNotifications = () => {
   const { user } = useAuth();
   const [isRegistered, setIsRegistered] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
-
-  /**
-   * Set the OneSignal external user ID on app load
-   * This connects the logged-in user ID with OneSignal for targeted notifications
-   * Called on every app load to ensure the connection is always fresh
-   */
-  const setExternalUserId = useCallback(async () => {
-    if (!user || !isDespia()) {
-      return;
-    }
-
-    try {
-      console.log("[Push] Setting OneSignal external user ID:", user.id);
-      await despia(`setonesignalplayerid://?user_id=${user.id}`);
-      console.log("[Push] OneSignal external user ID set successfully");
-    } catch (error) {
-      console.error("[Push] Failed to set OneSignal external user ID:", error);
-    }
-  }, [user]);
+  const initializationRef = useRef(false);
 
   /**
    * Register the device for push notifications via Despia/OneSignal
    */
   const registerForPush = useCallback(async (): Promise<PushRegistrationResult> => {
+    console.log("[Push] registerForPush called");
+    
     if (!user) {
+      console.log("[Push] No user logged in, skipping registration");
       return { success: false, error: "No user logged in" };
     }
 
     if (!isDespia()) {
+      console.log("[Push] Not in Despia environment, skipping registration");
       return { success: false, error: "Not in Despia environment" };
     }
 
@@ -50,17 +36,24 @@ export const usePushNotifications = () => {
 
     try {
       // Get OneSignal player ID from Despia native runtime
+      console.log("[Push] Getting OneSignal player ID...");
       const result = await despia("getonesignalplayerid://", ["onesignalplayerid"]);
+      console.log("[Push] Player ID result:", JSON.stringify(result));
       
-      if (!result || !result.onesignalplayerid) {
-        throw new Error("Failed to get OneSignal player ID");
+      if (!result?.onesignalplayerid) {
+        throw new Error("Failed to get OneSignal player ID - result was empty");
       }
 
       const playerId = result.onesignalplayerid;
+      console.log("[Push] Got player ID:", playerId);
 
-      // Get device info
-      const deviceType = /android/i.test(navigator.userAgent) ? "android" : "ios";
-      const deviceName = navigator.userAgent.substring(0, 100);
+      // Determine device type with better detection
+      const ua = navigator.userAgent.toLowerCase();
+      const deviceType = ua.includes("android") ? "android" : "ios";
+      const deviceName = ua.includes("ipad") ? "despia-ipad" : 
+                         ua.includes("iphone") ? "despia-iphone" : "despia-device";
+
+      console.log("[Push] Storing token - userId:", user.id, "playerId:", playerId, "device:", deviceName);
 
       // Store push token in database
       const { error } = await supabase
@@ -79,14 +72,15 @@ export const usePushNotifications = () => {
         );
 
       if (error) {
-        console.error("Failed to store push token:", error);
+        console.error("[Push] Failed to store push token:", error);
         throw error;
       }
 
+      console.log("[Push] Token stored successfully in database");
       setIsRegistered(true);
       return { success: true, playerId };
     } catch (error: any) {
-      console.error("Push registration failed:", error);
+      console.error("[Push] Registration failed:", error);
       return { success: false, error: error.message };
     } finally {
       setIsRegistering(false);
@@ -100,14 +94,16 @@ export const usePushNotifications = () => {
     if (!user) return;
 
     try {
+      console.log("[Push] Unregistering push for user:", user.id);
       await supabase
         .from("push_tokens")
         .update({ is_active: false })
         .eq("user_id", user.id);
 
       setIsRegistered(false);
+      console.log("[Push] Unregistered successfully");
     } catch (error) {
-      console.error("Failed to unregister push:", error);
+      console.error("[Push] Failed to unregister push:", error);
     }
   }, [user]);
 
@@ -115,40 +111,99 @@ export const usePushNotifications = () => {
    * Check if user has an active push registration
    */
   const checkRegistrationStatus = useCallback(async () => {
-    if (!user || !isDespia()) return;
+    if (!user || !isDespia()) return false;
 
     try {
       const { data } = await supabase
         .from("push_tokens")
-        .select("id")
+        .select("id, player_id")
         .eq("user_id", user.id)
         .eq("is_active", true)
         .limit(1);
 
-      setIsRegistered(!!(data && data.length > 0));
+      const hasToken = !!(data && data.length > 0);
+      setIsRegistered(hasToken);
+      return hasToken;
     } catch (error) {
-      console.error("Failed to check push registration:", error);
+      console.error("[Push] Failed to check push registration:", error);
+      return false;
     }
   }, [user]);
 
-  // Set external user ID on every app load when user is logged in
-  useEffect(() => {
-    if (user && isDespia()) {
-      setExternalUserId();
-    }
-  }, [user, setExternalUserId]);
+  /**
+   * Set the OneSignal external user ID
+   * This links the user's database ID to their device in OneSignal
+   */
+  const setExternalUserId = useCallback(async () => {
+    if (!user || !isDespia()) return;
 
-  // Auto-register on login when in Despia environment
-  useEffect(() => {
-    if (user && isDespia()) {
-      checkRegistrationStatus().then(() => {
-        // Register if not already registered
-        if (!isRegistered) {
-          registerForPush();
-        }
-      });
+    try {
+      console.log("[Push] Setting OneSignal external user ID:", user.id);
+      await despia(`setonesignalplayerid://?user_id=${user.id}`);
+      console.log("[Push] External user ID set successfully");
+    } catch (error) {
+      console.error("[Push] Failed to set external user ID:", error);
     }
-  }, [user, checkRegistrationStatus, registerForPush, isRegistered]);
+  }, [user]);
+
+  // Single initialization effect - combines external ID setting and registration
+  useEffect(() => {
+    const initializePush = async () => {
+      // Skip if not in Despia or no user
+      if (!user || !isDespia()) {
+        console.log("[Push] Skipping init - user:", !!user, "isDespia:", isDespia());
+        return;
+      }
+
+      // Prevent double initialization
+      if (initializationRef.current) {
+        console.log("[Push] Already initialized, skipping");
+        return;
+      }
+      initializationRef.current = true;
+
+      console.log("[Push] Initializing push notifications for user:", user.id);
+
+      // Step 1: Always set external user ID first (links user to device in OneSignal)
+      try {
+        console.log("[Push] Step 1: Setting external user ID");
+        await despia(`setonesignalplayerid://?user_id=${user.id}`);
+        console.log("[Push] External user ID set successfully");
+      } catch (error) {
+        console.error("[Push] Failed to set external user ID:", error);
+        // Continue anyway - registration can still work
+      }
+
+      // Step 2: Check existing registration directly from database
+      console.log("[Push] Step 2: Checking existing registration");
+      const { data: existingTokens } = await supabase
+        .from("push_tokens")
+        .select("id, player_id")
+        .eq("user_id", user.id)
+        .eq("is_active", true)
+        .limit(1);
+
+      const hasActiveToken = !!(existingTokens && existingTokens.length > 0);
+      console.log("[Push] Has active token:", hasActiveToken, existingTokens);
+      setIsRegistered(hasActiveToken);
+
+      // Step 3: Register device if not already registered
+      if (!hasActiveToken) {
+        console.log("[Push] Step 3: No active token, registering device...");
+        const result = await registerForPush();
+        console.log("[Push] Registration result:", result);
+      } else {
+        console.log("[Push] Step 3: Already registered, skipping");
+      }
+    };
+
+    initializePush();
+
+    // Reset initialization flag when user changes (logout/login)
+    return () => {
+      initializationRef.current = false;
+    };
+  }, [user, registerForPush]);
 
   return {
     isDespia: isDespia(),
