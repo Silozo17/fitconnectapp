@@ -16,14 +16,18 @@ const FeaturedCoaches = () => {
   const { location, isLoading: locationLoading } = useUserLocation();
   const { countryCode, isLoading: countryLoading } = useCountry();
   
+  // Defer fetching until location is resolved to prevent double-render with reordering
+  const isLocationReady = !locationLoading && !countryLoading;
+  
   // Use dedicated hook for featured coaches with quality-based sorting
   // Pass countryCode to enforce strict country filtering based on user's selected location
   const { coaches: coachesToShow, isLoading: coachesLoading, locationLabel } = useFeaturedCoaches({
     userLocation: location,
     countryCode, // Strict filtering by selected country
+    enabled: isLocationReady, // Only fetch when location is resolved
   });
 
-  const isLoading = locationLoading || coachesLoading || countryLoading;
+  const isLoading = !isLocationReady || coachesLoading;
 
   return (
     <section className="py-24 md:py-32 bg-background">
