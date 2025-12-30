@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format, startOfDay, endOfDay } from "date-fns";
+import { checkCoachDataAccess } from "./useCoachDataAccess";
 
 export interface FoodDiaryEntry {
   id: string;
@@ -76,11 +77,24 @@ export const useFoodDiary = (clientId: string | undefined, date: Date) => {
 };
 
 // Fetch food diary entries for a date range (for coach viewing)
-export const useFoodDiaryRange = (clientId: string | undefined, startDate: Date, endDate: Date) => {
+export const useFoodDiaryRange = (
+  clientId: string | undefined, 
+  startDate: Date, 
+  endDate: Date,
+  coachId?: string
+) => {
   return useQuery({
-    queryKey: ['food-diary-range', clientId, format(startDate, 'yyyy-MM-dd'), format(endDate, 'yyyy-MM-dd')],
+    queryKey: ['food-diary-range', clientId, format(startDate, 'yyyy-MM-dd'), format(endDate, 'yyyy-MM-dd'), coachId],
     queryFn: async () => {
       if (!clientId) return [];
+      
+      // If coach is viewing, check permission first
+      if (coachId) {
+        const { allowed } = await checkCoachDataAccess(clientId, coachId, "meal_logs");
+        if (!allowed) {
+          throw new Error("Access denied: Client has restricted meal logs access");
+        }
+      }
       
       const { data, error } = await supabase
         .from('food_diary')
