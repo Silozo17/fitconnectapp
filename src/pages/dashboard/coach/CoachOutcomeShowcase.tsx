@@ -55,9 +55,12 @@ import {
   OutcomeShowcase,
   ConsentStatus,
 } from "@/hooks/useOutcomeShowcase";
+import { useCoachProfileId } from "@/hooks/useCoachProfileId";
+import { ShowcasePhotoEditor } from "@/components/showcase/ShowcasePhotoEditor";
 
 export default function CoachOutcomeShowcase() {
   const { t } = useTranslation();
+  const { data: coachId } = useCoachProfileId();
   const { data: showcases = [], isLoading: showcasesLoading } = useMyShowcaseItems();
   const { data: eligibleClients = [], isLoading: clientsLoading } = useEligibleClients();
   const createShowcase = useCreateShowcase();
@@ -80,6 +83,8 @@ export default function CoachOutcomeShowcase() {
     duration: "",
     bodyFatChange: "",
     isAnonymized: false,
+    beforePhotoUrl: "",
+    afterPhotoUrl: "",
   });
 
   // External form state
@@ -185,6 +190,8 @@ export default function CoachOutcomeShowcase() {
       duration: item.stats?.duration || "",
       bodyFatChange: item.stats?.bodyFatChange || "",
       isAnonymized: item.isAnonymized,
+      beforePhotoUrl: item.beforePhotoUrl || "",
+      afterPhotoUrl: item.afterPhotoUrl || "",
     });
   };
 
@@ -202,6 +209,8 @@ export default function CoachOutcomeShowcase() {
         bodyFatChange: editForm.bodyFatChange || null,
       },
       isAnonymized: editForm.isAnonymized,
+      beforePhotoUrl: editForm.beforePhotoUrl || null,
+      afterPhotoUrl: editForm.afterPhotoUrl || null,
     }, {
       onSuccess: () => {
         setEditingItem(null);
@@ -518,12 +527,26 @@ export default function CoachOutcomeShowcase() {
 
         {/* Edit Showcase Modal */}
         <Dialog open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{t("showcase.editShowcase", "Edit Transformation")}</DialogTitle>
             </DialogHeader>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
+              {/* Photo Editor Section */}
+              {editingItem && coachId && (
+                <ShowcasePhotoEditor
+                  clientId={editingItem.clientId}
+                  coachId={coachId}
+                  currentBeforePhoto={editForm.beforePhotoUrl || null}
+                  currentAfterPhoto={editForm.afterPhotoUrl || null}
+                  onBeforePhotoChange={(url) => setEditForm({ ...editForm, beforePhotoUrl: url || "" })}
+                  onAfterPhotoChange={(url) => setEditForm({ ...editForm, afterPhotoUrl: url || "" })}
+                  consentType={editingItem.consentType}
+                  isExternal={editingItem.isExternal}
+                />
+              )}
+
               <div className="space-y-2">
                 <Label>{t("showcase.displayName", "Display Name")}</Label>
                 <Input

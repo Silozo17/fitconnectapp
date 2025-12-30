@@ -37,6 +37,7 @@ export interface OutcomeShowcase {
   coachConsentAcknowledged: boolean;
   consentStatus: ConsentStatus;
   scheduledPublishAt: Date | null;
+  consentType: ConsentType | null;
 }
 
 export interface EligibleClient {
@@ -180,7 +181,10 @@ export function useShowcaseItems(coachId?: string, publishedOnly = false) {
 
       let query = supabase
         .from("coach_outcome_showcases")
-        .select("*")
+        .select(`
+          *,
+          consent:client_outcome_consents!consent_id(consent_type, is_active)
+        `)
         .eq("coach_id", coachId)
         .order("display_order", { ascending: true });
 
@@ -191,28 +195,32 @@ export function useShowcaseItems(coachId?: string, publishedOnly = false) {
       const { data, error } = await query;
       if (error) throw error;
 
-      return (data || []).map((s) => ({
-        id: s.id,
-        coachId: s.coach_id,
-        clientId: s.client_id,
-        consentId: s.consent_id,
-        title: s.title,
-        description: s.description,
-        beforePhotoUrl: s.before_photo_url,
-        afterPhotoUrl: s.after_photo_url,
-        stats: s.stats as Record<string, any> | null,
-        isAnonymized: s.is_anonymized || false,
-        displayName: s.display_name,
-        displayOrder: s.display_order || 0,
-        isPublished: s.is_published || false,
-        publishedAt: s.published_at ? new Date(s.published_at) : null,
-        createdAt: new Date(s.created_at),
-        isExternal: s.is_external || false,
-        externalClientName: s.external_client_name,
-        coachConsentAcknowledged: s.coach_consent_acknowledged || false,
-        consentStatus: (s.consent_status as ConsentStatus) || "pending",
-        scheduledPublishAt: s.scheduled_publish_at ? new Date(s.scheduled_publish_at) : null,
-      }));
+      return (data || []).map((s) => {
+        const consentData = s.consent as { consent_type: string; is_active: boolean } | null;
+        return {
+          id: s.id,
+          coachId: s.coach_id,
+          clientId: s.client_id,
+          consentId: s.consent_id,
+          title: s.title,
+          description: s.description,
+          beforePhotoUrl: s.before_photo_url,
+          afterPhotoUrl: s.after_photo_url,
+          stats: s.stats as Record<string, any> | null,
+          isAnonymized: s.is_anonymized || false,
+          displayName: s.display_name,
+          displayOrder: s.display_order || 0,
+          isPublished: s.is_published || false,
+          publishedAt: s.published_at ? new Date(s.published_at) : null,
+          createdAt: new Date(s.created_at),
+          isExternal: s.is_external || false,
+          externalClientName: s.external_client_name,
+          coachConsentAcknowledged: s.coach_consent_acknowledged || false,
+          consentStatus: (s.consent_status as ConsentStatus) || "pending",
+          scheduledPublishAt: s.scheduled_publish_at ? new Date(s.scheduled_publish_at) : null,
+          consentType: consentData?.is_active ? (consentData.consent_type as ConsentType) : null,
+        };
+      });
     },
     enabled: !!coachId,
   });
