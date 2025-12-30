@@ -8,46 +8,45 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { AlertTriangle, TrendingDown, CheckCircle2, ChevronDown, Clock, MessageSquare } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, YAxis } from "recharts";
 import type { PlateauDetection, PlateauHistory } from "@/hooks/usePlateauDetection";
-import { useMarkPlateau, useMarkBreakthrough } from "@/hooks/usePlateauDetection";
+import { useMarkPlateau, useMarkBreakthrough, usePlateauHistory } from "@/hooks/usePlateauDetection";
 
 interface PlateauInsightCardProps {
   plateau: PlateauDetection;
-  history?: PlateauHistory[];
-  clientId: string;
+  onDismiss?: () => void;
 }
 
-export function PlateauInsightCard({ plateau, history = [], clientId }: PlateauInsightCardProps) {
+export function PlateauInsightCard({ plateau, onDismiss }: PlateauInsightCardProps) {
   const { t } = useTranslation();
   const [coachNotes, setCoachNotes] = useState("");
   const [showHistory, setShowHistory] = useState(false);
   
+  const { data: history = [] } = usePlateauHistory(plateau.clientId);
   const markPlateau = useMarkPlateau();
   const markBreakthrough = useMarkBreakthrough();
 
   const severityStyles = {
-    low: 'bg-warning/20 text-warning border-warning/30',
-    medium: 'bg-orange-500/20 text-orange-500 border-orange-500/30',
-    high: 'bg-destructive/20 text-destructive border-destructive/30',
+    mild: 'bg-warning/20 text-warning border-warning/30',
+    moderate: 'bg-orange-500/20 text-orange-500 border-orange-500/30',
+    severe: 'bg-destructive/20 text-destructive border-destructive/30',
   };
 
-  // Generate mini chart data from plateau values
-  const chartData = plateau.values.map((value, index) => ({
+  // Generate mini chart data from plateau baseline and current values
+  const chartData = Array.from({ length: plateau.durationWeeks }, (_, index) => ({
     week: index + 1,
-    value,
+    value: plateau.baselineValue + ((plateau.currentValue - plateau.baselineValue) * (index / (plateau.durationWeeks - 1 || 1))),
   }));
 
   const handleMarkAcknowledged = () => {
     markPlateau.mutate({
-      clientId,
+      clientId: plateau.clientId,
       metricType: plateau.metricType,
-      startValue: plateau.values[0],
-      currentValue: plateau.values[plateau.values.length - 1],
-      coachNotes: coachNotes || undefined,
+      startDate: plateau.startDate,
+      notes: coachNotes || undefined,
     });
   };
 
   const handleMarkBreakthrough = (plateauId: string) => {
-    markBreakthrough.mutate({ plateauId });
+    markBreakthrough.mutate(plateauId);
   };
 
   return (
@@ -86,7 +85,7 @@ export function PlateauInsightCard({ plateau, history = [], clientId }: PlateauI
           </div>
           <div className="text-right">
             <p className="text-sm font-medium text-foreground">
-              {plateau.values[plateau.values.length - 1]?.toFixed(1)} kg
+              {plateau.currentValue?.toFixed(1)} kg
             </p>
             <p className="text-xs text-muted-foreground flex items-center gap-1 justify-end">
               <TrendingDown className="w-3 h-3" />
@@ -173,7 +172,7 @@ export function PlateauInsightCard({ plateau, history = [], clientId }: PlateauI
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {item.durationWeeks} {t('insights.weeks', 'weeks')} • {item.startValue?.toFixed(1)} → {item.endValue?.toFixed(1)} kg
+                    {item.durationWeeks} {t('insights.weeks', 'weeks')} • {item.baselineValue?.toFixed(1)} → {item.currentValue?.toFixed(1)} kg
                   </p>
                   {item.coachNotes && (
                     <p className="text-xs text-muted-foreground mt-1 italic">

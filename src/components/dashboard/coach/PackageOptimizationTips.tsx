@@ -5,8 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Lightbulb, TrendingUp, AlertTriangle, Target, DollarSign } from "lucide-react";
 import type { PackageMetrics, PackageAnalyticsSummary } from "@/hooks/usePackageAnalytics";
 
-type SummaryType = PackageAnalyticsSummary;
-
 interface PackageOptimizationTipsProps {
   packages: PackageMetrics[];
   summary?: PackageAnalyticsSummary;
@@ -82,7 +80,7 @@ export function PackageOptimizationTips({ packages, summary }: PackageOptimizati
               { package: pkg.packageName }
             ),
             category: 'retention',
-            affectedPackage: pkg.name,
+            affectedPackage: pkg.packageName,
             priority: 'low',
           });
         }
