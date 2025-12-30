@@ -202,9 +202,12 @@ Respond in JSON format:
   "improvements": ["area to focus on"]
 }`;
 
-    const aiResponse = await fetch("https://api.lovable.ai/v1/chat/completions", {
+    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
+    
+    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
+        "Authorization": `Bearer ${lovableApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -216,7 +219,6 @@ Respond in JSON format:
           },
           { role: "user", content: prompt },
         ],
-        temperature: 0.7,
         max_tokens: 500,
       }),
     });
@@ -227,7 +229,15 @@ Respond in JSON format:
       improvements: ["Keep pushing towards your goals"],
     };
 
-    if (aiResponse.ok) {
+    if (!aiResponse.ok) {
+      if (aiResponse.status === 429) {
+        console.log("Rate limited by Lovable AI, using fallback summary");
+      } else if (aiResponse.status === 402) {
+        console.log("Payment required for Lovable AI, using fallback summary");
+      } else {
+        console.log(`AI response error: ${aiResponse.status}, using fallback summary`);
+      }
+    } else {
       const aiData = await aiResponse.json();
       const content = aiData.choices?.[0]?.message?.content;
       if (content) {
