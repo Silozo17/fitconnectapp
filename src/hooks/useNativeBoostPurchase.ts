@@ -120,12 +120,10 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
 
     // Skip if recently attempted (prevents rapid-fire calls)
     if (reconciliationAttemptedRef.current) {
-      console.log('[NativeBoostIAP] Skipping reconciliation - already attempted recently');
       return false;
     }
 
     reconciliationAttemptedRef.current = true;
-    console.log('[NativeBoostIAP] Checking for boost entitlement reconciliation...');
 
     try {
       const { data, error } = await supabase.functions.invoke('verify-boost-entitlement');
@@ -136,8 +134,6 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
       }
 
       if (data?.reconciled) {
-        console.log('[NativeBoostIAP] Boost reconciled from entitlement!', data);
-        
         // Invalidate queries to refresh boost data
         queryClient.invalidateQueries({ queryKey: ['coach-boost-status'] });
         queryClient.invalidateQueries({ queryKey: ['boost-attributions'] });
@@ -148,10 +144,8 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
           description: 'Your boost has been successfully activated.',
         });
         return true;
-      } else {
-        console.log('[NativeBoostIAP] No reconciliation needed:', data?.status);
-        return false;
       }
+      return false;
     } catch (e) {
       console.error('[NativeBoostIAP] Reconciliation check exception:', e);
       return false;
@@ -165,8 +159,6 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        console.log('[NativeBoostIAP] App resumed - checking boost entitlement');
-        
         // Reset reconciliation flag to allow re-check on resume
         reconciliationAttemptedRef.current = false;
         reconcileBoostEntitlement();
@@ -175,7 +167,6 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
         setTimeout(() => {
           setState(prev => {
             if (prev.purchaseStatus === 'purchasing' && !prev.isPolling) {
-              console.log('[NativeBoostIAP] Safety reset on app resume - stuck in purchasing state');
               return { ...prev, purchaseStatus: 'idle' };
             }
             return prev;
@@ -208,7 +199,6 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
 
       // Check if boost was activated successfully
       if (data && data.is_active && data.payment_status === 'succeeded' && data.boost_end_date) {
-        console.log('[NativeBoostIAP] Boost confirmed:', data);
         return true;
       }
 
@@ -287,13 +277,12 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
         queryClient.invalidateQueries({ queryKey: ['boost-attributions'] });
       }
     }, POLL_INTERVAL_MS);
-  }, [pollBoostStatus, queryClient, triggerCelebration]);
+  }, [pollBoostStatus, queryClient, triggerCelebration, reconcileBoostEntitlement]);
 
   /**
    * Handle IAP success callback from Despia
    */
   const handleIAPSuccess = useCallback((data: IAPSuccessData) => {
-    console.log('[NativeBoostIAP] IAP Success received:', data);
     clearPurchaseTimeout();
 
     // Start polling for webhook confirmation
@@ -305,7 +294,6 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
    * Cancel is a user choice - reset database pending status and allow immediate retry
    */
   const handleIAPCancel = useCallback(async () => {
-    console.log('[NativeBoostIAP] Purchase cancelled by user');
     clearPurchaseTimeout();
     
     // Reset any pending database record so user can retry
@@ -364,7 +352,6 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
    * Only set pending when StoreKit explicitly returns a deferred transaction
    */
   const handleIAPPending = useCallback(() => {
-    console.log('[NativeBoostIAP] Purchase pending (Ask to Buy or deferred)');
     clearPurchaseTimeout();
     setState(prev => ({
       ...prev,
@@ -410,8 +397,6 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
    * Trigger a boost purchase
    */
   const purchase = useCallback(() => {
-    console.log('[NativeBoostIAP] === BOOST PURCHASE START ===');
-
     if (!state.isAvailable) {
       toast.error('Native purchases not available');
       return;
@@ -423,7 +408,6 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
     }
 
     const productId = getBoostProductId();
-    console.log('[NativeBoostIAP] Product ID:', productId);
 
     if (!productId) {
       toast.error('Boost not available on this platform');
@@ -441,7 +425,6 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
 
     // Set a timeout to reset if no response received
     purchaseTimeoutRef.current = setTimeout(() => {
-      console.warn('[NativeBoostIAP] Purchase timeout');
       setState(prev => {
         if (prev.purchaseStatus === 'purchasing' && !prev.isPolling) {
           return {
@@ -498,5 +481,3 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
     reconcileBoostEntitlement,
   };
 };
-
-export default useNativeBoostPurchase;

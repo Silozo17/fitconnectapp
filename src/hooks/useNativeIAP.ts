@@ -111,7 +111,6 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     }
 
     reconciliationAttemptedRef.current = true;
-    console.log('[NativeIAP] Checking for subscription entitlement reconciliation...');
 
     try {
       const { data, error } = await supabase.functions.invoke('verify-subscription-entitlement');
@@ -122,8 +121,6 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
       }
 
       if (data?.reconciled) {
-        console.log('[NativeIAP] Subscription reconciled!', data);
-        
         // Invalidate queries to refresh subscription data
         queryClient.invalidateQueries({ queryKey: ['coach-profile'] });
         queryClient.invalidateQueries({ queryKey: ['platform-subscription'] });
@@ -137,8 +134,6 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
           // Trigger celebration
           triggerHaptic('success');
         }
-      } else {
-        console.log('[NativeIAP] No subscription reconciliation needed:', data?.status);
       }
     } catch (e) {
       console.error('[NativeIAP] Subscription reconciliation exception:', e);
@@ -169,8 +164,6 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        console.log('[NativeIAP] App resumed - checking subscription entitlement');
-        
         // Reset reconciliation flag and re-check entitlement
         // This handles: StoreKit interruptions, background purchases, slow webhooks
         reconciliationAttemptedRef.current = false;
@@ -181,7 +174,6 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
           setState(prev => {
             // Only reset if stuck in purchasing (not polling, not pending)
             if (prev.purchaseStatus === 'purchasing' && !prev.isPolling) {
-              console.log('[NativeIAP] Safety reset on app resume - stuck in purchasing state');
               return { ...prev, purchaseStatus: 'idle' };
             }
             return prev;
@@ -214,7 +206,6 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
 
       // Check if subscription was updated to the expected tier
       if (data && data.tier === expectedTier && data.status === 'active') {
-        console.log('[NativeIAP] Subscription confirmed:', data);
         return true;
       }
 
@@ -292,7 +283,6 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
    * Handle IAP success callback from Despia
    */
   const handleIAPSuccess = useCallback((data: IAPSuccessData) => {
-    console.log('[NativeIAP] IAP Success received:', data);
     clearPurchaseTimeout();
     
     // Extract tier from product ID
@@ -319,7 +309,6 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
    * Cancel is a user choice, not an error - immediately reset to idle for retry
    */
   const handleIAPCancel = useCallback(() => {
-    console.log('[NativeIAP] Purchase cancelled by user');
     clearPurchaseTimeout();
     setState(prev => ({
       ...prev,
@@ -363,7 +352,6 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
    * Only set pending when StoreKit explicitly returns a deferred transaction
    */
   const handleIAPPending = useCallback(() => {
-    console.log('[NativeIAP] Purchase pending (Ask to Buy or deferred)');
     clearPurchaseTimeout();
     setState(prev => ({
       ...prev,
@@ -396,14 +384,6 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
    * Trigger a purchase
    */
   const purchase = useCallback(async (tier: SubscriptionTier, interval: BillingInterval) => {
-    // === DEBUG LOGGING START ===
-    console.log('[NativeIAP] === PURCHASE DEBUG START ===');
-    console.log('[NativeIAP] Tier received:', tier);
-    console.log('[NativeIAP] Interval received:', interval);
-    console.log('[NativeIAP] Tier type:', typeof tier);
-    console.log('[NativeIAP] Interval type:', typeof interval);
-    // === DEBUG LOGGING END ===
-
     if (!state.isAvailable) {
       toast.error('Native purchases not available');
       return;
@@ -421,16 +401,10 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     // Get the platform-specific product ID (iOS or Android)
     const productId = getPlatformProductId(tier, interval);
 
-    console.log('[NativeIAP] Product ID resolved:', productId);
-    console.log('[NativeIAP] External ID:', externalId);
-    console.log('[NativeIAP] === PURCHASE DEBUG END ===');
-
     if (!productId) {
       toast.error('Invalid subscription selection for this platform');
       return;
     }
-
-    console.log('[NativeIAP] Starting purchase:', { tier, interval, productId });
 
     setState(prev => ({
       ...prev,
@@ -444,7 +418,6 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
 
     // Set a timeout to reset if no response received (2 minutes)
     purchaseTimeoutRef.current = setTimeout(() => {
-      console.warn('[NativeIAP] Purchase timeout - no response received after 2 minutes');
       setState(prev => {
         if (prev.purchaseStatus === 'purchasing' && !prev.isPolling) {
           toast.error('Purchase timed out', {

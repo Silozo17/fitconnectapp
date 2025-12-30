@@ -59,12 +59,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           
           // If session is invalid or expired, try to refresh it
           if (error || !session) {
-            console.log('[Auth] Session invalid or expired, attempting refresh...');
             const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
             
             if (refreshError || !refreshData.session) {
               // Session cannot be recovered - clear state
-              console.log('[Auth] Unable to refresh session, clearing state');
               setSession(null);
               setUser(null);
               setRole(null);
@@ -96,22 +94,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Handle focus events for Despia native app
     const handleFocus = async () => {
       if (isDespia()) {
-        console.log('[Auth] Despia app focused, checking session...');
         supabase.auth.startAutoRefresh();
         try {
           const { data: { session }, error } = await supabase.auth.getSession();
           
           // Check for invalid JWT (common in native apps after background)
           if (error) {
-            console.warn('[Auth] Session error on focus:', error.message);
-            
             // If it's a JWT error, try to refresh
             if (error.message?.includes('JWT') || error.message?.includes('token') || error.message?.includes('claim')) {
-              console.log('[Auth] JWT error detected, attempting full session refresh...');
               const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
               
               if (refreshError || !refreshData.session) {
-                console.log('[Auth] Session refresh failed, clearing state');
                 setSession(null);
                 setUser(null);
                 setRole(null);
@@ -119,7 +112,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 return;
               }
               
-              console.log('[Auth] Session refreshed successfully');
               setSession(refreshData.session);
               setUser(refreshData.session.user);
               if (refreshData.session.user) {
@@ -152,12 +144,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               // Test the token by making a simple request
               const { error: testError } = await supabase.auth.getUser();
               if (testError) {
-                console.warn('[Auth] Token validation failed:', testError.message);
                 // Token is invalid, try to refresh
                 const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
                 
                 if (refreshError || !refreshData.session) {
-                  console.log('[Auth] Token refresh failed, clearing state');
                   setSession(null);
                   setUser(null);
                   setRole(null);
@@ -197,14 +187,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        if (event === 'TOKEN_REFRESHED') {
-          console.log('[Auth] Token refreshed successfully');
-        }
-        
-        if (event === 'SIGNED_OUT') {
-          console.log('[Auth] User signed out');
-        }
-
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -229,10 +211,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         // Handle potential JWT errors during initialization
         if (error) {
-          console.warn('[Auth] Initial session error:', error.message);
           if (error.message?.includes('JWT') || error.message?.includes('token') || error.message?.includes('claim')) {
             // Clear any corrupted session data
-            console.log('[Auth] Clearing corrupted session data');
             await supabase.auth.signOut();
             setSession(null);
             setUser(null);
@@ -247,11 +227,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // Validate the session by checking if the user can be fetched
           const { error: userError } = await supabase.auth.getUser();
           if (userError) {
-            console.warn('[Auth] User validation failed:', userError.message);
             // Try to refresh the session
             const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
             if (refreshError || !refreshData.session) {
-              console.log('[Auth] Session recovery failed, clearing state');
               setSession(null);
               setUser(null);
               setRole(null);
@@ -334,7 +312,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await supabase.auth.signOut();
     } catch (error) {
       // Session might already be invalid - that's okay, just clear local state
-      console.warn("Sign out warning:", error);
+      console.error("Sign out error:", error);
     }
     // Always clear local state regardless of API response
     setSession(null);
