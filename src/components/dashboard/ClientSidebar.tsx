@@ -503,15 +503,7 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
 
           {/* Profile Section - Compact single row */}
           <div className="p-2 border-t border-border">
-            <div className="flex items-center justify-between gap-2">
-              <UserAvatar 
-                src={avatarUrl} 
-                avatarSlug={selectedAvatar?.slug}
-                avatarRarity={selectedAvatar?.rarity as Rarity}
-                name={displayName} 
-                className="w-9 h-9" 
-                showRarityBorder
-              />
+            <div className="flex items-center justify-end gap-2">
               <div className="flex items-center gap-1">
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -543,6 +535,14 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
                   <TooltipContent>{t("navigation.signOut")}</TooltipContent>
                 </Tooltip>
               </div>
+              <UserAvatar 
+                src={avatarUrl} 
+                avatarSlug={selectedAvatar?.slug}
+                avatarRarity={selectedAvatar?.rarity as Rarity}
+                name={displayName} 
+                className="w-9 h-9" 
+                showRarityBorder
+              />
             </div>
           </div>
         </SheetContent>
