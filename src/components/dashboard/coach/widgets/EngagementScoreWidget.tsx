@@ -33,10 +33,10 @@ function ClientEngagementItem({ client }: { client: ClientEngagementData }) {
 
   return (
     <div
-      className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
+      className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
       onClick={() => navigate(`/dashboard/clients/${client.clientId}`)}
     >
-      <Avatar className="h-10 w-10">
+      <Avatar className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0">
         <AvatarImage src={client.avatarUrl || undefined} alt={client.clientName} />
         <AvatarFallback className="text-xs">
           {client.clientName.split(" ").map((n) => n[0]).join("").toUpperCase()}
@@ -45,9 +45,9 @@ function ClientEngagementItem({ client }: { client: ClientEngagementData }) {
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
-          <span className="font-medium text-sm truncate">{client.clientName}</span>
-          <div className="flex items-center gap-1">
-            <span className={cn("text-sm font-bold", getScoreColor(client.overallScore))}>
+          <span className="font-medium text-xs sm:text-sm truncate">{client.clientName}</span>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <span className={cn("text-xs sm:text-sm font-bold", getScoreColor(client.overallScore))}>
               {client.overallScore}
             </span>
             <TrendIcon className={cn("w-3 h-3", trend.color)} />
@@ -105,7 +105,8 @@ export function EngagementScoreWidget() {
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
             <Activity className="w-4 h-4 text-primary" />
-            Client Engagement
+            <span className="hidden sm:inline">Client Engagement</span>
+            <span className="sm:hidden">Engagement</span>
           </CardTitle>
           <Badge variant="secondary" className={cn("text-xs", getScoreColor(avgScore))}>
             Avg: {avgScore}%

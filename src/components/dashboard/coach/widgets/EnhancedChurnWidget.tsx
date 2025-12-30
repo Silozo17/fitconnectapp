@@ -29,10 +29,10 @@ function ChurnClientItem({ client }: { client: EnhancedChurnData }) {
 
   return (
     <div
-      className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
+      className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
       onClick={() => navigate(`/dashboard/clients/${client.clientId}`)}
     >
-      <Avatar className="h-10 w-10">
+      <Avatar className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0">
         <AvatarImage src={client.avatarUrl || undefined} alt={client.clientName} />
         <AvatarFallback className="text-xs">
           {client.clientName.split(" ").map((n) => n[0]).join("").toUpperCase()}
@@ -40,28 +40,29 @@ function ChurnClientItem({ client }: { client: EnhancedChurnData }) {
       </Avatar>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-sm truncate">{client.clientName}</span>
-          <Badge className={cn("text-xs", urgency.color)}>
-            {urgency.label}
+        <div className="flex items-center gap-1 sm:gap-2">
+          <span className="font-medium text-xs sm:text-sm truncate">{client.clientName}</span>
+          <Badge className={cn("text-[10px] px-1.5 py-0 h-4 flex-shrink-0", urgency.color)}>
+            <span className="hidden sm:inline">{urgency.label}</span>
+            <span className="sm:hidden">{client.urgency === "immediate" ? "!" : "~"}</span>
           </Badge>
         </div>
-        <div className="flex items-center gap-2 mt-1">
-          <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 sm:gap-2 mt-0.5">
+          <div className="flex items-center gap-0.5 sm:gap-1">
             <TrajectoryIcon className={cn("w-3 h-3", trajectory.color)} />
-            <span className={cn("text-xs", trajectory.color)}>{trajectory.label}</span>
+            <span className={cn("text-[10px] sm:text-xs", trajectory.color)}>{trajectory.label}</span>
           </div>
           {client.daysUntilChurn && (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Clock className="w-3 h-3" />
-              <span>{client.daysUntilChurn}d predicted</span>
+            <div className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs text-muted-foreground">
+              <Clock className="w-3 h-3 hidden sm:inline" />
+              <span>{client.daysUntilChurn}d</span>
             </div>
           )}
         </div>
       </div>
 
-      {/* Mini sparkline representation */}
-      <div className="flex items-end gap-0.5 h-6">
+      {/* Mini sparkline representation - hidden on mobile */}
+      <div className="hidden sm:flex items-end gap-0.5 h-6">
         {client.weeklyScores.slice(-4).map((score, i) => (
           <div
             key={i}

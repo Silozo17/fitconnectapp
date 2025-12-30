@@ -133,10 +133,10 @@ export function ClientLTVWidget() {
             )}
           </div>
         </div>
-        <div className="flex justify-between text-xs text-muted-foreground">
-          <span>{ltvDistribution.high} high value</span>
-          <span>{ltvDistribution.medium} medium</span>
-          <span>{ltvDistribution.low} growing</span>
+        <div className="flex flex-wrap justify-between gap-1 text-[10px] sm:text-xs text-muted-foreground">
+          <span className="whitespace-nowrap">{ltvDistribution.high} <span className="hidden sm:inline">high value</span><span className="sm:hidden">high</span></span>
+          <span className="whitespace-nowrap">{ltvDistribution.medium} <span className="hidden sm:inline">medium</span><span className="sm:hidden">med</span></span>
+          <span className="whitespace-nowrap">{ltvDistribution.low} <span className="hidden sm:inline">growing</span><span className="sm:hidden">grow</span></span>
         </div>
 
         {/* Top Clients */}
@@ -147,27 +147,27 @@ export function ClientLTVWidget() {
             return (
               <div
                 key={client.clientId}
-                className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/30 transition-colors cursor-pointer"
+                className="flex items-center gap-2 sm:gap-3 p-2 rounded-lg hover:bg-muted/30 transition-colors cursor-pointer"
                 onClick={() => navigate(`/dashboard/clients/${client.clientId}`)}
               >
-                <span className="text-xs font-medium text-muted-foreground w-4">
+                <span className="text-xs font-medium text-muted-foreground w-4 flex-shrink-0">
                   #{index + 1}
                 </span>
-                <Avatar className="h-8 w-8">
+                <Avatar className="h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0">
                   <AvatarImage src={client.avatarUrl || undefined} alt={client.clientName} />
                   <AvatarFallback className="text-xs">
                     {client.clientName.split(" ").map((n) => n[0]).join("").toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <span className="text-sm font-medium truncate block">{client.clientName}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {client.monthsAsClient} months
+                  <span className="text-xs sm:text-sm font-medium truncate block">{client.clientName}</span>
+                  <span className="text-[10px] sm:text-xs text-muted-foreground">
+                    {client.monthsAsClient}mo
                   </span>
                 </div>
-                <div className="text-right">
-                  <span className="text-sm font-bold">{formatCurrency(client.projectedLTV)}</span>
-                  <Badge variant="outline" className={cn("text-xs ml-2", tier.color, tier.bgColor)}>
+                <div className="text-right flex-shrink-0">
+                  <span className="text-xs sm:text-sm font-bold block">{formatCurrency(client.projectedLTV)}</span>
+                  <Badge variant="outline" className={cn("text-[10px] sm:text-xs hidden sm:inline-flex", tier.color, tier.bgColor)}>
                     {tier.label}
                   </Badge>
                 </div>
