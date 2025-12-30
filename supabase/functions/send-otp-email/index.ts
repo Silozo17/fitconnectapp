@@ -64,6 +64,24 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
+    // Check if user already exists in auth.users
+    const { data: existingUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+    if (!listError && existingUsers?.users) {
+      const existingUser = existingUsers.users.find(
+        u => u.email?.toLowerCase() === email.toLowerCase()
+      );
+      if (existingUser) {
+        console.log(`[send-otp-email] Email already registered: ${email}`);
+        return new Response(
+          JSON.stringify({ 
+            error: "email_already_registered",
+            message: "This email is already registered" 
+          }),
+          { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     // Generate OTP code
     const code = generateOTP();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes from now
