@@ -1,0 +1,130 @@
+import { useTranslation } from "react-i18next";
+import { Card, CardContent } from "@/components/ui/card";
+import { useReadinessScore } from "@/hooks/useReadinessScore";
+import { InfoTooltip } from "@/components/ui/info-tooltip";
+import { Progress } from "@/components/ui/progress";
+import { Battery, Moon, Heart, Activity, Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
+
+interface ReadinessWidgetProps {
+  className?: string;
+}
+
+const readinessExplanation = {
+  title: "Readiness Score",
+  description: "A daily score (0-100) based on your sleep quality, heart rate, and recent activity. Higher scores suggest you're ready for intense training.",
+  goodRange: "70-100 is optimal for high-intensity workouts",
+  howToImprove: "Prioritize 7-9 hours of sleep and allow rest after intense training days.",
+};
+
+export function ReadinessWidget({ className }: ReadinessWidgetProps) {
+  const { t } = useTranslation("dashboard");
+  const { readiness, isLoading, hasData } = useReadinessScore();
+
+  if (isLoading) {
+    return (
+      <Card variant="elevated" className={cn("rounded-3xl", className)}>
+        <CardContent className="p-5">
+          <div className="flex items-center gap-3 mb-4">
+            <ShimmerSkeleton className="h-12 w-12 rounded-2xl" />
+            <div className="space-y-2">
+              <ShimmerSkeleton className="h-5 w-32" />
+              <ShimmerSkeleton className="h-3 w-24" />
+            </div>
+          </div>
+          <ShimmerSkeleton className="h-3 w-full rounded-full" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!hasData || !readiness) {
+    return null; // Don't show if no wearable data
+  }
+
+  const levelColors = {
+    optimal: "bg-green-500",
+    good: "bg-lime-500",
+    moderate: "bg-amber-500",
+    low: "bg-red-500",
+  };
+
+  const componentIcons = {
+    sleep: Moon,
+    recovery: Heart,
+    activity: Activity,
+  };
+
+  return (
+    <Card variant="elevated" className={cn("rounded-3xl overflow-hidden", className)}>
+      <CardContent className="p-5">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className={cn("p-3 rounded-2xl", levelColors[readiness.level] + "/15")}>
+              <Battery className={cn("h-5 w-5", readiness.color)} />
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <h3 className="font-semibold text-foreground">
+                  {t("client.readiness.title", "Today's Readiness")}
+                </h3>
+                <InfoTooltip explanation={readinessExplanation} side="top" />
+              </div>
+              <p className="text-sm text-muted-foreground capitalize">
+                {readiness.level} readiness
+              </p>
+            </div>
+          </div>
+          <div className={cn("text-3xl font-bold", readiness.color)}>
+            {readiness.score}
+          </div>
+        </div>
+
+        {/* Progress bar */}
+        <div className="mb-4">
+          <Progress
+            value={readiness.score}
+            className="h-2.5"
+          />
+        </div>
+
+        {/* Component breakdown */}
+        <div className="grid grid-cols-3 gap-3 mb-4">
+          {(Object.entries(readiness.components) as [keyof typeof componentIcons, typeof readiness.components.sleep][]).map(
+            ([key, component]) => {
+              const Icon = componentIcons[key];
+              return (
+                <div
+                  key={key}
+                  className="bg-muted/50 rounded-xl p-3 text-center"
+                >
+                  <Icon className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
+                  <div className="text-xs text-muted-foreground capitalize mb-0.5">
+                    {key}
+                  </div>
+                  <div className="font-semibold text-foreground text-sm">
+                    {component.value !== null
+                      ? `${component.value}${component.unit}`
+                      : "—"}
+                  </div>
+                </div>
+              );
+            }
+          )}
+        </div>
+
+        {/* Recommendation */}
+        <div className="flex items-start gap-2 bg-muted/30 rounded-xl p-3">
+          <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+          <p className="text-sm text-muted-foreground">
+            {readiness.recommendation}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default ReadinessWidget;

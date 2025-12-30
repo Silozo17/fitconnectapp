@@ -9,6 +9,9 @@ import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout"
 
 import UserConnectionRequests from "@/components/dashboard/client/UserConnectionRequests";
 import { DailyTipWidget } from "@/components/dashboard/client/DailyTipWidget";
+import { ReadinessWidget } from "@/components/dashboard/client/ReadinessWidget";
+import { WearableTrendCard } from "@/components/dashboard/client/WearableTrendCard";
+import { GoalSuggestionBanner } from "@/components/dashboard/client/GoalSuggestionBanner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -166,6 +169,15 @@ const ClientOverview = () => {
       <Suspense fallback={<HealthWidgetSkeleton />}>
         <HealthDataWidget compact className="mb-6" />
       </Suspense>
+
+      {/* Goal Suggestions (Adaptive) */}
+      <GoalSuggestionBanner className="mb-6" />
+
+      {/* Readiness Score & Wearable Trends */}
+      <div className="grid md:grid-cols-2 gap-5 mb-6">
+        <ReadinessWidget />
+        <WearableTrendCard />
+      </div>
 
       {/* Daily Tip */}
       <DailyTipWidget className="mb-6" />
