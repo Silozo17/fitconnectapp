@@ -58,8 +58,11 @@ export function SEOHead({
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={description} />
       <meta property="og:image" content={fullOgImage} />
+      <meta property="og:image:secure_url" content={fullOgImage} />
+      <meta property="og:image:type" content="image/png" />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
+      <meta property="og:image:alt" content={`${fullTitle} - FitConnect`} />
       <meta property="og:site_name" content="FitConnect" />
       <meta property="og:locale" content="en_GB" />
 
@@ -69,6 +72,7 @@ export function SEOHead({
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={fullOgImage} />
+      <meta name="twitter:image:alt" content={`${fullTitle} - FitConnect`} />
       <meta name="twitter:site" content="@FitConnect" />
 
       {/* JSON-LD Schema */}

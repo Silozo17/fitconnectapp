@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => ({
     VitePWA({
       registerType: 'autoUpdate',
       manifestFilename: 'manifest.webmanifest',
-      includeAssets: ['favicon.svg', 'logo.svg', 'favicon.ico', 'apple-touch-icon.png', 'robots.txt', 'manifest.json'],
+      includeAssets: ['favicon.svg', 'logo.svg', 'favicon.ico', 'apple-touch-icon.png', 'robots.txt', 'manifest.json', 'og-image.png'],
       manifest: {
         id: 'fitconnect-pwa',
         name: 'FitConnect',
