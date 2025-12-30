@@ -179,7 +179,7 @@ export const LogWorkoutModal = ({
                   placeholder="e.g., Push Day, Leg Day, Full Body"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-[1fr_100px] sm:grid-cols-[1fr_120px] gap-3">
                 <div className="min-w-0">
                   <Label htmlFor="loggedAt">Date</Label>
                   <Input
@@ -191,17 +191,17 @@ export const LogWorkoutModal = ({
                   />
                 </div>
                 <div className="min-w-0">
-                  <Label htmlFor="duration">Duration (min)</Label>
+                  <Label htmlFor="duration">Duration</Label>
                   <Input
                     id="duration"
                     type="number"
                     min="1"
-                    className="w-full min-w-0"
+                    className="w-full min-w-0 text-center"
                     value={durationMinutes || ""}
                     onChange={(e) =>
                       setDurationMinutes(e.target.value ? parseInt(e.target.value) : null)
                     }
-                    placeholder="60"
+                    placeholder="min"
                   />
                 </div>
               </div>
