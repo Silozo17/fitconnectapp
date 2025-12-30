@@ -68,7 +68,6 @@ export const useHealthData = (options: UseHealthDataOptions = {}) => {
 
       // If no clientId provided, get current user's client profile
       if (!targetClientId) {
-        console.log('[useHealthData] No clientId provided, fetching client profile for user:', user?.id);
         const { data: clientProfile, error: profileError } = await supabase
           .from("client_profiles")
           .select("id")
@@ -81,22 +80,13 @@ export const useHealthData = (options: UseHealthDataOptions = {}) => {
         }
 
         if (!clientProfile) {
-          console.log('[useHealthData] No client profile found');
           return [];
         }
         targetClientId = clientProfile.id;
-        console.log('[useHealthData] Found client profile:', targetClientId);
       }
 
       const startDateStr = format(startDate, "yyyy-MM-dd");
       const endDateStr = format(endDate, "yyyy-MM-dd");
-      
-      console.log('[useHealthData] Fetching health data:', {
-        clientId: targetClientId,
-        dataType,
-        startDate: startDateStr,
-        endDate: endDateStr,
-      });
 
       let query = supabase
         .from("health_data_sync")
@@ -115,11 +105,6 @@ export const useHealthData = (options: UseHealthDataOptions = {}) => {
       if (error) {
         console.error('[useHealthData] Error fetching health data:', error);
         throw error;
-      }
-
-      console.log('[useHealthData] Fetched data:', data?.length || 0, 'records');
-      if (data && data.length > 0) {
-        console.log('[useHealthData] Sample data:', data.slice(0, 3));
       }
 
       return data as HealthDataPoint[];
@@ -158,8 +143,6 @@ export const useHealthData = (options: UseHealthDataOptions = {}) => {
       const currentClientId = targetClientIdRef.current;
       if (!currentClientId) return;
 
-      console.log('[useHealthData] Setting up realtime subscription for client:', currentClientId);
-
       // Clean up existing channel
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current);
@@ -175,15 +158,12 @@ export const useHealthData = (options: UseHealthDataOptions = {}) => {
             table: 'health_data_sync',
             filter: `client_id=eq.${currentClientId}`
           },
-          (payload) => {
-            console.log('[useHealthData] Realtime update received:', payload.eventType, payload);
+          () => {
             // Refetch data on any change
             refetch();
           }
         )
-        .subscribe((status) => {
-          console.log('[useHealthData] Realtime subscription status:', status);
-        });
+        .subscribe();
 
       channelRef.current = channel;
     }, 500);
@@ -191,7 +171,6 @@ export const useHealthData = (options: UseHealthDataOptions = {}) => {
     return () => {
       clearTimeout(setupChannel);
       if (channelRef.current) {
-        console.log('[useHealthData] Cleaning up realtime subscription');
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
       }
@@ -211,21 +190,6 @@ export const useHealthData = (options: UseHealthDataOptions = {}) => {
       return recordedDate === todayStr;
     });
   }, [data, todayStr]);
-
-  // Debug logging in useEffect to avoid console spam during renders
-  useEffect(() => {
-    if (!isLoading) {
-      console.log('[useHealthData] Query key:', ["health-data", user?.id, clientId, dataType, startDateKey, endDateKey]);
-      console.log('[useHealthData] Today string:', todayStr);
-      console.log('[useHealthData] Total data points:', data?.length ?? 0);
-      console.log('[useHealthData] Today data points:', todayData?.length ?? 0);
-      if (todayData && todayData.length > 0) {
-        console.log('[useHealthData] Today data sample:', todayData.slice(0, 3));
-      } else if (data && data.length > 0) {
-        console.log('[useHealthData] Data dates available:', [...new Set(data.map(d => d.recorded_at))]);
-      }
-    }
-  }, [data, todayData, isLoading, user?.id, clientId, dataType, startDateKey, endDateKey, todayStr]);
 
   // Get today's value using priority-based selection for multi-device deduplication
   const getTodayValue = useCallback((type: HealthDataType) => {
