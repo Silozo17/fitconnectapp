@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
@@ -23,7 +23,7 @@ interface ClientDashboardLayoutProps {
 
 const LOADING_TIMEOUT_MS = 10000;
 
-const ClientDashboardLayoutInner = ({
+const ClientDashboardLayoutInner = memo(({
   children,
   title = "Client Dashboard",
   description,
@@ -36,31 +36,38 @@ const ClientDashboardLayoutInner = ({
   const { isOpen: profilePanelOpen } = useProfilePanel();
   const { shouldShow: showDiscover, markAsSeen: markDiscoverSeen } = useDiscoverModal('client');
 
+  // Check if user just completed onboarding - prevents flash of redirect
+  const justCompletedOnboarding = useMemo(() => {
+    if (typeof sessionStorage === 'undefined') return false;
+    const flag = sessionStorage.getItem('fitconnect_onboarding_just_completed');
+    if (flag === 'client') {
+      sessionStorage.removeItem('fitconnect_onboarding_just_completed');
+      return true;
+    }
+    return false;
+  }, []);
+
   useEffect(() => {
-    if (!isLoading && onboardingStatus && !onboardingStatus.isOnboarded && !onboardingStatus.error) {
+    if (!isLoading && onboardingStatus && !onboardingStatus.isOnboarded && !onboardingStatus.error && !justCompletedOnboarding) {
       navigate("/onboarding/client", { replace: true });
     }
-  }, [onboardingStatus, isLoading, navigate]);
+  }, [onboardingStatus, isLoading, navigate, justCompletedOnboarding]);
 
-  if (isLoading) {
+  // Show loading only if actually loading and not just completed onboarding
+  if (isLoading && !justCompletedOnboarding) {
     return (
-      <>
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-        <MobileBottomNav variant="client" />
-      </>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
     );
   }
 
-  if (!onboardingStatus?.isOnboarded) {
+  // Guard: if not onboarded and not just completed, show loading (redirect will happen)
+  if (!onboardingStatus?.isOnboarded && !justCompletedOnboarding) {
     return (
-      <>
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-        <MobileBottomNav variant="client" />
-      </>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
     );
   }
 
@@ -112,7 +119,9 @@ const ClientDashboardLayoutInner = ({
       />
     </>
   );
-};
+});
+
+ClientDashboardLayoutInner.displayName = 'ClientDashboardLayoutInner';
 
 const ClientDashboardLayout = (props: ClientDashboardLayoutProps) => (
   <ProfilePanelProvider>

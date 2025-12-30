@@ -168,20 +168,14 @@ export function useClientXP() {
         .eq('client_id', profile.id)
         .maybeSingle();
       
-      if (error) throw error;
-      
-      if (!data) {
-        const { data: newData, error: insertError } = await supabase
-          .from('client_xp')
-          .insert({ client_id: profile.id })
-          .select()
-          .single();
-        
-        if (insertError) throw insertError;
-        return newData as ClientXP;
+      // Return null gracefully if error or no data - XP record will be created by trigger
+      if (error) {
+        console.error('[useClientXP] Error fetching XP:', error);
+        return null;
       }
       
-      return data as ClientXP;
+      // Return data or null - don't try to INSERT here (trigger handles creation)
+      return data as ClientXP | null;
     },
     enabled: !!user && !!profile?.id,
   });
