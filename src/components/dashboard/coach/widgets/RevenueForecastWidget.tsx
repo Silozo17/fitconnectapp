@@ -132,9 +132,9 @@ export function RevenueForecastWidget() {
         </div>
 
         {/* Revenue Chart */}
-        <div className="h-32">
+        <div className="h-36 sm:h-40">
           <ChartContainer config={chartConfig}>
-            <AreaChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
+            <AreaChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
               <defs>
                 <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
@@ -146,7 +146,7 @@ export function RevenueForecastWidget() {
                 axisLine={false} 
                 tickLine={false}
                 tick={{ fontSize: 10 }}
-                interval={1}
+                interval="preserveStartEnd"
               />
               <YAxis 
                 hide 
@@ -168,18 +168,24 @@ export function RevenueForecastWidget() {
         </div>
 
         {/* Revenue Breakdown */}
-        <div className="flex items-center justify-between text-xs">
+        <div className="flex flex-wrap gap-x-3 gap-y-1 text-[10px] sm:text-xs mt-2">
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-primary" />
-            <span className="text-muted-foreground">Subs: {formatCurrency(revenueBreakdown.subscriptions)}</span>
+            <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+            <span className="text-muted-foreground whitespace-nowrap">
+              <span className="hidden sm:inline">Subs</span><span className="sm:hidden">S</span>: {formatCurrency(revenueBreakdown.subscriptions)}
+            </span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-accent" />
-            <span className="text-muted-foreground">Pkgs: {formatCurrency(revenueBreakdown.packages)}</span>
+            <div className="w-2 h-2 rounded-full bg-accent flex-shrink-0" />
+            <span className="text-muted-foreground whitespace-nowrap">
+              <span className="hidden sm:inline">Pkgs</span><span className="sm:hidden">P</span>: {formatCurrency(revenueBreakdown.packages)}
+            </span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-secondary" />
-            <span className="text-muted-foreground">Sessions: {formatCurrency(revenueBreakdown.sessions)}</span>
+            <div className="w-2 h-2 rounded-full bg-secondary flex-shrink-0" />
+            <span className="text-muted-foreground whitespace-nowrap">
+              <span className="hidden sm:inline">Sessions</span><span className="sm:hidden">Sess</span>: {formatCurrency(revenueBreakdown.sessions)}
+            </span>
           </div>
         </div>
       </CardContent>

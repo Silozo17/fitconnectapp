@@ -41,32 +41,32 @@ function CheckInItem({ suggestion }: { suggestion: CheckInSuggestion }) {
 
   return (
     <div
-      className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer group"
+      className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer group"
       onClick={() => navigate(`/dashboard/clients/${suggestion.clientId}`)}
     >
-      <div className="relative">
-        <Avatar className="h-10 w-10">
+      <div className="relative flex-shrink-0">
+        <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
           <AvatarImage src={suggestion.avatarUrl || undefined} alt={suggestion.clientName} />
           <AvatarFallback className="text-xs">
             {suggestion.clientName.split(" ").map((n) => n[0]).join("").toUpperCase()}
           </AvatarFallback>
         </Avatar>
         <div className={cn(
-          "absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center",
+          "absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center",
           config.bgColor
         )}>
-          <Icon className={cn("w-3 h-3", config.color)} />
+          <Icon className={cn("w-2.5 h-2.5 sm:w-3 sm:h-3", config.color)} />
         </div>
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-sm truncate">{suggestion.clientName}</span>
-          <Badge variant="outline" className={cn("text-xs", config.color, config.bgColor)}>
+        <div className="flex items-center gap-1 sm:gap-2">
+          <span className="font-medium text-xs sm:text-sm truncate">{suggestion.clientName}</span>
+          <Badge variant="outline" className={cn("text-[10px] sm:text-xs px-1.5 sm:px-2 py-0 h-4 sm:h-5 flex-shrink-0 max-w-[80px] sm:max-w-none truncate", config.color, config.bgColor)}>
             {suggestion.reasonLabel}
           </Badge>
         </div>
-        <p className="text-xs text-muted-foreground truncate mt-0.5">
+        <p className="text-[10px] sm:text-xs text-muted-foreground truncate mt-0.5 break-words">
           {suggestion.context}
         </p>
       </div>
@@ -74,13 +74,13 @@ function CheckInItem({ suggestion }: { suggestion: CheckInSuggestion }) {
       <Button
         size="sm"
         variant="ghost"
-        className="opacity-0 group-hover:opacity-100 transition-opacity"
+        className="opacity-0 group-hover:opacity-100 transition-opacity hidden sm:flex"
         onClick={handleSendMessage}
       >
         <Send className="w-4 h-4" />
       </Button>
 
-      <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0 group-hover:hidden" />
+      <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0 sm:group-hover:hidden" />
     </div>
   );
 }
