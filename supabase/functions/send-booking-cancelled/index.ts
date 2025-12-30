@@ -82,7 +82,30 @@ serve(async (req) => {
     const cancellerName = cancelledBy === 'coach' ? coachName : clientName;
     const recipientUserId = recipientIsClient ? session.client.user_id : session.coach.user_id;
 
-    // Check email preferences - skip if user has disabled booking emails
+    // Send push notification FIRST (before email preference check)
+    try {
+      console.log("[Push] Sending booking cancelled push to:", recipientUserId);
+      const pushResponse = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${supabaseServiceKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userIds: [recipientUserId],
+          title: "😔 Session Cancelled",
+          message: `Your session with ${cancellerName} on ${formattedDate} has been cancelled`,
+          preferenceKey: "push_bookings",
+          data: { type: "booking_cancelled", sessionId },
+        }),
+      });
+      const pushResult = await pushResponse.json();
+      console.log("[Push] Booking cancelled result:", JSON.stringify(pushResult));
+    } catch (pushError) {
+      console.error("[Push] Booking cancelled failed (non-blocking):", pushError);
+    }
+
+    // Check email preferences - only skip EMAIL, not push (push already sent above)
     const { data: prefs } = await supabase
       .from("notification_preferences")
       .select("email_bookings")
@@ -90,8 +113,8 @@ serve(async (req) => {
       .single();
 
     if (prefs && prefs.email_bookings === false) {
-      console.log("User has disabled booking email notifications");
-      return new Response(JSON.stringify({ skipped: true, reason: "Notifications disabled" }), {
+      console.log("User has disabled booking email notifications - email skipped, push already sent");
+      return new Response(JSON.stringify({ success: true, emailSkipped: true, pushSent: true }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
