@@ -1134,6 +1134,10 @@ export type Database = {
           leaderboard_display_name: string | null
           leaderboard_visible: boolean | null
           location: string | null
+          location_accuracy: string | null
+          location_confidence: string | null
+          location_lat: number | null
+          location_lng: number | null
           medical_conditions: string[] | null
           onboarding_completed: boolean
           onboarding_progress: Json | null
@@ -1173,6 +1177,10 @@ export type Database = {
           leaderboard_display_name?: string | null
           leaderboard_visible?: boolean | null
           location?: string | null
+          location_accuracy?: string | null
+          location_confidence?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
           medical_conditions?: string[] | null
           onboarding_completed?: boolean
           onboarding_progress?: Json | null
@@ -1212,6 +1220,10 @@ export type Database = {
           leaderboard_display_name?: string | null
           leaderboard_visible?: boolean | null
           location?: string | null
+          location_accuracy?: string | null
+          location_confidence?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
           medical_conditions?: string[] | null
           onboarding_completed?: boolean
           onboarding_progress?: Json | null

@@ -257,3 +257,6 @@ verify_jwt = false
 
 [functions.unified-food-search]
 verify_jwt = false
+
+[functions.reverse-geocode]
+verify_jwt = false
