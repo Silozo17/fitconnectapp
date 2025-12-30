@@ -8,7 +8,6 @@ import { MessageCircle } from "lucide-react";
 import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
 import { usePlatformContact } from "@/hooks/usePlatformContact";
 import { useTranslation } from "react-i18next";
-import { createFAQPageSchema, createBreadcrumbSchema } from "@/components/shared/SEOHead";
 
 const FAQ = () => {
   const { contact } = usePlatformContact();
@@ -111,28 +110,10 @@ const FAQ = () => {
     }
   ];
 
-  // Combine all FAQs for schema
-  const allFAQsForSchema = [...clientFAQs, ...coachFAQs, ...generalFAQs];
-  
-  const faqSchema = createFAQPageSchema(allFAQsForSchema);
-  const breadcrumbSchema = createBreadcrumbSchema([
-    { name: "Home", url: "/" },
-    { name: "FAQ", url: "/faq" },
-  ]);
-
   return (
     <PageLayout
       title={t("faq.meta.title")}
       description={t("faq.meta.description")}
-      canonicalPath="/faq"
-      keywords={[
-        "fitness FAQ",
-        "personal trainer questions",
-        "coaching FAQ UK",
-        "fitness platform help",
-        "book trainer questions",
-      ]}
-      schema={[faqSchema, breadcrumbSchema]}
     >
       {/* Decorative Avatar */}
       <DecorativeAvatar 

@@ -106,6 +106,8 @@ const menuGroupsConfig: MenuGroup[] = [
       { titleKey: "navigation.client.sessions", icon: Calendar, path: "/dashboard/client/sessions" },
       { titleKey: "navigation.client.myPlans", icon: ClipboardList, path: "/dashboard/client/plans", badgeKey: "plans" },
       { titleKey: "navigation.client.myLibrary", icon: BookOpen, path: "/dashboard/client/library" },
+      { titleKey: "navigation.client.foodDiary", icon: Utensils, path: "/dashboard/client/food-diary" },
+      { titleKey: "navigation.client.trainingLogs", icon: Dumbbell, path: "/dashboard/client/training-logs" },
     ],
   },
   {
@@ -116,8 +118,6 @@ const menuGroupsConfig: MenuGroup[] = [
     items: [
       { titleKey: "navigation.client.progress", icon: TrendingUp, path: "/dashboard/client/progress" },
       { titleKey: "navigation.client.habits", icon: Target, path: "/dashboard/client/habits" },
-      { titleKey: "navigation.client.foodDiary", icon: Utensils, path: "/dashboard/client/food-diary" },
-      { titleKey: "navigation.client.trainingLogs", icon: Dumbbell, path: "/dashboard/client/training-logs" },
     ],
   },
   {
@@ -503,7 +503,15 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
 
           {/* Profile Section - Compact single row */}
           <div className="p-2 border-t border-border">
-            <div className="flex items-center justify-end gap-2">
+            <div className="flex items-center justify-between gap-2">
+              <UserAvatar 
+                src={avatarUrl} 
+                avatarSlug={selectedAvatar?.slug}
+                avatarRarity={selectedAvatar?.rarity as Rarity}
+                name={displayName} 
+                className="w-9 h-9" 
+                showRarityBorder
+              />
               <div className="flex items-center gap-1">
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -535,14 +543,6 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
                   <TooltipContent>{t("navigation.signOut")}</TooltipContent>
                 </Tooltip>
               </div>
-              <UserAvatar 
-                src={avatarUrl} 
-                avatarSlug={selectedAvatar?.slug}
-                avatarRarity={selectedAvatar?.rarity as Rarity}
-                name={displayName} 
-                className="w-9 h-9" 
-                showRarityBorder
-              />
             </div>
           </div>
         </SheetContent>

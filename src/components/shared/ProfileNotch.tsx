@@ -23,7 +23,7 @@ const ProfileNotch = ({ className, headerHeight = 64 }: ProfileNotchProps) => {
         // Icon centering
         "flex items-center justify-center",
         // Interactive states - synced with panel animation
-        "transition-all duration-500 [transition-timing-function:cubic-bezier(0.32,0.72,0,1)]",
+        "transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]",
         "hover:scale-105 active:scale-95",
         "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background",
         // Shadow for depth
