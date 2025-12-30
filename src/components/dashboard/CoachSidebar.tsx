@@ -23,6 +23,8 @@ import {
   User,
   Rocket,
   UserPlus,
+  BarChart3,
+  ImageIcon,
   Lock,
   Receipt,
 } from "lucide-react";
@@ -104,6 +106,7 @@ const menuGroups: MenuGroup[] = [
     items: [
       { titleKey: "navigation.coach.packages", icon: Package, path: "/dashboard/coach/packages" },
       { titleKey: "navigation.coach.digitalProducts", icon: ShoppingBag, path: "/dashboard/coach/products" },
+      { titleKey: "navigation.coach.packageAnalytics", icon: BarChart3, path: "/dashboard/coach/analytics/packages", requiredFeature: "basic_analytics" },
     ],
   },
   {
@@ -116,6 +119,7 @@ const menuGroups: MenuGroup[] = [
       { titleKey: "navigation.coach.earnings", icon: DollarSign, path: "/dashboard/coach/earnings", requiredFeature: "basic_analytics" },
       { titleKey: "navigation.coach.financial", icon: Receipt, path: "/dashboard/coach/financial" },
       { titleKey: "navigation.coach.reviews", icon: Star, path: "/dashboard/coach/reviews" },
+      { titleKey: "navigation.coach.transformations", icon: ImageIcon, path: "/dashboard/coach/showcase" },
       { titleKey: "navigation.coach.integrations", icon: Settings, path: "/dashboard/coach/integrations", requiredFeature: "custom_integrations" },
     ],
   },

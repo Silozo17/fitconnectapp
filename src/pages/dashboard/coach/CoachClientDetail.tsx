@@ -21,6 +21,9 @@ import {
   Trash2,
   Utensils,
   Camera,
+  TrendingUp,
+  Brain,
+  Sparkles,
 } from "lucide-react";
 import { ClientMealLogs } from "@/components/coach/ClientMealLogs";
 import { ClientTrainingLogs } from "@/components/coach/ClientTrainingLogs";
@@ -53,6 +56,14 @@ import { HealthProfileCard } from "@/components/dashboard/clients/HealthProfileC
 import { PackageCreditsInfo } from "@/components/dashboard/clients/PackageCreditsInfo";
 import HabitManager from "@/components/dashboard/clients/HabitManager";
 import { FeatureGate } from "@/components/FeatureGate";
+// Phase 2 Components
+import { GoalAdherenceTimeline } from "@/components/dashboard/coach/GoalAdherenceTimeline";
+import { GoalProjectionChart } from "@/components/dashboard/coach/GoalProjectionChart";
+import { GoalMilestoneTracker } from "@/components/dashboard/coach/GoalMilestoneTracker";
+import { AIClientSummaryEditor } from "@/components/dashboard/coach/AIClientSummaryEditor";
+import { SummaryApprovalWorkflow } from "@/components/dashboard/coach/SummaryApprovalWorkflow";
+import { PlateauInsightCard } from "@/components/dashboard/coach/PlateauInsightCard";
+import { ClientUpsellSection } from "@/components/dashboard/coach/ClientUpsellSection";
 import { 
   useClientDetail, 
   useClientSessions, 
@@ -64,6 +75,9 @@ import {
   useRemovePlanAssignment
 } from "@/hooks/useCoachClients";
 import { useClientActivePackage } from "@/hooks/usePackages";
+import { useGoalAdherence } from "@/hooks/useGoalAdherence";
+import { useSummaryHistory, useGenerateSummary } from "@/hooks/useSummaryGeneration";
+import { usePlateauDetection } from "@/hooks/usePlateauDetection";
 import { notifyClientAboutPlanChange } from "@/utils/notifications";
 import { format } from "date-fns";
 import { enGB, pl } from "date-fns/locale";
@@ -90,6 +104,21 @@ const CoachClientDetail = () => {
   const { data: progressData = [], isLoading: isLoadingProgress } = useClientProgress(id);
   const { data: planAssignments = [], isLoading: isLoadingPlans } = useClientPlanAssignments(id);
   const { data: activePackage, isLoading: isLoadingPackage } = useClientActivePackage(id, coachProfile?.id);
+  
+  // Phase 2 hooks
+  const { data: goalAdherence = [], isLoading: isLoadingGoals } = useGoalAdherence(id);
+  const { data: summaries = [], isLoading: isLoadingSummaries } = useSummaryHistory(id || "");
+  const { data: allPlateaus = [], isLoading: isLoadingPlateaus } = usePlateauDetection();
+  const generateSummary = useGenerateSummary();
+  
+  // Filter plateaus for this client
+  const plateaus = useMemo(() => {
+    return allPlateaus.filter(p => p.clientId === id);
+  }, [allPlateaus, id]);
+
+  // Selected states for Phase 2 components
+  const [selectedSummary, setSelectedSummary] = useState<typeof summaries[0] | null>(null);
+  const [selectedGoal, setSelectedGoal] = useState<typeof goalAdherence[0] | null>(null);
 
   // Mutation hooks for plan actions
   const updatePlanAssignment = useUpdatePlanAssignment();
@@ -443,10 +472,13 @@ const CoachClientDetail = () => {
           <TabsTrigger value="overview" className="text-xs sm:text-sm">{t('clientDetail.tabs.overview')}</TabsTrigger>
           <TabsTrigger value="sessions" className="text-xs sm:text-sm">{t('clientDetail.tabs.sessions')}</TabsTrigger>
           <TabsTrigger value="progress" className="text-xs sm:text-sm">{t('clientDetail.tabs.progress')}</TabsTrigger>
+          <TabsTrigger value="goals" className="text-xs sm:text-sm">{t('clientDetail.tabs.goals', 'Goals')}</TabsTrigger>
           <TabsTrigger value="data" className="text-xs sm:text-sm">{t('clientDetail.tabs.data', 'Data')}</TabsTrigger>
           <TabsTrigger value="photos" className="text-xs sm:text-sm">{t('clientDetail.tabs.photos', 'Photos')}</TabsTrigger>
           <TabsTrigger value="plans" className="text-xs sm:text-sm">{t('clientDetail.tabs.plans')}</TabsTrigger>
           <TabsTrigger value="habits" className="text-xs sm:text-sm">{t('clientDetail.tabs.habits')}</TabsTrigger>
+          <TabsTrigger value="summaries" className="text-xs sm:text-sm">{t('clientDetail.tabs.summaries', 'Summaries')}</TabsTrigger>
+          <TabsTrigger value="insights" className="text-xs sm:text-sm">{t('clientDetail.tabs.insights', 'Insights')}</TabsTrigger>
           <TabsTrigger value="reports" className="text-xs sm:text-sm">{t('clientDetail.tabs.reports', 'Reports')}</TabsTrigger>
           <TabsTrigger value="notes" className="text-xs sm:text-sm">{t('clientDetail.tabs.notes')}</TabsTrigger>
         </TabsList>
@@ -629,6 +661,219 @@ const CoachClientDetail = () => {
               </div>
             )}
           </FeatureGate>
+        </TabsContent>
+
+        {/* Goals Tab - Phase 2 */}
+        <TabsContent value="goals" className="space-y-6">
+          {isLoadingGoals ? (
+            <div className="flex items-center justify-center p-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : goalAdherence.length > 0 ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Goal List */}
+              <div className="space-y-4">
+                <h3 className="font-display font-bold text-foreground flex items-center gap-2">
+                  <Target className="w-5 h-5 text-primary" />
+                  {t('clientDetail.goals.activeGoals', 'Active Goals')}
+                </h3>
+                {goalAdherence.map((adherence) => (
+                  <div 
+                    key={adherence.goal.id}
+                    className={`cursor-pointer transition-all ${selectedGoal?.goal.id === adherence.goal.id ? 'ring-2 ring-primary' : ''}`}
+                    onClick={() => setSelectedGoal(adherence)}
+                  >
+                    <GoalAdherenceTimeline adherence={adherence} />
+                  </div>
+                ))}
+              </div>
+
+              {/* Goal Details */}
+              <div className="space-y-4">
+                {selectedGoal ? (
+                  <>
+                    <GoalProjectionChart adherence={selectedGoal} />
+                    {selectedGoal.milestones.length > 0 && (
+                      <GoalMilestoneTracker
+                        goalTitle={selectedGoal.goal.title}
+                        milestones={selectedGoal.milestones.map(m => ({
+                          id: m.id,
+                          label: m.milestoneLabel || `${m.milestoneValue} ${selectedGoal.goal.targetUnit || ''}`,
+                          targetValue: m.milestoneValue,
+                          isReached: !!m.reachedAt,
+                          reachedAt: m.reachedAt ? m.reachedAt.toISOString() : undefined,
+                        }))}
+                        currentValue={selectedGoal.goal.currentValue || 0}
+                        targetUnit={selectedGoal.goal.targetUnit || undefined}
+                        onCelebrate={(milestoneId) => {
+                          toast.success(`Milestone celebrated!`);
+                        }}
+                      />
+                    )}
+                  </>
+                ) : (
+                  <div className="glass-card p-12 text-center">
+                    <Target className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">{t('clientDetail.goals.selectGoal', 'Select a goal to view details')}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="glass-card p-12 text-center">
+              <Target className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">{t('clientDetail.goals.noGoals', 'No goals set for this client')}</p>
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Summaries Tab - Phase 2 */}
+        <TabsContent value="summaries" className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h3 className="font-display font-bold text-foreground flex items-center gap-2">
+              <Brain className="w-5 h-5 text-primary" />
+              {t('clientDetail.summaries.aiSummaries', 'AI Summaries')}
+            </h3>
+            <Button 
+              onClick={() => id && generateSummary.mutate({ clientId: id })}
+              disabled={generateSummary.isPending}
+              className="bg-primary text-primary-foreground"
+            >
+              {generateSummary.isPending ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Sparkles className="w-4 h-4 mr-2" />
+              )}
+              {t('clientDetail.summaries.generate', 'Generate Summary')}
+            </Button>
+          </div>
+
+          {isLoadingSummaries ? (
+            <div className="flex items-center justify-center p-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : summaries.length > 0 ? (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Summary List */}
+              <div className="space-y-3">
+                {summaries.map((summary) => (
+                  <div
+                    key={summary.id}
+                    className={`glass-subtle p-4 rounded-lg cursor-pointer transition-all hover:bg-secondary/50 ${
+                      selectedSummary?.id === summary.id ? 'ring-2 ring-primary bg-secondary/50' : ''
+                    }`}
+                    onClick={() => setSelectedSummary(summary)}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant={
+                        summary.status === 'shared' ? 'default' :
+                        summary.status === 'approved' ? 'secondary' :
+                        'outline'
+                      }>
+                        {summary.status}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">
+                        v{summary.version}
+                      </span>
+                    </div>
+                    <p className="text-sm font-medium capitalize">{summary.summaryType} Summary</p>
+                    <p className="text-xs text-muted-foreground">
+                      {format(summary.createdAt, 'd MMM yyyy')}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Summary Editor */}
+              <div className="lg:col-span-2">
+                {selectedSummary ? (
+                  <AIClientSummaryEditor
+                    summary={selectedSummary}
+                    clientName={fullName}
+                    onRegenerate={() => id && generateSummary.mutate({ clientId: id })}
+                    onClose={() => setSelectedSummary(null)}
+                  />
+                ) : (
+                  <div className="glass-card p-12 text-center">
+                    <Brain className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">{t('clientDetail.summaries.selectSummary', 'Select a summary to review')}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="glass-card p-12 text-center">
+              <Brain className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground mb-4">{t('clientDetail.summaries.noSummaries', 'No summaries generated yet')}</p>
+              <Button 
+                onClick={() => id && generateSummary.mutate({ clientId: id })}
+                disabled={generateSummary.isPending}
+                variant="outline"
+              >
+                {generateSummary.isPending ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4 mr-2" />
+                )}
+                {t('clientDetail.summaries.generateFirst', 'Generate First Summary')}
+              </Button>
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Insights Tab - Phase 2 */}
+        <TabsContent value="insights" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Plateau Detection */}
+            <div className="space-y-4">
+              <h3 className="font-display font-bold text-foreground flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-warning" />
+                {t('clientDetail.insights.plateauDetection', 'Plateau Detection')}
+              </h3>
+              {isLoadingPlateaus ? (
+                <div className="glass-card p-8 flex items-center justify-center">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                </div>
+              ) : plateaus.length > 0 ? (
+                <div className="space-y-4">
+                  {plateaus.filter(p => p.isActive).map((plateau, index) => (
+                    <PlateauInsightCard 
+                      key={`${plateau.clientId}-${plateau.metricType}-${index}`}
+                      plateau={plateau} 
+                    />
+                  ))}
+                  {plateaus.filter(p => p.isActive).length === 0 && (
+                    <div className="glass-subtle p-6 text-center rounded-lg">
+                      <TrendingUp className="w-8 h-8 text-success mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">
+                        {t('clientDetail.insights.noPlateaus', 'No plateaus detected - client is making progress!')}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="glass-subtle p-6 text-center rounded-lg">
+                  <TrendingUp className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">
+                    {t('clientDetail.insights.insufficientData', 'Not enough data for plateau detection')}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Upsell Opportunities */}
+            <div className="space-y-4">
+              {id && (
+                <ClientUpsellSection
+                  clientId={id}
+                  clientName={fullName}
+                  onCreateSuggestion={() => {
+                    toast.success("Feature coming soon!");
+                  }}
+                />
+              )}
+            </div>
+          </div>
         </TabsContent>
 
         {/* Plans Tab */}
