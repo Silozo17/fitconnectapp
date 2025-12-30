@@ -295,7 +295,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -304,6 +304,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (error) {
       return { error: new Error('Invalid email or password') };
     }
+
+    // Track session on successful login
+    if (data?.session) {
+      try {
+        await supabase.functions.invoke('track-session', {
+          body: {
+            action: 'login',
+          },
+        });
+      } catch (trackError) {
+        // Don't fail login if session tracking fails
+        console.error('[Auth] Session tracking failed:', trackError);
+      }
+    }
+
     return { error: null };
   }, []);
 

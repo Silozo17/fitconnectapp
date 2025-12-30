@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +23,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Loader2, Mail, Lock, Shield, Trash2, AlertTriangle, Settings } from "lucide-react";
 import { DeleteAccountModal } from "./DeleteAccountModal";
 import { isDespia, openNativeSettings } from "@/lib/despia";
+import { TwoFactorSettings } from "@/components/settings/TwoFactorSettings";
+import { ActiveSessionsSection } from "@/components/settings/ActiveSessionsSection";
 
 const emailSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -258,8 +261,7 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
                   <FormItem>
                     <FormLabel>{t('security.newPassword')}</FormLabel>
                     <FormControl>
-                      <Input
-                        type="password"
+                      <PasswordInput
                         placeholder={t('security.passwordPlaceholder')}
                         {...field}
                       />
@@ -275,8 +277,7 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
                   <FormItem>
                     <FormLabel>{t('security.confirmPassword')}</FormLabel>
                     <FormControl>
-                      <Input
-                        type="password"
+                      <PasswordInput
                         placeholder={t('security.confirmPasswordPlaceholder')}
                         {...field}
                       />
@@ -310,6 +311,14 @@ export const AccountSecuritySection = ({ role = "client" }: AccountSecuritySecti
         onOpenChange={setShowDeleteDialog}
         role={role}
       />
+
+      {/* 2FA Settings - Only for coach/admin */}
+      {(role === "coach" || role === "client") && (
+        <TwoFactorSettings />
+      )}
+
+      {/* Active Sessions - For all users */}
+      <ActiveSessionsSection />
     </>
   );
 };

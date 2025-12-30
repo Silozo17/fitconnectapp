@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { GradientButton } from "@/components/ui/gradient-button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Dumbbell, Loader2, CheckCircle, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -230,9 +230,8 @@ const ResetPassword = () => {
                 <Label htmlFor="password" className="text-foreground text-sm sm:text-base">
                   {t("form.newPassword")}
                 </Label>
-                <Input
+                <PasswordInput
                   id="password"
-                  type="password"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -249,9 +248,8 @@ const ResetPassword = () => {
                 <Label htmlFor="confirmPassword" className="text-foreground text-sm sm:text-base">
                   {t("form.confirmPassword")}
                 </Label>
-                <Input
+                <PasswordInput
                   id="confirmPassword"
-                  type="password"
                   placeholder="••••••••"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
