@@ -40,6 +40,11 @@ export const COACH_WIDGET_TYPES = {
   engagement_connection_requests: { label: "Connection Requests", category: "engagement", icon: "UserPlus" },
   engagement_reviews: { label: "Recent Reviews", category: "engagement", icon: "MessageSquare" },
   
+  // Intelligence Category (Phase 3)
+  intelligence_client_risk: { label: "Client Attention Needed", category: "intelligence", icon: "AlertTriangle" },
+  intelligence_ai_insights: { label: "AI Insights", category: "intelligence", icon: "Sparkles" },
+  intelligence_checkin_suggestions: { label: "Smart Check-ins", category: "intelligence", icon: "MessageCircle" },
+  
   // Actions Category
   quick_actions: { label: "Quick Actions", category: "actions", icon: "Zap" },
 } as const;
@@ -49,6 +54,7 @@ export const COACH_WIDGET_CATEGORIES = [
   { key: "business", label: "Business", icon: "DollarSign" },
   { key: "lists", label: "Lists & Activity", icon: "List" },
   { key: "engagement", label: "Engagement", icon: "Users" },
+  { key: "intelligence", label: "Intelligence", icon: "Sparkles" },
   { key: "actions", label: "Quick Actions", icon: "Zap" },
 ] as const;
 

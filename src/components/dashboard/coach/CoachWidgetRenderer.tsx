@@ -14,6 +14,9 @@ import {
   ConnectionRequestsWidget,
   PipelineWidget,
 } from "./widgets";
+import { ClientRiskWidget } from "./ClientRiskWidget";
+import { AIClientInsightsWidget } from "./AIClientInsightsWidget";
+import { CheckInSuggestionsWidget } from "./CheckInSuggestionsWidget";
 
 interface UpcomingSession {
   id: string;
@@ -104,6 +107,15 @@ export function CoachWidgetRenderer({
 
     case "list_pipeline":
       return <PipelineWidget />;
+
+    case "intelligence_client_risk":
+      return <ClientRiskWidget />;
+
+    case "intelligence_ai_insights":
+      return <AIClientInsightsWidget />;
+
+    case "intelligence_checkin_suggestions":
+      return <CheckInSuggestionsWidget />;
 
     case "business_earnings":
       return (
