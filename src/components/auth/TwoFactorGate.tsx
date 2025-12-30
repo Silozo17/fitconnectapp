@@ -142,7 +142,7 @@ export const TwoFactorGate = ({ children }: TwoFactorGateProps) => {
     setIsSendingOTP(true);
     try {
       const { error } = await supabase.functions.invoke("send-otp-email", {
-        body: { email: user.email },
+        body: { email: user.email, purpose: "2fa" },
       });
       if (error) throw error;
       setOtpSent(true);
@@ -241,6 +241,7 @@ export const TwoFactorGate = ({ children }: TwoFactorGateProps) => {
           ) : (
             <OTPVerification
               email={user?.email || ""}
+              purpose="2fa"
               onVerified={handleVerified}
               onBack={() => setOtpSent(false)}
             />

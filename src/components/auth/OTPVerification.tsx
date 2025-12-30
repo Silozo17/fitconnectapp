@@ -9,11 +9,12 @@ import { useTranslation } from "react-i18next";
 
 interface OTPVerificationProps {
   email: string;
+  purpose?: "signup" | "2fa";
   onVerified: () => void;
   onBack: () => void;
 }
 
-export function OTPVerification({ email, onVerified, onBack }: OTPVerificationProps) {
+export function OTPVerification({ email, purpose = "signup", onVerified, onBack }: OTPVerificationProps) {
   const { t } = useTranslation('common');
   const [code, setCode] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
@@ -62,7 +63,7 @@ export function OTPVerification({ email, onVerified, onBack }: OTPVerificationPr
     setIsResending(true);
     try {
       const { error } = await supabase.functions.invoke("send-otp-email", {
-        body: { email },
+        body: { email, purpose },
       });
 
       if (error) throw error;
