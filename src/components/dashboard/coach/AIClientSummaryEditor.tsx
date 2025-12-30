@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import type { ClientSummary, GeneratedContent } from "@/hooks/useSummaryGeneration";
-import { useApproveSummary, useUpdateSummaryEdits, useShareSummary } from "@/hooks/useSummaryGeneration";
+import { useApproveSummary, useUpdateSummary, useShareSummary } from "@/hooks/useSummaryGeneration";
 
 interface AIClientSummaryEditorProps {
   summary: ClientSummary;
@@ -35,17 +35,17 @@ export function AIClientSummaryEditor({
 }: AIClientSummaryEditorProps) {
   const { t } = useTranslation();
   const [editedContent, setEditedContent] = useState<GeneratedContent>(
-    summary.coach_edits || summary.generated_content
+    summary.coachEdits || summary.generatedContent
   );
   const [hasChanges, setHasChanges] = useState(false);
   const [showVersionHistory, setShowVersionHistory] = useState(false);
 
   const approveSummary = useApproveSummary();
-  const updateEdits = useUpdateSummaryEdits();
+  const updateEdits = useUpdateSummary();
   const shareSummary = useShareSummary();
 
   useEffect(() => {
-    const original = summary.coach_edits || summary.generated_content;
+    const original = summary.coachEdits || summary.generatedContent;
     const changed = JSON.stringify(editedContent) !== JSON.stringify(original);
     setHasChanges(changed);
   }, [editedContent, summary]);
@@ -60,7 +60,7 @@ export function AIClientSummaryEditor({
   const handleSave = () => {
     updateEdits.mutate({
       summaryId: summary.id,
-      edits: editedContent,
+      coachEdits: editedContent,
     });
   };
 
@@ -68,19 +68,19 @@ export function AIClientSummaryEditor({
     if (hasChanges) {
       updateEdits.mutate({
         summaryId: summary.id,
-        edits: editedContent,
+        coachEdits: editedContent,
       }, {
         onSuccess: () => {
-          approveSummary.mutate({ summaryId: summary.id });
+          approveSummary.mutate(summary.id);
         }
       });
     } else {
-      approveSummary.mutate({ summaryId: summary.id });
+      approveSummary.mutate(summary.id);
     }
   };
 
   const handleShare = () => {
-    shareSummary.mutate({ summaryId: summary.id });
+    shareSummary.mutate(summary.id);
   };
 
   const statusStyles = {
@@ -113,7 +113,7 @@ export function AIClientSummaryEditor({
             </div>
             <p className="text-sm text-muted-foreground flex items-center gap-2">
               <Clock className="w-3 h-3" />
-              {t('summaries.generated', 'Generated')} {format(new Date(summary.created_at), 'd MMM yyyy, HH:mm')}
+              {t('summaries.generated', 'Generated')} {format(summary.createdAt, 'd MMM yyyy, HH:mm')}
               {summary.version > 1 && ` • v${summary.version}`}
             </p>
           </div>
@@ -152,7 +152,7 @@ export function AIClientSummaryEditor({
                   )}
                 </div>
                 <Textarea
-                  value={editedContent[key] || ''}
+                  value={Array.isArray(editedContent[key]) ? (editedContent[key] as string[]).join('\n') : (editedContent[key] as string) || ''}
                   onChange={(e) => handleSectionEdit(key, e.target.value)}
                   className="min-h-[100px] resize-y break-words"
                   placeholder={t('summaries.enterContent', 'Enter content...')}
@@ -169,22 +169,22 @@ export function AIClientSummaryEditor({
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t('summaries.type', 'Type')}</span>
-                  <span className="capitalize">{summary.summary_type}</span>
+                  <span className="capitalize">{summary.summaryType}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t('summaries.version', 'Version')}</span>
                   <span>{summary.version}</span>
                 </div>
-                {summary.approved_at && (
+                {summary.approvedAt && (
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">{t('summaries.approved', 'Approved')}</span>
-                    <span>{format(new Date(summary.approved_at), 'd MMM')}</span>
+                    <span>{format(summary.approvedAt, 'd MMM')}</span>
                   </div>
                 )}
-                {summary.shared_at && (
+                {summary.sharedAt && (
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">{t('summaries.shared', 'Shared')}</span>
-                    <span>{format(new Date(summary.shared_at), 'd MMM')}</span>
+                    <span>{format(summary.sharedAt, 'd MMM')}</span>
                   </div>
                 )}
               </div>

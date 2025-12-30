@@ -6,19 +6,20 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Target, TrendingUp, TrendingDown, Clock, CheckCircle2, Edit } from "lucide-react";
 import { format, differenceInDays, addDays } from "date-fns";
-import type { GoalWithAdherence } from "@/hooks/useGoalAdherence";
+import type { GoalAdherence } from "@/hooks/useGoalAdherence";
 
 interface GoalAdherenceTimelineProps {
-  goal: GoalWithAdherence;
+  adherence: GoalAdherence;
   onEdit?: () => void;
 }
 
-export function GoalAdherenceTimeline({ goal, onEdit }: GoalAdherenceTimelineProps) {
+export function GoalAdherenceTimeline({ adherence, onEdit }: GoalAdherenceTimelineProps) {
   const { t } = useTranslation();
+  const { goal } = adherence;
 
   const timeline = useMemo(() => {
-    const startDate = new Date(goal.start_date);
-    const targetDate = goal.target_date ? new Date(goal.target_date) : addDays(startDate, 90);
+    const startDate = goal.startDate;
+    const targetDate = goal.targetDate ? goal.targetDate : addDays(startDate, 90);
     const today = new Date();
     
     const totalDays = differenceInDays(targetDate, startDate);
@@ -26,7 +27,7 @@ export function GoalAdherenceTimeline({ goal, onEdit }: GoalAdherenceTimelinePro
     const remainingDays = differenceInDays(targetDate, today);
     
     const timeProgress = Math.min(100, Math.max(0, (elapsedDays / totalDays) * 100));
-    const valueProgress = goal.progress_percentage;
+    const valueProgress = adherence.progressPercent;
     
     // Calculate if ahead or behind
     const expectedProgress = timeProgress;
@@ -54,7 +55,7 @@ export function GoalAdherenceTimeline({ goal, onEdit }: GoalAdherenceTimelinePro
       projectedEndDate,
       dailyRate,
     };
-  }, [goal]);
+  }, [goal, adherence]);
 
   const statusBadge = useMemo(() => {
     if (goal.status === 'completed') {
@@ -133,13 +134,13 @@ export function GoalAdherenceTimeline({ goal, onEdit }: GoalAdherenceTimelinePro
           </div>
           <div className="text-center">
             <p className="text-sm font-medium text-foreground">
-              {timeline.dailyRate.toFixed(1)}%
+              {adherence.weeklyProgressRate.toFixed(1)}%
             </p>
             <p className="text-xs text-muted-foreground">{t('goals.weeklyRate', 'Weekly Rate')}</p>
           </div>
           <div className="text-center">
             <p className="text-sm font-medium text-foreground">
-              {goal.current_value ?? '-'}{goal.target_unit ? ` ${goal.target_unit}` : ''}
+              {goal.currentValue ?? '-'}{goal.targetUnit ? ` ${goal.targetUnit}` : ''}
             </p>
             <p className="text-xs text-muted-foreground">{t('goals.current', 'Current')}</p>
           </div>

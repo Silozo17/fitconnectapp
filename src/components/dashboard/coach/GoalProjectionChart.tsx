@@ -3,22 +3,23 @@ import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ReferenceLine, Area, ComposedChart } from "recharts";
-import { format, addDays, differenceInDays, parseISO } from "date-fns";
-import type { GoalWithAdherence } from "@/hooks/useGoalAdherence";
+import { format, addDays, differenceInDays } from "date-fns";
+import type { GoalAdherence } from "@/hooks/useGoalAdherence";
 
 interface GoalProjectionChartProps {
-  goal: GoalWithAdherence;
+  adherence: GoalAdherence;
   progressHistory?: { date: string; value: number }[];
 }
 
-export function GoalProjectionChart({ goal, progressHistory = [] }: GoalProjectionChartProps) {
+export function GoalProjectionChart({ adherence, progressHistory = [] }: GoalProjectionChartProps) {
   const { t } = useTranslation();
+  const { goal } = adherence;
 
   const chartData = useMemo(() => {
-    const startDate = new Date(goal.start_date);
-    const targetDate = goal.target_date ? new Date(goal.target_date) : addDays(startDate, 90);
-    const startValue = goal.start_value ?? 0;
-    const targetValue = goal.target_value ?? 100;
+    const startDate = goal.startDate;
+    const targetDate = goal.targetDate ? goal.targetDate : addDays(startDate, 90);
+    const startValue = goal.startValue ?? 0;
+    const targetValue = goal.targetValue ?? 100;
     const totalDays = differenceInDays(targetDate, startDate);
     
     const data: Array<{
@@ -48,7 +49,7 @@ export function GoalProjectionChart({ goal, progressHistory = [] }: GoalProjecti
       // Calculate projected value (based on current trend)
       const today = new Date();
       const elapsedDays = differenceInDays(today, startDate);
-      const currentValue = goal.current_value ?? startValue;
+      const currentValue = goal.currentValue ?? startValue;
       const dailyRate = elapsedDays > 0 ? (currentValue - startValue) / elapsedDays : 0;
       
       const projectedValue = currentDate > today 
