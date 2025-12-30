@@ -1,19 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Trophy, MapPin, Globe, Users, ChevronRight, Medal, Award, Lock } from "lucide-react";
+import { Trophy, MapPin, Globe, Users, ChevronRight, Medal, Award, Lock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGlobalLeaderboard, useLocalLeaderboard, PublicLeaderboardEntry } from "@/hooks/usePublicLeaderboard";
+import { useUserLocation } from "@/hooks/useUserLocation";
 import { Link } from "react-router-dom";
-
-const LOCATION_CACHE_KEY = 'fitconnect_user_location';
-
-interface CachedLocation {
-  city: string;
-  country: string;
-  timestamp: number;
-}
 
 const LeaderboardEntry = React.forwardRef<HTMLDivElement, { entry: PublicLeaderboardEntry; index: number }>(
   ({ entry, index }, ref) => {
@@ -63,21 +56,52 @@ function LeaderboardColumn({
   icon: Icon, 
   entries, 
   isLoading, 
-  totalParticipants 
+  totalParticipants,
+  showLocationCta,
+  onRequestLocation,
+  isRequestingLocation,
 }: { 
   title: string; 
   icon: typeof Globe; 
   entries: PublicLeaderboardEntry[];
   isLoading: boolean;
   totalParticipants: number;
+  showLocationCta?: boolean;
+  onRequestLocation?: () => void;
+  isRequestingLocation?: boolean;
 }) {
   const { t } = useTranslation('landing');
   
   return (
     <Card className="p-6 glass-card">
-      <div className="flex items-center gap-2 mb-4">
-        <Icon className="h-5 w-5 text-primary" />
-        <h3 className="font-bold text-lg">{title}</h3>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Icon className="h-5 w-5 text-primary" />
+          <h3 className="font-bold text-lg">{title}</h3>
+        </div>
+        
+        {/* Location CTA button for "Near You" column */}
+        {showLocationCta && onRequestLocation && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onRequestLocation}
+            disabled={isRequestingLocation}
+            className="gap-1.5 text-xs"
+          >
+            {isRequestingLocation ? (
+              <>
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Detecting...
+              </>
+            ) : (
+              <>
+                <MapPin className="h-3 w-3" />
+                Use my location
+              </>
+            )}
+          </Button>
+        )}
       </div>
       
       <div className="space-y-2">
@@ -89,6 +113,34 @@ function LeaderboardColumn({
           entries.map((entry, index) => (
             <LeaderboardEntry key={`${entry.displayName}-${index}`} entry={entry} index={index} />
           ))
+        ) : showLocationCta ? (
+          <div className="text-center py-8">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-muted/50 mb-3">
+              <MapPin className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <p className="text-muted-foreground text-sm">
+              Enable precise location to see nearby competitors
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onRequestLocation}
+              disabled={isRequestingLocation}
+              className="mt-3 gap-1.5"
+            >
+              {isRequestingLocation ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Detecting...
+                </>
+              ) : (
+                <>
+                  <MapPin className="h-4 w-4" />
+                  Use my location
+                </>
+              )}
+            </Button>
+          </div>
         ) : (
           <div className="text-center py-8">
             <p className="text-muted-foreground">
@@ -112,50 +164,47 @@ function LeaderboardColumn({
 
 export default function Leaderboard() {
   const { t } = useTranslation('landing');
-  const [userLocation, setUserLocation] = useState<CachedLocation | null>(null);
+  
+  // Use the new location hook with precise location support
+  const { 
+    location: userLocation, 
+    isLoading: locationLoading,
+    accuracyLevel,
+    isRequestingPrecise,
+    requestPreciseLocation,
+  } = useUserLocation();
   
   const { data: globalData, isLoading: globalLoading } = useGlobalLeaderboard(5);
+  
+  // Only use city filtering when we have precise or manual location
+  const canFilterByCity = accuracyLevel === 'precise' || accuracyLevel === 'manual';
+  const cityToFilter = canFilterByCity ? userLocation?.city : null;
+  
   const { data: localData, isLoading: localLoading } = useLocalLeaderboard(
     'city',
-    userLocation?.city || null,
+    cityToFilter,
     5
   );
 
-  useEffect(() => {
-    // Check cache first
-    const cached = localStorage.getItem(LOCATION_CACHE_KEY);
-    if (cached) {
-      try {
-        const parsed: CachedLocation = JSON.parse(cached);
-        const weekInMs = 7 * 24 * 60 * 60 * 1000;
-        if (Date.now() - parsed.timestamp < weekInMs) {
-          setUserLocation(parsed);
-          return;
-        }
-      } catch {
-        localStorage.removeItem(LOCATION_CACHE_KEY);
-      }
-    }
-
-    // Use the cached location from useUserLocation hook storage
-    const userLocationCache = localStorage.getItem('fitconnect_user_location');
-    if (userLocationCache) {
-      try {
-        const parsed = JSON.parse(userLocationCache);
-        if (parsed.city) {
-          setUserLocation({
-            city: parsed.city,
-            country: parsed.country,
-            timestamp: parsed.timestamp,
-          });
-        }
-      } catch {
-        // Ignore parse errors
-      }
-    }
-  }, []);
-
   const hasParticipants = (globalData?.totalParticipants || 0) > 0;
+  
+  // Determine the Near You column title
+  const getNearYouTitle = () => {
+    if (accuracyLevel === 'precise' || accuracyLevel === 'manual') {
+      const displayLocation = userLocation?.displayLocation || userLocation?.city;
+      if (displayLocation) {
+        return t('leaderboard.nearYouWithCity', { city: displayLocation });
+      }
+    }
+    return t('leaderboard.nearYou');
+  };
+  
+  // Show location CTA when we only have approximate (IP-based) location
+  const showLocationCta = accuracyLevel === 'approximate' || !accuracyLevel;
+
+  const handleRequestLocation = async () => {
+    await requestPreciseLocation();
+  };
 
   return (
     <section className="py-20 px-4 bg-gradient-to-b from-background to-muted/20">
@@ -199,11 +248,14 @@ export default function Leaderboard() {
             totalParticipants={globalData?.totalParticipants || 0}
           />
           <LeaderboardColumn
-            title={userLocation?.city ? t('leaderboard.nearYouWithCity', { city: userLocation.city }) : t('leaderboard.nearYou')}
+            title={getNearYouTitle()}
             icon={MapPin}
             entries={localData?.entries || []}
-            isLoading={localLoading || !userLocation}
+            isLoading={localLoading || locationLoading}
             totalParticipants={localData?.totalParticipants || 0}
+            showLocationCta={showLocationCta}
+            onRequestLocation={handleRequestLocation}
+            isRequestingLocation={isRequestingPrecise}
           />
         </div>
 

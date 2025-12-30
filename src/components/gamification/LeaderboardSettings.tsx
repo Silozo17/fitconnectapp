@@ -3,10 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Trophy, Eye, EyeOff, Info, Shield } from 'lucide-react';
+import { Trophy, Eye, EyeOff, Info, Shield, Navigation, Loader2 } from 'lucide-react';
 import { LocationAutocomplete } from '@/components/shared/LocationAutocomplete';
-import type { PlaceLocationData } from '@/types/location';
+import { LocationAccuracyBadge } from '@/components/shared/LocationPermissionPrompt';
+import type { PlaceLocationData, LocationAccuracyLevel } from '@/types/location';
 
 // Use canonical type
 type LocationData = PlaceLocationData;
@@ -18,6 +20,12 @@ interface LeaderboardSettingsProps {
   county: string | null;
   country: string | null;
   onUpdate: (field: string, value: any) => void;
+  /** Called when user requests precise GPS location */
+  onRequestPreciseLocation?: () => Promise<boolean>;
+  /** Whether precise location request is in progress */
+  isRequestingPrecise?: boolean;
+  /** Current location accuracy level */
+  accuracyLevel?: LocationAccuracyLevel | null;
 }
 
 export function LeaderboardSettings({
@@ -27,6 +35,9 @@ export function LeaderboardSettings({
   county,
   country,
   onUpdate,
+  onRequestPreciseLocation,
+  isRequestingPrecise,
+  accuracyLevel,
 }: LeaderboardSettingsProps) {
   const { t } = useTranslation('gamification');
   
@@ -46,6 +57,12 @@ export function LeaderboardSettings({
       onUpdate('city', null);
       onUpdate('county', null);
       onUpdate('country', null);
+    }
+  };
+
+  const handleDetectLocation = async () => {
+    if (onRequestPreciseLocation) {
+      await onRequestPreciseLocation();
     }
   };
 
@@ -109,12 +126,41 @@ export function LeaderboardSettings({
               </div>
 
               <div className="space-y-2">
-                <Label>{t('leaderboard.settings.location')}</Label>
-                <LocationAutocomplete
-                  value={locationDisplayValue}
-                  onLocationChange={handleLocationChange}
-                  placeholder={t('leaderboard.settings.locationPlaceholder')}
-                />
+                <div className="flex items-center justify-between">
+                  <Label>{t('leaderboard.settings.location')}</Label>
+                  {accuracyLevel && (
+                    <LocationAccuracyBadge accuracy={accuracyLevel} />
+                  )}
+                </div>
+                
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <LocationAutocomplete
+                      value={locationDisplayValue}
+                      onLocationChange={handleLocationChange}
+                      placeholder={t('leaderboard.settings.locationPlaceholder')}
+                    />
+                  </div>
+                  
+                  {/* Detect my location button */}
+                  {onRequestPreciseLocation && (
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handleDetectLocation}
+                      disabled={isRequestingPrecise}
+                      title="Detect my location"
+                      className="shrink-0"
+                    >
+                      {isRequestingPrecise ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Navigation className="h-4 w-4" />
+                      )}
+                    </Button>
+                  )}
+                </div>
+                
                 <p className="text-xs text-muted-foreground">
                   {t('leaderboard.settings.locationHint')}
                 </p>

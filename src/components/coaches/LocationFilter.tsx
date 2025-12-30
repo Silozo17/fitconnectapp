@@ -1,11 +1,12 @@
 import { useState, useMemo } from "react";
-import { MapPin, Search, X } from "lucide-react";
+import { MapPin, Search, X, Navigation, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAvailableCities } from "@/hooks/useAvailableCities";
 import { LocationData } from "@/types/ranking";
+import { LocationAccuracyLevel } from "@/types/location";
 
 interface LocationFilterProps {
   /** Auto-detected location from browser/IP */
@@ -18,6 +19,12 @@ interface LocationFilterProps {
   onLocationSelect: (location: LocationData) => void;
   /** Called when user clears manual selection */
   onClearLocation: () => void;
+  /** Called when user requests precise GPS location */
+  onRequestPreciseLocation?: () => Promise<boolean>;
+  /** Whether precise location request is in progress */
+  isRequestingPrecise?: boolean;
+  /** Current location accuracy level */
+  accuracyLevel?: LocationAccuracyLevel | null;
 }
 
 export function LocationFilter({
@@ -26,6 +33,9 @@ export function LocationFilter({
   isAutoLocationLoading,
   onLocationSelect,
   onClearLocation,
+  onRequestPreciseLocation,
+  isRequestingPrecise,
+  accuracyLevel,
 }: LocationFilterProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -59,30 +69,75 @@ export function LocationFilter({
     setIsSearchFocused(false);
   };
 
-  const displayLocation = activeLocation?.city 
+  // Use displayLocation if available, otherwise fall back to city/region/country
+  const displayLocation = activeLocation?.displayLocation 
+    || activeLocation?.city 
     || activeLocation?.region 
     || activeLocation?.country 
     || null;
 
+  // Get user-friendly accuracy label
+  const getAccuracyLabel = () => {
+    switch (accuracyLevel) {
+      case 'precise':
+        return 'Precise location';
+      case 'manual':
+        return 'Manually set';
+      case 'approximate':
+      default:
+        return 'Approximate location';
+    }
+  };
+
+  const handleRequestLocation = async () => {
+    if (onRequestPreciseLocation) {
+      await onRequestPreciseLocation();
+    }
+  };
+
   return (
     <div className="space-y-3">
-      <h4 className="font-medium text-sm">Location</h4>
+      <div className="flex items-center justify-between">
+        <h4 className="font-medium text-sm">Location</h4>
+        
+        {/* GPS button - only show when not already precise/manual */}
+        {onRequestPreciseLocation && accuracyLevel !== 'precise' && accuracyLevel !== 'manual' && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleRequestLocation}
+            disabled={isRequestingPrecise}
+            className="gap-1.5 h-7 text-xs"
+          >
+            {isRequestingPrecise ? (
+              <>
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Detecting...
+              </>
+            ) : (
+              <>
+                <Navigation className="h-3 w-3" />
+                Use my location
+              </>
+            )}
+          </Button>
+        )}
+      </div>
       
       {/* Current Location Badge */}
       {displayLocation && (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Badge 
             variant={isManual ? "default" : "secondary"} 
             className="flex items-center gap-1.5 py-1.5 px-3"
           >
             {isManual ? (
               <Search className="w-3 h-3" />
+            ) : accuracyLevel === 'precise' ? (
+              <Navigation className="w-3 h-3" />
             ) : (
               <MapPin className="w-3 h-3" />
             )}
-            <span className="text-xs">
-              {isManual ? "Filtered" : "Your Location"}:
-            </span>
             <span className="font-medium">{displayLocation}</span>
             {isManual && (
               <button
@@ -94,6 +149,39 @@ export function LocationFilter({
               </button>
             )}
           </Badge>
+          
+          {/* Accuracy indicator */}
+          <span className="text-xs text-muted-foreground">
+            {getAccuracyLabel()}
+          </span>
+        </div>
+      )}
+
+      {/* No precise location - show CTA */}
+      {!displayLocation && accuracyLevel === 'approximate' && onRequestPreciseLocation && (
+        <div className="p-3 rounded-lg bg-muted/30 border border-border/50">
+          <p className="text-xs text-muted-foreground mb-2">
+            Enable precise location for accurate nearby coaches
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRequestLocation}
+            disabled={isRequestingPrecise}
+            className="gap-1.5"
+          >
+            {isRequestingPrecise ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Detecting...
+              </>
+            ) : (
+              <>
+                <Navigation className="h-4 w-4" />
+                Use my location
+              </>
+            )}
+          </Button>
         </div>
       )}
 
