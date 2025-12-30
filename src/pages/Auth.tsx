@@ -10,7 +10,9 @@ import { Button } from "@/components/ui/button";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dumbbell, Loader2, User, Briefcase, ArrowLeft, CheckCircle, Mail } from "lucide-react";
+import { PasswordInput } from "@/components/ui/password-input";
+import { TermsCheckbox } from "@/components/auth/TermsCheckbox";
+import { Dumbbell, Loader2, User, Briefcase, ArrowLeft, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import BlobShape from "@/components/ui/blob-shape";
@@ -21,6 +23,7 @@ import { usePasswordBreachCheck } from "@/hooks/usePasswordBreachCheck";
 import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 import { supabase } from "@/integrations/supabase/client";
 import { logError } from "@/lib/error-utils";
+import { getEnvironment } from "@/hooks/useEnvironment";
 
 const authSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -44,10 +47,12 @@ const Auth = () => {
   const [passwordValue, setPasswordValue] = useState("");
   const [showOTPVerification, setShowOTPVerification] = useState(false);
   const [pendingSignupData, setPendingSignupData] = useState<{ email: string; password: string } | null>(null);
-  const [hasNavigated, setHasNavigated] = useState(false); // Prevent duplicate navigation after signup
+  const [hasNavigated, setHasNavigated] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   const [resetLinkSent, setResetLinkSent] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [termsError, setTermsError] = useState("");
   const { signIn, signUp, user, role } = useAuth();
   
   // Get return URL from query params or location state
@@ -201,8 +206,14 @@ const Auth = () => {
   };
 
   const onSubmit = async (data: AuthFormData) => {
-    // For signup, validate password strength and breach status
+    // For signup, validate terms acceptance and password
     if (!isLogin) {
+      if (!agreedToTerms) {
+        setTermsError(t("auth.termsRequired", "You must agree to the Terms & Conditions"));
+        return;
+      }
+      setTermsError("");
+      
       const validation = validatePassword(data.password);
       if (!validation.isValid) {
         toast.error(t("auth.chooseStrongerPassword"));
@@ -552,9 +563,8 @@ const Auth = () => {
                         </button>
                       )}
                     </div>
-                    <Input
+                    <PasswordInput
                       id="password"
-                      type="password"
                       placeholder="••••••••"
                       className="mt-1 sm:mt-1.5 bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl h-10 sm:h-12"
                       {...register("password")}
@@ -572,6 +582,15 @@ const Auth = () => {
                       />
                     )}
                   </div>
+
+                  {/* Terms Checkbox (Sign Up only) */}
+                  {!isLogin && (
+                    <TermsCheckbox
+                      checked={agreedToTerms}
+                      onCheckedChange={setAgreedToTerms}
+                      error={termsError}
+                    />
+                  )}
 
                   <GradientButton
                     type="submit"
