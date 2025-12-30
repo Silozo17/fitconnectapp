@@ -54,6 +54,22 @@ Allow: /
 User-agent: Amazonbot
 Allow: /
 
+# 2025 AI Crawlers
+User-agent: Gemini
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: DuckAssistBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: AhrefsBot
+Allow: /
+
 # Default Rules
 User-agent: *
 Allow: /

@@ -116,8 +116,11 @@ export default function BlogPost() {
         canonicalPath={`/blog/${post.slug}`}
         ogType="article"
         ogImage={post.featured_image || undefined}
+        ogImageAlt={post.title}
         keywords={post.keywords || []}
         schema={[articleSchema, breadcrumbSchema]}
+        publishedTime={post.published_at}
+        modifiedTime={post.updated_at || post.published_at}
       />
 
       <div className="min-h-screen bg-background">

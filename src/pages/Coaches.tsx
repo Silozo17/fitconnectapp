@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { Search, SlidersHorizontal, Loader2, Users } from "lucide-react";
-import { Helmet } from "react-helmet-async";
+import { SEOHead, createBreadcrumbSchema } from "@/components/shared/SEOHead";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -87,15 +87,38 @@ const Coaches = () => {
     setConnectionCoach(coach);
   }, []);
 
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Find Coaches", url: "/coaches" }
+  ]);
+
+  const serviceSchema = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": "Find Fitness Coaches",
+    "description": t('seoDescription'),
+    "url": "https://getfitconnect.co.uk/coaches",
+    "provider": {
+      "@type": "Organization",
+      "name": "FitConnect",
+      "url": "https://getfitconnect.co.uk"
+    },
+    "areaServed": {
+      "@type": "Country",
+      "name": "United Kingdom"
+    },
+    "serviceType": ["Personal Training", "Nutrition Coaching", "Boxing Training", "MMA Training"]
+  };
+
   return (
     <>
-      <Helmet>
-        <title>{t('title')} | FitConnect</title>
-        <meta 
-          name="description" 
-          content={t('seoDescription')} 
-        />
-      </Helmet>
+      <SEOHead
+        title={t('title')}
+        description={t('seoDescription')}
+        canonicalPath="/coaches"
+        keywords={["find personal trainer", "book fitness coach", "hire nutritionist UK", "personal trainer near me", "online fitness coach"]}
+        schema={[breadcrumbSchema, serviceSchema]}
+      />
 
       <div className="min-h-screen bg-background">
         <Navbar />
