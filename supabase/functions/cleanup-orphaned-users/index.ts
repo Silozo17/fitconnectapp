@@ -66,21 +66,36 @@ Deno.serve(async (req) => {
 
     console.log(`Found ${orphanedUsers?.length || 0} orphaned auth users`);
 
-    // Delete orphaned users
+    // Delete orphaned users and all their remaining data
     const deleted: string[] = [];
     const failed: string[] = [];
 
     if (orphanedUsers && orphanedUsers.length > 0) {
       for (const userId of orphanedUsers) {
-        // Also delete any remaining user_roles just in case
+        console.log(`Cleaning up orphaned user: ${userId}`);
+        
+        // Delete from ALL user-linked tables to ensure complete cleanup
+        await supabaseAdmin.from("notifications").delete().eq("user_id", userId);
+        await supabaseAdmin.from("notification_preferences").delete().eq("user_id", userId);
+        await supabaseAdmin.from("email_preferences").delete().eq("user_id", userId);
+        await supabaseAdmin.from("push_tokens").delete().eq("user_id", userId);
+        
+        // Delete from all profile tables
+        await supabaseAdmin.from("client_profiles").delete().eq("user_id", userId);
+        await supabaseAdmin.from("coach_profiles").delete().eq("user_id", userId);
+        await supabaseAdmin.from("admin_profiles").delete().eq("user_id", userId);
+        await supabaseAdmin.from("user_profiles").delete().eq("user_id", userId);
+        
+        // Delete user_roles
         await supabaseAdmin.from("user_roles").delete().eq("user_id", userId);
         
+        // Finally delete auth user
         const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
         if (deleteError) {
           console.error(`Failed to delete orphaned user ${userId}:`, deleteError);
           failed.push(userId);
         } else {
-          console.log(`Deleted orphaned user: ${userId}`);
+          console.log(`Successfully deleted orphaned user: ${userId}`);
           deleted.push(userId);
         }
       }

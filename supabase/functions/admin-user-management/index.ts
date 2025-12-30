@@ -235,33 +235,29 @@ Deno.serve(async (req) => {
       case "bulk_delete": {
         const { profileIds, userIds } = body;
         
-        // Delete profiles first
-        const table = getTableName(userType);
-        const { error } = await supabaseAdmin
-          .from(table)
-          .delete()
-          .in("id", profileIds);
-
-        if (error) {
-          console.error("Bulk delete profiles error:", error);
-          return new Response(JSON.stringify({ error: error.message }), {
-            status: 400,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-
-        // Delete user_roles and auth users if userIds provided
+        console.log(`Bulk delete: ${profileIds.length} profiles, ${userIds?.length || 0} users`);
+        
+        // Delete ALL user-related data for each user to prevent orphans
         if (userIds && userIds.length > 0) {
-          // Delete user_roles BEFORE auth users to allow re-registration
-          const { error: rolesError } = await supabaseAdmin
-            .from("user_roles")
-            .delete()
-            .in("user_id", userIds);
-          
-          if (rolesError) {
-            console.warn("Failed to delete user_roles:", rolesError);
+          for (const userId of userIds) {
+            console.log(`Cleaning up all data for user: ${userId}`);
+            
+            // Delete from user-linked tables (order matters for foreign keys)
+            await supabaseAdmin.from("notifications").delete().eq("user_id", userId);
+            await supabaseAdmin.from("notification_preferences").delete().eq("user_id", userId);
+            await supabaseAdmin.from("email_preferences").delete().eq("user_id", userId);
+            await supabaseAdmin.from("push_tokens").delete().eq("user_id", userId);
+            
+            // Delete from ALL profile tables (not just the specified userType)
+            await supabaseAdmin.from("client_profiles").delete().eq("user_id", userId);
+            await supabaseAdmin.from("coach_profiles").delete().eq("user_id", userId);
+            await supabaseAdmin.from("admin_profiles").delete().eq("user_id", userId);
+            await supabaseAdmin.from("user_profiles").delete().eq("user_id", userId);
+            
+            // Delete user_roles
+            await supabaseAdmin.from("user_roles").delete().eq("user_id", userId);
           }
-
+          
           // Now delete auth users
           const deleteErrors: string[] = [];
           for (const userId of userIds) {
@@ -269,11 +265,13 @@ Deno.serve(async (req) => {
             if (authError) {
               console.error(`Failed to delete auth user ${userId}:`, authError);
               deleteErrors.push(userId);
+            } else {
+              console.log(`Successfully deleted auth user: ${userId}`);
             }
           }
           
           if (deleteErrors.length > 0) {
-            console.warn(`Failed to delete ${deleteErrors.length} auth users. Users may still be able to re-register.`);
+            console.warn(`Failed to delete ${deleteErrors.length} auth users`);
           }
         }
 
