@@ -188,7 +188,7 @@ const ClientOverview = () => {
       <WeeklySummaryCard className="mb-6" />
 
       {/* Monthly Review */}
-      <MonthlyReviewCard />
+      <MonthlyReviewCard className="mb-6" />
 
       {/* Friend Requests */}
       <UserConnectionRequests />
@@ -279,7 +279,7 @@ const ClientOverview = () => {
 
       {/* CTA Section - Find a Coach */}
       {!isLoading && (
-        <Card variant="floating" className="relative overflow-hidden rounded-3xl">
+        <Card variant="floating" className="relative overflow-hidden rounded-3xl mb-8">
           {/* Background gradient */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-transparent to-accent/15 pointer-events-none" />
           

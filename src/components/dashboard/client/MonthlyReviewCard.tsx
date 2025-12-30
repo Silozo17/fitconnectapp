@@ -33,7 +33,11 @@ interface MonthlyReviewData {
   streak: { current: number; best: number };
 }
 
-export function MonthlyReviewCard() {
+interface MonthlyReviewCardProps {
+  className?: string;
+}
+
+export function MonthlyReviewCard({ className }: MonthlyReviewCardProps) {
   const { user } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -72,7 +76,7 @@ export function MonthlyReviewCard() {
       : TrendingDown;
 
   return (
-    <Card variant="floating" className="rounded-3xl overflow-hidden">
+    <Card variant="floating" className={cn("rounded-3xl overflow-hidden", className)}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
