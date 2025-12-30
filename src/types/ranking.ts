@@ -5,29 +5,16 @@
  * Location proximity is weighted highest (50%), followed by engagement (30%) and profile completeness (20%).
  */
 
+// Re-export canonical location types for backward compatibility
+export type { UserLocationData as LocationData, CoachLocationData } from './location';
+import type { UserLocationData, CoachLocationData } from './location';
+
 export type LocationMatchLevel = 
   | 'exact_city'      // Same city (e.g., "Harrow" matches "Harrow")
   | 'same_region'     // Same region/county (e.g., "Greater London", "England")
   | 'same_country'    // Same country (e.g., "United Kingdom")
   | 'online_only'     // Coach only offers online (no location penalty)
   | 'no_match';       // Different country or no location data
-
-export interface LocationData {
-  city: string | null;
-  region: string | null;
-  county?: string | null;
-  country: string | null;
-  /** ISO 3166-1 alpha-2 country code (e.g., 'GB', 'PL') */
-  countryCode?: string | null;
-}
-
-export interface CoachLocationData {
-  location_city: string | null;
-  location_region: string | null;
-  location_country: string | null;
-  online_available: boolean | null;
-  in_person_available: boolean | null;
-}
 
 export interface CoachEngagementData {
   coach_id: string;

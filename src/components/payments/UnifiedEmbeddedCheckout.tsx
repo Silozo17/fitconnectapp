@@ -6,16 +6,10 @@ import {
 } from "@stripe/react-stripe-js";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import type { CheckoutType, BookingDetails } from "@/types/checkout";
 
-export type CheckoutType = "package" | "subscription" | "digital-product" | "digital-bundle" | "booking";
-
-interface BookingDetails {
-  sessionTypeId: string;
-  requestedAt: string;
-  durationMinutes: number;
-  isOnline: boolean;
-  message?: string;
-}
+// Re-export types for backward compatibility
+export type { CheckoutType } from "@/types/checkout";
 
 interface UnifiedEmbeddedCheckoutProps {
   checkoutType: CheckoutType;

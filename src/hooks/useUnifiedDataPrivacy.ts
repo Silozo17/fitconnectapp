@@ -2,22 +2,21 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import type { 
+  ClientDataType as CanonicalClientDataType, 
+  ExtendedHealthDataType,
+  UnifiedDataType 
+} from "@/types/health";
+import { 
+  CLIENT_DATA_TYPES as CANONICAL_CLIENT_DATA_TYPES,
+  EXTENDED_HEALTH_DATA_TYPES,
+  ALL_UNIFIED_DATA_TYPES 
+} from "@/types/health";
 
-// Client data types
-export type ClientDataType = "progress_photos" | "meal_logs" | "training_logs";
-
-// Health data types from wearables
-export type HealthDataType = 
-  | "steps" 
-  | "heart_rate" 
-  | "sleep" 
-  | "calories" 
-  | "distance" 
-  | "active_minutes"
-  | "weight";
-
-// Combined type
-export type DataType = ClientDataType | HealthDataType;
+// Re-export types for backward compatibility
+export type ClientDataType = CanonicalClientDataType;
+export type HealthDataType = ExtendedHealthDataType;
+export type DataType = UnifiedDataType;
 
 export interface DataSharingPreference {
   id: string;
@@ -36,27 +35,10 @@ export interface CoachWithAllPreferences {
   preferences: DataSharingPreference[];
 }
 
-// All data types organized by category
-export const CLIENT_DATA_TYPES: ClientDataType[] = [
-  "progress_photos",
-  "meal_logs",
-  "training_logs",
-];
-
-export const HEALTH_DATA_TYPES: HealthDataType[] = [
-  "steps",
-  "heart_rate", 
-  "sleep",
-  "calories",
-  "distance",
-  "active_minutes",
-  "weight",
-];
-
-export const ALL_DATA_TYPES: DataType[] = [
-  ...CLIENT_DATA_TYPES,
-  ...HEALTH_DATA_TYPES,
-];
+// Use canonical type arrays
+export const CLIENT_DATA_TYPES: ClientDataType[] = CANONICAL_CLIENT_DATA_TYPES;
+export const HEALTH_DATA_TYPES: HealthDataType[] = EXTENDED_HEALTH_DATA_TYPES;
+export const ALL_DATA_TYPES: DataType[] = ALL_UNIFIED_DATA_TYPES;
 
 export const useUnifiedDataPrivacy = () => {
   const { user } = useAuth();

@@ -3,8 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { format, subDays, startOfDay } from "date-fns";
 import { useMemo, useEffect, useRef, useCallback } from "react";
+import type { CoreHealthDataType } from "@/types/health";
 
-export type HealthDataType = "steps" | "heart_rate" | "sleep" | "calories" | "distance" | "active_minutes";
+// Re-export for backward compatibility
+export type HealthDataType = CoreHealthDataType;
 
 // Priority order for data sources - higher priority sources take precedence
 const SOURCE_PRIORITY = ['apple_health', 'health_connect', 'fitbit', 'garmin', 'manual'];
