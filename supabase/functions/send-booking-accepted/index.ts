@@ -63,7 +63,32 @@ serve(async (req) => {
       throw new Error("Client email not found");
     }
 
-    // Check email preferences - skip if user has disabled booking emails
+    const coachName = session.coach.display_name || "Your Coach";
+
+    // Send push notification FIRST (before email preference check)
+    try {
+      console.log("[Push] Sending booking accepted push to client:", session.client.user_id);
+      const pushResponse = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${supabaseServiceKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userIds: [session.client.user_id],
+          title: "🎉 Booking Confirmed!",
+          message: `${coachName} has accepted your booking request`,
+          preferenceKey: "push_bookings",
+          data: { type: "booking_accepted", sessionId },
+        }),
+      });
+      const pushResult = await pushResponse.json();
+      console.log("[Push] Booking accepted result:", JSON.stringify(pushResult));
+    } catch (pushError) {
+      console.error("[Push] Booking accepted failed (non-blocking):", pushError);
+    }
+
+    // Check email preferences - only skip EMAIL, not push (push already sent above)
     const { data: prefs } = await supabase
       .from("notification_preferences")
       .select("email_bookings")
@@ -71,8 +96,8 @@ serve(async (req) => {
       .single();
 
     if (prefs && prefs.email_bookings === false) {
-      console.log("User has disabled booking email notifications");
-      return new Response(JSON.stringify({ skipped: true, reason: "Notifications disabled" }), {
+      console.log("User has disabled booking email notifications - email skipped, push already sent");
+      return new Response(JSON.stringify({ success: true, emailSkipped: true, pushSent: true }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -81,7 +106,6 @@ serve(async (req) => {
     // Use default FitConnect mascot avatar
     const avatarUrl = getDefaultAvatarUrl(supabaseUrl);
 
-    const coachName = session.coach.display_name || "Your Coach";
     const clientName = session.client.first_name || "there";
 
     // Format date/time

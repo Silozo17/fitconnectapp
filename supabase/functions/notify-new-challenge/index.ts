@@ -64,11 +64,11 @@ Deno.serve(async (req) => {
     // Get notification preferences for all users
     const { data: prefsData } = await supabase
       .from('notification_preferences')
-      .select('user_id, push_bookings')
+      .select('user_id, push_challenges')
       .in('user_id', userIds);
 
     // Filter to only users who have push notifications enabled (default is enabled if no pref record)
-    const userPrefsMap = new Map(prefsData?.map(p => [p.user_id, p.push_bookings]) || []);
+    const userPrefsMap = new Map(prefsData?.map(p => [p.user_id, p.push_challenges]) || []);
     const enabledUserIds = userIds.filter(userId => {
       const pref = userPrefsMap.get(userId);
       // Default to enabled if no preference exists or if explicitly true
