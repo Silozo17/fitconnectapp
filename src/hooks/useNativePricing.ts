@@ -1,5 +1,5 @@
 import { useCountry } from "@/hooks/useCountry";
-import { isDespia } from "@/lib/despia";
+import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
 import { 
   getPricingConfig, 
   NATIVE_PRICING_CONFIGS, 
@@ -32,20 +32,24 @@ export interface NativePricing {
 /**
  * Hook for native app pricing (iOS/Android)
  * Returns higher prices that account for App Store/Play Store fees (~30%)
- * Automatically detects if running in native environment (Despia)
+ * Uses usePlatformRestrictions for consistent platform detection with React state
  */
 export function useNativePricing(): NativePricing {
   const { countryCode } = useCountry();
+  const { isNativeMobile } = usePlatformRestrictions();
   const config = getPricingConfig(countryCode);
-  const isNative = isDespia();
   
-  // Use native pricing when in Despia, otherwise fall back to web pricing
-  const pricing = isNative 
+  // Use native pricing when on native mobile (iOS/Android via Despia)
+  const pricing = isNativeMobile 
     ? NATIVE_PRICING_CONFIGS[config.country] 
     : config.pricing;
   
+  if (import.meta.env.DEV) {
+    console.log('[useNativePricing] isNativeMobile:', isNativeMobile, 'country:', config.country);
+  }
+  
   return {
-    isNative,
+    isNative: isNativeMobile,
     country: config.country,
     currency: config.currency,
     currencySymbol: config.currencySymbol,

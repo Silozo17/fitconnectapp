@@ -510,15 +510,31 @@ const CoachOnboarding = () => {
         toast.success("Profile saved! Complete your subscription to unlock all features.");
         navigate(`/subscribe?tier=${formData.subscriptionTier}&billing=${billingInterval}&from=onboarding`);
       } else if (formData.alsoClient) {
-        // Invalidate onboarding status cache before navigation
-        queryClient.invalidateQueries({ queryKey: ["coach-onboarding-status", user.id] });
+        // Set completion flag BEFORE navigation - dashboard will check this
+        sessionStorage.setItem('fitconnect_onboarding_just_completed', 'coach');
+        
+        // Refetch (not just invalidate) to ensure cache has fresh data
+        await queryClient.refetchQueries({ queryKey: ["coach-onboarding-status", user.id] });
         await refreshProfiles();
+        
+        if (import.meta.env.DEV) {
+          console.log('[CoachOnboarding] handleComplete - navigating to client onboarding');
+        }
+        
         toast.success("Coach profile completed! Now let's set up your client profile.");
         navigate("/onboarding/client", { replace: true });
       } else {
-        // Invalidate onboarding status cache before navigation to prevent flickering
-        queryClient.invalidateQueries({ queryKey: ["coach-onboarding-status", user.id] });
+        // Set completion flag BEFORE navigation - dashboard will check this to prevent flicker
+        sessionStorage.setItem('fitconnect_onboarding_just_completed', 'coach');
+        
+        // Refetch (not just invalidate) to ensure cache has fresh data
+        await queryClient.refetchQueries({ queryKey: ["coach-onboarding-status", user.id] });
         await refreshProfiles();
+        
+        if (import.meta.env.DEV) {
+          console.log('[CoachOnboarding] handleComplete - navigating to dashboard');
+        }
+        
         toast.success("Profile completed! Welcome to FitConnect.");
         navigate("/dashboard/coach", { replace: true });
       }

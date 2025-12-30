@@ -47,6 +47,7 @@ export const useClientOnboardingStatus = () => {
     staleTime: 5 * 60 * 1000, // 5 minutes - prevents waterfall loading on dashboard
     gcTime: 60 * 60 * 1000, // 1 hour
     refetchOnWindowFocus: true,
+    refetchOnMount: true, // Always refetch on mount to get fresh data after onboarding
     retry: 2, // Retry twice before giving up
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
   });
@@ -86,6 +87,7 @@ export const useCoachOnboardingStatus = () => {
     enabled: !!user?.id,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 60 * 60 * 1000, // 1 hour
+    refetchOnMount: true, // Always refetch on mount to get fresh data after onboarding
     retry: 2, // Retry twice before giving up
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
   });
