@@ -5,24 +5,31 @@ interface SEOHeadProps {
   description: string;
   canonicalPath?: string;
   ogImage?: string;
+  ogImageAlt?: string;
   ogType?: "website" | "article" | "profile";
   noIndex?: boolean;
   keywords?: string[];
   schema?: object | object[];
+  publishedTime?: string;
+  modifiedTime?: string;
 }
 
 const BASE_URL = "https://getfitconnect.co.uk";
-const DEFAULT_OG_IMAGE = `${BASE_URL}/og-image.png`;
+const DEFAULT_OG_IMAGE = `${BASE_URL}/og-image.webp`;
+const DEFAULT_OG_IMAGE_ALT = "FitConnect - Connect with world-class fitness coaches in the UK";
 
 export function SEOHead({
   title,
   description,
   canonicalPath = "",
   ogImage = DEFAULT_OG_IMAGE,
+  ogImageAlt = DEFAULT_OG_IMAGE_ALT,
   ogType = "website",
   noIndex = false,
   keywords = [],
   schema,
+  publishedTime,
+  modifiedTime,
 }: SEOHeadProps) {
   const fullTitle = title.includes("FitConnect") ? title : `${title} | FitConnect`;
   const canonicalUrl = `${BASE_URL}${canonicalPath}`;
@@ -58,10 +65,21 @@ export function SEOHead({
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={description} />
       <meta property="og:image" content={fullOgImage} />
+      <meta property="og:image:secure_url" content={fullOgImage} />
+      <meta property="og:image:type" content={fullOgImage.endsWith('.webp') ? 'image/webp' : 'image/png'} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
+      <meta property="og:image:alt" content={ogImageAlt} />
       <meta property="og:site_name" content="FitConnect" />
       <meta property="og:locale" content="en_GB" />
+      
+      {/* Article-specific Open Graph */}
+      {ogType === "article" && publishedTime && (
+        <meta property="article:published_time" content={publishedTime} />
+      )}
+      {ogType === "article" && modifiedTime && (
+        <meta property="article:modified_time" content={modifiedTime} />
+      )}
 
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
@@ -69,6 +87,7 @@ export function SEOHead({
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={fullOgImage} />
+      <meta name="twitter:image:alt" content={ogImageAlt} />
       <meta name="twitter:site" content="@FitConnect" />
 
       {/* JSON-LD Schema */}

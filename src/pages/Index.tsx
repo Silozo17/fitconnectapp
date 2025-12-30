@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import { SEOHead, createBreadcrumbSchema } from "@/components/shared/SEOHead";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Hero from "@/components/landing/Hero";
@@ -36,15 +36,44 @@ const Index = () => {
     }
   }, [user, role, loading, navigate]);
 
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "FitConnect",
+    "url": "https://getfitconnect.co.uk",
+    "logo": "https://getfitconnect.co.uk/pwa-512x512.png",
+    "description": "Connect with world-class fitness coaches in the UK",
+    "sameAs": [
+      "https://twitter.com/FitConnect",
+      "https://instagram.com/fitconnect"
+    ]
+  };
+
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "FitConnect",
+    "url": "https://getfitconnect.co.uk",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://getfitconnect.co.uk/coaches?search={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  };
+
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: "Home", url: "/" }
+  ]);
+
   return (
     <>
-      <Helmet>
-        <title>FitConnect - Find Your Perfect Fitness Coach | Personal Training, Nutrition & Combat Sports</title>
-        <meta 
-          name="description" 
-          content="Connect with elite personal trainers, nutritionists, and combat sports coaches. Get personalized training plans and achieve your fitness goals with FitConnect." 
-        />
-      </Helmet>
+      <SEOHead
+        title="FitConnect - Find Your Perfect Fitness Coach | Personal Training, Nutrition & Combat Sports"
+        description="Connect with elite personal trainers, nutritionists, and combat sports coaches in the UK. Get personalized training plans and achieve your fitness goals."
+        canonicalPath="/"
+        keywords={["personal trainer near me", "fitness coach UK", "online personal training", "find personal trainer", "book fitness coach"]}
+        schema={[organizationSchema, websiteSchema, breadcrumbSchema]}
+      />
       
       <div className="min-h-screen bg-background">
         <Navbar />
