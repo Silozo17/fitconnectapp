@@ -5,12 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { MessageSquare, Calendar, UserPlus, Loader2, AlertCircle } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { MessageSquare, Calendar, UserPlus, Loader2, AlertCircle, Award, ChevronDown } from "lucide-react";
 import { useMyCoaches } from "@/hooks/useMyCoaches";
+import { useMyShowcaseConsents } from "@/hooks/useClientShowcaseConsents";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
+import { ShowcaseConsentCard } from "@/components/coaches/ShowcaseConsentCard";
 
 const ClientCoaches = () => {
   const { data: coaches = [], isLoading, error, refetch } = useMyCoaches();
+  const { data: consentsMap } = useMyShowcaseConsents();
 
   return (
     <ClientDashboardLayout
@@ -71,51 +75,82 @@ const ClientCoaches = () => {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {coaches.map((connection) => (
-            <Card key={connection.id} className="hover:border-primary/50 transition-colors">
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <Avatar className="w-16 h-16">
-                    <AvatarImage src={connection.coach.profile_image_url || undefined} />
-                    <AvatarFallback className="bg-primary text-primary-foreground text-lg">
-                      {connection.coach.display_name?.[0] || "C"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground truncate">
-                      {connection.coach.display_name || "Coach"}
-                    </h3>
-                    <div className="flex flex-wrap gap-1 mt-1 mb-2">
-                      {connection.coach.coach_types?.slice(0, 2).map((type) => (
-                        <Badge key={type} variant="secondary" className="text-xs">
-                          {type}
-                        </Badge>
-                      ))}
+          {coaches.map((connection) => {
+            const consent = consentsMap?.get(connection.coach.id) || null;
+            
+            return (
+              <Card key={connection.id} className="hover:border-primary/50 transition-colors">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <Avatar className="w-16 h-16">
+                      <AvatarImage src={connection.coach.profile_image_url || undefined} />
+                      <AvatarFallback className="bg-primary text-primary-foreground text-lg">
+                        {connection.coach.display_name?.[0] || "C"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-foreground truncate">
+                        {connection.coach.display_name || "Coach"}
+                      </h3>
+                      <div className="flex flex-wrap gap-1 mt-1 mb-2">
+                        {connection.coach.coach_types?.slice(0, 2).map((type) => (
+                          <Badge key={type} variant="secondary" className="text-xs">
+                            {type}
+                          </Badge>
+                        ))}
+                      </div>
+                      {connection.coach.bio && (
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {connection.coach.bio}
+                        </p>
+                      )}
                     </div>
-                    {connection.coach.bio && (
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {connection.coach.bio}
-                      </p>
-                    )}
                   </div>
-                </div>
-                <div className="flex gap-2 mt-4">
-                  <Button variant="outline" size="sm" className="flex-1" asChild>
-                    <Link to={`/dashboard/client/messages/${connection.coach.id}`}>
-                      <MessageSquare className="w-4 h-4 mr-2" />
-                      Message
-                    </Link>
-                  </Button>
-                  <Button variant="outline" size="sm" className="flex-1" asChild>
-                    <Link to="/dashboard/client/sessions">
-                      <Calendar className="w-4 h-4 mr-2" />
-                      Sessions
-                    </Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  <div className="flex gap-2 mt-4">
+                    <Button variant="outline" size="sm" className="flex-1" asChild>
+                      <Link to={`/dashboard/client/messages/${connection.coach.id}`}>
+                        <MessageSquare className="w-4 h-4 mr-2" />
+                        Message
+                      </Link>
+                    </Button>
+                    <Button variant="outline" size="sm" className="flex-1" asChild>
+                      <Link to="/dashboard/client/sessions">
+                        <Calendar className="w-4 h-4 mr-2" />
+                        Sessions
+                      </Link>
+                    </Button>
+                  </div>
+
+                  {/* Showcase Consent Section */}
+                  <Collapsible className="mt-4 border-t border-border/50 pt-4">
+                    <CollapsibleTrigger className="flex w-full items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <Award className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">Transformation Showcase</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={consent ? "default" : "secondary"} className="text-xs">
+                          {consent ? (
+                            consent.consentType === "full" ? "Full" :
+                            consent.consentType === "with_name" ? "With Name" :
+                            consent.consentType === "with_photos" ? "With Photos" : "Stats Only"
+                          ) : "Not Shared"}
+                        </Badge>
+                        <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                      </div>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <ShowcaseConsentCard
+                        coachId={connection.coach.id}
+                        coachName={connection.coach.display_name || "Coach"}
+                        existingConsent={consent}
+                      />
+                    </CollapsibleContent>
+                  </Collapsible>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
     </ClientDashboardLayout>
