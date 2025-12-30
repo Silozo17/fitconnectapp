@@ -5750,6 +5750,10 @@ export type Database = {
           last_name: string | null
           locale_initialized_at: string | null
           location: string | null
+          terms_accepted_at: string | null
+          terms_app_version: string | null
+          terms_platform: string | null
+          terms_version: string | null
           updated_at: string | null
           user_id: string
           username: string
@@ -5768,6 +5772,10 @@ export type Database = {
           last_name?: string | null
           locale_initialized_at?: string | null
           location?: string | null
+          terms_accepted_at?: string | null
+          terms_app_version?: string | null
+          terms_platform?: string | null
+          terms_version?: string | null
           updated_at?: string | null
           user_id: string
           username: string
@@ -5786,6 +5794,10 @@ export type Database = {
           last_name?: string | null
           locale_initialized_at?: string | null
           location?: string | null
+          terms_accepted_at?: string | null
+          terms_app_version?: string | null
+          terms_platform?: string | null
+          terms_version?: string | null
           updated_at?: string | null
           user_id?: string
           username?: string
@@ -5809,6 +5821,81 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_security_settings: {
+        Row: {
+          created_at: string | null
+          id: string
+          two_factor_disabled_at: string | null
+          two_factor_enabled: boolean | null
+          two_factor_method: string | null
+          two_factor_verified_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          two_factor_disabled_at?: string | null
+          two_factor_enabled?: boolean | null
+          two_factor_method?: string | null
+          two_factor_verified_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          two_factor_disabled_at?: string | null
+          two_factor_enabled?: boolean | null
+          two_factor_method?: string | null
+          two_factor_verified_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_sessions: {
+        Row: {
+          created_at: string | null
+          device_info: string | null
+          id: string
+          ip_country: string | null
+          ip_region: string | null
+          is_active: boolean | null
+          is_current: boolean | null
+          last_seen_at: string | null
+          platform: string | null
+          session_token_hash: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          device_info?: string | null
+          id?: string
+          ip_country?: string | null
+          ip_region?: string | null
+          is_active?: boolean | null
+          is_current?: boolean | null
+          last_seen_at?: string | null
+          platform?: string | null
+          session_token_hash: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          device_info?: string | null
+          id?: string
+          ip_country?: string | null
+          ip_region?: string | null
+          is_active?: boolean | null
+          is_current?: boolean | null
+          last_seen_at?: string | null
+          platform?: string | null
+          session_token_hash?: string
           user_id?: string
         }
         Relationships: []
