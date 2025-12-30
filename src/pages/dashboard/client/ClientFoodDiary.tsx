@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { format, addDays, subDays } from "date-fns";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
@@ -55,8 +55,9 @@ const ClientFoodDiary = () => {
   const deleteEntry = useDeleteFoodDiaryEntry();
   const updateEntry = useUpdateFoodDiaryEntry();
 
-  const dailyMacros = calculateDailyMacros(entries);
-  const groupedEntries = groupEntriesByMeal(entries);
+  // Memoize expensive calculations
+  const dailyMacros = useMemo(() => calculateDailyMacros(entries), [entries]);
+  const groupedEntries = useMemo(() => groupEntriesByMeal(entries), [entries]);
 
   const handleFoodFound = (food: any, mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack', quantity?: number) => {
     if (!clientProfile?.id) return;
