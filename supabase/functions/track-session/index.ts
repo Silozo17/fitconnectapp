@@ -84,16 +84,21 @@ serve(async (req) => {
     // Extract token from header
     const token = authHeader.replace("Bearer ", "");
 
-    // Create Supabase client
+    // Create Supabase clients
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    // User client for authentication
+    const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
     });
 
-    // Get current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    // Service client for database operations (bypasses RLS)
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Get current user (use user client for auth)
+    const { data: { user }, error: userError } = await supabaseUser.auth.getUser();
     if (userError || !user) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
