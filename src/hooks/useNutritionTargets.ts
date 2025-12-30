@@ -11,6 +11,10 @@ import {
   type Gender,
 } from "@/lib/nutrition-science-config";
 
+// Helper to avoid deep type instantiation with Supabase queries
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = supabase as any;
+
 export interface NutritionTargets {
   calories: number;
   protein: number;
@@ -157,7 +161,7 @@ export const useNutritionTargets = (clientId?: string) => {
       let targetClientId = clientId;
       
       if (!targetClientId && user) {
-        const { data: profile } = await supabase
+        const { data: profile } = await db
           .from("client_profiles")
           .select("id")
           .eq("user_id", user.id)
@@ -169,26 +173,38 @@ export const useNutritionTargets = (clientId?: string) => {
         return FALLBACK_TARGETS;
       }
       
-      // 1. Check for coach-assigned nutrition plan
-      const { data: planAssignments } = await supabase
+      // 1. Check for coach-assigned nutrition plan (using db alias to avoid deep type instantiation)
+      const planAssignmentsResult = await db
         .from("plan_assignments")
-        .select("id, training_plans:training_plans(id, plan_type, content)")
+        .select("id, plan_id")
         .eq("client_id", targetClientId)
         .eq("is_active", true)
         .order("assigned_at", { ascending: false });
       
-      // Filter for nutrition plans
+      const planAssignments = planAssignmentsResult.data as Array<{ id: string; plan_id: string }> | null;
+      
+      // Fetch nutrition plans separately if assignments exist
       if (planAssignments && planAssignments.length > 0) {
-        for (const pa of planAssignments) {
-          const plan = pa.training_plans as any;
-          if (plan?.plan_type === "nutrition" && plan?.content) {
-            const content = plan.content as Record<string, any>;
+        const planIds = planAssignments.map(pa => pa.plan_id).filter(Boolean);
+        if (planIds.length > 0) {
+          const nutritionPlanResult = await db
+            .from("training_plans")
+            .select("id, plan_type, content")
+            .in("id", planIds)
+            .eq("plan_type", "nutrition")
+            .limit(1)
+            .maybeSingle();
+          
+          const nutritionPlan = nutritionPlanResult.data as { id: string; plan_type: string; content: Record<string, unknown> } | null;
+          
+          if (nutritionPlan?.content) {
+            const content = nutritionPlan.content;
             if (content?.daily_calories || content?.calories) {
               return {
-                calories: content.daily_calories || content.calories || 2000,
-                protein: content.protein_g || content.protein || 150,
-                carbs: content.carbs_g || content.carbs || 200,
-                fat: content.fat_g || content.fat || 65,
+                calories: Number(content.daily_calories || content.calories || 2000),
+                protein: Number(content.protein_g || content.protein || 150),
+                carbs: Number(content.carbs_g || content.carbs || 200),
+                fat: Number(content.fat_g || content.fat || 65),
                 source: "coach" as const,
               };
             }
@@ -197,11 +213,11 @@ export const useNutritionTargets = (clientId?: string) => {
       }
       
       // 2. Calculate from client profile
-      const { data: clientProfile } = await supabase
+      const { data: clientProfile } = await db
         .from("client_profiles")
         .select("id, weight_kg, height_cm, age, gender, activity_level, fitness_goals")
         .eq("id", targetClientId)
-        .single();
+        .single() as { data: ClientProfileForNutrition | null };
       
       if (clientProfile) {
         const calculated = calculateTargets(clientProfile);
