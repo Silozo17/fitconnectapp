@@ -1,7 +1,7 @@
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { isDespia, withDespia } from "@/lib/despia";
+import { isDespia } from "@/lib/despia";
 import despia from "despia-native";
 
 interface PushRegistrationResult {
@@ -14,6 +14,26 @@ export const usePushNotifications = () => {
   const { user } = useAuth();
   const [isRegistered, setIsRegistered] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
+  const hasSetExternalUserId = useRef(false);
+
+  /**
+   * Set the OneSignal external user ID on app load
+   * This connects the logged-in user ID with OneSignal for targeted notifications
+   */
+  const setExternalUserId = useCallback(async () => {
+    if (!user || !isDespia() || hasSetExternalUserId.current) {
+      return;
+    }
+
+    try {
+      console.log("[Push] Setting OneSignal external user ID:", user.id);
+      await despia(`setonesignalplayerid://?user_id=${user.id}`);
+      hasSetExternalUserId.current = true;
+      console.log("[Push] OneSignal external user ID set successfully");
+    } catch (error) {
+      console.error("[Push] Failed to set OneSignal external user ID:", error);
+    }
+  }, [user]);
 
   /**
    * Register the device for push notifications via Despia/OneSignal
@@ -87,6 +107,7 @@ export const usePushNotifications = () => {
         .eq("user_id", user.id);
 
       setIsRegistered(false);
+      hasSetExternalUserId.current = false;
     } catch (error) {
       console.error("Failed to unregister push:", error);
     }
@@ -112,6 +133,20 @@ export const usePushNotifications = () => {
     }
   }, [user]);
 
+  // Set external user ID on every app load when user is logged in
+  useEffect(() => {
+    if (user && isDespia()) {
+      setExternalUserId();
+    }
+  }, [user, setExternalUserId]);
+
+  // Reset the flag when user logs out
+  useEffect(() => {
+    if (!user) {
+      hasSetExternalUserId.current = false;
+    }
+  }, [user]);
+
   // Auto-register on login when in Despia environment
   useEffect(() => {
     if (user && isDespia()) {
@@ -122,7 +157,7 @@ export const usePushNotifications = () => {
         }
       });
     }
-  }, [user, isDespia, checkRegistrationStatus, registerForPush, isRegistered]);
+  }, [user, checkRegistrationStatus, registerForPush, isRegistered]);
 
   return {
     isDespia: isDespia(),
@@ -131,5 +166,6 @@ export const usePushNotifications = () => {
     registerForPush,
     unregisterPush,
     checkRegistrationStatus,
+    setExternalUserId,
   };
 };
