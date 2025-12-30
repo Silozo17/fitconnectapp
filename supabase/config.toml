@@ -284,3 +284,6 @@ verify_jwt = false
 
 [functions.generate-monthly-client-review]
 verify_jwt = true
+
+[functions.generate-weekly-client-summary]
+verify_jwt = true

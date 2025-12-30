@@ -12,6 +12,8 @@ import { DailyTipWidget } from "@/components/dashboard/client/DailyTipWidget";
 import { ReadinessWidget } from "@/components/dashboard/client/ReadinessWidget";
 import { WearableTrendCard } from "@/components/dashboard/client/WearableTrendCard";
 import { GoalSuggestionBanner } from "@/components/dashboard/client/GoalSuggestionBanner";
+import { WeeklySummaryCard } from "@/components/dashboard/client/WeeklySummaryCard";
+import MonthlyReviewCard from "@/components/dashboard/client/MonthlyReviewCard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -181,6 +183,12 @@ const ClientOverview = () => {
 
       {/* Daily Tip */}
       <DailyTipWidget className="mb-6" />
+
+      {/* Weekly Summary */}
+      <WeeklySummaryCard className="mb-6" />
+
+      {/* Monthly Review */}
+      <MonthlyReviewCard />
 
       {/* Friend Requests */}
       <UserConnectionRequests />
