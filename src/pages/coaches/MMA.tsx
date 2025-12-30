@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Flame, Target, Zap, Shield, Users, ArrowRight, Star } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { SEOHead, createFAQPageSchema, createServiceSchema, createBreadcrumbSchema } from "@/components/shared/SEOHead";
 
 const MMA = () => {
   const { t } = useTranslation('pages');
@@ -71,12 +71,40 @@ const MMA = () => {
     { name: "Jake Morrison", specialty: t('coachTypes.mma.featured.specialties.wrestling'), rating: 4.9, clients: 200 },
   ];
 
+  const faqSchema = createFAQPageSchema(faqs);
+  const serviceSchema = createServiceSchema({
+    name: "MMA Coaching Services",
+    description: "Find certified MMA coaches for mixed martial arts training, BJJ, Muay Thai, wrestling, and self-defense. Book sessions with experienced MMA trainers across the UK.",
+    url: "/coaches/mma",
+  });
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Coaches", url: "/coaches" },
+    { name: "MMA Coaches", url: "/coaches/mma" },
+  ]);
+
   return (
     <>
-      <Helmet>
-        <title>{t('coachTypes.mma.meta.title')}</title>
-        <meta name="description" content={t('coachTypes.mma.meta.description')} />
-      </Helmet>
+      <SEOHead
+        title="Find MMA Coaches Near Me | Mixed Martial Arts Training UK"
+        description="Find and book experienced MMA coaches near you. Learn mixed martial arts, BJJ, Muay Thai, wrestling, and self-defense with certified trainers. Online and in-person MMA training available across the UK."
+        canonicalPath="/coaches/mma"
+        keywords={[
+          "MMA coach near me",
+          "MMA coach UK",
+          "mixed martial arts training",
+          "MMA lessons near me",
+          "learn MMA UK",
+          "BJJ coach UK",
+          "Muay Thai coach",
+          "self-defense classes UK",
+          "MMA gym near me",
+          "combat sports training",
+          "MMA trainer London",
+          "MMA lessons Manchester",
+        ]}
+        schema={[faqSchema, serviceSchema, breadcrumbSchema]}
+      />
       
       <div className="min-h-screen bg-background">
         <Navbar />

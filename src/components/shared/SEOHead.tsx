@@ -29,13 +29,43 @@ export function SEOHead({
   const fullOgImage = ogImage.startsWith("http") ? ogImage : `${BASE_URL}${ogImage}`;
 
   const defaultKeywords = [
-    "personal trainer",
-    "fitness coach",
-    "nutritionist",
-    "boxing coach",
-    "MMA coach",
-    "online coaching",
-    "fitness training UK",
+    // Primary high-volume keywords
+    "personal trainer near me",
+    "personal trainer UK",
+    "find personal trainer",
+    "book personal trainer",
+    "hire personal trainer",
+    "fitness coach near me",
+    "fitness coach UK",
+    "online personal training UK",
+    "online personal trainer",
+    // Specialty coaches
+    "boxing coach near me",
+    "boxing coach UK",
+    "boxing lessons UK",
+    "MMA coach near me",
+    "MMA coach UK",
+    "mixed martial arts training",
+    "nutritionist near me UK",
+    "online nutritionist UK",
+    "nutrition coach UK",
+    "macro coaching UK",
+    "bodybuilding coach UK",
+    "competition prep coach",
+    "physique coach UK",
+    // Commercial intent keywords
+    "fitness marketplace UK",
+    "fitness coaching platform",
+    "workout plans UK",
+    "meal plans UK",
+    "digital fitness products",
+    "certified fitness professional UK",
+    "verified personal trainer",
+    // Location-based
+    "personal trainer London",
+    "personal trainer Manchester",
+    "personal trainer Birmingham",
+    "fitness coach London",
   ];
 
   const allKeywords = [...new Set([...defaultKeywords, ...keywords])].join(", ");
@@ -301,5 +331,74 @@ export function createArticleSchema(article: {
     ...(article.keywords && {
       "keywords": article.keywords.join(", "),
     }),
+  };
+}
+
+// Helper to create FAQPage schema for rich results
+export function createFAQPageSchema(faqs: { question: string; answer: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map((faq) => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer,
+      },
+    })),
+  };
+}
+
+// Helper to create HowTo schema for step-by-step guides
+export function createHowToSchema(howTo: {
+  name: string;
+  description: string;
+  steps: { name: string; text: string; url?: string }[];
+  totalTime?: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": howTo.name,
+    "description": howTo.description,
+    ...(howTo.totalTime && { "totalTime": howTo.totalTime }),
+    "step": howTo.steps.map((step, index) => ({
+      "@type": "HowToStep",
+      "position": index + 1,
+      "name": step.name,
+      "text": step.text,
+      ...(step.url && { "url": `https://getfitconnect.co.uk${step.url}` }),
+    })),
+  };
+}
+
+// Helper to create SoftwareApplication schema
+export function createSoftwareApplicationSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "FitConnect",
+    "applicationCategory": "HealthApplication",
+    "operatingSystem": "Web, iOS, Android",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "GBP",
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "250",
+      "bestRating": "5",
+      "worstRating": "1",
+    },
+    "description": "UK's leading fitness coach marketplace. Find and book certified personal trainers, boxing coaches, MMA coaches, nutritionists, and bodybuilding coaches.",
+    "url": "https://getfitconnect.co.uk",
+    "provider": {
+      "@type": "Organization",
+      "name": "FitConnect",
+      "url": "https://getfitconnect.co.uk",
+    },
   };
 }

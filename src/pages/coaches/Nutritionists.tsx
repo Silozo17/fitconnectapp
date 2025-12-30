@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Apple, Utensils, Heart, Scale, CheckCircle, ArrowRight, Star, Leaf } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { SEOHead, createFAQPageSchema, createServiceSchema, createBreadcrumbSchema } from "@/components/shared/SEOHead";
 
 const Nutritionists = () => {
   const { t } = useTranslation('pages');
@@ -64,12 +64,40 @@ const Nutritionists = () => {
     { name: "Lisa Thompson", specialty: t('coachTypes.nutritionists.featured.specialties.plantBased'), rating: 4.9, clients: 150 },
   ];
 
+  const faqSchema = createFAQPageSchema(faqs);
+  const serviceSchema = createServiceSchema({
+    name: "Nutrition Coaching Services",
+    description: "Find certified nutritionists and nutrition coaches for meal planning, macro coaching, weight management, and dietary guidance. Book consultations with registered nutritionists across the UK.",
+    url: "/coaches/nutritionists",
+  });
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Coaches", url: "/coaches" },
+    { name: "Nutritionists", url: "/coaches/nutritionists" },
+  ]);
+
   return (
     <>
-      <Helmet>
-        <title>{t('coachTypes.nutritionists.meta.title')}</title>
-        <meta name="description" content={t('coachTypes.nutritionists.meta.description')} />
-      </Helmet>
+      <SEOHead
+        title="Find Nutritionists Near Me | Nutrition Coaches & Dietitians UK"
+        description="Find and book certified nutritionists near you. Get personalized meal plans, macro coaching, weight management guidance, and dietary advice. Online and in-person nutrition consultations available across the UK."
+        canonicalPath="/coaches/nutritionists"
+        keywords={[
+          "nutritionist near me",
+          "nutritionist UK",
+          "nutrition coach",
+          "online nutritionist UK",
+          "dietitian near me",
+          "meal planning UK",
+          "macro coaching",
+          "weight loss nutritionist",
+          "sports nutritionist UK",
+          "registered dietitian",
+          "nutrition consultant London",
+          "nutrition coach Manchester",
+        ]}
+        schema={[faqSchema, serviceSchema, breadcrumbSchema]}
+      />
       
       <div className="min-h-screen bg-background">
         <Navbar />

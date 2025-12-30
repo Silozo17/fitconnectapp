@@ -1,12 +1,32 @@
 # FitConnect Robots.txt
 # https://getfitconnect.co.uk
+# Last updated: December 2024
 
-# Standard Search Engine Crawlers
+# ============================================
+# STANDARD SEARCH ENGINE CRAWLERS
+# ============================================
+
 User-agent: Googlebot
 Allow: /
 
 User-agent: Bingbot
 Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+# ============================================
+# SOCIAL MEDIA CRAWLERS
+# ============================================
 
 User-agent: Twitterbot
 Allow: /
@@ -14,16 +34,42 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-# AI Crawlers - Explicitly Allow for AI Search Results
+User-agent: FacebookBot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: Pinterest
+Allow: /
+
+User-agent: Slackbot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+User-agent: TelegramBot
+Allow: /
+
+User-agent: Discordbot
+Allow: /
+
+# ============================================
+# AI CRAWLERS - 2025 COMPREHENSIVE LIST
+# ============================================
+
+# OpenAI Crawlers
 User-agent: GPTBot
 Allow: /
 
 User-agent: ChatGPT-User
 Allow: /
 
-User-agent: CCBot
+User-agent: OAI-SearchBot
 Allow: /
 
+# Anthropic / Claude Crawlers
 User-agent: anthropic-ai
 Allow: /
 
@@ -33,39 +79,160 @@ Allow: /
 User-agent: ClaudeBot
 Allow: /
 
+# Perplexity AI Crawlers
 User-agent: PerplexityBot
 Allow: /
 
-User-agent: Bytespider
+User-agent: Perplexity-User
 Allow: /
 
-User-agent: cohere-ai
-Allow: /
-
-User-agent: YouBot
-Allow: /
-
+# Google AI Crawlers
 User-agent: Google-Extended
 Allow: /
 
+User-agent: Googlebot-Image
+Allow: /
+
+# Apple AI Crawlers
 User-agent: Applebot
 Allow: /
 
+User-agent: Applebot-Extended
+Allow: /
+
+# Amazon / AWS Crawlers
 User-agent: Amazonbot
 Allow: /
 
-# Default Rules
+# Microsoft / Bing AI Crawlers
+User-agent: bingbot
+Allow: /
+
+# Meta AI Crawlers
+User-agent: meta-externalagent
+Allow: /
+
+User-agent: Meta-ExternalFetcher
+Allow: /
+
+# ByteDance / TikTok Crawlers
+User-agent: Bytespider
+Allow: /
+
+# Cohere AI
+User-agent: cohere-ai
+Allow: /
+
+User-agent: cohere-training
+Allow: /
+
+# You.com
+User-agent: YouBot
+Allow: /
+
+# DuckDuckGo AI
+User-agent: DuckAssistBot
+Allow: /
+
+# Mistral AI
+User-agent: MistralAI-User
+Allow: /
+
+# Common Crawl (used by many AI models)
+User-agent: CCBot
+Allow: /
+
+# Diffbot (structured data extraction)
+User-agent: Diffbot
+Allow: /
+
+# AI2 / Semantic Scholar
+User-agent: AI2Bot
+Allow: /
+
+# Hugging Face
+User-agent: HuggingFaceBot
+Allow: /
+
+# Neeva (search AI)
+User-agent: NeevaBot
+Allow: /
+
+# Brave Search
+User-agent: BraveBot
+Allow: /
+
+# Mojeek
+User-agent: MojeekBot
+Allow: /
+
+# Webz.io (AI data)
+User-agent: webzio-extended
+Allow: /
+
+# ============================================
+# DEFAULT RULES
+# ============================================
+
 User-agent: *
 Allow: /
 
-# Protected routes - Disallow crawling
+# ============================================
+# PROTECTED ROUTES - DISALLOW CRAWLING
+# ============================================
+
+# User dashboard areas (require authentication)
 Disallow: /dashboard/
 Disallow: /onboarding/
-Disallow: /auth
-Disallow: /subscribe
-Disallow: /api/
-Disallow: /checkout
-Disallow: /docs/admin/
 
-# Sitemaps - Dynamic sitemap from edge function
+# Authentication pages
+Disallow: /auth
+Disallow: /auth/
+Disallow: /login
+Disallow: /signup
+Disallow: /reset-password
+
+# Payment and checkout
+Disallow: /subscribe
+Disallow: /checkout
+Disallow: /checkout/
+
+# API endpoints
+Disallow: /api/
+Disallow: /functions/
+
+# Admin areas
+Disallow: /docs/admin/
+Disallow: /admin/
+
+# Temporary or draft content
+Disallow: /draft/
+Disallow: /preview/
+
+# User-specific pages
+Disallow: /settings/
+Disallow: /profile/edit
+
+# Search with parameters (prevent duplicate content)
+Disallow: /*?*sort=
+Disallow: /*?*filter=
+Disallow: /*?*page=
+
+# ============================================
+# SITEMAPS
+# ============================================
+
 Sitemap: https://getfitconnect.co.uk/sitemap.xml
+
+# ============================================
+# CRAWL DELAY (optional, for server protection)
+# ============================================
+
+# Uncomment if needed to reduce server load
+# Crawl-delay: 1
+
+# ============================================
+# HOST DIRECTIVE
+# ============================================
+
+Host: https://getfitconnect.co.uk
