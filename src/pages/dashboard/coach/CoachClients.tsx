@@ -12,11 +12,14 @@ import {
   UserCheck,
   Clock,
   Loader2,
+  CheckSquare,
+  Square,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,12 +42,14 @@ import { ClientCardMobile } from "@/components/dashboard/clients/ClientCardMobil
 import { useCoachClients, CoachClient } from "@/hooks/useCoachClients";
 import ClientRequests from "@/components/dashboard/coach/ClientRequests";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
-
+import { BatchOperationsToolbar } from "@/components/coach/clients/BatchOperationsToolbar";
+import { isFeatureEnabled } from "@/lib/coach-feature-flags";
 const CoachClients = () => {
   const { t } = useTranslation("coach");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [planFilter, setPlanFilter] = useState("all");
+  const [selectedClientIds, setSelectedClientIds] = useState<string[]>([]);
   
   // Modal states
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
@@ -76,6 +81,22 @@ const CoachClients = () => {
     const plans = clients.map(c => c.plan_type).filter(Boolean) as string[];
     return [...new Set(plans)];
   }, [clients]);
+
+  const toggleClientSelection = (clientId: string) => {
+    setSelectedClientIds(prev => 
+      prev.includes(clientId) 
+        ? prev.filter(id => id !== clientId)
+        : [...prev, clientId]
+    );
+  };
+
+  const selectedNames = useMemo(() => {
+    return clients
+      .filter(c => selectedClientIds.includes(c.client_id))
+      .map(c => `${c.client_profile?.first_name || ''} ${c.client_profile?.last_name || ''}`.trim() || 'Unknown');
+  }, [clients, selectedClientIds]);
+
+  const batchEnabled = isFeatureEnabled("BATCH_OPERATIONS");
 
   const handleScheduleSession = (client: CoachClient) => {
     setSelectedClient(client);
@@ -425,6 +446,15 @@ const CoachClients = () => {
         clientName={selectedClient ? getFullName(selectedClient) : undefined}
         clientId={selectedClient?.client_id}
       />
+
+      {/* Batch Operations Toolbar */}
+      {batchEnabled && (
+        <BatchOperationsToolbar
+          selectedIds={selectedClientIds}
+          selectedNames={selectedNames}
+          onClearSelection={() => setSelectedClientIds([])}
+        />
+      )}
     </DashboardLayout>
   );
 };
