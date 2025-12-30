@@ -164,9 +164,9 @@ const CoachCaseStudies = () => {
                             )}
                           </Badge>
                         </div>
-                        {caseStudy.content?.summary && (
+                        {(caseStudy.content as { summary?: string })?.summary && (
                           <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                            {caseStudy.content.summary}
+                            {(caseStudy.content as { summary?: string }).summary}
                           </p>
                         )}
                         <p className="text-xs text-muted-foreground">
