@@ -19,7 +19,7 @@ export interface OutcomeShowcase {
   id: string;
   coachId: string;
   clientId: string;
-  consentId: string;
+  consentId: string | null;
   title: string | null;
   description: string | null;
   beforePhotoUrl: string | null;
@@ -31,6 +31,9 @@ export interface OutcomeShowcase {
   isPublished: boolean;
   publishedAt: Date | null;
   createdAt: Date;
+  isExternal: boolean;
+  externalClientName: string | null;
+  coachConsentAcknowledged: boolean;
 }
 
 export interface EligibleClient {
@@ -190,6 +193,9 @@ export function useShowcaseItems(coachId?: string, publishedOnly = false) {
         isPublished: s.is_published || false,
         publishedAt: s.published_at ? new Date(s.published_at) : null,
         createdAt: new Date(s.created_at),
+        isExternal: s.is_external || false,
+        externalClientName: s.external_client_name,
+        coachConsentAcknowledged: s.coach_consent_acknowledged || false,
       }));
     },
     enabled: !!coachId,
@@ -409,6 +415,63 @@ export function useDeleteShowcase() {
     },
     onError: () => {
       toast.error("Failed to delete showcase");
+    },
+  });
+}
+
+export function useCreateExternalShowcase() {
+  const queryClient = useQueryClient();
+  const { data: coachId } = useCoachProfileId();
+
+  return useMutation({
+    mutationFn: async (data: {
+      externalClientName: string;
+      displayName?: string;
+      title?: string;
+      description?: string;
+      beforePhotoUrl?: string;
+      afterPhotoUrl?: string;
+      stats?: Record<string, any>;
+      isAnonymized?: boolean;
+    }) => {
+      if (!coachId) throw new Error("No coach ID");
+
+      // Get max display order
+      const { data: existing } = await supabase
+        .from("coach_outcome_showcases")
+        .select("display_order")
+        .eq("coach_id", coachId)
+        .order("display_order", { ascending: false })
+        .limit(1);
+
+      const nextOrder = (existing?.[0]?.display_order || 0) + 1;
+
+      const { error } = await supabase.from("coach_outcome_showcases").insert({
+        coach_id: coachId,
+        client_id: coachId, // Use coach's own ID as placeholder for external
+        consent_id: null,
+        is_external: true,
+        external_client_name: data.externalClientName,
+        coach_consent_acknowledged: true,
+        coach_consent_acknowledged_at: new Date().toISOString(),
+        display_name: data.displayName || data.externalClientName,
+        title: data.title,
+        description: data.description,
+        before_photo_url: data.beforePhotoUrl,
+        after_photo_url: data.afterPhotoUrl,
+        stats: data.stats,
+        is_anonymized: data.isAnonymized || false,
+        display_order: nextOrder,
+      });
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["showcase-items"] });
+      toast.success("External transformation added");
+    },
+    onError: () => {
+      toast.error("Failed to add external transformation");
     },
   });
 }
