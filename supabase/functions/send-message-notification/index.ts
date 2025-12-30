@@ -95,7 +95,43 @@ serve(async (req) => {
       throw new Error("Receiver email not found");
     }
 
-    // Check email preferences (use notification_preferences table which is the single source of truth)
+    // Truncate message preview (needed for both push and email)
+    const messagePreview = message.content.length > 150 
+      ? message.content.substring(0, 150) + '...' 
+      : message.content;
+
+    const senderName = senderCoach?.display_name || 
+      [senderClient?.first_name, senderClient?.last_name].filter(Boolean).join(' ') || 
+      "Someone";
+
+    // SEND PUSH NOTIFICATION FIRST (before email preference check)
+    // This ensures push is sent regardless of email preferences
+    let pushSent = false;
+    try {
+      console.log("[Push] Sending push notification to user:", receiverUserId);
+      const pushResponse = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${supabaseServiceKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userIds: [receiverUserId],
+          title: `💬 ${senderName}`,
+          message: messagePreview,
+          preferenceKey: "push_messages",
+          data: { type: "message", senderId: message.sender_id, messageId },
+        }),
+      });
+      
+      const pushResult = await pushResponse.json();
+      console.log("[Push] Push notification result:", JSON.stringify(pushResult));
+      pushSent = pushResponse.ok;
+    } catch (pushError) {
+      console.error("[Push] Push notification failed (non-blocking):", pushError);
+    }
+
+    // Check email preferences - only skip EMAIL, not the whole function
     const { data: prefs } = await supabase
       .from("notification_preferences")
       .select("email_messages")
@@ -103,8 +139,12 @@ serve(async (req) => {
       .single();
 
     if (prefs && prefs.email_messages === false) {
-      console.log("User has disabled message email notifications");
-      return new Response(JSON.stringify({ skipped: true, reason: "Notifications disabled" }), {
+      console.log("User has disabled message email notifications - email skipped, push already sent");
+      return new Response(JSON.stringify({ 
+        success: true, 
+        emailSkipped: true,
+        pushSent 
+      }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -112,22 +152,12 @@ serve(async (req) => {
 
     // Use default FitConnect mascot avatar
     const avatarUrl = getDefaultAvatarUrl(supabaseUrl);
-
-    const senderName = senderCoach?.display_name || 
-      [senderClient?.first_name, senderClient?.last_name].filter(Boolean).join(' ') || 
-      "Someone";
     
     const receiverName = receiverCoach?.display_name || receiverClient?.first_name || "there";
-
-    // Truncate message preview
-    const messagePreview = message.content.length > 150 
-      ? message.content.substring(0, 150) + '...' 
-      : message.content;
 
     const dashboardUrl = receiverCoach 
       ? `${siteUrl}/dashboard/coach/messages`
       : `${siteUrl}/dashboard/client/messages`;
-
     const emailContent = `
       <div style="text-align: center; margin-bottom: 24px;">
         <span style="font-size: 48px;">💬</span>
@@ -194,31 +224,7 @@ serve(async (req) => {
 
     console.log("Message notification email sent successfully");
 
-    // Send push notification
-    try {
-      const pushResponse = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${supabaseServiceKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userIds: [receiverUserId],
-          title: `💬 ${senderName}`,
-          message: messagePreview,
-          preferenceKey: "push_messages",
-          data: { type: "message", senderId: message.sender_id, messageId },
-        }),
-      });
-      
-      if (pushResponse.ok) {
-        console.log("Push notification sent successfully");
-      }
-    } catch (pushError) {
-      console.error("Push notification failed (non-blocking):", pushError);
-    }
-
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ success: true, pushSent }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
