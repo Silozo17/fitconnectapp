@@ -41,12 +41,11 @@ const Coaches = () => {
     clearManualLocation,
   } = useMarketplaceLocationFilter();
 
+  // Determine if location is ready (manual selection or auto-detection complete)
+  const isLocationReady = isManualSelection || !autoLocationLoading;
+
   // Determine effective location for proximity ranking (manual overrides auto)
-  const effectiveLocation = isManualSelection
-    ? manualLocation
-    : autoLocationLoading
-      ? null
-      : autoLocation;
+  const effectiveLocation = isManualSelection ? manualLocation : autoLocation;
 
   // Get country from URL locale route - this is the default source of truth
   // URL: /en-gb/coaches → locationCode: 'gb' → shows UK coaches
@@ -72,6 +71,7 @@ const Coaches = () => {
     userLocation: effectiveLocation,
     enableLocationRanking: true,
     countryCode: effectiveCountryCode,
+    enabled: isLocationReady,
   });
 
   const handleBook = useCallback((coach: MarketplaceCoach) => {
