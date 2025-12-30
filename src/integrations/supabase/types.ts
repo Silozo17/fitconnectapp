@@ -4515,6 +4515,9 @@ export type Database = {
           push_connections: boolean | null
           push_messages: boolean | null
           push_motivation: boolean | null
+          push_onboarding: boolean | null
+          push_progress: boolean | null
+          push_reengagement: boolean | null
           push_reminders: boolean | null
           reminder_hours_before: number | null
           updated_at: string
@@ -4533,6 +4536,9 @@ export type Database = {
           push_connections?: boolean | null
           push_messages?: boolean | null
           push_motivation?: boolean | null
+          push_onboarding?: boolean | null
+          push_progress?: boolean | null
+          push_reengagement?: boolean | null
           push_reminders?: boolean | null
           reminder_hours_before?: number | null
           updated_at?: string
@@ -4551,6 +4557,9 @@ export type Database = {
           push_connections?: boolean | null
           push_messages?: boolean | null
           push_motivation?: boolean | null
+          push_onboarding?: boolean | null
+          push_progress?: boolean | null
+          push_reengagement?: boolean | null
           push_reminders?: boolean | null
           reminder_hours_before?: number | null
           updated_at?: string
