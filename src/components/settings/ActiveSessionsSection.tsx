@@ -74,12 +74,15 @@ export const ActiveSessionsSection = () => {
     const info = (deviceInfo || "").toLowerCase();
     const plat = (platform || "").toLowerCase();
 
-    if (plat.includes("ios") || plat.includes("android") || info.includes("mobile")) {
-      return <Smartphone className="w-4 h-4" />;
-    }
+    // Check for tablets first
     if (info.includes("tablet") || info.includes("ipad")) {
       return <Tablet className="w-4 h-4" />;
     }
+    // Check for mobile devices (including native app)
+    if (plat === "ios" || plat === "android" || info.includes("iphone") || info.includes("android phone") || info.includes("mobile")) {
+      return <Smartphone className="w-4 h-4" />;
+    }
+    // Desktop/web
     return <Monitor className="w-4 h-4" />;
   };
 
