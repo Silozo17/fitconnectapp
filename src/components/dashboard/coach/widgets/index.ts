@@ -11,3 +11,9 @@ export { EngagementScoreWidget } from "./EngagementScoreWidget";
 export { RevenueForecastWidget } from "./RevenueForecastWidget";
 export { ClientLTVWidget } from "./ClientLTVWidget";
 export { EnhancedChurnWidget } from "./EnhancedChurnWidget";
+// Phase 2 Widgets
+export { PlateauDetectionWidget } from "./PlateauDetectionWidget";
+export { UpsellInsightsWidget } from "./UpsellInsightsWidget";
+export { GoalAdherenceWidget } from "./GoalAdherenceWidget";
+export { PendingSummariesWidget } from "./PendingSummariesWidget";
+export { PackageAnalyticsWidget } from "./PackageAnalyticsWidget";
