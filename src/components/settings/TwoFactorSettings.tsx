@@ -88,11 +88,11 @@ export const TwoFactorSettings = () => {
       // Password verified, update 2FA setting
       const { error } = await supabase
         .from("user_security_settings")
-        .upsert({
-          user_id: user.id,
+        .update({
           two_factor_enabled: false,
           two_factor_disabled_at: new Date().toISOString(),
-        });
+        })
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
@@ -114,14 +114,14 @@ export const TwoFactorSettings = () => {
     if (!user) return;
 
     try {
-      const { error } = await supabase
-        .from("user_security_settings")
-        .upsert({
-          user_id: user.id,
-          two_factor_enabled: true,
-          two_factor_method: "email",
-          two_factor_verified_at: null,
-        });
+    const { error } = await supabase
+      .from("user_security_settings")
+      .update({
+        two_factor_enabled: true,
+        two_factor_method: "email",
+        two_factor_verified_at: null,
+      })
+      .eq('user_id', user.id);
 
       if (error) throw error;
 
