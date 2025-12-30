@@ -65,6 +65,18 @@ serve(async (req) => {
 
     const coachName = session.coach.display_name || "Your Coach";
 
+    // Format date/time for push notification
+    const sessionDate = new Date(session.scheduled_at);
+    const formattedDateShort = sessionDate.toLocaleDateString('en-GB', { 
+      weekday: 'short',
+      day: 'numeric', 
+      month: 'short'
+    });
+    const formattedTimeShort = sessionDate.toLocaleTimeString('en-GB', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+
     // Send push notification FIRST (before email preference check)
     try {
       console.log("[Push] Sending booking accepted push to client:", session.client.user_id);
@@ -76,8 +88,9 @@ serve(async (req) => {
         },
         body: JSON.stringify({
           userIds: [session.client.user_id],
-          title: "🎉 Booking Confirmed!",
-          message: `${coachName} has accepted your booking request`,
+          title: "Booking Confirmed",
+          subtitle: coachName,
+          message: `${formattedDateShort} at ${formattedTimeShort}`,
           preferenceKey: "push_bookings",
           data: { type: "booking_accepted", sessionId },
         }),
@@ -108,8 +121,7 @@ serve(async (req) => {
 
     const clientName = session.client.first_name || "there";
 
-    // Format date/time
-    const sessionDate = new Date(session.scheduled_at);
+    // Format date/time for email (longer format)
     const formattedDate = sessionDate.toLocaleDateString('en-GB', { 
       weekday: 'long',
       day: 'numeric', 

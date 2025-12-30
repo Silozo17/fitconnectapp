@@ -120,8 +120,9 @@ Deno.serve(async (req) => {
         },
         body: JSON.stringify({
           userIds: enabledUserIds,
-          title: "🏆 New Challenge Available!",
-          message: `"${title}" - Earn ${xp_reward} XP!`,
+          title: "New Challenge",
+          subtitle: title,
+          message: `Earn ${xp_reward} XP!`,
           preferenceKey: "push_challenges",
           data: { type: "new_challenge", challengeId: challenge_id },
         }),

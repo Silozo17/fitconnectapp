@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
       .insert({
         user_id: client.user_id,
         type: 'challenge_completed',
-        title: '🎉 Challenge Completed!',
+        title: 'Challenge Completed!',
         message: `Congratulations! You completed "${challenge.title}". ${rewardText}`,
         data: { 
           challenge_id, 
@@ -81,8 +81,9 @@ Deno.serve(async (req) => {
         },
         body: JSON.stringify({
           userIds: [client.user_id],
-          title: '🎉 Challenge Completed!',
-          message: `You completed "${challenge.title}"! ${rewardText}`,
+          title: 'Challenge Completed',
+          subtitle: challenge.title,
+          message: rewardText,
           preferenceKey: 'push_challenges',
           data: { type: 'challenge_completed', challengeId: challenge_id },
         }),

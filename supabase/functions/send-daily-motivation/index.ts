@@ -5,18 +5,18 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Motivational messages pool
+// Motivational messages pool - clean titles for push notifications
 const MOTIVATIONAL_MESSAGES = [
-  { title: "🌅 Rise and Shine!", message: "Every champion was once a beginner. Let's crush today's workout!" },
-  { title: "💪 You've Got This!", message: "Success is the sum of small efforts repeated daily. Keep pushing!" },
-  { title: "🔥 Stay Focused!", message: "The only bad workout is the one that didn't happen. Make it count!" },
-  { title: "⚡ Energy Boost!", message: "Your body can stand almost anything. It's your mind you have to convince." },
-  { title: "🎯 Stay on Track!", message: "Discipline is doing what needs to be done, even when you don't want to." },
-  { title: "🏆 Champion Mindset!", message: "Winners are not people who never fail, but people who never quit." },
-  { title: "🌟 Believe in Yourself!", message: "You are stronger than you think. Every rep brings you closer to your goals." },
-  { title: "🚀 Push Your Limits!", message: "Comfort zones are where dreams go to die. Challenge yourself today!" },
-  { title: "💯 Give It Your All!", message: "Don't count the days, make the days count. Today is your day!" },
-  { title: "🎉 Celebrate Progress!", message: "Every step forward is a step toward your goals. You're doing amazing!" },
+  { title: "Rise and Shine", message: "Every champion was once a beginner. Let's crush today's workout!" },
+  { title: "You've Got This", message: "Success is the sum of small efforts repeated daily. Keep pushing!" },
+  { title: "Stay Focused", message: "The only bad workout is the one that didn't happen. Make it count!" },
+  { title: "Energy Boost", message: "Your body can stand almost anything. It's your mind you have to convince." },
+  { title: "Stay on Track", message: "Discipline is doing what needs to be done, even when you don't want to." },
+  { title: "Champion Mindset", message: "Winners are not people who never fail, but people who never quit." },
+  { title: "Believe in Yourself", message: "You are stronger than you think. Every rep brings you closer to your goals." },
+  { title: "Push Your Limits", message: "Comfort zones are where dreams go to die. Challenge yourself today!" },
+  { title: "Give It Your All", message: "Don't count the days, make the days count. Today is your day!" },
+  { title: "Celebrate Progress", message: "Every step forward is a step toward your goals. You're doing amazing!" },
 ];
 
 Deno.serve(async (req) => {
@@ -90,6 +90,7 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           userIds,
           title: randomMessage.title,
+          subtitle: "Daily Motivation",
           message: randomMessage.message,
           preferenceKey: 'push_motivation',
           data: { type: 'daily_motivation' },

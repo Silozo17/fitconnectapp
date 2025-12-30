@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
       const notifications = userIds.map((userId: string) => ({
         user_id: userId,
         type: 'challenge_expiring',
-        title: '⏰ Challenge Ending Soon!',
+        title: 'Challenge Ending Soon!',
         message: `"${challenge.title}" ends in less than 24 hours! Complete it to earn ${challenge.xp_reward} XP.`,
         data: { challenge_id: challenge.id },
         read: false,
@@ -102,8 +102,9 @@ Deno.serve(async (req) => {
           },
           body: JSON.stringify({
             userIds,
-            title: '⏰ Challenge Ending Soon!',
-            message: `"${challenge.title}" ends in less than 24 hours!`,
+            title: 'Challenge Ending Soon',
+            subtitle: challenge.title,
+            message: `Complete it to earn ${challenge.xp_reward} XP!`,
             preferenceKey: 'push_challenges',
             data: { type: 'challenge_expiring', challengeId: challenge.id },
           }),

@@ -159,8 +159,9 @@ serve(async (req) => {
         },
         body: JSON.stringify({
           userIds: [request.coach.user_id],
-          title: "🤝 New Connection Request",
-          message: `${clientName} wants to connect with you!`,
+          title: "New Connection Request",
+          subtitle: clientName,
+          message: "Wants to connect with you",
           preferenceKey: "push_connections",
           data: { type: "connection_request", requestId: connectionRequestId },
         }),

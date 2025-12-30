@@ -9,6 +9,7 @@ const corsHeaders = {
 interface PushNotificationRequest {
   userIds: string[];
   title: string;
+  subtitle?: string; // iOS subtitle - shown between title and body
   message: string;
   data?: Record<string, unknown>;
   preferenceKey?: string; // e.g., 'push_messages', 'push_bookings', etc.
@@ -37,7 +38,8 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const { 
       userIds, 
-      title, 
+      title,
+      subtitle,
       message, 
       data, 
       preferenceKey,
@@ -46,6 +48,7 @@ serve(async (req) => {
 
     console.log(`[send-push] ===== PUSH NOTIFICATION REQUEST =====`);
     console.log(`[send-push] Title: "${title}"`);
+    console.log(`[send-push] Subtitle: "${subtitle || 'none'}"`);
     console.log(`[send-push] Message: "${message}"`);
     console.log(`[send-push] Target user IDs: ${JSON.stringify(userIds)}`);
     console.log(`[send-push] Preference key: ${preferenceKey || "none"}`);
@@ -99,6 +102,11 @@ serve(async (req) => {
       contents: { en: message },
       data: data || {},
     };
+
+    // Add subtitle for iOS if provided
+    if (subtitle) {
+      oneSignalBody.subtitle = { en: subtitle };
+    }
 
     if (useExternalUserIds) {
       // Use external user IDs (set via setonesignalplayerid on app load)
