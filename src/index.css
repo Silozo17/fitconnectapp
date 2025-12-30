@@ -316,6 +316,16 @@
     padding-top: env(safe-area-inset-top, 0px);
   }
 
+  /* Adaptive safe area - uses minimum padding on native iPads where env() may not work properly */
+  .pt-safe-status-adaptive {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  /* When running in Despia native app, ensure minimum padding for iPad status bar */
+  body[data-native="true"] .pt-safe-status-adaptive {
+    padding-top: max(env(safe-area-inset-top, 0px), 24px);
+  }
+
   .mt-header-safe {
     margin-top: calc(4rem + env(safe-area-inset-top, 0px));
   }

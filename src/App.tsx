@@ -184,9 +184,21 @@ function LanguagePersistence() {
   return null;
 }
 
-// Despia native initialization (Android status bar config)
+// Despia native initialization (Android status bar config + iPad detection)
 function DespiaInitializer() {
   useAppInitialization();
+  
+  // Set data attributes for native/iPad detection (used by CSS for safe area handling)
+  if (typeof window !== 'undefined') {
+    const ua = navigator.userAgent.toLowerCase();
+    if (ua.includes('despia')) {
+      document.body.setAttribute('data-native', 'true');
+      if (ua.includes('ipad')) {
+        document.body.setAttribute('data-ipad', 'true');
+      }
+    }
+  }
+  
   return null;
 }
 
