@@ -3,7 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserLocation } from '@/hooks/useUserLocation';
 import { ModernLeaderboard, LocationType } from './ModernLeaderboard';
+import { LocationPermissionPrompt } from '@/components/shared/LocationPermissionPrompt';
 import { XPLeaderboardEntry } from '@/hooks/useGamification';
 import { Globe, MapPin, Map, Building, AlertCircle } from 'lucide-react';
 
@@ -11,7 +13,7 @@ interface LocationLeaderboardProps {
   timeFrame?: 'weekly' | 'monthly' | 'alltime';
 }
 
-function useUserLocation() {
+function useUserProfileLocation() {
   const { user } = useAuth();
   return useQuery({
     queryKey: ['user-location', user?.id],
@@ -158,8 +160,17 @@ function useMyRank(locationType: LocationType, locationValue: string | null, use
 }
 
 export function LocationLeaderboard({ timeFrame = 'alltime' }: LocationLeaderboardProps) {
-  const { data: userLocation, isLoading: locationLoading } = useUserLocation();
+  const { data: userLocation, isLoading: locationLoading } = useUserProfileLocation();
   const [selectedLocation, setSelectedLocation] = useState<LocationType>('global');
+  
+  // Use the location hook for GPS prompt functionality
+  const { 
+    shouldShowLocationPrompt, 
+    requestPreciseLocation, 
+    isRequestingPrecise, 
+    error: locationError,
+    dismissLocationPrompt 
+  } = useUserLocation();
 
   // Get location value based on selection
   const locationValue = useMemo(() => {
@@ -226,6 +237,17 @@ export function LocationLeaderboard({ timeFrame = 'alltime' }: LocationLeaderboa
 
   return (
     <div className="space-y-4">
+      {/* Location Permission Banner - Show when only approximate location */}
+      {shouldShowLocationPrompt && (
+        <LocationPermissionPrompt
+          onRequestLocation={requestPreciseLocation}
+          isLoading={isRequestingPrecise}
+          error={locationError}
+          variant="banner"
+          onDismiss={dismissLocationPrompt}
+        />
+      )}
+
       <ModernLeaderboard
         entries={entries || []}
         currentUserId={userLocation?.id}

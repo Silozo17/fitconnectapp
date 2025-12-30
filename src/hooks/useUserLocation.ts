@@ -5,6 +5,8 @@ import { LocationAccuracyLevel } from "@/types/location";
 import { useAuth } from "@/contexts/AuthContext";
 
 const MANUAL_LOCATION_KEY = "fitconnect_manual_location";
+const SESSION_PRECISE_KEY = "fitconnect_session_precise_location";
+const PROMPT_DISMISSED_KEY = "fitconnect_location_prompt_dismissed";
 const LOCATION_EXPIRY_DAYS = 7;
 const GEO_TIMEOUT_MS = 10000; // 10 seconds for precise location
 
@@ -34,9 +36,11 @@ interface UseUserLocationReturn {
   error: string | null;
   accuracyLevel: LocationAccuracyLevel | null;
   isRequestingPrecise: boolean;
+  shouldShowLocationPrompt: boolean;
   requestPreciseLocation: () => Promise<boolean>;
   setManualLocation: (location: Partial<LocationData>) => void;
   clearLocation: () => void;
+  dismissLocationPrompt: () => void;
 }
 
 // Helper to check if location consent is granted
@@ -69,15 +73,35 @@ const getStoredManualLocation = (): StoredManualLocation | null => {
   }
 };
 
+// Get session-stored precise location (survives page navigations but clears on browser close)
+const getSessionPreciseLocation = (): LocationData | null => {
+  try {
+    const stored = sessionStorage.getItem(SESSION_PRECISE_KEY);
+    if (!stored) return null;
+    return JSON.parse(stored) as LocationData;
+  } catch {
+    return null;
+  }
+};
+
+// Check if location prompt was dismissed this session
+const isPromptDismissed = (): boolean => {
+  return sessionStorage.getItem(PROMPT_DISMISSED_KEY) === 'true';
+};
+
 export const useUserLocation = (): UseUserLocationReturn => {
   const { user } = useAuth();
   const [location, setLocation] = useState<LocationData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isRequestingPrecise, setIsRequestingPrecise] = useState(false);
+  const [promptDismissed, setPromptDismissed] = useState(() => isPromptDismissed());
   
   // Memory-only precise location for logged-out users (GDPR compliant)
-  const [memoryPreciseLocation, setMemoryPreciseLocation] = useState<LocationData | null>(null);
+  // Also check sessionStorage for persistence across page navigations
+  const [memoryPreciseLocation, setMemoryPreciseLocation] = useState<LocationData | null>(
+    () => getSessionPreciseLocation()
+  );
 
   // Default UK location (approximate - no city shown)
   const defaultLocation: LocationData = {
@@ -263,8 +287,9 @@ export const useUserLocation = (): UseUserLocationReturn => {
                 })
                 .eq('user_id', user.id);
             } else {
-              // For logged-out users, store in memory only (GDPR)
+              // For logged-out users, store in memory and sessionStorage (GDPR compliant)
               setMemoryPreciseLocation(preciseLocation);
+              sessionStorage.setItem(SESSION_PRECISE_KEY, JSON.stringify(preciseLocation));
             }
 
             setLocation(preciseLocation);
@@ -350,10 +375,25 @@ export const useUserLocation = (): UseUserLocationReturn => {
    */
   const clearLocation = useCallback(() => {
     localStorage.removeItem(MANUAL_LOCATION_KEY);
+    sessionStorage.removeItem(SESSION_PRECISE_KEY);
     setMemoryPreciseLocation(null);
     setLocation(defaultLocation);
     setError(null);
   }, []);
+
+  /**
+   * Dismiss location prompt for this session
+   */
+  const dismissLocationPrompt = useCallback(() => {
+    sessionStorage.setItem(PROMPT_DISMISSED_KEY, 'true');
+    setPromptDismissed(true);
+  }, []);
+
+  // Show prompt when: has approximate location, not dismissed, and not loading
+  const shouldShowLocationPrompt = 
+    !isLoading && 
+    !promptDismissed && 
+    location?.accuracyLevel === 'approximate';
 
   return {
     location,
@@ -361,8 +401,10 @@ export const useUserLocation = (): UseUserLocationReturn => {
     error,
     accuracyLevel: location?.accuracyLevel || null,
     isRequestingPrecise,
+    shouldShowLocationPrompt,
     requestPreciseLocation,
     setManualLocation,
     clearLocation,
+    dismissLocationPrompt,
   };
 };

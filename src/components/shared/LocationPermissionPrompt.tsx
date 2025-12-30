@@ -55,49 +55,50 @@ export function LocationPermissionPrompt({
   if (variant === 'banner') {
     return (
       <div className={cn(
-        "relative rounded-lg border border-border/50 bg-muted/30 p-4",
+        "relative rounded-xl border border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10 p-5",
         className
       )}>
         {onDismiss && (
           <button
             onClick={onDismiss}
-            className="absolute right-2 top-2 text-muted-foreground hover:text-foreground"
+            className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
             aria-label="Dismiss"
           >
             <X className="h-4 w-4" />
           </button>
         )}
         
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-3">
-            <div className="rounded-full bg-primary/10 p-2">
-              <MapPin className="h-5 w-5 text-primary" />
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-4">
+            <div className="rounded-full bg-primary/15 p-3 shrink-0">
+              <MapPin className="h-6 w-6 text-primary" />
             </div>
-            <div>
-              <h4 className="text-sm font-medium">Enable precise location</h4>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                See competitors near you. Your exact location stays private.
+            <div className="pr-6 sm:pr-0">
+              <h4 className="text-base font-semibold">Get accurate local results</h4>
+              <p className="text-sm text-muted-foreground mt-1">
+                We'll find your exact city to show you relevant competitors and coaches nearby. 
+                <span className="block sm:inline"> We never track your location.</span>
               </p>
             </div>
           </div>
           
-          <div className="flex items-center gap-2 ml-10 sm:ml-0">
+          <div className="flex items-center gap-3 ml-0 sm:ml-4 shrink-0">
             {error ? (
-              <div className="flex items-center gap-1.5 text-destructive text-sm">
-                <AlertCircle className="h-4 w-4" />
+              <div className="flex items-center gap-2 text-destructive text-sm">
+                <AlertCircle className="h-4 w-4 shrink-0" />
                 <span>{error}</span>
               </div>
             ) : (
               <Button
                 onClick={handleClick}
                 disabled={isLoading}
-                size="sm"
-                className="gap-1.5"
+                size="default"
+                className="gap-2 whitespace-nowrap"
               >
                 {isLoading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Detecting...
+                    Finding location...
                   </>
                 ) : (
                   <>
