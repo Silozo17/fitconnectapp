@@ -1,4 +1,4 @@
-import { useState, useEffect, memo, useCallback } from "react";
+import { useState, useEffect, memo, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
@@ -33,6 +33,21 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
   const { isOpen: profilePanelOpen } = useProfilePanel();
   const { shouldShow: showDiscover, markAsSeen: markDiscoverSeen } = useDiscoverModal('coach');
   
+  // Check if onboarding was JUST completed (set by CoachOnboarding before navigation)
+  const justCompletedOnboarding = useMemo(() => {
+    if (typeof sessionStorage === 'undefined') return false;
+    const flag = sessionStorage.getItem('fitconnect_onboarding_just_completed');
+    if (flag === 'coach') {
+      // Remove the flag immediately so it doesn't persist
+      sessionStorage.removeItem('fitconnect_onboarding_just_completed');
+      if (import.meta.env.DEV) {
+        console.log('[DashboardLayout] Detected just-completed onboarding flag, skipping redirect check');
+      }
+      return true;
+    }
+    return false;
+  }, []);
+  
   useCoachProfileRealtime();
 
   const handleToggleSidebar = useCallback(() => {
@@ -43,14 +58,18 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
     setMobileOpen(true);
   }, []);
 
+  // Redirect to onboarding if not completed - but skip if just completed
   useEffect(() => {
-    if (!isLoading && onboardingStatus && !onboardingStatus.isOnboarded && !onboardingStatus.error) {
+    if (!isLoading && onboardingStatus && !onboardingStatus.isOnboarded && !onboardingStatus.error && !justCompletedOnboarding) {
+      if (import.meta.env.DEV) {
+        console.log('[DashboardLayout] Not onboarded, redirecting to onboarding');
+      }
       navigate("/onboarding/coach", { replace: true });
     }
-  }, [onboardingStatus, isLoading, navigate]);
+  }, [onboardingStatus, isLoading, navigate, justCompletedOnboarding]);
 
-  // Don't render bottom nav during loading states to prevent flickering
-  if (isLoading) {
+  // Show loader during initial loading - but NOT if we just completed onboarding
+  if (isLoading && !justCompletedOnboarding) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -58,7 +77,8 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
     );
   }
 
-  if (!onboardingStatus?.isOnboarded) {
+  // Show loader while redirecting to onboarding - but NOT if we just completed
+  if (!onboardingStatus?.isOnboarded && !justCompletedOnboarding) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -86,7 +106,7 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
 
         <div className={`transition-all duration-300 h-full flex flex-col overflow-hidden ${sidebarCollapsed ? "xl:ml-16" : "xl:ml-64"}`}>
           <DashboardHeader 
-            subscriptionTier={onboardingStatus.subscriptionTier} 
+            subscriptionTier={onboardingStatus?.subscriptionTier} 
             onMenuToggle={handleOpenMobile} 
           />
           
