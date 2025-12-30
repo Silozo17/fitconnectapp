@@ -24,9 +24,11 @@ import { SUBSCRIPTION_TIERS, TierKey } from "@/lib/stripe-config";
 import { useTranslation } from "react-i18next";
 import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
 import { useNativeIAP, SubscriptionTier, BillingInterval } from "@/hooks/useNativeIAP";
+import { useNativePricing } from "@/hooks/useNativePricing";
 import { triggerConfetti, confettiPresets } from "@/lib/confetti";
 import { triggerHaptic } from "@/lib/despia";
 import { IAPUnsuccessfulDialog } from "@/components/iap/IAPUnsuccessfulDialog";
+import { useQueryClient } from "@tanstack/react-query";
 
 // Full steps array (for new users without client profile)
 const FULL_STEPS = [
@@ -99,7 +101,9 @@ const CoachOnboarding = () => {
   const { user } = useAuth();
   const { refreshProfiles } = useAdminView();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { isNativeMobile } = usePlatformRestrictions();
+  const nativePricing = useNativePricing();
   
   // Dynamic steps array - excludes Dual Account step for users with existing client profile
   const STEPS = getSteps(hasExistingClientProfile);
@@ -506,10 +510,14 @@ const CoachOnboarding = () => {
         toast.success("Profile saved! Complete your subscription to unlock all features.");
         navigate(`/subscribe?tier=${formData.subscriptionTier}&billing=${billingInterval}&from=onboarding`);
       } else if (formData.alsoClient) {
+        // Invalidate onboarding status cache before navigation
+        queryClient.invalidateQueries({ queryKey: ["coach-onboarding-status", user.id] });
         await refreshProfiles();
         toast.success("Coach profile completed! Now let's set up your client profile.");
         navigate("/onboarding/client", { replace: true });
       } else {
+        // Invalidate onboarding status cache before navigation to prevent flickering
+        queryClient.invalidateQueries({ queryKey: ["coach-onboarding-status", user.id] });
         await refreshProfiles();
         toast.success("Profile completed! Welcome to FitConnect.");
         navigate("/dashboard/coach", { replace: true });
@@ -979,7 +987,7 @@ const CoachOnboarding = () => {
                             </div>
                             <div>
                               <h3 className="font-display font-bold text-foreground">{freeTier.name}</h3>
-                              <span className="text-lg font-bold text-primary">£0<span className="text-xs text-muted-foreground">/mo</span></span>
+                              <span className="text-lg font-bold text-primary">{nativePricing.formatPrice(0)}<span className="text-xs text-muted-foreground">/mo</span></span>
                             </div>
                             {formData.subscriptionTier === "free" && <Check className="w-5 h-5 text-primary ml-auto" />}
                           </div>
@@ -1001,10 +1009,10 @@ const CoachOnboarding = () => {
                   {paidTiers.map((tier) => {
                     const Icon = tier.icon;
                     const tierConfig = SUBSCRIPTION_TIERS[tier.id as TierKey];
-                    const monthlyPrice = tierConfig.prices.monthly.amount;
-                    const yearlyPrice = tierConfig.prices.yearly.amount;
+                    const monthlyPrice = nativePricing.getSubscriptionPrice(tier.id as SubscriptionTier, 'monthly');
+                    const yearlyPrice = nativePricing.getSubscriptionPrice(tier.id as SubscriptionTier, 'yearly');
                     const yearlyMonthly = Math.round(yearlyPrice / 12);
-                    const savings = tierConfig.prices.yearly.savings;
+                    const savings = nativePricing.getSubscriptionSavings(tier.id as SubscriptionTier);
                     
                     const isSelectedMonthly = formData.subscriptionTier === tier.id && billingInterval === 'monthly';
                     const isSelectedYearly = formData.subscriptionTier === tier.id && billingInterval === 'yearly';
@@ -1032,7 +1040,7 @@ const CoachOnboarding = () => {
                               </div>
                               <div className="flex-1">
                                 <h3 className="font-display font-bold text-foreground text-sm">{tier.name} - Monthly</h3>
-                                <span className="text-base font-bold text-primary">£{monthlyPrice}<span className="text-xs text-muted-foreground">/mo</span></span>
+                                <span className="text-base font-bold text-primary">{nativePricing.formatPrice(monthlyPrice)}<span className="text-xs text-muted-foreground">/mo</span></span>
                               </div>
                               {isSelectedMonthly && <Check className="w-5 h-5 text-primary" />}
                             </div>
@@ -1061,9 +1069,9 @@ const CoachOnboarding = () => {
                               isSelectedYearly ? "border-primary bg-primary/10" : "border-border hover:border-muted-foreground"
                             }`}
                           >
-                            {savings && (
+                            {savings > 0 && (
                               <span className="absolute -top-2 right-3 px-2 py-0.5 bg-accent text-accent-foreground text-xs font-bold rounded-full">
-                                Save £{savings}
+                                Save {nativePricing.formatPrice(savings)}
                               </span>
                             )}
                             <div className="flex items-center gap-3 mb-1.5">
@@ -1075,8 +1083,8 @@ const CoachOnboarding = () => {
                               <div className="flex-1">
                                 <h3 className="font-display font-bold text-foreground text-sm">{tier.name} - Annual</h3>
                                 <div>
-                                  <span className="text-base font-bold text-primary">£{yearlyMonthly}<span className="text-xs text-muted-foreground">/mo</span></span>
-                                  <span className="text-xs text-muted-foreground ml-2">Billed £{yearlyPrice}/year</span>
+                                  <span className="text-base font-bold text-primary">{nativePricing.formatPrice(yearlyMonthly)}<span className="text-xs text-muted-foreground">/mo</span></span>
+                                  <span className="text-xs text-muted-foreground ml-2">Billed {nativePricing.formatPrice(yearlyPrice)}/year</span>
                                 </div>
                               </div>
                               {isSelectedYearly && <Check className="w-5 h-5 text-primary" />}
@@ -1190,10 +1198,10 @@ const CoachOnboarding = () => {
               {paidTiers.map((tier) => {
                 const Icon = tier.icon;
                 const tierConfig = SUBSCRIPTION_TIERS[tier.id as TierKey];
-                const monthlyPrice = tierConfig.prices.monthly.amount;
-                const yearlyPrice = tierConfig.prices.yearly.amount;
+                const monthlyPrice = nativePricing.getSubscriptionPrice(tier.id as SubscriptionTier, 'monthly');
+                const yearlyPrice = nativePricing.getSubscriptionPrice(tier.id as SubscriptionTier, 'yearly');
                 const yearlyMonthlyEquivalent = Math.round(yearlyPrice / 12);
-                const savings = tierConfig.prices.yearly.savings;
+                const savings = nativePricing.getSubscriptionSavings(tier.id as SubscriptionTier);
                 
                 const isSelectedMonthly = formData.subscriptionTier === tier.id && billingInterval === 'monthly';
                 const isSelectedYearly = formData.subscriptionTier === tier.id && billingInterval === 'yearly';
@@ -1225,7 +1233,7 @@ const CoachOnboarding = () => {
                         </div>
                         <div className="flex-1">
                           <h3 className="font-display font-bold text-foreground text-base lg:text-lg">{tier.name}</h3>
-                          <span className="text-xl lg:text-2xl font-bold text-primary">£{monthlyPrice}<span className="text-sm text-muted-foreground">/mo</span></span>
+                          <span className="text-xl lg:text-2xl font-bold text-primary">{nativePricing.formatPrice(monthlyPrice)}<span className="text-sm text-muted-foreground">/mo</span></span>
                         </div>
                         {isSelectedMonthly && <Check className="w-6 h-6 text-primary" />}
                       </div>
@@ -1257,7 +1265,7 @@ const CoachOnboarding = () => {
                     >
                       {savings > 0 && (
                         <span className="absolute -top-2.5 right-3 px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full">
-                          Save £{savings}
+                          Save {nativePricing.formatPrice(savings)}
                         </span>
                       )}
                       <div className="flex items-center gap-3">
@@ -1269,13 +1277,13 @@ const CoachOnboarding = () => {
                         <div className="flex-1">
                           <h3 className="font-display font-bold text-foreground text-base lg:text-lg">{tier.name} <span className="text-xs lg:text-sm font-normal text-muted-foreground">(Annual)</span></h3>
                           <div className="flex items-baseline gap-2">
-                            <span className="text-xl lg:text-2xl font-bold text-primary">£{yearlyMonthlyEquivalent}<span className="text-sm text-muted-foreground">/mo</span></span>
-                            <span className="text-sm text-muted-foreground line-through">£{monthlyPrice}</span>
+                            <span className="text-xl lg:text-2xl font-bold text-primary">{nativePricing.formatPrice(yearlyMonthlyEquivalent)}<span className="text-sm text-muted-foreground">/mo</span></span>
+                            <span className="text-sm text-muted-foreground line-through">{nativePricing.formatPrice(monthlyPrice)}</span>
                           </div>
                         </div>
                         {isSelectedYearly && <Check className="w-6 h-6 text-primary" />}
                       </div>
-                      <p className="text-sm text-muted-foreground mt-2">Billed annually at £{yearlyPrice}/year</p>
+                      <p className="text-sm text-muted-foreground mt-2">Billed annually at {nativePricing.formatPrice(yearlyPrice)}/year</p>
                     </button>
                   </div>
                 );
@@ -1344,10 +1352,10 @@ const CoachOnboarding = () => {
                 {paidTiers.map((tier) => {
                   const Icon = tier.icon;
                   const tierConfig = SUBSCRIPTION_TIERS[tier.id as TierKey];
-                  const monthlyPrice = tierConfig.prices.monthly.amount;
-                  const yearlyPrice = tierConfig.prices.yearly.amount;
+                  const monthlyPrice = nativePricing.getSubscriptionPrice(tier.id as SubscriptionTier, 'monthly');
+                  const yearlyPrice = nativePricing.getSubscriptionPrice(tier.id as SubscriptionTier, 'yearly');
                   const yearlyMonthlyEquivalent = Math.round(yearlyPrice / 12);
-                  const savings = tierConfig.prices.yearly.savings;
+                  const savings = nativePricing.getSubscriptionSavings(tier.id as SubscriptionTier);
                   
                   const isSelectedMonthly = formData.subscriptionTier === tier.id && billingInterval === 'monthly';
                   const isSelectedYearly = formData.subscriptionTier === tier.id && billingInterval === 'yearly';
@@ -1380,7 +1388,7 @@ const CoachOnboarding = () => {
                             </div>
                             <div>
                               <h3 className="font-display font-bold text-foreground">{tier.name}</h3>
-                              <span className="text-lg font-bold text-primary">£{monthlyPrice}<span className="text-xs text-muted-foreground">/mo</span></span>
+                              <span className="text-lg font-bold text-primary">{nativePricing.formatPrice(monthlyPrice)}<span className="text-xs text-muted-foreground">/mo</span></span>
                             </div>
                             {isSelectedMonthly && <Check className="w-5 h-5 text-primary ml-auto" />}
                           </div>
@@ -1412,7 +1420,7 @@ const CoachOnboarding = () => {
                         >
                           {savings > 0 && (
                             <span className="absolute -top-2 right-3 px-2 py-0.5 bg-green-500 text-white text-xs font-bold rounded-full">
-                              Save £{savings}
+                              Save {nativePricing.formatPrice(savings)}
                             </span>
                           )}
                           <div className="flex items-center gap-3">
@@ -1424,13 +1432,13 @@ const CoachOnboarding = () => {
                             <div>
                               <h3 className="font-display font-bold text-foreground">{tier.name} <span className="text-xs font-normal text-muted-foreground">(Annual)</span></h3>
                               <div className="flex items-baseline gap-1.5">
-                                <span className="text-lg font-bold text-primary">£{yearlyMonthlyEquivalent}<span className="text-xs text-muted-foreground">/mo</span></span>
-                                <span className="text-xs text-muted-foreground line-through">£{monthlyPrice}</span>
+                                <span className="text-lg font-bold text-primary">{nativePricing.formatPrice(yearlyMonthlyEquivalent)}<span className="text-xs text-muted-foreground">/mo</span></span>
+                                <span className="text-xs text-muted-foreground line-through">{nativePricing.formatPrice(monthlyPrice)}</span>
                               </div>
                             </div>
                             {isSelectedYearly && <Check className="w-5 h-5 text-primary ml-auto" />}
                           </div>
-                          <p className="text-xs text-muted-foreground mt-2">Billed annually at £{yearlyPrice}/year</p>
+                          <p className="text-xs text-muted-foreground mt-2">Billed annually at {nativePricing.formatPrice(yearlyPrice)}/year</p>
                         </button>
                       </div>
                     </CarouselItem>

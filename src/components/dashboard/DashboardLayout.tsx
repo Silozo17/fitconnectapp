@@ -49,25 +49,20 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
     }
   }, [onboardingStatus, isLoading, navigate]);
 
+  // Don't render bottom nav during loading states to prevent flickering
   if (isLoading) {
     return (
-      <>
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-        <MobileBottomNav variant="coach" />
-      </>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
     );
   }
 
   if (!onboardingStatus?.isOnboarded) {
     return (
-      <>
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-        <MobileBottomNav variant="coach" />
-      </>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
     );
   }
 
