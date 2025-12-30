@@ -28,7 +28,7 @@ export function RevenueForecastWidget() {
 
   if (isLoading) {
     return (
-      <Card>
+      <Card className="w-full h-full">
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-primary" />
@@ -36,7 +36,7 @@ export function RevenueForecastWidget() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Skeleton className="h-16" />
             <Skeleton className="h-16" />
           </div>
@@ -48,7 +48,7 @@ export function RevenueForecastWidget() {
 
   if (!data) {
     return (
-      <Card>
+      <Card className="w-full h-full">
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-primary" />
@@ -82,7 +82,7 @@ export function RevenueForecastWidget() {
   };
 
   return (
-    <Card>
+    <Card className="w-full h-full">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
@@ -102,9 +102,9 @@ export function RevenueForecastWidget() {
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 overflow-hidden">
         {/* Key Metrics */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="p-3 rounded-lg bg-muted/30">
             <p className="text-xs text-muted-foreground">Monthly Recurring</p>
             <p className="text-xl font-bold">{formatCurrency(metrics.currentMRR)}</p>
@@ -132,8 +132,8 @@ export function RevenueForecastWidget() {
         </div>
 
         {/* Revenue Chart */}
-        <div className="h-36 sm:h-40">
-          <ChartContainer config={chartConfig}>
+        <div className="w-full aspect-[2/1] md:aspect-[3/1] min-h-[120px]">
+          <ChartContainer config={chartConfig} className="w-full h-full">
             <AreaChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
               <defs>
                 <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">

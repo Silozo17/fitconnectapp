@@ -50,7 +50,7 @@ export function useRevenueForecasting() {
     queryFn: async (): Promise<RevenueForecastData | null> => {
       if (!user?.id || !isFeatureEnabled("REVENUE_FORECASTING")) return null;
 
-      // Get coach profile
+      // Get coach profile first (needed for subsequent queries)
       const { data: coachProfile } = await supabase
         .from("coach_profiles")
         .select("id, subscription_tier, currency")
@@ -64,17 +64,62 @@ export function useRevenueForecasting() {
       const now = new Date();
       const sixMonthsAgo = startOfMonth(subMonths(now, 6));
 
-      // Fetch active subscriptions for MRR
-      const { data: activeSubscriptions } = await supabase
-        .from("client_subscriptions")
-        .select(`
-          id,
-          status,
-          current_period_start,
-          plan:coach_subscription_plans(price)
-        `)
-        .eq("coach_id", coachProfile.id)
-        .eq("status", "active");
+      // Fetch all data in parallel for performance
+      const [
+        { data: activeSubscriptions },
+        { data: packages },
+        { data: subscriptionPayments },
+        { data: paidSessions },
+        { count: activeClients }
+      ] = await Promise.all([
+        // Active subscriptions for MRR
+        supabase
+          .from("client_subscriptions")
+          .select(`
+            id,
+            status,
+            current_period_start,
+            plan:coach_subscription_plans(price)
+          `)
+          .eq("coach_id", coachProfile.id)
+          .eq("status", "active"),
+        
+        // Historical package purchases
+        supabase
+          .from("client_package_purchases")
+          .select("amount_paid, purchased_at, status")
+          .eq("coach_id", coachProfile.id)
+          .gte("purchased_at", sixMonthsAgo.toISOString())
+          .eq("status", "active"),
+        
+        // Subscription payments history
+        supabase
+          .from("client_subscriptions")
+          .select(`
+            current_period_start,
+            status,
+            created_at,
+            cancelled_at,
+            plan:coach_subscription_plans(price)
+          `)
+          .eq("coach_id", coachProfile.id)
+          .gte("current_period_start", sixMonthsAgo.toISOString()),
+        
+        // Paid sessions (booking requests with payment)
+        supabase
+          .from("booking_requests")
+          .select("amount_paid, requested_at, status")
+          .eq("coach_id", coachProfile.id)
+          .gte("requested_at", sixMonthsAgo.toISOString())
+          .in("status", ["confirmed", "completed"]),
+        
+        // Active clients for ARPC
+        supabase
+          .from("coach_clients")
+          .select("*", { count: "exact", head: true })
+          .eq("coach_id", coachProfile.id)
+          .eq("status", "active")
+      ]);
 
       // Calculate current MRR
       const currentMRR = (activeSubscriptions || []).reduce((sum, sub) => {
@@ -82,35 +127,6 @@ export function useRevenueForecasting() {
         const gross = plan?.price || 0;
         return sum + (gross * (1 - commissionRate));
       }, 0);
-
-      // Fetch historical package purchases
-      const { data: packages } = await supabase
-        .from("client_package_purchases")
-        .select("amount_paid, purchased_at, status")
-        .eq("coach_id", coachProfile.id)
-        .gte("purchased_at", sixMonthsAgo.toISOString())
-        .eq("status", "active");
-
-      // Fetch subscription payments history
-      const { data: subscriptionPayments } = await supabase
-        .from("client_subscriptions")
-        .select(`
-          current_period_start,
-          status,
-          created_at,
-          cancelled_at,
-          plan:coach_subscription_plans(price)
-        `)
-        .eq("coach_id", coachProfile.id)
-        .gte("current_period_start", sixMonthsAgo.toISOString());
-
-      // Fetch paid sessions (booking requests with payment)
-      const { data: paidSessions } = await supabase
-        .from("booking_requests")
-        .select("amount_paid, requested_at, status")
-        .eq("coach_id", coachProfile.id)
-        .gte("requested_at", sixMonthsAgo.toISOString())
-        .in("status", ["confirmed", "completed"]);
 
       // Calculate historical monthly data
       const historicalMonths: MonthlyRevenue[] = [];
@@ -172,13 +188,6 @@ export function useRevenueForecasting() {
       const cancelledSubs = subscriptionPayments?.filter(s => s.cancelled_at)?.length || 0;
       const churnRate = totalSubs > 0 ? cancelledSubs / totalSubs : 0;
       const retentionRate = 1 - churnRate;
-
-      // Get active clients for ARPC
-      const { count: activeClients } = await supabase
-        .from("coach_clients")
-        .select("*", { count: "exact", head: true })
-        .eq("coach_id", coachProfile.id)
-        .eq("status", "active");
 
       const avgRevenuePerClient = activeClients && activeClients > 0
         ? avgMonthlyRevenue / activeClients
