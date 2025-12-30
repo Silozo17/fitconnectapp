@@ -172,13 +172,13 @@ const CoachOnboarding = () => {
     formDataRef.current.alsoClient = formData.alsoClient;
   }, [formData.alsoClient]);
 
-  // Check if onboarding is already completed, restore saved step, and check for existing client profile
+  // Check if onboarding is already completed, restore saved step, check for existing client profile, and pre-populate names
   useEffect(() => {
     const checkProfile = async () => {
       if (!user) return;
 
-      // Check for coach profile and existing client profile in parallel
-      const [coachResult, clientResult] = await Promise.all([
+      // Check for coach profile, existing client profile, and user profile names in parallel
+      const [coachResult, clientResult, userProfileResult] = await Promise.all([
         supabase
           .from("coach_profiles")
           .select("id, onboarding_completed, onboarding_progress")
@@ -188,11 +188,17 @@ const CoachOnboarding = () => {
           .from("client_profiles")
           .select("id")
           .eq("user_id", user.id)
+          .maybeSingle(),
+        supabase
+          .from("user_profiles")
+          .select("id, username, first_name, last_name, display_name")
+          .eq("user_id", user.id)
           .maybeSingle()
       ]);
 
       const { data } = coachResult;
       const hasClientProfile = !!clientResult.data;
+      const userProfile = userProfileResult.data;
       
       // Set client profile status first (affects STEPS array)
       setHasExistingClientProfile(hasClientProfile);
@@ -222,9 +228,24 @@ const CoachOnboarding = () => {
           setCurrentStep(restoredStep);
         }
         
-        // Restore saved form data if available
+        // Restore saved form data if available, but prioritize user_profiles names
         if (progress?.form_data) {
-          setFormData(prev => ({ ...prev, ...progress.form_data }));
+          setFormData(prev => ({ 
+            ...prev, 
+            ...progress.form_data,
+            // Override with user_profiles names if they exist (collected during signup)
+            firstName: userProfile?.first_name || progress.form_data?.firstName || "",
+            lastName: userProfile?.last_name || progress.form_data?.lastName || "",
+            displayName: progress.form_data?.displayName || userProfile?.display_name || "",
+          }));
+        } else {
+          // No saved progress - just use user_profiles names
+          setFormData(prev => ({
+            ...prev,
+            firstName: userProfile?.first_name || "",
+            lastName: userProfile?.last_name || "",
+            displayName: userProfile?.display_name || "",
+          }));
         }
         
         setIsCheckingProfile(false);

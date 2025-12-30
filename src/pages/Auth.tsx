@@ -25,12 +25,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { logError } from "@/lib/error-utils";
 import { getEnvironment } from "@/hooks/useEnvironment";
 
-const authSchema = z.object({
+// Base schema for login
+const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
 });
 
-type AuthFormData = z.infer<typeof authSchema>;
+// Extended schema for signup with required first name
+const signupSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  firstName: z.string().min(1, "First name is required").max(50, "First name is too long"),
+  lastName: z.string().max(50, "Last name is too long").optional(),
+});
+
+type AuthFormData = z.infer<typeof signupSchema>;
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -46,7 +57,7 @@ const Auth = () => {
   const [alsoFindCoach, setAlsoFindCoach] = useState(false);
   const [passwordValue, setPasswordValue] = useState("");
   const [showOTPVerification, setShowOTPVerification] = useState(false);
-  const [pendingSignupData, setPendingSignupData] = useState<{ email: string; password: string } | null>(null);
+  const [pendingSignupData, setPendingSignupData] = useState<{ email: string; password: string; firstName: string; lastName: string } | null>(null);
   const [hasNavigated, setHasNavigated] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
@@ -79,7 +90,11 @@ const Auth = () => {
     watch,
     getValues,
   } = useForm<AuthFormData>({
-    resolver: zodResolver(authSchema),
+    resolver: zodResolver(isLogin ? loginSchema : signupSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+    },
   });
 
   // Debounced breach check
@@ -228,7 +243,12 @@ const Auth = () => {
       setIsSubmitting(true);
       try {
         await sendOTPEmail(data.email);
-        setPendingSignupData({ email: data.email, password: data.password });
+        setPendingSignupData({ 
+          email: data.email, 
+          password: data.password,
+          firstName: data.firstName || "",
+          lastName: data.lastName || "",
+        });
         setShowOTPVerification(true);
         toast.success(t("otp.verificationSent"));
       } catch (error: unknown) {
@@ -266,7 +286,13 @@ const Auth = () => {
 
     setIsSubmitting(true);
     try {
-      const { error } = await signUp(pendingSignupData.email, pendingSignupData.password, selectedRole);
+      const { error } = await signUp(
+        pendingSignupData.email, 
+        pendingSignupData.password, 
+        selectedRole,
+        pendingSignupData.firstName,
+        pendingSignupData.lastName
+      );
       if (error) {
         if (error.message.includes("already registered")) {
           toast.error(t("auth.emailAlreadyRegistered"));
@@ -282,7 +308,7 @@ const Auth = () => {
         supabase.functions.invoke("send-welcome-email", {
           body: {
             email: pendingSignupData.email,
-            firstName: "",
+            firstName: pendingSignupData.firstName,
             role: selectedRole,
           },
         }).catch((err) => console.error("Failed to send welcome email:", err));
@@ -530,6 +556,41 @@ const Auth = () => {
 
                 {/* Form */}
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
+                  {/* Name fields (Sign Up only) */}
+                  {!isLogin && (
+                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                      <div>
+                        <Label htmlFor="firstName" className="text-foreground text-sm sm:text-base">
+                          {t("form.firstName")} <span className="text-destructive">*</span>
+                        </Label>
+                        <Input
+                          id="firstName"
+                          type="text"
+                          placeholder={t("placeholder.enterName")}
+                          className="mt-1 sm:mt-1.5 bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl h-10 sm:h-12"
+                          {...register("firstName")}
+                        />
+                        {errors.firstName && (
+                          <p className="text-destructive text-sm mt-1">
+                            {errors.firstName.message}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <Label htmlFor="lastName" className="text-foreground text-sm sm:text-base">
+                          {t("form.lastName")}
+                        </Label>
+                        <Input
+                          id="lastName"
+                          type="text"
+                          placeholder={t("form.lastName")}
+                          className="mt-1 sm:mt-1.5 bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl h-10 sm:h-12"
+                          {...register("lastName")}
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   <div>
                     <Label htmlFor="email" className="text-foreground text-sm sm:text-base">
                       {t("auth.email")}

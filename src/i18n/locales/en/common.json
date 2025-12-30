@@ -329,7 +329,9 @@
     "checkingBreaches": "Checking against known breaches...",
     "passwordBreached": "This password was found in a data breach. Please choose a different password.",
     "passwordSecure": "Password meets security requirements",
-    "chooseStrongerPassword": "Please choose a stronger password"
+    "chooseStrongerPassword": "Please choose a stronger password",
+    "firstNameRequired": "First name is required",
+    "termsRequired": "You must agree to the Terms & Conditions"
   },
   "otp": {
     "checkEmail": "Check your email",

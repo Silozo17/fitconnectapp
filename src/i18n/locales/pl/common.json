@@ -329,7 +329,9 @@
     "checkingBreaches": "Sprawdzanie wycieków danych...",
     "passwordBreached": "To hasło zostało znalezione w wycieku danych. Wybierz inne hasło.",
     "passwordSecure": "Hasło spełnia wymagania bezpieczeństwa",
-    "chooseStrongerPassword": "Wybierz silniejsze hasło"
+    "chooseStrongerPassword": "Wybierz silniejsze hasło",
+    "firstNameRequired": "Imię jest wymagane",
+    "termsRequired": "Musisz zaakceptować Regulamin"
   },
   "otp": {
     "checkEmail": "Sprawdź email",

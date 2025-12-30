@@ -92,32 +92,37 @@ const ClientOnboarding = () => {
     allergies: [] as string[],
   });
 
-  // Check if onboarding is already completed and restore saved step
+  // Check if onboarding is already completed, restore saved step, and pre-populate names
   useEffect(() => {
     const checkProfile = async () => {
       if (!user) return;
 
-      let { data } = await supabase
-        .from("client_profiles")
-        .select("id, onboarding_completed, onboarding_progress")
-        .eq("user_id", user.id)
-        .maybeSingle();
+      // Fetch client profile and user_profiles in parallel
+      const [clientResult, userProfileResult] = await Promise.all([
+        supabase
+          .from("client_profiles")
+          .select("id, onboarding_completed, onboarding_progress")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+        supabase
+          .from("user_profiles")
+          .select("id, username, first_name, last_name")
+          .eq("user_id", user.id)
+          .maybeSingle()
+      ]);
+
+      let { data } = clientResult;
+      const userProfile = userProfileResult.data;
 
       // If no profile exists, create one (handles legacy users with missing profiles)
       if (!data) {
-        // Get user_profile info for username
-        const { data: userProfile } = await supabase
-          .from("user_profiles")
-          .select("id, username, first_name")
-          .eq("user_id", user.id)
-          .maybeSingle();
-        
         const { data: newProfile, error: createError } = await supabase
           .from("client_profiles")
           .insert({
             user_id: user.id,
             username: userProfile?.username || `user_${user.id.substring(0, 8)}`,
             first_name: userProfile?.first_name || null,
+            last_name: userProfile?.last_name || null,
             user_profile_id: userProfile?.id || null,
             onboarding_completed: false,
           })
@@ -145,9 +150,22 @@ const ClientOnboarding = () => {
           setCurrentStep(progress.current_step);
         }
         
-        // Restore saved form data if available
+        // Restore saved form data if available, but prioritize user_profiles names
         if (progress?.form_data) {
-          setFormData(prev => ({ ...prev, ...progress.form_data }));
+          setFormData(prev => ({ 
+            ...prev, 
+            ...progress.form_data,
+            // Override with user_profiles names if they exist (collected during signup)
+            firstName: userProfile?.first_name || progress.form_data?.firstName || "",
+            lastName: userProfile?.last_name || progress.form_data?.lastName || "",
+          }));
+        } else {
+          // No saved progress - just use user_profiles names
+          setFormData(prev => ({
+            ...prev,
+            firstName: userProfile?.first_name || "",
+            lastName: userProfile?.last_name || "",
+          }));
         }
         
         setIsCheckingProfile(false);
@@ -419,6 +437,7 @@ const ClientOnboarding = () => {
               <p className="text-sm text-muted-foreground mt-1.5">Tell us a bit about yourself.</p>
             </div>
 
+            {/* Show names as read-only if already populated from signup, otherwise allow editing */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
               <div>
                 <Label htmlFor="firstName" className="text-foreground text-sm">
