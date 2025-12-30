@@ -113,6 +113,11 @@ const CoachConnections = lazy(() => import('@/pages/dashboard/coach/CoachConnect
 const CoachProducts = lazy(() => import('@/pages/dashboard/coach/CoachProducts'));
 const CoachPackageAnalytics = lazy(() => import('@/pages/dashboard/coach/CoachPackageAnalytics'));
 const CoachOutcomeShowcase = lazy(() => import('@/pages/dashboard/coach/CoachOutcomeShowcase'));
+const CoachAIRecommendations = lazy(() => import('@/pages/dashboard/coach/CoachAIRecommendations'));
+const CoachScheduledCheckins = lazy(() => import('@/pages/dashboard/coach/CoachScheduledCheckins'));
+const CoachWearableDashboard = lazy(() => import('@/pages/dashboard/coach/CoachWearableDashboard'));
+const CoachClientComparison = lazy(() => import('@/pages/dashboard/coach/CoachClientComparison'));
+const CoachCaseStudies = lazy(() => import('@/pages/dashboard/coach/CoachCaseStudies'));
 
 // Shared Dashboard Pages
 const Notifications = lazy(() => import('@/pages/dashboard/Notifications'));
@@ -686,6 +691,31 @@ const App = () => (
                               <Route path="/dashboard/coach/showcase" element={
                                 <ProtectedRoute allowedRoles={["coach"]}>
                                   <CoachOutcomeShowcase />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/dashboard/coach/ai-recommendations" element={
+                                <ProtectedRoute allowedRoles={["coach"]}>
+                                  <CoachAIRecommendations />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/dashboard/coach/scheduled-checkins" element={
+                                <ProtectedRoute allowedRoles={["coach"]}>
+                                  <CoachScheduledCheckins />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/dashboard/coach/wearables" element={
+                                <ProtectedRoute allowedRoles={["coach"]}>
+                                  <CoachWearableDashboard />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/dashboard/coach/compare" element={
+                                <ProtectedRoute allowedRoles={["coach"]}>
+                                  <CoachClientComparison />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/dashboard/coach/case-studies" element={
+                                <ProtectedRoute allowedRoles={["coach"]}>
+                                  <CoachCaseStudies />
                                 </ProtectedRoute>
                               } />
                               <Route path="/dashboard/notifications" element={

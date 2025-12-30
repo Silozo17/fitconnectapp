@@ -463,7 +463,13 @@
       "gamification": "Gamification",
       "achievements": "Achievements",
       "integrations": "Integrations",
-      "settings": "Settings"
+      "settings": "Settings",
+      "analytics": "Analytics",
+      "wearableInsights": "Wearable Insights",
+      "clientComparison": "Compare Clients",
+      "aiRecommendations": "AI Recommendations",
+      "scheduledCheckins": "Scheduled Check-Ins",
+      "caseStudies": "Case Studies"
     },
     "client": {
       "home": "Home",

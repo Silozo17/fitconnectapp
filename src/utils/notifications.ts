@@ -18,6 +18,12 @@ export type NotificationType =
   | "showcase_consent_request"
   | "showcase_consent_granted"
   | "showcase_published"
+  | "ai_recommendation_generated"
+  | "plan_progression_ready"
+  | "scheduled_checkin_sent"
+  | "review_prompt_sent"
+  | "new_review_received"
+  | "case_study_published"
   | "general";
 
 interface CreateNotificationParams {
