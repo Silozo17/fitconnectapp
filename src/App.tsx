@@ -23,6 +23,7 @@ import { CookieConsentBanner } from "./components/shared/CookieConsentBanner";
 import { ErrorBoundary } from "./components/shared/ErrorBoundary";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { SessionActivityTracker } from "@/components/auth/SessionActivityTracker";
+import { PushNotificationInitializer } from "@/components/notifications/PushNotificationInitializer";
 
 import PageLoadingSpinner from "@/components/shared/PageLoadingSpinner";
 
@@ -219,6 +220,7 @@ const App = () => (
               <CountryProvider>
                 <AuthProvider>
                   <SessionActivityTracker />
+                  <PushNotificationInitializer />
                   <AnimationSettingsProvider>
                     <CelebrationProvider>
                       <CelebrationListeners />
