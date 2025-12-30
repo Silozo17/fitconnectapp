@@ -101,7 +101,16 @@ serve(async (req) => {
     console.log('AI response received, parsing suggestions...');
     
     // Parse JSON from response
-    let suggestions = [];
+    interface ChallengeSuggestion {
+      title: string;
+      description: string;
+      target_value: number;
+      target_unit: string;
+      xp_reward: number;
+      challenge_type: string;
+      duration_days: number;
+    }
+    let suggestions: ChallengeSuggestion[] = [];
     try {
       // Extract JSON array from response
       const jsonMatch = content.match(/\[[\s\S]*\]/);

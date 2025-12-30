@@ -61,7 +61,7 @@ serve(async (req) => {
         { name: "enterprise", displayName: "Enterprise", monthlyPrice: 9900, yearlyPrice: 99000, features: ["Unlimited clients", "White label", "API access"] },
       ];
 
-      const results = [];
+      const results: { tier: string; stripeProductId: string; stripePriceIdMonthly: string; stripePriceIdYearly: string }[] = [];
 
       for (const tier of tierConfigs) {
         console.log(`[STRIPE-SYNC] Processing tier: ${tier.name}`);
