@@ -22,7 +22,7 @@ import { OnboardingLayout } from "@/components/onboarding/OnboardingLayout";
 import { COACH_TYPES, COACH_TYPE_CATEGORIES, getCoachTypesByCategory } from "@/constants/coachTypes";
 import { SUBSCRIPTION_TIERS, TierKey } from "@/lib/stripe-config";
 import { useTranslation } from "react-i18next";
-import { useIOSRestrictions } from "@/hooks/useIOSRestrictions";
+import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
 import { useNativeIAP, SubscriptionTier, BillingInterval } from "@/hooks/useNativeIAP";
 import { triggerConfetti, confettiPresets } from "@/lib/confetti";
 import { triggerHaptic } from "@/lib/despia";
@@ -99,7 +99,7 @@ const CoachOnboarding = () => {
   const { user } = useAuth();
   const { refreshProfiles } = useAdminView();
   const navigate = useNavigate();
-  const { isNativeMobile } = useIOSRestrictions();
+  const { isNativeMobile } = usePlatformRestrictions();
   
   // Dynamic steps array - excludes Dual Account step for users with existing client profile
   const STEPS = getSteps(hasExistingClientProfile);
