@@ -63,6 +63,7 @@ const Coaches = () => {
    */
   const effectiveCountryCode = manualCountryCode ?? locationCode;
 
+  // Defer fetching until auto-location is resolved (prevents double-render with reordering)
   const { data: coaches, isLoading, error } = useCoachMarketplace({
     search: searchQuery || undefined,
     coachTypes: selectedTypes.length > 0 ? selectedTypes : undefined,
@@ -72,7 +73,11 @@ const Coaches = () => {
     userLocation: effectiveLocation,
     enableLocationRanking: true,
     countryCode: effectiveCountryCode,
+    enabled: !autoLocationLoading, // Only fetch when location is resolved
   });
+
+  // Unified loading: show loader until both location AND coaches are ready
+  const isFullyLoading = autoLocationLoading || isLoading;
 
   const handleBook = useCallback((coach: MarketplaceCoach) => {
     setBookingCoach(coach);
@@ -186,7 +191,7 @@ const Coaches = () => {
 
               {/* Coaches Grid */}
               <div className="flex-1">
-                {isLoading ? (
+                {isFullyLoading ? (
                   <div className="flex items-center justify-center py-20">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   </div>

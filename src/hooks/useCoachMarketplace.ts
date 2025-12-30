@@ -91,6 +91,8 @@ export interface UseCoachMarketplaceOptions {
   countryCode?: string;
   /** Only show coaches with complete profiles (real coaches, not test/placeholder) - handled by RPC */
   realCoachesOnly?: boolean;
+  /** Whether the query should execute (default: true) - use to defer until location is ready */
+  enabled?: boolean;
 }
 
 export interface UseCoachMarketplaceResult {
@@ -214,6 +216,7 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
       };
     },
     staleTime: 1000 * 60 * 2, // 2 minutes
+    enabled: options.enabled !== false, // Defer query until location is ready
   });
 
   return {

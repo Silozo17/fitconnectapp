@@ -19,6 +19,8 @@ interface UseFeaturedCoachesOptions {
   userLocation: LocationData | null;
   /** When provided, strictly filter coaches to this country only */
   countryCode?: string | null;
+  /** Whether the query should execute (default: true) - use to defer until location is ready */
+  enabled?: boolean;
 }
 
 interface UseFeaturedCoachesResult {
@@ -38,9 +40,10 @@ function getMatchLevelFromTier(locationTier: number): LocationMatchLevel {
   return 'no_match';
 }
 
-export function useFeaturedCoaches({ userLocation, countryCode }: UseFeaturedCoachesOptions): UseFeaturedCoachesResult {
+export function useFeaturedCoaches({ userLocation, countryCode, enabled = true }: UseFeaturedCoachesOptions): UseFeaturedCoachesResult {
   const query = useQuery({
     queryKey: ['featured-coaches-rpc', userLocation?.city, userLocation?.region, userLocation?.countryCode, countryCode],
+    enabled, // Defer query until location is ready
     queryFn: async () => {
       // Call the SQL ranking function with a limit of 4 for featured
       const { data, error } = await supabase.rpc('get_ranked_coaches', {
