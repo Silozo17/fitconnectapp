@@ -15,13 +15,13 @@ export const COACH_FEATURE_FLAGS = {
   BATCH_OPERATIONS: true,
   TEMPLATE_FOLDERS: true,
   
-  // Phase 2 Features (disabled until ready)
-  AI_CLIENT_SUMMARY: false,
-  AI_PLATEAU_DETECTION: false,
-  PACKAGE_ANALYTICS: false,
-  UPSELL_INSIGHTS: false,
-  GOAL_ADHERENCE_TRACKER: false,
-  CLIENT_OUTCOMES_SHOWCASE: false,
+  // Phase 2 Features
+  AI_CLIENT_SUMMARY: true,
+  AI_PLATEAU_DETECTION: true,
+  PACKAGE_ANALYTICS: true,
+  UPSELL_INSIGHTS: true,
+  GOAL_ADHERENCE_TRACKER: true,
+  CLIENT_OUTCOMES_SHOWCASE: true,
   
   // Phase 3 Features (disabled until ready)
   AI_PLAN_RECOMMENDATIONS: false,
