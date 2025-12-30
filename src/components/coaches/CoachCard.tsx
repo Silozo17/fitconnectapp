@@ -18,7 +18,7 @@ import { useExchangeRates } from "@/hooks/useExchangeRates";
 import { getDisplayLocation } from "@/lib/location-utils";
 import { useTranslation } from "@/hooks/useTranslation";
 import { getCoachTypeDisplayLabel } from "@/constants/coachTypes";
-import { useIOSRestrictions } from "@/hooks/useIOSRestrictions";
+import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
 
 interface CoachCardProps {
   coach: MarketplaceCoach;
@@ -36,7 +36,7 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
   const autoLinkPrefix = useCoachLinkPrefix();
   const effectiveLinkPrefix = linkPrefix ?? autoLinkPrefix;
   const { convertForViewer } = useExchangeRates();
-  const { isIOSNative } = useIOSRestrictions();
+  const { isIOSNative } = usePlatformRestrictions();
 
   const isClient = user && (role === "client" || role === "admin");
   const isAuthenticated = !!user;

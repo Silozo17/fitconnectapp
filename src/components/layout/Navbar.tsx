@@ -8,7 +8,7 @@ import { Menu, Dumbbell, ChevronDown, Swords, Apple, Flame, Users, BookOpen, Tro
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { HeaderLocaleSelector } from "@/components/shared/HeaderLocaleSelector";
-import { useIOSRestrictions } from "@/hooks/useIOSRestrictions";
+import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
 
 const Navbar = () => {
   const { t } = useTranslation("common");
@@ -17,7 +17,7 @@ const Navbar = () => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const { user, role, signOut } = useAuth();
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const { isIOSNative, shouldHideCoachMarketplace, shouldHidePricingPage } = useIOSRestrictions();
+  const { isIOSNative, shouldHideCoachMarketplace, shouldHidePricingPage } = usePlatformRestrictions();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);

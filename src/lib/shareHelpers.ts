@@ -1,4 +1,4 @@
-import type { ShareOptions } from './share';
+import type { ShareOptions } from './share.web';
 import type { ShareableAchievement } from '@/components/gamification/ShareAchievementButton';
 import type { Challenge } from '@/hooks/useChallenges';
 

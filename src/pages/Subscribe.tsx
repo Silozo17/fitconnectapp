@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { getAvatarImageUrl } from "@/hooks/useAvatars";
 import { toast } from "sonner";
 import { isDespia } from "@/lib/despia";
-import { useIOSRestrictions } from "@/hooks/useIOSRestrictions";
+import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 // Tier-to-avatar mapping - each tier gets a progressively better avatar
 const TIER_AVATARS: Record<TierKey, string> = {
@@ -40,7 +40,7 @@ export default function Subscribe() {
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { isIOSNative } = useIOSRestrictions();
+  const { isIOSNative } = usePlatformRestrictions();
   const { currentTier } = useFeatureAccess();
   
   // Build return URL for auth redirect
