@@ -3,14 +3,6 @@ import { Search, LogOut, User, Menu } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminView } from "@/contexts/AdminContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
@@ -19,6 +11,12 @@ import ViewSwitcher from "@/components/admin/ViewSwitcher";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { FeedbackModal } from "@/components/feedback/FeedbackModal";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 
 interface ClientDashboardHeaderProps {
@@ -74,41 +72,45 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
           <div className="hidden xl:block">
             <NotificationCenter />
           </div>
-          <div className="hidden xl:block">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-3 px-2 py-1.5 h-auto rounded-xl">
-                  <UserAvatar
-                    src={avatarUrl}
-                    avatarSlug={selectedAvatar?.slug}
-                    avatarRarity={selectedAvatar?.rarity as any}
-                    name={displayName}
-                    variant="squircle"
-                    size="xs"
-                  />
-                  <span className="hidden md:block font-medium text-sm">{displayName || t('header.roleClient')}</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 rounded-xl">
-                <DropdownMenuLabel>
-                  <div className="flex flex-col">
-                    <span>{displayName || t('header.roleClient')}</span>
-                    <span className="text-xs text-muted-foreground font-normal">{t('header.roleClient')}</span>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("/dashboard/profile")} className="rounded-lg">
-                  <User className="w-4 h-4 mr-2" />
-                  {t('header.myProfile')}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={signOut} className="text-destructive rounded-lg">
-                  <LogOut className="w-4 h-4 mr-2" />
-                  {t('header.signOut')}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          <TooltipProvider>
+            <div className="hidden xl:flex items-center gap-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-9 w-9 rounded-xl"
+                    onClick={() => navigate("/dashboard/profile")}
+                  >
+                    <User className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t('header.myProfile')}</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-9 w-9 rounded-xl"
+                    onClick={signOut}
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t('header.signOut')}</TooltipContent>
+              </Tooltip>
+              <UserAvatar
+                src={avatarUrl}
+                avatarSlug={selectedAvatar?.slug}
+                avatarRarity={selectedAvatar?.rarity as any}
+                name={displayName}
+                variant="squircle"
+                size="xs"
+                className="ml-1"
+              />
+            </div>
+          </TooltipProvider>
           <Button variant="ghost" size="icon" className="xl:hidden" onClick={onMenuToggle}>
             <Menu className="w-5 h-5" />
           </Button>

@@ -7,19 +7,17 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useSelectedAvatar } from "@/hooks/useAvatars";
 import { useNavigate } from "react-router-dom";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import ViewSwitcher from "@/components/admin/ViewSwitcher";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { FeedbackModal } from "@/components/feedback/FeedbackModal";
 import { normalizeTier, SUBSCRIPTION_TIERS } from "@/lib/stripe-config";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 
 interface DashboardHeaderProps {
@@ -81,40 +79,45 @@ const DashboardHeader = memo(({ subscriptionTier, onMenuToggle }: DashboardHeade
           <div className="hidden xl:block">
             <NotificationCenter />
           </div>
-          <div className="hidden xl:block">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-3 px-2 py-1.5 h-auto rounded-xl">
-                  <UserAvatar
-                    src={avatarUrl}
-                    avatarSlug={selectedAvatar?.slug}
-                    avatarRarity={selectedAvatar?.rarity as any}
-                    name={displayName}
-                    variant="squircle"
-                    size="xs"
-                  />
-                  <span className="hidden md:block font-medium text-sm">{displayName || t('header.roleCoach')}</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 rounded-xl" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium">{displayName || t('header.roleCoach')}</p>
-                    <p className="text-xs text-muted-foreground">{tierLabel} Plan</p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleProfileClick} className="rounded-lg">
-                  <User className="h-4 w-4 mr-2" />
-                  {t('header.myProfile')}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleSignOut} className="rounded-lg">
-                  <LogOut className="h-4 w-4 mr-2" />
-                  {t('header.signOut')}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          <TooltipProvider>
+            <div className="hidden xl:flex items-center gap-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-9 w-9 rounded-xl"
+                    onClick={handleProfileClick}
+                  >
+                    <User className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t('header.myProfile')}</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-9 w-9 rounded-xl"
+                    onClick={handleSignOut}
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t('header.signOut')}</TooltipContent>
+              </Tooltip>
+              <UserAvatar
+                src={avatarUrl}
+                avatarSlug={selectedAvatar?.slug}
+                avatarRarity={selectedAvatar?.rarity as any}
+                name={displayName}
+                variant="squircle"
+                size="xs"
+                className="ml-1"
+              />
+            </div>
+          </TooltipProvider>
           <Button variant="ghost" size="icon" className="xl:hidden" onClick={onMenuToggle}>
             <Menu className="w-5 h-5" />
           </Button>

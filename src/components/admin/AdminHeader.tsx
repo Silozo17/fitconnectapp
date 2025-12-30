@@ -12,13 +12,11 @@ import { NotificationCenter } from "@/components/notifications/NotificationCente
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { FeedbackModal } from "@/components/feedback/FeedbackModal";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface AdminHeaderProps {
   onMenuToggle: () => void;
@@ -27,7 +25,7 @@ interface AdminHeaderProps {
 const AdminHeader = ({ onMenuToggle }: AdminHeaderProps) => {
   const { t } = useTranslation("admin");
   const navigate = useNavigate();
-  const { signOut, role } = useAuth();
+  const { signOut } = useAuth();
   const { displayName, avatarUrl } = useUserProfile();
   const { activeProfileType } = useAdminView();
   const avatarProfileType = activeProfileType === 'admin' ? 'client' : activeProfileType as 'client' | 'coach';
@@ -72,42 +70,46 @@ const AdminHeader = ({ onMenuToggle }: AdminHeaderProps) => {
           <NotificationCenter />
         </div>
 
-        {/* Profile Dropdown - Hidden on mobile */}
-        <div className="hidden xl:block">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-auto p-0 pt-4 overflow-visible bg-transparent hover:bg-transparent">
-                <UserAvatar
-                  src={avatarUrl}
-                  avatarSlug={selectedAvatar?.slug}
-                  avatarRarity={selectedAvatar?.rarity as any}
-                  name={displayName}
-                  variant="squircle"
-                  size="xs"
-                />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{displayName || "Admin"}</p>
-                  <p className="text-xs leading-none text-muted-foreground capitalize">
-                    {role}
-                  </p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
-                <User className="h-4 w-4 mr-2" />
-                {t('sidebar.myProfile')}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={signOut}>
-                <LogOut className="h-4 w-4 mr-2" />
-                {t('sidebar.signOut')}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        {/* Profile Section - Desktop only */}
+        <TooltipProvider>
+          <div className="hidden xl:flex items-center gap-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-9 w-9 rounded-xl"
+                  onClick={() => navigate("/dashboard/profile")}
+                >
+                  <User className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{t('sidebar.myProfile')}</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-9 w-9 rounded-xl"
+                  onClick={signOut}
+                >
+                  <LogOut className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{t('sidebar.signOut')}</TooltipContent>
+            </Tooltip>
+            <UserAvatar
+              src={avatarUrl}
+              avatarSlug={selectedAvatar?.slug}
+              avatarRarity={selectedAvatar?.rarity as any}
+              name={displayName}
+              variant="squircle"
+              size="xs"
+              className="ml-1"
+            />
+          </div>
+        </TooltipProvider>
 
         {/* Mobile Hamburger - Right side */}
         <Button
