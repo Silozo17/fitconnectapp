@@ -368,6 +368,9 @@ const ClientOnboarding = () => {
       // Refresh profiles so ViewSwitcher updates immediately
       await refreshProfiles();
       
+      // Set flag so ClientDashboardLayout doesn't redirect back during cache update
+      sessionStorage.setItem('fitconnect_onboarding_just_completed', 'client');
+      
       toast.success("Profile completed! Let's find you a coach.");
       navigate("/dashboard/client");
       // Don't reset isNavigating on success - we're navigating away
