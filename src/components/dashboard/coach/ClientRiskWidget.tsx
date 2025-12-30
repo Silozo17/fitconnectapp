@@ -37,7 +37,7 @@ function ClientRiskItem({ client }: { client: ClientRiskData }) {
   return (
     <div
       className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
-      onClick={() => navigate(`/dashboard/clients/${client.clientId}`)}
+      onClick={() => navigate(`/dashboard/coach/clients/${client.clientId}`)}
     >
       <Avatar className="h-10 w-10">
         <AvatarImage src={client.avatarUrl || undefined} alt={client.clientName} />
