@@ -47,8 +47,8 @@ export function useCoachProfile() {
         throw error;
       }
       
-      if (!data) {
-        console.warn("No coach profile found for user:", user.id);
+      if (!data && import.meta.env.DEV) {
+        console.warn("No coach profile found for current user");
       }
       
       return data;

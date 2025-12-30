@@ -105,8 +105,6 @@ const ClientOnboarding = () => {
 
       // If no profile exists, create one (handles legacy users with missing profiles)
       if (!data) {
-        console.log("[ClientOnboarding] No profile found, creating one for user:", user.id);
-        
         // Get user_profile info for username
         const { data: userProfile } = await supabase
           .from("user_profiles")
@@ -134,7 +132,6 @@ const ClientOnboarding = () => {
         }
         
         data = newProfile;
-        console.log("[ClientOnboarding] Created new profile:", newProfile?.id);
       }
 
       if (data?.onboarding_completed) {

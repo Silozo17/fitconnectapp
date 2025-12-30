@@ -91,7 +91,6 @@ export const useWearables = () => {
   const mapHealthKitToDataType = (hkType: string): string | null => {
     // Skip unsupported category types entirely - they cause native crashes
     if (UNSUPPORTED_CATEGORY_TYPES.some(cat => hkType.includes(cat))) {
-      console.log(`[useWearables] Skipping unsupported category type: ${hkType}`);
       return null;
     }
     
@@ -124,16 +123,12 @@ export const useWearables = () => {
   // Helper function to sync HealthKit data to health_data_sync table
   const syncHealthDataToDatabase = useCallback(async (clientId: string, healthData: unknown, connectionId?: string) => {
     if (!healthData) {
-      console.log('[useWearables] No health data to sync');
       return;
     }
-
-    console.log('[useWearables] Syncing health data to health_data_sync:', healthData);
 
     try {
       // TYPE GUARD: Validate healthData is a proper object before processing
       if (!isValidHealthDataObject(healthData)) {
-        console.log('[useWearables] Invalid health data format:', typeof healthData, Array.isArray(healthData) ? '(array)' : '');
         return;
       }
 
@@ -152,26 +147,7 @@ export const useWearables = () => {
         wearable_connection_id: string | null;
       }> = [];
 
-      // DEEP DEBUG: Log full raw response structure (safe now)
-      console.log('[useWearables] ==== DEEP DEBUG: RAW HEALTHKIT DATA ====');
-      console.log('[useWearables] Data type:', typeof data);
-      
-      // Safe Object.keys call with fallback
-      const dataKeys = safeObjectKeys(data);
-      console.log('[useWearables] Data keys:', dataKeys);
-      console.log('[useWearables] Full data JSON:', JSON.stringify(data, null, 2));
-      
       const dataEntries = safeObjectEntries<unknown[]>(data);
-      
-      for (const [metricType, readings] of dataEntries) {
-        console.log(`[useWearables] Type "${metricType}":`);
-        console.log(`  - Is Array: ${Array.isArray(readings)}`);
-        console.log(`  - Length: ${Array.isArray(readings) ? readings.length : 'N/A'}`);
-        if (Array.isArray(readings) && readings.length > 0 && readings[0]) {
-          console.log(`  - First sample FULL:`, JSON.stringify(readings[0], null, 2));
-          console.log(`  - All keys in first sample:`, safeObjectKeys(readings[0]));
-        }
-      }
 
       // Group data by date and type for aggregation
       const aggregatedData: Record<string, Record<string, { sum: number; count: number; maxValue?: number }>> = {};
@@ -181,7 +157,6 @@ export const useWearables = () => {
 
         const dataType = mapHealthKitToDataType(metricType);
         if (!dataType) {
-          console.log(`[useWearables] Skipping unmapped metric type: ${metricType}`);
           continue;
         }
 
@@ -196,14 +171,12 @@ export const useWearables = () => {
         for (const reading of readings) {
           // Handle null/undefined values gracefully
           if (reading === null || reading === undefined) {
-            console.log(`[useWearables] ${dataType}: Sample is null/undefined`);
             continue;
           }
           
           const readingObj = reading as { date?: string; startDate?: string; value?: number };
           
           if (readingObj.value === undefined || readingObj.value === null) {
-            console.log(`[useWearables] ${dataType}: Sample missing value field:`, JSON.stringify(reading));
             continue;
           }
 
@@ -224,16 +197,6 @@ export const useWearables = () => {
           }
         }
       }
-      
-      // Log synced types summary
-      const syncedTypes = new Set<string>();
-      for (const types of Object.values(aggregatedData)) {
-        for (const dataType of Object.keys(types)) {
-          syncedTypes.add(dataType);
-        }
-      }
-      console.log('[useWearables] Successfully aggregated types:', [...syncedTypes]);
-      console.log('[useWearables] Aggregated data:', aggregatedData);
 
       // Convert aggregated data to entries
       for (const [dateStr, types] of Object.entries(aggregatedData)) {
@@ -254,8 +217,6 @@ export const useWearables = () => {
       }
 
       if (healthDataEntries.length > 0) {
-        console.log(`[useWearables] Upserting ${healthDataEntries.length} health_data_sync entries...`);
-
         // Upsert entries - the table has a unique constraint on (client_id, data_type, recorded_at, source)
         const { error: upsertError } = await supabase
           .from('health_data_sync')
@@ -269,28 +230,20 @@ export const useWearables = () => {
           throw upsertError;
         }
 
-        console.log(`[useWearables] Successfully synced ${healthDataEntries.length} health data entries`);
-
         // Trigger achievement checks
-        console.log('[useWearables] Triggering achievement check...');
         supabase.functions.invoke('check-health-achievements', {
           body: { clientId }
         }).then(({ error }) => {
           if (error) console.error('[useWearables] Achievement check error:', error);
-          else console.log('[useWearables] Achievement check completed');
         });
 
         // Trigger challenge progress sync
-        console.log('[useWearables] Triggering challenge progress sync...');
         supabase.functions.invoke('sync-challenge-progress', {
           body: { clientId }
         }).then(({ error }) => {
           if (error) console.error('[useWearables] Challenge sync error:', error);
-          else console.log('[useWearables] Challenge sync completed');
         });
 
-      } else {
-        console.log('[useWearables] No health data to insert');
       }
     } catch (e) {
       console.error('[useWearables] Error syncing health data:', e);
@@ -303,8 +256,6 @@ export const useWearables = () => {
       toast.error("Please sign in to connect Apple Health");
       throw new Error("Not signed in");
     }
-
-    console.log('[useWearables] Starting native HealthKit connection...');
 
     // Get client profile ID
     const { data: clientProfile, error: profileError } = await supabase
@@ -321,10 +272,7 @@ export const useWearables = () => {
 
     // Attempt to connect using the correct Despia SDK pattern
     // This triggers the iOS permission dialog automatically on first read
-    console.log('[useWearables] Calling checkHealthKitConnection...');
     const result = await checkHealthKitConnection();
-    
-    console.log('[useWearables] HealthKit connection result:', result);
 
     if (!result.success) {
       triggerHaptic('error');
@@ -335,7 +283,6 @@ export const useWearables = () => {
 
     // Success - user granted permissions
     triggerHaptic('success');
-    console.log('[useWearables] HealthKit permission granted, saving to database...');
 
     // Save connection to database
     const { data: existing } = await supabase
@@ -376,12 +323,10 @@ export const useWearables = () => {
 
     // If we got initial health data, sync it
     if (result.data) {
-      console.log('[useWearables] Syncing initial health data...');
       await syncHealthDataToDatabase(clientProfile.id, result.data);
     }
 
     // Trigger a full sync of 7 days of data
-    console.log('[useWearables] Fetching 7 days of health data...');
     const fullSyncResult = await syncHealthKitData(7);
     if (fullSyncResult.success && fullSyncResult.data) {
       await syncHealthDataToDatabase(clientProfile.id, fullSyncResult.data);
@@ -406,24 +351,15 @@ export const useWearables = () => {
       const isIOSNativeNow = isDespiaEnv && /iPad|iPhone|iPod/i.test(navigator.userAgent);
       const isAndroidNativeNow = isDespiaEnv && /Android/i.test(navigator.userAgent);
       
-      console.log('[useWearables] Platform detection at mutation time:', {
-        provider,
-        isDespiaEnv,
-        isIOSNativeNow,
-        isAndroidNativeNow,
-        userAgent: navigator.userAgent
-      });
 
       // For Apple Health on iOS native, use native HealthKit flow
       if (provider === "apple_health" && isIOSNativeNow) {
-        console.log('[useWearables] Using native HealthKit flow');
         await handleNativeHealthKitConnect();
         return { native: true };
       }
 
       // For Health Connect on Android native, use native Health Connect flow
       if (provider === "health_connect" && isAndroidNativeNow) {
-        console.log('[useWearables] Using native Health Connect flow');
         // TODO: Implement native Health Connect flow when available
         toast.info("Health Connect integration coming soon");
         return { native: true };
