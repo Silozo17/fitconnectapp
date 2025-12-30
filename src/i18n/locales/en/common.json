@@ -469,7 +469,8 @@
       "clientComparison": "Compare Clients",
       "aiRecommendations": "AI Recommendations",
       "scheduledCheckins": "Scheduled Check-Ins",
-      "caseStudies": "Case Studies"
+      "caseStudies": "Case Studies",
+      "automations": "Automations"
     },
     "client": {
       "home": "Home",

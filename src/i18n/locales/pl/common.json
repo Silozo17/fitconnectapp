@@ -462,7 +462,14 @@
       "gamification": "Grywalizacja",
       "achievements": "Osiągnięcia",
       "integrations": "Integracje",
-      "settings": "Ustawienia"
+      "settings": "Ustawienia",
+      "analytics": "Analityka",
+      "wearableInsights": "Dane z urządzeń",
+      "clientComparison": "Porównaj klientów",
+      "aiRecommendations": "Rekomendacje AI",
+      "scheduledCheckins": "Zaplanowane check-iny",
+      "caseStudies": "Studia przypadków",
+      "automations": "Automatyzacje"
     },
     "client": {
       "home": "Strona główna",
