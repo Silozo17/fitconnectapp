@@ -148,7 +148,7 @@ export function ClientLTVWidget() {
               <div
                 key={client.clientId}
                 className="flex items-center gap-2 sm:gap-3 p-2 rounded-lg hover:bg-muted/30 transition-colors cursor-pointer"
-                onClick={() => navigate(`/dashboard/clients/${client.clientId}`)}
+                onClick={() => navigate(`/dashboard/coach/clients/${client.clientId}`)}
               >
                 <span className="text-xs font-medium text-muted-foreground w-4 flex-shrink-0">
                   #{index + 1}

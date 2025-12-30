@@ -30,7 +30,7 @@ function ChurnClientItem({ client }: { client: EnhancedChurnData }) {
   return (
     <div
       className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
-      onClick={() => navigate(`/dashboard/clients/${client.clientId}`)}
+      onClick={() => navigate(`/dashboard/coach/clients/${client.clientId}`)}
     >
       <Avatar className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0">
         <AvatarImage src={client.avatarUrl || undefined} alt={client.clientName} />
