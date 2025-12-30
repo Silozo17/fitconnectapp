@@ -6,17 +6,10 @@ import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Trophy, Eye, EyeOff, Info, Shield } from 'lucide-react';
 import { LocationAutocomplete } from '@/components/shared/LocationAutocomplete';
+import type { PlaceLocationData } from '@/types/location';
 
-interface LocationData {
-  place_id: string;
-  formatted_address: string;
-  city: string;
-  region: string;
-  country: string;
-  country_code: string;
-  lat: number;
-  lng: number;
-}
+// Use canonical type
+type LocationData = PlaceLocationData;
 
 interface LeaderboardSettingsProps {
   leaderboardVisible: boolean;

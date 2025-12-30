@@ -1,37 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { CheckoutType, CheckoutItem } from "@/types/checkout";
 
-export type CheckoutType = "digital-product" | "digital-bundle" | "package" | "subscription";
-
-export interface CheckoutItem {
-  id: string;
-  name: string;
-  description: string | null;
-  price: number;
-  currency: string;
-  imageUrl: string | null;
-  type: CheckoutType;
-  // Product-specific
-  contentType?: string;
-  durationMinutes?: number;
-  pageCount?: number;
-  // Package-specific
-  sessionCount?: number;
-  validityDays?: number;
-  // Subscription-specific
-  billingPeriod?: string;
-  sessionsPerPeriod?: number;
-  features?: string[];
-  // Bundle-specific
-  productCount?: number;
-  // Coach info
-  coach: {
-    id: string;
-    displayName: string;
-    profileImageUrl: string | null;
-    username: string | null;
-  } | null;
-}
+// Re-export types for backward compatibility
+export type { CheckoutType, CheckoutItem } from "@/types/checkout";
 
 // Helper to fetch coach profile
 async function fetchCoachProfile(coachId: string) {
@@ -50,7 +22,6 @@ async function fetchCoachProfile(coachId: string) {
     username: data.username,
   };
 }
-
 export const useCheckoutItem = (type: CheckoutType | null, itemId: string | null, coachId?: string | null) => {
   return useQuery({
     queryKey: ["checkout-item", type, itemId],

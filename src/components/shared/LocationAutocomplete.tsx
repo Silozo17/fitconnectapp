@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { MapPin, Loader2, Check, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import type { PlaceLocationData } from "@/types/location";
 
 interface PlacePrediction {
   place_id: string;
@@ -11,19 +12,8 @@ interface PlacePrediction {
   secondary_text: string;
 }
 
-export interface LocationData {
-  place_id?: string;
-  formatted_address?: string;
-  formattedAddress?: string;
-  city?: string;
-  region?: string;
-  county?: string;
-  country?: string;
-  country_code?: string;
-  countryCode?: string;
-  lat?: number;
-  lng?: number;
-}
+// Re-export for backward compatibility
+export type LocationData = PlaceLocationData;
 
 interface LocationAutocompleteProps {
   value: string;

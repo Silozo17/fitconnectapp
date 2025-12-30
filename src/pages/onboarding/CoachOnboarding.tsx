@@ -81,16 +81,9 @@ const getDisplayableTiers = () => {
     }));
 };
 
-interface LocationData {
-  place_id: string;
-  formatted_address: string;
-  city: string;
-  region: string;
-  country: string;
-  country_code: string;
-  lat: number;
-  lng: number;
-}
+// Import canonical location type
+import type { PlaceLocationData } from '@/types/location';
+type LocationData = PlaceLocationData;
 
 const CoachOnboarding = () => {
   const { t } = useTranslation('common');

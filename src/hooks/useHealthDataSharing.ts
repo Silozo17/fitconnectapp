@@ -2,16 +2,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import type { HealthDataTypeWithAll, ExtendedHealthDataType } from "@/types/health";
+import { EXTENDED_HEALTH_DATA_TYPES } from "@/types/health";
 
-export type HealthDataType = 
-  | "all" 
-  | "steps" 
-  | "heart_rate" 
-  | "sleep" 
-  | "calories" 
-  | "distance" 
-  | "active_minutes"
-  | "weight";
+// Re-export for backward compatibility
+export type HealthDataType = HealthDataTypeWithAll;
 
 export interface HealthDataSharingPreference {
   id: string;
@@ -30,15 +25,8 @@ export interface CoachWithPreferences {
   preferences: HealthDataSharingPreference[];
 }
 
-const DATA_TYPES: HealthDataType[] = [
-  "steps",
-  "heart_rate", 
-  "sleep",
-  "calories",
-  "distance",
-  "active_minutes",
-  "weight"
-];
+// Use canonical types
+const DATA_TYPES: ExtendedHealthDataType[] = EXTENDED_HEALTH_DATA_TYPES;
 
 export const useHealthDataSharing = () => {
   const { user } = useAuth();

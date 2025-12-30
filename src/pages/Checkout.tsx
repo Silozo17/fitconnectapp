@@ -9,7 +9,10 @@ import { useCheckoutItem, CheckoutType } from "@/hooks/useCheckoutItem";
 import { ProductPriceSummary } from "@/components/payments/ProductPriceSummary";
 import { UnifiedEmbeddedCheckout, CheckoutLoading } from "@/components/payments/UnifiedEmbeddedCheckout";
 
-const TYPE_CONFIG: Record<CheckoutType, { label: string; icon: typeof Package }> = {
+// Subset of CheckoutType used by this page (excludes 'booking' which has its own flow)
+type PageCheckoutType = Exclude<CheckoutType, "booking">;
+
+const TYPE_CONFIG: Record<PageCheckoutType, { label: string; icon: typeof Package }> = {
   "digital-product": { label: "DIGITAL PRODUCT", icon: BookOpen },
   "digital-bundle": { label: "BUNDLE", icon: Layers },
   "package": { label: "SESSION PACKAGE", icon: Package },
@@ -34,7 +37,7 @@ export default function Checkout() {
   const currentUrl = `${location.pathname}${location.search}`;
   const encodedReturnUrl = encodeURIComponent(currentUrl);
 
-  const type = searchParams.get("type") as CheckoutType;
+  const type = searchParams.get("type") as PageCheckoutType;
   const itemId = searchParams.get("itemId");
   const coachId = searchParams.get("coachId");
   const clientId = searchParams.get("clientId");
