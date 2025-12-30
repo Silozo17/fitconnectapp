@@ -44,21 +44,33 @@ serve(async (req) => {
       useExternalUserIds = true // Default to using external user IDs (set via setonesignalplayerid)
     }: PushNotificationRequest = await req.json();
 
-    console.log(`[send-push] Sending notification to ${userIds.length} users: "${title}"`);
-    console.log(`[send-push] Using ${useExternalUserIds ? "external_user_ids" : "player_ids"} method`);
+    console.log(`[send-push] ===== PUSH NOTIFICATION REQUEST =====`);
+    console.log(`[send-push] Title: "${title}"`);
+    console.log(`[send-push] Message: "${message}"`);
+    console.log(`[send-push] Target user IDs: ${JSON.stringify(userIds)}`);
+    console.log(`[send-push] Preference key: ${preferenceKey || "none"}`);
+    console.log(`[send-push] Method: ${useExternalUserIds ? "external_user_ids" : "player_ids"}`);
 
     // Filter users based on their notification preferences
     let eligibleUserIds = userIds;
     if (preferenceKey) {
-      const { data: prefs } = await supabase
+      console.log(`[send-push] Checking notification preferences for key: ${preferenceKey}`);
+      const { data: prefs, error: prefsError } = await supabase
         .from("notification_preferences")
         .select(`user_id, ${preferenceKey}`)
         .in("user_id", userIds);
+
+      if (prefsError) {
+        console.error(`[send-push] Error fetching preferences:`, prefsError);
+      }
+
+      console.log(`[send-push] Preferences data:`, JSON.stringify(prefs));
 
       if (prefs) {
         const disabledUsers = new Set(
           prefs.filter((p: any) => p[preferenceKey] === false).map((p: any) => p.user_id)
         );
+        console.log(`[send-push] Users with disabled ${preferenceKey}:`, Array.from(disabledUsers));
         eligibleUserIds = userIds.filter((id) => !disabledUsers.has(id));
       }
     }
@@ -71,7 +83,14 @@ serve(async (req) => {
       );
     }
 
-    console.log(`[send-push] ${eligibleUserIds.length} eligible users after preference check`);
+    console.log(`[send-push] Eligible user IDs: ${JSON.stringify(eligibleUserIds)}`);
+
+    // Also check if users have push tokens registered (for debugging)
+    const { data: debugTokens } = await supabase
+      .from("push_tokens")
+      .select("user_id, player_id, device_type, is_active")
+      .in("user_id", eligibleUserIds);
+    console.log(`[send-push] Push tokens in database for eligible users:`, JSON.stringify(debugTokens));
 
     // Build OneSignal request body
     let oneSignalBody: Record<string, unknown> = {
@@ -85,7 +104,7 @@ serve(async (req) => {
       // Use external user IDs (set via setonesignalplayerid on app load)
       // This is the preferred method as it directly targets users by their database ID
       oneSignalBody.include_external_user_ids = eligibleUserIds;
-      console.log(`[send-push] Targeting ${eligibleUserIds.length} external user IDs`);
+      console.log(`[send-push] OneSignal body with external_user_ids:`, JSON.stringify(oneSignalBody));
     } else {
       // Fallback: Get active push tokens for eligible users and use player_ids
       const { data: tokens, error: tokensError } = await supabase
