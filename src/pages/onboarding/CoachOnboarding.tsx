@@ -408,7 +408,6 @@ const CoachOnboarding = () => {
   const handleComplete = async () => {
     // Guard: prevent during existing navigation or submission
     if (!user || isNavigating || isSubmitting) {
-      console.log("[CoachOnboarding] handleComplete blocked - user:", !!user, "navigating:", isNavigating, "submitting:", isSubmitting);
       return;
     }
 

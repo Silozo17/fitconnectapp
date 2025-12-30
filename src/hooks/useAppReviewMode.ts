@@ -33,10 +33,10 @@ export function useAppReviewMode() {
 }
 
 /**
- * App Review Credentials for Apple App Store Review:
+ * App Review Account for Apple App Store Review:
  * 
  * Email: appstore.review@fitconnect.app
- * Password: FitConnect2024!Review
+ * Password: See App Store Connect submission notes
  * 
  * Features accessible:
  * - Full client experience
