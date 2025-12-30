@@ -5099,6 +5099,7 @@ export type Database = {
           push_progress: boolean | null
           push_reengagement: boolean | null
           push_reminders: boolean | null
+          push_showcase: boolean | null
           reminder_hours_before: number | null
           updated_at: string
           user_id: string
@@ -5123,6 +5124,7 @@ export type Database = {
           push_progress?: boolean | null
           push_reengagement?: boolean | null
           push_reminders?: boolean | null
+          push_showcase?: boolean | null
           reminder_hours_before?: number | null
           updated_at?: string
           user_id: string
@@ -5147,6 +5149,7 @@ export type Database = {
           push_progress?: boolean | null
           push_reengagement?: boolean | null
           push_reminders?: boolean | null
+          push_showcase?: boolean | null
           reminder_hours_before?: number | null
           updated_at?: string
           user_id?: string
