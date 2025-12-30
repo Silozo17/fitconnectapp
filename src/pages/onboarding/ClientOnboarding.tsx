@@ -15,7 +15,7 @@ import { AvatarSelectionStep } from "@/components/onboarding/AvatarSelectionStep
 import { OnboardingLayout } from "@/components/onboarding/OnboardingLayout";
 import { useTranslation } from "react-i18next";
 
-const STEPS = ["Choose Avatar", "Personal Info", "Body Metrics", "Fitness Goals", "Dietary Info", "Connect Devices"];
+const STEPS = ["Personal Info", "Body Metrics", "Fitness Goals", "Dietary Info", "Connect Devices", "Choose Avatar"];
 
 const FITNESS_GOALS: { id: string; label: string; icon: LucideIcon }[] = [
   { id: "weight_loss", label: "Weight Loss", icon: Flame },
@@ -213,7 +213,18 @@ const ClientOnboarding = () => {
   }, [isNavigating]);
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev) => {
+      const updated = { ...prev, [field]: value };
+      
+      // If gender changes and user previously selected an avatar, clear it
+      // (Avatar list is filtered by gender, so selection may no longer be valid)
+      if (field === 'gender' && prev.gender !== value && prev.selectedAvatarId) {
+        updated.selectedAvatarId = null;
+        updated.selectedAvatarSlug = null;
+      }
+      
+      return updated;
+    });
   };
 
   const handleMultiSelect = (field: string, value: string) => {
@@ -241,14 +252,8 @@ const ClientOnboarding = () => {
       return;
     }
     
-    // Validate avatar selection on step 0
-    if (currentStep === 0 && !formData.selectedAvatarId) {
-      toast.error("Please choose an avatar to continue");
-      return;
-    }
-    
-    // Validate first name on personal info step
-    if (currentStep === 1 && !formData.firstName.trim()) {
+    // Validate first name on personal info step (now step 0)
+    if (currentStep === 0 && !formData.firstName.trim()) {
       toast.error("Please enter your first name");
       return;
     }
@@ -385,20 +390,20 @@ const ClientOnboarding = () => {
 
   // Determine footer actions based on current step
   const getFooterActions = () => {
-    // Last step (Wearables)
+    // Last step (Avatar - now step 5)
     if (currentStep === 5) {
       return {
         primary: {
-          label: wearablesState.hasAnyConnection ? "Complete Setup" : "Skip & Complete",
+          label: "Complete Setup",
           onClick: handleComplete,
           loading: isSubmitting,
-          disabled: isNavigating || isSubmitting,
+          disabled: isNavigating || isSubmitting || !formData.selectedAvatarId,
         },
-        secondary: currentStep > 0 ? {
+        secondary: {
           label: "Back",
           onClick: handleBack,
           disabled: isNavigating || isSubmitting,
-        } : undefined,
+        },
       };
     }
 
@@ -418,16 +423,15 @@ const ClientOnboarding = () => {
   };
 
   const renderStepContent = () => {
-    switch (currentStep) {
-      case 0:
-        return (
-          <AvatarSelectionStep
-            selectedAvatarId={formData.selectedAvatarId}
-            onSelect={handleAvatarSelect}
-          />
-        );
+    if (import.meta.env.DEV) {
+      console.log('[ClientOnboarding] Rendering step:', currentStep, STEPS[currentStep]);
+      console.log('[ClientOnboarding] Gender:', formData.gender);
+      console.log('[ClientOnboarding] Avatar:', formData.selectedAvatarId);
+    }
 
-      case 1:
+    switch (currentStep) {
+      // Step 0: Personal Info (includes gender - needed before avatar step)
+      case 0:
         return (
           <div className="space-y-5">
             <div className="mb-4">
@@ -522,7 +526,8 @@ const ClientOnboarding = () => {
           </div>
         );
 
-      case 2:
+      // Step 1: Body Metrics
+      case 1:
         return (
           <div className="space-y-5">
             <div className="mb-4">
@@ -563,7 +568,8 @@ const ClientOnboarding = () => {
           </div>
         );
 
-      case 3:
+      // Step 2: Fitness Goals
+      case 2:
         return (
           <div className="space-y-5">
             <div className="mb-4">
@@ -601,7 +607,8 @@ const ClientOnboarding = () => {
           </div>
         );
 
-      case 4:
+      // Step 3: Dietary Info
+      case 3:
         return (
           <div className="space-y-5">
             <div className="mb-4">
@@ -653,10 +660,21 @@ const ClientOnboarding = () => {
           </div>
         );
 
-      case 5:
+      // Step 4: Connect Devices (Wearables)
+      case 4:
         return (
           <WearablesOnboardingStep
             onStateChange={setWearablesState}
+          />
+        );
+
+      // Step 5: Choose Avatar (LAST - now has gender available)
+      case 5:
+        return (
+          <AvatarSelectionStep
+            selectedAvatarId={formData.selectedAvatarId}
+            onSelect={handleAvatarSelect}
+            userGender={formData.gender}
           />
         );
 
