@@ -23,25 +23,41 @@ export function DatePickerWithRange({ date, onDateChange, className }: DatePicke
             variant="outline"
             size="sm"
             className={cn(
-              "justify-start text-left font-normal",
+              "justify-start text-left font-normal w-full sm:w-auto",
               !date && "text-muted-foreground"
             )}
           >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {date?.from ? (
-              date.to ? (
-                <>
-                  {format(date.from, "LLL dd, y")} - {format(date.to, "LLL dd, y")}
-                </>
+            <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+            <span className="truncate">
+              {date?.from ? (
+                date.to ? (
+                  <>
+                    <span className="hidden sm:inline">
+                      {format(date.from, "LLL dd, y")} - {format(date.to, "LLL dd, y")}
+                    </span>
+                    <span className="sm:hidden">
+                      {format(date.from, "MMM dd")} - {format(date.to, "MMM dd")}
+                    </span>
+                  </>
+                ) : (
+                  format(date.from, "LLL dd, y")
+                )
               ) : (
-                format(date.from, "LLL dd, y")
-              )
-            ) : (
-              <span>Pick a date range</span>
-            )}
+                <span>Pick a date range</span>
+              )}
+            </span>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent className="w-auto p-0 max-w-[95vw]" align="start">
+          <Calendar
+            initialFocus
+            mode="range"
+            defaultMonth={date?.from}
+            selected={date}
+            onSelect={onDateChange}
+            numberOfMonths={1}
+            className="p-3 pointer-events-auto sm:hidden"
+          />
           <Calendar
             initialFocus
             mode="range"
@@ -49,6 +65,7 @@ export function DatePickerWithRange({ date, onDateChange, className }: DatePicke
             selected={date}
             onSelect={onDateChange}
             numberOfMonths={2}
+            className="p-3 pointer-events-auto hidden sm:block"
           />
         </PopoverContent>
       </Popover>

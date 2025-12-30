@@ -100,42 +100,42 @@ const CoachScheduledCheckins = () => {
       />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card variant="glass" className="glass-card rounded-2xl">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
-                <Calendar className="w-7 h-7 text-primary" />
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
+        <Card variant="glass" className="glass-card rounded-xl sm:rounded-2xl">
+          <CardContent className="p-3 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-3">
+              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-primary/10 flex items-center justify-center">
+                <Calendar className="w-5 h-5 sm:w-7 sm:h-7 text-primary" />
               </div>
-              <div>
-                <p className="text-2xl font-bold">{scheduledCheckins.length}</p>
-                <p className="text-sm text-muted-foreground">{t("scheduledCheckins.totalScheduled")}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card variant="glass" className="glass-card rounded-2xl">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="w-14 h-14 rounded-2xl bg-success/10 flex items-center justify-center">
-                <Play className="w-7 h-7 text-success" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{activeCount}</p>
-                <p className="text-sm text-muted-foreground">{t("scheduledCheckins.activeCheckins")}</p>
+              <div className="text-center sm:text-left">
+                <p className="text-lg sm:text-2xl font-bold">{scheduledCheckins.length}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">{t("scheduledCheckins.totalScheduled")}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card variant="glass" className="glass-card rounded-2xl">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center">
-                <MessageSquare className="w-7 h-7 text-muted-foreground" />
+        <Card variant="glass" className="glass-card rounded-xl sm:rounded-2xl">
+          <CardContent className="p-3 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-3">
+              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-success/10 flex items-center justify-center">
+                <Play className="w-5 h-5 sm:w-7 sm:h-7 text-success" />
               </div>
-              <div>
-                <p className="text-2xl font-bold">{totalSent}</p>
-                <p className="text-sm text-muted-foreground">{t("scheduledCheckins.messagesSent")}</p>
+              <div className="text-center sm:text-left">
+                <p className="text-lg sm:text-2xl font-bold">{activeCount}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">{t("scheduledCheckins.activeCheckins")}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card variant="glass" className="glass-card rounded-xl sm:rounded-2xl">
+          <CardContent className="p-3 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-3">
+              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-muted/50 flex items-center justify-center">
+                <MessageSquare className="w-5 h-5 sm:w-7 sm:h-7 text-muted-foreground" />
+              </div>
+              <div className="text-center sm:text-left">
+                <p className="text-lg sm:text-2xl font-bold">{totalSent}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">{t("scheduledCheckins.messagesSent")}</p>
               </div>
             </div>
           </CardContent>
@@ -143,14 +143,14 @@ const CoachScheduledCheckins = () => {
       </div>
 
       {/* Main Content */}
-      <Card variant="glass" className="glass-card rounded-3xl">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-primary" />
+      <Card variant="glass" className="glass-card rounded-2xl sm:rounded-3xl">
+        <CardHeader className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
               {t("scheduledCheckins.title")}
             </CardTitle>
-            <Button onClick={() => { setEditingCheckin(null); setFormOpen(true); }}>
+            <Button size="sm" className="w-full sm:w-auto" onClick={() => { setEditingCheckin(null); setFormOpen(true); }}>
               <Plus className="w-4 h-4 mr-2" />
               {t("scheduledCheckins.createNew")}
             </Button>
@@ -173,47 +173,48 @@ const CoachScheduledCheckins = () => {
               </Button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {scheduledCheckins.map((checkin) => (
                 <Card key={checkin.id} variant="glass" className="glass-card">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-4">
+                  <CardContent className="p-3 sm:p-4">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2">
-                          <p className="font-medium truncate">
+                        <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-2">
+                          <p className="font-medium truncate text-sm sm:text-base">
                             {checkin.client?.first_name} {checkin.client?.last_name}
                           </p>
-                          <Badge variant={checkin.is_active ? "default" : "secondary"}>
+                          <Badge variant={checkin.is_active ? "default" : "secondary"} className="text-xs">
                             {checkin.is_active ? t("status.active") : t("status.paused")}
                           </Badge>
-                          <Badge variant="outline">
+                          <Badge variant="outline" className="text-xs">
                             {t(`scheduledCheckins.scheduleTypes.${checkin.schedule_type}`)}
                           </Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                        <p className="text-xs sm:text-sm text-muted-foreground mb-2 line-clamp-2">
                           {checkin.message_template}
                         </p>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             {getScheduleDescription(checkin)}
                           </span>
                           {checkin.last_sent_at && (
-                            <span>
+                            <span className="hidden sm:inline">
                               {t("scheduledCheckins.lastSent")}: {format(new Date(checkin.last_sent_at), "PP")}
                             </span>
                           )}
                           {checkin.next_run_at && checkin.is_active && (
-                            <span>
+                            <span className="hidden sm:inline">
                               {t("scheduledCheckins.nextRun")}: {format(new Date(checkin.next_run_at), "PP 'at' p")}
                             </span>
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1 sm:gap-2 self-end sm:self-start">
                         <Button
                           variant="ghost"
                           size="icon"
+                          className="h-8 w-8 sm:h-9 sm:w-9"
                           onClick={() => toggleActive(checkin.id, !checkin.is_active)}
                         >
                           {checkin.is_active ? (
@@ -225,6 +226,7 @@ const CoachScheduledCheckins = () => {
                         <Button
                           variant="ghost"
                           size="icon"
+                          className="h-8 w-8 sm:h-9 sm:w-9"
                           onClick={() => handleEdit(checkin)}
                         >
                           <Edit2 className="w-4 h-4" />
@@ -232,6 +234,7 @@ const CoachScheduledCheckins = () => {
                         <Button
                           variant="ghost"
                           size="icon"
+                          className="h-8 w-8 sm:h-9 sm:w-9"
                           onClick={() => handleDelete(checkin.id)}
                         >
                           <Trash2 className="w-4 h-4 text-destructive" />

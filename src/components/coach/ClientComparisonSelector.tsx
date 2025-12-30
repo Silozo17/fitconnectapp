@@ -14,7 +14,7 @@ export function ClientComparisonSelector({ clients, selectedIds, onToggle, maxSe
   const { t } = useTranslation("coach");
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
       {clients.map((client) => {
         const isSelected = selectedIds.includes(client.id);
         const isDisabled = !isSelected && selectedIds.length >= maxSelection;
@@ -25,7 +25,7 @@ export function ClientComparisonSelector({ clients, selectedIds, onToggle, maxSe
             onClick={() => !isDisabled && onToggle(client.id)}
             disabled={isDisabled}
             className={cn(
-              "relative p-4 rounded-xl border-2 transition-all text-left",
+              "relative p-2 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all text-left min-h-[80px] sm:min-h-[100px]",
               isSelected
                 ? "border-primary bg-primary/5"
                 : isDisabled
@@ -34,17 +34,17 @@ export function ClientComparisonSelector({ clients, selectedIds, onToggle, maxSe
             )}
           >
             {isSelected && (
-              <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                <Check className="w-3 h-3 text-primary-foreground" />
+              <div className="absolute top-1 right-1 sm:top-2 sm:right-2 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-primary flex items-center justify-center">
+                <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-primary-foreground" />
               </div>
             )}
             <UserAvatar
               src={client.avatar_url}
               name={`${client.first_name || ""} ${client.last_name || ""}`}
-              className="w-12 h-12 mx-auto mb-2"
+              className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-1 sm:mb-2"
             />
-            <p className="text-sm font-medium text-center truncate">
-              {client.first_name} {client.last_name}
+            <p className="text-xs sm:text-sm font-medium text-center truncate">
+              {client.first_name} {client.last_name?.charAt(0)}.
             </p>
           </button>
         );

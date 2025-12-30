@@ -15,7 +15,7 @@ export function CaseStudyPreview({ open, onOpenChange, caseStudy }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh]">
+      <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[80vh] overflow-x-hidden">
         <DialogHeader>
           <DialogTitle>{caseStudy?.title}</DialogTitle>
         </DialogHeader>

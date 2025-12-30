@@ -25,25 +25,25 @@ export function AIPlanRecommendationCard({ recommendation, onApply, onDismiss, t
 
   return (
     <Card variant="glass" className="glass-card">
-      <CardContent className="p-4">
-        <div className="flex items-start gap-4">
-          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${priorityColors[recommendation.priority]}`}>
-            <TypeIcon className="w-6 h-6" />
+      <CardContent className="p-3 sm:p-4">
+        <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
+          <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 ${priorityColors[recommendation.priority]}`}>
+            <TypeIcon className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-medium">{recommendation.title}</h3>
-              <Badge variant="outline" className={priorityColors[recommendation.priority]}>
+            <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-1">
+              <h3 className="font-medium text-sm sm:text-base">{recommendation.title}</h3>
+              <Badge variant="outline" className={`text-xs ${priorityColors[recommendation.priority]}`}>
                 {t(`aiRecommendations.priority.${recommendation.priority}`)}
               </Badge>
-              <Badge variant="secondary">
+              <Badge variant="secondary" className="text-xs">
                 {t(`aiRecommendations.types.${recommendation.recommendation_type}`)}
               </Badge>
             </div>
-            <p className="text-sm text-muted-foreground mb-2">
+            <p className="text-xs sm:text-sm text-muted-foreground mb-2">
               {recommendation.client?.first_name} {recommendation.client?.last_name}
             </p>
-            <p className="text-sm mb-2">{recommendation.description}</p>
+            <p className="text-xs sm:text-sm mb-2">{recommendation.description}</p>
             {recommendation.rationale && (
               <p className="text-xs text-muted-foreground italic">{recommendation.rationale}</p>
             )}
@@ -52,10 +52,11 @@ export function AIPlanRecommendationCard({ recommendation, onApply, onDismiss, t
             </p>
           </div>
           {recommendation.status === "pending" && (
-            <div className="flex items-center gap-2">
-              <Button size="sm" onClick={onApply}>
-                <Check className="w-4 h-4 mr-1" />
-                {t("aiRecommendations.applyToPlan")}
+            <div className="flex items-center gap-2 shrink-0 self-end sm:self-start">
+              <Button size="sm" onClick={onApply} className="text-xs sm:text-sm">
+                <Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                <span className="hidden sm:inline">{t("aiRecommendations.applyToPlan")}</span>
+                <span className="sm:hidden">{t("aiRecommendations.applied")}</span>
               </Button>
               <Button size="sm" variant="ghost" onClick={onDismiss}>
                 <X className="w-4 h-4" />
