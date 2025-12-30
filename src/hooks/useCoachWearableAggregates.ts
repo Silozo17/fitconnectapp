@@ -72,7 +72,13 @@ export function useCoachWearableAggregates() {
 
   return {
     clientsWithData: data?.clients || [],
-    aggregates: data?.aggregates || {},
+    aggregates: (data?.aggregates || {}) as {
+      avgSteps: number | null;
+      avgHeartRate: number | null;
+      avgSleep: number | null;
+      avgCalories: number | null;
+      connectedClients: number;
+    },
     alerts: data?.alerts || [],
     isLoading,
     refetch,
