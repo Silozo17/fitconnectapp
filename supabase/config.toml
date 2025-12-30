@@ -296,3 +296,12 @@ verify_jwt = true
 
 [functions.generate-checkin-message]
 verify_jwt = true
+
+[functions.generate-plan-recommendations]
+verify_jwt = true
+
+[functions.generate-case-study]
+verify_jwt = true
+
+[functions.process-scheduled-checkins]
+verify_jwt = false

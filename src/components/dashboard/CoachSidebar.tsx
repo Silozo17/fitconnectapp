@@ -27,6 +27,11 @@ import {
   ImageIcon,
   Lock,
   Receipt,
+  Sparkles,
+  Activity,
+  Users2,
+  CalendarClock,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
@@ -130,6 +135,19 @@ const menuGroups: MenuGroup[] = [
     collapsible: true,
     items: [
       { titleKey: "navigation.coach.achievements", icon: Trophy, path: "/dashboard/coach/achievements" },
+    ],
+  },
+  {
+    id: "analytics",
+    labelKey: "navigation.coach.analytics",
+    icon: BarChart3,
+    collapsible: true,
+    items: [
+      { titleKey: "navigation.coach.wearableInsights", icon: Activity, path: "/dashboard/coach/wearables", requiredFeature: "advanced_analytics" },
+      { titleKey: "navigation.coach.clientComparison", icon: Users2, path: "/dashboard/coach/compare", requiredFeature: "basic_analytics" },
+      { titleKey: "navigation.coach.aiRecommendations", icon: Sparkles, path: "/dashboard/coach/ai-recommendations", requiredFeature: "ai_client_analysis" },
+      { titleKey: "navigation.coach.scheduledCheckins", icon: CalendarClock, path: "/dashboard/coach/scheduled-checkins" },
+      { titleKey: "navigation.coach.caseStudies", icon: FileText, path: "/dashboard/coach/case-studies" },
     ],
   },
 ];
