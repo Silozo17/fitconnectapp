@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import Cropper, { Area, Point } from "react-easy-crop";
+import { useState, useCallback, lazy, Suspense } from "react";
+import type { Area, Point } from "react-easy-crop";
 import {
   Dialog,
   DialogContent,
@@ -11,6 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Loader2, ZoomIn } from "lucide-react";
 import { getCroppedImg, CropArea } from "@/lib/cropImage";
+
+// Lazy-load the cropper component to reduce main bundle size
+const Cropper = lazy(() => import("react-easy-crop"));
 
 interface ImageCropperModalProps {
   open: boolean;
@@ -71,17 +74,19 @@ export function ImageCropperModal({
         </DialogHeader>
 
         <div className="relative w-full h-[350px] bg-muted/50 rounded-2xl mx-6 overflow-hidden" style={{ width: 'calc(100% - 48px)' }}>
-          <Cropper
-            image={imageSrc}
-            crop={crop}
-            zoom={zoom}
-            aspect={1}
-            cropShape="round"
-            showGrid={false}
-            onCropChange={onCropChange}
-            onZoomChange={onZoomChange}
-            onCropComplete={onCropAreaChange}
-          />
+          <Suspense fallback={<div className="w-full h-full flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div>}>
+            <Cropper
+              image={imageSrc}
+              crop={crop}
+              zoom={zoom}
+              aspect={1}
+              cropShape="round"
+              showGrid={false}
+              onCropChange={onCropChange}
+              onZoomChange={onZoomChange}
+              onCropComplete={onCropAreaChange}
+            />
+          </Suspense>
         </div>
 
         <div className="px-6 py-4 space-y-3">

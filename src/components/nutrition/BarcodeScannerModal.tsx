@@ -8,7 +8,9 @@ import { useOpenFoodFactsBarcode } from "@/hooks/useOpenFoodFacts";
 import { useUserLocalePreference } from "@/hooks/useUserLocalePreference";
 import { toast } from "sonner";
 import { enableScanningMode, disableScanningMode, isDespia } from "@/lib/despia";
-import { Html5Qrcode } from "html5-qrcode";
+
+// Lazy-loaded to reduce main bundle size (~180KB)
+type Html5QrcodeType = import('html5-qrcode').Html5Qrcode;
 
 interface BarcodeScannerModalProps {
   open: boolean;
@@ -39,7 +41,7 @@ export const BarcodeScannerModal = ({
   const [manualBarcode, setManualBarcode] = useState("");
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
-  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const scannerRef = useRef<Html5QrcodeType | null>(null);
   const scannerContainerId = "barcode-scanner-container";
   const isProcessingRef = useRef(false);
 
@@ -84,6 +86,9 @@ export const BarcodeScannerModal = ({
     }
 
     try {
+      // Dynamically import html5-qrcode when needed
+      const { Html5Qrcode } = await import('html5-qrcode');
+      
       // Create new scanner instance
       scannerRef.current = new Html5Qrcode(scannerContainerId);
       
