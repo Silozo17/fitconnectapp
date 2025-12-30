@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Trophy, Globe, MapPin, Search, Users, ChevronRight, Filter, Medal, Award, Flag, Building2, Sparkles, Lock, Crown, Target, Flame, Dumbbell, BarChart3, Camera, Utensils, Zap } from "lucide-react";
@@ -243,11 +243,11 @@ export default function Community() {
     }
   };
 
-  // Avatar data
+  // Avatar data with memoized sorting
   const { data: avatars, isLoading: avatarsLoading } = useAvatars();
-  const freeAvatars = avatars?.filter(a => a.category === 'free').sort(sortByRarity) || [];
-  const challengeAvatars = avatars?.filter(a => a.category === 'challenge_unlock').sort(sortByRarity) || [];
-  const coachAvatars = avatars?.filter(a => a.category === 'coach_exclusive').sort(sortByRarity) || [];
+  const freeAvatars = useMemo(() => avatars?.filter(a => a.category === 'free').sort(sortByRarity) || [], [avatars]);
+  const challengeAvatars = useMemo(() => avatars?.filter(a => a.category === 'challenge_unlock').sort(sortByRarity) || [], [avatars]);
+  const coachAvatars = useMemo(() => avatars?.filter(a => a.category === 'coach_exclusive').sort(sortByRarity) || [], [avatars]);
 
   const handleTabChange = (value: string) => {
     setSearchParams({ tab: value });

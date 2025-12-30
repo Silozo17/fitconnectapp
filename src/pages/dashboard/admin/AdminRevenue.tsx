@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -81,12 +82,13 @@ const AdminRevenue = () => {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  const stats = data?.stats ?? { totalRevenue: 0, mrr: 0, commissionEarnings: 0, activeSubscriptions: 0 };
-  const comparison = data?.comparison ?? null;
-  const transactions = data?.transactions ?? [];
-  const revenueData = data?.revenueData ?? [];
-  const tierData = data?.tierData ?? [];
-  const showComp = dateRange.compareMode !== 'none' && comparison !== null;
+  // Memoize derived data to prevent unnecessary re-renders
+  const stats = useMemo(() => data?.stats ?? { totalRevenue: 0, mrr: 0, commissionEarnings: 0, activeSubscriptions: 0 }, [data?.stats]);
+  const comparison = useMemo(() => data?.comparison ?? null, [data?.comparison]);
+  const transactions = useMemo(() => data?.transactions ?? [], [data?.transactions]);
+  const revenueData = useMemo(() => data?.revenueData ?? [], [data?.revenueData]);
+  const tierData = useMemo(() => data?.tierData ?? [], [data?.tierData]);
+  const showComp = useMemo(() => dateRange.compareMode !== 'none' && comparison !== null, [dateRange.compareMode, comparison]);
 
   return (
     <>

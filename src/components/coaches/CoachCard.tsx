@@ -1,3 +1,4 @@
+import React, { useCallback, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,7 +28,7 @@ interface CoachCardProps {
   linkPrefix?: string;
 }
 
-const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCardProps) => {
+const CoachCard = React.memo(({ coach, onBook, onRequestConnection, linkPrefix }: CoachCardProps) => {
   const { t } = useTranslation('coaches');
   const { data: reviews = [] } = useCoachReviews(coach.id);
   const averageRating = calculateAverageRating(reviews);
@@ -41,18 +42,17 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
   const isClient = user && (role === "client" || role === "admin");
   const isAuthenticated = !!user;
 
-  const handleMessage = (e: React.MouseEvent) => {
+  const handleMessage = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (!isAuthenticated) {
       navigate("/auth?redirect=/coaches");
       return;
     }
-    // Navigate to messages with this coach
     navigate(`/dashboard/client/messages/${coach.id}`);
-  };
+  }, [isAuthenticated, navigate, coach.id]);
 
-  const handleBook = (e: React.MouseEvent) => {
+  const handleBook = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (!isAuthenticated) {
@@ -60,9 +60,9 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
       return;
     }
     onBook?.(coach);
-  };
+  }, [isAuthenticated, navigate, onBook, coach]);
 
-  const handleRequestConnection = (e: React.MouseEvent) => {
+  const handleRequestConnection = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (!isAuthenticated) {
@@ -70,19 +70,20 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
       return;
     }
     onRequestConnection?.(coach);
-  };
+  }, [isAuthenticated, navigate, onRequestConnection, coach]);
 
-  const handleSignUp = (e: React.MouseEvent) => {
+  const handleSignUp = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     navigate("/auth?tab=register&role=client");
-  };
+  }, [navigate]);
 
-  // Convert coach's hourly rate for viewer
+  // Memoize converted rate calculation
   const coachCurrency = (coach.currency as CurrencyCode) || 'GBP';
-  const convertedRate = coach.hourly_rate 
-    ? convertForViewer(coach.hourly_rate, coachCurrency)
-    : null;
+  const convertedRate = useMemo(() => 
+    coach.hourly_rate ? convertForViewer(coach.hourly_rate, coachCurrency) : null,
+    [coach.hourly_rate, coachCurrency, convertForViewer]
+  );
 
   return (
     <div className={`group glass-card-elevated rounded-2xl overflow-hidden hover-lift relative ${coach.is_sponsored ? "ring-2 ring-primary/50" : ""}`}>
@@ -268,6 +269,8 @@ const CoachCard = ({ coach, onBook, onRequestConnection, linkPrefix }: CoachCard
       </div>
     </div>
   );
-};
+});
+
+CoachCard.displayName = 'CoachCard';
 
 export default CoachCard;

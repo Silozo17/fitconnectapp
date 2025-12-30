@@ -1,3 +1,4 @@
+import React from "react";
 import { Link } from "react-router-dom";
 import { Heart, Loader2, MapPin, Video, Users } from "lucide-react";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
@@ -63,7 +64,7 @@ interface FavouriteCoachCardProps {
   linkPrefix: string;
 }
 
-const FavouriteCoachCard = ({ coach, reviewData, linkPrefix }: FavouriteCoachCardProps) => {
+const FavouriteCoachCard = React.memo(({ coach, reviewData, linkPrefix }: FavouriteCoachCardProps) => {
   const averageRating = reviewData?.average || 0;
   const reviewCount = reviewData?.count || 0;
 
@@ -158,7 +159,15 @@ const FavouriteCoachCard = ({ coach, reviewData, linkPrefix }: FavouriteCoachCar
       </CardContent>
     </Card>
   );
-};
+}, (prevProps, nextProps) => {
+  // Custom comparison - only re-render if coach.id or reviewData changes
+  return prevProps.coach.id === nextProps.coach.id && 
+         prevProps.reviewData?.average === nextProps.reviewData?.average &&
+         prevProps.reviewData?.count === nextProps.reviewData?.count &&
+         prevProps.linkPrefix === nextProps.linkPrefix;
+});
+
+FavouriteCoachCard.displayName = 'FavouriteCoachCard';
 
 const ClientFavourites = () => {
   const { data: coaches = [], isLoading } = useFavouriteCoaches();
