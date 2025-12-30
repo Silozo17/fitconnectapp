@@ -82,7 +82,7 @@ export function ScheduledCheckInForm({ open, onOpenChange, editingCheckin, onSub
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-[95vw] sm:max-w-lg overflow-x-hidden">
         <DialogHeader>
           <DialogTitle>
             {editingCheckin ? t("scheduledCheckins.editCheckin") : t("scheduledCheckins.createNew")}

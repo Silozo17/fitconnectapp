@@ -63,27 +63,28 @@ const CoachClientComparison = () => {
       />
 
       {/* Selection & Filters */}
-      <Card variant="glass" className="glass-card rounded-3xl mb-6">
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <CardTitle className="flex items-center gap-2">
-              <Users2 className="w-5 h-5 text-primary" />
+      <Card variant="glass" className="glass-card rounded-2xl sm:rounded-3xl mb-6">
+        <CardHeader className="p-4 sm:p-6">
+          <div className="flex flex-col gap-3 sm:gap-4">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <Users2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
               {t("clientComparison.selectClients")}
             </CardTitle>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
               <DatePickerWithRange
                 date={dateRange}
                 onDateChange={setDateRange}
+                className="w-full sm:w-auto"
               />
               {selectedClientIds.length > 0 && (
-                <Button variant="outline" size="sm" onClick={handleClearSelection}>
+                <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={handleClearSelection}>
                   {t("clientComparison.clearSelection")}
                 </Button>
               )}
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
           <ClientComparisonSelector
             clients={availableClients}
             selectedIds={selectedClientIds}
@@ -103,20 +104,20 @@ const CoachClientComparison = () => {
           ) : (
             <>
               {/* Charts */}
-              <Card variant="glass" className="glass-card rounded-3xl mb-6">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5 text-primary" />
+              <Card variant="glass" className="glass-card rounded-2xl sm:rounded-3xl mb-6">
+                <CardHeader className="p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                      <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                       {t("clientComparison.progressCharts")}
                     </CardTitle>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" className="w-full sm:w-auto">
                       <Download className="w-4 h-4 mr-2" />
                       {t("clientComparison.exportComparison")}
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
                   <ComparisonCharts data={comparisonData} />
                 </CardContent>
               </Card>
