@@ -87,16 +87,16 @@ export const ReportDetailModal = ({ report, onClose, clientName }: ReportDetailM
 
   return (
     <Dialog open={!!report} onOpenChange={() => onClose()}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <DialogTitle>{report.title}</DialogTitle>
-              <DialogDescription>
+      <DialogContent className="w-full max-w-3xl max-h-[90vh] overflow-y-auto px-4 sm:px-6">
+        <DialogHeader className="space-y-2">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <DialogTitle className="text-lg sm:text-xl truncate">{report.title}</DialogTitle>
+              <DialogDescription className="text-sm">
                 {t("clientDetail.reports.reportFor", "Report for")} {clientName} • {format(new Date(report.created_at), "d MMM yyyy")}
               </DialogDescription>
             </div>
-            <Badge className={statusColors[report.status]}>
+            <Badge className={`${statusColors[report.status]} shrink-0`}>
               {t(`clientDetail.reports.status.${report.status}`, report.status)}
             </Badge>
           </div>
@@ -128,11 +128,11 @@ export const ReportDetailModal = ({ report, onClose, clientName }: ReportDetailM
                 <h4 className="font-medium mb-3">{t("clientDetail.reports.sections.trends", "Trends & Patterns")}</h4>
                 <div className="space-y-3">
                   {report.report_data.trends.map((trend, i) => (
-                    <div key={i} className="flex items-start gap-3 p-3 bg-secondary/50 rounded-lg">
-                      {getTrendIcon(trend.trend)}
-                      <div>
-                        <p className="font-medium">{trend.category}</p>
-                        <p className="text-sm text-muted-foreground">{trend.detail}</p>
+                    <div key={i} className="flex flex-col sm:flex-row items-start gap-2 sm:gap-3 p-3 bg-secondary/50 rounded-lg">
+                      <div className="shrink-0">{getTrendIcon(trend.trend)}</div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium break-words">{trend.category}</p>
+                        <p className="text-sm text-muted-foreground break-words">{trend.detail}</p>
                       </div>
                     </div>
                   ))}
@@ -171,9 +171,9 @@ export const ReportDetailModal = ({ report, onClose, clientName }: ReportDetailM
                 <h4 className="font-medium mb-3">{t("clientDetail.reports.sections.concerns", "Potential Concerns")}</h4>
                 <div className="space-y-2">
                   {report.report_data.risks.map((risk, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <Badge className={getRiskColor(risk.level)}>{risk.level}</Badge>
-                      <p className="text-sm text-muted-foreground">{risk.description}</p>
+                    <div key={i} className="flex flex-wrap items-start gap-2">
+                      <Badge className={`${getRiskColor(risk.level)} shrink-0`}>{risk.level}</Badge>
+                      <p className="text-sm text-muted-foreground break-words max-w-full flex-1 min-w-0">{risk.description}</p>
                     </div>
                   ))}
                 </div>
@@ -189,8 +189,8 @@ export const ReportDetailModal = ({ report, onClose, clientName }: ReportDetailM
                 <ul className="space-y-2">
                   {report.report_data.recommendations.map((rec, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-success flex-shrink-0 mt-0.5" />
-                      <span>{rec}</span>
+                      <CheckCircle className="w-4 h-4 text-success shrink-0 mt-0.5" />
+                      <span className="break-words">{rec}</span>
                     </li>
                   ))}
                 </ul>
@@ -210,12 +210,13 @@ export const ReportDetailModal = ({ report, onClose, clientName }: ReportDetailM
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t">
+          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t">
             {hasChanges && (
               <Button 
                 variant="outline" 
                 onClick={handleSaveNotes}
                 disabled={updateReport.isPending}
+                className="w-full sm:w-auto"
               >
                 {updateReport.isPending ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -229,6 +230,7 @@ export const ReportDetailModal = ({ report, onClose, clientName }: ReportDetailM
               <Button 
                 onClick={handleSendToClient}
                 disabled={sendReport.isPending}
+                className="w-full sm:w-auto"
               >
                 {sendReport.isPending ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />

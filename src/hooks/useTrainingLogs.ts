@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { checkCoachDataAccess } from "./useCoachDataAccess";
 
 export interface TrainingLogSet {
   id?: string;
@@ -51,11 +52,11 @@ export interface CreateTrainingLogInput {
 }
 
 // Fetch client's training logs
-export const useTrainingLogs = (clientId?: string) => {
+export const useTrainingLogs = (clientId?: string, coachId?: string) => {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: ["training-logs", clientId || user?.id],
+    queryKey: ["training-logs", clientId || user?.id, coachId],
     queryFn: async () => {
       // If no clientId provided, get current user's client profile
       let targetClientId = clientId;
@@ -70,6 +71,14 @@ export const useTrainingLogs = (clientId?: string) => {
       }
 
       if (!targetClientId) return [];
+
+      // If coach is viewing, check permission first
+      if (coachId && clientId) {
+        const { allowed } = await checkCoachDataAccess(clientId, coachId, "training_logs");
+        if (!allowed) {
+          throw new Error("Access denied: Client has restricted training logs access");
+        }
+      }
 
       const { data, error } = await supabase
         .from("training_logs")

@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 interface ClientTrainingLogsProps {
   clientId: string;
   clientName?: string;
+  coachId?: string;
 }
 
 const RPE_COLORS: Record<number, string> = {
@@ -116,8 +117,8 @@ const TrainingLogItem = ({ log }: { log: TrainingLog }) => {
   );
 };
 
-export const ClientTrainingLogs = ({ clientId, clientName }: ClientTrainingLogsProps) => {
-  const { data: logs, isLoading, error } = useTrainingLogs(clientId);
+export const ClientTrainingLogs = ({ clientId, clientName, coachId }: ClientTrainingLogsProps) => {
+  const { data: logs, isLoading, error } = useTrainingLogs(clientId, coachId);
 
   // Check if access is denied
   const isAccessDenied = error?.message?.includes("permission") || 

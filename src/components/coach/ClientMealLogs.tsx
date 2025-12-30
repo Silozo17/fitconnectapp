@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 interface ClientMealLogsProps {
   clientId: string;
   clientName?: string;
+  coachId?: string;
 }
 
 const MEAL_TYPE_COLORS: Record<string, string> = {
@@ -19,12 +20,12 @@ const MEAL_TYPE_COLORS: Record<string, string> = {
   snack: "bg-purple-500/20 text-purple-700 dark:text-purple-400",
 };
 
-export const ClientMealLogs = ({ clientId, clientName }: ClientMealLogsProps) => {
+export const ClientMealLogs = ({ clientId, clientName, coachId }: ClientMealLogsProps) => {
   const [dateOffset, setDateOffset] = useState(0);
   const endDate = subDays(new Date(), dateOffset);
   const startDate = subDays(endDate, 6);
 
-  const { data: entries, isLoading, error } = useFoodDiaryRange(clientId, startDate, endDate);
+  const { data: entries, isLoading, error } = useFoodDiaryRange(clientId, startDate, endDate, coachId);
 
   // Check if access is denied (RLS blocking)
   const isAccessDenied = error?.message?.includes("permission") || 

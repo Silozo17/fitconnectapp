@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useFoodDiary, useAddFoodDiaryEntry, useDeleteFoodDiaryEntry, useUpdateFoodDiaryEntry, calculateDailyMacros, groupEntriesByMeal, FoodDiaryInsert, FoodDiaryEntry } from "@/hooks/useFoodDiary";
+import { useNutritionTargets } from "@/hooks/useNutritionTargets";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
@@ -14,6 +15,8 @@ import { Progress } from "@/components/ui/progress";
 import { BarcodeScannerModal } from "@/components/nutrition/BarcodeScannerModal";
 import { FoodSearchModal } from "@/components/nutrition/FoodSearchModal";
 import { EditFoodEntryModal } from "@/components/nutrition/EditFoodEntryModal";
+import { InfoTooltip } from "@/components/shared/InfoTooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 const MEAL_TYPES = [
@@ -32,14 +35,14 @@ const ClientFoodDiary = () => {
   const [scannedFood, setScannedFood] = useState<any>(null);
   const [editingEntry, setEditingEntry] = useState<FoodDiaryEntry | null>(null);
 
-  // Get client profile for ID and targets
+  // Get client profile for ID
   const { data: clientProfile } = useQuery({
     queryKey: ['client-profile-for-diary', user?.id],
     queryFn: async () => {
       if (!user) return null;
       const { data } = await supabase
         .from('client_profiles')
-        .select('id, weight_kg, height_cm, activity_level, gender, age')
+        .select('id')
         .eq('user_id', user.id)
         .single();
       return data;
@@ -47,8 +50,8 @@ const ClientFoodDiary = () => {
     enabled: !!user?.id,
   });
 
-  // Default targets (could be enhanced to fetch from assigned plans)
-  const nutritionTargets = { calories: 2000, protein: 150, carbs: 200, fat: 65 };
+  // Get nutrition targets (coach > calculated > fallback)
+  const { data: nutritionTargets, isLoading: targetsLoading } = useNutritionTargets(clientProfile?.id);
 
   const { data: entries = [], isLoading } = useFoodDiary(clientProfile?.id, selectedDate);
   const addEntry = useAddFoodDiaryEntry();
@@ -100,9 +103,17 @@ const ClientFoodDiary = () => {
     setEditingEntry(null);
   };
 
-  const targets = nutritionTargets || { calories: 2000, protein: 150, carbs: 200, fat: 65 };
-
+  const targets = nutritionTargets || { calories: 2000, protein: 150, carbs: 200, fat: 65, source: "fallback" as const };
   const isToday = format(selectedDate, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
+
+  const getTargetSourceLabel = () => {
+    if (!nutritionTargets) return null;
+    switch (nutritionTargets.source) {
+      case "coach": return "Set by your coach";
+      case "calculated": return "Based on your profile";
+      case "fallback": return nutritionTargets.warning || "Default targets";
+    }
+  };
 
   return (
     <>
@@ -152,13 +163,25 @@ const ClientFoodDiary = () => {
           {/* Daily Summary */}
           <Card className="rounded-2xl">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base">Daily Summary</CardTitle>
+              <div className="flex items-center gap-1">
+                <CardTitle className="text-base">Daily Summary</CardTitle>
+                <TooltipProvider>
+                  <InfoTooltip 
+                    content={getTargetSourceLabel() || "Your daily nutrition targets"} 
+                  />
+                </TooltipProvider>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Calories */}
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span>Calories</span>
+                  <div className="flex items-center gap-1">
+                    <span>Calories</span>
+                    <TooltipProvider>
+                      <InfoTooltip content="Your daily calorie target based on your goals and activity level" />
+                    </TooltipProvider>
+                  </div>
                   <span className="font-medium">
                     {Math.round(dailyMacros.calories)} / {targets.calories} kcal
                   </span>
@@ -171,21 +194,32 @@ const ClientFoodDiary = () => {
 
               {/* Macros */}
               <div className="grid grid-cols-3 gap-4">
-                <div className="text-center p-3 rounded-xl bg-blue-500/10">
-                  <p className="text-xs text-muted-foreground">Protein</p>
-                  <p className="text-lg font-bold text-blue-500">{Math.round(dailyMacros.protein_g)}g</p>
-                  <p className="text-xs text-muted-foreground">/ {targets.protein}g</p>
-                </div>
-                <div className="text-center p-3 rounded-xl bg-amber-500/10">
-                  <p className="text-xs text-muted-foreground">Carbs</p>
-                  <p className="text-lg font-bold text-amber-500">{Math.round(dailyMacros.carbs_g)}g</p>
-                  <p className="text-xs text-muted-foreground">/ {targets.carbs}g</p>
-                </div>
-                <div className="text-center p-3 rounded-xl bg-rose-500/10">
-                  <p className="text-xs text-muted-foreground">Fat</p>
-                  <p className="text-lg font-bold text-rose-500">{Math.round(dailyMacros.fat_g)}g</p>
-                  <p className="text-xs text-muted-foreground">/ {targets.fat}g</p>
-                </div>
+                <TooltipProvider>
+                  <div className="text-center p-3 rounded-xl bg-blue-500/10">
+                    <div className="flex items-center justify-center gap-0.5">
+                      <p className="text-xs text-muted-foreground">Protein</p>
+                      <InfoTooltip content="Protein supports muscle growth and repair" />
+                    </div>
+                    <p className="text-lg font-bold text-blue-500">{Math.round(dailyMacros.protein_g)}g</p>
+                    <p className="text-xs text-muted-foreground">/ {targets.protein}g</p>
+                  </div>
+                  <div className="text-center p-3 rounded-xl bg-amber-500/10">
+                    <div className="flex items-center justify-center gap-0.5">
+                      <p className="text-xs text-muted-foreground">Carbs</p>
+                      <InfoTooltip content="Carbohydrates provide energy for workouts" />
+                    </div>
+                    <p className="text-lg font-bold text-amber-500">{Math.round(dailyMacros.carbs_g)}g</p>
+                    <p className="text-xs text-muted-foreground">/ {targets.carbs}g</p>
+                  </div>
+                  <div className="text-center p-3 rounded-xl bg-rose-500/10">
+                    <div className="flex items-center justify-center gap-0.5">
+                      <p className="text-xs text-muted-foreground">Fat</p>
+                      <InfoTooltip content="Healthy fats support hormone function" />
+                    </div>
+                    <p className="text-lg font-bold text-rose-500">{Math.round(dailyMacros.fat_g)}g</p>
+                    <p className="text-xs text-muted-foreground">/ {targets.fat}g</p>
+                  </div>
+                </TooltipProvider>
               </div>
             </CardContent>
           </Card>

@@ -169,8 +169,8 @@ export const LogWorkoutModal = ({
         <ScrollArea className="max-h-[calc(90vh-180px)] px-4 sm:px-6">
           <div className="space-y-4 py-4">
             {/* Workout Details */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              <div className="col-span-2">
+            <div className="space-y-3 sm:space-y-4">
+              <div>
                 <Label htmlFor="workoutName">Workout Name *</Label>
                 <Input
                   id="workoutName"
@@ -179,27 +179,31 @@ export const LogWorkoutModal = ({
                   placeholder="e.g., Push Day, Leg Day, Full Body"
                 />
               </div>
-              <div>
-                <Label htmlFor="loggedAt">Date</Label>
-                <Input
-                  id="loggedAt"
-                  type="date"
-                  value={loggedAt}
-                  onChange={(e) => setLoggedAt(e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="duration">Duration (minutes)</Label>
-                <Input
-                  id="duration"
-                  type="number"
-                  min="1"
-                  value={durationMinutes || ""}
-                  onChange={(e) =>
-                    setDurationMinutes(e.target.value ? parseInt(e.target.value) : null)
-                  }
-                  placeholder="60"
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="min-w-0">
+                  <Label htmlFor="loggedAt">Date</Label>
+                  <Input
+                    id="loggedAt"
+                    type="date"
+                    className="w-full min-w-0"
+                    value={loggedAt}
+                    onChange={(e) => setLoggedAt(e.target.value)}
+                  />
+                </div>
+                <div className="min-w-0">
+                  <Label htmlFor="duration">Duration (min)</Label>
+                  <Input
+                    id="duration"
+                    type="number"
+                    min="1"
+                    className="w-full min-w-0"
+                    value={durationMinutes || ""}
+                    onChange={(e) =>
+                      setDurationMinutes(e.target.value ? parseInt(e.target.value) : null)
+                    }
+                    placeholder="60"
+                  />
+                </div>
               </div>
             </div>
 
