@@ -242,6 +242,7 @@ serve(async (req) => {
     console.log("Booking reminder emails sent successfully");
 
     // Send push notifications to both client and coach
+    const pushTitle = isUrgent ? "Session Starting Soon" : "Session Tomorrow";
     try {
       // Push to client
       await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
@@ -252,8 +253,9 @@ serve(async (req) => {
         },
         body: JSON.stringify({
           userIds: [session.client.user_id],
-          title: `${urgencyEmoji} ${reminderText}`,
-          message: `Session with ${coachName} at ${formattedTime}`,
+          title: pushTitle,
+          subtitle: coachName,
+          message: `${formattedDate} at ${formattedTime}`,
           preferenceKey: "push_reminders",
           data: { type: "booking_reminder", sessionId, reminderType },
         }),
@@ -268,8 +270,9 @@ serve(async (req) => {
         },
         body: JSON.stringify({
           userIds: [session.coach.user_id],
-          title: `${urgencyEmoji} ${reminderText}`,
-          message: `Session with ${clientName} at ${formattedTime}`,
+          title: pushTitle,
+          subtitle: clientName,
+          message: `${formattedDate} at ${formattedTime}`,
           preferenceKey: "push_reminders",
           data: { type: "booking_reminder", sessionId, reminderType },
         }),

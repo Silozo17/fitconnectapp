@@ -41,23 +41,13 @@ Deno.serve(async (req) => {
       throw new Error('Client not found');
     }
 
-    // Map rarity to emoji
-    const rarityEmojis: Record<string, string> = {
-      common: '⭐',
-      uncommon: '✨',
-      rare: '💫',
-      epic: '🌟',
-      legendary: '👑',
-    };
-    const rarityEmoji = rarityEmojis[badge.rarity] || '🏅';
-
     // Create in-app notification
     const { error: notifError } = await supabase
       .from('notifications')
       .insert({
         user_id: client.user_id,
         type: 'achievement_earned',
-        title: `${rarityEmoji} Achievement Unlocked!`,
+        title: 'Achievement Unlocked!',
         message: `You earned the "${badge.name}" badge! ${badge.description}`,
         data: { 
           badge_id,
@@ -82,8 +72,9 @@ Deno.serve(async (req) => {
         },
         body: JSON.stringify({
           userIds: [client.user_id],
-          title: `${rarityEmoji} Achievement Unlocked!`,
-          message: `You earned the "${badge.name}" badge!`,
+          title: 'Achievement Unlocked',
+          subtitle: badge.name,
+          message: `${badge.description}. +${badge.xp_reward} XP`,
           preferenceKey: 'push_achievements',
           data: { type: 'achievement_earned', badgeId: badge_id },
         }),

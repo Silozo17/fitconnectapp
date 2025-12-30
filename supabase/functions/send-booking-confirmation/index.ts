@@ -67,9 +67,18 @@ serve(async (req) => {
 
     const coachName = booking.coach.display_name || "Your Coach";
 
+    // Format date/time for push notification
+    const requestedDate = new Date(booking.requested_at);
+    const formattedDateShort = requestedDate.toLocaleDateString('en-GB', { 
+      weekday: 'short',
+      day: 'numeric', 
+      month: 'short'
+    });
+
     // Send push notification FIRST (before email preference check)
     try {
       console.log("[Push] Sending booking confirmation push to client:", booking.client.user_id);
+      const sessionType = booking.session_type?.name || "Training Session";
       const pushResponse = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
         method: "POST",
         headers: {
@@ -78,8 +87,9 @@ serve(async (req) => {
         },
         body: JSON.stringify({
           userIds: [booking.client.user_id],
-          title: "✅ Booking Request Sent!",
-          message: `Your booking request has been sent to ${coachName}`,
+          title: "Booking Request Sent",
+          subtitle: coachName,
+          message: `${sessionType} on ${formattedDateShort}`,
           preferenceKey: "push_bookings",
           data: { type: "booking_confirmation", bookingRequestId },
         }),
@@ -110,8 +120,7 @@ serve(async (req) => {
 
     const clientName = booking.client.first_name || "there";
 
-    // Format date/time
-    const requestedDate = new Date(booking.requested_at);
+    // Format date/time for email (longer format)
     const formattedDate = requestedDate.toLocaleDateString('en-GB', { 
       weekday: 'long',
       day: 'numeric', 

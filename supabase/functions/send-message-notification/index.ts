@@ -117,7 +117,8 @@ serve(async (req) => {
         },
         body: JSON.stringify({
           userIds: [receiverUserId],
-          title: `💬 ${senderName}`,
+          title: "New Message",
+          subtitle: senderName,
           message: messagePreview,
           preferenceKey: "push_messages",
           data: { type: "message", senderId: message.sender_id, messageId },

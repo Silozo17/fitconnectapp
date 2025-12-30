@@ -93,8 +93,9 @@ serve(async (req) => {
         },
         body: JSON.stringify({
           userIds: [recipientUserId],
-          title: "😔 Session Cancelled",
-          message: `Your session with ${cancellerName} on ${formattedDate} has been cancelled`,
+          title: "Session Cancelled",
+          subtitle: cancellerName,
+          message: `${formattedDate} at ${formattedTime}`,
           preferenceKey: "push_bookings",
           data: { type: "booking_cancelled", sessionId },
         }),
