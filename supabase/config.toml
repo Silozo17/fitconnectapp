@@ -266,3 +266,18 @@ verify_jwt = true
 
 [functions.revoke-all-sessions]
 verify_jwt = true
+
+[functions.notify-onboarding-incomplete]
+verify_jwt = false
+
+[functions.notify-streak-at-risk]
+verify_jwt = false
+
+[functions.notify-plan-assigned]
+verify_jwt = false
+
+[functions.notify-inactive-user]
+verify_jwt = false
+
+[functions.notify-weekly-progress]
+verify_jwt = false

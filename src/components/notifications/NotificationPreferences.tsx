@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Bell, Mail, Smartphone, Clock, Trophy, Users, Sparkles } from "lucide-react";
+import { Bell, Mail, Smartphone, Clock, Trophy, Users, Sparkles, TrendingUp, UserPlus, RotateCcw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -269,6 +269,69 @@ export const NotificationPreferences = () => {
             <Switch
               checked={(localPrefs as any).push_motivation ?? true}
               onCheckedChange={(checked) => handleToggle("push_motivation", checked)}
+              disabled={saving}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Engagement & Progress Notifications */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5" />
+            {t('notifications.engagement.title', 'Engagement & Progress')}
+          </CardTitle>
+          <CardDescription>
+            {t('notifications.engagement.description', 'Notifications to help you stay on track')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <UserPlus className="w-4 h-4 text-blue-500" />
+              <div>
+                <Label>{t('notifications.engagement.onboarding', 'Onboarding Reminders')}</Label>
+                <p className="text-sm text-muted-foreground">
+                  {t('notifications.engagement.onboardingDesc', 'Profile completion and setup reminders')}
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={(localPrefs as any).push_onboarding ?? true}
+              onCheckedChange={(checked) => handleToggle("push_onboarding", checked)}
+              disabled={saving}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-green-500" />
+              <div>
+                <Label>{t('notifications.engagement.progress', 'Progress Updates')}</Label>
+                <p className="text-sm text-muted-foreground">
+                  {t('notifications.engagement.progressDesc', 'Streaks, milestones, and weekly summaries')}
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={(localPrefs as any).push_progress ?? true}
+              onCheckedChange={(checked) => handleToggle("push_progress", checked)}
+              disabled={saving}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <RotateCcw className="w-4 h-4 text-orange-500" />
+              <div>
+                <Label>{t('notifications.engagement.reengagement', 'Re-engagement')}</Label>
+                <p className="text-sm text-muted-foreground">
+                  {t('notifications.engagement.reengagementDesc', 'Reminders when you haven\'t been active')}
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={(localPrefs as any).push_reengagement ?? true}
+              onCheckedChange={(checked) => handleToggle("push_reengagement", checked)}
               disabled={saving}
             />
           </div>
