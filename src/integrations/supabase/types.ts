@@ -2689,14 +2689,18 @@ export type Database = {
           after_photo_url: string | null
           before_photo_url: string | null
           client_id: string
+          coach_consent_acknowledged: boolean | null
+          coach_consent_acknowledged_at: string | null
           coach_id: string
-          consent_id: string
+          consent_id: string | null
           created_at: string
           description: string | null
           display_name: string | null
           display_order: number | null
+          external_client_name: string | null
           id: string
           is_anonymized: boolean | null
+          is_external: boolean | null
           is_published: boolean | null
           published_at: string | null
           stats: Json | null
@@ -2707,14 +2711,18 @@ export type Database = {
           after_photo_url?: string | null
           before_photo_url?: string | null
           client_id: string
+          coach_consent_acknowledged?: boolean | null
+          coach_consent_acknowledged_at?: string | null
           coach_id: string
-          consent_id: string
+          consent_id?: string | null
           created_at?: string
           description?: string | null
           display_name?: string | null
           display_order?: number | null
+          external_client_name?: string | null
           id?: string
           is_anonymized?: boolean | null
+          is_external?: boolean | null
           is_published?: boolean | null
           published_at?: string | null
           stats?: Json | null
@@ -2725,14 +2733,18 @@ export type Database = {
           after_photo_url?: string | null
           before_photo_url?: string | null
           client_id?: string
+          coach_consent_acknowledged?: boolean | null
+          coach_consent_acknowledged_at?: string | null
           coach_id?: string
-          consent_id?: string
+          consent_id?: string | null
           created_at?: string
           description?: string | null
           display_name?: string | null
           display_order?: number | null
+          external_client_name?: string | null
           id?: string
           is_anonymized?: boolean | null
+          is_external?: boolean | null
           is_published?: boolean | null
           published_at?: string | null
           stats?: Json | null
