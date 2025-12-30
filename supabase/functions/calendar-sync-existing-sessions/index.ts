@@ -115,7 +115,7 @@ serve(async (req) => {
     }
 
     // Sync each session
-    const results = [];
+    const results: { sessionId: string; success: boolean; eventId?: string; error?: string }[] = [];
     let syncedCount = 0;
     let failedCount = 0;
 

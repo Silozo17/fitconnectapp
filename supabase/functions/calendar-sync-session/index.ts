@@ -37,7 +37,7 @@ serve(async (req) => {
     if (sessionError || !session) throw new Error("Session not found");
 
     // Try to sync to both coach and client calendars
-    const results = [];
+    const results: { role: string; success: boolean; eventId?: string; error?: string }[] = [];
 
     // Sync to coach's calendar
     const { data: coachCalendar } = await supabase
