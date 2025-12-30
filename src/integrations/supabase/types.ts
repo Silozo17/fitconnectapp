@@ -915,6 +915,156 @@ export type Database = {
           },
         ]
       }
+      client_engagement_history: {
+        Row: {
+          client_id: string
+          coach_id: string
+          created_at: string
+          engagement_score: number
+          factors: Json | null
+          id: string
+          risk_score: number | null
+          trajectory: string | null
+          week_start: string
+        }
+        Insert: {
+          client_id: string
+          coach_id: string
+          created_at?: string
+          engagement_score: number
+          factors?: Json | null
+          id?: string
+          risk_score?: number | null
+          trajectory?: string | null
+          week_start: string
+        }
+        Update: {
+          client_id?: string
+          coach_id?: string
+          created_at?: string
+          engagement_score?: number
+          factors?: Json | null
+          id?: string
+          risk_score?: number | null
+          trajectory?: string | null
+          week_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_engagement_history_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_engagement_history_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_engagement_history_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_engagement_history_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_engagement_history_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_engagement_scores: {
+        Row: {
+          client_id: string
+          coach_id: string
+          habit_completion_score: number | null
+          id: string
+          message_responsiveness_score: number | null
+          overall_score: number
+          plan_adherence_score: number | null
+          progress_logging_score: number | null
+          session_attendance_score: number | null
+          updated_at: string
+          week_over_week_change: number | null
+        }
+        Insert: {
+          client_id: string
+          coach_id: string
+          habit_completion_score?: number | null
+          id?: string
+          message_responsiveness_score?: number | null
+          overall_score: number
+          plan_adherence_score?: number | null
+          progress_logging_score?: number | null
+          session_attendance_score?: number | null
+          updated_at?: string
+          week_over_week_change?: number | null
+        }
+        Update: {
+          client_id?: string
+          coach_id?: string
+          habit_completion_score?: number | null
+          id?: string
+          message_responsiveness_score?: number | null
+          overall_score?: number
+          plan_adherence_score?: number | null
+          progress_logging_score?: number | null
+          session_attendance_score?: number | null
+          updated_at?: string
+          week_over_week_change?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_engagement_scores_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_engagement_scores_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_engagement_scores_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_engagement_scores_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_engagement_scores_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_habits: {
         Row: {
           category: string
@@ -4405,30 +4555,45 @@ export type Database = {
           coach_id: string
           content: string
           created_at: string | null
+          folder_id: string | null
           id: string
           is_active: boolean | null
+          last_used_at: string | null
           name: string
+          tags: string[] | null
           updated_at: string | null
+          usage_count: number | null
+          variables: string[] | null
         }
         Insert: {
           category?: string | null
           coach_id: string
           content: string
           created_at?: string | null
+          folder_id?: string | null
           id?: string
           is_active?: boolean | null
+          last_used_at?: string | null
           name: string
+          tags?: string[] | null
           updated_at?: string | null
+          usage_count?: number | null
+          variables?: string[] | null
         }
         Update: {
           category?: string | null
           coach_id?: string
           content?: string
           created_at?: string | null
+          folder_id?: string | null
           id?: string
           is_active?: boolean | null
+          last_used_at?: string | null
           name?: string
+          tags?: string[] | null
           updated_at?: string | null
+          usage_count?: number | null
+          variables?: string[] | null
         }
         Relationships: [
           {
@@ -4443,6 +4608,13 @@ export type Database = {
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_templates_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "template_folders"
             referencedColumns: ["id"]
           },
         ]
@@ -4504,7 +4676,9 @@ export type Database = {
       notification_preferences: {
         Row: {
           created_at: string
+          dropoff_threshold_days: number | null
           email_bookings: boolean | null
+          email_dropoff_alerts: boolean | null
           email_marketing: boolean | null
           email_messages: boolean | null
           email_reminders: boolean | null
@@ -4513,6 +4687,7 @@ export type Database = {
           push_bookings: boolean | null
           push_challenges: boolean | null
           push_connections: boolean | null
+          push_dropoff_alerts: boolean | null
           push_messages: boolean | null
           push_motivation: boolean | null
           push_onboarding: boolean | null
@@ -4525,7 +4700,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          dropoff_threshold_days?: number | null
           email_bookings?: boolean | null
+          email_dropoff_alerts?: boolean | null
           email_marketing?: boolean | null
           email_messages?: boolean | null
           email_reminders?: boolean | null
@@ -4534,6 +4711,7 @@ export type Database = {
           push_bookings?: boolean | null
           push_challenges?: boolean | null
           push_connections?: boolean | null
+          push_dropoff_alerts?: boolean | null
           push_messages?: boolean | null
           push_motivation?: boolean | null
           push_onboarding?: boolean | null
@@ -4546,7 +4724,9 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          dropoff_threshold_days?: number | null
           email_bookings?: boolean | null
+          email_dropoff_alerts?: boolean | null
           email_marketing?: boolean | null
           email_messages?: boolean | null
           email_reminders?: boolean | null
@@ -4555,6 +4735,7 @@ export type Database = {
           push_bookings?: boolean | null
           push_challenges?: boolean | null
           push_connections?: boolean | null
+          push_dropoff_alerts?: boolean | null
           push_messages?: boolean | null
           push_motivation?: boolean | null
           push_onboarding?: boolean | null
@@ -5339,6 +5520,51 @@ export type Database = {
             columns: ["admin_id"]
             isOneToOne: false
             referencedRelation: "admin_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      template_folders: {
+        Row: {
+          coach_id: string
+          color: string | null
+          created_at: string
+          id: string
+          name: string
+          position: number | null
+          updated_at: string
+        }
+        Insert: {
+          coach_id: string
+          color?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          position?: number | null
+          updated_at?: string
+        }
+        Update: {
+          coach_id?: string
+          color?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          position?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_folders_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "template_folders_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
             referencedColumns: ["id"]
           },
         ]
