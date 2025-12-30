@@ -2693,6 +2693,7 @@ export type Database = {
           coach_consent_acknowledged_at: string | null
           coach_id: string
           consent_id: string | null
+          consent_status: string | null
           created_at: string
           description: string | null
           display_name: string | null
@@ -2703,6 +2704,7 @@ export type Database = {
           is_external: boolean | null
           is_published: boolean | null
           published_at: string | null
+          scheduled_publish_at: string | null
           stats: Json | null
           title: string | null
           updated_at: string
@@ -2715,6 +2717,7 @@ export type Database = {
           coach_consent_acknowledged_at?: string | null
           coach_id: string
           consent_id?: string | null
+          consent_status?: string | null
           created_at?: string
           description?: string | null
           display_name?: string | null
@@ -2725,6 +2728,7 @@ export type Database = {
           is_external?: boolean | null
           is_published?: boolean | null
           published_at?: string | null
+          scheduled_publish_at?: string | null
           stats?: Json | null
           title?: string | null
           updated_at?: string
@@ -2737,6 +2741,7 @@ export type Database = {
           coach_consent_acknowledged_at?: string | null
           coach_id?: string
           consent_id?: string | null
+          consent_status?: string | null
           created_at?: string
           description?: string | null
           display_name?: string | null
@@ -2747,6 +2752,7 @@ export type Database = {
           is_external?: boolean | null
           is_published?: boolean | null
           published_at?: string | null
+          scheduled_publish_at?: string | null
           stats?: Json | null
           title?: string | null
           updated_at?: string
