@@ -242,7 +242,20 @@ const Auth = () => {
       // Send OTP and show verification screen
       setIsSubmitting(true);
       try {
-        await sendOTPEmail(data.email);
+        const response = await supabase.functions.invoke("send-otp-email", {
+          body: { email: data.email },
+        });
+        
+        // Check if email already exists
+        if (response.data?.error === "email_already_registered") {
+          toast.error(t("auth.emailAlreadyRegistered"));
+          setIsLogin(true);
+          setIsSubmitting(false);
+          return;
+        }
+        
+        if (response.error) throw response.error;
+        
         setPendingSignupData({ 
           email: data.email, 
           password: data.password,
