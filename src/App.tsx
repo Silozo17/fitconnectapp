@@ -111,6 +111,8 @@ const CoachBoost = lazy(() => import('@/pages/dashboard/coach/CoachBoost'));
 const CoachAchievements = lazy(() => import('@/pages/dashboard/coach/CoachAchievements'));
 const CoachConnections = lazy(() => import('@/pages/dashboard/coach/CoachConnections'));
 const CoachProducts = lazy(() => import('@/pages/dashboard/coach/CoachProducts'));
+const CoachPackageAnalytics = lazy(() => import('@/pages/dashboard/coach/CoachPackageAnalytics'));
+const CoachOutcomeShowcase = lazy(() => import('@/pages/dashboard/coach/CoachOutcomeShowcase'));
 
 // Shared Dashboard Pages
 const Notifications = lazy(() => import('@/pages/dashboard/Notifications'));
@@ -674,6 +676,16 @@ const App = () => (
                               <Route path="/dashboard/coach/products" element={
                                 <ProtectedRoute allowedRoles={["coach"]}>
                                   <CoachProducts />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/dashboard/coach/analytics/packages" element={
+                                <ProtectedRoute allowedRoles={["coach"]}>
+                                  <CoachPackageAnalytics />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/dashboard/coach/showcase" element={
+                                <ProtectedRoute allowedRoles={["coach"]}>
+                                  <CoachOutcomeShowcase />
                                 </ProtectedRoute>
                               } />
                               <Route path="/dashboard/notifications" element={
