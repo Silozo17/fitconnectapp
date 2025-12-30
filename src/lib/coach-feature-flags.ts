@@ -1,0 +1,53 @@
+/**
+ * Coach Feature Flags
+ * 
+ * Controls the rollout of Phase 1 coach features.
+ * Set to false to disable a feature without code changes.
+ */
+
+export const COACH_FEATURE_FLAGS = {
+  // Phase 1 Features
+  ENHANCED_CHURN_PREDICTION: true,
+  CLIENT_ENGAGEMENT_SCORING: true,
+  DROPOFF_ALERTS: true,
+  REVENUE_FORECASTING: true,
+  CLIENT_LTV: true,
+  BATCH_OPERATIONS: true,
+  TEMPLATE_FOLDERS: true,
+  
+  // Phase 2 Features (disabled until ready)
+  AI_CLIENT_SUMMARY: false,
+  AI_PLATEAU_DETECTION: false,
+  PACKAGE_ANALYTICS: false,
+  UPSELL_INSIGHTS: false,
+  GOAL_ADHERENCE_TRACKER: false,
+  CLIENT_OUTCOMES_SHOWCASE: false,
+  
+  // Phase 3 Features (disabled until ready)
+  AI_PLAN_RECOMMENDATIONS: false,
+  AI_CHECKIN_COMPOSER: false,
+  AUTO_PLAN_PROGRESSION: false,
+  SCHEDULED_CHECKIN_AUTOMATION: false,
+  CASE_STUDY_GENERATOR: false,
+  REVIEW_MANAGEMENT: false,
+  WEARABLE_DASHBOARD: false,
+  CLIENT_COMPARISON_ANALYTICS: false,
+} as const;
+
+export type CoachFeatureFlag = keyof typeof COACH_FEATURE_FLAGS;
+
+/**
+ * Check if a feature is enabled
+ */
+export function isFeatureEnabled(flag: CoachFeatureFlag): boolean {
+  return COACH_FEATURE_FLAGS[flag] ?? false;
+}
+
+/**
+ * Get all enabled features
+ */
+export function getEnabledFeatures(): CoachFeatureFlag[] {
+  return (Object.keys(COACH_FEATURE_FLAGS) as CoachFeatureFlag[]).filter(
+    (flag) => COACH_FEATURE_FLAGS[flag]
+  );
+}
