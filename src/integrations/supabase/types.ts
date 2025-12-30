@@ -6239,6 +6239,7 @@ export type Database = {
           was_awarded: boolean
         }[]
       }
+      check_email_exists: { Args: { email_to_check: string }; Returns: boolean }
       client_can_view_client_profile: {
         Args: { target_client_profile_id: string }
         Returns: boolean
@@ -6280,6 +6281,13 @@ export type Database = {
         Returns: boolean
       }
       coach_is_visible: { Args: { check_coach_id: string }; Returns: boolean }
+      delete_orphaned_auth_users: {
+        Args: never
+        Returns: {
+          deleted_email: string
+          deleted_user_id: string
+        }[]
+      }
       find_orphaned_auth_users: { Args: never; Returns: string[] }
       generate_product_slug: {
         Args: { product_id: string; title: string }
