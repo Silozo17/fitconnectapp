@@ -147,8 +147,8 @@ export function ScheduledCheckInForm({ open, onOpenChange, editingCheckin, onSub
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>{t("common.cancel")}</Button>
+        <DialogFooter className="flex-col sm:flex-row gap-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t("cancel", { ns: "common" })}</Button>
           <Button onClick={handleSubmit} disabled={!clientId || !messageTemplate || isSubmitting}>
             {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
             {editingCheckin ? t("common.save") : t("scheduledCheckins.create")}
