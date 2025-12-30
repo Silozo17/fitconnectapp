@@ -32,6 +32,15 @@
       "todaysHealth": "Today's Health",
       "friendRequests": "Friend Requests",
       "recentActivity": "Recent Activity"
+    },
+    "dailyTip": {
+      "label": "Tip of the Day",
+      "whyMatters": "Why it matters"
+    },
+    "greeting": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening"
     }
   },
   "coach": {

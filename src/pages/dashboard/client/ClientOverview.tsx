@@ -4,9 +4,11 @@ import { useTranslation } from "react-i18next";
 import { useCoachLinkPrefix } from "@/hooks/useCoachLinkPrefix";
 import { useClientDashboardStats } from "@/hooks/useClientDashboardStats";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useMicroWinDetection } from "@/hooks/useMicroWinDetection";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 
 import UserConnectionRequests from "@/components/dashboard/client/UserConnectionRequests";
+import { DailyTipWidget } from "@/components/dashboard/client/DailyTipWidget";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -52,6 +54,9 @@ const ClientOverview = () => {
   const { t } = useTranslation('dashboard');
   const coachLinkPrefix = useCoachLinkPrefix();
   const { displayName } = useUserProfile();
+  
+  // Micro-win detection (triggers celebrations on dashboard mount)
+  useMicroWinDetection();
   
   const { 
     data: stats, 
@@ -161,6 +166,9 @@ const ClientOverview = () => {
       <Suspense fallback={<HealthWidgetSkeleton />}>
         <HealthDataWidget compact className="mb-6" />
       </Suspense>
+
+      {/* Daily Tip */}
+      <DailyTipWidget className="mb-6" />
 
       {/* Friend Requests */}
       <UserConnectionRequests />
