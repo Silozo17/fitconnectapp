@@ -290,3 +290,6 @@ verify_jwt = true
 
 [functions.generate-client-summary]
 verify_jwt = true
+
+[functions.notify-showcase-consent]
+verify_jwt = true

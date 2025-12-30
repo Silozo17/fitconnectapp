@@ -538,7 +538,7 @@ export function useRequestShowcaseConsent() {
 
       if (updateError) throw updateError;
 
-      // Create notification for client
+      // Create in-app notification for client
       const { error: notifError } = await supabase.from("notifications").insert({
         user_id: clientProfile.user_id,
         type: "showcase_consent_request",
@@ -548,6 +548,20 @@ export function useRequestShowcaseConsent() {
       });
 
       if (notifError) console.error("Failed to create notification:", notifError);
+
+      // Send push notification
+      try {
+        await supabase.functions.invoke("notify-showcase-consent", {
+          body: {
+            type: "request",
+            coachId,
+            clientUserId: clientProfile.user_id,
+            coachName: coachProfile?.display_name || "Your coach",
+          },
+        });
+      } catch (pushError) {
+        console.error("Failed to send push notification:", pushError);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["showcase-items"] });

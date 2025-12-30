@@ -83,6 +83,20 @@ export function useGrantShowcaseConsent() {
     mutationFn: async (data: { coachId: string; consentType: ConsentType }) => {
       if (!clientId) throw new Error("No client ID");
 
+      // Get client name for notification
+      const { data: clientProfile } = await supabase
+        .from("client_profiles")
+        .select("first_name, last_name")
+        .eq("id", clientId)
+        .single();
+
+      // Get coach's user_id for notification
+      const { data: coachProfile } = await supabase
+        .from("coach_profiles")
+        .select("user_id")
+        .eq("id", data.coachId)
+        .single();
+
       // Revoke any existing consent first
       await supabase
         .from("client_outcome_consents")
@@ -115,6 +129,33 @@ export function useGrantShowcaseConsent() {
         .eq("coach_id", data.coachId)
         .eq("client_id", clientId)
         .in("consent_status", ["pending", "requested"]);
+
+      // Create in-app notification for coach
+      if (coachProfile?.user_id) {
+        const clientName = `${clientProfile?.first_name || ""} ${clientProfile?.last_name || ""}`.trim() || "A client";
+        
+        await supabase.from("notifications").insert({
+          user_id: coachProfile.user_id,
+          type: "showcase_consent_granted",
+          title: "Showcase Consent Granted",
+          message: `${clientName} has granted permission to showcase their transformation.`,
+          data: { clientId, consentType: data.consentType },
+        });
+
+        // Send push notification
+        try {
+          await supabase.functions.invoke("notify-showcase-consent", {
+            body: {
+              type: "granted",
+              coachUserId: coachProfile.user_id,
+              clientName,
+              consentType: data.consentType,
+            },
+          });
+        } catch (pushError) {
+          console.error("Failed to send push notification:", pushError);
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-showcase-consents"] });
@@ -167,6 +208,20 @@ export function useRevokeShowcaseConsent() {
 
   return useMutation({
     mutationFn: async (data: { consentId: string; coachId: string; clientId: string }) => {
+      // Get client name for notification
+      const { data: clientProfile } = await supabase
+        .from("client_profiles")
+        .select("first_name, last_name")
+        .eq("id", data.clientId)
+        .single();
+
+      // Get coach's user_id for notification
+      const { data: coachProfile } = await supabase
+        .from("coach_profiles")
+        .select("user_id")
+        .eq("id", data.coachId)
+        .single();
+
       const { error } = await supabase
         .from("client_outcome_consents")
         .update({
@@ -185,6 +240,32 @@ export function useRevokeShowcaseConsent() {
           consent_status: "denied"
         })
         .eq("consent_id", data.consentId);
+
+      // Create in-app notification for coach
+      if (coachProfile?.user_id) {
+        const clientName = `${clientProfile?.first_name || ""} ${clientProfile?.last_name || ""}`.trim() || "A client";
+        
+        await supabase.from("notifications").insert({
+          user_id: coachProfile.user_id,
+          type: "showcase_consent_revoked",
+          title: "Showcase Consent Revoked",
+          message: `${clientName} has revoked permission to showcase their transformation.`,
+          data: { clientId: data.clientId },
+        });
+
+        // Send push notification
+        try {
+          await supabase.functions.invoke("notify-showcase-consent", {
+            body: {
+              type: "denied",
+              coachUserId: coachProfile.user_id,
+              clientName,
+            },
+          });
+        } catch (pushError) {
+          console.error("Failed to send push notification:", pushError);
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-showcase-consents"] });
