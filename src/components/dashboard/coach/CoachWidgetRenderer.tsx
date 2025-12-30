@@ -17,6 +17,11 @@ import {
   RevenueForecastWidget,
   ClientLTVWidget,
   EnhancedChurnWidget,
+  PlateauDetectionWidget,
+  UpsellInsightsWidget,
+  GoalAdherenceWidget,
+  PendingSummariesWidget,
+  PackageAnalyticsWidget,
 } from "./widgets";
 import { ClientRiskWidget } from "./ClientRiskWidget";
 import { AIClientInsightsWidget } from "./AIClientInsightsWidget";
@@ -131,6 +136,22 @@ export function CoachWidgetRenderer({
 
     case "business_client_ltv":
       return isFeatureEnabled("CLIENT_LTV") ? <ClientLTVWidget /> : null;
+
+    // Phase 2 Widgets
+    case "intelligence_plateau_detection":
+      return isFeatureEnabled("AI_PLATEAU_DETECTION") ? <PlateauDetectionWidget /> : null;
+
+    case "intelligence_upsell_insights":
+      return isFeatureEnabled("UPSELL_INSIGHTS") ? <UpsellInsightsWidget /> : null;
+
+    case "intelligence_goal_adherence":
+      return isFeatureEnabled("GOAL_ADHERENCE_TRACKER") ? <GoalAdherenceWidget /> : null;
+
+    case "intelligence_pending_summaries":
+      return isFeatureEnabled("AI_CLIENT_SUMMARY") ? <PendingSummariesWidget /> : null;
+
+    case "business_package_analytics":
+      return isFeatureEnabled("PACKAGE_ANALYTICS") ? <PackageAnalyticsWidget /> : null;
 
     case "business_earnings":
       return (

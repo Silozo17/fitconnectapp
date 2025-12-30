@@ -287,3 +287,6 @@ verify_jwt = true
 
 [functions.generate-weekly-client-summary]
 verify_jwt = true
+
+[functions.generate-client-summary]
+verify_jwt = true
