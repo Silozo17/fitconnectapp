@@ -1,4 +1,5 @@
-import { MessageCircle, Zap, Clock, Send, ChevronRight } from "lucide-react";
+import { useState } from "react";
+import { MessageCircle, Zap, Clock, Send, ChevronRight, Sparkles } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +9,9 @@ import { useSmartCheckInSuggestions, CheckInPriority, CheckInSuggestion } from "
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { AICheckInComposer } from "@/components/coach/AICheckInComposer";
+import { ClientContext } from "@/hooks/useAICheckInComposer";
+import { isFeatureEnabled } from "@/lib/coach-feature-flags";
 
 const priorityConfig: Record<CheckInPriority, { color: string; bgColor: string; icon: typeof Zap }> = {
   urgent: {
@@ -27,16 +31,27 @@ const priorityConfig: Record<CheckInPriority, { color: string; bgColor: string; 
   },
 };
 
-function CheckInItem({ suggestion }: { suggestion: CheckInSuggestion }) {
+interface CheckInItemProps {
+  suggestion: CheckInSuggestion;
+  onAICompose?: (suggestion: CheckInSuggestion) => void;
+}
+
+function CheckInItem({ suggestion, onAICompose }: CheckInItemProps) {
   const navigate = useNavigate();
   const config = priorityConfig[suggestion.priority];
   const Icon = config.icon;
+  const aiEnabled = isFeatureEnabled("AI_CHECKIN_COMPOSER");
 
   const handleSendMessage = (e: React.MouseEvent) => {
     e.stopPropagation();
     // Navigate to messages with pre-filled template
     navigate(`/dashboard/messages?to=${suggestion.clientId}&template=${encodeURIComponent(suggestion.messageTemplate)}`);
     toast.success("Opening message composer...");
+  };
+
+  const handleAICompose = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onAICompose?.(suggestion);
   };
 
   return (
@@ -71,14 +86,28 @@ function CheckInItem({ suggestion }: { suggestion: CheckInSuggestion }) {
         </p>
       </div>
 
-      <Button
-        size="sm"
-        variant="ghost"
-        className="opacity-0 group-hover:opacity-100 transition-opacity hidden sm:flex"
-        onClick={handleSendMessage}
-      >
-        <Send className="w-4 h-4" />
-      </Button>
+      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        {aiEnabled && (
+          <Button
+            size="sm"
+            variant="ghost"
+            className="hidden sm:flex h-8 w-8 p-0"
+            onClick={handleAICompose}
+            title="AI Compose"
+          >
+            <Sparkles className="w-4 h-4 text-primary" />
+          </Button>
+        )}
+        <Button
+          size="sm"
+          variant="ghost"
+          className="hidden sm:flex h-8 w-8 p-0"
+          onClick={handleSendMessage}
+          title="Use template"
+        >
+          <Send className="w-4 h-4" />
+        </Button>
+      </div>
 
       <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0 sm:group-hover:hidden" />
     </div>
@@ -88,8 +117,30 @@ function CheckInItem({ suggestion }: { suggestion: CheckInSuggestion }) {
 export function CheckInSuggestionsWidget() {
   const { data: suggestions, isLoading } = useSmartCheckInSuggestions();
   const navigate = useNavigate();
+  const [aiComposerOpen, setAiComposerOpen] = useState(false);
+  const [selectedSuggestion, setSelectedSuggestion] = useState<CheckInSuggestion | null>(null);
 
   const displaySuggestions = suggestions?.slice(0, 5) || [];
+
+  const handleAICompose = (suggestion: CheckInSuggestion) => {
+    setSelectedSuggestion(suggestion);
+    setAiComposerOpen(true);
+  };
+
+  const handleSendAIMessage = (message: string) => {
+    if (!selectedSuggestion) return;
+    // Navigate to messages with the AI-generated message
+    navigate(`/dashboard/messages?to=${selectedSuggestion.clientId}&template=${encodeURIComponent(message)}`);
+    toast.success("Opening message composer with AI message...");
+  };
+
+  // Convert suggestion to ClientContext for the AI composer
+  const getClientContext = (suggestion: CheckInSuggestion): ClientContext => ({
+    clientId: suggestion.clientId,
+    clientName: suggestion.clientName,
+    reason: suggestion.reason,
+    reasonContext: suggestion.context,
+  });
 
   if (isLoading) {
     return (
@@ -136,36 +187,52 @@ export function CheckInSuggestionsWidget() {
   const urgentCount = displaySuggestions.filter((s) => s.priority === "urgent").length;
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base flex items-center gap-2">
-            <MessageCircle className="w-4 h-4 text-primary" />
-            Smart Check-ins
-          </CardTitle>
-          {urgentCount > 0 && (
-            <Badge variant="destructive" className="text-xs">
-              {urgentCount} urgent
-            </Badge>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        {displaySuggestions.map((suggestion) => (
-          <CheckInItem key={`${suggestion.clientId}-${suggestion.reason}`} suggestion={suggestion} />
-        ))}
+    <>
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base flex items-center gap-2">
+              <MessageCircle className="w-4 h-4 text-primary" />
+              Smart Check-ins
+            </CardTitle>
+            {urgentCount > 0 && (
+              <Badge variant="destructive" className="text-xs">
+                {urgentCount} urgent
+              </Badge>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {displaySuggestions.map((suggestion) => (
+            <CheckInItem 
+              key={`${suggestion.clientId}-${suggestion.reason}`} 
+              suggestion={suggestion}
+              onAICompose={handleAICompose}
+            />
+          ))}
 
-        {suggestions && suggestions.length > 5 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full mt-2"
-            onClick={() => navigate("/dashboard/clients")}
-          >
-            View all {suggestions.length} suggestions
-          </Button>
-        )}
-      </CardContent>
-    </Card>
+          {suggestions && suggestions.length > 5 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full mt-2"
+              onClick={() => navigate("/dashboard/clients")}
+            >
+              View all {suggestions.length} suggestions
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* AI Check-In Composer Modal */}
+      {selectedSuggestion && (
+        <AICheckInComposer
+          open={aiComposerOpen}
+          onOpenChange={setAiComposerOpen}
+          clientContext={getClientContext(selectedSuggestion)}
+          onSend={handleSendAIMessage}
+        />
+      )}
+    </>
   );
 }
