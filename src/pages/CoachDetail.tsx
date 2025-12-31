@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import PageLayout from "@/components/layout/PageLayout";
-import { SEOHead, createLocalBusinessSchema, createBreadcrumbSchema } from "@/components/shared/SEOHead";
+import { createLocalBusinessSchema, createBreadcrumbSchema } from "@/components/shared/SEOHead";
 import { useCoachById } from "@/hooks/useCoachMarketplace";
 import { useCoachAvailability, useSessionTypes } from "@/hooks/useCoachSchedule";
 import RequestConnectionModal from "@/components/coaches/RequestConnectionModal";
@@ -136,26 +136,21 @@ const CoachDetail = () => {
   const primaryCoachType = coach.coach_types?.[0] || "Fitness";
 
   return (
-    <>
-      <SEOHead
-        title={`${coach.display_name || "Coach"} - ${primaryCoachType} Coach`}
-        description={coach.bio?.slice(0, 155) || `Connect with ${coach.display_name}, a verified ${primaryCoachType.toLowerCase()} coach on FitConnect. Book sessions, view reviews, and start your fitness journey.`}
-        canonicalPath={`/coaches/${coach.username}`}
-        ogType="profile"
-        ogImage={coach.profile_image_url || undefined}
-        keywords={[
-          ...coachTypeKeywords,
-          ...locationKeywords,
-          "book personal trainer",
-          "fitness coaching",
-          "verified coach",
-        ]}
-        schema={[coachSchema, breadcrumbSchema]}
-      />
-      <PageLayout 
-        title={`${coach.display_name || "Coach"} - Coach Profile`}
-        description={coach.bio || `View ${coach.display_name}'s coaching profile and connect with them`}
-      >
+    <PageLayout 
+      title={`${coach.display_name || "Coach"} - ${primaryCoachType} Coach`}
+      description={coach.bio?.slice(0, 155) || `Connect with ${coach.display_name}, a verified ${primaryCoachType.toLowerCase()} coach on FitConnect. Book sessions, view reviews, and start your fitness journey.`}
+      canonicalPath={`/coaches/${coach.username}`}
+      ogType="profile"
+      ogImage={coach.profile_image_url || undefined}
+      keywords={[
+        ...coachTypeKeywords,
+        ...locationKeywords,
+        "book personal trainer",
+        "fitness coaching",
+        "verified coach",
+      ]}
+      schema={[coachSchema, breadcrumbSchema]}
+    >
         <div className="min-h-screen bg-background">
           {/* Back Button */}
           <div className="container mx-auto px-4 pt-24 pb-4">
@@ -365,8 +360,7 @@ const CoachDetail = () => {
           coach={coach}
           onMessageFirst={handleMessageCoach}
         />
-      </PageLayout>
-    </>
+    </PageLayout>
   );
 };
 
