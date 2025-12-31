@@ -1406,6 +1406,62 @@ export type Database = {
           },
         ]
       }
+      client_custom_field_values: {
+        Row: {
+          client_id: string
+          created_at: string | null
+          field_id: string
+          id: string
+          updated_at: string | null
+          value: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string | null
+          field_id: string
+          id?: string
+          updated_at?: string | null
+          value?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string | null
+          field_id?: string
+          id?: string
+          updated_at?: string | null
+          value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_custom_field_values_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_custom_field_values_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_custom_field_values_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_custom_field_values_field_id_fkey"
+            columns: ["field_id"]
+            isOneToOne: false
+            referencedRelation: "coach_message_fields"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_engagement_history: {
         Row: {
           client_id: string
@@ -3241,6 +3297,63 @@ export type Database = {
           },
           {
             foreignKeyName: "coach_leads_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coach_message_fields: {
+        Row: {
+          coach_id: string
+          created_at: string | null
+          default_value: string | null
+          description: string | null
+          field_label: string
+          field_name: string
+          field_type: string
+          id: string
+          is_active: boolean | null
+          is_global: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string | null
+          default_value?: string | null
+          description?: string | null
+          field_label: string
+          field_name: string
+          field_type?: string
+          id?: string
+          is_active?: boolean | null
+          is_global?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string | null
+          default_value?: string | null
+          description?: string | null
+          field_label?: string
+          field_name?: string
+          field_type?: string
+          id?: string
+          is_active?: boolean | null
+          is_global?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_message_fields_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_message_fields_coach_id_fkey"
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "public_coach_profiles"
