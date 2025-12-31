@@ -80,6 +80,8 @@ const ClientDashboardLayoutInner = memo(({
       <Helmet>
         <title>{title} | FitConnect</title>
         {description && <meta name="description" content={description} />}
+        {/* Prevent dashboard pages from being indexed by search engines */}
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
       <PlatformBackground showAmbientGlow={false} />

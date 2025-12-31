@@ -41,6 +41,7 @@ const STATIC_PAGES = [
   { path: "/docs/getting-started", priority: "0.7", changefreq: "monthly" },
   
   // Documentation - Client guides
+  { path: "/docs/client", priority: "0.6", changefreq: "monthly" },
   { path: "/docs/client/booking", priority: "0.6", changefreq: "monthly" },
   { path: "/docs/client/coaches", priority: "0.6", changefreq: "monthly" },
   { path: "/docs/client/communication", priority: "0.6", changefreq: "monthly" },
@@ -50,8 +51,13 @@ const STATIC_PAGES = [
   { path: "/docs/client/profile", priority: "0.6", changefreq: "monthly" },
   { path: "/docs/client/progress", priority: "0.6", changefreq: "monthly" },
   { path: "/docs/client/wearables", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/client/readiness", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/client/micro-wins", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/client/goal-suggestions", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/client/trends", priority: "0.6", changefreq: "monthly" },
   
   // Documentation - Coach guides
+  { path: "/docs/coach", priority: "0.6", changefreq: "monthly" },
   { path: "/docs/coach/availability", priority: "0.6", changefreq: "monthly" },
   { path: "/docs/coach/clients", priority: "0.6", changefreq: "monthly" },
   { path: "/docs/coach/marketing", priority: "0.6", changefreq: "monthly" },
@@ -61,8 +67,26 @@ const STATIC_PAGES = [
   { path: "/docs/coach/plans", priority: "0.6", changefreq: "monthly" },
   { path: "/docs/coach/profile", priority: "0.6", changefreq: "monthly" },
   { path: "/docs/coach/verification", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/coach/ai-recommendations", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/coach/client-risk", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/coach/plateau-detection", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/coach/revenue-forecast", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/coach/checkin-suggestions", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/coach/group-classes", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/coach/engagement-scoring", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/coach/client-ltv", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/coach/upsell-insights", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/coach/goal-adherence", priority: "0.6", changefreq: "monthly" },
+  
+  // Documentation - Coach Automations
+  { path: "/docs/coach/automations", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/coach/automations/dropoff-rescue", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/coach/automations/milestones", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/coach/automations/habit-streaks", priority: "0.6", changefreq: "monthly" },
+  { path: "/docs/coach/automations/weekly-summaries", priority: "0.6", changefreq: "monthly" },
   
   // Documentation - Integrations
+  { path: "/docs/integrations", priority: "0.6", changefreq: "monthly" },
   { path: "/docs/integrations/apple-health", priority: "0.6", changefreq: "monthly" },
   { path: "/docs/integrations/calendar", priority: "0.6", changefreq: "monthly" },
   { path: "/docs/integrations/fitbit", priority: "0.6", changefreq: "monthly" },
@@ -133,7 +157,8 @@ Deno.serve(async (req) => {
     // Build sitemap XML
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
 `;
 
     // Add static pages
