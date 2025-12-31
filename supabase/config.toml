@@ -262,7 +262,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.track-session]
-verify_jwt = true
+verify_jwt = false
 
 [functions.revoke-all-sessions]
 verify_jwt = true
