@@ -47,6 +47,9 @@ export default function WearablesOverview() {
             <p className="text-sm text-muted-foreground mb-2">
               Syncs data from Apple Watch and iPhone health sensors. Available exclusively 
               on iOS devices via the FitConnect native app.
+              <RouterLink to="/docs/integrations/apple-health" className="text-primary hover:underline ml-1">
+                Learn more →
+              </RouterLink>
             </p>
             <p className="text-xs text-muted-foreground">
               Compatible devices: Apple Watch, iPhone (with health sensors)
@@ -56,11 +59,14 @@ export default function WearablesOverview() {
           <div className="p-4 rounded-lg border border-border bg-card/50">
             <div className="flex items-center justify-between mb-2">
               <h4 className="font-medium">🤖 Health Connect</h4>
-              <span className="text-xs bg-muted px-2 py-1 rounded">Android Only</span>
+              <span className="text-xs bg-amber-500/20 text-amber-400 px-2 py-1 rounded">Coming Soon</span>
             </div>
             <p className="text-sm text-muted-foreground mb-2">
               Google's health data hub for Android. Aggregates data from various fitness 
               apps and wearables. Available via the FitConnect Android app.
+              <RouterLink to="/docs/integrations/health-connect" className="text-primary hover:underline ml-1">
+                Learn more →
+              </RouterLink>
             </p>
             <p className="text-xs text-muted-foreground">
               Compatible devices: Samsung Galaxy Watch, Google Pixel Watch, most Android wearables
@@ -83,13 +89,19 @@ export default function WearablesOverview() {
             </p>
           </div>
 
-          <div className="p-4 rounded-lg border border-border bg-card/50 opacity-60">
+          <div className="p-4 rounded-lg border border-border bg-card/50">
             <div className="flex items-center justify-between mb-2">
               <h4 className="font-medium">🏃 Garmin</h4>
               <span className="text-xs bg-amber-500/20 text-amber-400 px-2 py-1 rounded">Coming Soon</span>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground mb-2">
               Direct Garmin Connect integration is in development. Stay tuned!
+              <RouterLink to="/docs/integrations/garmin" className="text-primary hover:underline ml-1">
+                Learn more →
+              </RouterLink>
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Compatible devices: All Garmin wearables and fitness trackers
             </p>
           </div>
         </div>

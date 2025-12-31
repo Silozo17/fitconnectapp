@@ -102,6 +102,7 @@ const navItems: NavItem[] = [
       { title: "Managing Reviews", href: "/docs/coach/reviews", icon: Star },
       { title: "Verification", href: "/docs/coach/verification", icon: FileCheck },
       { title: "Earnings & Stripe", href: "/docs/coach/earnings", icon: BarChart3 },
+      { title: "Achievements", href: "/docs/coach/achievements", icon: Trophy },
     ],
   },
   {
@@ -110,11 +111,14 @@ const navItems: NavItem[] = [
     icon: Plug,
     children: [
       { title: "Wearables Overview", href: "/docs/integrations/wearables", icon: Settings },
+      { title: "Apple Health", href: "/docs/integrations/apple-health", icon: Settings },
+      { title: "Health Connect", href: "/docs/integrations/health-connect", icon: Settings },
+      { title: "Garmin", href: "/docs/integrations/garmin", icon: Settings },
+      { title: "Fitbit", href: "/docs/integrations/fitbit", icon: Settings },
       { title: "Zoom", href: "/docs/integrations/zoom", icon: Plug },
       { title: "Google Meet", href: "/docs/integrations/google-meet", icon: Plug },
       { title: "Google Calendar", href: "/docs/integrations/google-calendar", icon: Calendar },
       { title: "Apple Calendar", href: "/docs/integrations/apple-calendar", icon: Calendar },
-      { title: "Fitbit", href: "/docs/integrations/fitbit", icon: Settings },
     ],
   },
   {
