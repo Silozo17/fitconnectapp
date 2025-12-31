@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback, useRef, Re
 import { supabase } from "@/integrations/supabase/client";
 import { RouteLocationCode, SUPPORTED_LOCATIONS, isValidLocation, COUNTRY_TO_LOCATION } from "@/lib/locale-routing";
 import { User } from "@supabase/supabase-js";
+import { perfLogger } from "@/lib/performance-logger";
 
 // Storage key for country preference (localStorage fallback for unauthenticated users)
 const COUNTRY_STORAGE_KEY = "fitconnect_country";
@@ -127,6 +128,7 @@ function setStoredCountryPreference(countryCode: RouteLocationCode, source: 'geo
  * Fetch user's country preference from database
  */
 async function fetchUserCountryPreference(userId: string): Promise<RouteLocationCode | null> {
+  perfLogger.logEvent('country_db_fetch_start');
   try {
     const { data, error } = await supabase
       .from("user_profiles")
@@ -135,16 +137,19 @@ async function fetchUserCountryPreference(userId: string): Promise<RouteLocation
       .maybeSingle();
 
     if (error) {
+      perfLogger.logEvent('country_db_fetch_error');
       console.error("Error fetching user country preference:", error);
       return null;
     }
 
     const pref = data?.country_preference;
+    perfLogger.logEvent('country_db_fetch_end', { hasPreference: !!pref });
     if (pref && isValidLocation(pref)) {
       return pref as RouteLocationCode;
     }
     return null;
   } catch (err) {
+    perfLogger.logEvent('country_db_fetch_error');
     console.error("Failed to fetch user country preference:", err);
     return null;
   }
@@ -175,6 +180,7 @@ async function saveUserCountryPreference(userId: string, countryCode: RouteLocat
  * Detect country from IP/device geolocation
  */
 async function detectCountryFromGeo(): Promise<RouteLocationCode> {
+  perfLogger.logEvent('country_geo_detection_start');
   try {
     // Check if we have cached location data first
     const cachedLocation = localStorage.getItem(LOCATION_CACHE_KEY);
@@ -182,6 +188,7 @@ async function detectCountryFromGeo(): Promise<RouteLocationCode> {
       try {
         const parsed = JSON.parse(cachedLocation);
         if (parsed.country) {
+          perfLogger.logEvent('country_geo_detection_end', { source: 'cache' });
           return mapToLocationCode(parsed.country);
         }
       } catch {
@@ -190,15 +197,19 @@ async function detectCountryFromGeo(): Promise<RouteLocationCode> {
     }
     
     // Call edge function for detection
+    perfLogger.logEvent('country_geo_edge_function_start');
     const { data, error } = await supabase.functions.invoke('get-user-location');
     
     if (error) {
+      perfLogger.logEvent('country_geo_edge_function_error');
       console.error('Country detection error:', error);
       return DEFAULT_COUNTRY;
     }
     
+    perfLogger.logEvent('country_geo_detection_end', { source: 'edge_function' });
     return mapToLocationCode(data?.country || data?.countryCode);
   } catch (err) {
+    perfLogger.logEvent('country_geo_detection_error');
     console.error('Country detection failed:', err);
     return DEFAULT_COUNTRY;
   }
@@ -218,12 +229,18 @@ interface CountryProviderProps {
  * IMPORTANT: Currency is NEVER inferred from language - only from country.
  */
 export function CountryProvider({ children }: CountryProviderProps) {
+  perfLogger.logEvent('country_context_init_start');
+  
   // Use direct Supabase auth instead of useAuth to avoid circular dependency
   const [user, setUser] = useState<User | null>(null);
   
   // PERFORMANCE FIX: Initialize with localStorage immediately to prevent blocking
   const [countryCode, setCountryCode] = useState<RouteLocationCode>(() => {
     const storedPref = getStoredCountryPreference();
+    perfLogger.logEvent('country_localStorage_init', { 
+      hasStored: !!storedPref, 
+      source: storedPref?.source || 'default' 
+    });
     return storedPref?.countryCode || DEFAULT_COUNTRY;
   });
   const [detectedCountry, setDetectedCountry] = useState<RouteLocationCode | null>(() => {

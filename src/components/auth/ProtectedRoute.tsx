@@ -2,6 +2,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { TwoFactorGate } from "./TwoFactorGate";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
+import { perfLogger } from "@/lib/performance-logger";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -12,9 +13,18 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const { user, role, allRoles, loading } = useAuth();
   const location = useLocation();
 
+  perfLogger.logEvent('protected_route_check', { 
+    path: location.pathname.replace(/[a-f0-9-]{36}/gi, '[id]'),
+    loading, 
+    hasUser: !!user, 
+    role: role || 'none',
+    rolesCount: allRoles.length
+  });
+
   // PERFORMANCE FIX: Show skeleton instead of spinner while loading
   // This provides immediate visual feedback and reduces perceived load time
   if (loading || (user && role === null)) {
+    perfLogger.logEvent('protected_route_loading_skeleton');
     return (
       <div className="min-h-screen bg-background">
         <DashboardSkeleton />
@@ -51,9 +61,11 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   );
 
   if (isPrivilegedUser) {
+    perfLogger.logEvent('protected_route_render', { requiresTwoFactor: true });
     return <TwoFactorGate>{children}</TwoFactorGate>;
   }
 
+  perfLogger.logEvent('protected_route_render', { requiresTwoFactor: false });
   return <>{children}</>;
 };
 
