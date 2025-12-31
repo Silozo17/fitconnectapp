@@ -13,18 +13,19 @@ export const SYSTEM_VARIABLES: SystemVariable[] = [
   { name: "client_name", category: "client", description: "Full name (John Smith)" },
   { name: "client_first_name", category: "client", description: "First name only (John)" },
   { name: "client_last_name", category: "client", description: "Last name only (Smith)" },
-  { name: "client_full_name", category: "client", description: "Full name (alias for client_name)" },
   { name: "client_display_name", category: "client", description: "First name or username" },
+  { name: "client_email", category: "client", description: "Client's email address" },
+  { name: "client_goal", category: "client", description: "Primary fitness goal" },
   
   // Coach
   { name: "coach_name", category: "coach", description: "Coach display name" },
   { name: "coach_first_name", category: "coach", description: "Coach first name" },
-  { name: "coach_display_name", category: "coach", description: "Coach display name" },
   
   // Context
   { name: "current_date", category: "context", description: "Today's date (1 January 2025)" },
   { name: "current_time", category: "context", description: "Current time (14:30)" },
-  { name: "today", category: "context", description: "Today's date (alias)" },
+  { name: "next_session_date", category: "context", description: "Next scheduled session date" },
+  { name: "next_session_time", category: "context", description: "Next scheduled session time" },
   { name: "days_since_last_login", category: "context", description: "Days since client last logged in" },
   { name: "days_since_last_session", category: "context", description: "Days since last session" },
   { name: "days_since_activity", category: "context", description: "Days since any activity" },
@@ -35,6 +36,9 @@ export const SYSTEM_VARIABLES: SystemVariable[] = [
   
   // Relationship
   { name: "coaching_start_date", category: "relationship", description: "When coaching relationship started" },
+  { name: "total_sessions_completed", category: "relationship", description: "Number of sessions completed" },
+  { name: "current_streak", category: "relationship", description: "Current workout streak in days" },
+  { name: "subscription_name", category: "relationship", description: "Active subscription or package name" },
 ];
 
 // Category labels for grouping
@@ -154,11 +158,11 @@ export function useMessageVariables() {
       client_name: sampleData?.clientName || "John Smith",
       client_first_name: sampleData?.clientName?.split(" ")[0] || "John",
       client_last_name: sampleData?.clientName?.split(" ")[1] || "Smith",
-      client_full_name: sampleData?.clientName || "John Smith",
       client_display_name: sampleData?.clientName?.split(" ")[0] || "John",
+      client_email: "john.smith@email.com",
+      client_goal: "Weight Loss",
       coach_name: sampleData?.coachName || "Coach Sarah",
       coach_first_name: sampleData?.coachName?.split(" ")[0] || "Sarah",
-      coach_display_name: sampleData?.coachName || "Coach Sarah",
       current_date: new Date().toLocaleDateString("en-GB", {
         day: "numeric",
         month: "long",
@@ -168,17 +172,17 @@ export function useMessageVariables() {
         hour: "2-digit",
         minute: "2-digit",
       }),
-      today: new Date().toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      }),
+      next_session_date: "5 January 2025",
+      next_session_time: "10:00",
       days_since_last_login: "3",
       days_since_last_session: "5",
       days_since_activity: "2",
       value: "30",
       unit: "days",
       coaching_start_date: "15 June 2025",
+      total_sessions_completed: "24",
+      current_streak: "14",
+      subscription_name: "Premium Monthly",
     };
     
     // Replace system variables
