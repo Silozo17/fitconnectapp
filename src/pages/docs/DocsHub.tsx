@@ -21,7 +21,7 @@ import {
   Package,
   Rocket
 } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { DocSearch } from "@/components/docs/DocSearch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/layout/Navbar";
@@ -99,13 +99,9 @@ export default function DocsHub() {
               Find guides, tutorials, and answers to help you get the most out of FitConnect.
             </p>
             
-            {/* Search (visual only for now) */}
-            <div className="max-w-xl mx-auto relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input 
-                placeholder={t('placeholder.search')} 
-                className="pl-12 h-12 text-lg bg-card border-border"
-              />
+            {/* Search with autocomplete */}
+            <div className="max-w-xl mx-auto">
+              <DocSearch />
             </div>
           </div>
         </section>
