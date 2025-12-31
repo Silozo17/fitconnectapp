@@ -97,26 +97,25 @@ const CoachAIRecommendations = () => {
             </CardContent>
           </Card>
         </div>
-        <Card variant="glass" className="glass-card rounded-2xl shrink-0">
-          <CardContent className="p-6 flex items-center justify-center h-full">
-            <Button
-              onClick={() => generateRecommendations()}
-              disabled={isGenerating}
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {t("aiRecommendations.generating")}
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  {t("aiRecommendations.generateNew")}
-                </>
-              )}
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="shrink-0 flex items-center">
+          <Button
+            onClick={() => generateRecommendations()}
+            disabled={isGenerating}
+            size="lg"
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                {t("aiRecommendations.generating")}
+              </>
+            ) : (
+              <>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                {t("aiRecommendations.generateNew")}
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       {/* Recommendations List */}
