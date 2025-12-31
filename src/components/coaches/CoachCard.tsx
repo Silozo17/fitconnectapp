@@ -8,7 +8,6 @@ import FavouriteButton from "@/components/favourites/FavouriteButton";
 import StarRating from "@/components/reviews/StarRating";
 import { VerifiedBadge } from "@/components/verification/VerifiedBadge";
 import { QualifiedCoachBadge } from "@/components/verification/QualifiedCoachBadge";
-import { useCoachReviews, calculateAverageRating } from "@/hooks/useReviews";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatCurrency, type CurrencyCode } from "@/lib/currency";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -30,8 +29,9 @@ interface CoachCardProps {
 
 const CoachCard = React.memo(({ coach, onBook, onRequestConnection, linkPrefix }: CoachCardProps) => {
   const { t } = useTranslation('coaches');
-  const { data: reviews = [] } = useCoachReviews(coach.id);
-  const averageRating = calculateAverageRating(reviews);
+  // Use pre-fetched rating/review data from RPC instead of N+1 queries
+  const averageRating = coach.avg_rating ?? coach.rating ?? 0;
+  const reviewCount = coach.review_count ?? coach.reviews_count ?? 0;
   const { user, role } = useAuth();
   const navigate = useNavigate();
   const autoLinkPrefix = useCoachLinkPrefix();
@@ -130,7 +130,7 @@ const CoachCard = React.memo(({ coach, onBook, onRequestConnection, linkPrefix }
 
       <div className="p-5">
         <div className="flex items-center gap-1 mb-2">
-          <StarRating rating={averageRating} reviewCount={reviews.length} size="sm" />
+          <StarRating rating={averageRating} reviewCount={reviewCount} size="sm" />
         </div>
 
         <div className="flex items-center gap-2 mb-1">

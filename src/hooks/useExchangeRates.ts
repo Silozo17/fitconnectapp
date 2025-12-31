@@ -66,9 +66,10 @@ export function useExchangeRates() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['exchange-rates'],
     queryFn: () => fetchExchangeRates('GBP'),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes (formerly cacheTime)
+    staleTime: 30 * 60 * 1000, // 30 minutes - rates update daily, not every 5 min
+    gcTime: 60 * 60 * 1000, // 1 hour cache
     retry: 2,
+    refetchOnWindowFocus: false, // Stable UX - don't refetch on focus
   });
   
   /**

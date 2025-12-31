@@ -7,6 +7,7 @@
  * - Verified, profile completeness, and engagement are secondary factors
  */
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { LocationData, RankingScore, LocationMatchLevel } from "@/types/ranking";
 
@@ -116,9 +117,41 @@ function getMatchLevelFromTier(locationTier: number): LocationMatchLevel {
   return 'no_match';
 }
 
+// Empty result to prevent stale cache from showing during location resolution
+const EMPTY_RESULT = { coaches: [] as MarketplaceCoach[], effectiveMatchLevel: 'no_match' as const };
+
 export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): UseCoachMarketplaceResult => {
+  // Create stable query key to prevent cache misses
+  const queryKey = useMemo(() => [
+    "marketplace-coaches-rpc",
+    options.userLocation?.city || null,
+    options.userLocation?.region || options.userLocation?.county || null,
+    options.userLocation?.countryCode || null,
+    options.countryCode || null,
+    options.search || null,
+    options.coachTypes?.join(',') || null,
+    options.priceRange?.min ?? null,
+    options.priceRange?.max ?? null,
+    options.onlineOnly || false,
+    options.inPersonOnly || false,
+    options.limit || 50,
+  ], [
+    options.userLocation?.city,
+    options.userLocation?.region,
+    options.userLocation?.county,
+    options.userLocation?.countryCode,
+    options.countryCode,
+    options.search,
+    options.coachTypes,
+    options.priceRange?.min,
+    options.priceRange?.max,
+    options.onlineOnly,
+    options.inPersonOnly,
+    options.limit,
+  ]);
+  
   const query = useQuery({
-    queryKey: ["marketplace-coaches-rpc", options],
+    queryKey,
     queryFn: async () => {
       // Call the SQL ranking function
       const { data, error } = await supabase.rpc('get_ranked_coaches', {
@@ -215,8 +248,11 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
         effectiveMatchLevel,
       };
     },
-    staleTime: 1000 * 60 * 2, // 2 minutes
+    staleTime: 1000 * 60 * 5, // 5 minutes - coaches don't change often
+    gcTime: 1000 * 60 * 15, // 15 minutes cache
     enabled: options.enabled !== false, // Defer query until location is ready
+    placeholderData: EMPTY_RESULT, // Prevents stale cache from flashing wrong order
+    refetchOnWindowFocus: false, // Disable refetch on window focus for stable UX
   });
 
   return {
