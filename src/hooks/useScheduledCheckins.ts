@@ -59,9 +59,28 @@ export function useScheduledCheckins() {
       if (!coachProfile) return [];
       const { data, error } = await supabase
         .from("scheduled_checkins")
-        .select(`*, client:client_profiles!scheduled_checkins_client_id_fkey(first_name, last_name)`)
+        .select(`*, client:client_profiles!scheduled_checkins_client_id_fkey(first_name, last_name), linked_template:message_templates(name)`)
         .eq("coach_id", coachProfile.id)
         .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!coachProfile,
+  });
+
+  // Fetch template assignments for multi-client templates
+  const { data: templateAssignments = [] } = useQuery({
+    queryKey: ["scheduled-checkin-assignments", coachProfile?.id],
+    queryFn: async () => {
+      if (!coachProfile) return [];
+      const { data, error } = await supabase
+        .from("scheduled_checkin_assignments")
+        .select(`
+          *,
+          template_checkin:scheduled_checkins!scheduled_checkin_assignments_template_checkin_id_fkey(id, message_template, schedule_type, time_of_day, day_of_week),
+          client:client_profiles!scheduled_checkin_assignments_client_id_fkey(id, first_name, last_name)
+        `)
+        .eq("is_active", true);
       if (error) throw error;
       return data;
     },
@@ -75,16 +94,54 @@ export function useScheduledCheckins() {
         data.time_of_day,
         data.day_of_week
       );
-      const { error } = await supabase.from("scheduled_checkins").insert({
-        ...data,
-        coach_id: coachProfile?.id,
-        next_run_at: nextRunAt.toISOString(),
-      });
-      if (error) throw error;
+      
+      // If creating as template with multiple clients
+      if (data.is_template && data.client_ids && data.client_ids.length > 0) {
+        // Create the template check-in (without a specific client_id)
+        const { data: templateData, error: templateError } = await supabase
+          .from("scheduled_checkins")
+          .insert({
+            coach_id: coachProfile?.id,
+            client_id: data.client_ids[0], // Use first client as primary
+            message_template: data.message_template,
+            schedule_type: data.schedule_type,
+            time_of_day: data.time_of_day,
+            day_of_week: data.day_of_week,
+            next_run_at: nextRunAt.toISOString(),
+            is_template: true,
+            linked_template_id: data.linked_template_id,
+          })
+          .select("id")
+          .single();
+        
+        if (templateError) throw templateError;
+        
+        // Create assignments for all clients
+        const assignments = data.client_ids.map((clientId: string) => ({
+          template_checkin_id: templateData.id,
+          client_id: clientId,
+          is_active: true,
+        }));
+        
+        const { error: assignError } = await supabase
+          .from("scheduled_checkin_assignments")
+          .insert(assignments);
+        
+        if (assignError) throw assignError;
+      } else {
+        // Single client check-in (original behavior)
+        const { error } = await supabase.from("scheduled_checkins").insert({
+          ...data,
+          coach_id: coachProfile?.id,
+          next_run_at: nextRunAt.toISOString(),
+        });
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       toast.success("Check-in scheduled");
       queryClient.invalidateQueries({ queryKey: ["scheduled-checkins"] });
+      queryClient.invalidateQueries({ queryKey: ["scheduled-checkin-assignments"] });
     },
     onError: () => toast.error("Failed to create check-in"),
   });
@@ -130,6 +187,7 @@ export function useScheduledCheckins() {
 
   return {
     scheduledCheckins,
+    templateAssignments,
     isLoading,
     createCheckin: createMutation.mutate,
     updateCheckin: updateMutation.mutate,
