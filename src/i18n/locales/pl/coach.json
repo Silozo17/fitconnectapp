@@ -1672,7 +1672,10 @@
     "dayOfWeek": "Dzień tygodnia",
     "dayOfMonth": "Dzień miesiąca",
     "saved": "Check-in zapisany",
-    "deleted": "Check-in usunięty"
+    "deleted": "Check-in usunięty",
+    "statusActive": "Aktywny",
+    "statusPaused": "Wstrzymany",
+    "save": "Zapisz"
   },
   "wearableDashboard": {
     "title": "Dane z urządzeń",
