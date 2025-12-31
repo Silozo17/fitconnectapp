@@ -175,13 +175,25 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
                     </div>
 
                     <ul className="space-y-2 mb-4">
-                      {tier.featureKeys.map((featureKey, i) => (
+                      {tier.featureKeys.slice(0, 5).map((featureKey, i) => (
                         <li key={i} className="flex items-center gap-2 text-sm">
                           <Check className="h-4 w-4 text-primary" />
                           <span className="text-muted-foreground">{translateFeature(featureKey, t, tPages)}</span>
                         </li>
                       ))}
+                      {tier.featureKeys.length > 5 && (
+                        <li className="text-xs text-muted-foreground">
+                          +{tier.featureKeys.length - 5} more features
+                        </li>
+                      )}
                     </ul>
+                    
+                    <a 
+                      href="/pricing" 
+                      className="text-xs text-muted-foreground underline hover:text-primary block mb-3"
+                    >
+                      See full feature comparison
+                    </a>
 
                     {isCurrentTier ? (
                       activeTier !== "free" ? (

@@ -99,7 +99,7 @@ const menuGroups: MenuGroup[] = [
     icon: Zap,
     collapsible: false,
     items: [
-      { titleKey: "navigation.coach.automations", icon: Zap, path: "/dashboard/coach/automations" },
+      { titleKey: "navigation.coach.automations", icon: Zap, path: "/dashboard/coach/automations", requiredFeature: "automations" },
     ],
   },
   {
@@ -135,7 +135,7 @@ const menuGroups: MenuGroup[] = [
     items: [
       { titleKey: "navigation.coach.boost", icon: Rocket, path: "/dashboard/coach/boost", requiredFeature: "boost_marketing" },
       { titleKey: "navigation.coach.financial", icon: Receipt, path: "/dashboard/coach/financial", requiredFeature: "advanced_reporting" },
-      { titleKey: "navigation.coach.reviews", icon: Star, path: "/dashboard/coach/reviews", requiredFeature: "review_management" },
+      { titleKey: "navigation.coach.reviews", icon: Star, path: "/dashboard/coach/reviews" }, // Free tier - no requiredFeature
       { titleKey: "navigation.coach.transformations", icon: ImageIcon, path: "/dashboard/coach/showcase", requiredFeature: "client_outcomes_showcase" },
       { titleKey: "navigation.coach.integrations", icon: Settings, path: "/dashboard/coach/integrations", requiredFeature: "custom_integrations" },
     ],
