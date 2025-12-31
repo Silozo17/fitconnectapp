@@ -1,7 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Search } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Command,
@@ -23,6 +22,7 @@ export function DocSearch({ className, onSelect }: DocSearchProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { role } = useAuth();
+  const containerRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   
@@ -62,16 +62,26 @@ export function DocSearch({ className, onSelect }: DocSearchProps) {
     onSelect?.();
   };
 
-  // Keyboard shortcut (Cmd/Ctrl + K)
+  // Close on click outside
   useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        setOpen((open) => !open);
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
       }
     };
-    document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Close on Escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
   }, []);
 
   // Calculate total results
@@ -80,27 +90,21 @@ export function DocSearch({ className, onSelect }: DocSearchProps) {
   );
 
   return (
-    <div className={cn("relative w-full", className)}>
+    <div ref={containerRef} className={cn("relative w-full", className)}>
       <Command 
-        className="rounded-lg border border-border bg-card shadow-md"
+        className="rounded-lg border border-border bg-card shadow-md overflow-hidden"
         shouldFilter={false}
       >
-        <div className="flex items-center border-b border-border px-3">
-          <Search className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
-          <CommandInput
-            placeholder={t('placeholder.search')}
-            value={search}
-            onValueChange={setSearch}
-            onFocus={() => setOpen(true)}
-            className="flex h-12 w-full rounded-md bg-transparent py-3 text-base outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
-          />
-          <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground sm:flex">
-            <span className="text-xs">⌘</span>K
-          </kbd>
-        </div>
+        <CommandInput
+          placeholder={t('placeholder.search')}
+          value={search}
+          onValueChange={setSearch}
+          onFocus={() => setOpen(true)}
+          className="h-12"
+        />
         
         {open && (
-          <CommandList className="max-h-[300px] overflow-y-auto">
+          <CommandList className="max-h-[300px] overflow-y-auto border-t border-border">
             {!hasResults && search && (
               <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
                 No results found for "{search}"
