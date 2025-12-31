@@ -22,8 +22,8 @@ interface SEOHeadProps {
 }
 
 const BASE_URL = "https://getfitconnect.co.uk";
-const DEFAULT_OG_IMAGE = `${BASE_URL}/og-image.webp`;
-const DEFAULT_OG_IMAGE_ALT = "FitConnect - Connect with world-class fitness coaches in the UK";
+const DEFAULT_OG_IMAGE = `${BASE_URL}/og-image.png`;
+const DEFAULT_OG_IMAGE_ALT = "FitConnect - Connect with world-class fitness coaches in the UK. Find personal trainers, nutritionists, and boxing coaches.";
 
 export function SEOHead({
   title,
@@ -91,7 +91,7 @@ export function SEOHead({
       <meta property="og:description" content={description} />
       <meta property="og:image" content={fullOgImage} />
       <meta property="og:image:secure_url" content={fullOgImage} />
-      <meta property="og:image:type" content={fullOgImage.endsWith('.webp') ? 'image/webp' : 'image/png'} />
+      <meta property="og:image:type" content={fullOgImage.endsWith('.webp') ? 'image/webp' : fullOgImage.endsWith('.jpg') || fullOgImage.endsWith('.jpeg') ? 'image/jpeg' : 'image/png'} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:image:alt" content={ogImageAlt} />
