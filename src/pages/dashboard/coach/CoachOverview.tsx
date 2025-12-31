@@ -12,6 +12,7 @@ import { AddClientModal } from "@/components/dashboard/clients/AddClientModal";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { useCoachDashboardStats } from "@/hooks/useCoachDashboardStats";
 import { useCoachProfileRealtime } from "@/hooks/useCoachProfileRealtime";
+import { useAutoAwardCoachBadges } from "@/hooks/useAutoAwardCoachBadges";
 import { useCoachWidgets, useUpdateCoachWidget, useReorderCoachWidgets } from "@/hooks/useCoachWidgets";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 import { cn } from "@/lib/utils";
@@ -36,6 +37,9 @@ const CoachOverview = () => {
   
   // Subscribe to real-time coach profile updates (e.g., tier changes by admin)
   useCoachProfileRealtime();
+  
+  // OPTIMIZED: Badge awarding moved here from layout (prevents queries on every navigation)
+  useAutoAwardCoachBadges();
   
   const { unreadCount: unreadMessages } = useUnreadMessages();
   const { data: dashboardData, isLoading: statsLoading, error, refetch } = useCoachDashboardStats();

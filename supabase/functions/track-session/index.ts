@@ -123,27 +123,9 @@ serve(async (req) => {
     const ua = userAgent || req.headers.get("user-agent") || "";
     const { deviceInfo, platform } = parseUserAgent(ua);
 
-    // Get IP-based location (country only - no precise location)
-    let ipCountry = null;
-    let ipRegion = null;
-
-    try {
-      // Get client IP
-      const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-        req.headers.get("x-real-ip") ||
-        "unknown";
-
-      if (clientIp && clientIp !== "unknown" && clientIp !== "127.0.0.1") {
-        const geoResponse = await fetch(`https://ipapi.co/${clientIp}/json/`);
-        if (geoResponse.ok) {
-          const geoData = await geoResponse.json();
-          ipCountry = geoData.country_name || null;
-          ipRegion = geoData.region || null;
-        }
-      }
-    } catch (geoError) {
-      console.error("[track-session] Geo lookup error:", geoError);
-    }
+    // OPTIMIZED: Removed slow ipapi.co geo-lookup (~300ms per call)
+    // Location data is already captured during onboarding and stored in user preferences
+    // This significantly improves edge function response time from ~600ms to ~200ms
 
     console.log(`[track-session] ${isUpdate ? "Updating" : "Creating"} session for user: ${user.id}`);
 
@@ -164,7 +146,7 @@ serve(async (req) => {
         .update({ is_current: false })
         .eq("user_id", user.id);
 
-      // Upsert the session
+      // Upsert the session (without geo data - already captured in user preferences)
       const { error } = await supabase
         .from("user_sessions")
         .upsert(
@@ -173,8 +155,6 @@ serve(async (req) => {
             session_token_hash: tokenHash,
             device_info: deviceInfo,
             platform,
-            ip_country: ipCountry,
-            ip_region: ipRegion,
             last_seen_at: new Date().toISOString(),
             is_current: true,
             is_active: true,

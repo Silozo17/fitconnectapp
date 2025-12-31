@@ -3,12 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuthSafe } from "@/contexts/AuthContext";
 import { isDespia } from "@/lib/despia";
 
-// OPTIMIZED: Increased interval to reduce edge function calls
-const ACTIVITY_UPDATE_INTERVAL = 5 * 60 * 1000; // 5 minutes
+// OPTIMIZED: Increased intervals to reduce edge function calls and improve native performance
+const ACTIVITY_UPDATE_INTERVAL = 10 * 60 * 1000; // 10 minutes (was 5)
 // Minimum time between updates (debounce)
 const MIN_UPDATE_INTERVAL = 60000; // 1 minute
-// Extra debounce for native apps
-const NATIVE_DEBOUNCE = 120000; // 2 minutes
+// Extra debounce for native apps - longer to reduce API calls
+const NATIVE_DEBOUNCE = 5 * 60 * 1000; // 5 minutes (was 2)
 
 /**
  * Hook to periodically update session activity (last_seen_at)

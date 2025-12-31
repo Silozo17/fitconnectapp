@@ -5,6 +5,7 @@ import { useCoachLinkPrefix } from "@/hooks/useCoachLinkPrefix";
 import { useClientDashboardStats } from "@/hooks/useClientDashboardStats";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useMicroWinDetection } from "@/hooks/useMicroWinDetection";
+import { useAutoAwardClientBadges } from "@/hooks/useAutoAwardClientBadges";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 
 import UserConnectionRequests from "@/components/dashboard/client/UserConnectionRequests";
@@ -59,6 +60,9 @@ const ClientOverview = () => {
   const { t } = useTranslation('dashboard');
   const coachLinkPrefix = useCoachLinkPrefix();
   const { displayName } = useUserProfile();
+  
+  // OPTIMIZED: Moved badge awarding here from layout (prevents queries on every navigation)
+  useAutoAwardClientBadges();
   
   // Micro-win detection (triggers celebrations on dashboard mount)
   useMicroWinDetection();

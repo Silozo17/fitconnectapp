@@ -128,8 +128,10 @@ export function useMicroWinDetection() {
       return microWins;
     },
     enabled: !!user?.id,
-    staleTime: 60 * 1000, // 1 minute
+    staleTime: 5 * 60 * 1000, // 5 minutes (OPTIMIZED: was 1 minute)
+    gcTime: 10 * 60 * 1000, // 10 minutes
     refetchOnWindowFocus: false,
+    refetchOnMount: false, // OPTIMIZED: Don't refetch on every mount
   });
 
   // Celebrate wins that haven't been celebrated yet
