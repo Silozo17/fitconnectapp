@@ -27,7 +27,9 @@ import {
   UsersRound,
   Link2,
   Plug,
-  FileText
+  FileText,
+  TrendingUp,
+  Target
 } from "lucide-react";
 
 const coachGuides = [
@@ -174,6 +176,30 @@ const coachGuides = [
     description: "Smart suggestions for when and how to check in with clients.",
     href: "/docs/coach/checkin-suggestions",
     icon: MessageSquare,
+  },
+  {
+    title: "Engagement Scoring",
+    description: "Track client engagement levels and identify those needing attention.",
+    href: "/docs/coach/engagement-scoring",
+    icon: Activity,
+  },
+  {
+    title: "Client LTV",
+    description: "Understand client lifetime value and make data-driven business decisions.",
+    href: "/docs/coach/client-ltv",
+    icon: TrendingUp,
+  },
+  {
+    title: "Upsell Insights",
+    description: "Discover opportunities to offer additional services to ready clients.",
+    href: "/docs/coach/upsell-insights",
+    icon: Sparkles,
+  },
+  {
+    title: "Goal Adherence",
+    description: "Monitor how closely clients are tracking towards their goals.",
+    href: "/docs/coach/goal-adherence",
+    icon: Target,
   },
   {
     title: "Automations",

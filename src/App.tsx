@@ -224,6 +224,10 @@ const DocsCoachPlateau = lazy(() => import('@/pages/docs/coach/CoachPlateauDocs'
 const DocsCoachRevenueForecast = lazy(() => import('@/pages/docs/coach/CoachRevenueForecastDocs'));
 const DocsCoachCheckInSuggestions = lazy(() => import('@/pages/docs/coach/CoachCheckInSuggestionsDocs'));
 const DocsCoachGroupClasses = lazy(() => import('@/pages/docs/coach/CoachGroupClassesDocs'));
+const DocsCoachEngagementScoring = lazy(() => import('@/pages/docs/coach/CoachEngagementScoringDocs'));
+const DocsCoachClientLTV = lazy(() => import('@/pages/docs/coach/CoachClientLTVDocs'));
+const DocsCoachUpsell = lazy(() => import('@/pages/docs/coach/CoachUpsellDocs'));
+const DocsCoachGoalAdherence = lazy(() => import('@/pages/docs/coach/CoachGoalAdherenceDocs'));
 
 // Client Additional Documentation
 const DocsClientReadiness = lazy(() => import('@/pages/docs/client/ClientReadinessDocs'));
@@ -387,6 +391,10 @@ const App = () => (
                               <Route path="/docs/coach/revenue-forecast" element={<DocsCoachRevenueForecast />} />
                               <Route path="/docs/coach/checkin-suggestions" element={<DocsCoachCheckInSuggestions />} />
                               <Route path="/docs/coach/group-classes" element={<DocsCoachGroupClasses />} />
+                              <Route path="/docs/coach/engagement-scoring" element={<DocsCoachEngagementScoring />} />
+                              <Route path="/docs/coach/client-ltv" element={<DocsCoachClientLTV />} />
+                              <Route path="/docs/coach/upsell-insights" element={<DocsCoachUpsell />} />
+                              <Route path="/docs/coach/goal-adherence" element={<DocsCoachGoalAdherence />} />
                               <Route path="/docs/coach/automations" element={<DocsCoachAutomations />} />
                               <Route path="/docs/coach/automations/dropoff-rescue" element={<DocsCoachDropoffRescue />} />
                               <Route path="/docs/coach/automations/milestones" element={<DocsCoachMilestones />} />
