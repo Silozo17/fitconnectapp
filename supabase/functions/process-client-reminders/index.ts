@@ -97,18 +97,41 @@ serve(async (req) => {
         }
 
         // Send the message
-        const { error: messageError } = await supabase
+        const { data: message, error: messageError } = await supabase
           .from("messages")
           .insert({
             sender_id: reminder.coach.user_id,
             receiver_id: reminder.client.user_id,
             content: messageContent,
-          });
+            metadata: { source: 'client_reminder', reminder_id: reminder.id }
+          })
+          .select()
+          .single();
 
         if (messageError) {
           console.error("Error sending reminder message:", messageError);
           errors++;
           continue;
+        }
+
+        // Trigger push notification
+        try {
+          await fetch(`${supabaseUrl}/functions/v1/send-message-notification`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${supabaseServiceKey}`
+            },
+            body: JSON.stringify({
+              messageId: message.id,
+              senderId: reminder.coach.user_id,
+              receiverId: reminder.client.user_id,
+              content: messageContent,
+              senderName: reminder.coach.display_name || 'Your Coach'
+            })
+          });
+        } catch (notifError) {
+          console.error("Notification error:", notifError);
         }
 
         // Calculate next run time
