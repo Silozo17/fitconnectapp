@@ -18,7 +18,16 @@ import {
   UtensilsCrossed,
   Sparkles,
   Star,
-  Trophy
+  Trophy,
+  Brain,
+  AlertTriangle,
+  Activity,
+  LineChart,
+  Settings,
+  UsersRound,
+  Link2,
+  Plug,
+  FileText
 } from "lucide-react";
 
 const coachGuides = [
@@ -41,6 +50,30 @@ const coachGuides = [
     icon: Users,
   },
   {
+    title: "Client Comparison",
+    description: "Compare client progress side-by-side to identify trends.",
+    href: "/docs/coach/comparison",
+    icon: BarChart3,
+  },
+  {
+    title: "Client Wearables",
+    description: "View and analyse wearable data from your clients' devices.",
+    href: "/docs/coach/wearables",
+    icon: Settings,
+  },
+  {
+    title: "Client Risk Detection",
+    description: "Identify at-risk clients and prevent churn with early intervention.",
+    href: "/docs/coach/client-risk",
+    icon: AlertTriangle,
+  },
+  {
+    title: "Plateau Detection",
+    description: "Automatically detect when clients hit plateaus and need plan adjustments.",
+    href: "/docs/coach/plateau-detection",
+    icon: Activity,
+  },
+  {
     title: "Messaging & Templates",
     description: "Communicate effectively with clients using templates and quick actions.",
     href: "/docs/coach/messaging",
@@ -59,10 +92,34 @@ const coachGuides = [
     icon: Calendar,
   },
   {
+    title: "Group Classes",
+    description: "Create and manage group training sessions for multiple clients.",
+    href: "/docs/coach/group-classes",
+    icon: UsersRound,
+  },
+  {
     title: "Packages & Pricing",
     description: "Create packages and subscription plans for your clients.",
     href: "/docs/coach/packages",
     icon: CreditCard,
+  },
+  {
+    title: "Package Analytics",
+    description: "Track package sales, usage, and revenue performance.",
+    href: "/docs/coach/package-analytics",
+    icon: BarChart3,
+  },
+  {
+    title: "Financial Management",
+    description: "Manage invoices, refunds, and financial reporting.",
+    href: "/docs/coach/financial",
+    icon: CreditCard,
+  },
+  {
+    title: "Revenue Forecasting",
+    description: "AI-powered predictions for subscription and session revenue.",
+    href: "/docs/coach/revenue-forecast",
+    icon: LineChart,
   },
   {
     title: "Verification",
@@ -107,16 +164,58 @@ const coachGuides = [
     icon: Sparkles,
   },
   {
+    title: "AI Recommendations",
+    description: "Get AI-powered suggestions for plan adjustments and client interventions.",
+    href: "/docs/coach/ai-recommendations",
+    icon: Brain,
+  },
+  {
+    title: "Check-in Suggestions",
+    description: "Smart suggestions for when and how to check in with clients.",
+    href: "/docs/coach/checkin-suggestions",
+    icon: MessageSquare,
+  },
+  {
     title: "Automations",
     description: "Set up automated messages, reminders, and client engagement workflows.",
     href: "/docs/coach/automations",
     icon: ClipboardList,
   },
   {
+    title: "Outcome Showcase",
+    description: "Display client transformations and success stories on your profile.",
+    href: "/docs/coach/showcase",
+    icon: Trophy,
+  },
+  {
+    title: "Case Studies",
+    description: "Create detailed case studies from client journeys.",
+    href: "/docs/coach/case-studies",
+    icon: FileText,
+  },
+  {
     title: "Managing Reviews",
     description: "View, respond to, and leverage client reviews and testimonials.",
     href: "/docs/coach/reviews",
     icon: Star,
+  },
+  {
+    title: "Integrations",
+    description: "Connect calendar, video conferencing, and other tools.",
+    href: "/docs/coach/integrations",
+    icon: Plug,
+  },
+  {
+    title: "Connections",
+    description: "Manage your professional network and referral connections.",
+    href: "/docs/coach/connections",
+    icon: Link2,
+  },
+  {
+    title: "Settings",
+    description: "Configure notifications, privacy, and account preferences.",
+    href: "/docs/coach/settings",
+    icon: Settings,
   },
   {
     title: "Achievements",
