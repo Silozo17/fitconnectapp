@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/chart";
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, BarChart, Bar, CartesianGrid } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { FeatureGate } from "@/components/FeatureGate";
 
 const CoachPackageAnalytics = () => {
   const { t } = useTranslation();
@@ -55,6 +56,7 @@ const CoachPackageAnalytics = () => {
 
   return (
     <DashboardLayout title={t('analytics.packagePerformance', 'Package Performance')} description={t('analytics.packageDesc', 'Analyze your session packages performance')}>
+      <FeatureGate feature="package_analytics">
       <div className="space-y-6 overflow-x-hidden">
         {/* Header with Period Selector */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -221,6 +223,7 @@ const CoachPackageAnalytics = () => {
           </TabsContent>
         </Tabs>
       </div>
+      </FeatureGate>
     </DashboardLayout>
   );
 };

@@ -18,6 +18,7 @@ import {
 import { useScheduledCheckins } from "@/hooks/useScheduledCheckins";
 import { ScheduledCheckInForm } from "@/components/coach/ScheduledCheckInForm";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
+import { FeatureGate } from "@/components/FeatureGate";
 import { format } from "date-fns";
 import {
   AlertDialog,
@@ -93,6 +94,7 @@ const CoachScheduledCheckins = () => {
       title={t("scheduledCheckins.title")}
       description={t("scheduledCheckins.subtitle")}
     >
+      <FeatureGate feature="scheduled_checkin_automation">
       <PageHelpBanner
         pageKey="coach_scheduled_checkins"
         title="Automated Client Check-Ins"
@@ -283,6 +285,7 @@ const CoachScheduledCheckins = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      </FeatureGate>
     </DashboardLayout>
   );
 };

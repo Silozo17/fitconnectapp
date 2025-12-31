@@ -20,6 +20,7 @@ import { useCaseStudyGenerator } from "@/hooks/useCaseStudyGenerator";
 import { CaseStudyGenerator } from "@/components/showcase/CaseStudyGenerator";
 import { CaseStudyPreview } from "@/components/showcase/CaseStudyPreview";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
+import { FeatureGate } from "@/components/FeatureGate";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import {
@@ -73,6 +74,7 @@ const CoachCaseStudies = () => {
       title={t("caseStudies.title")}
       description={t("caseStudies.subtitle")}
     >
+      <FeatureGate feature="case_study_generator">
       <PageHelpBanner
         pageKey="coach_case_studies"
         title="Client Transformation Stories"
@@ -262,6 +264,7 @@ const CoachCaseStudies = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      </FeatureGate>
     </DashboardLayout>
   );
 };

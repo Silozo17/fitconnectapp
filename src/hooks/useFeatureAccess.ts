@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { useCoachProfile } from "./useCoachClients";
 import { useCoachClients } from "./useCoachClients";
 import { SUBSCRIPTION_TIERS, TierKey, normalizeTier } from "@/lib/stripe-config";
@@ -7,16 +8,24 @@ export const useFeatureAccess = () => {
   const { data: coachProfile, isLoading: profileLoading } = useCoachProfile();
   const { data: clients, isLoading: clientsLoading } = useCoachClients();
   
-  // Only normalize tier when we have profile data - prevents flicker to "free" during loading
-  const currentTier = profileLoading ? null : normalizeTier(coachProfile?.subscription_tier);
+  // Cache the last known tier to prevent flicker during loading states
+  const lastKnownTierRef = useRef<TierKey>("free");
+  
+  // Only update cached tier when we have valid profile data
+  if (!profileLoading && coachProfile?.subscription_tier) {
+    lastKnownTierRef.current = normalizeTier(coachProfile.subscription_tier);
+  }
+  
   // Use cached tier during loading to prevent visual flicker
-  const effectiveTier = currentTier ?? "free";
+  const effectiveTier = profileLoading 
+    ? lastKnownTierRef.current 
+    : normalizeTier(coachProfile?.subscription_tier);
+    
   const tierConfig = SUBSCRIPTION_TIERS[effectiveTier];
   
   // Check if coach has access to a feature
-  // During loading, return true to prevent lock icons from flickering
+  // During loading, use cached tier to prevent flicker
   const hasFeature = (feature: FeatureKey): boolean => {
-    if (profileLoading) return true; // Assume access during loading to prevent flicker
     const allowedTiers = FEATURE_ACCESS[feature] as readonly string[];
     return allowedTiers.includes(effectiveTier);
   };

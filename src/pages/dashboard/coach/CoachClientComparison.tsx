@@ -17,6 +17,7 @@ import { ClientComparisonSelector } from "@/components/coach/ClientComparisonSel
 import { ComparisonCharts } from "@/components/coach/ComparisonCharts";
 import { ComparisonTable } from "@/components/coach/ComparisonTable";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
+import { FeatureGate } from "@/components/FeatureGate";
 import { DatePickerWithRange } from "@/components/ui/date-range-picker";
 import { DateRange } from "react-day-picker";
 import { subMonths } from "date-fns";
@@ -56,6 +57,7 @@ const CoachClientComparison = () => {
       title={t("clientComparison.title")}
       description={t("clientComparison.subtitle")}
     >
+      <FeatureGate feature="client_comparison_analytics">
       <PageHelpBanner
         pageKey="coach_client_comparison"
         title="Compare Client Progress"
@@ -151,6 +153,7 @@ const CoachClientComparison = () => {
           </CardContent>
         </Card>
       )}
+      </FeatureGate>
     </DashboardLayout>
   );
 };

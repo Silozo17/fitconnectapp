@@ -22,6 +22,7 @@ import { format } from "date-fns";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { cn } from "@/lib/utils";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
+import { FeatureGate } from "@/components/FeatureGate";
 
 interface Review {
   id: string;
@@ -161,6 +162,7 @@ const CoachReviews = () => {
 
   return (
     <DashboardLayout title={t("reviewsPage.title")} description={t("reviewsPage.subtitle")}>
+      <FeatureGate feature="review_management">
       <PageHelpBanner
         pageKey="coach_reviews"
         title="Client Feedback"
@@ -376,6 +378,7 @@ const CoachReviews = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </FeatureGate>
     </DashboardLayout>
   );
 };

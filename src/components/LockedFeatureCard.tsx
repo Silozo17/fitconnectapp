@@ -7,7 +7,7 @@ import { TierKey, SUBSCRIPTION_TIERS } from "@/lib/stripe-config";
 import { useActivePricing } from "@/hooks/useActivePricing";
 import { useNativePricing } from "@/hooks/useNativePricing";
 import { useNativeIAP, SubscriptionTier } from "@/hooks/useNativeIAP";
-import { isDespia } from "@/lib/despia";
+import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
 
 interface LockedFeatureCardProps {
   feature: FeatureKey;
@@ -21,10 +21,10 @@ export const LockedFeatureCard = ({ feature, requiredTier, className }: LockedFe
   const featureDescription = FEATURE_DESCRIPTIONS[feature];
   
   // Platform detection and pricing
-  const isNativeApp = isDespia();
+  const { isNativeMobile } = usePlatformRestrictions();
   const webPricing = useActivePricing();
   const nativePricing = useNativePricing();
-  const pricing = isNativeApp ? nativePricing : webPricing;
+  const pricing = isNativeMobile ? nativePricing : webPricing;
   
   // Native IAP hook
   const { purchase: nativePurchase, state: iapState } = useNativeIAP();
@@ -64,7 +64,7 @@ export const LockedFeatureCard = ({ feature, requiredTier, className }: LockedFe
           </p>
         </div>
         
-        {isNativeApp && isPricedTier ? (
+        {isNativeMobile && isPricedTier ? (
           <Button 
             onClick={handleNativeUpgrade}
             disabled={isPurchasing}
