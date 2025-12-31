@@ -20,7 +20,7 @@ const isEnabled = (): boolean => {
 
 // Performance metrics storage
 interface PerformanceMetric {
-  type: 'navigation' | 'query' | 'rpc' | 'chunk';
+  type: 'navigation' | 'query' | 'rpc' | 'chunk' | 'startup' | 'auth';
   name: string;
   duration: number;
   timestamp: number;
@@ -234,6 +234,8 @@ const getEmoji = (type: PerformanceMetric['type']): string => {
     case 'query': return '📊';
     case 'rpc': return '⚡';
     case 'chunk': return '📦';
+    case 'startup': return '🚀';
+    case 'auth': return '🔐';
     default: return '📈';
   }
 };

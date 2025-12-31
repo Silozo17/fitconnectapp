@@ -210,7 +210,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Start auto refresh on mount
     supabase.auth.startAutoRefresh();
 
-    // Set up auth state listener
+    // Set up auth state listener FIRST - this handles auth state changes
+    // and will fire immediately with the cached session
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
@@ -226,25 +227,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setAllRoles([]);
         }
         
+        // PERFORMANCE FIX: Set loading=false immediately on auth state change
+        // The onAuthStateChange fires with cached session first, so UI can render
         setLoading(false);
       }
     );
 
-    // Check for existing session with validation
-    const initializeSession = async () => {
+    // PERFORMANCE FIX: Background session validation (non-blocking)
+    // onAuthStateChange already provides the cached session for immediate UI render
+    // This validates the session in the background and refreshes if needed
+    const validateSessionInBackground = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         
-        // Handle potential JWT errors during initialization
+        // Handle potential JWT errors
         if (error) {
           if (error.message?.includes('JWT') || error.message?.includes('token') || error.message?.includes('claim')) {
-            // Clear any corrupted session data
             await supabase.auth.signOut();
             setSession(null);
             setUser(null);
             setRole(null);
             setAllRoles([]);
-            setLoading(false);
             return;
           }
         }
@@ -260,31 +263,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               setUser(null);
               setRole(null);
               setAllRoles([]);
-              setLoading(false);
-              return;
             }
-            setSession(refreshData.session);
-            setUser(refreshData.session.user);
-            if (refreshData.session.user) {
-              fetchUserRole(refreshData.session.user.id);
-            }
-          } else {
-            setSession(session);
-            setUser(session.user ?? null);
-            if (session.user) {
-              fetchUserRole(session.user.id);
-            }
+            // If refresh succeeded, onAuthStateChange will handle the update
           }
         }
-        
-        setLoading(false);
       } catch (err) {
-        console.error('[Auth] Session initialization error:', err);
-        setLoading(false);
+        console.error('[Auth] Session validation error:', err);
       }
     };
     
-    initializeSession();
+    // Run validation after a small delay to not block initial render
+    const validationTimeout = setTimeout(validateSessionInBackground, 100);
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -292,6 +281,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (focusDebounceRef.current) {
         clearTimeout(focusDebounceRef.current);
       }
+      clearTimeout(validationTimeout);
       supabase.auth.stopAutoRefresh();
       subscription.unsubscribe();
     };
