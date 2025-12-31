@@ -391,3 +391,11 @@ export const useAuth = () => {
   }
   return context;
 };
+
+/**
+ * Safe version of useAuth that returns undefined instead of throwing
+ * when used outside AuthProvider. Use for optional auth-dependent features.
+ */
+export const useAuthSafe = () => {
+  return useContext(AuthContext);
+};

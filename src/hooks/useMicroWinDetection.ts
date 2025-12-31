@@ -164,19 +164,5 @@ export function useMicroWinDetection() {
     sessionStorage.setItem(storageKey, JSON.stringify([...celebrated]));
   }, [wins]);
 
-  // Welcome confetti on first dashboard visit of the day (fallback)
-  useEffect(() => {
-    const today = new Date().toISOString().split('T')[0];
-    const storageKey = `microwin-welcomed-${today}`;
-    
-    if (!sessionStorage.getItem(storageKey)) {
-      sessionStorage.setItem(storageKey, 'true');
-      setTimeout(() => {
-        triggerConfetti(confettiPresets.subtle);
-        triggerHaptic('light');
-      }, 2000);
-    }
-  }, []);
-
   return { wins, isLoading };
 }
