@@ -1,11 +1,5 @@
 project_id = "ntgfihgneyoxxbwmtceq"
 
-[functions.prerender]
-verify_jwt = false
-
-[functions.bot-router]
-verify_jwt = false
-
 [functions.wearable-sync-all]
 verify_jwt = false
 
