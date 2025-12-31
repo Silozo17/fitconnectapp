@@ -35,7 +35,7 @@ export function useCoachWearableAggregates() {
         .from("health_data_sync")
         .select("*")
         .in("client_id", clientIds)
-        .gte("synced_at", weekAgo);
+        .gte("created_at", weekAgo);
 
       const clientsWithData = clients?.map((c) => ({
         ...c.client,
