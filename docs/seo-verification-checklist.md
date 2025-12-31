@@ -37,37 +37,16 @@ curl -I https://getfitconnect.co.uk/api/sitemap
 ### 3. OG Image Accessibility
 
 ```bash
-# Verify OG image loads (primary PNG)
-curl -I https://getfitconnect.co.uk/og-image.png
+# Verify OG image loads
+curl -I https://getfitconnect.co.uk/og-image.webp
 
-# Expected: HTTP 200, Content-Type: image/png
+# Expected: HTTP 200, Content-Type: image/webp
 ```
 
 **Expected Response:**
 - Status: `200 OK`
-- Content-Type: `image/png`
-- Dimensions: 1200×630 pixels
-- File size ~50-300KB (optimal for sharing)
-
-### 4. Social Sharing Validators
-
-Use these tools to verify OG images display correctly:
-
-| Platform | Tool URL | How to Use |
-|----------|----------|------------|
-| Facebook | https://developers.facebook.com/tools/debug/ | Paste URL, click "Debug". Use "Scrape Again" to refresh cache |
-| LinkedIn | https://www.linkedin.com/post-inspector/ | Paste URL, click "Inspect" |
-| Twitter/X | https://cards-dev.twitter.com/validator | Paste URL (requires login) |
-| WhatsApp | Send link to yourself on mobile | Check preview appears correctly |
-| Slack | Paste link in any channel | Check unfurl preview shows image |
-| Discord | Paste link in any channel | Check embed preview shows image |
-
-**Verification Checklist:**
-- [ ] Image loads (not broken/missing)
-- [ ] Correct 1200×630 dimensions displayed
-- [ ] Title and description appear correctly
-- [ ] No mixed-content warnings
-- [ ] HTTPS URL used throughout
+- Content-Type: `image/webp`
+- File size ~50-200KB (optimal for sharing)
 
 ## Page-Level Verification
 
