@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
 import { useClientOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { useDiscoverModal } from "@/hooks/useDiscoverModal";
+import { perfLogger } from "@/lib/performance-logger";
 // OPTIMIZED: Moved useAutoAwardClientBadges to specific pages (ClientOverview, ClientAchievements)
 // to prevent 3 database queries on every navigation
 import ClientSidebar from "./ClientSidebar";
@@ -55,6 +56,11 @@ const ClientDashboardLayoutInner = memo(({
       return true;
     }
     return false;
+  }, []);
+
+  // Log dashboard mount
+  useEffect(() => {
+    perfLogger.logEvent('client_dashboard_layout_mount', { isKnownOnboarded, justCompletedOnboarding });
   }, []);
 
   // When onboarding status confirms user is onboarded, cache it

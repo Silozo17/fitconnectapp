@@ -8,9 +8,14 @@ import "./i18n";
 // Performance instrumentation (DEV-only when VITE_PERF_DEBUG=true)
 import { perfLogger } from "./lib/performance-logger";
 
+// Initialize the performance logger FIRST
+perfLogger.initLogger();
+
 // Record app start time
 const appStartTime = performance.now();
-perfLogger.startTiming('startup', 'app-init');
+
+perfLogger.logEvent('main_tsx_execute');
+perfLogger.logEvent('react_render_start');
 
 createRoot(document.getElementById("root")!).render(<App />);
 
@@ -18,7 +23,7 @@ createRoot(document.getElementById("root")!).render(<App />);
 requestAnimationFrame(() => {
   requestAnimationFrame(() => {
     const firstRenderTime = performance.now() - appStartTime;
-    perfLogger.endTiming(perfLogger.startTiming('startup', 'first-render'), { 
+    perfLogger.logTimedEvent('first_render_complete', firstRenderTime, { 
       totalMs: Math.round(firstRenderTime) 
     });
   });
