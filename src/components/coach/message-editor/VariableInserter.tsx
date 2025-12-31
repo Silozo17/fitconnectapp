@@ -6,7 +6,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Variable, Search, User, UserCheck, Calendar, Trophy, Heart } from "lucide-react";
 import { useMessageVariables, CATEGORY_LABELS, VariableOption } from "@/hooks/useMessageVariables";
@@ -90,59 +89,60 @@ export function VariableInserter({
           </div>
         </div>
 
-        <div className="flex flex-col max-h-[50vh] overflow-hidden">
-          <ScrollArea className="flex-1">
-            {isLoading ? (
-              <div className="p-4 text-center text-sm text-muted-foreground">
-                Loading...
-              </div>
-            ) : filteredCategories.length === 0 ? (
-              <div className="p-4 text-center text-sm text-muted-foreground">
-                No variables found
-              </div>
-            ) : (
-              <div className="p-3 space-y-4 overscroll-contain">
-                {filteredCategories.map(([category, variables]) => (
-                  <div key={category}>
-                    <div className="flex items-center gap-2 px-2 mb-2">
-                      <span className={cn(
-                        "p-1 rounded",
-                        CATEGORY_COLORS[category]?.split(" ")[0] || "bg-muted"
-                      )}>
-                        {CATEGORY_ICONS[category]}
-                      </span>
-                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                        {CATEGORY_LABELS[category] || category}
-                      </span>
-                    </div>
-                    <div className="space-y-1">
-                      {variables.map((variable) => (
-                        <button
-                          key={variable.name}
-                          type="button"
-                          onClick={() => handleInsert(variable)}
-                          className="w-full flex items-start gap-3 p-2 rounded-md hover:bg-muted/50 text-left transition-colors"
-                        >
-                          <Badge
-                            variant="outline"
-                            className={cn(
-                              "font-mono text-xs shrink-0 mt-0.5",
-                              CATEGORY_COLORS[category]
-                            )}
-                          >
-                            {`{${variable.name}}`}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground leading-relaxed">
-                            {variable.description}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
+        <div
+          className="max-h-[320px] overflow-y-auto overscroll-contain"
+          style={{ WebkitOverflowScrolling: "touch" }}
+        >
+          {isLoading ? (
+            <div className="p-4 text-center text-sm text-muted-foreground">
+              Loading...
+            </div>
+          ) : filteredCategories.length === 0 ? (
+            <div className="p-4 text-center text-sm text-muted-foreground">
+              No variables found
+            </div>
+          ) : (
+            <div className="p-3 space-y-4">
+              {filteredCategories.map(([category, variables]) => (
+                <div key={category}>
+                  <div className="flex items-center gap-2 px-2 mb-2">
+                    <span className={cn(
+                      "p-1 rounded",
+                      CATEGORY_COLORS[category]?.split(" ")[0] || "bg-muted"
+                    )}>
+                      {CATEGORY_ICONS[category]}
+                    </span>
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      {CATEGORY_LABELS[category] || category}
+                    </span>
                   </div>
-                ))}
-              </div>
-            )}
-          </ScrollArea>
+                  <div className="space-y-1">
+                    {variables.map((variable) => (
+                      <button
+                        key={variable.name}
+                        type="button"
+                        onClick={() => handleInsert(variable)}
+                        className="w-full flex items-start gap-3 p-2 rounded-md hover:bg-muted/50 text-left transition-colors"
+                      >
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "font-mono text-xs shrink-0 mt-0.5",
+                            CATEGORY_COLORS[category]
+                          )}
+                        >
+                          {`{${variable.name}}`}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground leading-relaxed">
+                          {variable.description}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="p-2 border-t bg-muted/30">
