@@ -100,12 +100,13 @@ const CoachAIRecommendations = () => {
             <Button
               onClick={() => generateRecommendations()}
               disabled={isGenerating}
-              className="w-full"
+              className="whitespace-nowrap"
             >
               {isGenerating ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {t("aiRecommendations.generating")}
+                  <span className="hidden sm:inline">{t("aiRecommendations.generating")}</span>
+                  <span className="sm:hidden">...</span>
                 </>
               ) : (
                 <>
@@ -132,7 +133,7 @@ const CoachAIRecommendations = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-4">
               <TabsTrigger value="pending">
-                {t("status.pending")} ({recommendations.filter((r) => r.status === "pending").length})
+                {t("aiRecommendations.pending", "Pending")} ({recommendations.filter((r) => r.status === "pending").length})
               </TabsTrigger>
               <TabsTrigger value="applied">
                 <Check className="w-4 h-4 mr-1" />
