@@ -236,6 +236,23 @@ export function useClientReminders() {
     onError: () => toast.error("Failed to create template"),
   });
 
+  const deleteTemplateMutation = useMutation({
+    mutationFn: async (id: string) => {
+      // Only delete non-system templates
+      const { error } = await supabase
+        .from("reminder_templates")
+        .update({ is_active: false })
+        .eq("id", id)
+        .eq("is_system", false);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Template deleted");
+      queryClient.invalidateQueries({ queryKey: ["reminder-templates"] });
+    },
+    onError: () => toast.error("Failed to delete template"),
+  });
+
   return {
     templates,
     reminders,
@@ -245,7 +262,9 @@ export function useClientReminders() {
     deleteReminder: deleteReminderMutation.mutate,
     togglePause: (id: string, is_paused: boolean) => togglePauseMutation.mutate({ id, is_paused }),
     createTemplate: createTemplateMutation.mutate,
+    deleteTemplate: deleteTemplateMutation.mutate,
     isCreating: createReminderMutation.isPending,
     isUpdating: updateReminderMutation.isPending,
+    isDeleting: deleteTemplateMutation.isPending,
   };
 }

@@ -8,18 +8,30 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useClientReminders, ReminderTemplate } from "@/hooks/useClientReminders";
-import { Loader2, Clock, Plus, Users, Smartphone } from "lucide-react";
+import { Loader2, Clock, Plus, Users, Smartphone, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { ClientReminderAssignment } from "./ClientReminderAssignment";
 import { ActiveRemindersList } from "./ActiveRemindersList";
 
 export function ReminderSettings() {
   const { t } = useTranslation("coach");
-  const { templates, isLoading, createTemplate, isCreating } = useClientReminders();
+  const { templates, isLoading, createTemplate, deleteTemplate, isCreating, isDeleting } = useClientReminders();
   
   const [isCreatingOpen, setIsCreatingOpen] = useState(false);
   const [assigningTemplate, setAssigningTemplate] = useState<ReminderTemplate | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
   const [newTemplate, setNewTemplate] = useState({
     name: '',
     message_template: '',
@@ -35,6 +47,19 @@ export function ReminderSettings() {
         setNewTemplate({ name: '', message_template: '', category: 'general', default_frequency: 'daily', default_time: '09:00' });
       },
     } as any);
+  };
+
+  const handleDeleteTemplate = (id: string) => {
+    setTemplateToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteTemplate = () => {
+    if (templateToDelete) {
+      deleteTemplate(templateToDelete);
+      setDeleteDialogOpen(false);
+      setTemplateToDelete(null);
+    }
   };
 
   if (isLoading) {
@@ -57,7 +82,7 @@ export function ReminderSettings() {
   return (
     <div className="space-y-6">
       {/* Delivery Notice */}
-      <Alert variant="warning" className="border-warning/30">
+      <Alert className="border-border/30 bg-card/30 backdrop-blur-xl">
         <Smartphone className="h-4 w-4" />
         <AlertDescription className="text-sm">
           <span className="font-medium">{t("automations.reminders.deliveryNotice", "How reminders are delivered:")}</span>{" "}
@@ -194,14 +219,26 @@ export function ReminderSettings() {
                       {template.message_template}
                     </p>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setAssigningTemplate(template)}
-                  >
-                    <Users className="h-4 w-4 mr-1" />
-                    Assign
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setAssigningTemplate(template)}
+                    >
+                      <Users className="h-4 w-4 mr-1" />
+                      Assign
+                    </Button>
+                    {!template.is_system && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handleDeleteTemplate(template.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -215,6 +252,24 @@ export function ReminderSettings() {
         onOpenChange={(open) => !open && setAssigningTemplate(null)}
         template={assigningTemplate}
       />
+
+      {/* Delete Template Confirmation */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("automations.reminders.deleteTemplateTitle", "Delete Template?")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("automations.reminders.deleteTemplateDesc", "This will permanently delete this reminder template. Any active reminders using this template will continue to work but you won't be able to assign it to new clients.")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("common:common.cancel", "Cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteTemplate} disabled={isDeleting}>
+              {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : t("common:common.delete", "Delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
