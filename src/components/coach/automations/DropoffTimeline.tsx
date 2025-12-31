@@ -48,42 +48,44 @@ export function DropoffTimeline({ stage1Days, stage2Days, stage3Days, isEnabled 
 
   return (
     <div className={cn(
-      "rounded-lg border p-4 transition-opacity",
+      "rounded-lg border p-3 sm:p-4 transition-opacity",
       !isEnabled && "opacity-50"
     )}>
-      <p className="text-sm font-medium mb-4">
+      <p className="text-sm font-medium mb-6 sm:mb-4">
         {t("automations.dropoff.timeline.title", "Rescue Timeline")}
       </p>
       
       {/* Timeline container */}
-      <div className="relative h-20">
+      <div className="relative h-28 sm:h-24">
         {/* Base line */}
-        <div className="absolute top-8 left-0 right-0 h-0.5 bg-border" />
+        <div className="absolute top-8 left-4 right-4 sm:left-0 sm:right-0 h-0.5 bg-border" />
         
         {/* Stage markers */}
         {stages.map((stage, index) => {
           const position = (stage.day / maxDay) * 100;
+          // Clamp position to prevent overflow, with more margin on mobile
+          const clampedPosition = Math.min(Math.max(position, 8), 92);
           const Icon = stage.icon;
           
           return (
             <div
               key={index}
-              className="absolute flex flex-col items-center"
-              style={{ left: `${Math.min(position, 95)}%`, transform: 'translateX(-50%)' }}
+              className="absolute flex flex-col items-center w-16 sm:w-auto"
+              style={{ left: `${clampedPosition}%`, transform: 'translateX(-50%)' }}
             >
               {/* Dot */}
               <div className={cn(
-                "w-4 h-4 rounded-full border-2 border-background mt-6",
+                "w-3 h-3 sm:w-4 sm:h-4 rounded-full border-2 border-background mt-6",
                 stage.color
               )} />
               
               {/* Label below */}
               <div className="mt-2 text-center">
                 {Icon && <Icon className={cn("h-3 w-3 mx-auto mb-0.5", stage.textColor)} />}
-                <p className={cn("text-xs font-medium whitespace-nowrap", stage.textColor)}>
+                <p className={cn("text-[10px] sm:text-xs font-medium leading-tight", stage.textColor)}>
                   {stage.label}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-[10px] sm:text-xs text-muted-foreground">
                   {stage.day === 0 
                     ? t("automations.dropoff.timeline.dayZero", "Day 0")
                     : t("automations.dropoff.timeline.dayN", "Day {{n}}", { n: stage.day })
@@ -98,8 +100,8 @@ export function DropoffTimeline({ stage1Days, stage2Days, stage3Days, isEnabled 
         <div 
           className="absolute top-8 h-0.5 bg-gradient-to-r from-primary via-warning to-destructive"
           style={{ 
-            left: `${(stage1Days / maxDay) * 100}%`, 
-            right: `${100 - (stage3Days / maxDay) * 100}%`,
+            left: `${Math.max((stage1Days / maxDay) * 100, 8)}%`, 
+            right: `${Math.max(100 - (stage3Days / maxDay) * 100, 8)}%`,
           }}
         />
       </div>

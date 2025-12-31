@@ -187,16 +187,16 @@ export function DropoffRescueSettings() {
           </Alert>
 
           {/* Stage Configuration */}
-          <div className="space-y-4">
-            <div>
+          <div className="space-y-6">
+            <div className="space-y-3">
               <Label className="flex items-center gap-2">
                 <MessageSquare className="h-4 w-4 text-primary" />
                 {t("automations.dropoff.stage1Label", "Stage 1: Auto-message client")}
               </Label>
-              <p className="text-xs text-muted-foreground mb-2">
+              <p className="text-xs text-muted-foreground">
                 {t("automations.dropoff.stage1Help", "Days after last activity before sending automatic check-in")}
               </p>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 sm:gap-4">
                 <Slider
                   value={[stage1Days]}
                   onValueChange={([v]) => setStage1Days(v)}
@@ -206,21 +206,21 @@ export function DropoffRescueSettings() {
                   className="flex-1"
                   disabled={!isEnabled}
                 />
-                <span className="text-sm font-medium w-20 text-right">
+                <span className="text-sm font-medium w-16 sm:w-20 text-right shrink-0">
                   {t("automations.dropoff.daysAfter", "{{days}} days", { days: stage1Days })}
                 </span>
               </div>
             </div>
 
-            <div>
+            <div className="space-y-3">
               <Label className="flex items-center gap-2">
                 <Bell className="h-4 w-4 text-warning" />
                 {t("automations.dropoff.stage2Label", "Stage 2: Alert you (coach)")}
               </Label>
-              <p className="text-xs text-muted-foreground mb-2">
+              <p className="text-xs text-muted-foreground">
                 {t("automations.dropoff.stage2Help", "Days after last activity before you receive a notification")}
               </p>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 sm:gap-4">
                 <Slider
                   value={[stage2Days]}
                   onValueChange={([v]) => setStage2Days(v)}
@@ -230,21 +230,21 @@ export function DropoffRescueSettings() {
                   className="flex-1"
                   disabled={!isEnabled}
                 />
-                <span className="text-sm font-medium w-20 text-right">
+                <span className="text-sm font-medium w-16 sm:w-20 text-right shrink-0">
                   {t("automations.dropoff.daysAfter", "{{days}} days", { days: stage2Days })}
                 </span>
               </div>
             </div>
 
-            <div>
+            <div className="space-y-3">
               <Label className="flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-destructive" />
                 {t("automations.dropoff.stage3Label", "Stage 3: Critical escalation")}
               </Label>
-              <p className="text-xs text-muted-foreground mb-2">
+              <p className="text-xs text-muted-foreground">
                 {t("automations.dropoff.stage3Help", "Days after last activity before critical notification")}
               </p>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 sm:gap-4">
                 <Slider
                   value={[stage3Days]}
                   onValueChange={([v]) => setStage3Days(v)}
@@ -254,7 +254,7 @@ export function DropoffRescueSettings() {
                   className="flex-1"
                   disabled={!isEnabled}
                 />
-                <span className="text-sm font-medium w-20 text-right">
+                <span className="text-sm font-medium w-16 sm:w-20 text-right shrink-0">
                   {t("automations.dropoff.daysAfter", "{{days}} days", { days: stage3Days })}
                 </span>
               </div>

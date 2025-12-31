@@ -53,14 +53,14 @@ export function MilestoneSettings() {
   return (
     <div className="space-y-6">
       <Card variant="glass">
-        <CardHeader>
-          <div className="flex items-center justify-between">
+        <CardHeader className="pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Trophy className="h-5 w-5 text-warning" />
                 {t("automations.milestones.title", "Milestone Celebrations")}
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="mt-1">
                 {t("automations.milestones.description", "Automatically celebrate client achievements")}
               </CardDescription>
             </div>
@@ -69,13 +69,14 @@ export function MilestoneSettings() {
               size="sm"
               onClick={handleTestNow}
               disabled={isTesting}
+              className="w-full sm:w-auto shrink-0"
             >
               {isTesting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Play className="h-4 w-4 mr-2" />}
               Run Detection
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 pt-0">
           {MILESTONE_TYPES.map(({ key, icon: Icon, label, color }) => {
             const milestone = getMilestone(key);
             const isEnabled = milestone?.is_enabled ?? false;
@@ -145,13 +146,13 @@ function MilestoneCard({
   };
 
   return (
-    <div className="p-4 rounded-lg border border-border bg-card/50 space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Icon className={`h-5 w-5 ${color}`} />
-          <span className="font-medium">{label}</span>
+    <div className="p-3 sm:p-4 rounded-lg border border-border bg-card/50 space-y-4">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <Icon className={`h-4 w-4 sm:h-5 sm:w-5 shrink-0 ${color}`} />
+          <span className="font-medium text-sm sm:text-base truncate">{label}</span>
         </div>
-        <Switch checked={isEnabled} onCheckedChange={onToggle} />
+        <Switch checked={isEnabled} onCheckedChange={onToggle} className="shrink-0" />
       </div>
 
       {isEnabled && (
