@@ -61,7 +61,7 @@ const ClientDashboardLayoutInner = memo(({
   // Log dashboard mount
   useEffect(() => {
     perfLogger.logEvent('client_dashboard_layout_mount', { isKnownOnboarded, justCompletedOnboarding });
-  }, []);
+  }, [isKnownOnboarded, justCompletedOnboarding]);
 
   // When onboarding status confirms user is onboarded, cache it
   useEffect(() => {

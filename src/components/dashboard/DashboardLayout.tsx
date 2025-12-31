@@ -62,7 +62,7 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
   // Log dashboard mount
   useEffect(() => {
     perfLogger.logEvent('coach_dashboard_layout_mount', { isKnownOnboarded, justCompletedOnboarding });
-  }, []);
+  }, [isKnownOnboarded, justCompletedOnboarding]);
   
   useCoachProfileRealtime();
 
