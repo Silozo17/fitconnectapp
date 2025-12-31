@@ -151,7 +151,7 @@ export function ScheduledCheckInForm({ open, onOpenChange, editingCheckin, onSub
           <Button variant="outline" onClick={() => onOpenChange(false)}>{t("cancel", { ns: "common" })}</Button>
           <Button onClick={handleSubmit} disabled={!clientId || !messageTemplate || isSubmitting}>
             {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            {editingCheckin ? t("common.save") : t("scheduledCheckins.create")}
+            {editingCheckin ? t("scheduledCheckins.save") : t("scheduledCheckins.create")}
           </Button>
         </DialogFooter>
       </DialogContent>

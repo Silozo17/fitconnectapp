@@ -1667,7 +1667,10 @@
     "dayOfWeek": "Day of Week",
     "dayOfMonth": "Day of Month",
     "saved": "Check-in saved",
-    "deleted": "Check-in deleted"
+    "deleted": "Check-in deleted",
+    "statusActive": "Active",
+    "statusPaused": "Paused",
+    "save": "Save"
   },
   "wearableDashboard": {
     "title": "Wearable Insights",

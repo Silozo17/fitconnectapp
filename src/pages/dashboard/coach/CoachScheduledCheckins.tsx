@@ -184,7 +184,7 @@ const CoachScheduledCheckins = () => {
                             {checkin.client?.first_name} {checkin.client?.last_name}
                           </p>
                           <Badge variant={checkin.is_active ? "default" : "secondary"} className="text-xs">
-                            {checkin.is_active ? t("status.active") : t("status.paused")}
+                            {checkin.is_active ? t("scheduledCheckins.statusActive") : t("scheduledCheckins.statusPaused")}
                           </Badge>
                           <Badge variant="outline" className="text-xs">
                             {t(`scheduledCheckins.scheduleTypes.${checkin.schedule_type}`)}
