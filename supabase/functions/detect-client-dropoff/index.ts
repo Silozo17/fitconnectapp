@@ -128,18 +128,36 @@ serve(async (req) => {
         // Calculate days since last activity based on configured signals
         let lastActivityTimestamp = 0;
 
-        // Check training logs
+        // Check training logs - use logged_at column (not completed_at which doesn't exist)
         if (config.signals.training_logs) {
           const { data: trainingLog } = await supabase
             .from("training_logs")
-            .select("completed_at")
+            .select("logged_at")
             .eq("client_id", clientId)
-            .order("completed_at", { ascending: false })
+            .order("logged_at", { ascending: false })
             .limit(1)
             .maybeSingle();
           
-          if (trainingLog?.completed_at) {
-            const logTime = new Date(trainingLog.completed_at).getTime();
+          if (trainingLog?.logged_at) {
+            const logTime = new Date(trainingLog.logged_at).getTime();
+            if (logTime > lastActivityTimestamp) {
+              lastActivityTimestamp = logTime;
+            }
+          }
+        }
+
+        // Check meal logs
+        if (config.signals.meal_logs) {
+          const { data: mealLog } = await supabase
+            .from("meal_logs")
+            .select("logged_at")
+            .eq("client_id", clientId)
+            .order("logged_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          
+          if (mealLog?.logged_at) {
+            const logTime = new Date(mealLog.logged_at).getTime();
             if (logTime > lastActivityTimestamp) {
               lastActivityTimestamp = logTime;
             }
