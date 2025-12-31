@@ -51,33 +51,33 @@ serve(async (req) => {
     const { colors } = EMAIL_CONFIG;
 
     // Determine sender and receiver types
-    // Messages store user_id values, so we need to query by user_id, not profile id
-    // Check if sender is coach
+    // Messages store profile_id values (coach_profiles.id or client_profiles.id)
+    // Check if sender is coach (by profile id)
     const { data: senderCoach } = await supabase
       .from("coach_profiles")
-      .select("user_id, display_name, profile_image_url, selected_avatar_id")
-      .eq("user_id", message.sender_id)
+      .select("id, user_id, display_name, profile_image_url, selected_avatar_id")
+      .eq("id", message.sender_id)
       .single();
 
-    // Check if sender is client
+    // Check if sender is client (by profile id)
     const { data: senderClient } = await supabase
       .from("client_profiles")
-      .select("user_id, first_name, last_name, avatar_url, selected_avatar_id")
-      .eq("user_id", message.sender_id)
+      .select("id, user_id, first_name, last_name, avatar_url, selected_avatar_id")
+      .eq("id", message.sender_id)
       .single();
 
-    // Check if receiver is coach
+    // Check if receiver is coach (by profile id)
     const { data: receiverCoach } = await supabase
       .from("coach_profiles")
-      .select("user_id, display_name")
-      .eq("user_id", message.receiver_id)
+      .select("id, user_id, display_name")
+      .eq("id", message.receiver_id)
       .single();
 
-    // Check if receiver is client
+    // Check if receiver is client (by profile id)
     const { data: receiverClient } = await supabase
       .from("client_profiles")
-      .select("user_id, first_name")
-      .eq("user_id", message.receiver_id)
+      .select("id, user_id, first_name")
+      .eq("id", message.receiver_id)
       .single();
 
     const sender = senderCoach || senderClient;

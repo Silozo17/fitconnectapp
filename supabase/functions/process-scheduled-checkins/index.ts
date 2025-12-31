@@ -244,12 +244,12 @@ serve(async (req) => {
           .replace(/{client_name}/g, clientName)
           .replace(/{days_since_login}/g, "recently");
 
-        // Send message directly (messages table uses sender_id and receiver_id)
+        // Send message directly (messages table uses profile_id values, not user_id)
         const { data: messageData, error: messageError } = await supabase
           .from("messages")
           .insert({
-            sender_id: checkin.coach.user_id,
-            receiver_id: checkin.client.user_id,
+            sender_id: checkin.coach.id,    // coach_profiles.id
+            receiver_id: checkin.client.id, // client_profiles.id
             content: message,
             metadata: {
               source: "scheduled_checkin",

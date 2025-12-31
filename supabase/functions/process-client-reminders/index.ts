@@ -96,12 +96,12 @@ serve(async (req) => {
           continue;
         }
 
-        // Send the message
+        // Send the message (messages table uses profile_id values, not user_id)
         const { data: message, error: messageError } = await supabase
           .from("messages")
           .insert({
-            sender_id: reminder.coach.user_id,
-            receiver_id: reminder.client.user_id,
+            sender_id: reminder.coach.id,    // coach_profiles.id
+            receiver_id: reminder.client.id, // client_profiles.id
             content: messageContent,
             metadata: { source: 'client_reminder', reminder_id: reminder.id }
           })

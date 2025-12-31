@@ -239,9 +239,10 @@ serve(async (req) => {
               const message = (config.stage1_template || TONE_MESSAGES[config.stage1_tone])
                 .replace(/{client_name}/g, clientName);
 
+              // Messages table uses profile_id values, not user_id
               await supabase.from("messages").insert({
-                sender_id: setting.coach.user_id,
-                receiver_id: client?.user_id,
+                sender_id: setting.coach.id,  // coach_profiles.id
+                receiver_id: client?.id,      // client_profiles.id
                 content: message,
               });
 
