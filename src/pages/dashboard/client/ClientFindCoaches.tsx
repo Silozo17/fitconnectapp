@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { Search, SlidersHorizontal, Loader2, Users, MapPin } from "lucide-react";
+import { Search, SlidersHorizontal, Users, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -16,7 +16,7 @@ import { useMarketplaceLocationFilter } from "@/hooks/useMarketplaceLocationFilt
 import { useCountry } from "@/hooks/useCountry";
 import { useUserLocalePreference } from "@/hooks/useUserLocalePreference";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
-
+import { CoachCardSkeleton } from "@/components/dashboard/CoachCardSkeleton";
 const ClientFindCoaches = () => {
   const { t } = useTranslation("client");
   const [searchQuery, setSearchQuery] = useState("");
@@ -197,8 +197,10 @@ const ClientFindCoaches = () => {
         {/* Coaches Grid */}
         <div className="flex-1">
           {isFullyLoading ? (
-            <div className="flex items-center justify-center py-20">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <CoachCardSkeleton key={i} />
+              ))}
             </div>
           ) : error ? (
             <div className="text-center py-20 text-muted-foreground">

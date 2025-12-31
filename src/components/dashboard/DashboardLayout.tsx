@@ -35,6 +35,12 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
   const { isOpen: profilePanelOpen } = useProfilePanel();
   const { shouldShow: showDiscover, markAsSeen: markDiscoverSeen } = useDiscoverModal('coach');
   
+  // PERFORMANCE: Check localStorage for known-onboarded coaches to skip DB check
+  const isKnownOnboarded = useMemo(() => {
+    if (typeof localStorage === 'undefined') return false;
+    return localStorage.getItem('fitconnect_coach_onboarded') === 'true';
+  }, []);
+
   // Check if onboarding was JUST completed (set by CoachOnboarding before navigation)
   const justCompletedOnboarding = useMemo(() => {
     if (typeof sessionStorage === 'undefined') return false;
@@ -42,6 +48,8 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
     if (flag === 'coach') {
       // Remove the flag immediately so it doesn't persist
       sessionStorage.removeItem('fitconnect_onboarding_just_completed');
+      // Set the permanent flag for future visits
+      localStorage.setItem('fitconnect_coach_onboarded', 'true');
       if (import.meta.env.DEV) {
         console.log('[DashboardLayout] Detected just-completed onboarding flag, skipping redirect check');
       }
@@ -60,18 +68,25 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
     setMobileOpen(true);
   }, []);
 
-  // Redirect to onboarding if not completed - but skip if just completed
+  // When onboarding status confirms user is onboarded, cache it
   useEffect(() => {
-    if (!isLoading && onboardingStatus && !onboardingStatus.isOnboarded && !onboardingStatus.error && !justCompletedOnboarding) {
+    if (onboardingStatus?.isOnboarded && !isKnownOnboarded) {
+      localStorage.setItem('fitconnect_coach_onboarded', 'true');
+    }
+  }, [onboardingStatus?.isOnboarded, isKnownOnboarded]);
+
+  // Redirect to onboarding if not completed - but skip if just completed or known-onboarded
+  useEffect(() => {
+    if (!isLoading && onboardingStatus && !onboardingStatus.isOnboarded && !onboardingStatus.error && !justCompletedOnboarding && !isKnownOnboarded) {
       if (import.meta.env.DEV) {
         console.log('[DashboardLayout] Not onboarded, redirecting to onboarding');
       }
       navigate("/onboarding/coach", { replace: true });
     }
-  }, [onboardingStatus, isLoading, navigate, justCompletedOnboarding]);
+  }, [onboardingStatus, isLoading, navigate, justCompletedOnboarding, isKnownOnboarded]);
 
-  // OPTIMIZED: Use skeleton instead of spinner for better perceived performance
-  if (isLoading && !justCompletedOnboarding) {
+  // OPTIMIZED: Skip loading state entirely for known-onboarded users
+  if (isLoading && !justCompletedOnboarding && !isKnownOnboarded) {
     return (
       <div className="min-h-screen bg-background p-4 lg:p-6">
         <DashboardSkeleton variant="coach" />
@@ -79,8 +94,8 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
     );
   }
 
-  // Show skeleton while redirecting to onboarding - but NOT if we just completed
-  if (!onboardingStatus?.isOnboarded && !justCompletedOnboarding) {
+  // Show skeleton while redirecting to onboarding - but NOT if we just completed or known-onboarded
+  if (!onboardingStatus?.isOnboarded && !justCompletedOnboarding && !isKnownOnboarded) {
     return (
       <div className="min-h-screen bg-background p-4 lg:p-6">
         <DashboardSkeleton variant="coach" />

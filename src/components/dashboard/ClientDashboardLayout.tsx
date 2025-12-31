@@ -38,25 +38,41 @@ const ClientDashboardLayoutInner = memo(({
   const { isOpen: profilePanelOpen } = useProfilePanel();
   const { shouldShow: showDiscover, markAsSeen: markDiscoverSeen } = useDiscoverModal('client');
 
+  // PERFORMANCE: Check localStorage for known-onboarded users to skip DB check
+  const isKnownOnboarded = useMemo(() => {
+    if (typeof localStorage === 'undefined') return false;
+    return localStorage.getItem('fitconnect_client_onboarded') === 'true';
+  }, []);
+
   // Check if user just completed onboarding - prevents flash of redirect
   const justCompletedOnboarding = useMemo(() => {
     if (typeof sessionStorage === 'undefined') return false;
     const flag = sessionStorage.getItem('fitconnect_onboarding_just_completed');
     if (flag === 'client') {
       sessionStorage.removeItem('fitconnect_onboarding_just_completed');
+      // Set the permanent flag for future visits
+      localStorage.setItem('fitconnect_client_onboarded', 'true');
       return true;
     }
     return false;
   }, []);
 
+  // When onboarding status confirms user is onboarded, cache it
   useEffect(() => {
-    if (!isLoading && onboardingStatus && !onboardingStatus.isOnboarded && !onboardingStatus.error && !justCompletedOnboarding) {
+    if (onboardingStatus?.isOnboarded && !isKnownOnboarded) {
+      localStorage.setItem('fitconnect_client_onboarded', 'true');
+    }
+  }, [onboardingStatus?.isOnboarded, isKnownOnboarded]);
+
+  useEffect(() => {
+    if (!isLoading && onboardingStatus && !onboardingStatus.isOnboarded && !onboardingStatus.error && !justCompletedOnboarding && !isKnownOnboarded) {
       navigate("/onboarding/client", { replace: true });
     }
-  }, [onboardingStatus, isLoading, navigate, justCompletedOnboarding]);
+  }, [onboardingStatus, isLoading, navigate, justCompletedOnboarding, isKnownOnboarded]);
 
-  // OPTIMIZED: Use skeleton instead of spinner for better perceived performance
-  if (isLoading && !justCompletedOnboarding) {
+  // OPTIMIZED: Skip loading state entirely for known-onboarded users
+  // Only show skeleton if we're actually loading AND not known-onboarded
+  if (isLoading && !justCompletedOnboarding && !isKnownOnboarded) {
     return (
       <div className="min-h-screen bg-background p-4 lg:p-6">
         <DashboardSkeleton variant="client" />
@@ -64,8 +80,8 @@ const ClientDashboardLayoutInner = memo(({
     );
   }
 
-  // Guard: if not onboarded and not just completed, show skeleton (redirect will happen)
-  if (!onboardingStatus?.isOnboarded && !justCompletedOnboarding) {
+  // Guard: if not onboarded and not just completed and not known-onboarded, show skeleton (redirect will happen)
+  if (!onboardingStatus?.isOnboarded && !justCompletedOnboarding && !isKnownOnboarded) {
     return (
       <div className="min-h-screen bg-background p-4 lg:p-6">
         <DashboardSkeleton variant="client" />
