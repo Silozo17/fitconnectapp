@@ -103,18 +103,26 @@ serve(async (req) => {
           continue;
         }
 
-        // Calculate next run time
+        // Calculate next run time preserving the scheduled time
         let nextRunAt: Date | null = null;
+        const [hours, minutes] = (checkin.time_of_day || "09:00").split(":").map(Number);
         
         if (checkin.schedule_type === "daily") {
           nextRunAt = new Date(now);
           nextRunAt.setDate(nextRunAt.getDate() + 1);
+          nextRunAt.setHours(hours, minutes, 0, 0);
         } else if (checkin.schedule_type === "weekly") {
           nextRunAt = new Date(now);
           nextRunAt.setDate(nextRunAt.getDate() + 7);
+          nextRunAt.setHours(hours, minutes, 0, 0);
         } else if (checkin.schedule_type === "monthly") {
           nextRunAt = new Date(now);
           nextRunAt.setMonth(nextRunAt.getMonth() + 1);
+          // Preserve the day of month if set
+          if (checkin.day_of_month) {
+            nextRunAt.setDate(checkin.day_of_month);
+          }
+          nextRunAt.setHours(hours, minutes, 0, 0);
         }
         // For "once" type, we don't set a next run
 

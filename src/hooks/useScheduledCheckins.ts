@@ -3,6 +3,42 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
+// Calculate the next run time based on schedule configuration
+function calculateNextRunAt(
+  scheduleType: string,
+  timeOfDay: string,
+  dayOfWeek?: number | null,
+  dayOfMonth?: number | null
+): Date {
+  const now = new Date();
+  const [hours, minutes] = timeOfDay.split(":").map(Number);
+  
+  const nextRun = new Date();
+  nextRun.setHours(hours, minutes, 0, 0);
+
+  if (scheduleType === "daily") {
+    // If today's time has passed, schedule for tomorrow
+    if (nextRun <= now) {
+      nextRun.setDate(nextRun.getDate() + 1);
+    }
+  } else if (scheduleType === "weekly" && dayOfWeek !== undefined && dayOfWeek !== null) {
+    const currentDay = nextRun.getDay();
+    let daysUntil = dayOfWeek - currentDay;
+    if (daysUntil < 0 || (daysUntil === 0 && nextRun <= now)) {
+      daysUntil += 7;
+    }
+    nextRun.setDate(nextRun.getDate() + daysUntil);
+  } else if (scheduleType === "monthly") {
+    const targetDay = dayOfMonth || nextRun.getDate();
+    nextRun.setDate(targetDay);
+    if (nextRun <= now) {
+      nextRun.setMonth(nextRun.getMonth() + 1);
+    }
+  }
+
+  return nextRun;
+}
+
 export function useScheduledCheckins() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -34,7 +70,16 @@ export function useScheduledCheckins() {
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
-      const { error } = await supabase.from("scheduled_checkins").insert({ ...data, coach_id: coachProfile?.id });
+      const nextRunAt = calculateNextRunAt(
+        data.schedule_type,
+        data.time_of_day,
+        data.day_of_week
+      );
+      const { error } = await supabase.from("scheduled_checkins").insert({
+        ...data,
+        coach_id: coachProfile?.id,
+        next_run_at: nextRunAt.toISOString(),
+      });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -46,7 +91,16 @@ export function useScheduledCheckins() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...data }: any) => {
-      const { error } = await supabase.from("scheduled_checkins").update(data).eq("id", id);
+      // Recalculate next_run_at when updating schedule settings
+      const nextRunAt = calculateNextRunAt(
+        data.schedule_type,
+        data.time_of_day,
+        data.day_of_week
+      );
+      const { error } = await supabase.from("scheduled_checkins").update({
+        ...data,
+        next_run_at: nextRunAt.toISOString(),
+      }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
