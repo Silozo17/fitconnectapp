@@ -58,9 +58,10 @@ const ClientDashboardLayoutInner = memo(({
     return false;
   }, []);
 
-  // Log dashboard mount
+  // Log dashboard mount (runs once on mount)
   useEffect(() => {
-    perfLogger.logEvent('client_dashboard_layout_mount', { isKnownOnboarded, justCompletedOnboarding });
+    perfLogger.logEvent('client_dashboard_layout_mount');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // When onboarding status confirms user is onboarded, cache it
