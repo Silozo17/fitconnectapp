@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { resolveMessageVariables, fetchCustomFieldValues } from "../_shared/message-variables.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -191,7 +192,7 @@ serve(async (req) => {
       .select(`
         *,
         coach:coach_profiles(id, user_id, display_name),
-        client:client_profiles(id, user_id, first_name, last_name)
+        client:client_profiles(id, user_id, first_name, last_name, city, gender, age)
       `)
       .eq("is_active", true)
       .lte("next_run_at", now.toISOString());
@@ -235,14 +236,26 @@ serve(async (req) => {
           continue;
         }
 
-        // Replace template variables
-        const clientName = [checkin.client?.first_name, checkin.client?.last_name]
-          .filter(Boolean)
-          .join(" ") || "there";
-        
-        const message = checkin.message_template
-          .replace(/{client_name}/g, clientName)
-          .replace(/{days_since_login}/g, "recently");
+        // Fetch custom fields for this coach/client pair
+        const customFields = await fetchCustomFieldValues(supabase, checkin.coach_id, checkin.client_id);
+
+        // Resolve message variables using the shared resolver
+        const message = resolveMessageVariables(
+          checkin.message_template,
+          {
+            client: {
+              first_name: checkin.client?.first_name,
+              last_name: checkin.client?.last_name,
+              city: checkin.client?.city,
+              gender: checkin.client?.gender,
+              age: checkin.client?.age,
+            },
+            coach: {
+              display_name: checkin.coach?.display_name,
+            },
+          },
+          customFields
+        );
 
         // Send message directly (messages table uses profile_id values, not user_id)
         const { data: messageData, error: messageError } = await supabase
