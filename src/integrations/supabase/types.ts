@@ -314,6 +314,78 @@ export type Database = {
           },
         ]
       }
+      automation_logs: {
+        Row: {
+          action_type: string
+          automation_type: string
+          client_id: string | null
+          coach_id: string
+          created_at: string
+          id: string
+          message_sent: string | null
+          metadata: Json | null
+          status: string
+        }
+        Insert: {
+          action_type: string
+          automation_type: string
+          client_id?: string | null
+          coach_id: string
+          created_at?: string
+          id?: string
+          message_sent?: string | null
+          metadata?: Json | null
+          status?: string
+        }
+        Update: {
+          action_type?: string
+          automation_type?: string
+          client_id?: string | null
+          coach_id?: string
+          created_at?: string
+          id?: string
+          message_sent?: string | null
+          metadata?: Json | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_logs_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_logs_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       avatars: {
         Row: {
           category: string
@@ -1130,6 +1202,84 @@ export type Database = {
           },
         ]
       }
+      client_automation_status: {
+        Row: {
+          client_id: string
+          coach_id: string
+          created_at: string
+          id: string
+          is_at_risk: boolean
+          last_coach_alert_at: string | null
+          last_recovery_attempt_at: string | null
+          last_soft_checkin_at: string | null
+          muted_until: string | null
+          risk_stage: number
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          coach_id: string
+          created_at?: string
+          id?: string
+          is_at_risk?: boolean
+          last_coach_alert_at?: string | null
+          last_recovery_attempt_at?: string | null
+          last_soft_checkin_at?: string | null
+          muted_until?: string | null
+          risk_stage?: number
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          coach_id?: string
+          created_at?: string
+          id?: string
+          is_at_risk?: boolean
+          last_coach_alert_at?: string | null
+          last_recovery_attempt_at?: string | null
+          last_soft_checkin_at?: string | null
+          muted_until?: string | null
+          risk_stage?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_automation_status_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_automation_status_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_automation_status_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_automation_status_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_automation_status_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_badges: {
         Row: {
           badge_id: string
@@ -1915,6 +2065,118 @@ export type Database = {
           },
         ]
       }
+      client_reminders: {
+        Row: {
+          client_id: string
+          coach_id: string
+          created_at: string
+          custom_interval_days: number | null
+          custom_message: string | null
+          day_of_week: number | null
+          end_date: string | null
+          frequency: string
+          id: string
+          is_active: boolean
+          is_paused: boolean
+          last_sent_at: string | null
+          max_sends: number | null
+          next_run_at: string | null
+          sends_count: number
+          start_date: string
+          template_id: string | null
+          time_of_day: string
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          coach_id: string
+          created_at?: string
+          custom_interval_days?: number | null
+          custom_message?: string | null
+          day_of_week?: number | null
+          end_date?: string | null
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          is_paused?: boolean
+          last_sent_at?: string | null
+          max_sends?: number | null
+          next_run_at?: string | null
+          sends_count?: number
+          start_date?: string
+          template_id?: string | null
+          time_of_day?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          coach_id?: string
+          created_at?: string
+          custom_interval_days?: number | null
+          custom_message?: string | null
+          day_of_week?: number | null
+          end_date?: string | null
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          is_paused?: boolean
+          last_sent_at?: string | null
+          max_sends?: number | null
+          next_run_at?: string | null
+          sends_count?: number
+          start_date?: string
+          template_id?: string | null
+          time_of_day?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_reminders_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_reminders_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_reminders_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_reminders_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_reminders_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_reminders_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "reminder_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_subscriptions: {
         Row: {
           cancelled_at: string | null
@@ -1992,6 +2254,51 @@ export type Database = {
           xp_to_next_level?: number
         }
         Relationships: []
+      }
+      coach_automation_settings: {
+        Row: {
+          automation_type: string
+          coach_id: string
+          config: Json
+          created_at: string
+          id: string
+          is_enabled: boolean
+          updated_at: string
+        }
+        Insert: {
+          automation_type: string
+          coach_id: string
+          config?: Json
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          updated_at?: string
+        }
+        Update: {
+          automation_type?: string
+          coach_id?: string
+          config?: Json
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_automation_settings_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_automation_settings_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       coach_availability: {
         Row: {
@@ -5223,6 +5530,60 @@ export type Database = {
         }
         Relationships: []
       }
+      milestone_automations: {
+        Row: {
+          actions: Json
+          apply_to_all_clients: boolean
+          coach_id: string
+          created_at: string
+          id: string
+          is_enabled: boolean
+          message_template: string | null
+          milestone_type: string
+          threshold_value: number
+          updated_at: string
+        }
+        Insert: {
+          actions?: Json
+          apply_to_all_clients?: boolean
+          coach_id: string
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          message_template?: string | null
+          milestone_type: string
+          threshold_value?: number
+          updated_at?: string
+        }
+        Update: {
+          actions?: Json
+          apply_to_all_clients?: boolean
+          coach_id?: string
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          message_template?: string | null
+          milestone_type?: string
+          threshold_value?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milestone_automations_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "milestone_automations_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       newsletter_subscribers: {
         Row: {
           email: string
@@ -5796,6 +6157,60 @@ export type Database = {
         }
         Relationships: []
       }
+      reminder_templates: {
+        Row: {
+          category: string
+          coach_id: string | null
+          created_at: string
+          default_frequency: string
+          default_time: string
+          id: string
+          is_active: boolean
+          is_system: boolean
+          message_template: string
+          name: string
+        }
+        Insert: {
+          category: string
+          coach_id?: string | null
+          created_at?: string
+          default_frequency?: string
+          default_time?: string
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          message_template: string
+          name: string
+        }
+        Update: {
+          category?: string
+          coach_id?: string | null
+          created_at?: string
+          default_frequency?: string
+          default_time?: string
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          message_template?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminder_templates_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminder_templates_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       review_disputes: {
         Row: {
           admin_notes: string | null
@@ -6018,6 +6433,62 @@ export type Database = {
           },
         ]
       }
+      scheduled_checkin_assignments: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          last_sent_at: string | null
+          template_checkin_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_sent_at?: string | null
+          template_checkin_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_sent_at?: string | null
+          template_checkin_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_checkin_assignments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_checkin_assignments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_checkin_assignments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_checkin_assignments_template_checkin_id_fkey"
+            columns: ["template_checkin_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_checkins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scheduled_checkins: {
         Row: {
           client_id: string
@@ -6027,7 +6498,9 @@ export type Database = {
           day_of_week: number | null
           id: string
           is_active: boolean | null
+          is_template: boolean
           last_sent_at: string | null
+          linked_template_id: string | null
           message_template: string
           next_run_at: string | null
           schedule_type: string
@@ -6044,7 +6517,9 @@ export type Database = {
           day_of_week?: number | null
           id?: string
           is_active?: boolean | null
+          is_template?: boolean
           last_sent_at?: string | null
+          linked_template_id?: string | null
           message_template: string
           next_run_at?: string | null
           schedule_type: string
@@ -6061,7 +6536,9 @@ export type Database = {
           day_of_week?: number | null
           id?: string
           is_active?: boolean | null
+          is_template?: boolean
           last_sent_at?: string | null
+          linked_template_id?: string | null
           message_template?: string
           next_run_at?: string | null
           schedule_type?: string
@@ -6104,6 +6581,13 @@ export type Database = {
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_checkins_linked_template_id_fkey"
+            columns: ["linked_template_id"]
+            isOneToOne: false
+            referencedRelation: "message_templates"
             referencedColumns: ["id"]
           },
         ]
