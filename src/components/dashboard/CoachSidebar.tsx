@@ -94,6 +94,15 @@ const menuGroups: MenuGroup[] = [
     ],
   },
   {
+    id: "automations",
+    labelKey: "navigation.coach.automations",
+    icon: Zap,
+    collapsible: false,
+    items: [
+      { titleKey: "navigation.coach.automations", icon: Zap, path: "/dashboard/coach/automations" },
+    ],
+  },
+  {
     id: "clients",
     labelKey: "navigation.coach.clientManagement",
     icon: Users,
@@ -106,15 +115,6 @@ const menuGroups: MenuGroup[] = [
       { titleKey: "navigation.coach.clientComparison", icon: Users2, path: "/dashboard/coach/compare", requiredFeature: "client_comparison_analytics" },
       { titleKey: "navigation.coach.aiRecommendations", icon: Sparkles, path: "/dashboard/coach/ai-recommendations", requiredFeature: "ai_plan_recommendations" },
       { titleKey: "navigation.coach.caseStudies", icon: FileText, path: "/dashboard/coach/case-studies", requiredFeature: "case_study_generator" },
-    ],
-  },
-  {
-    id: "automations",
-    labelKey: "navigation.coach.automations",
-    icon: Zap,
-    collapsible: false,
-    items: [
-      { titleKey: "navigation.coach.automations", icon: Zap, path: "/dashboard/coach/automations" },
     ],
   },
   {
