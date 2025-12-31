@@ -126,7 +126,7 @@ serve(async (req) => {
         }
 
         // Calculate days since last activity based on configured signals
-        let lastActivityDate: Date | null = null;
+        let lastActivityTimestamp = 0;
 
         // Check training logs
         if (config.signals.training_logs) {
@@ -139,9 +139,9 @@ serve(async (req) => {
             .maybeSingle();
           
           if (trainingLog?.completed_at) {
-            const logDate = new Date(trainingLog.completed_at);
-            if (lastActivityDate === null || logDate > lastActivityDate) {
-              lastActivityDate = logDate;
+            const logTime = new Date(trainingLog.completed_at).getTime();
+            if (logTime > lastActivityTimestamp) {
+              lastActivityTimestamp = logTime;
             }
           }
         }
@@ -157,9 +157,9 @@ serve(async (req) => {
             .maybeSingle();
           
           if (lastMessage?.created_at) {
-            const msgDate = new Date(lastMessage.created_at);
-            if (!lastActivityDate || msgDate > lastActivityDate) {
-              lastActivityDate = msgDate;
+            const msgTime = new Date(lastMessage.created_at).getTime();
+            if (msgTime > lastActivityTimestamp) {
+              lastActivityTimestamp = msgTime;
             }
           }
         }
@@ -176,16 +176,16 @@ serve(async (req) => {
             .maybeSingle();
           
           if (recentSession?.start_time) {
-            const sessionDate = new Date(recentSession.start_time);
-            if (!lastActivityDate || sessionDate > lastActivityDate) {
-              lastActivityDate = sessionDate;
+            const sessionTime = new Date(recentSession.start_time).getTime();
+            if (sessionTime > lastActivityTimestamp) {
+              lastActivityTimestamp = sessionTime;
             }
           }
         }
 
         // Calculate days since last activity
-        const daysSinceActivity = lastActivityDate 
-          ? Math.floor((now.getTime() - lastActivityDate.getTime()) / (1000 * 60 * 60 * 24))
+        const daysSinceActivity = lastActivityTimestamp > 0
+          ? Math.floor((now.getTime() - lastActivityTimestamp) / (1000 * 60 * 60 * 24))
           : 999; // If no activity found, consider very inactive
 
         // Determine risk stage
