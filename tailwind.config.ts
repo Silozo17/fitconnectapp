@@ -107,9 +107,6 @@ export default {
         "safe-left": "env(safe-area-inset-left, 0px)",
         "safe-right": "env(safe-area-inset-right, 0px)",
       },
-      transitionTimingFunction: {
-        "ios-spring": "cubic-bezier(0.32, 0.72, 0, 1)",
-      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
