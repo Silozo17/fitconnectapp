@@ -51,7 +51,7 @@ function baseTemplate({
   const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
   const safeDescription = escapeHtml(truncate(description, 155));
   const fullUrl = `${BASE_URL}${canonicalUrl}`;
-  const defaultOgImage = `${BASE_URL}/og-image.webp`;
+  const defaultOgImage = `${BASE_URL}/og-image.png`;
   
   const schemaScripts = schema
     ? (Array.isArray(schema) ? schema : [schema])
@@ -186,7 +186,7 @@ function articleSchema(post: any) {
     "@type": "Article",
     headline: post.title,
     description: post.excerpt || post.meta_description,
-    image: post.featured_image || `${BASE_URL}/og-image.webp`,
+    image: post.featured_image || `${BASE_URL}/og-image.png`,
     author: {
       "@type": "Person",
       name: post.author || SITE_NAME
