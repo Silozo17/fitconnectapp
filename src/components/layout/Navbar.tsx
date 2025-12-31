@@ -86,13 +86,9 @@ const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
           <Link to="/" className="flex items-center gap-2 group">
-            <img 
-              src="/pwa-192x192.png" 
-              alt="FitConnect Logo" 
-              width={40}
-              height={40}
-              className="w-10 h-10 rounded-xl group-hover:shadow-glow-sm transition-all duration-300"
-            />
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center group-hover:shadow-glow-sm transition-all duration-300">
+              <Dumbbell className="w-5 h-5 text-primary-foreground" />
+            </div>
             <span className="font-display font-bold text-xl text-foreground">FitConnect</span>
           </Link>
 
@@ -233,13 +229,9 @@ const Navbar = () => {
             <SheetContent side="right" className="w-[300px] sm:w-[350px] p-0 flex flex-col h-full">
               {/* Fixed Header with Logo */}
               <div className="flex items-center gap-2 p-6 pb-4 border-b border-border/50 shrink-0">
-                <img 
-                  src="/pwa-192x192.png" 
-                  alt="FitConnect Logo" 
-                  width={40}
-                  height={40}
-                  className="w-10 h-10 rounded-xl"
-                />
+                <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+                  <Dumbbell className="w-5 h-5 text-primary-foreground" />
+                </div>
                 <span className="font-display font-bold text-xl text-foreground">FitConnect</span>
               </div>
 
