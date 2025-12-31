@@ -151,8 +151,8 @@ const TrustAndVerification = () => {
 
   return (
     <PageLayout
-      title="Trust & Verification | How We Verify Coaches"
-      description="Learn how FitConnect verifies coach credentials, certifications, and qualifications. Our rigorous verification process ensures you train with trusted, qualified professionals."
+      title="Coach Verification | How We Vet Fitness Professionals"
+      description="Every FitConnect coach is verified. Learn about our credential checks, background screening and ongoing quality monitoring to ensure your safety."
     >
       <Helmet>
         <script type="application/ld+json">

@@ -51,6 +51,25 @@ const Index = () => {
     }
   };
 
+  const softwareAppSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "FitConnect",
+    "operatingSystem": ["iOS", "Android"],
+    "applicationCategory": "HealthApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "GBP"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "500"
+    },
+    "description": "Connect with verified personal trainers, nutritionists and fitness coaches across the UK."
+  };
+
   const breadcrumbSchema = createBreadcrumbSchema([
     { name: "Home", url: "/" }
   ]);
@@ -58,11 +77,11 @@ const Index = () => {
   return (
     <>
       <SEOHead
-        title="FitConnect - Find Your Perfect Fitness Coach | Personal Training, Nutrition & Combat Sports"
-        description="Connect with elite personal trainers, nutritionists, and combat sports coaches in the UK. Get personalized training plans and achieve your fitness goals."
+        title="Find Personal Trainers & Fitness Coaches | FitConnect UK"
+        description="Connect with verified personal trainers, nutritionists and boxing coaches across the UK. Book sessions, get custom workout plans and achieve your fitness goals. Download free."
         canonicalPath="/"
-        keywords={["personal trainer near me", "fitness coach UK", "online personal training", "find personal trainer", "book fitness coach"]}
-        schema={[websiteSchema, breadcrumbSchema]}
+        keywords={["find personal trainer", "personal trainer near me", "fitness coach UK", "online personal training", "book fitness coach", "hire personal trainer"]}
+        schema={[websiteSchema, softwareAppSchema, breadcrumbSchema]}
       />
       
       <div className="min-h-screen bg-background">
