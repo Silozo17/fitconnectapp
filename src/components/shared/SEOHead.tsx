@@ -1,5 +1,10 @@
 import { Helmet } from "react-helmet-async";
 
+interface HreflangEntry {
+  lang: string;
+  url: string;
+}
+
 interface SEOHeadProps {
   title: string;
   description: string;
@@ -12,6 +17,8 @@ interface SEOHeadProps {
   schema?: object | object[];
   publishedTime?: string;
   modifiedTime?: string;
+  /** Alternate language/region versions of this page for hreflang tags */
+  hreflangEntries?: HreflangEntry[];
 }
 
 const BASE_URL = "https://getfitconnect.co.uk";
@@ -30,6 +37,7 @@ export function SEOHead({
   schema,
   publishedTime,
   modifiedTime,
+  hreflangEntries = [],
 }: SEOHeadProps) {
   const fullTitle = title.includes("FitConnect") ? title : `${title} | FitConnect`;
   const canonicalUrl = `${BASE_URL}${canonicalPath}`;
@@ -47,6 +55,9 @@ export function SEOHead({
 
   const allKeywords = [...new Set([...defaultKeywords, ...keywords])].join(", ");
 
+  // Determine robots directive
+  const robotsContent = noIndex ? "noindex, nofollow" : "index, follow";
+
   return (
     <Helmet>
       {/* Primary Meta Tags */}
@@ -54,10 +65,24 @@ export function SEOHead({
       <meta name="title" content={fullTitle} />
       <meta name="description" content={description} />
       <meta name="keywords" content={allKeywords} />
-      {noIndex && <meta name="robots" content="noindex, nofollow" />}
+      <meta name="robots" content={robotsContent} />
       
       {/* Canonical URL */}
       <link rel="canonical" href={canonicalUrl} />
+
+      {/* Hreflang tags for international/locale versions */}
+      {hreflangEntries.map((entry) => (
+        <link 
+          key={entry.lang} 
+          rel="alternate" 
+          hrefLang={entry.lang} 
+          href={entry.url.startsWith("http") ? entry.url : `${BASE_URL}${entry.url}`} 
+        />
+      ))}
+      {/* Add x-default if we have hreflang entries */}
+      {hreflangEntries.length > 0 && (
+        <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />
+      )}
 
       {/* Open Graph / Facebook */}
       <meta property="og:type" content={ogType} />
@@ -317,4 +342,19 @@ export function createArticleSchema(article: {
       "keywords": article.keywords.join(", "),
     }),
   };
+}
+
+// Helper to generate hreflang entries for supported locales
+export function createHreflangEntries(
+  basePath: string,
+  supportedLocales: { lang: string; location: string }[] = [
+    { lang: "en-GB", location: "gb" },
+    { lang: "en-US", location: "us" },
+    { lang: "pl", location: "pl" },
+  ]
+): HreflangEntry[] {
+  return supportedLocales.map((locale) => ({
+    lang: locale.lang,
+    url: `/${locale.location}-${locale.lang.split("-")[0].toLowerCase()}${basePath}`,
+  }));
 }
