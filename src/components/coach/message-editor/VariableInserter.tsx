@@ -90,6 +90,7 @@ export function VariableInserter({
         </div>
 
         <div
+          data-radix-scroll-lock-ignore
           className="max-h-[320px] overflow-y-auto overscroll-contain"
           style={{ WebkitOverflowScrolling: "touch" }}
         >
