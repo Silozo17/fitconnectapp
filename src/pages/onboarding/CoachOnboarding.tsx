@@ -1155,6 +1155,12 @@ const CoachOnboarding = () => {
                   </p>
                 </div>
               )}
+              
+              <p className="text-sm text-muted-foreground text-center mt-2">
+                <a href="/pricing" target="_blank" className="underline hover:text-primary">
+                  Compare all features
+                </a>
+              </p>
             </div>
           );
         }

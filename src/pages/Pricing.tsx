@@ -4,7 +4,7 @@ import BlobShape from "@/components/ui/blob-shape";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { Link } from "react-router-dom";
-import { Check, Zap, Star, Crown, Sparkles, Users, MessageSquare, Calendar, TrendingUp, Video, FileText, Shield, Percent } from "lucide-react";
+import { Check, X, Zap, Star, Crown, Sparkles, Users, MessageSquare, Calendar, TrendingUp, Video, FileText, Shield, Percent, Activity, Bot, Rocket, Settings } from "lucide-react";
 import { SUBSCRIPTION_TIERS, TierKey, BillingInterval } from "@/lib/stripe-config";
 import { cn } from "@/lib/utils";
 import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
@@ -25,6 +25,87 @@ const tierIcons: Record<TierKey, typeof Zap> = {
   enterprise: Crown,
   founder: Sparkles,
 };
+
+// Comprehensive feature list grouped by category
+const FEATURE_CATEGORIES = [
+  {
+    name: "Client Management",
+    icon: Users,
+    features: [
+      { name: "Client Limit", free: "3 clients", starter: "10 clients", pro: "50 clients", enterprise: "Unlimited" },
+      { name: "Client Messaging", free: true, starter: true, pro: true, enterprise: true },
+      { name: "Session Scheduling", free: true, starter: true, pro: true, enterprise: true },
+      { name: "Client Reviews", free: true, starter: true, pro: true, enterprise: true },
+      { name: "Client Progress Tracking", free: false, starter: false, pro: true, enterprise: true },
+      { name: "Wearable Device Insights", free: false, starter: false, pro: true, enterprise: true },
+      { name: "Client Comparison Analytics", free: false, starter: false, pro: false, enterprise: true },
+    ],
+  },
+  {
+    name: "Content Creation",
+    icon: FileText,
+    features: [
+      { name: "Basic Workout Plans", free: true, starter: true, pro: true, enterprise: true },
+      { name: "Workout Plan Builder", free: false, starter: true, pro: true, enterprise: true },
+      { name: "Nutrition Plan Builder", free: false, starter: false, pro: true, enterprise: true },
+      { name: "Template Folders", free: false, starter: true, pro: true, enterprise: true },
+      { name: "Digital Products", free: false, starter: true, pro: true, enterprise: true },
+      { name: "Group Classes", free: false, starter: true, pro: true, enterprise: true },
+    ],
+  },
+  {
+    name: "Business Tools",
+    icon: TrendingUp,
+    features: [
+      { name: "Packages & Subscriptions", free: true, starter: true, pro: true, enterprise: true },
+      { name: "Basic Analytics", free: false, starter: true, pro: true, enterprise: true },
+      { name: "Advanced Analytics", free: false, starter: false, pro: true, enterprise: true },
+      { name: "Boost Marketing Visibility", free: false, starter: true, pro: true, enterprise: true },
+      { name: "Revenue Forecasting", free: false, starter: false, pro: true, enterprise: true },
+      { name: "Client Transformations Showcase", free: false, starter: false, pro: true, enterprise: true },
+      { name: "Advanced Reporting", free: false, starter: false, pro: false, enterprise: true },
+    ],
+  },
+  {
+    name: "Automations",
+    icon: Zap,
+    features: [
+      { name: "Drop-off Rescue", free: false, starter: false, pro: true, enterprise: true },
+      { name: "Milestone Celebrations", free: false, starter: false, pro: true, enterprise: true },
+      { name: "Scheduled Reminders", free: false, starter: false, pro: true, enterprise: true },
+      { name: "Automated Check-ins", free: false, starter: false, pro: true, enterprise: true },
+    ],
+  },
+  {
+    name: "Integrations",
+    icon: Settings,
+    features: [
+      { name: "Stripe Connect Payments", free: true, starter: true, pro: true, enterprise: true },
+      { name: "Video Conferencing (Zoom)", free: false, starter: false, pro: true, enterprise: true },
+      { name: "Calendar Sync", free: false, starter: false, pro: true, enterprise: true },
+      { name: "Custom Integrations", free: false, starter: false, pro: true, enterprise: true },
+    ],
+  },
+  {
+    name: "AI Features",
+    icon: Bot,
+    features: [
+      { name: "AI Workout Generator", free: false, starter: false, pro: true, enterprise: true },
+      { name: "AI Meal Suggestions", free: false, starter: false, pro: true, enterprise: true },
+      { name: "AI Client Analysis", free: false, starter: false, pro: false, enterprise: true },
+      { name: "Churn Prediction", free: false, starter: false, pro: false, enterprise: true },
+      { name: "AI Plan Recommendations", free: false, starter: false, pro: false, enterprise: true },
+      { name: "Case Study Generator", free: false, starter: false, pro: false, enterprise: true },
+    ],
+  },
+  {
+    name: "Platform Fees",
+    icon: Percent,
+    features: [
+      { name: "Platform Commission", free: "4%", starter: "3%", pro: "2%", enterprise: "1%" },
+    ],
+  },
+];
 
 const Pricing = () => {
   const { t } = useTranslation('pages');
@@ -63,6 +144,17 @@ const Pricing = () => {
       description: t('pricing.platformFeatures.securePayments.description')
     }
   ];
+
+  const renderFeatureValue = (value: boolean | string) => {
+    if (typeof value === "boolean") {
+      return value ? (
+        <Check className="w-5 h-5 text-primary mx-auto" />
+      ) : (
+        <X className="w-5 h-5 text-muted-foreground/40 mx-auto" />
+      );
+    }
+    return <span className="text-sm font-medium">{value}</span>;
+  };
 
   return (
     <PageLayout
@@ -249,8 +341,60 @@ const Pricing = () => {
         </div>
       </section>
 
-      {/* Platform Features */}
+      {/* Full Feature Comparison Table */}
       <section className="py-20 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Complete{" "}
+              <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                Feature Comparison
+              </span>
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              See exactly what's included in each plan. Every feature, every tier.
+            </p>
+          </div>
+
+          <div className="max-w-6xl mx-auto overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left py-4 px-4 font-semibold">Feature</th>
+                  <th className="text-center py-4 px-4 font-semibold">Free</th>
+                  <th className="text-center py-4 px-4 font-semibold">Starter</th>
+                  <th className="text-center py-4 px-4 font-semibold bg-primary/5 rounded-t-lg">Pro</th>
+                  <th className="text-center py-4 px-4 font-semibold">Enterprise</th>
+                </tr>
+              </thead>
+              <tbody>
+                {FEATURE_CATEGORIES.map((category, catIndex) => (
+                  <>
+                    <tr key={`cat-${catIndex}`} className="bg-muted/50">
+                      <td colSpan={5} className="py-3 px-4 font-semibold flex items-center gap-2">
+                        <category.icon className="w-4 h-4 text-primary" />
+                        {category.name}
+                      </td>
+                    </tr>
+                    {category.features.map((feature, fIndex) => (
+                      <tr key={`${catIndex}-${fIndex}`} className="border-b border-border/50 hover:bg-muted/30">
+                        <td className="py-3 px-4 text-sm">{feature.name}</td>
+                        <td className="py-3 px-4 text-center">{renderFeatureValue(feature.free)}</td>
+                        <td className="py-3 px-4 text-center">{renderFeatureValue(feature.starter)}</td>
+                        <td className="py-3 px-4 text-center bg-primary/5">{renderFeatureValue(feature.pro)}</td>
+                        <td className="py-3 px-4 text-center">{renderFeatureValue(feature.enterprise)}</td>
+                      </tr>
+                    ))}
+                  </>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* Platform Features */}
+      <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -285,7 +429,7 @@ const Pricing = () => {
       </section>
 
       {/* FAQ CTA */}
-      <section className="py-20">
+      <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-2xl font-bold mb-4">{t('pricing.cta.title')}</h2>
