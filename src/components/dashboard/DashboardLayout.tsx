@@ -59,10 +59,9 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
     return false;
   }, []);
   
-  // Log dashboard mount (runs once on mount)
+  // Log dashboard mount
   useEffect(() => {
-    perfLogger.logEvent('coach_dashboard_layout_mount');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    perfLogger.logEvent('coach_dashboard_layout_mount', { isKnownOnboarded, justCompletedOnboarding });
   }, []);
   
   useCoachProfileRealtime();

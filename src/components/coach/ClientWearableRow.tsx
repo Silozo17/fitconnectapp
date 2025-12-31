@@ -1,4 +1,3 @@
-import { forwardRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UserAvatar } from "@/components/shared/UserAvatar";
@@ -11,8 +10,7 @@ interface Props {
   alertType?: string;
 }
 
-export const ClientWearableRow = forwardRef<HTMLDivElement, Props>(
-  ({ client, hasAlert, alertType }, ref) => {
+export function ClientWearableRow({ client, hasAlert, alertType }: Props) {
   const { t } = useTranslation("coach");
   
   const getLatestValue = (type: string) => {
@@ -27,7 +25,7 @@ export const ClientWearableRow = forwardRef<HTMLDivElement, Props>(
   const calories = getLatestValue("calories");
 
   return (
-    <Card ref={ref} variant="glass" className={`glass-card ${hasAlert ? "border-warning/50" : ""}`}>
+    <Card variant="glass" className={`glass-card ${hasAlert ? "border-warning/50" : ""}`}>
       <CardContent className="p-4">
         <div className="flex items-center gap-4">
           <UserAvatar
@@ -70,6 +68,4 @@ export const ClientWearableRow = forwardRef<HTMLDivElement, Props>(
       </CardContent>
     </Card>
   );
-});
-
-ClientWearableRow.displayName = "ClientWearableRow";
+}
