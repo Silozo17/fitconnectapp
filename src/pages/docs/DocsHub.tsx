@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
-import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { SEOHead, createBreadcrumbSchema } from "@/components/shared/SEOHead";
 import { 
   BookOpen, 
   User, 
@@ -78,12 +78,20 @@ export default function DocsHub() {
     }] : []),
   ];
 
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Help Center", url: "/docs" }
+  ]);
+
   return (
     <>
-      <Helmet>
-        <title>Help Center | FitConnect</title>
-        <meta name="description" content="Get help with FitConnect. Find guides, tutorials, and answers to common questions." />
-      </Helmet>
+      <SEOHead
+        title="Help Center"
+        description="Get help with FitConnect. Find guides, tutorials, and answers to common questions about finding coaches, booking sessions, and tracking progress."
+        canonicalPath="/docs"
+        keywords={["fitconnect help", "fitness app support", "coaching platform guide", "personal trainer help"]}
+        schema={breadcrumbSchema}
+      />
 
       <div className="min-h-screen flex flex-col bg-background">
         <Navbar />
