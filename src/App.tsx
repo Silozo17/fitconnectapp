@@ -199,6 +199,19 @@ const DocsAIClientSummary = lazy(() => import('@/pages/docs/coach/ai/AIClientSum
 const DocsAIWorkoutGenerator = lazy(() => import('@/pages/docs/coach/ai/AIWorkoutGeneratorDocs'));
 const DocsAINutritionGenerator = lazy(() => import('@/pages/docs/coach/ai/AINutritionGeneratorDocs'));
 const DocsAIMacroCalculator = lazy(() => import('@/pages/docs/coach/ai/AIMacroCalculatorDocs'));
+const DocsAICheckInComposer = lazy(() => import('@/pages/docs/coach/ai/AICheckInComposerDocs'));
+const DocsAIProgressInsights = lazy(() => import('@/pages/docs/coach/ai/AIProgressInsightsDocs'));
+const DocsAIExerciseAlternatives = lazy(() => import('@/pages/docs/coach/ai/AIExerciseAlternativesDocs'));
+const DocsAIFoodSubstitutions = lazy(() => import('@/pages/docs/coach/ai/AIFoodSubstitutionsDocs'));
+const DocsAIPlanRecommendations = lazy(() => import('@/pages/docs/coach/ai/AIPlanRecommendationsDocs'));
+
+// Coach Additional Documentation
+const DocsCoachAchievements = lazy(() => import('@/pages/docs/coach/CoachAchievementsDocs'));
+
+// Integration Documentation - Wearables
+const DocsAppleHealth = lazy(() => import('@/pages/docs/integrations/AppleHealthIntegration'));
+const DocsHealthConnect = lazy(() => import('@/pages/docs/integrations/HealthConnectIntegration'));
+const DocsGarmin = lazy(() => import('@/pages/docs/integrations/GarminIntegration'));
 
 // Subscribe pages
 const Subscribe = lazy(() => import('@/pages/Subscribe'));
@@ -323,7 +336,13 @@ const App = () => (
                               <Route path="/docs/coach/ai/workout-generator" element={<DocsAIWorkoutGenerator />} />
                               <Route path="/docs/coach/ai/nutrition-generator" element={<DocsAINutritionGenerator />} />
                               <Route path="/docs/coach/ai/macro-calculator" element={<DocsAIMacroCalculator />} />
+                              <Route path="/docs/coach/ai/checkin-composer" element={<DocsAICheckInComposer />} />
+                              <Route path="/docs/coach/ai/progress-insights" element={<DocsAIProgressInsights />} />
+                              <Route path="/docs/coach/ai/exercise-alternatives" element={<DocsAIExerciseAlternatives />} />
+                              <Route path="/docs/coach/ai/food-substitutions" element={<DocsAIFoodSubstitutions />} />
+                              <Route path="/docs/coach/ai/plan-recommendations" element={<DocsAIPlanRecommendations />} />
                               <Route path="/docs/coach/reviews" element={<DocsCoachReviews />} />
+                              <Route path="/docs/coach/achievements" element={<DocsCoachAchievements />} />
                               <Route path="/docs/coach/automations" element={<DocsCoachAutomations />} />
                               <Route path="/docs/coach/automations/dropoff-rescue" element={<DocsCoachDropoffRescue />} />
                               <Route path="/docs/coach/automations/milestones" element={<DocsCoachMilestones />} />
@@ -345,12 +364,15 @@ const App = () => (
                               <Route path="/docs/admin/audit" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminAudit /></ProtectedRoute>} />
                               
                               {/* Public Integration Documentation Routes */}
+                              <Route path="/docs/integrations/wearables" element={<WearablesOverviewDocs />} />
+                              <Route path="/docs/integrations/apple-health" element={<DocsAppleHealth />} />
+                              <Route path="/docs/integrations/health-connect" element={<DocsHealthConnect />} />
+                              <Route path="/docs/integrations/garmin" element={<DocsGarmin />} />
+                              <Route path="/docs/integrations/fitbit" element={<FitbitIntegrationDocs />} />
                               <Route path="/docs/integrations/zoom" element={<ZoomIntegrationDocs />} />
                               <Route path="/docs/integrations/google-meet" element={<GoogleMeetIntegrationDocs />} />
                               <Route path="/docs/integrations/google-calendar" element={<GoogleCalendarIntegrationDocs />} />
                               <Route path="/docs/integrations/apple-calendar" element={<AppleCalendarIntegrationDocs />} />
-                              <Route path="/docs/integrations/fitbit" element={<FitbitIntegrationDocs />} />
-                              <Route path="/docs/integrations/wearables" element={<WearablesOverviewDocs />} />
                               
                               {/* Dashboard Redirect */}
                               <Route path="/dashboard" element={

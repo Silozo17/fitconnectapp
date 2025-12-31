@@ -17,7 +17,8 @@ import {
   Rocket,
   UtensilsCrossed,
   Sparkles,
-  Star
+  Star,
+  Trophy
 } from "lucide-react";
 
 const coachGuides = [
@@ -116,6 +117,12 @@ const coachGuides = [
     description: "View, respond to, and leverage client reviews and testimonials.",
     href: "/docs/coach/reviews",
     icon: Star,
+  },
+  {
+    title: "Achievements",
+    description: "Earn XP, unlock badges, and level up as you grow your coaching business.",
+    href: "/docs/coach/achievements",
+    icon: Trophy,
   },
 ];
 
