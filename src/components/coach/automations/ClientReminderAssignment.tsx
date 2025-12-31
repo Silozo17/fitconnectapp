@@ -12,6 +12,7 @@ import { useClientReminders, ReminderTemplate } from "@/hooks/useClientReminders
 import { Loader2, Users, Calendar, Clock, MessageSquare } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { format } from "date-fns";
+import { VariableInserter } from "@/components/coach/message-editor/VariableInserter";
 
 interface ClientReminderAssignmentProps {
   open: boolean;
@@ -165,12 +166,18 @@ export function ClientReminderAssignment({ open, onOpenChange, template }: Clien
             )}
 
             {(!useTemplate || !template) && (
-              <Textarea
-                value={customMessage}
-                onChange={(e) => setCustomMessage(e.target.value)}
-                placeholder="Use {client_name} for personalization. E.g., 'Hey {client_name}, don't forget to log your workout today!'"
-                rows={3}
-              />
+              <div className="space-y-2">
+                <VariableInserter 
+                  onInsert={(variable) => setCustomMessage(prev => prev + variable)}
+                  excludeCategories={["milestone"]}
+                />
+                <Textarea
+                  value={customMessage}
+                  onChange={(e) => setCustomMessage(e.target.value)}
+                  placeholder="Use {client_first_name} for personalization. E.g., 'Hey {client_first_name}, don't forget to log your workout today!'"
+                  rows={3}
+                />
+              </div>
             )}
 
             {useTemplate && template && (

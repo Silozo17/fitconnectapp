@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2, Users, FileText } from "lucide-react";
+import { VariableInserter } from "@/components/coach/message-editor/VariableInserter";
 
 // Generate time options in 5-minute increments (00:00 to 23:55)
 const generateTimeOptions = () => {
@@ -346,14 +347,22 @@ export function ScheduledCheckInForm({ open, onOpenChange, editingCheckin, onSub
           </div>
 
           <div>
-            <Label>{t("scheduledCheckins.messageTemplate")}</Label>
+            <div className="flex items-center justify-between mb-1">
+              <Label>{t("scheduledCheckins.messageTemplate")}</Label>
+              <VariableInserter 
+                onInsert={(variable) => setMessageTemplate(prev => prev + variable)}
+                excludeCategories={["milestone"]}
+              />
+            </div>
             <Textarea
               value={messageTemplate}
               onChange={(e) => setMessageTemplate(e.target.value)}
               placeholder={t("scheduledCheckins.messagePlaceholder")}
               rows={4}
             />
-            <p className="text-xs text-muted-foreground mt-1">{t("scheduledCheckins.templateVariables")}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Use variables like {"{client_first_name}"} to personalize messages
+            </p>
           </div>
         </div>
 
