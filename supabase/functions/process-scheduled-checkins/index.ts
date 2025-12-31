@@ -25,7 +25,7 @@ serve(async (req) => {
       .from("scheduled_checkins")
       .select(`
         *,
-        coach:coach_profiles(id, user_id, first_name, last_name),
+        coach:coach_profiles(id, user_id, display_name),
         client:client_profiles(id, user_id, first_name, last_name)
       `)
       .eq("is_active", true)
@@ -60,40 +60,19 @@ serve(async (req) => {
           .replace(/{client_name}/g, clientName)
           .replace(/{days_since_login}/g, "recently");
 
-        // Create message in conversation
-        // First, find or create conversation
-        const { data: existingConversation } = await supabase
-          .from("conversations")
-          .select("id")
-          .or(`and(participant1_id.eq.${checkin.coach?.user_id},participant2_id.eq.${checkin.client?.user_id}),and(participant1_id.eq.${checkin.client?.user_id},participant2_id.eq.${checkin.coach?.user_id})`)
-          .maybeSingle();
-
-        let conversationId = existingConversation?.id;
-
-        if (!conversationId) {
-          const { data: newConversation, error: convError } = await supabase
-            .from("conversations")
-            .insert({
-              participant1_id: checkin.coach?.user_id,
-              participant2_id: checkin.client?.user_id,
-            })
-            .select("id")
-            .single();
-
-          if (convError) {
-            console.error("Error creating conversation:", convError);
-            errors++;
-            continue;
-          }
-          conversationId = newConversation.id;
+        // Validate we have both user IDs
+        if (!checkin.coach?.user_id || !checkin.client?.user_id) {
+          console.error(`Missing user IDs for check-in ${checkin.id}`);
+          errors++;
+          continue;
         }
 
-        // Send message
+        // Send message directly (messages table uses sender_id and receiver_id)
         const { error: messageError } = await supabase
           .from("messages")
           .insert({
-            conversation_id: conversationId,
-            sender_id: checkin.coach?.user_id,
+            sender_id: checkin.coach.user_id,
+            receiver_id: checkin.client.user_id,
             content: message,
           });
 
