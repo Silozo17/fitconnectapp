@@ -7,7 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { useAutomationSettings, DropoffRescueConfig } from "@/hooks/useAutomationSettings";
-import { Loader2, AlertTriangle, MessageSquare, Bell } from "lucide-react";
+import { Loader2, AlertTriangle, MessageSquare, Bell, Play } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export function DropoffRescueSettings() {
   const { t } = useTranslation("coach");
@@ -47,6 +49,26 @@ export function DropoffRescueSettings() {
     updateConfig('dropoff_rescue', newConfig);
     if (isEnabled !== dropoffSetting?.is_enabled) {
       toggleAutomation('dropoff_rescue', isEnabled);
+    }
+  };
+
+  const [isTesting, setIsTesting] = useState(false);
+  
+  const handleTestNow = async () => {
+    setIsTesting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('detect-client-dropoff', {
+        body: {}
+      });
+      
+      if (error) throw error;
+      
+      toast.success(`Detection complete: ${data.at_risk || 0} clients at risk, ${data.messages_sent || 0} messages sent`);
+    } catch (error) {
+      console.error('Test failed:', error);
+      toast.error('Failed to run detection');
+    } finally {
+      setIsTesting(false);
     }
   };
 
@@ -141,14 +163,24 @@ export function DropoffRescueSettings() {
             </div>
           </div>
 
-          <Button 
-            onClick={handleSave} 
-            disabled={isSaving}
-            className="w-full"
-          >
-            {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            {t("common.save", "Save Settings")}
-          </Button>
+          <div className="flex gap-3">
+            <Button 
+              onClick={handleSave} 
+              disabled={isSaving}
+              className="flex-1"
+            >
+              {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {t("common.save", "Save Settings")}
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={handleTestNow}
+              disabled={isTesting || !isEnabled}
+            >
+              {isTesting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Play className="h-4 w-4 mr-2" />}
+              Run Detection Now
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>
