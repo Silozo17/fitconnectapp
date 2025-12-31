@@ -7,8 +7,9 @@ const Privacy = () => {
   const { contact } = usePlatformContact();
   return (
     <PageLayout
-      title="Privacy Policy"
-      description="Learn how FitConnect collects, uses, and protects your personal information. Our commitment to your privacy and data security."
+      title="Privacy Policy | How FitConnect Protects Your Data"
+      description="Read how FitConnect collects, uses and protects your personal data. GDPR compliant. Your privacy and security is our priority."
+      canonicalPath="/privacy"
     >
       {/* Hero Section */}
       <section className="relative pt-32 pb-12 overflow-hidden">
