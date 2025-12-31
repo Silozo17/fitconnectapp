@@ -1,5 +1,3 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { SEOHead, createBreadcrumbSchema } from "@/components/shared/SEOHead";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -11,31 +9,11 @@ import Testimonials from "@/components/landing/Testimonials";
 import CTA from "@/components/landing/CTA";
 import { AvatarShowcase } from "@/components/landing/AvatarShowcase";
 import { BlogSection } from "@/components/landing/BlogSection";
-import { useAuth } from "@/contexts/AuthContext";
-import { isDespia } from "@/lib/despia";
-import { getBestDashboardRoute, saveViewState, getViewModeFromPath } from "@/lib/view-restoration";
+
+// NOTE: Authenticated user redirects are handled centrally by RouteRestorer
+// to prevent race conditions and screen flashing
 
 const Index = () => {
-  const { user, role, loading } = useAuth();
-  const navigate = useNavigate();
-
-  // In native app, authenticated users should not be on homepage - redirect to dashboard
-  // CRITICAL: Use saved view preference, not role-based default
-  useEffect(() => {
-    if (!loading && user && role && isDespia()) {
-      // getBestDashboardRoute checks saved route first, then saved view preference, then falls back to role default
-      const dashboardRoute = getBestDashboardRoute(role);
-      
-      // Sync view state to ensure consistency
-      const viewMode = getViewModeFromPath(dashboardRoute);
-      if (viewMode) {
-        saveViewState(viewMode);
-      }
-      
-      navigate(dashboardRoute, { replace: true });
-    }
-  }, [user, role, loading, navigate]);
-
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
