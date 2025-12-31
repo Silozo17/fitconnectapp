@@ -21,9 +21,9 @@ const PopoverContent = React.forwardRef<
       align={align}
       sideOffset={sideOffset}
       className={cn(
-        // Premium glass styling
-        "z-50 w-72 p-4 text-popover-foreground outline-none",
-        "glass-floating",
+        // Premium glass styling with isolation for backdrop-filter
+        "z-50 w-72 p-4 text-popover-foreground outline-none isolate",
+        "bg-popover/95 backdrop-blur-xl border border-border/40 rounded-xl shadow-xl",
         // Inner highlight
         "before:absolute before:inset-0 before:rounded-[inherit] before:pointer-events-none",
         "before:shadow-[inset_0_1px_0_hsl(0_0%_100%/0.1),inset_0_-1px_0_hsl(0_0%_0%/0.15)]",
