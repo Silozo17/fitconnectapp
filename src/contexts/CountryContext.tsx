@@ -220,28 +220,31 @@ interface CountryProviderProps {
 export function CountryProvider({ children }: CountryProviderProps) {
   // Use direct Supabase auth instead of useAuth to avoid circular dependency
   const [user, setUser] = useState<User | null>(null);
+  const [authReady, setAuthReady] = useState(false);
   const [countryCode, setCountryCode] = useState<RouteLocationCode>(DEFAULT_COUNTRY);
   const [detectedCountry, setDetectedCountry] = useState<RouteLocationCode | null>(null);
   const [isManualOverride, setIsManualOverride] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   // Listen to auth state changes directly from Supabase
+  // OPTIMIZED: Only subscribe to onAuthStateChange, no initial getSession call
+  // This prevents duplicate auth API calls since AuthContext already does initial fetch
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-
-    // Listen for auth changes
+    // Listen for auth changes - this will fire with initial state
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      setAuthReady(true);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   // Resolve country using priority order
+  // OPTIMIZED: Wait for auth to be ready before resolving to prevent race conditions
   useEffect(() => {
+    // Don't resolve until auth state is known
+    if (!authReady) return;
+    
     const resolveCountry = async () => {
       setIsLoading(true);
 
@@ -295,7 +298,7 @@ export function CountryProvider({ children }: CountryProviderProps) {
     };
 
     resolveCountry();
-  }, [user?.id]);
+  }, [user?.id, authReady]);
 
   // Set country manually (highest priority)
   const setCountry = useCallback((code: RouteLocationCode) => {

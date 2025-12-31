@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { isDespia } from "@/lib/despia";
 
 interface OnboardingStatus {
   isOnboarded: boolean;
@@ -12,6 +13,12 @@ interface OnboardingStatus {
   } | null;
   error?: boolean;
 }
+
+// Default placeholder to prevent loading flash
+const DEFAULT_ONBOARDING_STATUS: OnboardingStatus = {
+  isOnboarded: false,
+  onboardingProgress: null,
+};
 
 export const useClientOnboardingStatus = () => {
   const { user } = useAuth();
@@ -46,8 +53,10 @@ export const useClientOnboardingStatus = () => {
     enabled: !!user?.id,
     staleTime: 5 * 60 * 1000, // 5 minutes - prevents waterfall loading on dashboard
     gcTime: 60 * 60 * 1000, // 1 hour
-    refetchOnWindowFocus: true,
-    refetchOnMount: true, // Always refetch on mount to get fresh data after onboarding
+    // OPTIMIZED: Reduce aggressive refetching in native to prevent navigation delays
+    refetchOnWindowFocus: !isDespia(), // Disable in native app
+    refetchOnMount: 'always', // Use 'always' to get background updates without blocking
+    placeholderData: DEFAULT_ONBOARDING_STATUS, // Prevents loading flash
     retry: 2, // Retry twice before giving up
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
   });
@@ -87,7 +96,10 @@ export const useCoachOnboardingStatus = () => {
     enabled: !!user?.id,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 60 * 60 * 1000, // 1 hour
-    refetchOnMount: true, // Always refetch on mount to get fresh data after onboarding
+    // OPTIMIZED: Reduce aggressive refetching in native to prevent navigation delays
+    refetchOnWindowFocus: !isDespia(), // Disable in native app
+    refetchOnMount: 'always', // Use 'always' to get background updates without blocking
+    placeholderData: DEFAULT_ONBOARDING_STATUS, // Prevents loading flash
     retry: 2, // Retry twice before giving up
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
   });
