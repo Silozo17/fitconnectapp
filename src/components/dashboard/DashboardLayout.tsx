@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useCoachOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { useCoachProfileRealtime } from "@/hooks/useCoachProfileRealtime";
 import { useDiscoverModal } from "@/hooks/useDiscoverModal";
+import { useAutoAwardCoachBadges } from "@/hooks/useAutoAwardCoachBadges";
 import { Loader2 } from "lucide-react";
 import CoachSidebar from "./CoachSidebar";
 import DashboardHeader from "./DashboardHeader";
@@ -49,6 +50,9 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
   }, []);
   
   useCoachProfileRealtime();
+  
+  // Proactive badge awarding - checks and awards badges app-wide, not just on Achievements page
+  useAutoAwardCoachBadges();
 
   const handleToggleSidebar = useCallback(() => {
     setSidebarCollapsed(prev => !prev);

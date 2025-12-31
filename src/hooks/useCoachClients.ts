@@ -55,6 +55,7 @@ export function useCoachProfile() {
     },
     enabled: !!user?.id,
     retry: 2,
+    staleTime: 1000 * 60 * 5, // 5 minutes - prevents tier flicker during refetches
   });
 }
 
