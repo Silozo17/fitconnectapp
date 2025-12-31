@@ -50,15 +50,39 @@ const clientGuides = [
     icon: TrendingUp,
   },
   {
-    title: "Achievements & Leaderboards",
-    description: "Earn badges, gain XP, and compete with others on location-based leaderboards.",
+    title: "Challenges",
+    description: "Join platform-wide or coach challenges and compete for rewards.",
+    href: "/docs/client/challenges",
+    icon: Target,
+  },
+  {
+    title: "Achievements",
+    description: "Earn badges, gain XP, and unlock exclusive avatars.",
     href: "/docs/client/achievements",
     icon: Trophy,
   },
   {
-    title: "Settings & Integrations",
-    description: "Connect wearables, manage notifications, and customise your experience.",
-    href: "/docs/client/settings",
+    title: "Leaderboards",
+    description: "Compete with others on location-based leaderboards.",
+    href: "/docs/client/leaderboards",
+    icon: Trophy,
+  },
+  {
+    title: "Data Sharing",
+    description: "Control what health data you share with your coaches.",
+    href: "/docs/client/data-sharing",
+    icon: Settings,
+  },
+  {
+    title: "Account Security",
+    description: "Enable two-factor authentication and manage your security settings.",
+    href: "/docs/client/security",
+    icon: Settings,
+  },
+  {
+    title: "Wearable Devices",
+    description: "Connect fitness trackers and sync your health data automatically.",
+    href: "/docs/client/wearables",
     icon: Settings,
   },
   {
@@ -72,12 +96,6 @@ const clientGuides = [
     description: "Create grocery lists from meal plans with supermarket integration.",
     href: "/docs/client/grocery",
     icon: ShoppingCart,
-  },
-  {
-    title: "Challenges",
-    description: "Join platform-wide or coach challenges and compete for rewards.",
-    href: "/docs/client/challenges",
-    icon: Sword,
   },
   {
     title: "Fitness Tools",
