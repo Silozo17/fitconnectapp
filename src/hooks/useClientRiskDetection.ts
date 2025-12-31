@@ -151,7 +151,7 @@ export function useClientRiskDetection() {
           .from("habit_logs")
           .select("completed_count, client_habits!inner(client_id, target_count)")
           .eq("client_habits.client_id", clientId)
-          .gte("log_date", sevenDaysAgo.toISOString().split("T")[0]);
+          .gte("logged_at", sevenDaysAgo.toISOString().split("T")[0]);
 
         let habitCompletionRate: number | null = null;
         if (habitLogs && habitLogs.length > 0) {
