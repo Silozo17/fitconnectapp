@@ -192,6 +192,8 @@ const DocsClientSecurity = lazy(() => import('@/pages/docs/client/ClientSecurity
 const DocsClientWearables = lazy(() => import('@/pages/docs/client/ClientWearablesDocs'));
 const DocsClientDataSharing = lazy(() => import('@/pages/docs/client/ClientDataSharingDocs'));
 const DocsClientLeaderboards = lazy(() => import('@/pages/docs/client/ClientLeaderboardDocs'));
+const DocsClientMessages = lazy(() => import('@/pages/docs/client/ClientMessagesDocs'));
+const DocsClientFavourites = lazy(() => import('@/pages/docs/client/ClientFavouritesDocs'));
 
 // AI Documentation
 const DocsCoachAIOverview = lazy(() => import('@/pages/docs/coach/CoachAIOverviewDocs'));
@@ -207,6 +209,15 @@ const DocsAIPlanRecommendations = lazy(() => import('@/pages/docs/coach/ai/AIPla
 
 // Coach Additional Documentation
 const DocsCoachAchievements = lazy(() => import('@/pages/docs/coach/CoachAchievementsDocs'));
+const DocsCoachFinancial = lazy(() => import('@/pages/docs/coach/CoachFinancialDocs'));
+const DocsCoachWearables = lazy(() => import('@/pages/docs/coach/CoachWearablesDocs'));
+const DocsCoachIntegrations = lazy(() => import('@/pages/docs/coach/CoachIntegrationsDocs'));
+const DocsCoachSettings = lazy(() => import('@/pages/docs/coach/CoachSettingsDocs'));
+const DocsCoachShowcase = lazy(() => import('@/pages/docs/coach/CoachShowcaseDocs'));
+const DocsCoachComparison = lazy(() => import('@/pages/docs/coach/CoachClientComparisonDocs'));
+const DocsCoachCaseStudies = lazy(() => import('@/pages/docs/coach/CoachCaseStudiesDocs'));
+const DocsCoachPackageAnalytics = lazy(() => import('@/pages/docs/coach/CoachPackageAnalyticsDocs'));
+const DocsCoachConnections = lazy(() => import('@/pages/docs/coach/CoachConnectionsDocs'));
 
 // Integration Documentation - Wearables
 const DocsAppleHealth = lazy(() => import('@/pages/docs/integrations/AppleHealthIntegration'));
@@ -316,6 +327,8 @@ const App = () => (
                               <Route path="/docs/client/wearables" element={<DocsClientWearables />} />
                               <Route path="/docs/client/data-sharing" element={<DocsClientDataSharing />} />
                               <Route path="/docs/client/leaderboards" element={<DocsClientLeaderboards />} />
+                              <Route path="/docs/client/messages" element={<DocsClientMessages />} />
+                              <Route path="/docs/client/favourites" element={<DocsClientFavourites />} />
                               <Route path="/docs/coach" element={<DocsCoachOverview />} />
                               <Route path="/docs/coach/onboarding" element={<DocsCoachOnboarding />} />
                               <Route path="/docs/coach/profile" element={<DocsCoachProfile />} />
@@ -343,6 +356,15 @@ const App = () => (
                               <Route path="/docs/coach/ai/plan-recommendations" element={<DocsAIPlanRecommendations />} />
                               <Route path="/docs/coach/reviews" element={<DocsCoachReviews />} />
                               <Route path="/docs/coach/achievements" element={<DocsCoachAchievements />} />
+                              <Route path="/docs/coach/financial" element={<DocsCoachFinancial />} />
+                              <Route path="/docs/coach/wearables" element={<DocsCoachWearables />} />
+                              <Route path="/docs/coach/integrations" element={<DocsCoachIntegrations />} />
+                              <Route path="/docs/coach/settings" element={<DocsCoachSettings />} />
+                              <Route path="/docs/coach/showcase" element={<DocsCoachShowcase />} />
+                              <Route path="/docs/coach/comparison" element={<DocsCoachComparison />} />
+                              <Route path="/docs/coach/case-studies" element={<DocsCoachCaseStudies />} />
+                              <Route path="/docs/coach/package-analytics" element={<DocsCoachPackageAnalytics />} />
+                              <Route path="/docs/coach/connections" element={<DocsCoachConnections />} />
                               <Route path="/docs/coach/automations" element={<DocsCoachAutomations />} />
                               <Route path="/docs/coach/automations/dropoff-rescue" element={<DocsCoachDropoffRescue />} />
                               <Route path="/docs/coach/automations/milestones" element={<DocsCoachMilestones />} />
