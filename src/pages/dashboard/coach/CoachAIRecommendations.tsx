@@ -55,58 +55,58 @@ const CoachAIRecommendations = () => {
       />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <Card variant="glass" className="glass-card rounded-2xl">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="w-14 h-14 rounded-2xl bg-destructive/10 flex items-center justify-center">
-                <Sparkles className="w-7 h-7 text-destructive" />
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 flex-1">
+          <Card variant="glass" className="glass-card rounded-2xl">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="w-14 h-14 rounded-2xl bg-destructive/10 flex items-center justify-center">
+                  <Sparkles className="w-7 h-7 text-destructive" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{priorityCounts.high}</p>
+                  <p className="text-sm text-muted-foreground">{t("aiRecommendations.priority.high")}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-2xl font-bold">{priorityCounts.high}</p>
-                <p className="text-sm text-muted-foreground">{t("aiRecommendations.priority.high")}</p>
+            </CardContent>
+          </Card>
+          <Card variant="glass" className="glass-card rounded-2xl">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="w-14 h-14 rounded-2xl bg-warning/10 flex items-center justify-center">
+                  <Sparkles className="w-7 h-7 text-warning" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{priorityCounts.medium}</p>
+                  <p className="text-sm text-muted-foreground">{t("aiRecommendations.priority.medium")}</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card variant="glass" className="glass-card rounded-2xl">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="w-14 h-14 rounded-2xl bg-warning/10 flex items-center justify-center">
-                <Sparkles className="w-7 h-7 text-warning" />
+            </CardContent>
+          </Card>
+          <Card variant="glass" className="glass-card rounded-2xl">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center">
+                  <Sparkles className="w-7 h-7 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{priorityCounts.low}</p>
+                  <p className="text-sm text-muted-foreground">{t("aiRecommendations.priority.low")}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-2xl font-bold">{priorityCounts.medium}</p>
-                <p className="text-sm text-muted-foreground">{t("aiRecommendations.priority.medium")}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card variant="glass" className="glass-card rounded-2xl">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center">
-                <Sparkles className="w-7 h-7 text-muted-foreground" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{priorityCounts.low}</p>
-                <p className="text-sm text-muted-foreground">{t("aiRecommendations.priority.low")}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card variant="glass" className="glass-card rounded-2xl">
+            </CardContent>
+          </Card>
+        </div>
+        <Card variant="glass" className="glass-card rounded-2xl shrink-0">
           <CardContent className="p-6 flex items-center justify-center h-full">
             <Button
               onClick={() => generateRecommendations()}
               disabled={isGenerating}
-              className="whitespace-nowrap"
             >
               {isGenerating ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  <span className="hidden sm:inline">{t("aiRecommendations.generating")}</span>
-                  <span className="sm:hidden">...</span>
+                  {t("aiRecommendations.generating")}
                 </>
               ) : (
                 <>
