@@ -470,7 +470,10 @@
       "aiRecommendations": "AI Recommendations",
       "scheduledCheckins": "Scheduled Check-Ins",
       "caseStudies": "Case Studies",
-      "automations": "Automations"
+      "automations": "Automations",
+      "dropoffRescue": "Drop-off Rescue",
+      "milestonesCelebration": "Milestone Celebration",
+      "reminderSettings": "Reminder Settings"
     },
     "client": {
       "home": "Home",
