@@ -5,6 +5,7 @@ import {
   Calendar,
   MoreVertical,
 } from "lucide-react";
+import { AtRiskClientsBadge } from "@/components/coach/automations/AtRiskClientsBadge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -71,6 +72,12 @@ export function ClientCardMobile({
             >
               {client.status}
             </Badge>
+            {(client as any).automation_status?.is_at_risk && (
+              <AtRiskClientsBadge 
+                isAtRisk={(client as any).automation_status?.is_at_risk}
+                riskStage={(client as any).automation_status?.risk_stage}
+              />
+            )}
             {client.plan_type && (
               <span className="text-xs text-muted-foreground truncate max-w-[100px]">
                 {client.plan_type}

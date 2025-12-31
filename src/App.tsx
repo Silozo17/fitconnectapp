@@ -115,6 +115,7 @@ const CoachPackageAnalytics = lazy(() => import('@/pages/dashboard/coach/CoachPa
 const CoachOutcomeShowcase = lazy(() => import('@/pages/dashboard/coach/CoachOutcomeShowcase'));
 const CoachAIRecommendations = lazy(() => import('@/pages/dashboard/coach/CoachAIRecommendations'));
 const CoachScheduledCheckins = lazy(() => import('@/pages/dashboard/coach/CoachScheduledCheckins'));
+const CoachAutomations = lazy(() => import('@/pages/dashboard/coach/CoachAutomations'));
 const CoachWearableDashboard = lazy(() => import('@/pages/dashboard/coach/CoachWearableDashboard'));
 const CoachClientComparison = lazy(() => import('@/pages/dashboard/coach/CoachClientComparison'));
 const CoachCaseStudies = lazy(() => import('@/pages/dashboard/coach/CoachCaseStudies'));
@@ -701,6 +702,11 @@ const App = () => (
                               <Route path="/dashboard/coach/scheduled-checkins" element={
                                 <ProtectedRoute allowedRoles={["coach"]}>
                                   <CoachScheduledCheckins />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/dashboard/coach/automations" element={
+                                <ProtectedRoute allowedRoles={["coach"]}>
+                                  <CoachAutomations />
                                 </ProtectedRoute>
                               } />
                               <Route path="/dashboard/coach/wearables" element={
