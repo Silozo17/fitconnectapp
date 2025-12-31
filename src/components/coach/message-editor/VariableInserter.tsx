@@ -76,7 +76,7 @@ export function VariableInserter({
           Insert Variable
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="start">
+      <PopoverContent className="w-80 p-0" align="start" disablePortal>
         <div className="p-3 border-b">
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -90,7 +90,6 @@ export function VariableInserter({
         </div>
 
         <div
-          data-radix-scroll-lock-ignore
           className="max-h-[320px] overflow-y-auto overscroll-contain"
           style={{ WebkitOverflowScrolling: "touch" }}
         >
