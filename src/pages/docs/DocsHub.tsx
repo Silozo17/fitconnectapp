@@ -86,10 +86,10 @@ export default function DocsHub() {
   return (
     <>
       <SEOHead
-        title="Help Center"
-        description="Get help with FitConnect. Find guides, tutorials, and answers to common questions about finding coaches, booking sessions, and tracking progress."
+        title="Help Center | FitConnect Guides & Tutorials"
+        description="Find answers about booking sessions, managing clients, setting up payments and using FitConnect features. Step-by-step guides included."
         canonicalPath="/docs"
-        keywords={["fitconnect help", "fitness app support", "coaching platform guide", "personal trainer help"]}
+        keywords={["fitconnect help", "fitness app support", "coaching platform guide", "personal trainer help", "fitness app tutorials"]}
         schema={breadcrumbSchema}
       />
 

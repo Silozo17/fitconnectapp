@@ -7,8 +7,9 @@ const Terms = () => {
   const { contact } = usePlatformContact();
   return (
     <PageLayout
-      title="Terms of Service"
-      description="Read FitConnect's Terms of Service. Understand your rights and responsibilities when using our fitness coaching platform."
+      title="Terms of Service | FitConnect User Agreement"
+      description="FitConnect terms and conditions for clients and coaches. Understand your rights, payments, refunds and platform usage policies."
+      canonicalPath="/terms"
     >
       {/* Hero Section */}
       <section className="relative pt-32 pb-12 overflow-hidden">

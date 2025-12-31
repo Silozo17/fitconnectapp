@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import { SEOHead } from "@/components/shared/SEOHead";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -71,12 +71,46 @@ const MMA = () => {
     { name: "Jake Morrison", specialty: t('coachTypes.mma.featured.specialties.wrestling'), rating: 4.9, clients: 200 },
   ];
 
+  // Generate FAQ schema
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(faq => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  };
+
+  // Service schema
+  const serviceSchema = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": "MMA Training",
+    "provider": {
+      "@type": "Organization",
+      "name": "FitConnect"
+    },
+    "serviceType": "Mixed Martial Arts Training",
+    "areaServed": {
+      "@type": "Country",
+      "name": "United Kingdom"
+    },
+    "priceRange": "£40-£100"
+  };
+
   return (
     <>
-      <Helmet>
-        <title>{t('coachTypes.mma.meta.title')}</title>
-        <meta name="description" content={t('coachTypes.mma.meta.description')} />
-      </Helmet>
+      <SEOHead
+        title={t('coachTypes.mma.meta.title')}
+        description={t('coachTypes.mma.meta.description')}
+        canonicalPath="/coaches/mma"
+        keywords={["MMA training UK", "MMA coach", "learn mixed martial arts", "BJJ training", "Muay Thai"]}
+        schema={[faqSchema, serviceSchema]}
+      />
       
       <div className="min-h-screen bg-background">
         <Navbar />
