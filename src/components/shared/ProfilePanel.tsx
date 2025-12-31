@@ -86,7 +86,7 @@ const ProfilePanel = ({ children, headerHeight = 64 }: ProfilePanelProps) => {
           // Border adjustments
           "rounded-t-none border-t-0",
           // Animation - GPU accelerated with iOS-like spring easing
-          "transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]",
+          "transition-[transform,opacity] duration-500 ease-ios-spring",
           isOpen 
             ? "opacity-100" 
             : "opacity-0 pointer-events-none"
