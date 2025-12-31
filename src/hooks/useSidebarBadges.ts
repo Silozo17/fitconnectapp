@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { perfLogger } from "@/lib/performance-logger";
 
 interface ClientBadges {
   newPlans: number;
@@ -42,6 +43,9 @@ export const useClientBadges = () => {
   const fetchBadges = useCallback(async () => {
     if (!clientProfileId || !user) return;
 
+    perfLogger.logEvent('client_badge_fetch_start');
+    const startTime = performance.now();
+
     // Get client's last viewed timestamp for plans
     const { data: clientProfile } = await supabase
       .from("client_profiles")
@@ -69,6 +73,11 @@ export const useClientBadges = () => {
       .eq("addressee_user_id", user.id)
       .eq("status", "pending");
 
+    perfLogger.logTimedEvent('client_badge_fetch_end', performance.now() - startTime, {
+      plansCount: plansCount || 0,
+      connectionsCount: connectionsCount || 0
+    });
+
     setBadges({ newPlans: plansCount || 0, pendingConnections: connectionsCount || 0 });
   }, [clientProfileId, user]);
 
@@ -92,6 +101,8 @@ export const useClientBadges = () => {
   useEffect(() => {
     if (!clientProfileId || !user) return;
 
+    perfLogger.logRealtimeSubscribe(`client-badges-${clientProfileId}`);
+    
     const channel = supabase
       .channel(`client-badges-${clientProfileId}`)
       .on(
@@ -153,6 +164,9 @@ export const useCoachBadges = () => {
   const fetchBadges = useCallback(async () => {
     if (!coachProfileId || !user) return;
 
+    perfLogger.logEvent('coach_badge_fetch_start');
+    const startTime = performance.now();
+
     // Get coach's last viewed timestamp for leads
     const { data: coachProfile } = await supabase
       .from("coach_profiles")
@@ -194,6 +208,13 @@ export const useCoachBadges = () => {
       .eq("addressee_user_id", user.id)
       .eq("status", "pending");
 
+    perfLogger.logTimedEvent('coach_badge_fetch_end', performance.now() - startTime, {
+      leadsCount: leadsCount || 0,
+      bookingsCount: bookingsCount || 0,
+      clientRequestsCount: clientRequestsCount || 0,
+      friendRequestsCount: friendRequestsCount || 0
+    });
+
     setBadges({
       newLeads: leadsCount || 0,
       pendingBookings: bookingsCount || 0,
@@ -222,6 +243,8 @@ export const useCoachBadges = () => {
   useEffect(() => {
     if (!coachProfileId || !user) return;
 
+    perfLogger.logRealtimeSubscribe(`coach-badges-${coachProfileId}`);
+    
     const channel = supabase
       .channel(`coach-badges-${coachProfileId}`)
       .on(
@@ -286,6 +309,9 @@ export const useAdminBadges = () => {
   const fetchBadges = useCallback(async () => {
     if (!user || !isAdmin) return;
 
+    perfLogger.logEvent('admin_badge_fetch_start');
+    const startTime = performance.now();
+
     // Pending verification documents
     const { count: verificationsCount } = await supabase
       .from("coach_verification_documents")
@@ -309,6 +335,11 @@ export const useAdminBadges = () => {
       .from("client_profiles")
       .select("*", { count: "exact", head: true })
       .gt("created_at", viewedAt);
+
+    perfLogger.logTimedEvent('admin_badge_fetch_end', performance.now() - startTime, {
+      verificationsCount: verificationsCount || 0,
+      usersCount: usersCount || 0
+    });
 
     setBadges({
       pendingVerifications: verificationsCount || 0,
@@ -336,6 +367,8 @@ export const useAdminBadges = () => {
   useEffect(() => {
     if (!user || !isAdmin) return;
 
+    perfLogger.logRealtimeSubscribe('admin-badges');
+    
     const channel = supabase
       .channel("admin-badges")
       .on(

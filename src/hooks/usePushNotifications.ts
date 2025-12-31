@@ -2,6 +2,7 @@ import { useEffect, useCallback, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { isDespia } from "@/lib/despia";
+import { perfLogger } from "@/lib/performance-logger";
 import despia from "despia-native";
 
 interface PushRegistrationResult {
@@ -162,6 +163,9 @@ export const usePushNotifications = () => {
       }
       initializationRef.current = true;
 
+      perfLogger.logEvent('push_init_start');
+      const pushStart = performance.now();
+
       console.log("[Push] Initializing push notifications for user:", user.id);
 
       // Step 1: Always set external user ID first (links user to device in OneSignal)
@@ -189,6 +193,8 @@ export const usePushNotifications = () => {
         const result = await registerForPush();
         console.log("[Push] Registration result:", result);
       }
+      
+      perfLogger.logTimedEvent('push_init_end', performance.now() - pushStart);
     };
 
     // PERFORMANCE FIX: Delay push notification init by 2 seconds in Despia

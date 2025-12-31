@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { isDespia } from "@/lib/despia";
+import { perfLogger } from "@/lib/performance-logger";
 import {
   ViewMode,
   getSavedViewState,
@@ -159,6 +160,8 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     const restoreViewOnResume = (source: string) => {
       if (!isDespia() || !user || !role) return;
       
+      perfLogger.logEvent('admin_restoreViewOnResume', { source });
+      
       console.log(`[AdminContext] ${source} - checking persisted view`);
       const savedState = getSavedViewState();
       
@@ -183,11 +186,15 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
+        perfLogger.logVisibilityChange('visible', 'AdminContext');
         restoreViewOnResume('visibilitychange');
+      } else {
+        perfLogger.logVisibilityChange('hidden', 'AdminContext');
       }
     };
 
     const handleFocus = () => {
+      perfLogger.logFocusEvent('AdminContext');
       restoreViewOnResume('window.focus');
     };
 
@@ -207,29 +214,35 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
+    perfLogger.logEvent('admin_fetchProfiles_start', { canSwitchRoles });
+
     // For clients who can't switch roles, set their profile type correctly
     if (!canSwitchRoles) {
       if (role === "client") {
         setActiveProfileType("client");
         setViewModeState("client");
         // Fetch their client profile ID for messaging
+        const startTime = performance.now();
         const { data } = await supabase
           .from("client_profiles")
           .select("id")
           .eq("user_id", user.id)
           .maybeSingle();
+        perfLogger.logTimedEvent('admin_fetchClientProfile', performance.now() - startTime);
         if (data?.id) {
           setActiveProfileId(data.id);
           setAvailableProfiles({ client: data.id });
         }
       }
       setIsLoadingProfiles(false);
+      perfLogger.logEvent('admin_fetchProfiles_end_client_only');
       return;
     }
 
     setIsLoadingProfiles(true);
 
     try {
+      const parallelStart = performance.now();
       const [adminResult, clientResult, coachResult] = await Promise.all([
         supabase
           .from("admin_profiles")
@@ -247,6 +260,12 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
           .eq("user_id", user.id)
           .maybeSingle(),
       ]);
+      
+      perfLogger.logTimedEvent('admin_fetchProfiles_parallel', performance.now() - parallelStart, {
+        hasAdmin: !!adminResult.data?.id,
+        hasClient: !!clientResult.data?.id,
+        hasCoach: !!coachResult.data?.id
+      });
 
       const profiles: AvailableProfiles = {};
 
@@ -327,8 +346,10 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       setViewModeState(defaultType);
     } catch (error) {
       console.error("Error fetching profiles:", error);
+      perfLogger.logEvent('admin_fetchProfiles_error');
     } finally {
       setIsLoadingProfiles(false);
+      perfLogger.logEvent('admin_fetchProfiles_end');
     }
   }, [user?.id, canSwitchRoles, role, isAdminUser, location.pathname, activeProfileId]);
 

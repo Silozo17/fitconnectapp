@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useCoachOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { useCoachProfileRealtime } from "@/hooks/useCoachProfileRealtime";
 import { useDiscoverModal } from "@/hooks/useDiscoverModal";
+import { perfLogger } from "@/lib/performance-logger";
 // OPTIMIZED: Moved useAutoAwardCoachBadges to specific pages (CoachOverview, CoachAchievements)
 // to prevent 3 database queries on every navigation
 import CoachSidebar from "./CoachSidebar";
@@ -56,6 +57,11 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
       return true;
     }
     return false;
+  }, []);
+  
+  // Log dashboard mount
+  useEffect(() => {
+    perfLogger.logEvent('coach_dashboard_layout_mount', { isKnownOnboarded, justCompletedOnboarding });
   }, []);
   
   useCoachProfileRealtime();
