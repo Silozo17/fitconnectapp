@@ -78,7 +78,7 @@ const CoachDetail = () => {
 
   if (isLoading) {
     return (
-      <PageLayout title={t('detail.loading')} description={t('detail.loading')}>
+      <PageLayout title={t('detail.loading')} description={t('detail.loading')} noIndex={true}>
         <div className="min-h-screen flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
