@@ -20,6 +20,18 @@ const DEFAULT_ONBOARDING_STATUS: OnboardingStatus = {
   onboardingProgress: null,
 };
 
+// PERFORMANCE FIX: Read from localStorage for instant hydration
+const getClientOnboardingFromStorage = (): OnboardingStatus | undefined => {
+  try {
+    if (typeof localStorage === 'undefined') return undefined;
+    const isOnboarded = localStorage.getItem('fitconnect_client_onboarded') === 'true';
+    if (isOnboarded) {
+      return { isOnboarded: true, onboardingProgress: null };
+    }
+  } catch {}
+  return undefined;
+};
+
 export const useClientOnboardingStatus = () => {
   const { user } = useAuth();
 
@@ -37,8 +49,12 @@ export const useClientOnboardingStatus = () => {
 
         if (error) {
           console.error("Error fetching client onboarding status:", error);
-          // Return error state but don't throw - prevents infinite loading
           return { isOnboarded: false, error: true };
+        }
+
+        // Cache the result for future visits
+        if (data?.onboarding_completed) {
+          localStorage.setItem('fitconnect_client_onboarded', 'true');
         }
 
         return {
@@ -51,15 +67,29 @@ export const useClientOnboardingStatus = () => {
       }
     },
     enabled: !!user?.id,
-    staleTime: 5 * 60 * 1000, // 5 minutes - prevents waterfall loading on dashboard
+    staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 60 * 60 * 1000, // 1 hour
-    // OPTIMIZED: Reduce aggressive refetching in native to prevent navigation delays
-    refetchOnWindowFocus: !isDespia(), // Disable in native app
-    refetchOnMount: 'always', // Use 'always' to get background updates without blocking
-    placeholderData: DEFAULT_ONBOARDING_STATUS, // Prevents loading flash
-    retry: 2, // Retry twice before giving up
+    refetchOnWindowFocus: !isDespia(),
+    // PERFORMANCE FIX: Changed from 'always' to false - trust localStorage for returning users
+    refetchOnMount: false,
+    // PERFORMANCE FIX: Use localStorage for instant hydration
+    initialData: getClientOnboardingFromStorage,
+    placeholderData: DEFAULT_ONBOARDING_STATUS,
+    retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
   });
+};
+
+// PERFORMANCE FIX: Read from localStorage for instant hydration
+const getCoachOnboardingFromStorage = (): OnboardingStatus | undefined => {
+  try {
+    if (typeof localStorage === 'undefined') return undefined;
+    const isOnboarded = localStorage.getItem('fitconnect_coach_onboarded') === 'true';
+    if (isOnboarded) {
+      return { isOnboarded: true, onboardingProgress: null };
+    }
+  } catch {}
+  return undefined;
 };
 
 export const useCoachOnboardingStatus = () => {
@@ -79,8 +109,12 @@ export const useCoachOnboardingStatus = () => {
 
         if (error) {
           console.error("Error fetching coach onboarding status:", error);
-          // Return error state but don't throw - prevents infinite loading
           return { isOnboarded: false, error: true };
+        }
+
+        // Cache the result for future visits
+        if (data?.onboarding_completed) {
+          localStorage.setItem('fitconnect_coach_onboarded', 'true');
         }
 
         return {
@@ -94,13 +128,15 @@ export const useCoachOnboardingStatus = () => {
       }
     },
     enabled: !!user?.id,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 60 * 60 * 1000, // 1 hour
-    // OPTIMIZED: Reduce aggressive refetching in native to prevent navigation delays
-    refetchOnWindowFocus: !isDespia(), // Disable in native app
-    refetchOnMount: 'always', // Use 'always' to get background updates without blocking
-    placeholderData: DEFAULT_ONBOARDING_STATUS, // Prevents loading flash
-    retry: 2, // Retry twice before giving up
+    staleTime: 5 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
+    refetchOnWindowFocus: !isDespia(),
+    // PERFORMANCE FIX: Changed from 'always' to false - trust localStorage for returning users
+    refetchOnMount: false,
+    // PERFORMANCE FIX: Use localStorage for instant hydration
+    initialData: getCoachOnboardingFromStorage,
+    placeholderData: DEFAULT_ONBOARDING_STATUS,
+    retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
   });
 };

@@ -154,12 +154,20 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   }, [user, role, canSwitchRoles, hasInitializedFromRole]);
 
   // CRITICAL FIX: Add visibilitychange AND focus handlers for app resume (background → foreground)
-  // Some native WebViews fire focus instead of visibilitychange
+  // PERFORMANCE FIX: Added debounce to prevent double-firing
+  const lastResumeRef = useRef<number>(0);
+  
   useEffect(() => {
     const restoreViewOnResume = (source: string) => {
       if (!isDespia() || !user || !role) return;
       
-      console.log(`[AdminContext] ${source} - checking persisted view`);
+      // PERFORMANCE FIX: Debounce - skip if already handled within 1 second
+      const now = Date.now();
+      if (now - lastResumeRef.current < 1000) {
+        return;
+      }
+      lastResumeRef.current = now;
+      
       const savedState = getSavedViewState();
       
       if (savedState && savedState.type !== activeProfileType) {
@@ -171,7 +179,6 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
             : true; // Everyone can access client view
         
         if (hasAccess) {
-          console.log(`[AdminContext] Restoring view on ${source}:`, savedState.type, '(was:', activeProfileType, ')');
           setActiveProfileType(savedState.type);
           setViewModeState(savedState.type);
           if (savedState.profileId) {
