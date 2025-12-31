@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSafe } from "@/contexts/AuthContext";
 import { isDespia } from "@/lib/despia";
 
 // OPTIMIZED: Increased interval to reduce edge function calls
@@ -16,7 +16,9 @@ const NATIVE_DEBOUNCE = 120000; // 2 minutes
  * OPTIMIZED: Reduced frequency for native apps to improve performance
  */
 export const useSessionActivity = () => {
-  const { user, session } = useAuth();
+  const auth = useAuthSafe();
+  const user = auth?.user;
+  const session = auth?.session;
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastUpdateRef = useRef<number>(0);
 
