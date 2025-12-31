@@ -484,11 +484,22 @@ serve(async (req) => {
           } else {
             // Also update coach profile subscription tier if cancelled
             if (newStatus === "cancelled") {
-              await supabase
+              // CRITICAL: Check if coach is a Founder - Founders are NEVER downgraded automatically
+              const { data: founderCheck } = await supabase
                 .from("coach_profiles")
-                .update({ subscription_tier: "free" })
-                .eq("id", platformSubMatch.coach_id);
-              console.log("Coach subscription tier reset to free");
+                .select("subscription_tier")
+                .eq("id", platformSubMatch.coach_id)
+                .single();
+
+              if (founderCheck?.subscription_tier === 'founder') {
+                console.log("FOUNDER PROTECTION: Skipping Stripe cancellation downgrade - Founder tier is immutable");
+              } else {
+                await supabase
+                  .from("coach_profiles")
+                  .update({ subscription_tier: "free" })
+                  .eq("id", platformSubMatch.coach_id);
+                console.log("Coach subscription tier reset to free");
+              }
             }
           }
         } else {

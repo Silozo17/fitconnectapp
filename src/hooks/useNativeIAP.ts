@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCoachProfileId } from '@/hooks/useCoachProfileId';
+import { useCoachProfile } from '@/hooks/useCoachClients';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
@@ -60,6 +61,10 @@ const PURCHASE_TIMEOUT_MS = 120000; // 2 minutes timeout for stuck purchases
 export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn => {
   const { user } = useAuth();
   const { data: coachProfileId } = useCoachProfileId();
+  const { data: coachProfile } = useCoachProfile();
+  
+  // Check if current tier is Founder - Founders skip all reconciliation
+  const isFounder = coachProfile?.subscription_tier === 'founder';
   const queryClient = useQueryClient();
   const [state, setState] = useState<NativeIAPState>({
     isAvailable: false,
@@ -104,8 +109,17 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
    * Reconcile subscription entitlement with RevenueCat
    * Calls the verify-subscription-entitlement edge function to check RevenueCat
    * and reconcile DB state if there's a mismatch
+   * 
+   * CRITICAL: Founders are NEVER reconciled - their tier is immutable and protected
    */
   const reconcileSubscription = useCallback(async () => {
+    // FOUNDER PROTECTION: Skip reconciliation entirely for Founders
+    // Founder tier is permanent and cannot be modified by automated processes
+    if (isFounder) {
+      console.log('[NativeIAP] Skipping reconciliation - Founder tier is immutable');
+      return;
+    }
+
     if (!coachProfileId || !user || reconciliationAttemptedRef.current) {
       return;
     }
@@ -117,6 +131,12 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
       
       if (error) {
         console.error('[NativeIAP] Subscription reconciliation failed:', error);
+        return;
+      }
+
+      // Handle founder_immutable response from edge function
+      if (data?.status === 'founder_immutable') {
+        console.log('[NativeIAP] Edge function confirmed Founder tier is immutable');
         return;
       }
 
@@ -138,13 +158,21 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     } catch (e) {
       console.error('[NativeIAP] Subscription reconciliation exception:', e);
     }
-  }, [coachProfileId, user, queryClient]);
+  }, [coachProfileId, user, queryClient, isFounder]);
 
   /**
    * Auto-reconcile on mount when native IAP is available
    * This recovers from webhook failures or delayed processing
+   * 
+   * CRITICAL: Founders are excluded from auto-reconciliation
    */
   useEffect(() => {
+    // FOUNDER PROTECTION: Skip auto-reconciliation for Founders
+    if (isFounder) {
+      console.log('[NativeIAP] Skipping auto-reconciliation - Founder tier is immutable');
+      return;
+    }
+
     if (state.isAvailable && coachProfileId && user) {
       // Delay slightly to avoid race conditions on app startup
       const timer = setTimeout(() => {
@@ -153,21 +181,26 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
       
       return () => clearTimeout(timer);
     }
-  }, [state.isAvailable, coachProfileId, user, reconcileSubscription]);
+  }, [state.isAvailable, coachProfileId, user, reconcileSubscription, isFounder]);
 
   /**
    * Foreground/resume reconciliation and safety reset
    * When app returns to foreground:
    * 1. Re-check subscription entitlement (handles StoreKit interruptions, slow webhooks)
    * 2. Clear stuck purchasing state if no polling is active
+   * 
+   * CRITICAL: Founders are excluded from visibility-based reconciliation
    */
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        // Reset reconciliation flag and re-check entitlement
-        // This handles: StoreKit interruptions, background purchases, slow webhooks
-        reconciliationAttemptedRef.current = false;
-        reconcileSubscription();
+        // FOUNDER PROTECTION: Skip visibility reconciliation for Founders
+        if (!isFounder) {
+          // Reset reconciliation flag and re-check entitlement
+          // This handles: StoreKit interruptions, background purchases, slow webhooks
+          reconciliationAttemptedRef.current = false;
+          reconcileSubscription();
+        }
         
         // Give callbacks 2 seconds to fire if there's a pending response
         setTimeout(() => {
@@ -184,7 +217,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [reconcileSubscription]);
+  }, [reconcileSubscription, isFounder]);
 
   /**
    * Poll the backend to check if the subscription has been updated via webhook

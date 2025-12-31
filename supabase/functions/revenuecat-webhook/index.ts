@@ -469,6 +469,18 @@ serve(async (req) => {
       case "EXPIRATION": {
         logStep("Processing EXPIRATION", { coachId });
 
+        // CRITICAL: Check if coach is a Founder - Founders are NEVER downgraded automatically
+        const { data: coachData } = await supabase
+          .from("coach_profiles")
+          .select("subscription_tier")
+          .eq("id", coachId)
+          .single();
+
+        if (coachData?.subscription_tier === 'founder') {
+          logStep("FOUNDER PROTECTION: Skipping EXPIRATION downgrade - Founder tier is immutable", { coachId });
+          break;
+        }
+
         // Subscription has fully expired - downgrade to free tier
         const { error: subError } = await supabase
           .from("platform_subscriptions")
@@ -519,6 +531,18 @@ serve(async (req) => {
       case "BILLING_ISSUES_GRACE_PERIOD_EXPIRED": {
         logStep("Processing BILLING_ISSUES_GRACE_PERIOD_EXPIRED", { coachId });
 
+        // CRITICAL: Check if coach is a Founder - Founders are NEVER downgraded automatically
+        const { data: graceCoachData } = await supabase
+          .from("coach_profiles")
+          .select("subscription_tier")
+          .eq("id", coachId)
+          .single();
+
+        if (graceCoachData?.subscription_tier === 'founder') {
+          logStep("FOUNDER PROTECTION: Skipping BILLING_ISSUES_GRACE_PERIOD_EXPIRED downgrade - Founder tier is immutable", { coachId });
+          break;
+        }
+
         // Grace period over - same as EXPIRATION, downgrade to free
         const { error: subError } = await supabase
           .from("platform_subscriptions")
@@ -567,6 +591,18 @@ serve(async (req) => {
           } else {
             logStep("Successfully processed BOOST refund", { coachId });
           }
+          break;
+        }
+
+        // CRITICAL: Check if coach is a Founder - Founders are NEVER downgraded automatically
+        const { data: refundCoachData } = await supabase
+          .from("coach_profiles")
+          .select("subscription_tier")
+          .eq("id", coachId)
+          .single();
+
+        if (refundCoachData?.subscription_tier === 'founder') {
+          logStep("FOUNDER PROTECTION: Skipping REFUND downgrade - Founder tier is immutable", { coachId });
           break;
         }
 
