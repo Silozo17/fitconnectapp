@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useMemo, useCallback, useRef, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useMemo, useCallback, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
@@ -21,21 +21,12 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Debounce delay for focus handlers (prevents rapid re-validation in native)
-const FOCUS_DEBOUNCE_MS = 500;
-// Minimum time between session validations
-const SESSION_VALIDATION_COOLDOWN_MS = 30000;
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<AppRole | null>(null);
   const [allRoles, setAllRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  // Refs for debouncing and cooldown tracking
-  const lastValidationRef = useRef<number>(0);
-  const focusDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchUserRole = async (userId: string) => {
     // Fetch all roles for the user and prioritize by importance
@@ -100,27 +91,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
-    // Handle focus events for Despia native app (debounced + cooldown)
-    const handleFocus = () => {
-      if (!isDespia()) return;
-      
-      // Clear existing debounce timer
-      if (focusDebounceRef.current) {
-        clearTimeout(focusDebounceRef.current);
-      }
-      
-      // Debounce to prevent rapid successive calls
-      focusDebounceRef.current = setTimeout(async () => {
-        const now = Date.now();
-        
-        // Skip if we validated recently (cooldown)
-        if (now - lastValidationRef.current < SESSION_VALIDATION_COOLDOWN_MS) {
-          return;
-        }
-        
-        lastValidationRef.current = now;
+    // Handle focus events for Despia native app
+    const handleFocus = async () => {
+      if (isDespia()) {
         supabase.auth.startAutoRefresh();
-        
         try {
           const { data: { session }, error } = await supabase.auth.getSession();
           
@@ -201,7 +175,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } catch (err) {
           console.error('[Auth] Error handling focus:', err);
         }
-      }, FOCUS_DEBOUNCE_MS);
+      }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -210,8 +184,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Start auto refresh on mount
     supabase.auth.startAutoRefresh();
 
-    // Set up auth state listener FIRST - this handles auth state changes
-    // and will fire immediately with the cached session
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
@@ -227,27 +200,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setAllRoles([]);
         }
         
-        // PERFORMANCE FIX: Set loading=false immediately on auth state change
-        // The onAuthStateChange fires with cached session first, so UI can render
         setLoading(false);
       }
     );
 
-    // PERFORMANCE FIX: Background session validation (non-blocking)
-    // onAuthStateChange already provides the cached session for immediate UI render
-    // This validates the session in the background and refreshes if needed
-    const validateSessionInBackground = async () => {
+    // Check for existing session with validation
+    const initializeSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         
-        // Handle potential JWT errors
+        // Handle potential JWT errors during initialization
         if (error) {
           if (error.message?.includes('JWT') || error.message?.includes('token') || error.message?.includes('claim')) {
+            // Clear any corrupted session data
             await supabase.auth.signOut();
             setSession(null);
             setUser(null);
             setRole(null);
             setAllRoles([]);
+            setLoading(false);
             return;
           }
         }
@@ -263,25 +234,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               setUser(null);
               setRole(null);
               setAllRoles([]);
+              setLoading(false);
+              return;
             }
-            // If refresh succeeded, onAuthStateChange will handle the update
+            setSession(refreshData.session);
+            setUser(refreshData.session.user);
+            if (refreshData.session.user) {
+              fetchUserRole(refreshData.session.user.id);
+            }
+          } else {
+            setSession(session);
+            setUser(session.user ?? null);
+            if (session.user) {
+              fetchUserRole(session.user.id);
+            }
           }
         }
+        
+        setLoading(false);
       } catch (err) {
-        console.error('[Auth] Session validation error:', err);
+        console.error('[Auth] Session initialization error:', err);
+        setLoading(false);
       }
     };
     
-    // Run validation after a small delay to not block initial render
-    const validationTimeout = setTimeout(validateSessionInBackground, 100);
+    initializeSession();
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
-      if (focusDebounceRef.current) {
-        clearTimeout(focusDebounceRef.current);
-      }
-      clearTimeout(validationTimeout);
       supabase.auth.stopAutoRefresh();
       subscription.unsubscribe();
     };

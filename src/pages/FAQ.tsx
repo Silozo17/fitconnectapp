@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import PageLayout from "@/components/layout/PageLayout";
 import BlobShape from "@/components/ui/blob-shape";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -9,7 +8,6 @@ import { MessageCircle } from "lucide-react";
 import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
 import { usePlatformContact } from "@/hooks/usePlatformContact";
 import { useTranslation } from "react-i18next";
-import { Helmet } from "react-helmet-async";
 
 const FAQ = () => {
   const { contact } = usePlatformContact();
@@ -112,35 +110,11 @@ const FAQ = () => {
     }
   ];
 
-  // Generate FAQPage schema for structured data
-  const faqSchema = useMemo(() => {
-    const allFaqs = [...clientFAQs, ...coachFAQs, ...generalFAQs];
-    return {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": allFaqs.map(faq => ({
-        "@type": "Question",
-        "name": faq.question,
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": faq.answer
-        }
-      }))
-    };
-  }, [clientFAQs, coachFAQs, generalFAQs]);
-
   return (
     <PageLayout
       title={t("faq.meta.title")}
       description={t("faq.meta.description")}
     >
-      {/* FAQPage Schema for SEO */}
-      <Helmet>
-        <script type="application/ld+json">
-          {JSON.stringify(faqSchema)}
-        </script>
-      </Helmet>
-
       {/* Decorative Avatar */}
       <DecorativeAvatar 
         avatarSlug="yoga-wolf" 

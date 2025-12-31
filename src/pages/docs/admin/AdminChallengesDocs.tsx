@@ -5,7 +5,7 @@ import { Trophy, Target, Gift, Users } from "lucide-react";
 export default function AdminChallengesDocs() {
   return (
     <DocsLayout
-      title="Challenges Management | Admin Guide"
+      title="Challenges Management"
       description="Create and manage platform-wide fitness challenges."
       breadcrumbs={[{ label: "For Administrators", href: "/docs/admin" }, { label: "Challenges" }]}
       noIndex

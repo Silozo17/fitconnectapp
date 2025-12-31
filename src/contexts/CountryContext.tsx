@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { RouteLocationCode, SUPPORTED_LOCATIONS, isValidLocation, COUNTRY_TO_LOCATION } from "@/lib/locale-routing";
 import { User } from "@supabase/supabase-js";
@@ -220,29 +220,19 @@ interface CountryProviderProps {
 export function CountryProvider({ children }: CountryProviderProps) {
   // Use direct Supabase auth instead of useAuth to avoid circular dependency
   const [user, setUser] = useState<User | null>(null);
-  
-  // PERFORMANCE FIX: Initialize with localStorage immediately to prevent blocking
-  const [countryCode, setCountryCode] = useState<RouteLocationCode>(() => {
-    const storedPref = getStoredCountryPreference();
-    return storedPref?.countryCode || DEFAULT_COUNTRY;
-  });
-  const [detectedCountry, setDetectedCountry] = useState<RouteLocationCode | null>(() => {
-    const storedPref = getStoredCountryPreference();
-    return storedPref?.countryCode || null;
-  });
-  const [isManualOverride, setIsManualOverride] = useState(() => {
-    const storedPref = getStoredCountryPreference();
-    return storedPref?.source === 'manual';
-  });
-  // PERFORMANCE FIX: Start with isLoading=false since we have localStorage values
-  const [isLoading, setIsLoading] = useState(false);
-  
-  // Track if we've already resolved from DB (to prevent duplicate fetches)
-  const hasResolvedFromDb = useRef(false);
+  const [countryCode, setCountryCode] = useState<RouteLocationCode>(DEFAULT_COUNTRY);
+  const [detectedCountry, setDetectedCountry] = useState<RouteLocationCode | null>(null);
+  const [isManualOverride, setIsManualOverride] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Listen to auth state changes directly from Supabase
-  // OPTIMIZED: Only subscribe to onAuthStateChange, no initial getSession call
   useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
@@ -250,49 +240,58 @@ export function CountryProvider({ children }: CountryProviderProps) {
     return () => subscription.unsubscribe();
   }, []);
 
-  // PERFORMANCE FIX: Resolve country in background WITHOUT blocking initial render
-  // Start with localStorage values immediately, then enhance when user/geo data available
+  // Resolve country using priority order
   useEffect(() => {
     const resolveCountry = async () => {
-      // Priority 1: Check for manual override (already set in initial state)
+      setIsLoading(true);
+
+      // Priority 1: Check for manual override in localStorage
       const storedPref = getStoredCountryPreference();
       if (storedPref?.source === 'manual') {
-        // Manual override takes highest priority - already loaded from localStorage
+        // Manual override takes highest priority
+        setCountryCode(storedPref.countryCode);
+        setIsManualOverride(true);
+        setDetectedCountry(storedPref.countryCode);
+        setIsLoading(false);
         return;
       }
 
       // Priority 2: Check saved user preference (DB for logged-in users)
-      if (user?.id && !hasResolvedFromDb.current) {
-        hasResolvedFromDb.current = true;
+      if (user?.id) {
         const dbCountry = await fetchUserCountryPreference(user.id);
         if (dbCountry) {
           setCountryCode(dbCountry);
           setIsManualOverride(false);
           setDetectedCountry(dbCountry);
+          // Also update localStorage for consistency
           setStoredCountryPreference(dbCountry, 'geo');
+          setIsLoading(false);
           return;
         }
       }
 
       // Priority 2b: For unauthenticated users, check localStorage geo preference
       if (!user?.id && storedPref?.source === 'geo') {
-        // Already loaded from localStorage in initial state
+        setCountryCode(storedPref.countryCode);
+        setIsManualOverride(false);
+        setDetectedCountry(storedPref.countryCode);
+        setIsLoading(false);
         return;
       }
 
-      // Priority 3: Geo-detection fallback (only if no cached value exists)
-      if (!storedPref) {
-        const geoCountry = await detectCountryFromGeo();
-        setDetectedCountry(geoCountry);
-        setCountryCode(geoCountry);
-        setIsManualOverride(false);
-        setStoredCountryPreference(geoCountry, 'geo');
-        
-        // For logged-in users, also save to DB
-        if (user?.id) {
-          await saveUserCountryPreference(user.id, geoCountry);
-        }
+      // Priority 3: Geo-detection fallback
+      const geoCountry = await detectCountryFromGeo();
+      setDetectedCountry(geoCountry);
+      setCountryCode(geoCountry);
+      setIsManualOverride(false);
+      setStoredCountryPreference(geoCountry, 'geo');
+      
+      // For logged-in users, also save to DB
+      if (user?.id) {
+        await saveUserCountryPreference(user.id, geoCountry);
       }
+
+      setIsLoading(false);
     };
 
     resolveCountry();

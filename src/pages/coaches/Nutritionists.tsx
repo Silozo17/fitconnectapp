@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { SEOHead } from "@/components/shared/SEOHead";
+import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -64,46 +64,12 @@ const Nutritionists = () => {
     { name: "Lisa Thompson", specialty: t('coachTypes.nutritionists.featured.specialties.plantBased'), rating: 4.9, clients: 150 },
   ];
 
-  // Generate FAQ schema
-  const faqSchema = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": faqs.map(faq => ({
-      "@type": "Question",
-      "name": faq.question,
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": faq.answer
-      }
-    }))
-  };
-
-  // Service schema
-  const serviceSchema = {
-    "@context": "https://schema.org",
-    "@type": "Service",
-    "name": "Nutrition Coaching",
-    "provider": {
-      "@type": "Organization",
-      "name": "FitConnect"
-    },
-    "serviceType": "Nutrition Coaching",
-    "areaServed": {
-      "@type": "Country",
-      "name": "United Kingdom"
-    },
-    "priceRange": "£40-£80"
-  };
-
   return (
     <>
-      <SEOHead
-        title={t('coachTypes.nutritionists.meta.title')}
-        description={t('coachTypes.nutritionists.meta.description')}
-        canonicalPath="/coaches/nutritionists"
-        keywords={["nutritionist UK", "nutrition coach", "dietitian", "meal plan", "sports nutrition"]}
-        schema={[faqSchema, serviceSchema]}
-      />
+      <Helmet>
+        <title>{t('coachTypes.nutritionists.meta.title')}</title>
+        <meta name="description" content={t('coachTypes.nutritionists.meta.description')} />
+      </Helmet>
       
       <div className="min-h-screen bg-background">
         <Navbar />

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Mail, ArrowRight, Zap } from "lucide-react";
+import { Dumbbell, Mail, ArrowRight, Zap } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -114,13 +114,9 @@ const Footer = () => {
           {/* Brand */}
           <div className="col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4 group">
-              <img 
-                src="/pwa-192x192.png" 
-                alt="FitConnect Logo" 
-                width={40}
-                height={40}
-                className="w-10 h-10 rounded-xl group-hover:shadow-glow-sm transition-all duration-300"
-              />
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center group-hover:shadow-glow-sm transition-all duration-300">
+                <Dumbbell className="w-5 h-5 text-primary-foreground" />
+              </div>
               <span className="font-display font-bold text-xl text-foreground">
                 FitConnect
               </span>

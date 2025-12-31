@@ -6,6 +6,7 @@ import { useCoachOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { useCoachProfileRealtime } from "@/hooks/useCoachProfileRealtime";
 import { useDiscoverModal } from "@/hooks/useDiscoverModal";
 import { useAutoAwardCoachBadges } from "@/hooks/useAutoAwardCoachBadges";
+import { Loader2 } from "lucide-react";
 import CoachSidebar from "./CoachSidebar";
 import DashboardHeader from "./DashboardHeader";
 import SkipNavigation from "@/components/shared/SkipNavigation";
@@ -15,7 +16,6 @@ import { ProfilePanelProvider, useProfilePanel } from "@/contexts/ProfilePanelCo
 import ProfilePanel from "@/components/shared/ProfilePanel";
 import CoachProfileSummary from "@/components/dashboard/coach/CoachProfileSummary";
 import { DiscoverModal } from "@/components/discover/DiscoverModal";
-import { DashboardSkeleton } from "./DashboardSkeleton";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -72,20 +72,20 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
     }
   }, [onboardingStatus, isLoading, navigate, justCompletedOnboarding]);
 
-  // OPTIMIZED: Use skeleton instead of spinner for better perceived performance
+  // Show loader during initial loading - but NOT if we just completed onboarding
   if (isLoading && !justCompletedOnboarding) {
     return (
-      <div className="min-h-screen bg-background p-4 lg:p-6">
-        <DashboardSkeleton variant="coach" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
-  // Show skeleton while redirecting to onboarding - but NOT if we just completed
+  // Show loader while redirecting to onboarding - but NOT if we just completed
   if (!onboardingStatus?.isOnboarded && !justCompletedOnboarding) {
     return (
-      <div className="min-h-screen bg-background p-4 lg:p-6">
-        <DashboardSkeleton variant="coach" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }

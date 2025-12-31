@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { SEOHead } from "@/components/shared/SEOHead";
+import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -105,36 +105,12 @@ const SuccessStories = () => {
     ? stories 
     : stories.filter(s => s.category === activeFilter);
 
-  // Review schema for testimonials
-  const reviewSchema = {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    "name": "FitConnect Client Success Stories",
-    "itemListElement": stories.slice(0, 3).map((story, index) => ({
-      "@type": "Review",
-      "position": index + 1,
-      "reviewBody": story.quote,
-      "author": {
-        "@type": "Person",
-        "name": story.name
-      },
-      "reviewRating": {
-        "@type": "Rating",
-        "ratingValue": story.rating,
-        "bestRating": 5
-      }
-    }))
-  };
-
   return (
     <>
-      <SEOHead
-        title={t('successStories.meta.title')}
-        description={t('successStories.meta.description')}
-        canonicalPath="/success-stories"
-        keywords={["fitness transformation stories", "weight loss success", "PT results", "client testimonials", "before after fitness"]}
-        schema={reviewSchema}
-      />
+      <Helmet>
+        <title>{t('successStories.meta.title')}</title>
+        <meta name="description" content={t('successStories.meta.description')} />
+      </Helmet>
       
       <div className="min-h-screen bg-background relative">
         <Navbar />

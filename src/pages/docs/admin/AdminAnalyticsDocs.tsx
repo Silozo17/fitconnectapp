@@ -5,7 +5,7 @@ import { BarChart3, Users, TrendingUp, Activity } from "lucide-react";
 export default function AdminAnalyticsDocs() {
   return (
     <DocsLayout
-      title="Platform Analytics | Admin Guide"
+      title="Platform Analytics"
       description="Track user growth, engagement, and platform health metrics."
       breadcrumbs={[{ label: "For Administrators", href: "/docs/admin" }, { label: "Analytics" }]}
       noIndex

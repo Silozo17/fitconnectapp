@@ -1,7 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import PageLoadingSpinner from "@/components/shared/PageLoadingSpinner";
-import { useRef, useEffect, useState } from "react";
 
 interface GuestOnlyRouteProps {
   children: React.ReactNode;
@@ -9,31 +8,13 @@ interface GuestOnlyRouteProps {
 
 const GuestOnlyRoute = ({ children }: GuestOnlyRouteProps) => {
   const { user, role, loading } = useAuth();
-  const hasRenderedContent = useRef(false);
-  const [minLoadingComplete, setMinLoadingComplete] = useState(false);
 
-  // Prevent flash by ensuring minimum loading time on first render
-  useEffect(() => {
-    if (!hasRenderedContent.current && loading) {
-      const timer = setTimeout(() => {
-        setMinLoadingComplete(true);
-      }, 100); // Brief minimum to prevent flash
-      return () => clearTimeout(timer);
-    } else {
-      setMinLoadingComplete(true);
-    }
-  }, [loading]);
-
-  // Show loading only during actual loading state
-  if (loading && !minLoadingComplete) {
+  if (loading) {
     return <PageLoadingSpinner />;
   }
 
   // If user is authenticated, redirect to their role-based dashboard
   if (user) {
-    // Mark that we've rendered content before redirect
-    hasRenderedContent.current = true;
-    
     if (role === "admin" || role === "manager" || role === "staff") {
       return <Navigate to="/dashboard/admin" replace />;
     } else if (role === "coach") {
@@ -44,7 +25,6 @@ const GuestOnlyRoute = ({ children }: GuestOnlyRouteProps) => {
   }
 
   // Not authenticated, show the guest-only content
-  hasRenderedContent.current = true;
   return <>{children}</>;
 };
 

@@ -34,7 +34,6 @@ const Blog = lazy(() => import('@/pages/Blog'));
 const BlogPost = lazy(() => import('@/pages/BlogPost'));
 const Checkout = lazy(() => import('@/pages/Checkout'));
 const Install = lazy(() => import('@/pages/Install'));
-const TrustAndVerification = lazy(() => import('@/pages/TrustAndVerification'));
 
 // Coach category pages
 const PersonalTrainers = lazy(() => import('@/pages/coaches/PersonalTrainers'));
@@ -76,7 +75,6 @@ function PageRoutes() {
       <Route path="blog" element={<Blog />} />
       <Route path="blog/:slug" element={<BlogPost />} />
       <Route path="install" element={<Install />} />
-      <Route path="trust-and-verification" element={<TrustAndVerification />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
@@ -149,7 +147,6 @@ export function WebsiteRouter() {
           <Route path="blog" element={<Blog />} />
           <Route path="blog/:slug" element={<BlogPost />} />
           <Route path="install" element={<Install />} />
-          <Route path="trust-and-verification" element={<TrustAndVerification />} />
           
           <Route path="*" element={<NotFound />} />
         </Routes>

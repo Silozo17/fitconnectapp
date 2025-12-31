@@ -10,12 +10,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { getCountryNameFromCode } from '@/lib/location-utils';
-import { isDespia } from '@/lib/despia';
 import type { LocationData, LocationMatchLevel } from '@/types/ranking';
 import type { MarketplaceCoach } from '@/hooks/useCoachMarketplace';
 
 const FEATURED_COACH_LIMIT = 4;
-const EMPTY_COACHES: MarketplaceCoach[] = [];
 
 interface UseFeaturedCoachesOptions {
   userLocation: LocationData | null;
@@ -133,9 +131,6 @@ export function useFeaturedCoaches({ userLocation, countryCode, enabled = true }
       return coaches;
     },
     staleTime: 1000 * 60 * 2, // 2 minutes
-    // OPTIMIZED: Reduce refetching in native apps
-    refetchOnWindowFocus: !isDespia(),
-    placeholderData: EMPTY_COACHES, // Prevents loading flash
   });
 
   // Location label: prefer country name from countryCode when filtering by country

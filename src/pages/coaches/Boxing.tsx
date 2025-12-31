@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { SEOHead } from "@/components/shared/SEOHead";
+import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -64,46 +64,12 @@ const Boxing = () => {
     { name: "Sarah Jones", specialty: t('coachTypes.boxing.featured.specialties.womens'), rating: 4.9, experience: t('coachTypes.boxing.featured.experience', { years: 15 }) },
   ];
 
-  // Generate FAQ schema
-  const faqSchema = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": faqs.map(faq => ({
-      "@type": "Question",
-      "name": faq.question,
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": faq.answer
-      }
-    }))
-  };
-
-  // Service schema
-  const serviceSchema = {
-    "@context": "https://schema.org",
-    "@type": "Service",
-    "name": "Boxing Training",
-    "provider": {
-      "@type": "Organization",
-      "name": "FitConnect"
-    },
-    "serviceType": "Boxing Training",
-    "areaServed": {
-      "@type": "Country",
-      "name": "United Kingdom"
-    },
-    "priceRange": "£40-£80"
-  };
-
   return (
     <>
-      <SEOHead
-        title={t('coachTypes.boxing.meta.title')}
-        description={t('coachTypes.boxing.meta.description')}
-        canonicalPath="/coaches/boxing"
-        keywords={["boxing coach UK", "learn boxing", "boxing training", "boxing lessons", "boxing fitness"]}
-        schema={[faqSchema, serviceSchema]}
-      />
+      <Helmet>
+        <title>{t('coachTypes.boxing.meta.title')}</title>
+        <meta name="description" content={t('coachTypes.boxing.meta.description')} />
+      </Helmet>
       
       <div className="min-h-screen bg-background">
         <Navbar />

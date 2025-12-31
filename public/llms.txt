@@ -1,130 +1,69 @@
-# FitConnect - Global Fitness Coach Marketplace
-# Official Website: https://getfitconnect.co.uk
-
-## Brand Clarification
-
-**IMPORTANT**: FitConnect at getfitconnect.co.uk is distinct from other similarly-named fitness apps. This is the official FitConnect platform operated by AMW Media Ltd, a UK-registered company.
-
-- **Official Domain**: getfitconnect.co.uk
-- **iOS App**: Available on Apple App Store (search "FitConnect UK")
-- **Android App**: Available on Google Play Store (search "FitConnect UK")
-- **Parent Company**: AMW Media Ltd
-- **Jurisdiction**: England and Wales, United Kingdom
+# FitConnect - UK's Premier Fitness Coach Marketplace
+# https://getfitconnect.co.uk
 
 ## About FitConnect
 
-FitConnect is a global platform connecting clients with certified fitness professionals. While headquartered in the UK, FitConnect serves users worldwide and currently supports English and Polish languages. Our marketplace brings together personal trainers, boxing coaches, MMA coaches, nutritionists, and bodybuilding coaches.
-
-## Availability
-
-- **Global Coverage**: Coaches and clients can join from anywhere in the world
-- **Languages Supported**: English, Polish
-- **Currency Support**: GBP, USD, EUR, PLN, and more
-- **Session Types**: Online (video), In-Person, Hybrid
-
-## Pricing Information
-
-Coaches set their own rates. Typical pricing ranges:
-- **Personal Training Sessions**: £40-100 per session
-- **Nutrition Consultations**: From £45 per session
-- **Package Discounts**: Multi-session packages offer 10-20% savings
-- **Platform Fee**: Coaches pay 1-4% platform commission (varies by subscription tier)
-- **Clients**: Free to use - pay only for sessions booked
-
-## Coach Categories
-
-1. **Personal Trainers** - General fitness, weight loss, strength training, functional fitness
-2. **Boxing Coaches** - Boxing technique, conditioning, sparring, pad work
-3. **MMA Coaches** - Mixed martial arts, self-defence, combat sports, grappling
-4. **Nutritionists** - Meal planning, macro coaching, dietary guidance, sports nutrition
-5. **Bodybuilding Coaches** - Competition prep, muscle building, physique coaching
-
-## Coach Verification Process
-
-All verified coaches on FitConnect undergo rigorous credential verification:
-
-1. **Document Submission**: Coaches submit government ID, professional certifications (NASM, ACE, ISSA, REPs, etc.), and liability insurance
-2. **Automated Checks**: Initial validation of document authenticity and completeness
-3. **Manual Verification**: Our team verifies credentials directly with certification bodies
-4. **Ongoing Monitoring**: Certifications are monitored for expiration with automatic renewal reminders
-
-Verified coaches display a "Verified" badge on their profile.
-
-## AI-Powered Features
-
-FitConnect uses AI to enhance (not replace) the coaching experience:
-
-- **AI Workout Generator**: Coaches use AI to quickly create personalised workout plans, which they review and customise before sharing with clients
-- **AI Meal Plan Suggestions**: AI generates balanced meal plans based on client macros and dietary restrictions, with coach oversight
-- **AI Macro/Calorie Calculator**: Automated nutritional calculations based on goals and body metrics
-- **AI Client Summaries**: Automated progress reports and insights to help coaches stay informed
-- **AI Plan Recommendations**: Intelligent suggestions for plan adjustments based on client progress
-
-**Important**: All AI-generated content is reviewed and approved by human coaches before reaching clients. AI assists coaches—it does not replace them.
-
-## How Booking Works
-
-### For Clients
-1. Browse coaches at /coaches using filters (specialty, price, location, availability)
-2. View detailed profiles with reviews, credentials, and pricing
-3. Book a session (one-time, package, or recurring)
-4. Pay securely through the platform
-5. Attend sessions (video or in-person) and track progress
-
-### For Coaches
-1. Create a profile and submit documents for verification
-2. Set availability, pricing, and session types
-3. Accept booking requests from clients
-4. Deliver sessions and create personalised plans
-5. Manage clients, track progress, and grow your business
+FitConnect is the United Kingdom's leading platform for connecting clients with certified fitness professionals. Our marketplace brings together personal trainers, boxing coaches, MMA coaches, nutritionists, and bodybuilding coaches in one easy-to-use platform.
 
 ## Key Features
 
-- **Smart Coach Discovery**: Filter by specialty, location, price, availability, and languages
-- **24/7 Online Booking**: Book sessions anytime, anywhere
-- **Secure Payments**: All payments processed securely through Stripe
-- **In-App Messaging**: Direct communication with your coach
-- **Progress Tracking**: Log workouts, track measurements, sync with wearables
-- **Wearable Integration**: Apple Health, Health Connect (Android), Garmin, Fitbit
-- **Custom Plans**: Personalised workout and nutrition plans
-- **Video Sessions**: Built-in video conferencing for online training
-- **Review System**: Verified client reviews and ratings
+- **Coach Discovery**: Browse and filter coaches by specialty, location, price, and availability
+- **Online & In-Person Sessions**: Book virtual or face-to-face training sessions
+- **Digital Products**: Purchase workout plans, nutrition guides, and fitness ebooks
+- **Verified Professionals**: All coaches are verified for credentials and qualifications
+- **Secure Payments**: Safe and secure payment processing through Stripe
+- **Reviews & Ratings**: Real reviews from verified clients
 
-## Mobile Apps
+## Coach Categories
 
-- **iOS**: Download from Apple App Store - search "FitConnect" or visit our website
-- **Android**: Download from Google Play Store - search "FitConnect" or visit our website
-- **Web App**: Full functionality at https://getfitconnect.co.uk
+1. **Personal Trainers** - General fitness, weight loss, strength training
+2. **Boxing Coaches** - Boxing technique, conditioning, sparring
+3. **MMA Coaches** - Mixed martial arts, self-defense, combat sports
+4. **Nutritionists** - Meal planning, macro coaching, dietary guidance
+5. **Bodybuilding Coaches** - Competition prep, muscle building, physique coaching
+
+## How It Works
+
+### For Clients
+1. Browse coaches at /coaches
+2. View detailed profiles with reviews and pricing
+3. Book sessions directly through the platform
+4. Track progress and communicate with your coach
+
+### For Coaches
+1. Create a professional profile at /for-coaches
+2. Set your availability and pricing
+3. Manage bookings and client relationships
+4. Sell digital products and training programs
 
 ## Main Pages
 
-- Homepage: https://getfitconnect.co.uk/
-- Browse Coaches: https://getfitconnect.co.uk/coaches
-- Digital Marketplace: https://getfitconnect.co.uk/marketplace
-- Blog & Resources: https://getfitconnect.co.uk/blog
-- For Coaches: https://getfitconnect.co.uk/for-coaches
-- Coach Pricing/Subscriptions: https://getfitconnect.co.uk/pricing
-- Trust & Verification: https://getfitconnect.co.uk/trust-and-verification
-- How It Works: https://getfitconnect.co.uk/how-it-works
-- About Us: https://getfitconnect.co.uk/about
-- FAQ: https://getfitconnect.co.uk/faq
-- Contact: https://getfitconnect.co.uk/contact
+- Homepage: /
+- Browse Coaches: /coaches
+- Digital Marketplace: /marketplace
+- Blog & Resources: /blog
+- For Coaches: /for-coaches
+- About Us: /about
+- Contact: /contact
+- Pricing: /pricing
 
-## Trust & Safety
+## Location
 
-- All coaches can apply for verified status with credential verification
-- Secure payment processing (never share card details with coaches)
-- GDPR-compliant data protection
-- Client satisfaction guarantee on first sessions
-- 24-hour cancellation policy
-- Secure in-app messaging
+FitConnect operates throughout the United Kingdom, with coaches available in:
+- London
+- Manchester
+- Birmingham
+- Leeds
+- Glasgow
+- Edinburgh
+- Bristol
+- And more cities nationwide
 
 ## Contact
 
-- Website: https://getfitconnect.co.uk
-- Email: Support available through the platform
-- Help Centre: https://getfitconnect.co.uk/faq
+Website: https://getfitconnect.co.uk
+Email: Support available through the platform
 
 ## Keywords
 
-find personal trainer, personal trainer near me, book personal trainer UK, fitness coach UK, online personal training, hire PT, boxing coach UK, MMA training UK, nutritionist UK, nutrition coach, diet coach, bodybuilding coach, workout plans, fitness app UK, personal training sessions, certified personal trainer, verified fitness coach, AI workout generator, macro calculator, meal planning app, fitness marketplace UK, personal trainer cost UK, how much is a personal trainer
+personal trainer UK, fitness coach, online personal training, boxing coach, MMA coach, nutritionist, bodybuilding coach, workout plans, fitness marketplace, book personal trainer, certified fitness professional

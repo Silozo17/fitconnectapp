@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import PageLayout from "@/components/layout/PageLayout";
 import BlobShape from "@/components/ui/blob-shape";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +10,6 @@ import { cn } from "@/lib/utils";
 import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
 import { useCountry } from "@/hooks/useCountry";
 import { useTranslation } from "@/hooks/useTranslation";
-import { Helmet } from "react-helmet-async";
 import { 
   getPricingConfig, 
   getSubscriptionPrice, 
@@ -157,108 +156,11 @@ const Pricing = () => {
     return <span className="text-sm font-medium">{value}</span>;
   };
 
-  // Generate Offer schema for structured data
-  const pricingSchema = useMemo(() => ({
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": "FitConnect Coach Subscription Pricing",
-    "description": "Subscription plans for fitness coaches on FitConnect. From free to enterprise, choose the plan that fits your coaching business.",
-    "mainEntity": {
-      "@type": "ItemList",
-      "itemListElement": [
-        {
-          "@type": "Offer",
-          "name": "FitConnect Free Plan",
-          "description": "Start your coaching journey with up to 3 clients, basic features included",
-          "price": "0",
-          "priceCurrency": "GBP",
-          "category": "Coach Subscription"
-        },
-        {
-          "@type": "Offer",
-          "name": "FitConnect Starter Plan",
-          "description": "Grow your business with up to 10 clients and marketing tools",
-          "price": "9.99",
-          "priceCurrency": "GBP",
-          "priceSpecification": {
-            "@type": "UnitPriceSpecification",
-            "price": "9.99",
-            "priceCurrency": "GBP",
-            "billingDuration": "P1M"
-          },
-          "category": "Coach Subscription"
-        },
-        {
-          "@type": "Offer",
-          "name": "FitConnect Pro Plan",
-          "description": "Full-featured plan with AI tools, automations, and up to 50 clients",
-          "price": "24.99",
-          "priceCurrency": "GBP",
-          "priceSpecification": {
-            "@type": "UnitPriceSpecification",
-            "price": "24.99",
-            "priceCurrency": "GBP",
-            "billingDuration": "P1M"
-          },
-          "category": "Coach Subscription"
-        },
-        {
-          "@type": "Offer",
-          "name": "FitConnect Enterprise Plan",
-          "description": "Unlimited clients, advanced AI, and premium features for scaling coaches",
-          "price": "49.99",
-          "priceCurrency": "GBP",
-          "priceSpecification": {
-            "@type": "UnitPriceSpecification",
-            "price": "49.99",
-            "priceCurrency": "GBP",
-            "billingDuration": "P1M"
-          },
-          "category": "Coach Subscription"
-        }
-      ]
-    }
-  }), []);
-
-  // Session pricing schema for client-facing info
-  const sessionPricingSchema = useMemo(() => ({
-    "@context": "https://schema.org",
-    "@type": "Service",
-    "name": "FitConnect Personal Training Sessions",
-    "description": "Book sessions with verified fitness coaches. Coaches set their own rates.",
-    "provider": {
-      "@type": "Organization",
-      "name": "FitConnect",
-      "url": "https://getfitconnect.co.uk"
-    },
-    "areaServed": {
-      "@type": "Place",
-      "name": "Worldwide"
-    },
-    "offers": {
-      "@type": "AggregateOffer",
-      "lowPrice": "40",
-      "highPrice": "100",
-      "priceCurrency": "GBP",
-      "offerCount": "500+",
-      "description": "Personal training sessions typically range from £40-100 per session. Coaches set their own rates."
-    }
-  }), []);
-
   return (
     <PageLayout
       title={t('pricing.meta.title')}
       description={t('pricing.meta.description')}
     >
-      {/* Structured Data for SEO */}
-      <Helmet>
-        <script type="application/ld+json">
-          {JSON.stringify(pricingSchema)}
-        </script>
-        <script type="application/ld+json">
-          {JSON.stringify(sessionPricingSchema)}
-        </script>
-      </Helmet>
       {/* Decorative Avatars - placed at PageLayout level */}
       <DecorativeAvatar 
         avatarSlug="bodybuilder-bull" 

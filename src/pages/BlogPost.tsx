@@ -52,28 +52,21 @@ export default function BlogPost() {
 
   if (isLoading) {
     return (
-      <>
-        <SEOHead
-          title="Loading Article | FitConnect Blog"
-          description="Loading fitness article..."
-          noIndex={true}
-        />
-        <div className="min-h-screen bg-background">
-          <Navbar />
-          <main className="pt-24 pb-16">
-            <div className="container mx-auto px-4 max-w-4xl">
-              <Skeleton className="h-8 w-32 mb-4" />
-              <Skeleton className="h-12 w-full mb-4" />
-              <Skeleton className="h-6 w-64 mb-8" />
-              <Skeleton className="h-96 w-full rounded-2xl mb-8" />
-              <Skeleton className="h-4 w-full mb-2" />
-              <Skeleton className="h-4 w-full mb-2" />
-              <Skeleton className="h-4 w-3/4" />
-            </div>
-          </main>
-          <Footer />
-        </div>
-      </>
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="pt-24 pb-16">
+          <div className="container mx-auto px-4 max-w-4xl">
+            <Skeleton className="h-8 w-32 mb-4" />
+            <Skeleton className="h-12 w-full mb-4" />
+            <Skeleton className="h-6 w-64 mb-8" />
+            <Skeleton className="h-96 w-full rounded-2xl mb-8" />
+            <Skeleton className="h-4 w-full mb-2" />
+            <Skeleton className="h-4 w-full mb-2" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
+        </main>
+        <Footer />
+      </div>
     );
   }
 

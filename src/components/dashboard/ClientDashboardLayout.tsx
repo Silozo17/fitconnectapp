@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useClientOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { useDiscoverModal } from "@/hooks/useDiscoverModal";
 import { useAutoAwardClientBadges } from "@/hooks/useAutoAwardClientBadges";
+import { Loader2 } from "lucide-react";
 import ClientSidebar from "./ClientSidebar";
 import ClientDashboardHeader from "./ClientDashboardHeader";
 import SkipNavigation from "@/components/shared/SkipNavigation";
@@ -14,7 +15,6 @@ import { ProfilePanelProvider, useProfilePanel } from "@/contexts/ProfilePanelCo
 import ProfilePanel from "@/components/shared/ProfilePanel";
 import ClientProfileSummary from "@/components/dashboard/client/ClientProfileSummary";
 import { DiscoverModal } from "@/components/discover/DiscoverModal";
-import { DashboardSkeleton } from "./DashboardSkeleton";
 
 interface ClientDashboardLayoutProps {
   children: React.ReactNode;
@@ -57,20 +57,20 @@ const ClientDashboardLayoutInner = memo(({
     }
   }, [onboardingStatus, isLoading, navigate, justCompletedOnboarding]);
 
-  // OPTIMIZED: Use skeleton instead of spinner for better perceived performance
+  // Show loading only if actually loading and not just completed onboarding
   if (isLoading && !justCompletedOnboarding) {
     return (
-      <div className="min-h-screen bg-background p-4 lg:p-6">
-        <DashboardSkeleton variant="client" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
-  // Guard: if not onboarded and not just completed, show skeleton (redirect will happen)
+  // Guard: if not onboarded and not just completed, show loading (redirect will happen)
   if (!onboardingStatus?.isOnboarded && !justCompletedOnboarding) {
     return (
-      <div className="min-h-screen bg-background p-4 lg:p-6">
-        <DashboardSkeleton variant="client" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }

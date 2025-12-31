@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { SEOHead } from "@/components/shared/SEOHead";
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Dumbbell, Apple, Trophy, Users } from "lucide-react";
 
@@ -51,12 +51,10 @@ const GetStarted = () => {
 
   return (
     <>
-      <SEOHead
-        title="Get Started with FitConnect | Free Fitness Coaching App"
-        description="Create your free FitConnect account. Connect with personal trainers, nutritionists and boxing coaches. Start your transformation today."
-        canonicalPath="/get-started"
-        keywords={["fitness coaching app", "personal trainer app", "get started fitness", "workout app UK"]}
-      />
+      <Helmet>
+        <title>Get Started | FitConnect</title>
+        <meta name="description" content="Start your fitness journey with FitConnect. Find coaches, get personalized plans, and track your progress." />
+      </Helmet>
 
       <div className="h-dvh bg-background flex flex-col overflow-hidden">
         {/* Main content */}

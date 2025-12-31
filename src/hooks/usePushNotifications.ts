@@ -147,17 +147,17 @@ export const usePushNotifications = () => {
   }, [user]);
 
   // Single initialization effect - combines external ID setting and registration
-  // PERFORMANCE FIX: Defer push notification initialization in Despia native
-  // to avoid blocking critical app startup path
   useEffect(() => {
     const initializePush = async () => {
       // Skip if not in Despia or no user
       if (!user || !isDespia()) {
+        console.log("[Push] Skipping init - user:", !!user, "isDespia:", isDespia());
         return;
       }
 
       // Prevent double initialization
       if (initializationRef.current) {
+        console.log("[Push] Already initialized, skipping");
         return;
       }
       initializationRef.current = true;
@@ -166,6 +166,7 @@ export const usePushNotifications = () => {
 
       // Step 1: Always set external user ID first (links user to device in OneSignal)
       try {
+        console.log("[Push] Step 1: Setting external user ID");
         await despia(`setonesignalplayerid://?user_id=${user.id}`);
         console.log("[Push] External user ID set successfully");
       } catch (error) {
@@ -174,6 +175,7 @@ export const usePushNotifications = () => {
       }
 
       // Step 2: Check existing registration directly from database
+      console.log("[Push] Step 2: Checking existing registration");
       const { data: existingTokens } = await supabase
         .from("push_tokens")
         .select("id, player_id")
@@ -182,28 +184,23 @@ export const usePushNotifications = () => {
         .limit(1);
 
       const hasActiveToken = !!(existingTokens && existingTokens.length > 0);
+      console.log("[Push] Has active token:", hasActiveToken, existingTokens);
       setIsRegistered(hasActiveToken);
 
       // Step 3: Register device if not already registered
       if (!hasActiveToken) {
+        console.log("[Push] Step 3: No active token, registering device...");
         const result = await registerForPush();
         console.log("[Push] Registration result:", result);
+      } else {
+        console.log("[Push] Step 3: Already registered, skipping");
       }
     };
 
-    // PERFORMANCE FIX: Delay push notification init by 2 seconds in Despia
-    // This allows critical UI to render first
-    let timeoutId: NodeJS.Timeout | null = null;
-    
-    if (user && isDespia()) {
-      timeoutId = setTimeout(initializePush, 2000);
-    }
+    initializePush();
 
     // Reset initialization flag when user changes (logout/login)
     return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
       initializationRef.current = false;
     };
   }, [user, registerForPush]);

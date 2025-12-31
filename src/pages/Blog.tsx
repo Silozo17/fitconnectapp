@@ -70,12 +70,11 @@ export default function Blog() {
   return (
     <>
       <SEOHead
-        title="Fitness Blog | Training Tips & Nutrition Advice"
-        description="Expert fitness articles from FitConnect coaches. Workout tips, nutrition guides, training advice and industry insights to help you reach your goals."
+        title="Fitness Blog - Expert Workout Tips, Nutrition Guides & Coaching Advice"
+        description="Discover expert fitness advice, workout tips, nutrition guides, and personal training insights. Learn from top coaches and transform your health journey with FitConnect."
         canonicalPath="/blog"
-        keywords={["fitness blog", "personal training tips", "workout advice UK", "nutrition articles", "fitness tips"]}
+        keywords={["fitness blog", "workout tips", "nutrition advice", "personal training", "fitness guides", "exercise tips"]}
         schema={[blogSchema, breadcrumbSchema]}
-        noIndex={isLoading}
       />
 
       <div className="min-h-screen bg-background">

@@ -17,7 +17,6 @@ const RouteRestorer = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const hasRestored = useRef(false);
-  const navigationInProgress = useRef(false);
 
   // Track route changes for future restoration
   useRouteRestoration();
@@ -25,7 +24,7 @@ const RouteRestorer = () => {
   // Handle route restoration for authenticated users
   useEffect(() => {
     // CRITICAL: Wait for BOTH auth AND AdminContext to be fully ready
-    if (loading || isLoadingProfiles || hasRestored.current || navigationInProgress.current) return;
+    if (loading || isLoadingProfiles || hasRestored.current) return;
 
     // Only restore for authenticated users
     if (user && role) {
@@ -36,13 +35,12 @@ const RouteRestorer = () => {
       // This prevents redundant navigation that could cause flicker
       const currentViewMode = getViewModeFromPath(currentPath);
       if (currentViewMode === activeProfileType) {
+        console.log('[RouteRestorer] Current path already matches active profile type:', activeProfileType);
         hasRestored.current = true;
         return;
       }
 
-      // Paths that should trigger restoration - CONSOLIDATED logic
-      // Native app: restore from /, /auth, /get-started, /dashboard
-      // Web: restore from /auth, /get-started only (/ shows landing page)
+      // Paths that should trigger restoration
       const shouldRestore = isNativeApp
         ? currentPath === "/" || currentPath === "/auth" || currentPath === "/get-started" || currentPath === "/dashboard"
         : currentPath === "/auth" || currentPath === "/get-started";
@@ -52,29 +50,22 @@ const RouteRestorer = () => {
         const restoredRoute = getRestoredRoute(role);
         
         if (restoredRoute && restoredRoute !== currentPath) {
-          navigationInProgress.current = true;
+          console.log('[RouteRestorer] Navigating to restored route:', restoredRoute);
           // Sync view state before navigating
           const viewMode = getViewModeFromPath(restoredRoute);
           if (viewMode) {
             saveViewState(viewMode);
           }
-          // Defer navigation to next frame to prevent race conditions
-          requestAnimationFrame(() => {
-            navigate(restoredRoute, { replace: true });
-            navigationInProgress.current = false;
-          });
+          navigate(restoredRoute, { replace: true });
         } else if (isNativeApp && !restoredRoute) {
           // No saved route but authenticated in native app - go to best dashboard
           const defaultRoute = getBestDashboardRoute(role);
-          navigationInProgress.current = true;
+          console.log('[RouteRestorer] No restored route, navigating to default:', defaultRoute);
           const viewMode = getViewModeFromPath(defaultRoute);
           if (viewMode) {
             saveViewState(viewMode);
           }
-          requestAnimationFrame(() => {
-            navigate(defaultRoute, { replace: true });
-            navigationInProgress.current = false;
-          });
+          navigate(defaultRoute, { replace: true });
         }
       }
 

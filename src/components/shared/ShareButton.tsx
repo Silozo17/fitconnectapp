@@ -1,4 +1,4 @@
-import { useState, forwardRef } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -18,14 +18,14 @@ interface ShareButtonProps {
   className?: string;
 }
 
-export const ShareButton = forwardRef<HTMLButtonElement, ShareButtonProps>(({ 
+export function ShareButton({ 
   title,
   text,
   url,
   variant = 'outline',
   size = 'sm',
   className = ''
-}, ref) => {
+}: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
   const { share, triggerNativeShare, shouldShowNativeButton, isDespia } = useShareManager();
 
@@ -95,6 +95,4 @@ export const ShareButton = forwardRef<HTMLButtonElement, ShareButtonProps>(({
       </DropdownMenuContent>
     </DropdownMenu>
   );
-});
-
-ShareButton.displayName = "ShareButton";
+}

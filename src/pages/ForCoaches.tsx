@@ -114,27 +114,10 @@ const ForCoaches = () => {
     }
   ];
 
-  // HowTo schema for becoming a coach
-  const howToSchema = {
-    "@context": "https://schema.org",
-    "@type": "HowTo",
-    "name": "How to Become a Coach on FitConnect",
-    "description": "Apply to become a verified fitness coach on FitConnect and grow your business",
-    "step": steps.map((step, index) => ({
-      "@type": "HowToStep",
-      "position": index + 1,
-      "name": step.title,
-      "text": step.description
-    }))
-  };
-
   return (
     <PageLayout
       title={t("forCoaches.title")}
       description={t("forCoaches.metaDescription")}
-      canonicalPath="/for-coaches"
-      keywords={["become a personal trainer", "grow coaching business", "PT platform", "fitness business"]}
-      schema={howToSchema}
     >
       {/* Decorative Avatar */}
       <DecorativeAvatar 

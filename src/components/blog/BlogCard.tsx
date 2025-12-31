@@ -1,4 +1,3 @@
-import { forwardRef } from "react";
 import { Link } from "react-router-dom";
 import { Calendar, Clock, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +21,7 @@ interface BlogCardProps {
   featured?: boolean;
 }
 
-export const BlogCard = forwardRef<HTMLAnchorElement, BlogCardProps>(({ post, featured = false }, ref) => {
+export function BlogCard({ post, featured = false }: BlogCardProps) {
   const categoryColors: Record<string, string> = {
     "Workout Apps": "bg-primary/20 text-primary",
     "Personal Training": "bg-accent/20 text-accent",
@@ -100,6 +99,4 @@ export const BlogCard = forwardRef<HTMLAnchorElement, BlogCardProps>(({ post, fe
       </div>
     </Link>
   );
-});
-
-BlogCard.displayName = "BlogCard";
+}

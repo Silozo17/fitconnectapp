@@ -161,8 +161,8 @@ const clientGuides = [
 export default function ClientOverview() {
   return (
     <DocsLayout
-      title="Client Guide | Using FitConnect App"
-      description="Learn how to find coaches, book sessions, track progress and achieve your fitness goals with FitConnect."
+      title="Client Documentation"
+      description="Everything you need to know about using FitConnect as a client."
       breadcrumbs={[{ label: "For Clients" }]}
     >
       {/* Introduction */}

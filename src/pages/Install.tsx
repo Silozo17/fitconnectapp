@@ -21,7 +21,6 @@ const Install = () => {
         <Helmet>
           <title>FitConnect Installed | You're All Set</title>
           <meta name="description" content="FitConnect is installed on your device. Enjoy quick access to your fitness coaching platform." />
-          <meta name="robots" content="noindex" />
         </Helmet>
         
         <Card className="max-w-md w-full text-center">
@@ -46,11 +45,10 @@ const Install = () => {
 
   return (
     <div className="min-h-screen bg-background">
-        <Helmet>
-          <title>Download FitConnect | Free Fitness App UK</title>
-          <meta name="description" content="Download FitConnect free on iOS and Android. Find personal trainers, track workouts and achieve your fitness goals. Rated 4.8 stars." />
-          <meta name="keywords" content="fitness app download, personal trainer app, workout app UK, iOS fitness app, Android fitness app" />
-        </Helmet>
+      <Helmet>
+        <title>Install FitConnect | Add to Home Screen</title>
+        <meta name="description" content="Install FitConnect on your device for quick access to fitness coaching, offline support, and push notifications." />
+      </Helmet>
 
       <div className="container max-w-2xl mx-auto px-4 py-8">
         {/* Header */}

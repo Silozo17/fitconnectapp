@@ -1,4 +1,3 @@
-import { forwardRef } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { getAvatarImageUrl } from "@/hooks/useAvatars";
@@ -51,20 +50,17 @@ const SQUIRCLE_CLIP_PATHS = {
 const SQUIRCLE_GRADIENT = 'bg-gradient-to-br from-cyan-400 via-emerald-400 to-lime-400';
 const SQUIRCLE_GLOW = 'shadow-[0_0_30px_rgba(0,255,170,0.5)]';
 
-export const UserAvatar = forwardRef<HTMLDivElement, UserAvatarProps>(function UserAvatar(
-  { 
-    src, 
-    avatarSlug, 
-    avatarRarity,
-    name, 
-    className, 
-    fallbackClassName,
-    showRarityBorder = false,
-    variant = 'circle',
-    size = 'md'
-  },
-  ref
-) {
+export const UserAvatar = ({ 
+  src, 
+  avatarSlug, 
+  avatarRarity,
+  name, 
+  className, 
+  fallbackClassName,
+  showRarityBorder = false,
+  variant = 'circle',
+  size = 'md'
+}: UserAvatarProps) => {
   const getInitials = () => {
     if (!name) return "?";
     return name
@@ -118,7 +114,7 @@ export const UserAvatar = forwardRef<HTMLDivElement, UserAvatarProps>(function U
       : "border border-border";
 
     return (
-      <Avatar ref={ref} className={cn(borderClass, className)}>
+      <Avatar className={cn(borderClass, className)}>
         <AvatarImage 
           src={imageUrl || undefined} 
           alt={name || "User"} 
@@ -142,7 +138,6 @@ export const UserAvatar = forwardRef<HTMLDivElement, UserAvatarProps>(function U
   
   return (
     <div 
-      ref={ref}
       className={cn(
         "relative shrink-0 rounded-2xl overflow-visible",
         // Only show gradient for character avatars, neutral background for uploaded photos
@@ -186,6 +181,4 @@ export const UserAvatar = forwardRef<HTMLDivElement, UserAvatarProps>(function U
       )}
     </div>
   );
-});
-
-UserAvatar.displayName = "UserAvatar";
+};

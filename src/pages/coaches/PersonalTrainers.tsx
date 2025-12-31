@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { SEOHead } from "@/components/shared/SEOHead";
+import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -64,46 +64,12 @@ const PersonalTrainers = () => {
     { name: "Mike Johnson", specialty: t('coachTypes.personalTrainers.featured.specialties.functional'), rating: 4.9, sessions: 420 },
   ];
 
-  // Generate FAQ schema from translated FAQs
-  const faqSchema = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": faqs.map(faq => ({
-      "@type": "Question",
-      "name": faq.question,
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": faq.answer
-      }
-    }))
-  };
-
-  // Service schema for personal training
-  const serviceSchema = {
-    "@context": "https://schema.org",
-    "@type": "Service",
-    "name": "Personal Training",
-    "provider": {
-      "@type": "Organization",
-      "name": "FitConnect"
-    },
-    "serviceType": "Personal Training",
-    "areaServed": {
-      "@type": "Country",
-      "name": "United Kingdom"
-    },
-    "priceRange": "£40-£100"
-  };
-
   return (
     <>
-      <SEOHead
-        title={t('coachTypes.personalTrainers.meta.title')}
-        description={t('coachTypes.personalTrainers.meta.description')}
-        canonicalPath="/coaches/personal-trainers"
-        keywords={["personal trainers UK", "certified personal trainer", "book PT", "hire personal trainer", "fitness coach"]}
-        schema={[faqSchema, serviceSchema]}
-      />
+      <Helmet>
+        <title>{t('coachTypes.personalTrainers.meta.title')}</title>
+        <meta name="description" content={t('coachTypes.personalTrainers.meta.description')} />
+      </Helmet>
       
       <div className="min-h-screen bg-background">
         <Navbar />
