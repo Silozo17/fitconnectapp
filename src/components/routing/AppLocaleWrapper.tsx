@@ -1,19 +1,21 @@
+import { Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
 import { AppLocaleProvider } from '@/contexts/AppLocaleContext';
+import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
 
 /**
  * AppLocaleWrapper is a layout route component that provides AppLocaleProvider
  * to all app routes (dashboard, docs, onboarding, etc.) without locale URL logic.
- * Uses Outlet pattern to render nested route content.
  * 
- * PERFORMANCE: Suspense boundary REMOVED to eliminate spinner flash on navigation.
- * Each lazy page handles its own loading state via skeletons, not full-screen spinners.
- * This prevents the jarring "loading spinner on every navigation" pattern.
+ * PERFORMANCE: Uses DashboardSkeleton instead of spinner for smoother UX.
+ * Suspense boundary is REQUIRED for React.lazy() components to work.
  */
 export function AppLocaleWrapper() {
   return (
     <AppLocaleProvider>
-      <Outlet />
+      <Suspense fallback={<DashboardSkeleton />}>
+        <Outlet />
+      </Suspense>
     </AppLocaleProvider>
   );
 }
