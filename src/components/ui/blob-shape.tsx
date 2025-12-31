@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
 
 interface BlobShapeProps {
@@ -20,17 +21,22 @@ const sizeStyles = {
   xl: "w-[500px] h-[500px]",
 };
 
-const BlobShape = ({ className, variant = "pink", size = "lg" }: BlobShapeProps) => {
-  return (
-    <div
-      className={cn(
-        "absolute rounded-full blur-3xl animate-blob-move",
-        variantStyles[variant],
-        sizeStyles[size],
-        className
-      )}
-    />
-  );
-};
+const BlobShape = forwardRef<HTMLDivElement, BlobShapeProps>(
+  ({ className, variant = "pink", size = "lg" }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          "absolute rounded-full blur-3xl animate-blob-move",
+          variantStyles[variant],
+          sizeStyles[size],
+          className
+        )}
+      />
+    );
+  }
+);
+
+BlobShape.displayName = "BlobShape";
 
 export default BlobShape;

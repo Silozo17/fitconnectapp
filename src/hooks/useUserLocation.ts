@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { CONSENT_STORAGE_KEY, CookieConsent } from "@/types/consent";
 import { LocationAccuracyLevel } from "@/types/location";
@@ -7,7 +7,9 @@ import { useAuth } from "@/contexts/AuthContext";
 const MANUAL_LOCATION_KEY = "fitconnect_manual_location";
 const SESSION_PRECISE_KEY = "fitconnect_session_precise_location";
 const PROMPT_DISMISSED_KEY = "fitconnect_location_prompt_dismissed";
+const IP_LOCATION_CACHE_KEY = "fitconnect_ip_location_cache";
 const LOCATION_EXPIRY_DAYS = 7;
+const IP_CACHE_MINUTES = 5; // Cache IP-based location for 5 minutes
 const GEO_TIMEOUT_MS = 10000; // 10 seconds for precise location
 
 interface LocationData {
@@ -89,6 +91,41 @@ const isPromptDismissed = (): boolean => {
   return sessionStorage.getItem(PROMPT_DISMISSED_KEY) === 'true';
 };
 
+// Get cached IP location (avoid repeated edge function calls)
+interface CachedIPLocation {
+  data: {
+    region?: string;
+    country?: string;
+    countryCode?: string;
+  };
+  timestamp: number;
+}
+
+const getCachedIPLocation = (): CachedIPLocation['data'] | null => {
+  try {
+    const stored = localStorage.getItem(IP_LOCATION_CACHE_KEY);
+    if (!stored) return null;
+    const parsed: CachedIPLocation = JSON.parse(stored);
+    const expiryTime = IP_CACHE_MINUTES * 60 * 1000;
+    if (Date.now() - parsed.timestamp < expiryTime) {
+      return parsed.data;
+    }
+    localStorage.removeItem(IP_LOCATION_CACHE_KEY);
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+const setCachedIPLocation = (data: CachedIPLocation['data']): void => {
+  try {
+    const cache: CachedIPLocation = { data, timestamp: Date.now() };
+    localStorage.setItem(IP_LOCATION_CACHE_KEY, JSON.stringify(cache));
+  } catch {
+    // Ignore storage errors
+  }
+};
+
 export const useUserLocation = (): UseUserLocationReturn => {
   const { user } = useAuth();
   const [location, setLocation] = useState<LocationData | null>(null);
@@ -96,6 +133,9 @@ export const useUserLocation = (): UseUserLocationReturn => {
   const [error, setError] = useState<string | null>(null);
   const [isRequestingPrecise, setIsRequestingPrecise] = useState(false);
   const [promptDismissed, setPromptDismissed] = useState(() => isPromptDismissed());
+  
+  // Track if initial fetch is done to prevent duplicate calls
+  const initialFetchDoneRef = useRef(false);
   
   // Memory-only precise location for logged-out users (GDPR compliant)
   // Also check sessionStorage for persistence across page navigations
@@ -116,6 +156,11 @@ export const useUserLocation = (): UseUserLocationReturn => {
 
   // Initialize location on mount
   useEffect(() => {
+    // Prevent duplicate fetches on re-renders
+    if (initialFetchDoneRef.current && location) {
+      return;
+    }
+    
     let isMounted = true;
 
     const initLocation = async () => {
@@ -133,6 +178,7 @@ export const useUserLocation = (): UseUserLocationReturn => {
             accuracyLevel: 'manual',
           });
           setIsLoading(false);
+          initialFetchDoneRef.current = true;
         }
         return;
       }
@@ -142,6 +188,7 @@ export const useUserLocation = (): UseUserLocationReturn => {
         if (isMounted) {
           setLocation(memoryPreciseLocation);
           setIsLoading(false);
+          initialFetchDoneRef.current = true;
         }
         return;
       }
@@ -167,6 +214,7 @@ export const useUserLocation = (): UseUserLocationReturn => {
                 accuracyLevel: 'precise',
               });
               setIsLoading(false);
+              initialFetchDoneRef.current = true;
             }
             return;
           }
@@ -180,15 +228,43 @@ export const useUserLocation = (): UseUserLocationReturn => {
         if (isMounted) {
           setLocation(defaultLocation);
           setIsLoading(false);
+          initialFetchDoneRef.current = true;
         }
         return;
       }
 
       // 5. Use IP-based geolocation (country/region only - no city for approximate)
+      // OPTIMIZED: Check cache first to avoid repeated edge function calls
       try {
+        const cachedIP = getCachedIPLocation();
+        if (cachedIP) {
+          // Use cached IP location
+          if (isMounted) {
+            setLocation({
+              city: null,
+              region: cachedIP.region || null,
+              country: cachedIP.country || "United Kingdom",
+              countryCode: cachedIP.countryCode || "GB",
+              county: null,
+              displayLocation: null,
+              accuracyLevel: 'approximate',
+            });
+            setIsLoading(false);
+            initialFetchDoneRef.current = true;
+          }
+          return;
+        }
+        
         const { data, error: fetchError } = await supabase.functions.invoke('get-user-location');
         
         if (fetchError) throw fetchError;
+        
+        // Cache the result
+        setCachedIPLocation({
+          region: data?.region,
+          country: data?.country,
+          countryCode: data?.countryCode,
+        });
         
         // For IP-based (approximate), we don't show city to avoid inaccuracy
         if (isMounted) {
@@ -202,12 +278,14 @@ export const useUserLocation = (): UseUserLocationReturn => {
             accuracyLevel: 'approximate',
           });
           setIsLoading(false);
+          initialFetchDoneRef.current = true;
         }
       } catch (err) {
         console.error('IP location detection failed:', err);
         if (isMounted) {
           setLocation(defaultLocation);
           setIsLoading(false);
+          initialFetchDoneRef.current = true;
         }
       }
     };
@@ -217,6 +295,7 @@ export const useUserLocation = (): UseUserLocationReturn => {
       if (isMounted && isLoading) {
         setLocation(defaultLocation);
         setIsLoading(false);
+        initialFetchDoneRef.current = true;
       }
     }, GEO_TIMEOUT_MS);
 
