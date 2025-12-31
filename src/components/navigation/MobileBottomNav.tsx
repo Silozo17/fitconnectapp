@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Home, Search, Calendar, MessageSquare, User, Users, BarChart3, Settings } from "lucide-react";
@@ -6,6 +6,30 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
 import { WebOnlyFeatureDialog } from "@/components/shared/WebOnlyFeatureDialog";
 import { cn } from "@/lib/utils";
+
+// Prefetch dashboard pages for faster navigation
+const prefetchClientPages = () => {
+  import('@/pages/dashboard/client/ClientOverview');
+  import('@/pages/dashboard/client/ClientPlans');
+  import('@/pages/dashboard/client/ClientMessages');
+  import('@/pages/dashboard/client/ClientSettings');
+  import('@/pages/dashboard/client/ClientFindCoaches');
+};
+
+const prefetchCoachPages = () => {
+  import('@/pages/dashboard/coach/CoachOverview');
+  import('@/pages/dashboard/coach/CoachClients');
+  import('@/pages/dashboard/coach/CoachSchedule');
+  import('@/pages/dashboard/coach/CoachMessages');
+  import('@/pages/dashboard/coach/CoachSettings');
+};
+
+const prefetchAdminPages = () => {
+  import('@/pages/dashboard/admin/AdminUsers');
+  import('@/pages/dashboard/admin/AdminCoaches');
+  import('@/pages/dashboard/admin/AdminAnalytics');
+  import('@/pages/dashboard/admin/AdminSettings');
+};
 
 interface NavItem {
   icon: React.ElementType;
@@ -57,6 +81,22 @@ const MobileBottomNav = ({ variant }: MobileBottomNavProps) => {
   // State for web-only feature dialog
   const [showWebOnlyDialog, setShowWebOnlyDialog] = useState(false);
   const [blockedFeatureName, setBlockedFeatureName] = useState("");
+
+  // Prefetch dashboard pages after mount for faster navigation
+  useEffect(() => {
+    const prefetch = () => {
+      if (variant === "client") prefetchClientPages();
+      else if (variant === "coach") prefetchCoachPages();
+      else if (variant === "admin") prefetchAdminPages();
+    };
+    
+    // Use requestIdleCallback if available, otherwise setTimeout
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(prefetch);
+    } else {
+      setTimeout(prefetch, 100);
+    }
+  }, [variant]);
 
   // Keep all items but mark restricted ones for rendering
   const navItems = useMemo(() => {

@@ -9,7 +9,7 @@ const SESSION_PRECISE_KEY = "fitconnect_session_precise_location";
 const PROMPT_DISMISSED_KEY = "fitconnect_location_prompt_dismissed";
 const IP_LOCATION_CACHE_KEY = "fitconnect_ip_location_cache";
 const LOCATION_EXPIRY_DAYS = 7;
-const IP_CACHE_MINUTES = 5; // Cache IP-based location for 5 minutes
+const IP_CACHE_MINUTES = 30; // Cache IP-based location for 30 minutes (was 5)
 const GEO_TIMEOUT_MS = 10000; // 10 seconds for precise location
 
 interface LocationData {
@@ -126,11 +126,63 @@ const setCachedIPLocation = (data: CachedIPLocation['data']): void => {
   }
 };
 
+// Default UK location (approximate - no city shown)
+const defaultLocation: LocationData = {
+  city: null,
+  region: null,
+  country: "United Kingdom",
+  countryCode: "GB",
+  county: null,
+  displayLocation: null,
+  accuracyLevel: 'approximate',
+};
+
+// Synchronously initialize location from cache to prevent loading flash
+const getInitialLocation = (): LocationData | null => {
+  // 1. Check manual location first
+  const manual = getStoredManualLocation();
+  if (manual) {
+    return {
+      city: manual.city,
+      region: manual.region,
+      country: manual.country,
+      countryCode: manual.countryCode,
+      county: manual.county,
+      displayLocation: manual.displayLocation || manual.city,
+      accuracyLevel: 'manual',
+    };
+  }
+  
+  // 2. Check session precise location
+  const sessionPrecise = getSessionPreciseLocation();
+  if (sessionPrecise) {
+    return sessionPrecise;
+  }
+  
+  // 3. Check cached IP location
+  const cachedIP = getCachedIPLocation();
+  if (cachedIP) {
+    return {
+      city: null,
+      region: cachedIP.region || null,
+      country: cachedIP.country || "United Kingdom",
+      countryCode: cachedIP.countryCode || "GB",
+      county: null,
+      displayLocation: null,
+      accuracyLevel: 'approximate',
+    };
+  }
+  
+  return null;
+};
+
 export const useUserLocation = (): UseUserLocationReturn => {
   const auth = useAuthSafe();
   const user = auth?.user;
-  const [location, setLocation] = useState<LocationData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  
+  // Synchronous initialization from cache - prevents loading flash
+  const [location, setLocation] = useState<LocationData | null>(() => getInitialLocation());
+  const [isLoading, setIsLoading] = useState(() => !getInitialLocation());
   const [error, setError] = useState<string | null>(null);
   const [isRequestingPrecise, setIsRequestingPrecise] = useState(false);
   const [promptDismissed, setPromptDismissed] = useState(() => isPromptDismissed());
@@ -143,17 +195,6 @@ export const useUserLocation = (): UseUserLocationReturn => {
   const [memoryPreciseLocation, setMemoryPreciseLocation] = useState<LocationData | null>(
     () => getSessionPreciseLocation()
   );
-
-  // Default UK location (approximate - no city shown)
-  const defaultLocation: LocationData = {
-    city: null,
-    region: null,
-    country: "United Kingdom",
-    countryCode: "GB",
-    county: null,
-    displayLocation: null,
-    accuracyLevel: 'approximate',
-  };
 
   // Initialize location on mount
   useEffect(() => {
