@@ -245,21 +245,20 @@ export const ScheduledCheckinsSettings = () => {
         </Card>
       </div>
 
-      {/* Delivery Notice */}
-      <Alert className="border-border/30 bg-card/30 backdrop-blur-xl">
-        <CalendarCheck className="h-4 w-4" />
-        <AlertDescription className="text-sm">
-          <span className="font-medium">{t("scheduledCheckins.deliveryNotice", "How Scheduled Check-ins work:")}</span>{" "}
-          {t("scheduledCheckins.deliveryNoticeDesc", "Messages are sent at the scheduled time via push notification and appear in the client's in-app message center.")}{" "}
-          <span className="text-muted-foreground">
-            {t("scheduledCheckins.deliveryNoticeHint", "If push notifications are disabled, clients will see check-ins when they open the app.")}
-          </span>
-        </AlertDescription>
-      </Alert>
-
       {/* Main Content */}
       <Card variant="glass" className="glass-card rounded-2xl sm:rounded-3xl">
         <CardHeader className="p-4 sm:p-6">
+          {/* Delivery Notice */}
+          <Alert className="border-border/30 bg-card/30 backdrop-blur-xl mb-4">
+            <CalendarCheck className="h-4 w-4" />
+            <AlertDescription className="text-sm">
+              <span className="font-medium">{t("scheduledCheckins.deliveryNotice", "How Scheduled Check-ins work:")}</span>{" "}
+              {t("scheduledCheckins.deliveryNoticeDesc", "Messages are sent at the scheduled time via push notification and appear in the client's in-app message center.")}{" "}
+              <span className="text-muted-foreground">
+                {t("scheduledCheckins.deliveryNoticeHint", "If push notifications are disabled, clients will see check-ins when they open the app.")}
+              </span>
+            </AlertDescription>
+          </Alert>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
