@@ -63,8 +63,10 @@ export function DropoffTimeline({ stage1Days, stage2Days, stage3Days, isEnabled 
         {/* Stage markers */}
         {stages.map((stage, index) => {
           const position = (stage.day / maxDay) * 100;
-          // Clamp position to prevent overflow, with more margin on mobile
-          const clampedPosition = Math.min(Math.max(position, 8), 92);
+          // Day 0 should be at the very start, other stages clamped to prevent overlap
+          const clampedPosition = stage.day === 0 
+            ? 2  // Fixed position at the start for Day 0
+            : Math.min(Math.max(position, 12), 92);  // Other stages start at 12% to avoid overlapping Day 0
           const Icon = stage.icon;
           
           return (
