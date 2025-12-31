@@ -16,8 +16,10 @@ import {
   Send,
   CheckCircle2,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  CalendarCheck
 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useScheduledCheckins } from "@/hooks/useScheduledCheckins";
 import { useLatestCheckinLog } from "@/hooks/useScheduledCheckinLogs";
 import { ScheduledCheckInForm } from "@/components/coach/ScheduledCheckInForm";
@@ -242,6 +244,18 @@ export const ScheduledCheckinsSettings = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Delivery Notice */}
+      <Alert className="border-border/30 bg-card/30 backdrop-blur-xl">
+        <CalendarCheck className="h-4 w-4" />
+        <AlertDescription className="text-sm">
+          <span className="font-medium">{t("scheduledCheckins.deliveryNotice", "How Scheduled Check-ins work:")}</span>{" "}
+          {t("scheduledCheckins.deliveryNoticeDesc", "Messages are sent at the scheduled time via push notification and appear in the client's in-app message center.")}{" "}
+          <span className="text-muted-foreground">
+            {t("scheduledCheckins.deliveryNoticeHint", "If push notifications are disabled, clients will see check-ins when they open the app.")}
+          </span>
+        </AlertDescription>
+      </Alert>
 
       {/* Main Content */}
       <Card variant="glass" className="glass-card rounded-2xl sm:rounded-3xl">

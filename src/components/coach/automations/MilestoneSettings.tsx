@@ -7,9 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useMilestoneAutomations, MilestoneType } from "@/hooks/useMilestoneAutomations";
-import { Loader2, Trophy, Target, Scale, Flame, Zap, CheckCircle2, Play } from "lucide-react";
+import { Loader2, Trophy, Target, Scale, Flame, Zap, CheckCircle2, Play, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const MILESTONE_TYPES: { key: MilestoneType; icon: typeof Scale; label: string; color: string }[] = [
   { key: 'streak', icon: Flame, label: 'Session Streak', color: 'text-warning' },
@@ -52,6 +53,18 @@ export function MilestoneSettings() {
 
   return (
     <div className="space-y-6">
+      {/* Delivery Notice */}
+      <Alert className="border-border/30 bg-card/30 backdrop-blur-xl">
+        <Bell className="h-4 w-4" />
+        <AlertDescription className="text-sm">
+          <span className="font-medium">{t("automations.milestones.deliveryNotice", "How Milestone Celebrations work:")}</span>{" "}
+          {t("automations.milestones.deliveryNoticeDesc", "When clients hit achievements, celebratory messages are sent automatically via push notification and appear in-app.")}{" "}
+          <span className="text-muted-foreground">
+            {t("automations.milestones.deliveryNoticeHint", "If a client has disabled push notifications, they will see the celebration when they next open the app.")}
+          </span>
+        </AlertDescription>
+      </Alert>
+
       <Card variant="glass">
         <CardHeader className="pb-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">

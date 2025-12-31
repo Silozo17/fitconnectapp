@@ -128,6 +128,18 @@ export function DropoffRescueSettings() {
 
   return (
     <div className="space-y-6">
+      {/* Delivery Notice */}
+      <Alert className="border-border/30 bg-card/30 backdrop-blur-xl">
+        <MessageSquare className="h-4 w-4" />
+        <AlertDescription className="text-sm">
+          <span className="font-medium">{t("automations.dropoff.deliveryNotice", "How Drop-off Rescue works:")}</span>{" "}
+          {t("automations.dropoff.deliveryNoticeDesc", "The system monitors client activity and automatically sends check-in messages when they become inactive. Messages are delivered via push notification and in-app messaging.")}{" "}
+          <span className="text-muted-foreground">
+            {t("automations.dropoff.deliveryNoticeHint", "If a client has disabled push notifications, they will only see messages when they open the app.")}
+          </span>
+        </AlertDescription>
+      </Alert>
+
       {/* Stats Cards */}
       <StatCardGrid columns={3}>
         <StatCard
