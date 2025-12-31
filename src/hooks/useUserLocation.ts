@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { CONSENT_STORAGE_KEY, CookieConsent } from "@/types/consent";
 import { LocationAccuracyLevel } from "@/types/location";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSafe } from "@/contexts/AuthContext";
 
 const MANUAL_LOCATION_KEY = "fitconnect_manual_location";
 const SESSION_PRECISE_KEY = "fitconnect_session_precise_location";
@@ -127,7 +127,8 @@ const setCachedIPLocation = (data: CachedIPLocation['data']): void => {
 };
 
 export const useUserLocation = (): UseUserLocationReturn => {
-  const { user } = useAuth();
+  const auth = useAuthSafe();
+  const user = auth?.user;
   const [location, setLocation] = useState<LocationData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

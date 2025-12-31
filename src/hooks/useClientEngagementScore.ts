@@ -110,7 +110,7 @@ export function useClientEngagementScore(clientId?: string) {
           .from("habit_logs")
           .select("completed_count, client_habits!inner(client_id, target_count)")
           .eq("client_habits.client_id", cId)
-          .gte("log_date", sevenDaysAgo.toISOString().split("T")[0]);
+          .gte("logged_at", sevenDaysAgo.toISOString().split("T")[0]);
 
         if (habitLogs && habitLogs.length > 0) {
           const totalCompleted = habitLogs.reduce((sum, log) => sum + (log.completed_count || 0), 0);
@@ -176,7 +176,7 @@ export function useClientEngagementScore(clientId?: string) {
           .from("training_logs")
           .select("*", { count: "exact", head: true })
           .eq("client_id", cId)
-          .gte("completed_at", sevenDaysAgo.toISOString());
+          .gte("logged_at", sevenDaysAgo.toISOString());
 
         // Expected: at least 3 workouts per week
         const expectedWorkouts = 3;

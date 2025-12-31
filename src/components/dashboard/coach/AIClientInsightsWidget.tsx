@@ -146,7 +146,7 @@ export function AIClientInsightsWidget() {
             .from("habit_logs")
             .select("completed_count, client_habits!inner(client_id, target_count)")
             .eq("client_habits.client_id", client.client_id)
-            .gte("log_date", twoWeeksAgo.toISOString().split("T")[0]);
+            .gte("logged_at", twoWeeksAgo.toISOString().split("T")[0]);
 
           let habitRate = 0;
           if (habitLogs && habitLogs.length > 0) {
