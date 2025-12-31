@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
 import { useClientOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { useDiscoverModal } from "@/hooks/useDiscoverModal";
+import { useAutoAwardClientBadges } from "@/hooks/useAutoAwardClientBadges";
 import { Loader2 } from "lucide-react";
 import ClientSidebar from "./ClientSidebar";
 import ClientDashboardHeader from "./ClientDashboardHeader";
@@ -35,6 +36,9 @@ const ClientDashboardLayoutInner = memo(({
   const [mobileOpen, setMobileOpen] = useState(false);
   const { isOpen: profilePanelOpen } = useProfilePanel();
   const { shouldShow: showDiscover, markAsSeen: markDiscoverSeen } = useDiscoverModal('client');
+
+  // Proactive badge awarding - checks and awards badges app-wide, not just on Achievements page
+  useAutoAwardClientBadges();
 
   // Check if user just completed onboarding - prevents flash of redirect
   const justCompletedOnboarding = useMemo(() => {

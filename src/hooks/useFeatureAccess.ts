@@ -7,13 +7,18 @@ export const useFeatureAccess = () => {
   const { data: coachProfile, isLoading: profileLoading } = useCoachProfile();
   const { data: clients, isLoading: clientsLoading } = useCoachClients();
   
-  const currentTier = normalizeTier(coachProfile?.subscription_tier);
-  const tierConfig = SUBSCRIPTION_TIERS[currentTier];
+  // Only normalize tier when we have profile data - prevents flicker to "free" during loading
+  const currentTier = profileLoading ? null : normalizeTier(coachProfile?.subscription_tier);
+  // Use cached tier during loading to prevent visual flicker
+  const effectiveTier = currentTier ?? "free";
+  const tierConfig = SUBSCRIPTION_TIERS[effectiveTier];
   
   // Check if coach has access to a feature
+  // During loading, return true to prevent lock icons from flickering
   const hasFeature = (feature: FeatureKey): boolean => {
+    if (profileLoading) return true; // Assume access during loading to prevent flicker
     const allowedTiers = FEATURE_ACCESS[feature] as readonly string[];
-    return allowedTiers.includes(currentTier);
+    return allowedTiers.includes(effectiveTier);
   };
   
   // Get client limit for current tier
@@ -44,7 +49,7 @@ export const useFeatureAccess = () => {
   };
   
   return {
-    currentTier,
+    currentTier: effectiveTier,
     tierConfig,
     hasFeature,
     clientLimit,
@@ -53,7 +58,7 @@ export const useFeatureAccess = () => {
     remainingClientSlots,
     isApproachingLimit,
     getMinimumTier,
-    isFounder: currentTier === "founder",
+    isFounder: effectiveTier === "founder",
     isLoading: profileLoading || clientsLoading,
   };
 };
