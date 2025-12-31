@@ -7,7 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useMilestoneAutomations, MilestoneType } from "@/hooks/useMilestoneAutomations";
-import { Loader2, Trophy, Target, Scale, Flame, Zap, CheckCircle2 } from "lucide-react";
+import { Loader2, Trophy, Target, Scale, Flame, Zap, CheckCircle2, Play } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const MILESTONE_TYPES: { key: MilestoneType; icon: typeof Scale; label: string; color: string }[] = [
   { key: 'streak', icon: Flame, label: 'Session Streak', color: 'text-warning' },
@@ -20,6 +22,25 @@ const MILESTONE_TYPES: { key: MilestoneType; icon: typeof Scale; label: string; 
 export function MilestoneSettings() {
   const { t } = useTranslation("coach");
   const { milestones, isLoading, getMilestone, toggleMilestone, updateMilestone, isSaving, defaultMessages, defaultThresholds } = useMilestoneAutomations();
+  const [isTesting, setIsTesting] = useState(false);
+  
+  const handleTestNow = async () => {
+    setIsTesting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('detect-milestones', {
+        body: {}
+      });
+      
+      if (error) throw error;
+      
+      toast.success(`Detection complete: ${data.milestones_detected || 0} milestones found, ${data.messages_sent || 0} messages sent`);
+    } catch (error) {
+      console.error('Test failed:', error);
+      toast.error('Failed to run detection');
+    } finally {
+      setIsTesting(false);
+    }
+  };
   
   if (isLoading) {
     return (
@@ -33,14 +54,25 @@ export function MilestoneSettings() {
     <div className="space-y-6">
       <Card variant="glass">
         <CardHeader>
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <Trophy className="h-5 w-5 text-warning" />
-              {t("automations.milestones.title", "Milestone Celebrations")}
-            </CardTitle>
-            <CardDescription>
-              {t("automations.milestones.description", "Automatically celebrate client achievements")}
-            </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Trophy className="h-5 w-5 text-warning" />
+                {t("automations.milestones.title", "Milestone Celebrations")}
+              </CardTitle>
+              <CardDescription>
+                {t("automations.milestones.description", "Automatically celebrate client achievements")}
+              </CardDescription>
+            </div>
+            <Button 
+              variant="outline"
+              size="sm"
+              onClick={handleTestNow}
+              disabled={isTesting}
+            >
+              {isTesting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Play className="h-4 w-4 mr-2" />}
+              Run Detection
+            </Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">

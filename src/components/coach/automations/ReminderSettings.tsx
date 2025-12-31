@@ -7,15 +7,18 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useClientReminders } from "@/hooks/useClientReminders";
-import { Loader2, Clock, Plus, Trash2 } from "lucide-react";
+import { useClientReminders, ReminderTemplate } from "@/hooks/useClientReminders";
+import { Loader2, Clock, Plus, Users } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ClientReminderAssignment } from "./ClientReminderAssignment";
+import { ActiveRemindersList } from "./ActiveRemindersList";
 
 export function ReminderSettings() {
   const { t } = useTranslation("coach");
   const { templates, isLoading, createTemplate, isCreating } = useClientReminders();
   
   const [isCreatingOpen, setIsCreatingOpen] = useState(false);
+  const [assigningTemplate, setAssigningTemplate] = useState<ReminderTemplate | null>(null);
   const [newTemplate, setNewTemplate] = useState({
     name: '',
     message_template: '',
@@ -52,6 +55,10 @@ export function ReminderSettings() {
 
   return (
     <div className="space-y-6">
+      {/* Active Reminders List */}
+      <ActiveRemindersList />
+
+      {/* Templates Card */}
       <Card variant="glass">
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -174,12 +181,27 @@ export function ReminderSettings() {
                       {template.message_template}
                     </p>
                   </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setAssigningTemplate(template)}
+                  >
+                    <Users className="h-4 w-4 mr-1" />
+                    Assign
+                  </Button>
                 </div>
               ))}
             </div>
           )}
         </CardContent>
       </Card>
+
+      {/* Assignment Dialog */}
+      <ClientReminderAssignment 
+        open={!!assigningTemplate}
+        onOpenChange={(open) => !open && setAssigningTemplate(null)}
+        template={assigningTemplate}
+      />
     </div>
   );
 }
