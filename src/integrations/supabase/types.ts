@@ -6489,6 +6489,95 @@ export type Database = {
           },
         ]
       }
+      scheduled_checkin_logs: {
+        Row: {
+          checkin_id: string
+          client_id: string
+          coach_id: string
+          created_at: string
+          error_message: string | null
+          id: string
+          message_id: string | null
+          metadata: Json | null
+          notification_sent: boolean | null
+          status: string
+        }
+        Insert: {
+          checkin_id: string
+          client_id: string
+          coach_id: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_id?: string | null
+          metadata?: Json | null
+          notification_sent?: boolean | null
+          status: string
+        }
+        Update: {
+          checkin_id?: string
+          client_id?: string
+          coach_id?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_id?: string | null
+          metadata?: Json | null
+          notification_sent?: boolean | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_checkin_logs_checkin_id_fkey"
+            columns: ["checkin_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_checkins"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_checkin_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_checkin_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_checkin_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_checkin_logs_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_checkin_logs_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_checkin_logs_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scheduled_checkins: {
         Row: {
           client_id: string
