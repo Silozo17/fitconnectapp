@@ -260,8 +260,8 @@ serve(async (req) => {
               }
             }
 
-            // Send celebration message
-            if (actions.send_message && setting.coach?.user_id && client?.user_id) {
+            // Send celebration message (messages table uses profile_id values, not user_id)
+            if (actions.send_message && setting.coach?.id && client?.id) {
               const messageTemplate = config.message_template || DEFAULT_CELEBRATION_MESSAGES[config.milestone_type] || "";
               const message = messageTemplate
                 .replace(/{client_name}/g, clientName)
@@ -270,8 +270,8 @@ serve(async (req) => {
 
               if (message) {
                 await supabase.from("messages").insert({
-                  sender_id: setting.coach.user_id,
-                  receiver_id: client.user_id,
+                  sender_id: setting.coach.id,    // coach_profiles.id
+                  receiver_id: client.id,         // client_profiles.id
                   content: message,
                 });
                 messagesSent++;
