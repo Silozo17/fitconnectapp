@@ -3,9 +3,10 @@ import BlobShape from "@/components/ui/blob-shape";
 import { Card, CardContent } from "@/components/ui/card";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { Link } from "react-router-dom";
-import { Award, Users, Heart, Target, TrendingUp, Shield, Sparkles, Globe } from "lucide-react";
+import { Award, Users, Heart, Target, TrendingUp, Shield, Sparkles, Globe, Smartphone, CheckCircle } from "lucide-react";
 import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
 import { useTranslation } from "react-i18next";
+import { Helmet } from "react-helmet-async";
 
 const About = () => {
   const { t } = useTranslation("pages");
@@ -63,12 +64,48 @@ const About = () => {
     }
   ];
 
+  // Organization schema for SEO
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "FitConnect",
+    "alternateName": "FitConnect UK",
+    "url": "https://getfitconnect.co.uk",
+    "logo": "https://getfitconnect.co.uk/pwa-512x512.png",
+    "description": "Global fitness coaching marketplace connecting clients with verified personal trainers, nutritionists, boxing coaches, MMA coaches, and bodybuilding coaches.",
+    "foundingDate": "2025",
+    "foundingLocation": {
+      "@type": "Place",
+      "name": "London, United Kingdom"
+    },
+    "areaServed": {
+      "@type": "Place",
+      "name": "Worldwide"
+    },
+    "knowsLanguage": ["English", "Polish"],
+    "sameAs": [
+      "https://apps.apple.com/app/fitconnect",
+      "https://play.google.com/store/apps/details?id=com.fitconnect"
+    ],
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer support",
+      "availableLanguage": ["English", "Polish"]
+    }
+  };
+
   return (
     <PageLayout
       title={t("about.meta.title")}
       description={t("about.meta.description")}
       className="overflow-x-hidden"
     >
+      {/* Organization Schema */}
+      <Helmet>
+        <script type="application/ld+json">
+          {JSON.stringify(organizationSchema)}
+        </script>
+      </Helmet>
       {/* Decorative Avatars */}
       <DecorativeAvatar 
         avatarSlug="weightlifting-lion" 
@@ -284,8 +321,68 @@ const About = () => {
         </div>
       </section>
 
+      {/* Global Availability Section */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-secondary/5 via-primary/5 to-accent/5 overflow-hidden">
+              <CardContent className="p-8 md:p-12">
+                <div className="flex items-start gap-6">
+                  <div className="hidden md:block">
+                    <Globe className="w-16 h-16 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold mb-4">Available Worldwide</h3>
+                    <p className="text-muted-foreground mb-4">
+                      FitConnect connects clients with coaches globally. Whether you prefer online sessions 
+                      or in-person training, our platform brings world-class coaching to you.
+                    </p>
+                    <ul className="space-y-2 text-muted-foreground mb-6">
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-primary shrink-0" />
+                        Online coaching available everywhere
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-primary shrink-0" />
+                        In-person sessions with local coaches
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-primary shrink-0" />
+                        Available in English and Polish
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-primary shrink-0" />
+                        Multiple currency support (GBP, USD, EUR, PLN)
+                      </li>
+                    </ul>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80">
+                        <Smartphone className="w-5 h-5 text-primary" />
+                        <span className="text-sm font-medium">iOS & Android Apps</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Brand Clarification */}
+      <section className="py-12 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <p className="text-sm text-muted-foreground">
+              <strong>FitConnect</strong> at getfitconnect.co.uk is the official global fitness coaching marketplace 
+              operated by AMW Media Ltd. We are distinct from other similarly-named fitness applications.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
-      <section className="py-20 bg-muted/30">
+      <section className="py-20">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             {t("about.cta.titleStart")}{" "}

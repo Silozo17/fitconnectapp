@@ -1,12 +1,19 @@
 import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { isDespia } from "@/lib/despia";
 
+// OPTIMIZED: Increased interval to reduce edge function calls
 const ACTIVITY_UPDATE_INTERVAL = 5 * 60 * 1000; // 5 minutes
+// Minimum time between updates (debounce)
+const MIN_UPDATE_INTERVAL = 60000; // 1 minute
+// Extra debounce for native apps
+const NATIVE_DEBOUNCE = 120000; // 2 minutes
 
 /**
  * Hook to periodically update session activity (last_seen_at)
  * Only runs when user is authenticated
+ * OPTIMIZED: Reduced frequency for native apps to improve performance
  */
 export const useSessionActivity = () => {
   const { user, session } = useAuth();
@@ -26,8 +33,11 @@ export const useSessionActivity = () => {
     const updateActivity = async () => {
       const now = Date.now();
       
+      // OPTIMIZED: Longer debounce for native apps to reduce API calls
+      const minInterval = isDespia() ? NATIVE_DEBOUNCE : MIN_UPDATE_INTERVAL;
+      
       // Debounce: don't update if we just updated
-      if (now - lastUpdateRef.current < 60000) {
+      if (now - lastUpdateRef.current < minInterval) {
         return;
       }
       
@@ -53,8 +63,9 @@ export const useSessionActivity = () => {
     intervalRef.current = setInterval(updateActivity, ACTIVITY_UPDATE_INTERVAL);
 
     // Update on visibility change (when user returns to tab)
+    // OPTIMIZED: Only for web, not native (native uses focus handler with debounce)
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
+      if (document.visibilityState === "visible" && !isDespia()) {
         updateActivity();
       }
     };

@@ -150,10 +150,27 @@ const HowItWorks = () => {
     }
   ];
 
+  // HowTo schema for finding a coach
+  const howToSchema = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to Find a Personal Trainer on FitConnect",
+    "description": "Step-by-step guide to finding and booking a fitness coach on FitConnect",
+    "step": clientSteps.map((step, index) => ({
+      "@type": "HowToStep",
+      "position": index + 1,
+      "name": step.title,
+      "text": step.description
+    }))
+  };
+
   return (
     <PageLayout
       title={t("howItWorks.title")}
       description={t("howItWorks.metaDescription")}
+      canonicalPath="/how-it-works"
+      keywords={["how to find personal trainer", "book fitness coach", "online PT app"]}
+      schema={howToSchema}
     >
       {/* Decorative Avatars */}
       <DecorativeAvatar 

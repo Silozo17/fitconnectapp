@@ -33,7 +33,12 @@ export default function Marketplace() {
   const paidProducts = products?.filter(p => p.price > 0) || [];
 
   return (
-    <PageLayout title="Marketplace - Digital Content" description="Discover e-books, video courses, workout templates, and more from top fitness professionals.">
+    <PageLayout 
+      title="Fitness E-books & Workout Plans | FitConnect Marketplace" 
+      description="Download workout templates, meal plans, e-books and video courses from certified coaches. Free and premium fitness resources for every goal."
+      keywords={["fitness e-books UK", "workout templates", "meal plan downloads", "fitness courses", "coaching resources"]}
+      noIndex={productsLoading}
+    >
       <div className="min-h-screen bg-background">
         {/* Hero Section */}
         <section className="relative py-16 md:py-24 overflow-hidden">

@@ -1,3 +1,4 @@
+import { memo, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { CoachDashboardWidget } from "@/hooks/useCoachWidgets";
 import { Wallet, Package, CreditCard, Users } from "lucide-react";
@@ -53,7 +54,11 @@ interface CoachWidgetRendererProps {
   onAddClient?: () => void;
 }
 
-export function CoachWidgetRenderer({
+/**
+ * OPTIMIZED: Memoized widget renderer to prevent unnecessary re-renders
+ * when parent dashboard state changes
+ */
+export const CoachWidgetRenderer = memo(function CoachWidgetRenderer({
   widget,
   stats,
   upcomingSessions = [],
@@ -62,12 +67,20 @@ export function CoachWidgetRenderer({
   onAddClient,
 }: CoachWidgetRendererProps) {
   const { t } = useTranslation("coach");
+  
+  // Memoize stats values to prevent child re-renders
+  const memoizedStats = useMemo(() => ({
+    activeClients: stats?.activeClients || 0,
+    sessionsThisWeek: stats?.sessionsThisWeek || 0,
+    averageRating: stats?.averageRating || 0,
+    totalReviews: stats?.totalReviews || 0,
+  }), [stats?.activeClients, stats?.sessionsThisWeek, stats?.averageRating, stats?.totalReviews]);
 
   switch (widget.widget_type) {
     case "stats_clients":
       return (
         <StatsClientsWidget
-          activeClients={stats?.activeClients || 0}
+          activeClients={memoizedStats.activeClients}
           isLoading={isLoading}
         />
       );
@@ -75,7 +88,7 @@ export function CoachWidgetRenderer({
     case "stats_sessions":
       return (
         <StatsSessionsWidget
-          sessionsThisWeek={stats?.sessionsThisWeek || 0}
+          sessionsThisWeek={memoizedStats.sessionsThisWeek}
           isLoading={isLoading}
         />
       );
@@ -86,8 +99,8 @@ export function CoachWidgetRenderer({
     case "stats_rating":
       return (
         <StatsRatingWidget
-          averageRating={stats?.averageRating || 0}
-          totalReviews={stats?.totalReviews || 0}
+          averageRating={memoizedStats.averageRating}
+          totalReviews={memoizedStats.totalReviews}
           isLoading={isLoading}
         />
       );
@@ -106,8 +119,8 @@ export function CoachWidgetRenderer({
     case "engagement_reviews":
       return (
         <ReviewsWidget
-          averageRating={stats?.averageRating || 0}
-          totalReviews={stats?.totalReviews || 0}
+          averageRating={memoizedStats.averageRating}
+          totalReviews={memoizedStats.totalReviews}
           isLoading={isLoading}
         />
       );
@@ -204,4 +217,6 @@ export function CoachWidgetRenderer({
     default:
       return null;
   }
-}
+});
+
+CoachWidgetRenderer.displayName = "CoachWidgetRenderer";

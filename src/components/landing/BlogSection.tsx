@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, BookOpen } from "lucide-react";
@@ -7,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function BlogSection() {
+export const BlogSection = forwardRef<HTMLElement, object>(function BlogSection(_, ref) {
   const { t } = useTranslation('landing');
   
   const { data: posts, isLoading } = useQuery({
@@ -27,7 +28,7 @@ export function BlogSection() {
 
   if (isLoading) {
     return (
-      <section className="py-16 sm:py-24 bg-background">
+      <section ref={ref} className="py-16 sm:py-24 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <Skeleton className="h-8 w-64 mx-auto mb-4" />
@@ -48,7 +49,7 @@ export function BlogSection() {
   }
 
   return (
-    <section className="py-16 sm:py-24 bg-background border-t border-border">
+    <section ref={ref} className="py-16 sm:py-24 bg-background border-t border-border">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
@@ -83,4 +84,6 @@ export function BlogSection() {
       </div>
     </section>
   );
-}
+});
+
+BlogSection.displayName = "BlogSection";

@@ -113,11 +113,12 @@ const Coaches = () => {
   return (
     <>
       <SEOHead
-        title={t('title')}
-        description={t('seoDescription')}
+        title="Find Personal Trainers Near You | Verified UK Coaches"
+        description="Browse hundreds of verified personal trainers, nutritionists, boxing and MMA coaches. Filter by location, price and specialty. Book your first session today."
         canonicalPath="/coaches"
-        keywords={["find personal trainer", "book fitness coach", "hire nutritionist UK", "personal trainer near me", "online fitness coach"]}
+        keywords={["personal trainer near me", "find fitness coach", "book personal trainer", "hire PT UK", "online fitness coach"]}
         schema={[breadcrumbSchema, serviceSchema]}
+        noIndex={isFullyLoading}
       />
 
       <div className="min-h-screen bg-background">

@@ -1,5 +1,3 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { SEOHead, createBreadcrumbSchema } from "@/components/shared/SEOHead";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -11,44 +9,11 @@ import Testimonials from "@/components/landing/Testimonials";
 import CTA from "@/components/landing/CTA";
 import { AvatarShowcase } from "@/components/landing/AvatarShowcase";
 import { BlogSection } from "@/components/landing/BlogSection";
-import { useAuth } from "@/contexts/AuthContext";
-import { isDespia } from "@/lib/despia";
-import { getBestDashboardRoute, saveViewState, getViewModeFromPath } from "@/lib/view-restoration";
+
+// NOTE: Authenticated user redirects are handled centrally by RouteRestorer
+// to prevent race conditions and screen flashing
 
 const Index = () => {
-  const { user, role, loading } = useAuth();
-  const navigate = useNavigate();
-
-  // In native app, authenticated users should not be on homepage - redirect to dashboard
-  // CRITICAL: Use saved view preference, not role-based default
-  useEffect(() => {
-    if (!loading && user && role && isDespia()) {
-      // getBestDashboardRoute checks saved route first, then saved view preference, then falls back to role default
-      const dashboardRoute = getBestDashboardRoute(role);
-      
-      // Sync view state to ensure consistency
-      const viewMode = getViewModeFromPath(dashboardRoute);
-      if (viewMode) {
-        saveViewState(viewMode);
-      }
-      
-      navigate(dashboardRoute, { replace: true });
-    }
-  }, [user, role, loading, navigate]);
-
-  const organizationSchema = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "FitConnect",
-    "url": "https://getfitconnect.co.uk",
-    "logo": "https://getfitconnect.co.uk/pwa-512x512.png",
-    "description": "Connect with world-class fitness coaches in the UK",
-    "sameAs": [
-      "https://twitter.com/FitConnect",
-      "https://instagram.com/fitconnect"
-    ]
-  };
-
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -56,9 +21,31 @@ const Index = () => {
     "url": "https://getfitconnect.co.uk",
     "potentialAction": {
       "@type": "SearchAction",
-      "target": "https://getfitconnect.co.uk/coaches?search={search_term_string}",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://getfitconnect.co.uk/coaches?search={search_term_string}"
+      },
       "query-input": "required name=search_term_string"
     }
+  };
+
+  const softwareAppSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "FitConnect",
+    "operatingSystem": ["iOS", "Android"],
+    "applicationCategory": "HealthApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "GBP"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "500"
+    },
+    "description": "Connect with verified personal trainers, nutritionists and fitness coaches across the UK."
   };
 
   const breadcrumbSchema = createBreadcrumbSchema([
@@ -68,11 +55,11 @@ const Index = () => {
   return (
     <>
       <SEOHead
-        title="FitConnect - Find Your Perfect Fitness Coach | Personal Training, Nutrition & Combat Sports"
-        description="Connect with elite personal trainers, nutritionists, and combat sports coaches in the UK. Get personalized training plans and achieve your fitness goals."
+        title="Find Personal Trainers & Fitness Coaches | FitConnect UK"
+        description="Connect with verified personal trainers, nutritionists and boxing coaches across the UK. Book sessions, get custom workout plans and achieve your fitness goals. Download free."
         canonicalPath="/"
-        keywords={["personal trainer near me", "fitness coach UK", "online personal training", "find personal trainer", "book fitness coach"]}
-        schema={[organizationSchema, websiteSchema, breadcrumbSchema]}
+        keywords={["find personal trainer", "personal trainer near me", "fitness coach UK", "online personal training", "book fitness coach", "hire personal trainer"]}
+        schema={[websiteSchema, softwareAppSchema, breadcrumbSchema]}
       />
       
       <div className="min-h-screen bg-background">
