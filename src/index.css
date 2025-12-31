@@ -1215,3 +1215,9 @@
 .animate-badge-shine {
   animation: badge-shine 2s ease-in-out infinite;
 }
+
+/* Touch-friendly scroll area for modals and popovers */
+.touch-scroll-area {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
