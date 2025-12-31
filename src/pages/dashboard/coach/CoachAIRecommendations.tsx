@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sparkles, Dumbbell, Apple, Heart, RefreshCw, Check, X, Loader2 } from "lucide-react";
+import { Sparkles, Dumbbell, Apple, Heart, RefreshCw, Check, X, Loader2, Clock } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAIPlanRecommendations } from "@/hooks/useAIPlanRecommendations";
 import { AIPlanRecommendationCard } from "@/components/coach/AIPlanRecommendationCard";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
@@ -129,20 +130,58 @@ const CoachAIRecommendations = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-4">
-              <TabsTrigger value="pending">
-                {t("aiRecommendations.pending", "Pending")} ({recommendations.filter((r) => r.status === "pending").length})
-              </TabsTrigger>
-              <TabsTrigger value="applied">
-                <Check className="w-4 h-4 mr-1" />
-                {t("aiRecommendations.applied")} ({recommendations.filter((r) => r.status === "applied").length})
-              </TabsTrigger>
-              <TabsTrigger value="dismissed">
-                <X className="w-4 h-4 mr-1" />
-                {t("aiRecommendations.dismissed")} ({recommendations.filter((r) => r.status === "dismissed").length})
-              </TabsTrigger>
-            </TabsList>
+          <TooltipProvider>
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="mb-4">
+                <TabsTrigger value="pending">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="flex items-center">
+                        <Clock className="w-4 h-4 sm:mr-1" />
+                        <span className="hidden sm:inline">
+                          {t("aiRecommendations.pending", "Pending")}
+                        </span>
+                        <span className="ml-1">({recommendations.filter((r) => r.status === "pending").length})</span>
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="sm:hidden">
+                      {t("aiRecommendations.pending", "Pending")}
+                    </TooltipContent>
+                  </Tooltip>
+                </TabsTrigger>
+                <TabsTrigger value="applied">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="flex items-center">
+                        <Check className="w-4 h-4 sm:mr-1" />
+                        <span className="hidden sm:inline">
+                          {t("aiRecommendations.applied")}
+                        </span>
+                        <span className="ml-1">({recommendations.filter((r) => r.status === "applied").length})</span>
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="sm:hidden">
+                      {t("aiRecommendations.applied")}
+                    </TooltipContent>
+                  </Tooltip>
+                </TabsTrigger>
+                <TabsTrigger value="dismissed">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="flex items-center">
+                        <X className="w-4 h-4 sm:mr-1" />
+                        <span className="hidden sm:inline">
+                          {t("aiRecommendations.dismissed")}
+                        </span>
+                        <span className="ml-1">({recommendations.filter((r) => r.status === "dismissed").length})</span>
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="sm:hidden">
+                      {t("aiRecommendations.dismissed")}
+                    </TooltipContent>
+                  </Tooltip>
+                </TabsTrigger>
+              </TabsList>
 
             <TabsContent value={activeTab}>
               {isLoading ? (
@@ -180,7 +219,8 @@ const CoachAIRecommendations = () => {
                 </div>
               )}
             </TabsContent>
-          </Tabs>
+            </Tabs>
+          </TooltipProvider>
         </CardContent>
       </Card>
     </DashboardLayout>
