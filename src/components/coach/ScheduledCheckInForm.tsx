@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -10,6 +9,34 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
+
+// Generate time options in 5-minute increments (00:00 to 23:55)
+const generateTimeOptions = () => {
+  const options: { value: string; label: string }[] = [];
+  for (let hour = 0; hour < 24; hour++) {
+    for (let minute = 0; minute < 60; minute += 5) {
+      const hourStr = hour.toString().padStart(2, "0");
+      const minuteStr = minute.toString().padStart(2, "0");
+      const value = `${hourStr}:${minuteStr}`;
+      const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+      const ampm = hour < 12 ? "AM" : "PM";
+      const label = `${displayHour}:${minuteStr} ${ampm}`;
+      options.push({ value, label });
+    }
+  }
+  return options;
+};
+
+// Round time to nearest 5-minute increment
+const roundToNearest5 = (time: string): string => {
+  const [hours, minutes] = time.split(":").map(Number);
+  const roundedMinutes = Math.round(minutes / 5) * 5;
+  const adjustedHours = roundedMinutes === 60 ? hours + 1 : hours;
+  const finalMinutes = roundedMinutes === 60 ? 0 : roundedMinutes;
+  return `${String(adjustedHours % 24).padStart(2, "0")}:${String(finalMinutes).padStart(2, "0")}`;
+};
+
+const TIME_OPTIONS = generateTimeOptions();
 
 interface Props {
   open: boolean;
@@ -57,7 +84,8 @@ export function ScheduledCheckInForm({ open, onOpenChange, editingCheckin, onSub
       setClientId(editingCheckin.client_id);
       setMessageTemplate(editingCheckin.message_template);
       setScheduleType(editingCheckin.schedule_type);
-      setTimeOfDay(editingCheckin.time_of_day);
+      // Round existing time to nearest 5-minute increment
+      setTimeOfDay(roundToNearest5(editingCheckin.time_of_day || "09:00"));
       setDayOfWeek(editingCheckin.day_of_week || 1);
     } else {
       setClientId("");
@@ -132,7 +160,21 @@ export function ScheduledCheckInForm({ open, onOpenChange, editingCheckin, onSub
 
           <div>
             <Label>{t("scheduledCheckins.timeOfDay")}</Label>
-            <Input type="time" value={timeOfDay} onChange={(e) => setTimeOfDay(e.target.value)} />
+            <Select value={timeOfDay} onValueChange={setTimeOfDay}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select time" />
+              </SelectTrigger>
+              <SelectContent className="max-h-60">
+                {TIME_OPTIONS.map((time) => (
+                  <SelectItem key={time.value} value={time.value}>
+                    {time.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground mt-1">
+              Times are scheduled in 5-minute intervals
+            </p>
           </div>
 
           <div>
