@@ -1626,6 +1626,7 @@
     "dismiss": "Odrzuć",
     "applied": "Zastosowane",
     "dismissed": "Odrzucone",
+    "pending": "Oczekujące",
     "priority": {
       "high": "Wysoki",
       "medium": "Średni",
