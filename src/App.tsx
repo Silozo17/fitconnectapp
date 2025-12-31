@@ -190,6 +190,15 @@ const DocsClientMarketplace = lazy(() => import('@/pages/docs/client/ClientMarke
 const DocsClientReceipts = lazy(() => import('@/pages/docs/client/ClientReceiptsDocs'));
 const DocsClientSecurity = lazy(() => import('@/pages/docs/client/ClientSecurityDocs'));
 const DocsClientWearables = lazy(() => import('@/pages/docs/client/ClientWearablesDocs'));
+const DocsClientDataSharing = lazy(() => import('@/pages/docs/client/ClientDataSharingDocs'));
+const DocsClientLeaderboards = lazy(() => import('@/pages/docs/client/ClientLeaderboardDocs'));
+
+// AI Documentation
+const DocsCoachAIOverview = lazy(() => import('@/pages/docs/coach/CoachAIOverviewDocs'));
+const DocsAIClientSummary = lazy(() => import('@/pages/docs/coach/ai/AIClientSummaryDocs'));
+const DocsAIWorkoutGenerator = lazy(() => import('@/pages/docs/coach/ai/AIWorkoutGeneratorDocs'));
+const DocsAINutritionGenerator = lazy(() => import('@/pages/docs/coach/ai/AINutritionGeneratorDocs'));
+const DocsAIMacroCalculator = lazy(() => import('@/pages/docs/coach/ai/AIMacroCalculatorDocs'));
 
 // Subscribe pages
 const Subscribe = lazy(() => import('@/pages/Subscribe'));
@@ -292,6 +301,8 @@ const App = () => (
                               <Route path="/docs/client/receipts" element={<DocsClientReceipts />} />
                               <Route path="/docs/client/security" element={<DocsClientSecurity />} />
                               <Route path="/docs/client/wearables" element={<DocsClientWearables />} />
+                              <Route path="/docs/client/data-sharing" element={<DocsClientDataSharing />} />
+                              <Route path="/docs/client/leaderboards" element={<DocsClientLeaderboards />} />
                               <Route path="/docs/coach" element={<DocsCoachOverview />} />
                               <Route path="/docs/coach/onboarding" element={<DocsCoachOnboarding />} />
                               <Route path="/docs/coach/profile" element={<DocsCoachProfile />} />
@@ -307,6 +318,11 @@ const App = () => (
                               <Route path="/docs/coach/boost" element={<DocsCoachBoost />} />
                               <Route path="/docs/coach/nutrition" element={<DocsCoachNutrition />} />
                               <Route path="/docs/coach/ai" element={<DocsCoachAI />} />
+                              <Route path="/docs/coach/ai/overview" element={<DocsCoachAIOverview />} />
+                              <Route path="/docs/coach/ai/client-summary" element={<DocsAIClientSummary />} />
+                              <Route path="/docs/coach/ai/workout-generator" element={<DocsAIWorkoutGenerator />} />
+                              <Route path="/docs/coach/ai/nutrition-generator" element={<DocsAINutritionGenerator />} />
+                              <Route path="/docs/coach/ai/macro-calculator" element={<DocsAIMacroCalculator />} />
                               <Route path="/docs/coach/reviews" element={<DocsCoachReviews />} />
                               <Route path="/docs/coach/automations" element={<DocsCoachAutomations />} />
                               <Route path="/docs/coach/automations/dropoff-rescue" element={<DocsCoachDropoffRescue />} />
