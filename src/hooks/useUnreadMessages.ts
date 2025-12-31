@@ -1,61 +1,28 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminView } from "@/contexts/AdminContext";
+import { useClientProfileId } from "@/hooks/useClientProfileId";
+import { useCoachProfileId } from "@/hooks/useCoachProfileId";
 import { triggerHaptic } from "@/lib/despia";
+
+// PERFORMANCE FIX: Delay before creating realtime subscriptions (ms)
+const SUBSCRIPTION_DELAY_MS = 2000;
 
 export const useUnreadMessages = () => {
   const { user, role } = useAuth();
   const { activeProfileId } = useAdminView();
+  const { data: clientProfileId } = useClientProfileId();
+  const { data: coachProfileId } = useCoachProfileId();
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [currentProfileId, setCurrentProfileId] = useState<string | null>(null);
+  const subscriptionDelayRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Get current user's profile ID - prioritize activeProfileId from AdminContext
-  useEffect(() => {
-    const fetchProfileId = async () => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
-      // If we have an active profile from AdminContext (view switching), use it
-      if (activeProfileId) {
-        setCurrentProfileId(activeProfileId);
-        return;
-      }
-
-      // Handle admin role
-      if (role === "admin" || role === "manager" || role === "staff") {
-        const { data: adminData } = await supabase
-          .from("admin_profiles")
-          .select("id")
-          .eq("user_id", user.id)
-          .single();
-        
-        if (adminData) {
-          setCurrentProfileId(adminData.id);
-          return;
-        }
-      }
-
-      const table = role === "coach" ? "coach_profiles" : "client_profiles";
-      
-      const { data } = await supabase
-        .from(table)
-        .select("id")
-        .eq("user_id", user.id)
-        .single();
-
-      if (data) {
-        setCurrentProfileId(data.id);
-      } else {
-        setLoading(false);
-      }
-    };
-
-    fetchProfileId();
-  }, [user, role, activeProfileId]);
+  // PERFORMANCE FIX: Use cached profile IDs instead of fetching inline
+  // Priority: activeProfileId (admin switching) > role-based profile ID
+  const currentProfileId = activeProfileId || 
+    (role === "coach" ? coachProfileId : clientProfileId) || 
+    null;
 
   // Fetch unread count
   const fetchUnreadCount = useCallback(async () => {
@@ -77,52 +44,66 @@ export const useUnreadMessages = () => {
   useEffect(() => {
     if (currentProfileId) {
       fetchUnreadCount();
+    } else {
+      setLoading(false);
     }
   }, [currentProfileId, fetchUnreadCount]);
 
-  // Realtime subscription for new messages
+  // PERFORMANCE FIX: Deferred realtime subscription
   useEffect(() => {
     if (!currentProfileId) return;
 
-    const channel = supabase
-      .channel(`unread-messages-${currentProfileId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-          filter: `receiver_id=eq.${currentProfileId}`,
-        },
-        () => {
-          // New message received - increment count and trigger haptic
-          triggerHaptic('light');
-          setUnreadCount((prev) => prev + 1);
-        }
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "messages",
-          filter: `receiver_id=eq.${currentProfileId}`,
-        },
-        (payload) => {
-          // Message updated - check if it was marked as read
-          const updated = payload.new as { read_at: string | null };
-          const old = payload.old as { read_at: string | null };
-          
-          if (old.read_at === null && updated.read_at !== null) {
-            // Message was marked as read - decrement count
-            setUnreadCount((prev) => Math.max(0, prev - 1));
+    // Clear any existing delay timer
+    if (subscriptionDelayRef.current) {
+      clearTimeout(subscriptionDelayRef.current);
+    }
+
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    // Delay subscription creation to allow UI to render first
+    subscriptionDelayRef.current = setTimeout(() => {
+      channel = supabase
+        .channel(`unread-messages-${currentProfileId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "messages",
+            filter: `receiver_id=eq.${currentProfileId}`,
+          },
+          () => {
+            triggerHaptic('light');
+            setUnreadCount((prev) => prev + 1);
           }
-        }
-      )
-      .subscribe();
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "messages",
+            filter: `receiver_id=eq.${currentProfileId}`,
+          },
+          (payload) => {
+            const updated = payload.new as { read_at: string | null };
+            const old = payload.old as { read_at: string | null };
+            
+            if (old.read_at === null && updated.read_at !== null) {
+              setUnreadCount((prev) => Math.max(0, prev - 1));
+            }
+          }
+        )
+        .subscribe();
+    }, SUBSCRIPTION_DELAY_MS);
 
     return () => {
-      supabase.removeChannel(channel);
+      if (subscriptionDelayRef.current) {
+        clearTimeout(subscriptionDelayRef.current);
+      }
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
     };
   }, [currentProfileId]);
 

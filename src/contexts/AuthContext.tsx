@@ -22,9 +22,12 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Debounce delay for focus handlers (prevents rapid re-validation in native)
-const FOCUS_DEBOUNCE_MS = 500;
+// PERFORMANCE FIX: Increased from 500ms to 1000ms for native apps
+const FOCUS_DEBOUNCE_MS = 1000;
 // Minimum time between session validations
 const SESSION_VALIDATION_COOLDOWN_MS = 30000;
+// Guard to prevent both visibility and focus handlers from firing together
+let isHandlingResume = false;
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -58,149 +61,84 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    // Handle visibility change for PWA/browser background/foreground
-    const handleVisibilityChange = async () => {
-      if (document.visibilityState === 'visible') {
-        // App is now visible - start auto refresh and revalidate session
+    // PERFORMANCE FIX: Unified handler for both visibility and focus events
+    // Prevents double-firing on native app resume
+    const handleAppResume = async (source: 'visibility' | 'focus') => {
+      // Guard: prevent concurrent handling from both events
+      if (isHandlingResume) {
+        return;
+      }
+      
+      // For focus events, only handle in Despia native
+      if (source === 'focus' && !isDespia()) {
+        return;
+      }
+      
+      // Check cooldown
+      const now = Date.now();
+      if (now - lastValidationRef.current < SESSION_VALIDATION_COOLDOWN_MS) {
+        return;
+      }
+      
+      isHandlingResume = true;
+      lastValidationRef.current = now;
+      
+      try {
         supabase.auth.startAutoRefresh();
-        try {
-          const { data: { session }, error } = await supabase.auth.getSession();
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error || !session) {
+          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
           
-          // If session is invalid or expired, try to refresh it
-          if (error || !session) {
-            const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-            
-            if (refreshError || !refreshData.session) {
-              // Session cannot be recovered - clear state
-              setSession(null);
-              setUser(null);
-              setRole(null);
-              setAllRoles([]);
-              return;
-            }
-            
-            setSession(refreshData.session);
-            setUser(refreshData.session.user);
-            if (refreshData.session.user) {
-              setTimeout(() => fetchUserRole(refreshData.session.user.id), 0);
-            }
-          } else {
-            setSession(session);
-            setUser(session.user ?? null);
-            if (session.user) {
-              setTimeout(() => fetchUserRole(session.user.id), 0);
-            }
+          if (refreshError || !refreshData.session) {
+            setSession(null);
+            setUser(null);
+            setRole(null);
+            setAllRoles([]);
+            return;
           }
-        } catch (err) {
-          console.error('[Auth] Error handling visibility change:', err);
+          
+          setSession(refreshData.session);
+          setUser(refreshData.session.user);
+          if (refreshData.session.user) {
+            setTimeout(() => fetchUserRole(refreshData.session.user.id), 0);
+          }
+        } else {
+          setSession(session);
+          setUser(session.user ?? null);
+          if (session.user) {
+            setTimeout(() => fetchUserRole(session.user.id), 0);
+          }
         }
+      } catch (err) {
+        console.error('[Auth] Error handling app resume:', err);
+      } finally {
+        // Reset guard after a short delay to allow for event settling
+        setTimeout(() => {
+          isHandlingResume = false;
+        }, 100);
+      }
+    };
+
+    // Handle visibility change for PWA/browser background/foreground
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        handleAppResume('visibility');
       } else {
-        // App is in background - stop auto refresh to save resources
         supabase.auth.stopAutoRefresh();
       }
     };
 
-    // Handle focus events for Despia native app (debounced + cooldown)
+    // Handle focus events for Despia native app (debounced)
     const handleFocus = () => {
-      if (!isDespia()) return;
-      
       // Clear existing debounce timer
       if (focusDebounceRef.current) {
         clearTimeout(focusDebounceRef.current);
       }
       
       // Debounce to prevent rapid successive calls
-      focusDebounceRef.current = setTimeout(async () => {
-        const now = Date.now();
-        
-        // Skip if we validated recently (cooldown)
-        if (now - lastValidationRef.current < SESSION_VALIDATION_COOLDOWN_MS) {
-          return;
-        }
-        
-        lastValidationRef.current = now;
-        supabase.auth.startAutoRefresh();
-        
-        try {
-          const { data: { session }, error } = await supabase.auth.getSession();
-          
-          // Check for invalid JWT (common in native apps after background)
-          if (error) {
-            // If it's a JWT error, try to refresh
-            if (error.message?.includes('JWT') || error.message?.includes('token') || error.message?.includes('claim')) {
-              const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-              
-              if (refreshError || !refreshData.session) {
-                setSession(null);
-                setUser(null);
-                setRole(null);
-                setAllRoles([]);
-                return;
-              }
-              
-              setSession(refreshData.session);
-              setUser(refreshData.session.user);
-              if (refreshData.session.user) {
-                setTimeout(() => fetchUserRole(refreshData.session.user.id), 0);
-              }
-              return;
-            }
-          }
-          
-          if (!session) {
-            // Try to refresh the session
-            const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-            
-            if (refreshError || !refreshData.session) {
-              setSession(null);
-              setUser(null);
-              setRole(null);
-              setAllRoles([]);
-              return;
-            }
-            
-            setSession(refreshData.session);
-            setUser(refreshData.session.user);
-            if (refreshData.session.user) {
-              setTimeout(() => fetchUserRole(refreshData.session.user.id), 0);
-            }
-          } else {
-            // Validate the session token before using it
-            try {
-              // Test the token by making a simple request
-              const { error: testError } = await supabase.auth.getUser();
-              if (testError) {
-                // Token is invalid, try to refresh
-                const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-                
-                if (refreshError || !refreshData.session) {
-                  setSession(null);
-                  setUser(null);
-                  setRole(null);
-                  setAllRoles([]);
-                  return;
-                }
-                
-                setSession(refreshData.session);
-                setUser(refreshData.session.user);
-                if (refreshData.session.user) {
-                  setTimeout(() => fetchUserRole(refreshData.session.user.id), 0);
-                }
-                return;
-              }
-            } catch (validationErr) {
-              console.error('[Auth] Token validation error:', validationErr);
-            }
-            
-            setSession(session);
-            setUser(session.user ?? null);
-            if (session.user) {
-              setTimeout(() => fetchUserRole(session.user.id), 0);
-            }
-          }
-        } catch (err) {
-          console.error('[Auth] Error handling focus:', err);
-        }
+      focusDebounceRef.current = setTimeout(() => {
+        handleAppResume('focus');
       }, FOCUS_DEBOUNCE_MS);
     };
 

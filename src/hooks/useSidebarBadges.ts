@@ -1,6 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useClientProfileId } from "@/hooks/useClientProfileId";
+import { useCoachProfileId } from "@/hooks/useCoachProfileId";
+
+// PERFORMANCE FIX: Delay before creating realtime subscriptions (ms)
+const SUBSCRIPTION_DELAY_MS = 2000;
 
 interface ClientBadges {
   newPlans: number;
@@ -21,22 +26,10 @@ interface AdminBadges {
 
 export const useClientBadges = () => {
   const { user } = useAuth();
+  // PERFORMANCE FIX: Use shared cached profile ID hook instead of inline fetch
+  const { data: clientProfileId } = useClientProfileId();
   const [badges, setBadges] = useState<ClientBadges>({ newPlans: 0, pendingConnections: 0 });
-  const [clientProfileId, setClientProfileId] = useState<string | null>(null);
-
-  // Get client profile ID
-  useEffect(() => {
-    const fetchProfileId = async () => {
-      if (!user) return;
-      const { data } = await supabase
-        .from("client_profiles")
-        .select("id")
-        .eq("user_id", user.id)
-        .single();
-      if (data) setClientProfileId(data.id);
-    };
-    fetchProfileId();
-  }, [user]);
+  const subscriptionDelayRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch new plans count and pending connections
   const fetchBadges = useCallback(async () => {
@@ -88,37 +81,50 @@ export const useClientBadges = () => {
     fetchBadges();
   }, [clientProfileId, fetchBadges]);
 
-  // Realtime subscription for plan assignments and connections
+  // PERFORMANCE FIX: Deferred realtime subscription
   useEffect(() => {
     if (!clientProfileId || !user) return;
 
-    const channel = supabase
-      .channel(`client-badges-${clientProfileId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "plan_assignments",
-          filter: `client_id=eq.${clientProfileId}`,
-        },
-        () => {
-          setBadges((prev) => ({ ...prev, newPlans: prev.newPlans + 1 }));
-        }
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "user_connections",
-        },
-        () => fetchBadges()
-      )
-      .subscribe();
+    if (subscriptionDelayRef.current) {
+      clearTimeout(subscriptionDelayRef.current);
+    }
+
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    subscriptionDelayRef.current = setTimeout(() => {
+      channel = supabase
+        .channel(`client-badges-${clientProfileId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "plan_assignments",
+            filter: `client_id=eq.${clientProfileId}`,
+          },
+          () => {
+            setBadges((prev) => ({ ...prev, newPlans: prev.newPlans + 1 }));
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "user_connections",
+          },
+          () => fetchBadges()
+        )
+        .subscribe();
+    }, SUBSCRIPTION_DELAY_MS);
 
     return () => {
-      supabase.removeChannel(channel);
+      if (subscriptionDelayRef.current) {
+        clearTimeout(subscriptionDelayRef.current);
+      }
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
     };
   }, [clientProfileId, user, fetchBadges]);
 
@@ -127,27 +133,15 @@ export const useClientBadges = () => {
 
 export const useCoachBadges = () => {
   const { user } = useAuth();
+  // PERFORMANCE FIX: Use shared cached profile ID hook instead of inline fetch
+  const { data: coachProfileId } = useCoachProfileId();
   const [badges, setBadges] = useState<CoachBadges>({
     newLeads: 0,
     pendingBookings: 0,
     pendingClientRequests: 0,
     pendingFriendRequests: 0,
   });
-  const [coachProfileId, setCoachProfileId] = useState<string | null>(null);
-
-  // Get coach profile ID
-  useEffect(() => {
-    const fetchProfileId = async () => {
-      if (!user) return;
-      const { data } = await supabase
-        .from("coach_profiles")
-        .select("id")
-        .eq("user_id", user.id)
-        .single();
-      if (data) setCoachProfileId(data.id);
-    };
-    fetchProfileId();
-  }, [user]);
+  const subscriptionDelayRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch all badge counts
   const fetchBadges = useCallback(async () => {
@@ -218,55 +212,68 @@ export const useCoachBadges = () => {
     fetchBadges();
   }, [coachProfileId, fetchBadges]);
 
-  // Realtime subscriptions
+  // PERFORMANCE FIX: Deferred realtime subscription
   useEffect(() => {
     if (!coachProfileId || !user) return;
 
-    const channel = supabase
-      .channel(`coach-badges-${coachProfileId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "coach_leads",
-          filter: `coach_id=eq.${coachProfileId}`,
-        },
-        () => fetchBadges()
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "booking_requests",
-          filter: `coach_id=eq.${coachProfileId}`,
-        },
-        () => fetchBadges()
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "connection_requests",
-          filter: `coach_id=eq.${coachProfileId}`,
-        },
-        () => fetchBadges()
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "user_connections",
-        },
-        () => fetchBadges()
-      )
-      .subscribe();
+    if (subscriptionDelayRef.current) {
+      clearTimeout(subscriptionDelayRef.current);
+    }
+
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    subscriptionDelayRef.current = setTimeout(() => {
+      channel = supabase
+        .channel(`coach-badges-${coachProfileId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "coach_leads",
+            filter: `coach_id=eq.${coachProfileId}`,
+          },
+          () => fetchBadges()
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "booking_requests",
+            filter: `coach_id=eq.${coachProfileId}`,
+          },
+          () => fetchBadges()
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "connection_requests",
+            filter: `coach_id=eq.${coachProfileId}`,
+          },
+          () => fetchBadges()
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "user_connections",
+          },
+          () => fetchBadges()
+        )
+        .subscribe();
+    }, SUBSCRIPTION_DELAY_MS);
 
     return () => {
-      supabase.removeChannel(channel);
+      if (subscriptionDelayRef.current) {
+        clearTimeout(subscriptionDelayRef.current);
+      }
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
     };
   }, [coachProfileId, user, fetchBadges]);
 
@@ -279,6 +286,7 @@ export const useAdminBadges = () => {
     pendingVerifications: 0,
     newUsers: 0,
   });
+  const subscriptionDelayRef = useRef<NodeJS.Timeout | null>(null);
 
   const isAdmin = role === "admin" || role === "manager" || role === "staff";
 
@@ -332,34 +340,47 @@ export const useAdminBadges = () => {
     if (user && isAdmin) fetchBadges();
   }, [user, isAdmin, fetchBadges]);
 
-  // Realtime subscriptions
+  // PERFORMANCE FIX: Deferred realtime subscription
   useEffect(() => {
     if (!user || !isAdmin) return;
 
-    const channel = supabase
-      .channel("admin-badges")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "coach_verification_documents",
-        },
-        () => fetchBadges()
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "client_profiles",
-        },
-        () => fetchBadges()
-      )
-      .subscribe();
+    if (subscriptionDelayRef.current) {
+      clearTimeout(subscriptionDelayRef.current);
+    }
+
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    subscriptionDelayRef.current = setTimeout(() => {
+      channel = supabase
+        .channel("admin-badges")
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "coach_verification_documents",
+          },
+          () => fetchBadges()
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "client_profiles",
+          },
+          () => fetchBadges()
+        )
+        .subscribe();
+    }, SUBSCRIPTION_DELAY_MS);
 
     return () => {
-      supabase.removeChannel(channel);
+      if (subscriptionDelayRef.current) {
+        clearTimeout(subscriptionDelayRef.current);
+      }
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
     };
   }, [user, isAdmin, fetchBadges]);
 

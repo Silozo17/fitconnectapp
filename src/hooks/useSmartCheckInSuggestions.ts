@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { subDays, format, isToday, isTomorrow, differenceInDays } from "date-fns";
+import { useCoachProfileId } from "@/hooks/useCoachProfileId";
+import { subDays, format, differenceInDays } from "date-fns";
 
 export type CheckInPriority = "urgent" | "suggested" | "routine";
 export type CheckInReason = 
@@ -50,45 +51,91 @@ const MESSAGE_TEMPLATES: Record<CheckInReason, string> = {
 
 export function useSmartCheckInSuggestions() {
   const { user } = useAuth();
+  // PERFORMANCE FIX: Use cached profile ID hook
+  const { data: coachProfileId } = useCoachProfileId();
 
   return useQuery({
-    queryKey: ["smart-checkin-suggestions", user?.id],
+    queryKey: ["smart-checkin-suggestions", coachProfileId],
     queryFn: async (): Promise<CheckInSuggestion[]> => {
-      if (!user?.id) return [];
-
-      const { data: coachProfile } = await supabase
-        .from("coach_profiles")
-        .select("id")
-        .eq("user_id", user.id)
-        .single();
-
-      if (!coachProfile) return [];
+      if (!coachProfileId) return [];
 
       const suggestions: CheckInSuggestion[] = [];
       const now = new Date();
-      const today = format(now, "yyyy-MM-dd");
       const yesterday = format(subDays(now, 1), "yyyy-MM-dd");
       const sevenDaysAgo = subDays(now, 7);
 
-      // Get active clients
-      const { data: clients } = await supabase
-        .from("coach_clients")
-        .select(`
-          client_id,
-          created_at,
-          client_profiles!coach_clients_client_id_fkey (
-            id,
-            first_name,
-            last_name,
-            username,
-            avatar_url
-          )
-        `)
-        .eq("coach_id", coachProfile.id)
-        .eq("status", "active");
+      // PERFORMANCE FIX: Get all data in parallel batch queries instead of N+1
+      const [clientsResult, sessionsResult, badgesResult, messagesResult] = await Promise.all([
+        // Get active clients
+        supabase
+          .from("coach_clients")
+          .select(`
+            client_id,
+            created_at,
+            client_profiles!coach_clients_client_id_fkey (
+              id,
+              first_name,
+              last_name,
+              username,
+              avatar_url
+            )
+          `)
+          .eq("coach_id", coachProfileId)
+          .eq("status", "active"),
+        
+        // Get all sessions completed yesterday for all clients in one query
+        supabase
+          .from("coaching_sessions")
+          .select("client_id")
+          .eq("coach_id", coachProfileId)
+          .eq("status", "completed")
+          .gte("scheduled_at", `${yesterday}T00:00:00`)
+          .lte("scheduled_at", `${yesterday}T23:59:59`),
+        
+        // Get all recent badges for all clients in one query
+        supabase
+          .from("client_badges")
+          .select("client_id, earned_at, badges(name)")
+          .gte("earned_at", sevenDaysAgo.toISOString())
+          .order("earned_at", { ascending: false }),
+        
+        // Get last message timestamps for all clients (use RPC or aggregate if available)
+        // For now, we'll fetch this per-client but batch it
+        supabase
+          .from("messages")
+          .select("sender_id, receiver_id, created_at")
+          .gte("created_at", subDays(now, 14).toISOString())
+          .order("created_at", { ascending: false }),
+      ]);
 
+      const clients = clientsResult.data;
       if (!clients) return [];
 
+      // Build lookup maps for O(1) access
+      const sessionsYesterday = new Set(
+        sessionsResult.data?.map(s => s.client_id) || []
+      );
+      
+      const recentBadges = new Map<string, { name: string }>();
+      for (const badge of badgesResult.data || []) {
+        if (!recentBadges.has(badge.client_id)) {
+          const badgeData = badge.badges as unknown as { name: string } | null;
+          if (badgeData) {
+            recentBadges.set(badge.client_id, badgeData);
+          }
+        }
+      }
+      
+      // Build last message map per client
+      const lastMessageDates = new Map<string, Date>();
+      for (const msg of messagesResult.data || []) {
+        const clientId = msg.sender_id || msg.receiver_id;
+        if (clientId && !lastMessageDates.has(clientId)) {
+          lastMessageDates.set(clientId, new Date(msg.created_at));
+        }
+      }
+
+      // Process all clients without additional queries
       for (const client of clients) {
         const profile = client.client_profiles;
         if (!profile) continue;
@@ -111,22 +158,11 @@ export function useSmartCheckInSuggestions() {
             context: `Joined ${daysSinceJoined === 0 ? "today" : `${daysSinceJoined} days ago`}`,
             dueDate: now,
           });
-          continue; // Skip other checks for new clients
+          continue;
         }
 
-        // Check for sessions completed yesterday (follow-up)
-        const { data: recentSession } = await supabase
-          .from("coaching_sessions")
-          .select("id, scheduled_at")
-          .eq("client_id", client.client_id)
-          .eq("coach_id", coachProfile.id)
-          .eq("status", "completed")
-          .gte("scheduled_at", `${yesterday}T00:00:00`)
-          .lte("scheduled_at", `${yesterday}T23:59:59`)
-          .limit(1)
-          .maybeSingle();
-
-        if (recentSession) {
+        // Check for sessions completed yesterday (from pre-fetched data)
+        if (sessionsYesterday.has(client.client_id)) {
           suggestions.push({
             clientId: client.client_id,
             clientName,
@@ -141,19 +177,9 @@ export function useSmartCheckInSuggestions() {
           continue;
         }
 
-        // Skip habit checking for now - simplify to avoid type issues
-        // Check for milestone badges earned recently
-        const { data: recentBadge } = await supabase
-          .from("client_badges")
-          .select("earned_at, badges(name)")
-          .eq("client_id", client.client_id)
-          .gte("earned_at", sevenDaysAgo.toISOString())
-          .order("earned_at", { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (recentBadge) {
-          const badgeData = recentBadge.badges as unknown as { name: string } | null;
+        // Check for milestone badges (from pre-fetched data)
+        const badge = recentBadges.get(client.client_id);
+        if (badge) {
           suggestions.push({
             clientId: client.client_id,
             clientName,
@@ -162,23 +188,16 @@ export function useSmartCheckInSuggestions() {
             reason: "milestone_reached",
             reasonLabel: REASON_LABELS.milestone_reached,
             messageTemplate: MESSAGE_TEMPLATES.milestone_reached,
-            context: `Earned "${badgeData?.name || "badge"}" recently`,
+            context: `Earned "${badge.name}" recently`,
             dueDate: now,
           });
           continue;
         }
 
-        // Check for inactivity (no messages in 5+ days)
-        const { data: lastMessage } = await supabase
-          .from("messages")
-          .select("created_at")
-          .or(`sender_id.eq.${client.client_id},receiver_id.eq.${client.client_id}`)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
+        // Check for inactivity (from pre-fetched data)
+        const lastMessage = lastMessageDates.get(client.client_id);
         if (lastMessage) {
-          const daysSinceMessage = differenceInDays(now, new Date(lastMessage.created_at));
+          const daysSinceMessage = differenceInDays(now, lastMessage);
           if (daysSinceMessage >= 5) {
             suggestions.push({
               clientId: client.client_id,
@@ -204,7 +223,7 @@ export function useSmartCheckInSuggestions() {
 
       return suggestions.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
     },
-    enabled: !!user?.id,
+    enabled: !!coachProfileId,
     staleTime: 5 * 60 * 1000,
   });
 }
