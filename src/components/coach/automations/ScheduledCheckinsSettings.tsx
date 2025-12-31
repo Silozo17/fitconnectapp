@@ -400,9 +400,9 @@ export const ScheduledCheckinsSettings = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogCancel>{t("common:common.cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete} disabled={isDeleting}>
-              {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : t("common.delete")}
+              {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : t("common:common.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

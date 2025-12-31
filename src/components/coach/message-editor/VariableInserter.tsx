@@ -90,57 +90,59 @@ export function VariableInserter({
           </div>
         </div>
 
-        <ScrollArea className="h-[300px]">
-          {isLoading ? (
-            <div className="p-4 text-center text-sm text-muted-foreground">
-              Loading...
-            </div>
-          ) : filteredCategories.length === 0 ? (
-            <div className="p-4 text-center text-sm text-muted-foreground">
-              No variables found
-            </div>
-          ) : (
-            <div className="p-2 space-y-4">
-              {filteredCategories.map(([category, variables]) => (
-                <div key={category}>
-                  <div className="flex items-center gap-2 px-2 mb-2">
-                    <span className={cn(
-                      "p-1 rounded",
-                      CATEGORY_COLORS[category]?.split(" ")[0] || "bg-muted"
-                    )}>
-                      {CATEGORY_ICONS[category]}
-                    </span>
-                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      {CATEGORY_LABELS[category] || category}
-                    </span>
-                  </div>
-                  <div className="space-y-1">
-                    {variables.map((variable) => (
-                      <button
-                        key={variable.name}
-                        type="button"
-                        onClick={() => handleInsert(variable)}
-                        className="w-full flex items-start gap-3 p-2 rounded-md hover:bg-muted/50 text-left transition-colors"
-                      >
-                        <Badge
-                          variant="outline"
-                          className={cn(
-                            "font-mono text-xs shrink-0 mt-0.5",
-                            CATEGORY_COLORS[category]
-                          )}
+        <ScrollArea className="h-[300px] overflow-hidden">
+          <div className="h-full">
+            {isLoading ? (
+              <div className="p-4 text-center text-sm text-muted-foreground">
+                Loading...
+              </div>
+            ) : filteredCategories.length === 0 ? (
+              <div className="p-4 text-center text-sm text-muted-foreground">
+                No variables found
+              </div>
+            ) : (
+              <div className="p-2 space-y-4">
+                {filteredCategories.map(([category, variables]) => (
+                  <div key={category}>
+                    <div className="flex items-center gap-2 px-2 mb-2">
+                      <span className={cn(
+                        "p-1 rounded",
+                        CATEGORY_COLORS[category]?.split(" ")[0] || "bg-muted"
+                      )}>
+                        {CATEGORY_ICONS[category]}
+                      </span>
+                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        {CATEGORY_LABELS[category] || category}
+                      </span>
+                    </div>
+                    <div className="space-y-1">
+                      {variables.map((variable) => (
+                        <button
+                          key={variable.name}
+                          type="button"
+                          onClick={() => handleInsert(variable)}
+                          className="w-full flex items-start gap-3 p-2 rounded-md hover:bg-muted/50 text-left transition-colors"
                         >
-                          {`{${variable.name}}`}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground leading-relaxed">
-                          {variable.description}
-                        </span>
-                      </button>
-                    ))}
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              "font-mono text-xs shrink-0 mt-0.5",
+                              CATEGORY_COLORS[category]
+                            )}
+                          >
+                            {`{${variable.name}}`}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground leading-relaxed">
+                            {variable.description}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </ScrollArea>
 
         <div className="p-2 border-t bg-muted/30">
