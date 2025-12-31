@@ -238,6 +238,7 @@ export function ScheduledCheckInForm({ open, onOpenChange, editingCheckin, onSub
                       <Checkbox 
                         checked={selectedClientIds.includes(client.id)}
                         onCheckedChange={() => toggleClientSelection(client.id)}
+                        onClick={(e) => e.stopPropagation()}
                       />
                       <span className="text-sm">{client.first_name} {client.last_name}</span>
                     </div>

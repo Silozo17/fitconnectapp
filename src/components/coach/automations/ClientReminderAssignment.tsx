@@ -131,6 +131,7 @@ export function ClientReminderAssignment({ open, onOpenChange, template }: Clien
                       <Checkbox 
                         checked={selectedClients.includes(client.client_id)}
                         onCheckedChange={() => toggleClient(client.client_id)}
+                        onClick={(e) => e.stopPropagation()}
                       />
                       <span className="text-sm">
                         {client.client_profile?.first_name} {client.client_profile?.last_name}
