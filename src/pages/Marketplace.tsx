@@ -33,7 +33,7 @@ export default function Marketplace() {
   const paidProducts = products?.filter(p => p.price > 0) || [];
 
   return (
-    <PageLayout title="Marketplace - Digital Content" description="Discover e-books, video courses, workout templates, and more from top fitness professionals.">
+    <PageLayout title="Marketplace - Digital Content" description="Discover e-books, video courses, workout templates, and more from top fitness professionals." noIndex={productsLoading}>
       <div className="min-h-screen bg-background">
         {/* Hero Section */}
         <section className="relative py-16 md:py-24 overflow-hidden">

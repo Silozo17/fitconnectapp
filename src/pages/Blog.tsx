@@ -75,6 +75,7 @@ export default function Blog() {
         canonicalPath="/blog"
         keywords={["fitness blog", "workout tips", "nutrition advice", "personal training", "fitness guides", "exercise tips"]}
         schema={[blogSchema, breadcrumbSchema]}
+        noIndex={isLoading}
       />
 
       <div className="min-h-screen bg-background">

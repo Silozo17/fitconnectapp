@@ -118,6 +118,7 @@ const Coaches = () => {
         canonicalPath="/coaches"
         keywords={["find personal trainer", "book fitness coach", "hire nutritionist UK", "personal trainer near me", "online fitness coach"]}
         schema={[breadcrumbSchema, serviceSchema]}
+        noIndex={isFullyLoading}
       />
 
       <div className="min-h-screen bg-background">

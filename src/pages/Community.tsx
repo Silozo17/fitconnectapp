@@ -1,8 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import { useSearchParams, Link } from "react-router-dom";
+import { SEOHead } from "@/components/shared/SEOHead";
 import { Trophy, Globe, MapPin, Search, Users, ChevronRight, Filter, Medal, Award, Flag, Building2, Sparkles, Lock, Crown, Target, Flame, Dumbbell, BarChart3, Camera, Utensils, Zap } from "lucide-react";
-import { Link } from "react-router-dom";
 import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -255,10 +254,12 @@ export default function Community() {
 
   return (
     <>
-      <Helmet>
-        <title>{t('community.meta.title')}</title>
-        <meta name="description" content={t('community.meta.description')} />
-      </Helmet>
+      <SEOHead
+        title={t('community.meta.title')}
+        description={t('community.meta.description')}
+        canonicalPath="/community"
+        noIndex={leaderboardLoading || avatarsLoading}
+      />
 
       <div className="min-h-screen bg-background relative">
         <Navbar />
