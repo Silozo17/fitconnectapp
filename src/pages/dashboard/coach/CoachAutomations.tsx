@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
@@ -8,9 +9,20 @@ import { MilestoneSettings } from "@/components/coach/automations/MilestoneSetti
 import { ReminderSettings } from "@/components/coach/automations/ReminderSettings";
 import { AlertTriangle, Trophy, Clock, Zap } from "lucide-react";
 
+const VALID_TABS = ["dropoff", "milestones", "reminders"];
+
 export default function CoachAutomations() {
   const { t } = useTranslation("coach");
-  const [activeTab, setActiveTab] = useState("dropoff");
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") || "dropoff";
+  const [activeTab, setActiveTab] = useState(VALID_TABS.includes(initialTab) ? initialTab : "dropoff");
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab && VALID_TABS.includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   return (
     <>

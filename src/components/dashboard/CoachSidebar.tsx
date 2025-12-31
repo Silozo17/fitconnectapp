@@ -32,6 +32,8 @@ import {
   Users2,
   CalendarClock,
   FileText,
+  AlertTriangle,
+  Bell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
@@ -114,6 +116,9 @@ const menuGroups: MenuGroup[] = [
     collapsible: true,
     items: [
       { titleKey: "navigation.coach.scheduledCheckins", icon: CalendarClock, path: "/dashboard/coach/scheduled-checkins", requiredFeature: "scheduled_checkin_automation" },
+      { titleKey: "navigation.coach.dropoffRescue", icon: AlertTriangle, path: "/dashboard/coach/automations?tab=dropoff" },
+      { titleKey: "navigation.coach.milestonesCelebration", icon: Trophy, path: "/dashboard/coach/automations?tab=milestones" },
+      { titleKey: "navigation.coach.reminderSettings", icon: Bell, path: "/dashboard/coach/automations?tab=reminders" },
     ],
   },
   {
@@ -232,9 +237,17 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
     return group.items.reduce((sum, item) => sum + getBadgeCount(item.badgeKey), 0);
   }, [getBadgeCount]);
 
+  const isItemActive = useCallback((itemPath: string): boolean => {
+    const [basePath, query] = itemPath.split('?');
+    if (query) {
+      return location.pathname === basePath && location.search.includes(query);
+    }
+    return location.pathname === itemPath;
+  }, [location.pathname, location.search]);
+
   const isGroupActive = useCallback((group: MenuGroup): boolean => {
-    return group.items.some((item) => location.pathname === item.path);
-  }, [location.pathname]);
+    return group.items.some((item) => isItemActive(item.path));
+  }, [isItemActive]);
 
   const toggleGroup = useCallback((groupId: string) => {
     setOpenGroups((prev) => {
@@ -253,7 +266,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
   }, []);
 
   const renderMenuItem = (item: MenuItem, indented = false, isCollapsed = false) => {
-    const isActive = location.pathname === item.path;
+    const isActive = isItemActive(item.path);
     const badgeCount = getBadgeCount(item.badgeKey);
     const isLocked = item.requiredFeature && !hasFeature(item.requiredFeature);
     const title = t(item.titleKey);
