@@ -32,8 +32,7 @@ import {
   Users2,
   CalendarClock,
   FileText,
-  AlertTriangle,
-  Bell,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
@@ -112,13 +111,10 @@ const menuGroups: MenuGroup[] = [
   {
     id: "automations",
     labelKey: "navigation.coach.automations",
-    icon: CalendarClock,
-    collapsible: true,
+    icon: Zap,
+    collapsible: false,
     items: [
-      { titleKey: "navigation.coach.scheduledCheckins", icon: CalendarClock, path: "/dashboard/coach/scheduled-checkins", requiredFeature: "scheduled_checkin_automation" },
-      { titleKey: "navigation.coach.dropoffRescue", icon: AlertTriangle, path: "/dashboard/coach/automations?tab=dropoff" },
-      { titleKey: "navigation.coach.milestonesCelebration", icon: Trophy, path: "/dashboard/coach/automations?tab=milestones" },
-      { titleKey: "navigation.coach.reminderSettings", icon: Bell, path: "/dashboard/coach/automations?tab=reminders" },
+      { titleKey: "navigation.coach.automations", icon: Zap, path: "/dashboard/coach/automations" },
     ],
   },
   {

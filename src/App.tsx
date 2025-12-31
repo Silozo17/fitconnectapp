@@ -701,7 +701,7 @@ const App = () => (
                               } />
                               <Route path="/dashboard/coach/scheduled-checkins" element={
                                 <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachScheduledCheckins />
+                                  <CoachAutomations />
                                 </ProtectedRoute>
                               } />
                               <Route path="/dashboard/coach/automations" element={
