@@ -57,6 +57,7 @@ import {
 } from "@/hooks/useOutcomeShowcase";
 import { useCoachProfileId } from "@/hooks/useCoachProfileId";
 import { ShowcasePhotoEditor } from "@/components/showcase/ShowcasePhotoEditor";
+import { FeatureGate } from "@/components/FeatureGate";
 
 export default function CoachOutcomeShowcase() {
   const { t } = useTranslation();
@@ -271,6 +272,7 @@ export default function CoachOutcomeShowcase() {
 
   return (
     <DashboardLayout>
+      <FeatureGate feature="client_outcomes_showcase">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -735,6 +737,7 @@ export default function CoachOutcomeShowcase() {
           </DialogContent>
         </Dialog>
       </div>
+      </FeatureGate>
     </DashboardLayout>
   );
 }

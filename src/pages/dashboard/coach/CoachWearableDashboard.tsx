@@ -21,6 +21,7 @@ import { useCoachWearableAggregates } from "@/hooks/useCoachWearableAggregates";
 import { ClientWearableRow } from "@/components/coach/ClientWearableRow";
 import { WearableAlerts } from "@/components/coach/WearableAlerts";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
+import { FeatureGate } from "@/components/FeatureGate";
 
 const CoachWearableDashboard = () => {
   const { t } = useTranslation("coach");
@@ -52,6 +53,7 @@ const CoachWearableDashboard = () => {
       title={t("wearableDashboard.title")}
       description={t("wearableDashboard.subtitle")}
     >
+      <FeatureGate feature="wearable_dashboard">
       <PageHelpBanner
         pageKey="coach_wearable_dashboard"
         title="Client Wearable Insights"
@@ -202,6 +204,7 @@ const CoachWearableDashboard = () => {
           )}
         </CardContent>
       </Card>
+      </FeatureGate>
     </DashboardLayout>
   );
 };

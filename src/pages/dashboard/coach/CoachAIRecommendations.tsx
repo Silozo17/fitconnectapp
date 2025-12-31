@@ -10,6 +10,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useAIPlanRecommendations } from "@/hooks/useAIPlanRecommendations";
 import { AIPlanRecommendationCard } from "@/components/coach/AIPlanRecommendationCard";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
+import { FeatureGate } from "@/components/FeatureGate";
 
 const CoachAIRecommendations = () => {
   const { t } = useTranslation("coach");
@@ -49,6 +50,7 @@ const CoachAIRecommendations = () => {
       title={t("aiRecommendations.title")}
       description={t("aiRecommendations.subtitle")}
     >
+      <FeatureGate feature="ai_plan_recommendations">
       <PageHelpBanner
         pageKey="coach_ai_recommendations"
         title="AI-Powered Insights"
@@ -223,6 +225,7 @@ const CoachAIRecommendations = () => {
           </TooltipProvider>
         </CardContent>
       </Card>
+      </FeatureGate>
     </DashboardLayout>
   );
 };
