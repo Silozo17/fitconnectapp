@@ -86,7 +86,7 @@ const CoachCard = React.memo(({ coach, onBook, onRequestConnection, linkPrefix }
   );
 
   return (
-    <div className={`group glass-card-elevated rounded-2xl overflow-hidden hover-lift relative ${coach.is_sponsored ? "ring-2 ring-primary/50" : ""}`}>
+    <div className={`group glass-card-elevated rounded-2xl overflow-hidden hover-lift-gpu relative coach-card-container ${coach.is_sponsored ? "ring-2 ring-primary/50" : ""}`}>
       <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
         {coach.is_sponsored && (
           <Badge className="bg-primary/90 text-primary-foreground border-0 backdrop-blur-sm">
@@ -100,7 +100,13 @@ const CoachCard = React.memo(({ coach, onBook, onRequestConnection, linkPrefix }
       <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
         {(coach.card_image_url || coach.profile_image_url) ? (
           // Priority 1: Uploaded card or profile image
-          <img src={coach.card_image_url || coach.profile_image_url || ""} alt={coach.display_name || "Coach"} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <img 
+            src={coach.card_image_url || coach.profile_image_url || ""} 
+            alt={coach.display_name || "Coach"} 
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+            decoding="async"
+          />
         ) : coach.avatars?.slug ? (
           // Priority 2: Selected character avatar displayed full-width
           <div className="w-full h-full overflow-hidden bg-gradient-to-br from-cyan-400 via-emerald-400 to-lime-400">
@@ -108,6 +114,8 @@ const CoachCard = React.memo(({ coach, onBook, onRequestConnection, linkPrefix }
               src={getAvatarImageUrl(coach.avatars.slug)} 
               alt={coach.display_name || "Coach"} 
               className="w-full h-[180%] object-contain object-top"
+              loading="lazy"
+              decoding="async"
             />
           </div>
         ) : (
@@ -116,6 +124,8 @@ const CoachCard = React.memo(({ coach, onBook, onRequestConnection, linkPrefix }
             src={fallbackCoachImage} 
             alt={coach.display_name || "Coach"} 
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+            decoding="async"
           />
         )}
         <div className="absolute bottom-3 left-3 flex gap-2">

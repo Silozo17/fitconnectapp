@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+/* Fonts are loaded via index.html with preload for better performance */
 
 /* ========================================
    CIRCULAR STAT COMPONENTS - Premium Effects
@@ -33,6 +33,22 @@
 
 .circular-stat-pulse {
   animation: circular-stat-pulse 2s ease-in-out infinite;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .circular-stat-pulse,
+  .leaderboard-avatar-ring::before,
+  .glow-orb,
+  .glow-orb-purple,
+  .blob,
+  .pulse-glow,
+  .float,
+  .animate-shine,
+  .animate-pulse-subtle,
+  .animate-badge-shine {
+    animation: none !important;
+  }
 }
 
 /* Entry animation for circular stats */
@@ -89,6 +105,19 @@
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   animation: ring-rotate 4s linear infinite, ring-glow-pulse 2s ease-in-out infinite;
+  /* Performance: Use GPU-accelerated properties */
+  will-change: transform;
+}
+
+/* Pause animations when not visible (for mobile battery savings) */
+@media (max-width: 768px) {
+  .leaderboard-avatar-ring::before {
+    animation-play-state: paused;
+  }
+  .leaderboard-avatar-ring:hover::before,
+  .leaderboard-avatar-ring:focus-within::before {
+    animation-play-state: running;
+  }
 }
 
 .leaderboard-avatar-ring-gold {
@@ -580,6 +609,14 @@
     50% { transform: translate(-25px, 25px) scale(1.08); }
   }
 
+  /* Disable background orb animations on mobile for battery savings */
+  @media (max-width: 768px) {
+    .glow-orb,
+    .glow-orb-purple {
+      animation: none;
+    }
+  }
+
   /* ========================================
      GRADIENT TEXT UTILITIES
      ======================================== */
@@ -1054,17 +1091,36 @@
     @apply transition-transform active:scale-[0.98];
   }
 
-  /* Skeleton shimmer effect */
+  /* Skeleton shimmer effect - optimized for GPU */
   .skeleton-shimmer {
-    @apply relative overflow-hidden;
+    @apply relative overflow-hidden bg-muted;
+  }
+  
+  .skeleton-shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
     background: linear-gradient(
       90deg,
-      hsl(var(--muted)) 0%,
-      hsl(var(--muted) / 0.5) 50%,
-      hsl(var(--muted)) 100%
+      transparent 0%,
+      hsl(var(--muted-foreground) / 0.08) 50%,
+      transparent 100%
     );
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
+    transform: translateX(-100%);
+    animation: shimmer-optimized 1.5s infinite;
+    will-change: transform;
+  }
+  
+  @keyframes shimmer-optimized {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton-shimmer::after {
+      animation: none;
+    }
   }
 
   /* Consistent card hover states */
@@ -1220,4 +1276,96 @@
 .touch-scroll-area {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+}
+
+/* ========================================
+   PERFORMANCE OPTIMIZATIONS
+   ======================================== */
+
+/* CSS Containment for list items - reduces layout recalculation */
+.coach-card-container,
+.message-item-container,
+.notification-item-container {
+  contain: layout style paint;
+}
+
+/* Dashboard widgets - content-visibility for off-screen rendering optimization */
+.dashboard-widget {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 200px;
+}
+
+/* Touch action optimization - eliminates 300ms delay */
+.touch-scroll-optimized {
+  touch-action: pan-y;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Horizontal scrolling containers */
+.touch-scroll-x {
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* GPU-accelerated transitions - use specific properties instead of 'all' */
+.transition-gpu {
+  transition-property: transform, opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+  will-change: transform, opacity;
+}
+
+/* Hover lift effect optimized for GPU */
+.hover-lift-gpu {
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift-gpu:hover {
+  transform: translateY(-2px);
+}
+
+/* Card shadow transition using pseudo-element for GPU acceleration */
+.card-shadow-gpu {
+  position: relative;
+}
+
+.card-shadow-gpu::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+  box-shadow: 0 12px 40px hsl(0 0% 0% / 0.35);
+  pointer-events: none;
+}
+
+.card-shadow-gpu:hover::before {
+  opacity: 1;
+}
+
+/* Scroll snap optimization for carousels */
+.scroll-snap-container {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
+}
+
+.scroll-snap-item {
+  scroll-snap-align: start;
+  scroll-snap-stop: normal;
+}
+
+/* Performance class for heavy components */
+.perf-contain {
+  contain: layout style;
+}
+
+/* Lazy loading placeholder */
+.lazy-image-placeholder {
+  background: hsl(var(--muted));
+  aspect-ratio: inherit;
 }
