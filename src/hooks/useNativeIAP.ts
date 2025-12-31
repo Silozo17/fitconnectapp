@@ -61,10 +61,20 @@ const PURCHASE_TIMEOUT_MS = 120000; // 2 minutes timeout for stuck purchases
 export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn => {
   const { user } = useAuth();
   const { data: coachProfileId } = useCoachProfileId();
-  const { data: coachProfile } = useCoachProfile();
+  const { data: coachProfile, isLoading: isProfileLoading } = useCoachProfile();
   
-  // Check if current tier is Founder - Founders skip all reconciliation
-  const isFounder = coachProfile?.subscription_tier === 'founder';
+  // CRITICAL: Check BOTH database tier AND localStorage cache for Founder
+  // This provides double protection against reconciliation running before profile loads
+  const isFounderFromDB = coachProfile?.subscription_tier === 'founder';
+  const isFounderFromCache = (() => {
+    try {
+      return localStorage.getItem('fitconnect_cached_tier') === 'founder';
+    } catch {
+      return false;
+    }
+  })();
+  const isFounder = isFounderFromDB || isFounderFromCache;
+  
   const queryClient = useQueryClient();
   const [state, setState] = useState<NativeIAPState>({
     isAvailable: false,
@@ -111,10 +121,18 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
    * and reconcile DB state if there's a mismatch
    * 
    * CRITICAL: Founders are NEVER reconciled - their tier is immutable and protected
+   * CRITICAL: Never run reconciliation while profile is still loading
    */
   const reconcileSubscription = useCallback(async () => {
+    // GUARD 1: Wait for profile to actually load before any reconciliation
+    // This prevents race conditions where reconciliation runs before we know the tier
+    if (isProfileLoading) {
+      console.log('[NativeIAP] Profile still loading - deferring reconciliation');
+      return;
+    }
+    
     // FOUNDER PROTECTION: Skip reconciliation entirely for Founders
-    // Founder tier is permanent and cannot be modified by automated processes
+    // Check both DB and localStorage cache for maximum protection
     if (isFounder) {
       console.log('[NativeIAP] Skipping reconciliation - Founder tier is immutable');
       return;
@@ -158,15 +176,21 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     } catch (e) {
       console.error('[NativeIAP] Subscription reconciliation exception:', e);
     }
-  }, [coachProfileId, user, queryClient, isFounder]);
+  }, [coachProfileId, user, queryClient, isFounder, isProfileLoading]);
 
   /**
    * Auto-reconcile on mount when native IAP is available
    * This recovers from webhook failures or delayed processing
    * 
    * CRITICAL: Founders are excluded from auto-reconciliation
+   * CRITICAL: Never run until profile has loaded to prevent race conditions
    */
   useEffect(() => {
+    // GUARD: Wait for profile to load before any auto-reconciliation
+    if (isProfileLoading) {
+      return;
+    }
+    
     // FOUNDER PROTECTION: Skip auto-reconciliation for Founders
     if (isFounder) {
       console.log('[NativeIAP] Skipping auto-reconciliation - Founder tier is immutable');
@@ -181,7 +205,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
       
       return () => clearTimeout(timer);
     }
-  }, [state.isAvailable, coachProfileId, user, reconcileSubscription, isFounder]);
+  }, [state.isAvailable, coachProfileId, user, reconcileSubscription, isFounder, isProfileLoading]);
 
   /**
    * Foreground/resume reconciliation and safety reset

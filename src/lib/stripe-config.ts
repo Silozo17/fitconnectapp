@@ -250,9 +250,49 @@ export const TIER_ORDER: TierKey[] = ["free", "starter", "pro", "enterprise", "f
 // Helper to get tier position for comparison
 export const getTierPosition = (tier: TierKey): number => TIER_ORDER.indexOf(tier);
 
+// CRITICAL: Storage key for tier persistence (must match useFeatureAccess.ts)
+const TIER_STORAGE_KEY = 'fitconnect_cached_tier';
+
 // Map legacy or invalid tier names to valid TierKeys
+// CRITICAL: This function now has FOUNDER PROTECTION built in
 export const normalizeTier = (tier: string | null | undefined): TierKey => {
-  if (!tier) return "free";
+  // FOUNDER PROTECTION: Check localStorage for cached founder tier
+  // This prevents any code path from accidentally downgrading a founder
+  const getCachedTier = (): TierKey | null => {
+    try {
+      const cached = localStorage.getItem(TIER_STORAGE_KEY);
+      if (cached && cached in SUBSCRIPTION_TIERS) {
+        return cached as TierKey;
+      }
+    } catch {
+      // localStorage may be unavailable
+    }
+    return null;
+  };
+  
+  const cachedTier = getCachedTier();
+  
+  // FOUNDER IMMUTABILITY: If cached tier is founder, NEVER return anything else
+  // This is the ultimate protection against accidental downgrades
+  if (cachedTier === 'founder') {
+    // Only allow founder -> founder
+    if (tier === 'founder' || !tier) {
+      return 'founder';
+    }
+    // Log any attempt to change from founder to something else
+    console.warn(`[normalizeTier] BLOCKED: Attempted to change from founder to "${tier}"`);
+    return 'founder';
+  }
+  
+  // If tier is explicitly "founder", always return founder
+  if (tier === 'founder') {
+    return 'founder';
+  }
+  
+  // No tier provided - check cache first, then default to free
+  if (!tier) {
+    return cachedTier || 'free';
+  }
   
   // Direct match to valid tier
   if (tier in SUBSCRIPTION_TIERS) {
@@ -266,5 +306,5 @@ export const normalizeTier = (tier: string | null | undefined): TierKey => {
     basic: "starter",
   };
   
-  return legacyMap[tier] || "free";
+  return legacyMap[tier] || cachedTier || "free";
 };
