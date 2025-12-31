@@ -218,6 +218,18 @@ const DocsCoachComparison = lazy(() => import('@/pages/docs/coach/CoachClientCom
 const DocsCoachCaseStudies = lazy(() => import('@/pages/docs/coach/CoachCaseStudiesDocs'));
 const DocsCoachPackageAnalytics = lazy(() => import('@/pages/docs/coach/CoachPackageAnalyticsDocs'));
 const DocsCoachConnections = lazy(() => import('@/pages/docs/coach/CoachConnectionsDocs'));
+const DocsCoachAIRecommendations = lazy(() => import('@/pages/docs/coach/CoachAIRecommendationsDocs'));
+const DocsCoachClientRisk = lazy(() => import('@/pages/docs/coach/CoachClientRiskDocs'));
+const DocsCoachPlateau = lazy(() => import('@/pages/docs/coach/CoachPlateauDocs'));
+const DocsCoachRevenueForecast = lazy(() => import('@/pages/docs/coach/CoachRevenueForecastDocs'));
+const DocsCoachCheckInSuggestions = lazy(() => import('@/pages/docs/coach/CoachCheckInSuggestionsDocs'));
+const DocsCoachGroupClasses = lazy(() => import('@/pages/docs/coach/CoachGroupClassesDocs'));
+
+// Client Additional Documentation
+const DocsClientReadiness = lazy(() => import('@/pages/docs/client/ClientReadinessDocs'));
+const DocsClientMicroWins = lazy(() => import('@/pages/docs/client/ClientMicroWinsDocs'));
+const DocsClientGoalSuggestions = lazy(() => import('@/pages/docs/client/ClientGoalSuggestionsDocs'));
+const DocsClientTrends = lazy(() => import('@/pages/docs/client/ClientTrendsDocs'));
 
 // Integration Documentation - Wearables
 const DocsAppleHealth = lazy(() => import('@/pages/docs/integrations/AppleHealthIntegration'));
@@ -329,6 +341,10 @@ const App = () => (
                               <Route path="/docs/client/leaderboards" element={<DocsClientLeaderboards />} />
                               <Route path="/docs/client/messages" element={<DocsClientMessages />} />
                               <Route path="/docs/client/favourites" element={<DocsClientFavourites />} />
+                              <Route path="/docs/client/readiness" element={<DocsClientReadiness />} />
+                              <Route path="/docs/client/micro-wins" element={<DocsClientMicroWins />} />
+                              <Route path="/docs/client/goal-suggestions" element={<DocsClientGoalSuggestions />} />
+                              <Route path="/docs/client/trends" element={<DocsClientTrends />} />
                               <Route path="/docs/coach" element={<DocsCoachOverview />} />
                               <Route path="/docs/coach/onboarding" element={<DocsCoachOnboarding />} />
                               <Route path="/docs/coach/profile" element={<DocsCoachProfile />} />
@@ -365,6 +381,12 @@ const App = () => (
                               <Route path="/docs/coach/case-studies" element={<DocsCoachCaseStudies />} />
                               <Route path="/docs/coach/package-analytics" element={<DocsCoachPackageAnalytics />} />
                               <Route path="/docs/coach/connections" element={<DocsCoachConnections />} />
+                              <Route path="/docs/coach/ai-recommendations" element={<DocsCoachAIRecommendations />} />
+                              <Route path="/docs/coach/client-risk" element={<DocsCoachClientRisk />} />
+                              <Route path="/docs/coach/plateau-detection" element={<DocsCoachPlateau />} />
+                              <Route path="/docs/coach/revenue-forecast" element={<DocsCoachRevenueForecast />} />
+                              <Route path="/docs/coach/checkin-suggestions" element={<DocsCoachCheckInSuggestions />} />
+                              <Route path="/docs/coach/group-classes" element={<DocsCoachGroupClasses />} />
                               <Route path="/docs/coach/automations" element={<DocsCoachAutomations />} />
                               <Route path="/docs/coach/automations/dropoff-rescue" element={<DocsCoachDropoffRescue />} />
                               <Route path="/docs/coach/automations/milestones" element={<DocsCoachMilestones />} />

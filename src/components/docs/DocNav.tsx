@@ -34,7 +34,12 @@ import {
   Star,
   LayoutDashboard,
   FileText,
-  Plug
+  Plug,
+  Brain,
+  AlertTriangle,
+  Activity,
+  LineChart,
+  UsersRound
 } from "lucide-react";
 
 interface NavItem {
@@ -66,6 +71,10 @@ const navItems: NavItem[] = [
       { title: "Training Logs", href: "/docs/client/training-logs", icon: Dumbbell },
       { title: "Tracking Progress", href: "/docs/client/progress", icon: TrendingUp },
       { title: "Habits & Streaks", href: "/docs/client/habits", icon: Flame },
+      { title: "Readiness Score", href: "/docs/client/readiness", icon: Target },
+      { title: "Wearable Trends", href: "/docs/client/trends", icon: TrendingUp },
+      { title: "Micro Wins", href: "/docs/client/micro-wins", icon: Trophy },
+      { title: "Goal Suggestions", href: "/docs/client/goal-suggestions", icon: Sparkles },
       { title: "Shopping Lists", href: "/docs/client/grocery", icon: ShoppingCart },
       { title: "Challenges", href: "/docs/client/challenges", icon: Target },
       { title: "Achievements", href: "/docs/client/achievements", icon: Trophy },
@@ -93,6 +102,8 @@ const navItems: NavItem[] = [
       { title: "Managing Clients", href: "/docs/coach/clients", icon: Users },
       { title: "Client Comparison", href: "/docs/coach/comparison", icon: BarChart3 },
       { title: "Client Wearables", href: "/docs/coach/wearables", icon: Settings },
+      { title: "Client Risk Detection", href: "/docs/coach/client-risk", icon: AlertTriangle },
+      { title: "Plateau Detection", href: "/docs/coach/plateau-detection", icon: Activity },
       { title: "Sales Pipeline", href: "/docs/coach/pipeline", icon: Kanban },
       { title: "Messaging & Templates", href: "/docs/coach/messaging", icon: MessageSquare },
       { title: "Building Plans", href: "/docs/coach/plans", icon: ClipboardList },
@@ -101,9 +112,13 @@ const navItems: NavItem[] = [
       { title: "Schedule & Sessions", href: "/docs/coach/schedule", icon: Calendar },
       { title: "Packages & Pricing", href: "/docs/coach/packages", icon: CreditCard },
       { title: "Package Analytics", href: "/docs/coach/package-analytics", icon: BarChart3 },
+      { title: "Group Classes", href: "/docs/coach/group-classes", icon: UsersRound },
       { title: "Financial Management", href: "/docs/coach/financial", icon: CreditCard },
+      { title: "Revenue Forecasting", href: "/docs/coach/revenue-forecast", icon: LineChart },
       { title: "Boost Marketing", href: "/docs/coach/boost", icon: Rocket },
       { title: "AI Tools", href: "/docs/coach/ai", icon: Sparkles },
+      { title: "AI Recommendations", href: "/docs/coach/ai-recommendations", icon: Brain },
+      { title: "Check-in Suggestions", href: "/docs/coach/checkin-suggestions", icon: MessageSquare },
       { title: "Automations", href: "/docs/coach/automations", icon: Settings },
       { title: "Outcome Showcase", href: "/docs/coach/showcase", icon: Trophy },
       { title: "Case Studies", href: "/docs/coach/case-studies", icon: FileText },
