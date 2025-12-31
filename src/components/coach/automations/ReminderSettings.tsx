@@ -8,8 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useClientReminders, ReminderTemplate } from "@/hooks/useClientReminders";
-import { Loader2, Clock, Plus, Users } from "lucide-react";
+import { Loader2, Clock, Plus, Users, Smartphone } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ClientReminderAssignment } from "./ClientReminderAssignment";
 import { ActiveRemindersList } from "./ActiveRemindersList";
 
@@ -55,6 +56,18 @@ export function ReminderSettings() {
 
   return (
     <div className="space-y-6">
+      {/* Delivery Notice */}
+      <Alert variant="warning" className="border-warning/30">
+        <Smartphone className="h-4 w-4" />
+        <AlertDescription className="text-sm">
+          <span className="font-medium">{t("automations.reminders.deliveryNotice", "How reminders are delivered:")}</span>{" "}
+          {t("automations.reminders.deliveryNoticeDesc", "Reminders are sent as push notifications and appear in the client's in-app notification center.")}{" "}
+          <span className="text-muted-foreground">
+            {t("automations.reminders.deliveryNoticeHint", "If a client has disabled push notifications on their device, they will only see reminders when they open the app.")}
+          </span>
+        </AlertDescription>
+      </Alert>
+
       {/* Active Reminders List */}
       <ActiveRemindersList />
 
