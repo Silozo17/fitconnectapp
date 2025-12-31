@@ -101,10 +101,10 @@ const menuGroups: MenuGroup[] = [
       { titleKey: "navigation.coach.clients", icon: Users, path: "/dashboard/coach/clients", badgeKey: "clients", badgeVariant: "warning" },
       { titleKey: "navigation.coach.schedule", icon: Calendar, path: "/dashboard/coach/schedule", badgeKey: "schedule", badgeVariant: "warning" },
       { titleKey: "navigation.coach.trainingPlans", icon: ClipboardList, path: "/dashboard/coach/plans", requiredFeature: "workout_plan_builder" },
-      { titleKey: "navigation.coach.wearableInsights", icon: Activity, path: "/dashboard/coach/wearables", requiredFeature: "advanced_analytics" },
-      { titleKey: "navigation.coach.clientComparison", icon: Users2, path: "/dashboard/coach/compare", requiredFeature: "basic_analytics" },
-      { titleKey: "navigation.coach.aiRecommendations", icon: Sparkles, path: "/dashboard/coach/ai-recommendations", requiredFeature: "ai_client_analysis" },
-      { titleKey: "navigation.coach.caseStudies", icon: FileText, path: "/dashboard/coach/case-studies" },
+      { titleKey: "navigation.coach.wearableInsights", icon: Activity, path: "/dashboard/coach/wearables", requiredFeature: "wearable_dashboard" },
+      { titleKey: "navigation.coach.clientComparison", icon: Users2, path: "/dashboard/coach/compare", requiredFeature: "client_comparison_analytics" },
+      { titleKey: "navigation.coach.aiRecommendations", icon: Sparkles, path: "/dashboard/coach/ai-recommendations", requiredFeature: "ai_plan_recommendations" },
+      { titleKey: "navigation.coach.caseStudies", icon: FileText, path: "/dashboard/coach/case-studies", requiredFeature: "case_study_generator" },
     ],
   },
   {
@@ -113,7 +113,7 @@ const menuGroups: MenuGroup[] = [
     icon: CalendarClock,
     collapsible: true,
     items: [
-      { titleKey: "navigation.coach.scheduledCheckins", icon: CalendarClock, path: "/dashboard/coach/scheduled-checkins" },
+      { titleKey: "navigation.coach.scheduledCheckins", icon: CalendarClock, path: "/dashboard/coach/scheduled-checkins", requiredFeature: "scheduled_checkin_automation" },
     ],
   },
   {
@@ -133,9 +133,9 @@ const menuGroups: MenuGroup[] = [
     collapsible: true,
     items: [
       { titleKey: "navigation.coach.boost", icon: Rocket, path: "/dashboard/coach/boost", requiredFeature: "boost_marketing" },
-      { titleKey: "navigation.coach.financial", icon: Receipt, path: "/dashboard/coach/financial" },
-      { titleKey: "navigation.coach.reviews", icon: Star, path: "/dashboard/coach/reviews" },
-      { titleKey: "navigation.coach.transformations", icon: ImageIcon, path: "/dashboard/coach/showcase" },
+      { titleKey: "navigation.coach.financial", icon: Receipt, path: "/dashboard/coach/financial", requiredFeature: "advanced_reporting" },
+      { titleKey: "navigation.coach.reviews", icon: Star, path: "/dashboard/coach/reviews", requiredFeature: "review_management" },
+      { titleKey: "navigation.coach.transformations", icon: ImageIcon, path: "/dashboard/coach/showcase", requiredFeature: "client_outcomes_showcase" },
       { titleKey: "navigation.coach.integrations", icon: Settings, path: "/dashboard/coach/integrations", requiredFeature: "custom_integrations" },
     ],
   },
@@ -154,7 +154,7 @@ const menuGroups: MenuGroup[] = [
     icon: BarChart3,
     collapsible: true,
     items: [
-      { titleKey: "navigation.coach.packageAnalytics", icon: BarChart3, path: "/dashboard/coach/analytics/packages", requiredFeature: "basic_analytics" },
+      { titleKey: "navigation.coach.packageAnalytics", icon: BarChart3, path: "/dashboard/coach/analytics/packages", requiredFeature: "package_analytics" },
       { titleKey: "navigation.coach.earnings", icon: DollarSign, path: "/dashboard/coach/earnings", requiredFeature: "basic_analytics" },
     ],
   },
