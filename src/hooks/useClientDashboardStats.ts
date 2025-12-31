@@ -99,7 +99,8 @@ export function useClientDashboardStats() {
       };
     },
     enabled: !!(userId || (isRoleSwitching && profileId)),
-    staleTime: 60000, // 1 minute cache
+    staleTime: 2 * 60 * 1000, // 2 minutes (OPTIMIZED: was 1 minute)
     gcTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnMount: false, // OPTIMIZED: Don't refetch on every navigation
   });
 }

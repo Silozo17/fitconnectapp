@@ -5,7 +5,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useCoachOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { useCoachProfileRealtime } from "@/hooks/useCoachProfileRealtime";
 import { useDiscoverModal } from "@/hooks/useDiscoverModal";
-import { useAutoAwardCoachBadges } from "@/hooks/useAutoAwardCoachBadges";
+// OPTIMIZED: Moved useAutoAwardCoachBadges to specific pages (CoachOverview, CoachAchievements)
+// to prevent 3 database queries on every navigation
 import CoachSidebar from "./CoachSidebar";
 import DashboardHeader from "./DashboardHeader";
 import SkipNavigation from "@/components/shared/SkipNavigation";
@@ -50,9 +51,6 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
   }, []);
   
   useCoachProfileRealtime();
-  
-  // Proactive badge awarding - checks and awards badges app-wide, not just on Achievements page
-  useAutoAwardCoachBadges();
 
   const handleToggleSidebar = useCallback(() => {
     setSidebarCollapsed(prev => !prev);
