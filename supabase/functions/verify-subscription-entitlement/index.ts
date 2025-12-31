@@ -14,7 +14,12 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
 // Subscription entitlements to check (in order of tier priority - highest first)
 const SUBSCRIPTION_ENTITLEMENTS = ['enterprise', 'pro', 'starter'] as const;
 
+// All possible subscription tiers - founder is permanent and immutable
 type SubscriptionTier = typeof SUBSCRIPTION_ENTITLEMENTS[number] | 'free' | 'founder';
+type ActiveSubscriptionTier = typeof SUBSCRIPTION_ENTITLEMENTS[number];
+
+// Narrowed tier for comparison after founder early-exit
+type NonFounderTier = Exclude<SubscriptionTier, 'founder'>;
 
 interface RevenueCatEntitlement {
   expires_date: string;
@@ -80,6 +85,21 @@ serve(async (req) => {
     const currentDbTier = (coachProfile.subscription_tier as SubscriptionTier) || 'free';
     logStep("Found coach profile", { coachId: coachProfile.id, currentTier: currentDbTier });
 
+    // CRITICAL: Founder tier is IMMUTABLE - never reconcile or sync with RevenueCat
+    // Founder status is granted by admin and cannot be automatically changed
+    if (currentDbTier === 'founder') {
+      logStep("FOUNDER TIER DETECTED - Skipping reconciliation (immutable)", { 
+        coachId: coachProfile.id,
+        reason: "Founder tier is permanent and cannot be modified by automated processes"
+      });
+      return new Response(JSON.stringify({ 
+        status: "founder_immutable", 
+        reconciled: false,
+        tier: "founder",
+        message: "Founder tier is permanent and protected from automatic changes"
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     // Get current subscription status from DB
     const { data: currentSub } = await supabase
       .from("platform_subscriptions")
@@ -102,8 +122,9 @@ serve(async (req) => {
 
     if (!rcResponse.ok) {
       if (rcResponse.status === 404) {
-        // No subscriber in RevenueCat - ensure downgraded to free (unless founder)
-        if (currentDbTier !== 'free' && currentDbTier !== 'founder') {
+        // No subscriber in RevenueCat - ensure downgraded to free
+        // Note: Founder tier already handled above with early return
+        if (currentDbTier !== 'free') {
           logStep("No RevenueCat subscriber found - checking if downgrade needed", { currentTier: currentDbTier });
           
           // Double-check there's no active admin-granted subscription
@@ -248,8 +269,9 @@ serve(async (req) => {
         expires_at: expiresDate?.toISOString()
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     } else {
-      // No active entitlement - ensure downgraded (unless founder or admin-granted)
-      if (currentDbTier !== 'free' && currentDbTier !== 'founder') {
+      // No active entitlement - ensure downgraded
+      // Note: Founder tier already handled above with early return
+      if (currentDbTier !== 'free') {
         // Check for admin-granted subscription before downgrading
         const { data: adminSub } = await supabase
           .from("admin_granted_subscriptions")

@@ -6904,6 +6904,54 @@ export type Database = {
           },
         ]
       }
+      subscription_tier_changes: {
+        Row: {
+          change_reason: string | null
+          change_source: string
+          coach_id: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          new_tier: string
+          old_tier: string | null
+        }
+        Insert: {
+          change_reason?: string | null
+          change_source?: string
+          coach_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          new_tier: string
+          old_tier?: string | null
+        }
+        Update: {
+          change_reason?: string | null
+          change_source?: string
+          coach_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          new_tier?: string
+          old_tier?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_tier_changes_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_tier_changes_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           amount: number
