@@ -95,6 +95,7 @@ const navItems: NavItem[] = [
       { title: "Packages & Pricing", href: "/docs/coach/packages", icon: CreditCard },
       { title: "Boost Marketing", href: "/docs/coach/boost", icon: Rocket },
       { title: "AI Tools", href: "/docs/coach/ai", icon: Sparkles },
+      { title: "Automations", href: "/docs/coach/automations", icon: Settings },
       { title: "Managing Reviews", href: "/docs/coach/reviews", icon: Star },
       { title: "Verification", href: "/docs/coach/verification", icon: FileCheck },
       { title: "Earnings & Stripe", href: "/docs/coach/earnings", icon: BarChart3 },

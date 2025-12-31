@@ -156,6 +156,11 @@ const DocsCoachBoost = lazy(() => import('@/pages/docs/coach/CoachBoostDocs'));
 const DocsCoachNutrition = lazy(() => import('@/pages/docs/coach/CoachNutritionDocs'));
 const DocsCoachAI = lazy(() => import('@/pages/docs/coach/CoachAIDocs'));
 const DocsCoachReviews = lazy(() => import('@/pages/docs/coach/CoachReviewsDocs'));
+const DocsCoachAutomations = lazy(() => import('@/pages/docs/coach/CoachAutomationsOverview'));
+const DocsCoachDropoffRescue = lazy(() => import('@/pages/docs/coach/automations/DropoffRescueDocs'));
+const DocsCoachMilestones = lazy(() => import('@/pages/docs/coach/automations/MilestoneDocs'));
+const DocsCoachReminders = lazy(() => import('@/pages/docs/coach/automations/ReminderDocs'));
+const DocsCoachScheduledCheckins = lazy(() => import('@/pages/docs/coach/automations/ScheduledCheckinsDocs'));
 const DocsAdminOverview = lazy(() => import('@/pages/docs/admin/AdminOverview'));
 const DocsAdminDashboard = lazy(() => import('@/pages/docs/admin/AdminDashboardDocs'));
 const DocsAdminUsers = lazy(() => import('@/pages/docs/admin/AdminUsersDocs'));
@@ -183,6 +188,8 @@ const DocsClientTrainingLogs = lazy(() => import('@/pages/docs/client/ClientTrai
 const DocsClientDataPrivacy = lazy(() => import('@/pages/docs/client/ClientDataPrivacyDocs'));
 const DocsClientMarketplace = lazy(() => import('@/pages/docs/client/ClientMarketplaceDocs'));
 const DocsClientReceipts = lazy(() => import('@/pages/docs/client/ClientReceiptsDocs'));
+const DocsClientSecurity = lazy(() => import('@/pages/docs/client/ClientSecurityDocs'));
+const DocsClientWearables = lazy(() => import('@/pages/docs/client/ClientWearablesDocs'));
 
 // Subscribe pages
 const Subscribe = lazy(() => import('@/pages/Subscribe'));
@@ -283,6 +290,8 @@ const App = () => (
                               <Route path="/docs/client/data-privacy" element={<DocsClientDataPrivacy />} />
                               <Route path="/docs/client/marketplace" element={<DocsClientMarketplace />} />
                               <Route path="/docs/client/receipts" element={<DocsClientReceipts />} />
+                              <Route path="/docs/client/security" element={<DocsClientSecurity />} />
+                              <Route path="/docs/client/wearables" element={<DocsClientWearables />} />
                               <Route path="/docs/coach" element={<DocsCoachOverview />} />
                               <Route path="/docs/coach/onboarding" element={<DocsCoachOnboarding />} />
                               <Route path="/docs/coach/profile" element={<DocsCoachProfile />} />
@@ -299,6 +308,11 @@ const App = () => (
                               <Route path="/docs/coach/nutrition" element={<DocsCoachNutrition />} />
                               <Route path="/docs/coach/ai" element={<DocsCoachAI />} />
                               <Route path="/docs/coach/reviews" element={<DocsCoachReviews />} />
+                              <Route path="/docs/coach/automations" element={<DocsCoachAutomations />} />
+                              <Route path="/docs/coach/automations/dropoff-rescue" element={<DocsCoachDropoffRescue />} />
+                              <Route path="/docs/coach/automations/milestones" element={<DocsCoachMilestones />} />
+                              <Route path="/docs/coach/automations/reminders" element={<DocsCoachReminders />} />
+                              <Route path="/docs/coach/automations/checkins" element={<DocsCoachScheduledCheckins />} />
                               
                               {/* Protected Admin Documentation Routes */}
                               <Route path="/docs/admin" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminOverview /></ProtectedRoute>} />

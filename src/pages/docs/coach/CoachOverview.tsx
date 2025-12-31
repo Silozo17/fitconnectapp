@@ -106,6 +106,12 @@ const coachGuides = [
     icon: Sparkles,
   },
   {
+    title: "Automations",
+    description: "Set up automated messages, reminders, and client engagement workflows.",
+    href: "/docs/coach/automations",
+    icon: ClipboardList,
+  },
+  {
     title: "Managing Reviews",
     description: "View, respond to, and leverage client reviews and testimonials.",
     href: "/docs/coach/reviews",
