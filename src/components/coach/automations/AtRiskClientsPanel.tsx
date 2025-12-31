@@ -133,30 +133,28 @@ function AtRiskClientRow({ client, getStageBadgeVariant, getStageLabel, onMute, 
   const initials = clientName.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
 
   return (
-    <div className="flex items-center justify-between p-3 hover:bg-muted/30">
-      <div className="flex items-center gap-3">
-        <Avatar className="h-8 w-8">
+    <div className="flex items-center justify-between p-2 sm:p-3 hover:bg-muted/30 gap-2">
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+        <Avatar className="h-7 w-7 sm:h-8 sm:w-8 shrink-0">
           <AvatarImage src={client.client?.avatar_url || undefined} />
           <AvatarFallback className="text-xs">{initials}</AvatarFallback>
         </Avatar>
-        <div>
-          <p className="text-sm font-medium">{clientName}</p>
-          <div className="flex items-center gap-2">
-            <Badge variant={getStageBadgeVariant(client.risk_stage)} className="text-xs h-5">
-              {getStageLabel(client.risk_stage)}
-            </Badge>
-          </div>
+        <div className="min-w-0">
+          <p className="text-sm font-medium truncate">{clientName}</p>
+          <Badge variant={getStageBadgeVariant(client.risk_stage)} className="text-[10px] sm:text-xs h-4 sm:h-5">
+            {getStageLabel(client.risk_stage)}
+          </Badge>
         </div>
       </div>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-8 px-2">
-              <VolumeX className="h-4 w-4" />
+            <Button variant="ghost" size="sm" className="h-7 w-7 sm:h-8 sm:w-8 p-0">
+              <VolumeX className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="bg-popover">
             <DropdownMenuItem onClick={() => onMute(client.client_id, 7)}>
               <Clock className="h-4 w-4 mr-2" />
               {t("automations.dropoff.mute7days", "Mute for 7 days")}
@@ -175,10 +173,10 @@ function AtRiskClientRow({ client, getStageBadgeVariant, getStageLabel, onMute, 
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 px-2"
+          className="h-7 w-7 sm:h-8 sm:w-8 p-0"
           onClick={() => onDismiss(client.client_id)}
         >
-          <X className="h-4 w-4" />
+          <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
         </Button>
       </div>
     </div>
