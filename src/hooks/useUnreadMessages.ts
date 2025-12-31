@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminView } from "@/contexts/AdminContext";
 import { triggerHaptic } from "@/lib/despia";
-import { perfLogger } from "@/lib/performance-logger";
 
 export const useUnreadMessages = () => {
   const { user, role } = useAuth();
@@ -85,8 +84,6 @@ export const useUnreadMessages = () => {
   useEffect(() => {
     if (!currentProfileId) return;
 
-    perfLogger.logRealtimeSubscribe(`unread-messages-${currentProfileId}`);
-    
     const channel = supabase
       .channel(`unread-messages-${currentProfileId}`)
       .on(

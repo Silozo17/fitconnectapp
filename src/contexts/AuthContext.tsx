@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { clearLastRoute } from "@/hooks/useRouteRestoration";
 import { isDespia } from "@/lib/despia";
-import { perfLogger } from "@/lib/performance-logger";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
@@ -39,17 +38,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const focusDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchUserRole = async (userId: string) => {
-    perfLogger.logEvent('auth_fetchUserRole_start');
-    const startTime = performance.now();
-    
     // Fetch all roles for the user and prioritize by importance
     const { data: roles } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", userId);
-    
-    const duration = performance.now() - startTime;
-    perfLogger.logTimedEvent('auth_fetchUserRole_end', duration, { rolesCount: roles?.length || 0 });
     
     if (roles && roles.length > 0) {
       // Priority: admin > manager > staff > coach > client
@@ -65,35 +58,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    perfLogger.logEvent('auth_context_init_start');
-    
     // Handle visibility change for PWA/browser background/foreground
     const handleVisibilityChange = async () => {
-      const state = document.visibilityState;
-      perfLogger.logVisibilityChange(state as 'visible' | 'hidden', 'AuthContext');
-      
-      if (state === 'visible') {
+      if (document.visibilityState === 'visible') {
         // App is now visible - start auto refresh and revalidate session
         supabase.auth.startAutoRefresh();
-        
-        perfLogger.logEvent('auth_visibility_getSession_start');
-        const sessionStart = performance.now();
-        
         try {
           const { data: { session }, error } = await supabase.auth.getSession();
           
-          perfLogger.logTimedEvent('auth_visibility_getSession_end', performance.now() - sessionStart);
-          
           // If session is invalid or expired, try to refresh it
           if (error || !session) {
-            perfLogger.logEvent('auth_visibility_refreshSession_start');
-            const refreshStart = performance.now();
-            
             const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-            
-            perfLogger.logTimedEvent('auth_visibility_refreshSession_end', performance.now() - refreshStart, {
-              success: !refreshError && !!refreshData.session
-            });
             
             if (refreshError || !refreshData.session) {
               // Session cannot be recovered - clear state
@@ -129,8 +104,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const handleFocus = () => {
       if (!isDespia()) return;
       
-      perfLogger.logFocusEvent('AuthContext_despia');
-      
       // Clear existing debounce timer
       if (focusDebounceRef.current) {
         clearTimeout(focusDebounceRef.current);
@@ -142,20 +115,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         // Skip if we validated recently (cooldown)
         if (now - lastValidationRef.current < SESSION_VALIDATION_COOLDOWN_MS) {
-          perfLogger.logEvent('auth_focus_skipped_cooldown');
           return;
         }
         
         lastValidationRef.current = now;
         supabase.auth.startAutoRefresh();
         
-        perfLogger.logEvent('auth_focus_getSession_start');
-        const focusSessionStart = performance.now();
-        
         try {
           const { data: { session }, error } = await supabase.auth.getSession();
           
-          perfLogger.logTimedEvent('auth_focus_getSession_end', performance.now() - focusSessionStart);
           // Check for invalid JWT (common in native apps after background)
           if (error) {
             // If it's a JWT error, try to refresh
@@ -246,8 +214,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // and will fire immediately with the cached session
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        perfLogger.logEvent('auth_onAuthStateChange', { event, hasSession: !!session });
-        
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -264,7 +230,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // PERFORMANCE FIX: Set loading=false immediately on auth state change
         // The onAuthStateChange fires with cached session first, so UI can render
         setLoading(false);
-        perfLogger.logEvent('auth_loading_complete');
       }
     );
 
@@ -272,15 +237,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // onAuthStateChange already provides the cached session for immediate UI render
     // This validates the session in the background and refreshes if needed
     const validateSessionInBackground = async () => {
-      perfLogger.logEvent('auth_background_validate_start');
-      const bgValidateStart = performance.now();
-      
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         // Handle potential JWT errors
         if (error) {
-          perfLogger.logEvent('auth_background_jwt_error', { message: error.message?.substring(0, 50) });
           if (error.message?.includes('JWT') || error.message?.includes('token') || error.message?.includes('claim')) {
             await supabase.auth.signOut();
             setSession(null);
@@ -306,11 +267,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             // If refresh succeeded, onAuthStateChange will handle the update
           }
         }
-        
-        perfLogger.logTimedEvent('auth_background_validate_end', performance.now() - bgValidateStart);
       } catch (err) {
         console.error('[Auth] Session validation error:', err);
-        perfLogger.logEvent('auth_background_validate_error');
       }
     };
     
