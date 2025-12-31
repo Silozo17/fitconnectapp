@@ -7,9 +7,10 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { DropoffRescueSettings } from "@/components/coach/automations/DropoffRescueSettings";
 import { MilestoneSettings } from "@/components/coach/automations/MilestoneSettings";
 import { ReminderSettings } from "@/components/coach/automations/ReminderSettings";
-import { AlertTriangle, Trophy, Clock, Zap } from "lucide-react";
+import { ScheduledCheckinsSettings } from "@/components/coach/automations/ScheduledCheckinsSettings";
+import { AlertTriangle, Trophy, Clock, Zap, CalendarCheck } from "lucide-react";
 
-const VALID_TABS = ["dropoff", "milestones", "reminders"];
+const VALID_TABS = ["dropoff", "milestones", "reminders", "scheduled_checkins"];
 
 export default function CoachAutomations() {
   const { t } = useTranslation("coach");
@@ -42,7 +43,7 @@ export default function CoachAutomations() {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:inline-grid">
+            <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
               <TabsTrigger value="dropoff" className="gap-2">
                 <AlertTriangle className="h-4 w-4" />
                 <span className="hidden sm:inline">{t("automations.tabs.dropoff", "Drop-off Rescue")}</span>
@@ -58,6 +59,11 @@ export default function CoachAutomations() {
                 <span className="hidden sm:inline">{t("automations.tabs.reminders", "Reminders")}</span>
                 <span className="sm:hidden">Remind</span>
               </TabsTrigger>
+              <TabsTrigger value="scheduled_checkins" className="gap-2">
+                <CalendarCheck className="h-4 w-4" />
+                <span className="hidden sm:inline">{t("automations.tabs.scheduledCheckins", "Check-ins")}</span>
+                <span className="sm:hidden">Check-ins</span>
+              </TabsTrigger>
             </TabsList>
 
             <div className="mt-6">
@@ -69,6 +75,9 @@ export default function CoachAutomations() {
               </TabsContent>
               <TabsContent value="reminders" className="m-0">
                 <ReminderSettings />
+              </TabsContent>
+              <TabsContent value="scheduled_checkins" className="m-0">
+                <ScheduledCheckinsSettings />
               </TabsContent>
             </div>
           </Tabs>
