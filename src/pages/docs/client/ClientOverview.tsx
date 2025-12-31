@@ -12,10 +12,15 @@ import {
   ArrowRight,
   Target,
   ShoppingCart,
-  Sword,
   Calculator,
   Library,
-  Users
+  Users,
+  MessageSquare,
+  Star,
+  Battery,
+  Sparkles,
+  Zap,
+  Activity
 } from "lucide-react";
 
 const clientGuides = [
@@ -38,6 +43,12 @@ const clientGuides = [
     icon: Calendar,
   },
   {
+    title: "Messages",
+    description: "Communicate with your coach through our messaging system.",
+    href: "/docs/client/messages",
+    icon: MessageSquare,
+  },
+  {
     title: "Workout & Nutrition Plans",
     description: "Access and follow the personalised plans your coach creates for you.",
     href: "/docs/client/plans",
@@ -48,6 +59,30 @@ const clientGuides = [
     description: "Log your workouts, measurements, and progress photos to see your transformation.",
     href: "/docs/client/progress",
     icon: TrendingUp,
+  },
+  {
+    title: "Readiness Score",
+    description: "Understand your daily readiness based on sleep, recovery, and activity data.",
+    href: "/docs/client/readiness",
+    icon: Battery,
+  },
+  {
+    title: "Wearable Trends",
+    description: "Track week-over-week changes in your health metrics from connected devices.",
+    href: "/docs/client/trends",
+    icon: Activity,
+  },
+  {
+    title: "Micro Wins",
+    description: "Celebrate small victories that keep you motivated on your fitness journey.",
+    href: "/docs/client/micro-wins",
+    icon: Zap,
+  },
+  {
+    title: "Goal Suggestions",
+    description: "Get AI-powered goal recommendations that evolve with your progress.",
+    href: "/docs/client/goal-suggestions",
+    icon: Sparkles,
   },
   {
     title: "Challenges",
@@ -66,24 +101,6 @@ const clientGuides = [
     description: "Compete with others on location-based leaderboards.",
     href: "/docs/client/leaderboards",
     icon: Trophy,
-  },
-  {
-    title: "Data Sharing",
-    description: "Control what health data you share with your coaches.",
-    href: "/docs/client/data-sharing",
-    icon: Settings,
-  },
-  {
-    title: "Account Security",
-    description: "Enable two-factor authentication and manage your security settings.",
-    href: "/docs/client/security",
-    icon: Settings,
-  },
-  {
-    title: "Wearable Devices",
-    description: "Connect fitness trackers and sync your health data automatically.",
-    href: "/docs/client/wearables",
-    icon: Settings,
   },
   {
     title: "Habits & Streaks",
@@ -110,10 +127,34 @@ const clientGuides = [
     icon: Library,
   },
   {
+    title: "Favourites",
+    description: "Save and manage your favourite coaches for quick access.",
+    href: "/docs/client/favourites",
+    icon: Star,
+  },
+  {
     title: "Connections",
     description: "Connect with friends, share progress, and view their achievements.",
     href: "/docs/client/connections",
     icon: Users,
+  },
+  {
+    title: "Data Sharing",
+    description: "Control what health data you share with your coaches.",
+    href: "/docs/client/data-sharing",
+    icon: Settings,
+  },
+  {
+    title: "Account Security",
+    description: "Enable two-factor authentication and manage your security settings.",
+    href: "/docs/client/security",
+    icon: Settings,
+  },
+  {
+    title: "Wearable Devices",
+    description: "Connect fitness trackers and sync your health data automatically.",
+    href: "/docs/client/wearables",
+    icon: Settings,
   },
 ];
 
