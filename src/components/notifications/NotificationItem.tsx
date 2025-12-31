@@ -8,7 +8,8 @@ import {
   CreditCard,
   Bell,
   X,
-  Trophy
+  Trophy,
+  Camera
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,10 @@ const getNotificationIcon = (type: string) => {
     case "challenge_completed":
     case "level_up":
       return Trophy;
+    case "showcase_consent_request":
+    case "showcase_consent_granted":
+    case "showcase_consent_revoked":
+      return Camera;
     default:
       return Bell;
   }
@@ -75,6 +80,12 @@ const getNotificationColor = (type: string) => {
     case "challenge_completed":
     case "level_up":
       return "text-amber-500 bg-amber-500/10";
+    case "showcase_consent_request":
+      return "text-orange-500 bg-orange-500/10";
+    case "showcase_consent_granted":
+      return "text-green-500 bg-green-500/10";
+    case "showcase_consent_revoked":
+      return "text-destructive bg-destructive/10";
     default:
       return "text-muted-foreground bg-muted";
   }

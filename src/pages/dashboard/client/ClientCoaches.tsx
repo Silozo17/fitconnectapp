@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,9 +14,28 @@ import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 import { ShowcaseConsentCard } from "@/components/coaches/ShowcaseConsentCard";
 
 const ClientCoaches = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { data: coaches = [], isLoading, error, refetch } = useMyCoaches();
   const { data: consentsMap } = useMyShowcaseConsents();
-
+  
+  // Track which coach's consent section should be auto-expanded
+  const targetCoachId = searchParams.get("coachId");
+  const [expandedCoachId, setExpandedCoachId] = useState<string | null>(targetCoachId);
+  const coachCardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  
+  // Auto-scroll to target coach card when navigating from notification
+  useEffect(() => {
+    if (targetCoachId && !isLoading && coaches.length > 0) {
+      const cardElement = coachCardRefs.current.get(targetCoachId);
+      if (cardElement) {
+        setTimeout(() => {
+          cardElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 100);
+      }
+      // Clear the query param after handling
+      setSearchParams({}, { replace: true });
+    }
+  }, [targetCoachId, isLoading, coaches, setSearchParams]);
   return (
     <ClientDashboardLayout
       title="My Coaches"
@@ -77,9 +97,16 @@ const ClientCoaches = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {coaches.map((connection) => {
             const consent = consentsMap?.get(connection.coach.id) || null;
+            const isTargetCoach = connection.coach.id === targetCoachId;
             
             return (
-              <Card key={connection.id} className="hover:border-primary/50 transition-colors">
+              <Card 
+                key={connection.id} 
+                ref={(el) => {
+                  if (el) coachCardRefs.current.set(connection.coach.id, el);
+                }}
+                className={`hover:border-primary/50 transition-colors ${isTargetCoach ? 'ring-2 ring-primary' : ''}`}
+              >
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
                     <Avatar className="w-16 h-16">
@@ -122,7 +149,11 @@ const ClientCoaches = () => {
                   </div>
 
                   {/* Showcase Consent Section */}
-                  <Collapsible className="mt-4 border-t border-border/50 pt-4">
+                  <Collapsible 
+                    className="mt-4 border-t border-border/50 pt-4"
+                    open={expandedCoachId === connection.coach.id}
+                    onOpenChange={(open) => setExpandedCoachId(open ? connection.coach.id : null)}
+                  >
                     <CollapsibleTrigger className="flex w-full items-center justify-between text-sm">
                       <div className="flex items-center gap-2">
                         <Award className="h-4 w-4 text-muted-foreground" />

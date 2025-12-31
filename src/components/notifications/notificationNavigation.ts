@@ -66,6 +66,21 @@ export const getNotificationRoute = (
       // Users see feedback update notifications - no specific page to navigate to
       return null;
     
+    case "showcase_consent_request": {
+      // Route client to My Coaches page with coachId to auto-expand consent section
+      const coachId = data.coach_id;
+      return role === "client" 
+        ? `/dashboard/client/coaches${coachId ? `?coachId=${coachId}` : ''}`
+        : null;
+    }
+    
+    case "showcase_consent_granted":
+    case "showcase_consent_revoked":
+      // Route coach to their showcases page
+      return role === "coach" 
+        ? `${baseRoute}/showcases`
+        : null;
+    
     default:
       return null;
   }
