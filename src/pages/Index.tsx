@@ -36,19 +36,6 @@ const Index = () => {
     }
   }, [user, role, loading, navigate]);
 
-  const organizationSchema = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "FitConnect",
-    "url": "https://getfitconnect.co.uk",
-    "logo": "https://getfitconnect.co.uk/pwa-512x512.png",
-    "description": "Connect with world-class fitness coaches in the UK",
-    "sameAs": [
-      "https://twitter.com/FitConnect",
-      "https://instagram.com/fitconnect"
-    ]
-  };
-
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -56,7 +43,10 @@ const Index = () => {
     "url": "https://getfitconnect.co.uk",
     "potentialAction": {
       "@type": "SearchAction",
-      "target": "https://getfitconnect.co.uk/coaches?search={search_term_string}",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://getfitconnect.co.uk/coaches?search={search_term_string}"
+      },
       "query-input": "required name=search_term_string"
     }
   };
@@ -72,7 +62,7 @@ const Index = () => {
         description="Connect with elite personal trainers, nutritionists, and combat sports coaches in the UK. Get personalized training plans and achieve your fitness goals."
         canonicalPath="/"
         keywords={["personal trainer near me", "fitness coach UK", "online personal training", "find personal trainer", "book fitness coach"]}
-        schema={[organizationSchema, websiteSchema, breadcrumbSchema]}
+        schema={[websiteSchema, breadcrumbSchema]}
       />
       
       <div className="min-h-screen bg-background">
