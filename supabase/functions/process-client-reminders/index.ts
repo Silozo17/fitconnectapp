@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { resolveMessageVariables, fetchCustomFieldValues } from "../_shared/message-variables.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -25,7 +26,7 @@ serve(async (req) => {
       .select(`
         *,
         coach:coach_profiles!client_reminders_coach_id_fkey(id, user_id, display_name),
-        client:client_profiles!client_reminders_client_id_fkey(id, user_id, first_name, last_name, timezone),
+        client:client_profiles!client_reminders_client_id_fkey(id, user_id, first_name, last_name, city, gender, age),
         template:reminder_templates(name, message_template)
       `)
       .eq("is_active", true)
@@ -75,15 +76,10 @@ serve(async (req) => {
           continue;
         }
 
-        // Get message content (custom or template)
-        const clientName = [reminder.client?.first_name, reminder.client?.last_name]
-          .filter(Boolean)
-          .join(" ") || "there";
+        // Get message template (custom or from template)
+        const templateMessage = reminder.custom_message || reminder.template?.message_template || "";
 
-        let messageContent = reminder.custom_message || reminder.template?.message_template || "";
-        messageContent = messageContent.replace(/{{client_name}}/g, clientName);
-
-        if (!messageContent) {
+        if (!templateMessage) {
           console.error(`No message content for reminder ${reminder.id}`);
           errors++;
           continue;
@@ -95,6 +91,27 @@ serve(async (req) => {
           errors++;
           continue;
         }
+
+        // Fetch custom fields for this coach/client pair
+        const customFields = await fetchCustomFieldValues(supabase, reminder.coach_id, reminder.client_id);
+
+        // Resolve message variables using the shared resolver
+        const messageContent = resolveMessageVariables(
+          templateMessage,
+          {
+            client: {
+              first_name: reminder.client?.first_name,
+              last_name: reminder.client?.last_name,
+              city: reminder.client?.city,
+              gender: reminder.client?.gender,
+              age: reminder.client?.age,
+            },
+            coach: {
+              display_name: reminder.coach?.display_name,
+            },
+          },
+          customFields
+        );
 
         // Send the message (messages table uses profile_id values, not user_id)
         const { data: message, error: messageError } = await supabase

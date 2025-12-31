@@ -312,3 +312,53 @@ export function findUnresolvedVariables(
   
   return unresolved;
 }
+
+/**
+ * Fetch custom field values for a specific coach/client pair
+ */
+export async function fetchCustomFieldValues(
+  supabase: any,
+  coachId: string,
+  clientId: string
+): Promise<Record<string, string>> {
+  try {
+    const { data: customFieldValues } = await supabase
+      .from("client_custom_field_values")
+      .select(`
+        value,
+        field:coach_message_fields(field_name, default_value)
+      `)
+      .eq("client_id", clientId);
+
+    const customFields: Record<string, string> = {};
+    
+    if (customFieldValues) {
+      for (const cfv of customFieldValues) {
+        const fieldName = (cfv.field as any)?.field_name;
+        if (fieldName) {
+          customFields[fieldName] = cfv.value || (cfv.field as any)?.default_value || '';
+        }
+      }
+    }
+
+    // Also fetch global fields for this coach
+    const { data: globalFields } = await supabase
+      .from("coach_message_fields")
+      .select("field_name, default_value")
+      .eq("coach_id", coachId)
+      .eq("is_global", true);
+
+    if (globalFields) {
+      for (const field of globalFields) {
+        if (!customFields[field.field_name]) {
+          customFields[field.field_name] = field.default_value || '';
+        }
+      }
+    }
+
+    return customFields;
+  } catch (error) {
+    console.error("Error fetching custom field values:", error);
+    return {};
+  }
+}

@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { resolveMessageVariables, fetchCustomFieldValues } from "../_shared/message-variables.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -15,12 +16,12 @@ interface MilestoneActions {
 }
 
 const DEFAULT_CELEBRATION_MESSAGES: Record<string, string> = {
-  streak: "🎉 Amazing {client_name}! You've hit a {value}-day streak! Your consistency is paying off!",
-  program_complete: "🏆 Congratulations {client_name}! You've completed your training program! What an achievement!",
-  challenge_complete: "🌟 {client_name}, you crushed it! Challenge complete! You should be so proud!",
-  wearable_target: "💪 Great job {client_name}! You hit your {value} {unit} target today!",
-  adherence: "✨ Incredible consistency {client_name}! {value}% adherence this week - you're unstoppable!",
-  pr: "🔥 NEW PR {client_name}! You just set a personal record! Keep pushing those limits!",
+  streak: "🎉 Amazing {client_first_name}! You've hit a {value}-day streak! Your consistency is paying off!",
+  program_complete: "🏆 Congratulations {client_first_name}! You've completed your training program! What an achievement!",
+  challenge_complete: "🌟 {client_first_name}, you crushed it! Challenge complete! You should be so proud!",
+  wearable_target: "💪 Great job {client_first_name}! You hit your {value} {unit} target today!",
+  adherence: "✨ Incredible consistency {client_first_name}! {value}% adherence this week - you're unstoppable!",
+  pr: "🔥 NEW PR {client_first_name}! You just set a personal record! Keep pushing those limits!",
 };
 
 serve(async (req) => {
@@ -81,7 +82,7 @@ serve(async (req) => {
         .from("coach_clients")
         .select(`
           client_id,
-          client:client_profiles!coach_clients_client_id_fkey(id, user_id, first_name, last_name)
+          client:client_profiles!coach_clients_client_id_fkey(id, user_id, first_name, last_name, city, gender, age)
         `)
         .eq("coach_id", coachId)
         .eq("status", "active");
@@ -91,9 +92,6 @@ serve(async (req) => {
       for (const clientRecord of clients) {
         const clientId = clientRecord.client_id;
         const client = clientRecord.client as any;
-        const clientName = [client?.first_name, client?.last_name]
-          .filter(Boolean)
-          .join(" ") || "there";
 
         for (const config of milestoneConfigs) {
           const actions: MilestoneActions = config.actions as MilestoneActions;
@@ -262,11 +260,33 @@ serve(async (req) => {
 
             // Send celebration message (messages table uses profile_id values, not user_id)
             if (actions.send_message && setting.coach?.id && client?.id) {
+              // Fetch custom fields for this coach/client pair
+              const customFields = await fetchCustomFieldValues(supabase, coachId, clientId);
+
+              // Use custom template or default message
               const messageTemplate = config.message_template || DEFAULT_CELEBRATION_MESSAGES[config.milestone_type] || "";
-              const message = messageTemplate
-                .replace(/{client_name}/g, clientName)
-                .replace(/{value}/g, String(milestoneValue))
-                .replace(/{unit}/g, milestoneUnit);
+              
+              // Resolve message variables using the shared resolver
+              const message = resolveMessageVariables(
+                messageTemplate,
+                {
+                  client: {
+                    first_name: client?.first_name,
+                    last_name: client?.last_name,
+                    city: client?.city,
+                    gender: client?.gender,
+                    age: client?.age,
+                  },
+                  coach: {
+                    display_name: setting.coach?.display_name,
+                  },
+                  milestone: {
+                    value: milestoneValue,
+                    unit: milestoneUnit,
+                  },
+                },
+                customFields
+              );
 
               if (message) {
                 await supabase.from("messages").insert({
@@ -280,6 +300,7 @@ serve(async (req) => {
 
             // Notify coach
             if (actions.notify_coach && setting.coach?.user_id) {
+              const clientName = [client?.first_name, client?.last_name].filter(Boolean).join(" ") || "A client";
               await supabase.from("notifications").insert({
                 user_id: setting.coach.user_id,
                 type: "milestone_achieved",

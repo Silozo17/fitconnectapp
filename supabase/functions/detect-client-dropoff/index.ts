@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { resolveMessageVariables, fetchCustomFieldValues } from "../_shared/message-variables.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -44,9 +45,9 @@ const DEFAULT_CONFIG: DropoffConfig = {
 };
 
 const TONE_MESSAGES = {
-  supportive: "Hey {client_name}, just checking in on you! 💙 I noticed we haven't connected in a while. Remember, I'm here to support you - no pressure, just wanted to make sure you're doing okay. Let me know if there's anything I can help with!",
-  motivational: "Hey {client_name}! 💪 Missing your energy around here! Remember why you started this journey - you've got so much potential. Let's get back on track together! What do you say?",
-  direct: "Hi {client_name}, I noticed you haven't been active lately. I wanted to reach out and see if everything is okay. Let's chat about what's been going on and how we can get you back on track.",
+  supportive: "Hey {client_first_name}, just checking in on you! 💙 I noticed we haven't connected in a while. Remember, I'm here to support you - no pressure, just wanted to make sure you're doing okay. Let me know if there's anything I can help with!",
+  motivational: "Hey {client_first_name}! 💪 Missing your energy around here! Remember why you started this journey - you've got so much potential. Let's get back on track together! What do you say?",
+  direct: "Hi {client_first_name}, I noticed you haven't been active lately. I wanted to reach out and see if everything is okay. Let's chat about what's been going on and how we can get you back on track.",
 };
 
 serve(async (req) => {
@@ -95,7 +96,7 @@ serve(async (req) => {
         .from("coach_clients")
         .select(`
           client_id,
-          client:client_profiles!coach_clients_client_id_fkey(id, user_id, first_name, last_name)
+          client:client_profiles!coach_clients_client_id_fkey(id, user_id, first_name, last_name, city, gender, age)
         `)
         .eq("coach_id", coachId)
         .eq("status", "active");
@@ -108,9 +109,6 @@ serve(async (req) => {
       for (const clientRecord of clients) {
         const clientId = clientRecord.client_id;
         const client = clientRecord.client as any;
-        const clientName = [client?.first_name, client?.last_name]
-          .filter(Boolean)
-          .join(" ") || "there";
 
         // Get current automation status
         const { data: currentStatus } = await supabase
@@ -236,8 +234,33 @@ serve(async (req) => {
           // Execute action based on stage
           if (newRiskStage === 1) {
             if (config.stage1_action === "auto_message") {
-              const message = (config.stage1_template || TONE_MESSAGES[config.stage1_tone])
-                .replace(/{client_name}/g, clientName);
+              // Fetch custom fields for this coach/client pair
+              const customFields = await fetchCustomFieldValues(supabase, coachId, clientId);
+
+              // Use custom template or default tone message
+              const template = config.stage1_template || TONE_MESSAGES[config.stage1_tone];
+              
+              // Resolve message variables using the shared resolver
+              const message = resolveMessageVariables(
+                template,
+                {
+                  client: {
+                    first_name: client?.first_name,
+                    last_name: client?.last_name,
+                    city: client?.city,
+                    gender: client?.gender,
+                    age: client?.age,
+                  },
+                  coach: {
+                    display_name: setting.coach?.display_name,
+                  },
+                  computed: {
+                    daysSinceLogin: daysSinceActivity,
+                    daysSinceSession: daysSinceActivity,
+                  },
+                },
+                customFields
+              );
 
               // Messages table uses profile_id values, not user_id
               await supabase.from("messages").insert({
@@ -265,6 +288,7 @@ serve(async (req) => {
               messages++;
             } else {
               // Alert only - create notification
+              const clientName = [client?.first_name, client?.last_name].filter(Boolean).join(" ") || "A client";
               await supabase.from("notifications").insert({
                 user_id: setting.coach.user_id,
                 type: "client_at_risk",
@@ -276,6 +300,7 @@ serve(async (req) => {
             }
           } else if (newRiskStage === 2) {
             // Stage 2 - Always alert coach
+            const clientName = [client?.first_name, client?.last_name].filter(Boolean).join(" ") || "A client";
             await supabase.from("notifications").insert({
               user_id: setting.coach.user_id,
               type: "client_at_risk",
@@ -302,6 +327,7 @@ serve(async (req) => {
             alerts++;
           } else if (newRiskStage === 3) {
             // Stage 3 - Recovery attempt
+            const clientName = [client?.first_name, client?.last_name].filter(Boolean).join(" ") || "A client";
             await supabase.from("notifications").insert({
               user_id: setting.coach.user_id,
               type: "client_critical",
