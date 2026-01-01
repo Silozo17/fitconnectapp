@@ -5,11 +5,10 @@ import { Dumbbell, Zap, Settings, Clock, Target, Repeat } from "lucide-react";
 export default function AIWorkoutGeneratorDocs() {
   return (
     <DocsLayout
-      title="AI Workout Generator"
-      description="Create personalised training programs in seconds using AI-powered workout generation"
+      title="AI Workout Generator | FitConnect Coach Guide"
+      description="Create personalised training programmes in seconds. AI builds plans based on client goals and equipment."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
-        { label: "Coach", href: "/docs/coach" },
+        { label: "Coach Guide", href: "/docs/coach" },
         { label: "AI Tools", href: "/docs/coach/ai" },
         { label: "Workout Generator" }
       ]}

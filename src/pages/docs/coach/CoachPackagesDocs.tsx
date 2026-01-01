@@ -6,10 +6,9 @@ import { Package, RefreshCw, CreditCard, Tag } from "lucide-react";
 export default function CoachPackagesDocs() {
   return (
     <DocsLayout
-      title="Packages & Pricing"
-      description="Learn how to create session packages and subscription plans for your clients."
+      title="Create Session Packages | FitConnect Coach Guide"
+      description="Sell multi-session bundles and subscription plans. Increase client retention with package deals."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
         { label: "Coach Guide", href: "/docs/coach" },
         { label: "Packages & Pricing" }
       ]}

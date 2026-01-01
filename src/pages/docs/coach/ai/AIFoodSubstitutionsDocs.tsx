@@ -5,11 +5,10 @@ import { Apple, AlertTriangle, RefreshCw, Scale, Leaf, ShieldCheck } from "lucid
 export default function AIFoodSubstitutionsDocs() {
   return (
     <DocsLayout
-      title="AI Food Substitutions"
-      description="Find meal and ingredient alternatives that match macros while respecting dietary restrictions and preferences."
+      title="AI Food Substitutions | FitConnect Coach Guide"
+      description="Suggest meal swaps meeting macros for allergies or dietary preferences. Allergen-aware suggestions."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
-        { label: "Coach", href: "/docs/coach" },
+        { label: "Coach Guide", href: "/docs/coach" },
         { label: "AI Tools", href: "/docs/coach/ai" },
         { label: "Food Substitutions" },
       ]}

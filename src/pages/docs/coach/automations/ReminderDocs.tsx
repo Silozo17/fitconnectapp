@@ -18,10 +18,10 @@ import {
 export default function ReminderDocs() {
   return (
     <DocsLayout
-      title="Reminder Templates"
-      description="Send automated recurring reminders to keep clients on track with workouts, nutrition, hydration, and habits."
+      title="Reminder Templates | FitConnect Coach Guide"
+      description="Create reusable reminder templates for habits, logs and check-ins. Help clients stay consistent."
       breadcrumbs={[
-        { label: "For Coaches", href: "/docs/coach" }, 
+        { label: "Coach Guide", href: "/docs/coach" }, 
         { label: "Automations", href: "/docs/coach/automations" },
         { label: "Reminders" }
       ]}

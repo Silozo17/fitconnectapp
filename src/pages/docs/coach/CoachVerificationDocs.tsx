@@ -6,10 +6,9 @@ import { BadgeCheck, FileText, Clock, Shield } from "lucide-react";
 export default function CoachVerificationDocs() {
   return (
     <DocsLayout
-      title="Verification"
-      description="Learn how to get verified to build trust and stand out in the marketplace."
+      title="Get Verified | FitConnect Coach Guide"
+      description="Submit ID and certifications to earn your verified badge. Build trust with potential clients."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
         { label: "Coach Guide", href: "/docs/coach" },
         { label: "Verification" }
       ]}

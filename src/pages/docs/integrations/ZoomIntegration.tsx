@@ -6,10 +6,10 @@ import { Video, Settings, CheckCircle, XCircle, Shield, HelpCircle, ExternalLink
 export default function ZoomIntegration() {
   return (
     <DocsLayout
-      title="Zoom Integration"
-      description="Connect your Zoom account to automatically create video meetings for online coaching sessions."
+      title="Zoom Integration | FitConnect Guide"
+      description="Connect Zoom for automatic meeting links on online sessions. Video conferencing for coaches."
       breadcrumbs={[
-        { label: "Integrations", href: "/docs/integrations/zoom" },
+        { label: "Integrations", href: "/docs/integrations" },
         { label: "Zoom" }
       ]}
     >

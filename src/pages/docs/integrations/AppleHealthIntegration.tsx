@@ -6,10 +6,9 @@ import { Link } from "react-router-dom";
 export default function AppleHealthIntegration() {
   return (
     <DocsLayout
-      title="Apple Health Integration"
-      description="Connect your iPhone's Apple Health data to sync steps, heart rate, sleep, and more with FitConnect."
+      title="Apple Health Integration | FitConnect Guide"
+      description="Sync steps, heart rate, sleep and calories from your iPhone automatically. iOS wearable integration."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
         { label: "Integrations", href: "/docs/integrations" },
         { label: "Apple Health" },
       ]}

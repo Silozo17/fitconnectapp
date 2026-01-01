@@ -5,11 +5,10 @@ import { Dumbbell, RefreshCw, AlertCircle, Check, Settings } from "lucide-react"
 export default function AIExerciseAlternativesDocs() {
   return (
     <DocsLayout
-      title="AI Exercise Alternatives"
-      description="Find suitable exercise substitutions for clients based on equipment, injuries, or preferences."
+      title="AI Exercise Alternatives | FitConnect Coach Guide"
+      description="Find suitable exercise swaps for injuries, equipment limitations or client preferences."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
-        { label: "Coach", href: "/docs/coach" },
+        { label: "Coach Guide", href: "/docs/coach" },
         { label: "AI Tools", href: "/docs/coach/ai" },
         { label: "Exercise Alternatives" },
       ]}

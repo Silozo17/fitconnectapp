@@ -5,9 +5,9 @@ import { Package, FileText, Video, DollarSign } from "lucide-react";
 export default function CoachProductsDocs() {
   return (
     <DocsLayout
-      title="Digital Products"
-      description="Create and sell e-books, videos, templates, and bundles."
-      breadcrumbs={[{ label: "For Coaches", href: "/docs/coach" }, { label: "Digital Products" }]}
+      title="Sell Digital Products | FitConnect Coach Guide"
+      description="Create and sell e-books, video courses and training programmes. Generate passive income as a coach."
+      breadcrumbs={[{ label: "Coach Guide", href: "/docs/coach" }, { label: "Digital Products" }]}
     >
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">

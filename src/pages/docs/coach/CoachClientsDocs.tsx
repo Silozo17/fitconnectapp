@@ -6,10 +6,9 @@ import { Users, ClipboardList, Heart, TrendingUp } from "lucide-react";
 export default function CoachClientsDocs() {
   return (
     <DocsLayout
-      title="Managing Clients"
-      description="Learn how to view your client roster, track their progress, and manage client relationships."
+      title="Manage Your Clients | FitConnect Coach Guide"
+      description="View client rosters, track progress and manage health data. A complete CRM for personal trainers and fitness coaches."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
         { label: "Coach Guide", href: "/docs/coach" },
         { label: "Managing Clients" }
       ]}

@@ -6,10 +6,9 @@ import { MessageSquare, FileText, Zap, Send } from "lucide-react";
 export default function CoachMessagingDocs() {
   return (
     <DocsLayout
-      title="Messaging & Templates"
-      description="Learn how to communicate with clients, use quick actions, and create reusable message templates."
+      title="Message Your Clients | FitConnect Coach Guide"
+      description="Chat with clients, use quick actions and save message templates. Real-time messaging for coaches."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
         { label: "Coach Guide", href: "/docs/coach" },
         { label: "Messaging & Templates" }
       ]}

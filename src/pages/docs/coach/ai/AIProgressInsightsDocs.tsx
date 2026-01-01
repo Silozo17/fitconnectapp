@@ -5,11 +5,10 @@ import { TrendingUp, Activity, Scale, Brain, AlertTriangle, Target } from "lucid
 export default function AIProgressInsightsDocs() {
   return (
     <DocsLayout
-      title="AI Progress Insights"
-      description="Understand how AI analyses your clients' data to surface trends, patterns, and actionable insights."
+      title="AI Progress Insights | FitConnect Coach Guide"
+      description="Understand client trends with AI-powered analysis. Identify plateaus, patterns and opportunities."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
-        { label: "Coach", href: "/docs/coach" },
+        { label: "Coach Guide", href: "/docs/coach" },
         { label: "AI Tools", href: "/docs/coach/ai" },
         { label: "Progress Insights" },
       ]}

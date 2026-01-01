@@ -17,10 +17,10 @@ import {
 export default function ScheduledCheckinsDocs() {
   return (
     <DocsLayout
-      title="Scheduled Check-ins"
-      description="Schedule automated check-in messages to specific clients on a recurring basis."
+      title="Scheduled Check-ins | FitConnect Coach Guide"
+      description="Automate recurring client messages. Set weekly or monthly touchpoints to maintain engagement."
       breadcrumbs={[
-        { label: "For Coaches", href: "/docs/coach" }, 
+        { label: "Coach Guide", href: "/docs/coach" }, 
         { label: "Automations", href: "/docs/coach/automations" },
         { label: "Scheduled Check-ins" }
       ]}

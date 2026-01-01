@@ -6,10 +6,9 @@ import { Dumbbell, Utensils, Sparkles, Users } from "lucide-react";
 export default function CoachPlansDocs() {
   return (
     <DocsLayout
-      title="Building Plans"
-      description="Learn how to create workout and nutrition plans using the plan builder tools."
+      title="Build Workout Plans | FitConnect Coach Guide"
+      description="Create personalised training programmes with drag-and-drop. Use AI assistance and assign plans to clients instantly."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
         { label: "Coach Guide", href: "/docs/coach" },
         { label: "Building Plans" }
       ]}
