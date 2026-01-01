@@ -518,14 +518,14 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
             {menuGroups.map((group, index) => (
               <div key={group.id}>
                 {index > 0 && <div className="my-2 border-t border-sidebar-border/50" />}
-                {renderGroup(group, false)}
+                {renderGroup(group, false, true)}
               </div>
             ))}
           </nav>
 
           {/* Settings */}
           <div className="p-2 border-t border-sidebar-border space-y-1">
-            {renderMenuItem(settingsItem, false, false)}
+            {renderMenuItem(settingsItem, false, false, true)}
           </div>
 
           {/* Profile Section - Compact single row */}
