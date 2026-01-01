@@ -134,9 +134,10 @@ export function AssignFreePlanModal({ open, onOpenChange, coach }: AssignFreePla
           </div>
 
           {!isFounderSelected && (
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0 overflow-hidden">
               <Label>Expiry Date (optional)</Label>
               <Input
+                className="w-full min-w-0"
                 type="date"
                 value={expiresAt}
                 onChange={(e) => setExpiresAt(e.target.value)}

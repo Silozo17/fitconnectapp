@@ -225,23 +225,23 @@ const CreateHabitModal = ({ open, onOpenChange, coachId, clientId, habit }: Crea
           
           {/* Dates */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0 overflow-hidden">
               <Label htmlFor="start_date">Start Date</Label>
               <Input
                 id="start_date"
                 type="date"
-                className="w-full"
+                className="w-full min-w-0"
                 value={formData.start_date}
                 onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
                 required
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0 overflow-hidden">
               <Label htmlFor="end_date">End Date (optional)</Label>
               <Input
                 id="end_date"
                 type="date"
-                className="w-full"
+                className="w-full min-w-0"
                 value={formData.end_date}
                 onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
               />

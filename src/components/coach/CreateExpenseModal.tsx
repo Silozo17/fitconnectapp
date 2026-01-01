@@ -115,10 +115,10 @@ export function CreateExpenseModal({
               />
             </div>
 
-            <div className="space-y-2 min-w-0">
+            <div className="space-y-2 min-w-0 overflow-hidden">
               <Label>Date</Label>
               <Input
-                className="w-full"
+                className="w-full min-w-0"
                 type="date"
                 value={expenseDate}
                 onChange={(e) => setExpenseDate(e.target.value)}

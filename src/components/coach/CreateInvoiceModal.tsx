@@ -132,11 +132,11 @@ export function CreateInvoiceModal({
 
         <div className="space-y-6">
           {/* Client Selection */}
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+            <div className="space-y-2 min-w-0">
               <Label>Client (Optional)</Label>
               <Select value={clientId} onValueChange={setClientId}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a client" />
                 </SelectTrigger>
               <SelectContent>
@@ -149,9 +149,10 @@ export function CreateInvoiceModal({
               </Select>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0 overflow-hidden">
               <Label>Due Date</Label>
               <Input
+                className="w-full min-w-0"
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}

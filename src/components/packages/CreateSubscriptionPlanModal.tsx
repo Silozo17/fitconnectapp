@@ -150,11 +150,12 @@ const CreateSubscriptionPlanModal = ({ open, onOpenChange, editPlan }: CreateSub
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="price">{t("subscriptionPlans.priceRequired")}</Label>
               <Input
                 id="price"
+                className="w-full"
                 type="number"
                 min="0"
                 step="0.01"
@@ -163,10 +164,10 @@ const CreateSubscriptionPlanModal = ({ open, onOpenChange, editPlan }: CreateSub
                 onChange={(e) => setPrice(e.target.value)}
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label>{t("subscriptionPlans.billingPeriod")}</Label>
               <Select value={billingPeriod} onValueChange={setBillingPeriod}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
