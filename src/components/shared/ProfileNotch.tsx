@@ -16,15 +16,15 @@ const ProfileNotch = ({ className, headerHeight = 64 }: ProfileNotchProps) => {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1280;
   
   // Calculate actual header height
-  // On iOS native mobile: base (64px) + safe area (59px) + bottom padding (12px) = 135px
-  // On other mobile: base (64px) + bottom padding (12px) = 76px
+  // On iOS native mobile: base (64px, includes pb-3 via border-box) + safe area (59px) = 123px
+  // On other mobile: base (64px) - CSS env() handles safe area
   // On desktop: just use the prop value (64px)
   let actualHeaderHeight = headerHeight;
   if (isMobile) {
     if (env.isDespia && env.isIOS) {
-      actualHeaderHeight = 64 + 59 + 12; // 135px
+      actualHeaderHeight = 64 + 59; // 123px - min-h-16 includes padding with border-box
     } else {
-      actualHeaderHeight = 64 + 12; // 76px for other mobile
+      actualHeaderHeight = 64; // CSS env() handles safe area separately
     }
   }
 
