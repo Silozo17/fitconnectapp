@@ -281,6 +281,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
+    // CRITICAL FIX: Clear stale onboarding cache before login
+    // This ensures we don't inherit cache from a previous user
+    try {
+      localStorage.removeItem('fitconnect_coach_onboarded');
+      localStorage.removeItem('fitconnect_client_onboarded');
+    } catch {}
+    
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -313,6 +320,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (user?.id) {
       clearUserNativeCache(user.id);
     }
+    
+    // CRITICAL FIX: Clear onboarding cache to prevent stale data for next user
+    try {
+      localStorage.removeItem('fitconnect_coach_onboarded');
+      localStorage.removeItem('fitconnect_client_onboarded');
+    } catch {}
     
     try {
       await supabase.auth.signOut();
