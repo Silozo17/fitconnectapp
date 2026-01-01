@@ -6,10 +6,10 @@ import { DocScreenshot } from "@/components/docs/DocScreenshot";
 export default function ClientSessions() {
   return (
     <DocsLayout
-      title="Booking Sessions"
-      description="Learn how to book, manage, reschedule, and cancel coaching sessions."
+      title="Book PT Sessions | Schedule Training Online"
+      description="Book personal training sessions online 24/7. Learn how to schedule, reschedule and cancel coaching sessions with your trainer."
       breadcrumbs={[
-        { label: "For Clients", href: "/docs/client" },
+        { label: "Client Guide", href: "/docs/client" },
         { label: "Booking Sessions" },
       ]}
     >

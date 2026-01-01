@@ -6,10 +6,10 @@ import { DocScreenshot } from "@/components/docs/DocScreenshot";
 export default function CoachEarnings() {
   return (
     <DocsLayout
-      title="Earnings & Stripe Setup"
-      description="Set up payments, track earnings, and manage your coaching finances."
+      title="PT Earnings & Stripe Payments | Get Paid as a Coach"
+      description="Set up Stripe payments, track coaching earnings and manage your personal training finances. Accept payments from UK clients."
       breadcrumbs={[
-        { label: "For Coaches", href: "/docs/coach" },
+        { label: "Coach Guide", href: "/docs/coach" },
         { label: "Earnings & Stripe" },
       ]}
     >
