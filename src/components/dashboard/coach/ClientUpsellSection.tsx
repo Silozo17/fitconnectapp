@@ -16,12 +16,14 @@ import {
   ChevronRight,
   Lightbulb,
   CheckCircle2,
-  X
+  X,
+  Loader2
 } from "lucide-react";
-import { useUpsellInsights, UpsellSuggestion } from "@/hooks/useUpsellInsights";
+import { useUpsellInsights, useUpdateSuggestionOutcome, UpsellSuggestion } from "@/hooks/useUpsellInsights";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 interface ClientUpsellSectionProps {
   clientId: string;
@@ -35,14 +37,15 @@ export function ClientUpsellSection({
   onCreateSuggestion 
 }: ClientUpsellSectionProps) {
   const { t } = useTranslation();
-  const { data: insights, isLoading } = useUpsellInsights();
+  const { data: insights, isLoading } = useUpsellInsights(clientId);
 
-  const clientInsights = useMemo(() => {
-    return insights?.filter((i) => i.clientId === clientId) || [];
-  }, [insights, clientId]);
+  const activeSuggestion = useMemo(() => {
+    return insights?.find((i) => i.status === "pending");
+  }, [insights]);
 
-  const activeSuggestion = clientInsights.find((i) => i.status === "pending");
-  const historySuggestions = clientInsights.filter((i) => i.status !== "pending");
+  const historySuggestions = useMemo(() => {
+    return insights?.filter((i) => i.status !== "pending") || [];
+  }, [insights]);
 
   if (isLoading) {
     return (
@@ -115,19 +118,48 @@ export function ClientUpsellSection({
 
 function ActiveSuggestionCard({ suggestion }: { suggestion: UpsellSuggestion }) {
   const { t } = useTranslation();
+  const updateOutcome = useUpdateSuggestionOutcome();
 
   const typeLabels: Record<string, string> = {
+    renewal: t("upsell.type.renewal", "Renewal"),
+    upgrade: t("upsell.type.upgrade", "Upgrade"),
+    addon: t("upsell.type.addon", "Add-on"),
+    new_package: t("upsell.type.newPackage", "New Package"),
     package_upgrade: t("upsell.type.packageUpgrade", "Package Upgrade"),
     add_nutrition: t("upsell.type.addNutrition", "Add Nutrition"),
     extend_sessions: t("upsell.type.extendSessions", "Extend Sessions"),
     premium_feature: t("upsell.type.premiumFeature", "Premium Feature"),
   };
 
-  const confidenceColors = {
-    high: "text-success",
-    medium: "text-warning",
+  const priorityColors = {
+    high: "text-destructive",
+    normal: "text-primary",
     low: "text-muted-foreground",
   };
+
+  const handleAccept = () => {
+    updateOutcome.mutate(
+      { suggestionId: suggestion.id, outcome: "accepted" },
+      {
+        onSuccess: () => {
+          toast.success(t("upsell.acceptedSuccess", "Suggestion accepted"));
+        },
+      }
+    );
+  };
+
+  const handleDismiss = () => {
+    updateOutcome.mutate(
+      { suggestionId: suggestion.id, outcome: "dismissed" },
+      {
+        onSuccess: () => {
+          toast.success(t("upsell.dismissedSuccess", "Suggestion dismissed"));
+        },
+      }
+    );
+  };
+
+  const isUpdating = updateOutcome.isPending;
 
   return (
     <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 space-y-3">
@@ -140,9 +172,9 @@ function ActiveSuggestionCard({ suggestion }: { suggestion: UpsellSuggestion }) 
         </div>
         <Badge 
           variant="outline" 
-          className={cn("text-xs", confidenceColors[suggestion.confidence])}
+          className={cn("text-xs capitalize", priorityColors[suggestion.priority])}
         >
-          {suggestion.confidence} {t("upsell.confidence", "confidence")}
+          {suggestion.priority} {t("upsell.priority", "priority")}
         </Badge>
       </div>
 
@@ -161,12 +193,31 @@ function ActiveSuggestionCard({ suggestion }: { suggestion: UpsellSuggestion }) 
       )}
 
       <div className="flex gap-2 pt-2">
-        <Button size="sm" className="flex-1">
-          <CheckCircle2 className="w-4 h-4 mr-1" />
+        <Button 
+          size="sm" 
+          className="flex-1" 
+          onClick={handleAccept}
+          disabled={isUpdating}
+        >
+          {isUpdating ? (
+            <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+          ) : (
+            <CheckCircle2 className="w-4 h-4 mr-1" />
+          )}
           {t("upsell.accept", "Accept")}
         </Button>
-        <Button size="sm" variant="outline" className="flex-1">
-          <X className="w-4 h-4 mr-1" />
+        <Button 
+          size="sm" 
+          variant="outline" 
+          className="flex-1"
+          onClick={handleDismiss}
+          disabled={isUpdating}
+        >
+          {isUpdating ? (
+            <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+          ) : (
+            <X className="w-4 h-4 mr-1" />
+          )}
           {t("upsell.dismiss", "Dismiss")}
         </Button>
       </div>
@@ -175,8 +226,6 @@ function ActiveSuggestionCard({ suggestion }: { suggestion: UpsellSuggestion }) 
 }
 
 function HistorySuggestionItem({ suggestion }: { suggestion: UpsellSuggestion }) {
-  const { t } = useTranslation();
-
   const statusStyles = {
     accepted: "bg-success/10 text-success",
     dismissed: "bg-muted text-muted-foreground",
@@ -190,7 +239,7 @@ function HistorySuggestionItem({ suggestion }: { suggestion: UpsellSuggestion })
         <span className="text-foreground">{suggestion.suggestedProduct || suggestion.suggestionType}</span>
       </div>
       <div className="flex items-center gap-2">
-        <Badge className={cn("text-xs", statusStyles[suggestion.status])}>
+        <Badge className={cn("text-xs capitalize", statusStyles[suggestion.status])}>
           {suggestion.status}
         </Badge>
         <span className="text-xs text-muted-foreground">
