@@ -42,11 +42,11 @@ const DashboardHeader = memo(({ subscriptionTier, onMenuToggle }: DashboardHeade
 
   return (
     <header 
-      className="fixed top-0 left-0 right-0 z-30 glass-premium border-b border-border/30 pt-safe-status xl:static xl:pt-0"
+      className="fixed top-0 left-0 right-0 z-30 glass-premium border-b border-border/30 xl:static"
       role="banner"
       aria-label="Dashboard header"
     >
-      <div className="h-16 px-4 xl:px-6 flex items-center justify-between">
+      <div className="h-16 px-4 xl:px-6 flex items-center justify-between pt-safe-status xl:pt-0">
         {/* Left side */}
         <div className="flex items-center gap-3 flex-1">
           <div className="xl:hidden">
