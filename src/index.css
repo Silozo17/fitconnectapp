@@ -349,6 +349,17 @@
     margin-top: calc(4rem + env(safe-area-inset-top, 0px));
   }
 
+  /* Native iOS fallback - when env() returns 0 in Despia webview */
+  /* Applied via JavaScript by adding .native-ios class to html element */
+  html.native-ios .pt-safe-status {
+    /* iPhone Dynamic Island: ~59px, Notch: ~47px, older: ~44px */
+    padding-top: max(env(safe-area-inset-top, 0px), 47px);
+  }
+
+  html.native-ios .mt-header-safe {
+    margin-top: calc(4rem + max(env(safe-area-inset-top, 0px), 47px));
+  }
+
   /* ========================================
      GLASSMORPHISM EFFECTS - Premium Frost System
      ======================================== */
