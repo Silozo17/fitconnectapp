@@ -494,7 +494,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
 
       {/* Mobile Sidebar */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="w-72 p-0 flex flex-col" onOpenAutoFocus={(e) => e.preventDefault()}>
+        <SheetContent side="left" className="w-72 p-0 flex flex-col overflow-hidden" onOpenAutoFocus={(e) => e.preventDefault()}>
           {/* Logo */}
           <div className="p-4 border-b border-sidebar-border">
             <div className="flex items-center gap-3">
@@ -514,7 +514,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-2 space-y-2 overflow-y-auto">
+          <nav className="flex-1 p-2 space-y-2 overflow-y-auto overflow-x-hidden touch-pan-y overscroll-y-contain">
             {menuGroups.map((group, index) => (
               <div key={group.id}>
                 {index > 0 && <div className="my-2 border-t border-sidebar-border/50" />}

@@ -194,7 +194,7 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }: AdminSidebarProps) => {
 
       {/* Mobile Sidebar */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="w-64 p-0 flex flex-col" onOpenAutoFocus={(e) => e.preventDefault()}>
+        <SheetContent side="left" className="w-64 p-0 flex flex-col overflow-hidden" onOpenAutoFocus={(e) => e.preventDefault()}>
           {/* Logo */}
           <div className="p-4 border-b border-border flex items-center">
             <div className="flex items-center gap-2">
@@ -212,7 +212,7 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }: AdminSidebarProps) => {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
+          <nav className="flex-1 p-2 space-y-1 overflow-y-auto overflow-x-hidden touch-pan-y overscroll-y-contain">
             {mainNavItems.map((item) => renderNavItem(item, false))}
 
             <div className="pt-4 pb-2">
