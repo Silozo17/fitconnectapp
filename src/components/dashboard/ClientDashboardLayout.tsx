@@ -15,7 +15,7 @@ import { ProfilePanelProvider, useProfilePanel } from "@/contexts/ProfilePanelCo
 import ProfilePanel from "@/components/shared/ProfilePanel";
 import ClientProfileSummary from "@/components/dashboard/client/ClientProfileSummary";
 import { DiscoverModal } from "@/components/discover/DiscoverModal";
-import { DashboardSkeleton } from "./DashboardSkeleton";
+import PageLoadingSpinner from "@/components/shared/PageLoadingSpinner";
 
 interface ClientDashboardLayoutProps {
   children: React.ReactNode;
@@ -71,22 +71,14 @@ const ClientDashboardLayoutInner = memo(({
   }, [onboardingStatus, isLoading, navigate, justCompletedOnboarding, isKnownOnboarded]);
 
   // OPTIMIZED: Skip loading state entirely for known-onboarded users
-  // Only show skeleton if we're actually loading AND not known-onboarded
+  // Only show spinner if we're actually loading AND not known-onboarded
   if (isLoading && !justCompletedOnboarding && !isKnownOnboarded) {
-    return (
-      <div className="min-h-screen bg-background p-4 lg:p-6">
-        <DashboardSkeleton variant="client" />
-      </div>
-    );
+    return <PageLoadingSpinner />;
   }
 
-  // Guard: if not onboarded and not just completed and not known-onboarded, show skeleton (redirect will happen)
+  // Guard: if not onboarded and not just completed and not known-onboarded, show spinner (redirect will happen)
   if (!onboardingStatus?.isOnboarded && !justCompletedOnboarding && !isKnownOnboarded) {
-    return (
-      <div className="min-h-screen bg-background p-4 lg:p-6">
-        <DashboardSkeleton variant="client" />
-      </div>
-    );
+    return <PageLoadingSpinner />;
   }
 
   return (

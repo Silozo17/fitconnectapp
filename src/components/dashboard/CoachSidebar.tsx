@@ -1,4 +1,4 @@
-import { useState, useEffect, memo, useCallback, useMemo } from "react";
+import { useState, useEffect, memo, useCallback, useMemo, useTransition } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
@@ -180,6 +180,17 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
   const { unreadCount } = useUnreadMessages();
   const { badges: { newLeads, pendingBookings, pendingClientRequests, pendingFriendRequests } } = useCoachBadges();
   const { hasFeature } = useFeatureAccess();
+  const [isPending, startTransition] = useTransition();
+
+  // Optimized mobile navigation - close sheet first, then navigate
+  const handleMobileNavigation = useCallback((path: string) => {
+    // Close sheet immediately for responsive feel
+    setMobileOpen(false);
+    // Use startTransition to prevent UI blocking during chunk load
+    startTransition(() => {
+      navigate(path);
+    });
+  }, [navigate, setMobileOpen]);
 
   // Initialize open groups based on current path
   const getInitialOpenGroups = useCallback(() => {
@@ -207,10 +218,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
     });
   }, [location.pathname]);
 
-  // Close mobile menu on navigation
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [location.pathname, setMobileOpen]);
+  // Remove auto-close on navigation for desktop - let optimized mobile handler manage it
 
   const getBadgeCount = useCallback((badgeKey?: BadgeKey): number => {
     switch (badgeKey) {
@@ -261,11 +269,14 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
     });
   }, []);
 
-  const renderMenuItem = (item: MenuItem, indented = false, isCollapsed = false) => {
+  const renderMenuItem = (item: MenuItem, indented = false, isCollapsed = false, isMobile = false) => {
     const isActive = isItemActive(item.path);
     const badgeCount = getBadgeCount(item.badgeKey);
     const isLocked = item.requiredFeature && !hasFeature(item.requiredFeature);
     const title = t(item.titleKey);
+
+    // For mobile, use button with optimized navigation
+    const handleClick = isMobile ? () => handleMobileNavigation(item.path) : undefined;
 
     if (isCollapsed) {
       return (
@@ -298,6 +309,31 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
       );
     }
 
+    // For mobile, use button with onClick for optimized navigation
+    if (isMobile) {
+      return (
+        <button
+          key={item.path}
+          type="button"
+          onClick={handleClick}
+          className={cn(
+            "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 relative w-full text-left",
+            indented && "ml-4",
+            isActive
+              ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-glow-sm"
+              : isLocked
+                ? "text-sidebar-foreground/40 hover:bg-sidebar-accent/50"
+                : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+          )}
+        >
+          <item.icon className="w-4 h-4 flex-shrink-0" />
+          <span className="font-medium text-sm flex-1">{title}</span>
+          {isLocked && <Lock className="w-3.5 h-3.5 text-warning" />}
+          {badgeCount > 0 && !isLocked && <SidebarBadge count={badgeCount} variant={item.badgeVariant} />}
+        </button>
+      );
+    }
+
     return (
       <Link
         key={item.path}
@@ -320,11 +356,11 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
     );
   };
 
-  const renderGroup = (group: MenuGroup, isCollapsed = false) => {
+  const renderGroup = (group: MenuGroup, isCollapsed = false, isMobile = false) => {
     if (!group.collapsible) {
       return (
         <div key={group.id} className="space-y-1">
-          {group.items.map((item) => renderMenuItem(item, false, isCollapsed))}
+          {group.items.map((item) => renderMenuItem(item, false, isCollapsed, isMobile))}
         </div>
       );
     }
@@ -391,7 +427,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-1 mt-1">
-          {group.items.map((item) => renderMenuItem(item, true, false))}
+          {group.items.map((item) => renderMenuItem(item, true, false, isMobile))}
         </CollapsibleContent>
       </Collapsible>
     );

@@ -49,38 +49,32 @@
     <!-- Theme Color -->
     <meta name="theme-color" content="#0D0D14" />
     
-    <!-- Critical CSS for instant loading skeleton - eliminates white/black screen flash -->
+    <!-- Critical CSS for instant loading spinner - eliminates white/black screen flash -->
     <style>
       /* Base styles for instant render */
       *,*::before,*::after{box-sizing:border-box}
       html{-webkit-text-size-adjust:100%;tab-size:4}
       body{margin:0;font-family:'Inter',system-ui,-apple-system,sans-serif;background:#0D0D14;color:#f8fafc;line-height:1.5}
       
-      /* App shell skeleton - shown instantly before React hydrates */
-      .app-shell{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
-      .shell-header{height:64px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;padding:0 16px}
-      .shell-logo{width:140px;height:32px;background:linear-gradient(90deg,rgba(190,255,0,0.15) 0%,rgba(190,255,0,0.08) 100%);border-radius:6px}
-      .shell-content{flex:1;display:flex}
-      .shell-sidebar{width:72px;border-right:1px solid rgba(255,255,255,0.08);padding:16px 12px;display:none}
-      @media(min-width:768px){.shell-sidebar{display:flex;flex-direction:column;gap:8px}}
-      .shell-nav-item{height:44px;background:rgba(255,255,255,0.03);border-radius:8px}
-      .shell-main{flex:1;padding:16px;max-width:100%}
-      .shell-card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:20px;margin-bottom:16px}
-      .shell-card-header{height:24px;width:50%;background:rgba(255,255,255,0.08);border-radius:6px;margin-bottom:16px}
-      .shell-card-content{display:flex;flex-direction:column;gap:12px}
-      .shell-line{height:16px;background:rgba(255,255,255,0.05);border-radius:4px}
-      .shell-line-short{width:60%}
-      .shell-line-medium{width:80%}
-      .shell-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:16px}
+      /* Branded loader - shown instantly before React hydrates */
+      .app-loader{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:24px}
+      .loader-ring{position:relative;width:64px;height:64px}
+      .loader-ring-outer{width:64px;height:64px;border-radius:50%;border:2px solid rgba(190,255,0,0.2)}
+      .loader-ring-spin{position:absolute;inset:0;width:64px;height:64px;border-radius:50%;border:2px solid transparent;border-top-color:#BEFF00;animation:loader-spin 1s linear infinite}
+      .loader-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+      .loader-icon-inner{width:40px;height:40px;border-radius:8px;background:rgba(190,255,0,0.1);display:flex;align-items:center;justify-content:center;animation:loader-bounce 1s ease-in-out infinite}
+      .loader-icon-inner svg{width:20px;height:20px;color:#BEFF00}
+      .loader-text{display:flex;align-items:center;gap:8px;color:rgba(248,250,252,0.6);font-size:14px;font-weight:500}
+      .loader-dots{display:flex;gap:4px}
+      .loader-dot{width:6px;height:6px;border-radius:50%;background:#BEFF00;animation:loader-bounce 1s ease-in-out infinite}
+      .loader-dot:nth-child(2){animation-delay:150ms}
+      .loader-dot:nth-child(3){animation-delay:300ms}
+      @keyframes loader-spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+      @keyframes loader-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+      @media(prefers-reduced-motion:reduce){.loader-ring-spin,.loader-icon-inner,.loader-dot{animation:none}}
       
-      /* Skeleton shimmer animation - GPU accelerated */
-      @keyframes shell-shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
-      .shell-shimmer{position:relative;overflow:hidden}
-      .shell-shimmer::after{content:'';position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent);animation:shell-shimmer 1.5s ease-in-out infinite}
-      @media(prefers-reduced-motion:reduce){.shell-shimmer::after{animation:none}}
-      
-      /* Hide skeleton when React mounts */
-      .app-shell[data-hydrated]{display:none!important}
+      /* Hide loader when React mounts */
+      .app-loader[data-hydrated]{display:none!important}
     </style>
     <meta name="msapplication-TileColor" content="#0D0D14" />
 
@@ -186,57 +180,38 @@
       </div>
     </noscript>
     
-    <!-- App Shell Skeleton - Shown instantly before React hydrates -->
-    <div class="app-shell" id="app-shell">
-      <header class="shell-header">
-        <div class="shell-logo shell-shimmer"></div>
-      </header>
-      <div class="shell-content">
-        <nav class="shell-sidebar">
-          <div class="shell-nav-item shell-shimmer"></div>
-          <div class="shell-nav-item shell-shimmer"></div>
-          <div class="shell-nav-item shell-shimmer"></div>
-          <div class="shell-nav-item shell-shimmer"></div>
-          <div class="shell-nav-item shell-shimmer"></div>
-        </nav>
-        <main class="shell-main">
-          <div class="shell-card">
-            <div class="shell-card-header shell-shimmer"></div>
-            <div class="shell-card-content">
-              <div class="shell-line shell-line-medium shell-shimmer"></div>
-              <div class="shell-line shell-shimmer"></div>
-              <div class="shell-line shell-line-short shell-shimmer"></div>
-            </div>
+    <!-- Branded Loader - Shown instantly before React hydrates -->
+    <div class="app-loader" id="app-loader">
+      <div class="loader-ring">
+        <div class="loader-ring-outer"></div>
+        <div class="loader-ring-spin"></div>
+        <div class="loader-icon">
+          <div class="loader-icon-inner">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/>
+            </svg>
           </div>
-          <div class="shell-grid">
-            <div class="shell-card">
-              <div class="shell-card-header shell-shimmer"></div>
-              <div class="shell-card-content">
-                <div class="shell-line shell-shimmer"></div>
-                <div class="shell-line shell-line-medium shell-shimmer"></div>
-              </div>
-            </div>
-            <div class="shell-card">
-              <div class="shell-card-header shell-shimmer"></div>
-              <div class="shell-card-content">
-                <div class="shell-line shell-shimmer"></div>
-                <div class="shell-line shell-line-short shell-shimmer"></div>
-              </div>
-            </div>
-          </div>
-        </main>
+        </div>
+      </div>
+      <div class="loader-text">
+        <span>Loading</span>
+        <span class="loader-dots">
+          <span class="loader-dot"></span>
+          <span class="loader-dot"></span>
+          <span class="loader-dot"></span>
+        </span>
       </div>
     </div>
     
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- Hide app shell once React mounts -->
+    <!-- Hide loader once React mounts -->
     <script>
-      // Mark shell as hydrated when React renders
+      // Mark loader as hydrated when React renders
       window.__hideAppShell = function() {
-        var shell = document.getElementById('app-shell');
-        if (shell) shell.setAttribute('data-hydrated', 'true');
+        var loader = document.getElementById('app-loader');
+        if (loader) loader.setAttribute('data-hydrated', 'true');
       };
     </script>
   </body>
