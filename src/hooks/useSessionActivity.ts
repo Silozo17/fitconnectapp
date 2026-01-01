@@ -43,6 +43,14 @@ export const useSessionActivity = () => {
         return;
       }
       
+      // Validate session is still fresh before calling edge function
+      // This prevents 401 errors on cold start when session might be stale
+      const { data: { session: freshSession } } = await supabase.auth.getSession();
+      if (!freshSession?.access_token) {
+        console.debug("[SessionActivity] Skipping - no valid session");
+        return;
+      }
+      
       lastUpdateRef.current = now;
 
       try {
