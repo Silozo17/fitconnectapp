@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { useCreateHabit, useUpdateHabit, Habit, HABIT_CATEGORIES_LIST, WEARABLE_HABIT_TARGETS } from "@/hooks/useHabits";
 import { Watch, ShieldCheck } from "lucide-react";
+import { getCategoryIcon } from "@/lib/habit-icons";
 
 interface CreateHabitModalProps {
   open: boolean;
@@ -95,12 +96,12 @@ const CreateHabitModal = ({ open, onOpenChange, coachId, clientId, habit }: Crea
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Habit' : 'Create New Habit'}</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="flex-1 overflow-y-auto space-y-4 pr-1">
           {/* Name */}
           <div className="space-y-2">
             <Label htmlFor="name">Habit Name *</Label>
@@ -139,7 +140,7 @@ const CreateHabitModal = ({ open, onOpenChange, coachId, clientId, habit }: Crea
                 {HABIT_CATEGORIES_LIST.map((cat) => (
                   <SelectItem key={cat.value} value={cat.value}>
                     <span className="flex items-center gap-2">
-                      <span>{cat.icon}</span>
+                      <span className={cat.color}>{getCategoryIcon(cat.icon, "h-4 w-4")}</span>
                       <span>{cat.label}</span>
                     </span>
                   </SelectItem>
@@ -200,12 +201,13 @@ const CreateHabitModal = ({ open, onOpenChange, coachId, clientId, habit }: Crea
           </div>
           
           {/* Dates */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label htmlFor="start_date">Start Date</Label>
               <Input
                 id="start_date"
                 type="date"
+                className="w-full"
                 value={formData.start_date}
                 onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
                 required
@@ -216,6 +218,7 @@ const CreateHabitModal = ({ open, onOpenChange, coachId, clientId, habit }: Crea
               <Input
                 id="end_date"
                 type="date"
+                className="w-full"
                 value={formData.end_date}
                 onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
               />
@@ -243,7 +246,7 @@ const CreateHabitModal = ({ open, onOpenChange, coachId, clientId, habit }: Crea
                   Habit will auto-complete when wearable data meets the target
                 </p>
                 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-2">
                     <Label>Data Type</Label>
                     <Select
@@ -293,16 +296,17 @@ const CreateHabitModal = ({ open, onOpenChange, coachId, clientId, habit }: Crea
             />
           </div>
           
-          {/* Actions */}
-          <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={createHabit.isPending || updateHabit.isPending}>
-              {isEditing ? 'Save Changes' : 'Create Habit'}
-            </Button>
-          </div>
-        </form>
+        </div>
+        
+        {/* Actions - outside scrollable area */}
+        <div className="flex justify-end gap-2 pt-4 border-t mt-4 shrink-0">
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} disabled={createHabit.isPending || updateHabit.isPending}>
+            {isEditing ? 'Save Changes' : 'Create Habit'}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

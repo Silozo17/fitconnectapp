@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Check, Flame, Undo2, Salad, Dumbbell, Moon, Flower2, Pill, Droplet, Watch, ShieldCheck } from "lucide-react";
+import { Check, Flame, Undo2, Watch, ShieldCheck } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,23 +8,11 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { cn } from "@/lib/utils";
 import { HabitWithStreak, getHabitCategory, useLogHabit, useUnlogHabit } from "@/hooks/useHabits";
 import { useCelebration, StreakMilestone } from "@/contexts/CelebrationContext";
+import { getCategoryIcon } from "@/lib/habit-icons";
 
 interface TodayHabitCardProps {
   habit: HabitWithStreak;
 }
-
-const getCategoryIcon = (iconName: string, className: string = "h-6 w-6") => {
-  const icons: Record<string, React.ReactNode> = {
-    'Salad': <Salad className={className} />,
-    'Dumbbell': <Dumbbell className={className} />,
-    'Moon': <Moon className={className} />,
-    'Flower2': <Flower2 className={className} />,
-    'Pill': <Pill className={className} />,
-    'Droplet': <Droplet className={className} />,
-    'Check': <Check className={className} />,
-  };
-  return icons[iconName] || <Check className={className} />;
-};
 
 const TodayHabitCard = ({ habit }: TodayHabitCardProps) => {
   const { t } = useTranslation("client");

@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Habit, getHabitCategory, useUpdateHabit, useDeleteHabit } from "@/hooks/useHabits";
 import { cn } from "@/lib/utils";
+import { getCategoryIcon } from "@/lib/habit-icons";
 
 interface HabitCardProps {
   habit: Habit;
@@ -46,7 +47,7 @@ const HabitCard = ({ habit, streak, onEdit }: HabitCardProps) => {
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3 min-w-0">
-            <span className="text-2xl shrink-0">{category.icon}</span>
+            <span className={cn("shrink-0", category.color)}>{getCategoryIcon(category.icon, "h-6 w-6")}</span>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h4 className="font-medium truncate">{habit.name}</h4>
