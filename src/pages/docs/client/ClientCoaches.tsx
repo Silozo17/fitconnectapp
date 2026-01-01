@@ -6,10 +6,10 @@ import { DocScreenshot } from "@/components/docs/DocScreenshot";
 export default function ClientCoaches() {
   return (
     <DocsLayout
-      title="Finding Coaches"
-      description="Learn how to search, filter, and discover the perfect coach for your fitness journey."
+      title="Find Personal Trainers Near You | FitConnect Client Guide"
+      description="Search and filter UK coaches by specialty, price and location. Compare profiles, read reviews and book sessions."
       breadcrumbs={[
-        { label: "For Clients", href: "/docs/client" },
+        { label: "Client Guide", href: "/docs/client" },
         { label: "Finding Coaches" },
       ]}
     >

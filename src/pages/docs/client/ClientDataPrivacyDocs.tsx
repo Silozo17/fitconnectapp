@@ -5,10 +5,10 @@ import { Shield, Eye, EyeOff, Users, Camera, Utensils, Dumbbell, Heart, Activity
 export default function ClientDataPrivacyDocs() {
   return (
     <DocsLayout
-      title="Data Privacy Controls"
-      description="Control what data your coaches can access and manage your privacy settings."
+      title="Control Your Data | FitConnect Privacy Guide"
+      description="Manage what coaches can see, control sharing permissions and understand your privacy rights on FitConnect."
       breadcrumbs={[
-        { label: "For Clients", href: "/docs/client" },
+        { label: "Client Guide", href: "/docs/client" },
         { label: "Data Privacy" }
       ]}
     >

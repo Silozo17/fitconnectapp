@@ -6,10 +6,9 @@ import { TrendingUp, Camera, LineChart, Scale } from "lucide-react";
 export default function ClientProgress() {
   return (
     <DocsLayout
-      title="Tracking Progress"
-      description="Learn how to log your progress, upload photos, and track your fitness journey over time."
+      title="Track Your Fitness Progress | FitConnect Client Guide"
+      description="Log measurements, upload progress photos and view charts showing your transformation over time."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
         { label: "Client Guide", href: "/docs/client" },
         { label: "Tracking Progress" }
       ]}

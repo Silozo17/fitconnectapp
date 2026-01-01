@@ -5,10 +5,10 @@ import { CheckCircle2, Flame, Calendar, Target, Zap, Gift } from "lucide-react";
 export default function ClientHabits() {
   return (
     <DocsLayout
-      title="Habits & Streaks"
-      description="Build consistent daily habits and earn rewards for your dedication."
+      title="Build Healthy Habits & Streaks | FitConnect Client Guide"
+      description="Complete daily habits, build streaks and earn XP rewards. Track consistency with visual heatmaps and unlock badges."
       breadcrumbs={[
-        { label: "For Clients", href: "/docs/client" },
+        { label: "Client Guide", href: "/docs/client" },
         { label: "Habits & Streaks" }
       ]}
     >

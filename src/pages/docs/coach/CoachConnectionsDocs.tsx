@@ -6,8 +6,8 @@ import { Users, UserPlus, MessageSquare, Eye, Network, Shield } from "lucide-rea
 export default function CoachConnectionsDocs() {
   return (
     <DocsLayout
-      title="Coach Connections"
-      description="Build your professional network by connecting with other coaches on the platform."
+      title="Client Connections | FitConnect Coach Guide"
+      description="Accept connection requests and manage your client relationships on the platform."
       breadcrumbs={[
         { label: "Coach Guide", href: "/docs/coach" },
         { label: "Connections" }

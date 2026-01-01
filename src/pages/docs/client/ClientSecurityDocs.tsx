@@ -16,9 +16,9 @@ import {
 export default function ClientSecurityDocs() {
   return (
     <DocsLayout
-      title="Account Security"
-      description="Protect your account with two-factor authentication, session management, and security best practices."
-      breadcrumbs={[{ label: "For Clients", href: "/docs/client" }, { label: "Account Security" }]}
+      title="Account Security & 2FA | FitConnect Client Guide"
+      description="Protect your account with two-factor authentication, manage sessions and follow security best practices."
+      breadcrumbs={[{ label: "Client Guide", href: "/docs/client" }, { label: "Account Security" }]}
     >
       {/* Overview */}
       <section className="mb-10">

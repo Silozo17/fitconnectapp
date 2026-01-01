@@ -6,8 +6,8 @@ import { Camera, Shield, CheckCircle, XCircle, Clock, Globe, Users, Image } from
 export default function CoachShowcaseDocs() {
   return (
     <DocsLayout
-      title="Transformations & Showcase"
-      description="Display client transformations on your profile to demonstrate your coaching results."
+      title="Showcase Transformations | FitConnect Coach Guide"
+      description="Display before and after photos. Build social proof on your coaching profile."
       breadcrumbs={[
         { label: "Coach Guide", href: "/docs/coach" },
         { label: "Transformations" }

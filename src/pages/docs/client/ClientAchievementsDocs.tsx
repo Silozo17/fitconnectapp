@@ -5,11 +5,10 @@ import { Trophy, Star, Zap, TrendingUp, Target, Medal, Award, Flame } from "luci
 export default function ClientAchievementsDocs() {
   return (
     <DocsLayout
-      title="Achievements, XP & Levels"
-      description="Earn experience points, level up, and collect badges as you progress on your fitness journey"
+      title="Badges & Rewards | FitConnect Client Guide"
+      description="Unlock achievement badges for milestones, streaks and challenge completions. Level up your profile."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
-        { label: "Client", href: "/docs/client" },
+        { label: "Client Guide", href: "/docs/client" },
         { label: "Achievements" }
       ]}
     >

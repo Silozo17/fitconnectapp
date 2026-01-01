@@ -5,9 +5,9 @@ import { Star, MessageSquare, TrendingUp } from "lucide-react";
 export default function CoachReviewsDocs() {
   return (
     <DocsLayout
-      title="Managing Reviews | Coach Guide - FitConnect"
-      description="View and respond to client reviews on your profile to build trust and visibility."
-      breadcrumbs={[{ label: "For Coaches", href: "/docs/coach" }, { label: "Reviews" }]}
+      title="Manage Client Reviews | FitConnect Coach Guide"
+      description="View, respond to and leverage reviews to grow your coaching business and visibility."
+      breadcrumbs={[{ label: "Coach Guide", href: "/docs/coach" }, { label: "Reviews" }]}
     >
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">

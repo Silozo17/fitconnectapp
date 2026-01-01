@@ -5,10 +5,10 @@ import { Receipt, Download, CreditCard, Calendar, FileText, Search } from "lucid
 export default function ClientReceiptsDocs() {
   return (
     <DocsLayout
-      title="Receipts & Payment History"
-      description="View your payment history, download invoices, and manage your transaction records."
+      title="View Your Receipts | FitConnect Client Guide"
+      description="Access payment history, download invoices and manage your coaching subscriptions."
       breadcrumbs={[
-        { label: "For Clients", href: "/docs/client" },
+        { label: "Client Guide", href: "/docs/client" },
         { label: "Receipts" }
       ]}
     >

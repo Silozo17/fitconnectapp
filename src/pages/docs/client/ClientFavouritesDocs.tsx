@@ -6,8 +6,8 @@ import { Heart, Search, Star, Users, Clock, BookmarkPlus } from "lucide-react";
 export default function ClientFavouritesDocs() {
   return (
     <DocsLayout
-      title="Favourites"
-      description="Save coaches you're interested in and build your shortlist for easy comparison."
+      title="Save Favourite Coaches | FitConnect Client Guide"
+      description="Bookmark coaches to compare later. Build your shortlist before booking sessions."
       breadcrumbs={[
         { label: "Client Guide", href: "/docs/client" },
         { label: "Favourites" }

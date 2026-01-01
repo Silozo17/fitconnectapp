@@ -5,9 +5,9 @@ import { Utensils, Calculator, Sparkles, Apple } from "lucide-react";
 export default function CoachNutritionDocs() {
   return (
     <DocsLayout
-      title="Nutrition Builder"
-      description="Create personalised meal plans for your clients."
-      breadcrumbs={[{ label: "For Coaches", href: "/docs/coach" }, { label: "Nutrition Builder" }]}
+      title="Create Meal Plans | FitConnect Coach Guide"
+      description="Build nutrition plans with macro targets. Use our 650k food database for UK supermarket products."
+      breadcrumbs={[{ label: "Coach Guide", href: "/docs/coach" }, { label: "Nutrition Builder" }]}
     >
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">

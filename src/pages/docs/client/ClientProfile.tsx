@@ -6,10 +6,10 @@ import { DocScreenshot } from "@/components/docs/DocScreenshot";
 export default function ClientProfile() {
   return (
     <DocsLayout
-      title="Creating Your Profile"
-      description="Set up your client profile to get personalised coach recommendations and better service."
+      title="Create Your Fitness Profile | FitConnect Client Guide"
+      description="Set up your profile with goals, measurements and health info. Get personalised coach recommendations."
       breadcrumbs={[
-        { label: "For Clients", href: "/docs/client" },
+        { label: "Client Guide", href: "/docs/client" },
         { label: "Creating Your Profile" },
       ]}
     >

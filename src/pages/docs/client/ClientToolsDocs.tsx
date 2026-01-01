@@ -5,10 +5,10 @@ import { Calculator, Scale, Flame, Activity, Percent, Dumbbell, Droplets, Heart 
 export default function ClientToolsDocs() {
   return (
     <DocsLayout
-      title="Fitness Tools & Calculators"
-      description="Free tools to help you understand your body and set realistic fitness goals."
+      title="Fitness Calculator Tools | BMI, TDEE & Macros"
+      description="Use BMI, TDEE and macro calculators. Set realistic fitness goals based on your personal metrics."
       breadcrumbs={[
-        { label: "For Clients", href: "/docs/client" },
+        { label: "Client Guide", href: "/docs/client" },
         { label: "Fitness Tools" }
       ]}
     >

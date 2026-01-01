@@ -5,8 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trophy, Zap, TrendingUp, Star, Flame, Target, PartyPopper } from "lucide-react";
 
 const breadcrumbs = [
-  { label: "Docs", href: "/docs" },
-  { label: "For Clients", href: "/docs/client" },
+  { label: "Client Guide", href: "/docs/client" },
   { label: "Micro Wins" },
 ];
 
@@ -15,8 +14,8 @@ export default function ClientMicroWinsDocs() {
 
   return (
     <DocsLayout
-      title="Micro Wins"
-      description="Celebrate small victories that keep you motivated on your fitness journey."
+      title="Celebrate Micro Wins | FitConnect Client Guide"
+      description="Track small daily victories that add up to big results. Stay motivated with automatic achievement detection."
       breadcrumbs={breadcrumbs}
     >
       <section className="space-y-6">

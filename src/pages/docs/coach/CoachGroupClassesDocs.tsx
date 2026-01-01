@@ -6,8 +6,8 @@ import { Users, Calendar, DollarSign, Clock, Video, MapPin, Bell, Settings } fro
 export default function CoachGroupClassesDocs() {
   return (
     <DocsLayout
-      title="Group Classes"
-      description="Set up and manage group training sessions to expand your reach and income."
+      title="Run Group Classes | FitConnect Coach Guide"
+      description="Schedule and manage group sessions. Assign programmes to multiple clients at once."
       breadcrumbs={[
         { label: "Coach Guide", href: "/docs/coach" },
         { label: "Group Classes" }

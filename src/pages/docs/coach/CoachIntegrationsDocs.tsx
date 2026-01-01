@@ -6,8 +6,8 @@ import { Link, Calendar, Video, RefreshCw, Shield, CheckCircle, XCircle, Clock }
 export default function CoachIntegrationsDocs() {
   return (
     <DocsLayout
-      title="Coach Integrations"
-      description="Connect your calendar, video conferencing, and other tools to streamline your coaching workflow."
+      title="Coach Integrations | FitConnect Guide"
+      description="Connect calendars, video conferencing and other tools to your coaching dashboard."
       breadcrumbs={[
         { label: "Coach Guide", href: "/docs/coach" },
         { label: "Integrations" }

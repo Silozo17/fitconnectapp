@@ -5,10 +5,10 @@ import { Trophy, Target, Users, Medal, Calendar, Zap } from "lucide-react";
 export default function ClientChallenges() {
   return (
     <DocsLayout
-      title="Challenges"
-      description="Compete in fitness challenges to earn exclusive rewards and XP."
+      title="Join Fitness Challenges | FitConnect Client Guide"
+      description="Compete in group challenges, earn exclusive rewards and stay motivated with community fitness goals."
       breadcrumbs={[
-        { label: "For Clients", href: "/docs/client" },
+        { label: "Client Guide", href: "/docs/client" },
         { label: "Challenges" }
       ]}
     >

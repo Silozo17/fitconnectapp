@@ -15,8 +15,8 @@ export default function CoachOnboarding() {
 
   return (
     <DocsLayout
-      title="Getting Started as a Coach"
-      description="Complete guide to setting up your coaching business on FitConnect."
+      title="Coach Onboarding Guide | FitConnect"
+      description="Complete setup guide for new coaches. Configure payments, services and availability."
       breadcrumbs={[
         { label: "For Coaches", href: "/docs/coach" },
         { label: "Getting Started" },

@@ -5,10 +5,10 @@ import { ShoppingBag, Search, Package, CreditCard, Library, Tag, FileText, Video
 export default function ClientMarketplaceDocs() {
   return (
     <DocsLayout
-      title="Digital Marketplace"
-      description="Browse and purchase digital fitness products from coaches including e-books, videos, and training templates."
+      title="Browse Fitness Products | FitConnect Marketplace"
+      description="Shop e-books, workout programmes and video courses from certified UK coaches. Digital fitness content."
       breadcrumbs={[
-        { label: "For Clients", href: "/docs/client" },
+        { label: "Client Guide", href: "/docs/client" },
         { label: "Marketplace" }
       ]}
     >
