@@ -362,14 +362,16 @@ const ClientOnboarding = () => {
           });
       }
 
-      // Invalidate the onboarding status cache before navigating
-      queryClient.invalidateQueries({ queryKey: ["client-onboarding-status", user.id] });
-      
-      // Refresh profiles so ViewSwitcher updates immediately
-      await refreshProfiles();
-      
       // Set flag so ClientDashboardLayout doesn't redirect back during cache update
       sessionStorage.setItem('fitconnect_onboarding_just_completed', 'client');
+      
+      // Post-save operations (non-critical) - wrap separately so errors don't show "save failed"
+      try {
+        queryClient.invalidateQueries({ queryKey: ["client-onboarding-status", user.id] });
+        await refreshProfiles();
+      } catch (postSaveError) {
+        console.warn('[ClientOnboarding] Post-save refresh error (non-critical):', postSaveError);
+      }
       
       toast.success("Profile completed! Let's find you a coach.");
       navigate("/dashboard/client");

@@ -513,9 +513,13 @@ const CoachOnboarding = () => {
         // Set completion flag BEFORE navigation - dashboard will check this
         sessionStorage.setItem('fitconnect_onboarding_just_completed', 'coach');
         
-        // Refetch (not just invalidate) to ensure cache has fresh data
-        await queryClient.refetchQueries({ queryKey: ["coach-onboarding-status", user.id] });
-        await refreshProfiles();
+        // Post-save operations (non-critical) - wrap separately so errors don't show "save failed"
+        try {
+          await queryClient.refetchQueries({ queryKey: ["coach-onboarding-status", user.id] });
+          await refreshProfiles();
+        } catch (postSaveError) {
+          console.warn('[CoachOnboarding] Post-save refresh error (non-critical):', postSaveError);
+        }
         
         if (import.meta.env.DEV) {
           console.log('[CoachOnboarding] handleComplete - navigating to client onboarding');
@@ -527,9 +531,13 @@ const CoachOnboarding = () => {
         // Set completion flag BEFORE navigation - dashboard will check this to prevent flicker
         sessionStorage.setItem('fitconnect_onboarding_just_completed', 'coach');
         
-        // Refetch (not just invalidate) to ensure cache has fresh data
-        await queryClient.refetchQueries({ queryKey: ["coach-onboarding-status", user.id] });
-        await refreshProfiles();
+        // Post-save operations (non-critical) - wrap separately so errors don't show "save failed"
+        try {
+          await queryClient.refetchQueries({ queryKey: ["coach-onboarding-status", user.id] });
+          await refreshProfiles();
+        } catch (postSaveError) {
+          console.warn('[CoachOnboarding] Post-save refresh error (non-critical):', postSaveError);
+        }
         
         if (import.meta.env.DEV) {
           console.log('[CoachOnboarding] handleComplete - navigating to dashboard');
