@@ -8,7 +8,7 @@ interface ProfileNotchProps {
   headerHeight?: number;
 }
 
-const ProfileNotch = ({ className, headerHeight = 42 }: ProfileNotchProps) => {
+const ProfileNotch = ({ className, headerHeight = 64 }: ProfileNotchProps) => {
   const { toggle, isOpen } = useProfilePanel();
   
   // Use the shared hook that reads Despia's --safe-area-top CSS variable
