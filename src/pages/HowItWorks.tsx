@@ -78,6 +78,7 @@ const HowItWorks = () => {
       icon: FileText,
       title: t("howItWorks.coachSteps.step1.title"),
       description: t("howItWorks.coachSteps.step1.description"),
+      image: `${SUPABASE_URL}/storage/v1/object/public/website-images/apply_verify.webp`,
       details: [
         t("howItWorks.coachSteps.step1.detail1"),
         t("howItWorks.coachSteps.step1.detail2"),
@@ -90,6 +91,7 @@ const HowItWorks = () => {
       icon: Users,
       title: t("howItWorks.coachSteps.step2.title"),
       description: t("howItWorks.coachSteps.step2.description"),
+      image: `${SUPABASE_URL}/storage/v1/object/public/website-images/build_profile.webp`,
       details: [
         t("howItWorks.coachSteps.step2.detail1"),
         t("howItWorks.coachSteps.step2.detail2"),
@@ -102,6 +104,7 @@ const HowItWorks = () => {
       icon: Zap,
       title: t("howItWorks.coachSteps.step3.title"),
       description: t("howItWorks.coachSteps.step3.description"),
+      image: `${SUPABASE_URL}/storage/v1/object/public/website-images/get_discovered.webp`,
       details: [
         t("howItWorks.coachSteps.step3.detail1"),
         t("howItWorks.coachSteps.step3.detail2"),
@@ -114,6 +117,7 @@ const HowItWorks = () => {
       icon: Award,
       title: t("howItWorks.coachSteps.step4.title"),
       description: t("howItWorks.coachSteps.step4.description"),
+      image: `${SUPABASE_URL}/storage/v1/object/public/website-images/coach_earn.webp`,
       details: [
         t("howItWorks.coachSteps.step4.detail1"),
         t("howItWorks.coachSteps.step4.detail2"),
@@ -313,8 +317,13 @@ const HowItWorks = () => {
                       </ul>
                     </div>
                     <div className={index % 2 === 1 ? 'md:order-1' : ''}>
-                      <Card variant="glass" className="aspect-square flex items-center justify-center">
-                        <step.icon className="w-24 h-24 text-primary/30" />
+                      <Card variant="glass" className="aspect-square overflow-hidden p-0">
+                        <img 
+                          src={step.image} 
+                          alt={step.title}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
                       </Card>
                     </div>
                   </div>
