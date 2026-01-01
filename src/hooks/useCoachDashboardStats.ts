@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCoachProfileId } from "./useCoachProfileId";
 import { useActiveProfile } from "@/hooks/useActiveProfile";
+import { useAuth } from "@/contexts/AuthContext";
+import { getNativeCache, setNativeCache, CACHE_KEYS, CACHE_TTL } from "@/lib/native-cache";
 
 export interface CoachDashboardStats {
   displayName: string;
@@ -19,7 +21,13 @@ export interface UpcomingSession {
   avatar: string;
 }
 
+interface CachedCoachDashboardData {
+  stats: CoachDashboardStats;
+  upcomingSessions: UpcomingSession[];
+}
+
 export const useCoachDashboardStats = () => {
+  const { user } = useAuth();
   const { data: coachProfileId } = useCoachProfileId();
   const { profileId, isRoleSwitching } = useActiveProfile();
 
@@ -116,7 +124,7 @@ export const useCoachDashboardStats = () => {
         }
       }
 
-      return {
+      const result: CachedCoachDashboardData = {
         stats: {
           displayName: profileData.data?.display_name || "",
           activeClients: clients.count || 0,
@@ -126,8 +134,20 @@ export const useCoachDashboardStats = () => {
         },
         upcomingSessions: formattedSessions,
       };
+
+      // Cache for native app cold start optimization
+      if (user?.id) {
+        setNativeCache(CACHE_KEYS.COACH_DASHBOARD_STATS, result, CACHE_TTL.DASHBOARD_STATS, user.id);
+      }
+
+      return result;
     },
     enabled: !!effectiveProfileId,
     staleTime: 1000 * 60 * 5, // 5 minutes
+    // Native: Use cached value as placeholder for instant render
+    placeholderData: () => {
+      if (!user?.id) return undefined;
+      return getNativeCache<CachedCoachDashboardData>(CACHE_KEYS.COACH_DASHBOARD_STATS, user.id) ?? undefined;
+    },
   });
 };

@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { clearLastRoute } from "@/hooks/useRouteRestoration";
 import { isDespia } from "@/lib/despia";
+import { getNativeCache, setNativeCache, clearUserNativeCache, CACHE_KEYS, CACHE_TTL } from "@/lib/native-cache";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
@@ -32,7 +33,16 @@ let isHandlingResume = false;
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [role, setRole] = useState<AppRole | null>(null);
+  // Native: Initialize role from cache for instant render on cold start
+  const [role, setRole] = useState<AppRole | null>(() => {
+    // Try to get cached role synchronously for native cold start
+    if (isDespia()) {
+      // We need user ID for cache key, but user isn't loaded yet
+      // We'll set this after user is available
+      return null;
+    }
+    return null;
+  });
   const [allRoles, setAllRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -53,8 +63,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const sortedRoles = roles
         .map(r => r.role)
         .sort((a, b) => roleOrder.indexOf(a) - roleOrder.indexOf(b));
-      setRole(sortedRoles[0]);
+      
+      const primaryRole = sortedRoles[0];
+      setRole(primaryRole);
       setAllRoles(sortedRoles);
+      
+      // Cache roles for native cold start optimization
+      setNativeCache(CACHE_KEYS.USER_ROLE, primaryRole, CACHE_TTL.USER_ROLE, userId);
+      setNativeCache(CACHE_KEYS.ALL_USER_ROLES, sortedRoles, CACHE_TTL.USER_ROLE, userId);
     } else {
       setAllRoles([]);
     }
@@ -156,7 +172,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
+          // Native: Try to restore role from cache immediately for instant render
+          const cachedRole = getNativeCache<AppRole>(CACHE_KEYS.USER_ROLE, session.user.id);
+          const cachedAllRoles = getNativeCache<AppRole[]>(CACHE_KEYS.ALL_USER_ROLES, session.user.id);
+          if (cachedRole) {
+            setRole(cachedRole);
+          }
+          if (cachedAllRoles && cachedAllRoles.length > 0) {
+            setAllRoles(cachedAllRoles);
+          }
+          
           // Defer Supabase calls with setTimeout to avoid deadlock
+          // This will also update cache with fresh data
           setTimeout(() => {
             fetchUserRole(session.user.id);
           }, 0);
@@ -282,6 +309,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signOut = useCallback(async () => {
+    // Clear native cache for this user before signing out
+    if (user?.id) {
+      clearUserNativeCache(user.id);
+    }
+    
     try {
       await supabase.auth.signOut();
     } catch (error) {
@@ -295,7 +327,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setAllRoles([]);
     // Clear saved route so next login starts fresh
     clearLastRoute();
-  }, []);
+  }, [user?.id]);
 
   const refreshRole = useCallback(async () => {
     if (user?.id) {
