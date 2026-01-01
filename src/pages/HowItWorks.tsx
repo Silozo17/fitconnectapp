@@ -15,12 +15,15 @@ import { useTranslation } from "react-i18next";
 const HowItWorks = () => {
   const { t } = useTranslation("pages");
 
+  const SUPABASE_URL = "https://ntgfihgneyoxxbwmtceq.supabase.co";
+  
   const clientSteps = [
     {
       step: "01",
       icon: Search,
       title: t("howItWorks.clientSteps.step1.title"),
       description: t("howItWorks.clientSteps.step1.description"),
+      image: `${SUPABASE_URL}/storage/v1/object/public/website-images/find_discover.webp`,
       details: [
         t("howItWorks.clientSteps.step1.detail1"),
         t("howItWorks.clientSteps.step1.detail2"),
@@ -33,6 +36,7 @@ const HowItWorks = () => {
       icon: MessageSquare,
       title: t("howItWorks.clientSteps.step2.title"),
       description: t("howItWorks.clientSteps.step2.description"),
+      image: `${SUPABASE_URL}/storage/v1/object/public/website-images/connect_consult.webp`,
       details: [
         t("howItWorks.clientSteps.step2.detail1"),
         t("howItWorks.clientSteps.step2.detail2"),
@@ -45,6 +49,7 @@ const HowItWorks = () => {
       icon: Calendar,
       title: t("howItWorks.clientSteps.step3.title"),
       description: t("howItWorks.clientSteps.step3.description"),
+      image: `${SUPABASE_URL}/storage/v1/object/public/website-images/book_train.webp`,
       details: [
         t("howItWorks.clientSteps.step3.detail1"),
         t("howItWorks.clientSteps.step3.detail2"),
@@ -57,6 +62,7 @@ const HowItWorks = () => {
       icon: TrendingUp,
       title: t("howItWorks.clientSteps.step4.title"),
       description: t("howItWorks.clientSteps.step4.description"),
+      image: `${SUPABASE_URL}/storage/v1/object/public/website-images/track_transform.webp`,
       details: [
         t("howItWorks.clientSteps.step4.detail1"),
         t("howItWorks.clientSteps.step4.detail2"),
@@ -262,8 +268,13 @@ const HowItWorks = () => {
                       </ul>
                     </div>
                     <div className={index % 2 === 1 ? 'md:order-1' : ''}>
-                      <Card variant="glass" className="aspect-square flex items-center justify-center">
-                        <step.icon className="w-24 h-24 text-primary/30" />
+                      <Card variant="glass" className="aspect-square overflow-hidden p-0">
+                        <img 
+                          src={step.image} 
+                          alt={step.title}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
                       </Card>
                     </div>
                   </div>
