@@ -1,9 +1,38 @@
-import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { Download, Share, Plus, CheckCircle2, Smartphone, Zap, RefreshCw, Bell } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { SEOHead, createBreadcrumbSchema } from '@/components/shared/SEOHead';
+
+// SoftwareApplication schema for app download page
+const softwareAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "FitConnect",
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "iOS, Android, Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "GBP"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.8",
+    "ratingCount": "2500",
+    "bestRating": "5",
+    "worstRating": "1"
+  },
+  "description": "Find personal trainers, nutritionists and boxing coaches. Track workouts, follow custom plans and achieve your fitness goals.",
+  "downloadUrl": "https://play.google.com/store/apps/details?id=com.despia.fitconnect",
+  "featureList": "Personal trainer discovery, Workout tracking, Nutrition plans, Progress tracking, Wearable integration"
+};
+
+const breadcrumbSchema = createBreadcrumbSchema([
+  { name: "Home", url: "https://getfitconnect.co.uk" },
+  { name: "Download", url: "https://getfitconnect.co.uk/install" }
+]);
 
 const Install = () => {
   const { canInstall, isInstalled, isIOS, triggerInstall } = usePWAInstall();
@@ -18,11 +47,11 @@ const Install = () => {
   if (isInstalled) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Helmet>
-          <title>FitConnect Installed | You're All Set</title>
-          <meta name="description" content="FitConnect is installed on your device. Enjoy quick access to your fitness coaching platform." />
-          <meta name="robots" content="noindex" />
-        </Helmet>
+        <SEOHead
+          title="FitConnect Installed | You're All Set"
+          description="FitConnect is installed on your device. Enjoy quick access to your fitness coaching platform."
+          noIndex={true}
+        />
         
         <Card className="max-w-md w-full text-center">
           <CardHeader>
@@ -46,11 +75,13 @@ const Install = () => {
 
   return (
     <div className="min-h-screen bg-background">
-        <Helmet>
-          <title>Download FitConnect | Free Fitness App UK</title>
-          <meta name="description" content="Download FitConnect free on iOS and Android. Find personal trainers, track workouts and achieve your fitness goals. Rated 4.8 stars." />
-          <meta name="keywords" content="fitness app download, personal trainer app, workout app UK, iOS fitness app, Android fitness app" />
-        </Helmet>
+      <SEOHead
+        title="Download FitConnect | Free Fitness App for iOS & Android"
+        description="Download FitConnect free on iOS and Android. Find personal trainers near you, track workouts and achieve your fitness goals. Rated 4.8 stars by UK users."
+        canonicalPath="/install"
+        keywords={["download fitness app", "personal trainer app UK", "workout app iOS", "fitness app Android", "free PT app"]}
+        schema={[softwareAppSchema, breadcrumbSchema]}
+      />
 
       <div className="container max-w-2xl mx-auto px-4 py-8">
         {/* Header */}

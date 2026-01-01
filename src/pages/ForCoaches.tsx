@@ -120,6 +120,7 @@ const ForCoaches = () => {
     "@type": "HowTo",
     "name": "How to Become a Coach on FitConnect",
     "description": "Apply to become a verified fitness coach on FitConnect and grow your business",
+    "totalTime": "PT15M",
     "step": steps.map((step, index) => ({
       "@type": "HowToStep",
       "position": index + 1,
@@ -128,13 +129,23 @@ const ForCoaches = () => {
     }))
   };
 
+  // Breadcrumb schema
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://getfitconnect.co.uk" },
+      { "@type": "ListItem", "position": 2, "name": "For Coaches", "item": "https://getfitconnect.co.uk/for-coaches" }
+    ]
+  };
+
   return (
     <PageLayout
       title={t("forCoaches.title")}
       description={t("forCoaches.metaDescription")}
       canonicalPath="/for-coaches"
-      keywords={["become a personal trainer", "grow coaching business", "PT platform", "fitness business"]}
-      schema={howToSchema}
+      keywords={["become personal trainer UK", "grow coaching business", "PT platform UK", "fitness business tools", "personal trainer software"]}
+      schema={[howToSchema, breadcrumbSchema]}
     >
       {/* Decorative Avatar */}
       <DecorativeAvatar 

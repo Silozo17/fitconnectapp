@@ -156,6 +156,7 @@ const HowItWorks = () => {
     "@type": "HowTo",
     "name": "How to Find a Personal Trainer on FitConnect",
     "description": "Step-by-step guide to finding and booking a fitness coach on FitConnect",
+    "totalTime": "PT10M",
     "step": clientSteps.map((step, index) => ({
       "@type": "HowToStep",
       "position": index + 1,
@@ -164,13 +165,23 @@ const HowItWorks = () => {
     }))
   };
 
+  // Breadcrumb schema
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://getfitconnect.co.uk" },
+      { "@type": "ListItem", "position": 2, "name": "How It Works", "item": "https://getfitconnect.co.uk/how-it-works" }
+    ]
+  };
+
   return (
     <PageLayout
       title={t("howItWorks.title")}
       description={t("howItWorks.metaDescription")}
       canonicalPath="/how-it-works"
-      keywords={["how to find personal trainer", "book fitness coach", "online PT app"]}
-      schema={howToSchema}
+      keywords={["how to find personal trainer UK", "book fitness coach online", "online PT app UK", "personal training app"]}
+      schema={[howToSchema, breadcrumbSchema]}
     >
       {/* Decorative Avatars */}
       <DecorativeAvatar 
