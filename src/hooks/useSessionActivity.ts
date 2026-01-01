@@ -23,7 +23,8 @@ export const useSessionActivity = () => {
   const lastUpdateRef = useRef<number>(0);
 
   useEffect(() => {
-    if (!user || !session) {
+    // Early exit: need both user and session with valid access token
+    if (!user || !session?.access_token) {
       // Clear interval if user is not authenticated
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -66,8 +67,10 @@ export const useSessionActivity = () => {
       }
     };
 
-    // Initial update when session starts
-    updateActivity();
+    // Delay initial update to allow session to fully establish
+    const initialTimeout = setTimeout(() => {
+      updateActivity();
+    }, 2000);
 
     // Set up periodic updates
     intervalRef.current = setInterval(updateActivity, ACTIVITY_UPDATE_INTERVAL);
@@ -83,10 +86,11 @@ export const useSessionActivity = () => {
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
+      clearTimeout(initialTimeout);
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [user, session]);
+  }, [user, session?.access_token]);
 };
