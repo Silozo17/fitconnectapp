@@ -5,9 +5,9 @@ import { Sparkles, Dumbbell, Utensils, Calculator } from "lucide-react";
 export default function CoachAIDocs() {
   return (
     <DocsLayout
-      title="AI Tools for Coaches"
-      description="Use AI to generate workout plans, meal suggestions, and more."
-      breadcrumbs={[{ label: "For Coaches", href: "/docs/coach" }, { label: "AI Tools" }]}
+      title="AI Tools Overview | FitConnect Coach Guide"
+      description="Generate workouts, meal plans and client insights with AI assistance. Save hours on programme design."
+      breadcrumbs={[{ label: "Coach Guide", href: "/docs/coach" }, { label: "AI Tools" }]}
     >
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">

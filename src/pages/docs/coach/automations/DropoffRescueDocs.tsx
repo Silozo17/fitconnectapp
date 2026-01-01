@@ -15,10 +15,10 @@ import {
 export default function DropoffRescueDocs() {
   return (
     <DocsLayout
-      title="Drop-off Rescue"
-      description="Automatically detect and re-engage clients who become inactive before they churn."
+      title="Dropoff Rescue | FitConnect Coach Guide"
+      description="Automatically re-engage inactive clients before they churn. Three-stage intervention system."
       breadcrumbs={[
-        { label: "For Coaches", href: "/docs/coach" }, 
+        { label: "Coach Guide", href: "/docs/coach" }, 
         { label: "Automations", href: "/docs/coach/automations" },
         { label: "Drop-off Rescue" }
       ]}

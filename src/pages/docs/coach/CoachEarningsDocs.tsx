@@ -6,10 +6,10 @@ import { CreditCard, BarChart3, Calendar, DollarSign } from "lucide-react";
 export default function CoachEarningsDocs() {
   return (
     <DocsLayout
-      title="Earnings & Stripe Connect"
-      description="Track your income, understand platform fees, and manage your Stripe Connect account."
+      title="Track Your Earnings | FitConnect Coach Guide"
+      description="View revenue, set up Stripe payments and download financial reports. Manage your coaching income easily."
       breadcrumbs={[
-        { label: "For Coaches", href: "/docs/coach" },
+        { label: "Coach Guide", href: "/docs/coach" },
         { label: "Earnings & Stripe" },
       ]}
     >

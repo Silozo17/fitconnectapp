@@ -5,11 +5,10 @@ import { MessageSquare, Sparkles, RefreshCw, Heart, Briefcase, Smile } from "luc
 export default function AICheckInComposerDocs() {
   return (
     <DocsLayout
-      title="AI Check-in Composer"
-      description="Generate personalised check-in messages for your clients using AI-powered message composition."
+      title="AI Check-in Composer | FitConnect Coach Guide"
+      description="Generate personalised check-in messages based on client activity and progress. Multiple tone options."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
-        { label: "Coach", href: "/docs/coach" },
+        { label: "Coach Guide", href: "/docs/coach" },
         { label: "AI Tools", href: "/docs/coach/ai" },
         { label: "Check-in Composer" },
       ]}

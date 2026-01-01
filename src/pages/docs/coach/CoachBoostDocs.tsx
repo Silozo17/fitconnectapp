@@ -5,9 +5,9 @@ import { Rocket, Users, Percent, TrendingUp, CreditCard, Clock } from "lucide-re
 export default function CoachBoostDocs() {
   return (
     <DocsLayout
-      title="Boost Marketing"
-      description="Get featured in search results and acquire new clients."
-      breadcrumbs={[{ label: "For Coaches", href: "/docs/coach" }, { label: "Boost" }]}
+      title="Boost Your Profile | FitConnect Coach Guide"
+      description="Pay-per-result marketing to appear at top of search results. Acquire new clients with Boost."
+      breadcrumbs={[{ label: "Coach Guide", href: "/docs/coach" }, { label: "Boost" }]}
     >
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">

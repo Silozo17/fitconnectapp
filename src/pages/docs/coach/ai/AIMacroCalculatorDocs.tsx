@@ -6,10 +6,10 @@ import { Calculator, Target, TrendingUp } from "lucide-react";
 export default function AIMacroCalculatorDocs() {
   return (
     <DocsLayout
-      title="AI Macro Calculator"
-      description="Automatically calculate personalised calorie and macro targets based on client goals and data."
+      title="AI Macro Calculator | FitConnect Coach Guide"
+      description="Calculate precise calorie and macro targets based on client goals, activity and metrics."
       breadcrumbs={[
-        { label: "For Coaches", href: "/docs/coach" },
+        { label: "Coach Guide", href: "/docs/coach" },
         { label: "AI Tools", href: "/docs/coach/ai" },
         { label: "Macro Calculator" },
       ]}

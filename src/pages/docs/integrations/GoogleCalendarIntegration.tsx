@@ -5,11 +5,10 @@ import { Calendar, Link2, RefreshCw, Shield, Settings, Trash2 } from "lucide-rea
 export default function GoogleCalendarIntegration() {
   return (
     <DocsLayout
-      title="Google Calendar Integration"
-      description="Sync your FitConnect schedule with Google Calendar for seamless calendar management."
+      title="Google Calendar Integration | FitConnect Guide"
+      description="Sync your bookings with Google Calendar. Prevent double-booking with two-way sync."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
-        { label: "Integrations" },
+        { label: "Integrations", href: "/docs/integrations" },
         { label: "Google Calendar" }
       ]}
     >

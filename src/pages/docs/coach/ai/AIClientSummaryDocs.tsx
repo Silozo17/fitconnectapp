@@ -5,11 +5,10 @@ import { Brain, FileText, CheckCircle, Clock, Edit, Send, AlertTriangle } from "
 export default function AIClientSummaryDocs() {
   return (
     <DocsLayout
-      title="AI Client Summary"
-      description="Automatically generate comprehensive progress summaries for your clients using AI analysis"
+      title="AI Client Summary | FitConnect Coach Guide"
+      description="Get instant AI-generated summaries of client progress and compliance. Review and share with clients."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
-        { label: "Coach", href: "/docs/coach" },
+        { label: "Coach Guide", href: "/docs/coach" },
         { label: "AI Tools", href: "/docs/coach/ai" },
         { label: "Client Summary" }
       ]}

@@ -6,10 +6,9 @@ import { Link } from "react-router-dom";
 export default function GarminIntegration() {
   return (
     <DocsLayout
-      title="Garmin Integration"
-      description="Connect your Garmin device to sync workouts, heart rate, sleep, and more with FitConnect."
+      title="Garmin Integration | FitConnect Guide"
+      description="Sync Garmin watch data including workouts, steps and recovery metrics. Coming soon."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
         { label: "Integrations", href: "/docs/integrations" },
         { label: "Garmin" },
       ]}

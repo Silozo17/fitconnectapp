@@ -6,10 +6,9 @@ import { Calendar, Clock, Video, CalendarCheck } from "lucide-react";
 export default function CoachScheduleDocs() {
   return (
     <DocsLayout
-      title="Schedule & Sessions"
-      description="Learn how to set your availability, manage bookings, and run coaching sessions."
+      title="Manage Your Schedule | FitConnect Coach Guide"
+      description="Set availability, sync calendars and manage booking requests from clients. Never double-book again."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
         { label: "Coach Guide", href: "/docs/coach" },
         { label: "Schedule & Sessions" }
       ]}

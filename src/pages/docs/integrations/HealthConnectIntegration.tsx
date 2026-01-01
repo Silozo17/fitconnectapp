@@ -6,10 +6,9 @@ import { Link } from "react-router-dom";
 export default function HealthConnectIntegration() {
   return (
     <DocsLayout
-      title="Health Connect (Android)"
-      description="Connect your Android device's Health Connect data to sync fitness metrics with FitConnect."
+      title="Health Connect Integration | FitConnect Guide"
+      description="Connect Android Health Connect to sync fitness data from multiple apps. Coming soon."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
         { label: "Integrations", href: "/docs/integrations" },
         { label: "Health Connect" },
       ]}

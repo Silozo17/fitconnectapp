@@ -5,11 +5,10 @@ import { Activity, Link2, RefreshCw, Heart, Footprints, Moon, Flame, Trash2, Shi
 export default function FitbitIntegration() {
   return (
     <DocsLayout
-      title="Fitbit Integration"
-      description="Connect your Fitbit device to automatically sync fitness and health data with FitConnect."
+      title="Fitbit Integration | FitConnect Guide"
+      description="Connect your Fitbit to sync activity, sleep and heart rate data. Works on iOS, Android and web."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
-        { label: "Integrations" },
+        { label: "Integrations", href: "/docs/integrations" },
         { label: "Fitbit" }
       ]}
     >

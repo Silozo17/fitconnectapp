@@ -5,11 +5,10 @@ import { Brain, Dumbbell, Apple, Moon, Lightbulb, CheckCircle, XCircle, RefreshC
 export default function AIPlanRecommendationsDocs() {
   return (
     <DocsLayout
-      title="AI Plan Recommendations"
-      description="Receive AI-generated suggestions for optimising your clients' workout and nutrition plans."
+      title="AI Plan Recommendations | FitConnect Coach Guide"
+      description="Get AI suggestions for next training phases based on client progress. Proactive programme optimisation."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
-        { label: "Coach", href: "/docs/coach" },
+        { label: "Coach Guide", href: "/docs/coach" },
         { label: "AI Tools", href: "/docs/coach/ai" },
         { label: "Plan Recommendations" },
       ]}

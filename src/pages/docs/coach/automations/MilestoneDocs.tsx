@@ -15,10 +15,10 @@ import {
 export default function MilestoneDocs() {
   return (
     <DocsLayout
-      title="Milestone Celebrations"
-      description="Automatically celebrate client achievements with personalised congratulations and optional rewards."
+      title="Milestone Celebrations | FitConnect Coach Guide"
+      description="Automatically celebrate client milestones with custom messages. Award badges for achievements."
       breadcrumbs={[
-        { label: "For Coaches", href: "/docs/coach" }, 
+        { label: "Coach Guide", href: "/docs/coach" }, 
         { label: "Automations", href: "/docs/coach/automations" },
         { label: "Milestones" }
       ]}

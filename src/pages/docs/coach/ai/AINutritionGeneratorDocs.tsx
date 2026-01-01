@@ -6,10 +6,10 @@ import { Utensils, Apple } from "lucide-react";
 export default function AINutritionGeneratorDocs() {
   return (
     <DocsLayout
-      title="AI Nutrition Generator"
-      description="Create personalised meal plans using AI, tailored to your client's goals and dietary requirements."
+      title="AI Meal Plan Generator | FitConnect Coach Guide"
+      description="Generate balanced meal plans meeting client macros and dietary needs. Save hours on nutrition planning."
       breadcrumbs={[
-        { label: "For Coaches", href: "/docs/coach" },
+        { label: "Coach Guide", href: "/docs/coach" },
         { label: "AI Tools", href: "/docs/coach/ai" },
         { label: "Nutrition Generator" },
       ]}
