@@ -1,6 +1,7 @@
 import { User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProfilePanel } from "@/contexts/ProfilePanelContext";
+import { getEnvironment } from "@/hooks/useEnvironment";
 
 interface ProfileNotchProps {
   className?: string;
@@ -9,6 +10,23 @@ interface ProfileNotchProps {
 
 const ProfileNotch = ({ className, headerHeight = 64 }: ProfileNotchProps) => {
   const { toggle, isOpen } = useProfilePanel();
+  
+  // Get environment to determine actual header height on iOS native
+  const env = getEnvironment();
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1280;
+  
+  // Calculate actual header height
+  // On iOS native mobile: base (64px) + safe area (59px) + bottom padding (12px) = 135px
+  // On other mobile: base (64px) + bottom padding (12px) = 76px
+  // On desktop: just use the prop value (64px)
+  let actualHeaderHeight = headerHeight;
+  if (isMobile) {
+    if (env.isDespia && env.isIOS) {
+      actualHeaderHeight = 64 + 59 + 12; // 135px
+    } else {
+      actualHeaderHeight = 64 + 12; // 76px for other mobile
+    }
+  }
 
   return (
     <button
@@ -33,9 +51,10 @@ const ProfileNotch = ({ className, headerHeight = 64 }: ProfileNotchProps) => {
         className
       )}
       style={{
-        // When closed: at bottom of header, protruding down
-        // When open: at bottom of panel (header + 65vh), protruding down
-        top: isOpen ? `calc(${headerHeight}px + 65vh - 24px)` : `${headerHeight - 24}px`,
+        // Notch is 48px tall, so -24px makes it straddle the header's bottom edge
+        top: isOpen 
+          ? `calc(${actualHeaderHeight}px + 65vh - 24px)` 
+          : `${actualHeaderHeight - 24}px`,
       }}
       aria-label={isOpen ? "Close profile" : "Open profile"}
       aria-expanded={isOpen}
