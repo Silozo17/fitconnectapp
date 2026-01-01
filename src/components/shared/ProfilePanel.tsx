@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { useProfilePanel } from "@/contexts/ProfilePanelContext";
 import ProfileNotch from "./ProfileNotch";
+import { getEnvironment } from "@/hooks/useEnvironment";
 
 interface ProfilePanelProps {
   children: React.ReactNode;
@@ -13,6 +14,23 @@ const ProfilePanel = ({ children, headerHeight = 64 }: ProfilePanelProps) => {
   const panelRef = useRef<HTMLDivElement>(null);
   const touchStartY = useRef<number>(0);
   const touchCurrentY = useRef<number>(0);
+
+  // Get environment to determine actual header height on iOS native
+  const env = getEnvironment();
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1280;
+  
+  // Calculate actual header height (must match ProfileNotch calculation)
+  // On iOS native mobile: 59px safe area + 64px min-h-16 + 12px pb-3 = 135px
+  // On other mobile: 64px + 12px = 76px (CSS env() handles safe area separately)
+  // On desktop: just use the prop value (64px)
+  let actualHeaderHeight = headerHeight;
+  if (isMobile) {
+    if (env.isDespia && env.isIOS) {
+      actualHeaderHeight = 59 + 64 + 12; // 135px total
+    } else {
+      actualHeaderHeight = 64 + 12; // 76px - CSS env() adds safe area separately
+    }
+  }
 
   // Handle swipe up to close
   const handleTouchStart = useCallback((e: TouchEvent) => {
@@ -68,7 +86,7 @@ const ProfilePanel = ({ children, headerHeight = 64 }: ProfilePanelProps) => {
           "fixed inset-0 z-40 bg-background/70 transition-opacity duration-300",
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         )}
-        style={{ top: headerHeight }}
+        style={{ top: actualHeaderHeight }}
         onClick={close}
         aria-hidden="true"
       />
@@ -92,7 +110,7 @@ const ProfilePanel = ({ children, headerHeight = 64 }: ProfilePanelProps) => {
             : "opacity-0 pointer-events-none"
         )}
         style={{ 
-          top: headerHeight,
+          top: actualHeaderHeight,
           willChange: 'transform, opacity',
           transformOrigin: 'top center',
           transform: isOpen 
@@ -116,7 +134,7 @@ const ProfilePanel = ({ children, headerHeight = 64 }: ProfilePanelProps) => {
       </div>
 
       {/* Notch - always visible, fixed position */}
-      <ProfileNotch headerHeight={headerHeight} />
+      <ProfileNotch headerHeight={actualHeaderHeight} />
     </>
   );
 };
