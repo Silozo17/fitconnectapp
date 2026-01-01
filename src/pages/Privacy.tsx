@@ -5,11 +5,23 @@ import { usePlatformContact } from "@/hooks/usePlatformContact";
 
 const Privacy = () => {
   const { contact } = usePlatformContact();
+  // Breadcrumb schema
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://getfitconnect.co.uk" },
+      { "@type": "ListItem", "position": 2, "name": "Privacy Policy", "item": "https://getfitconnect.co.uk/privacy" }
+    ]
+  };
+
   return (
     <PageLayout
       title="Privacy Policy | How FitConnect Protects Your Data"
       description="Read how FitConnect collects, uses and protects your personal data. GDPR compliant. Your privacy and security is our priority."
       canonicalPath="/privacy"
+      keywords={["FitConnect privacy policy", "fitness app data protection", "GDPR fitness app"]}
+      schema={breadcrumbSchema}
     >
       {/* Hero Section */}
       <section className="relative pt-32 pb-12 overflow-hidden">

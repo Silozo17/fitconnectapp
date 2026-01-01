@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import PageLayout from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -88,15 +86,43 @@ const Contact = () => {
     { title: t("contact.quickLinks.faqs"), href: "/faq" },
   ];
 
+  // ContactPage schema
+  const contactSchema = {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "name": "Contact FitConnect",
+    "description": "Get in touch with the FitConnect support team",
+    "mainEntity": {
+      "@type": "Organization",
+      "name": "FitConnect",
+      "email": contact.email,
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer support",
+        "email": contact.email,
+        "availableLanguage": ["English", "Polish"]
+      }
+    }
+  };
+
+  // Breadcrumb schema
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://getfitconnect.co.uk" },
+      { "@type": "ListItem", "position": 2, "name": "Contact", "item": "https://getfitconnect.co.uk/contact" }
+    ]
+  };
+
   return (
-    <>
-      <Helmet>
-        <title>{t("contact.meta.title")}</title>
-        <meta name="description" content={t("contact.meta.description")} />
-      </Helmet>
-      
-      <div className="min-h-screen bg-background relative">
-        <Navbar />
+    <PageLayout
+      title={t("contact.meta.title")}
+      description={t("contact.meta.description")}
+      canonicalPath="/contact"
+      keywords={["contact FitConnect", "fitness app support UK", "PT platform help", "customer service"]}
+      schema={[contactSchema, breadcrumbSchema]}
+    >
         
         {/* Decorative Avatar */}
         <DecorativeAvatar 
@@ -253,10 +279,7 @@ const Contact = () => {
             </div>
           </div>
         </section>
-
-        <Footer />
-      </div>
-    </>
+    </PageLayout>
   );
 };
 

@@ -9,7 +9,7 @@ import { MessageCircle } from "lucide-react";
 import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
 import { usePlatformContact } from "@/hooks/usePlatformContact";
 import { useTranslation } from "react-i18next";
-import { Helmet } from "react-helmet-async";
+
 
 const FAQ = () => {
   const { contact } = usePlatformContact();
@@ -129,17 +129,24 @@ const FAQ = () => {
     };
   }, [clientFAQs, coachFAQs, generalFAQs]);
 
+  // Breadcrumb schema
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://getfitconnect.co.uk" },
+      { "@type": "ListItem", "position": 2, "name": "FAQ", "item": "https://getfitconnect.co.uk/faq" }
+    ]
+  };
+
   return (
     <PageLayout
       title={t("faq.meta.title")}
       description={t("faq.meta.description")}
+      canonicalPath="/faq"
+      keywords={["FitConnect FAQ", "fitness coaching questions", "personal trainer help", "booking sessions help"]}
+      schema={[faqSchema, breadcrumbSchema]}
     >
-      {/* FAQPage Schema for SEO */}
-      <Helmet>
-        <script type="application/ld+json">
-          {JSON.stringify(faqSchema)}
-        </script>
-      </Helmet>
 
       {/* Decorative Avatar */}
       <DecorativeAvatar 

@@ -5,11 +5,23 @@ import { usePlatformContact } from "@/hooks/usePlatformContact";
 
 const Terms = () => {
   const { contact } = usePlatformContact();
+  // Breadcrumb schema
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://getfitconnect.co.uk" },
+      { "@type": "ListItem", "position": 2, "name": "Terms of Service", "item": "https://getfitconnect.co.uk/terms" }
+    ]
+  };
+
   return (
     <PageLayout
       title="Terms of Service | FitConnect User Agreement"
       description="FitConnect terms and conditions for clients and coaches. Understand your rights, payments, refunds and platform usage policies."
       canonicalPath="/terms"
+      keywords={["FitConnect terms", "fitness app terms of service", "PT platform agreement"]}
+      schema={breadcrumbSchema}
     >
       {/* Hero Section */}
       <section className="relative pt-32 pb-12 overflow-hidden">
