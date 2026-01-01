@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useTransition, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
@@ -165,10 +165,21 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
   const { unreadCount } = useUnreadMessages();
   const { badges: { newPlans, pendingConnections } } = useClientBadges();
   const { shouldHideMarketplace } = usePlatformRestrictions();
+  const [isPending, startTransition] = useTransition();
   
   // State for web-only feature dialog
   const [showWebOnlyDialog, setShowWebOnlyDialog] = useState(false);
   const [blockedFeatureName, setBlockedFeatureName] = useState("");
+
+  // Optimized mobile navigation - close sheet first, then navigate
+  const handleMobileNavigation = useCallback((path: string) => {
+    // Close sheet immediately for responsive feel
+    setMobileOpen(false);
+    // Use startTransition to prevent UI blocking during chunk load
+    startTransition(() => {
+      navigate(path);
+    });
+  }, [navigate, setMobileOpen]);
 
   // Filter menu groups and items based on platform restrictions
   // Items with disabledOnIOS are kept but rendered as disabled with popup
@@ -209,10 +220,7 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
     });
   }, [location.pathname]);
 
-  // Close mobile menu on navigation
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [location.pathname, setMobileOpen]);
+  // Remove auto-close on navigation for desktop - let optimized mobile handler manage it
 
   const getBadgeCount = (badgeKey?: BadgeKey): number => {
     switch (badgeKey) {
@@ -256,11 +264,16 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
     setShowWebOnlyDialog(true);
   };
 
-  const renderMenuItem = (item: MenuItem, indented = false, isCollapsed = false) => {
+  const renderMenuItem = (item: MenuItem, indented = false, isCollapsed = false, isMobile = false) => {
     const isActive = location.pathname === item.path;
     const badgeCount = getBadgeCount(item.badgeKey);
     const title = t(item.titleKey);
     const isDisabledOnPlatform = shouldHideMarketplace && item.disabledOnIOS;
+
+    // For mobile sidebar, use button with optimized navigation
+    const handleClick = isMobile ? () => handleMobileNavigation(item.path) : undefined;
+    const Component = isMobile ? 'button' : Link;
+    const linkProps = isMobile ? { type: 'button' as const, onClick: handleClick } : { to: item.path };
 
     if (isCollapsed) {
       return (
@@ -314,6 +327,28 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
       );
     }
 
+    // For mobile, use button with onClick for optimized navigation
+    if (isMobile) {
+      return (
+        <button
+          key={item.path}
+          type="button"
+          onClick={handleClick}
+          className={cn(
+            "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 relative w-full text-left",
+            indented && "ml-4",
+            isActive
+              ? "bg-primary text-primary-foreground shadow-glow-sm"
+              : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+          )}
+        >
+          <item.icon className="w-4 h-4 flex-shrink-0" />
+          <span className="font-medium text-sm flex-1">{title}</span>
+          {badgeCount > 0 && <SidebarBadge count={badgeCount} />}
+        </button>
+      );
+    }
+
     return (
       <Link
         key={item.path}
@@ -333,11 +368,11 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
     );
   };
 
-  const renderGroup = (group: MenuGroup, isCollapsed = false) => {
+  const renderGroup = (group: MenuGroup, isCollapsed = false, isMobile = false) => {
     if (!group.collapsible) {
       return (
         <div key={group.id} className="space-y-1">
-          {group.items.map((item) => renderMenuItem(item, false, isCollapsed))}
+          {group.items.map((item) => renderMenuItem(item, false, isCollapsed, isMobile))}
         </div>
       );
     }
@@ -404,7 +439,7 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-1 mt-1">
-          {group.items.map((item) => renderMenuItem(item, true, false))}
+          {group.items.map((item) => renderMenuItem(item, true, false, isMobile))}
         </CollapsibleContent>
       </Collapsible>
     );
@@ -491,14 +526,14 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
             {menuGroups.map((group, index) => (
               <div key={group.id}>
                 {index > 0 && <div className="my-2 border-t border-border/50" />}
-                {renderGroup(group, false)}
+                {renderGroup(group, false, true)}
               </div>
             ))}
           </nav>
 
           {/* Settings */}
           <div className="p-2 border-t border-border space-y-1">
-            {renderMenuItem(settingsItem, false, false)}
+            {renderMenuItem(settingsItem, false, false, true)}
           </div>
 
           {/* Profile Section - Compact single row */}

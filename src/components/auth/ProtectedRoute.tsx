@@ -1,7 +1,7 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { TwoFactorGate } from "./TwoFactorGate";
-import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
+import PageLoadingSpinner from "@/components/shared/PageLoadingSpinner";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -12,14 +12,9 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const { user, role, allRoles, loading } = useAuth();
   const location = useLocation();
 
-  // PERFORMANCE FIX: Show skeleton instead of spinner while loading
-  // This provides immediate visual feedback and reduces perceived load time
+  // Show branded spinner while loading auth state
   if (loading || (user && role === null)) {
-    return (
-      <div className="min-h-screen bg-background">
-        <DashboardSkeleton />
-      </div>
-    );
+    return <PageLoadingSpinner />;
   }
 
   if (!user) {

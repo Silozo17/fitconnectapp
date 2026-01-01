@@ -16,7 +16,7 @@ import { ProfilePanelProvider, useProfilePanel } from "@/contexts/ProfilePanelCo
 import ProfilePanel from "@/components/shared/ProfilePanel";
 import CoachProfileSummary from "@/components/dashboard/coach/CoachProfileSummary";
 import { DiscoverModal } from "@/components/discover/DiscoverModal";
-import { DashboardSkeleton } from "./DashboardSkeleton";
+import PageLoadingSpinner from "@/components/shared/PageLoadingSpinner";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -87,20 +87,12 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
 
   // OPTIMIZED: Skip loading state entirely for known-onboarded users
   if (isLoading && !justCompletedOnboarding && !isKnownOnboarded) {
-    return (
-      <div className="min-h-screen bg-background p-4 lg:p-6">
-        <DashboardSkeleton variant="coach" />
-      </div>
-    );
+    return <PageLoadingSpinner />;
   }
 
-  // Show skeleton while redirecting to onboarding - but NOT if we just completed or known-onboarded
+  // Show spinner while redirecting to onboarding - but NOT if we just completed or known-onboarded
   if (!onboardingStatus?.isOnboarded && !justCompletedOnboarding && !isKnownOnboarded) {
-    return (
-      <div className="min-h-screen bg-background p-4 lg:p-6">
-        <DashboardSkeleton variant="coach" />
-      </div>
-    );
+    return <PageLoadingSpinner />;
   }
 
   return (
