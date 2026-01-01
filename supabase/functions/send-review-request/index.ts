@@ -57,6 +57,31 @@ serve(async (req) => {
     await fetch("https://api.resend.com/emails", { method: "POST", headers: { "Authorization": `Bearer ${resendApiKey}`, "Content-Type": "application/json" }, body: JSON.stringify({ from: "FitConnect <support@getfitconnect.co.uk>", to: [clientUser.email], subject: `⭐ How was your session with ${coachName}?`, html }) });
     await supabase.from("email_logs").insert({ user_id: session.client.user_id, email_type: "review_request", recipient_email: clientUser.email, subject: `How was your session with ${coachName}?`, status: "sent" });
 
+    // Create in-app notification
+    await supabase.from("notifications").insert({
+      user_id: session.client.user_id,
+      title: "Leave a Review",
+      message: `How was your session with ${coachName}? We'd love to hear your feedback.`,
+      type: "review_prompt_sent",
+      read: false,
+      data: { sessionId, coachId: session.coach.id, coachName, reviewUrl }
+    });
+
+    // Send push notification (fire and forget)
+    const pushUrl = `/review?sessionId=${sessionId}&coachId=${session.coach.id}&coachName=${encodeURIComponent(coachName)}`;
+    fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${supabaseServiceKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userIds: [session.client.user_id],
+        title: "Leave a Review ⭐",
+        subtitle: `Session with ${coachName}`,
+        message: "How was your session? Tap to leave a review.",
+        preferenceKey: "push_bookings",
+        data: { type: "review_request", sessionId, coachId: session.coach.id, url: pushUrl }
+      })
+    }).catch(err => console.error("Push notification failed:", err));
+
     return new Response(JSON.stringify({ success: true }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error: any) {
     console.error("Error sending review request:", error);

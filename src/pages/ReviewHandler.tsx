@@ -31,7 +31,7 @@ const ReviewHandler = () => {
     // If not logged in, redirect to auth with return URL
     if (!user) {
       const returnUrl = `/review?${searchParams.toString()}`;
-      navigate(`/auth?redirect=${encodeURIComponent(returnUrl)}`, { replace: true });
+      navigate(`/auth?returnUrl=${encodeURIComponent(returnUrl)}`, { replace: true });
       return;
     }
 
