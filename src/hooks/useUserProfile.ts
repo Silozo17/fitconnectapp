@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { getNativeCache, setNativeCache, CACHE_KEYS, CACHE_TTL } from "@/lib/native-cache";
 
 export interface UserProfile {
   id: string;
@@ -39,10 +40,20 @@ export const useUserProfile = () => {
         throw error;
       }
 
+      // Cache for native app cold start optimization
+      if (data && user.id) {
+        setNativeCache(CACHE_KEYS.USER_PROFILE, data, CACHE_TTL.USER_PROFILE, user.id);
+      }
+
       return data as UserProfile | null;
     },
     enabled: !!user?.id,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    // Native: Use cached value as initial data for instant render
+    initialData: () => {
+      if (!user?.id) return undefined;
+      return getNativeCache<UserProfile>(CACHE_KEYS.USER_PROFILE, user.id) ?? undefined;
+    },
   });
 
   const updateProfileMutation = useMutation({

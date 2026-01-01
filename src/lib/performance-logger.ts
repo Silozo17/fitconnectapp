@@ -1,4 +1,9 @@
 /**
+ * NOTE: This file has been extended with cache hit/miss logging
+ * for native performance optimization. See logCacheResult().
+ */
+
+/**
  * Performance Logger - Dev-only instrumentation for measuring app performance
  * 
  * Measures:
@@ -185,6 +190,23 @@ export const logChunkLoad = (chunkName: string, duration: number): void => {
 };
 
 /**
+ * Log cache hit/miss for native caching
+ * DEV-ONLY: No sensitive data logged
+ */
+export const logCacheResult = (key: string, hit: boolean, reason?: string): void => {
+  if (!isEnabled()) return;
+  
+  const emoji = hit ? '✅' : '❌';
+  const status = hit ? 'HIT' : 'MISS';
+  const reasonStr = reason ? ` (${reason})` : '';
+  
+  console.log(
+    `%c${emoji} [Cache] ${status}: ${key}${reasonStr}`,
+    `color: ${hit ? '#22c55e' : '#f97316'}; font-weight: bold;`
+  );
+};
+
+/**
  * Get all metrics (for debugging)
  */
 export const getMetrics = (): PerformanceMetric[] => {
@@ -267,6 +289,7 @@ export const perfLogger = {
   logQuery,
   logRPC,
   logChunkLoad,
+  logCacheResult,
   getMetrics,
   getSummary,
   clearMetrics,

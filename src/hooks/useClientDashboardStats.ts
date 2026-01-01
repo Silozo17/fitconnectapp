@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useActiveProfile } from '@/hooks/useActiveProfile';
+import { getNativeCache, setNativeCache, CACHE_KEYS, CACHE_TTL } from '@/lib/native-cache';
 
 export interface DashboardStats {
   coachCount: number;
@@ -90,17 +91,29 @@ export function useClientDashboardStats() {
           .is('read_at', null),
       ]);
 
-      return {
+      const stats: DashboardStats = {
         coachCount: coaches.count || 0,
         upcomingSessions: sessions.count || 0,
         activePlans: plans.count || 0,
         unreadMessages: messages.count || 0,
         firstName,
       };
+
+      // Cache for native app cold start optimization
+      if (userId) {
+        setNativeCache(CACHE_KEYS.CLIENT_DASHBOARD_STATS, stats, CACHE_TTL.DASHBOARD_STATS, userId);
+      }
+
+      return stats;
     },
     enabled: !!(userId || (isRoleSwitching && profileId)),
     staleTime: 2 * 60 * 1000, // 2 minutes (OPTIMIZED: was 1 minute)
     gcTime: 5 * 60 * 1000, // 5 minutes
     refetchOnMount: false, // OPTIMIZED: Don't refetch on every navigation
+    // Native: Use cached value as placeholder for instant render
+    placeholderData: () => {
+      if (!userId) return undefined;
+      return getNativeCache<DashboardStats>(CACHE_KEYS.CLIENT_DASHBOARD_STATS, userId) ?? undefined;
+    },
   });
 }
