@@ -4,10 +4,13 @@ import { AppLocaleProvider } from '@/contexts/AppLocaleContext';
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
 
 /**
- * AppLocaleWrapper is a layout route component that provides AppLocaleProvider
- * to all app routes (dashboard, docs, onboarding, etc.) without locale URL logic.
+ * AppLocaleWrapper is a layout route component for DASHBOARD and ONBOARDING routes.
+ * Uses DashboardSkeleton as fallback for smooth transitions between dashboard pages.
  * 
- * PERFORMANCE: Uses DashboardSkeleton instead of spinner for smoother UX.
+ * IMPORTANT: This is for dashboard/onboarding routes ONLY.
+ * For public website routes (docs, auth, subscribe), use WebsiteLocaleWrapper instead.
+ * 
+ * PERFORMANCE: DashboardSkeleton matches the dashboard layout to prevent jarring shifts.
  * Suspense boundary is REQUIRED for React.lazy() components to work.
  */
 export function AppLocaleWrapper() {

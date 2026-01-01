@@ -29,8 +29,9 @@ import { PushNotificationInitializer } from "@/components/notifications/PushNoti
 
 import PageLoadingSpinner from "@/components/shared/PageLoadingSpinner";
 
-// Layout wrapper for app routes (provides AppLocaleProvider)
-import { AppLocaleWrapper } from "./components/routing/AppLocaleWrapper";
+// Layout wrappers for routes (provides AppLocaleProvider with different fallbacks)
+import { AppLocaleWrapper } from "./components/routing/AppLocaleWrapper"; // Dashboard/onboarding - DashboardSkeleton fallback
+import { WebsiteLocaleWrapper } from "./components/routing/WebsiteLocaleWrapper"; // Docs/auth/subscribe - simple spinner fallback
 
 // Website Router
 import { WebsiteRouter } from "./components/routing/WebsiteRouter";
@@ -325,11 +326,11 @@ const App = () => (
                         <LocaleProvider>
                           <LanguagePersistence />
                           <Routes>
-                            {/* Zoom OAuth redirect - must be outside AppLocaleWrapper for isolation */}
+                            {/* Zoom OAuth redirect - must be outside wrappers for isolation */}
                             <Route path="/api/zoom/oauth" element={<ZoomOAuth />} />
                             
-                            {/* App routes - wrapped with AppLocaleWrapper (layout route pattern) */}
-                            <Route element={<AppLocaleWrapper />}>
+                            {/* Public routes - wrapped with WebsiteLocaleWrapper (simple spinner fallback) */}
+                            <Route element={<WebsiteLocaleWrapper />}>
                               {/* Auth */}
                               <Route path="/auth" element={<Auth />} />
                               <Route path="/auth/reset-password" element={<Suspense fallback={<PageLoadingSpinner />}><ResetPassword /></Suspense>} />
@@ -337,18 +338,6 @@ const App = () => (
                               {/* Subscription Pages */}
                               <Route path="/subscribe" element={<Subscribe />} />
                               <Route path="/subscribe/success" element={<SubscribeSuccess />} />
-                              
-                              {/* Onboarding */}
-                              <Route path="/onboarding/client" element={
-                                <ProtectedRoute allowedRoles={["client"]}>
-                                  <ClientOnboarding />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/onboarding/coach" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachOnboarding />
-                                </ProtectedRoute>
-                              } />
                               
                               {/* Documentation Routes */}
                               <Route path="/docs" element={<DocsHub />} />
@@ -458,6 +447,21 @@ const App = () => (
                               <Route path="/docs/integrations/google-meet" element={<GoogleMeetIntegrationDocs />} />
                               <Route path="/docs/integrations/google-calendar" element={<GoogleCalendarIntegrationDocs />} />
                               <Route path="/docs/integrations/apple-calendar" element={<AppleCalendarIntegrationDocs />} />
+                            </Route>
+                            
+                            {/* Dashboard/Onboarding routes - wrapped with AppLocaleWrapper (skeleton fallback) */}
+                            <Route element={<AppLocaleWrapper />}>
+                              {/* Onboarding */}
+                              <Route path="/onboarding/client" element={
+                                <ProtectedRoute allowedRoles={["client"]}>
+                                  <ClientOnboarding />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/onboarding/coach" element={
+                                <ProtectedRoute allowedRoles={["coach"]}>
+                                  <CoachOnboarding />
+                                </ProtectedRoute>
+                              } />
                               
                               {/* Dashboard Redirect */}
                               <Route path="/dashboard" element={
