@@ -111,7 +111,7 @@ const Navbar = () => {
                 </button>
                 
                 {activeDropdown === "coaches" && (
-                  <div className="absolute top-full left-0 mt-2 w-72 glass-card rounded-xl shadow-lg p-2 animate-in fade-in slide-in-from-top-2">
+                  <div className="absolute top-full left-0 mt-2 w-72 bg-card border border-border rounded-xl shadow-lg p-2 animate-in fade-in slide-in-from-top-2">
                     {coachTypes.map((item) => (
                       <Link
                         key={item.href}
