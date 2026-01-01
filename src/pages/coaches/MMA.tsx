@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { SEOHead } from "@/components/shared/SEOHead";
+import { SEOHead, createBreadcrumbSchema } from "@/components/shared/SEOHead";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -85,14 +85,17 @@ const MMA = () => {
     }))
   };
 
-  // Service schema
+  // Service schema with enhanced details
   const serviceSchema = {
     "@context": "https://schema.org",
     "@type": "Service",
     "name": "MMA Training",
+    "description": "Train MMA with experienced coaches. Learn BJJ, Muay Thai, wrestling and striking for all levels across the UK.",
+    "url": "https://getfitconnect.co.uk/coaches/mma",
     "provider": {
       "@type": "Organization",
-      "name": "FitConnect"
+      "name": "FitConnect",
+      "url": "https://getfitconnect.co.uk"
     },
     "serviceType": "Mixed Martial Arts Training",
     "areaServed": {
@@ -102,14 +105,21 @@ const MMA = () => {
     "priceRange": "£40-£100"
   };
 
+  // Breadcrumb schema
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Find Coaches", url: "/coaches" },
+    { name: "MMA Coaches", url: "/coaches/mma" }
+  ]);
+
   return (
     <>
       <SEOHead
         title={t('coachTypes.mma.meta.title')}
         description={t('coachTypes.mma.meta.description')}
         canonicalPath="/coaches/mma"
-        keywords={["MMA training UK", "MMA coach", "learn mixed martial arts", "BJJ training", "Muay Thai"]}
-        schema={[faqSchema, serviceSchema]}
+        keywords={["MMA coach near me", "MMA training UK", "learn mixed martial arts", "BJJ training", "Muay Thai coach", "martial arts classes"]}
+        schema={[faqSchema, serviceSchema, breadcrumbSchema]}
       />
       
       <div className="min-h-screen bg-background">

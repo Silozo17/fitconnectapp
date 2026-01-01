@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { SEOHead } from "@/components/shared/SEOHead";
+import { SEOHead, createBreadcrumbSchema } from "@/components/shared/SEOHead";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -78,22 +78,32 @@ const Boxing = () => {
     }))
   };
 
-  // Service schema
+  // Service schema with enhanced details
   const serviceSchema = {
     "@context": "https://schema.org",
     "@type": "Service",
     "name": "Boxing Training",
+    "description": "Find experienced boxing coaches for fitness, technique or competition training across the UK.",
+    "url": "https://getfitconnect.co.uk/coaches/boxing",
     "provider": {
       "@type": "Organization",
-      "name": "FitConnect"
+      "name": "FitConnect",
+      "url": "https://getfitconnect.co.uk"
     },
     "serviceType": "Boxing Training",
     "areaServed": {
       "@type": "Country",
       "name": "United Kingdom"
     },
-    "priceRange": "£40-£80"
+    "priceRange": "£40-£100"
   };
+
+  // Breadcrumb schema
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Find Coaches", url: "/coaches" },
+    { name: "Boxing Coaches", url: "/coaches/boxing" }
+  ]);
 
   return (
     <>
@@ -101,8 +111,8 @@ const Boxing = () => {
         title={t('coachTypes.boxing.meta.title')}
         description={t('coachTypes.boxing.meta.description')}
         canonicalPath="/coaches/boxing"
-        keywords={["boxing coach UK", "learn boxing", "boxing training", "boxing lessons", "boxing fitness"]}
-        schema={[faqSchema, serviceSchema]}
+        keywords={["boxing coach near me", "learn boxing UK", "boxing training", "boxing lessons", "boxing fitness", "boxing classes"]}
+        schema={[faqSchema, serviceSchema, breadcrumbSchema]}
       />
       
       <div className="min-h-screen bg-background">
