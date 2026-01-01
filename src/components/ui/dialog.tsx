@@ -43,8 +43,8 @@ const DialogContent = React.forwardRef<
         // Premium glass styling
         "gap-4 p-6",
         "glass-floating",
-        // Overflow containment - prevent horizontal scroll
-        "overflow-x-hidden overflow-y-auto",
+        // Overflow containment - prevent horizontal scroll and touch shifting
+        "overflow-x-hidden overflow-y-auto touch-pan-y overscroll-y-contain",
         // Inner highlight for depth
         "before:absolute before:inset-0 before:rounded-[inherit] before:pointer-events-none",
         "before:shadow-[inset_0_1px_0_hsl(0_0%_100%/0.1),inset_0_-1px_0_hsl(0_0%_0%/0.15)]",
