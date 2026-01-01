@@ -70,7 +70,7 @@ export const NotificationCenter = () => {
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-80 p-0" align="end">
+        <PopoverContent className="w-80 p-0" align="end" collisionPadding={16} disablePortal>
           <div className="flex items-center justify-between p-4 pb-2">
             <h4 className="font-semibold">Notifications</h4>
             <div className="flex items-center gap-1">
