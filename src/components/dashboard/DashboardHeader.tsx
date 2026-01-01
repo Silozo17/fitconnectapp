@@ -46,7 +46,7 @@ const DashboardHeader = memo(({ subscriptionTier, onMenuToggle }: DashboardHeade
       role="banner"
       aria-label="Dashboard header"
     >
-      <div className="h-16 px-4 xl:px-6 flex items-center justify-between pt-safe-status xl:pt-0">
+      <div className="min-h-16 h-auto xl:h-16 px-4 xl:px-6 flex items-center justify-between pt-safe-status pb-3 xl:pt-0 xl:pb-0">
         {/* Left side */}
         <div className="flex items-center gap-3 flex-1">
           <div className="xl:hidden">

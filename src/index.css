@@ -353,11 +353,13 @@
   /* Applied via JavaScript by adding .native-ios class to html element */
   html.native-ios .pt-safe-status {
     /* iPhone Dynamic Island: ~59px, Notch: ~47px, older: ~44px */
-    padding-top: max(env(safe-area-inset-top, 0px), 47px);
+    /* Use 59px minimum to cover all modern iPhones including Dynamic Island */
+    padding-top: max(env(safe-area-inset-top, 0px), 59px);
   }
 
   html.native-ios .mt-header-safe {
-    margin-top: calc(4rem + max(env(safe-area-inset-top, 0px), 47px));
+    /* 4rem base + 59px safe area + 12px (pb-3) extra bottom padding */
+    margin-top: calc(4rem + max(env(safe-area-inset-top, 0px), 59px) + 0.75rem);
   }
 
   /* ========================================
