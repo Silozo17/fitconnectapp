@@ -49,11 +49,11 @@ export function DocsLayout({ title, description, breadcrumbs = [], children, noI
     <>
       <SEOHead
         title={`${title} | FitConnect Help Center`}
-        description={description || `Learn about ${title} on FitConnect - comprehensive guides and tutorials for fitness coaches and clients.`}
+        description={description || `Learn about ${title} on FitConnect - comprehensive guides and tutorials for UK fitness coaches and clients.`}
         canonicalPath={location.pathname}
         ogType="article"
         noIndex={noIndex}
-        keywords={["FitConnect", "help", "documentation", "guide", title.toLowerCase()]}
+        keywords={["FitConnect help", "fitness app guide UK", "personal trainer help", title.toLowerCase()]}
         schema={createBreadcrumbSchema(breadcrumbSchemaItems)}
       />
 

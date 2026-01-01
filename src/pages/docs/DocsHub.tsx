@@ -83,14 +83,38 @@ export default function DocsHub() {
     { name: "Help Center", url: "/docs" }
   ]);
 
+  const howToSchema = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to Use FitConnect",
+    "description": "Step-by-step guides for using FitConnect to find coaches, book sessions, and track your fitness progress.",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Create Your Account",
+        "text": "Sign up for free as a client or coach to get started."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Find a Coach",
+        "text": "Browse verified personal trainers, nutritionists, and boxing coaches."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Book a Session",
+        "text": "Schedule consultations or training sessions with your chosen coach."
+      }
+    ]
+  };
+
   return (
     <>
       <SEOHead
-        title="Help Center | FitConnect Guides & Tutorials"
-        description="Find answers about booking sessions, managing clients, setting up payments and using FitConnect features. Step-by-step guides included."
+        title="Help Center | FitConnect Support & Guides UK"
+        description="Get help with FitConnect. Step-by-step guides for booking sessions, managing clients, setting up payments and using all app features."
         canonicalPath="/docs"
-        keywords={["fitconnect help", "fitness app support", "coaching platform guide", "personal trainer help", "fitness app tutorials"]}
-        schema={breadcrumbSchema}
+        keywords={["FitConnect help", "fitness app support UK", "PT app guide", "coaching platform help", "personal trainer app tutorials"]}
+        schema={[breadcrumbSchema, howToSchema]}
       />
 
       <div className="min-h-screen flex flex-col bg-background">
