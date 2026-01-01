@@ -5,11 +5,10 @@ import { Trophy, Globe, MapPin, Users, Eye, EyeOff, TrendingUp } from "lucide-re
 export default function ClientLeaderboardDocs() {
   return (
     <DocsLayout
-      title="Leaderboard"
-      description="See how you rank against other users locally, nationally, and globally"
+      title="Fitness Leaderboards | FitConnect Client Guide"
+      description="Compete on local, county and UK-wide leaderboards. See how you rank against other fitness enthusiasts."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
-        { label: "Client", href: "/docs/client" },
+        { label: "Client Guide", href: "/docs/client" },
         { label: "Leaderboard" }
       ]}
     >

@@ -5,11 +5,10 @@ import { Trophy, Users, Target, Clock, Star, Gift, Medal, Zap } from "lucide-rea
 export default function ClientChallengesDocs() {
   return (
     <DocsLayout
-      title="Challenges"
-      description="Join fitness challenges to stay motivated, compete with others, and earn rewards"
+      title="Community Challenges | FitConnect Client Guide"
+      description="Join monthly challenges, compete with others and win exclusive rewards. Stay motivated together."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
-        { label: "Client", href: "/docs/client" },
+        { label: "Client Guide", href: "/docs/client" },
         { label: "Challenges" }
       ]}
     >

@@ -6,10 +6,9 @@ import { Trophy, Star, Users, Shield, Sparkles } from "lucide-react";
 export default function ClientAchievements() {
   return (
     <DocsLayout
-      title="Achievements & Leaderboards"
-      description="Discover how to earn XP, unlock badges and avatars, and compete on location-based leaderboards."
+      title="Achievements & Leaderboards | FitConnect Client Guide"
+      description="Earn XP, unlock badges and avatars, and compete on UK location-based leaderboards."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
         { label: "Client Guide", href: "/docs/client" },
         { label: "Achievements & Leaderboards" }
       ]}

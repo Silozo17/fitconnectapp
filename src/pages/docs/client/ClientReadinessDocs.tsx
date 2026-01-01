@@ -5,8 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Battery, Moon, Heart, Activity, Sparkles, TrendingUp, AlertCircle } from "lucide-react";
 
 const breadcrumbs = [
-  { label: "Docs", href: "/docs" },
-  { label: "For Clients", href: "/docs/client" },
+  { label: "Client Guide", href: "/docs/client" },
   { label: "Readiness Score" },
 ];
 
@@ -15,8 +14,8 @@ export default function ClientReadinessDocs() {
 
   return (
     <DocsLayout
-      title="Readiness Score"
-      description="Understand your daily readiness and optimise your training based on recovery data."
+      title="Check Your Readiness Score | FitConnect Client Guide"
+      description="View your daily readiness score based on sleep, recovery and activity data from your wearables."
       breadcrumbs={breadcrumbs}
     >
       <section className="space-y-6">

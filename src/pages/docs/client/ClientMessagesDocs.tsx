@@ -6,8 +6,8 @@ import { MessageSquare, Image, Bell, Search, Clock, Shield } from "lucide-react"
 export default function ClientMessagesDocs() {
   return (
     <DocsLayout
-      title="Messages"
-      description="Learn how to communicate with your coach through the FitConnect messaging system."
+      title="Message Your Coach | FitConnect Client Guide"
+      description="Chat with coaches, share progress photos and get guidance. Real-time messaging built in."
       breadcrumbs={[
         { label: "Client Guide", href: "/docs/client" },
         { label: "Messages" }

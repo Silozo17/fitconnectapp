@@ -5,10 +5,10 @@ import { ShoppingCart, Plus, Sparkles, Store, Check, Trash2 } from "lucide-react
 export default function ClientGrocery() {
   return (
     <DocsLayout
-      title="Shopping Lists"
-      description="Create grocery lists manually or generate them from your nutrition plan."
+      title="Create Shopping Lists | FitConnect Client Guide"
+      description="Build grocery lists from meal plans. Compare supermarket prices from Tesco, Asda and Sainsbury's."
       breadcrumbs={[
-        { label: "For Clients", href: "/docs/client" },
+        { label: "Client Guide", href: "/docs/client" },
         { label: "Shopping Lists" }
       ]}
     >

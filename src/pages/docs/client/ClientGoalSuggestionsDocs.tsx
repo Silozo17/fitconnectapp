@@ -5,8 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Target, Sparkles, TrendingUp, CheckCircle2, XCircle, RefreshCw, Brain } from "lucide-react";
 
 const breadcrumbs = [
-  { label: "Docs", href: "/docs" },
-  { label: "For Clients", href: "/docs/client" },
+  { label: "Client Guide", href: "/docs/client" },
   { label: "Goal Suggestions" },
 ];
 
@@ -15,8 +14,8 @@ export default function ClientGoalSuggestionsDocs() {
 
   return (
     <DocsLayout
-      title="Adaptive Goal Suggestions"
-      description="AI-powered goal recommendations that evolve with your progress."
+      title="AI Goal Recommendations | FitConnect Client Guide"
+      description="Get personalised goal suggestions based on your progress, habits and coach input."
       breadcrumbs={breadcrumbs}
     >
       <section className="space-y-6">

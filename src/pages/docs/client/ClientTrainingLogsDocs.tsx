@@ -5,10 +5,10 @@ import { Dumbbell, Plus, Edit, Trash2, Eye, Calendar, BarChart3 } from "lucide-r
 export default function ClientTrainingLogsDocs() {
   return (
     <DocsLayout
-      title="Training Logs"
-      description="Log your workouts manually to track your strength training and exercise progress."
+      title="Log Your Workouts | FitConnect Client Guide"
+      description="Record independent workouts, track sets and reps, and share training data with your coach."
       breadcrumbs={[
-        { label: "For Clients", href: "/docs/client" },
+        { label: "Client Guide", href: "/docs/client" },
         { label: "Training Logs" }
       ]}
     >

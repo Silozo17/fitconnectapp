@@ -5,10 +5,10 @@ import { Library, Download, Play, FileText, Package, Clock } from "lucide-react"
 export default function ClientLibrary() {
   return (
     <DocsLayout
-      title="Digital Library"
-      description="Access e-books, videos, templates, and other digital products you've purchased."
+      title="Access Your Digital Library | FitConnect Client Guide"
+      description="Download purchased e-books, videos and training programmes from your coaches anytime."
       breadcrumbs={[
-        { label: "For Clients", href: "/docs/client" },
+        { label: "Client Guide", href: "/docs/client" },
         { label: "Digital Library" }
       ]}
     >

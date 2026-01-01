@@ -5,10 +5,10 @@ import { Utensils, Search, ScanBarcode, Camera, Clock, Eye, Calendar } from "luc
 export default function ClientFoodDiaryDocs() {
   return (
     <DocsLayout
-      title="Food Diary"
-      description="Track your daily meals, calories, and macros to stay on top of your nutrition goals."
+      title="Track Your Meals | Food Diary Guide"
+      description="Log daily meals, scan barcodes and hit your macro targets. Sync with your nutrition plan from your coach."
       breadcrumbs={[
-        { label: "For Clients", href: "/docs/client" },
+        { label: "Client Guide", href: "/docs/client" },
         { label: "Food Diary" }
       ]}
     >

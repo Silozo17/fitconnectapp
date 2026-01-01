@@ -5,8 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, Minus, Footprints, Timer, Moon, Flame, Heart, BarChart3 } from "lucide-react";
 
 const breadcrumbs = [
-  { label: "Docs", href: "/docs" },
-  { label: "For Clients", href: "/docs/client" },
+  { label: "Client Guide", href: "/docs/client" },
   { label: "Wearable Trends" },
 ];
 
@@ -15,8 +14,8 @@ export default function ClientTrendsDocs() {
 
   return (
     <DocsLayout
-      title="Wearable Trends"
-      description="Track week-over-week changes in your health metrics from connected devices."
+      title="View Your Trends | FitConnect Client Guide"
+      description="Analyse long-term progress charts for weight, strength, steps and other health metrics."
       breadcrumbs={breadcrumbs}
     >
       <section className="space-y-6">

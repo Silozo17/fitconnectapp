@@ -5,10 +5,10 @@ import { Users, UserPlus, MessageCircle, Trophy, Shield, Bell } from "lucide-rea
 export default function ClientConnectionsDocs() {
   return (
     <DocsLayout
-      title="Connections & Friends"
-      description="Connect with other FitConnect members for motivation and friendly competition."
+      title="Connect with Friends | FitConnect Client Guide"
+      description="Add fitness friends, compete together and share progress. Build your support network."
       breadcrumbs={[
-        { label: "For Clients", href: "/docs/client" },
+        { label: "Client Guide", href: "/docs/client" },
         { label: "Connections" }
       ]}
     >

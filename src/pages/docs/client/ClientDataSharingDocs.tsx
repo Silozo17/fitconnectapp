@@ -5,11 +5,10 @@ import { Shield, Eye, EyeOff, Users, Heart, Utensils, Dumbbell, Activity, Camera
 export default function ClientDataSharingDocs() {
   return (
     <DocsLayout
-      title="Data Sharing & Privacy Controls"
-      description="Control exactly what health and fitness data you share with your coaches"
+      title="Share Data with Coaches | FitConnect Privacy Guide"
+      description="Control which health and fitness metrics your coach can view. Manage per-coach sharing permissions easily."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
-        { label: "Client", href: "/docs/client" },
+        { label: "Client Guide", href: "/docs/client" },
         { label: "Data Sharing" }
       ]}
     >

@@ -17,9 +17,9 @@ import {
 export default function ClientWearablesDocs() {
   return (
     <DocsLayout
-      title="Wearable Device Integration"
-      description="Connect your fitness tracker or smartwatch to automatically sync health data with FitConnect."
-      breadcrumbs={[{ label: "For Clients", href: "/docs/client" }, { label: "Wearables" }]}
+      title="Connect Your Wearables | FitConnect Client Guide"
+      description="Sync Apple Watch, Fitbit, Garmin and more. Automatically track steps, heart rate, sleep and calories."
+      breadcrumbs={[{ label: "Client Guide", href: "/docs/client" }, { label: "Wearables" }]}
     >
       {/* Overview */}
       <section className="mb-10">

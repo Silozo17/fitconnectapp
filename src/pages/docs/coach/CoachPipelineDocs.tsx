@@ -5,9 +5,9 @@ import { Kanban, Users, ArrowRight, Target, FileText } from "lucide-react";
 export default function CoachPipelineDocs() {
   return (
     <DocsLayout
-      title="Sales Pipeline"
-      description="Track leads and convert prospects into paying clients."
-      breadcrumbs={[{ label: "For Coaches", href: "/docs/coach" }, { label: "Sales Pipeline" }]}
+      title="Sales Pipeline | FitConnect Coach Guide"
+      description="Track leads from first contact to conversion. Manage your sales funnel and grow clients."
+      breadcrumbs={[{ label: "Coach Guide", href: "/docs/coach" }, { label: "Sales Pipeline" }]}
     >
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">

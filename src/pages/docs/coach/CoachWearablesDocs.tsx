@@ -6,8 +6,8 @@ import { Activity, Heart, Moon, Footprints, AlertTriangle, Clock, Shield, Users 
 export default function CoachWearablesDocs() {
   return (
     <DocsLayout
-      title="Wearable Dashboard"
-      description="Monitor your clients' health data from their connected wearable devices in one unified view."
+      title="Client Wearable Data | FitConnect Coach Guide"
+      description="View synced health metrics from your clients' connected devices. Monitor activity and recovery."
       breadcrumbs={[
         { label: "Coach Guide", href: "/docs/coach" },
         { label: "Wearable Dashboard" }

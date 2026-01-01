@@ -6,8 +6,8 @@ import { Settings, User, Bell, Shield, CreditCard, Link, Calendar, Eye } from "l
 export default function CoachSettingsDocs() {
   return (
     <DocsLayout
-      title="Coach Settings"
-      description="Configure your account preferences, notifications, privacy, and connected services."
+      title="Coach Settings | FitConnect Guide"
+      description="Configure account, notifications, integrations and business preferences for your coaching profile."
       breadcrumbs={[
         { label: "Coach Guide", href: "/docs/coach" },
         { label: "Settings" }

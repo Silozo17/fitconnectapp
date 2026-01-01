@@ -6,10 +6,9 @@ import { Settings, Watch, Bell, Lock } from "lucide-react";
 export default function ClientSettingsDocs() {
   return (
     <DocsLayout
-      title="Settings & Integrations"
-      description="Learn how to manage your profile, privacy settings, wearable connections, and notifications."
+      title="Manage Your Settings | FitConnect Client Guide"
+      description="Update profile, preferences, notifications and privacy settings for your FitConnect account."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
         { label: "Client Guide", href: "/docs/client" },
         { label: "Settings & Integrations" }
       ]}
