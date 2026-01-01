@@ -253,6 +253,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signUp = useCallback(async (email: string, password: string, selectedRole: AppRole, firstName: string, lastName?: string) => {
+    // CRITICAL FIX: Clear stale onboarding cache before signup
+    // This ensures new users don't inherit cache from a previous session
+    try {
+      localStorage.removeItem('fitconnect_coach_onboarded');
+      localStorage.removeItem('fitconnect_client_onboarded');
+    } catch {}
+    
     const redirectUrl = `${window.location.origin}/`;
     
     const { data, error } = await supabase.auth.signUp({
