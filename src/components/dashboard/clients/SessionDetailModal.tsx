@@ -185,10 +185,10 @@ export function SessionDetailModal({ open, onOpenChange, session, onRefresh }: S
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-lg bg-card border-border max-h-[90vh] overflow-hidden overflow-y-auto overflow-x-hidden touch-pan-y overscroll-y-contain">
-          <DialogHeader>
-            <DialogTitle className="flex items-center justify-between text-foreground">
+          <DialogHeader className="pr-10">
+            <DialogTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-foreground">
               <span>{t('sessionDetailModal.title')}</span>
-              <Badge className={status.color}>
+              <Badge className={`${status.color} shrink-0`}>
                 <StatusIcon className="h-3 w-3 mr-1" />
                 {status.label}
               </Badge>
