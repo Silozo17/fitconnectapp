@@ -196,7 +196,7 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }: AdminSidebarProps) => {
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent side="left" className="w-64 p-0 flex flex-col overflow-hidden" onOpenAutoFocus={(e) => e.preventDefault()}>
           {/* Logo */}
-          <div className="p-4 border-b border-border flex items-center safe-top">
+          <div className="p-4 border-b border-border flex items-center safe-top-sidebar">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <Dumbbell className="w-5 h-5 text-primary-foreground" />

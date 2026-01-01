@@ -318,6 +318,15 @@
     padding-top: var(--safe-area-top, 59px);
   }
   
+  /* Sidebar-specific safe area - reduced padding for native iOS */
+  .safe-top-sidebar {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  
+  html.native-ios .safe-top-sidebar {
+    padding-top: calc(var(--safe-area-top, 59px) / 2);
+  }
+  
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
