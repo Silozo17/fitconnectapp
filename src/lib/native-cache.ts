@@ -36,6 +36,7 @@ export const CACHE_KEYS = {
   // Profile IDs - rarely change, long TTL
   COACH_PROFILE_ID: 'coach_profile_id',
   CLIENT_PROFILE_ID: 'client_profile_id',
+  AVAILABLE_PROFILES: 'available_profiles',
   
   // User profile data - moderate TTL
   USER_PROFILE: 'user_profile',
@@ -57,6 +58,7 @@ export type CacheKey = typeof CACHE_KEYS[keyof typeof CACHE_KEYS];
  */
 export const CACHE_TTL = {
   PROFILE_ID: 1000 * 60 * 60 * 24, // 24 hours - rarely changes
+  AVAILABLE_PROFILES: 1000 * 60 * 60, // 1 hour - profiles rarely change
   USER_PROFILE: 1000 * 60 * 30, // 30 minutes
   USER_ROLE: 1000 * 60 * 60, // 1 hour
   DASHBOARD_STATS: 1000 * 60 * 10, // 10 minutes
