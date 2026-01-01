@@ -105,7 +105,7 @@ export function GrantAvatarModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Gift className="h-5 w-5 text-primary" />
@@ -116,15 +116,15 @@ export function GrantAvatarModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 min-w-0">
           {/* Search */}
-          <div className="relative">
+          <div className="relative min-w-0">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder={t('avatars.searchAvatars')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
+              className="pl-9 w-full"
             />
           </div>
 
@@ -166,7 +166,7 @@ export function GrantAvatarModal({
                 <p className="text-sm">{t('avatars.userHasAll')}</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 {filteredAvatars.map((avatar) => {
                   const rarityConfig = RARITY_CONFIG[avatar.rarity as keyof typeof RARITY_CONFIG];
                   const isSelected = selectedAvatarIds.has(avatar.id);
@@ -232,13 +232,14 @@ export function GrantAvatarModal({
           )}
 
           {/* Reason */}
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0">
             <Label>{t('avatars.reasonOptional')}</Label>
             <Textarea
               placeholder={t('avatars.grantReason')}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               rows={2}
+              className="w-full"
             />
           </div>
         </div>

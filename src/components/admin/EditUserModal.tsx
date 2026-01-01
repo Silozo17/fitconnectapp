@@ -179,7 +179,7 @@ const EditUserModal = ({ user, open, onClose, onSaved }: EditUserModalProps) => 
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh]">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle>Edit User</DialogTitle>
           <DialogDescription>
@@ -276,8 +276,8 @@ const EditUserModal = ({ user, open, onClose, onSaved }: EditUserModalProps) => 
                 </div>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                <div className="space-y-2 min-w-0 overflow-hidden">
                   <Label htmlFor="dateOfBirth">Date of Birth</Label>
                   <Input
                     id="dateOfBirth"
@@ -285,18 +285,20 @@ const EditUserModal = ({ user, open, onClose, onSaved }: EditUserModalProps) => 
                     value={dateOfBirth}
                     onChange={(e) => setDateOfBirth(e.target.value)}
                     max={new Date().toISOString().split('T')[0]}
+                    className="w-full min-w-0"
                   />
                   {user.age !== null && (
                     <p className="text-xs text-muted-foreground">Current age: {user.age} years</p>
                   )}
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2 min-w-0">
                   <Label htmlFor="pronouns">Pronouns</Label>
                   <Input
                     id="pronouns"
                     value={pronouns}
                     onChange={(e) => setPronouns(e.target.value)}
                     placeholder="e.g., he/him, she/her, they/them"
+                    className="w-full"
                   />
                 </div>
               </div>

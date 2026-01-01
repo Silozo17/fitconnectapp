@@ -93,7 +93,7 @@ export const AddConnectionModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserPlus className="w-5 h-5 text-primary" />
@@ -101,16 +101,16 @@ export const AddConnectionModal = ({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 min-w-0">
           {/* Search Input */}
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="Search by @username or email address..."
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="pl-9"
+                className="pl-9 w-full"
               />
             </div>
             <p className="text-xs text-muted-foreground">
@@ -222,6 +222,7 @@ export const AddConnectionModal = ({
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 rows={3}
+                className="w-full"
               />
 
               <Button
