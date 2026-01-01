@@ -245,20 +245,22 @@ export function CoachQualificationsManager() {
                     onChange={(e) => setNewQualification(prev => ({ ...prev, issuing_authority: e.target.value }))}
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2 min-w-0 overflow-hidden">
                     <Label htmlFor="qual-issue">Issue Date</Label>
                     <Input
                       id="qual-issue"
+                      className="w-full min-w-0"
                       type="date"
                       value={newQualification.issue_date}
                       onChange={(e) => setNewQualification(prev => ({ ...prev, issue_date: e.target.value }))}
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 min-w-0 overflow-hidden">
                     <Label htmlFor="qual-expiry">Expiry Date</Label>
                     <Input
                       id="qual-expiry"
+                      className="w-full min-w-0"
                       type="date"
                       value={newQualification.expiry_date}
                       onChange={(e) => setNewQualification(prev => ({ ...prev, expiry_date: e.target.value }))}

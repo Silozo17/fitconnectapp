@@ -130,18 +130,19 @@ const CreatePackageModal = ({ open, onOpenChange, editPackage }: CreatePackageMo
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="sessions">{t("packages.numberOfSessions")}</Label>
               <Input
                 id="sessions"
+                className="w-full"
                 type="number"
                 min="1"
                 value={sessionCount}
                 onChange={(e) => setSessionCount(e.target.value)}
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="duration">{t("packages.sessionDuration")}</Label>
               <select
                 id="duration"

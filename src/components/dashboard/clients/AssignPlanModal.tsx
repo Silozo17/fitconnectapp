@@ -193,14 +193,14 @@ export function AssignPlanModal({ open, onOpenChange, clientName, clientId }: As
             </ScrollArea>
 
             {selectedPlan && (
-              <div className="space-y-2">
+              <div className="space-y-2 min-w-0 overflow-hidden">
                 <Label htmlFor="startDate">{t('assignPlanModal.startDate')}</Label>
                 <Input 
                   id="startDate" 
                   type="date" 
                   value={startDate} 
                   onChange={(e) => setStartDate(e.target.value)} 
-                  className="bg-background border-border" 
+                  className="w-full min-w-0 bg-background border-border" 
                 />
               </div>
             )}

@@ -164,18 +164,20 @@ export function AdminQualificationsManager({ coachId }: AdminQualificationsManag
                   placeholder="e.g. CIMSPA, NASM"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2 min-w-0 overflow-hidden">
                   <Label>Issue Date</Label>
                   <Input 
+                    className="w-full min-w-0"
                     type="date" 
                     value={issueDate} 
                     onChange={(e) => setIssueDate(e.target.value)}
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2 min-w-0 overflow-hidden">
                   <Label>Expiry Date</Label>
                   <Input 
+                    className="w-full min-w-0"
                     type="date" 
                     value={expiryDate} 
                     onChange={(e) => setExpiryDate(e.target.value)}
