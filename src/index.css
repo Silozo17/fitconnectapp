@@ -358,8 +358,8 @@
   }
 
   html.native-ios .mt-header-safe {
-    /* 4rem base + Despia safe area + 12px (pb-3) extra bottom padding */
-    margin-top: calc(4rem + var(--safe-area-top, 59px) + 0.75rem);
+    /* 4rem base + Despia safe area */
+    margin-top: calc(4rem + var(--safe-area-top, 59px));
   }
 
   /* ========================================
