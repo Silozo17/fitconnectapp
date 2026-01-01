@@ -58,7 +58,7 @@ export function CancelSessionModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-card border-border">
+      <DialogContent className="sm:max-w-md bg-card border-border overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
             <XCircle className="h-5 w-5 text-destructive" />
@@ -69,7 +69,7 @@ export function CancelSessionModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
+        <div className="space-y-6 py-4 min-w-0">
           {isLateCancellation && (
             <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
               <div className="flex items-start gap-3">
@@ -86,7 +86,7 @@ export function CancelSessionModal({
             </div>
           )}
 
-          <div className="space-y-3">
+          <div className="space-y-3 min-w-0">
             <Label>Reason for Cancellation</Label>
             <RadioGroup value={selectedReason} onValueChange={setSelectedReason}>
               {CANCEL_REASONS.map((reason) => (
@@ -101,14 +101,14 @@ export function CancelSessionModal({
           </div>
 
           {selectedReason === "Other" && (
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="customReason">Please specify</Label>
               <Textarea
                 id="customReason"
                 value={customReason}
                 onChange={(e) => setCustomReason(e.target.value)}
                 placeholder="Enter your reason..."
-                className="bg-background border-border resize-none"
+                className="w-full bg-background border-border resize-none"
                 rows={3}
               />
             </div>

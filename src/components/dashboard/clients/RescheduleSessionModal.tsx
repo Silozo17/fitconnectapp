@@ -49,7 +49,7 @@ export function RescheduleSessionModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-card border-border">
+      <DialogContent className="sm:max-w-md bg-card border-border overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
             <CalendarDays className="h-5 w-5 text-primary" />
@@ -57,12 +57,12 @@ export function RescheduleSessionModal({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
+        <div className="space-y-6 py-4 min-w-0">
           <div className="text-sm text-muted-foreground">
             Current: {format(currentDate, "EEEE, MMMM d, yyyy 'at' h:mm a")}
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3 min-w-0">
             <Label>Select New Date</Label>
             <div className="flex justify-center">
               <Calendar
@@ -75,13 +75,13 @@ export function RescheduleSessionModal({
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3 min-w-0">
             <Label className="flex items-center gap-2">
               <Clock className="h-4 w-4" />
               Select New Time
             </Label>
             <Select value={selectedTime} onValueChange={setSelectedTime}>
-              <SelectTrigger className="bg-background border-border">
+              <SelectTrigger className="w-full bg-background border-border">
                 <SelectValue placeholder="Select time" />
               </SelectTrigger>
               <SelectContent className="max-h-60">

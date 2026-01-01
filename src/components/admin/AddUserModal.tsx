@@ -64,27 +64,29 @@ const AddUserModal = ({ isOpen, onClose, onSuccess }: AddUserModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md overflow-hidden">
         <DialogHeader>
           <DialogTitle>Add New User</DialogTitle>
           <DialogDescription>Create a new client or coach account</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
+        <form onSubmit={handleSubmit} className="space-y-4 min-w-0">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="first_name">First Name</Label>
               <Input
                 id="first_name"
+                className="w-full"
                 value={formData.first_name}
                 onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
                 placeholder="John"
                 required
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="last_name">Last Name</Label>
               <Input
                 id="last_name"
+                className="w-full"
                 value={formData.last_name}
                 onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
                 placeholder="Doe"
@@ -93,11 +95,12 @@ const AddUserModal = ({ isOpen, onClose, onSuccess }: AddUserModalProps) => {
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0">
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               type="email"
+              className="w-full"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               placeholder="user@example.com"
@@ -117,13 +120,13 @@ const AddUserModal = ({ isOpen, onClose, onSuccess }: AddUserModalProps) => {
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0">
             <Label htmlFor="role">Role</Label>
             <Select
               value={formData.role}
               onValueChange={(value: "client" | "coach") => setFormData({ ...formData, role: value })}
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>
               <SelectContent>

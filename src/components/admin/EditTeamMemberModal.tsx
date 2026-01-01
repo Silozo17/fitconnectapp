@@ -86,7 +86,7 @@ const EditTeamMemberModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md overflow-hidden">
         <DialogHeader>
           <DialogTitle>Edit Team Member</DialogTitle>
           <DialogDescription>
@@ -94,12 +94,13 @@ const EditTeamMemberModal = ({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
+        <form onSubmit={handleSubmit} className="space-y-4 min-w-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="first_name">First Name</Label>
               <Input
                 id="first_name"
+                className="w-full"
                 value={formData.first_name}
                 onChange={(e) =>
                   setFormData({ ...formData, first_name: e.target.value })
@@ -107,10 +108,11 @@ const EditTeamMemberModal = ({
                 placeholder="John"
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="last_name">Last Name</Label>
               <Input
                 id="last_name"
+                className="w-full"
                 value={formData.last_name}
                 onChange={(e) =>
                   setFormData({ ...formData, last_name: e.target.value })
@@ -120,10 +122,11 @@ const EditTeamMemberModal = ({
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0">
             <Label htmlFor="display_name">Display Name</Label>
             <Input
               id="display_name"
+              className="w-full"
               value={formData.display_name}
               onChange={(e) =>
                 setFormData({ ...formData, display_name: e.target.value })
@@ -132,10 +135,11 @@ const EditTeamMemberModal = ({
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0">
             <Label htmlFor="department">Department</Label>
             <Input
               id="department"
+              className="w-full"
               value={formData.department}
               onChange={(e) =>
                 setFormData({ ...formData, department: e.target.value })

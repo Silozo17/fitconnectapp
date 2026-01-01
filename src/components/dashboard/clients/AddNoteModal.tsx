@@ -54,7 +54,7 @@ export function AddNoteModal({ open, onOpenChange, clientName, clientId }: AddNo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg bg-card border-border">
+      <DialogContent className="sm:max-w-lg bg-card border-border overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
             <FileText className="h-5 w-5 text-primary" />
@@ -62,14 +62,14 @@ export function AddNoteModal({ open, onOpenChange, clientName, clientId }: AddNo
           </DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
+        <form onSubmit={handleSubmit} className="space-y-4 min-w-0">
+          <div className="space-y-2 min-w-0">
             <Label htmlFor="category" className="flex items-center gap-2">
               <Tag className="h-4 w-4" />
               {t('addNoteModal.category')}
             </Label>
             <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="bg-background border-border">
+              <SelectTrigger className="w-full bg-background border-border">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -85,14 +85,14 @@ export function AddNoteModal({ open, onOpenChange, clientName, clientId }: AddNo
             </Select>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0">
             <Label htmlFor="content">{t('addNoteModal.noteContent')}</Label>
             <Textarea
               id="content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder={t('addNoteModal.notePlaceholder')}
-              className="bg-background border-border resize-none min-h-[150px]"
+              className="w-full bg-background border-border resize-none min-h-[150px]"
               required
             />
           </div>

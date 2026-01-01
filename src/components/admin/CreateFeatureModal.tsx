@@ -100,7 +100,7 @@ export function CreateFeatureModal({ open, onOpenChange }: CreateFeatureModalPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md overflow-hidden">
         <DialogHeader>
           <DialogTitle>Create Platform Feature</DialogTitle>
           <DialogDescription>
@@ -108,33 +108,35 @@ export function CreateFeatureModal({ open, onOpenChange }: CreateFeatureModalPro
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
+        <div className="space-y-4 py-4 min-w-0">
+          <div className="space-y-2 min-w-0">
             <Label>Feature Name</Label>
             <Input
+              className="w-full"
               placeholder="e.g., max_clients"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0">
             <Label>Description</Label>
             <Textarea
+              className="w-full"
               placeholder="What does this feature control?"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2 min-w-0">
               <Label>Category</Label>
               <Select
                 value={formData.category}
                 onValueChange={(value) => setFormData({ ...formData, category: value })}
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -145,13 +147,13 @@ export function CreateFeatureModal({ open, onOpenChange }: CreateFeatureModalPro
               </Select>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label>Value Type</Label>
               <Select
                 value={formData.value_type}
                 onValueChange={(value) => setFormData({ ...formData, value_type: value })}
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -163,14 +165,14 @@ export function CreateFeatureModal({ open, onOpenChange }: CreateFeatureModalPro
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0">
             <Label>Default Value</Label>
             {formData.value_type === "boolean" ? (
               <Select
                 value={formData.default_value}
                 onValueChange={(value) => setFormData({ ...formData, default_value: value })}
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -180,6 +182,7 @@ export function CreateFeatureModal({ open, onOpenChange }: CreateFeatureModalPro
               </Select>
             ) : (
               <Input
+                className="w-full"
                 type={formData.value_type === "number" ? "number" : "text"}
                 value={formData.default_value}
                 onChange={(e) => setFormData({ ...formData, default_value: e.target.value })}
