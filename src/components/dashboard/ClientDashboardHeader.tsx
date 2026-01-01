@@ -38,11 +38,11 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
 
   return (
     <header 
-      className="fixed top-0 left-0 right-0 z-40 glass-premium border-b border-border/30 xl:static"
+      className="fixed top-0 left-0 right-0 z-40 glass-premium border-b border-border/30 xl:static pt-safe-status pb-3 xl:pt-0 xl:pb-0"
       role="banner"
       aria-label="Dashboard header"
     >
-      <div className="flex items-center justify-between min-h-16 h-auto xl:h-16 px-4 xl:px-6 pt-safe-status pb-3 xl:pt-0 xl:pb-0">
+      <div className="flex items-center justify-between min-h-16 h-auto xl:h-16 px-4 xl:px-6">
         {/* Left side */}
         <div className="flex items-center gap-3 flex-1">
           <div className="xl:hidden">
