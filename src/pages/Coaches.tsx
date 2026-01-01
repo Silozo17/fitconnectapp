@@ -95,8 +95,8 @@ const Coaches = () => {
   const serviceSchema = {
     "@context": "https://schema.org",
     "@type": "Service",
-    "name": "Find Fitness Coaches",
-    "description": t('seoDescription'),
+    "name": "Find Personal Trainers & Fitness Coaches",
+    "description": "Browse verified personal trainers, nutritionists, boxing and MMA coaches across the UK. Book online or in-person sessions.",
     "url": "https://getfitconnect.co.uk/coaches",
     "provider": {
       "@type": "Organization",
@@ -107,16 +107,17 @@ const Coaches = () => {
       "@type": "Country",
       "name": "United Kingdom"
     },
-    "serviceType": ["Personal Training", "Nutrition Coaching", "Boxing Training", "MMA Training"]
+    "serviceType": ["Personal Training", "Nutrition Coaching", "Boxing Training", "MMA Training"],
+    "priceRange": "£40-£100"
   };
 
   return (
     <>
       <SEOHead
-        title="Find Personal Trainers Near You | Verified UK Coaches"
-        description="Browse hundreds of verified personal trainers, nutritionists, boxing and MMA coaches. Filter by location, price and specialty. Book your first session today."
+        title="Personal Trainers Near Me | Browse UK Coaches"
+        description="Browse verified personal trainers, nutritionists and boxing coaches. Filter by location, price and speciality. Book online or in-person sessions today."
         canonicalPath="/coaches"
-        keywords={["personal trainer near me", "find fitness coach", "book personal trainer", "hire PT UK", "online fitness coach"]}
+        keywords={["personal trainer near me", "find fitness coach UK", "book personal trainer", "hire PT", "online fitness coach", "local personal trainers"]}
         schema={[breadcrumbSchema, serviceSchema]}
         noIndex={isFullyLoading}
       />

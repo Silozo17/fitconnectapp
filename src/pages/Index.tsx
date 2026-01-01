@@ -45,7 +45,29 @@ const Index = () => {
       "ratingValue": "4.8",
       "ratingCount": "500"
     },
-    "description": "Connect with verified personal trainers, nutritionists and fitness coaches across the UK."
+    "description": "Find verified personal trainers, nutritionists and fitness coaches across the UK. Book sessions and achieve your fitness goals."
+  };
+
+  const mobileAppSchema = {
+    "@context": "https://schema.org",
+    "@type": "MobileApplication",
+    "name": "FitConnect",
+    "operatingSystem": ["iOS", "Android"],
+    "applicationCategory": "HealthApplication",
+    "downloadUrl": [
+      "https://apps.apple.com/app/fitconnect",
+      "https://play.google.com/store/apps/details?id=uk.co.getfitconnect"
+    ],
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "GBP"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "reviewCount": "500"
+    }
   };
 
   const breadcrumbSchema = createBreadcrumbSchema([
@@ -55,11 +77,11 @@ const Index = () => {
   return (
     <>
       <SEOHead
-        title="Find Personal Trainers & Fitness Coaches | FitConnect UK"
-        description="Connect with verified personal trainers, nutritionists and boxing coaches across the UK. Book sessions, get custom workout plans and achieve your fitness goals. Download free."
+        title="Find Personal Trainers Near You | FitConnect UK"
+        description="Find verified personal trainers, nutritionists and boxing coaches across the UK. Book sessions online or in-person. Free to download on iOS and Android."
         canonicalPath="/"
-        keywords={["find personal trainer", "personal trainer near me", "fitness coach UK", "online personal training", "book fitness coach", "hire personal trainer"]}
-        schema={[websiteSchema, softwareAppSchema, breadcrumbSchema]}
+        keywords={["personal trainer near me", "find personal trainer UK", "fitness coach", "book personal trainer", "hire PT near me", "online personal training"]}
+        schema={[websiteSchema, softwareAppSchema, mobileAppSchema, breadcrumbSchema]}
       />
       
       <div className="min-h-screen bg-background">
