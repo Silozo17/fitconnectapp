@@ -22,7 +22,7 @@ interface SEOHeadProps {
 }
 
 const BASE_URL = "https://getfitconnect.co.uk";
-const DEFAULT_OG_IMAGE = `${BASE_URL}/og-image.webp`;
+const DEFAULT_OG_IMAGE = `${BASE_URL}/og-image.webp?v=2`;
 const DEFAULT_OG_IMAGE_ALT = "FitConnect - Connect with world-class fitness coaches in the UK";
 
 export function SEOHead({
