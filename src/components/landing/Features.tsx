@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Search,
@@ -8,7 +9,7 @@ import {
   Shield,
 } from "lucide-react";
 
-const Features = () => {
+const Features = forwardRef<HTMLElement>((props, ref) => {
   const { t } = useTranslation('landing');
   
   const features = [
@@ -51,7 +52,7 @@ const Features = () => {
   ];
 
   return (
-    <section id="how-it-works" className="py-24 md:py-32 bg-secondary/30 relative">
+    <section ref={ref} id="how-it-works" className="py-24 md:py-32 bg-secondary/30 relative">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
@@ -91,6 +92,8 @@ const Features = () => {
       </div>
     </section>
   );
-};
+});
+
+Features.displayName = "Features";
 
 export default Features;

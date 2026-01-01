@@ -1,8 +1,9 @@
+import { forwardRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Star, Quote } from "lucide-react";
 import BlobShape from "@/components/ui/blob-shape";
 
-const Testimonials = () => {
+const Testimonials = forwardRef<HTMLElement>((props, ref) => {
   const { t } = useTranslation('landing');
   
   const testimonials = [
@@ -24,7 +25,7 @@ const Testimonials = () => {
   ];
 
   return (
-    <section className="py-24 md:py-32 bg-secondary/30 relative overflow-hidden">
+    <section ref={ref} className="py-24 md:py-32 bg-secondary/30 relative overflow-hidden">
       {/* Background Blobs */}
       <BlobShape variant="purple" size="lg" className="top-0 left-1/4 opacity-30" />
       <BlobShape variant="teal" size="md" className="bottom-0 right-1/4 opacity-20" />
@@ -92,6 +93,8 @@ const Testimonials = () => {
       </div>
     </section>
   );
-};
+});
+
+Testimonials.displayName = "Testimonials";
 
 export default Testimonials;
