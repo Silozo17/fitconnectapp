@@ -340,19 +340,25 @@ export const checkHealthKitConnection = async (): Promise<HealthKitConnectionRes
 
 /**
  * Supported HealthKit QUANTITY type identifiers for multi-metric sync.
- * These work reliably with Despia's HKStatisticsCollectionQuery.
  * 
- * NOTE: CATEGORY types (like HKCategoryTypeIdentifierSleepAnalysis) are NOT supported
- * because Despia uses HKStatisticsCollectionQuery internally, which only works with
- * QUANTITY types. Sleep requires HKSampleQuery which Despia doesn't support.
- * Sleep data can be entered manually or synced from Fitbit/Garmin instead.
+ * IMPORTANT: Only CUMULATIVE types are supported because Despia's 
+ * HKStatisticsCollectionQuery uses .cumulativeSum internally.
+ * 
+ * EXCLUDED TYPES:
+ * - HKQuantityTypeIdentifierHeartRate: DISCRETE type requiring .discreteAverage,
+ *   causes iOS crash when mixed with cumulative types in the same query.
+ * - HKCategoryTypeIdentifierSleepAnalysis: CATEGORY type requiring HKSampleQuery,
+ *   not supported by Despia's HKStatisticsCollectionQuery.
+ * 
+ * Heart Rate and Sleep must be entered manually via ManualHealthDataModal.
+ * Contact Despia support to request support for discrete/category types.
  */
 export const SUPPORTED_HEALTHKIT_TYPES = [
-  'HKQuantityTypeIdentifierStepCount',           // steps
-  'HKQuantityTypeIdentifierHeartRate',           // heart_rate (avg)
-  'HKQuantityTypeIdentifierActiveEnergyBurned',  // calories
-  'HKQuantityTypeIdentifierAppleExerciseTime',   // active_minutes
-  'HKQuantityTypeIdentifierDistanceWalkingRunning', // distance
+  'HKQuantityTypeIdentifierStepCount',           // steps (cumulative)
+  'HKQuantityTypeIdentifierActiveEnergyBurned',  // calories (cumulative)
+  'HKQuantityTypeIdentifierAppleExerciseTime',   // active_minutes (cumulative)
+  'HKQuantityTypeIdentifierDistanceWalkingRunning', // distance (cumulative)
+  // EXCLUDED: 'HKQuantityTypeIdentifierHeartRate' - discrete type, causes crash
 ] as const;
 
 /**
