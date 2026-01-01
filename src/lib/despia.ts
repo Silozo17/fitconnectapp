@@ -423,8 +423,8 @@ export const syncHealthKitData = async (days: number = 7): Promise<HealthKitConn
         }
       }
       
-      // Small delay between calls to prevent native bridge flooding
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // 200ms delay between calls to prevent native bridge flooding
+      await new Promise(resolve => setTimeout(resolve, 200));
       
     } catch (e) {
       const errorMsg = e instanceof Error ? e.message : String(e);
