@@ -106,7 +106,7 @@ const ChangeRoleModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md overflow-hidden">
         <DialogHeader>
           <DialogTitle>Change Role</DialogTitle>
           <DialogDescription>
@@ -114,14 +114,14 @@ const ChangeRoleModal = ({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
+        <form onSubmit={handleSubmit} className="space-y-4 min-w-0">
+          <div className="space-y-2 min-w-0">
             <Label htmlFor="role">Select Role</Label>
             <Select
               value={selectedRole}
               onValueChange={setSelectedRole}
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a role" />
               </SelectTrigger>
               <SelectContent>

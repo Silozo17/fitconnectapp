@@ -103,7 +103,7 @@ export const AccountStatusModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md overflow-hidden">
         <DialogHeader>
           <DialogTitle>Change Account Status</DialogTitle>
           <DialogDescription>
@@ -111,11 +111,11 @@ export const AccountStatusModal = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
+        <div className="space-y-4 py-4 min-w-0">
+          <div className="space-y-2 min-w-0">
             <Label>Account Status</Label>
             <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

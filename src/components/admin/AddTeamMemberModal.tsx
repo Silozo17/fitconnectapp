@@ -67,27 +67,29 @@ const AddTeamMemberModal = ({ isOpen, onClose, onSuccess }: AddTeamMemberModalPr
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md overflow-hidden">
         <DialogHeader>
           <DialogTitle>Add Team Member</DialogTitle>
           <DialogDescription>Add a new admin, manager, or staff member</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
+        <form onSubmit={handleSubmit} className="space-y-4 min-w-0">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="first_name">First Name</Label>
               <Input
                 id="first_name"
+                className="w-full"
                 value={formData.first_name}
                 onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
                 placeholder="John"
                 required
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="last_name">Last Name</Label>
               <Input
                 id="last_name"
+                className="w-full"
                 value={formData.last_name}
                 onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
                 placeholder="Doe"
@@ -96,11 +98,12 @@ const AddTeamMemberModal = ({ isOpen, onClose, onSuccess }: AddTeamMemberModalPr
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0">
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               type="email"
+              className="w-full"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               placeholder="team@example.com"
@@ -120,13 +123,13 @@ const AddTeamMemberModal = ({ isOpen, onClose, onSuccess }: AddTeamMemberModalPr
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0">
             <Label htmlFor="role">Role</Label>
             <Select
               value={formData.role}
               onValueChange={(value: "admin" | "manager" | "staff") => setFormData({ ...formData, role: value })}
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>
               <SelectContent>
@@ -137,13 +140,13 @@ const AddTeamMemberModal = ({ isOpen, onClose, onSuccess }: AddTeamMemberModalPr
             </Select>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0">
             <Label htmlFor="department">Department</Label>
             <Select
               value={formData.department}
               onValueChange={(value) => setFormData({ ...formData, department: value })}
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select department" />
               </SelectTrigger>
               <SelectContent>

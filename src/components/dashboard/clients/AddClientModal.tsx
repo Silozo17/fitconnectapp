@@ -110,7 +110,7 @@ export function AddClientModal({ open, onOpenChange }: AddClientModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-card border-border">
+      <DialogContent className="sm:max-w-md bg-card border-border overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
             <UserPlus className="h-5 w-5 text-primary" />
@@ -118,33 +118,33 @@ export function AddClientModal({ open, onOpenChange }: AddClientModalProps) {
           </DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
+        <form onSubmit={handleSubmit} className="space-y-4 min-w-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="firstName">First Name *</Label>
               <Input
                 id="firstName"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder="John"
-                className="bg-background border-border"
+                className="w-full bg-background border-border"
                 required
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="lastName">Last Name *</Label>
               <Input
                 id="lastName"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="Doe"
-                className="bg-background border-border"
+                className="w-full bg-background border-border"
                 required
               />
             </div>
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0">
             <Label htmlFor="email">Email Address *</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -154,7 +154,7 @@ export function AddClientModal({ open, onOpenChange }: AddClientModalProps) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="client@example.com"
-                className="pl-10 bg-background border-border"
+                className="w-full pl-10 bg-background border-border"
                 required
               />
             </div>
@@ -163,10 +163,10 @@ export function AddClientModal({ open, onOpenChange }: AddClientModalProps) {
             </p>
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0">
             <Label htmlFor="planType">Initial Plan Type</Label>
             <Select value={planType} onValueChange={setPlanType}>
-              <SelectTrigger className="bg-background border-border">
+              <SelectTrigger className="w-full bg-background border-border">
                 <SelectValue placeholder="Select a plan type" />
               </SelectTrigger>
               <SelectContent>
@@ -178,14 +178,14 @@ export function AddClientModal({ open, onOpenChange }: AddClientModalProps) {
             </Select>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0">
             <Label htmlFor="message">Personal Message (Optional)</Label>
             <Textarea
               id="message"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Add a personal message to include in the invitation..."
-              className="bg-background border-border min-h-[80px]"
+              className="w-full bg-background border-border min-h-[80px]"
             />
           </div>
           

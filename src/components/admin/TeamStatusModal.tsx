@@ -63,20 +63,20 @@ export const TeamStatusModal = ({ isOpen, onClose, member, onStatusChange }: Tea
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md overflow-hidden">
         <DialogHeader>
           <DialogTitle>Change Account Status</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 py-4 min-w-0">
           <p className="text-sm text-muted-foreground">
             Change the account status for <strong>{memberName}</strong>
           </p>
 
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0">
             <Label>Status</Label>
             <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

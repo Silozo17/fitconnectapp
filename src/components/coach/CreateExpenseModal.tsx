@@ -66,7 +66,7 @@ export function CreateExpenseModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Receipt className="h-5 w-5 text-primary" />
@@ -74,11 +74,11 @@ export function CreateExpenseModal({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="space-y-2">
+        <div className="space-y-4 min-w-0">
+          <div className="space-y-2 min-w-0">
             <Label>Category</Label>
             <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
@@ -91,19 +91,21 @@ export function CreateExpenseModal({
             </Select>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0">
             <Label>Description</Label>
             <Input
+              className="w-full"
               placeholder="e.g., Gym membership, Resistance bands"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
 
-          <div className="grid gap-4 grid-cols-2">
-            <div className="space-y-2">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+            <div className="space-y-2 min-w-0">
               <Label>Amount (£)</Label>
               <Input
+                className="w-full"
                 type="number"
                 min="0"
                 step="0.01"
@@ -113,9 +115,10 @@ export function CreateExpenseModal({
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label>Date</Label>
               <Input
+                className="w-full"
                 type="date"
                 value={expenseDate}
                 onChange={(e) => setExpenseDate(e.target.value)}
@@ -123,9 +126,10 @@ export function CreateExpenseModal({
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0">
             <Label>Notes (Optional)</Label>
             <Textarea
+              className="w-full"
               placeholder="Additional details..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}

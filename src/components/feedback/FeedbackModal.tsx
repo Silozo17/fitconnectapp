@@ -109,7 +109,7 @@ export const FeedbackModal = () => {
           <p>{t("feedback.sendFeedback")}</p>
         </TooltipContent>
       </Tooltip>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
