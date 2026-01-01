@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Calendar, Clock, MapPin, Video, User, CheckCircle, XCircle, AlertCircle, CalendarDays, Link2, ExternalLink, Star, Loader2 } from "lucide-react";
+import { Calendar, Clock, MapPin, Video, User, CheckCircle, XCircle, AlertCircle, CalendarDays, Link2, ExternalLink, Star, Loader2, Edit2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSessionManagement } from "@/hooks/useSessionManagement";
 import { RescheduleSessionModal } from "./RescheduleSessionModal";
@@ -11,6 +11,8 @@ import { CancelSessionModal } from "./CancelSessionModal";
 import { useTranslation } from "@/hooks/useTranslation";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { VenueAutocomplete } from "@/components/shared/VenueAutocomplete";
 
 interface Session {
   id: string;
@@ -36,7 +38,10 @@ interface SessionDetailModalProps {
 
 export function SessionDetailModal({ open, onOpenChange, session, onRefresh }: SessionDetailModalProps) {
   const { t } = useTranslation("coach");
+  const queryClient = useQueryClient();
   const [notes, setNotes] = useState(session?.notes || "");
+  const [location, setLocation] = useState(session?.location || "");
+  const [isEditingLocation, setIsEditingLocation] = useState(false);
   const [showReschedule, setShowReschedule] = useState(false);
   const [showCancel, setShowCancel] = useState(false);
   const [sendingReviewRequest, setSendingReviewRequest] = useState(false);
@@ -52,12 +57,17 @@ export function SessionDetailModal({ open, onOpenChange, session, onRefresh }: S
     DEFAULT_CANCELLATION_NOTICE_HOURS,
   } = useSessionManagement();
 
+  // Sync notes and location when session changes
   useEffect(() => {
     if (session?.notes) {
       setNotes(session.notes);
     }
+    if (session?.location !== undefined) {
+      setLocation(session.location || "");
+    }
     setReviewExists(session?.hasReview ?? false);
-  }, [session?.notes, session?.hasReview]);
+    setIsEditingLocation(false);
+  }, [session?.notes, session?.location, session?.hasReview, open]);
 
   // Check if review exists for this session
   useEffect(() => {
@@ -77,6 +87,27 @@ export function SessionDetailModal({ open, onOpenChange, session, onRefresh }: S
       checkReview();
     }
   }, [open, session]);
+
+  // Location update mutation
+  const updateLocationMutation = useMutation({
+    mutationFn: async (newLocation: string) => {
+      if (!session) throw new Error("No session");
+      const { error } = await supabase
+        .from("coaching_sessions")
+        .update({ location: newLocation })
+        .eq("id", session.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(t('sessionDetailModal.locationUpdated') || "Location updated");
+      queryClient.invalidateQueries({ queryKey: ["coaching-sessions"] });
+      onRefresh?.();
+      setIsEditingLocation(false);
+    },
+    onError: () => {
+      toast.error(t('sessionDetailModal.locationUpdateFailed') || "Failed to update location");
+    },
+  });
 
   if (!session) return null;
 
@@ -147,12 +178,13 @@ export function SessionDetailModal({ open, onOpenChange, session, onRefresh }: S
     markNoShow.isPending ||
     saveNotes.isPending ||
     createVideoMeeting.isPending ||
-    sendingReviewRequest;
+    sendingReviewRequest ||
+    updateLocationMutation.isPending;
 
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-lg bg-card border-border max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-lg bg-card border-border max-h-[90vh] overflow-y-auto overflow-x-hidden touch-pan-y overscroll-y-contain">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between text-foreground">
               <span>{t('sessionDetailModal.title')}</span>
@@ -196,9 +228,10 @@ export function SessionDetailModal({ open, onOpenChange, session, onRefresh }: S
               </div>
             )}
 
-            <div className="flex items-center gap-2 text-sm p-3 rounded-lg bg-background border border-border">
+            {/* Location Section */}
+            <div className="space-y-2">
               {session.isOnline ? (
-                <div className="flex items-center justify-between w-full">
+                <div className="flex items-center justify-between w-full p-3 rounded-lg bg-background border border-border">
                   <div className="flex items-center gap-2">
                     <Video className="h-4 w-4 text-primary" />
                     <span className="text-foreground">{t('sessionDetailModal.onlineSession')}</span>
@@ -217,8 +250,53 @@ export function SessionDetailModal({ open, onOpenChange, session, onRefresh }: S
                 </div>
               ) : (
                 <>
-                  <MapPin className="h-4 w-4 text-primary" />
-                  <span className="text-foreground">{session.location || t('sessionDetailModal.locationTbd')}</span>
+                  {isEditingLocation ? (
+                    <div className="space-y-2">
+                      <VenueAutocomplete
+                        value={location}
+                        onVenueChange={(loc) => setLocation(loc)}
+                        placeholder={t('scheduleSessionModal.venuePlaceholder') || "Search for a gym, studio, park..."}
+                      />
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          onClick={() => {
+                            setLocation(session.location || "");
+                            setIsEditingLocation(false);
+                          }}
+                        >
+                          {t('sessionDetailModal.cancel') || "Cancel"}
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          onClick={() => updateLocationMutation.mutate(location)}
+                          disabled={updateLocationMutation.isPending}
+                        >
+                          {updateLocationMutation.isPending ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            t('sessionDetailModal.saveLocation') || "Save"
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div 
+                      className={`flex items-center gap-2 text-sm p-3 rounded-lg bg-background border border-border ${
+                        session.status === "scheduled" ? "cursor-pointer hover:bg-secondary/50 transition-colors" : ""
+                      }`}
+                      onClick={() => session.status === "scheduled" && setIsEditingLocation(true)}
+                    >
+                      <MapPin className="h-4 w-4 text-primary" />
+                      <span className="text-foreground flex-1">
+                        {session.location || t('sessionDetailModal.locationTbd')}
+                      </span>
+                      {session.status === "scheduled" && (
+                        <Edit2 className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </div>
+                  )}
                 </>
               )}
             </div>
