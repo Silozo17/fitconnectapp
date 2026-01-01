@@ -14,6 +14,7 @@ import MobileBottomNav from "@/components/navigation/MobileBottomNav";
 import PlatformBackground from "@/components/shared/PlatformBackground";
 import { ProfilePanelProvider, useProfilePanel } from "@/contexts/ProfilePanelContext";
 import ProfilePanel from "@/components/shared/ProfilePanel";
+import ProfileNotch from "@/components/shared/ProfileNotch";
 import CoachProfileSummary from "@/components/dashboard/coach/CoachProfileSummary";
 import { DiscoverModal } from "@/components/discover/DiscoverModal";
 import PageLoadingSpinner from "@/components/shared/PageLoadingSpinner";
@@ -126,7 +127,10 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
             <CoachProfileSummary />
           </ProfilePanel>
 
-          <main 
+          {/* Profile Notch - rendered outside ProfilePanel to avoid CSS transform containment */}
+          <ProfileNotch />
+
+          <main
             id="main-content" 
             className={`flex-1 p-4 lg:p-6 overflow-y-auto pb-mobile-nav mt-header-safe xl:mt-0 ${profilePanelOpen ? 'pointer-events-none' : ''}`}
             role="main"

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { useProfilePanel } from "@/contexts/ProfilePanelContext";
-import ProfileNotch from "./ProfileNotch";
 import { getEnvironment } from "@/hooks/useEnvironment";
 
 interface ProfilePanelProps {
@@ -132,9 +131,6 @@ const ProfilePanel = ({ children, headerHeight = 64 }: ProfilePanelProps) => {
           {children}
         </div>
       </div>
-
-      {/* Notch - always visible, fixed position */}
-      <ProfileNotch headerHeight={actualHeaderHeight} />
     </>
   );
 };
