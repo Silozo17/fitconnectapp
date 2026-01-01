@@ -253,8 +253,9 @@ export const useSessionManagement = () => {
         const reviewMode = coachSettings?.review_request_mode || "auto";
         
         if (reviewMode === "auto") {
-          // Send review request email to client
-          await supabase.functions.invoke("send-review-request", {
+          // Fire and forget - send review request email in background
+          // Don't await - user gets immediate confirmation
+          supabase.functions.invoke("send-review-request", {
             body: { 
               sessionId,
               customMessage: coachSettings?.custom_review_message || null,

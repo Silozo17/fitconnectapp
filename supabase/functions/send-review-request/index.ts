@@ -13,7 +13,7 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    const siteUrl = Deno.env.get("SITE_URL") || "https://fitconnect.com";
+    const siteUrl = Deno.env.get("APP_URL") || Deno.env.get("SITE_URL") || "https://app.getfitconnect.co.uk";
     if (!resendApiKey) throw new Error("RESEND_API_KEY not configured");
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -42,7 +42,7 @@ serve(async (req) => {
     let personalizedMessage = "";
     if (customMessage) personalizedMessage = customMessage.replace(/{client_name}/g, clientName).replace(/{session_date}/g, formattedDate);
 
-    const reviewUrl = `${siteUrl}/coaches/${session.coach.id}?review=true`;
+    const reviewUrl = `${siteUrl}/review?sessionId=${sessionId}&coachId=${session.coach.id}&coachName=${encodeURIComponent(coachName)}`;
 
     const emailContent = `
       ${freeFloatingAvatarComponent(avatarUrl, "Review Mascot", 140)}

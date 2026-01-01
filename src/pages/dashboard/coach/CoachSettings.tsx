@@ -195,7 +195,7 @@ const CoachSettings = () => {
   
   // Read tab from URL params for deep linking (e.g., ?tab=verification or ?tab=subscription)
   const urlTab = searchParams.get("tab");
-  const validTabs = ["profile", "notifications", "preferences", "subscription", "invoice", "integrations", "verification", "security", "marketplace", "services", "account", "qualifications"];
+  const validTabs = ["profile", "notifications", "preferences", "subscription", "invoice", "integrations", "verification", "security", "marketplace", "account", "qualifications"];
   const initialTab = urlTab && validTabs.includes(urlTab) ? urlTab : "profile";
   const [selectedTab, setSelectedTab] = useState(initialTab);
 
@@ -538,7 +538,6 @@ const CoachSettings = () => {
                 { id: "profile", icon: User, label: t('tabs.profile') },
                 { id: "marketplace", icon: Store, label: t('tabs.marketplace') },
                 { id: "qualifications", icon: Award, label: t('tabs.qualifications', 'Qualifications') },
-                { id: "services", icon: CreditCard, label: t('tabs.services') },
                 { id: "invoice", icon: Receipt, label: t('tabs.invoice') },
                 { id: "verification", icon: Shield, label: t('tabs.verification') },
                 { id: "integrations", icon: Plug, label: t('tabs.integrations') },
@@ -834,6 +833,25 @@ const CoachSettings = () => {
                         </div>
                       </div>
                     </div>
+
+                    <Separator />
+
+                    {/* Hourly Rate */}
+                    <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg">
+                      <div>
+                        <Label className="text-base font-medium">{t('marketplace.hourlyRate', 'Hourly Rate')}</Label>
+                        <p className="text-sm text-muted-foreground">{t('marketplace.hourlyRateDesc', 'Your base hourly rate displayed on your profile.')}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground">{getCurrencySymbol((profile.currency || "GBP") as any)}</span>
+                        <Input
+                          type="number"
+                          value={profile.hourly_rate || ""}
+                          onChange={(e) => setProfile({ ...profile, hourly_rate: parseFloat(e.target.value) || null })}
+                          className="w-24"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </MarketplaceSection>
 
@@ -885,57 +903,6 @@ const CoachSettings = () => {
                     )}
                     {t('saveChanges')}
                   </Button>
-                </div>
-              </div>
-            )}
-
-            {/* Services & Pricing Tab */}
-            {selectedTab === "services" && (
-              <div className="card-elevated p-6">
-                <h2 className="font-display font-bold text-foreground mb-6">{t('services.title')}</h2>
-
-                <div className="space-y-6">
-                  {/* Currency Selection */}
-                  <div className="p-4 bg-secondary/50 rounded-lg">
-                    <div className="mb-4">
-                      <Label className="text-foreground font-medium">{t('services.pricingCurrency')}</Label>
-                      <p className="text-sm text-muted-foreground">
-                        {t('services.pricingCurrencyDesc')}
-                      </p>
-                    </div>
-                    <CurrencySelector 
-                      value={profile.currency || "GBP"}
-                      onChange={(value) => setProfile({ ...profile, currency: value })}
-                    />
-                  </div>
-
-                  {/* Hourly Rate */}
-                  <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg">
-                    <div>
-                      <p className="font-medium text-foreground">{t('services.hourlyRate')}</p>
-                      <p className="text-sm text-muted-foreground">{t('services.hourlyRateDesc')}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground">{getCurrencySymbol((profile.currency || "GBP") as any)}</span>
-                      <Input
-                        type="number"
-                        value={profile.hourly_rate || ""}
-                        onChange={(e) => setProfile({ ...profile, hourly_rate: parseFloat(e.target.value) || null })}
-                        className="w-24"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end">
-                    <Button onClick={handleSaveProfile} disabled={saving} className="bg-primary text-primary-foreground">
-                      {saving ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <Save className="w-4 h-4 mr-2" />
-                      )}
-                      {t('saveChanges')}
-                    </Button>
-                  </div>
                 </div>
               </div>
             )}
@@ -1242,31 +1209,16 @@ const CoachSettings = () => {
                       </p>
                     </div>
                     <Separator />
+                    {/* Pricing Currency */}
                     <div className="max-w-xs">
-                      <Label htmlFor="cancellation-hours" className="text-base font-medium">{t('preferences.cancellationPolicy')}</Label>
+                      <Label className="text-base font-medium">{t('preferences.pricingCurrency', 'Pricing Currency')}</Label>
                       <p className="text-sm text-muted-foreground mb-2">
-                        {t('preferences.cancellationPolicyDesc')}
+                        {t('preferences.pricingCurrencyDesc', 'Currency used for your services and session pricing.')}
                       </p>
-                      <Input
-                        id="cancellation-hours"
-                        type="number"
-                        min="1"
-                        max="168"
-                        defaultValue="24"
-                        placeholder="24"
-                        className="w-24"
-                        onChange={async (e) => {
-                          const hours = parseInt(e.target.value) || 24;
-                          if (user) {
-                            await supabase
-                              .from("coach_profiles")
-                              .update({ min_cancellation_hours: hours })
-                              .eq("user_id", user.id);
-                            toast.success("Cancellation policy updated");
-                          }
-                        }}
+                      <CurrencySelector 
+                        value={profile.currency || "GBP"}
+                        onChange={(value) => setProfile({ ...profile, currency: value })}
                       />
-                      <p className="text-xs text-muted-foreground mt-1">{t('preferences.hours')}</p>
                     </div>
                   </div>
                 </div>

@@ -1043,6 +1043,35 @@ const CoachSchedule = () => {
                   {t("schedule.bookingSettings.depositsInfo")}
                 </p>
               </div>
+
+              {/* Cancellation Policy */}
+              <div className="space-y-2 pt-4 border-t border-border">
+                <Label className="font-medium">{t("schedule.bookingSettings.cancellationPolicy", "Cancellation Policy")}</Label>
+                <p className="text-sm text-muted-foreground">
+                  {t("schedule.bookingSettings.cancellationPolicyDesc", "Minimum notice required for clients to cancel without penalty.")}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    min="1"
+                    max="168"
+                    defaultValue="24"
+                    placeholder="24"
+                    className="w-24"
+                    onChange={async (e) => {
+                      const hours = parseInt(e.target.value) || 24;
+                      if (coachId) {
+                        await supabase
+                          .from("coach_profiles")
+                          .update({ min_cancellation_hours: hours })
+                          .eq("id", coachId);
+                        toast.success(t("schedule.bookingSettings.cancellationUpdated", "Cancellation policy updated"));
+                      }
+                    }}
+                  />
+                  <span className="text-sm text-muted-foreground">{t("schedule.bookingSettings.hours", "hours")}</span>
+                </div>
+              </div>
             </div>
           </Card>
 
