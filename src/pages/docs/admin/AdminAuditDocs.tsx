@@ -5,9 +5,9 @@ import { FileText, Search, Filter, Download } from "lucide-react";
 export default function AdminAuditDocs() {
   return (
     <DocsLayout
-      title="Audit Log"
-      description="Review all administrative actions for security and compliance."
-      breadcrumbs={[{ label: "For Administrators", href: "/docs/admin" }, { label: "Audit Log" }]}
+      title="Audit Log | Admin Guide"
+      description="Review all administrative actions for security and compliance. Filter, search, and export immutable activity records."
+      breadcrumbs={[{ label: "Admin Guide", href: "/docs/admin" }, { label: "Audit Log" }]}
       noIndex
     >
       <section className="mb-10">

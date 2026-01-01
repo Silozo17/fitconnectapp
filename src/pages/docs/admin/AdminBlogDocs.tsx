@@ -5,9 +5,9 @@ import { FileText, Edit, Eye, Search } from "lucide-react";
 export default function AdminBlogDocs() {
   return (
     <DocsLayout
-      title="Blog Management"
-      description="Create and manage blog posts for the platform."
-      breadcrumbs={[{ label: "For Administrators", href: "/docs/admin" }, { label: "Blog" }]}
+      title="Blog Management | Admin Guide"
+      description="Create and manage blog posts for SEO and user engagement. Configure meta titles, descriptions, and featured images."
+      breadcrumbs={[{ label: "Admin Guide", href: "/docs/admin" }, { label: "Blog" }]}
       noIndex
     >
       <section className="mb-10">

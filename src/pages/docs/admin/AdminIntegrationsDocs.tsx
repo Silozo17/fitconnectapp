@@ -5,9 +5,9 @@ import { Plug, CheckCircle, AlertTriangle, Settings } from "lucide-react";
 export default function AdminIntegrationsDocs() {
   return (
     <DocsLayout
-      title="Integrations"
-      description="Monitor and configure third-party integrations."
-      breadcrumbs={[{ label: "For Administrators", href: "/docs/admin" }, { label: "Integrations" }]}
+      title="Integrations | Admin Guide"
+      description="Monitor Stripe, RevenueCat, wearables, and email service health. Configure third-party connections and API settings."
+      breadcrumbs={[{ label: "Admin Guide", href: "/docs/admin" }, { label: "Integrations" }]}
       noIndex
     >
       <section className="mb-10">

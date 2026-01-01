@@ -6,8 +6,8 @@ export default function AdminAnalyticsDocs() {
   return (
     <DocsLayout
       title="Platform Analytics | Admin Guide"
-      description="Track user growth, engagement, and platform health metrics."
-      breadcrumbs={[{ label: "For Administrators", href: "/docs/admin" }, { label: "Analytics" }]}
+      description="Monitor user growth, engagement metrics, and platform health. Track signups, conversions, and performance data."
+      breadcrumbs={[{ label: "Admin Guide", href: "/docs/admin" }, { label: "Analytics" }]}
       noIndex
     >
       <section className="mb-10">
