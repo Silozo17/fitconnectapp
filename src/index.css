@@ -346,7 +346,7 @@
   }
 
   .mt-header-safe {
-    margin-top: calc(3rem + env(safe-area-inset-top, 0px));
+    margin-top: calc(2.625rem + env(safe-area-inset-top, 0px));
   }
 
   /* Native iOS fallback - use Despia's runtime CSS variable */
@@ -358,8 +358,8 @@
   }
 
   html.native-ios .mt-header-safe {
-    /* 3rem base + Despia safe area */
-    margin-top: calc(3rem + var(--safe-area-top, 59px));
+    /* 2.625rem (42px) base + Despia safe area */
+    margin-top: calc(2.625rem + var(--safe-area-top, 59px));
   }
 
   /* ========================================

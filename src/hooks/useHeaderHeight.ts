@@ -6,7 +6,7 @@ import { getEnvironment } from "@/hooks/useEnvironment";
  * of the visible header element. This ensures the ProfileNotch aligns with
  * the actual rendered header, including CSS fallbacks for safe areas.
  */
-export const useHeaderHeight = (baseHeight = 48): number => {
+export const useHeaderHeight = (baseHeight = 42): number => {
   const env = getEnvironment();
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1280;
   
