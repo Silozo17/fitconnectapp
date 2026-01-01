@@ -939,8 +939,8 @@
   "coachTypes": {
     "boxing": {
       "meta": {
-        "title": "Boxing Coaches UK | Learn Boxing with Expert Trainers",
-        "description": "Find experienced boxing coaches for fitness, technique or competition. Beginner-friendly training, pad work and sparring. Book your first session today."
+        "title": "Boxing Coaches Near Me | Learn Boxing UK from £40",
+        "description": "Find experienced boxing coaches across the UK. Beginner-friendly training, pad work and sparring. Book online or in-person sessions from £40."
       },
       "hero": {
         "badge": "Boxing Training",
@@ -1021,8 +1021,8 @@
     },
     "mma": {
       "meta": {
-        "title": "MMA Coaches UK | Mixed Martial Arts Training",
-        "description": "Train MMA with experienced coaches. Learn BJJ, Muay Thai, wrestling and striking. All levels welcome from beginners to competitive fighters. Book now."
+        "title": "MMA Coaches Near Me | Learn Mixed Martial Arts UK",
+        "description": "Find MMA coaches across the UK. Learn BJJ, Muay Thai, wrestling and striking from £40. All levels from beginners to fighters. Book online today."
       },
       "hero": {
         "badge": "Mixed Martial Arts",
@@ -1203,8 +1203,8 @@
     },
     "nutritionists": {
       "meta": {
-        "title": "Nutritionists UK | Expert Diet & Nutrition Coaches",
-        "description": "Work with qualified nutritionists for personalised meal plans, weight management and sports nutrition. Book a consultation with UK nutrition experts today."
+        "title": "Nutritionists Near Me | Book a Diet Coach UK",
+        "description": "Find qualified nutritionists across the UK. Personalised meal plans, weight management and sports nutrition from £40. Book your consultation today."
       },
       "hero": {
         "badge": "Nutrition Coaching",

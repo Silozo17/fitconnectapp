@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { SEOHead } from "@/components/shared/SEOHead";
+import { SEOHead, createBreadcrumbSchema } from "@/components/shared/SEOHead";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -78,22 +78,32 @@ const Nutritionists = () => {
     }))
   };
 
-  // Service schema
+  // Service schema with enhanced details
   const serviceSchema = {
     "@context": "https://schema.org",
     "@type": "Service",
     "name": "Nutrition Coaching",
+    "description": "Work with qualified nutritionists for personalised meal plans, weight management and sports nutrition across the UK.",
+    "url": "https://getfitconnect.co.uk/coaches/nutritionists",
     "provider": {
       "@type": "Organization",
-      "name": "FitConnect"
+      "name": "FitConnect",
+      "url": "https://getfitconnect.co.uk"
     },
     "serviceType": "Nutrition Coaching",
     "areaServed": {
       "@type": "Country",
       "name": "United Kingdom"
     },
-    "priceRange": "£40-£80"
+    "priceRange": "£40-£100"
   };
+
+  // Breadcrumb schema
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Find Coaches", url: "/coaches" },
+    { name: "Nutritionists", url: "/coaches/nutritionists" }
+  ]);
 
   return (
     <>
@@ -101,8 +111,8 @@ const Nutritionists = () => {
         title={t('coachTypes.nutritionists.meta.title')}
         description={t('coachTypes.nutritionists.meta.description')}
         canonicalPath="/coaches/nutritionists"
-        keywords={["nutritionist UK", "nutrition coach", "dietitian", "meal plan", "sports nutrition"]}
-        schema={[faqSchema, serviceSchema]}
+        keywords={["nutritionist near me", "nutrition coach UK", "dietitian UK", "meal plan coach", "sports nutritionist", "weight loss nutritionist"]}
+        schema={[faqSchema, serviceSchema, breadcrumbSchema]}
       />
       
       <div className="min-h-screen bg-background">
