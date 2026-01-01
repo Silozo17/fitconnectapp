@@ -48,6 +48,40 @@
     
     <!-- Theme Color -->
     <meta name="theme-color" content="#0D0D14" />
+    
+    <!-- Critical CSS for instant loading skeleton - eliminates white/black screen flash -->
+    <style>
+      /* Base styles for instant render */
+      *,*::before,*::after{box-sizing:border-box}
+      html{-webkit-text-size-adjust:100%;tab-size:4}
+      body{margin:0;font-family:'Inter',system-ui,-apple-system,sans-serif;background:#0D0D14;color:#f8fafc;line-height:1.5}
+      
+      /* App shell skeleton - shown instantly before React hydrates */
+      .app-shell{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+      .shell-header{height:64px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;padding:0 16px}
+      .shell-logo{width:140px;height:32px;background:linear-gradient(90deg,rgba(190,255,0,0.15) 0%,rgba(190,255,0,0.08) 100%);border-radius:6px}
+      .shell-content{flex:1;display:flex}
+      .shell-sidebar{width:72px;border-right:1px solid rgba(255,255,255,0.08);padding:16px 12px;display:none}
+      @media(min-width:768px){.shell-sidebar{display:flex;flex-direction:column;gap:8px}}
+      .shell-nav-item{height:44px;background:rgba(255,255,255,0.03);border-radius:8px}
+      .shell-main{flex:1;padding:16px;max-width:100%}
+      .shell-card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:20px;margin-bottom:16px}
+      .shell-card-header{height:24px;width:50%;background:rgba(255,255,255,0.08);border-radius:6px;margin-bottom:16px}
+      .shell-card-content{display:flex;flex-direction:column;gap:12px}
+      .shell-line{height:16px;background:rgba(255,255,255,0.05);border-radius:4px}
+      .shell-line-short{width:60%}
+      .shell-line-medium{width:80%}
+      .shell-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:16px}
+      
+      /* Skeleton shimmer animation - GPU accelerated */
+      @keyframes shell-shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+      .shell-shimmer{position:relative;overflow:hidden}
+      .shell-shimmer::after{content:'';position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent);animation:shell-shimmer 1.5s ease-in-out infinite}
+      @media(prefers-reduced-motion:reduce){.shell-shimmer::after{animation:none}}
+      
+      /* Hide skeleton when React mounts */
+      .app-shell[data-hydrated]{display:none!important}
+    </style>
     <meta name="msapplication-TileColor" content="#0D0D14" />
 
     <!-- iOS PWA Support -->
@@ -152,7 +186,58 @@
       </div>
     </noscript>
     
+    <!-- App Shell Skeleton - Shown instantly before React hydrates -->
+    <div class="app-shell" id="app-shell">
+      <header class="shell-header">
+        <div class="shell-logo shell-shimmer"></div>
+      </header>
+      <div class="shell-content">
+        <nav class="shell-sidebar">
+          <div class="shell-nav-item shell-shimmer"></div>
+          <div class="shell-nav-item shell-shimmer"></div>
+          <div class="shell-nav-item shell-shimmer"></div>
+          <div class="shell-nav-item shell-shimmer"></div>
+          <div class="shell-nav-item shell-shimmer"></div>
+        </nav>
+        <main class="shell-main">
+          <div class="shell-card">
+            <div class="shell-card-header shell-shimmer"></div>
+            <div class="shell-card-content">
+              <div class="shell-line shell-line-medium shell-shimmer"></div>
+              <div class="shell-line shell-shimmer"></div>
+              <div class="shell-line shell-line-short shell-shimmer"></div>
+            </div>
+          </div>
+          <div class="shell-grid">
+            <div class="shell-card">
+              <div class="shell-card-header shell-shimmer"></div>
+              <div class="shell-card-content">
+                <div class="shell-line shell-shimmer"></div>
+                <div class="shell-line shell-line-medium shell-shimmer"></div>
+              </div>
+            </div>
+            <div class="shell-card">
+              <div class="shell-card-header shell-shimmer"></div>
+              <div class="shell-card-content">
+                <div class="shell-line shell-shimmer"></div>
+                <div class="shell-line shell-line-short shell-shimmer"></div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+    
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Hide app shell once React mounts -->
+    <script>
+      // Mark shell as hydrated when React renders
+      window.__hideAppShell = function() {
+        var shell = document.getElementById('app-shell');
+        if (shell) shell.setAttribute('data-hydrated', 'true');
+      };
+    </script>
   </body>
 </html>

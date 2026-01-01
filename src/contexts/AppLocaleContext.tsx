@@ -43,12 +43,20 @@ export function AppLocaleProvider({ children }: AppLocaleProviderProps) {
     setLocale(dateLocale);
   }, [location, setCurrency, setLocale]);
   
-  // Sync i18n language when language changes
+  // Sync i18n language when language changes (load Polish on demand)
   useEffect(() => {
-    const i18nLang = LANGUAGE_TO_I18N[language];
-    if (i18n.language !== i18nLang) {
-      i18n.changeLanguage(i18nLang);
-    }
+    const syncLanguage = async () => {
+      const i18nLang = LANGUAGE_TO_I18N[language];
+      if (i18n.language !== i18nLang) {
+        // Load Polish translations on demand if switching to Polish
+        if (i18nLang === 'pl') {
+          const { loadPolishTranslations } = await import('@/i18n');
+          await loadPolishTranslations();
+        }
+        i18n.changeLanguage(i18nLang);
+      }
+    };
+    syncLanguage();
   }, [language]);
   
   const value: AppLocaleContextType = {

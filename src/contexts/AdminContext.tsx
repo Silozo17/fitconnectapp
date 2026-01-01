@@ -208,9 +208,27 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   }, [activeProfileType, isAdminUser, role, user]);
 
   // Fetch all profiles for the user
-  const fetchProfiles = useCallback(async () => {
+  // PERFORMANCE: For native cold start, defer fetch if we have valid localStorage state
+  const fetchProfiles = useCallback(async (options?: { immediate?: boolean }) => {
     if (!user?.id) {
       setIsLoadingProfiles(false);
+      return;
+    }
+
+    // PERFORMANCE FIX: For native cold start, skip immediate fetch if we have saved state
+    // This prevents 3 DB queries from blocking initial render
+    const isNativeApp = isDespia();
+    const savedState = getSavedViewState();
+    
+    if (isNativeApp && savedState && hasRestoredFromStorageRef.current && !options?.immediate) {
+      // Trust localStorage on cold start, fetch in background
+      console.log('[AdminContext] Native cold start: trusting localStorage, deferring profile fetch');
+      setIsLoadingProfiles(false);
+      
+      // Schedule background fetch after render
+      requestIdleCallback(() => {
+        fetchProfiles({ immediate: true });
+      }, { timeout: 2000 });
       return;
     }
 
@@ -271,18 +289,18 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
 
       // CRITICAL FIX: If we already restored from storage, don't overwrite!
       // Only apply defaults if there's no valid persisted preference
-      const savedState = getSavedViewState();
+      const currentSavedState = getSavedViewState();
       
-      if (hasRestoredFromStorageRef.current && savedState) {
+      if (hasRestoredFromStorageRef.current && currentSavedState) {
         // Validate the saved state has a valid profile
-        const hasValidProfile = savedState.type === "admin" 
+        const hasValidProfile = currentSavedState.type === "admin" 
           ? isAdminUser 
-          : !!profiles[savedState.type];
+          : !!profiles[currentSavedState.type];
         
         if (hasValidProfile) {
-          console.log('[AdminContext] fetchProfiles: Preserving restored view:', savedState.type, '- NOT overwriting (hasRestoredFromStorageRef=true)');
+          console.log('[AdminContext] fetchProfiles: Preserving restored view:', currentSavedState.type, '- NOT overwriting (hasRestoredFromStorageRef=true)');
           // Update profile ID if we now have it
-          const profileId = profiles[savedState.type] || null;
+          const profileId = profiles[currentSavedState.type] || null;
           if (profileId && !activeProfileId) {
             setActiveProfileId(profileId);
           }
@@ -316,14 +334,14 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       }
       
       // Fallback to localStorage if no valid URL path
-      if (savedState) {
-        const isValidSavedRole = profiles[savedState.type] && 
-          (isAdminUser || savedState.type !== "admin"); // Non-admins can't switch to admin
+      if (currentSavedState) {
+        const isValidSavedRole = profiles[currentSavedState.type] && 
+          (isAdminUser || currentSavedState.type !== "admin"); // Non-admins can't switch to admin
         
         if (isValidSavedRole) {
-          setActiveProfileType(savedState.type);
-          setActiveProfileId(savedState.profileId);
-          setViewModeState(savedState.type);
+          setActiveProfileType(currentSavedState.type);
+          setActiveProfileId(currentSavedState.profileId);
+          setViewModeState(currentSavedState.type);
           return;
         }
       }

@@ -38,7 +38,8 @@ import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { I18N_FEATURE_FLAGS } from './feature-flags';
 
-// Import translation files
+// Import ONLY English translation files synchronously (production language)
+// Polish translations are loaded on-demand to reduce initial bundle size
 import enCommon from './locales/en/common.json';
 import enLanding from './locales/en/landing.json';
 import enDashboard from './locales/en/dashboard.json';
@@ -52,19 +53,6 @@ import enAdmin from './locales/en/admin.json';
 import enPages from './locales/en/pages.json';
 import enGamification from './locales/en/gamification.json';
 import enMarketplace from './locales/en/marketplace.json';
-import plCommon from './locales/pl/common.json';
-import plLanding from './locales/pl/landing.json';
-import plDashboard from './locales/pl/dashboard.json';
-import plSettings from './locales/pl/settings.json';
-import plBooking from './locales/pl/booking.json';
-import plMessaging from './locales/pl/messaging.json';
-import plCoaches from './locales/pl/coaches.json';
-import plClient from './locales/pl/client.json';
-import plCoach from './locales/pl/coach.json';
-import plAdmin from './locales/pl/admin.json';
-import plPages from './locales/pl/pages.json';
-import plGamification from './locales/pl/gamification.json';
-import plMarketplace from './locales/pl/marketplace.json';
 
 // Production-visible languages (what users see in production)
 export const SUPPORTED_LANGUAGES = [
@@ -105,7 +93,8 @@ const getStoredLanguage = (): LanguageCode => {
   return DEFAULT_LANGUAGE;
 };
 
-// Translation resources (includes Polish for dev mode)
+// Translation resources - start with English only
+// Polish is loaded on-demand when user switches language
 const resources = {
   en: {
     common: enCommon,
@@ -122,22 +111,68 @@ const resources = {
     gamification: enGamification,
     marketplace: enMarketplace,
   },
-  pl: {
-    common: plCommon,
-    landing: plLanding,
-    dashboard: plDashboard,
-    settings: plSettings,
-    booking: plBooking,
-    messaging: plMessaging,
-    coaches: plCoaches,
-    client: plClient,
-    coach: plCoach,
-    admin: plAdmin,
-    pages: plPages,
-    gamification: plGamification,
-    marketplace: plMarketplace,
-  },
 };
+
+/**
+ * Dynamically load Polish translations when needed.
+ * This reduces initial bundle size by ~50KB+ (gzipped).
+ */
+export async function loadPolishTranslations(): Promise<void> {
+  if (i18n.hasResourceBundle('pl', 'common')) {
+    // Already loaded
+    return;
+  }
+  
+  try {
+    const [
+      plCommon,
+      plLanding,
+      plDashboard,
+      plSettings,
+      plBooking,
+      plMessaging,
+      plCoaches,
+      plClient,
+      plCoach,
+      plAdmin,
+      plPages,
+      plGamification,
+      plMarketplace,
+    ] = await Promise.all([
+      import('./locales/pl/common.json'),
+      import('./locales/pl/landing.json'),
+      import('./locales/pl/dashboard.json'),
+      import('./locales/pl/settings.json'),
+      import('./locales/pl/booking.json'),
+      import('./locales/pl/messaging.json'),
+      import('./locales/pl/coaches.json'),
+      import('./locales/pl/client.json'),
+      import('./locales/pl/coach.json'),
+      import('./locales/pl/admin.json'),
+      import('./locales/pl/pages.json'),
+      import('./locales/pl/gamification.json'),
+      import('./locales/pl/marketplace.json'),
+    ]);
+    
+    i18n.addResourceBundle('pl', 'common', plCommon.default, true, true);
+    i18n.addResourceBundle('pl', 'landing', plLanding.default, true, true);
+    i18n.addResourceBundle('pl', 'dashboard', plDashboard.default, true, true);
+    i18n.addResourceBundle('pl', 'settings', plSettings.default, true, true);
+    i18n.addResourceBundle('pl', 'booking', plBooking.default, true, true);
+    i18n.addResourceBundle('pl', 'messaging', plMessaging.default, true, true);
+    i18n.addResourceBundle('pl', 'coaches', plCoaches.default, true, true);
+    i18n.addResourceBundle('pl', 'client', plClient.default, true, true);
+    i18n.addResourceBundle('pl', 'coach', plCoach.default, true, true);
+    i18n.addResourceBundle('pl', 'admin', plAdmin.default, true, true);
+    i18n.addResourceBundle('pl', 'pages', plPages.default, true, true);
+    i18n.addResourceBundle('pl', 'gamification', plGamification.default, true, true);
+    i18n.addResourceBundle('pl', 'marketplace', plMarketplace.default, true, true);
+    
+    console.log('[i18n] Polish translations loaded dynamically');
+  } catch (error) {
+    console.error('[i18n] Failed to load Polish translations:', error);
+  }
+}
 
 // Get whitelisted languages for detector
 const getWhitelistedLanguages = (): string[] => {

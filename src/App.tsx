@@ -15,6 +15,8 @@ import { CelebrationListeners } from "@/components/gamification/CelebrationListe
 import { CountryProvider } from "@/contexts/CountryContext";
 import { useLanguagePersistence } from "@/hooks/useLanguagePersistence";
 import { useAppInitialization } from "@/hooks/useAppInitialization";
+import { useDeferredMount } from "@/hooks/useDeferredMount";
+import { HydrationSignal } from "@/components/shared/HydrationSignal";
 
 import ScrollRestoration from "./components/shared/ScrollRestoration";
 import { ReloadPrompt } from "./components/pwa/ReloadPrompt";
@@ -256,6 +258,37 @@ function DespiaInitializer() {
   return null;
 }
 
+// Deferred non-critical trackers - don't block initial render
+function DeferredTrackers() {
+  const shouldMount = useDeferredMount(200);
+  
+  if (!shouldMount) return null;
+  
+  return (
+    <>
+      <SessionActivityTracker />
+      <PushNotificationInitializer />
+    </>
+  );
+}
+
+// Deferred celebration context - not needed for initial render
+function DeferredCelebration({ children }: { children: React.ReactNode }) {
+  const shouldMount = useDeferredMount(100);
+  
+  if (shouldMount) {
+    return (
+      <CelebrationProvider>
+        <CelebrationListeners />
+        {children}
+      </CelebrationProvider>
+    );
+  }
+  
+  // Render children without celebration context initially
+  return <>{children}</>;
+}
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -276,6 +309,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <ReloadPrompt />
+          <HydrationSignal />
           <DespiaInitializer />
           <BrowserRouter>
             <InstallBanner />
@@ -284,11 +318,9 @@ const App = () => (
               <CookieConsentBanner />
               <CountryProvider>
                 <AuthProvider>
-                  <SessionActivityTracker />
-                  <PushNotificationInitializer />
+                  <DeferredTrackers />
                   <AnimationSettingsProvider>
-                    <CelebrationProvider>
-                      <CelebrationListeners />
+                    <DeferredCelebration>
                       <AdminProvider>
                         <LocaleProvider>
                           <LanguagePersistence />
@@ -841,7 +873,7 @@ const App = () => (
                         </Routes>
                         </LocaleProvider>
                       </AdminProvider>
-                    </CelebrationProvider>
+                    </DeferredCelebration>
                   </AnimationSettingsProvider>
                 </AuthProvider>
               </CountryProvider>
