@@ -1,5 +1,14 @@
 import { useState, useEffect, useMemo } from "react";
-import { isDespia } from "@/lib/despia";
+
+/**
+ * Check if running inside Despia native environment.
+ * Inlined here to avoid importing from @/lib/despia which imports despia-native,
+ * preventing module initialization issues that can break React hooks.
+ */
+const checkIsDespia = (): boolean => {
+  if (typeof navigator === 'undefined') return false;
+  return navigator.userAgent.toLowerCase().includes('despia');
+};
 
 export interface EnvironmentInfo {
   /** Running in standard browser (not PWA, not native) */
@@ -27,7 +36,7 @@ const getInitialPlatformState = () => {
   const ua = navigator.userAgent.toLowerCase();
   const iOS = ua.includes('iphone') || ua.includes('ipad') || ua.includes('ipod');
   const android = ua.includes('android');
-  const despiaEnv = isDespia();
+  const despiaEnv = checkIsDespia();
   const isCapacitor = !!(window as any).Capacitor;
   const isCordova = !!(window as any).cordova;
   const nativeApp = isCapacitor || isCordova;
@@ -76,7 +85,7 @@ export const useEnvironment = (): EnvironmentInfo => {
     setIsNativeApp(isCapacitor || isCordova);
 
     // Detect Despia native runtime
-    setIsDespiaEnv(isDespia());
+    setIsDespiaEnv(checkIsDespia());
 
     // Detect PWA (standalone mode)
     // Method 1: display-mode media query
@@ -126,7 +135,7 @@ export const getEnvironment = (): EnvironmentInfo => {
   const isCapacitor = typeof window !== "undefined" && !!(window as any).Capacitor;
   const isCordova = typeof window !== "undefined" && !!(window as any).cordova;
   const isNativeApp = isCapacitor || isCordova;
-  const isDespiaEnv = isDespia();
+  const isDespiaEnv = checkIsDespia();
 
   const isStandaloneMode = typeof window !== "undefined" && 
     window.matchMedia("(display-mode: standalone)").matches;
