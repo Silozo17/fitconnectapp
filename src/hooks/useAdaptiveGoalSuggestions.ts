@@ -1,3 +1,4 @@
+import { useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,6 +20,11 @@ export interface GoalSuggestion {
  */
 export function useAdaptiveGoalSuggestions() {
   const { user } = useAuth();
+
+  // Track dismissed suggestions in state for reactivity
+  const [dismissedIds, setDismissedIds] = useState<string[]>(() => 
+    JSON.parse(sessionStorage.getItem('dismissed-suggestions') || '[]')
+  );
 
   const { data: suggestions, isLoading } = useQuery<GoalSuggestion[]>({
     queryKey: ['adaptive-goal-suggestions', user?.id],
@@ -145,14 +151,17 @@ export function useAdaptiveGoalSuggestions() {
     refetchOnWindowFocus: false,
   });
 
-  // Get dismissed suggestions from session storage
-  const dismissedIds = JSON.parse(sessionStorage.getItem('dismissed-suggestions') || '[]') as string[];
+  // Filter out dismissed suggestions
   const activeSuggestions = suggestions?.filter(s => !dismissedIds.includes(s.id)) || [];
 
-  const dismissSuggestion = (id: string) => {
-    const current = JSON.parse(sessionStorage.getItem('dismissed-suggestions') || '[]') as string[];
-    sessionStorage.setItem('dismissed-suggestions', JSON.stringify([...current, id]));
-  };
+  // Dismiss a suggestion - updates state to trigger re-render
+  const dismissSuggestion = useCallback((id: string) => {
+    setDismissedIds(prev => {
+      const updated = [...prev, id];
+      sessionStorage.setItem('dismissed-suggestions', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
 
   return {
     suggestions: activeSuggestions,

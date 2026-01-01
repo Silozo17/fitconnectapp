@@ -61,9 +61,9 @@ export function DocsLayout({ title, description, breadcrumbs = [], children, noI
         <Navbar />
         
         <div className="flex-1 flex pt-16 md:pt-20">
-          {/* Sidebar - hidden on mobile */}
+        {/* Sidebar - hidden on mobile */}
           <div className="hidden lg:block">
-            <div className="sticky top-0 h-screen">
+            <div className="sticky top-20 max-h-[calc(100vh-8rem)] overflow-y-auto">
               <DocNav />
             </div>
           </div>
@@ -126,7 +126,7 @@ export function DocsLayout({ title, description, breadcrumbs = [], children, noI
               </div>
 
               {/* Page content */}
-              <div className="prose prose-invert max-w-none">
+              <div className="prose prose-invert prose-docs max-w-none">
                 {children}
               </div>
             </div>

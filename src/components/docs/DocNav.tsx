@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -7,6 +8,7 @@ import {
   Dumbbell, 
   Shield,
   ChevronRight,
+  ChevronDown,
   Home,
   UserPlus,
   Search,
@@ -41,15 +43,29 @@ import {
   LineChart,
   UsersRound
 } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
+interface NavChild {
+  title: string;
+  href: string;
+  icon?: React.ElementType;
+}
+
+interface NavSection {
+  sectionTitle: string;
+  children: NavChild[];
+}
 
 interface NavItem {
   title: string;
   href: string;
   icon?: React.ElementType;
-  children?: NavItem[];
+  sections?: NavSection[];
+  children?: NavChild[]; // For non-sectioned items like Integrations
   adminOnly?: boolean;
 }
 
+// Categorized navigation structure
 const navItems: NavItem[] = [
   {
     title: "Getting Started",
@@ -60,79 +76,159 @@ const navItems: NavItem[] = [
     title: "For Clients",
     href: "/docs/client",
     icon: User,
-    children: [
-      { title: "Overview", href: "/docs/client", icon: Home },
-      { title: "Creating Your Profile", href: "/docs/client/profile", icon: UserPlus },
-      { title: "Finding Coaches", href: "/docs/client/coaches", icon: Search },
-      { title: "Booking Sessions", href: "/docs/client/sessions", icon: Calendar },
-      { title: "Messages", href: "/docs/client/messages", icon: MessageSquare },
-      { title: "Workout & Nutrition Plans", href: "/docs/client/plans", icon: ClipboardList },
-      { title: "Food Diary", href: "/docs/client/food-diary", icon: Utensils },
-      { title: "Training Logs", href: "/docs/client/training-logs", icon: Dumbbell },
-      { title: "Tracking Progress", href: "/docs/client/progress", icon: TrendingUp },
-      { title: "Habits & Streaks", href: "/docs/client/habits", icon: Flame },
-      { title: "Readiness Score", href: "/docs/client/readiness", icon: Target },
-      { title: "Wearable Trends", href: "/docs/client/trends", icon: TrendingUp },
-      { title: "Micro Wins", href: "/docs/client/micro-wins", icon: Trophy },
-      { title: "Goal Suggestions", href: "/docs/client/goal-suggestions", icon: Sparkles },
-      { title: "Shopping Lists", href: "/docs/client/grocery", icon: ShoppingCart },
-      { title: "Challenges", href: "/docs/client/challenges", icon: Target },
-      { title: "Achievements", href: "/docs/client/achievements", icon: Trophy },
-      { title: "Leaderboards", href: "/docs/client/leaderboards", icon: BarChart3 },
-      { title: "Fitness Tools", href: "/docs/client/tools", icon: Calculator },
-      { title: "Marketplace", href: "/docs/client/marketplace", icon: Package },
-      { title: "Digital Library", href: "/docs/client/library", icon: Library },
-      { title: "Favourites", href: "/docs/client/favourites", icon: Star },
-      { title: "Receipts", href: "/docs/client/receipts", icon: CreditCard },
-      { title: "Connections", href: "/docs/client/connections", icon: Link2 },
-      { title: "Data Sharing", href: "/docs/client/data-sharing", icon: Shield },
-      { title: "Account Security", href: "/docs/client/security", icon: Shield },
-      { title: "Wearables", href: "/docs/client/wearables", icon: Settings },
-      { title: "Settings", href: "/docs/client/settings", icon: Settings },
+    sections: [
+      {
+        sectionTitle: "Getting Started",
+        children: [
+          { title: "Overview", href: "/docs/client", icon: Home },
+          { title: "Creating Your Profile", href: "/docs/client/profile", icon: UserPlus },
+        ]
+      },
+      {
+        sectionTitle: "Finding & Booking",
+        children: [
+          { title: "Finding Coaches", href: "/docs/client/coaches", icon: Search },
+          { title: "Booking Sessions", href: "/docs/client/sessions", icon: Calendar },
+          { title: "Messages", href: "/docs/client/messages", icon: MessageSquare },
+          { title: "Favourites", href: "/docs/client/favourites", icon: Star },
+        ]
+      },
+      {
+        sectionTitle: "Plans & Nutrition",
+        children: [
+          { title: "Workout & Nutrition Plans", href: "/docs/client/plans", icon: ClipboardList },
+          { title: "Food Diary", href: "/docs/client/food-diary", icon: Utensils },
+          { title: "Shopping Lists", href: "/docs/client/grocery", icon: ShoppingCart },
+        ]
+      },
+      {
+        sectionTitle: "Progress & Health",
+        children: [
+          { title: "Training Logs", href: "/docs/client/training-logs", icon: Dumbbell },
+          { title: "Tracking Progress", href: "/docs/client/progress", icon: TrendingUp },
+          { title: "Habits & Streaks", href: "/docs/client/habits", icon: Flame },
+          { title: "Readiness Score", href: "/docs/client/readiness", icon: Target },
+          { title: "Wearable Trends", href: "/docs/client/trends", icon: TrendingUp },
+          { title: "Micro Wins", href: "/docs/client/micro-wins", icon: Trophy },
+          { title: "Goal Suggestions", href: "/docs/client/goal-suggestions", icon: Sparkles },
+        ]
+      },
+      {
+        sectionTitle: "Achievements & Social",
+        children: [
+          { title: "Challenges", href: "/docs/client/challenges", icon: Target },
+          { title: "Achievements", href: "/docs/client/achievements", icon: Trophy },
+          { title: "Leaderboards", href: "/docs/client/leaderboards", icon: BarChart3 },
+          { title: "Connections", href: "/docs/client/connections", icon: Link2 },
+        ]
+      },
+      {
+        sectionTitle: "Tools & Library",
+        children: [
+          { title: "Fitness Tools", href: "/docs/client/tools", icon: Calculator },
+          { title: "Marketplace", href: "/docs/client/marketplace", icon: Package },
+          { title: "Digital Library", href: "/docs/client/library", icon: Library },
+        ]
+      },
+      {
+        sectionTitle: "Settings & Privacy",
+        children: [
+          { title: "Data Sharing", href: "/docs/client/data-sharing", icon: Shield },
+          { title: "Account Security", href: "/docs/client/security", icon: Shield },
+          { title: "Wearables", href: "/docs/client/wearables", icon: Settings },
+          { title: "Settings", href: "/docs/client/settings", icon: Settings },
+          { title: "Receipts", href: "/docs/client/receipts", icon: CreditCard },
+        ]
+      },
     ],
   },
   {
     title: "For Coaches",
     href: "/docs/coach",
     icon: Dumbbell,
-    children: [
-      { title: "Overview", href: "/docs/coach", icon: Home },
-      { title: "Getting Started", href: "/docs/coach/onboarding", icon: BookOpen },
-      { title: "Profile Setup", href: "/docs/coach/profile", icon: UserPlus },
-      { title: "Managing Clients", href: "/docs/coach/clients", icon: Users },
-      { title: "Client Comparison", href: "/docs/coach/comparison", icon: BarChart3 },
-      { title: "Client Wearables", href: "/docs/coach/wearables", icon: Settings },
-      { title: "Client Risk Detection", href: "/docs/coach/client-risk", icon: AlertTriangle },
-      { title: "Plateau Detection", href: "/docs/coach/plateau-detection", icon: Activity },
-      { title: "Sales Pipeline", href: "/docs/coach/pipeline", icon: Kanban },
-      { title: "Messaging & Templates", href: "/docs/coach/messaging", icon: MessageSquare },
-      { title: "Building Plans", href: "/docs/coach/plans", icon: ClipboardList },
-      { title: "Nutrition Builder", href: "/docs/coach/nutrition", icon: Utensils },
-      { title: "Digital Products", href: "/docs/coach/products", icon: Package },
-      { title: "Schedule & Sessions", href: "/docs/coach/schedule", icon: Calendar },
-      { title: "Packages & Pricing", href: "/docs/coach/packages", icon: CreditCard },
-      { title: "Package Analytics", href: "/docs/coach/package-analytics", icon: BarChart3 },
-      { title: "Group Classes", href: "/docs/coach/group-classes", icon: UsersRound },
-      { title: "Financial Management", href: "/docs/coach/financial", icon: CreditCard },
-      { title: "Revenue Forecasting", href: "/docs/coach/revenue-forecast", icon: LineChart },
-      { title: "Boost Marketing", href: "/docs/coach/boost", icon: Rocket },
-      { title: "Engagement Scoring", href: "/docs/coach/engagement-scoring", icon: Activity },
-      { title: "Client LTV", href: "/docs/coach/client-ltv", icon: CreditCard },
-      { title: "Upsell Insights", href: "/docs/coach/upsell-insights", icon: TrendingUp },
-      { title: "Goal Adherence", href: "/docs/coach/goal-adherence", icon: Target },
-      { title: "AI Tools", href: "/docs/coach/ai", icon: Sparkles },
-      { title: "AI Recommendations", href: "/docs/coach/ai-recommendations", icon: Brain },
-      { title: "Check-in Suggestions", href: "/docs/coach/checkin-suggestions", icon: MessageSquare },
-      { title: "Automations", href: "/docs/coach/automations", icon: Settings },
-      { title: "Outcome Showcase", href: "/docs/coach/showcase", icon: Trophy },
-      { title: "Case Studies", href: "/docs/coach/case-studies", icon: FileText },
-      { title: "Managing Reviews", href: "/docs/coach/reviews", icon: Star },
-      { title: "Verification", href: "/docs/coach/verification", icon: FileCheck },
-      { title: "Earnings & Stripe", href: "/docs/coach/earnings", icon: BarChart3 },
-      { title: "Integrations", href: "/docs/coach/integrations", icon: Plug },
-      { title: "Connections", href: "/docs/coach/connections", icon: Link2 },
-      { title: "Settings", href: "/docs/coach/settings", icon: Settings },
-      { title: "Achievements", href: "/docs/coach/achievements", icon: Trophy },
+    sections: [
+      {
+        sectionTitle: "Getting Started",
+        children: [
+          { title: "Overview", href: "/docs/coach", icon: Home },
+          { title: "Getting Started", href: "/docs/coach/onboarding", icon: BookOpen },
+          { title: "Profile Setup", href: "/docs/coach/profile", icon: UserPlus },
+          { title: "Verification", href: "/docs/coach/verification", icon: FileCheck },
+        ]
+      },
+      {
+        sectionTitle: "Client Management",
+        children: [
+          { title: "Managing Clients", href: "/docs/coach/clients", icon: Users },
+          { title: "Client Comparison", href: "/docs/coach/comparison", icon: BarChart3 },
+          { title: "Client Wearables", href: "/docs/coach/wearables", icon: Settings },
+          { title: "Client Risk Detection", href: "/docs/coach/client-risk", icon: AlertTriangle },
+          { title: "Plateau Detection", href: "/docs/coach/plateau-detection", icon: Activity },
+          { title: "Goal Adherence", href: "/docs/coach/goal-adherence", icon: Target },
+        ]
+      },
+      {
+        sectionTitle: "Sales & Pipeline",
+        children: [
+          { title: "Sales Pipeline", href: "/docs/coach/pipeline", icon: Kanban },
+          { title: "Messaging & Templates", href: "/docs/coach/messaging", icon: MessageSquare },
+          { title: "Check-in Suggestions", href: "/docs/coach/checkin-suggestions", icon: MessageSquare },
+        ]
+      },
+      {
+        sectionTitle: "Plans & Nutrition",
+        children: [
+          { title: "Building Plans", href: "/docs/coach/plans", icon: ClipboardList },
+          { title: "Nutrition Builder", href: "/docs/coach/nutrition", icon: Utensils },
+          { title: "Digital Products", href: "/docs/coach/products", icon: Package },
+        ]
+      },
+      {
+        sectionTitle: "Scheduling & Payments",
+        children: [
+          { title: "Schedule & Sessions", href: "/docs/coach/schedule", icon: Calendar },
+          { title: "Packages & Pricing", href: "/docs/coach/packages", icon: CreditCard },
+          { title: "Package Analytics", href: "/docs/coach/package-analytics", icon: BarChart3 },
+          { title: "Group Classes", href: "/docs/coach/group-classes", icon: UsersRound },
+          { title: "Financial Management", href: "/docs/coach/financial", icon: CreditCard },
+          { title: "Earnings & Stripe", href: "/docs/coach/earnings", icon: BarChart3 },
+        ]
+      },
+      {
+        sectionTitle: "Analytics & Insights",
+        children: [
+          { title: "Engagement Scoring", href: "/docs/coach/engagement-scoring", icon: Activity },
+          { title: "Client LTV", href: "/docs/coach/client-ltv", icon: CreditCard },
+          { title: "Upsell Insights", href: "/docs/coach/upsell-insights", icon: TrendingUp },
+          { title: "Revenue Forecasting", href: "/docs/coach/revenue-forecast", icon: LineChart },
+        ]
+      },
+      {
+        sectionTitle: "AI & Automation",
+        children: [
+          { title: "AI Tools", href: "/docs/coach/ai", icon: Sparkles },
+          { title: "AI Recommendations", href: "/docs/coach/ai-recommendations", icon: Brain },
+          { title: "Automations", href: "/docs/coach/automations", icon: Settings },
+        ]
+      },
+      {
+        sectionTitle: "Marketing & Showcase",
+        children: [
+          { title: "Boost Marketing", href: "/docs/coach/boost", icon: Rocket },
+          { title: "Outcome Showcase", href: "/docs/coach/showcase", icon: Trophy },
+          { title: "Case Studies", href: "/docs/coach/case-studies", icon: FileText },
+          { title: "Managing Reviews", href: "/docs/coach/reviews", icon: Star },
+        ]
+      },
+      {
+        sectionTitle: "Settings & Integrations",
+        children: [
+          { title: "Integrations", href: "/docs/coach/integrations", icon: Plug },
+          { title: "Connections", href: "/docs/coach/connections", icon: Link2 },
+          { title: "Settings", href: "/docs/coach/settings", icon: Settings },
+          { title: "Achievements", href: "/docs/coach/achievements", icon: Trophy },
+        ]
+      },
     ],
   },
   {
@@ -187,7 +283,28 @@ export function DocNav({ onNavigate }: DocNavProps) {
   const isActive = (href: string) => currentPath === href;
   const isParentActive = (item: NavItem) => 
     currentPath.startsWith(item.href) || 
+    item.sections?.some(section => section.children.some(child => currentPath === child.href)) ||
     item.children?.some(child => currentPath === child.href);
+
+  // Track which sections are expanded
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(() => {
+    // Auto-expand sections that contain the active route
+    const initial: Record<string, boolean> = {};
+    navItems.forEach(item => {
+      if (item.sections) {
+        item.sections.forEach(section => {
+          const key = `${item.href}-${section.sectionTitle}`;
+          const hasActive = section.children.some(child => currentPath === child.href);
+          initial[key] = hasActive;
+        });
+      }
+    });
+    return initial;
+  });
+
+  const toggleSection = (key: string) => {
+    setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }));
+  };
 
   const handleClick = () => {
     onNavigate?.();
@@ -197,7 +314,7 @@ export function DocNav({ onNavigate }: DocNavProps) {
   const visibleNavItems = navItems.filter(item => !item.adminOnly || isAdmin);
 
   return (
-    <nav className="w-full lg:w-64 flex-shrink-0 border-r border-border bg-card/50 p-4 overflow-y-auto">
+    <nav className="w-full lg:w-64 flex-shrink-0 border-r border-border bg-card/50 p-4 pb-8">
       <div className="mb-6">
         <Link to="/docs" className="flex items-center gap-2 text-primary font-semibold" onClick={handleClick}>
           <BookOpen className="h-5 w-5" />
@@ -213,14 +330,14 @@ export function DocNav({ onNavigate }: DocNavProps) {
               onClick={handleClick}
               className={cn(
                 "flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors",
-                isActive(item.href) || (isParentActive(item) && !item.children)
+                isActive(item.href) || (isParentActive(item) && !item.sections && !item.children)
                   ? "bg-primary/20 text-primary font-medium"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
               {item.icon && <item.icon className="h-4 w-4" />}
               <span>{item.title}</span>
-              {item.children && (
+              {(item.sections || item.children) && (
                 <ChevronRight className={cn(
                   "h-4 w-4 ml-auto transition-transform",
                   isParentActive(item) && "rotate-90"
@@ -228,7 +345,59 @@ export function DocNav({ onNavigate }: DocNavProps) {
               )}
             </Link>
 
-            {item.children && isParentActive(item) && (
+            {/* Sectioned navigation (Client & Coach) */}
+            {item.sections && isParentActive(item) && (
+              <div className="ml-4 mt-2 space-y-2 border-l border-border pl-3">
+                {item.sections.map((section) => {
+                  const sectionKey = `${item.href}-${section.sectionTitle}`;
+                  const isSectionExpanded = expandedSections[sectionKey] ?? section.children.some(c => isActive(c.href));
+                  const hasActiveChild = section.children.some(c => isActive(c.href));
+
+                  return (
+                    <Collapsible
+                      key={sectionKey}
+                      open={isSectionExpanded}
+                      onOpenChange={() => toggleSection(sectionKey)}
+                    >
+                      <CollapsibleTrigger className={cn(
+                        "flex items-center justify-between w-full px-2 py-1.5 text-xs font-medium uppercase tracking-wide rounded transition-colors",
+                        hasActiveChild 
+                          ? "text-primary" 
+                          : "text-muted-foreground hover:text-foreground"
+                      )}>
+                        <span>{section.sectionTitle}</span>
+                        {isSectionExpanded ? (
+                          <ChevronDown className="h-3 w-3" />
+                        ) : (
+                          <ChevronRight className="h-3 w-3" />
+                        )}
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="space-y-0.5 mt-1">
+                        {section.children.map((child) => (
+                          <Link
+                            key={child.href}
+                            to={child.href}
+                            onClick={handleClick}
+                            className={cn(
+                              "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors",
+                              isActive(child.href)
+                                ? "bg-primary/20 text-primary font-medium"
+                                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                            )}
+                          >
+                            {child.icon && <child.icon className="h-3.5 w-3.5" />}
+                            <span>{child.title}</span>
+                          </Link>
+                        ))}
+                      </CollapsibleContent>
+                    </Collapsible>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Flat navigation (Integrations, Admin) */}
+            {item.children && !item.sections && isParentActive(item) && (
               <div className="ml-4 mt-1 space-y-1 border-l border-border pl-3">
                 {item.children.map((child) => (
                   <Link

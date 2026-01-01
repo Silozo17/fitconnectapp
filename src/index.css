@@ -171,6 +171,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Documentation prose overrides - remove link underscoring */
+.prose-docs a {
+  @apply text-primary no-underline transition-colors;
+}
+.prose-docs a:hover {
+  @apply text-primary/80;
+}
+
 @layer base {
   /* Prevent mobile browser zoom on form inputs - requires 16px minimum */
   @media screen and (max-width: 768px) {
