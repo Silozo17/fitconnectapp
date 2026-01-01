@@ -42,7 +42,7 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
       role="banner"
       aria-label="Dashboard header"
     >
-      <div className="flex items-center justify-between min-h-16 h-auto xl:h-16 px-4 xl:px-6">
+      <div className="flex items-center justify-between min-h-12 h-auto xl:h-16 px-4 xl:px-6">
         {/* Left side */}
         <div className="flex items-center gap-3 flex-1">
           <div className="xl:hidden">
