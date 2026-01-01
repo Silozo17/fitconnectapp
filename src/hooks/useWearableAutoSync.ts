@@ -4,12 +4,14 @@ import { useSyncAllWearables } from './useSyncAllWearables';
 
 const AUTO_SYNC_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
 const MIN_SYNC_INTERVAL_MS = 60 * 1000; // 1 minute minimum between syncs
+const RETRY_DELAY_MS = 5000; // 5 seconds delay before retry
 
 export const useWearableAutoSync = () => {
   const { syncAll, isSyncing, lastSyncedAt, hasConnectedDevices } = useSyncAllWearables();
   const queryClient = useQueryClient();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastAutoSyncRef = useRef<Date | null>(null);
+  const retryCountRef = useRef<number>(0);
 
   const shouldSync = useCallback(() => {
     // Don't sync if no devices connected
@@ -54,23 +56,47 @@ export const useWearableAutoSync = () => {
     return true;
   }, [hasConnectedDevices, isSyncing, lastSyncedAt]);
 
-  const performAutoSync = useCallback(async () => {
+  const performAutoSync = useCallback(async (isRetry = false) => {
     // Refresh connection data first to get accurate lastSyncedAt
     await queryClient.refetchQueries({ queryKey: ["wearable-connections"], exact: false });
     
     if (!shouldSync()) return;
     
-    console.log('[useWearableAutoSync] Performing auto-sync (excluding Apple Health due to Despia limitations)...');
+    /**
+     * MULTI-METRIC APPLE HEALTH SYNC ENABLED
+     * 
+     * Now syncing all supported QUANTITY types every 15 minutes:
+     * - Steps (HKQuantityTypeIdentifierStepCount)
+     * - Heart Rate (HKQuantityTypeIdentifierHeartRate)
+     * - Calories (HKQuantityTypeIdentifierActiveEnergyBurned)
+     * - Active Minutes (HKQuantityTypeIdentifierAppleExerciseTime)
+     * - Distance (HKQuantityTypeIdentifierDistanceWalkingRunning)
+     * 
+     * NOTE: Sleep is NOT synced because it's a CATEGORY type which requires
+     * HKSampleQuery. Despia only supports HKStatisticsCollectionQuery.
+     * Users can enter sleep manually or sync from Fitbit/Garmin.
+     */
+    console.log(`[useWearableAutoSync] Performing auto-sync (all wearables including Apple Health)... ${isRetry ? '[RETRY]' : ''}`);
     lastAutoSyncRef.current = new Date();
     
     try {
-      // IMPORTANT: Disable Apple Health from auto-sync due to Despia native bridge limitations
-      // Apple Health sync can fail silently, leaving UI in broken states
-      // Users must manually trigger Apple Health sync via the sync button
-      await syncAll({ includeAppleHealth: false });
+      // Include Apple Health in auto-sync - multi-metric sync is now supported
+      await syncAll({ includeAppleHealth: true });
       console.log('[useWearableAutoSync] Auto-sync complete');
+      retryCountRef.current = 0; // Reset retry count on success
     } catch (error) {
       console.error('[useWearableAutoSync] Auto-sync failed:', error);
+      
+      // Simple retry mechanism: retry once after 5 seconds if first attempt fails
+      if (!isRetry && retryCountRef.current < 1) {
+        retryCountRef.current += 1;
+        console.log(`[useWearableAutoSync] Scheduling retry in ${RETRY_DELAY_MS / 1000}s...`);
+        setTimeout(() => {
+          performAutoSync(true);
+        }, RETRY_DELAY_MS);
+      } else {
+        retryCountRef.current = 0; // Reset after failed retry
+      }
     }
   }, [shouldSync, syncAll, queryClient]);
 
