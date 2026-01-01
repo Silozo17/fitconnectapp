@@ -244,7 +244,13 @@ export const checkHealthKitConnection = async (): Promise<HealthKitConnectionRes
   }
 
   try {
-    console.log('[Despia HealthKit] Attempting to read data (triggers permission if needed)...');
+    /**
+     * REQUEST ALL SUPPORTED TYPES UPFRONT
+     * This ensures iOS shows the full permission dialog for all 5 metrics
+     * when the user first connects Apple Health, not just Steps.
+     */
+    const allTypes = SUPPORTED_HEALTHKIT_TYPES.join(',');
+    console.log(`[Despia HealthKit] Attempting to read data for: ${allTypes} (triggers permission if needed)...`);
     
     // Create a timeout promise to prevent infinite waiting (Despia limitation)
     const timeoutPromise = new Promise<never>((_, reject) => {
@@ -254,7 +260,7 @@ export const checkHealthKitConnection = async (): Promise<HealthKitConnectionRes
     // Race between actual call and timeout
     const response = await Promise.race([
       despia(
-        'healthkit://read?types=HKQuantityTypeIdentifierStepCount&days=1',
+        `healthkit://read?types=${allTypes}&days=1`,
         ['healthkitResponse']
       ),
       timeoutPromise
