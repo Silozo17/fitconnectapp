@@ -83,7 +83,7 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg bg-card border-border max-h-[85vh] flex flex-col">
+      <DialogContent className="sm:max-w-lg bg-card border-border max-h-[85vh] flex flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
             <Calendar className="h-5 w-5 text-primary" />
@@ -91,30 +91,30 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
           </DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
-          <div className="flex-1 overflow-y-auto overflow-x-hidden touch-pan-y overscroll-y-contain space-y-4 pr-1">
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0 min-w-0">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden touch-pan-y overscroll-y-contain space-y-4 pr-1 min-w-0">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-2">
+              <div className="space-y-2 min-w-0">
                 <Label htmlFor="date">{t('scheduleSessionModal.date')}</Label>
                 <Input
                   id="date"
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="bg-background border-border"
+                  className="w-full bg-background border-border"
                   required
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 min-w-0">
                 <Label htmlFor="time">{t('scheduleSessionModal.time')}</Label>
-                <div className="relative">
+                <div className="relative min-w-0">
                   <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
                   <Input
                     id="time"
                     type="time"
                     value={time}
                     onChange={(e) => setTime(e.target.value)}
-                    className="pl-10 bg-background border-border"
+                    className="w-full pl-10 bg-background border-border"
                     required
                   />
                 </div>
@@ -122,10 +122,10 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-2">
+              <div className="space-y-2 min-w-0">
                 <Label htmlFor="sessionType">{t('scheduleSessionModal.sessionType')}</Label>
                 <Select value={sessionType} onValueChange={setSessionType} required>
-                  <SelectTrigger className="bg-background border-border">
+                  <SelectTrigger className="w-full bg-background border-border">
                     <SelectValue placeholder={t('scheduleSessionModal.selectType')} />
                   </SelectTrigger>
                   <SelectContent>
@@ -137,10 +137,10 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 min-w-0">
                 <Label htmlFor="duration">{t('scheduleSessionModal.duration')}</Label>
                 <Select value={duration} onValueChange={setDuration}>
-                  <SelectTrigger className="bg-background border-border">
+                  <SelectTrigger className="w-full bg-background border-border">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -167,12 +167,13 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
             </div>
 
             {!isOnline && (
-              <div className="space-y-2">
+              <div className="space-y-2 min-w-0">
                 <Label htmlFor="location">{t('scheduleSessionModal.location')}</Label>
                 <VenueAutocomplete
                   value={location}
                   onVenueChange={(loc) => setLocation(loc)}
                   placeholder={t('scheduleSessionModal.venuePlaceholder')}
+                  className="w-full"
                 />
               </div>
             )}
