@@ -6,16 +6,19 @@ import { getEnvironment } from "@/hooks/useEnvironment";
  * of the visible header element. This ensures the ProfileNotch aligns with
  * the actual rendered header, including CSS fallbacks for safe areas.
  */
-export const useHeaderHeight = (baseHeight = 42): number => {
+export const useHeaderHeight = (baseHeight = 64): number => {
   const env = getEnvironment();
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1280;
+  
+  // Native iOS uses 42px, everything else uses the default baseHeight (64px)
+  const effectiveBaseHeight = (env.isDespia && env.isIOS) ? 42 : baseHeight;
   
   // Initial value: use reasonable default for native iOS
   const [height, setHeight] = useState(() => {
     if (isMobile && env.isDespia && env.isIOS) {
-      return 59 + baseHeight; // 123px for iOS native (no bottom padding)
+      return 59 + effectiveBaseHeight; // 101px for iOS native (59px safe area + 42px content)
     }
-    return baseHeight;
+    return effectiveBaseHeight;
   });
 
   useEffect(() => {
@@ -34,13 +37,13 @@ export const useHeaderHeight = (baseHeight = 42): number => {
         const paddingTop = parseInt(computedStyle.paddingTop, 10) || 0;
         const paddingBottom = parseInt(computedStyle.paddingBottom, 10) || 0;
         
-        // Total header height = safe area padding + base height + bottom padding
-        setHeight(paddingTop + baseHeight + paddingBottom);
+        // Total header height = safe area padding + effective base height + bottom padding
+        setHeight(paddingTop + effectiveBaseHeight + paddingBottom);
       } else if (env.isDespia && env.isIOS) {
         // Fallback: Use the same 59px fallback as CSS
-        setHeight(59 + baseHeight);
+        setHeight(59 + effectiveBaseHeight);
       } else {
-        setHeight(baseHeight);
+        setHeight(effectiveBaseHeight);
       }
     };
 
@@ -52,7 +55,7 @@ export const useHeaderHeight = (baseHeight = 42): number => {
       clearTimeout(timeoutId);
       window.removeEventListener('resize', computeHeight);
     };
-  }, [isMobile, env.isDespia, env.isIOS, baseHeight]);
+  }, [isMobile, env.isDespia, env.isIOS, effectiveBaseHeight]);
 
   return height;
 };

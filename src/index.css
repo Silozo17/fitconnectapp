@@ -346,7 +346,7 @@
   }
 
   .mt-header-safe {
-    margin-top: calc(2.625rem + env(safe-area-inset-top, 0px));
+    margin-top: calc(4rem + env(safe-area-inset-top, 0px));
   }
 
   /* Native iOS fallback - use Despia's runtime CSS variable */
@@ -360,6 +360,11 @@
   html.native-ios .mt-header-safe {
     /* 2.625rem (42px) base + Despia safe area */
     margin-top: calc(2.625rem + var(--safe-area-top, 59px));
+  }
+
+  /* Native iOS header content - reduced height for native app only */
+  html.native-ios header > div:first-child {
+    min-height: 42px !important;
   }
 
   /* ========================================
