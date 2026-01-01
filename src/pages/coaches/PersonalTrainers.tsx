@@ -82,10 +82,13 @@ const PersonalTrainers = () => {
   const serviceSchema = {
     "@context": "https://schema.org",
     "@type": "Service",
-    "name": "Personal Training",
+    "name": "Personal Training UK",
+    "description": "Hire certified personal trainers across the UK. Online and in-person sessions with custom workout plans.",
+    "url": "https://getfitconnect.co.uk/coaches/personal-trainers",
     "provider": {
       "@type": "Organization",
-      "name": "FitConnect"
+      "name": "FitConnect",
+      "url": "https://getfitconnect.co.uk"
     },
     "serviceType": "Personal Training",
     "areaServed": {
@@ -95,14 +98,40 @@ const PersonalTrainers = () => {
     "priceRange": "£40-£100"
   };
 
+  // Breadcrumb schema for navigation
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://getfitconnect.co.uk"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Coaches",
+        "item": "https://getfitconnect.co.uk/coaches"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": "Personal Trainers",
+        "item": "https://getfitconnect.co.uk/coaches/personal-trainers"
+      }
+    ]
+  };
+
   return (
     <>
       <SEOHead
         title={t('coachTypes.personalTrainers.meta.title')}
         description={t('coachTypes.personalTrainers.meta.description')}
         canonicalPath="/coaches/personal-trainers"
-        keywords={["personal trainers UK", "certified personal trainer", "book PT", "hire personal trainer", "fitness coach"]}
-        schema={[faqSchema, serviceSchema]}
+        keywords={["hire personal trainer UK", "certified PT near me", "book personal trainer", "personal training sessions", "fitness coach UK"]}
+        schema={[faqSchema, serviceSchema, breadcrumbSchema]}
       />
       
       <div className="min-h-screen bg-background">
