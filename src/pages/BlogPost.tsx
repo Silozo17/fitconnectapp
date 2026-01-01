@@ -79,19 +79,26 @@ export default function BlogPost() {
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <main className="pt-24 pb-16">
-          <div className="container mx-auto px-4 text-center py-16">
-            <h1 className="text-2xl font-bold mb-4">Article Not Found</h1>
-            <p className="text-muted-foreground mb-6">The article you're looking for doesn't exist.</p>
-            <Button asChild>
-              <Link to="/blog">Back to Blog</Link>
-            </Button>
-          </div>
-        </main>
-        <Footer />
-      </div>
+      <>
+        <SEOHead
+          title="Article Not Found | FitConnect Blog"
+          description="The article you're looking for doesn't exist or has been moved."
+          noIndex={true}
+        />
+        <div className="min-h-screen bg-background">
+          <Navbar />
+          <main className="pt-24 pb-16">
+            <div className="container mx-auto px-4 text-center py-16">
+              <h1 className="text-2xl font-bold mb-4">Article Not Found</h1>
+              <p className="text-muted-foreground mb-6">The article you're looking for doesn't exist.</p>
+              <Button asChild>
+                <Link to="/blog">Back to Blog</Link>
+              </Button>
+            </div>
+          </main>
+          <Footer />
+        </div>
+      </>
     );
   }
 

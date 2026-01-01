@@ -53,27 +53,32 @@ export default function Blog() {
     "@context": "https://schema.org",
     "@type": "Blog",
     "name": "FitConnect Fitness Blog",
-    "description": "Expert fitness advice, workout tips, nutrition guides, and coaching insights from FitConnect.",
+    "description": "Expert fitness advice, workout tips, nutrition guides, and coaching insights from UK personal trainers and nutritionists.",
     "url": "https://getfitconnect.co.uk/blog",
+    "inLanguage": "en-GB",
     "publisher": {
       "@type": "Organization",
       "name": "FitConnect",
       "url": "https://getfitconnect.co.uk",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://getfitconnect.co.uk/og-image.webp"
+      }
     },
   };
 
   const breadcrumbSchema = createBreadcrumbSchema([
     { name: "Home", url: "/" },
-    { name: "Blog", url: "/blog" },
+    { name: "Fitness Blog", url: "/blog" },
   ]);
 
   return (
     <>
       <SEOHead
-        title="Fitness Blog | Training Tips & Nutrition Advice"
-        description="Expert fitness articles from FitConnect coaches. Workout tips, nutrition guides, training advice and industry insights to help you reach your goals."
+        title="Fitness Blog UK | Expert Training Tips & Nutrition Advice"
+        description="Read expert fitness articles from UK personal trainers. Workout tips, nutrition guides, weight loss advice and training insights to reach your goals."
         canonicalPath="/blog"
-        keywords={["fitness blog", "personal training tips", "workout advice UK", "nutrition articles", "fitness tips"]}
+        keywords={["fitness blog UK", "personal training tips", "workout advice", "nutrition articles UK", "weight loss tips", "gym tips UK", "fitness advice"]}
         schema={[blogSchema, breadcrumbSchema]}
         noIndex={isLoading}
       />

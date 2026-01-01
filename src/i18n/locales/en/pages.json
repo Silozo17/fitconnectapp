@@ -716,8 +716,12 @@
     }
   },
   "blog": {
-    "title": "Blog",
-    "subtitle": "Fitness tips, success stories, and industry insights",
+    "meta": {
+      "title": "Fitness Blog UK | Expert Training Tips & Nutrition Advice",
+      "description": "Read expert fitness articles from UK personal trainers. Workout tips, nutrition guides, weight loss advice and training insights."
+    },
+    "title": "Fitness Blog",
+    "subtitle": "Expert fitness tips, nutrition advice and training insights from UK coaches",
     "readMore": "Read More",
     "readTime": "min read",
     "categories": "Categories",

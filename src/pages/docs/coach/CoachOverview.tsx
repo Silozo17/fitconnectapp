@@ -254,8 +254,8 @@ const coachGuides = [
 export default function CoachOverview() {
   return (
     <DocsLayout
-      title="Coach Dashboard Guide | Grow Your PT Business"
-      description="Master FitConnect's coaching tools. Client management, workout builders, payments and marketing features."
+      title="Coach Guide | Grow Your Personal Training Business UK"
+      description="Master FitConnect's coaching tools. Client management, workout builders, payment processing and marketing features for UK personal trainers."
       breadcrumbs={[{ label: "For Coaches" }]}
     >
       {/* Introduction */}

@@ -10,8 +10,8 @@ import { User, Dumbbell, ArrowRight } from "lucide-react";
 export default function GettingStarted() {
   return (
     <DocsLayout
-      title="Getting Started Guide | FitConnect for Beginners"
-      description="New to FitConnect? Learn how to create your account, find coaches, book sessions and start your fitness journey in minutes."
+      title="Getting Started | How to Use FitConnect App"
+      description="New to FitConnect? Learn how to create your account, find personal trainers, book sessions and start your UK fitness journey in minutes."
       breadcrumbs={[{ label: "Getting Started" }]}
     >
       {/* Introduction */}
