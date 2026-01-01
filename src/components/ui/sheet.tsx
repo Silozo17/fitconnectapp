@@ -64,6 +64,8 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
         className={cn(
           sheetVariants({ side }),
           "p-6 pb-safe-bottom overflow-hidden",
+          // Add top safe area for left/right side sheets (navigation sidebars)
+          (side === "left" || side === "right") && "pt-safe-status",
           // Inner highlight for depth
           "before:absolute before:inset-0 before:rounded-[inherit] before:pointer-events-none",
           "before:shadow-[inset_0_1px_0_hsl(0_0%_100%/0.1),inset_0_-1px_0_hsl(0_0%_0%/0.15)]",

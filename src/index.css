@@ -313,6 +313,11 @@
     padding-top: env(safe-area-inset-top, 0px);
   }
   
+  /* Native iOS override for safe-top - use Despia's runtime variable */
+  html.native-ios .safe-top {
+    padding-top: var(--safe-area-top, 59px);
+  }
+  
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }

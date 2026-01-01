@@ -506,7 +506,7 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent side="left" className="w-72 p-0 flex flex-col overflow-hidden" onOpenAutoFocus={(e) => e.preventDefault()}>
           {/* Logo */}
-          <div className="p-4 border-b border-border">
+          <div className="p-4 border-b border-border safe-top">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <Dumbbell className="w-5 h-5 text-primary-foreground" />

@@ -496,7 +496,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent side="left" className="w-72 p-0 flex flex-col overflow-hidden" onOpenAutoFocus={(e) => e.preventDefault()}>
           {/* Logo */}
-          <div className="p-4 border-b border-sidebar-border">
+          <div className="p-4 border-b border-sidebar-border safe-top">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shrink-0">
                 <Dumbbell className="w-6 h-6 text-primary-foreground" />
