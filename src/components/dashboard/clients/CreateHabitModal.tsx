@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,6 +49,26 @@ const CreateHabitModal = ({ open, onOpenChange, coachId, clientId, habit }: Crea
   });
   
   const [useWearable, setUseWearable] = useState(!!habit?.wearable_target_type);
+  
+  // Sync form data when modal opens or habit changes
+  useEffect(() => {
+    if (open) {
+      setFormData({
+        name: habit?.name || '',
+        description: habit?.description || '',
+        category: habit?.category || 'other',
+        frequency: habit?.frequency || 'daily',
+        specific_days: habit?.specific_days || [],
+        target_count: habit?.target_count || 1,
+        reminder_time: habit?.reminder_time || '',
+        start_date: habit?.start_date || new Date().toISOString().split('T')[0],
+        end_date: habit?.end_date || '',
+        wearable_target_type: habit?.wearable_target_type || '',
+        wearable_target_value: habit?.wearable_target_value || 0,
+      });
+      setUseWearable(!!habit?.wearable_target_type);
+    }
+  }, [open, habit]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,7 +121,7 @@ const CreateHabitModal = ({ open, onOpenChange, coachId, clientId, habit }: Crea
           <DialogTitle>{isEditing ? 'Edit Habit' : 'Create New Habit'}</DialogTitle>
         </DialogHeader>
         
-        <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-4 pr-1 touch-pan-y overscroll-y-contain">
           {/* Name */}
           <div className="space-y-2">
             <Label htmlFor="name">Habit Name *</Label>
