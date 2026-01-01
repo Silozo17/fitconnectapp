@@ -184,7 +184,7 @@ export function SessionDetailModal({ open, onOpenChange, session, onRefresh }: S
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-lg bg-card border-border max-h-[90vh] overflow-y-auto overflow-x-hidden touch-pan-y overscroll-y-contain">
+        <DialogContent className="sm:max-w-lg bg-card border-border max-h-[90vh] overflow-hidden overflow-y-auto overflow-x-hidden touch-pan-y overscroll-y-contain">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between text-foreground">
               <span>{t('sessionDetailModal.title')}</span>
@@ -195,7 +195,7 @@ export function SessionDetailModal({ open, onOpenChange, session, onRefresh }: S
             </DialogTitle>
           </DialogHeader>
           
-          <div className="space-y-4">
+          <div className="space-y-4 min-w-0">
             <div className="flex items-center gap-3 p-3 rounded-lg bg-background border border-border">
               <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
                 <User className="h-5 w-5 text-primary" />
@@ -251,11 +251,12 @@ export function SessionDetailModal({ open, onOpenChange, session, onRefresh }: S
               ) : (
                 <>
                   {isEditingLocation ? (
-                    <div className="space-y-2">
+                    <div className="space-y-2 min-w-0 w-full">
                       <VenueAutocomplete
                         value={location}
                         onVenueChange={(loc) => setLocation(loc)}
                         placeholder={t('scheduleSessionModal.venuePlaceholder') || "Search for a gym, studio, park..."}
+                        className="w-full"
                       />
                       <div className="flex gap-2">
                         <Button 
@@ -290,7 +291,7 @@ export function SessionDetailModal({ open, onOpenChange, session, onRefresh }: S
                     >
                       <MapPin className="h-4 w-4 text-primary" />
                       <span className="text-foreground flex-1">
-                        {session.location || t('sessionDetailModal.locationTbd')}
+                        {location || t('sessionDetailModal.locationTbd')}
                       </span>
                       {session.status === "scheduled" && (
                         <Edit2 className="h-4 w-4 text-muted-foreground" />

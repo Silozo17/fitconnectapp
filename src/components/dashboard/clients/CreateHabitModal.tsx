@@ -116,17 +116,18 @@ const CreateHabitModal = ({ open, onOpenChange, coachId, clientId, habit }: Crea
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[85vh] flex flex-col">
+      <DialogContent className="max-w-md max-h-[85vh] flex flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Habit' : 'Create New Habit'}</DialogTitle>
         </DialogHeader>
         
-        <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-4 pr-1 touch-pan-y overscroll-y-contain">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-4 pr-1 touch-pan-y overscroll-y-contain min-w-0">
           {/* Name */}
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0">
             <Label htmlFor="name">Habit Name *</Label>
             <Input
               id="name"
+              className="w-full"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="e.g., Drink 8 glasses of water"
@@ -135,10 +136,11 @@ const CreateHabitModal = ({ open, onOpenChange, coachId, clientId, habit }: Crea
           </div>
           
           {/* Description */}
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0">
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
+              className="w-full"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Add any helpful details or instructions..."
@@ -147,13 +149,13 @@ const CreateHabitModal = ({ open, onOpenChange, coachId, clientId, habit }: Crea
           </div>
           
           {/* Category */}
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0">
             <Label>Category</Label>
             <Select
               value={formData.category}
               onValueChange={(value) => setFormData({ ...formData, category: value })}
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -170,13 +172,13 @@ const CreateHabitModal = ({ open, onOpenChange, coachId, clientId, habit }: Crea
           </div>
           
           {/* Frequency */}
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0">
             <Label>Frequency</Label>
             <Select
               value={formData.frequency}
               onValueChange={(value) => setFormData({ ...formData, frequency: value })}
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -208,10 +210,11 @@ const CreateHabitModal = ({ open, onOpenChange, coachId, clientId, habit }: Crea
           )}
           
           {/* Target Count */}
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0">
             <Label htmlFor="target">Times per day</Label>
             <Input
               id="target"
+              className="w-full"
               type="number"
               min={1}
               max={20}
@@ -267,13 +270,13 @@ const CreateHabitModal = ({ open, onOpenChange, coachId, clientId, habit }: Crea
                 </p>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-2">
+                  <div className="space-y-2 min-w-0">
                     <Label>Data Type</Label>
                     <Select
                       value={formData.wearable_target_type}
                       onValueChange={handleWearableTypeChange}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select data type" />
                       </SelectTrigger>
                       <SelectContent>
@@ -286,10 +289,11 @@ const CreateHabitModal = ({ open, onOpenChange, coachId, clientId, habit }: Crea
                     </Select>
                   </div>
                   
-                  <div className="space-y-2">
+                  <div className="space-y-2 min-w-0">
                     <Label>Target Value</Label>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
                       <Input
+                        className="w-full min-w-0"
                         type="number"
                         min={1}
                         value={formData.wearable_target_value}
@@ -306,10 +310,11 @@ const CreateHabitModal = ({ open, onOpenChange, coachId, clientId, habit }: Crea
           </div>
           
           {/* Reminder Time */}
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0">
             <Label htmlFor="reminder">Reminder Time (optional)</Label>
             <Input
               id="reminder"
+              className="w-full"
               type="time"
               value={formData.reminder_time}
               onChange={(e) => setFormData({ ...formData, reminder_time: e.target.value })}

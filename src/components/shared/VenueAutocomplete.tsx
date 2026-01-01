@@ -162,8 +162,8 @@ export function VenueAutocomplete({
   };
 
   return (
-    <div className={cn("relative", className)}>
-      <div className="relative">
+    <div className={cn("relative min-w-0 w-full", className)}>
+      <div className="relative min-w-0">
         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
         <Input
           ref={inputRef}
@@ -175,7 +175,7 @@ export function VenueAutocomplete({
           placeholder={placeholder}
           disabled={disabled}
           className={cn(
-            "pl-10 pr-10 bg-background border-border text-foreground",
+            "w-full pl-10 pr-10 bg-background border-border text-foreground",
             selectedVenue && "border-green-500/50"
           )}
         />
