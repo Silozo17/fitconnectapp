@@ -349,17 +349,17 @@
     margin-top: calc(4rem + env(safe-area-inset-top, 0px));
   }
 
-  /* Native iOS fallback - when env() returns 0 in Despia webview */
+  /* Native iOS fallback - use Despia's runtime CSS variable */
+  /* Despia injects --safe-area-top with device-specific values (Dynamic Island, Notch, etc.) */
   /* Applied via JavaScript by adding .native-ios class to html element */
   html.native-ios .pt-safe-status {
-    /* iPhone Dynamic Island: ~59px, Notch: ~47px, older: ~44px */
-    /* Use 59px minimum to cover all modern iPhones including Dynamic Island */
-    padding-top: max(env(safe-area-inset-top, 0px), 59px);
+    /* Use Despia's runtime value with 59px fallback for Dynamic Island */
+    padding-top: var(--safe-area-top, 59px);
   }
 
   html.native-ios .mt-header-safe {
-    /* 4rem base + 59px safe area + 12px (pb-3) extra bottom padding */
-    margin-top: calc(4rem + max(env(safe-area-inset-top, 0px), 59px) + 0.75rem);
+    /* 4rem base + Despia safe area + 12px (pb-3) extra bottom padding */
+    margin-top: calc(4rem + var(--safe-area-top, 59px) + 0.75rem);
   }
 
   /* ========================================

@@ -1,7 +1,7 @@
 import { User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProfilePanel } from "@/contexts/ProfilePanelContext";
-import { getEnvironment } from "@/hooks/useEnvironment";
+import { useHeaderHeight } from "@/hooks/useHeaderHeight";
 
 interface ProfileNotchProps {
   className?: string;
@@ -11,22 +11,8 @@ interface ProfileNotchProps {
 const ProfileNotch = ({ className, headerHeight = 64 }: ProfileNotchProps) => {
   const { toggle, isOpen } = useProfilePanel();
   
-  // Get environment to determine actual header height on iOS native
-  const env = getEnvironment();
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1280;
-  
-  // Calculate actual header height
-  // On iOS native mobile: 59px safe area + 64px min-h-16 + 12px pb-3 = 135px
-  // On other mobile: 64px + 12px = 76px (CSS env() handles safe area separately)
-  // On desktop: just use the prop value (64px)
-  let actualHeaderHeight = headerHeight;
-  if (isMobile) {
-    if (env.isDespia && env.isIOS) {
-      actualHeaderHeight = 59 + 64 + 12; // 135px total
-    } else {
-      actualHeaderHeight = 64 + 12; // 76px - CSS env() adds safe area separately
-    }
-  }
+  // Use the shared hook that reads Despia's --safe-area-top CSS variable
+  const actualHeaderHeight = useHeaderHeight(headerHeight);
 
   return (
     <button
