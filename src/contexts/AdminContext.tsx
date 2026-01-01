@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { isDespia } from "@/lib/despia";
+import { getNativeCache, setNativeCache, CACHE_KEYS, CACHE_TTL } from "@/lib/native-cache";
 import {
   ViewMode,
   getSavedViewState,
@@ -223,6 +224,24 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     if (isNativeApp && savedState && hasRestoredFromStorageRef.current && !options?.immediate) {
       // Trust localStorage on cold start, fetch in background
       console.log('[AdminContext] Native cold start: trusting localStorage, deferring profile fetch');
+      
+      // CRITICAL FIX: Restore cached profiles BEFORE setting loading=false
+      // This ensures ViewSwitcher shows existing profiles, not "create +" options
+      const cachedProfiles = getNativeCache<AvailableProfiles>(
+        CACHE_KEYS.AVAILABLE_PROFILES, 
+        user.id
+      );
+      
+      if (cachedProfiles) {
+        console.log('[AdminContext] Restored cached profiles:', cachedProfiles);
+        setAvailableProfiles(cachedProfiles);
+        // Also set the profile ID if we have it
+        const profileId = cachedProfiles[savedState.type] || null;
+        if (profileId) {
+          setActiveProfileId(profileId);
+        }
+      }
+      
       setIsLoadingProfiles(false);
       
       // Schedule background fetch after render
@@ -286,6 +305,11 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       }
 
       setAvailableProfiles(profiles);
+      
+      // Cache profiles for native cold start
+      if (user?.id) {
+        setNativeCache(CACHE_KEYS.AVAILABLE_PROFILES, profiles, CACHE_TTL.AVAILABLE_PROFILES, user.id);
+      }
 
       // CRITICAL FIX: If we already restored from storage, don't overwrite!
       // Only apply defaults if there's no valid persisted preference
