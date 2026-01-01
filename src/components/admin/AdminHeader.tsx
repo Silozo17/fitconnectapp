@@ -33,7 +33,7 @@ const AdminHeader = ({ onMenuToggle }: AdminHeaderProps) => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-10 border-b border-border bg-card xl:static">
-      <div className="h-16 px-4 xl:px-6 flex items-center justify-between pt-safe-status xl:pt-0">
+      <div className="min-h-16 h-auto xl:h-16 px-4 xl:px-6 flex items-center justify-between pt-safe-status pb-3 xl:pt-0 xl:pb-0">
       {/* Left side - Feedback on mobile, Search on desktop */}
       <div className="flex items-center gap-3 flex-1">
         {/* Feedback - Left on mobile */}
