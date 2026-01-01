@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
 import { useCountry } from "@/hooks/useCountry";
 import { useTranslation } from "@/hooks/useTranslation";
-import { Helmet } from "react-helmet-async";
+
 import { 
   getPricingConfig, 
   getSubscriptionPrice, 
@@ -245,20 +245,24 @@ const Pricing = () => {
     }
   }), []);
 
+  // Breadcrumb schema
+  const breadcrumbSchema = useMemo(() => ({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://getfitconnect.co.uk" },
+      { "@type": "ListItem", "position": 2, "name": "Pricing", "item": "https://getfitconnect.co.uk/pricing" }
+    ]
+  }), []);
+
   return (
     <PageLayout
       title={t('pricing.meta.title')}
       description={t('pricing.meta.description')}
+      canonicalPath="/pricing"
+      keywords={["personal trainer pricing UK", "fitness coach subscription", "PT platform cost", "coach software pricing"]}
+      schema={[pricingSchema, sessionPricingSchema, breadcrumbSchema]}
     >
-      {/* Structured Data for SEO */}
-      <Helmet>
-        <script type="application/ld+json">
-          {JSON.stringify(pricingSchema)}
-        </script>
-        <script type="application/ld+json">
-          {JSON.stringify(sessionPricingSchema)}
-        </script>
-      </Helmet>
       {/* Decorative Avatars - placed at PageLayout level */}
       <DecorativeAvatar 
         avatarSlug="bodybuilder-bull" 

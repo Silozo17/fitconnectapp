@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { SEOHead } from "@/components/shared/SEOHead";
+import { SEOHead, createBreadcrumbSchema } from "@/components/shared/SEOHead";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Dumbbell, Apple, Trophy, Users } from "lucide-react";
 
@@ -27,6 +27,12 @@ const slides = [
   },
 ];
 
+// Breadcrumb schema
+const breadcrumbSchema = createBreadcrumbSchema([
+  { name: "Home", url: "https://getfitconnect.co.uk" },
+  { name: "Get Started", url: "https://getfitconnect.co.uk/get-started" }
+]);
+
 const GetStarted = () => {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -52,10 +58,11 @@ const GetStarted = () => {
   return (
     <>
       <SEOHead
-        title="Get Started with FitConnect | Free Fitness Coaching App"
-        description="Create your free FitConnect account. Connect with personal trainers, nutritionists and boxing coaches. Start your transformation today."
+        title="Get Started with FitConnect | Join Free Today"
+        description="Create your free FitConnect account in minutes. Connect with verified personal trainers, nutritionists and coaches across the UK. No commitment required."
         canonicalPath="/get-started"
-        keywords={["fitness coaching app", "personal trainer app", "get started fitness", "workout app UK"]}
+        keywords={["join fitness app", "create PT account", "sign up fitness coaching", "free fitness app UK"]}
+        schema={breadcrumbSchema}
       />
 
       <div className="h-dvh bg-background flex flex-col overflow-hidden">
