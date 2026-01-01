@@ -9,7 +9,7 @@ import {
   BadgeCheck, Lock, AlertTriangle, Sparkles
 } from "lucide-react";
 import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
-import { Helmet } from "react-helmet-async";
+
 
 const TrustAndVerification = () => {
   const verificationSteps = [
@@ -149,16 +149,24 @@ const TrustAndVerification = () => {
     ]
   };
 
+  // Breadcrumb schema
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://getfitconnect.co.uk" },
+      { "@type": "ListItem", "position": 2, "name": "Trust & Verification", "item": "https://getfitconnect.co.uk/trust-and-verification" }
+    ]
+  };
+
   return (
     <PageLayout
-      title="Coach Verification | How We Vet Fitness Professionals"
-      description="Every FitConnect coach is verified. Learn about our credential checks, background screening and ongoing quality monitoring to ensure your safety."
+      title="Coach Verification | Trust & Safety on FitConnect"
+      description="Every FitConnect coach is verified. Learn about our ID checks, credential verification, background screening and ongoing quality monitoring."
+      canonicalPath="/trust-and-verification"
+      keywords={["verified personal trainers UK", "trusted fitness coaches", "coach verification process", "safe fitness platform"]}
+      schema={[faqSchema, breadcrumbSchema]}
     >
-      <Helmet>
-        <script type="application/ld+json">
-          {JSON.stringify(faqSchema)}
-        </script>
-      </Helmet>
 
       {/* Decorative Avatars */}
       <DecorativeAvatar 

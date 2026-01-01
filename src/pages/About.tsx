@@ -6,7 +6,6 @@ import { Link } from "react-router-dom";
 import { Award, Users, Heart, Target, TrendingUp, Shield, Sparkles, Globe, Smartphone, CheckCircle } from "lucide-react";
 import { DecorativeAvatar } from "@/components/shared/DecorativeAvatar";
 import { useTranslation } from "react-i18next";
-import { Helmet } from "react-helmet-async";
 
 const About = () => {
   const { t } = useTranslation("pages");
@@ -72,40 +71,47 @@ const About = () => {
     "alternateName": "FitConnect UK",
     "url": "https://getfitconnect.co.uk",
     "logo": "https://getfitconnect.co.uk/pwa-512x512.png",
-    "description": "Global fitness coaching marketplace connecting clients with verified personal trainers, nutritionists, boxing coaches, MMA coaches, and bodybuilding coaches.",
+    "description": "UK fitness coaching marketplace connecting clients with verified personal trainers, nutritionists, boxing coaches, MMA coaches, and bodybuilding coaches.",
     "foundingDate": "2025",
     "foundingLocation": {
       "@type": "Place",
       "name": "London, United Kingdom"
     },
     "areaServed": {
-      "@type": "Place",
-      "name": "Worldwide"
+      "@type": "Country",
+      "name": "United Kingdom"
     },
     "knowsLanguage": ["English", "Polish"],
     "sameAs": [
-      "https://apps.apple.com/app/fitconnect",
-      "https://play.google.com/store/apps/details?id=com.fitconnect"
+      "https://play.google.com/store/apps/details?id=com.despia.fitconnect"
     ],
     "contactPoint": {
       "@type": "ContactPoint",
       "contactType": "customer support",
+      "email": "support@getfitconnect.co.uk",
       "availableLanguage": ["English", "Polish"]
     }
+  };
+
+  // Breadcrumb schema
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://getfitconnect.co.uk" },
+      { "@type": "ListItem", "position": 2, "name": "About", "item": "https://getfitconnect.co.uk/about" }
+    ]
   };
 
   return (
     <PageLayout
       title={t("about.meta.title")}
       description={t("about.meta.description")}
+      canonicalPath="/about"
+      keywords={["about FitConnect", "fitness coaching platform UK", "personal trainer marketplace", "UK fitness app"]}
+      schema={[organizationSchema, breadcrumbSchema]}
       className="overflow-x-hidden"
     >
-      {/* Organization Schema */}
-      <Helmet>
-        <script type="application/ld+json">
-          {JSON.stringify(organizationSchema)}
-        </script>
-      </Helmet>
       {/* Decorative Avatars */}
       <DecorativeAvatar 
         avatarSlug="weightlifting-lion" 

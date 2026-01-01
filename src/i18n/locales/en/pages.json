@@ -2,7 +2,7 @@
   "about": {
     "meta": {
       "title": "About FitConnect | UK Fitness Coaching Platform",
-      "description": "FitConnect connects gym-goers with verified personal trainers, nutritionists and coaches across the UK. Founded in 2025, available on iOS and Android."
+      "description": "FitConnect connects you with verified personal trainers, nutritionists and coaches across the UK. Founded 2025. Download free on iOS and Android."
     },
     "hero": {
       "badge": "Our Story",
@@ -97,8 +97,8 @@
   },
   "contact": {
     "meta": {
-      "title": "Contact FitConnect | Get Support & Help",
-      "description": "Need help with FitConnect? Contact our UK support team via email or live chat. We respond within 24 hours to all enquiries."
+      "title": "Contact FitConnect | UK Support Team",
+      "description": "Need help with FitConnect? Contact our UK support team via email or chat. We respond within 24 hours to all enquiries about coaching and bookings."
     },
     "hero": {
       "badge": "Get in Touch",
@@ -149,8 +149,8 @@
   },
   "faq": {
     "meta": {
-      "title": "FAQ | Common Questions About FitConnect",
-      "description": "Find answers about finding coaches, booking sessions, pricing and payments. Everything you need to know about using FitConnect for fitness coaching."
+      "title": "FAQ | FitConnect Help Centre & Common Questions",
+      "description": "Find answers about booking coaches, session pricing, payments and cancellations. Everything you need to know about using FitConnect in the UK."
     },
     "hero": {
       "badge": "Help Center",

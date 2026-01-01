@@ -126,14 +126,24 @@ const SuccessStories = () => {
     }))
   };
 
+  // Breadcrumb schema
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://getfitconnect.co.uk" },
+      { "@type": "ListItem", "position": 2, "name": "Success Stories", "item": "https://getfitconnect.co.uk/success-stories" }
+    ]
+  };
+
   return (
     <>
       <SEOHead
         title={t('successStories.meta.title')}
         description={t('successStories.meta.description')}
         canonicalPath="/success-stories"
-        keywords={["fitness transformation stories", "weight loss success", "PT results", "client testimonials", "before after fitness"]}
-        schema={reviewSchema}
+        keywords={["fitness transformation UK", "weight loss success stories", "PT client results", "before after fitness UK"]}
+        schema={[reviewSchema, breadcrumbSchema]}
       />
       
       <div className="min-h-screen bg-background relative">
