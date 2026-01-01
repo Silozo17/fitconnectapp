@@ -83,7 +83,7 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg bg-card border-border max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-lg bg-card border-border max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
             <Calendar className="h-5 w-5 text-primary" />
@@ -91,117 +91,119 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
           </DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="date">{t('scheduleSessionModal.date')}</Label>
-              <Input
-                id="date"
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="bg-background border-border"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="time">{t('scheduleSessionModal.time')}</Label>
-              <div className="relative">
-                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden touch-pan-y overscroll-y-contain space-y-4 pr-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="date">{t('scheduleSessionModal.date')}</Label>
                 <Input
-                  id="time"
-                  type="time"
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                  className="pl-10 bg-background border-border"
+                  id="date"
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="bg-background border-border"
                   required
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="time">{t('scheduleSessionModal.time')}</Label>
+                <div className="relative">
+                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                  <Input
+                    id="time"
+                    type="time"
+                    value={time}
+                    onChange={(e) => setTime(e.target.value)}
+                    className="pl-10 bg-background border-border"
+                    required
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="sessionType">{t('scheduleSessionModal.sessionType')}</Label>
-              <Select value={sessionType} onValueChange={setSessionType} required>
-                <SelectTrigger className="bg-background border-border">
-                  <SelectValue placeholder={t('scheduleSessionModal.selectType')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1-on-1">{t('scheduleSessionModal.sessionTypes.oneOnOne')}</SelectItem>
-                  <SelectItem value="group">{t('scheduleSessionModal.sessionTypes.group')}</SelectItem>
-                  <SelectItem value="assessment">{t('scheduleSessionModal.sessionTypes.assessment')}</SelectItem>
-                  <SelectItem value="consultation">{t('scheduleSessionModal.sessionTypes.consultation')}</SelectItem>
-                  <SelectItem value="nutrition-review">{t('scheduleSessionModal.sessionTypes.nutritionReview')}</SelectItem>
-                </SelectContent>
-              </Select>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="sessionType">{t('scheduleSessionModal.sessionType')}</Label>
+                <Select value={sessionType} onValueChange={setSessionType} required>
+                  <SelectTrigger className="bg-background border-border">
+                    <SelectValue placeholder={t('scheduleSessionModal.selectType')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1-on-1">{t('scheduleSessionModal.sessionTypes.oneOnOne')}</SelectItem>
+                    <SelectItem value="group">{t('scheduleSessionModal.sessionTypes.group')}</SelectItem>
+                    <SelectItem value="assessment">{t('scheduleSessionModal.sessionTypes.assessment')}</SelectItem>
+                    <SelectItem value="consultation">{t('scheduleSessionModal.sessionTypes.consultation')}</SelectItem>
+                    <SelectItem value="nutrition-review">{t('scheduleSessionModal.sessionTypes.nutritionReview')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="duration">{t('scheduleSessionModal.duration')}</Label>
+                <Select value={duration} onValueChange={setDuration}>
+                  <SelectTrigger className="bg-background border-border">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="30">{t('scheduleSessionModal.durations.30min')}</SelectItem>
+                    <SelectItem value="45">{t('scheduleSessionModal.durations.45min')}</SelectItem>
+                    <SelectItem value="60">{t('scheduleSessionModal.durations.60min')}</SelectItem>
+                    <SelectItem value="90">{t('scheduleSessionModal.durations.90min')}</SelectItem>
+                    <SelectItem value="120">{t('scheduleSessionModal.durations.120min')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="duration">{t('scheduleSessionModal.duration')}</Label>
-              <Select value={duration} onValueChange={setDuration}>
-                <SelectTrigger className="bg-background border-border">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="30">{t('scheduleSessionModal.durations.30min')}</SelectItem>
-                  <SelectItem value="45">{t('scheduleSessionModal.durations.45min')}</SelectItem>
-                  <SelectItem value="60">{t('scheduleSessionModal.durations.60min')}</SelectItem>
-                  <SelectItem value="90">{t('scheduleSessionModal.durations.90min')}</SelectItem>
-                  <SelectItem value="120">{t('scheduleSessionModal.durations.120min')}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
 
-          <div className="flex items-center justify-between p-3 rounded-lg bg-background border border-border">
-            <div className="flex items-center gap-2">
-              <Video className="h-4 w-4 text-primary" />
-              <Label htmlFor="isOnline" className="cursor-pointer">{t('scheduleSessionModal.onlineSession')}</Label>
-            </div>
-            <Switch
-              id="isOnline"
-              checked={isOnline}
-              onCheckedChange={setIsOnline}
-            />
-          </div>
-
-          {!isOnline && (
-            <div className="space-y-2">
-              <Label htmlFor="location">{t('scheduleSessionModal.location')}</Label>
-              <VenueAutocomplete
-                value={location}
-                onVenueChange={(loc) => setLocation(loc)}
-                placeholder={t('scheduleSessionModal.venuePlaceholder')}
+            <div className="flex items-center justify-between p-3 rounded-lg bg-background border border-border">
+              <div className="flex items-center gap-2">
+                <Video className="h-4 w-4 text-primary" />
+                <Label htmlFor="isOnline" className="cursor-pointer">{t('scheduleSessionModal.onlineSession')}</Label>
+              </div>
+              <Switch
+                id="isOnline"
+                checked={isOnline}
+                onCheckedChange={setIsOnline}
               />
             </div>
-          )}
 
-          {/* Payment Mode Selection */}
-          {!isLoadingPackage && (
-            <PaymentModeSelector
-              value={paymentMode}
-              onChange={setPaymentMode}
-              price={price}
-              onPriceChange={setPrice}
-              creditsAvailable={creditsAvailable}
-              hasActivePackage={hasActivePackage}
-              packageName={packageName}
-            />
-          )}
-          
-          <div className="space-y-2">
-            <Label htmlFor="notes">{t('scheduleSessionModal.sessionNotes')}</Label>
-            <Textarea
-              id="notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder={t('scheduleSessionModal.sessionNotesPlaceholder')}
-              className="bg-background border-border resize-none"
-              rows={3}
-            />
+            {!isOnline && (
+              <div className="space-y-2">
+                <Label htmlFor="location">{t('scheduleSessionModal.location')}</Label>
+                <VenueAutocomplete
+                  value={location}
+                  onVenueChange={(loc) => setLocation(loc)}
+                  placeholder={t('scheduleSessionModal.venuePlaceholder')}
+                />
+              </div>
+            )}
+
+            {/* Payment Mode Selection */}
+            {!isLoadingPackage && (
+              <PaymentModeSelector
+                value={paymentMode}
+                onChange={setPaymentMode}
+                price={price}
+                onPriceChange={setPrice}
+                creditsAvailable={creditsAvailable}
+                hasActivePackage={hasActivePackage}
+                packageName={packageName}
+              />
+            )}
+            
+            <div className="space-y-2">
+              <Label htmlFor="notes">{t('scheduleSessionModal.sessionNotes')}</Label>
+              <Textarea
+                id="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder={t('scheduleSessionModal.sessionNotesPlaceholder')}
+                className="bg-background border-border resize-none"
+                rows={3}
+              />
+            </div>
           </div>
           
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="gap-2 sm:gap-0 pt-4 border-t border-border mt-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               {t('scheduleSessionModal.cancel')}
             </Button>
