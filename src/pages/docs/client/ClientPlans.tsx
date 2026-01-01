@@ -6,10 +6,9 @@ import { Dumbbell, Utensils, CheckCircle, MessageSquare } from "lucide-react";
 export default function ClientPlans() {
   return (
     <DocsLayout
-      title="Workout & Nutrition Plans"
-      description="Learn how to view, follow, and log your assigned workout and nutrition plans from your coach."
+      title="View Workout & Nutrition Plans | Training Programmes"
+      description="Access personalised workout and meal plans from your coach. Track exercises, log workouts and follow nutrition programmes."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
         { label: "Client Guide", href: "/docs/client" },
         { label: "Workout & Nutrition Plans" }
       ]}

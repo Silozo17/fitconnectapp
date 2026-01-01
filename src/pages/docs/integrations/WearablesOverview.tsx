@@ -6,11 +6,10 @@ import { Link as RouterLink } from "react-router-dom";
 export default function WearablesOverview() {
   return (
     <DocsLayout
-      title="Wearables & Health Data"
-      description="Connect your fitness devices to automatically track your activity, sleep, and health metrics."
+      title="Connect Fitness Wearables | Apple Watch, Fitbit & Garmin"
+      description="Sync Apple Watch, Fitbit, Garmin and other wearables with FitConnect. Track steps, heart rate, sleep and calories automatically."
       breadcrumbs={[
-        { label: "Docs", href: "/docs" },
-        { label: "Integrations" },
+        { label: "Integrations", href: "/docs/integrations" },
         { label: "Wearables Overview" }
       ]}
     >
