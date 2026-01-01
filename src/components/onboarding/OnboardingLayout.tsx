@@ -3,6 +3,7 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Dumbbell, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useEnvironment } from '@/hooks/useEnvironment';
 
 interface OnboardingLayoutProps {
   /** Current step (0-indexed) */
@@ -88,6 +89,7 @@ export function OnboardingLayout({
   skipDisabled = false,
 }: OnboardingLayoutProps) {
   const progressPercent = totalSteps > 0 ? ((currentStep + 1) / totalSteps) * 100 : 0;
+  const { isDespia, isIOS } = useEnvironment();
   const headerRef = useRef<HTMLElement>(null);
   const footerRef = useRef<HTMLElement>(null);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
@@ -136,7 +138,10 @@ export function OnboardingLayout({
         ref={headerRef}
         className="flex-shrink-0 border-b border-border bg-background z-10"
         style={{
-          paddingTop: 'env(safe-area-inset-top)',
+          // Native iOS (Despia) uses runtime variable, web/PWA uses standard env()
+          paddingTop: isDespia && isIOS 
+            ? 'var(--safe-area-top, 59px)' 
+            : 'env(safe-area-inset-top)',
         }}
       >
         {/* Logo Row (optional) */}
