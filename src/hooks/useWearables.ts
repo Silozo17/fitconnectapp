@@ -202,7 +202,15 @@ export const useWearables = () => {
       for (const [dateStr, types] of Object.entries(aggregatedData)) {
         for (const [dataType, { sum, count }] of Object.entries(types)) {
           // For heart_rate, use average; for others, use sum
-          const value = dataType === 'heart_rate' ? Math.round(sum / count) : sum;
+          let value = dataType === 'heart_rate' ? Math.round(sum / count) : sum;
+
+          // Round whole-number metrics to avoid weird decimal display
+          const wholeNumberTypes = ['steps', 'calories', 'active_minutes'];
+          if (wholeNumberTypes.includes(dataType)) {
+            value = Math.round(value);
+          } else if (dataType === 'distance') {
+            value = Math.round(value * 10) / 10; // 1 decimal for meters
+          }
 
           healthDataEntries.push({
             client_id: clientId,

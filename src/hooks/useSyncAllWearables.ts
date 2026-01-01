@@ -150,19 +150,23 @@ export const useSyncAllWearables = () => {
        * - 'HKQuantityTypeIdentifierAppleExerciseTime': 'active_minutes',
        */
       const mapHealthKitToDataType = (hkType: string): string | null => {
-        // Skip unsupported category types entirely
+        // Skip unsupported category types entirely - they cause native crashes
         if (UNSUPPORTED_CATEGORY_TYPES.some(cat => hkType.includes(cat))) {
           console.log(`[useSyncAllWearables] Skipping unsupported category type: ${hkType}`);
           return null;
         }
         
-        // TEMPORARY: Only steps work reliably due to Despia SDK bug
-        if (hkType === 'HKQuantityTypeIdentifierStepCount') {
-          return 'steps';
-        }
+        // Map all supported QUANTITY types
+        // Sequential single-type sync is now crash-proof
+        const mappings: Record<string, string> = {
+          'HKQuantityTypeIdentifierStepCount': 'steps',
+          'HKQuantityTypeIdentifierActiveEnergyBurned': 'calories',
+          'HKQuantityTypeIdentifierDistanceWalkingRunning': 'distance',
+          'HKQuantityTypeIdentifierAppleExerciseTime': 'active_minutes',
+          // EXCLUDED: HeartRate (discrete type) and Sleep (category type)
+        };
         
-        console.log(`[useSyncAllWearables] Skipping ${hkType} - temporarily disabled due to Despia SDK bug`);
-        return null;
+        return mappings[hkType] || null;
       };
 
       const getUnitForDataType = (dataType: string): string => {
@@ -298,11 +302,20 @@ export const useSyncAllWearables = () => {
             value = sum;
           }
 
+          // Round whole-number metrics to avoid weird decimal display (e.g., 2,196.701)
+          const wholeNumberTypes = ['steps', 'calories', 'active_minutes'];
+          let finalValue = value;
+          if (wholeNumberTypes.includes(dataType)) {
+            finalValue = Math.round(value);
+          } else if (dataType === 'distance') {
+            finalValue = Math.round(value * 10) / 10; // 1 decimal for meters
+          }
+
           healthDataSyncEntries.push({
             client_id: clientId,
             data_type: dataType,
             recorded_at: dateStr,
-            value: value,
+            value: finalValue,
             unit: getUnitForDataType(dataType),
             source: 'apple_health',
             wearable_connection_id: null,
