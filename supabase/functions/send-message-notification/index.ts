@@ -3,8 +3,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { 
   baseEmailTemplate, 
   ctaButton, 
-  squircleAvatarComponent,
-  getDefaultAvatarUrl,
+  freeFloatingAvatarComponent,
+  getEmailAvatarUrl,
   EMAIL_CONFIG 
 } from "../_shared/email-templates.ts";
 
@@ -152,8 +152,8 @@ serve(async (req) => {
       });
     }
 
-    // Use default FitConnect mascot avatar
-    const avatarUrl = getDefaultAvatarUrl(supabaseUrl);
+    // Use contextual avatar for messages
+    const avatarUrl = getEmailAvatarUrl('message', supabaseUrl);
     
     const receiverName = receiverCoach?.display_name || receiverClient?.first_name || "there";
 
@@ -161,9 +161,7 @@ serve(async (req) => {
       ? `${siteUrl}/dashboard/coach/messages`
       : `${siteUrl}/dashboard/client/messages`;
     const emailContent = `
-      <div style="text-align: center; margin-bottom: 24px;">
-        <span style="font-size: 48px;">💬</span>
-      </div>
+      ${freeFloatingAvatarComponent(avatarUrl, "Message Mascot", 140)}
       
       <h2 class="headline" style="color: ${colors.text}; margin: 0 0 16px 0; text-align: center; font-size: 24px;">
         New Message
@@ -172,8 +170,6 @@ serve(async (req) => {
       <p style="color: ${colors.textMuted}; line-height: 1.7; text-align: center; margin-bottom: 24px;">
         Hi ${receiverName}, you have a new message from <strong style="color: ${colors.primary}">${senderName}</strong>
       </p>
-      
-      ${squircleAvatarComponent(avatarUrl, senderName, 64)}
       
       <div style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; margin: 24px 0; border-left: 3px solid ${colors.primary};">
         <p style="color: ${colors.text}; margin: 0; line-height: 1.6; font-size: 15px;">

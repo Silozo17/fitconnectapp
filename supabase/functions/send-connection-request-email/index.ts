@@ -3,9 +3,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { 
   baseEmailTemplate, 
   ctaButton, 
-  squircleAvatarComponent,
+  freeFloatingAvatarComponent,
   messageBox,
-  getDefaultAvatarUrl,
+  getEmailAvatarUrl,
   EMAIL_CONFIG 
 } from "../_shared/email-templates.ts";
 
@@ -38,7 +38,6 @@ serve(async (req) => {
 
     console.log(`Sending connection request email for ${connectionRequestId}`);
 
-    // Get connection request details
     const { data: request, error: requestError } = await supabase
       .from("connection_requests")
       .select(`
@@ -54,8 +53,6 @@ serve(async (req) => {
     }
 
     const { colors } = EMAIL_CONFIG;
-
-    // Get coach email
     const { data: { users } } = await supabase.auth.admin.listUsers();
     const coachUser = users?.find(u => u.id === request.coach.user_id);
 
@@ -63,17 +60,13 @@ serve(async (req) => {
       throw new Error("Coach email not found");
     }
 
-    // Use default FitConnect mascot avatar
-    const avatarUrl = getDefaultAvatarUrl(supabaseUrl);
-
+    const avatarUrl = getEmailAvatarUrl('connection_request', supabaseUrl);
     const clientName = [request.client.first_name, request.client.last_name].filter(Boolean).join(' ') || "A potential client";
     const coachName = request.coach.display_name || "Coach";
     const goalsText = request.client.fitness_goals?.join(', ') || "Not specified";
 
     const emailContent = `
-      <div style="text-align: center; margin-bottom: 24px;">
-        <span style="font-size: 48px;">🤝</span>
-      </div>
+      ${freeFloatingAvatarComponent(avatarUrl, "Connection Mascot", 140)}
       
       <h2 class="headline" style="color: ${colors.text}; margin: 0 0 16px 0; text-align: center; font-size: 24px;">
         New Connection Request
@@ -82,8 +75,6 @@ serve(async (req) => {
       <p style="color: ${colors.textMuted}; line-height: 1.7; text-align: center; margin-bottom: 24px;">
         Hi ${coachName}, <strong style="color: ${colors.primary}">${clientName}</strong> wants to connect with you!
       </p>
-      
-      ${squircleAvatarComponent(avatarUrl, clientName, 80)}
       
       <div style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; margin: 24px 0;">
         <h4 style="color: ${colors.primary}; margin: 0 0 12px 0; font-size: 14px;">About ${request.client.first_name || 'this client'}</h4>
@@ -102,13 +93,7 @@ serve(async (req) => {
       ${request.message ? messageBox(request.message, clientName) : ''}
       
       <div style="text-align: center; margin: 32px 0;">
-        <table width="100%" cellpadding="0" cellspacing="0">
-          <tr>
-            <td style="text-align: center; padding: 8px;">
-              ${ctaButton("View Request", `${siteUrl}/dashboard/coach/connections`)}
-            </td>
-          </tr>
-        </table>
+        ${ctaButton("View Request", `${siteUrl}/dashboard/coach/connections`)}
       </div>
       
       <p style="color: ${colors.textDark}; font-size: 14px; text-align: center;">
@@ -118,12 +103,9 @@ serve(async (req) => {
 
     const html = baseEmailTemplate(emailContent, `${clientName} wants to connect with you`);
 
-    const emailResponse = await fetch("https://api.resend.com/emails", {
+    await fetch("https://api.resend.com/emails", {
       method: "POST",
-      headers: {
-        "Authorization": `Bearer ${resendApiKey}`,
-        "Content-Type": "application/json",
-      },
+      headers: { "Authorization": `Bearer ${resendApiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         from: "FitConnect <support@getfitconnect.co.uk>",
         to: [coachUser.email],
@@ -132,13 +114,6 @@ serve(async (req) => {
       }),
     });
 
-    if (!emailResponse.ok) {
-      const errorText = await emailResponse.text();
-      console.error("Email send error:", errorText);
-      throw new Error("Failed to send connection request email");
-    }
-
-    // Log email
     await supabase.from("email_logs").insert({
       user_id: request.coach.user_id,
       email_type: "connection_request",
@@ -147,16 +122,11 @@ serve(async (req) => {
       status: "sent",
     });
 
-    console.log("Connection request email sent successfully");
-
     // Send push notification
     try {
-      const pushResponse = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+      await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${supabaseServiceKey}`,
-          "Content-Type": "application/json",
-        },
+        headers: { "Authorization": `Bearer ${supabaseServiceKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
           userIds: [request.coach.user_id],
           title: "New Connection Request",
@@ -166,23 +136,13 @@ serve(async (req) => {
           data: { type: "connection_request", requestId: connectionRequestId },
         }),
       });
-      
-      if (pushResponse.ok) {
-        console.log("Push notification sent successfully");
-      }
     } catch (pushError) {
       console.error("Push notification failed (non-blocking):", pushError);
     }
 
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(JSON.stringify({ success: true }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error: any) {
     console.error("Error sending connection request email:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });

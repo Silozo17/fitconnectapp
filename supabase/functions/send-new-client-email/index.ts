@@ -3,9 +3,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { 
   baseEmailTemplate, 
   ctaButton, 
-  squircleAvatarComponent,
+  freeFloatingAvatarComponent,
   infoCard,
-  getDefaultAvatarUrl,
+  getEmailAvatarUrl,
   EMAIL_CONFIG 
 } from "../_shared/email-templates.ts";
 
@@ -72,17 +72,15 @@ serve(async (req) => {
     const clientName = [client.first_name, client.last_name].filter(Boolean).join(' ') || 'New Client';
     const { colors } = EMAIL_CONFIG;
 
-    // Use default FitConnect mascot avatar
-    const avatarUrl = getDefaultAvatarUrl(supabaseUrl);
+    // Use contextual avatar for new client emails
+    const avatarUrl = getEmailAvatarUrl('new_client', supabaseUrl);
 
     const goalsText = client.fitness_goals?.length 
       ? client.fitness_goals.join(', ')
       : 'Not specified';
 
     const emailContent = `
-      <div style="text-align: center; margin-bottom: 24px;">
-        <span style="font-size: 48px;">🎉</span>
-      </div>
+      ${freeFloatingAvatarComponent(avatarUrl, "New Client Mascot", 140)}
       
       <h2 class="headline" style="color: ${colors.text}; margin: 0 0 16px 0; text-align: center; font-size: 24px;">
         New Client Added!
@@ -91,8 +89,6 @@ serve(async (req) => {
       <p style="color: ${colors.textMuted}; line-height: 1.7; text-align: center; margin-bottom: 24px;">
         Great news! <strong style="color: ${colors.primary}">${clientName}</strong> is now your client.
       </p>
-      
-      ${squircleAvatarComponent(avatarUrl, clientName, 80)}
       
       ${infoCard("Client Details", [
         { label: "Name", value: clientName },
