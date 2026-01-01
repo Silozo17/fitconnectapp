@@ -13,9 +13,9 @@ export const useHeaderHeight = (baseHeight = 64): number => {
   // Initial value: use reasonable default for native iOS
   const [height, setHeight] = useState(() => {
     if (isMobile && env.isDespia && env.isIOS) {
-      return 59 + baseHeight + 12; // 135px default for iOS native
+      return 59 + baseHeight; // 123px for iOS native (no bottom padding)
     }
-    return isMobile ? baseHeight + 12 : baseHeight;
+    return baseHeight;
   });
 
   useEffect(() => {
@@ -32,15 +32,15 @@ export const useHeaderHeight = (baseHeight = 64): number => {
         // Read the actual computed padding-top of the header
         const computedStyle = getComputedStyle(header);
         const paddingTop = parseInt(computedStyle.paddingTop, 10) || 0;
-        const paddingBottom = parseInt(computedStyle.paddingBottom, 10) || 12;
+        const paddingBottom = parseInt(computedStyle.paddingBottom, 10) || 0;
         
         // Total header height = safe area padding + base height + bottom padding
         setHeight(paddingTop + baseHeight + paddingBottom);
       } else if (env.isDespia && env.isIOS) {
         // Fallback: Use the same 59px fallback as CSS
-        setHeight(59 + baseHeight + 12);
+        setHeight(59 + baseHeight);
       } else {
-        setHeight(baseHeight + 12);
+        setHeight(baseHeight);
       }
     };
 
