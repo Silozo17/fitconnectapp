@@ -333,7 +333,26 @@ export const checkHealthKitConnection = async (): Promise<HealthKitConnectionRes
 };
 
 /**
+ * Supported HealthKit QUANTITY type identifiers for multi-metric sync.
+ * These work reliably with Despia's HKStatisticsCollectionQuery.
+ * 
+ * NOTE: CATEGORY types (like HKCategoryTypeIdentifierSleepAnalysis) are NOT supported
+ * because Despia uses HKStatisticsCollectionQuery internally, which only works with
+ * QUANTITY types. Sleep requires HKSampleQuery which Despia doesn't support.
+ * Sleep data can be entered manually or synced from Fitbit/Garmin instead.
+ */
+export const SUPPORTED_HEALTHKIT_TYPES = [
+  'HKQuantityTypeIdentifierStepCount',           // steps
+  'HKQuantityTypeIdentifierHeartRate',           // heart_rate (avg)
+  'HKQuantityTypeIdentifierActiveEnergyBurned',  // calories
+  'HKQuantityTypeIdentifierAppleExerciseTime',   // active_minutes
+  'HKQuantityTypeIdentifierDistanceWalkingRunning', // distance
+] as const;
+
+/**
  * Sync health data from Apple Health via native HealthKit
+ * Syncs all supported QUANTITY types (steps, heart rate, calories, active minutes, distance)
+ * 
  * @param days Number of days of data to sync (default: 7)
  * @returns Object with success status and synced data
  */
@@ -343,20 +362,17 @@ export const syncHealthKitData = async (days: number = 7): Promise<HealthKitConn
   }
 
   try {
-    console.log(`[Despia HealthKit] Syncing ${days} days of health data...`);
+    console.log(`[Despia HealthKit] Syncing ${days} days of health data (multi-metric)...`);
     
     /**
-     * TEMPORARY FIX: Only sync step count to avoid Despia SDK crash
+     * MULTI-METRIC SYNC: Request all supported QUANTITY types
      * 
-     * The Despia HealthKitManager.swift has a bug where it uses hardcoded
-     * HealthKit type identifiers internally, regardless of what we pass in
-     * the types parameter. This causes crashes when it attempts to use
-     * HKStatisticsCollectionQuery with category types or certain quantity types.
-     * 
-     * Until Despia fixes their native SDK, we only request step count which
-     * is confirmed to work reliably.
+     * Sleep (HKCategoryTypeIdentifierSleepAnalysis) is EXCLUDED because:
+     * - It's a CATEGORY type, not a QUANTITY type
+     * - Despia uses HKStatisticsCollectionQuery which crashes with category types
+     * - Users can enter sleep manually or sync from Fitbit/Garmin instead
      */
-    const types = 'HKQuantityTypeIdentifierStepCount';
+    const types = SUPPORTED_HEALTHKIT_TYPES.join(',');
     
     // Add cache-busting timestamp to attempt to bypass any caching in Despia SDK
     const timestamp = Date.now();
