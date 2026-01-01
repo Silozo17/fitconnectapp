@@ -4,6 +4,33 @@
 // Default FitConnect mascot avatar for emails
 export const DEFAULT_EMAIL_AVATAR = 'Elite_Personal_Trainer_Human';
 
+// Email type to avatar mapping - different mascots for different contexts
+export const EMAIL_AVATARS = {
+  welcome_coach: 'Elite_Personal_Trainer_Human',
+  welcome_client: 'Sprinter_Cheetah',
+  password_reset: 'Meditative_Android_Monk',
+  booking: 'HIIT_Fox',
+  booking_reminder: 'Boxer_Dog',
+  booking_accepted: 'Strongman_Bear',
+  booking_cancelled: 'Yoga_Wolf',
+  message: 'Parkour_Monkey',
+  payment: 'Streetwear_Gorilla_Trainer',
+  payout: 'Powerlifter_Gorilla',
+  newsletter: 'Yoga_Deer_Female',
+  connection_request: 'CrossFit_Wolf',
+  review_request: 'Weightlifting_Lion',
+  new_client: 'Kickboxer_Panther',
+  platform_invite: 'Elite_Personal_Trainer_Human',
+  session_confirmation: 'HIIT_Fox',
+} as const;
+
+export type EmailType = keyof typeof EMAIL_AVATARS;
+
+export function getEmailAvatarUrl(emailType: EmailType, supabaseUrl: string): string {
+  const avatarName = EMAIL_AVATARS[emailType] || DEFAULT_EMAIL_AVATAR;
+  return `${supabaseUrl}/storage/v1/object/public/avatars/${avatarName}.webp`;
+}
+
 export const EMAIL_CONFIG = {
   colors: {
     primary: '#BEFF00',        // Electric lime
@@ -34,12 +61,42 @@ export const EMAIL_CONFIG = {
 // Get avatar URL from storage
 export function getAvatarUrl(avatarName: string | null, supabaseUrl: string): string | null {
   if (!avatarName) return null;
-  return `${supabaseUrl}/storage/v1/object/public/avatars/${encodeURIComponent(avatarName)}.png`;
+  return `${supabaseUrl}/storage/v1/object/public/avatars/${encodeURIComponent(avatarName)}.webp`;
 }
 
 // Get the default FitConnect mascot avatar URL
 export function getDefaultAvatarUrl(supabaseUrl: string): string {
-  return `${supabaseUrl}/storage/v1/object/public/avatars/${DEFAULT_EMAIL_AVATAR}.png`;
+  return `${supabaseUrl}/storage/v1/object/public/avatars/${DEFAULT_EMAIL_AVATAR}.webp`;
+}
+
+// Free-floating avatar component - no frames, larger, natural positioning
+// Inspired by modern mascot-style email designs
+export function freeFloatingAvatarComponent(
+  avatarUrl: string, 
+  altText: string, 
+  width: number = 180,
+  position: 'center' | 'right' | 'left' = 'center'
+): string {
+  const alignment = position === 'center' ? 'center' : position;
+  
+  return `
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 0 0 24px 0;">
+      <tr>
+        <td align="${alignment}">
+          <img 
+            src="${avatarUrl}" 
+            alt="${altText}" 
+            style="
+              width: ${width}px; 
+              height: auto;
+              display: block;
+              max-width: 100%;
+            "
+          >
+        </td>
+      </tr>
+    </table>
+  `;
 }
 
 // Base email wrapper with FitConnect branding

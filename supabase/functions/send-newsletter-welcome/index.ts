@@ -3,8 +3,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { 
   baseEmailTemplate, 
   ctaButton, 
-  squircleAvatarComponent,
-  getDefaultAvatarUrl,
+  freeFloatingAvatarComponent,
+  getEmailAvatarUrl,
   EMAIL_CONFIG 
 } from "../_shared/email-templates.ts";
 
@@ -39,13 +39,11 @@ serve(async (req) => {
     console.log(`Sending newsletter welcome to ${email}`);
 
     const { colors } = EMAIL_CONFIG;
-
-    // Use default FitConnect mascot avatar
-    const mascotAvatarUrl = getDefaultAvatarUrl(supabaseUrl);
+    const avatarUrl = getEmailAvatarUrl('newsletter', supabaseUrl);
     const name = firstName || "Fitness Enthusiast";
 
     const emailContent = `
-      ${squircleAvatarComponent(mascotAvatarUrl, "FitConnect", 100)}
+      ${freeFloatingAvatarComponent(avatarUrl, "FitConnect Mascot", 160)}
       
       <h2 class="headline" style="color: ${colors.text}; margin: 0 0 16px 0; text-align: center; font-size: 24px;">
         Welcome to FitConnect!
@@ -107,7 +105,6 @@ serve(async (req) => {
       throw new Error("Failed to send newsletter welcome email");
     }
 
-    // Log email (no user_id since they may not have an account)
     await supabase.from("email_logs").insert({
       email_type: "newsletter_welcome",
       recipient_email: email,

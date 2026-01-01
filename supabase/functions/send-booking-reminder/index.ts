@@ -3,9 +3,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { 
   baseEmailTemplate, 
   ctaButton, 
-  squircleAvatarComponent,
+  freeFloatingAvatarComponent,
   infoCard,
-  getDefaultAvatarUrl,
+  getEmailAvatarUrl,
   EMAIL_CONFIG 
 } from "../_shared/email-templates.ts";
 
@@ -103,8 +103,8 @@ serve(async (req) => {
     const reminderText = isUrgent ? "Starting in 1 hour!" : "Tomorrow's Session";
     const urgencyEmoji = isUrgent ? "⏰" : "📅";
 
-    // Use default FitConnect mascot avatar
-    const avatarUrl = getDefaultAvatarUrl(supabaseUrl);
+    // Use contextual avatar for booking reminders
+    const avatarUrl = getEmailAvatarUrl('booking_reminder', supabaseUrl);
 
     const coachName = session.coach.display_name || "Your Coach";
     const clientName = [session.client.first_name, session.client.last_name].filter(Boolean).join(' ') || "Your Client";
@@ -116,9 +116,7 @@ serve(async (req) => {
     // Send to client (only if email reminders are enabled)
     if (clientUser?.email && clientEmailEnabled) {
       const clientContent = `
-        <div style="text-align: center; margin-bottom: 24px;">
-          <span style="font-size: 48px;">${urgencyEmoji}</span>
-        </div>
+        ${freeFloatingAvatarComponent(avatarUrl, "Reminder Mascot", 140)}
         
         <h2 class="headline" style="color: ${colors.text}; margin: 0 0 8px 0; text-align: center; font-size: 24px;">
           ${reminderText}
@@ -127,8 +125,6 @@ serve(async (req) => {
         <p style="color: ${colors.primary}; font-size: 18px; text-align: center; margin: 0 0 24px 0;">
           Session with ${coachName}
         </p>
-        
-        ${squircleAvatarComponent(avatarUrl, coachName, 80)}
         
         ${infoCard("Session Details", [
           { label: "Date", value: formattedDate },
@@ -187,9 +183,7 @@ serve(async (req) => {
     // Send to coach (only if email reminders are enabled)
     if (coachUser?.email && coachEmailEnabled) {
       const coachContent = `
-        <div style="text-align: center; margin-bottom: 24px;">
-          <span style="font-size: 48px;">${urgencyEmoji}</span>
-        </div>
+        ${freeFloatingAvatarComponent(avatarUrl, "Reminder Mascot", 140)}
         
         <h2 class="headline" style="color: ${colors.text}; margin: 0 0 8px 0; text-align: center; font-size: 24px;">
           ${reminderText}
@@ -198,8 +192,6 @@ serve(async (req) => {
         <p style="color: ${colors.primary}; font-size: 18px; text-align: center; margin: 0 0 24px 0;">
           Session with ${clientName}
         </p>
-        
-        ${squircleAvatarComponent(avatarUrl, clientName, 80)}
         
         ${infoCard("Session Details", [
           { label: "Client", value: clientName },

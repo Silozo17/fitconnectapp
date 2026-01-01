@@ -3,6 +3,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { 
   baseEmailTemplate, 
   ctaButton,
+  freeFloatingAvatarComponent,
+  getEmailAvatarUrl,
   EMAIL_CONFIG 
 } from "../_shared/email-templates.ts";
 
@@ -36,13 +38,10 @@ serve(async (req) => {
     console.log(`Sending password reset email to ${email}`);
 
     const { colors } = EMAIL_CONFIG;
+    const avatarUrl = getEmailAvatarUrl('password_reset', supabaseUrl);
 
     const emailContent = `
-      <div style="text-align: center; margin-bottom: 24px;">
-        <div style="width: 64px; height: 64px; background: rgba(190, 255, 0, 0.2); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">
-          <span style="font-size: 32px;">🔐</span>
-        </div>
-      </div>
+      ${freeFloatingAvatarComponent(avatarUrl, "Security Mascot", 140)}
       
       <h2 class="headline" style="color: ${colors.text}; margin: 0 0 16px 0; text-align: center; font-size: 24px;">
         Reset Your Password

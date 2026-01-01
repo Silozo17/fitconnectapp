@@ -3,8 +3,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { 
   baseEmailTemplate, 
   ctaButton, 
-  squircleAvatarComponent,
-  getDefaultAvatarUrl,
+  freeFloatingAvatarComponent,
+  getEmailAvatarUrl,
   EMAIL_CONFIG 
 } from "../_shared/email-templates.ts";
 
@@ -41,8 +41,10 @@ serve(async (req) => {
 
     console.log(`Sending welcome email to ${email} (${role})`);
 
-    // Use default FitConnect mascot avatar
-    const mascotAvatarUrl = getDefaultAvatarUrl(supabaseUrl);
+    // Get contextual avatar based on role
+    const avatarUrl = role === 'coach' 
+      ? getEmailAvatarUrl('welcome_coach', supabaseUrl)
+      : getEmailAvatarUrl('welcome_client', supabaseUrl);
     const { colors } = EMAIL_CONFIG;
 
     let emailContent: string;
@@ -51,7 +53,7 @@ serve(async (req) => {
     if (role === 'client') {
       subject = `Welcome to FitConnect, ${firstName}! 🎉`;
       emailContent = `
-        ${squircleAvatarComponent(mascotAvatarUrl, "FitConnect", 100)}
+        ${freeFloatingAvatarComponent(avatarUrl, "FitConnect Mascot", 160)}
         
         <h2 class="headline" style="color: ${colors.text}; margin: 24px 0 16px 0; text-align: center; font-size: 24px;">
           Welcome, ${firstName}!
@@ -83,7 +85,7 @@ serve(async (req) => {
     } else {
       subject = `Welcome to FitConnect, Coach ${firstName}! 🏆`;
       emailContent = `
-        ${squircleAvatarComponent(mascotAvatarUrl, "FitConnect", 100)}
+        ${freeFloatingAvatarComponent(avatarUrl, "FitConnect Coach Mascot", 160)}
         
         <h2 class="headline" style="color: ${colors.text}; margin: 24px 0 16px 0; text-align: center; font-size: 24px;">
           Welcome, Coach ${firstName}!

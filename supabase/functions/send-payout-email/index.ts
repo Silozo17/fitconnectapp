@@ -3,8 +3,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { 
   baseEmailTemplate, 
   ctaButton, 
+  freeFloatingAvatarComponent,
   infoCard,
-  statsRow,
+  getEmailAvatarUrl,
   EMAIL_CONFIG 
 } from "../_shared/email-templates.ts";
 
@@ -63,6 +64,7 @@ serve(async (req) => {
 
     const coachName = coach.display_name || "Coach";
     const { colors } = EMAIL_CONFIG;
+    const avatarUrl = getEmailAvatarUrl('payout', supabaseUrl);
 
     // Format amount
     const formattedAmount = new Intl.NumberFormat('en-GB', {
@@ -81,9 +83,7 @@ serve(async (req) => {
     };
 
     const emailContent = `
-      <div style="text-align: center; margin-bottom: 24px;">
-        <span style="font-size: 48px;">💰</span>
-      </div>
+      ${freeFloatingAvatarComponent(avatarUrl, "Payout Mascot", 140)}
       
       <h2 class="headline" style="color: ${colors.text}; margin: 0 0 16px 0; text-align: center; font-size: 24px;">
         Payout Sent!

@@ -3,7 +3,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { 
   baseEmailTemplate, 
   ctaButton, 
-  infoCard,
+  freeFloatingAvatarComponent,
+  getEmailAvatarUrl,
   EMAIL_CONFIG 
 } from "../_shared/email-templates.ts";
 
@@ -55,6 +56,7 @@ serve(async (req) => {
     console.log(`Sending payment receipt to ${email}`);
 
     const { colors } = EMAIL_CONFIG;
+    const avatarUrl = getEmailAvatarUrl('payment', supabaseUrl);
 
     // Format amount
     const formattedAmount = new Intl.NumberFormat('en-GB', {
@@ -75,9 +77,7 @@ serve(async (req) => {
     });
 
     const emailContent = `
-      <div style="text-align: center; margin-bottom: 24px;">
-        <span style="font-size: 48px;">🧾</span>
-      </div>
+      ${freeFloatingAvatarComponent(avatarUrl, "Payment Mascot", 140)}
       
       <h2 class="headline" style="color: ${colors.text}; margin: 0 0 16px 0; text-align: center; font-size: 24px;">
         Payment Receipt
