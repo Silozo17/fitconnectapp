@@ -5,9 +5,9 @@ import { Dumbbell, CheckCircle, XCircle, Eye } from "lucide-react";
 export default function AdminCoachesDocs() {
   return (
     <DocsLayout
-      title="Coach Management"
-      description="Manage coaches, handle verifications, and monitor coach performance."
-      breadcrumbs={[{ label: "For Administrators", href: "/docs/admin" }, { label: "Coach Management" }]}
+      title="Coach Management | Admin Guide"
+      description="Manage coaches, review verification queues, and monitor performance. Grant subscriptions and take moderation actions."
+      breadcrumbs={[{ label: "Admin Guide", href: "/docs/admin" }, { label: "Coaches" }]}
       noIndex
     >
       <section className="mb-10">

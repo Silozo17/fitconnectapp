@@ -5,9 +5,9 @@ import { Users, Search, Ban, Shield } from "lucide-react";
 export default function AdminUsersDocs() {
   return (
     <DocsLayout
-      title="User Management"
-      description="View, search, and manage all platform users."
-      breadcrumbs={[{ label: "For Administrators", href: "/docs/admin" }, { label: "User Management" }]}
+      title="User Management | Admin Guide"
+      description="View, search, and manage all platform users. Suspend accounts, reset passwords, and perform bulk actions securely."
+      breadcrumbs={[{ label: "Admin Guide", href: "/docs/admin" }, { label: "Users" }]}
       noIndex
     >
       <section className="mb-10">

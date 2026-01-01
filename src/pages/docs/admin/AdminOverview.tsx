@@ -6,12 +6,10 @@ import { Shield, Users, BarChart3, Settings } from "lucide-react";
 export default function AdminOverview() {
   return (
     <DocsLayout
-      title="Admin Dashboard Guide | Platform Management"
-      description="Manage users, coaches, verifications and platform settings. Complete admin guide for FitConnect platform administrators."
-      breadcrumbs={[
-        { label: "Admin Guide" }
-      ]}
-      noIndex={true}
+      title="Admin Overview | Admin Guide"
+      description="Complete admin guide for platform management. Learn to manage users, coaches, verifications, and settings."
+      breadcrumbs={[{ label: "Admin Guide" }]}
+      noIndex
     >
       <section className="space-y-6">
         <h2 className="text-2xl font-semibold flex items-center gap-2">

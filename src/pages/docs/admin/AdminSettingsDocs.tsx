@@ -4,13 +4,10 @@ import { DocStep, DocTip, DocWarning, DocInfo } from "@/components/docs/DocCompo
 export default function AdminSettingsDocs() {
   return (
     <DocsLayout
-      title="Platform Settings"
-      description="Configure global platform settings and system-wide preferences"
-      breadcrumbs={[
-        { label: "Docs", href: "/docs" },
-        { label: "Admin", href: "/docs/admin" },
-        { label: "Platform Settings" },
-      ]}
+      title="Platform Settings | Admin Guide"
+      description="Configure global platform settings, feature flags, subscription tiers, and commission rates. Manage system-wide preferences."
+      breadcrumbs={[{ label: "Admin Guide", href: "/docs/admin" }, { label: "Settings" }]}
+      noIndex
     >
       <section className="mb-8">
         <h2 className="text-2xl font-bold mb-4">What It Is</h2>

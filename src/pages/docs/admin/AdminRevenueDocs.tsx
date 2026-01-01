@@ -5,9 +5,9 @@ import { DollarSign, TrendingUp, CreditCard, PieChart } from "lucide-react";
 export default function AdminRevenueDocs() {
   return (
     <DocsLayout
-      title="Revenue Dashboard"
-      description="Track platform revenue, commissions, and financial metrics."
-      breadcrumbs={[{ label: "For Administrators", href: "/docs/admin" }, { label: "Revenue" }]}
+      title="Revenue Dashboard | Admin Guide"
+      description="Track platform revenue, MRR, coach payouts, and commission earnings. Monitor transaction volume and financial health."
+      breadcrumbs={[{ label: "Admin Guide", href: "/docs/admin" }, { label: "Revenue" }]}
       noIndex
     >
       <section className="mb-10">

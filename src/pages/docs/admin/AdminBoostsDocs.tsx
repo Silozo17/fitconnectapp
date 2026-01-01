@@ -5,9 +5,9 @@ import { Rocket, DollarSign, Users, Settings, CreditCard } from "lucide-react";
 export default function AdminBoostsDocs() {
   return (
     <DocsLayout
-      title="Boost Management"
-      description="Monitor and manage the Boost marketing feature."
-      breadcrumbs={[{ label: "For Administrators", href: "/docs/admin" }, { label: "Boosts" }]}
+      title="Boost Management | Admin Guide"
+      description="Monitor Boost marketing feature revenue, active coaches, and client acquisitions. Configure pricing and commission rates."
+      breadcrumbs={[{ label: "Admin Guide", href: "/docs/admin" }, { label: "Boosts" }]}
       noIndex
     >
       <section className="mb-10">

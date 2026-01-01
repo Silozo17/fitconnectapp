@@ -4,13 +4,10 @@ import { DocStep, DocTip, DocWarning, DocInfo } from "@/components/docs/DocCompo
 export default function AdminVerificationsDocs() {
   return (
     <DocsLayout
-      title="Verification Queue"
-      description="Guide to reviewing and processing coach verification requests"
-      breadcrumbs={[
-        { label: "Docs", href: "/docs" },
-        { label: "Admin", href: "/docs/admin" },
-        { label: "Verification Queue" },
-      ]}
+      title="Verification Queue | Admin Guide"
+      description="Review and process coach verification requests. Verify credentials, certifications, and insurance documentation securely."
+      breadcrumbs={[{ label: "Admin Guide", href: "/docs/admin" }, { label: "Verifications" }]}
+      noIndex
     >
       <section className="mb-8">
         <h2 className="text-2xl font-bold mb-4">What It Is</h2>

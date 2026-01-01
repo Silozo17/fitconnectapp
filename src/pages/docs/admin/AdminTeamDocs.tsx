@@ -5,9 +5,9 @@ import { Users, Shield, UserPlus } from "lucide-react";
 export default function AdminTeamDocs() {
   return (
     <DocsLayout
-      title="Team Management"
-      description="Add team members and manage admin roles and permissions."
-      breadcrumbs={[{ label: "For Administrators", href: "/docs/admin" }, { label: "Team Management" }]}
+      title="Team Management | Admin Guide"
+      description="Add team members and manage admin roles. Configure permissions for Admin, Manager, and Staff access levels."
+      breadcrumbs={[{ label: "Admin Guide", href: "/docs/admin" }, { label: "Team" }]}
       noIndex
     >
       <section className="mb-10">

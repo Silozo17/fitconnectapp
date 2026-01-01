@@ -5,9 +5,9 @@ import { LayoutDashboard, Move, Eye, BarChart3 } from "lucide-react";
 export default function AdminDashboardDocs() {
   return (
     <DocsLayout
-      title="Admin Dashboard"
-      description="Overview of the admin dashboard and its customizable widgets."
-      breadcrumbs={[{ label: "For Administrators", href: "/docs/admin" }, { label: "Dashboard" }]}
+      title="Admin Dashboard | Admin Guide"
+      description="Customise your admin dashboard with drag-and-drop widgets. Monitor users, coaches, revenue, and sessions in real time."
+      breadcrumbs={[{ label: "Admin Guide", href: "/docs/admin" }, { label: "Dashboard" }]}
       noIndex
     >
       <section className="mb-10">
