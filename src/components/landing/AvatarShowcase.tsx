@@ -32,7 +32,7 @@ export function AvatarShowcase() {
   };
   
   return (
-    <section className="py-20 relative overflow-hidden">
+    <section className="py-12 relative overflow-hidden">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/5 to-background" />
       
@@ -134,13 +134,17 @@ export function AvatarShowcase() {
           </div>
         </div>
         
-        {/* Ape hand image - centered below the grid */}
-        <div className="flex justify-center mt-12">
-          <img 
-            src={apeHandImage} 
-            alt="Ape hand holding phone" 
-            className="w-full max-w-md object-contain"
-          />
+        {/* Ape hand image - centered with fade-out effect */}
+        <div className="flex justify-center mt-6 relative">
+          <div className="relative">
+            <img 
+              src={apeHandImage} 
+              alt="Ape hand holding phone" 
+              className="w-full max-w-md object-contain"
+            />
+            {/* Bottom fade overlay to hide cut-off */}
+            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
+          </div>
         </div>
       </div>
     </section>
