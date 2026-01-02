@@ -57,7 +57,7 @@ const Hero = () => {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center max-w-7xl mx-auto">
           
           {/* Left Column - Content */}
-          <div className="text-center lg:text-left order-2 lg:order-1">
+          <div className="text-center lg:text-left">
             {/* Badge */}
             <div className="flex justify-center lg:justify-start mb-6">
               <NeonBadge variant="lime" size="md" className="gap-2">
@@ -132,12 +132,12 @@ const Hero = () => {
           </div>
 
           {/* Right Column - Phone Mockups */}
-          <div className="relative order-1 lg:order-2 flex justify-center lg:justify-end">
+          <div className="relative flex justify-center lg:justify-end">
             {/* Glow effect behind phones */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/10 to-transparent rounded-full blur-3xl scale-75" />
             
-            {/* Phone mockups */}
-            <div className="relative">
+            {/* Phone mockups - 70% on mobile, 80% on tablet, full on desktop */}
+            <div className="relative scale-[0.7] md:scale-[0.8] lg:scale-100 origin-center">
               <img 
                 src={heroPhones} 
                 alt={t('hero.phonesAlt', 'FitConnect app on mobile devices')}
