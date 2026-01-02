@@ -175,7 +175,7 @@
 .prose-docs a:not([class*="bg-primary"]) {
   @apply text-primary no-underline transition-colors;
 }
-.prose-docs a:hover {
+.prose-docs a:not([class*="bg-primary"]):hover {
   @apply text-primary/80;
 }
 
