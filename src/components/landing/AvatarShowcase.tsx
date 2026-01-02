@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { ChevronRight, Lock, Sparkles, Trophy, Target } from 'lucide-react';
 import { useAvatars, getAvatarImageUrl } from '@/hooks/useAvatars';
 import { cn } from '@/lib/utils';
+import apeHandImage from '@/assets/ape_hand.webp';
 
 export function AvatarShowcase() {
   const { t } = useTranslation('landing');
@@ -130,6 +131,15 @@ export function AvatarShowcase() {
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </Link>
+            
+            {/* Ape hand image */}
+            <div className="flex justify-center mt-8">
+              <img 
+                src={apeHandImage} 
+                alt="Ape hand holding phone" 
+                className="w-full max-w-sm object-contain"
+              />
+            </div>
           </div>
         </div>
       </div>
