@@ -1,0 +1,109 @@
+/**
+ * Flattened array of all documentation pages in reading order.
+ * Used for previous/next navigation buttons.
+ */
+
+export interface DocPage {
+  href: string;
+  title: string;
+  adminOnly?: boolean;
+}
+
+export const docsNavigationOrder: DocPage[] = [
+  // Getting Started
+  { href: "/docs/getting-started", title: "Getting Started" },
+  
+  // Client Section
+  { href: "/docs/client", title: "Client Overview" },
+  { href: "/docs/client/profile", title: "Creating Your Profile" },
+  { href: "/docs/client/coaches", title: "Finding Coaches" },
+  { href: "/docs/client/sessions", title: "Booking Sessions" },
+  { href: "/docs/client/messages", title: "Messages" },
+  { href: "/docs/client/favourites", title: "Favourites" },
+  { href: "/docs/client/plans", title: "Workout & Nutrition Plans" },
+  { href: "/docs/client/food-diary", title: "Food Diary" },
+  { href: "/docs/client/grocery", title: "Shopping Lists" },
+  { href: "/docs/client/training-logs", title: "Training Logs" },
+  { href: "/docs/client/progress", title: "Tracking Progress" },
+  { href: "/docs/client/habits", title: "Habits & Streaks" },
+  { href: "/docs/client/readiness", title: "Readiness Score" },
+  { href: "/docs/client/trends", title: "Wearable Trends" },
+  { href: "/docs/client/micro-wins", title: "Micro Wins" },
+  { href: "/docs/client/goal-suggestions", title: "Goal Suggestions" },
+  { href: "/docs/client/challenges", title: "Challenges" },
+  { href: "/docs/client/achievements", title: "Achievements" },
+  { href: "/docs/client/leaderboards", title: "Leaderboards" },
+  { href: "/docs/client/connections", title: "Connections" },
+  { href: "/docs/client/tools", title: "Fitness Tools" },
+  { href: "/docs/client/marketplace", title: "Marketplace" },
+  { href: "/docs/client/library", title: "Digital Library" },
+  { href: "/docs/client/data-sharing", title: "Data Sharing" },
+  { href: "/docs/client/security", title: "Account Security" },
+  { href: "/docs/client/wearables", title: "Wearables" },
+  { href: "/docs/client/settings", title: "Settings" },
+  { href: "/docs/client/receipts", title: "Receipts" },
+  
+  // Coach Section
+  { href: "/docs/coach", title: "Coach Overview" },
+  { href: "/docs/coach/onboarding", title: "Getting Started" },
+  { href: "/docs/coach/profile", title: "Profile Setup" },
+  { href: "/docs/coach/verification", title: "Verification" },
+  { href: "/docs/coach/clients", title: "Managing Clients" },
+  { href: "/docs/coach/comparison", title: "Client Comparison" },
+  { href: "/docs/coach/wearables", title: "Client Wearables" },
+  { href: "/docs/coach/client-risk", title: "Client Risk Detection" },
+  { href: "/docs/coach/plateau-detection", title: "Plateau Detection" },
+  { href: "/docs/coach/goal-adherence", title: "Goal Adherence" },
+  { href: "/docs/coach/pipeline", title: "Sales Pipeline" },
+  { href: "/docs/coach/messaging", title: "Messaging & Templates" },
+  { href: "/docs/coach/checkin-suggestions", title: "Check-in Suggestions" },
+  { href: "/docs/coach/plans", title: "Building Plans" },
+  { href: "/docs/coach/nutrition", title: "Nutrition Builder" },
+  { href: "/docs/coach/products", title: "Digital Products" },
+  { href: "/docs/coach/schedule", title: "Schedule & Sessions" },
+  { href: "/docs/coach/packages", title: "Packages & Pricing" },
+  { href: "/docs/coach/package-analytics", title: "Package Analytics" },
+  { href: "/docs/coach/group-classes", title: "Group Classes" },
+  { href: "/docs/coach/financial", title: "Financial Management" },
+  { href: "/docs/coach/earnings", title: "Earnings & Stripe" },
+  { href: "/docs/coach/engagement-scoring", title: "Engagement Scoring" },
+  { href: "/docs/coach/client-ltv", title: "Client LTV" },
+  { href: "/docs/coach/upsell-insights", title: "Upsell Insights" },
+  { href: "/docs/coach/revenue-forecast", title: "Revenue Forecasting" },
+  { href: "/docs/coach/ai", title: "AI Tools" },
+  { href: "/docs/coach/ai-recommendations", title: "AI Recommendations" },
+  { href: "/docs/coach/automations", title: "Automations" },
+  { href: "/docs/coach/boost", title: "Boost Marketing" },
+  { href: "/docs/coach/showcase", title: "Outcome Showcase" },
+  { href: "/docs/coach/case-studies", title: "Case Studies" },
+  { href: "/docs/coach/reviews", title: "Managing Reviews" },
+  { href: "/docs/coach/integrations", title: "Integrations" },
+  { href: "/docs/coach/connections", title: "Connections" },
+  { href: "/docs/coach/settings", title: "Settings" },
+  { href: "/docs/coach/achievements", title: "Achievements" },
+  
+  // Integrations Section
+  { href: "/docs/integrations/wearables", title: "Wearables Overview" },
+  { href: "/docs/integrations/apple-health", title: "Apple Health" },
+  { href: "/docs/integrations/health-connect", title: "Health Connect" },
+  { href: "/docs/integrations/garmin", title: "Garmin" },
+  { href: "/docs/integrations/fitbit", title: "Fitbit" },
+  { href: "/docs/integrations/zoom", title: "Zoom" },
+  { href: "/docs/integrations/google-meet", title: "Google Meet" },
+  { href: "/docs/integrations/google-calendar", title: "Google Calendar" },
+  { href: "/docs/integrations/apple-calendar", title: "Apple Calendar" },
+  
+  // Admin Section (admin only)
+  { href: "/docs/admin", title: "Admin Overview", adminOnly: true },
+  { href: "/docs/admin/dashboard", title: "Dashboard", adminOnly: true },
+  { href: "/docs/admin/users", title: "User Management", adminOnly: true },
+  { href: "/docs/admin/coaches", title: "Coach Management", adminOnly: true },
+  { href: "/docs/admin/team", title: "Team Management", adminOnly: true },
+  { href: "/docs/admin/revenue", title: "Revenue", adminOnly: true },
+  { href: "/docs/admin/analytics", title: "Analytics", adminOnly: true },
+  { href: "/docs/admin/challenges", title: "Challenges", adminOnly: true },
+  { href: "/docs/admin/blog", title: "Blog", adminOnly: true },
+  { href: "/docs/admin/boosts", title: "Boosts", adminOnly: true },
+  { href: "/docs/admin/integrations", title: "Integrations", adminOnly: true },
+  { href: "/docs/admin/audit", title: "Audit Log", adminOnly: true },
+];
