@@ -96,6 +96,17 @@ const FITNESS_GOALS = [
 const ClientSettings = () => {
   const { t } = useTranslation('settings');
   const { user, signOut } = useAuth();
+  
+  // FIX: Guard against race condition during native pull-to-refresh
+  if (!user) {
+    return (
+      <ClientDashboardLayout title="Settings">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </ClientDashboardLayout>
+    );
+  }
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
