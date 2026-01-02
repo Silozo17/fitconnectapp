@@ -140,7 +140,7 @@ export function AvatarShowcase() {
             <img 
               src={apeHandImage} 
               alt="Ape hand holding phone" 
-              className="w-full max-w-xs object-contain"
+              className="w-full max-w-md lg:max-w-6xl xl:max-w-7xl object-contain"
             />
             {/* Bottom fade overlay to hide cut-off */}
             <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
