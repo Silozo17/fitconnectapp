@@ -136,8 +136,8 @@ const Hero = () => {
             {/* Glow effect behind phones */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/10 to-transparent rounded-full blur-3xl scale-75" />
             
-            {/* Phone mockups with float animation */}
-            <div className="relative animate-float-slow">
+            {/* Phone mockups */}
+            <div className="relative">
               <img 
                 src={heroPhones} 
                 alt={t('hero.phonesAlt', 'FitConnect app on mobile devices')}
