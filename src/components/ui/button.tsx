@@ -16,7 +16,7 @@ const buttonVariants = cva(
         ghost: "hover:bg-secondary hover:text-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         // Premium variants
-        lime: "bg-primary text-primary-foreground shadow-elevation-2 hover:shadow-glow hover:scale-[1.02]",
+        lime: "bg-primary text-black shadow-elevation-2 hover:shadow-glow hover:scale-[1.02]",
         "lime-outline": "border-2 border-primary text-primary bg-transparent hover:bg-primary/10 hover:shadow-glow-sm",
         floating: "bg-card text-foreground border border-border/50 shadow-float-sm hover:shadow-float-md hover:-translate-y-0.5",
         glass: "glass-interactive text-foreground",
