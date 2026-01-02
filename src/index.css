@@ -172,7 +172,7 @@
 @tailwind utilities;
 
 /* Documentation prose overrides - remove link underscoring */
-.prose-docs a {
+.prose-docs a:not([class*="bg-primary"]) {
   @apply text-primary no-underline transition-colors;
 }
 .prose-docs a:hover {
