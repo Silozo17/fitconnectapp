@@ -40,7 +40,7 @@ export const useClientAllergens = () => {
         .from('client_profiles')
         .select('allergen_preferences')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
 

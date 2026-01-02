@@ -29,6 +29,11 @@ const LOADING_TIMEOUT_MS = 10000;
 
 const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", description }: DashboardLayoutProps) => {
   const { user } = useAuth();
+  
+  // FIX: Guard against race condition during native pull-to-refresh
+  if (!user) {
+    return <PageLoadingSpinner />;
+  }
   const navigate = useNavigate();
   const { data: onboardingStatus, isLoading } = useCoachOnboardingStatus();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);

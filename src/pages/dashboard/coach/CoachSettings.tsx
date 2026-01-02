@@ -186,6 +186,17 @@ const CoachSettings = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, signOut } = useAuth();
+  
+  // FIX: Guard against race condition during native pull-to-refresh
+  if (!user) {
+    return (
+      <DashboardLayout title="Settings">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </DashboardLayout>
+    );
+  }
   const { currency } = useLocale();
   const { t } = useTranslation('settings');
   const queryClient = useQueryClient();
