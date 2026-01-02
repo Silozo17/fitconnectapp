@@ -179,6 +179,11 @@
   @apply text-primary/80;
 }
 
+/* Ensure buttons inside prose-docs never have underlines */
+.prose-docs a[class*="bg-primary"] {
+  @apply no-underline;
+}
+
 @layer base {
   /* Prevent mobile browser zoom on form inputs - requires 16px minimum */
   @media screen and (max-width: 768px) {
