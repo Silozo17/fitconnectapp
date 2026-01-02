@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { DocNav } from "./DocNav";
+import { DocNavigation } from "./DocNavigation";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { 
@@ -129,6 +130,9 @@ export function DocsLayout({ title, description, breadcrumbs = [], children, noI
               <div className="prose prose-invert prose-docs max-w-none">
                 {children}
               </div>
+
+              {/* Previous/Next Navigation */}
+              <DocNavigation />
             </div>
           </main>
         </div>
