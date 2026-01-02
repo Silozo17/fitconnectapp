@@ -33,7 +33,7 @@ const Hero = () => {
   ];
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden gradient-bg-hero">
+    <section className="relative min-h-screen flex items-center overflow-hidden gradient-bg-hero section-fade-bottom">
       {/* Decorative Avatar */}
       <DecorativeAvatar 
         avatarSlug="sprinter-cheetah" 
