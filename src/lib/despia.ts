@@ -415,21 +415,64 @@ export const syncHealthKitData = async (days: number = 7): Promise<HealthKitConn
         timeoutPromise
       ]);
       
+      // DEEP DEBUG: Log raw response structure
+      console.log(`[Despia HealthKit] ${type} RAW response:`, JSON.stringify(response, null, 2));
+      
       if (response && typeof response === 'object') {
-        const data = (response as Record<string, unknown>).healthkitResponse;
+        let healthkitData = (response as Record<string, unknown>).healthkitResponse;
         
-        if (data && typeof data === 'object') {
-          // Merge the type's data into our aggregate
-          const typeData = (data as Record<string, unknown>)[type];
-          if (typeData) {
-            allData[type] = typeData;
-            const pointCount = Array.isArray(typeData) ? typeData.length : 1;
-            totalDataPoints += pointCount;
-            console.log(`[Despia HealthKit] ✓ ${type}: ${pointCount} data points`);
-          } else {
-            console.log(`[Despia HealthKit] ✓ ${type}: no data`);
-          }
+        console.log(`[Despia HealthKit] ${type} healthkitResponse type:`, typeof healthkitData);
+        console.log(`[Despia HealthKit] ${type} healthkitResponse:`, JSON.stringify(healthkitData, null, 2));
+        
+        // FIX: Handle double-nested healthkitResponse (Despia SDK quirk)
+        if (healthkitData && typeof healthkitData === 'object' && 'healthkitResponse' in (healthkitData as object)) {
+          console.log(`[Despia HealthKit] ${type} Unwrapping double-nested healthkitResponse`);
+          healthkitData = (healthkitData as Record<string, unknown>).healthkitResponse;
         }
+        
+        // FIX: If healthkitData is directly an array, it's the type data
+        if (Array.isArray(healthkitData) && healthkitData.length > 0) {
+          console.log(`[Despia HealthKit] ${type} Response is array with ${healthkitData.length} items`);
+          allData[type] = healthkitData;
+          totalDataPoints += healthkitData.length;
+          console.log(`[Despia HealthKit] ✓ ${type}: ${healthkitData.length} data points (array format)`);
+        } else if (healthkitData && typeof healthkitData === 'object' && !Array.isArray(healthkitData)) {
+          // Standard object format: { "HKQuantityTypeIdentifier...": [...] }
+          const hkObj = healthkitData as Record<string, unknown>;
+          const typeData = hkObj[type];
+          
+          // Also try without the full type identifier (some SDKs shorten it)
+          const shortType = type.replace('HKQuantityTypeIdentifier', '');
+          const shortTypeData = hkObj[shortType];
+          
+          // Log all keys in the response object
+          console.log(`[Despia HealthKit] ${type} Response keys:`, Object.keys(hkObj));
+          
+          if (typeData && Array.isArray(typeData) && typeData.length > 0) {
+            allData[type] = typeData;
+            totalDataPoints += typeData.length;
+            console.log(`[Despia HealthKit] ✓ ${type}: ${typeData.length} data points`);
+          } else if (shortTypeData && Array.isArray(shortTypeData) && shortTypeData.length > 0) {
+            allData[type] = shortTypeData;
+            totalDataPoints += shortTypeData.length;
+            console.log(`[Despia HealthKit] ✓ ${type}: ${shortTypeData.length} data points (short key)`);
+          } else {
+            // Try first key in the object as fallback
+            const firstKey = Object.keys(hkObj)[0];
+            const firstData = firstKey ? hkObj[firstKey] : null;
+            if (firstData && Array.isArray(firstData) && firstData.length > 0) {
+              allData[type] = firstData;
+              totalDataPoints += firstData.length;
+              console.log(`[Despia HealthKit] ✓ ${type}: ${firstData.length} data points (first key: ${firstKey})`);
+            } else {
+              console.log(`[Despia HealthKit] ✓ ${type}: no data (empty or no matching key)`);
+            }
+          }
+        } else {
+          console.log(`[Despia HealthKit] ✓ ${type}: no data (null/empty response)`);
+        }
+      } else {
+        console.log(`[Despia HealthKit] ${type}: Invalid response format`);
       }
       
       // 200ms delay between calls to prevent native bridge flooding
