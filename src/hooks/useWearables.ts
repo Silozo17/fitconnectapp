@@ -265,6 +265,17 @@ export const useWearables = () => {
       throw new Error("Not signed in");
     }
 
+    // Check for recent disconnect and enforce cooldown (prevents SDK state corruption)
+    const disconnectTime = sessionStorage.getItem('healthkit_disconnect_time');
+    if (disconnectTime) {
+      const elapsed = Date.now() - parseInt(disconnectTime);
+      if (elapsed < 1000) {
+        console.log('[useWearables] Enforcing reconnect cooldown...');
+        await new Promise(resolve => setTimeout(resolve, 1000 - elapsed));
+      }
+      sessionStorage.removeItem('healthkit_disconnect_time');
+    }
+
     // Get client profile ID
     const { data: clientProfile, error: profileError } = await supabase
       .from("client_profiles")
@@ -402,7 +413,14 @@ export const useWearables = () => {
       if (error) throw error;
     },
     onSuccess: () => {
+      // Immediately invalidate all health-related queries
       queryClient.invalidateQueries({ queryKey: ["wearable-connections"] });
+      queryClient.invalidateQueries({ queryKey: ["health-data"] });
+      queryClient.invalidateQueries({ queryKey: ["health-metrics"] });
+      
+      // Store disconnect timestamp to enforce cooldown on reconnect
+      sessionStorage.setItem('healthkit_disconnect_time', Date.now().toString());
+      
       toast.success("Wearable disconnected");
     },
     onError: () => {

@@ -156,14 +156,14 @@ export const useSyncAllWearables = () => {
           return null;
         }
         
-        // Map all supported QUANTITY types
-        // Sequential single-type sync is now crash-proof
+        // Map supported QUANTITY types that don't crash Despia SDK
         const mappings: Record<string, string> = {
           'HKQuantityTypeIdentifierStepCount': 'steps',
           'HKQuantityTypeIdentifierActiveEnergyBurned': 'calories',
           'HKQuantityTypeIdentifierDistanceWalkingRunning': 'distance',
-          'HKQuantityTypeIdentifierAppleExerciseTime': 'active_minutes',
-          // EXCLUDED: HeartRate (discrete type) and Sleep (category type)
+          // EXCLUDED: AppleExerciseTime (active_minutes) - Despia SDK crash
+          // EXCLUDED: HeartRate (discrete type) - SDK crash
+          // EXCLUDED: Sleep (category type) - SDK crash
         };
         
         return mappings[hkType] || null;

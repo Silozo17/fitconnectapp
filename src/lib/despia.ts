@@ -243,29 +243,37 @@ export const checkHealthKitConnection = async (): Promise<HealthKitConnectionRes
     return { success: false, error: 'HealthKit is only available on iOS' };
   }
 
-  try {
-    /**
-     * REQUEST ONLY STEPS FOR INITIAL PERMISSION CHECK
-     * This triggers the iOS permission dialog. We use only Steps to avoid
-     * the Despia SDK bug with multi-type HKStatisticsCollectionQuery.
-     * The full sync will fetch other types individually.
-     */
-    const checkType = 'HKQuantityTypeIdentifierStepCount';
-    console.log(`[Despia HealthKit] Checking connection with ${checkType} (triggers permission if needed)...`);
-    
-    // Create a timeout promise to prevent infinite waiting (Despia limitation)
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('HEALTHKIT_TIMEOUT')), HEALTHKIT_TIMEOUT_MS);
-    });
-    
-    // Race between actual call and timeout
-    const response = await Promise.race([
-      despia(
-        `healthkit://read?types=${checkType}&days=1`,
-        ['healthkitResponse']
-      ),
-      timeoutPromise
-    ]);
+  // Pre-connection delay to let native state settle (helps after permission changes)
+  await new Promise(resolve => setTimeout(resolve, 100));
+  
+  const checkType = 'HKQuantityTypeIdentifierStepCount';
+  const CONNECTION_TIMEOUT_MS = 2000;
+  const MAX_RETRIES = 1;
+  let retryCount = 0;
+  
+  while (retryCount <= MAX_RETRIES) {
+    try {
+      /**
+       * REQUEST ONLY STEPS FOR INITIAL PERMISSION CHECK
+       * This triggers the iOS permission dialog. We use only Steps to avoid
+       * the Despia SDK bug with multi-type HKStatisticsCollectionQuery.
+       * The full sync will fetch other types individually.
+       */
+      console.log(`[Despia HealthKit] Checking connection with ${checkType} (attempt ${retryCount + 1})...`);
+      
+      // Create a timeout promise (shorter timeout for connection check)
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('HEALTHKIT_TIMEOUT')), CONNECTION_TIMEOUT_MS);
+      });
+      
+      // Race between actual call and timeout
+      const response = await Promise.race([
+        despia(
+          `healthkit://read?types=${checkType}&days=1`,
+          ['healthkitResponse']
+        ),
+        timeoutPromise
+      ]);
     
     console.log('[Despia HealthKit] Response received:', JSON.stringify(response, null, 2));
     
@@ -307,36 +315,37 @@ export const checkHealthKitConnection = async (): Promise<HealthKitConnectionRes
       timedOut: false
     };
     
-  } catch (e) {
-    // Handle timeout specifically
-    if (e instanceof Error && e.message === 'HEALTHKIT_TIMEOUT') {
-      console.log('[Despia HealthKit] Connection check timed out after 3 seconds');
-      return { 
-        success: false, 
-        error: 'NO_RESPONSE',
-        timedOut: true
-      };
+    } catch (e) {
+      // Handle timeout - retry if we have retries left
+      if (e instanceof Error && e.message === 'HEALTHKIT_TIMEOUT') {
+        if (retryCount < MAX_RETRIES) {
+          console.log(`[Despia HealthKit] Attempt ${retryCount + 1} timed out, retrying...`);
+          await new Promise(resolve => setTimeout(resolve, 500));
+          retryCount++;
+          continue;
+        }
+        console.log('[Despia HealthKit] Connection check timed out after all retries');
+        return { 
+          success: false, 
+          error: 'NO_RESPONSE',
+          timedOut: true
+        };
+      }
+      
+      // Other errors - retry once
+      if (retryCount < MAX_RETRIES) {
+        console.log(`[Despia HealthKit] Attempt ${retryCount + 1} failed, retrying...`, e);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        retryCount++;
+        continue;
+      }
+      throw e;
     }
-    
-    console.error('[Despia HealthKit] Error during read attempt:', e);
-    
-    // Parse the error to provide a user-friendly message
-    const errorMessage = e instanceof Error ? e.message : String(e);
-    
-    // Check for common HealthKit error patterns
-    if (errorMessage.includes('denied') || errorMessage.includes('authorization')) {
-      return { 
-        success: false, 
-        error: 'Permission denied. Please go to Settings → Privacy & Security → Health and enable access for this app.' 
-      };
-    }
-    
-    if (errorMessage.includes('unavailable') || errorMessage.includes('not available')) {
-      return { success: false, error: 'HealthKit is not available on this device.' };
-    }
-    
-    return { success: false, error: errorMessage || 'Failed to connect to Apple Health' };
   }
+  
+  // If we exhausted retries without success
+  console.error('[Despia HealthKit] All connection attempts failed');
+  return { success: false, error: 'Failed to connect to Apple Health after retries' };
 };
 
 /**
@@ -355,11 +364,11 @@ export const checkHealthKitConnection = async (): Promise<HealthKitConnectionRes
  * Contact Despia support to request support for discrete/category types.
  */
 export const SUPPORTED_HEALTHKIT_TYPES = [
-  'HKQuantityTypeIdentifierStepCount',           // steps (cumulative)
-  'HKQuantityTypeIdentifierActiveEnergyBurned',  // calories (cumulative)
-  'HKQuantityTypeIdentifierAppleExerciseTime',   // active_minutes (cumulative)
+  'HKQuantityTypeIdentifierStepCount',              // steps (cumulative)
+  'HKQuantityTypeIdentifierActiveEnergyBurned',     // calories (cumulative)
   'HKQuantityTypeIdentifierDistanceWalkingRunning', // distance (cumulative)
-  // EXCLUDED: 'HKQuantityTypeIdentifierHeartRate' - discrete type, causes crash
+  // EXCLUDED: AppleExerciseTime (active_minutes) - Despia SDK crashes even with single-type query
+  // EXCLUDED: HeartRate - discrete type, causes crash with HKStatisticsCollectionQuery
 ] as const;
 
 /**
