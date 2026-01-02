@@ -155,7 +155,7 @@ export default function GettingStarted() {
           Ready to dive deeper? Explore our detailed guides for clients and coaches.
         </p>
         <div className="flex flex-wrap gap-4">
-          <Button asChild variant="lime">
+          <Button asChild variant="lime" className="text-black">
             <Link to="/docs/client">Client Documentation</Link>
           </Button>
           <Button asChild variant="outline">
