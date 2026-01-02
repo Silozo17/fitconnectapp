@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -254,9 +254,30 @@ function LanguagePersistence() {
   return null;
 }
 
-// Despia native initialization (Android status bar config)
+// Despia native initialization (Android status bar config + pull-to-refresh visual fix)
 function DespiaInitializer() {
   useAppInitialization();
+  
+  // FIX: Prevent visual duplication during native pull-to-refresh
+  // Despia overlays a snapshot of the current WebView during reload
+  // By fading out before unload, we prevent the "double navbar" flicker
+  React.useEffect(() => {
+    // Only apply for Despia native apps
+    if (!navigator.userAgent.toLowerCase().includes('despia')) return;
+    
+    const handleBeforeUnload = () => {
+      // Fade out the content before Despia takes a snapshot
+      const root = document.getElementById('root');
+      if (root) {
+        root.style.transition = 'opacity 0.05s ease-out';
+        root.style.opacity = '0';
+      }
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
+  
   return null;
 }
 

@@ -33,7 +33,9 @@ export class ErrorBoundary extends Component<Props, State> {
 
   private handleGoHome = () => {
     this.setState({ hasError: false, error: null });
-    window.location.href = "/";
+    // FIX: Navigate to /dashboard instead of / to ensure proper state restoration
+    // RouteRestorer will handle redirecting to the correct dashboard based on role
+    window.location.href = "/dashboard";
   };
 
   public render() {

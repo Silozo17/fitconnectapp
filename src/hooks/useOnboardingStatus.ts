@@ -38,7 +38,15 @@ export const useClientOnboardingStatus = () => {
   return useQuery({
     queryKey: ["client-onboarding-status", user?.id],
     queryFn: async (): Promise<OnboardingStatus> => {
-      if (!user?.id) return { isOnboarded: false };
+      // FIX: Guard against race condition during native pull-to-refresh
+      // Check localStorage for known-onboarded users before making DB call
+      if (!user?.id) {
+        const isKnown = localStorage.getItem('fitconnect_client_onboarded') === 'true';
+        if (isKnown) {
+          return { isOnboarded: true, onboardingProgress: null };
+        }
+        return { isOnboarded: false };
+      }
 
       try {
         const { data, error } = await supabase

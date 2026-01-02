@@ -45,6 +45,13 @@ const ClientDashboardLayoutInner = memo(({
     return localStorage.getItem('fitconnect_client_onboarded') === 'true';
   }, []);
 
+  // FIX: Guard against race condition during native pull-to-refresh
+  // If user is not yet available (auth loading), show loading spinner
+  // This prevents crashes when Despia's pull-to-refresh triggers a full page reload
+  if (!user) {
+    return <PageLoadingSpinner />;
+  }
+
   // Check if user just completed onboarding - prevents flash of redirect
   const justCompletedOnboarding = useMemo(() => {
     if (typeof sessionStorage === 'undefined') return false;
