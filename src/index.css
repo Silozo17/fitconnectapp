@@ -697,6 +697,36 @@
       hsl(var(--background));
   }
 
+  /* Section transition fade - smooth blend to next section */
+  .section-fade-bottom {
+    position: relative;
+  }
+  
+  .section-fade-bottom::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 8rem;
+    background: linear-gradient(to bottom, transparent, hsl(var(--background)));
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  /* Smooth top fade for sections */
+  .section-fade-top::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4rem;
+    background: linear-gradient(to top, transparent, hsl(var(--background)));
+    pointer-events: none;
+    z-index: 5;
+  }
+
   /* Premium curved header background */
   .gradient-header {
     background: linear-gradient(180deg, 
