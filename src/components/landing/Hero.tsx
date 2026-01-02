@@ -149,7 +149,7 @@ const Hero = () => {
         </div>
 
         {/* Stats Row */}
-        <div className="flex flex-wrap justify-center gap-4 md:gap-6 lg:gap-10 mt-16 lg:mt-20">
+        <div className="flex flex-wrap justify-center gap-4 md:gap-6 lg:gap-10 mt-8 lg:mt-12">
           {stats.map((stat, index) => (
             <div key={index} className="flex items-center gap-3 bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl px-5 py-3 md:px-6 md:py-4 hover:border-primary/30 transition-all duration-300">
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-primary/10 flex items-center justify-center">
