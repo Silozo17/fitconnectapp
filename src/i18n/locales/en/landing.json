@@ -6,6 +6,9 @@
     "description": "Connect with world-class personal trainers, nutritionists, and combat sports coaches. Achieve your fitness goals with personalized guidance.",
     "ctaPrimary": "Find Your Coach",
     "ctaSecondary": "Become a Coach",
+    "availableOn": "Available on",
+    "appBadgesAlt": "Download on App Store and Google Play",
+    "phonesAlt": "FitConnect app on mobile devices",
     "stats": {
       "activeUsers": "Active Users",
       "expertCoaches": "Expert Coaches",

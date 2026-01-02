@@ -6,6 +6,9 @@
     "description": "Połącz się ze światowej klasy trenerami personalnymi, dietetykami i trenerami sportów walki. Osiągnij swoje cele fitness dzięki spersonalizowanemu wsparciu.",
     "ctaPrimary": "Znajdź Trenera",
     "ctaSecondary": "Zostań Trenerem",
+    "availableOn": "Dostępne na",
+    "appBadgesAlt": "Pobierz z App Store i Google Play",
+    "phonesAlt": "Aplikacja FitConnect na urządzeniach mobilnych",
     "stats": {
       "activeUsers": "Aktywni Użytkownicy",
       "expertCoaches": "Eksperci Trenerzy",
