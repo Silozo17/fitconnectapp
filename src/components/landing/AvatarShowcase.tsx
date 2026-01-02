@@ -131,16 +131,16 @@ export function AvatarShowcase() {
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </Link>
-            
-            {/* Ape hand image */}
-            <div className="flex justify-center mt-8">
-              <img 
-                src={apeHandImage} 
-                alt="Ape hand holding phone" 
-                className="w-full max-w-sm object-contain"
-              />
-            </div>
           </div>
+        </div>
+        
+        {/* Ape hand image - centered below the grid */}
+        <div className="flex justify-center mt-12">
+          <img 
+            src={apeHandImage} 
+            alt="Ape hand holding phone" 
+            className="w-full max-w-md object-contain"
+          />
         </div>
       </div>
     </section>
