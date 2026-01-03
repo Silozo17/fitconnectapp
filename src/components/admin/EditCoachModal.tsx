@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -21,8 +22,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Mail, MapPin, FileText, Globe, User, Clock, Building2 } from "lucide-react";
+import { Loader2, Mail, MapPin, FileText, Globe, User, Clock, Building2, Gift, AlertCircle } from "lucide-react";
 import { useAdminUserManagement } from "@/hooks/useAdminUserManagement";
+import { useGrantFreePlan, useRevokeGrantedPlan } from "@/hooks/useAdminData";
 import { StatusBadge } from "./StatusBadge";
 import { LocationAutocomplete, LocationData } from "@/components/shared/LocationAutocomplete";
 import { CoachTypeSelector } from "@/components/coach/CoachTypeSelector";
@@ -30,6 +32,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { AdminQualificationsManager } from "./AdminQualificationsManager";
 import { GymAutocomplete } from "@/components/shared/GymAutocomplete";
+import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
 
 interface CoachUser {
   id: string;
@@ -71,12 +75,14 @@ const EditCoachModal = ({ coach, open, onClose, onSaved }: EditCoachModalProps) 
   const [displayName, setDisplayName] = useState(coach.display_name || "");
   const [hourlyRate, setHourlyRate] = useState(coach.hourly_rate?.toString() || "");
   const [subscriptionTier, setSubscriptionTier] = useState(coach.subscription_tier || "free");
+  const [originalTier, setOriginalTier] = useState(coach.subscription_tier || "free");
   const [email, setEmail] = useState("");
   const [originalEmail, setOriginalEmail] = useState("");
   const [saving, setSaving] = useState(false);
   const [loadingEmail, setLoadingEmail] = useState(false);
   const [updatingEmail, setUpdatingEmail] = useState(false);
   const [loadingProfile, setLoadingProfile] = useState(false);
+  const [tierChangePending, setTierChangePending] = useState(false);
   
   // Extended fields
   const [bio, setBio] = useState("");
@@ -90,6 +96,24 @@ const EditCoachModal = ({ coach, open, onClose, onSaved }: EditCoachModalProps) 
   const [gymAffiliation, setGymAffiliation] = useState("");
   
   const { getUserEmail, updateEmail } = useAdminUserManagement("coach");
+  const grantFreePlan = useGrantFreePlan();
+  const revokeGrantedPlan = useRevokeGrantedPlan();
+
+  // Fetch active admin grant for this coach
+  const { data: activeGrant, refetch: refetchGrant } = useQuery({
+    queryKey: ["coach-active-grant", coach.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("admin_granted_subscriptions")
+        .select("*")
+        .eq("coach_id", coach.id)
+        .eq("is_active", true)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: open && !!coach.id,
+  });
 
   // Fetch full coach profile data
   useEffect(() => {
@@ -155,6 +179,7 @@ const EditCoachModal = ({ coach, open, onClose, onSaved }: EditCoachModalProps) 
     setDisplayName(coach.display_name || "");
     setHourlyRate(coach.hourly_rate?.toString() || "");
     setSubscriptionTier(coach.subscription_tier || "free");
+    setOriginalTier(coach.subscription_tier || "free");
   }, [coach]);
 
   const handleEmailUpdate = async () => {
@@ -173,13 +198,63 @@ const EditCoachModal = ({ coach, open, onClose, onSaved }: EditCoachModalProps) 
     setLocationData(data || null);
   };
 
+  // Handle tier change via admin grant system
+  const handleTierChange = async (newTier: string) => {
+    if (newTier === originalTier) {
+      setSubscriptionTier(newTier);
+      return;
+    }
+
+    setTierChangePending(true);
+    try {
+      if (newTier === "free") {
+        // Revoke any existing grant and set to free
+        if (activeGrant) {
+          await revokeGrantedPlan.mutateAsync({
+            grantId: activeGrant.id,
+            coachId: coach.id,
+            tier: activeGrant.tier,
+            coachName: coach.display_name || undefined,
+          });
+        } else {
+          // Just update the profile directly if no grant exists
+          await supabase
+            .from("coach_profiles")
+            .update({ subscription_tier: "free" })
+            .eq("id", coach.id);
+        }
+        toast.success("Coach set to Free tier");
+      } else {
+        // Grant the new tier via admin grant system (protected from RevenueCat reconciliation)
+        await grantFreePlan.mutateAsync({
+          coachId: coach.id,
+          tier: newTier,
+          reason: "Admin tier change via Edit Coach modal",
+          coachName: coach.display_name || undefined,
+        });
+        toast.success(`Coach granted ${newTier} tier`);
+      }
+      
+      setSubscriptionTier(newTier);
+      setOriginalTier(newTier);
+      refetchGrant();
+    } catch (error) {
+      console.error("Failed to change tier:", error);
+      toast.error("Failed to change tier");
+      // Revert to original
+      setSubscriptionTier(originalTier);
+    } finally {
+      setTierChangePending(false);
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
 
+    // Note: subscription_tier is now handled separately via handleTierChange
     const updateData: Record<string, unknown> = {
       display_name: displayName || null,
       hourly_rate: hourlyRate ? parseFloat(hourlyRate) : null,
-      subscription_tier: subscriptionTier,
       bio: bio || null,
       coach_types: coachTypes.length > 0 ? coachTypes : null,
       online_available: onlineAvailable,
@@ -310,11 +385,22 @@ const EditCoachModal = ({ coach, open, onClose, onSaved }: EditCoachModalProps) 
 
                 <div className="space-y-2">
                   <Label htmlFor="tier">Subscription Tier</Label>
-                  <Select value={subscriptionTier} onValueChange={setSubscriptionTier}>
+                  <Select 
+                    value={subscriptionTier} 
+                    onValueChange={handleTierChange}
+                    disabled={tierChangePending}
+                  >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select tier" />
+                      {tierChangePending ? (
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span>Updating...</span>
+                        </div>
+                      ) : (
+                        <SelectValue placeholder="Select tier" />
+                      )}
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-[200]" position="popper" sideOffset={4}>
                       <SelectItem value="free">Free</SelectItem>
                       <SelectItem value="starter">Starter</SelectItem>
                       <SelectItem value="pro">Pro</SelectItem>
@@ -322,6 +408,32 @@ const EditCoachModal = ({ coach, open, onClose, onSaved }: EditCoachModalProps) 
                       <SelectItem value="founder">Founder</SelectItem>
                     </SelectContent>
                   </Select>
+                  
+                  {/* Active admin grant indicator */}
+                  {activeGrant && (
+                    <div className="flex items-center gap-2 p-2 rounded-md bg-green-500/10 border border-green-500/20">
+                      <Gift className="h-4 w-4 text-green-500" />
+                      <div className="flex-1 text-xs">
+                        <span className="text-green-600 font-medium">Admin Granted</span>
+                        {activeGrant.expires_at && (
+                          <span className="text-muted-foreground ml-1">
+                            • Expires {format(new Date(activeGrant.expires_at), "MMM d, yyyy")}
+                          </span>
+                        )}
+                        {!activeGrant.expires_at && activeGrant.tier !== "founder" && (
+                          <span className="text-muted-foreground ml-1">• No expiry</span>
+                        )}
+                        {activeGrant.tier === "founder" && (
+                          <span className="text-amber-500 ml-1">• Lifetime</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    Tier changes are protected from automatic reconciliation
+                  </p>
                 </div>
               </div>
             </div>
