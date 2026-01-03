@@ -33,17 +33,10 @@ let isHandlingResume = false;
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  // Native: Initialize role from cache for instant render on cold start
-  const [role, setRole] = useState<AppRole | null>(() => {
-    // Try to get cached role synchronously for native cold start
-    if (isDespia()) {
-      // We need user ID for cache key, but user isn't loaded yet
-      // We'll set this after user is available
-      return null;
-    }
-    return null;
-  });
+  const [role, setRole] = useState<AppRole | null>(null);
   const [allRoles, setAllRoles] = useState<AppRole[]>([]);
+  // PERF FIX: Track if we've restored from cache to prevent flash
+  const [hasRestoredFromCache, setHasRestoredFromCache] = useState(false);
   const [loading, setLoading] = useState(true);
   
   // Refs for debouncing and cooldown tracking
@@ -172,11 +165,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Native: Try to restore role from cache immediately for instant render
+          // PERF FIX: Try to restore role from cache BEFORE setting loading=false
+          // This prevents the login screen flash for returning users
           const cachedRole = getNativeCache<AppRole>(CACHE_KEYS.USER_ROLE, session.user.id);
           const cachedAllRoles = getNativeCache<AppRole[]>(CACHE_KEYS.ALL_USER_ROLES, session.user.id);
+          
           if (cachedRole) {
             setRole(cachedRole);
+            setHasRestoredFromCache(true);
           }
           if (cachedAllRoles && cachedAllRoles.length > 0) {
             setAllRoles(cachedAllRoles);
@@ -190,9 +186,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } else {
           setRole(null);
           setAllRoles([]);
+          setHasRestoredFromCache(false);
         }
         
-        // PERFORMANCE FIX: Set loading=false immediately on auth state change
+        // PERF FIX: Set loading=false immediately on auth state change
         // The onAuthStateChange fires with cached session first, so UI can render
         setLoading(false);
       }

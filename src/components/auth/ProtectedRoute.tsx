@@ -12,8 +12,16 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const { user, role, allRoles, loading } = useAuth();
   const location = useLocation();
 
-  // Show branded spinner while loading auth state
-  if (loading || (user && role === null)) {
+  // PERF FIX: Only show spinner during initial auth loading
+  // If we have user but no role yet, wait briefly for cache restoration
+  // Don't block on role if user exists - role will be fetched async
+  if (loading) {
+    return <PageLoadingSpinner />;
+  }
+  
+  // PERF FIX: If user exists and we're still waiting for role, 
+  // show spinner only briefly - native cache should restore role immediately
+  if (user && role === null && allRoles.length === 0) {
     return <PageLoadingSpinner />;
   }
 

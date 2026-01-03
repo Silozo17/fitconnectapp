@@ -395,6 +395,52 @@
   }
 
   /* ========================================
+     NATIVE PERFORMANCE OPTIMIZATIONS
+     Reduce GPU load in Despia native WebView
+     ======================================== */
+  
+  /* Reduce backdrop-filter blur intensity in native apps for better GPU performance */
+  html.native-ios .glass-card,
+  html.native-ios .glass-card-elevated,
+  html.native-ios .card-elevated,
+  html.native-ios .glass-interactive,
+  html.native-ios .glass-nav {
+    backdrop-filter: blur(16px) saturate(120%);
+    -webkit-backdrop-filter: blur(16px) saturate(120%);
+  }
+
+  html.native-ios .glass,
+  html.native-ios .glass-dark,
+  html.native-ios .glass-premium,
+  html.native-ios .glass-floating {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  html.native-ios .glass-subtle {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  
+  /* Disable glow orb animations in native apps */
+  html.native-ios .glow-orb,
+  html.native-ios .glow-orb-purple,
+  html.native-ios .animate-pulse {
+    animation: none !important;
+  }
+  
+  /* Reduce filter blur on glow orbs in native */
+  html.native-ios .glow-orb {
+    filter: blur(30px);
+    opacity: 0.5;
+  }
+  
+  html.native-ios .glow-orb-purple {
+    filter: blur(40px);
+    opacity: 0.4;
+  }
+
+  /* ========================================
      GLASSMORPHISM EFFECTS - Premium Frost System
      ======================================== */
   

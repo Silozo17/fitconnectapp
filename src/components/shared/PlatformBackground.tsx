@@ -1,5 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { isDespia } from "@/lib/despia";
 import bgHorizontal from "@/assets/bg-horizontal.svg";
 import bgVertical from "@/assets/portrait_bg.svg";
 
@@ -17,6 +18,8 @@ interface PlatformBackgroundProps {
  * Platform-wide background component with abstract fluid green/black design.
  * Uses orientation-aware SVG backgrounds for vertical and horizontal displays.
  * Provides the foundation for glassmorphism card effects.
+ * 
+ * PERF FIX: Animated glow orbs are disabled in Despia native to reduce GPU load.
  */
 export const PlatformBackground = React.memo(function PlatformBackground({
   className,
@@ -24,6 +27,9 @@ export const PlatformBackground = React.memo(function PlatformBackground({
   showImage = true,
   showAmbientGlow = true,
 }: PlatformBackgroundProps) {
+  // PERF FIX: Disable animated glow effects in native app to reduce GPU repaints
+  const isNativeApp = isDespia();
+  const shouldShowAmbientGlow = showAmbientGlow && !isNativeApp;
   return (
     <div 
       className={cn(
@@ -65,8 +71,8 @@ export const PlatformBackground = React.memo(function PlatformBackground({
         }}
       />
       
-      {/* Ambient glow orbs for extra depth */}
-      {showAmbientGlow && (
+      {/* Ambient glow orbs for extra depth - DISABLED in native for GPU performance */}
+      {shouldShowAmbientGlow && (
         <>
           <div 
             className="absolute rounded-full animate-pulse"
