@@ -341,13 +341,19 @@ export const NativeSubscriptionButtons = ({
         {/* Legal disclosure - required by iOS App Store */}
         <p className="text-xs text-muted-foreground text-center pt-4 border-t border-border">
           By continuing, you agree to our{" "}
-          <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+          <button 
+            onClick={() => window.open(`${window.location.origin}/terms`, '_blank', 'noopener,noreferrer')}
+            className="text-primary hover:underline"
+          >
             Terms of Use
-          </a>
+          </button>
           {" "}and{" "}
-          <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+          <button 
+            onClick={() => window.open(`${window.location.origin}/privacy`, '_blank', 'noopener,noreferrer')}
+            className="text-primary hover:underline"
+          >
             Privacy Policy
-          </a>
+          </button>
         </p>
       </CardContent>
     </Card>

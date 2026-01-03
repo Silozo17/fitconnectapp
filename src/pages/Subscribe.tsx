@@ -15,6 +15,7 @@ import { isDespia } from "@/lib/despia";
 import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import BecomeCoachModal from "@/components/shared/BecomeCoachModal";
+import { openExternalUrl, shouldOpenExternally } from "@/lib/external-links";
 // Tier-to-avatar mapping - each tier gets a progressively better avatar
 const TIER_AVATARS: Record<TierKey, string> = {
   free: "strongman_bear",
@@ -318,13 +319,33 @@ export default function Subscribe() {
                   </Suspense>
                   <p className="text-xs text-gray-500 text-center mt-4">
                     By subscribing, you agree to our{" "}
-                    <Link to="/terms" className="underline hover:text-gray-700">
-                      Terms of Service
-                    </Link>{" "}
-                    and{" "}
-                    <Link to="/privacy" className="underline hover:text-gray-700">
-                      Privacy Policy
-                    </Link>
+                    {shouldOpenExternally() ? (
+                      <>
+                        <button 
+                          onClick={() => openExternalUrl(`${window.location.origin}/terms`)}
+                          className="underline hover:text-gray-700"
+                        >
+                          Terms of Service
+                        </button>{" "}
+                        and{" "}
+                        <button 
+                          onClick={() => openExternalUrl(`${window.location.origin}/privacy`)}
+                          className="underline hover:text-gray-700"
+                        >
+                          Privacy Policy
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <Link to="/terms" className="underline hover:text-gray-700">
+                          Terms of Service
+                        </Link>{" "}
+                        and{" "}
+                        <Link to="/privacy" className="underline hover:text-gray-700">
+                          Privacy Policy
+                        </Link>
+                      </>
+                    )}
                   </p>
                 </div>
               )}
