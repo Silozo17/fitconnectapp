@@ -29,6 +29,7 @@ import { triggerConfetti, confettiPresets } from "@/lib/confetti";
 import { triggerHaptic } from "@/lib/despia";
 import { IAPUnsuccessfulDialog } from "@/components/iap/IAPUnsuccessfulDialog";
 import { useQueryClient } from "@tanstack/react-query";
+import { LegalDisclosure } from "@/components/shared/LegalLinks";
 
 // Full steps array (for new users without client profile)
 const FULL_STEPS = [
@@ -1525,6 +1526,9 @@ const CoachOnboarding = () => {
                 </p>
               </div>
             )}
+            
+            {/* Legal disclosure - required for iOS App Store compliance */}
+            <LegalDisclosure className="mt-4" />
           </div>
         );
       }

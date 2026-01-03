@@ -22,6 +22,7 @@ import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { NativeSubscriptionManagement } from "@/components/payments/NativeSubscriptionManagement";
 import { BillingInterval } from "@/lib/pricing-config";
 import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
+import { LegalDisclosure } from "@/components/shared/LegalLinks";
 
 interface PlatformSubscriptionProps {
   coachId: string;
@@ -318,6 +319,9 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
                 );
               })}
           </div>
+          
+          {/* Legal disclosure - required for iOS App Store compliance */}
+          <LegalDisclosure className="mt-6 pt-4 border-t" />
         </CardContent>
       </Card>
 
