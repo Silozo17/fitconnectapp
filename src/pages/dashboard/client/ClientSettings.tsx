@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Save, LogOut, AlertTriangle, Info, Bell, User, Heart, Globe, Plug, Shield, Briefcase } from "lucide-react";
+import { Loader2, Save, LogOut, AlertTriangle, Info, Bell, User, Heart, Globe, Plug, Shield, Briefcase, CreditCard, FileText } from "lucide-react";
 import { HealthTagInput } from "@/components/dashboard/clients/HealthTagInput";
 import { CurrencySelector } from "@/components/shared/CurrencySelector";
 import { LanguageSelector } from "@/components/shared/LanguageSelector";
@@ -34,6 +34,9 @@ import HealthDataWidget from "@/components/integrations/HealthDataWidget";
 import AppleCalendarConnectModal from "@/components/integrations/AppleCalendarConnectModal";
 import { useCalendarSync, CalendarProvider } from "@/hooks/useCalendarSync";
 import { Calendar, Apple } from "lucide-react";
+import { ClientSubscriptionSection } from "@/components/settings/ClientSubscriptionSection";
+import { LegalSection } from "@/components/settings/LegalSection";
+import { HealthDataSection } from "@/components/settings/HealthDataSection";
 
 interface ClientProfile {
   first_name: string | null;
@@ -142,6 +145,8 @@ const ClientSettings = () => {
     { id: "preferences", icon: Globe, label: t('tabs.preferences') },
     { id: "integrations", icon: Plug, label: t('tabs.integrations') },
     { id: "notifications", icon: Bell, label: t('tabs.notifications') },
+    { id: "subscription", icon: CreditCard, label: t('tabs.subscription', 'Subscription') },
+    { id: "legal", icon: FileText, label: t('tabs.legal', 'Legal') },
     { id: "account", icon: Shield, label: t('tabs.account') },
   ];
 
@@ -748,6 +753,16 @@ const ClientSettings = () => {
             {/* Notifications Tab */}
             {selectedTab === "notifications" && (
               <NotificationPreferences />
+            )}
+
+            {/* Subscription Tab */}
+            {selectedTab === "subscription" && (
+              <ClientSubscriptionSection />
+            )}
+
+            {/* Legal Tab */}
+            {selectedTab === "legal" && (
+              <LegalSection />
             )}
 
             {/* Account Tab */}

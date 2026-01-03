@@ -1,6 +1,6 @@
 import { useState, Suspense, useEffect } from "react";
-import { Link, Navigate, useSearchParams, useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, Zap, CheckCircle } from "lucide-react";
+import { Link, useSearchParams, useLocation, useNavigate } from "react-router-dom";
+import { ArrowLeft, Zap, CheckCircle, Info, Briefcase } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { TierSelector, TierFeatures } from "@/components/payments/TierSelector";
 import { BillingToggle } from "@/components/payments/BillingToggle";
@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { isDespia } from "@/lib/despia";
 import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import BecomeCoachModal from "@/components/shared/BecomeCoachModal";
 // Tier-to-avatar mapping - each tier gets a progressively better avatar
 const TIER_AVATARS: Record<TierKey, string> = {
   free: "strongman_bear",
@@ -42,6 +43,10 @@ export default function Subscribe() {
   const navigate = useNavigate();
   const { isIOSNative } = usePlatformRestrictions();
   const { currentTier } = useFeatureAccess();
+  const [showBecomeCoachModal, setShowBecomeCoachModal] = useState(false);
+  
+  // Check if user is a client (not coach or admin)
+  const isClient = role === "client";
   
   // Build return URL for auth redirect
   const currentUrl = `${location.pathname}${location.search}`;
@@ -92,10 +97,7 @@ export default function Subscribe() {
     setCheckoutKey(prev => prev + 1);
   }, [selectedTier, billingInterval]);
 
-  // Allow coaches and admins to view this page
-  if (role && role !== "coach" && role !== "admin") {
-    return <Navigate to="/" replace />;
-  }
+  // Note: We no longer redirect clients - they can view the page with an info message
 
   const tierData = SUBSCRIPTION_TIERS[selectedTier];
   const backPath = getBackPath(fromParam);
@@ -222,8 +224,33 @@ export default function Subscribe() {
 
       {/* Right Side - Light - Side by side layout */}
       <div className="hidden md:flex w-1/2 bg-white p-4 md:p-6 lg:p-8 flex-col lg:flex-row gap-4 lg:gap-6 items-start overflow-y-auto">
-        {/* Show native IAP ONLY for native app environments */}
-        {isNativeApp ? (
+        {/* Client info message - clients can view but not purchase */}
+        {isClient ? (
+          <div className="w-full max-w-md mx-auto">
+            <div className="bg-blue-50 rounded-xl p-8 text-center">
+              <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Info className="w-8 h-8 text-blue-500" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Subscriptions are for Coach accounts
+              </h3>
+              <p className="text-gray-600 text-sm mb-6">
+                Client accounts are always free. Premium subscriptions unlock advanced features for coaches to grow their business.
+              </p>
+              <Button 
+                onClick={() => setShowBecomeCoachModal(true)}
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6"
+              >
+                <Briefcase className="w-4 h-4 mr-2" />
+                Switch to Coach Account
+              </Button>
+              <p className="text-xs text-gray-500 mt-4">
+                Becoming a coach lets you offer your services on FitConnect
+              </p>
+            </div>
+          </div>
+        ) : isNativeApp ? (
+          /* Show native IAP ONLY for native app environments */
           <div className="w-full">
             <NativeSubscriptionButtons currentTier={currentTier} />
           </div>
@@ -348,6 +375,11 @@ export default function Subscribe() {
           </div>
         </div>
       )}
+      
+      <BecomeCoachModal 
+        open={showBecomeCoachModal} 
+        onOpenChange={setShowBecomeCoachModal} 
+      />
     </div>
   );
 }

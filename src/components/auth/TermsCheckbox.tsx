@@ -36,6 +36,16 @@ export const TermsCheckbox = ({ checked, onCheckedChange, error }: TermsCheckbox
           >
             {t("auth.termsAndConditions", "Terms & Conditions")}
           </Link>
+          {" "}{t("auth.and", "and")}{" "}
+          <Link 
+            to="/privacy" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-primary hover:underline font-medium"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {t("auth.privacyPolicy", "Privacy Policy")}
+          </Link>
         </Label>
       </div>
       {error && (

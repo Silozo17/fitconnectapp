@@ -86,6 +86,7 @@ import { ProfileCompletionProgress } from "@/components/coach/ProfileCompletionP
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import AppleCalendarConnectModal from "@/components/integrations/AppleCalendarConnectModal";
 import { CoachQualificationsManager } from "@/components/coach/CoachQualificationsManager";
+import { LegalSection } from "@/components/settings/LegalSection";
 
 interface CoachProfile {
   display_name: string | null;
@@ -206,7 +207,7 @@ const CoachSettings = () => {
   
   // Read tab from URL params for deep linking (e.g., ?tab=verification or ?tab=subscription)
   const urlTab = searchParams.get("tab");
-  const validTabs = ["profile", "notifications", "preferences", "subscription", "invoice", "integrations", "verification", "security", "marketplace", "account", "qualifications"];
+  const validTabs = ["profile", "notifications", "preferences", "subscription", "invoice", "integrations", "verification", "security", "marketplace", "account", "qualifications", "legal"];
   const initialTab = urlTab && validTabs.includes(urlTab) ? urlTab : "profile";
   const [selectedTab, setSelectedTab] = useState(initialTab);
 
@@ -555,6 +556,7 @@ const CoachSettings = () => {
                 { id: "preferences", icon: Globe, label: t('tabs.preferences') },
                 { id: "notifications", icon: Bell, label: t('tabs.notifications') },
                 { id: "subscription", icon: CreditCard, label: t('tabs.subscription') },
+                { id: "legal", icon: FileText, label: t('tabs.legal', 'Legal') },
                 { id: "account", icon: Shield, label: t('tabs.account') },
               ].map((item) => (
                 <button
@@ -1327,6 +1329,11 @@ const CoachSettings = () => {
                   </CardContent>
                 </Card>
               </div>
+            )}
+
+            {/* Legal Tab */}
+            {selectedTab === "legal" && (
+              <LegalSection />
             )}
           </div>
         </div>
