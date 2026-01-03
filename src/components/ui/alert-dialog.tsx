@@ -38,8 +38,8 @@ const AlertDialogContent = React.forwardRef<
       className={cn(
         // Positioning
         "fixed left-[50%] top-[50%] z-50 grid w-[calc(100%-2rem)] max-w-lg translate-x-[-50%] translate-y-[-50%]",
-        // Premium glass styling
-        "gap-4 p-6",
+        // Premium glass styling with safe-area aware padding
+        "gap-4 p-6 modal-content-safe",
         "glass-floating",
         // Inner highlight for depth
         "before:absolute before:inset-0 before:rounded-[inherit] before:pointer-events-none",
@@ -51,7 +51,7 @@ const AlertDialogContent = React.forwardRef<
         "data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%]",
         "data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]",
         // Mobile optimizations
-        "max-h-[90vh] overflow-y-auto",
+        "overflow-y-auto",
         className,
       )}
       {...props}
