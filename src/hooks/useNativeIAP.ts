@@ -394,6 +394,9 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     reconciliationAttemptedRef.current = false;
     
     try {
+      // Small delay to allow webhook to process first
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       const { data: reconcileResult, error } = await supabase.functions.invoke('verify-subscription-entitlement');
       
       if (!error && reconcileResult?.reconciled && reconcileResult?.tier) {
@@ -406,11 +409,13 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
           purchaseStatus: 'idle',
         }));
         
-        // Invalidate queries
-        queryClient.invalidateQueries({ queryKey: ['coach-profile'] });
-        queryClient.invalidateQueries({ queryKey: ['platform-subscription'] });
-        queryClient.invalidateQueries({ queryKey: ['feature-access'] });
-        queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
+        // Invalidate queries with refetchType: 'all' for immediate refetch
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['coach-profile'], refetchType: 'all' }),
+          queryClient.invalidateQueries({ queryKey: ['platform-subscription'], refetchType: 'all' }),
+          queryClient.invalidateQueries({ queryKey: ['feature-access'], refetchType: 'all' }),
+          queryClient.invalidateQueries({ queryKey: ['subscription-status'], refetchType: 'all' }),
+        ]);
         
         triggerHaptic('success');
         options?.onPurchaseComplete?.(tier);

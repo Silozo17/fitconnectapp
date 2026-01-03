@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCoachOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { useCoachProfileRealtime } from "@/hooks/useCoachProfileRealtime";
+import { usePlatformSubscriptionRealtime } from "@/hooks/usePlatformSubscriptionRealtime";
 import { useDiscoverModal } from "@/hooks/useDiscoverModal";
 // OPTIMIZED: Moved useAutoAwardCoachBadges to specific pages (CoachOverview, CoachAchievements)
 // to prevent 3 database queries on every navigation
@@ -62,6 +63,7 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
   }, []);
   
   useCoachProfileRealtime();
+  usePlatformSubscriptionRealtime();
 
   const handleToggleSidebar = useCallback(() => {
     setSidebarCollapsed(prev => !prev);
