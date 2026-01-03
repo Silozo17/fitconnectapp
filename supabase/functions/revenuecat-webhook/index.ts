@@ -119,18 +119,40 @@ const isBoostProduct = (productId: string | undefined, entitlementIds?: string[]
   return boostProductIds.some(id => productId.includes(id));
 };
 
+// Tier priority order (highest first) - used to pick the best tier when multiple entitlements exist
+const TIER_PRIORITY: string[] = ['enterprise', 'pro', 'starter'];
+
 /**
  * Get tier from event using entitlement-first approach
+ * When multiple entitlements exist, picks the HIGHEST tier to avoid incorrect downgrades
  * Falls back to product ID mapping if no entitlement match
  */
 const getTierFromEvent = (event: RevenueCatEvent): string | null => {
   // First, check entitlements (most reliable - handles product ID variations)
+  // When multiple entitlements exist, pick the HIGHEST tier
   if (event.entitlement_ids?.length) {
+    let bestTier: string | null = null;
+    let bestPriority = Infinity;
+    
     for (const entId of event.entitlement_ids) {
       if (entitlementToTier[entId]) {
-        logStep("Tier from entitlement", { entitlementId: entId, tier: entitlementToTier[entId] });
-        return entitlementToTier[entId];
+        const tier = entitlementToTier[entId];
+        const priority = TIER_PRIORITY.indexOf(tier);
+        // Lower index = higher priority (enterprise=0, pro=1, starter=2)
+        if (priority !== -1 && priority < bestPriority) {
+          bestTier = tier;
+          bestPriority = priority;
+        }
       }
+    }
+    
+    if (bestTier) {
+      logStep("Tier from entitlement (highest of multiple)", { 
+        entitlementIds: event.entitlement_ids, 
+        selectedTier: bestTier,
+        allMatched: event.entitlement_ids.filter(e => entitlementToTier[e])
+      });
+      return bestTier;
     }
   }
   
@@ -392,37 +414,34 @@ serve(async (req) => {
           ? new Date(event.expiration_at_ms).toISOString() 
           : null;
 
-        // Update subscription record
-        const updateData: Record<string, unknown> = {
-          status: "active",
-          current_period_start: event.purchased_at_ms 
-            ? new Date(event.purchased_at_ms).toISOString() 
-            : new Date().toISOString(),
-          current_period_end: periodEnd,
-          updated_at: new Date().toISOString(),
-        };
-        
-        // Also update tier if available (handles tier changes during renewal)
-        if (tier) {
-          updateData.tier = tier;
-        }
+        const renewalTier = tier || 'starter';
 
-        const { error } = await supabase
+        // Use UPSERT to handle case where subscription record might not exist
+        const { data: renewalData, error } = await supabase
           .from("platform_subscriptions")
-          .update(updateData)
-          .eq("coach_id", coachId);
+          .upsert({
+            coach_id: coachId,
+            tier: renewalTier,
+            status: "active",
+            current_period_start: event.purchased_at_ms 
+              ? new Date(event.purchased_at_ms).toISOString() 
+              : new Date().toISOString(),
+            current_period_end: periodEnd,
+            stripe_customer_id: `rc_${event.app_user_id}`,
+            stripe_subscription_id: `rc_${event.original_transaction_id || event.transaction_id}`,
+            updated_at: new Date().toISOString(),
+          }, { onConflict: "coach_id" })
+          .select('id');
 
         if (error) {
           logStep("Error processing RENEWAL", { error: error.message });
         } else {
-          // Also update coach profile tier if we have it
-          if (tier) {
-            await supabase
-              .from("coach_profiles")
-              .update({ subscription_tier: tier })
-              .eq("id", coachId);
-          }
-          logStep("Successfully processed RENEWAL", { coachId, tier });
+          // Also update coach profile tier
+          await supabase
+            .from("coach_profiles")
+            .update({ subscription_tier: renewalTier })
+            .eq("id", coachId);
+          logStep("Successfully processed RENEWAL", { coachId, tier: renewalTier, upsertedRows: renewalData?.length || 0 });
         }
         break;
       }
@@ -431,18 +450,27 @@ serve(async (req) => {
         logStep("Processing CANCELLATION", { coachId, cancelReason: event.cancel_reason });
 
         // Mark as cancelled but don't remove access until expiration
-        const { error } = await supabase
+        // Use UPSERT to handle case where subscription record might not exist
+        const { data: cancelData, error } = await supabase
           .from("platform_subscriptions")
-          .update({
+          .upsert({
+            coach_id: coachId,
             status: "cancelled",
             updated_at: new Date().toISOString(),
-          })
-          .eq("coach_id", coachId);
+            // Preserve existing tier if record exists, otherwise use tier from event
+            tier: getTierFromEvent(event) || 'starter',
+            stripe_customer_id: `rc_${event.app_user_id}`,
+            stripe_subscription_id: `rc_${event.original_transaction_id || event.transaction_id}`,
+            current_period_end: event.expiration_at_ms 
+              ? new Date(event.expiration_at_ms).toISOString() 
+              : null,
+          }, { onConflict: "coach_id" })
+          .select('id');
 
         if (error) {
           logStep("Error processing CANCELLATION", { error: error.message });
         } else {
-          logStep("Successfully processed CANCELLATION", { coachId });
+          logStep("Successfully processed CANCELLATION", { coachId, upsertedRows: cancelData?.length || 0 });
         }
         break;
       }
@@ -450,18 +478,26 @@ serve(async (req) => {
       case "UNCANCELLATION": {
         logStep("Processing UNCANCELLATION", { coachId });
 
-        const { error } = await supabase
+        // Use UPSERT to handle case where subscription record might not exist
+        const { data: uncancelData, error } = await supabase
           .from("platform_subscriptions")
-          .update({
+          .upsert({
+            coach_id: coachId,
             status: "active",
             updated_at: new Date().toISOString(),
-          })
-          .eq("coach_id", coachId);
+            tier: getTierFromEvent(event) || 'starter',
+            stripe_customer_id: `rc_${event.app_user_id}`,
+            stripe_subscription_id: `rc_${event.original_transaction_id || event.transaction_id}`,
+            current_period_end: event.expiration_at_ms 
+              ? new Date(event.expiration_at_ms).toISOString() 
+              : null,
+          }, { onConflict: "coach_id" })
+          .select('id');
 
         if (error) {
           logStep("Error processing UNCANCELLATION", { error: error.message });
         } else {
-          logStep("Successfully processed UNCANCELLATION", { coachId });
+          logStep("Successfully processed UNCANCELLATION", { coachId, upsertedRows: uncancelData?.length || 0 });
         }
         break;
       }
@@ -674,7 +710,7 @@ serve(async (req) => {
       case "PRODUCT_CHANGE": {
         logStep("Processing PRODUCT_CHANGE", { coachId, oldProduct: event.product_id, newProduct: event.new_product_id, entitlementIds: event.entitlement_ids });
 
-        // Use entitlement-first tier detection
+        // Use entitlement-first tier detection (picks highest tier)
         const newTier = getTierFromEvent(event);
 
         if (!newTier) {
@@ -682,15 +718,21 @@ serve(async (req) => {
           break;
         }
 
-        // Update tier
-        const { error: subError } = await supabase
+        // Use UPSERT to handle case where subscription record might not exist
+        const { data: changeData, error: subError } = await supabase
           .from("platform_subscriptions")
-          .update({
+          .upsert({
+            coach_id: coachId,
             tier: newTier,
             status: "active",
+            current_period_end: event.expiration_at_ms 
+              ? new Date(event.expiration_at_ms).toISOString() 
+              : null,
+            stripe_customer_id: `rc_${event.app_user_id}`,
+            stripe_subscription_id: `rc_${event.original_transaction_id || event.transaction_id}`,
             updated_at: new Date().toISOString(),
-          })
-          .eq("coach_id", coachId);
+          }, { onConflict: "coach_id" })
+          .select('id');
 
         if (subError) {
           logStep("Error updating subscription tier", { error: subError.message });
@@ -704,7 +746,7 @@ serve(async (req) => {
         if (profileError) {
           logStep("Error updating coach profile tier", { error: profileError.message });
         } else {
-          logStep("Successfully processed PRODUCT_CHANGE", { coachId, newTier });
+          logStep("Successfully processed PRODUCT_CHANGE", { coachId, newTier, upsertedRows: changeData?.length || 0 });
         }
         break;
       }

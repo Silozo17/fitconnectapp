@@ -258,13 +258,17 @@ serve(async (req) => {
         });
 
         // Update coach profile
-        await supabase
+        const { error: profileError } = await supabase
           .from("coach_profiles")
           .update({ subscription_tier: activeTier })
           .eq("id", coachProfile.id);
+        
+        if (profileError) {
+          logStep("Error updating coach profile tier", { error: profileError.message });
+        }
 
-        // Upsert subscription record
-        await supabase
+        // Upsert subscription record - now works correctly with UNIQUE constraint on coach_id
+        const { data: upsertData, error: upsertError } = await supabase
           .from("platform_subscriptions")
           .upsert({
             coach_id: coachProfile.id,
@@ -274,7 +278,17 @@ serve(async (req) => {
             stripe_subscription_id: currentSub?.tier ? undefined : `rc_reconciled_${Date.now()}`,
             stripe_customer_id: currentSub?.tier ? undefined : `rc_${user.id}`,
             updated_at: new Date().toISOString(),
-          }, { onConflict: "coach_id" });
+          }, { onConflict: "coach_id" })
+          .select('id, tier, status');
+        
+        if (upsertError) {
+          logStep("Error upserting platform_subscriptions", { error: upsertError.message });
+        } else {
+          logStep("Successfully upserted platform_subscriptions", { 
+            upsertedRows: upsertData?.length || 0,
+            data: upsertData
+          });
+        }
 
         return new Response(JSON.stringify({ 
           status: "reconciled", 

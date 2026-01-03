@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ExternalLink, Apple, Smartphone, Clock, AlertTriangle, RefreshCw, Loader2 } from "lucide-react";
+import { ExternalLink, Apple, Smartphone, Clock, AlertTriangle, RefreshCw, Loader2, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -10,6 +10,8 @@ import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { triggerRestorePurchases, isDespia } from "@/lib/despia";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface NativeSubscriptionManagementProps {
   tier: string;
@@ -21,6 +23,7 @@ interface NativeSubscriptionManagementProps {
  * Shows platform-specific instructions and deep links instead of Stripe portal.
  * Phase 3: Now includes effective date messaging for cancelled subscriptions.
  * Phase 4: Includes "Refresh Purchase" button for stuck activation states.
+ * Phase 4: Includes "Restore Purchases" button for device transfers / reinstalls.
  */
 export const NativeSubscriptionManagement = ({ tier, currentPeriodEnd }: NativeSubscriptionManagementProps) => {
   const { t } = useTranslation("settings");
@@ -28,6 +31,8 @@ export const NativeSubscriptionManagement = ({ tier, currentPeriodEnd }: NativeS
   const { isCancelled, isWithinGracePeriod, hasAccessUntil, status } = useSubscriptionStatus();
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
+  const { user } = useAuth();
 
   const handleOpenSubscriptionSettings = () => {
     // Open external URLs - window.open works in Despia for external links
@@ -84,6 +89,77 @@ export const NativeSubscriptionManagement = ({ tier, currentPeriodEnd }: NativeS
       });
     } finally {
       setIsRefreshing(false);
+    }
+  };
+
+  /**
+   * PHASE 4: Restore purchases - useful for device transfers, reinstalls
+   * Calls RevenueCat restore and then reconciles with backend
+   */
+  const handleRestorePurchases = async () => {
+    if (!user?.id) {
+      toast.error('Please sign in to restore purchases');
+      return;
+    }
+    
+    setIsRestoring(true);
+    try {
+      // Trigger native restore
+      const triggered = triggerRestorePurchases(user.id);
+      
+      if (!triggered) {
+        toast.error('Restore not available', {
+          description: 'This feature is only available in the mobile app.',
+        });
+        setIsRestoring(false);
+        return;
+      }
+      
+      // Wait a moment for restore to process, then reconcile
+      toast.info('Restoring purchases...', {
+        description: 'Please wait while we verify your subscriptions.',
+      });
+      
+      // Wait 3 seconds for RevenueCat to process the restore
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Now reconcile with backend
+      const { data, error } = await supabase.functions.invoke('verify-subscription-entitlement');
+      
+      if (error) {
+        toast.error('Failed to verify restored purchases', {
+          description: 'Please try refreshing your purchase status.',
+        });
+        return;
+      }
+      
+      if (data?.reconciled && data?.tier) {
+        toast.success('Purchases restored!', {
+          description: `Your ${data.tier} plan has been restored.`,
+        });
+        // Invalidate all relevant queries
+        queryClient.invalidateQueries({ queryKey: ['coach-profile'] });
+        queryClient.invalidateQueries({ queryKey: ['platform-subscription'] });
+        queryClient.invalidateQueries({ queryKey: ['feature-access'] });
+        queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
+      } else if (data?.status === 'no_active_entitlement') {
+        toast.info('No purchases to restore', {
+          description: 'We couldn\'t find any active subscriptions to restore.',
+        });
+      } else {
+        toast.success('Restore complete', {
+          description: 'Your subscription status has been verified.',
+        });
+        queryClient.invalidateQueries({ queryKey: ['coach-profile'] });
+        queryClient.invalidateQueries({ queryKey: ['platform-subscription'] });
+      }
+    } catch (e) {
+      console.error('[NativeSubscriptionManagement] Restore failed:', e);
+      toast.error('Restore failed', {
+        description: 'Please try again or contact support.',
+      });
+    } finally {
+      setIsRestoring(false);
     }
   };
 
@@ -213,6 +289,23 @@ export const NativeSubscriptionManagement = ({ tier, currentPeriodEnd }: NativeS
             )}
             {isRefreshing ? "Verifying..." : "Refresh Purchase Status"}
           </Button>
+
+          {/* Phase 4: Restore Purchases for device transfers / reinstalls */}
+          {isDespia() && (
+            <Button
+              onClick={handleRestorePurchases}
+              variant="ghost"
+              className="w-full text-muted-foreground"
+              disabled={isRestoring}
+            >
+              {isRestoring ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <RotateCcw className="h-4 w-4 mr-2" />
+              )}
+              {isRestoring ? "Restoring..." : "Restore Purchases"}
+            </Button>
+          )}
         </div>
 
         <p className="text-xs text-muted-foreground text-center">
