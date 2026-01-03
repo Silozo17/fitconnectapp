@@ -309,7 +309,7 @@ export const NativeSubscriptionButtons = ({
           </Alert>
         )}
 
-        {/* Phase 4: Optimistic success message */}
+        {/* Phase 4: Optimistic success message with refresh option */}
         {optimisticTier && (
           <div className="flex items-center justify-center gap-2 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
             <SubscriptionStatusBadge status="activating" />
@@ -319,10 +319,15 @@ export const NativeSubscriptionButtons = ({
           </div>
         )}
 
-        {/* Status messages */}
+        {/* Status messages with refresh hint */}
         {state.isPolling && (
-          <div className="text-center text-sm text-muted-foreground animate-pulse">
-            Confirming your subscription with the App Store...
+          <div className="text-center space-y-2">
+            <div className="text-sm text-muted-foreground animate-pulse">
+              Confirming your subscription with the {isDespiaIOS() ? 'App Store' : 'Play Store'}...
+            </div>
+            <p className="text-xs text-muted-foreground">
+              This usually takes a few seconds. If it takes longer, go to Settings → Subscription and tap "Refresh Purchase Status".
+            </p>
           </div>
         )}
 
@@ -345,7 +350,7 @@ export const NativeSubscriptionButtons = ({
             onClick={() => window.open(`${window.location.origin}/terms`, '_blank', 'noopener,noreferrer')}
             className="text-primary hover:underline"
           >
-            Terms of Use
+            Terms of Use (EULA)
           </button>
           {" "}and{" "}
           <button 

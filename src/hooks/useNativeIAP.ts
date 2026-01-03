@@ -9,8 +9,8 @@ import { useRegisterResumeHandler } from '@/contexts/ResumeManagerContext';
 import { BACKGROUND_DELAYS } from '@/hooks/useAppResumeManager';
 import {
   isNativeIAPAvailable,
-  registerIAPCallbacks,
-  unregisterIAPCallbacks,
+  registerIAPCallbacksWithId,
+  unregisterIAPCallbacksWithId,
   triggerRevenueCatPurchase,
   getPlatformProductId,
   IAPSuccessData,
@@ -362,12 +362,19 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
 
   /**
    * Handle IAP success callback from Despia
+   * PHASE 2 FIX: Immediately reconcile after success, then poll as fallback
    */
-  const handleIAPSuccess = useCallback((data: IAPSuccessData) => {
+  const handleIAPSuccess = useCallback(async (data: IAPSuccessData) => {
     clearPurchaseTimeout();
     
-    // Extract tier from product ID
+    // Only handle subscription product IDs (not boost)
     const productIdLower = data.planID.toLowerCase();
+    if (productIdLower.includes('boost')) {
+      console.log('[NativeIAP] Ignoring boost product in subscription handler');
+      return;
+    }
+    
+    // Extract tier from product ID
     let tier: SubscriptionTier = 'starter';
     
     if (productIdLower.includes('pro')) {
@@ -379,11 +386,45 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     setState(prev => ({
       ...prev,
       purchasedProductId: data.planID,
+      purchaseStatus: 'success',
     }));
 
-    // Start polling for webhook confirmation
+    // PHASE 2: Immediately try to reconcile with RevenueCat
+    console.log('[NativeIAP] Purchase success - immediately reconciling with RevenueCat');
+    reconciliationAttemptedRef.current = false;
+    
+    try {
+      const { data: reconcileResult, error } = await supabase.functions.invoke('verify-subscription-entitlement');
+      
+      if (!error && reconcileResult?.reconciled && reconcileResult?.tier) {
+        console.log('[NativeIAP] Immediate reconciliation succeeded:', reconcileResult.tier);
+        
+        // Success! Update state and notify
+        setState(prev => ({
+          ...prev,
+          isPolling: false,
+          purchaseStatus: 'idle',
+        }));
+        
+        // Invalidate queries
+        queryClient.invalidateQueries({ queryKey: ['coach-profile'] });
+        queryClient.invalidateQueries({ queryKey: ['platform-subscription'] });
+        queryClient.invalidateQueries({ queryKey: ['feature-access'] });
+        queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
+        
+        triggerHaptic('success');
+        options?.onPurchaseComplete?.(tier);
+        return;
+      }
+      
+      console.log('[NativeIAP] Immediate reconciliation did not activate - falling back to polling');
+    } catch (e) {
+      console.error('[NativeIAP] Immediate reconciliation failed:', e);
+    }
+
+    // Fallback to polling if immediate reconciliation didn't work
     startPolling(tier);
-  }, [startPolling, clearPurchaseTimeout]);
+  }, [startPolling, clearPurchaseTimeout, queryClient, options]);
 
   /**
    * Handle IAP cancel callback from Despia
@@ -445,10 +486,10 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     });
   }, [clearPurchaseTimeout]);
 
-  // Register IAP callbacks once on mount when available
+  // Register IAP callbacks with unique ID to prevent collision with boost
   useEffect(() => {
     if (state.isAvailable) {
-      registerIAPCallbacks({
+      registerIAPCallbacksWithId('subscription', {
         onSuccess: handleIAPSuccess,
         onError: handleIAPError,
         onCancel: handleIAPCancel,
@@ -457,7 +498,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     }
 
     return () => {
-      unregisterIAPCallbacks();
+      unregisterIAPCallbacksWithId('subscription');
     };
   }, [state.isAvailable, handleIAPSuccess, handleIAPError, handleIAPCancel, handleIAPPending]);
 
