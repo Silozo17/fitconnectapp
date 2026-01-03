@@ -64,8 +64,9 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
       };
     },
     enabled: !!coachProfileId && !!user,
-    staleTime: 30_000, // 30 seconds
+    staleTime: 5_000, // 5 seconds - faster updates during active sessions
     refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 
   // Default state
