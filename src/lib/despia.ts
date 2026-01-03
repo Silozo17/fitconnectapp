@@ -644,6 +644,7 @@ let iapCallbacksInitialized = false;
 /**
  * Initialize global IAP callbacks that dispatch to all registered listeners
  * Only runs once when first listener registers
+ * PHASE 4 FIX: Handles async callbacks safely with Promise.resolve().catch()
  */
 const initializeGlobalIAPCallbacks = (): void => {
   if (iapCallbacksInitialized || typeof window === 'undefined') return;
@@ -651,19 +652,41 @@ const initializeGlobalIAPCallbacks = (): void => {
   iapCallbacksInitialized = true;
   
   // Global success handler - dispatches to ALL registered listeners
-  (window as any).iapSuccess = (data: IAPSuccessData) => {
+  // Handles both sync and async callbacks safely
+  (window as any).iapSuccess = (rawData: IAPSuccessData | string) => {
     if (!isDespia()) return;
+    
+    // PHASE 4 FIX: Normalize payload - Despia may send JSON string in some cases
+    let data: IAPSuccessData;
+    if (typeof rawData === 'string') {
+      try {
+        data = JSON.parse(rawData);
+        console.log('[Despia IAP] Parsed JSON string payload');
+      } catch {
+        console.error('[Despia IAP] Failed to parse string payload:', rawData);
+        // Trigger error handlers instead
+        iapCallbackRegistry.forEach((callbacks, id) => {
+          Promise.resolve(callbacks.onError?.('Invalid IAP response format')).catch(e => 
+            console.error(`[Despia IAP] Error in error handler for ${id}:`, e)
+          );
+        });
+        return;
+      }
+    } else {
+      data = rawData;
+    }
     
     const listenerCount = iapCallbackRegistry.size;
     console.log(`[Despia IAP] Purchase success - dispatching to ${listenerCount} listeners:`, data);
     
     iapCallbackRegistry.forEach((callbacks, id) => {
       console.log(`[Despia IAP] Dispatching success to listener: ${id}`);
-      try {
-        callbacks.onSuccess(data);
-      } catch (e) {
+      // PHASE 4 FIX: Use Promise.resolve to safely handle async callbacks
+      Promise.resolve(callbacks.onSuccess(data)).catch(e => {
         console.error(`[Despia IAP] Error in success handler for ${id}:`, e);
-      }
+        // Optionally route to error UI
+        callbacks.onError?.(`Activation failed: ${e instanceof Error ? e.message : 'Unknown error'}`);
+      });
     });
   };
   
@@ -790,6 +813,36 @@ export const triggerRevenueCatPurchase = (userId: string, productId: string): bo
  */
 export const isNativeIAPAvailable = (): boolean => {
   return isDespia();
+};
+
+/**
+ * Trigger RevenueCat restore purchases
+ * This restores any previously purchased subscriptions on the current device.
+ * Useful for:
+ * - Users switching devices
+ * - Users reinstalling the app
+ * - Users who purchased but didn't get entitlement activated
+ * 
+ * @param userId The user's ID (typically the auth user ID)
+ * @returns true if restore was triggered, false if not in Despia environment
+ */
+export const triggerRestorePurchases = (userId: string): boolean => {
+  if (!isDespia()) {
+    console.warn('[Despia IAP] Attempted restore outside of Despia environment');
+    return false;
+  }
+  
+  try {
+    // Use the standard RestoreInAppPurchases protocol
+    // The external_id ensures RevenueCat associates restored purchases with the right user
+    const command = `restoreinapppurchases://external_id=${encodeURIComponent(userId)}`;
+    console.log('[Despia IAP] Triggering restore purchases:', command);
+    despia(command);
+    return true;
+  } catch (e) {
+    console.error('[Despia IAP] Failed to trigger restore:', e);
+    return false;
+  }
 };
 
 // ============================================================================
