@@ -5,11 +5,12 @@ import CalendarConnectionCard from "@/components/integrations/CalendarConnection
 import HealthDataWidget from "@/components/integrations/HealthDataWidget";
 import AppleCalendarConnectModal from "@/components/integrations/AppleCalendarConnectModal";
 import { useCalendarSync, CalendarProvider } from "@/hooks/useCalendarSync";
-import { Calendar, Apple, Shield } from "lucide-react";
+import { Calendar, Apple, Shield, Heart } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
+import { useEnvironment } from "@/hooks/useEnvironment";
 
 const calendarProviders: {
   id: CalendarProvider;
@@ -37,6 +38,8 @@ const ClientIntegrations = () => {
   const [showAppleCalendarModal, setShowAppleCalendarModal] = useState(false);
   const { connectCalendar, disconnectCalendar, toggleSync, getConnection, isLoading } =
     useCalendarSync();
+  const { isIOS, isDespia } = useEnvironment();
+  const isIOSNative = isDespia && isIOS;
 
   const handleCalendarConnect = (provider: CalendarProvider, isCalDAV?: boolean) => {
     if (isCalDAV) {
@@ -64,6 +67,27 @@ const ClientIntegrations = () => {
           </p>
         </div>
 
+        {/* Apple Health Prominent Section - iOS only per App Store guidelines */}
+        {isIOSNative && (
+          <Card className="border-2 border-red-500/20 bg-gradient-to-br from-red-50/50 to-pink-50/50 dark:from-red-950/20 dark:to-pink-950/20 p-5 rounded-2xl">
+            <div className="flex items-start gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500 to-pink-600 flex items-center justify-center shadow-lg shrink-0">
+                <Heart className="w-7 h-7 text-white fill-white" />
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-xl font-semibold">Apple Health Integration</h2>
+                <p className="text-sm text-muted-foreground">
+                  FitConnect uses Apple Health to sync your steps, heart rate, sleep, workouts, and more. 
+                  Your health data is encrypted and only shared with coaches you choose to work with.
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Connect Apple Health below to get started. You can manage permissions anytime in iOS Settings → Privacy → Health.
+                </p>
+              </div>
+            </div>
+          </Card>
+        )}
+
         {/* Health Data Widget */}
         <HealthDataWidget />
 
@@ -74,7 +98,10 @@ const ClientIntegrations = () => {
           <div>
             <h2 className="text-xl font-semibold mb-1">Fitness Wearables</h2>
             <p className="text-sm text-muted-foreground">
-              Connect your fitness tracker to automatically sync steps, heart rate, sleep, and more
+              {isIOSNative 
+                ? "Connect Apple Health or other fitness trackers to sync your health data"
+                : "Connect your fitness tracker to automatically sync steps, heart rate, sleep, and more"
+              }
             </p>
           </div>
           <WearableConnectionList />

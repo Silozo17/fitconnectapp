@@ -14,6 +14,7 @@ import { useNativePricing } from "@/hooks/useNativePricing";
 import { useNativeBoostPurchase } from "@/hooks/useNativeBoostPurchase";
 import { isDespia } from "@/lib/despia";
 import { IAPUnsuccessfulDialog } from "@/components/iap/IAPUnsuccessfulDialog";
+import { LegalDisclosure } from "@/components/shared/LegalLinks";
 
 export const BoostToggleCard = () => {
   const { t } = useTranslation("coach");
@@ -273,6 +274,9 @@ export const BoostToggleCard = () => {
               </div>
             </div>
           </div>
+
+          {/* Legal disclosure - required for iOS App Store compliance */}
+          <LegalDisclosure className="mt-4 pt-4 border-t" />
 
           {isActive && remainingDays <= 5 && remainingDays > 0 && (
             <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-4">

@@ -118,14 +118,41 @@ export const LegalLinks = ({
 /**
  * Legal disclosure text for subscription/purchase screens
  * Required by iOS App Store before any purchase action
+ * Must include explicit reference to Terms of Use (EULA) per Apple guidelines
  */
 export const LegalDisclosure = ({ className = "" }: { className?: string }) => {
   const { t } = useTranslation();
+  const isNative = shouldOpenExternally();
+
+  const handleLegalClick = (path: string) => {
+    const fullUrl = `${window.location.origin}${path}`;
+    openExternalUrl(fullUrl);
+  };
   
   return (
     <p className={`text-xs text-muted-foreground text-center ${className}`}>
       {t("legal.agreementDisclosure", "By continuing, you agree to our")}{" "}
-      <LegalLinks variant="inline" />
+      {isNative ? (
+        <>
+          <button onClick={() => handleLegalClick('/terms')} className="text-primary hover:underline">
+            {t("legal.termsEula", "Terms of Use (EULA)")}
+          </button>
+          {" "}{t("common.and", "and")}{" "}
+          <button onClick={() => handleLegalClick('/privacy')} className="text-primary hover:underline">
+            {t("legal.privacyPolicy", "Privacy Policy")}
+          </button>
+        </>
+      ) : (
+        <>
+          <Link to="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+            {t("legal.termsEula", "Terms of Use (EULA)")}
+          </Link>
+          {" "}{t("common.and", "and")}{" "}
+          <Link to="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+            {t("legal.privacyPolicy", "Privacy Policy")}
+          </Link>
+        </>
+      )}
     </p>
   );
 };
