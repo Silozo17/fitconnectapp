@@ -9,8 +9,8 @@ import { useRegisterResumeHandler } from '@/contexts/ResumeManagerContext';
 import { BACKGROUND_DELAYS } from '@/hooks/useAppResumeManager';
 import {
   isNativeIAPAvailable,
-  registerIAPCallbacks,
-  unregisterIAPCallbacks,
+  registerIAPCallbacksWithId,
+  unregisterIAPCallbacksWithId,
   triggerRevenueCatPurchase,
   getBoostProductId,
   IAPSuccessData,
@@ -286,13 +286,43 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
 
   /**
    * Handle IAP success callback from Despia
+   * PHASE 2 FIX: Immediately reconcile after success, then poll as fallback
    */
-  const handleIAPSuccess = useCallback((data: IAPSuccessData) => {
+  const handleIAPSuccess = useCallback(async (data: IAPSuccessData) => {
     clearPurchaseTimeout();
 
-    // Start polling for webhook confirmation
+    // Only handle boost product IDs (not subscriptions)
+    const productIdLower = data.planID.toLowerCase();
+    if (!productIdLower.includes('boost')) {
+      console.log('[NativeBoostIAP] Ignoring non-boost product in boost handler');
+      return;
+    }
+
+    setState(prev => ({
+      ...prev,
+      purchaseStatus: 'success',
+    }));
+
+    // PHASE 2: Immediately try to reconcile with RevenueCat
+    console.log('[NativeBoostIAP] Purchase success - immediately reconciling with RevenueCat');
+    reconciliationAttemptedRef.current = false;
+    
+    const reconciled = await reconcileBoostEntitlement();
+    if (reconciled) {
+      console.log('[NativeBoostIAP] Immediate reconciliation succeeded');
+      setState(prev => ({
+        ...prev,
+        isPolling: false,
+        purchaseStatus: 'idle',
+      }));
+      return;
+    }
+    
+    console.log('[NativeBoostIAP] Immediate reconciliation did not activate - falling back to polling');
+
+    // Fallback to polling if immediate reconciliation didn't work
     startPolling();
-  }, [startPolling, clearPurchaseTimeout]);
+  }, [startPolling, clearPurchaseTimeout, reconcileBoostEntitlement]);
 
   /**
    * Handle IAP cancel callback from Despia
@@ -369,10 +399,10 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
     });
   }, [clearPurchaseTimeout]);
 
-  // Register IAP callbacks once on mount when available
+  // Register IAP callbacks with unique ID to prevent collision with subscriptions
   useEffect(() => {
     if (state.isAvailable) {
-      registerIAPCallbacks({
+      registerIAPCallbacksWithId('boost', {
         onSuccess: handleIAPSuccess,
         onError: handleIAPError,
         onCancel: handleIAPCancel,
@@ -381,7 +411,7 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
     }
 
     return () => {
-      unregisterIAPCallbacks();
+      unregisterIAPCallbacksWithId('boost');
     };
   }, [state.isAvailable, handleIAPSuccess, handleIAPError, handleIAPCancel, handleIAPPending]);
 

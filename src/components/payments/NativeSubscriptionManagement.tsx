@@ -1,4 +1,5 @@
-import { ExternalLink, Apple, Smartphone, Clock, AlertTriangle } from "lucide-react";
+import { useState } from "react";
+import { ExternalLink, Apple, Smartphone, Clock, AlertTriangle, RefreshCw, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -6,6 +7,9 @@ import { useEnvironment } from "@/hooks/useEnvironment";
 import { useTranslation } from "react-i18next";
 import { SubscriptionStatusBadge } from "./SubscriptionStatusBadge";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 interface NativeSubscriptionManagementProps {
   tier: string;
@@ -16,11 +20,14 @@ interface NativeSubscriptionManagementProps {
  * Component for managing subscriptions purchased through App Store or Play Store.
  * Shows platform-specific instructions and deep links instead of Stripe portal.
  * Phase 3: Now includes effective date messaging for cancelled subscriptions.
+ * Phase 4: Includes "Refresh Purchase" button for stuck activation states.
  */
 export const NativeSubscriptionManagement = ({ tier, currentPeriodEnd }: NativeSubscriptionManagementProps) => {
   const { t } = useTranslation("settings");
   const { isIOS, isAndroid } = useEnvironment();
   const { isCancelled, isWithinGracePeriod, hasAccessUntil, status } = useSubscriptionStatus();
+  const queryClient = useQueryClient();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleOpenSubscriptionSettings = () => {
     // Open external URLs - window.open works in Despia for external links
@@ -30,6 +37,53 @@ export const NativeSubscriptionManagement = ({ tier, currentPeriodEnd }: NativeS
     } else if (isAndroid) {
       // Android deep link to Play Store subscriptions
       window.open('https://play.google.com/store/account/subscriptions', '_blank');
+    }
+  };
+
+  /**
+   * PHASE 4: Manual refresh purchase - reconciles with RevenueCat
+   * Useful when purchase succeeded but activation is stuck
+   */
+  const handleRefreshPurchase = async () => {
+    setIsRefreshing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('verify-subscription-entitlement');
+      
+      if (error) {
+        toast.error('Failed to verify subscription', {
+          description: 'Please try again or contact support.',
+        });
+        return;
+      }
+      
+      if (data?.reconciled && data?.tier) {
+        toast.success('Subscription activated!', {
+          description: `Your ${data.tier} plan is now active.`,
+        });
+        // Invalidate all relevant queries
+        queryClient.invalidateQueries({ queryKey: ['coach-profile'] });
+        queryClient.invalidateQueries({ queryKey: ['platform-subscription'] });
+        queryClient.invalidateQueries({ queryKey: ['feature-access'] });
+        queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
+      } else if (data?.status === 'no_active_entitlement') {
+        toast.info('No active subscription found', {
+          description: 'If you recently purchased, it may take a moment to activate.',
+        });
+      } else {
+        toast.success('Subscription verified', {
+          description: 'Your subscription is up to date.',
+        });
+        // Still refresh data
+        queryClient.invalidateQueries({ queryKey: ['coach-profile'] });
+        queryClient.invalidateQueries({ queryKey: ['platform-subscription'] });
+      }
+    } catch (e) {
+      console.error('[NativeSubscriptionManagement] Refresh failed:', e);
+      toast.error('Something went wrong', {
+        description: 'Please try again.',
+      });
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -130,21 +184,41 @@ export const NativeSubscriptionManagement = ({ tier, currentPeriodEnd }: NativeS
               <li>Choose to upgrade, downgrade, or cancel</li>
             </ol>
           )}
+          <p className="mt-2 text-xs text-muted-foreground italic">
+            Plan changes take effect at the end of your current billing period.
+          </p>
         </div>
 
-        <Button 
-          onClick={handleOpenSubscriptionSettings}
-          className="w-full"
-          variant="default"
-        >
-          <ExternalLink className="h-4 w-4 mr-2" />
-          {isIOS ? "Open App Store Subscriptions" : "Open Google Play Subscriptions"}
-        </Button>
+        <div className="flex flex-col gap-2">
+          <Button 
+            onClick={handleOpenSubscriptionSettings}
+            className="w-full"
+            variant="default"
+          >
+            <ExternalLink className="h-4 w-4 mr-2" />
+            {isIOS ? "Open App Store Subscriptions" : "Open Google Play Subscriptions"}
+          </Button>
+
+          {/* Phase 4: Refresh Purchase button for stuck activations */}
+          <Button
+            onClick={handleRefreshPurchase}
+            variant="outline"
+            className="w-full"
+            disabled={isRefreshing}
+          >
+            {isRefreshing ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
+            {isRefreshing ? "Verifying..." : "Refresh Purchase Status"}
+          </Button>
+        </div>
 
         <p className="text-xs text-muted-foreground text-center">
           {isCancelled 
             ? "Resubscribing will restore your access immediately"
-            : "Changes may take a few minutes to reflect in the app"
+            : "If your plan doesn't update after purchase, tap 'Refresh Purchase Status'"
           }
         </p>
       </CardContent>
