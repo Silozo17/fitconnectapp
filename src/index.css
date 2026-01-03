@@ -367,6 +367,27 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
+  /* Modal safe-area utilities for native apps */
+  /* Close button positioning that respects safe-area */
+  .modal-close-safe {
+    top: calc(1rem + env(safe-area-inset-top, 0px));
+  }
+  
+  html.native-ios .modal-close-safe {
+    top: calc(1rem + var(--safe-area-top, 59px)) !important;
+  }
+  
+  /* Modal content safe padding */
+  .modal-content-safe {
+    padding-top: max(1.5rem, env(safe-area-inset-top, 0px));
+    max-height: calc(90vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  }
+  
+  html.native-ios .modal-content-safe {
+    padding-top: max(1.5rem, var(--safe-area-top, 59px));
+    max-height: calc(90vh - var(--safe-area-top, 59px) - env(safe-area-inset-bottom, 0px));
+  }
+
   /* Edge-to-edge iOS immersive experience */
   .pt-safe-status {
     padding-top: env(safe-area-inset-top, 0px);
