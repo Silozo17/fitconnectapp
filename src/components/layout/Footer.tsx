@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { SocialLinks } from "@/components/shared/SocialLinks";
 import { FooterLocaleSelector } from "@/components/shared/FooterLocaleSelector";
+import { openExternalUrl, shouldOpenExternally } from "@/lib/external-links";
 
 const Footer = () => {
   const { t } = useTranslation("common");
@@ -135,25 +136,48 @@ const Footer = () => {
           </div>
 
           {/* Links */}
-          {Object.entries(footerLinks).map(([title, links]) => (
-            <div key={title}>
-              <h4 className="font-display font-semibold text-foreground mb-4 text-sm">
-                {title}
-              </h4>
-              <ul className="space-y-3">
-                {links.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      to={link.href}
-                      className="text-muted-foreground hover:text-primary transition-colors text-sm"
-                    >
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {Object.entries(footerLinks).map(([title, links]) => {
+            const isLegalSection = title === t("website.footer.sections.legal");
+            const isNative = shouldOpenExternally();
+            
+            return (
+              <div key={title}>
+                <h4 className="font-display font-semibold text-foreground mb-4 text-sm">
+                  {title}
+                </h4>
+                <ul className="space-y-3">
+                  {links.map((link) => {
+                    // Legal links on native should open externally
+                    const isLegalLink = isLegalSection && (link.href === '/privacy' || link.href === '/terms');
+                    
+                    if (isNative && isLegalLink) {
+                      return (
+                        <li key={link.href}>
+                          <button
+                            onClick={() => openExternalUrl(`${window.location.origin}${link.href}`)}
+                            className="text-muted-foreground hover:text-primary transition-colors text-sm text-left"
+                          >
+                            {link.name}
+                          </button>
+                        </li>
+                      );
+                    }
+                    
+                    return (
+                      <li key={link.href}>
+                        <Link
+                          to={link.href}
+                          className="text-muted-foreground hover:text-primary transition-colors text-sm"
+                        >
+                          {link.name}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            );
+          })}
         </div>
 
         {/* Locale Selector */}

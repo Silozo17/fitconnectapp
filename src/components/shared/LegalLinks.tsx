@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ExternalLink, FileText, Shield } from "lucide-react";
+import { openExternalUrl, shouldOpenExternally } from "@/lib/external-links";
 
 interface LegalLinksProps {
   variant?: "compact" | "full" | "inline";
@@ -11,6 +12,9 @@ interface LegalLinksProps {
 /**
  * Reusable component for displaying legal links (Terms, Privacy Policy, EULA)
  * Required for iOS App Store compliance - links must be visible before any purchase
+ * 
+ * On native apps, links open in external browser (Safari/Chrome)
+ * On web, links use internal SPA navigation
  */
 export const LegalLinks = ({ 
   variant = "compact", 
@@ -18,27 +22,47 @@ export const LegalLinks = ({
   className = "" 
 }: LegalLinksProps) => {
   const { t } = useTranslation();
+  const isNative = shouldOpenExternally();
+
+  const handleLegalClick = (path: string) => {
+    const fullUrl = `${window.location.origin}${path}`;
+    openExternalUrl(fullUrl);
+  };
+
+  // Helper to render link or button based on environment
+  const LegalLink = ({ to, children, linkClassName }: { to: string; children: React.ReactNode; linkClassName?: string }) => {
+    if (isNative) {
+      return (
+        <button
+          onClick={() => handleLegalClick(to)}
+          className={linkClassName}
+        >
+          {children}
+        </button>
+      );
+    }
+    return (
+      <Link 
+        to={to} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className={linkClassName}
+      >
+        {children}
+      </Link>
+    );
+  };
 
   if (variant === "inline") {
     return (
       <span className={`text-sm text-muted-foreground ${className}`}>
-        <Link 
-          to="/terms" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="text-primary hover:underline"
-        >
+        <LegalLink to="/terms" linkClassName="text-primary hover:underline">
           {t("legal.termsOfUse", "Terms of Use")}
-        </Link>
+        </LegalLink>
         {" and "}
-        <Link 
-          to="/privacy" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="text-primary hover:underline"
-        >
+        <LegalLink to="/privacy" linkClassName="text-primary hover:underline">
           {t("legal.privacyPolicy", "Privacy Policy")}
-        </Link>
+        </LegalLink>
       </span>
     );
   }
@@ -48,36 +72,30 @@ export const LegalLinks = ({
       <div className={`space-y-3 ${className}`}>
         <h4 className="font-medium text-sm">{t("legal.title", "Legal")}</h4>
         <div className="space-y-2">
-          <Link 
+          <LegalLink 
             to="/terms" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            linkClassName="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             {showIcons && <FileText className="h-4 w-4" />}
             <span>{t("legal.termsOfUse", "Terms of Use")}</span>
             <ExternalLink className="h-3 w-3 opacity-50" />
-          </Link>
-          <Link 
+          </LegalLink>
+          <LegalLink 
             to="/privacy" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            linkClassName="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             {showIcons && <Shield className="h-4 w-4" />}
             <span>{t("legal.privacyPolicy", "Privacy Policy")}</span>
             <ExternalLink className="h-3 w-3 opacity-50" />
-          </Link>
-          <Link 
+          </LegalLink>
+          <LegalLink 
             to="/terms#eula" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            linkClassName="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             {showIcons && <FileText className="h-4 w-4" />}
             <span>{t("legal.eula", "End User License Agreement")}</span>
             <ExternalLink className="h-3 w-3 opacity-50" />
-          </Link>
+          </LegalLink>
         </div>
       </div>
     );
@@ -86,23 +104,13 @@ export const LegalLinks = ({
   // Default compact variant
   return (
     <div className={`flex flex-wrap gap-x-4 gap-y-1 text-sm ${className}`}>
-      <Link 
-        to="/terms" 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="text-primary hover:underline"
-      >
+      <LegalLink to="/terms" linkClassName="text-primary hover:underline">
         {t("legal.termsOfUse", "Terms of Use")}
-      </Link>
+      </LegalLink>
       <span className="text-muted-foreground">•</span>
-      <Link 
-        to="/privacy" 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="text-primary hover:underline"
-      >
+      <LegalLink to="/privacy" linkClassName="text-primary hover:underline">
         {t("legal.privacyPolicy", "Privacy Policy")}
-      </Link>
+      </LegalLink>
     </div>
   );
 };
