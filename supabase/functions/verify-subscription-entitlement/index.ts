@@ -100,6 +100,45 @@ serve(async (req) => {
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    // PHASE 2 FIX: Check for admin-granted subscription BEFORE RevenueCat
+    // This ensures admin grants are never overwritten by RevenueCat reconciliation
+    const { data: adminSub, error: adminSubError } = await supabase
+      .from("admin_granted_subscriptions")
+      .select("tier, is_active, expires_at")
+      .eq("coach_id", coachProfile.id)
+      .eq("is_active", true)
+      .maybeSingle();
+    
+    if (!adminSubError && adminSub && adminSub.is_active) {
+      const isExpired = adminSub.expires_at && new Date(adminSub.expires_at) < new Date();
+      if (!isExpired) {
+        logStep("Active admin-granted subscription found BEFORE RevenueCat check - preserving tier", { 
+          tier: adminSub.tier,
+          expires_at: adminSub.expires_at 
+        });
+        
+        // Ensure coach profile has the admin-granted tier (in case it got out of sync)
+        if (currentDbTier !== adminSub.tier) {
+          await supabase
+            .from("coach_profiles")
+            .update({ subscription_tier: adminSub.tier })
+            .eq("id", coachProfile.id);
+          logStep("Updated coach profile tier to match admin grant", { 
+            from: currentDbTier, 
+            to: adminSub.tier 
+          });
+        }
+        
+        return new Response(JSON.stringify({ 
+          status: "admin_granted", 
+          reconciled: currentDbTier !== adminSub.tier,
+          tier: adminSub.tier,
+          expires_at: adminSub.expires_at,
+          message: "Admin-granted subscription is active and protected"
+        }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+    }
+
     // Get current subscription status from DB
     const { data: currentSub } = await supabase
       .from("platform_subscriptions")
@@ -123,28 +162,12 @@ serve(async (req) => {
     if (!rcResponse.ok) {
       if (rcResponse.status === 404) {
         // No subscriber in RevenueCat - ensure downgraded to free
-        // Note: Founder tier already handled above with early return
+        // Note: Founder and admin-granted tiers already handled above with early return
+        // This path should rarely be hit for admin grants now
         if (currentDbTier !== 'free') {
-          logStep("No RevenueCat subscriber found - checking if downgrade needed", { currentTier: currentDbTier });
+          logStep("No RevenueCat subscriber found - downgrading", { currentTier: currentDbTier });
           
-          // Double-check there's no active admin-granted subscription
-          const { data: adminSub } = await supabase
-            .from("admin_granted_subscriptions")
-            .select("tier, is_active, expires_at")
-            .eq("coach_id", coachProfile.id)
-            .eq("is_active", true)
-            .maybeSingle();
-          
-          if (adminSub && (!adminSub.expires_at || new Date(adminSub.expires_at) > new Date())) {
-            logStep("Active admin-granted subscription found - keeping tier", { tier: adminSub.tier });
-            return new Response(JSON.stringify({ 
-              status: "admin_granted", 
-              reconciled: false,
-              tier: adminSub.tier
-            }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
-          }
-          
-          // No RevenueCat and no admin grant - downgrade
+          // Downgrade to free (admin grants already checked above)
           await supabase.from("coach_profiles").update({ subscription_tier: "free" }).eq("id", coachProfile.id);
           if (currentSub) {
             await supabase.from("platform_subscriptions").update({ status: "expired" }).eq("coach_id", coachProfile.id);
@@ -156,7 +179,7 @@ serve(async (req) => {
             tier: "free"
           }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
-        return new Response(JSON.stringify({ 
+        return new Response(JSON.stringify({
           status: "no_subscriber", 
           reconciled: false,
           tier: currentDbTier
@@ -270,25 +293,9 @@ serve(async (req) => {
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     } else {
       // No active entitlement - ensure downgraded
-      // Note: Founder tier already handled above with early return
+      // Note: Founder and admin-granted tiers already handled above with early return
+      // This path should rarely be hit for admin grants now
       if (currentDbTier !== 'free') {
-        // Check for admin-granted subscription before downgrading
-        const { data: adminSub } = await supabase
-          .from("admin_granted_subscriptions")
-          .select("tier, is_active, expires_at")
-          .eq("coach_id", coachProfile.id)
-          .eq("is_active", true)
-          .maybeSingle();
-        
-        if (adminSub && (!adminSub.expires_at || new Date(adminSub.expires_at) > new Date())) {
-          logStep("Active admin-granted subscription found - keeping tier", { tier: adminSub.tier });
-          return new Response(JSON.stringify({ 
-            status: "admin_granted", 
-            reconciled: false,
-            tier: adminSub.tier
-          }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
-        }
-        
         logStep("Reconciling: Downgrading to free (no active entitlement)", { from: currentDbTier });
 
         await supabase
