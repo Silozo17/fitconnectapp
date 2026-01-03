@@ -223,6 +223,18 @@ export const NativeSubscriptionButtons = ({
             In-app purchases are only available in the mobile app.
           </div>
         )}
+
+        {/* Legal disclosure - required by iOS App Store */}
+        <p className="text-xs text-muted-foreground text-center pt-4 border-t border-border">
+          By continuing, you agree to our{" "}
+          <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+            Terms of Use
+          </a>
+          {" "}and{" "}
+          <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+            Privacy Policy
+          </a>
+        </p>
       </CardContent>
     </Card>
   );

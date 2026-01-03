@@ -4,6 +4,7 @@ import { Activity, Heart, Watch, Apple, PenLine } from "lucide-react";
 import WearableConnectionCard from "./WearableConnectionCard";
 import { useWearables, WearableProvider } from "@/hooks/useWearables";
 import ManualHealthDataModal from "./ManualHealthDataModal";
+import HealthKitDisclosureModal from "./HealthKitDisclosureModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useEnvironment } from "@/hooks/useEnvironment";
@@ -11,6 +12,8 @@ import { useEnvironment } from "@/hooks/useEnvironment";
 const WearableConnectionList = () => {
   const { t } = useTranslation('settings');
   const [showManualEntry, setShowManualEntry] = useState(false);
+  const [showHealthKitDisclosure, setShowHealthKitDisclosure] = useState(false);
+  const [pendingHealthKitConnect, setPendingHealthKitConnect] = useState(false);
   const [connectingProvider, setConnectingProvider] = useState<WearableProvider | null>(null);
   const { isDespia, isIOS, isAndroid } = useEnvironment();
   const {
@@ -85,6 +88,19 @@ const WearableConnectionList = () => {
 
   // Handle connect with individual loading state tracking
   const handleConnect = useCallback(async (providerId: WearableProvider) => {
+    // For Apple Health on iOS, show disclosure modal first (required by Apple Guideline 2.5.1)
+    if (providerId === 'apple_health' && isDespia && isIOS) {
+      setPendingHealthKitConnect(true);
+      setShowHealthKitDisclosure(true);
+      return;
+    }
+    
+    // For other providers, connect directly
+    await performConnect(providerId);
+  }, [isDespia, isIOS]);
+
+  // Actually perform the connection after disclosure is acknowledged
+  const performConnect = useCallback(async (providerId: WearableProvider) => {
     setConnectingProvider(providerId);
     try {
       await connectWearable.mutateAsync(providerId);
@@ -93,8 +109,17 @@ const WearableConnectionList = () => {
       console.log('[WearableConnectionList] Connection failed:', error);
     } finally {
       setConnectingProvider(null);
+      setPendingHealthKitConnect(false);
     }
   }, [connectWearable]);
+
+  // Handle HealthKit disclosure modal continue action
+  const handleHealthKitContinue = useCallback(() => {
+    setShowHealthKitDisclosure(false);
+    if (pendingHealthKitConnect) {
+      performConnect('apple_health');
+    }
+  }, [pendingHealthKitConnect, performConnect]);
 
   if (isLoading) {
     return (
@@ -156,6 +181,17 @@ const WearableConnectionList = () => {
       </Card>
 
       <ManualHealthDataModal open={showManualEntry} onOpenChange={setShowManualEntry} />
+      
+      {/* HealthKit Disclosure Modal - required by Apple Guideline 2.5.1 */}
+      <HealthKitDisclosureModal
+        open={showHealthKitDisclosure}
+        onOpenChange={(open) => {
+          setShowHealthKitDisclosure(open);
+          if (!open) setPendingHealthKitConnect(false);
+        }}
+        onContinue={handleHealthKitContinue}
+        isLoading={connectingProvider === 'apple_health'}
+      />
     </div>
   );
 };
