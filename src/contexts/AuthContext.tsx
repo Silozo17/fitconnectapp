@@ -1,10 +1,11 @@
-import { createContext, useContext, useEffect, useState, useMemo, useCallback, useRef, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useMemo, useCallback, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { clearLastRoute } from "@/hooks/useRouteRestoration";
-import { isDespia } from "@/lib/despia";
 import { getNativeCache, setNativeCache, clearUserNativeCache, CACHE_KEYS, CACHE_TTL } from "@/lib/native-cache";
+import { useRegisterResumeHandler } from "@/contexts/ResumeManagerContext";
+import { BACKGROUND_DELAYS } from "@/hooks/useAppResumeManager";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
@@ -22,14 +23,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Debounce delay for focus handlers (prevents rapid re-validation in native)
-// PERFORMANCE FIX: Increased from 500ms to 1000ms for native apps
-const FOCUS_DEBOUNCE_MS = 1000;
-// Minimum time between session validations
-const SESSION_VALIDATION_COOLDOWN_MS = 30000;
-// Guard to prevent both visibility and focus handlers from firing together
-let isHandlingResume = false;
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -38,10 +31,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // PERF FIX: Track if we've restored from cache to prevent flash
   const [hasRestoredFromCache, setHasRestoredFromCache] = useState(false);
   const [loading, setLoading] = useState(true);
-  
-  // Refs for debouncing and cooldown tracking
-  const lastValidationRef = useRef<number>(0);
-  const focusDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchUserRole = async (userId: string) => {
     // Fetch all roles for the user and prioritize by importance
@@ -69,90 +58,61 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  useEffect(() => {
-    // PERFORMANCE FIX: Unified handler for both visibility and focus events
-    // Prevents double-firing on native app resume
-    const handleAppResume = async (source: 'visibility' | 'focus') => {
-      // Guard: prevent concurrent handling from both events
-      if (isHandlingResume) {
-        return;
-      }
+  /**
+   * Session validation logic - called on resume via ResumeManager
+   */
+  const validateSession = useCallback(async () => {
+    try {
+      supabase.auth.startAutoRefresh();
+      const { data: { session: currentSession }, error } = await supabase.auth.getSession();
       
-      // For focus events, only handle in Despia native
-      if (source === 'focus' && !isDespia()) {
-        return;
-      }
-      
-      // Check cooldown
-      const now = Date.now();
-      if (now - lastValidationRef.current < SESSION_VALIDATION_COOLDOWN_MS) {
-        return;
-      }
-      
-      isHandlingResume = true;
-      lastValidationRef.current = now;
-      
-      try {
-        supabase.auth.startAutoRefresh();
-        const { data: { session }, error } = await supabase.auth.getSession();
+      if (error || !currentSession) {
+        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
         
-        if (error || !session) {
-          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-          
-          if (refreshError || !refreshData.session) {
-            setSession(null);
-            setUser(null);
-            setRole(null);
-            setAllRoles([]);
-            return;
-          }
-          
-          setSession(refreshData.session);
-          setUser(refreshData.session.user);
-          if (refreshData.session.user) {
-            setTimeout(() => fetchUserRole(refreshData.session.user.id), 0);
-          }
-        } else {
-          setSession(session);
-          setUser(session.user ?? null);
-          if (session.user) {
-            setTimeout(() => fetchUserRole(session.user.id), 0);
-          }
+        if (refreshError || !refreshData.session) {
+          setSession(null);
+          setUser(null);
+          setRole(null);
+          setAllRoles([]);
+          return;
         }
-      } catch (err) {
-        console.error('[Auth] Error handling app resume:', err);
-      } finally {
-        // Reset guard after a short delay to allow for event settling
-        setTimeout(() => {
-          isHandlingResume = false;
-        }, 100);
-      }
-    };
-
-    // Handle visibility change for PWA/browser background/foreground
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        handleAppResume('visibility');
+        
+        setSession(refreshData.session);
+        setUser(refreshData.session.user);
+        if (refreshData.session.user) {
+          setTimeout(() => fetchUserRole(refreshData.session.user.id), 0);
+        }
       } else {
+        setSession(currentSession);
+        setUser(currentSession.user ?? null);
+        if (currentSession.user) {
+          setTimeout(() => fetchUserRole(currentSession.user.id), 0);
+        }
+      }
+    } catch (err) {
+      console.error('[Auth] Error validating session:', err);
+    }
+  }, []);
+
+  // Register with the unified ResumeManager for session validation on app resume
+  useRegisterResumeHandler(
+    useMemo(() => ({
+      id: 'session',
+      priority: 'immediate' as const,
+      delay: BACKGROUND_DELAYS.session,
+      handler: validateSession,
+    }), [validateSession])
+  );
+
+  useEffect(() => {
+    // Handle visibility hidden to stop auto refresh
+    const handleVisibilityHidden = () => {
+      if (document.visibilityState === 'hidden') {
         supabase.auth.stopAutoRefresh();
       }
     };
-
-    // Handle focus events for Despia native app (debounced)
-    const handleFocus = () => {
-      // Clear existing debounce timer
-      if (focusDebounceRef.current) {
-        clearTimeout(focusDebounceRef.current);
-      }
-      
-      // Debounce to prevent rapid successive calls
-      focusDebounceRef.current = setTimeout(() => {
-        handleAppResume('focus');
-      }, FOCUS_DEBOUNCE_MS);
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleFocus);
+    
+    document.addEventListener('visibilitychange', handleVisibilityHidden);
     
     // Start auto refresh on mount
     supabase.auth.startAutoRefresh();
@@ -238,11 +198,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const validationTimeout = setTimeout(validateSessionInBackground, 100);
 
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleFocus);
-      if (focusDebounceRef.current) {
-        clearTimeout(focusDebounceRef.current);
-      }
+      document.removeEventListener('visibilitychange', handleVisibilityHidden);
       clearTimeout(validationTimeout);
       supabase.auth.stopAutoRefresh();
       subscription.unsubscribe();

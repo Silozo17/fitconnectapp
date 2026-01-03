@@ -10,6 +10,7 @@ import { AdminProvider } from "@/contexts/AdminContext";
 import { LocaleProvider } from "@/contexts/LocaleContext";
 import { CookieConsentProvider } from "@/contexts/CookieConsentContext";
 import { CelebrationProvider } from "@/contexts/CelebrationContext";
+import { ResumeManagerProvider } from "@/contexts/ResumeManagerContext";
 import { AnimationSettingsProvider } from "@/contexts/AnimationSettingsContext";
 import { CelebrationListeners } from "@/components/gamification/CelebrationListeners";
 import { CountryProvider } from "@/contexts/CountryContext";
@@ -341,10 +342,11 @@ const App = () => (
               <CookieConsentBanner />
               <CountryProvider>
                 <AuthProvider>
-                  <DeferredTrackers />
-                  <AnimationSettingsProvider>
-                    <DeferredCelebration>
-                      <AdminProvider>
+                  <ResumeManagerProvider>
+                    <DeferredTrackers />
+                    <AnimationSettingsProvider>
+                      <DeferredCelebration>
+                        <AdminProvider>
                         <LocaleProvider>
                           <LanguagePersistence />
                           <Routes>
@@ -904,7 +906,8 @@ const App = () => (
                       </AdminProvider>
                     </DeferredCelebration>
                   </AnimationSettingsProvider>
-                </AuthProvider>
+                </ResumeManagerProvider>
+              </AuthProvider>
               </CountryProvider>
             </CookieConsentProvider>
           </BrowserRouter>

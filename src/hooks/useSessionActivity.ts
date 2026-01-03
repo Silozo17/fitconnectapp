@@ -1,7 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthSafe } from "@/contexts/AuthContext";
 import { isDespia } from "@/lib/despia";
+import { useRegisterResumeHandler } from "@/contexts/ResumeManagerContext";
+import { BACKGROUND_DELAYS } from "@/hooks/useAppResumeManager";
 
 // OPTIMIZED: Increased intervals to reduce edge function calls and improve native performance
 const ACTIVITY_UPDATE_INTERVAL = 10 * 60 * 1000; // 10 minutes (was 5)
@@ -22,6 +24,52 @@ export const useSessionActivity = () => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastUpdateRef = useRef<number>(0);
 
+  const updateActivity = useCallback(async () => {
+    const now = Date.now();
+    
+    // OPTIMIZED: Longer debounce for native apps to reduce API calls
+    const minInterval = isDespia() ? NATIVE_DEBOUNCE : MIN_UPDATE_INTERVAL;
+    
+    // Debounce: don't update if we just updated
+    if (now - lastUpdateRef.current < minInterval) {
+      return;
+    }
+    
+    // Validate session is still fresh before calling edge function
+    // This prevents 401 errors on cold start when session might be stale
+    const { data: { session: freshSession } } = await supabase.auth.getSession();
+    if (!freshSession?.access_token) {
+      console.debug("[SessionActivity] Skipping - no valid session");
+      return;
+    }
+    
+    lastUpdateRef.current = now;
+
+    try {
+      await supabase.functions.invoke("track-session", {
+        body: {
+          isUpdate: true,
+          userAgent: navigator.userAgent,
+        },
+      });
+    } catch (error) {
+      // Silently fail - don't disrupt user experience for activity tracking
+      console.debug("[SessionActivity] Update failed:", error);
+    }
+  }, []);
+
+  // Register with unified ResumeManager for visibility-triggered updates (web only)
+  // Native apps have their own debounce logic via NATIVE_DEBOUNCE
+  useRegisterResumeHandler(
+    useMemo(() => ({
+      id: 'sessionActivity',
+      priority: 'background' as const,
+      delay: BACKGROUND_DELAYS.sessionActivity,
+      handler: updateActivity,
+      webOnly: true, // Only run on web, native uses different timing
+    }), [updateActivity])
+  );
+
   useEffect(() => {
     // Early exit: need both user and session with valid access token
     if (!user || !session?.access_token) {
@@ -33,40 +81,6 @@ export const useSessionActivity = () => {
       return;
     }
 
-    const updateActivity = async () => {
-      const now = Date.now();
-      
-      // OPTIMIZED: Longer debounce for native apps to reduce API calls
-      const minInterval = isDespia() ? NATIVE_DEBOUNCE : MIN_UPDATE_INTERVAL;
-      
-      // Debounce: don't update if we just updated
-      if (now - lastUpdateRef.current < minInterval) {
-        return;
-      }
-      
-      // Validate session is still fresh before calling edge function
-      // This prevents 401 errors on cold start when session might be stale
-      const { data: { session: freshSession } } = await supabase.auth.getSession();
-      if (!freshSession?.access_token) {
-        console.debug("[SessionActivity] Skipping - no valid session");
-        return;
-      }
-      
-      lastUpdateRef.current = now;
-
-      try {
-        await supabase.functions.invoke("track-session", {
-          body: {
-            isUpdate: true,
-            userAgent: navigator.userAgent,
-          },
-        });
-      } catch (error) {
-        // Silently fail - don't disrupt user experience for activity tracking
-        console.debug("[SessionActivity] Update failed:", error);
-      }
-    };
-
     // Delay initial update to allow session to fully establish
     const initialTimeout = setTimeout(() => {
       updateActivity();
@@ -75,22 +89,11 @@ export const useSessionActivity = () => {
     // Set up periodic updates
     intervalRef.current = setInterval(updateActivity, ACTIVITY_UPDATE_INTERVAL);
 
-    // Update on visibility change (when user returns to tab)
-    // OPTIMIZED: Only for web, not native (native uses focus handler with debounce)
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible" && !isDespia()) {
-        updateActivity();
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
     return () => {
       clearTimeout(initialTimeout);
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [user, session?.access_token]);
+  }, [user, session?.access_token, updateActivity]);
 };
