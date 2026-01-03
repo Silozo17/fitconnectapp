@@ -4,6 +4,8 @@ import { useAuth } from "./AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { isDespia } from "@/lib/despia";
 import { getNativeCache, setNativeCache, CACHE_KEYS, CACHE_TTL } from "@/lib/native-cache";
+import { useRegisterResumeHandler } from "@/contexts/ResumeManagerContext";
+import { BACKGROUND_DELAYS } from "@/hooks/useAppResumeManager";
 import {
   ViewMode,
   getSavedViewState,
@@ -154,59 +156,43 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     setHasInitializedFromRole(true);
   }, [user, role, canSwitchRoles, hasInitializedFromRole]);
 
-  // CRITICAL FIX: Add visibilitychange AND focus handlers for app resume (background → foreground)
-  // PERFORMANCE FIX: Added debounce to prevent double-firing
-  const lastResumeRef = useRef<number>(0);
-  
-  useEffect(() => {
-    const restoreViewOnResume = (source: string) => {
-      if (!isDespia() || !user || !role) return;
+  /**
+   * View restoration logic - called on resume via ResumeManager
+   * Moved from local visibility handlers to centralized manager
+   */
+  const restoreViewOnResume = useCallback(() => {
+    if (!isDespia() || !user || !role) return;
+    
+    const savedState = getSavedViewState();
+    
+    if (savedState && savedState.type !== activeProfileType) {
+      // Validate that user has access to the saved view
+      const hasAccess = savedState.type === "admin" 
+        ? isAdminUser 
+        : savedState.type === "coach"
+          ? (isAdminUser || role === "coach")
+          : true; // Everyone can access client view
       
-      // PERFORMANCE FIX: Debounce - skip if already handled within 1 second
-      const now = Date.now();
-      if (now - lastResumeRef.current < 1000) {
-        return;
-      }
-      lastResumeRef.current = now;
-      
-      const savedState = getSavedViewState();
-      
-      if (savedState && savedState.type !== activeProfileType) {
-        // Validate that user has access to the saved view
-        const hasAccess = savedState.type === "admin" 
-          ? isAdminUser 
-          : savedState.type === "coach"
-            ? (isAdminUser || role === "coach")
-            : true; // Everyone can access client view
-        
-        if (hasAccess) {
-          setActiveProfileType(savedState.type);
-          setViewModeState(savedState.type);
-          if (savedState.profileId) {
-            setActiveProfileId(savedState.profileId);
-          }
+      if (hasAccess) {
+        setActiveProfileType(savedState.type);
+        setViewModeState(savedState.type);
+        if (savedState.profileId) {
+          setActiveProfileId(savedState.profileId);
         }
       }
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        restoreViewOnResume('visibilitychange');
-      }
-    };
-
-    const handleFocus = () => {
-      restoreViewOnResume('window.focus');
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleFocus);
-    
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleFocus);
-    };
+    }
   }, [activeProfileType, isAdminUser, role, user]);
+
+  // Register with the unified ResumeManager for view restoration on app resume
+  useRegisterResumeHandler(
+    useMemo(() => ({
+      id: 'viewRestore',
+      priority: 'fast' as const,
+      delay: BACKGROUND_DELAYS.viewRestore,
+      handler: restoreViewOnResume,
+      nativeOnly: true, // Only needed for Despia native
+    }), [restoreViewOnResume])
+  );
 
   // Fetch all profiles for the user
   // PERFORMANCE: For native cold start, defer fetch if we have valid localStorage state

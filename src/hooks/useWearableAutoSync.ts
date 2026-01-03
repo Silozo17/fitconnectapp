@@ -1,6 +1,8 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSyncAllWearables } from './useSyncAllWearables';
+import { useRegisterResumeHandler } from '@/contexts/ResumeManagerContext';
+import { BACKGROUND_DELAYS } from '@/hooks/useAppResumeManager';
 
 const AUTO_SYNC_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
 const MIN_SYNC_INTERVAL_MS = 60 * 1000; // 1 minute minimum between syncs
@@ -100,23 +102,25 @@ export const useWearableAutoSync = () => {
     }
   }, [shouldSync, syncAll, queryClient]);
 
+  // Register with unified ResumeManager for visibility-triggered sync
+  useRegisterResumeHandler(
+    useMemo(() => ({
+      id: 'wearable',
+      priority: 'background' as const,
+      delay: BACKGROUND_DELAYS.wearable,
+      handler: () => {
+        if (shouldSync()) {
+          performAutoSync();
+        }
+      },
+    }), [shouldSync, performAutoSync])
+  );
+
   useEffect(() => {
     // Set up interval for auto-sync
     intervalRef.current = setInterval(() => {
       performAutoSync();
     }, AUTO_SYNC_INTERVAL_MS);
-
-    // Also sync on visibility change (when tab becomes active)
-    const handleVisibilityChange = () => {
-      if (!document.hidden && shouldSync()) {
-        // Small delay to ensure everything is ready
-        setTimeout(() => {
-          performAutoSync();
-        }, 1000);
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     // Initial sync if needed (on mount)
     if (shouldSync()) {
@@ -128,13 +132,11 @@ export const useWearableAutoSync = () => {
       return () => {
         clearTimeout(initialSyncTimeout);
         if (intervalRef.current) clearInterval(intervalRef.current);
-        document.removeEventListener('visibilitychange', handleVisibilityChange);
       };
     }
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [performAutoSync, shouldSync]);
 

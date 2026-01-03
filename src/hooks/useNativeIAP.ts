@@ -1,10 +1,12 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCoachProfileId } from '@/hooks/useCoachProfileId';
 import { useCoachProfile } from '@/hooks/useCoachClients';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
+import { useRegisterResumeHandler } from '@/contexts/ResumeManagerContext';
+import { BACKGROUND_DELAYS } from '@/hooks/useAppResumeManager';
 import {
   isNativeIAPAvailable,
   registerIAPCallbacks,
@@ -208,40 +210,41 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
   }, [state.isAvailable, coachProfileId, user, reconcileSubscription, isFounder, isProfileLoading]);
 
   /**
-   * Foreground/resume reconciliation and safety reset
-   * When app returns to foreground:
-   * 1. Re-check subscription entitlement (handles StoreKit interruptions, slow webhooks)
-   * 2. Clear stuck purchasing state if no polling is active
-   * 
-   * CRITICAL: Founders are excluded from visibility-based reconciliation
+   * Resume handler for visibility - called via unified ResumeManager
+   * Handles: StoreKit interruptions, background purchases, slow webhooks
    */
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        // FOUNDER PROTECTION: Skip visibility reconciliation for Founders
-        if (!isFounder) {
-          // Reset reconciliation flag and re-check entitlement
-          // This handles: StoreKit interruptions, background purchases, slow webhooks
-          reconciliationAttemptedRef.current = false;
-          reconcileSubscription();
+  const handleResumeReconciliation = useCallback(() => {
+    // FOUNDER PROTECTION: Skip visibility reconciliation for Founders
+    if (isFounder) {
+      console.log('[NativeIAP] Skipping visibility reconciliation - Founder tier is immutable');
+      return;
+    }
+    
+    // Reset reconciliation flag and re-check entitlement
+    reconciliationAttemptedRef.current = false;
+    reconcileSubscription();
+    
+    // Give callbacks 2 seconds to fire if there's a pending response
+    setTimeout(() => {
+      setState(prev => {
+        // Only reset if stuck in purchasing (not polling, not pending)
+        if (prev.purchaseStatus === 'purchasing' && !prev.isPolling) {
+          return { ...prev, purchaseStatus: 'idle' };
         }
-        
-        // Give callbacks 2 seconds to fire if there's a pending response
-        setTimeout(() => {
-          setState(prev => {
-            // Only reset if stuck in purchasing (not polling, not pending)
-            if (prev.purchaseStatus === 'purchasing' && !prev.isPolling) {
-              return { ...prev, purchaseStatus: 'idle' };
-            }
-            return prev;
-          });
-        }, 2000);
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+        return prev;
+      });
+    }, 2000);
   }, [reconcileSubscription, isFounder]);
+
+  // Register with unified ResumeManager instead of local visibility handler
+  useRegisterResumeHandler(
+    useMemo(() => ({
+      id: 'subscription',
+      priority: 'background' as const,
+      delay: BACKGROUND_DELAYS.subscription,
+      handler: handleResumeReconciliation,
+    }), [handleResumeReconciliation])
+  );
 
   /**
    * Poll the backend to check if the subscription has been updated via webhook

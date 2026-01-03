@@ -1,10 +1,12 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCoachProfileId } from '@/hooks/useCoachProfileId';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import confetti from 'canvas-confetti';
+import { useRegisterResumeHandler } from '@/contexts/ResumeManagerContext';
+import { BACKGROUND_DELAYS } from '@/hooks/useAppResumeManager';
 import {
   isNativeIAPAvailable,
   registerIAPCallbacks,
@@ -153,31 +155,34 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
   }, [coachProfileId, user, queryClient, triggerCelebration]);
 
   /**
-   * Foreground/resume reconciliation + safety reset
+   * Resume handler - called via unified ResumeManager
    * Triggers boost entitlement check when app returns to foreground
    */
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        // Reset reconciliation flag to allow re-check on resume
-        reconciliationAttemptedRef.current = false;
-        reconcileBoostEntitlement();
-        
-        // Safety reset for stuck purchasing state after delay
-        setTimeout(() => {
-          setState(prev => {
-            if (prev.purchaseStatus === 'purchasing' && !prev.isPolling) {
-              return { ...prev, purchaseStatus: 'idle' };
-            }
-            return prev;
-          });
-        }, 2000);
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  const handleResumeReconciliation = useCallback(() => {
+    // Reset reconciliation flag to allow re-check on resume
+    reconciliationAttemptedRef.current = false;
+    reconcileBoostEntitlement();
+    
+    // Safety reset for stuck purchasing state after delay
+    setTimeout(() => {
+      setState(prev => {
+        if (prev.purchaseStatus === 'purchasing' && !prev.isPolling) {
+          return { ...prev, purchaseStatus: 'idle' };
+        }
+        return prev;
+      });
+    }, 2000);
   }, [reconcileBoostEntitlement]);
+
+  // Register with unified ResumeManager instead of local visibility handler
+  useRegisterResumeHandler(
+    useMemo(() => ({
+      id: 'boost',
+      priority: 'background' as const,
+      delay: BACKGROUND_DELAYS.boost,
+      handler: handleResumeReconciliation,
+    }), [handleResumeReconciliation])
+  );
 
   /**
    * Poll the backend to check if boost has been activated via webhook
