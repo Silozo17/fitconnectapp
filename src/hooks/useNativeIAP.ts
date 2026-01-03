@@ -53,8 +53,17 @@ interface UseNativeIAPReturn {
   reconcileSubscription: () => Promise<void>;
 }
 
-const POLL_INTERVAL_MS = 2000;
-const MAX_POLL_ATTEMPTS = 30; // 60 seconds max polling
+// PHASE 3 FIX: Faster initial polling, then slower
+// First 10 attempts: 1 second each (10s total)
+// Next 10 attempts: 2 seconds each (20s total)
+// Final 5 attempts: 3 seconds each (15s total)
+// Total: 45 seconds max polling time (improved from 60s)
+const INITIAL_POLL_INTERVAL_MS = 1000;
+const SECONDARY_POLL_INTERVAL_MS = 2000;
+const FINAL_POLL_INTERVAL_MS = 3000;
+const INITIAL_POLL_COUNT = 10;
+const SECONDARY_POLL_COUNT = 10;
+const MAX_POLL_ATTEMPTS = 25; // Reduced from 30
 const PURCHASE_TIMEOUT_MS = 120000; // 2 minutes timeout for stuck purchases
 
 /**
@@ -109,7 +118,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
   useEffect(() => {
     return () => {
       if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
+        clearTimeout(pollIntervalRef.current); // Changed to clearTimeout for setTimeout-based polling
       }
       if (purchaseTimeoutRef.current) {
         clearTimeout(purchaseTimeoutRef.current);
@@ -277,7 +286,8 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
   }, [coachProfileId]);
 
   /**
-   * Start polling for subscription confirmation
+   * Start polling for subscription confirmation with adaptive intervals
+   * PHASE 3 FIX: Faster initial polling for better UX
    */
   const startPolling = useCallback((expectedTier: SubscriptionTier) => {
     if (pollIntervalRef.current) {
@@ -287,16 +297,22 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     pollAttemptsRef.current = 0;
     setState(prev => ({ ...prev, isPolling: true, purchaseStatus: 'success' }));
 
-    pollIntervalRef.current = setInterval(async () => {
+    // Helper to get current poll interval based on attempt count
+    const getPollInterval = (attempt: number): number => {
+      if (attempt < INITIAL_POLL_COUNT) return INITIAL_POLL_INTERVAL_MS;
+      if (attempt < INITIAL_POLL_COUNT + SECONDARY_POLL_COUNT) return SECONDARY_POLL_INTERVAL_MS;
+      return FINAL_POLL_INTERVAL_MS;
+    };
+
+    // Use recursive setTimeout for adaptive intervals
+    const poll = async () => {
       pollAttemptsRef.current += 1;
+      const currentAttempt = pollAttemptsRef.current;
 
       const confirmed = await pollSubscriptionStatus(expectedTier);
 
       if (confirmed) {
         // Success! Stop polling
-        if (pollIntervalRef.current) {
-          clearInterval(pollIntervalRef.current);
-        }
         setState(prev => ({
           ...prev,
           isPolling: false,
@@ -307,17 +323,15 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
         queryClient.invalidateQueries({ queryKey: ['coach-profile'] });
         queryClient.invalidateQueries({ queryKey: ['platform-subscription'] });
         queryClient.invalidateQueries({ queryKey: ['feature-access'] });
+        queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
         
         // Call the success callback if provided (handles celebration/navigation)
         options?.onPurchaseComplete?.(expectedTier);
         return;
       }
 
-      if (pollAttemptsRef.current >= MAX_POLL_ATTEMPTS) {
+      if (currentAttempt >= MAX_POLL_ATTEMPTS) {
         // Max attempts reached, stop polling and try reconciliation as fallback
-        if (pollIntervalRef.current) {
-          clearInterval(pollIntervalRef.current);
-        }
         setState(prev => ({
           ...prev,
           isPolling: false,
@@ -335,8 +349,15 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
         
         // Still call success callback - payment was successful, just webhook is slow
         options?.onPurchaseComplete?.(expectedTier);
+        return;
       }
-    }, POLL_INTERVAL_MS);
+
+      // Schedule next poll with adaptive interval
+      pollIntervalRef.current = setTimeout(poll, getPollInterval(currentAttempt)) as unknown as NodeJS.Timeout;
+    };
+
+    // Start first poll immediately
+    poll();
   }, [pollSubscriptionStatus, queryClient, options, reconcileSubscription]);
 
   /**
@@ -520,7 +541,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
   const resetState = useCallback(() => {
     clearPurchaseTimeout();
     if (pollIntervalRef.current) {
-      clearInterval(pollIntervalRef.current);
+      clearTimeout(pollIntervalRef.current); // Changed to clearTimeout for setTimeout-based polling
       pollIntervalRef.current = null;
     }
     pollAttemptsRef.current = 0;

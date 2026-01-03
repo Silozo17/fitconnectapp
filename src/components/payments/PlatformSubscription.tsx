@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { SUBSCRIPTION_TIERS, TierKey, normalizeTier, getTierPosition } from "@/lib/stripe-config";
 import { useActivePricing } from "@/hooks/useActivePricing";
@@ -17,6 +16,8 @@ import { useNativePricing } from "@/hooks/useNativePricing";
 import { useNativeIAP, SubscriptionTier } from "@/hooks/useNativeIAP";
 import { isDespia } from "@/lib/despia";
 import { IAPUnsuccessfulDialog } from "@/components/iap/IAPUnsuccessfulDialog";
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { NativeSubscriptionManagement } from "@/components/payments/NativeSubscriptionManagement";
 
 interface PlatformSubscriptionProps {
   coachId: string;
@@ -50,19 +51,13 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   // Native IAP hook
   const { purchase: nativePurchase, state: iapState, dismissUnsuccessfulModal } = useNativeIAP();
 
-  const { data: subscription } = useQuery({
-    queryKey: ["platform-subscription", coachId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("platform_subscriptions")
-        .select("*")
-        .eq("coach_id", coachId)
-        .maybeSingle();
-      
-      if (error && error.code !== "PGRST116") throw error;
-      return data;
-    },
-  });
+  // Unified subscription status - single source of truth
+  const subscriptionStatus = useSubscriptionStatus();
+  
+  // Use the unified status for determining active tier and subscription source
+  const activeTier = subscriptionStatus.tier;
+  const isNativeSubscription = subscriptionStatus.isNativeSubscription;
+  const currentPeriodEnd = subscriptionStatus.currentPeriodEnd;
 
   const handleSubscribe = (tierKey: TierKey) => {
     if (isNativeApp && ['starter', 'pro', 'enterprise'].includes(tierKey)) {
@@ -74,8 +69,20 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
     }
   };
 
-  const handleManageSubscription = async () => {
+  /**
+   * Handle "Manage Subscription" button click.
+   * For native subscriptions (App Store / Play Store), this should NOT open Stripe.
+   * The NativeSubscriptionManagement component handles that case.
+   * This function is only called for actual Stripe subscriptions.
+   */
+  const handleManageStripeSubscription = async () => {
     if (!user) return;
+
+    // Safety check: Don't open Stripe for native subscriptions
+    if (isNativeSubscription) {
+      toast.info("Please manage your subscription through the App Store or Google Play");
+      return;
+    }
 
     setLoadingTier("manage");
     try {
@@ -103,7 +110,6 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
     }
   };
 
-  const activeTier = normalizeTier(subscription?.tier || currentTier);
   const currentPosition = getTierPosition(activeTier);
 
   const getButtonConfig = (tierKey: TierKey) => {
@@ -133,6 +139,16 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Show native subscription management for App Store / Play Store subscriptions */}
+          {isNativeSubscription && activeTier !== 'free' && (
+            <div className="mb-6">
+              <NativeSubscriptionManagement 
+                tier={activeTier} 
+                currentPeriodEnd={currentPeriodEnd}
+              />
+            </div>
+          )}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {(Object.entries(SUBSCRIPTION_TIERS) as [TierKey, typeof SUBSCRIPTION_TIERS[TierKey]][])
               .filter(([tierKey, tier]) => !tier.adminOnly || activeTier === tierKey)
@@ -197,30 +213,45 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
 
                     {isCurrentTier ? (
                       activeTier !== "free" ? (
-                        <Button
-                          variant="outline"
-                          className="w-full"
-                          onClick={handleManageSubscription}
-                          disabled={loadingTier === "manage"}
-                        >
-                          {loadingTier === "manage" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                          {t("subscription.manageSubscription")}
-                        </Button>
+                        // For current paid tier: Show "Manage" for Stripe, hide for native (shown above)
+                        isNativeSubscription ? (
+                          <Button variant="outline" className="w-full" disabled>
+                            {t("subscription.currentPlan")}
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            className="w-full"
+                            onClick={handleManageStripeSubscription}
+                            disabled={loadingTier === "manage"}
+                          >
+                            {loadingTier === "manage" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                            {t("subscription.manageSubscription")}
+                          </Button>
+                        )
                       ) : (
                         <Button variant="outline" className="w-full" disabled>
                           {t("subscription.currentPlan")}
                         </Button>
                       )
                     ) : tierKey === "free" ? (
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={handleManageSubscription}
-                        disabled={loadingTier === "manage"}
-                      >
-                        {loadingTier === "manage" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                        {t("subscription.downgrade")}
-                      </Button>
+                      // Downgrade to free: For native, show disabled (managed via platform)
+                      // For Stripe, show portal link
+                      isNativeSubscription ? (
+                        <Button variant="outline" className="w-full" disabled>
+                          {t("subscription.managedViaPlatform", "Manage via App Store/Play Store")}
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={handleManageStripeSubscription}
+                          disabled={loadingTier === "manage"}
+                        >
+                          {loadingTier === "manage" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                          {t("subscription.downgrade")}
+                        </Button>
+                      )
                     ) : (
                       <Button
                         variant={buttonConfig.variant}
