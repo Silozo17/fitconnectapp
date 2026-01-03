@@ -3,6 +3,7 @@ import { useCoachProfile } from "./useCoachClients";
 import { useCoachClients } from "./useCoachClients";
 import { SUBSCRIPTION_TIERS, TierKey, normalizeTier } from "@/lib/stripe-config";
 import { FEATURE_ACCESS, FeatureKey, getMinimumTierForFeature } from "@/lib/feature-config";
+import { useSubscriptionStatus } from "./useSubscriptionStatus";
 
 // CRITICAL: Persistent storage key for subscription tier
 // This prevents tier resets on page reload, session refresh, or profile loading delays
@@ -35,6 +36,9 @@ const persistTier = (tier: TierKey): void => {
 export const useFeatureAccess = () => {
   const { data: coachProfile, isLoading: profileLoading } = useCoachProfile();
   const { data: clients, isLoading: clientsLoading } = useCoachClients();
+  
+  // Phase 5: Get subscription status for grace period handling
+  const subscriptionStatus = useSubscriptionStatus();
   
   // CRITICAL: Initialize from localStorage to prevent "free" flash on page reload
   // This is the key fix - never default to "free" if we have a cached paid tier
@@ -90,12 +94,23 @@ export const useFeatureAccess = () => {
     return lastKnownTierRef.current;
   })();
   
+  // Phase 5: For cancelled subscriptions within grace period, use the paid tier for access
+  // This ensures users keep their features until their paid period actually ends
+  const accessTier: TierKey = (() => {
+    if (subscriptionStatus.isWithinGracePeriod && subscriptionStatus.tier !== 'free') {
+      // User is cancelled but still has access until period ends
+      return subscriptionStatus.tier;
+    }
+    return effectiveTier || 'free';
+  })();
+
   // Use free tier config as fallback only when effectiveTier is null
   const tierConfig = effectiveTier ? SUBSCRIPTION_TIERS[effectiveTier] : SUBSCRIPTION_TIERS.free;
   
   // Check if coach has access to a feature
   // CRITICAL: During loading, GRANT ACCESS to prevent feature lockouts
   // This is safer than denying - paid users should never be locked out
+  // Phase 5: Use accessTier which respects grace period
   const hasFeature = (feature: FeatureKey): boolean => {
     // If tier is null (still loading), grant access to prevent lockouts
     // This is intentionally permissive during loading states
@@ -104,12 +119,12 @@ export const useFeatureAccess = () => {
     }
     
     // FOUNDER PROTECTION: Founders have access to ALL features
-    if (effectiveTier === 'founder') {
+    if (accessTier === 'founder') {
       return true;
     }
     
     const allowedTiers = FEATURE_ACCESS[feature] as readonly string[];
-    return allowedTiers.includes(effectiveTier);
+    return allowedTiers.includes(accessTier);
   };
   
   // Get client limit for current tier
@@ -156,5 +171,9 @@ export const useFeatureAccess = () => {
     isLoading: profileLoading || clientsLoading,
     // New: Expose whether we have confirmed tier data
     hasFreshData: hasReceivedFreshDataRef.current,
+    // Phase 5: Expose cancellation status for UI messaging
+    isCancelled: subscriptionStatus.isCancelled,
+    isWithinGracePeriod: subscriptionStatus.isWithinGracePeriod,
+    accessEndsDate: subscriptionStatus.hasAccessUntil,
   };
 };

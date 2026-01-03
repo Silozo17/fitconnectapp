@@ -14,6 +14,10 @@ export interface SubscriptionStatus {
   isNativeSubscription: boolean;
   stripeSubscriptionId: string | null;
   isLoading: boolean;
+  // Phase 3: Effective date messaging
+  isCancelled: boolean;
+  hasAccessUntil: string | null;
+  isWithinGracePeriod: boolean;
 }
 
 /**
@@ -22,6 +26,7 @@ export interface SubscriptionStatus {
  * - Current tier
  * - Subscription source (Stripe vs RevenueCat vs Admin)
  * - Whether to show Stripe portal or native management UI
+ * - Cancellation status and grace period
  */
 export const useSubscriptionStatus = (): SubscriptionStatus => {
   const { user } = useAuth();
@@ -73,6 +78,9 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
       isNativeSubscription: false,
       stripeSubscriptionId: null,
       isLoading,
+      isCancelled: false,
+      hasAccessUntil: null,
+      isWithinGracePeriod: false,
     };
   }
 
@@ -89,6 +97,9 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
       isNativeSubscription: false,
       stripeSubscriptionId: null,
       isLoading: false,
+      isCancelled: false,
+      hasAccessUntil: null,
+      isWithinGracePeriod: false,
     };
   }
 
@@ -104,6 +115,9 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
         isNativeSubscription: false,
         stripeSubscriptionId: null,
         isLoading: false,
+        isCancelled: false,
+        hasAccessUntil: adminGrant.expires_at,
+        isWithinGracePeriod: false,
       };
     }
   }
@@ -118,14 +132,28 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
     // Determine if it's a native subscription (RevenueCat = App Store / Play Store)
     const isNative = isRevenueCat;
 
+    // Phase 5: Check if cancelled but still within grace period
+    const isCancelled = platformSub.status === 'cancelled';
+    const periodEnd = platformSub.current_period_end;
+    const now = new Date();
+    const isWithinGracePeriod = isCancelled && periodEnd && new Date(periodEnd) > now;
+
+    // If cancelled but still within period, treat as active for access purposes
+    const effectiveStatus = isWithinGracePeriod 
+      ? 'cancelled' // Keep cancelled status for UI messaging
+      : (platformSub.status as 'active' | 'past_due' | 'cancelled' | 'expired') || 'none';
+
     return {
       tier: normalizeTier(platformSub.tier || 'free'),
       source: isNative ? 'revenuecat' : 'stripe',
-      status: (platformSub.status as 'active' | 'past_due' | 'cancelled' | 'expired') || 'none',
-      currentPeriodEnd: platformSub.current_period_end,
+      status: effectiveStatus,
+      currentPeriodEnd: periodEnd,
       isNativeSubscription: isNative,
       stripeSubscriptionId: stripeSubId,
       isLoading: false,
+      isCancelled,
+      hasAccessUntil: isWithinGracePeriod ? periodEnd : null,
+      isWithinGracePeriod,
     };
   }
 
@@ -138,6 +166,9 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
     isNativeSubscription: false,
     stripeSubscriptionId: null,
     isLoading: false,
+    isCancelled: false,
+    hasAccessUntil: null,
+    isWithinGracePeriod: false,
   };
 };
 

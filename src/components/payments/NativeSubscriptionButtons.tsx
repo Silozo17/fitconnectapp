@@ -1,29 +1,37 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Crown, Check, Loader2, Smartphone } from 'lucide-react';
+import { Crown, Check, Loader2, Smartphone, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 import { useNativeIAP, SubscriptionTier, BillingInterval } from '@/hooks/useNativeIAP';
-import { isDespia, isDespiaAndroid } from '@/lib/despia';
+import { isDespia, isDespiaAndroid, isDespiaIOS } from '@/lib/despia';
 import { SUBSCRIPTION_TIERS, TierKey, normalizeTier, getTierPosition } from '@/lib/stripe-config';
 import { useNativePricing } from '@/hooks/useNativePricing';
+import { SubscriptionStatusBadge } from './SubscriptionStatusBadge';
 
 interface NativeSubscriptionButtonsProps {
   currentTier?: string;
   className?: string;
+  /** Optional: Set when purchase is optimistically confirmed but polling */
+  optimisticTier?: SubscriptionTier | null;
 }
 
 /**
  * Native subscription buttons for in-app purchases via Despia + RevenueCat
  * Only visible when running inside the Despia native environment
+ * 
+ * Phase 2: Properly handles downgrades by directing to platform subscription management
+ * Phase 4: Shows optimistic UI during purchase confirmation
  */
 export const NativeSubscriptionButtons = ({
   currentTier = 'free',
   className,
+  optimisticTier,
 }: NativeSubscriptionButtonsProps) => {
   const { t } = useTranslation('settings');
   const { t: tPages } = useTranslation('pages');
@@ -37,8 +45,11 @@ export const NativeSubscriptionButtons = ({
   }
 
   const activeTier = normalizeTier(currentTier);
+  // Use optimistic tier if we're confirming a purchase
+  const displayTier = optimisticTier || activeTier;
   const currentPosition = getTierPosition(activeTier);
   const isAndroid = isDespiaAndroid();
+  const isIOS = isDespiaIOS();
 
   // On Android, Enterprise tier doesn't have yearly pricing
   const isYearlyAvailable = (tierKey: string) => {
@@ -48,7 +59,15 @@ export const NativeSubscriptionButtons = ({
     return true;
   };
 
+  // Phase 2: Handle purchase - only for upgrades
   const handlePurchase = async (tierKey: SubscriptionTier) => {
+    const targetPosition = getTierPosition(tierKey);
+    
+    // Only allow purchases for upgrades - downgrades must go through platform
+    if (targetPosition <= currentPosition && activeTier !== 'free') {
+      return;
+    }
+    
     // Force monthly for Enterprise on Android
     const effectiveInterval = (isAndroid && tierKey === 'enterprise') 
       ? 'monthly' 
@@ -56,18 +75,67 @@ export const NativeSubscriptionButtons = ({
     await purchase(tierKey, effectiveInterval);
   };
 
-  const getButtonText = (tierKey: TierKey) => {
+  // Phase 2: Open platform subscription management for downgrades
+  const handleOpenPlatformSubscriptions = () => {
+    if (isIOS) {
+      window.open('https://apps.apple.com/account/subscriptions', '_blank');
+    } else if (isAndroid) {
+      window.open('https://play.google.com/store/account/subscriptions', '_blank');
+    }
+  };
+
+  // Phase 2 & 4: Determine button text and behavior
+  const getButtonConfig = (tierKey: TierKey) => {
     const targetPosition = getTierPosition(tierKey);
-    if (state.purchaseStatus === 'purchasing' || state.isPolling) {
-      return state.isPolling ? 'Confirming...' : 'Processing...';
+    const isProcessing = state.purchaseStatus === 'purchasing' || state.isPolling;
+    
+    // Phase 4: Show activating state for optimistic tier
+    if (optimisticTier === tierKey) {
+      return { 
+        text: 'Activating...', 
+        variant: 'default' as const,
+        disabled: true,
+        isActivating: true,
+      };
     }
+    
+    if (isProcessing) {
+      return { 
+        text: state.isPolling ? 'Confirming...' : 'Processing...', 
+        variant: 'default' as const,
+        disabled: true,
+        isActivating: false,
+      };
+    }
+    
+    // Current tier
+    if (targetPosition === currentPosition) {
+      return { 
+        text: t('subscription.current'), 
+        variant: 'outline' as const,
+        disabled: true,
+        isActivating: false,
+      };
+    }
+    
+    // Upgrade
     if (targetPosition > currentPosition) {
-      return t('subscription.upgrade');
+      return { 
+        text: t('subscription.upgrade'), 
+        variant: 'default' as const,
+        disabled: false,
+        isActivating: false,
+      };
     }
-    if (targetPosition < currentPosition) {
-      return t('subscription.downgrade');
-    }
-    return t('subscription.current');
+    
+    // Downgrade - show change plan button that opens platform settings
+    return { 
+      text: 'Change Plan', 
+      variant: 'outline' as const,
+      disabled: false,
+      isDowngrade: true,
+      isActivating: false,
+    };
   };
 
   // Filter to only subscription tiers (not free or admin-only)
@@ -185,25 +253,71 @@ export const NativeSubscriptionButtons = ({
                   ))}
                 </ul>
 
-                {isCurrentTier ? (
-                  <Button variant="outline" className="w-full" disabled>
-                    {t('subscription.currentPlan')}
-                  </Button>
-                ) : (
-                  <Button
-                    variant={canUpgrade ? 'default' : 'outline'}
-                    className="w-full"
-                    onClick={() => isPurchasable && handlePurchase(key)}
-                    disabled={isProcessing || !isAvailable}
-                  >
-                    {isProcessing && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                    {getButtonText(key)}
-                  </Button>
-                )}
+                {(() => {
+                  const buttonConfig = getButtonConfig(key);
+                  
+                  // Current tier
+                  if (isCurrentTier) {
+                    return (
+                      <Button variant="outline" className="w-full" disabled>
+                        {t('subscription.currentPlan')}
+                      </Button>
+                    );
+                  }
+                  
+                  // Phase 2: Downgrade - open platform subscriptions
+                  if ('isDowngrade' in buttonConfig && buttonConfig.isDowngrade) {
+                    return (
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleOpenPlatformSubscriptions}
+                      >
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        {buttonConfig.text}
+                      </Button>
+                    );
+                  }
+                  
+                  // Upgrade or processing
+                  return (
+                    <Button
+                      variant={buttonConfig.variant}
+                      className="w-full"
+                      onClick={() => isPurchasable && handlePurchase(key)}
+                      disabled={buttonConfig.disabled || isProcessing || !isAvailable}
+                    >
+                      {(isProcessing || buttonConfig.isActivating) && (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      )}
+                      {buttonConfig.text}
+                    </Button>
+                  );
+                })()}
               </div>
             );
           })}
         </div>
+
+        {/* Phase 2: Downgrade messaging */}
+        {activeTier !== 'free' && (
+          <Alert className="border-muted bg-muted/50">
+            <AlertDescription className="text-sm text-muted-foreground">
+              To downgrade or cancel, tap "Change Plan" or manage your subscription in{' '}
+              {isIOS ? 'App Store' : 'Google Play'} settings. Changes take effect at the end of your billing period.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Phase 4: Optimistic success message */}
+        {optimisticTier && (
+          <div className="flex items-center justify-center gap-2 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+            <SubscriptionStatusBadge status="activating" />
+            <span className="text-sm text-green-700">
+              Your {optimisticTier.charAt(0).toUpperCase() + optimisticTier.slice(1)} plan is being activated...
+            </span>
+          </div>
+        )}
 
         {/* Status messages */}
         {state.isPolling && (
