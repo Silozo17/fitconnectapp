@@ -36,8 +36,11 @@ export const useCoachDashboardStats = () => {
 
   return useQuery({
     queryKey: ["coach-dashboard-stats", effectiveProfileId],
-    queryFn: async (): Promise<{ stats: CoachDashboardStats; upcomingSessions: UpcomingSession[] }> => {
-      if (!effectiveProfileId) throw new Error("No coach profile ID");
+    queryFn: async (): Promise<{ stats: CoachDashboardStats; upcomingSessions: UpcomingSession[] } | null> => {
+      if (!effectiveProfileId) {
+        console.warn('[useCoachDashboardStats] No coach profile ID available');
+        return null;
+      }
 
       // Calculate week boundaries
       const now = new Date();

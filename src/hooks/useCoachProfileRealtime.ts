@@ -15,32 +15,40 @@ export function useCoachProfileRealtime() {
   useEffect(() => {
     if (!user?.id) return;
 
-    const channel = supabase
-      .channel(`coach-profile-realtime-${user.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "coach_profiles",
-          filter: `user_id=eq.${user.id}`,
-        },
-        () => {
-          console.log("[useCoachProfileRealtime] Coach profile updated");
-          // Invalidate all coach-related queries when profile is updated
-          queryClient.invalidateQueries({ queryKey: ["coach-profile", user.id] });
-          queryClient.invalidateQueries({ queryKey: ["coach-onboarding-status", user.id] });
-          queryClient.invalidateQueries({ queryKey: ["coach-clients"] });
-          queryClient.invalidateQueries({ queryKey: ["coach-profile-completion", user.id] });
-          // Also invalidate subscription queries since subscription_tier lives on coach_profiles
-          queryClient.invalidateQueries({ queryKey: ["subscription-status"] });
-          queryClient.invalidateQueries({ queryKey: ["feature-access"] });
-        }
-      )
-      .subscribe();
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    
+    try {
+      channel = supabase
+        .channel(`coach-profile-realtime-${user.id}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "coach_profiles",
+            filter: `user_id=eq.${user.id}`,
+          },
+          () => {
+            console.log("[useCoachProfileRealtime] Coach profile updated");
+            // Invalidate all coach-related queries when profile is updated
+            queryClient.invalidateQueries({ queryKey: ["coach-profile", user.id] });
+            queryClient.invalidateQueries({ queryKey: ["coach-onboarding-status", user.id] });
+            queryClient.invalidateQueries({ queryKey: ["coach-clients"] });
+            queryClient.invalidateQueries({ queryKey: ["coach-profile-completion", user.id] });
+            // Also invalidate subscription queries since subscription_tier lives on coach_profiles
+            queryClient.invalidateQueries({ queryKey: ["subscription-status"] });
+            queryClient.invalidateQueries({ queryKey: ["feature-access"] });
+          }
+        )
+        .subscribe();
+    } catch (error) {
+      console.error('[useCoachProfileRealtime] Error setting up channel:', error);
+    }
 
     return () => {
-      supabase.removeChannel(channel);
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
     };
   }, [user?.id, queryClient]);
 }
