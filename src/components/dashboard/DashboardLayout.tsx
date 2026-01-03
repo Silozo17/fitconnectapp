@@ -28,12 +28,9 @@ interface DashboardLayoutProps {
 const LOADING_TIMEOUT_MS = 10000;
 
 const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", description }: DashboardLayoutProps) => {
+  // ALL HOOKS MUST BE CALLED FIRST - before any conditional returns
+  // This prevents React "Rules of Hooks" violations
   const { user } = useAuth();
-  
-  // FIX: Guard against race condition during native pull-to-refresh
-  if (!user) {
-    return <PageLoadingSpinner />;
-  }
   const navigate = useNavigate();
   const { data: onboardingStatus, isLoading } = useCoachOnboardingStatus();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -90,6 +87,12 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
       navigate("/onboarding/coach", { replace: true });
     }
   }, [onboardingStatus, isLoading, navigate, justCompletedOnboarding, isKnownOnboarded]);
+
+  // CONDITIONAL RETURNS - Only after all hooks have been called
+  // Guard against race condition during native pull-to-refresh
+  if (!user) {
+    return <PageLoadingSpinner />;
+  }
 
   // OPTIMIZED: Skip loading state entirely for known-onboarded users
   if (isLoading && !justCompletedOnboarding && !isKnownOnboarded) {
