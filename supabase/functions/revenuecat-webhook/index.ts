@@ -123,13 +123,60 @@ const isBoostProduct = (productId: string | undefined, entitlementIds?: string[]
 const TIER_PRIORITY: string[] = ['enterprise', 'pro', 'starter'];
 
 /**
- * Get tier from event using entitlement-first approach
- * When multiple entitlements exist, picks the HIGHEST tier to avoid incorrect downgrades
- * Falls back to product ID mapping if no entitlement match
+ * Extract tier directly from product ID (most reliable for PRODUCT_CHANGE events)
+ * This ignores entitlements entirely and uses the actual purchased product
+ */
+const getTierFromProductId = (productId: string | undefined): string | null => {
+  if (!productId) return null;
+  
+  // Direct mapping first
+  if (productToTier[productId]) {
+    return productToTier[productId];
+  }
+  
+  // Fallback: check if product ID contains tier keywords
+  const productIdLower = productId.toLowerCase();
+  if (productIdLower.includes('enterprise')) return 'enterprise';
+  if (productIdLower.includes('pro')) return 'pro';
+  if (productIdLower.includes('starter')) return 'starter';
+  
+  return null;
+};
+
+/**
+ * Get tier from event using PRODUCT-FIRST approach for maximum reliability
+ * 
+ * Priority order:
+ * 1. new_product_id (for PRODUCT_CHANGE events - this is the NEW subscription)
+ * 2. product_id (the actual purchased product)
+ * 3. entitlements (as fallback, picks highest tier)
+ * 
+ * This fixes the bug where entitlements lag behind product changes.
  */
 const getTierFromEvent = (event: RevenueCatEvent): string | null => {
-  // First, check entitlements (most reliable - handles product ID variations)
-  // When multiple entitlements exist, pick the HIGHEST tier
+  // PRIORITY 1: For PRODUCT_CHANGE, use new_product_id (the product they upgraded TO)
+  if (event.new_product_id) {
+    const tierFromNewProduct = getTierFromProductId(event.new_product_id);
+    if (tierFromNewProduct) {
+      logStep("Tier from new_product_id (upgrade target)", { 
+        newProductId: event.new_product_id, 
+        tier: tierFromNewProduct 
+      });
+      return tierFromNewProduct;
+    }
+  }
+  
+  // PRIORITY 2: Use current product_id
+  if (event.product_id) {
+    const tierFromProduct = getTierFromProductId(event.product_id);
+    if (tierFromProduct) {
+      logStep("Tier from product_id", { productId: event.product_id, tier: tierFromProduct });
+      return tierFromProduct;
+    }
+  }
+  
+  // PRIORITY 3: Fallback to entitlements (picks highest tier)
+  // This handles cases where product ID format doesn't match our mapping
   if (event.entitlement_ids?.length) {
     let bestTier: string | null = null;
     let bestPriority = Infinity;
@@ -147,25 +194,12 @@ const getTierFromEvent = (event: RevenueCatEvent): string | null => {
     }
     
     if (bestTier) {
-      logStep("Tier from entitlement (highest of multiple)", { 
+      logStep("Tier from entitlement (fallback)", { 
         entitlementIds: event.entitlement_ids, 
-        selectedTier: bestTier,
-        allMatched: event.entitlement_ids.filter(e => entitlementToTier[e])
+        selectedTier: bestTier 
       });
       return bestTier;
     }
-  }
-  
-  // Fallback to product ID mapping
-  if (event.product_id && productToTier[event.product_id]) {
-    logStep("Tier from product_id", { productId: event.product_id, tier: productToTier[event.product_id] });
-    return productToTier[event.product_id];
-  }
-  
-  // Also check new_product_id for PRODUCT_CHANGE events
-  if (event.new_product_id && productToTier[event.new_product_id]) {
-    logStep("Tier from new_product_id", { newProductId: event.new_product_id, tier: productToTier[event.new_product_id] });
-    return productToTier[event.new_product_id];
   }
   
   return null;

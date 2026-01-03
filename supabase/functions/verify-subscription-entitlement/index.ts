@@ -28,12 +28,62 @@ interface RevenueCatEntitlement {
   grace_period_expires_date?: string;
 }
 
+interface RevenueCatSubscription {
+  expires_date: string;
+  purchase_date: string;
+  original_purchase_date: string;
+  product_plan_identifier?: string;
+  store: string;
+  unsubscribe_detected_at?: string; // Key for detecting cancellation
+  billing_issues_detected_at?: string;
+  grace_period_expires_date?: string;
+  is_sandbox: boolean;
+  ownership_type?: string;
+}
+
 interface RevenueCatSubscriberResponse {
   subscriber: {
     entitlements: Record<string, RevenueCatEntitlement>;
-    subscriptions: Record<string, unknown>;
+    subscriptions: Record<string, RevenueCatSubscription>;
   };
 }
+
+// Map RevenueCat product IDs to our tier names (same as webhook)
+const productToTier: Record<string, string> = {
+  // iOS App Store product IDs
+  "fitconnect.starter.monthly": "starter",
+  "fitconnect.starter.annual": "starter",
+  "fitconnect.pro.monthly": "pro",
+  "fitconnect.pro.annual": "pro",
+  "fitconnect.enterprise.monthly": "enterprise",
+  "fitconnect.enterprise.annual": "enterprise",
+  
+  // Android Google Play product IDs
+  "starter.monthly.play": "starter",
+  "starter.annual.play": "starter",
+  "pro.monthly.play": "pro",
+  "pro.annual.play": "pro",
+  "enterprise.monthly.play": "enterprise",
+  "enterprise.annual.play": "enterprise",
+};
+
+/**
+ * Extract tier from product ID (handles both direct mapping and keyword matching)
+ */
+const getTierFromProductId = (productId: string): string | null => {
+  // Direct mapping first
+  if (productToTier[productId]) {
+    return productToTier[productId];
+  }
+  
+  // Fallback: check if product ID contains tier keywords
+  const productIdLower = productId.toLowerCase();
+  if (productIdLower.includes('enterprise')) return 'enterprise';
+  if (productIdLower.includes('pro')) return 'pro';
+  if (productIdLower.includes('starter')) return 'starter';
+  
+  return null;
+};
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -193,48 +243,103 @@ serve(async (req) => {
 
     const rcData: RevenueCatSubscriberResponse = await rcResponse.json();
     const entitlements = rcData?.subscriber?.entitlements || {};
+    const subscriptions = rcData?.subscriber?.subscriptions || {};
 
-    logStep("RevenueCat entitlements", { 
+    logStep("RevenueCat data", { 
       entitlementIds: Object.keys(entitlements),
+      subscriptionProductIds: Object.keys(subscriptions),
       entitlements: Object.fromEntries(
         Object.entries(entitlements).map(([k, v]) => [k, { expires_date: v.expires_date }])
+      ),
+      subscriptions: Object.fromEntries(
+        Object.entries(subscriptions).map(([k, v]) => [k, { 
+          expires_date: v.expires_date,
+          unsubscribe_detected_at: v.unsubscribe_detected_at 
+        }])
       )
     });
 
-    // Find highest active subscription entitlement
+    // PHASE 2 FIX: Use SUBSCRIPTIONS object (product-first) for tier detection
+    // This is more reliable than entitlements which can lag behind product changes
     let activeTier: SubscriptionTier | null = null;
     let expiresDate: Date | null = null;
     let isInGracePeriod = false;
+    let isCancelled = false;
+    const now = new Date();
 
-    for (const entitlementId of SUBSCRIPTION_ENTITLEMENTS) {
-      const entitlement = entitlements[entitlementId];
-      if (entitlement) {
-        const expiration = new Date(entitlement.expires_date);
-        const now = new Date();
+    // First, scan subscriptions for the highest active tier
+    for (const [productId, subscription] of Object.entries(subscriptions)) {
+      // Skip boost products
+      if (productId.toLowerCase().includes('boost')) continue;
+      
+      const tier = getTierFromProductId(productId);
+      if (!tier) continue;
+      
+      const expiration = new Date(subscription.expires_date);
+      
+      // Check if subscription is still valid (not expired)
+      if (expiration > now) {
+        // Check if this tier is higher than current best
+        const tierPriority = SUBSCRIPTION_ENTITLEMENTS.indexOf(tier as ActiveSubscriptionTier);
+        const currentPriority = activeTier ? SUBSCRIPTION_ENTITLEMENTS.indexOf(activeTier as ActiveSubscriptionTier) : Infinity;
         
-        // Check if entitlement is active (not expired)
-        if (expiration > now) {
-          activeTier = entitlementId;
+        if (tierPriority !== -1 && tierPriority < currentPriority) {
+          activeTier = tier as ActiveSubscriptionTier;
           expiresDate = expiration;
-          logStep("Found active subscription entitlement", { 
-            entitlementId, 
-            expiresDate: entitlement.expires_date 
+          
+          // Check for cancellation via unsubscribe_detected_at
+          isCancelled = !!subscription.unsubscribe_detected_at;
+          
+          // Check for grace period
+          if (subscription.billing_issues_detected_at && subscription.grace_period_expires_date) {
+            const gracePeriodEnd = new Date(subscription.grace_period_expires_date);
+            if (gracePeriodEnd > now) {
+              isInGracePeriod = true;
+            }
+          }
+          
+          logStep("Found active subscription (product-first)", { 
+            productId, 
+            tier,
+            expiresDate: subscription.expires_date,
+            isCancelled,
+            isInGracePeriod 
           });
-          break;
         }
-        
-        // Check if in grace period
-        if (entitlement.grace_period_expires_date) {
-          const gracePeriodEnd = new Date(entitlement.grace_period_expires_date);
-          if (gracePeriodEnd > now) {
+      }
+    }
+
+    // Fallback: If no active subscription found via products, check entitlements
+    if (!activeTier) {
+      for (const entitlementId of SUBSCRIPTION_ENTITLEMENTS) {
+        const entitlement = entitlements[entitlementId];
+        if (entitlement) {
+          const expiration = new Date(entitlement.expires_date);
+          
+          // Check if entitlement is active (not expired)
+          if (expiration > now) {
             activeTier = entitlementId;
-            expiresDate = gracePeriodEnd;
-            isInGracePeriod = true;
-            logStep("Found entitlement in grace period", { 
+            expiresDate = expiration;
+            logStep("Found active subscription entitlement (fallback)", { 
               entitlementId, 
-              gracePeriodEnd: entitlement.grace_period_expires_date 
+              expiresDate: entitlement.expires_date 
             });
             break;
+          }
+          
+          // Check if in grace period
+          if (entitlement.grace_period_expires_date) {
+            const gracePeriodEnd = new Date(entitlement.grace_period_expires_date);
+            if (gracePeriodEnd > now) {
+              activeTier = entitlementId;
+              expiresDate = gracePeriodEnd;
+              isInGracePeriod = true;
+              logStep("Found entitlement in grace period (fallback)", { 
+                entitlementId, 
+                gracePeriodEnd: entitlement.grace_period_expires_date 
+              });
+              break;
+            }
           }
         }
       }
@@ -242,7 +347,8 @@ serve(async (req) => {
 
     // Determine if reconciliation is needed
     const dbStatus = currentSub?.status;
-    const expectedStatus = isInGracePeriod ? 'past_due' : 'active';
+    // Use 'cancelled' status if user cancelled but still has access
+    const expectedStatus = isCancelled ? 'cancelled' : (isInGracePeriod ? 'past_due' : 'active');
 
     if (activeTier) {
       // Active entitlement found - ensure DB matches
