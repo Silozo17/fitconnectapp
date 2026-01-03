@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SUBSCRIPTION_TIERS, TierKey } from "@/lib/stripe-config";
+import { useNativePricing } from "@/hooks/useNativePricing";
+import { SubscriptionTier } from "@/lib/pricing-config";
 import BecomeCoachModal from "@/components/shared/BecomeCoachModal";
 
 /**
@@ -17,6 +19,7 @@ import BecomeCoachModal from "@/components/shared/BecomeCoachModal";
 export const ClientSubscriptionSection = () => {
   const { t } = useTranslation('settings');
   const [showBecomeCoachModal, setShowBecomeCoachModal] = useState(false);
+  const pricing = useNativePricing();
 
   // Display only the paid tiers (starter, pro, enterprise)
   const displayTiers: TierKey[] = ['starter', 'pro', 'enterprise'];
@@ -83,7 +86,7 @@ export const ClientSubscriptionSection = () => {
                   </div>
                   <div className="text-right">
                     <div className="text-xl font-bold">
-                      £{tier.prices.monthly.amount}
+                      {pricing.formatPrice(pricing.getSubscriptionPrice(tierKey as SubscriptionTier, 'monthly'))}
                     </div>
                     <div className="text-xs text-muted-foreground">/month</div>
                   </div>
