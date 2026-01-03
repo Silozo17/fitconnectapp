@@ -6,6 +6,8 @@ import { Crown, Check, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -18,6 +20,8 @@ import { isDespia } from "@/lib/despia";
 import { IAPUnsuccessfulDialog } from "@/components/iap/IAPUnsuccessfulDialog";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { NativeSubscriptionManagement } from "@/components/payments/NativeSubscriptionManagement";
+import { BillingInterval } from "@/lib/pricing-config";
+import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
 
 interface PlatformSubscriptionProps {
   coachId: string;
@@ -41,9 +45,11 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
+  const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
   
   // Platform detection and pricing
   const isNativeApp = isDespia();
+  const { isAndroidNative } = usePlatformRestrictions();
   const webPricing = useActivePricing();
   const nativePricing = useNativePricing();
   const pricing = isNativeApp ? nativePricing : webPricing;
@@ -61,11 +67,13 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
 
   const handleSubscribe = (tierKey: TierKey) => {
     if (isNativeApp && ['starter', 'pro', 'enterprise'].includes(tierKey)) {
-      // Trigger native IAP directly
-      nativePurchase(tierKey as SubscriptionTier, 'monthly');
+      // For Enterprise on Android, yearly is not available
+      const effectiveInterval = (tierKey === 'enterprise' && isAndroidNative && billingInterval === 'yearly') 
+        ? 'monthly' 
+        : billingInterval;
+      nativePurchase(tierKey as SubscriptionTier, effectiveInterval);
     } else {
-      // Navigate to web checkout
-      navigate(`/subscribe?tier=${tierKey}&billing=monthly&from=settings`);
+      navigate(`/subscribe?tier=${tierKey}&billing=${billingInterval}&from=settings`);
     }
   };
 
@@ -149,6 +157,33 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
             </div>
           )}
 
+          {/* Billing interval toggle for native apps */}
+          {isNativeApp && (
+            <div className="mb-6">
+              <RadioGroup
+                value={billingInterval}
+                onValueChange={(val) => setBillingInterval(val as BillingInterval)}
+                className="flex gap-4"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="monthly" id="billing-monthly" />
+                  <Label htmlFor="billing-monthly" className="cursor-pointer">
+                    {t("subscription.monthly", "Monthly")}
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="yearly" id="billing-yearly" />
+                  <Label htmlFor="billing-yearly" className="cursor-pointer flex items-center gap-2">
+                    {t("subscription.yearly", "Yearly")}
+                    <Badge variant="secondary" className="text-xs">
+                      {t("subscription.save", "Save")} ~17%
+                    </Badge>
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {(Object.entries(SUBSCRIPTION_TIERS) as [TierKey, typeof SUBSCRIPTION_TIERS[TierKey]][])
               .filter(([tierKey, tier]) => !tier.adminOnly || activeTier === tierKey)
@@ -177,16 +212,32 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
                     )}
                     
                     <h3 className="font-semibold text-lg mb-1">{tier.name}</h3>
+                    {/* Show "Monthly only" note for Enterprise on Android when yearly is selected */}
+                    {tierKey === 'enterprise' && isAndroidNative && billingInterval === 'yearly' && (
+                      <p className="text-xs text-muted-foreground mb-2">
+                        {t("subscription.monthlyOnlyAndroid", "Monthly only on Android")}
+                      </p>
+                    )}
                     <div className="flex items-baseline gap-1 mb-4">
                       <span className="text-3xl font-bold">
                         {tier.prices.monthly.amount === 0 
                           ? t("subscription.free")
                           : (isPricedTier
-                              ? pricing.formatPrice(pricing.getSubscriptionPrice(tierKey as SubscriptionTier, 'monthly'))
+                              ? pricing.formatPrice(
+                                  pricing.getSubscriptionPrice(
+                                    tierKey as SubscriptionTier, 
+                                    // Enterprise on Android: always show monthly
+                                    (tierKey === 'enterprise' && isAndroidNative) ? 'monthly' : billingInterval
+                                  )
+                                )
                               : `${pricing.currencySymbol}${tier.prices.monthly.amount}`)}
                       </span>
                       {tier.prices.monthly.amount > 0 && (
-                        <span className="text-muted-foreground">{t("subscription.perMonth")}</span>
+                        <span className="text-muted-foreground">
+                          {billingInterval === 'yearly' && !(tierKey === 'enterprise' && isAndroidNative)
+                            ? t("subscription.perYear", "/year") 
+                            : t("subscription.perMonth")}
+                        </span>
                       )}
                     </div>
 
