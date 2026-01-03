@@ -117,6 +117,8 @@ const CoachOnboarding = () => {
   
   // Handle successful IAP purchase - show celebration and navigate
   const handleIAPSuccess = useCallback(async (tier: SubscriptionTier) => {
+    console.log('[CoachOnboarding] IAP Success callback fired:', tier);
+    
     // Trigger confetti celebration
     triggerConfetti(confettiPresets.medium);
     triggerHaptic('success');
@@ -128,18 +130,22 @@ const CoachOnboarding = () => {
       duration: 3000,
     });
     
-    // Refresh profiles so ViewSwitcher updates immediately
-    await refreshProfiles();
+    // Non-blocking profile refresh - don't let errors block navigation
+    refreshProfiles().catch(e => console.warn('[CoachOnboarding] Profile refresh failed (non-critical):', e));
     
-    // Navigate after a short delay to let the celebration show
+    // Invalidate onboarding status queries
+    queryClient.invalidateQueries({ queryKey: ['coach-onboarding-status'] });
+    
+    // Navigate after a shorter delay (1.5s instead of 2.5s)
     setTimeout(() => {
+      console.log('[CoachOnboarding] Navigating after IAP success, alsoClient:', formDataRef.current.alsoClient);
       if (formDataRef.current.alsoClient) {
-        navigate("/onboarding/client");
+        navigate("/onboarding/client", { replace: true });
       } else {
-        navigate("/dashboard/coach");
+        navigate("/dashboard/coach", { replace: true });
       }
-    }, 2500);
-  }, [navigate, refreshProfiles]);
+    }, 1500);
+  }, [navigate, refreshProfiles, queryClient]);
   
   const { purchase: nativePurchase, state: iapState, dismissUnsuccessfulModal } = useNativeIAP({
     onPurchaseComplete: handleIAPSuccess,
@@ -501,8 +507,22 @@ const CoachOnboarding = () => {
         
         // On native mobile (iOS/Android), trigger native IAP directly
         if (isNativeMobile && (tier === 'starter' || tier === 'pro' || tier === 'enterprise')) {
+          // Set completion flag BEFORE IAP - ensures dashboard knows onboarding is done
+          sessionStorage.setItem('fitconnect_onboarding_just_completed', 'coach');
+          console.log('[CoachOnboarding] Starting native IAP for tier:', tier);
+          
           toast.success("Profile saved! Completing subscription...");
           await nativePurchase(tier, billingInterval);
+          
+          // Fallback navigation timer - if IAP callback doesn't fire within 60s, navigate anyway
+          // This prevents users from getting stuck if there's a callback issue
+          setTimeout(() => {
+            if (window.location.pathname.includes('/onboarding/coach')) {
+              console.warn('[CoachOnboarding] Fallback navigation triggered after IAP timeout');
+              navigate("/dashboard/coach", { replace: true });
+            }
+          }, 60000);
+          
           // IAP hook handles success/error and navigation
           return;
         }

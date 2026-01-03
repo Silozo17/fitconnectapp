@@ -257,6 +257,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
 
   /**
    * Poll the backend to check if the subscription has been updated via webhook
+   * FIX: Accept ANY active paid tier (not just expected tier) to handle RevenueCat timing issues
    */
   const pollSubscriptionStatus = useCallback(async (expectedTier: SubscriptionTier): Promise<boolean> => {
     if (!coachProfileId) return false;
@@ -273,8 +274,11 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
         return false;
       }
 
-      // Check if subscription was updated to the expected tier
-      if (data && data.tier === expectedTier && data.status === 'active') {
+      // Accept ANY active paid subscription (not just expected tier)
+      // This handles RevenueCat timing issues where tier may temporarily mismatch
+      const activePaidTiers = ['starter', 'pro', 'enterprise'];
+      if (data && activePaidTiers.includes(data.tier) && data.status === 'active') {
+        console.log('[NativeIAP] Poll found active subscription:', data.tier, '(expected:', expectedTier, ')');
         return true;
       }
 
@@ -399,8 +403,11 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
       
       const { data: reconcileResult, error } = await supabase.functions.invoke('verify-subscription-entitlement');
       
-      if (!error && reconcileResult?.reconciled && reconcileResult?.tier) {
-        console.log('[NativeIAP] Immediate reconciliation succeeded:', reconcileResult.tier);
+      // FIX: Accept success if we have any valid tier, not just if reconciled flag is true
+      // This handles cases where status is "already_correct" or similar
+      const activePaidTiers = ['starter', 'pro', 'enterprise'];
+      if (!error && reconcileResult?.tier && activePaidTiers.includes(reconcileResult.tier)) {
+        console.log('[NativeIAP] Immediate reconciliation succeeded:', reconcileResult.tier, 'reconciled:', reconcileResult.reconciled);
         
         // Success! Update state and notify
         setState(prev => ({
@@ -415,6 +422,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
           queryClient.invalidateQueries({ queryKey: ['platform-subscription'], refetchType: 'all' }),
           queryClient.invalidateQueries({ queryKey: ['feature-access'], refetchType: 'all' }),
           queryClient.invalidateQueries({ queryKey: ['subscription-status'], refetchType: 'all' }),
+          queryClient.invalidateQueries({ queryKey: ['coach-onboarding-status'], refetchType: 'all' }),
         ]);
         
         triggerHaptic('success');
