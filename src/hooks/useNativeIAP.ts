@@ -170,10 +170,17 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
       }
 
       if (data?.reconciled) {
-        // Invalidate queries to refresh subscription data
-        queryClient.invalidateQueries({ queryKey: ['coach-profile'] });
-        queryClient.invalidateQueries({ queryKey: ['platform-subscription'] });
-        queryClient.invalidateQueries({ queryKey: ['feature-access'] });
+        // PHASE 2 FIX: Use resetQueries for critical tier queries to force fresh data
+        // This clears cache completely rather than just marking as stale
+        localStorage.removeItem('fitconnect_cached_tier');
+        localStorage.removeItem('fitconnect_tier_timestamp');
+        
+        await Promise.all([
+          queryClient.resetQueries({ queryKey: ['subscription-status'] }),
+          queryClient.resetQueries({ queryKey: ['feature-access'] }),
+          queryClient.invalidateQueries({ queryKey: ['coach-profile'], refetchType: 'all' }),
+          queryClient.invalidateQueries({ queryKey: ['platform-subscription'], refetchType: 'all' }),
+        ]);
         
         if (data.tier && data.tier !== 'free') {
           toast.success('Subscription activated!', {
@@ -323,16 +330,19 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
           purchaseStatus: 'idle',
         }));
 
-        // PHASE 1 FIX: Clear localStorage cache BEFORE invalidating queries
+        // PHASE 2 FIX: Clear localStorage cache and use resetQueries for critical tier data
         localStorage.removeItem('fitconnect_cached_tier');
+        localStorage.removeItem('fitconnect_tier_timestamp');
         localStorage.setItem('fitconnect_coach_onboarded', 'true');
         
-        // Invalidate queries to refresh subscription data throughout the app
-        queryClient.invalidateQueries({ queryKey: ['coach-profile'] });
-        queryClient.invalidateQueries({ queryKey: ['platform-subscription'] });
-        queryClient.invalidateQueries({ queryKey: ['feature-access'] });
-        queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
-        queryClient.invalidateQueries({ queryKey: ['coach-onboarding-status'] });
+        // Use resetQueries for tier-related queries to force complete cache clear and refetch
+        await Promise.all([
+          queryClient.resetQueries({ queryKey: ['subscription-status'] }),
+          queryClient.resetQueries({ queryKey: ['feature-access'] }),
+          queryClient.invalidateQueries({ queryKey: ['coach-profile'], refetchType: 'all' }),
+          queryClient.invalidateQueries({ queryKey: ['platform-subscription'], refetchType: 'all' }),
+          queryClient.invalidateQueries({ queryKey: ['coach-onboarding-status'], refetchType: 'all' }),
+        ]);
         
         // Call the success callback if provided (handles celebration/navigation)
         options?.onPurchaseComplete?.(expectedTier);
@@ -421,16 +431,17 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
           purchaseStatus: 'idle',
         }));
         
-        // PHASE 1 FIX: Clear localStorage cache BEFORE invalidating queries
+        // PHASE 2 FIX: Clear localStorage cache and use resetQueries for critical tier data
         localStorage.removeItem('fitconnect_cached_tier');
+        localStorage.removeItem('fitconnect_tier_timestamp');
         localStorage.setItem('fitconnect_coach_onboarded', 'true');
         
-        // Invalidate queries with refetchType: 'all' for immediate refetch
+        // Use resetQueries for tier-related queries to force complete cache clear and refetch
         await Promise.all([
+          queryClient.resetQueries({ queryKey: ['subscription-status'] }),
+          queryClient.resetQueries({ queryKey: ['feature-access'] }),
           queryClient.invalidateQueries({ queryKey: ['coach-profile'], refetchType: 'all' }),
           queryClient.invalidateQueries({ queryKey: ['platform-subscription'], refetchType: 'all' }),
-          queryClient.invalidateQueries({ queryKey: ['feature-access'], refetchType: 'all' }),
-          queryClient.invalidateQueries({ queryKey: ['subscription-status'], refetchType: 'all' }),
           queryClient.invalidateQueries({ queryKey: ['coach-onboarding-status'], refetchType: 'all' }),
         ]);
         
