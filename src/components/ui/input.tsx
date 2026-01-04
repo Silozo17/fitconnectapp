@@ -8,8 +8,8 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
       <input
         type={type}
         className={cn(
-          // Premium sizing - 48px touch target
-          "flex h-12 w-full rounded-xl border border-input bg-background/50 px-4 py-3",
+          // Premium sizing - 48px touch target, shrink-safe for flex/grid
+          "flex h-12 w-full min-w-0 max-w-full rounded-xl border border-input bg-background/50 px-4 py-3",
           // Typography
           "text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground",
           // Placeholder
