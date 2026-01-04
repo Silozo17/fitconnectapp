@@ -21,6 +21,24 @@ type ActiveSubscriptionTier = typeof SUBSCRIPTION_ENTITLEMENTS[number];
 // Narrowed tier for comparison after founder early-exit
 type NonFounderTier = Exclude<SubscriptionTier, 'founder'>;
 
+// TIER PRIORITY: Lower index = higher priority (enterprise=0, pro=1, starter=2, free=3)
+const TIER_PRIORITY: Record<string, number> = {
+  'enterprise': 0,
+  'pro': 1,
+  'starter': 2,
+  'free': 3,
+};
+
+/**
+ * Check if the new tier is an UPGRADE from the current tier
+ * Returns true if newTier has LOWER priority index (higher tier)
+ */
+const isUpgrade = (currentTier: string, newTier: string): boolean => {
+  const currentPriority = TIER_PRIORITY[currentTier] ?? 3; // default to free
+  const newPriority = TIER_PRIORITY[newTier] ?? 3;
+  return newPriority < currentPriority;
+};
+
 interface RevenueCatEntitlement {
   expires_date: string;
   purchase_date: string;
@@ -287,8 +305,22 @@ serve(async (req) => {
           activeTier = tier as ActiveSubscriptionTier;
           expiresDate = expiration;
           
-          // Check for cancellation via unsubscribe_detected_at
-          isCancelled = !!subscription.unsubscribe_detected_at;
+          // UPGRADE FIX: Check if this is an UPGRADE from current DB tier
+          // If upgrading, IGNORE unsubscribe_detected_at (it refers to the OLD plan being cancelled)
+          const isUpgradeFromDb = isUpgrade(currentDbTier, tier);
+          
+          if (isUpgradeFromDb) {
+            // UPGRADE: Old plan's cancellation is expected - treat as ACTIVE
+            isCancelled = false;
+            logStep("UPGRADE DETECTED - ignoring unsubscribe_detected_at", {
+              fromTier: currentDbTier,
+              toTier: tier,
+              unsubscribe_detected_at: subscription.unsubscribe_detected_at,
+            });
+          } else {
+            // NOT an upgrade: Check for cancellation via unsubscribe_detected_at
+            isCancelled = !!subscription.unsubscribe_detected_at;
+          }
           
           // Check for grace period
           if (subscription.billing_issues_detected_at && subscription.grace_period_expires_date) {
@@ -303,7 +335,8 @@ serve(async (req) => {
             tier,
             expiresDate: subscription.expires_date,
             isCancelled,
-            isInGracePeriod 
+            isInGracePeriod,
+            isUpgrade: isUpgradeFromDb,
           });
         }
       }
@@ -373,6 +406,9 @@ serve(async (req) => {
           logStep("Error updating coach profile tier", { error: profileError.message });
         }
 
+        // UPGRADE FIX: Clear pending_tier on upgrade to prevent tier reversion
+        const isUpgradeFromDb = isUpgrade(currentDbTier, activeTier);
+        
         // Upsert subscription record - now works correctly with UNIQUE constraint on coach_id
         const { data: upsertData, error: upsertError } = await supabase
           .from("platform_subscriptions")
@@ -383,6 +419,8 @@ serve(async (req) => {
             current_period_end: expiresDate?.toISOString(),
             stripe_subscription_id: currentSub?.tier ? undefined : `rc_reconciled_${Date.now()}`,
             stripe_customer_id: currentSub?.tier ? undefined : `rc_${user.id}`,
+            // UPGRADE FIX: Clear pending_tier on upgrade to prevent scheduled change interference
+            pending_tier: isUpgradeFromDb ? null : undefined,
             updated_at: new Date().toISOString(),
           }, { onConflict: "coach_id" })
           .select('id, tier, status');
@@ -392,7 +430,8 @@ serve(async (req) => {
         } else {
           logStep("Successfully upserted platform_subscriptions", { 
             upsertedRows: upsertData?.length || 0,
-            data: upsertData
+            data: upsertData,
+            clearedPendingTier: isUpgradeFromDb,
           });
         }
 

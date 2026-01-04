@@ -161,6 +161,14 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
     // Determine if it's a native subscription (RevenueCat = App Store / Play Store)
     const isNative = isRevenueCat;
 
+    // TIER PRIORITY for upgrade detection (lower = higher tier)
+    const TIER_PRIORITY: Record<string, number> = {
+      'enterprise': 0,
+      'pro': 1,
+      'starter': 2,
+      'free': 3,
+    };
+
     // Phase 5: Check if cancelled but still within grace period
     const isCancelled = platformSub.status === 'cancelled';
     const periodEnd = platformSub.current_period_end;
@@ -177,10 +185,31 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
     const pendingTier = pendingTierValue ? normalizeTier(pendingTierValue) : null;
     const hasPendingChange = !!pendingTier && pendingTier !== normalizeTier(platformSub.tier || 'free');
 
+    // UPGRADE FIX: Determine the reconciled tier
+    const dbTier = normalizeTier(platformSub.tier || 'free');
+    
+    // UPGRADE FIX: If status is 'cancelled' but the tier is HIGHER than profile tier,
+    // this is likely an upgrade scenario where RevenueCat marked the OLD subscription as cancelled.
+    // In this case, treat as ACTIVE.
+    const profileTierPriority = TIER_PRIORITY[currentTier] ?? 3;
+    const dbTierPriority = TIER_PRIORITY[dbTier] ?? 3;
+    const isUpgradeScenario = isCancelled && dbTierPriority < profileTierPriority;
+    
+    if (isUpgradeScenario) {
+      console.log('[useSubscriptionStatus] UPGRADE SCENARIO detected - treating cancelled as active', {
+        dbTier,
+        profileTier: currentTier,
+        status: platformSub.status,
+      });
+    }
+
     // Determine effective status for UI
     let effectiveStatus: 'active' | 'past_due' | 'cancelled' | 'expired' | 'none';
     if (isExpired) {
       effectiveStatus = 'expired';
+    } else if (isUpgradeScenario) {
+      // UPGRADE FIX: Treat upgrade scenario as active, not cancelled
+      effectiveStatus = 'active';
     } else if (isWithinGracePeriod) {
       effectiveStatus = 'cancelled'; // Keep cancelled status for UI messaging
     } else {
@@ -190,10 +219,10 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
     // Phase 7: If expired, tier should be the pending tier (if scheduled downgrade) or free
     const effectiveTier = isExpired 
       ? (pendingTier || 'free') 
-      : normalizeTier(platformSub.tier || 'free');
+      : dbTier;
     
     // Track what tier expired for messaging purposes
-    const expiredTier = isExpired ? normalizeTier(platformSub.tier || 'free') : null;
+    const expiredTier = isExpired ? dbTier : null;
 
     console.log('[useSubscriptionStatus] Platform subscription resolved:', {
       tier: effectiveTier,
@@ -202,6 +231,7 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
       isWithinGracePeriod,
       hasPendingChange,
       pendingTier: isExpired ? null : pendingTier,
+      isUpgradeScenario,
     });
 
     return {
@@ -212,9 +242,10 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
       isNativeSubscription: isNative,
       stripeSubscriptionId: stripeSubId,
       isLoading: false,
-      isCancelled,
-      hasAccessUntil: isWithinGracePeriod ? periodEnd : null,
-      isWithinGracePeriod,
+      // UPGRADE FIX: If upgrade scenario, don't report as cancelled
+      isCancelled: isUpgradeScenario ? false : isCancelled,
+      hasAccessUntil: isWithinGracePeriod && !isUpgradeScenario ? periodEnd : null,
+      isWithinGracePeriod: isUpgradeScenario ? false : isWithinGracePeriod,
       pendingTier: isExpired ? null : pendingTier, // Clear pending if already expired
       hasPendingChange: isExpired ? false : hasPendingChange,
       isExpired,

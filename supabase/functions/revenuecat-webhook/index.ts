@@ -122,6 +122,23 @@ const isBoostProduct = (productId: string | undefined, entitlementIds?: string[]
 // Tier priority order (highest first) - used to pick the best tier when multiple entitlements exist
 const TIER_PRIORITY: string[] = ['enterprise', 'pro', 'starter'];
 
+// Tier priority map for upgrade detection (lower index = higher priority)
+const TIER_PRIORITY_MAP: Record<string, number> = {
+  'enterprise': 0,
+  'pro': 1,
+  'starter': 2,
+  'free': 3,
+};
+
+/**
+ * Check if the new tier is an UPGRADE from the current tier
+ */
+const isUpgradeTier = (currentTier: string | null | undefined, newTier: string): boolean => {
+  const currentPriority = TIER_PRIORITY_MAP[currentTier || 'free'] ?? 3;
+  const newPriority = TIER_PRIORITY_MAP[newTier] ?? 3;
+  return newPriority < currentPriority;
+};
+
 /**
  * Extract tier directly from product ID (most reliable for PRODUCT_CHANGE events)
  * This ignores entitlements entirely and uses the actual purchased product
@@ -389,17 +406,31 @@ serve(async (req) => {
         const transactionId = `rc_${event.original_transaction_id || event.transaction_id}`;
         
         // Idempotency check - prevent duplicate subscription activations
+        // FIX: Only skip if SAME tier - allow upgrades to proceed even with same transactionId
         const { data: existingSub } = await supabase
           .from("platform_subscriptions")
           .select("stripe_subscription_id, status, tier")
           .eq("coach_id", coachId)
           .maybeSingle();
 
+        // FIX: Check if this is an upgrade - upgrades should ALWAYS proceed
+        const isUpgrade = isUpgradeTier(existingSub?.tier, tier);
+        
         if (existingSub?.stripe_subscription_id === transactionId && 
             existingSub?.status === 'active' && 
-            existingSub?.tier === tier) {
+            existingSub?.tier === tier &&
+            !isUpgrade) {
+          // Only skip if EXACT duplicate (same tier, same transaction, active)
           logStep("Duplicate subscription transaction - already processed", { transactionId, tier });
           break;
+        }
+        
+        if (isUpgrade) {
+          logStep("UPGRADE detected - processing even if transaction exists", { 
+            fromTier: existingSub?.tier, 
+            toTier: tier, 
+            transactionId 
+          });
         }
 
         const periodEnd = event.expiration_at_ms 
@@ -752,18 +783,37 @@ serve(async (req) => {
           break;
         }
 
+        // Get existing subscription to check if this is an upgrade
+        const { data: existingSubForChange } = await supabase
+          .from("platform_subscriptions")
+          .select("tier, status, pending_tier")
+          .eq("coach_id", coachId)
+          .maybeSingle();
+
+        const isUpgradeChange = isUpgradeTier(existingSubForChange?.tier, newTier);
+        
+        logStep("PRODUCT_CHANGE tier comparison", {
+          currentTier: existingSubForChange?.tier,
+          newTier,
+          isUpgrade: isUpgradeChange,
+          currentPendingTier: existingSubForChange?.pending_tier,
+        });
+
         // Use UPSERT to handle case where subscription record might not exist
+        // FIX: Clear pending_tier on upgrades to prevent tier reversion
         const { data: changeData, error: subError } = await supabase
           .from("platform_subscriptions")
           .upsert({
             coach_id: coachId,
             tier: newTier,
-            status: "active",
+            status: "active", // UPGRADE FIX: Always set to active on product change
             current_period_end: event.expiration_at_ms 
               ? new Date(event.expiration_at_ms).toISOString() 
               : null,
             stripe_customer_id: `rc_${event.app_user_id}`,
             stripe_subscription_id: `rc_${event.original_transaction_id || event.transaction_id}`,
+            // UPGRADE FIX: Clear pending_tier on upgrades to prevent scheduled change interference
+            pending_tier: isUpgradeChange ? null : existingSubForChange?.pending_tier,
             updated_at: new Date().toISOString(),
           }, { onConflict: "coach_id" })
           .select('id');
@@ -780,7 +830,12 @@ serve(async (req) => {
         if (profileError) {
           logStep("Error updating coach profile tier", { error: profileError.message });
         } else {
-          logStep("Successfully processed PRODUCT_CHANGE", { coachId, newTier, upsertedRows: changeData?.length || 0 });
+          logStep("Successfully processed PRODUCT_CHANGE", { 
+            coachId, 
+            newTier, 
+            upsertedRows: changeData?.length || 0,
+            clearedPendingTier: isUpgradeChange,
+          });
         }
         break;
       }
