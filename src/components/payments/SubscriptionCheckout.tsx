@@ -6,9 +6,8 @@ import {
 } from "@stripe/react-stripe-js";
 import { supabase } from "@/integrations/supabase/client";
 import { TierKey, BillingInterval } from "@/lib/stripe-config";
-import { Loader2, AlertTriangle } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useCountry } from "@/hooks/useCountry";
-import { isDespia } from "@/lib/despia";
 
 interface SubscriptionCheckoutProps {
   tier: TierKey;
@@ -16,21 +15,6 @@ interface SubscriptionCheckoutProps {
 }
 
 export function SubscriptionCheckout({ tier, billingInterval }: SubscriptionCheckoutProps) {
-  // CRITICAL: Block Stripe checkout on native apps
-  if (isDespia()) {
-    console.warn('[SubscriptionCheckout] Blocked Stripe checkout on native app');
-    return (
-      <div className="flex flex-col items-center justify-center h-[400px] text-center p-6">
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 max-w-sm">
-          <AlertTriangle className="h-8 w-8 text-amber-600 mx-auto mb-3" />
-          <p className="text-amber-800 font-medium">Web checkout not available</p>
-          <p className="text-amber-600 text-sm mt-2">
-            Please use the in-app subscription buttons to subscribe through the App Store or Google Play.
-          </p>
-        </div>
-      </div>
-    );
-  }
   const [error, setError] = useState<string | null>(null);
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [isLoadingStripe, setIsLoadingStripe] = useState(true);

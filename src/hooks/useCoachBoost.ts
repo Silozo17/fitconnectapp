@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCoachProfileId } from "./useCoachProfileId";
 import { toast } from "sonner";
-import { isDespia } from "@/lib/despia";
 
 export interface CoachBoost {
   id: string;
@@ -145,12 +144,6 @@ export const usePurchaseBoost = (countryCode?: string) => {
 
   return useMutation({
     mutationFn: async () => {
-      // CRITICAL: Block Stripe boost checkout on native apps
-      if (isDespia()) {
-        console.warn('[usePurchaseBoost] Blocked Stripe boost checkout on native app');
-        throw new Error("Please purchase Boost through the App Store or Google Play");
-      }
-      
       const { data, error } = await supabase.functions.invoke("boost-checkout", {
         body: { countryCode: countryCode || "GB" },
       });

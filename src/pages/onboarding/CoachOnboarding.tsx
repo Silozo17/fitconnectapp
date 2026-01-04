@@ -514,16 +514,14 @@ const CoachOnboarding = () => {
           toast.success("Profile saved! Completing subscription...");
           await nativePurchase(tier, billingInterval);
           
-          // Fallback navigation timer - if IAP callback doesn't fire within 30s, navigate anyway
+          // Fallback navigation timer - if IAP callback doesn't fire within 60s, navigate anyway
           // This prevents users from getting stuck if there's a callback issue
           setTimeout(() => {
             if (window.location.pathname.includes('/onboarding/coach')) {
               console.warn('[CoachOnboarding] Fallback navigation triggered after IAP timeout');
-              // Mark onboarding complete in localStorage as backup
-              localStorage.setItem('fitconnect_coach_onboarded', 'true');
               navigate("/dashboard/coach", { replace: true });
             }
-          }, 30000);
+          }, 60000);
           
           // IAP hook handles success/error and navigation
           return;
