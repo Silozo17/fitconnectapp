@@ -401,7 +401,9 @@ serve(async (req) => {
           reconciled: true,
           tier: activeTier,
           expires_at: expiresDate?.toISOString(),
-          is_grace_period: isInGracePeriod
+          is_grace_period: isInGracePeriod,
+          is_cancelled: isCancelled,
+          effective_end_date: isCancelled ? expiresDate?.toISOString() : null,
         }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
@@ -409,7 +411,9 @@ serve(async (req) => {
         status: "already_correct", 
         reconciled: false,
         tier: activeTier,
-        expires_at: expiresDate?.toISOString()
+        expires_at: expiresDate?.toISOString(),
+        is_cancelled: isCancelled,
+        effective_end_date: isCancelled ? expiresDate?.toISOString() : null,
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     } else {
       // No active entitlement - ensure downgraded
