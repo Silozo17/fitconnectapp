@@ -20,6 +20,10 @@ interface LocationData {
   county: string | null;
   displayLocation: string | null;
   accuracyLevel: LocationAccuracyLevel;
+  /** Latitude coordinate (for distance-based ranking) */
+  lat?: number | null;
+  /** Longitude coordinate (for distance-based ranking) */
+  lng?: number | null;
 }
 
 interface StoredManualLocation {
@@ -254,6 +258,8 @@ export const useUserLocation = (): UseUserLocationReturn => {
                 county: profile.county,
                 displayLocation: profile.city || profile.county,
                 accuracyLevel: 'precise',
+                lat: profile.location_lat,
+                lng: profile.location_lng,
               });
               setIsLoading(false);
               initialFetchDoneRef.current = true;
@@ -391,6 +397,8 @@ export const useUserLocation = (): UseUserLocationReturn => {
               county: data?.county || null,
               displayLocation: data?.displayLocation || data?.city || data?.county,
               accuracyLevel: 'precise',
+              lat: latitude,
+              lng: longitude,
             };
 
             // If logged in, save to profile (private columns)

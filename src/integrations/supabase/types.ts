@@ -8410,6 +8410,8 @@ export type Database = {
           p_search_term?: string
           p_user_city?: string
           p_user_country_code?: string
+          p_user_lat?: number
+          p_user_lng?: number
           p_user_region?: string
         }
         Returns: {
@@ -8420,6 +8422,7 @@ export type Database = {
           coach_types: string[]
           currency: string
           display_name: string
+          distance_miles: number
           engagement_score: number
           experience_years: number
           facebook_url: string

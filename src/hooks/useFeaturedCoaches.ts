@@ -44,7 +44,7 @@ function getMatchLevelFromTier(locationTier: number): LocationMatchLevel {
 
 export function useFeaturedCoaches({ userLocation, countryCode, enabled = true }: UseFeaturedCoachesOptions): UseFeaturedCoachesResult {
   const query = useQuery({
-    queryKey: ['featured-coaches-rpc', userLocation?.city, userLocation?.region, userLocation?.countryCode, countryCode],
+    queryKey: ['featured-coaches-rpc', userLocation?.city, userLocation?.region, userLocation?.countryCode, userLocation?.lat, userLocation?.lng, countryCode],
     enabled, // Defer query until location is ready
     queryFn: async () => {
       // Call the SQL ranking function with a limit of 4 for featured
@@ -60,6 +60,8 @@ export function useFeaturedCoaches({ userLocation, countryCode, enabled = true }
         p_online_only: false,
         p_in_person_only: false,
         p_limit: FEATURED_COACH_LIMIT,
+        p_user_lat: userLocation?.lat || null,
+        p_user_lng: userLocation?.lng || null,
       });
 
       if (error) throw error;

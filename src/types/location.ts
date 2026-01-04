@@ -31,6 +31,10 @@ export interface UserLocationData {
   accuracyLevel?: LocationAccuracyLevel;
   /** Display location (may be county if city confidence is low) */
   displayLocation?: string | null;
+  /** Latitude coordinate (for distance-based ranking) */
+  lat?: number | null;
+  /** Longitude coordinate (for distance-based ranking) */
+  lng?: number | null;
 }
 
 /**
