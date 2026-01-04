@@ -10,12 +10,43 @@ import { useSubscriptionStatus } from "./useSubscriptionStatus";
 const TIER_STORAGE_KEY = 'fitconnect_cached_tier';
 const TIER_TIMESTAMP_KEY = 'fitconnect_tier_timestamp';
 
+// Cache TTL - 5 minutes (300000ms) - after this, cache is considered stale
+const CACHE_TTL_MS = 5 * 60 * 1000;
+
+// Check if cached tier is still valid (not expired)
+const isCacheValid = (): boolean => {
+  try {
+    const timestamp = localStorage.getItem(TIER_TIMESTAMP_KEY);
+    if (!timestamp) return false;
+    
+    const cachedTime = parseInt(timestamp, 10);
+    const now = Date.now();
+    const isValid = (now - cachedTime) < CACHE_TTL_MS;
+    
+    if (!isValid) {
+      console.log('[useFeatureAccess] Cache expired, will refetch');
+    }
+    
+    return isValid;
+  } catch {
+    return false;
+  }
+};
+
 // Get cached tier from localStorage (survives page reloads)
+// Only returns cached value if it's still within TTL
 const getCachedTier = (): TierKey | null => {
   try {
     const cached = localStorage.getItem(TIER_STORAGE_KEY);
     if (cached && cached in SUBSCRIPTION_TIERS) {
-      return cached as TierKey;
+      // Only use cache if it's still valid (within TTL)
+      if (isCacheValid()) {
+        return cached as TierKey;
+      }
+      // Cache expired - clear it
+      console.log('[useFeatureAccess] Clearing expired tier cache');
+      localStorage.removeItem(TIER_STORAGE_KEY);
+      localStorage.removeItem(TIER_TIMESTAMP_KEY);
     }
   } catch {
     // localStorage may be unavailable
