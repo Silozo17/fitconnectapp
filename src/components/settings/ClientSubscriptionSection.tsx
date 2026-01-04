@@ -118,10 +118,13 @@ export const ClientSubscriptionSection = () => {
         <CardContent>
           {/* Mobile: Carousel, Desktop: Stack */}
           {isMobile ? (
-            <Carousel className="w-full" opts={{ align: "start" }}>
-              <CarouselContent className="-ml-2">
+            <Carousel 
+              className="w-full overflow-visible" 
+              opts={{ align: "center", containScroll: "trimSnaps" }}
+            >
+              <CarouselContent className="py-4">
                 {displayTiers.map((tierKey) => (
-                  <CarouselItem key={tierKey} className="pl-2 basis-[85%]">
+                  <CarouselItem key={tierKey} className="basis-[90%] px-2">
                     {renderTierCard(tierKey)}
                   </CarouselItem>
                 ))}
