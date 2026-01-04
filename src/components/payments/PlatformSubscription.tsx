@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
@@ -17,12 +17,15 @@ import { useActivePricing } from "@/hooks/useActivePricing";
 import { useNativePricing } from "@/hooks/useNativePricing";
 import { useNativeIAP, SubscriptionTier } from "@/hooks/useNativeIAP";
 import { isDespia } from "@/lib/despia";
+import { triggerHaptic } from "@/lib/despia";
+import { triggerConfetti, confettiPresets } from "@/lib/confetti";
 import { IAPUnsuccessfulDialog } from "@/components/iap/IAPUnsuccessfulDialog";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { NativeSubscriptionManagement } from "@/components/payments/NativeSubscriptionManagement";
 import { BillingInterval } from "@/lib/pricing-config";
 import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
 import { LegalDisclosure } from "@/components/shared/LegalLinks";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface PlatformSubscriptionProps {
   coachId: string;
@@ -45,6 +48,7 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   const { t: tPages } = useTranslation("pages");
   const { user } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
   
@@ -54,9 +58,38 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   const webPricing = useActivePricing();
   const nativePricing = useNativePricing();
   const pricing = isNativeApp ? nativePricing : webPricing;
+
+  // PHASE 4: Upgrade success callback with celebration UI
+  const handleUpgradeSuccess = useCallback(async (tier: SubscriptionTier) => {
+    console.log('[PlatformSubscription] Upgrade success callback triggered for tier:', tier);
+    
+    // 1. Trigger celebration IMMEDIATELY (before any async work)
+    triggerConfetti(confettiPresets.achievement);
+    triggerHaptic('success');
+    
+    // 2. Show success toast with prominent styling
+    const tierName = SUBSCRIPTION_TIERS[tier]?.name || tier;
+    toast.success(`🎉 Upgraded to ${tierName}!`, {
+      description: 'Your new features are now active. Enjoy!',
+      duration: 5000,
+    });
+    
+    // 3. Clear tier cache and force refetch for immediate UI update
+    localStorage.removeItem('fitconnect_cached_tier');
+    localStorage.removeItem('fitconnect_tier_timestamp');
+    
+    await Promise.all([
+      queryClient.resetQueries({ queryKey: ['subscription-status'] }),
+      queryClient.resetQueries({ queryKey: ['feature-access'] }),
+      queryClient.invalidateQueries({ queryKey: ['coach-profile'], refetchType: 'all' }),
+      queryClient.invalidateQueries({ queryKey: ['platform-subscription'], refetchType: 'all' }),
+    ]);
+  }, [queryClient]);
   
-  // Native IAP hook
-  const { purchase: nativePurchase, state: iapState, dismissUnsuccessfulModal } = useNativeIAP();
+  // Native IAP hook with success callback
+  const { purchase: nativePurchase, state: iapState, dismissUnsuccessfulModal } = useNativeIAP({
+    onPurchaseComplete: handleUpgradeSuccess,
+  });
 
   // Unified subscription status - single source of truth
   const subscriptionStatus = useSubscriptionStatus();
