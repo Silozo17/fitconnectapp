@@ -235,7 +235,16 @@
     "requiresAndroidApp": "Wymaga aplikacji FitConnect na Androida",
     "awaitingDeveloperAccess": "Integracja wkrótce dostępna",
     "appleCalendar": "Kalendarz Apple",
-    "googleCalendar": "Kalendarz Google"
+    "googleCalendar": "Kalendarz Google",
+    "supportedDevices": {
+      "title": "Synchronizuj swój zegarek",
+      "iosDescription": "Połącz Apple Health, aby synchronizować dane fitness. Każde urządzenie noszone, które zapisuje do Apple Health, będzie automatycznie synchronizowane z FitConnect.",
+      "androidDescription": "Połącz Health Connect, aby synchronizować dane fitness. Każde urządzenie noszone, które zapisuje do Health Connect, będzie automatycznie synchronizowane z FitConnect.",
+      "webDescription": "Zainstaluj aplikację FitConnect na telefonie, aby synchronizować dane z zegarków przez Apple Health (iOS) lub Health Connect (Android).",
+      "supported": "Obsługiwane urządzenia"
+    },
+    "installAppTitle": "Zainstaluj aplikację FitConnect",
+    "installAppDescription": "Aby synchronizować dane zdrowotne z zegarków, zainstaluj aplikację FitConnect na urządzeniu iOS lub Android. Aplikacja łączy się z Apple Health lub Health Connect, które automatycznie synchronizują dane z Twoich urządzeń noszonych."
   },
 
   "privacy": {

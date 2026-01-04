@@ -377,10 +377,13 @@ export const useWearables = () => {
         return { native: true };
       }
 
-      // For Health Connect on Android native, use native Health Connect flow
+      // For Health Connect on Android native - currently not supported by Despia SDK
+      // Users should connect their wearables to Health Connect directly
       if (provider === "health_connect" && isAndroidNativeNow) {
-        // TODO: Implement native Health Connect flow when available
-        toast.info("Health Connect integration coming soon");
+        toast.info(
+          "Health Connect integration coming soon! In the meantime, make sure your wearable syncs to Health Connect on your phone.",
+          { duration: 6000 }
+        );
         return { native: true };
       }
 

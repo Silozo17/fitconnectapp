@@ -235,7 +235,16 @@
     "requiresAndroidApp": "Requires FitConnect Android app",
     "awaitingDeveloperAccess": "Integration coming soon",
     "appleCalendar": "Apple Calendar",
-    "googleCalendar": "Google Calendar"
+    "googleCalendar": "Google Calendar",
+    "supportedDevices": {
+      "title": "Sync Your Wearable",
+      "iosDescription": "Connect Apple Health to sync your fitness data. Any wearable that writes to Apple Health will automatically sync with FitConnect.",
+      "androidDescription": "Connect Health Connect to sync your fitness data. Any wearable that writes to Health Connect will automatically sync with FitConnect.",
+      "webDescription": "Install the FitConnect app on your phone to sync wearable data via Apple Health (iOS) or Health Connect (Android).",
+      "supported": "Supported devices"
+    },
+    "installAppTitle": "Install the FitConnect App",
+    "installAppDescription": "To sync your health data from wearables, install the FitConnect app on your iOS or Android device. The app connects to Apple Health or Health Connect, which automatically syncs data from your wearable devices."
   },
 
   "privacy": {
