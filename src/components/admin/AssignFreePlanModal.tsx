@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useGrantFreePlan } from "@/hooks/useAdminData";
 import { Gift, Crown, Zap, Rocket, Sparkles, Infinity } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -52,7 +53,7 @@ export function AssignFreePlanModal({ open, onOpenChange, coach }: AssignFreePla
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md overflow-hidden">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Gift className="h-5 w-5 text-primary" />
@@ -63,111 +64,113 @@ export function AssignFreePlanModal({ open, onOpenChange, coach }: AssignFreePla
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label>Current Tier</Label>
-            <p className="text-sm text-muted-foreground capitalize">
-              {coach?.subscription_tier || "Free"}
-            </p>
-          </div>
+        <ScrollArea className="max-h-[60vh] pr-4">
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Current Tier</Label>
+              <p className="text-sm text-muted-foreground capitalize">
+                {coach?.subscription_tier || "Free"}
+              </p>
+            </div>
 
-          <div className="space-y-2">
-            <Label>Select New Tier</Label>
-            <div className="grid gap-2">
-              {tiers.map((tier) => {
-                const Icon = tier.icon;
-                const isSelected = selectedTier === tier.id;
-                return (
-                  <button
-                    key={tier.id}
-                    type="button"
-                    onClick={() => setSelectedTier(tier.id)}
-                    className={cn(
-                      "flex items-center gap-3 p-3 rounded-lg border transition-colors text-left",
-                      isSelected
-                        ? tier.special
-                          ? "border-amber-500 bg-amber-500/10"
-                          : "border-primary bg-primary/5"
-                        : "border-border hover:bg-muted/50",
-                      tier.special && "relative overflow-hidden"
-                    )}
-                  >
-                    {tier.special && (
-                      <div className="absolute top-0 right-0 bg-amber-500 text-xs text-black font-semibold px-2 py-0.5 rounded-bl">
-                        Admin Only
-                      </div>
-                    )}
-                    <div className={cn(
-                      "p-2 rounded-lg",
-                      isSelected 
-                        ? tier.special ? "bg-amber-500/20" : "bg-primary/10"
-                        : "bg-muted"
-                    )}>
-                      <Icon className={cn(
-                        "h-4 w-4",
-                        isSelected 
-                          ? tier.special ? "text-amber-500" : "text-primary"
-                          : "text-muted-foreground"
-                      )} />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium">{tier.name}</p>
-                        {tier.special && (
-                          <Infinity className="h-3 w-3 text-amber-500" />
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {tier.special ? "Unlimited access forever" : `Normally ${tier.price}`}
-                      </p>
-                    </div>
-                    {isSelected && (
+            <div className="space-y-2">
+              <Label>Select New Tier</Label>
+              <div className="grid gap-2">
+                {tiers.map((tier) => {
+                  const Icon = tier.icon;
+                  const isSelected = selectedTier === tier.id;
+                  return (
+                    <button
+                      key={tier.id}
+                      type="button"
+                      onClick={() => setSelectedTier(tier.id)}
+                      className={cn(
+                        "flex items-center gap-3 p-3 rounded-lg border transition-colors text-left",
+                        isSelected
+                          ? tier.special
+                            ? "border-amber-500 bg-amber-500/10"
+                            : "border-primary bg-primary/5"
+                          : "border-border hover:bg-muted/50",
+                        tier.special && "relative overflow-hidden"
+                      )}
+                    >
+                      {tier.special && (
+                        <div className="absolute top-0 right-0 bg-amber-500 text-xs text-black font-semibold px-2 py-0.5 rounded-bl">
+                          Admin Only
+                        </div>
+                      )}
                       <div className={cn(
-                        "h-2 w-2 rounded-full",
-                        tier.special ? "bg-amber-500" : "bg-primary"
-                      )} />
-                    )}
-                  </button>
-                );
-              })}
+                        "p-2 rounded-lg",
+                        isSelected 
+                          ? tier.special ? "bg-amber-500/20" : "bg-primary/10"
+                          : "bg-muted"
+                      )}>
+                        <Icon className={cn(
+                          "h-4 w-4",
+                          isSelected 
+                            ? tier.special ? "text-amber-500" : "text-primary"
+                            : "text-muted-foreground"
+                        )} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{tier.name}</p>
+                          {tier.special && (
+                            <Infinity className="h-3 w-3 text-amber-500" />
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {tier.special ? "Unlimited access forever" : `Normally ${tier.price}`}
+                        </p>
+                      </div>
+                      {isSelected && (
+                        <div className={cn(
+                          "h-2 w-2 rounded-full",
+                          tier.special ? "bg-amber-500" : "bg-primary"
+                        )} />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
 
-          {!isFounderSelected && (
-            <div className="space-y-2 min-w-0 overflow-hidden">
-              <Label>Expiry Date (optional)</Label>
-              <Input
-                className="w-full min-w-0"
-                type="date"
-                value={expiresAt}
-                onChange={(e) => setExpiresAt(e.target.value)}
-                min={new Date().toISOString().split("T")[0]}
+            {!isFounderSelected && (
+              <div className="space-y-2 min-w-0 overflow-hidden">
+                <Label>Expiry Date (optional)</Label>
+                <Input
+                  className="w-full min-w-0"
+                  type="date"
+                  value={expiresAt}
+                  onChange={(e) => setExpiresAt(e.target.value)}
+                  min={new Date().toISOString().split("T")[0]}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Leave empty for no expiry
+                </p>
+              </div>
+            )}
+
+            {isFounderSelected && (
+              <div className="rounded-lg bg-amber-500/10 border border-amber-500/30 p-3">
+                <p className="text-sm text-amber-500 flex items-center gap-2">
+                  <Infinity className="h-4 w-4" />
+                  Founder plan has no expiry - lifetime access
+                </p>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label>Reason (optional)</Label>
+              <Textarea
+                placeholder="Why is this plan being granted?"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                rows={2}
               />
-              <p className="text-xs text-muted-foreground">
-                Leave empty for no expiry
-              </p>
             </div>
-          )}
-
-          {isFounderSelected && (
-            <div className="rounded-lg bg-amber-500/10 border border-amber-500/30 p-3">
-              <p className="text-sm text-amber-500 flex items-center gap-2">
-                <Infinity className="h-4 w-4" />
-                Founder plan has no expiry - lifetime access
-              </p>
-            </div>
-          )}
-
-          <div className="space-y-2">
-            <Label>Reason (optional)</Label>
-            <Textarea
-              placeholder="Why is this plan being granted?"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              rows={2}
-            />
           </div>
-        </div>
+        </ScrollArea>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
