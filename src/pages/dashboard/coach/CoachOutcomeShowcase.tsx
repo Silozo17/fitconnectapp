@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,6 +42,8 @@ import {
   Clock,
   CheckCircle,
   XCircle,
+  Upload,
+  X,
 } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
 import {
@@ -58,6 +60,9 @@ import {
 import { useCoachProfileId } from "@/hooks/useCoachProfileId";
 import { ShowcasePhotoEditor } from "@/components/showcase/ShowcasePhotoEditor";
 import { FeatureGate } from "@/components/FeatureGate";
+import { TransformationPhotoCropperModal } from "@/components/shared/TransformationPhotoCropperModal";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function CoachOutcomeShowcase() {
   const { t } = useTranslation();
@@ -97,9 +102,20 @@ export default function CoachOutcomeShowcase() {
     duration: "",
     bodyFatChange: "",
     consentAcknowledged: false,
-    beforePhotoUrl: "",
-    afterPhotoUrl: "",
   });
+
+  // Photo upload state for external transformation
+  const [beforePhotoFile, setBeforePhotoFile] = useState<File | null>(null);
+  const [afterPhotoFile, setAfterPhotoFile] = useState<File | null>(null);
+  const [beforePreview, setBeforePreview] = useState<string>("");
+  const [afterPreview, setAfterPreview] = useState<string>("");
+  const [cropImage, setCropImage] = useState<{ src: string; type: 'before' | 'after' } | null>(null);
+  const [isUploadingPhotos, setIsUploadingPhotos] = useState(false);
+  
+  const beforeInputRef = useRef<HTMLInputElement>(null);
+  const afterInputRef = useRef<HTMLInputElement>(null);
+
+  const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB
 
   const handleTogglePublish = (item: OutcomeShowcase) => {
     // Only allow publishing if consent is granted or it's external
@@ -221,36 +237,126 @@ export default function CoachOutcomeShowcase() {
     });
   };
 
-  const handleAddExternal = () => {
+  const handlePhotoSelect = (file: File, type: 'before' | 'after') => {
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error(t("showcase.photoTooLarge", "Photo must be under 1MB"));
+      return;
+    }
+    
+    if (!file.type.startsWith('image/')) {
+      toast.error(t("showcase.invalidFileType", "Please select an image file"));
+      return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropImage({ src: reader.result as string, type });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCropComplete = (blob: Blob, type: 'before' | 'after') => {
+    const file = new File([blob], `${type}-photo.jpg`, { type: 'image/jpeg' });
+    const preview = URL.createObjectURL(blob);
+    
+    if (type === 'before') {
+      // Revoke old preview URL
+      if (beforePreview) URL.revokeObjectURL(beforePreview);
+      setBeforePhotoFile(file);
+      setBeforePreview(preview);
+    } else {
+      if (afterPreview) URL.revokeObjectURL(afterPreview);
+      setAfterPhotoFile(file);
+      setAfterPreview(preview);
+    }
+    setCropImage(null);
+  };
+
+  const handleRemovePhoto = (type: 'before' | 'after') => {
+    if (type === 'before') {
+      if (beforePreview) URL.revokeObjectURL(beforePreview);
+      setBeforePhotoFile(null);
+      setBeforePreview("");
+    } else {
+      if (afterPreview) URL.revokeObjectURL(afterPreview);
+      setAfterPhotoFile(null);
+      setAfterPreview("");
+    }
+  };
+
+  const uploadPhotoToStorage = async (file: File, folder: string): Promise<string | null> => {
+    const fileName = `${folder}/${coachId}/${Date.now()}-${file.name}`;
+    const { data, error } = await supabase.storage
+      .from('showcase-photos')
+      .upload(fileName, file);
+    
+    if (error) {
+      console.error('Upload error:', error);
+      return null;
+    }
+    
+    const { data: urlData } = supabase.storage
+      .from('showcase-photos')
+      .getPublicUrl(fileName);
+    
+    return urlData.publicUrl;
+  };
+
+  const handleAddExternal = async () => {
     if (!externalForm.clientName || !externalForm.consentAcknowledged) return;
 
-    createExternalShowcase.mutate({
-      externalClientName: externalForm.clientName,
-      displayName: externalForm.displayName || externalForm.clientName.split(" ")[0],
-      description: externalForm.description || undefined,
-      stats: {
-        weightLost: externalForm.weightLost || null,
-        duration: externalForm.duration || null,
-        bodyFatChange: externalForm.bodyFatChange || null,
-      },
-      beforePhotoUrl: externalForm.beforePhotoUrl || undefined,
-      afterPhotoUrl: externalForm.afterPhotoUrl || undefined,
-    }, {
-      onSuccess: () => {
-        setIsExternalModalOpen(false);
-        setExternalForm({
-          clientName: "",
-          displayName: "",
-          description: "",
-          weightLost: "",
-          duration: "",
-          bodyFatChange: "",
-          consentAcknowledged: false,
-          beforePhotoUrl: "",
-          afterPhotoUrl: "",
-        });
-      },
-    });
+    setIsUploadingPhotos(true);
+    
+    try {
+      let beforeUrl: string | undefined;
+      let afterUrl: string | undefined;
+      
+      if (beforePhotoFile) {
+        beforeUrl = await uploadPhotoToStorage(beforePhotoFile, 'before') || undefined;
+      }
+      
+      if (afterPhotoFile) {
+        afterUrl = await uploadPhotoToStorage(afterPhotoFile, 'after') || undefined;
+      }
+
+      createExternalShowcase.mutate({
+        externalClientName: externalForm.clientName,
+        displayName: externalForm.displayName || externalForm.clientName.split(" ")[0],
+        description: externalForm.description || undefined,
+        stats: {
+          weightLost: externalForm.weightLost || null,
+          duration: externalForm.duration || null,
+          bodyFatChange: externalForm.bodyFatChange || null,
+        },
+        beforePhotoUrl: beforeUrl,
+        afterPhotoUrl: afterUrl,
+      }, {
+        onSuccess: () => {
+          setIsExternalModalOpen(false);
+          setExternalForm({
+            clientName: "",
+            displayName: "",
+            description: "",
+            weightLost: "",
+            duration: "",
+            bodyFatChange: "",
+            consentAcknowledged: false,
+          });
+          // Clean up previews
+          if (beforePreview) URL.revokeObjectURL(beforePreview);
+          if (afterPreview) URL.revokeObjectURL(afterPreview);
+          setBeforePhotoFile(null);
+          setAfterPhotoFile(null);
+          setBeforePreview("");
+          setAfterPreview("");
+        },
+      });
+    } catch (error) {
+      console.error('Error uploading photos:', error);
+      toast.error(t("showcase.uploadError", "Failed to upload photos"));
+    } finally {
+      setIsUploadingPhotos(false);
+    }
   };
 
   const publishedCount = showcases.filter((s) => s.isPublished).length;
@@ -702,20 +808,103 @@ export default function CoachOutcomeShowcase() {
 
               {/* Before/After Photos */}
               <div className="grid grid-cols-2 gap-4">
+                {/* Before Photo Upload */}
                 <div className="space-y-2">
-                  <Label>{t("showcase.beforePhoto", "Before Photo URL")}</Label>
-                  <Input
-                    value={externalForm.beforePhotoUrl}
-                    onChange={(e) => setExternalForm({ ...externalForm, beforePhotoUrl: e.target.value })}
-                    placeholder="https://..."
+                  <Label>{t("showcase.beforePhoto", "Before Photo")}</Label>
+                  <div 
+                    className="aspect-[4/5] border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-muted/50 transition-colors relative overflow-hidden"
+                    onClick={() => beforeInputRef.current?.click()}
+                  >
+                    {beforePreview ? (
+                      <>
+                        <img 
+                          src={beforePreview} 
+                          alt="Before" 
+                          className="w-full h-full object-cover rounded-lg" 
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-2 right-2 h-6 w-6"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemovePhoto('before');
+                          }}
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-6 h-6 text-muted-foreground mb-1" />
+                        <span className="text-xs text-muted-foreground text-center px-2">
+                          {t("showcase.uploadPhoto", "Upload")}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">Max 1MB</span>
+                      </>
+                    )}
+                  </div>
+                  <input 
+                    ref={beforeInputRef}
+                    type="file" 
+                    accept="image/*" 
+                    className="hidden" 
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handlePhotoSelect(file, 'before');
+                      e.target.value = '';
+                    }}
                   />
                 </div>
+
+                {/* After Photo Upload */}
                 <div className="space-y-2">
-                  <Label>{t("showcase.afterPhoto", "After Photo URL")}</Label>
-                  <Input
-                    value={externalForm.afterPhotoUrl}
-                    onChange={(e) => setExternalForm({ ...externalForm, afterPhotoUrl: e.target.value })}
-                    placeholder="https://..."
+                  <Label>{t("showcase.afterPhoto", "After Photo")}</Label>
+                  <div 
+                    className="aspect-[4/5] border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-muted/50 transition-colors relative overflow-hidden"
+                    onClick={() => afterInputRef.current?.click()}
+                  >
+                    {afterPreview ? (
+                      <>
+                        <img 
+                          src={afterPreview} 
+                          alt="After" 
+                          className="w-full h-full object-cover rounded-lg" 
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-2 right-2 h-6 w-6"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemovePhoto('after');
+                          }}
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-6 h-6 text-muted-foreground mb-1" />
+                        <span className="text-xs text-muted-foreground text-center px-2">
+                          {t("showcase.uploadPhoto", "Upload")}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">Max 1MB</span>
+                      </>
+                    )}
+                  </div>
+                  <input 
+                    ref={afterInputRef}
+                    type="file" 
+                    accept="image/*" 
+                    className="hidden" 
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handlePhotoSelect(file, 'after');
+                      e.target.value = '';
+                    }}
                   />
                 </div>
               </div>
@@ -754,14 +943,24 @@ export default function CoachOutcomeShowcase() {
               </Button>
               <Button
                 onClick={handleAddExternal}
-                disabled={!externalForm.clientName || !externalForm.consentAcknowledged || createExternalShowcase.isPending}
+                disabled={!externalForm.clientName || !externalForm.consentAcknowledged || createExternalShowcase.isPending || isUploadingPhotos}
               >
-                {createExternalShowcase.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                {(createExternalShowcase.isPending || isUploadingPhotos) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 {t("showcase.addTransformation", "Add Transformation")}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Transformation Photo Cropper Modal */}
+        {cropImage && (
+          <TransformationPhotoCropperModal
+            open={!!cropImage}
+            onClose={() => setCropImage(null)}
+            imageSrc={cropImage.src}
+            onCropComplete={(blob) => handleCropComplete(blob, cropImage.type)}
+          />
+        )}
       </div>
       </FeatureGate>
     </DashboardLayout>

@@ -61,69 +61,51 @@ export function DropoffTimeline({ stage1Days, stage2Days, stage3Days, isEnabled 
       </p>
       
       {/* Timeline container - taller to accommodate top/bottom labels */}
-      <div className="relative h-40 sm:h-36">
+      <div className="relative h-36 sm:h-32">
         {/* Base line - centered vertically */}
         <div className="absolute top-1/2 left-4 right-4 sm:left-0 sm:right-0 h-0.5 bg-border -translate-y-1/2" />
         
-        {/* Stage markers */}
+        {/* Stage markers - dots always ON the line, labels above/below */}
         {stages.map((stage, index) => {
           const position = (stage.day / maxDay) * 100;
           const clampedPosition = stage.day === 0 
-            ? 2
-            : Math.min(Math.max(position, 15), 95);
+            ? 4
+            : Math.min(Math.max(position, 18), 92);
           const Icon = stage.icon;
           const isTop = stage.position === "top";
           
           return (
             <div
               key={index}
-              className={cn(
-                "absolute flex flex-col items-center w-16 sm:w-auto",
-                isTop ? "top-0" : "bottom-0"
-              )}
-              style={{ left: `${clampedPosition}%`, transform: 'translateX(-50%)' }}
+              className="absolute flex flex-col items-center"
+              style={{ 
+                left: `${clampedPosition}%`, 
+                top: '50%',
+                transform: 'translate(-50%, -50%)'
+              }}
             >
-              {isTop ? (
-                // Top position: label above, then dot
-                <>
-                  <div className="text-center mb-2">
-                    <Icon className={cn("h-3 w-3 mx-auto mb-0.5", stage.textColor)} />
-                    <p className={cn("text-[10px] sm:text-xs font-medium leading-tight", stage.textColor)}>
-                      {stage.label}
-                    </p>
-                    <p className="text-[10px] sm:text-xs text-muted-foreground">
-                      {stage.day === 0 
-                        ? t("automations.dropoff.timeline.dayZero", "Day 0")
-                        : t("automations.dropoff.timeline.dayN", "Day {{n}}", { n: stage.day })
-                      }
-                    </p>
-                  </div>
-                  <div className={cn(
-                    "w-3 h-3 sm:w-4 sm:h-4 rounded-full border-2 border-background",
-                    stage.color
-                  )} />
-                </>
-              ) : (
-                // Bottom position: dot, then label below
-                <>
-                  <div className={cn(
-                    "w-3 h-3 sm:w-4 sm:h-4 rounded-full border-2 border-background",
-                    stage.color
-                  )} />
-                  <div className="text-center mt-2">
-                    <Icon className={cn("h-3 w-3 mx-auto mb-0.5", stage.textColor)} />
-                    <p className={cn("text-[10px] sm:text-xs font-medium leading-tight", stage.textColor)}>
-                      {stage.label}
-                    </p>
-                    <p className="text-[10px] sm:text-xs text-muted-foreground">
-                      {stage.day === 0 
-                        ? t("automations.dropoff.timeline.dayZero", "Day 0")
-                        : t("automations.dropoff.timeline.dayN", "Day {{n}}", { n: stage.day })
-                      }
-                    </p>
-                  </div>
-                </>
-              )}
+              {/* Dot - always centered on line */}
+              <div className={cn(
+                "w-3 h-3 sm:w-4 sm:h-4 rounded-full border-2 border-background z-10 shrink-0",
+                stage.color
+              )} />
+              
+              {/* Label - positioned above or below the dot */}
+              <div className={cn(
+                "absolute text-center w-16 sm:w-auto",
+                isTop ? "bottom-full mb-1.5" : "top-full mt-1.5"
+              )}>
+                <Icon className={cn("h-3 w-3 mx-auto mb-0.5", stage.textColor)} />
+                <p className={cn("text-[10px] sm:text-xs font-medium leading-tight whitespace-nowrap", stage.textColor)}>
+                  {stage.label}
+                </p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">
+                  {stage.day === 0 
+                    ? t("automations.dropoff.timeline.dayZero", "Day 0")
+                    : t("automations.dropoff.timeline.dayN", "Day {{n}}", { n: stage.day })
+                  }
+                </p>
+              </div>
             </div>
           );
         })}
