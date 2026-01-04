@@ -207,14 +207,36 @@ serve(async (req) => {
       }
     }
 
-    // Get current subscription status from DB
+    // Get current subscription status from DB (include updated_at for protection window)
     const { data: currentSub } = await supabase
       .from("platform_subscriptions")
-      .select("status, tier, current_period_end")
+      .select("status, tier, current_period_end, updated_at")
       .eq("coach_id", coachProfile.id)
       .maybeSingle();
 
     logStep("Current subscription record", { currentSub });
+
+    // UPGRADE PROTECTION WINDOW: If DB was updated within last 2 minutes, trust it over RevenueCat
+    // This prevents stale RevenueCat API data (30-60s lag) from overwriting webhook-set tier
+    if (currentSub?.updated_at) {
+      const updatedAt = new Date(currentSub.updated_at);
+      const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+      
+      if (updatedAt > twoMinutesAgo) {
+        logStep("UPGRADE PROTECTION: DB was recently updated - skipping reconciliation", {
+          updatedAt: currentSub.updated_at,
+          currentTier: currentSub.tier,
+          ageSeconds: Math.round((Date.now() - updatedAt.getTime()) / 1000),
+        });
+        
+        return new Response(JSON.stringify({ 
+          status: "recently_updated", 
+          reconciled: false,
+          tier: currentSub.tier,
+          message: "Skipping reconciliation - database was recently updated by webhook"
+        }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+    }
 
     // Call RevenueCat API to get subscriber entitlements
     const rcResponse = await fetch(
@@ -455,6 +477,29 @@ serve(async (req) => {
       // Note: Founder and admin-granted tiers already handled above with early return
       // This path should rarely be hit for admin grants now
       if (currentDbTier !== 'free') {
+        // DOWNGRADE PROTECTION: Check if DB was recently updated (likely by webhook)
+        // If so, block the downgrade to prevent stale RevenueCat data from reverting tier
+        if (currentSub?.updated_at) {
+          const updatedAt = new Date(currentSub.updated_at);
+          const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+          
+          if (updatedAt > twoMinutesAgo) {
+            logStep("DOWNGRADE BLOCKED: DB was recently updated - trusting webhook data", {
+              updatedAt: currentSub.updated_at,
+              currentTier: currentDbTier,
+              wouldDowngradeTo: 'free',
+              ageSeconds: Math.round((Date.now() - updatedAt.getTime()) / 1000),
+            });
+            
+            return new Response(JSON.stringify({ 
+              status: "downgrade_blocked_recent_update", 
+              reconciled: false,
+              tier: currentDbTier,
+              message: "Downgrade blocked - database was recently updated by webhook"
+            }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          }
+        }
+        
         logStep("Reconciling: Downgrading to free (no active entitlement)", { from: currentDbTier });
 
         await supabase
