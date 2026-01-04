@@ -2,13 +2,12 @@ import { useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
-import { Crown, Check, Loader2, Clock, AlertTriangle } from "lucide-react";
+import { Crown, Check, Loader2, Clock, AlertTriangle, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -26,7 +25,7 @@ import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { NativeSubscriptionManagement } from "@/components/payments/NativeSubscriptionManagement";
 import { BillingInterval } from "@/lib/pricing-config";
 import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
-import { LegalDisclosure } from "@/components/shared/LegalLinks";
+import { LegalDisclosure, LegalLinks } from "@/components/shared/LegalLinks";
 import { useQueryClient } from "@tanstack/react-query";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
@@ -252,37 +251,36 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
               </div>
             )}
 
-            {/* Billing interval toggle for native apps */}
+            {/* Billing interval toggle for native apps - using Switch like onboarding */}
             {isNativeApp && (
-              <div className="mb-6">
-                <RadioGroup
-                  value={billingInterval}
-                  onValueChange={(val) => setBillingInterval(val as BillingInterval)}
-                  className="flex gap-4"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="monthly" id="billing-monthly" />
-                    <Label htmlFor="billing-monthly" className="cursor-pointer">
-                      {t("subscription.monthly", "Monthly")}
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="yearly" id="billing-yearly" />
-                    <Label htmlFor="billing-yearly" className="cursor-pointer flex items-center gap-2">
-                      {t("subscription.yearly", "Yearly")}
-                      <Badge variant="secondary" className="text-xs">
-                        {t("subscription.save", "Save")} ~17%
-                      </Badge>
-                    </Label>
-                  </div>
-                </RadioGroup>
+              <div className="mb-6 flex items-center justify-center gap-3">
+                <span className={`text-sm font-medium transition-colors ${billingInterval === 'monthly' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                  {t("subscription.monthly", "Monthly")}
+                </span>
+                <Switch 
+                  checked={billingInterval === 'yearly'}
+                  onCheckedChange={(checked) => setBillingInterval(checked ? 'yearly' : 'monthly')}
+                />
+                <span className={`text-sm font-medium transition-colors ${billingInterval === 'yearly' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                  {t("subscription.yearly", "Yearly")}
+                </span>
+                {billingInterval === 'yearly' && (
+                  <Badge variant="secondary" className="ml-1 text-xs">
+                    {t("subscription.save", "Save")} ~17%
+                  </Badge>
+                )}
               </div>
             )}
 
-          {/* Tier cards - carousel on mobile, grid on desktop */}
+          {/* Tier cards - exclude free tier, show as compact cards */}
           {(() => {
-            const tiers = (Object.entries(SUBSCRIPTION_TIERS) as [TierKey, typeof SUBSCRIPTION_TIERS[TierKey]][])
-              .filter(([tierKey, tier]) => !tier.adminOnly || activeTier === tierKey);
+            // Filter out free tier from display - free is handled by "Cancel Subscription" button
+            const paidTiers = (Object.entries(SUBSCRIPTION_TIERS) as [TierKey, typeof SUBSCRIPTION_TIERS[TierKey]][])
+              .filter(([tierKey, tier]) => {
+                if (tier.adminOnly && activeTier !== tierKey) return false;
+                if (tierKey === 'free') return false; // Never show free as a selectable card
+                return true;
+              });
 
             const renderTierCard = ([tierKey, tier]: [TierKey, typeof SUBSCRIPTION_TIERS[TierKey]]) => {
               const isCurrentTier = activeTier === tierKey;
@@ -427,27 +425,77 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
                 opts={{ align: "center", containScroll: "trimSnaps" }}
               >
                 <CarouselContent className="py-4">
-                  {tiers.map((tierEntry) => (
+                  {paidTiers.map((tierEntry) => (
                     <CarouselItem key={tierEntry[0]} className="basis-[90%] px-2">
                       {renderTierCard(tierEntry)}
                     </CarouselItem>
                   ))}
                 </CarouselContent>
                 <div className="flex justify-center gap-1 mt-4">
-                  {tiers.map((_, idx) => (
+                  {paidTiers.map((_, idx) => (
                     <div key={idx} className="w-2 h-2 rounded-full bg-muted" />
                   ))}
                 </div>
               </Carousel>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {tiers.map(renderTierCard)}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {paidTiers.map(renderTierCard)}
               </div>
             );
           })()}
           
-          {/* Legal disclosure - always visible below carousel/grid */}
-          <LegalDisclosure className="mt-6 pt-4 border-t" />
+          {/* Cancel subscription section for paid native users */}
+          {isNativeApp && isNativeSubscription && activeTier !== 'free' && (
+            <div className="mt-6 pt-4 border-t border-border">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => {
+                  if (typeof window !== 'undefined' && (window as any).despia?.openURL) {
+                    (window as any).despia.openURL('https://apps.apple.com/account/subscriptions');
+                  } else {
+                    window.open('https://apps.apple.com/account/subscriptions', '_blank');
+                  }
+                }}
+              >
+                <ExternalLink className="mr-2 h-4 w-4" />
+                {t("subscription.cancelSubscription", "Cancel Subscription")}
+              </Button>
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                Opens App Store subscription management
+              </p>
+            </div>
+          )}
+          
+          {/* Legal footer with restore purchases */}
+          <div className="mt-6 pt-4 border-t border-border">
+            <div className="flex flex-wrap justify-center items-center gap-4 text-sm mb-3">
+              {isNativeApp && (
+                <button 
+                  type="button"
+                  onClick={async () => {
+                    if (typeof window !== 'undefined' && (window as any).despia?.restorePurchases) {
+                      try {
+                        toast.loading("Restoring purchases...");
+                        await (window as any).despia.restorePurchases();
+                        toast.success("Purchases restored successfully");
+                      } catch (error) {
+                        console.error("Failed to restore purchases:", error);
+                        toast.error("Failed to restore purchases");
+                      }
+                    } else {
+                      toast.info("Restore purchases is only available on iOS/Android");
+                    }
+                  }}
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Restore Purchases
+                </button>
+              )}
+              <LegalLinks variant="compact" />
+            </div>
+            <LegalDisclosure />
+          </div>
         </CardContent>
       </Card>
 
